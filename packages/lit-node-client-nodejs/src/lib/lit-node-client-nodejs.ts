@@ -3,7 +3,6 @@ import { BigNumber, ethers } from 'ethers';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
-import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
   ILitResource,
   ISessionCapabilityObject,
@@ -50,7 +49,6 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
-  throwErrorV1,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -79,9 +77,7 @@ import type {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSessionSigsProps,
-  GetSignSessionKeySharesProp,
   GetSignedTokenRequest,
-  GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
   JsonPkpSignRequest,
@@ -97,13 +93,11 @@ import type {
   SessionSigningTemplate,
   SessionSigsMap,
   SigShare,
-  SignConditionECDSA,
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
-  ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
   ILitNodeClient,
   GetPkpSessionSigs,
@@ -118,6 +112,8 @@ import type {
   JsonPkpSignSdkParams,
   SigResponse,
   EncryptSdkParams,
+  JsonPKPClaimKeyRequest,
+  EncryptionSignRequest,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -594,137 +590,6 @@ export class LitNodeClientNodeJs
   };
 
   // ==================== API Calls to Nodes ====================
-  getClaimKeyExecutionShares = async (
-    url: string,
-    params: any,
-    requestId: string
-  ) => {
-    logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.PKP_CLAIM,
-    });
-    if (!params.authMethod) {
-      throw new Error('authMethod is required');
-    }
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
-
-  /**
-   * Get Signing Shares for Token containing Access Control Condition
-   *
-   * @param { string } url
-   * @param { SigningAccessControlConditionRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  getSigningShareForToken = async (
-    url: string,
-    params: SigningAccessControlConditionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    logWithRequestId(requestId, 'getSigningShareForToken');
-
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.SIGN_ACCS,
-    });
-
-    return this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
-
-  /**
-   *
-   * Get signature shares for decryption.
-   *
-   * @param url
-   * @param params
-   * @param requestId
-   * @returns
-   */
-  getSigningShareForDecryption = async (
-    url: string,
-    params: GetSigningShareForDecryptionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    log('getSigningShareForDecryption');
-
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
-    });
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
-
-  /**
-   *
-   * Sign Condition ECDSA
-   *
-   * @param { string } url
-   * @param { SignConditionECDSA } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  signConditionEcdsa = async (
-    url: string,
-    params: SignConditionECDSA,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      log('signConditionEcdsa');
-
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.SIGN_ECDSA,
-      });
-
-      const data = {
-        access_control_conditions: params.accessControlConditions,
-        evmContractConditions: params.evmContractConditions,
-        solRpcConditions: params.solRpcConditions,
-        auth_sig: params.auth_sig,
-        chain: params.chain,
-        iat: params.iat,
-        exp: params.exp,
-      };
-
-      return await this.sendCommandToNode({
-        url: urlWithPath,
-        data,
-        requestId: id,
-      });
-    };
-
-    const res = await executeWithRetry<any>(
-      wrapper,
-      (_error: any, _requestid: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('An error occured. attempting to retry: ');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    return res as unknown as NodeCommandResponse;
-  };
 
   /**
    *
@@ -1504,21 +1369,24 @@ export class LitNodeClientNodeJs
         // -- if session key is available, use it
         const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-        return this.getSigningShareForToken(
+        const reqBody: SigningAccessControlConditionRequest = {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          chain,
+          authSig: authSigToSend,
+          iat,
+          exp,
+        };
+
+        const urlWithPath = composeLitUrl({
           url,
-          {
-            accessControlConditions: formattedAccessControlConditions,
-            evmContractConditions: formattedEVMContractConditions,
-            solRpcConditions: formattedSolRpcConditions,
-            unifiedAccessControlConditions:
-              formattedUnifiedAccessControlConditions,
-            chain,
-            authSig: authSigToSend,
-            iat,
-            exp,
-          },
-          id
-        );
+          endpoint: LIT_ENDPOINT.SIGN_ACCS,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
@@ -1757,20 +1625,32 @@ export class LitNodeClientNodeJs
         // -- if session key is available, use it
         const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
 
-        return this.getSigningShareForDecryption(
+        if (!authSigToSend) {
+          return throwError({
+            message: `authSig is required`,
+            errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+            errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+          });
+        }
+
+        const reqBody: EncryptionSignRequest = {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          dataToEncryptHash,
+          chain,
+          authSig: authSigToSend,
+          epoch: this.currentEpochNumber!,
+        };
+
+        const urlWithParh = composeLitUrl({
           url,
-          {
-            accessControlConditions: formattedAccessControlConditions,
-            evmContractConditions: formattedEVMContractConditions,
-            solRpcConditions: formattedSolRpcConditions,
-            unifiedAccessControlConditions:
-              formattedUnifiedAccessControlConditions,
-            dataToEncryptHash,
-            chain,
-            authSig: authSigToSend,
-          },
-          id
-        );
+          endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
+        });
+
+        return this.generatePromise(urlWithParh, reqBody, id);
       });
 
       // -- resolve promises
@@ -1851,119 +1731,6 @@ export class LitNodeClientNodeJs
     return new LitAccessControlConditionResource(
       `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
     );
-  };
-
-  /**
-   *
-   * Validates a condition, and then signs the condition if the validation returns true.
-   * Before calling this function, you must know the on chain conditions that you wish to validate.
-   *
-   * @param { ValidateAndSignECDSA } params
-   *
-   * @returns { Promise<string> }
-   */
-  validateAndSignEcdsa = async (
-    params: ValidateAndSignECDSA
-  ): Promise<string> => {
-    // ========== Validate Params ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '7 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // ========== Prepare Params ==========
-    const { accessControlConditions, chain, auth_sig } = params;
-
-    // ========== Prepare JWT Params ==========
-    // we need to send jwt params iat (issued at) and exp (expiration)
-    // because the nodes may have different wall clock times
-    // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.getJWTParams();
-
-    // -- validate
-    if (!accessControlConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // -- formatted access control conditions
-    let formattedAccessControlConditions: any;
-
-    formattedAccessControlConditions = accessControlConditions.map((c: any) =>
-      canonicalAccessControlConditionFormatter(c)
-    );
-    log(
-      'formattedAccessControlConditions',
-      JSON.stringify(formattedAccessControlConditions)
-    );
-
-    // ========== Node Promises ==========
-    const wrapper = async (
-      id: string
-    ): Promise<RejectedNodePromises | SuccessNodePromises<any>> => {
-      const nodePromises = this.getNodePromises((url: string) => {
-        return this.signConditionEcdsa(
-          url,
-          {
-            accessControlConditions: formattedAccessControlConditions,
-            evmContractConditions: undefined,
-            solRpcConditions: undefined,
-            auth_sig,
-            chain,
-            iat,
-            exp,
-          },
-          id
-        );
-      });
-
-      // ----- Resolve Promises -----
-      const responses = await this.handleNodePromises(
-        nodePromises,
-        id,
-        this.connectedNodes.size
-      );
-
-      return responses;
-    };
-
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error has occured, attempting to retry ');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    const requestId = res.requestId;
-    // return the first value as this will be the signature data
-    try {
-      if (res.success === false) {
-        return 'Condition Failed';
-      }
-      const shareData = (res as SuccessNodePromises<any>).values;
-      const signature = this.getSignature(shareData, requestId);
-      return signature;
-    } catch (e) {
-      logErrorWithRequestId(requestId, 'Error - signed_ecdsa_messages - ', e);
-      const signed_ecdsa_message = res as RejectedNodePromises;
-      // have to cast to any to keep with above `string` return value
-      // this will be returned as `RejectedNodePromise`
-      return signed_ecdsa_message as any;
-    }
   };
 
   /** ============================== SESSION ============================== */
@@ -2077,13 +1844,14 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       logWithRequestId(id, 'signSessionKey body', body);
       const nodePromises = this.getNodePromises((url: string) => {
-        return this.getSignSessionKeyShares(
+        const reqBody: JsonSignSessionKeyRequestV1 = body;
+
+        const urlWithPath = composeLitUrl({
           url,
-          {
-            body,
-          },
-          id
-        );
+          endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
@@ -2259,23 +2027,6 @@ export class LitNodeClientNodeJs
     };
 
     return signSessionKeyRes;
-  };
-
-  getSignSessionKeyShares = async (
-    url: string,
-    params: GetSignSessionKeySharesProp,
-    requestId: string
-  ) => {
-    log('getSignSessionKeyShares');
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
-    });
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params.body,
-      requestId,
-    });
   };
 
   generateAuthMethodForWebAuthn = (
@@ -2583,11 +2334,21 @@ const resourceAbilityRequests = [
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = await this.getNodePromises((url: string) => {
-        const nodeRequestParams = {
+      const nodePromises = this.getNodePromises((url: string) => {
+        if (!params.authMethod) {
+          throw new Error('authMethod is required');
+        }
+
+        const reqBody: JsonPKPClaimKeyRequest = {
           authMethod: params.authMethod,
         };
-        return this.getClaimKeyExecutionShares(url, nodeRequestParams, id);
+
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.PKP_CLAIM,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       const responseData = await this.handleNodePromises(

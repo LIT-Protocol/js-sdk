@@ -54,9 +54,14 @@ export class TinnyPerson {
     // Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
     const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
 
+    const amount =
+      this.envConfig.processEnvs.NETWORK === LIT_TESTNET.LOCALCHAIN
+        ? '0.1'
+        : '0.0001';
+
     const transferTx = await this.wallet.sendTransaction({
       to: fundingWallet.address,
-      value: ethers.utils.parseEther('0.00001'),
+      value: ethers.utils.parseEther(amount),
     });
 
     const transferReciept = await transferTx.wait();

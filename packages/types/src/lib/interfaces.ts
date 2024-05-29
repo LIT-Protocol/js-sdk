@@ -19,6 +19,7 @@ import {
   UnifiedAccessControlConditions,
 } from './types';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
+import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -437,18 +438,6 @@ export interface GetSignedTokenRequest
   sessionSigs: SessionSigsMap;
 }
 
-export interface SigningAccessControlConditionRequest
-  extends MultipleAccessControlConditions {
-  // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
-  chain?: string;
-
-  // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
-  authSig?: AuthSig;
-
-  iat?: number;
-  exp?: number;
-}
-
 /**
  * Struct in rust
  * -----
@@ -622,16 +611,6 @@ export interface DecryptResponse {
 
 export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
   dataToEncryptHash: string;
-}
-
-export interface SignConditionECDSA {
-  accessControlConditions: any;
-  evmContractConditions: undefined;
-  solRpcConditions: undefined;
-  auth_sig: AuthSig;
-  chain: Chain;
-  iat: number;
-  exp: number;
 }
 
 export interface SigResponse {
@@ -878,11 +857,6 @@ export interface CombinedECDSASignature {
   r: string;
   s: string;
   recid: number;
-}
-export interface ValidateAndSignECDSA {
-  accessControlConditions: AccessControlConditions;
-  chain: Chain;
-  auth_sig: AuthSig;
 }
 
 export interface HandshakeWithNode {
