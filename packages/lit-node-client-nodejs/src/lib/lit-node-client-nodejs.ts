@@ -153,6 +153,13 @@ export class LitNodeClientNodeJs
   }
 
   // ========== Private Methods ==========
+  /**
+   * Handles the authentication callback and updates the storage item with the authentication signature.
+   * @param authCallbackParams - The parameters required for the authentication callback.
+   * @param authCallback - The optional authentication callback function.
+   * @returns A promise that resolves to the authentication signature.
+   * @throws An error if no default authentication callback is provided.
+   */
   #authCallbackAndUpdateStorageItem = async ({
     authCallbackParams,
     authCallback,
@@ -199,6 +206,7 @@ export class LitNodeClientNodeJs
 
     return authSig;
   };
+
   /**
    *
    * Check if a session key needs to be resigned. These are the scenarios where a session key needs to be resigned:
@@ -265,6 +273,15 @@ export class LitNodeClientNodeJs
 
     return false;
   };
+  /**
+   * Decrypts the ciphertext using the provided signature shares.
+   *
+   * @param networkPubKey - The network public key.
+   * @param identityParam - The identity parameter.
+   * @param ciphertext - The ciphertext to decrypt.
+   * @param signatureShares - An array of signature shares.
+   * @returns The decrypted data as a Uint8Array.
+   */
   #decryptWithSignatureShares = (
     networkPubKey: string,
     identityParam: Uint8Array,
@@ -280,9 +297,22 @@ export class LitNodeClientNodeJs
       sigShares
     );
   };
+  /**
+   * Checks if the given response is a success node promise.
+   * @private
+   * @param res - The response object to check.
+   * @returns A boolean indicating whether the response is a success node promise.
+   * @template T - The type of the success node promise.
+   */
   #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
     return res.success === true;
   };
+  /**
+   * Generates an identity parameter for encryption based on the provided conditions and private data.
+   * @param hashOfConditionsStr - The hash of the conditions string.
+   * @param hashOfPrivateDataStr - The hash of the private data string.
+   * @returns The generated identity parameter for encryption.
+   */
   #getIdentityParamForEncryption = (
     hashOfConditionsStr: string,
     hashOfPrivateDataStr: string
@@ -291,6 +321,7 @@ export class LitNodeClientNodeJs
       `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
     ).getResourceKey();
   };
+
   /**
    *
    * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
