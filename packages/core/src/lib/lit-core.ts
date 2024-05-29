@@ -30,7 +30,6 @@ import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   executeWithRetry,
-  getIpAddress,
   isBrowser,
   isNode,
   log,
@@ -168,7 +167,7 @@ export class LitCore {
     }
 
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
-    this.setCustomBootstrapUrls();
+    this.#setCustomBootstrapUrls();
 
     // -- set global variables
     globalThis.litConfig = this.config;
@@ -432,9 +431,9 @@ export class LitCore {
    * that the client's configuration is always in sync with the current state of the
    * staking contract.
    *
-   * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
+   * @returns { void }
    */
-  private _listenForNewEpoch() {
+  #listenForNewEpoch(): void {
     // Check if we've already set up the listener to avoid duplicates
     if (this._stakingContractListener) {
       // Already listening, do nothing
@@ -464,13 +463,14 @@ export class LitCore {
     this._stopNetworkPolling();
   }
 
-  _stopNetworkPolling() {
+  protected _stopNetworkPolling() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
       this._networkSyncInterval = null;
     }
   }
-  _stopListeningForNewEpoch() {
+
+  protected _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
       this._stakingContractListener = null;
@@ -484,7 +484,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  setCustomBootstrapUrls = (): void => {
+  #setCustomBootstrapUrls = (): void => {
     // -- validate
     if (this.config.litNetwork === 'custom') return;
 
@@ -561,8 +561,8 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this._scheduleNetworkSync();
-    this._listenForNewEpoch();
+    this.#scheduleNetworkSync();
+    this.#listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
     // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
@@ -805,7 +805,7 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  private _scheduleNetworkSync() {
+  #scheduleNetworkSync() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
     }
@@ -848,7 +848,7 @@ export class LitCore {
    * @returns { string }
    *
    */
-  getRequestId() {
+  getRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
@@ -859,7 +859,7 @@ export class LitCore {
    * @returns { string }
    */
 
-  getRandomHexString(size: number) {
+  getRandomHexString(size: number): string {
     return [...Array(size)]
       .map(() => Math.floor(Math.random() * 16).toString(16))
       .join('');
@@ -1205,7 +1205,10 @@ export class LitCore {
    * @returns { void }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
+  protected _throwNodeError = (
+    res: RejectedNodePromises,
+    requestId: string
+  ): void => {
     if (res.error) {
       if (
         ((res.error.errorCode &&

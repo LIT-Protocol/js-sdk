@@ -39,17 +39,6 @@ export interface ILitNodeClient {
   // ** IMPORTANT !! You have to create your constructor when implementing this class **
   // constructor(customConfig: LitNodeClientConfig);
 
-  // ========== Scoped Class Helpers ==========
-
-  /**
-   *
-   * Set bootstrapUrls to match the network litNetwork unless it's set to custom
-   *
-   * @returns { void }
-   *
-   */
-  setCustomBootstrapUrls(): void;
-
   /**
    *
    * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
@@ -125,19 +114,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Throw node error
-   *
-   * @param { RejectedNodePromises } res
-   *
-   * @returns { void }
-   *
-   */
-  _throwNodeError(res: RejectedNodePromises, requestId: string): void;
-
-  // ========== Shares Resolvers ==========
-
-  /**
-   *
    * Get Signature
    *
    * @param { Array<any> } shareData from all node promises
@@ -147,7 +123,6 @@ export interface ILitNodeClient {
    */
   getSignature(shareData: any[], requestId: string): Promise<any>;
 
-  // ========== API Calls to Nodes ==========
   sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;
 
   /**
@@ -204,7 +179,6 @@ export interface ILitNodeClient {
     requestId: string
   ): Promise<NodeCommandServerKeysResponse>;
 
-  // ========== Scoped Business Logics ==========
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
