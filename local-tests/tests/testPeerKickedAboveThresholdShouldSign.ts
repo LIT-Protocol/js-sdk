@@ -5,6 +5,9 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 
 export const testPeerKickedAboveThresholdShouldSign = async (devEnv: TinnyEnvironment) => {
+    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+
     const alice = await devEnv.createRandomPerson();
     const bob = await devEnv.createRandomPerson();
 
@@ -34,8 +37,8 @@ export const testPeerKickedAboveThresholdShouldSign = async (devEnv: TinnyEnviro
       console.log(decodedRecap);
     });
 
-    await devEnv.stopRandomNetworkPeer();
-
+    await devEnv.stopRandomNetworkPeerAndWaitForNextEpoch();
+    await devEnv.transitionEpochAndWait();
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient.executeJs({
       sessionSigs: bobsSessionSigs,

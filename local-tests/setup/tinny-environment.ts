@@ -416,7 +416,7 @@ export class TinnyEnvironment {
     console.log('testnet info:', res);
   }
 
-  async transitionAndEpochAndWait() {
+  async transitionEpochAndWait() {
     const stopRandomPeerRes = await fetch(
       this.processEnvs.TESTNET_MANAGER_URL +
         '/test/action/transition/epoch/wait/' +
@@ -429,7 +429,7 @@ export class TinnyEnvironment {
     }
   }
 
-  async stopRandomNetworkPeer() {
+  async stopRandomNetworkPeerAndWaitForNextEpoch() {
     const stopRandomPeerRes = await fetch(
       this.processEnvs.TESTNET_MANAGER_URL +
         '/test/action/stop/random/wait/' +
