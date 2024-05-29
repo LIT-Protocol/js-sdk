@@ -802,7 +802,7 @@ export class LitNodeClientNodeJs
 
         // this return { url: string, data: JsonRequest }
         // const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
-        const singleNodePromise = this.sendCommandToNode({
+        const singleNodePromise = this._sendCommandToNode({
           url: url,
           data: params,
           requestId: id,
@@ -1060,7 +1060,7 @@ export class LitNodeClientNodeJs
           endpoint: LIT_ENDPOINT.EXECUTE_JS,
         });
 
-        return this.generatePromise(urlWithPath, reqBody, requestId);
+        return this.#generatePromise(urlWithPath, reqBody, requestId);
       });
 
       // -- resolve promises
@@ -1186,12 +1186,12 @@ export class LitNodeClientNodeJs
    * @param requestId - The ID of the request.
    * @returns A promise that resolves with the response from the server.
    */
-  generatePromise = async (
+  #generatePromise = async (
     url: string,
     params: any,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    return await this.sendCommandToNode({
+    return await this._sendCommandToNode({
       url,
       data: params,
       requestId,
@@ -1264,7 +1264,7 @@ export class LitNodeClientNodeJs
           endpoint: LIT_ENDPOINT.PKP_SIGN,
         });
 
-        return this.generatePromise(urlWithPath, reqBody, id);
+        return this.#generatePromise(urlWithPath, reqBody, id);
       });
 
       const res = await this.handleNodePromises(
@@ -1416,7 +1416,7 @@ export class LitNodeClientNodeJs
           endpoint: LIT_ENDPOINT.SIGN_ACCS,
         });
 
-        return this.generatePromise(urlWithPath, reqBody, id);
+        return this.#generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
@@ -1680,7 +1680,7 @@ export class LitNodeClientNodeJs
           endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
         });
 
-        return this.generatePromise(urlWithParh, reqBody, id);
+        return this.#generatePromise(urlWithParh, reqBody, id);
       });
 
       // -- resolve promises
@@ -1881,7 +1881,7 @@ export class LitNodeClientNodeJs
           endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
         });
 
-        return this.generatePromise(urlWithPath, reqBody, id);
+        return this.#generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
@@ -2069,7 +2069,7 @@ export class LitNodeClientNodeJs
       url,
       endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
     });
-    return await this.sendCommandToNode({
+    return await this._sendCommandToNode({
       url: urlWithPath,
       data: params.body,
       requestId,
@@ -2409,7 +2409,7 @@ const resourceAbilityRequests = [
           endpoint: LIT_ENDPOINT.PKP_CLAIM,
         });
 
-        return this.generatePromise(urlWithPath, reqBody, id);
+        return this.#generatePromise(urlWithPath, reqBody, id);
       });
 
       const responseData = await this.handleNodePromises(

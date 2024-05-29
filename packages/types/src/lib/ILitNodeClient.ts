@@ -102,8 +102,6 @@ export interface ILitNodeClient {
    */
   getSignature(shareData: any[], requestId: string): Promise<any>;
 
-  sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;
-
   /**
    *
    * Get JS Execution Shares from Nodes
