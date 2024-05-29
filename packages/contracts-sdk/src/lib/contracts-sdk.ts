@@ -1097,8 +1097,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     let publicKey = '';
     while (tries < maxAttempts) {
       publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
-      console.log("pkp pub key: ", publicKey)
-      if (publicKey !== "0x") {
+      console.log('pkp pub key: ', publicKey);
+      if (publicKey !== '0x') {
         break;
       }
       tries++;
@@ -1106,7 +1106,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         setTimeout(resolve, 10_000);
       });
     }
-
 
     if (publicKey.startsWith('0x')) {
       publicKey = publicKey.slice(2);
@@ -1642,8 +1641,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         let publicKey = '';
         while (tries < maxAttempts) {
           publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
-          console.log("pkp pub key: ", publicKey)
-          if (publicKey !== "0x") {
+          console.log('pkp pub key: ', publicKey);
+          if (publicKey !== '0x') {
             break;
           }
           tries++;
@@ -1652,7 +1651,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           });
         }
 
-        console.warn("public key from token id", publicKey);
+        console.warn('public key from token id', publicKey);
         if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
         }
