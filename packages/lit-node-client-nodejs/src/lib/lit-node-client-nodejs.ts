@@ -1,6 +1,6 @@
 import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
-import { joinSignature, sha256 } from 'ethers/lib/utils';
+import { sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
 import {
@@ -16,7 +16,6 @@ import {
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
 import {
-  AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
@@ -29,7 +28,6 @@ import {
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
-  combineEcdsaShares,
   combineSignatureShares,
   encrypt,
   generateSessionKeyPair,
@@ -64,7 +62,6 @@ import {
 import type {
   AuthCallback,
   AuthCallbackParams,
-  AuthMethod,
   AuthSig,
   ClaimKeyResponse,
   ClaimProcessor,
@@ -92,13 +89,11 @@ import type {
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
-  SigShare,
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
-  WebAuthnAuthenticationVerificationParams,
   ILitNodeClient,
   GetPkpSessionSigs,
   CapacityCreditsReq,
@@ -114,14 +109,13 @@ import type {
   EncryptSdkParams,
   GetLitActionSessionSigs,
   EncryptionSignRequest,
-  GetSignSessionKeySharesProp,
   JsonPKPClaimKeyRequest,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
 import { normalizeJsParams } from './helpers/normalize-params';
 import { encodeCode } from './helpers/encode-code';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { getSignatures } from './helpers/get-signatures';
 import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
 import { getClaimsList } from './helpers/get-claims-list';
@@ -336,166 +330,6 @@ export class LitNodeClientNodeJs
 
     return { iat, exp };
   };
-
-  // ========== Rate Limit NFT ==========
-
-  // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
-  createCapacityDelegationAuthSig = async (
-    params: CapacityCreditsReq
-  ): Promise<CapacityCreditsRes> => {
-    // -- validate
-    if (!params.dAppOwnerWallet) {
-      throw new Error('dAppOwnerWallet must exist');
-    }
-
-    // Useful log for debugging
-    if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
-      log(
-        `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
-      );
-    }
-
-    // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
-    // usage to a list of delegatee addresses
-    const dAppOwnerWalletAddress = ethers.utils.getAddress(
-      await params.dAppOwnerWallet.getAddress()
-    );
-
-    // -- if it's not ready yet, then connect
-    if (!this.ready) {
-      await this.connect();
-    }
-
-    const nonce = await this.getLatestBlockhash();
-    const siweMessage = await createSiweMessageWithCapacityDelegation({
-      uri: 'lit:capability:delegation',
-      litNodeClient: this,
-      walletAddress: dAppOwnerWalletAddress,
-      nonce: nonce,
-      expiration: params.expiration,
-      domain: params.domain,
-      statement: params.statement,
-
-      // -- capacity delegation specific configuration
-      uses: params.uses,
-      delegateeAddresses: params.delegateeAddresses,
-      capacityTokenId: params.capacityTokenId,
-    });
-
-    const authSig = await generateAuthSig({
-      signer: params.dAppOwnerWallet,
-      toSign: siweMessage,
-    });
-
-    return { capacityDelegationAuthSig: authSig };
-  };
-
-  // ==================== SESSIONS ====================
-  /**
-   * Try to get the session key in the local storage,
-   * if not, generates one.
-   * @return { SessionKeyPair } session key pair
-   */
-  getSessionKey = (): SessionKeyPair => {
-    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
-    const storedSessionKeyOrError = getStorageItem(storageKey);
-
-    if (
-      storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
-      !storedSessionKeyOrError.result ||
-      storedSessionKeyOrError.result === ''
-    ) {
-      console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
-      );
-
-      // Generate new one
-      const newSessionKey = generateSessionKeyPair();
-
-      // (TRY) to set to local storage
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
-      } catch (e) {
-        log(
-          `[getSessionKey] Localstorage not available.Not a problem.Contiune...`
-        );
-      }
-
-      return newSessionKey;
-    } else {
-      return JSON.parse(storedSessionKeyOrError.result as string);
-    }
-  };
-
-  /**
-   * Check if a given object is of type SessionKeyPair.
-   *
-   * @param obj - The object to check.
-   * @returns True if the object is of type SessionKeyPair.
-   */
-  isSessionKeyPair(obj: any): obj is SessionKeyPair {
-    return (
-      typeof obj === 'object' &&
-      'publicKey' in obj &&
-      'secretKey' in obj &&
-      typeof obj.publicKey === 'string' &&
-      typeof obj.secretKey === 'string'
-    );
-  }
-
-  /**
-   * Generates wildcard capability for each of the LIT resources
-   * specified.
-   * @param litResources is an array of LIT resources
-   * @param addAllCapabilities is a boolean that specifies whether to add all capabilities for each resource
-   */
-  static async generateSessionCapabilityObjectWithWildcards(
-    litResources: ILitResource[],
-    addAllCapabilities?: boolean,
-    rateLimitAuthSig?: AuthSig
-  ): Promise<ISessionCapabilityObject> {
-    const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
-
-    // disable for now
-    const _addAllCapabilities = addAllCapabilities ?? false;
-
-    if (_addAllCapabilities) {
-      for (const litResource of litResources) {
-        sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
-      }
-    }
-
-    if (rateLimitAuthSig) {
-      throw new Error('Not implemented yet.');
-      // await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
-    }
-
-    return sessionCapabilityObject;
-  }
-
-  // backward compatibility
-  async generateSessionCapabilityObjectWithWildcards(
-    litResources: ILitResource[]
-  ): Promise<ISessionCapabilityObject> {
-    return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
-      litResources
-    );
-  }
-
-  /**
-   *
-   * Get expiration for session default time is 1 day / 24 hours
-   *
-   */
-  static getExpiration = () => {
-    return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
-  };
-
-  // backward compatibility
-  getExpiration = () => {
-    return LitNodeClientNodeJs.getExpiration();
-  };
-
   /**
    *
    * Get the signature from local storage, if not, generates one
@@ -619,8 +453,6 @@ export class LitNodeClientNodeJs
     return walletSig!;
   };
 
-  // ==================== API Calls to Nodes ====================
-
   /**
    *
    * Combine Shares from network public key set and signature shares
@@ -669,6 +501,194 @@ export class LitNodeClientNodeJs
     )}`;
 
     return finalJwt;
+  };
+  /**
+   *
+   * Get Session Key URI eg. lit:session:0x1234
+   *
+   * @param publicKey is the public key of the session key
+   * @returns { string } the session key uri
+   */
+  #getSessionKeyUri = (publicKey: string): string => {
+    return LIT_SESSION_KEY_URI + publicKey;
+  };
+  /**
+   * Generates a promise by sending a command to the Lit node
+   *
+   * @param url - The URL to send the command to.
+   * @param params - The parameters to include in the command.
+   * @param requestId - The ID of the request.
+   * @returns A promise that resolves with the response from the server.
+   */
+  #generatePromise = async (
+    url: string,
+    params: any,
+    requestId: string
+  ): Promise<NodeCommandResponse> => {
+    return await this._sendCommandToNode({
+      url,
+      data: params,
+      requestId,
+    });
+  };
+  // ========== Rate Limit NFT ==========
+
+  // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
+  /**
+   * Creates a capacity delegation authSig.
+   *
+   * @param params - The parameters for creating the capacity delegation authSig.
+   * @returns A promise that resolves to the capacity delegation authSig.
+   * @throws An error if the dAppOwnerWallet is not provided.
+   */
+  createCapacityDelegationAuthSig = async (
+    params: CapacityCreditsReq
+  ): Promise<CapacityCreditsRes> => {
+    // -- validate
+    if (!params.dAppOwnerWallet) {
+      throw new Error('dAppOwnerWallet must exist');
+    }
+
+    // Useful log for debugging
+    if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
+      log(
+        `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
+      );
+    }
+
+    // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
+    // usage to a list of delegatee addresses
+    const dAppOwnerWalletAddress = ethers.utils.getAddress(
+      await params.dAppOwnerWallet.getAddress()
+    );
+
+    // -- if it's not ready yet, then connect
+    if (!this.ready) {
+      await this.connect();
+    }
+
+    const nonce = await this.getLatestBlockhash();
+    const siweMessage = await createSiweMessageWithCapacityDelegation({
+      uri: 'lit:capability:delegation',
+      litNodeClient: this,
+      walletAddress: dAppOwnerWalletAddress,
+      nonce: nonce,
+      expiration: params.expiration,
+      domain: params.domain,
+      statement: params.statement,
+
+      // -- capacity delegation specific configuration
+      uses: params.uses,
+      delegateeAddresses: params.delegateeAddresses,
+      capacityTokenId: params.capacityTokenId,
+    });
+
+    const authSig = await generateAuthSig({
+      signer: params.dAppOwnerWallet,
+      toSign: siweMessage,
+    });
+
+    return { capacityDelegationAuthSig: authSig };
+  };
+
+  // ==================== SESSIONS ====================
+  /**
+   * Try to get the session key in the local storage,
+   * if not, generates one.
+   * @return { SessionKeyPair } session key pair
+   */
+  getSessionKey = (): SessionKeyPair => {
+    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
+    const storedSessionKeyOrError = getStorageItem(storageKey);
+
+    if (
+      storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
+      !storedSessionKeyOrError.result ||
+      storedSessionKeyOrError.result === ''
+    ) {
+      console.warn(
+        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+      );
+
+      // Generate new one
+      const newSessionKey = generateSessionKeyPair();
+
+      // (TRY) to set to local storage
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
+      } catch (e) {
+        log(
+          `[getSessionKey] Localstorage not available.Not a problem.Contiune...`
+        );
+      }
+
+      return newSessionKey;
+    } else {
+      return JSON.parse(storedSessionKeyOrError.result as string);
+    }
+  };
+
+  /**
+   * Check if a given object is of type SessionKeyPair.
+   *
+   * @param obj - The object to check.
+   * @returns True if the object is of type SessionKeyPair.
+   */
+  isSessionKeyPair(obj: any): obj is SessionKeyPair {
+    return (
+      typeof obj === 'object' &&
+      'publicKey' in obj &&
+      'secretKey' in obj &&
+      typeof obj.publicKey === 'string' &&
+      typeof obj.secretKey === 'string'
+    );
+  }
+
+  /**
+   * Generates wildcard capability for each of the LIT resources
+   * specified.
+   * @param litResources is an array of LIT resources
+   * @param addAllCapabilities is a boolean that specifies whether to add all capabilities for each resource
+   */
+  static async generateSessionCapabilityObjectWithWildcards(
+    litResources: ILitResource[],
+    addAllCapabilities?: boolean
+  ): Promise<ISessionCapabilityObject> {
+    const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
+
+    // disable for now
+    const _addAllCapabilities = addAllCapabilities ?? false;
+
+    if (_addAllCapabilities) {
+      for (const litResource of litResources) {
+        sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+      }
+    }
+
+    return sessionCapabilityObject;
+  }
+
+  // backward compatibility
+  async generateSessionCapabilityObjectWithWildcards(
+    litResources: ILitResource[]
+  ): Promise<ISessionCapabilityObject> {
+    return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
+      litResources
+    );
+  }
+
+  /**
+   *
+   * Get expiration for session default time is 1 day / 24 hours
+   *
+   */
+  static getExpiration = () => {
+    return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+  };
+
+  // backward compatibility
+  getExpiration = () => {
+    return LitNodeClientNodeJs.getExpiration();
   };
 
   // ========== Promise Handlers ==========
@@ -831,40 +851,6 @@ export class LitNodeClientNodeJs
       this.config.retryTolerance
     );
   };
-
-  /**
-   *
-   * Get a single signature
-   *
-   * @param { Array<any> } shareData from all node promises
-   *
-   * @returns { string } signature
-   *
-   */
-  getSignature = async (shareData: any[], requestId: string): Promise<any> => {
-    // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
-    const R_x = shareData[0].local_x;
-    const R_y = shareData[0].local_y;
-
-    const valid_shares = shareData.map((s: any) => s.signature_share);
-    const shares = JSON.stringify(valid_shares);
-
-    await wasmECDSA.initWasmEcdsaSdk(); // init WASM
-    const signature = wasmECDSA.combine_signature(R_x, R_y, shares);
-    logWithRequestId(requestId, 'raw ecdsa sig', signature);
-
-    return signature;
-  };
-
-  // ========== Scoped Business Logics ==========
-
-  // Normalize the data to a basic array
-
-  // TODO: executeJsWithTargettedNodes
-  // if (formattedParams.targetNodeRange) {
-  //   // FIXME: we should make this a separate function
-  //   res = await this.runOnTargetedNodes(formattedParams);
-  // }
 
   /**
    *
@@ -1048,26 +1034,6 @@ export class LitNodeClientNodeJs
     log('returnVal:', returnVal);
 
     return returnVal;
-  };
-
-  /**
-   * Generates a promise by sending a command to the Lit node
-   *
-   * @param url - The URL to send the command to.
-   * @param params - The parameters to include in the command.
-   * @param requestId - The ID of the request.
-   * @returns A promise that resolves with the response from the server.
-   */
-  #generatePromise = async (
-    url: string,
-    params: any,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    return await this._sendCommandToNode({
-      url,
-      data: params,
-      requestId,
-    });
   };
 
   /**
@@ -1931,23 +1897,6 @@ export class LitNodeClientNodeJs
     return signSessionKeyRes;
   };
 
-  getSignSessionKeyShares = async (
-    url: string,
-    params: GetSignSessionKeySharesProp,
-    requestId: string
-  ) => {
-    log('getSignSessionKeyShares');
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
-    });
-    return await this._sendCommandToNode({
-      url: urlWithPath,
-      data: params.body,
-      requestId,
-    });
-  };
-
   /**
    * Get session signatures for a set of resources
    *
@@ -2222,17 +2171,6 @@ const resourceAbilityRequests = [
     }
 
     return this.getPkpSessionSigs(params);
-  };
-
-  /**
-   *
-   * Get Session Key URI eg. lit:session:0x1234
-   *
-   * @param publicKey is the public key of the session key
-   * @returns { string } the session key uri
-   */
-  #getSessionKeyUri = (publicKey: string): string => {
-    return LIT_SESSION_KEY_URI + publicKey;
   };
 
   /**

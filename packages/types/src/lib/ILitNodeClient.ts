@@ -65,33 +65,6 @@ export interface ILitNodeClient {
   // ========== Promise Handlers ==========
 
   /**
-   * Handle node promises
-   *
-   * @param { Array<Promise<T>> } nodePromises
-   *
-   * @param {string} requestId request Id used for logging
-   * @param {number} minNodeCount The minimum number of nodes we need a successful response from to continue
-   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
-   *
-   */
-  handleNodePromises<T>(
-    nodePromises: Promise<T>[],
-    requestId: string,
-    minNodeCount: number
-  ): Promise<SuccessNodePromises<T> | RejectedNodePromises>;
-
-  /**
-   *
-   * Get Signature
-   *
-   * @param { Array<any> } shareData from all node promises
-   *
-   * @returns { string } signature
-   *
-   */
-  getSignature(shareData: any[], requestId: string): Promise<any>;
-
-  /**
    *
    * Get JS Execution Shares from Nodes
    *

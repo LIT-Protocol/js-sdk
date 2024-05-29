@@ -1053,9 +1053,6 @@ export interface SignSessionKeyResponse {
   authSig: AuthSig;
 }
 
-export interface GetSignSessionKeySharesProp {
-  body: SessionRequestBody;
-}
 export interface CommonGetSessionSigsProps {
   pkpPublicKey?: string;
 
