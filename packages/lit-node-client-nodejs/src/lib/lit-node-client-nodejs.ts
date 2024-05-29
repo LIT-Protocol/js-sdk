@@ -508,7 +508,7 @@ export class LitNodeClientNodeJs
    * 3. The authSig.signedMessage does not contain at least one session capability object
    *
    */
-  checkNeedToResignSessionKey = async ({
+  #checkNeedToResignSessionKey = async ({
     authSig,
     sessionKeyUri,
     resourceAbilityRequests,
@@ -2383,7 +2383,7 @@ const resourceAbilityRequests = [
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
-    const needToResignSessionKey = await this.checkNeedToResignSessionKey({
+    const needToResignSessionKey = await this.#checkNeedToResignSessionKey({
       authSig,
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
