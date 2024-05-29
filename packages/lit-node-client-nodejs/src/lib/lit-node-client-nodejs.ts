@@ -316,7 +316,6 @@ export class LitNodeClientNodeJs
       `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
     ).getResourceKey();
   };
-
   /**
    *
    * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
@@ -451,7 +450,6 @@ export class LitNodeClientNodeJs
     log('getWalletSig - flow 3');
     return walletSig!;
   };
-
   /**
    *
    * Combine Shares from network public key set and signature shares
@@ -677,9 +675,7 @@ export class LitNodeClientNodeJs
   }
 
   /**
-   *
    * Get expiration for session default time is 1 day / 24 hours
-   *
    */
   static getExpiration = () => {
     return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
@@ -1231,6 +1227,7 @@ const resourceAbilityRequests = [
   /** ============================== END POINTS ============================== */
   /**
    * Sign a session public key using a PKP, which generates an authSig.
+   * Endpoint: /web/sign_session_key endpoint.
    * @returns {Object} An object containing the resulting signature.
    */
   signSessionKey = async (
@@ -1525,7 +1522,7 @@ const resourceAbilityRequests = [
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
-   *
+   * Endpoint: /web/execute
    * @param { JsonExecutionSdkParams } params
    *
    * @returns { ExecuteJsResponse }
@@ -1709,6 +1706,8 @@ const resourceAbilityRequests = [
   /**
    * Use PKP to sign
    *
+   * Endpoint: /web/pkp/sign
+   *
    * @param { JsonPkpSignSdkParams } params
    * @param params.toSign - The data to sign
    * @param params.pubKey - The public key to sign with
@@ -1833,6 +1832,9 @@ const resourceAbilityRequests = [
    * Authenticates an Auth Method for claiming a Programmable Key Pair (PKP).
    * A {@link MintCallback} can be defined for custom on chain interactions
    * by default the callback will forward to a relay server for minting on chain.
+   *
+   * Endpoint: /web/pkp/claim
+   *
    * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
    * @returns {Promise<ClaimKeyResponse>}
    */
@@ -1974,6 +1976,8 @@ const resourceAbilityRequests = [
    *
    * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
    *
+   * Endpoint: /web/signing/access_control_condition
+   *
    * @param { GetSignedTokenRequest } params
    *
    * @returns { Promise<string> } final JWT
@@ -2113,6 +2117,8 @@ const resourceAbilityRequests = [
   /**
    *
    * Decrypt ciphertext with the LIT network.
+   *
+   * Endpoint: /web/encryption/sign
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
