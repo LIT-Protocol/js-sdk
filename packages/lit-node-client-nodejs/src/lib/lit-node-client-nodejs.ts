@@ -318,11 +318,15 @@ export class LitNodeClientNodeJs
     ).getResourceKey();
   };
   /**
+   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have
+   * different wall clock times, the nodes will verify that these params are withing a grace period
    *
-   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
-   *
+   * @returns { { iat: number, exp: number } } the jwt params
    */
-  #getJWTParams = () => {
+  #getJWTParams = (): {
+    iat: number;
+    exp: number;
+  } => {
     const now = Date.now();
     const iat = Math.floor(now / 1000);
     const exp = iat + 12 * 60 * 60; // 12 hours in seconds
