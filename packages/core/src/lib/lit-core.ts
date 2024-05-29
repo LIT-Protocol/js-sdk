@@ -1030,7 +1030,7 @@ export class LitCore {
    * @returns The session signature for the given URL.
    * @throws An error if sessionSigs is not provided or if the session signature for the URL is not found.
    */
-  getSessionSigByUrl = ({
+  protected _getSessionSigByUrl = ({
     sessionSigs,
     url,
   }: {
