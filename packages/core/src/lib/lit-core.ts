@@ -103,7 +103,7 @@ export type LitNodeClientConfigWithDefaults = Required<
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;
 // This interval is responsible for keeping latest block hash up to date
-const NETWORK_SYNC_INTERVAL = 30_000;
+const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
 export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
@@ -139,7 +139,7 @@ export class LitCore {
     currentNumber: null,
     lastUpdateTime: null,
   };
-
+  private _blockHashUrl = "http://0.0.0.0:8080/get_most_recent_valid_block";
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     // Initialize default config based on litNetwork
@@ -827,32 +827,34 @@ export class LitCore {
     this._networkSyncInterval = setInterval(async () => {
       if (
         !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= NETWORK_SYNC_INTERVAL
+        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
       ) {
         log(
-          'Syncing state for new network context current config: ',
-          this.config,
+          'Syncing state for new blockhash ',
           'current blockhash: ',
           this.lastBlockHashRetrieved
         );
         try {
-          await this.connect();
+          const blockHashFetchResp = await fetch(this._blockHashUrl);
+          const blockHashBody: any = await blockHashFetchResp.json();
+          this.latestBlockhash = blockHashBody.blockhash;
+          this.lastBlockHashRetrieved  = Date.now();
           log(
-            'Done syncing state new config: ',
-            this.config,
+            'Done syncing state new blockhash: ',
+            this.lastBlockHashRetrieved,
             'new blockhash: ',
-            this.lastBlockHashRetrieved
+            blockHashBody.blockhash
           );
         } catch (err: unknown) {
           // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
           const { message = '' } = err as Error | NodeClientErrorV1;
           logError(
-            'Error while attempting to refresh nodes to fetch new latestBlockhash:',
+            'Error while attempting fetch new latestBlockhash:',
             message
           );
         }
       }
-    }, NETWORK_SYNC_INTERVAL);
+    }, BLOCKHASH_SYNC_INTERVAL);
   }
 
   /**
