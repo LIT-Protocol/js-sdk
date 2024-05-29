@@ -29,7 +29,7 @@ describe('contractsSdk', () => {
   });
 
   it('Test that  connection from custom context resolves contracts in correct mapping', async () => {
-    const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
+    const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
     const provider = new ethers.providers.JsonRpcProvider(DEFAULT_RPC);
     litContracts = new LitContracts({
       customContext: {

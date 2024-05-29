@@ -67,6 +67,8 @@ import {
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
+const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
 // This function asynchronously executes a provided callback function for each item in the given array.
@@ -575,7 +577,7 @@ export class LitContracts {
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl = rpcUrl ?? DEFAULT_RPC;
+    rpcUrl = rpcUrl ?? DEFAULT_READ_RPC;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
