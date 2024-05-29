@@ -38,13 +38,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
-   *
-   */
-  getJWTParams(): { iat: number; exp: number };
-
-  /**
-   *
    * Combine Shares from signature shares
    *
    * @param { NodeBlsSigningShare } signatureShares

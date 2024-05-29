@@ -291,6 +291,18 @@ export class LitNodeClientNodeJs
       `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
     ).getResourceKey();
   };
+  /**
+   *
+   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
+   *
+   */
+  #getJWTParams = () => {
+    const now = Date.now();
+    const iat = Math.floor(now / 1000);
+    const exp = iat + 12 * 60 * 60; // 12 hours in seconds
+
+    return { iat, exp };
+  };
 
   // ========== Rate Limit NFT ==========
 
@@ -343,21 +355,6 @@ export class LitNodeClientNodeJs
     });
 
     return { capacityDelegationAuthSig: authSig };
-  };
-
-  // ========== Scoped Class Helpers ==========
-
-  /**
-   *
-   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
-   *
-   */
-  getJWTParams = () => {
-    const now = Date.now();
-    const iat = Math.floor(now / 1000);
-    const exp = iat + 12 * 60 * 60; // 12 hours in seconds
-
-    return { iat, exp };
   };
 
   // ==================== SESSIONS ====================
@@ -1342,7 +1339,7 @@ export class LitNodeClientNodeJs
     // we need to send jwt params iat (issued at) and exp (expiration)
     // because the nodes may have different wall clock times
     // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.getJWTParams();
+    const { iat, exp } = this.#getJWTParams();
 
     // ========== Formatting Access Control Conditions =========
     const {
