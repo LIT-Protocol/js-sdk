@@ -21,7 +21,7 @@ export class TinnyEnvironment {
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
-    DEBUG: Boolean(process.env['DEBUG']) || false,
+    DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'] || 'http://127.0.0.1:8545',
