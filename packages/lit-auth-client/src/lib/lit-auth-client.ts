@@ -138,8 +138,7 @@ export class LitAuthClient {
     }
 
     // Set RPC URL
-    this.rpcUrl =
-      options?.rpcUrl || 'https://lit-protocol.calderachain.xyz/replica-http';
+    this.rpcUrl = options?.rpcUrl || 'https://chain-rpc.litprotocol.com/http';
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);
