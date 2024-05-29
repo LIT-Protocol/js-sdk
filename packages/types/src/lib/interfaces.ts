@@ -1177,7 +1177,6 @@ export interface LitClientSessionManager {
   getSessionKey: () => SessionKeyPair;
   isSessionKeyPair(obj: any): boolean;
   getExpiration: () => string;
-  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
   getPkpSessionSigs: (params: GetPkpSessionSigs) => Promise<SessionSigsMap>;
   getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
   signSessionKey: (

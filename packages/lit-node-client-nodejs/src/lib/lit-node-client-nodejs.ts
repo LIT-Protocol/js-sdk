@@ -501,7 +501,7 @@ export class LitNodeClientNodeJs
    * Get the signature from local storage, if not, generates one
    *
    */
-  getWalletSig = async ({
+  #getWalletSig = async ({
     authNeededCallback,
     chain,
     sessionCapabilityObject,
@@ -789,7 +789,7 @@ export class LitNodeClientNodeJs
         log(`running on node ${nodeIndex} at ${url}`);
 
         // -- choose the right signature
-        const sessionSig = this.getSessionSigByUrl({
+        const sessionSig = this._getSessionSigByUrl({
           sessionSigs: params.sessionSigs,
           url,
         });
@@ -917,7 +917,7 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this._getNodePromises(async (url: string) => {
         // -- choose the right signature
-        const sessionSig = this.getSessionSigByUrl({
+        const sessionSig = this._getSessionSigByUrl({
           sessionSigs: formattedParams.sessionSigs,
           url,
         });
@@ -1112,7 +1112,7 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this._getNodePromises((url: string) => {
         // -- get the session sig from the url key
-        const sessionSig = this.getSessionSigByUrl({
+        const sessionSig = this._getSessionSigByUrl({
           sessionSigs: params.sessionSigs,
           url,
         });
@@ -2007,7 +2007,7 @@ const resourceAbilityRequests = [
     const nonce = this.latestBlockhash!;
 
     // -- (TRY) to get the wallet signature
-    let authSig = await this.getWalletSig({
+    let authSig = await this.#getWalletSig({
       authNeededCallback: params.authNeededCallback,
       chain: params.chain || 'ethereum',
       sessionCapabilityObject,
