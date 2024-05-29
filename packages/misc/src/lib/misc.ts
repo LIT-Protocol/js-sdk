@@ -915,4 +915,3 @@ export function normalizeAndStringify(input: string): string {
     return normalizeAndStringify(unescaped);
   }
 }
-
