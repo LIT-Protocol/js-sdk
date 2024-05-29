@@ -124,6 +124,7 @@ import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { getExpiration } from './helpers/get-expiration';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -202,7 +203,6 @@ export class LitNodeClientNodeJs
 
     return authSig;
   };
-
   /**
    *
    * Check if a session key needs to be resigned. These are the scenarios where a session key needs to be resigned:
@@ -317,13 +317,16 @@ export class LitNodeClientNodeJs
       `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
     ).getResourceKey();
   };
-
   /**
+   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have
+   * different wall clock times, the nodes will verify that these params are withing a grace period
    *
-   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
-   *
+   * @returns { { iat: number, exp: number } } the jwt params
    */
-  #getJWTParams = () => {
+  #getJWTParams = (): {
+    iat: number;
+    exp: number;
+  } => {
     const now = Date.now();
     const iat = Math.floor(now / 1000);
     const exp = iat + 12 * 60 * 60; // 12 hours in seconds
@@ -452,7 +455,6 @@ export class LitNodeClientNodeJs
     log('getWalletSig - flow 3');
     return walletSig!;
   };
-
   /**
    *
    * Combine Shares from network public key set and signature shares
@@ -678,17 +680,15 @@ export class LitNodeClientNodeJs
   }
 
   /**
-   *
    * Get expiration for session default time is 1 day / 24 hours
-   *
    */
   static getExpiration = () => {
-    return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+    return getExpiration();
   };
 
   // backward compatibility
   getExpiration = () => {
-    return LitNodeClientNodeJs.getExpiration();
+    return getExpiration();
   };
 
   // ========== Promise Handlers ==========
@@ -854,453 +854,6 @@ export class LitNodeClientNodeJs
 
   /**
    *
-   * Execute JS on the nodes and combine and return any resulting signatures
-   *
-   * @param { JsonExecutionSdkParams } params
-   *
-   * @returns { ExecuteJsResponse }
-   *
-   */
-  executeJs = async (
-    params: JsonExecutionSdkParams
-  ): Promise<ExecuteJsResponse> => {
-    // ========== Validate Params ==========
-    if (!this.ready) {
-      const message =
-        '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    const paramsIsSafe = safeParams({
-      functionName: 'executeJs',
-      params: params,
-    });
-
-    if (!paramsIsSafe) {
-      return throwError({
-        message: 'executeJs params are not valid',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
-    }
-
-    // Format the params
-    const formattedParams: JsonExecutionSdkParams = {
-      ...params,
-      ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
-      ...(params.code && { code: encodeCode(params.code) }),
-    };
-
-    // ========== Get Node Promises ==========
-    // Handle promises for commands sent to Lit nodes
-    const wrapper = async (
-      requestId: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this._getNodePromises(async (url: string) => {
-        // -- choose the right signature
-        const sessionSig = this._getSessionSigByUrl({
-          sessionSigs: formattedParams.sessionSigs,
-          url,
-        });
-
-        const reqBody: JsonExecutionRequest = {
-          ...formattedParams,
-          authSig: sessionSig,
-        };
-
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.EXECUTE_JS,
-        });
-
-        return this.#generatePromise(urlWithPath, reqBody, requestId);
-      });
-
-      // -- resolve promises
-      const res = await this._handleNodePromises(
-        nodePromises,
-        requestId,
-        this.connectedNodes.size
-      );
-
-      return res;
-    }; // wrapper end
-
-    // ========== Execute with Retry ==========
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
-        logError('an error occured, attempting to retry operation');
-      },
-      this.config.retryTolerance
-    );
-
-    // ========== Handle Response ==========
-    const requestId = res.requestId;
-
-    // -- case: promises rejected
-    if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
-    }
-
-    // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<NodeShare>).values;
-
-    logWithRequestId(
-      requestId,
-      'executeJs responseData from node : ',
-      JSON.stringify(responseData, null, 2)
-    );
-
-    // -- find the responseData that has the most common response
-    const mostCommonResponse = findMostCommonResponse(
-      responseData
-    ) as NodeShare;
-
-    const responseFromStrategy: any = processLitActionResponseStrategy(
-      responseData,
-      params.responseStrategy ?? { strategy: 'leastCommon' }
-    );
-    mostCommonResponse.response = responseFromStrategy;
-
-    const isSuccess = mostCommonResponse.success;
-    const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
-    const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
-
-    // -- we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
-    if (isSuccess && !hasSignedData && !hasClaimData) {
-      return mostCommonResponse as unknown as ExecuteJsResponse;
-    }
-
-    // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-    if (!hasSignedData && !hasClaimData) {
-      return {
-        claims: {},
-        signatures: null,
-        decryptions: [],
-        response: mostCommonResponse.response,
-        logs: mostCommonResponse.logs,
-      } as ExecuteJsNoSigningResponse;
-    }
-
-    // ========== Extract shares from response data ==========
-
-    // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map((r) => {
-      return removeDoubleQuotes(r.signedData);
-    });
-
-    logWithRequestId(
-      requestId,
-      'signatures shares to combine: ',
-      signedDataList
-    );
-
-    const signatures = getSignatures({
-      requestId,
-      networkPubKeySet: this.networkPubKeySet,
-      minNodeCount: this.config.minNodeCount,
-      signedData: signedDataList,
-    });
-
-    // -- 2. combine responses as a string, and parse it as JSON if possible
-    const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
-
-    // -- 3. combine logs
-    const mostCommonLogs: string = mostCommonString(
-      responseData.map((r: NodeLog) => r.logs)
-    );
-
-    // -- 4. combine claims
-    const claimsList = getClaimsList(responseData);
-    const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
-
-    // ========== Result ==========
-    const returnVal: ExecuteJsResponse = {
-      claims,
-      signatures,
-      // decryptions: [],
-      response: parsedResponse,
-      logs: mostCommonLogs,
-    };
-
-    log('returnVal:', returnVal);
-
-    return returnVal;
-  };
-
-  /**
-   * Use PKP to sign
-   *
-   * @param { JsonPkpSignSdkParams } params
-   * @param params.toSign - The data to sign
-   * @param params.pubKey - The public key to sign with
-   * @param params.sessionSigs - The session signatures to use
-   * @param params.authMethods - (optional) The auth methods to use
-   */
-  pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
-    // -- validate required params
-    const requiredParamKeys = ['toSign', 'pubKey'];
-
-    (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
-      if (!params[key]) {
-        throwError({
-          message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
-          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-        });
-      }
-    });
-
-    // -- validate present of accepted auth methods
-    if (
-      !params.sessionSigs &&
-      (!params.authMethods || params.authMethods.length <= 0)
-    ) {
-      throwError({
-        message: `Either sessionSigs or authMethods (length > 0) must be present.`,
-        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-      });
-    }
-
-    // ========== Get Node Promises ==========
-    // Handle promises for commands sent to Lit nodes
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this._getNodePromises((url: string) => {
-        // -- get the session sig from the url key
-        const sessionSig = this._getSessionSigByUrl({
-          sessionSigs: params.sessionSigs,
-          url,
-        });
-
-        const reqBody: JsonPkpSignRequest = {
-          toSign: normalizeArray(params.toSign),
-          pubkey: hexPrefixed(params.pubKey),
-          authSig: sessionSig,
-
-          // -- optional params
-          ...(params.authMethods &&
-            params.authMethods.length > 0 && {
-              authMethods: params.authMethods,
-            }),
-        };
-
-        logWithRequestId(id, 'reqBody:', reqBody);
-
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.PKP_SIGN,
-        });
-
-        return this.#generatePromise(urlWithPath, reqBody, id);
-      });
-
-      const res = await this._handleNodePromises(
-        nodePromises,
-        id,
-        this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
-      );
-      return res;
-    }; // wrapper end
-
-    // ========== Execute with Retry ==========
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('errror occured, retrying operation');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    // ========== Handle Response ==========
-    const requestId = res.requestId;
-
-    // -- case: promises rejected
-    if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
-    }
-
-    // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
-
-    logWithRequestId(
-      requestId,
-      'responseData',
-      JSON.stringify(responseData, null, 2)
-    );
-
-    // ========== Extract shares from response data ==========
-    // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = parsePkpSignResponse(responseData);
-
-    const signatures = getSignatures<{ signature: SigResponse }>({
-      requestId,
-      networkPubKeySet: this.networkPubKeySet,
-      minNodeCount: this.config.minNodeCount,
-      signedData: signedDataList,
-    });
-
-    logWithRequestId(requestId, `signature combination`, signatures);
-
-    return signatures.signature; // only a single signature is ever present, so we just return it.
-  };
-
-  /**
-   *
-   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
-   *
-   * @param { GetSignedTokenRequest } params
-   *
-   * @returns { Promise<string> } final JWT
-   *
-   */
-  getSignedToken = async (params: GetSignedTokenRequest): Promise<string> => {
-    // ========== Prepare Params ==========
-    const { chain, authSig, sessionSigs } = params;
-
-    // ========== Validation ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // -- validate if this.networkPubKeySet is null
-    if (this.networkPubKeySet === null) {
-      return throwError({
-        message: 'networkPubKeySet cannot be null',
-        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-      });
-    }
-
-    const paramsIsSafe = safeParams({
-      functionName: 'getSignedToken',
-      params,
-    });
-
-    if (!paramsIsSafe) {
-      return throwError({
-        message: `Parameter validation failed.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // ========== Prepare ==========
-    // we need to send jwt params iat (issued at) and exp (expiration)
-    // because the nodes may have different wall clock times
-    // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.#getJWTParams();
-
-    // ========== Formatting Access Control Conditions =========
-    const {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
-
-    if (error) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // ========== Get Node Promises ==========
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this._getNodePromises((url: string) => {
-        // -- if session key is available, use it
-        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
-
-        const reqBody: SigningAccessControlConditionRequest = {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          chain,
-          authSig: authSigToSend,
-          iat,
-          exp,
-        };
-
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.SIGN_ACCS,
-        });
-
-        return this.#generatePromise(urlWithPath, reqBody, id);
-      });
-
-      // -- resolve promises
-      const res = await this._handleNodePromises(
-        nodePromises,
-        id,
-        this.config.minNodeCount
-      );
-      return res;
-    };
-
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occured, attempting to retry ');
-        }
-      },
-      this.config.retryTolerance
-    );
-    const requestId = res.requestId;
-
-    // -- case: promises rejected
-    if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
-    }
-
-    const signatureShares: NodeBlsSigningShare[] = (
-      res as SuccessNodePromises<NodeBlsSigningShare>
-    ).values;
-
-    log('signatureShares', signatureShares);
-
-    // ========== Result ==========
-    const finalJwt: string = this.#combineSharesAndGetJWT(
-      signatureShares,
-      requestId
-    );
-
-    return finalJwt;
-  };
-
-  /**
-   *
    * Encrypt data using the LIT network public key.
    *
    * @param { EncryptSdkParams } params
@@ -1399,215 +952,289 @@ export class LitNodeClientNodeJs
     return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
   };
 
+  /** ============================== SESSION ============================== */
   /**
+   * Get session signatures for a set of resources
    *
-   * Decrypt ciphertext with the LIT network.
+   * High level, how this works:
+   * 1. Generate or retrieve session key
+   * 2. Generate or retrieve the wallet signature of the session key
+   * 3. Sign the specific resources with the session key
    *
+   * Note: When generating session signatures for different PKPs or auth methods,
+   * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
+   *
+   * @param { GetSessionSigsProps } params
+   * 
+   * @example
+   * 
+   * ```ts
+   * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
+import { LitAbility } from "@lit-protocol/types";
+import { logWithRequestId } from '../../../misc/src/lib/misc';
+
+const resourceAbilityRequests = [
+    {
+      resource: new LitPKPResource("*"),
+      ability: LitAbility.PKPSigning,
+    },
+    {
+      resource: new LitActionResource("*"),
+      ability: LitAbility.LitActionExecution,
+    },
+  ];
+   * ```
    */
-  decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
+  getSessionSigs = async (
+    params: GetSessionSigsProps
+  ): Promise<SessionSigsMap> => {
+    // -- prepare
+    // Try to get it from local storage, if not generates one~
+    const sessionKey = params.sessionKey ?? this.getSessionKey();
 
-    // ========== Validate Params ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+    const sessionKeyUri = this.#getSessionKeyUri(sessionKey.publicKey);
+
+    // First get or generate the session capability object for the specified resources.
+    const sessionCapabilityObject = params.sessionCapabilityObject
+      ? params.sessionCapabilityObject
+      : await this.generateSessionCapabilityObjectWithWildcards(
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
+    const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
+
+    if (!this.latestBlockhash) {
       throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+        message: 'Eth Blockhash is undefined.',
+        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
+        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
       });
     }
+    const nonce = this.latestBlockhash!;
 
-    // -- validate if this.subnetPubKey is null
-    if (!this.subnetPubKey) {
-      const message = 'subnetPubKey cannot be null';
-      return throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
+    // -- (TRY) to get the wallet signature
+    let authSig = await this.#getWalletSig({
+      authNeededCallback: params.authNeededCallback,
+      chain: params.chain || 'ethereum',
+      sessionCapabilityObject,
+      switchChain: params.switchChain,
+      expiration: expiration,
+      sessionKey: sessionKey,
+      sessionKeyUri: sessionKeyUri,
+      nonce,
 
-    const paramsIsSafe = safeParams({
-      functionName: 'decrypt',
-      params,
+      // -- for recap
+      resourceAbilityRequests: params.resourceAbilityRequests,
+
+      // -- optional fields
+      ...(params.litActionCode && { litActionCode: params.litActionCode }),
+      ...(params.litActionIpfsId && {
+        litActionIpfsId: params.litActionIpfsId,
+      }),
+      ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
-    if (!paramsIsSafe) {
-      return throwError({
-        message: `Parameter validation failed.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+    const needToResignSessionKey = await this.#checkNeedToResignSessionKey({
+      authSig,
+      sessionKeyUri,
+      resourceAbilityRequests: params.resourceAbilityRequests,
+    });
+
+    // -- (CHECK) if we need to resign the session key
+    if (needToResignSessionKey) {
+      log('need to re-sign session key.  Signing...');
+      authSig = await this.#authCallbackAndUpdateStorageItem({
+        authCallback: params.authNeededCallback,
+        authCallbackParams: {
+          chain: params.chain || 'ethereum',
+          statement: sessionCapabilityObject.statement,
+          resources: [sessionCapabilityObject.encodeAsSiweResource()],
+          switchChain: params.switchChain,
+          expiration,
+          sessionKey: sessionKey,
+          uri: sessionKeyUri,
+          nonce,
+          resourceAbilityRequests: params.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(params.litActionCode && { litActionCode: params.litActionCode }),
+          ...(params.litActionIpfsId && {
+            litActionIpfsId: params.litActionIpfsId,
+          }),
+          ...(params.jsParams && { jsParams: params.jsParams }),
+        },
       });
     }
 
-    // ========== Hashing Access Control Conditions =========
-    // hash the access control conditions
-    const hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
-
-    if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
-
-    // ========== Formatting Access Control Conditions =========
-    const {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
-
-    if (error) {
+    if (
+      authSig.address === '' ||
+      authSig.derivedVia === '' ||
+      authSig.sig === '' ||
+      authSig.signedMessage === ''
+    ) {
       throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        message: 'No wallet signature found',
+        errorKind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
+        errorCode: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
       });
+      // @ts-ignore - we throw an error above, so below should never be reached
+      return;
     }
 
-    // ========== Assemble identity parameter ==========
-    const identityParam = this.#getIdentityParamForEncryption(
-      hashOfConditionsStr,
-      dataToEncryptHash
-    );
+    // ===== AFTER we have Valid Signed Session Key =====
+    // - Let's sign the resources with the session key
+    // - 5 minutes is the default expiration for a session signature
+    // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
+    const sessionExpiration =
+      expiration ?? new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
-    log('identityParam', identityParam);
+    const capabilities = params.capacityDelegationAuthSig
+      ? [
+          ...(params.capabilityAuthSigs ?? []),
+          params.capacityDelegationAuthSig,
+          authSig,
+        ]
+      : [...(params.capabilityAuthSigs ?? []), authSig];
 
-    // ========== Get Network Signature ==========
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this._getNodePromises((url: string) => {
-        // -- if session key is available, use it
-        const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
-
-        if (!authSigToSend) {
-          return throwError({
-            message: `authSig is required`,
-            errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-            errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-          });
-        }
-
-        const reqBody: EncryptionSignRequest = {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          dataToEncryptHash,
-          chain,
-          authSig: authSigToSend,
-          epoch: this.currentEpochNumber!,
-        };
-
-        const urlWithParh = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
-        });
-
-        return this.#generatePromise(urlWithParh, reqBody, id);
-      });
-
-      // -- resolve promises
-      const res = await this._handleNodePromises(
-        nodePromises,
-        id,
-        this.config.minNodeCount
-      );
-      return res;
+    const signingTemplate = {
+      sessionKey: sessionKey.publicKey,
+      resourceAbilityRequests: params.resourceAbilityRequests,
+      capabilities,
+      issuedAt: new Date().toISOString(),
+      expiration: sessionExpiration,
     };
 
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (_error: string, _requestId: string, _isFinal: boolean) => {
-        logError('an error occured attempting to retry');
-      },
-      this.config.retryTolerance
-    );
+    const signatures: SessionSigsMap = {};
 
-    const requestId = res.requestId;
+    this.connectedNodes.forEach((nodeAddress: string) => {
+      const toSign: SessionSigningTemplate = {
+        ...signingTemplate,
+        nodeAddress,
+      };
 
-    // -- case: promises rejected
-    if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
-    }
+      const signedMessage = JSON.stringify(toSign);
 
-    const signatureShares: NodeBlsSigningShare[] = (
-      res as SuccessNodePromises<NodeBlsSigningShare>
-    ).values;
+      const uint8arrayKey = uint8arrayFromString(
+        sessionKey.secretKey,
+        'base16'
+      );
 
-    logWithRequestId(requestId, 'signatureShares', signatureShares);
+      const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
+      const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
 
-    // ========== Result ==========
-    const decryptedData = this.#decryptWithSignatureShares(
-      this.subnetPubKey,
-      uint8arrayFromString(identityParam, 'utf8'),
-      ciphertext,
-      signatureShares
-    );
+      signatures[nodeAddress] = {
+        sig: uint8arrayToString(signature, 'base16'),
+        derivedVia: 'litSessionSignViaNacl',
+        signedMessage: signedMessage,
+        address: sessionKey.publicKey,
+        algo: 'ed25519',
+      };
+    });
 
-    return { decryptedData };
+    log('signatures:', signatures);
+
+    return signatures;
   };
-
-  getLitResourceForEncryption = async (
-    params: EncryptRequest
-  ): Promise<LitAccessControlConditionResource> => {
-    // ========== Hashing Access Control Conditions =========
-    // hash the access control conditions
-    const hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
-
-    if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
-
-    // ========== Hashing Private Data ==========
-    // hash the private data
-    const hashOfPrivateData = await crypto.subtle.digest(
-      'SHA-256',
-      params.dataToEncrypt
-    );
-    const hashOfPrivateDataStr = uint8arrayToString(
-      new Uint8Array(hashOfPrivateData),
-      'base16'
-    );
-
-    return new LitAccessControlConditionResource(
-      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
-    );
-  };
-
-  /** ============================== SESSION ============================== */
 
   /**
+   * Retrieves the PKP sessionSigs.
+   *
+   * @param params - The parameters for retrieving the PKP sessionSigs.
+   * @returns A promise that resolves to the PKP sessionSigs.
+   * @throws An error if any of the required parameters are missing or if `litActionCode` and `ipfsId` exist at the same time.
+   */
+  getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
+    const chain = params?.chain || 'ethereum';
+
+    const pkpSessionSigs = this.getSessionSigs({
+      chain,
+      ...params,
+      authNeededCallback: async (props: AuthCallbackParams) => {
+        // -- validate
+        if (!props.expiration) {
+          throw new Error(
+            '[getPkpSessionSigs/callback] expiration is required'
+          );
+        }
+
+        if (!props.resources) {
+          throw new Error('[getPkpSessionSigs/callback]resources is required');
+        }
+
+        if (!props.resourceAbilityRequests) {
+          throw new Error(
+            '[getPkpSessionSigs/callback]resourceAbilityRequests is required'
+          );
+        }
+
+        // lit action code and ipfs id cannot exist at the same time
+        if (props.litActionCode && props.litActionIpfsId) {
+          throw new Error(
+            '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
+          );
+        }
+
+        /**
+         * We must provide an empty array for authMethods even if we are not using any auth methods.
+         * So that the nodes can serialize the request correctly.
+         */
+        const authMethods = params.authMethods || [];
+
+        const response = await this.signSessionKey({
+          sessionKey: props.sessionKey,
+          statement: props.statement || 'Some custom statement.',
+          authMethods: [...authMethods],
+          pkpPublicKey: params.pkpPublicKey,
+          expiration: props.expiration,
+          resources: props.resources,
+          chainId: 1,
+
+          // -- required fields
+          resourceAbilityRequests: props.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(props.litActionCode && { litActionCode: props.litActionCode }),
+          ...(props.litActionIpfsId && {
+            litActionIpfsId: props.litActionIpfsId,
+          }),
+          ...(props.jsParams && { jsParams: props.jsParams }),
+        });
+
+        return response.authSig;
+      },
+    });
+
+    return pkpSessionSigs;
+  };
+
+  /**
+   * Retrieves session signatures specifically for Lit Actions.
+   * Unlike `getPkpSessionSigs`, this function requires either `litActionCode` or `litActionIpfsId`, and `jsParams` must be provided.
+   *
+   * @param params - The parameters required for retrieving the session signatures.
+   * @returns A promise that resolves with the session signatures.
+   */
+  getLitActionSessionSigs = async (params: GetLitActionSessionSigs) => {
+    // Check if either litActionCode or litActionIpfsId is provided
+    if (!params.litActionCode && !params.litActionIpfsId) {
+      throw new Error(
+        "Either 'litActionCode' or 'litActionIpfsId' must be provided."
+      );
+    }
+
+    // Check if jsParams is provided
+    if (!params.jsParams) {
+      throw new Error("'jsParams' is required.");
+    }
+
+    return this.getPkpSessionSigs(params);
+  };
+
+  /** ============================== END POINTS ============================== */
+  /**
    * Sign a session public key using a PKP, which generates an authSig.
+   * Endpoint: /web/sign_session_key endpoint.
    * @returns {Object} An object containing the resulting signature.
    */
-
   signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
@@ -1898,285 +1525,321 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Get session signatures for a set of resources
    *
-   * High level, how this works:
-   * 1. Generate or retrieve session key
-   * 2. Generate or retrieve the wallet signature of the session key
-   * 3. Sign the specific resources with the session key
+   * Execute JS on the nodes and combine and return any resulting signatures
+   * Endpoint: /web/execute
+   * @param { JsonExecutionSdkParams } params
    *
-   * Note: When generating session signatures for different PKPs or auth methods,
-   * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
+   * @returns { ExecuteJsResponse }
    *
-   * @param { GetSessionSigsProps } params
-   * 
-   * @example
-   * 
-   * ```ts
-   * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
-import { LitAbility } from "@lit-protocol/types";
-import { logWithRequestId } from '../../../misc/src/lib/misc';
-
-const resourceAbilityRequests = [
-    {
-      resource: new LitPKPResource("*"),
-      ability: LitAbility.PKPSigning,
-    },
-    {
-      resource: new LitActionResource("*"),
-      ability: LitAbility.LitActionExecution,
-    },
-  ];
-   * ```
    */
-  getSessionSigs = async (
-    params: GetSessionSigsProps
-  ): Promise<SessionSigsMap> => {
-    // -- prepare
-    // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
+  executeJs = async (
+    params: JsonExecutionSdkParams
+  ): Promise<ExecuteJsResponse> => {
+    // ========== Validate Params ==========
+    if (!this.ready) {
+      const message =
+        '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
-    const sessionKeyUri = this.#getSessionKeyUri(sessionKey.publicKey);
-
-    // First get or generate the session capability object for the specified resources.
-    const sessionCapabilityObject = params.sessionCapabilityObject
-      ? params.sessionCapabilityObject
-      : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
-    const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
-
-    if (!this.latestBlockhash) {
       throwError({
-        message: 'Eth Blockhash is undefined.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
+        message,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
-    const nonce = this.latestBlockhash!;
 
-    // -- (TRY) to get the wallet signature
-    let authSig = await this.#getWalletSig({
-      authNeededCallback: params.authNeededCallback,
-      chain: params.chain || 'ethereum',
-      sessionCapabilityObject,
-      switchChain: params.switchChain,
-      expiration: expiration,
-      sessionKey: sessionKey,
-      sessionKeyUri: sessionKeyUri,
-      nonce,
-
-      // -- for recap
-      resourceAbilityRequests: params.resourceAbilityRequests,
-
-      // -- optional fields
-      ...(params.litActionCode && { litActionCode: params.litActionCode }),
-      ...(params.litActionIpfsId && {
-        litActionIpfsId: params.litActionIpfsId,
-      }),
-      ...(params.jsParams && { jsParams: params.jsParams }),
+    const paramsIsSafe = safeParams({
+      functionName: 'executeJs',
+      params: params,
     });
 
-    const needToResignSessionKey = await this.#checkNeedToResignSessionKey({
-      authSig,
-      sessionKeyUri,
-      resourceAbilityRequests: params.resourceAbilityRequests,
-    });
-
-    // -- (CHECK) if we need to resign the session key
-    if (needToResignSessionKey) {
-      log('need to re-sign session key.  Signing...');
-      authSig = await this.#authCallbackAndUpdateStorageItem({
-        authCallback: params.authNeededCallback,
-        authCallbackParams: {
-          chain: params.chain || 'ethereum',
-          statement: sessionCapabilityObject.statement,
-          resources: [sessionCapabilityObject.encodeAsSiweResource()],
-          switchChain: params.switchChain,
-          expiration,
-          sessionKey: sessionKey,
-          uri: sessionKeyUri,
-          nonce,
-          resourceAbilityRequests: params.resourceAbilityRequests,
-
-          // -- optional fields
-          ...(params.litActionCode && { litActionCode: params.litActionCode }),
-          ...(params.litActionIpfsId && {
-            litActionIpfsId: params.litActionIpfsId,
-          }),
-          ...(params.jsParams && { jsParams: params.jsParams }),
-        },
+    if (!paramsIsSafe) {
+      return throwError({
+        message: 'executeJs params are not valid',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
 
-    if (
-      authSig.address === '' ||
-      authSig.derivedVia === '' ||
-      authSig.sig === '' ||
-      authSig.signedMessage === ''
-    ) {
-      throwError({
-        message: 'No wallet signature found',
-        errorKind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
-        errorCode: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
-      });
-      // @ts-ignore - we throw an error above, so below should never be reached
-      return;
-    }
-
-    // ===== AFTER we have Valid Signed Session Key =====
-    // - Let's sign the resources with the session key
-    // - 5 minutes is the default expiration for a session signature
-    // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
-    const sessionExpiration =
-      expiration ?? new Date(Date.now() + 1000 * 60 * 5).toISOString();
-
-    const capabilities = params.capacityDelegationAuthSig
-      ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
-      : [...(params.capabilityAuthSigs ?? []), authSig];
-
-    const signingTemplate = {
-      sessionKey: sessionKey.publicKey,
-      resourceAbilityRequests: params.resourceAbilityRequests,
-      capabilities,
-      issuedAt: new Date().toISOString(),
-      expiration: sessionExpiration,
+    // Format the params
+    const formattedParams: JsonExecutionSdkParams = {
+      ...params,
+      ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
+      ...(params.code && { code: encodeCode(params.code) }),
     };
 
-    const signatures: SessionSigsMap = {};
-
-    this.connectedNodes.forEach((nodeAddress: string) => {
-      const toSign: SessionSigningTemplate = {
-        ...signingTemplate,
-        nodeAddress,
-      };
-
-      const signedMessage = JSON.stringify(toSign);
-
-      const uint8arrayKey = uint8arrayFromString(
-        sessionKey.secretKey,
-        'base16'
-      );
-
-      const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
-      const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
-
-      signatures[nodeAddress] = {
-        sig: uint8arrayToString(signature, 'base16'),
-        derivedVia: 'litSessionSignViaNacl',
-        signedMessage: signedMessage,
-        address: sessionKey.publicKey,
-        algo: 'ed25519',
-      };
-    });
-
-    log('signatures:', signatures);
-
-    return signatures;
-  };
-
-  /**
-   * Retrieves the PKP sessionSigs.
-   *
-   * @param params - The parameters for retrieving the PKP sessionSigs.
-   * @returns A promise that resolves to the PKP sessionSigs.
-   * @throws An error if any of the required parameters are missing or if `litActionCode` and `ipfsId` exist at the same time.
-   */
-  getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
-    const chain = params?.chain || 'ethereum';
-
-    const pkpSessionSigs = this.getSessionSigs({
-      chain,
-      ...params,
-      authNeededCallback: async (props: AuthCallbackParams) => {
-        // -- validate
-        if (!props.expiration) {
-          throw new Error(
-            '[getPkpSessionSigs/callback] expiration is required'
-          );
-        }
-
-        if (!props.resources) {
-          throw new Error('[getPkpSessionSigs/callback]resources is required');
-        }
-
-        if (!props.resourceAbilityRequests) {
-          throw new Error(
-            '[getPkpSessionSigs/callback]resourceAbilityRequests is required'
-          );
-        }
-
-        // lit action code and ipfs id cannot exist at the same time
-        if (props.litActionCode && props.litActionIpfsId) {
-          throw new Error(
-            '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
-          );
-        }
-
-        /**
-         * We must provide an empty array for authMethods even if we are not using any auth methods.
-         * So that the nodes can serialize the request correctly.
-         */
-        const authMethods = params.authMethods || [];
-
-        const response = await this.signSessionKey({
-          sessionKey: props.sessionKey,
-          statement: props.statement || 'Some custom statement.',
-          authMethods: [...authMethods],
-          pkpPublicKey: params.pkpPublicKey,
-          expiration: props.expiration,
-          resources: props.resources,
-          chainId: 1,
-
-          // -- required fields
-          resourceAbilityRequests: props.resourceAbilityRequests,
-
-          // -- optional fields
-          ...(props.litActionCode && { litActionCode: props.litActionCode }),
-          ...(props.litActionIpfsId && {
-            litActionIpfsId: props.litActionIpfsId,
-          }),
-          ...(props.jsParams && { jsParams: props.jsParams }),
+    // ========== Get Node Promises ==========
+    // Handle promises for commands sent to Lit nodes
+    const wrapper = async (
+      requestId: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this._getNodePromises(async (url: string) => {
+        // -- choose the right signature
+        const sessionSig = this._getSessionSigByUrl({
+          sessionSigs: formattedParams.sessionSigs,
+          url,
         });
 
-        return response.authSig;
+        const reqBody: JsonExecutionRequest = {
+          ...formattedParams,
+          authSig: sessionSig,
+        };
+
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.EXECUTE_JS,
+        });
+
+        return this.#generatePromise(urlWithPath, reqBody, requestId);
+      });
+
+      // -- resolve promises
+      const res = await this._handleNodePromises(
+        nodePromises,
+        requestId,
+        this.connectedNodes.size
+      );
+
+      return res;
+    }; // wrapper end
+
+    // ========== Execute with Retry ==========
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        logError('an error occured, attempting to retry operation');
       },
+      this.config.retryTolerance
+    );
+
+    // ========== Handle Response ==========
+    const requestId = res.requestId;
+
+    // -- case: promises rejected
+    if (!res.success) {
+      this._throwNodeError(res as RejectedNodePromises, requestId);
+    }
+
+    // -- case: promises success (TODO: check the keys of "values")
+    const responseData = (res as SuccessNodePromises<NodeShare>).values;
+
+    logWithRequestId(
+      requestId,
+      'executeJs responseData from node : ',
+      JSON.stringify(responseData, null, 2)
+    );
+
+    // -- find the responseData that has the most common response
+    const mostCommonResponse = findMostCommonResponse(
+      responseData
+    ) as NodeShare;
+
+    const responseFromStrategy: any = processLitActionResponseStrategy(
+      responseData,
+      params.responseStrategy ?? { strategy: 'leastCommon' }
+    );
+    mostCommonResponse.response = responseFromStrategy;
+
+    const isSuccess = mostCommonResponse.success;
+    const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
+    const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
+
+    // -- we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
+    if (isSuccess && !hasSignedData && !hasClaimData) {
+      return mostCommonResponse as unknown as ExecuteJsResponse;
+    }
+
+    // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
+    if (!hasSignedData && !hasClaimData) {
+      return {
+        claims: {},
+        signatures: null,
+        decryptions: [],
+        response: mostCommonResponse.response,
+        logs: mostCommonResponse.logs,
+      } as ExecuteJsNoSigningResponse;
+    }
+
+    // ========== Extract shares from response data ==========
+
+    // -- 1. combine signed data as a list, and get the signatures from it
+    const signedDataList = responseData.map((r) => {
+      return removeDoubleQuotes(r.signedData);
     });
 
-    return pkpSessionSigs;
+    logWithRequestId(
+      requestId,
+      'signatures shares to combine: ',
+      signedDataList
+    );
+
+    const signatures = getSignatures({
+      requestId,
+      networkPubKeySet: this.networkPubKeySet,
+      minNodeCount: this.config.minNodeCount,
+      signedData: signedDataList,
+    });
+
+    // -- 2. combine responses as a string, and parse it as JSON if possible
+    const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
+
+    // -- 3. combine logs
+    const mostCommonLogs: string = mostCommonString(
+      responseData.map((r: NodeLog) => r.logs)
+    );
+
+    // -- 4. combine claims
+    const claimsList = getClaimsList(responseData);
+    const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
+
+    // ========== Result ==========
+    const returnVal: ExecuteJsResponse = {
+      claims,
+      signatures,
+      // decryptions: [],
+      response: parsedResponse,
+      logs: mostCommonLogs,
+    };
+
+    log('returnVal:', returnVal);
+
+    return returnVal;
   };
 
   /**
-   * Retrieves session signatures specifically for Lit Actions.
-   * Unlike `getPkpSessionSigs`, this function requires either `litActionCode` or `litActionIpfsId`, and `jsParams` must be provided.
+   * Use PKP to sign
    *
-   * @param params - The parameters required for retrieving the session signatures.
-   * @returns A promise that resolves with the session signatures.
+   * Endpoint: /web/pkp/sign
+   *
+   * @param { JsonPkpSignSdkParams } params
+   * @param params.toSign - The data to sign
+   * @param params.pubKey - The public key to sign with
+   * @param params.sessionSigs - The session signatures to use
+   * @param params.authMethods - (optional) The auth methods to use
    */
-  getLitActionSessionSigs = async (params: GetLitActionSessionSigs) => {
-    // Check if either litActionCode or litActionIpfsId is provided
-    if (!params.litActionCode && !params.litActionIpfsId) {
-      throw new Error(
-        "Either 'litActionCode' or 'litActionIpfsId' must be provided."
+  pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
+    // -- validate required params
+    const requiredParamKeys = ['toSign', 'pubKey'];
+
+    (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
+      if (!params[key]) {
+        throwError({
+          message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
+          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
+        });
+      }
+    });
+
+    // -- validate present of accepted auth methods
+    if (
+      !params.sessionSigs &&
+      (!params.authMethods || params.authMethods.length <= 0)
+    ) {
+      throwError({
+        message: `Either sessionSigs or authMethods (length > 0) must be present.`,
+        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
+      });
+    }
+
+    // ========== Get Node Promises ==========
+    // Handle promises for commands sent to Lit nodes
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this._getNodePromises((url: string) => {
+        // -- get the session sig from the url key
+        const sessionSig = this._getSessionSigByUrl({
+          sessionSigs: params.sessionSigs,
+          url,
+        });
+
+        const reqBody: JsonPkpSignRequest = {
+          toSign: normalizeArray(params.toSign),
+          pubkey: hexPrefixed(params.pubKey),
+          authSig: sessionSig,
+
+          // -- optional params
+          ...(params.authMethods &&
+            params.authMethods.length > 0 && {
+              authMethods: params.authMethods,
+            }),
+        };
+
+        logWithRequestId(id, 'reqBody:', reqBody);
+
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.PKP_SIGN,
+        });
+
+        return this.#generatePromise(urlWithPath, reqBody, id);
+      });
+
+      const res = await this._handleNodePromises(
+        nodePromises,
+        id,
+        this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
       );
+      return res;
+    }; // wrapper end
+
+    // ========== Execute with Retry ==========
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('errror occured, retrying operation');
+        }
+      },
+      this.config.retryTolerance
+    );
+
+    // ========== Handle Response ==========
+    const requestId = res.requestId;
+
+    // -- case: promises rejected
+    if (!res.success) {
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
-    // Check if jsParams is provided
-    if (!params.jsParams) {
-      throw new Error("'jsParams' is required.");
-    }
+    // -- case: promises success (TODO: check the keys of "values")
+    const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
 
-    return this.getPkpSessionSigs(params);
+    logWithRequestId(
+      requestId,
+      'responseData',
+      JSON.stringify(responseData, null, 2)
+    );
+
+    // ========== Extract shares from response data ==========
+    // -- 1. combine signed data as a list, and get the signatures from it
+    const signedDataList = parsePkpSignResponse(responseData);
+
+    const signatures = getSignatures<{ signature: SigResponse }>({
+      requestId,
+      networkPubKeySet: this.networkPubKeySet,
+      minNodeCount: this.config.minNodeCount,
+      signedData: signedDataList,
+    });
+
+    logWithRequestId(requestId, `signature combination`, signatures);
+
+    return signatures.signature; // only a single signature is ever present, so we just return it.
   };
 
   /**
    * Authenticates an Auth Method for claiming a Programmable Key Pair (PKP).
    * A {@link MintCallback} can be defined for custom on chain interactions
    * by default the callback will forward to a relay server for minting on chain.
+   *
+   * Endpoint: /web/pkp/claim
+   *
    * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
    * @returns {Promise<ClaimKeyResponse>}
    */
@@ -2313,4 +1976,313 @@ const resourceAbilityRequests = [
       });
     }
   }
+
+  /**
+   *
+   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
+   *
+   * Endpoint: /web/signing/access_control_condition
+   *
+   * @param { GetSignedTokenRequest } params
+   *
+   * @returns { Promise<string> } final JWT
+   *
+   */
+  getSignedToken = async (params: GetSignedTokenRequest): Promise<string> => {
+    // ========== Prepare Params ==========
+    const { chain, authSig, sessionSigs } = params;
+
+    // ========== Validation ==========
+    // -- validate if it's ready
+    if (!this.ready) {
+      const message =
+        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+      throwError({
+        message,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+      });
+    }
+
+    // -- validate if this.networkPubKeySet is null
+    if (this.networkPubKeySet === null) {
+      return throwError({
+        message: 'networkPubKeySet cannot be null',
+        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
+      });
+    }
+
+    const paramsIsSafe = safeParams({
+      functionName: 'getSignedToken',
+      params,
+    });
+
+    if (!paramsIsSafe) {
+      return throwError({
+        message: `Parameter validation failed.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    // ========== Prepare ==========
+    // we need to send jwt params iat (issued at) and exp (expiration)
+    // because the nodes may have different wall clock times
+    // the nodes will verify that these params are withing a grace period
+    const { iat, exp } = this.#getJWTParams();
+
+    // ========== Formatting Access Control Conditions =========
+    const {
+      error,
+      formattedAccessControlConditions,
+      formattedEVMContractConditions,
+      formattedSolRpcConditions,
+      formattedUnifiedAccessControlConditions,
+    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
+
+    if (error) {
+      return throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    // ========== Get Node Promises ==========
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this._getNodePromises((url: string) => {
+        // -- if session key is available, use it
+        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+
+        const reqBody: SigningAccessControlConditionRequest = {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          chain,
+          authSig: authSigToSend,
+          iat,
+          exp,
+        };
+
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.SIGN_ACCS,
+        });
+
+        return this.#generatePromise(urlWithPath, reqBody, id);
+      });
+
+      // -- resolve promises
+      const res = await this._handleNodePromises(
+        nodePromises,
+        id,
+        this.config.minNodeCount
+      );
+      return res;
+    };
+
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('an error occured, attempting to retry ');
+        }
+      },
+      this.config.retryTolerance
+    );
+    const requestId = res.requestId;
+
+    // -- case: promises rejected
+    if (res.success === false) {
+      this._throwNodeError(res as RejectedNodePromises, requestId);
+    }
+
+    const signatureShares: NodeBlsSigningShare[] = (
+      res as SuccessNodePromises<NodeBlsSigningShare>
+    ).values;
+
+    log('signatureShares', signatureShares);
+
+    // ========== Result ==========
+    const finalJwt: string = this.#combineSharesAndGetJWT(
+      signatureShares,
+      requestId
+    );
+
+    return finalJwt;
+  };
+
+  /**
+   *
+   * Decrypt ciphertext with the LIT network.
+   *
+   * Endpoint: /web/encryption/sign
+   *
+   */
+  decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
+    const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
+
+    // ========== Validate Params ==========
+    // -- validate if it's ready
+    if (!this.ready) {
+      const message =
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+      throwError({
+        message,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+      });
+    }
+
+    // -- validate if this.subnetPubKey is null
+    if (!this.subnetPubKey) {
+      const message = 'subnetPubKey cannot be null';
+      return throwError({
+        message,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+      });
+    }
+
+    const paramsIsSafe = safeParams({
+      functionName: 'decrypt',
+      params,
+    });
+
+    if (!paramsIsSafe) {
+      return throwError({
+        message: `Parameter validation failed.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    // ========== Hashing Access Control Conditions =========
+    // hash the access control conditions
+    const hashOfConditions: ArrayBuffer | undefined =
+      await this.getHashedAccessControlConditions(params);
+
+    if (!hashOfConditions) {
+      return throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    const hashOfConditionsStr = uint8arrayToString(
+      new Uint8Array(hashOfConditions),
+      'base16'
+    );
+
+    // ========== Formatting Access Control Conditions =========
+    const {
+      error,
+      formattedAccessControlConditions,
+      formattedEVMContractConditions,
+      formattedSolRpcConditions,
+      formattedUnifiedAccessControlConditions,
+    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
+
+    if (error) {
+      throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    // ========== Assemble identity parameter ==========
+    const identityParam = this.#getIdentityParamForEncryption(
+      hashOfConditionsStr,
+      dataToEncryptHash
+    );
+
+    log('identityParam', identityParam);
+
+    // ========== Get Network Signature ==========
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this._getNodePromises((url: string) => {
+        // -- if session key is available, use it
+        const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
+
+        if (!authSigToSend) {
+          return throwError({
+            message: `authSig is required`,
+            errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+            errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+          });
+        }
+
+        const reqBody: EncryptionSignRequest = {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          dataToEncryptHash,
+          chain,
+          authSig: authSigToSend,
+          epoch: this.currentEpochNumber!,
+        };
+
+        const urlWithParh = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
+        });
+
+        return this.#generatePromise(urlWithParh, reqBody, id);
+      });
+
+      // -- resolve promises
+      const res = await this._handleNodePromises(
+        nodePromises,
+        id,
+        this.config.minNodeCount
+      );
+      return res;
+    };
+
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (_error: string, _requestId: string, _isFinal: boolean) => {
+        logError('an error occured attempting to retry');
+      },
+      this.config.retryTolerance
+    );
+
+    const requestId = res.requestId;
+
+    // -- case: promises rejected
+    if (res.success === false) {
+      this._throwNodeError(res as RejectedNodePromises, requestId);
+    }
+
+    const signatureShares: NodeBlsSigningShare[] = (
+      res as SuccessNodePromises<NodeBlsSigningShare>
+    ).values;
+
+    logWithRequestId(requestId, 'signatureShares', signatureShares);
+
+    // ========== Result ==========
+    const decryptedData = this.#decryptWithSignatureShares(
+      this.subnetPubKey,
+      uint8arrayFromString(identityParam, 'utf8'),
+      ciphertext,
+      signatureShares
+    );
+
+    return { decryptedData };
+  };
 }
