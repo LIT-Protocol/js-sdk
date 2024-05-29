@@ -102,20 +102,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Handshake with SGX
-   *
-   * @param { HandshakeWithNode } params
-   *
-   * @returns { Promise<NodeCommandServerKeysResponse> }
-   *
-   */
-  handshakeWithNode(
-    params: HandshakeWithNode,
-    requestId: string
-  ): Promise<NodeCommandServerKeysResponse>;
-
-  /**
-   *
    * Execute JS on the nodes and combine and return any resulting signatures
    *
    * @param { ExecuteJsRequest } params

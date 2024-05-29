@@ -607,7 +607,7 @@ export class LitCore {
   }): Promise<JsonHandshakeResponse> {
     const challenge = this.getRandomHexString(64);
 
-    const handshakeResult = await this.handshakeWithNode(
+    const handshakeResult = await this.#handshakeWithNode(
       { url, challenge },
       requestId
     );
@@ -887,7 +887,7 @@ export class LitCore {
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithNode = async (
+  #handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
