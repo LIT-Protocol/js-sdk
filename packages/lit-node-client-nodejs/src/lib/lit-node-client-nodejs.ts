@@ -2118,7 +2118,7 @@ const resourceAbilityRequests = [
     // Try to get it from local storage, if not generates one~
     const sessionKey = params.sessionKey ?? this.getSessionKey();
 
-    const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+    const sessionKeyUri = this.#getSessionKeyUri(sessionKey.publicKey);
 
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
@@ -2326,7 +2326,7 @@ const resourceAbilityRequests = [
    * @param publicKey is the public key of the session key
    * @returns { string } the session key uri
    */
-  getSessionKeyUri = (publicKey: string): string => {
+  #getSessionKeyUri = (publicKey: string): string => {
     return LIT_SESSION_KEY_URI + publicKey;
   };
 
