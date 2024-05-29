@@ -951,43 +951,6 @@ export class LitNodeClientNodeJs
     return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
   };
 
-  getLitResourceForEncryption = async (
-    params: EncryptRequest
-  ): Promise<LitAccessControlConditionResource> => {
-    // ========== Hashing Access Control Conditions =========
-    // hash the access control conditions
-    const hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
-
-    if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
-
-    // ========== Hashing Private Data ==========
-    // hash the private data
-    const hashOfPrivateData = await crypto.subtle.digest(
-      'SHA-256',
-      params.dataToEncrypt
-    );
-    const hashOfPrivateDataStr = uint8arrayToString(
-      new Uint8Array(hashOfPrivateData),
-      'base16'
-    );
-
-    return new LitAccessControlConditionResource(
-      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
-    );
-  };
-
   /** ============================== SESSION ============================== */
   /**
    * Get session signatures for a set of resources
