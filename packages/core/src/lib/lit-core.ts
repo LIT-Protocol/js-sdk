@@ -1136,7 +1136,7 @@ export class LitCore {
    * @param { number } minNodeCount number of nodes we need valid results from in order to resolve
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    */
-  handleNodePromises = async <T>(
+  protected _handleNodePromises = async <T>(
     nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number

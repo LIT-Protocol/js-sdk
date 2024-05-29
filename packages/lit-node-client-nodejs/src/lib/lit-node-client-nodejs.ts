@@ -811,7 +811,7 @@ export class LitNodeClientNodeJs
         nodePromises.push(singleNodePromise);
       }
 
-      const handledPromise = (await this.handleNodePromises(
+      const handledPromise = (await this._handleNodePromises(
         nodePromises,
         id,
         params.targetNodeRange
@@ -936,7 +936,7 @@ export class LitNodeClientNodeJs
       });
 
       // -- resolve promises
-      const res = await this.handleNodePromises(
+      const res = await this._handleNodePromises(
         nodePromises,
         requestId,
         this.connectedNodes.size
@@ -1139,7 +1139,7 @@ export class LitNodeClientNodeJs
         return this.#generatePromise(urlWithPath, reqBody, id);
       });
 
-      const res = await this.handleNodePromises(
+      const res = await this._handleNodePromises(
         nodePromises,
         id,
         this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
@@ -1292,7 +1292,7 @@ export class LitNodeClientNodeJs
       });
 
       // -- resolve promises
-      const res = await this.handleNodePromises(
+      const res = await this._handleNodePromises(
         nodePromises,
         id,
         this.config.minNodeCount
@@ -1556,7 +1556,7 @@ export class LitNodeClientNodeJs
       });
 
       // -- resolve promises
-      const res = await this.handleNodePromises(
+      const res = await this._handleNodePromises(
         nodePromises,
         id,
         this.config.minNodeCount
@@ -1759,7 +1759,7 @@ export class LitNodeClientNodeJs
       // -- resolve promises
       let res;
       try {
-        res = await this.handleNodePromises(
+        res = await this._handleNodePromises(
           nodePromises,
           id,
           this.connectedNodes.size
@@ -2284,7 +2284,7 @@ const resourceAbilityRequests = [
         return this.#generatePromise(urlWithPath, reqBody, id);
       });
 
-      const responseData = await this.handleNodePromises(
+      const responseData = await this._handleNodePromises(
         nodePromises,
         id,
         this.connectedNodes.size
