@@ -2,12 +2,12 @@ import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-sessio
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from 'local-tests/setup/tinny-config';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 export const testExample = async (devEnv: TinnyEnvironment) => {
   // Note: This test will be skipped if we are testing on the Cayenne network
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+  devEnv.setUnavailable(LIT_NETWORK.CAYENNE);
 
   const alice = await devEnv.createRandomPerson();
 

@@ -38,7 +38,7 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | Variable                 | Description                                                                                                                                                              |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `MAX_ATTEMPTS`           | Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.                                                        |
-| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_TESTNET.LOCALCHAIN`, `LIT_TESTNET.MANZANO`, or `LIT_TESTNET.CAYENNE`.                            |
+| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_NETWORK.LOCALCHAIN`, `LIT_NETWORK.MANZANO`, or `LIT_NETWORK.CAYENNE`.                            |
 | `DEBUG`                  | Specifies whether to enable debug mode.                                                                                                                                  |
 | `REQUEST_PER_KILOSECOND` | To execute a transaction with Lit, you must reserve capacity on the network using Capacity Credits. These allow a set number of requests over a period (default 2 days). |
 | `WAIT_FOR_KEY_INTERVAL`  | Wait time in milliseconds if no private keys are available.                                                                                                              |
@@ -61,7 +61,7 @@ export const testExample = async (devEnv: TinnyEnvironment) => {
 
   // ========== Enviorment ==========
   // This test will be skipped if we are testing on the Cayenne network
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+  devEnv.setUnavailable(LIT_NETWORK.CAYENNE);
 
   // Using litNodeClient
   const res = await devEnv.litNodeClient.executeJs({...});

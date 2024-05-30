@@ -1,9 +1,28 @@
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
-export enum LIT_TESTNET {
-  LOCALCHAIN = 'localchain',
-  MANZANO = 'manzano',
+/**
+ * Represents the supported networks for Tinny.
+ */
+export enum LIT_NETWORK {
+  /**
+   * Cayenne is the centralised testnet network.
+   */
   CAYENNE = 'cayenne',
+
+  /**
+   * Manzano is the decentralised testnet network.
+   */
+  MANZANO = 'manzano',
+
+  /**
+   * Habanero is the decentralised mainnet network.
+   */
+  HABANERO = 'habanero',
+
+  /**
+   * Localchain is a local network that is used for testing.
+   */
+  LOCALCHAIN = 'localchain',
 }
 
 export interface ProcessEnvs {
@@ -14,11 +33,11 @@ export interface ProcessEnvs {
 
   /**
    * The network to use for testing. This can be one of the following:
-   * - `LIT_TESTNET.LOCALCHAIN`
-   * - `LIT_TESTNET.MANZANO`
-   * - `LIT_TESTNET.CAYENNE`
+   * - `LIT_NETWORK.LOCALCHAIN`
+   * - `LIT_NETWORK.MANZANO`
+   * - `LIT_NETWORK.CAYENNE`
    */
-  NETWORK: LIT_TESTNET;
+  NETWORK: LIT_NETWORK;
 
   /**
    * The number of milliseconds to wait between each request.
@@ -94,6 +113,16 @@ export type PKPInfo = {
 export interface TinnyEnvConfig {
   rpc: string;
   litNodeClient: LitNodeClient;
-  network: LIT_TESTNET;
-  processEnvs: ProcessEnvs;
+  network: LIT_NETWORK;
+  processEnvs?: ProcessEnvs;
+}
+
+export interface TinnySpawnConfig {
+  fundWallet?: boolean;
+  createSiweMessage?: boolean;
+  generateAuthSig?: boolean;
+  authenticateWallet?: boolean;
+  setupContractsClient?: boolean;
+  mintPkp?: boolean;
+  mintPkpWithAuthMethod?: boolean;
 }

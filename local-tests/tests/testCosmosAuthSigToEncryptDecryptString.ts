@@ -1,7 +1,7 @@
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from 'local-tests/setup/tinny-config';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -15,9 +15,9 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
 ) => {
   console.log('❌❌ THIS IS A KNOWN FAILING TEST, PLEASE IGNORE FOR NOW. ❌❌');
 
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
-  devEnv.setUnavailable(LIT_TESTNET.LOCALCHAIN);
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+  devEnv.setUnavailable(LIT_NETWORK.CAYENNE);
+  devEnv.setUnavailable(LIT_NETWORK.LOCALCHAIN);
+  devEnv.setUnavailable(LIT_NETWORK.MANZANO);
 
   const accs = AccessControlConditions.getCosmosBasicAccessControlConditions({
     userAddress: devEnv.bareCosmosAuthSig.address,

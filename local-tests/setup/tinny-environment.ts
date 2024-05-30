@@ -1,4 +1,4 @@
-import { LIT_TESTNET, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
+import { LIT_NETWORK, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -13,14 +13,14 @@ import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 
 export class TinnyEnvironment {
-  public network: LIT_TESTNET;
+  public network: LIT_NETWORK;
 
   /**
    * Environment variables used in the process.
    */
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
-    NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
+    NETWORK: (process.env['NETWORK'] as LIT_NETWORK) || LIT_NETWORK.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
@@ -88,14 +88,14 @@ export class TinnyEnvironment {
     address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
   };
 
-  constructor(network?: LIT_TESTNET) {
+  constructor(network?: LIT_NETWORK) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
 
-    if (Object.values(LIT_TESTNET).indexOf(this.network) === -1) {
+    if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
         `Invalid network environment. Please use one of ${Object.values(
-          LIT_TESTNET
+          LIT_NETWORK
         )}`
       );
     }
@@ -106,7 +106,7 @@ export class TinnyEnvironment {
     ).fill(false);
 
     // -- setup rpc
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    if (this.network === LIT_NETWORK.LOCALCHAIN) {
       this.rpc = this.processEnvs.LIT_RPC_URL;
     } else {
       this.rpc = this.processEnvs.LIT_OFFICIAL_RPC;
@@ -192,7 +192,7 @@ export class TinnyEnvironment {
   async setupLitNodeClient() {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    if (this.network === LIT_NETWORK.LOCALCHAIN) {
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
         bootstrapUrls: this.processEnvs.BOOTSTRAP_URLS,
@@ -201,7 +201,7 @@ export class TinnyEnvironment {
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext as LitContractContext,
       });
-    } else if (this.network === LIT_TESTNET.MANZANO) {
+    } else if (this.network === LIT_NETWORK.MANZANO) {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network, // 'habanero' or 'manzano'
         checkNodeAttestation: true,
@@ -298,7 +298,7 @@ export class TinnyEnvironment {
     return await this.createNewPerson('Alice');
   }
 
-  setUnavailable = (network: LIT_TESTNET) => {
+  setUnavailable = (network: LIT_NETWORK) => {
     if (this.processEnvs.NETWORK === network) {
       throw new Error('LIT_IGNORE_TEST');
     }
@@ -352,7 +352,7 @@ export class TinnyEnvironment {
      * Setup contracts-sdk client
      * ====================================
      */
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    if (this.network === LIT_NETWORK.LOCALCHAIN) {
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
