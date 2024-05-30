@@ -1,0 +1,15 @@
+{
+  "name": "tinnytest",
+  "version": "0.0.5",
+  "description": "A package to run the test script for Lit Protocol with custom commands",
+  "main": "test.mjs",
+  "bin": {
+    "tinnytest": "./test.mjs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Lit Protocol & Anson (https://github.com/ansonhkg)",
+  "license": "MIT",
+  "dependencies": {}
+}
