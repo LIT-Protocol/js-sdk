@@ -25,6 +25,9 @@ export enum LIT_NETWORK {
   LOCALCHAIN = 'localchain',
 }
 
+/**
+ * Represents the configuration options for the testing environment.
+ */
 export interface ProcessEnvs {
   /**
    * Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.
@@ -110,13 +113,18 @@ export type PKPInfo = {
   ethAddress: string;
 };
 
+/**
+ * Represents the configuration options for the testing environment.
+ */
 export interface TinnyEnvConfig {
   rpc: string;
   litNodeClient: LitNodeClient;
   network: LIT_NETWORK;
   processEnvs?: ProcessEnvs;
 }
-
+/**
+ * Represents the configuration options for the tinny person spawn method.
+ */
 export interface TinnySpawnConfig {
   fundWallet?: boolean;
   createSiweMessage?: boolean;
