@@ -4,31 +4,43 @@ import fs from 'fs';
 
 const TEST_DIR = 'local-tests';
 
+const log = (message) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${message}`);
+};
+
 /**
  * Builds the project using esbuild.
  * @returns {Promise<void>} A promise that resolves when the build is complete.
  */
 export const build = async () => {
-  await esbuild.build({
-    entryPoints: [`${TEST_DIR}/test.ts`],
-    outfile: `./${TEST_DIR}/build/test.mjs`,
-    bundle: true,
-    plugins: [
-      nodeExternalsPlugin({
-        allowList: [
-          'ethers',
-          '@lit-protocol/accs-schemas',
-          'crypto',
-          'secp256k1',
-        ],
-      }),
-    ],
-    platform: 'node',
-    target: 'esnext',
-    format: 'esm',
-    inject: [`./${TEST_DIR}/shim.mjs`],
-    mainFields: ['module', 'main'],
-  });
+  log('Starting build process...');
+  try {
+    await esbuild.build({
+      entryPoints: [`${TEST_DIR}/test.ts`],
+      outfile: `./${TEST_DIR}/build/test.mjs`,
+      bundle: true,
+      plugins: [
+        nodeExternalsPlugin({
+          allowList: [
+            'ethers',
+            '@lit-protocol/accs-schemas',
+            'crypto',
+            'secp256k1',
+          ],
+        }),
+      ],
+      platform: 'node',
+      target: 'esnext',
+      format: 'esm',
+      inject: [`./${TEST_DIR}/shim.mjs`],
+      mainFields: ['module', 'main'],
+    });
+    log('✅ Build process completed successfully.');
+  } catch (e) {
+    log(`❌ Build process failed: ${error}`);
+    throw error;
+  }
 };
 
 /**
@@ -50,7 +62,9 @@ try {
 `;
     const newFile = content + file;
     fs.writeFileSync(`./${TEST_DIR}/build/test.mjs`, newFile);
+    log('✅ Polyfill added successfully.');
   } catch (e) {
+    log(`❌ Error in postBuildPolyfill: ${e}`);
     throw new Error(`Error in postBuildPolyfill: ${e}`);
   }
 };
@@ -67,7 +81,9 @@ export const postBuildMoveAndSetupPackageJsonToBuildDir = () => {
   // -- Copy the package.json file to the build directory
   try {
     fs.copyFileSync(COPY_FROM, COPY_TO);
+    log('✅ package.json copied successfully.');
   } catch (e) {
+    log(`❌ Error in copying package.json: ${e}`);
     throw new Error(
       `Error in postBuildMoveAndSetupPackageJsonToBuildDir: ${e}`
     );
@@ -83,7 +99,9 @@ export const postBuildMoveAndSetupPackageJsonToBuildDir = () => {
 
     // Write the updated package.json
     fs.writeFileSync(COPY_TO, JSON.stringify(buildPackageJson, null, 2));
+    log('✅ Dependencies added to build package.json successfully.');
   } catch (e) {
+    log(`❌ Error in setting up build package.json: ${e}`);
     throw new Error(
       `Error in postBuildMoveAndSetupPackageJsonToBuildDir: ${e}`
     );
@@ -92,9 +110,14 @@ export const postBuildMoveAndSetupPackageJsonToBuildDir = () => {
 
 // Go!
 (async () => {
+  log('Build script started.');
   const start = Date.now();
-  await build();
-  postBuildPolyfill();
-  postBuildMoveAndSetupPackageJsonToBuildDir();
-  console.log(`[build.mjs] 🚀 Build time: ${Date.now() - start}ms`);
+  try {
+    await build();
+    postBuildPolyfill();
+    postBuildMoveAndSetupPackageJsonToBuildDir();
+    log(`🚀 Build time: ${Date.now() - start}ms`);
+  } catch (error) {
+    log(`❌ Build script failed: ${error}`);
+  }
 })();
