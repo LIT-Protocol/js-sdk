@@ -79,6 +79,7 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
+import { testRevamp } from './tests/revamp/test-revamp';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -200,6 +201,10 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
     },
   };
 
+  const revamp = {
+    testRevamp,
+  };
+
   const testConfig = {
     tests: {
       // testExample,
@@ -214,6 +219,7 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
+      ...revamp,
     },
     devEnv,
   };

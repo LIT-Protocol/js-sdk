@@ -10,7 +10,12 @@ import {
   LitContractContext,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
+import {
+  LIT_NETWORK,
+  PKPInfo,
+  TinnyEnvConfig,
+  TinnySpawnConfig,
+} from './tinny-config';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import networkContext from './networkContext.json';
 import { AuthMethodScope } from '@lit-protocol/constants';
@@ -22,8 +27,8 @@ export class TinnyPerson {
   public authSig: AuthSig;
   public authMethod: AuthMethod;
   public contractsClient: LitContracts;
-  // public capacityTokenId: string;
-  // public capacityDelegationAuthSig: AuthSig;
+  public capacityTokenId: string;
+  public capacityDelegationAuthSig: AuthSig;
   public pkp: PKPInfo;
   public authMethodOwnedPkp: PKPInfo;
 
@@ -50,100 +55,157 @@ export class TinnyPerson {
     this.wallet = new ethers.Wallet(privateKey, this.provider);
   }
 
-  async spawn() {
-    // Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
-    const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
-    if (this.envConfig.network != LIT_TESTNET.LOCALCHAIN) {
-      const transferTx = await this.wallet.sendTransaction({
-        to: fundingWallet.address,
-        value: ethers.utils.parseEther('0.00001'),
-      });
-
-      const transferReciept = await transferTx.wait();
-      console.log(
-        '[𐬺🧪 Tinny Person𐬺] Transfered Assets for person tx: ',
-        transferReciept.transactionHash
-      );
-      this.wallet = fundingWallet;
+  /**
+   * Available spawn configurations:
+   * - fundWallet: funds the wallet with a small amount of ethers
+   * - createSiweMessage: creates a siwe message
+   * - generateAuthSig: generates an auth sig
+   * - authenticateWallet: authenticates the wallet
+   * - setupContractsClient: sets up the contracts client
+   * - mintPkp: mints a PKP
+   * - mintPkpWithAuthMethod: mints a PKP with an auth method
+   */
+  async spawn(config?: TinnySpawnConfig) {
+    // If no config is passed, set all to true
+    if (!config) {
+      config = {
+        fundWallet: true,
+        createSiweMessage: true,
+        generateAuthSig: true,
+        authenticateWallet: true,
+        setupContractsClient: true,
+        mintPkp: true,
+        mintPkpWithAuthMethod: true,
+      };
     }
 
-    console.log('[𐬺🧪 Tinny Person𐬺] Spawning person:', this.wallet.address);
+    // log the spawn config
+    console.log(
+      '[𐬺🧪 Tinny Person𐬺] Spawn Config: ',
+      Object.keys(config).map((key) => {
+        return config[key] ? `✅ ${key}` : `❌ ${key}`;
+      })
+    );
+
+    /**
+     * ====================================
+     * Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
+     * ====================================
+     */
+    if (config.fundWallet) {
+      const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
+      if (this.envConfig.network != LIT_NETWORK.LOCALCHAIN) {
+        const transferTx = await this.wallet.sendTransaction({
+          to: fundingWallet.address,
+          value: ethers.utils.parseEther('0.00001'),
+        });
+
+        const transferReciept = await transferTx.wait();
+        console.log(
+          '[𐬺🧪 Tinny Person𐬺] Transfered Assets for person tx: ',
+          transferReciept.transactionHash
+        );
+        this.wallet = fundingWallet;
+      }
+
+      console.log('[𐬺🧪 Tinny Person𐬺] Spawning person:', this.wallet.address);
+    }
+
     /**
      * ====================================
      * Get Hot Wallet Auth Sig
      * ====================================
      */
-    this.siweMessage = await createSiweMessage<BaseSiweMessage>({
-      nonce: await this.envConfig.litNodeClient.getLatestBlockhash(),
-      walletAddress: this.wallet.address,
-    });
+    if (config.generateAuthSig) {
+      console.log(
+        '[𐬺🧪 Tinny Person𐬺] Generating an authSig for the wallet...'
+      );
+      this.siweMessage = await createSiweMessage<BaseSiweMessage>({
+        nonce: await this.envConfig.litNodeClient.getLatestBlockhash(),
+        walletAddress: this.wallet.address,
+      });
 
-    this.authSig = await generateAuthSig({
-      signer: this.wallet,
-      toSign: this.siweMessage,
-    });
+      this.authSig = await generateAuthSig({
+        signer: this.wallet,
+        toSign: this.siweMessage,
+      });
+    }
 
     /**
      * ====================================
      * Craft an authMethod from the authSig for the eth wallet auth method
      * ====================================
      */
-    console.log(
-      '[𐬺🧪 Tinny Person𐬺] Crafting an authMethod from the authSig for the eth wallet auth method...'
-    );
-    this.authMethod = await EthWalletProvider.authenticate({
-      signer: this.wallet,
-      litNodeClient: this.envConfig.litNodeClient,
-    });
-
-    // /**
-    //  * ====================================
-    //  * Setup contracts-sdk client
-    //  * ====================================
-    //  */
-    if (this.envConfig.network === LIT_TESTNET.LOCALCHAIN) {
-      this.contractsClient = new LitContracts({
+    if (config.authenticateWallet) {
+      console.log(
+        '[𐬺🧪 Tinny Person𐬺] Crafting an authMethod from the authSig for the eth wallet auth method...'
+      );
+      this.authMethod = await EthWalletProvider.authenticate({
         signer: this.wallet,
-        debug: this.envConfig.processEnvs.DEBUG,
-        rpc: this.envConfig.processEnvs.LIT_RPC_URL, // anvil rpc
-        customContext: networkContext as unknown as LitContractContext,
-      });
-    } else {
-      this.contractsClient = new LitContracts({
-        signer: this.wallet,
-        debug: this.envConfig.processEnvs.DEBUG,
-        network: this.envConfig.network,
+        litNodeClient: this.envConfig.litNodeClient,
       });
     }
 
-    await this.contractsClient.connect();
+    /**
+     * ====================================
+     * Setup contracts-sdk client
+     * ====================================
+     */
+    if (config.setupContractsClient) {
+      console.log('[𐬺🧪 Tinny Person𐬺] Setting up contracts-sdk client...');
+      if (this.envConfig.network === LIT_NETWORK.LOCALCHAIN) {
+        this.contractsClient = new LitContracts({
+          signer: this.wallet,
+          debug: this.envConfig.processEnvs.DEBUG,
+          rpc: this.envConfig.processEnvs.LIT_RPC_URL, // anvil rpc
+          customContext: networkContext as unknown as LitContractContext,
+        });
+      } else {
+        this.contractsClient = new LitContracts({
+          signer: this.wallet,
+          debug: this.envConfig.processEnvs.DEBUG,
+          network: this.envConfig.network,
+        });
+      }
+
+      await this.contractsClient.connect();
+    }
 
     /**
      * ====================================
      * Mint a PKP
      * ====================================
      */
-    console.log('[𐬺🧪 Tinny Person𐬺] Minting a PKP...');
-    const walletMintRes =
-      await this.contractsClient.pkpNftContractUtils.write.mint();
+    if (config.mintPkp) {
+      console.log('[𐬺🧪 Tinny Person𐬺] Minting a PKP...');
+      const walletMintRes =
+        await this.contractsClient.pkpNftContractUtils.write.mint();
 
-    this.pkp = walletMintRes.pkp;
+      this.pkp = walletMintRes.pkp;
+    }
 
     /**
      * ====================================
      * Mint a PKP wiuth eth wallet auth method
      * ====================================
      */
-    console.log(
-      '[𐬺🧪 Tinny Person𐬺] Minting a PKP with eth wallet auth method...'
-    );
-    this.authMethodOwnedPkp = (
-      await this.contractsClient.mintWithAuth({
-        authMethod: this.authMethod,
-        scopes: [AuthMethodScope.SignAnything],
-      })
-    ).pkp;
+    if (config.mintPkpWithAuthMethod) {
+      console.log(
+        '[𐬺🧪 Tinny Person𐬺] Minting a PKP with eth wallet auth method...'
+      );
+      this.authMethodOwnedPkp = (
+        await this.contractsClient.mintWithAuth({
+          authMethod: this.authMethod,
+          scopes: [AuthMethodScope.SignAnything],
+        })
+      ).pkp;
+    }
 
+    /**
+     * ====================================
+     * Done spawning!
+     * ====================================
+     */
     console.log(
       '[𐬺🧪 Tinny Person𐬺] 🐣 TinnyPerson spawned:',
       this.wallet.address
