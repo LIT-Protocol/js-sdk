@@ -519,7 +519,7 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   getLatestBlockhash = async (): Promise<string> => {
-    await this.connect();
+    await this._syncBlockhash();    
 
     if (!this.latestBlockhash) {
       throw new Error(
@@ -809,6 +809,36 @@ export class LitCore {
     };
   }
 
+  private async _syncBlockhash() {
+    if (
+      !this.lastBlockHashRetrieved ||
+      Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
+    ) {
+      log(
+        'Syncing state for new blockhash ',
+        'current blockhash: ',
+        this.latestBlockhash
+      );
+      try {
+        const blockHashFetchResp = await fetch(this._blockHashUrl);
+        const blockHashBody: any = await blockHashFetchResp.json();
+        this.latestBlockhash = blockHashBody.blockhash;
+        this.lastBlockHashRetrieved  = Date.now();
+        log(
+          'Done syncing state new blockhash: ',
+          this.latestBlockhash
+        );
+      } catch (err: unknown) {
+        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+        const { message = '' } = err as Error | NodeClientErrorV1;
+        logError(
+          'Error while attempting fetch new latestBlockhash:',
+          message
+        );
+      }
+    }
+  }
+
   /** Currently, we perform a full sync every 30s, including handshaking with every node
    * However, we also have a state change listener that watches for staking contract state change events, which
    * _should_ be the only time that we need to perform handshakes with every node.
@@ -825,35 +855,7 @@ export class LitCore {
     }
 
     this._networkSyncInterval = setInterval(async () => {
-      if (
-        !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
-      ) {
-        log(
-          'Syncing state for new blockhash ',
-          'current blockhash: ',
-          this.lastBlockHashRetrieved
-        );
-        try {
-          const blockHashFetchResp = await fetch(this._blockHashUrl);
-          const blockHashBody: any = await blockHashFetchResp.json();
-          this.latestBlockhash = blockHashBody.blockhash;
-          this.lastBlockHashRetrieved  = Date.now();
-          log(
-            'Done syncing state new blockhash: ',
-            this.lastBlockHashRetrieved,
-            'new blockhash: ',
-            blockHashBody.blockhash
-          );
-        } catch (err: unknown) {
-          // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
-          const { message = '' } = err as Error | NodeClientErrorV1;
-          logError(
-            'Error while attempting fetch new latestBlockhash:',
-            message
-          );
-        }
-      }
+      await this._syncBlockhash();
     }, BLOCKHASH_SYNC_INTERVAL);
   }
 
