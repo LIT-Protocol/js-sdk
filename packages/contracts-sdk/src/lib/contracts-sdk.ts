@@ -1640,7 +1640,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         let maxAttempts = 10;
         let publicKey = '';
         while (tries < maxAttempts) {
-          publicKey = await this.pkpNftContract.read.getPubkey(tokenIdFromEvent);
+          publicKey = await this.pkpNftContract.read.getPubkey(
+            tokenIdFromEvent
+          );
           console.log('pkp pub key: ', publicKey);
           if (publicKey !== '0x') {
             break;
