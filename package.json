@@ -30,9 +30,6 @@
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
     "v": "node ./tools/scripts/get-npm-version.mjs",
-    "bump": "yarn tools --v --patch",
-    "bump:minor": "yarn tools --v --minor",
-    "bump:major": "yarn tools --v --major",
     "prettier": "nx format:write --all",
     "prettier:check": "nx format:check --all"
   },
