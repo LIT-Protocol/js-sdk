@@ -26,7 +26,6 @@
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:beta": "yarn node ./tools/scripts/pub.mjs --tag beta",
     "publish:staging": "yarn node ./tools/scripts/pub.mjs --tag staging",
-    "publish:app:html": "yarn node ./tools/scripts/build-html.mjs && cd dist/apps/html && vercel --prod",
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
     "bbp": "yarn bump && yarn build && yarn publish:dev",
     "gen:demo": "yarn node ./tools/scripts/gen-demo-app.mjs",
