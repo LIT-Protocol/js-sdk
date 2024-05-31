@@ -1,0 +1,29 @@
+{
+  "name": "@lit-protocol/wrapped-keys",
+  "type": "commonjs",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/wrapped-keys"
+  },
+  "tags": [
+    "universal"
+  ],
+  "buildOptions": {
+    "genReact": false
+  },
+  "version": "6.0.0-testing.4",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}
