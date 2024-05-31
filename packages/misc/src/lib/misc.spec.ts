@@ -169,6 +169,7 @@ describe('utils', () => {
     expect(
       utilsModule.checkIfAuthSigRequiresChainParam(
         {
+          // @ts-expect-error authSig doesn't have an ethereum prop defined?
           ethereum: 'foo',
         },
         '123',
