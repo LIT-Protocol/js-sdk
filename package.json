@@ -26,7 +26,6 @@
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
     "gen:internal-dev": "node ./tools/scripts/gen-internal-dev.mjs",
-    "gen:config": "yarn gen:contracts --update --outdir ./tools/scripts/lit-contracts && node ./tools/scripts/gen-lit-config.mjs",
     "update:contracts-sdk": "yarn node ./packages/contracts-sdk/tools.mjs",
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
