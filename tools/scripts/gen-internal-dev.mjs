@@ -85,7 +85,7 @@ const intToIP = (ip) => {
 
 const { validators, minNodeCount } = await getValidators();
 
-const networks = validators.map((item) => {
+let networks = validators.map((item) => {
   let proto = 'https://';
   if (item.port !== 443) {
     proto = 'http://';
@@ -98,7 +98,8 @@ console.log('✅ networks', networks);
 const internalPath =
   './packages/constants/src/lib/constants/autogen_internal.ts';
 
-const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+// replace ' with "" to avoid linting issues
+networks = networks.map((network) => network.replace(/'/g, '"'));
 
 await fs.writeFile(
   internalPath,
