@@ -271,7 +271,6 @@ There are currently three environments can be tested on, each of which can be ge
 
 | Environment | Generate Command  | Test Location              |
 | ----------- | ----------------- | -------------------------- |
-| React       | `yarn gen:react`  | http://localhost:4003      |
 | NodeJs      | `yarn gen:nodejs` | `yarn nx run nodejs:serve` |
 
 ### Unit Tests
