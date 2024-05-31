@@ -530,103 +530,6 @@ async function switchFunc() {
     exit();
   }
 }
-async function cloneFunc() {
-  const PROJECT_NAME = args[1];
-  const NPM_NAME = args[2];
-
-  greenLog(
-    `
-        Usage: node tools/scripts/tools.mjs --clone [project-name] [npm-name] [option]
-
-            [project-name]: the name of the project
-            [npm-name]: the npm name of the clone
-
-            [option]: the option to run
-                --publish: publish packages to npm
-        `,
-    true
-  );
-
-  if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
-    exit();
-  } else {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-
-  const dirs = (await listDirsRecursive('./dist/packages', false))
-    .filter((item) => item.includes(PROJECT_NAME))
-    .map((path) => {
-      const name = path.replace('dist/packages/', '');
-
-      const folderName = NPM_NAME.replaceAll('/', '-');
-      let clonePath = path.replace(PROJECT_NAME, folderName);
-
-      let npmName = clonePath.includes('-vanilla')
-        ? `${NPM_NAME}-vanilla`
-        : NPM_NAME;
-
-      return {
-        name,
-        path,
-        projectName: PROJECT_NAME,
-        npmName,
-        clonePath,
-      };
-    });
-
-  // for loop clone a copy from path to clonePath
-  for (let i = 0; i < dirs.length; i++) {
-    greenLog(`Cloning ${dirs[i].name} to ${dirs[i].clonePath}`);
-
-    const dir = dirs[i];
-
-    await childRunCommand(`cp -r ${dir.path} ${dir.clonePath}`);
-
-    // replace the name in package.json
-    const packageJson = JSON.parse(
-      await readFile(`${dir.clonePath}/package.json`)
-    );
-
-    packageJson.name = dir.npmName;
-    packageJson.publishConfig.directory = `../../dist/packages/${dir.npmName}`;
-
-    // bump version
-    // const version = packageJson.version.split('.');
-    // version[2] = parseInt(version[2]) + 1;
-    // packageJson.version = version.join('.');
-    // packageJson.version = packageJson.version;
-
-    await writeFile(
-      `${dir.clonePath}/package.json`,
-      JSON.stringify(packageJson, null, 4)
-    );
-  }
-
-  const OPTION2 = args[3];
-
-  if (OPTION2 === '--publish') {
-    // for loop publish each package
-    for (let i = 0; i < dirs.length; i++) {
-      const dir = dirs[i];
-
-      await childRunCommand(
-        `cd ${dir.clonePath} && npm publish --access public`
-      );
-    }
-
-    // for loop to delete the clone
-    for (let i = 0; i < dirs.length; i++) {
-      const dir = dirs[i];
-
-      // delete the clone
-      if (args[4] === '--remove') {
-        await childRunCommand(`rm -rf ${dir.clonePath}`);
-      }
-    }
-  }
-
-  exit();
-}
 
 async function watchFunc() {
   const OPTION = args[1];
@@ -817,9 +720,6 @@ async function setupLocalDevFunc() {
               `,
       true
     );
-
-    // await 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   /**
