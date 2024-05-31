@@ -37,7 +37,6 @@
     "bump": "yarn tools --v --patch",
     "bump:minor": "yarn tools --v --minor",
     "bump:major": "yarn tools --v --major",
-    "txServer": "node tx-handler-server.mjs",
     "prettier": "nx format:write --all",
     "prettier:check": "nx format:check --all"
   },
