@@ -20,7 +20,7 @@ import {
   writeJsonFile,
   checkEmptyDirectories,
 } from './utils.mjs';
-import fs from 'fs';
+import fs, { readFileSync } from 'fs';
 
 const args = getArgs();
 
@@ -619,6 +619,9 @@ async function fixTsConfigFunc() {
 }
 
 async function checkFunc() {
+  /**
+   * When you are working on a branch and you switch to another branch, you might have empty directories.
+   */
   if (!getFlag('--no-empty-directories')) {
     redLog('Please use the --no-empty-directories flag to run this command');
     process.exit();
@@ -756,6 +759,10 @@ async function setupLocalDevFunc() {
     greenLog(`packageJson.typings: ${packageJson.typings}`);
 
     await writeJsonFile(packageJsonPath, packageJson);
+
+    // add a new line to the packageJson content to avoid linting issues
+    const content = readFileSync(packageJsonPath, 'utf8');
+    fs.writeFileSync(packageJsonPath, `${content}\n`);
   };
 
   if (PROJECT_NAME === '--target') {
