@@ -30,7 +30,6 @@
     "update:contracts-sdk": "yarn node ./packages/contracts-sdk/tools.mjs",
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
-    "npm:login": "npm login",
     "dev:target": "yarn tools --watch --target",
     "apps": "yarn tools --dev --apps",
     "watch": "yarn tools --watch",
