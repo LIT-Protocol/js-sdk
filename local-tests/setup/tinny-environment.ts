@@ -21,7 +21,7 @@ export class TinnyEnvironment {
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
-    DEBUG: Boolean(process.env['DEBUG']) || false,
+    DEBUG: process.env['DEBUG'] === 'false',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'] || 'http://127.0.0.1:8545',
@@ -36,7 +36,7 @@ export class TinnyEnvironment {
       process.env['LIT_OFFICIAL_RPC'] ||
       'https://chain-rpc.litprotocol.com/http',
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
-    RUN_IN_BAND: Boolean(process.env['RUN_IN_BAND']) || false,
+    RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'false',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
 
     // Available Accounts
@@ -66,7 +66,10 @@ export class TinnyEnvironment {
     NO_SETUP: process.env['NO_SETUP'] === 'false',
     STOP_TESTNET: process.env[`STOP_TESTNET`] === 'true',
     TESTNET_MANAGER_URL: 'http://0.0.0.0:8000',
-    LIT_NODE_BINARY_PATH: process.env['LIT_NODE_BINARY_PATH'] || `./../../../lit-assets/rust/lit-node/target/debug/lit_node`
+    USE_LIT_NODE_BINARY: process.env[`USE_LIT_NODE_BINARY`] === `true`,
+    LIT_NODE_BINARY_PATH:
+      process.env['LIT_NODE_BINARY_PATH'] ||
+      `./../../../lit-assets/rust/lit-node/target/debug/lit_node`,
   };
 
   public litNodeClient: LitNodeClient;
@@ -363,7 +366,7 @@ export class TinnyEnvironment {
     if (existingTestnets.length > 0) {
       this._testnetId = existingTestnets[0];
     } else {
-      console.log("binary path: ", this.processEnvs.LIT_NODE_BINARY_PATH)
+      console.log('binary path: ', this.processEnvs.LIT_NODE_BINARY_PATH);
       const createTestnetResp = await fetch(
         this.processEnvs.TESTNET_MANAGER_URL + '/test/create/testnet',
         {
@@ -375,7 +378,9 @@ export class TinnyEnvironment {
             nodeCount: 6,
             pollingInterval: '2000',
             epochLength: 100,
-            customBuildPath: this.processEnvs.LIT_NODE_BINARY_PATH
+            customBuildPath: this.processEnvs.USE_LIT_NODE_BINARY
+              ? this.processEnvs.LIT_NODE_BINARY_PATH
+              : undefined,
           }),
         }
       );
@@ -407,9 +412,10 @@ export class TinnyEnvironment {
   }
 
   async getTestnetConfig() {
-    let infoResponse = await fetch(this.processEnvs.TESTNET_MANAGER_URL +
-      '/test/get/info/testnet/' +
-      this._testnetId
+    let infoResponse = await fetch(
+      this.processEnvs.TESTNET_MANAGER_URL +
+        '/test/get/info/testnet/' +
+        this._testnetId
     );
     const res = await infoResponse.json();
     console.log('testnet info:', res);
@@ -421,10 +427,10 @@ export class TinnyEnvironment {
         '/test/action/transition/epoch/wait/' +
         this._testnetId
     );
-    
+
     if (stopRandomPeerRes.status === 200) {
       const resp = await stopRandomPeerRes.json();
-      console.log("transition res ", resp);
+      console.log('transition res ', resp);
     }
   }
 
@@ -434,29 +440,32 @@ export class TinnyEnvironment {
         '/test/action/stop/random/wait/' +
         this._testnetId
     );
-    
+
     if (stopRandomPeerRes.status === 200) {
       let resp = await stopRandomPeerRes.json();
-      console.log(
-        "validator kick response: ", resp
-      )
+      console.log('validator kick response: ', resp);
       await this.pollTestnetForActive();
-    } 
+    }
   }
 
   async stopTestnet() {
-    if (this.network === LIT_TESTNET.LOCALCHAIN && this.processEnvs.STOP_TESTNET) {
+    if (
+      this.network === LIT_TESTNET.LOCALCHAIN &&
+      this.processEnvs.STOP_TESTNET
+    ) {
       console.log('stopping testnet with id:', this._testnetId);
       const shutdownResp = await fetch(
-        this.processEnvs.TESTNET_MANAGER_URL + '/test/delete/testnet/' + this._testnetId
+        this.processEnvs.TESTNET_MANAGER_URL +
+          '/test/delete/testnet/' +
+          this._testnetId
       );
       const existingTestnets: string[] = await shutdownResp.json();
       console.log('testnet manager shutdown: ', existingTestnets);
     } else {
-      console.log('skipping testnet shutdown.')
+      console.log('skipping testnet shutdown.');
     }
   }
-  
+
   /**
    * Context: the reason this is created instead of individually is because we can't allocate capacity beyond the global
    * max capacity.

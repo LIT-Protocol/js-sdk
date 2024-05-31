@@ -92,7 +92,18 @@ export interface ProcessEnvs {
    */
   TESTNET_MANAGER_URL: string;
 
+  /**
+   * Path to the Lit Node Binary to use,
+   * if flagging to not use the binary path this option will be ignored.
+   * see {@link USE_LIT_NODE_BINARY}
+   */
   LIT_NODE_BINARY_PATH: string;
+
+  /**
+   * Flag to indicate if the provided binary path should be used
+   * or if the testnet should be built from source before starting.
+   */
+  USE_LIT_NODE_BINARY: boolean;
 }
 
 /**
