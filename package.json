@@ -27,9 +27,6 @@
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
     "gen:internal-dev": "node ./tools/scripts/gen-internal-dev.mjs",
     "gen:config": "yarn gen:contracts --update --outdir ./tools/scripts/lit-contracts && node ./tools/scripts/gen-lit-config.mjs",
-    "delete": "yarn node ./tools/scripts/delete.mjs",
-    "delete:package": "yarn delete --package",
-    "delete:app": "yarn delete --app",
     "update:contracts-sdk": "yarn node ./packages/contracts-sdk/tools.mjs",
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
@@ -46,8 +43,6 @@
     "txServer": "node tx-handler-server.mjs",
     "prettier": "nx format:write --all",
     "prettier:check": "nx format:check --all",
-    "delete:merged-branches": "git branch --merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
-    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
     "cache:enable": "node ./tools/scripts/endisable-cache.mjs --enable=true",
     "cache:disable": "node ./tools/scripts/endisable-cache.mjs --enable=false"
   },
