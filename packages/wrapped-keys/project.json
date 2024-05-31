@@ -1,0 +1,35 @@
+{
+  "name": "wrapped-keys",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/wrapped-keys/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/wrapped-keys",
+        "main": "packages/wrapped-keys/src/index.ts",
+        "tsConfig": "packages/wrapped-keys/tsconfig.lib.json",
+        "assets": ["packages/wrapped-keys/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/wrapped-keys/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/wrapped-keys"],
+      "options": {
+        "jestConfig": "packages/wrapped-keys/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

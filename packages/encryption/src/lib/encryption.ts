@@ -142,6 +142,7 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
 
   // FIXME: The return type of this function is inferrable based on the value of `params.dataType`
   if (parsedJsonData.dataType === 'string') {
+    // @ts-ignore
     return decryptToString(
       {
         accessControlConditions: parsedJsonData.accessControlConditions,
@@ -157,6 +158,7 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
       litNodeClient
     );
   } else if (parsedJsonData.dataType === 'file') {
+    // @ts-ignore
     return decryptToFile(
       {
         accessControlConditions: parsedJsonData.accessControlConditions,

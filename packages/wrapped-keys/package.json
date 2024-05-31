@@ -1,22 +1,25 @@
 {
-  "name": "@lit-protocol/pkp-cosmos",
+  "name": "@lit-protocol/wrapped-keys",
   "version": "6.0.0-beta.4",
+  "peerDependencies": {
+    "tslib": "^2.3.0"
+  },
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LIT-Protocol/js-sdk"
+    "url": "https://github.com/Lit-Protocol/js-sdk"
   },
   "keywords": [
     "library"
   ],
   "bugs": {
-    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+    "url": "https://github.com/Lit-Protocol/js-sdk/issues"
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/pkp-cosmos"
+    "directory": "../../dist/packages/wrapped-keys"
   },
   "browser": {
     "crypto": false,
@@ -24,7 +27,5 @@
   },
   "tags": [
     "universal"
-  ],
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  ]
 }

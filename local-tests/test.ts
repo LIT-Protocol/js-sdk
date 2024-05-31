@@ -2,6 +2,7 @@ import { TinnyEnvironment } from './setup/tinny-environment';
 import { runInBand, runTestsParallel } from './setup/tinny-operations';
 // import { testBundleSpeed } from './tests/test-bundle-speed';
 // import { testExample } from './tests/test-example';
+import { testWrappedKeys } from './tests/testWrappedKeys';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
@@ -87,6 +88,7 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
   await devEnv.init();
 
   const eoaSessionSigsTests = {
+    testWrappedKeys,
     testUseEoaSessionSigsToExecuteJsSigning,
     testUseEoaSessionSigsToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,

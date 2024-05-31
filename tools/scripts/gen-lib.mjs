@@ -12,7 +12,9 @@ import {
   writeFile,
   readFile,
 } from './utils.mjs';
-import { readCachedProjectGraph } from '@nrwl/devkit';
+// import { readCachedProjectGraph } from '@nrwl/devkit';
+import devkit from '@nrwl/devkit';
+const { readCachedProjectGraph, createProjectGraphAsync } = devkit;
 import { exit } from 'process';
 import fs from 'fs';
 
@@ -80,11 +82,16 @@ const createBuild = (name) => {
   };
 };
 
-const getProject = () => {
+const getProject = async () => {
+  await createProjectGraphAsync();
   const graph = readCachedProjectGraph();
   const nodes = graph.nodes;
 
   const project = nodes[PROJECT_NAME].data;
+
+  if (!project) {
+    throw new Error(`Data for project ${PROJECT_NAME} not found.`);
+  }
 
   return project;
 };
@@ -120,7 +127,7 @@ async function modifyConfigFile(configFilePath, newLine) {
  *
  */
 const editProjectJson = async () => {
-  const project = getProject();
+  const project = await getProject();
 
   delete project.files;
   delete project.root;
@@ -139,7 +146,7 @@ const editProjectJson = async () => {
 };
 
 const editPackageJson = async () => {
-  const project = getProject();
+  const project = await getProject();
   const packageJson = project.root + '/package.json';
 
   let packageJsonData = await readJsonFile(packageJson);
@@ -177,7 +184,11 @@ const editPackageJson = async () => {
 };
 
 const editJestConfig = async () => {
-  const projectRoot = getProject().root;
+  const project = await getProject();
+  const projectRoot = project.root;
+  if (!projectRoot) {
+    throw new Error(`Root directory for project ${PROJECT_NAME} is not defined.`);
+  }
   const jestConfigPath = projectRoot + '/jest.config.ts';
   const newLine = "  setupFilesAfterEnv: ['../../jest.setup.js'],";
   modifyConfigFile(jestConfigPath, newLine);
