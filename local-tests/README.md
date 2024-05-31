@@ -47,6 +47,10 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | `RUN_IN_BAND_INTERVAL`   | The interval in milliseconds to run the tests in a single thread.                                                                                                        |
 | `LIT_RPC_URL`            | The URL of the Lit RPC server. If running locally on Anvil, it should be 'http://127.0.0.1:8545'.                                                                        |
 | `LIT_OFFICIAL_RPC`       | The URL of the official Lit RPC server, usually 'https://chain-rpc.litprotocol.com/http' but can be changed if needed.                                                   |
+| `SHIVA_URL`              | URl to connect to Shiva (our testing tool for network management).                                                                                                       |
+| `LIT_NODE_BINARY_PATH`   | URl to connect to Shiva (our testing tool for network management).                                                                                                       |
+| `USE_LIT_NODE_BINARY`    | Flag to indicate if a binary path should be used for testnet spawning or if it should be built from source.                                                              |
+| `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                                                                                      |
 
 # Writing a test
 
