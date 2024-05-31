@@ -47,7 +47,7 @@ export const derivedAddresses = async ({
 
   // if default RPC url is not provided, use the default one https://endpoints.omniatech.io/v1/matic/mumbai/public
   if (!defaultRPCUrl) {
-    defaultRPCUrl = 'https://chain-rpc.litprotocol.com/http';
+    defaultRPCUrl = 'https://lit-protocol.calderachain.xyz/replica-http';
   }
 
   // if pkpTokenId is provided, get the public key from it

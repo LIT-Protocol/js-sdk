@@ -66,7 +66,9 @@ import {
 } from './helpers/getBytes32FromMultihash';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 
-const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
+const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
 // This function asynchronously executes a provided callback function for each item in the given array.
@@ -575,7 +577,7 @@ export class LitContracts {
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl = rpcUrl ?? DEFAULT_RPC;
+    rpcUrl = rpcUrl ?? DEFAULT_READ_RPC;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -1090,8 +1092,20 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);
-
-    let publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+    let tries = 0;
+    let maxAttempts = 10;
+    let publicKey = '';
+    while (tries < maxAttempts) {
+      publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+      console.log('pkp pub key: ', publicKey);
+      if (publicKey !== '0x') {
+        break;
+      }
+      tries++;
+      await new Promise((resolve, _reject) => {
+        setTimeout(resolve, 10_000);
+      });
+    }
 
     if (publicKey.startsWith('0x')) {
       publicKey = publicKey.slice(2);
@@ -1622,11 +1636,24 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         tokenIdFromEvent = events[0].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
+        let tries = 0;
+        let maxAttempts = 10;
+        let publicKey = '';
+        while (tries < maxAttempts) {
+          publicKey = await this.pkpNftContract.read.getPubkey(
+            tokenIdFromEvent
+          );
+          console.log('pkp pub key: ', publicKey);
+          if (publicKey !== '0x') {
+            break;
+          }
+          tries++;
+          await new Promise((resolve, _reject) => {
+            setTimeout(resolve, 10_000);
+          });
+        }
 
-        let publicKey = await this.pkpNftContract.read.getPubkey(
-          tokenIdFromEvent
-        );
-
+        console.warn('public key from token id', publicKey);
         if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
         }
