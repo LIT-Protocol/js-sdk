@@ -139,7 +139,7 @@ export class LitCore {
     currentNumber: null,
     lastUpdateTime: null,
   };
-  private _blockHashUrl = "http://0.0.0.0:8080/get_most_recent_valid_block";
+  private _blockHashUrl = 'http://block-indexer.litgateway.com/get_most_recent_valid_block';
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     // Initialize default config based on litNetwork
@@ -519,9 +519,15 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   getLatestBlockhash = async (): Promise<string> => {
-    console.log('querying latest blockhash curent value is ', this.latestBlockhash);
-    await this._syncBlockhash();    
-    console.log(`querying latest blockhash current value is `, this.latestBlockhash);
+    console.log(
+      'querying latest blockhash curent value is ',
+      this.latestBlockhash
+    );
+    await this._syncBlockhash();
+    console.log(
+      `querying latest blockhash current value is `,
+      this.latestBlockhash
+    );
     if (!this.latestBlockhash) {
       throw new Error(
         `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
@@ -820,19 +826,13 @@ export class LitCore {
       const blockHashFetchResp = await fetch(this._blockHashUrl);
       const blockHashBody: any = await blockHashFetchResp.json();
       this.latestBlockhash = blockHashBody.blockhash;
-      this.lastBlockHashRetrieved  = Date.now();
-      log(
-        'Done syncing state new blockhash: ',
-        this.latestBlockhash
-      );
+      this.lastBlockHashRetrieved = Date.now();
+      log('Done syncing state new blockhash: ', this.latestBlockhash);
     } catch (err: unknown) {
       // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
       const { message = '' } = err as Error | NodeClientErrorV1;
-      logError(
-        'Error while attempting fetch new latestBlockhash:',
-        message
-      );
-    } 
+      logError('Error while attempting fetch new latestBlockhash:', message);
+    }
   }
 
   /** Currently, we perform a full sync every 30s, including handshaking with every node
