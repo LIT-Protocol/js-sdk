@@ -25,7 +25,6 @@
     "publish:staging": "yarn node ./tools/scripts/pub.mjs --tag staging",
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
-    "gen:contracts": "node node_modules/@getlit/contracts",
     "gen:internal-dev": "node ./tools/scripts/gen-internal-dev.mjs",
     "update:contracts": "yarn gen:contracts --update --outdir ./packages/contracts-sdk/src/abis",
     "gen:config": "yarn gen:contracts --update --outdir ./tools/scripts/lit-contracts && node ./tools/scripts/gen-lit-config.mjs",
