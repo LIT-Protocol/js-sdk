@@ -132,7 +132,6 @@ greenLog('Re-generating your HTML, React, and NodeJs apps');
 
 try {
   await runCommand(`yarn gen:nodejs`);
-  await runCommand(`yarn gen:html`);
   await runCommand(`yarn gen:react`);
 } catch (e) {
   redLog('Failed to generate your test apps. Try building the apps first.');

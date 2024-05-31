@@ -392,7 +392,6 @@ async function buildFunc() {
     await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
     await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
     await childRunCommand(`yarn postBuild:mapDepsToDist`);
-    await childRunCommand(`yarn gen:html`);
     await childRunCommand(`yarn gen:react`);
     await childRunCommand(`yarn gen:nodejs`);
   }
@@ -1276,9 +1275,6 @@ async function validateDependencyVersions() {
 async function postBuild() {
   // greenLog('...mapping dist package name to package.json name');
   // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-
-  greenLog('...generating apps/html/index.html');
-  await runCommand('yarn gen:html');
 
   greenLog('...generating apps/react/src/app/app.tsx');
   await runCommand('yarn gen:react');
