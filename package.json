@@ -7,8 +7,8 @@
     "reset:dev": "yarn tools --remove-local-dev",
     "reset": "rm -rf ./dist/packages && yarn reset:dev",
     "build": "yarn build:packages",
-    "build:dev": "yarn tools --remove-local-dev && rm -rf ./dist && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn nx format:write --files tsconfig.json && yarn tools --setup-local-dev && yarn build:verify",
-    "build:packages": "yarn tools --remove-local-dev && rm -rf ./dist && yarn gen:internal-dev && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn tools --setup-local-dev && yarn gen:readme && yarn build:verify && yarn nx format:write --all",
+    "build:dev": "yarn tools --remove-local-dev && rm -rf ./dist && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn nx run-many --target=build && yarn nx format:write --files tsconfig.json && yarn tools --setup-local-dev && yarn build:verify",
+    "build:packages": "yarn tools --remove-local-dev && rm -rf ./dist && yarn gen:internal-dev && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn nx run-many --target=build && yarn tools --setup-local-dev && yarn gen:readme && yarn build:verify && yarn nx format:write --all",
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
@@ -62,6 +62,7 @@
     "cross-fetch": "3.1.4",
     "date-and-time": "^2.4.1",
     "ethers": "^5.7.1",
+    "jose": "^5.3.0",
     "jszip": "^3.10.1",
     "micromodal": "^0.4.10",
     "multiformats": "^9.7.1",
@@ -102,6 +103,7 @@
     "eslint-plugin-jsx-a11y": "6.6.1",
     "eslint-plugin-react": "7.30.1",
     "eslint-plugin-react-hooks": "4.6.0",
+    "ipfs-unixfs-importer": "12.0.1",
     "jest": "27.5.1",
     "lerna": "^5.4.3",
     "live-server": "^1.2.2",
@@ -113,8 +115,7 @@
     "react-router-dom": "6.11.2",
     "ts-jest": "29.1.2",
     "typedoc": "^0.23.10",
-    "typescript": "~4.7.2",
-    "ipfs-unixfs-importer": "12.0.1"
+    "typescript": "~4.7.2"
   },
   "workspaces": [
     "packages/*"

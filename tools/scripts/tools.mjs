@@ -32,7 +32,6 @@ const optionMaps = new Map([
   ['--path', () => pathFunc()],
   ['--test', () => testFunc()],
   ['--find', () => findFunc()],
-  ['--build', () => buildFunc()],
   ['--switch', () => switchFunc()],
   ['--comment', () => commentFunc()],
   ['--remove-local-dev', () => removeLocalDevFunc()],
@@ -292,75 +291,6 @@ async function findFunc() {
 
     console.log(res);
     exit();
-  }
-}
-
-async function buildFunc() {
-  const BUILD_TYPE = args[1];
-
-  if (!BUILD_TYPE || BUILD_TYPE === '' || BUILD_TYPE === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --build [option]
-            [option]: the option to run
-                --packages: build packages
-                --target: build a target package
-                --all: build all
-    `,
-      true
-    );
-
-    exit();
-  }
-
-  if (BUILD_TYPE === '--target') {
-    const TARGET = args[2];
-
-    if (!TARGET || TARGET === '' || TARGET === '--help') {
-      greenLog(
-        `
-            Usage: node tools/scripts/tools.mjs --build --target [target]
-                [target]: the target to build
-            `,
-        true
-      );
-      exit();
-    }
-
-    await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
-    await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
-    await childRunCommand(`yarn postBuild:mapDepsToDist`);
-  }
-
-  if (BUILD_TYPE === '--packages') {
-    const MODE = args[2];
-    // console.log('MODE:', MODE);
-
-    if (!MODE || MODE === '' || MODE === '--help') {
-      greenLog(
-        `
-            Usage: node tools/scripts/tools.mjs --build --packages [option]
-
-                [option]: the option to run
-            `,
-        true
-      );
-    }
-
-    await childRunCommand(`yarn tools --match-versions`);
-
-    const ignoreList = (await listDirsRecursive('./apps', false))
-      .map((item) => item.replace('apps/', ''))
-      .join(',');
-
-    const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
-
-    spawnListener(command, {
-      onDone: () => {
-        console.log('Done!');
-        exit();
-      },
-    });
   }
 }
 
