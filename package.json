@@ -22,7 +22,6 @@
     "test:unit": "nx run-many --target=test",
     "test:unit:watch": "nx run-many --target=test --watch",
     "test:unit:bun": "bun ./tools/scripts/unit-test-with-bun.mjs",
-    "test:custom": "yarn tools --test --custom",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:beta": "yarn node ./tools/scripts/pub.mjs --tag beta",
     "publish:staging": "yarn node ./tools/scripts/pub.mjs --tag staging",
