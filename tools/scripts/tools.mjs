@@ -71,7 +71,6 @@ function helpFunc() {
             --find: different search options
             --publish: publish to npm
             --clone: clone a package from ./dist and publish to npm
-            --yalc: publish to yalc
             --build: build the project
             --dev: run dev stuff
             --watch: watch for changes
@@ -466,68 +465,6 @@ async function publishFunc() {
     );
     exit();
   }
-}
-async function yalcFunc() {
-  const OPTION2 = args[1];
-
-  if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --yalc [option]
-            [option]: the option to run
-                --publish: publish packages to yalc
-                --push: push packages to yalc
-                --remove: remove packages from yalc
-    `,
-      true
-    );
-
-    exit();
-  }
-
-  const dirs = (await listDirsRecursive('./dist/packages', false)).map((item) =>
-    item.replace('dist/packages/', '')
-  );
-
-  if (OPTION2 === '--publish') {
-    dirs.forEach((name) => {
-      spawnCommand(
-        'yalc',
-        ['publish', '--push'],
-        {
-          cwd: `dist/packages/${name}`,
-        },
-        { logExit: false }
-      );
-    });
-  }
-
-  if (OPTION2 === '--push') {
-    dirs.forEach((name) => {
-      spawnCommand(
-        'yalc',
-        ['push'],
-        {
-          cwd: `dist/packages/${name}`,
-        },
-        { logExit: false }
-      );
-    });
-  }
-
-  if (OPTION2 === '--remove') {
-    dirs.forEach((name) => {
-      spawnCommand(
-        'yalc',
-        ['remove', name],
-        {
-          cwd: `dist/packages/${name}`,
-        },
-        { logExit: false }
-      );
-    });
-  }
-  exit();
 }
 
 async function switchFunc() {

@@ -31,7 +31,6 @@
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
     "npm:login": "npm login",
-    "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\"",
     "dev:target": "yarn tools --watch --target",
     "apps": "yarn tools --dev --apps",
     "watch": "yarn tools --watch",
