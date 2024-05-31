@@ -34,7 +34,6 @@
     "gen:html": "yarn node ./tools/scripts/gen-html.mjs",
     "gen:react": "yarn node ./tools/scripts/gen-react.mjs",
     "gen:nodejs": "yarn node ./tools/scripts/gen-nodejs.mjs",
-    "gen:lib": "yarn node ./tools/scripts/gen-lib.mjs",
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
     "gen:contracts": "node node_modules/@getlit/contracts",
