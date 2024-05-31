@@ -26,7 +26,12 @@ import {
   CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
+import {
+  checkSevSnpAttestation,
+  computeHDPubKey,
+  loadModules,
+  unloadModules,
+} from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   executeWithRetry,
@@ -457,11 +462,15 @@ export class LitCore {
   }
 
   /**
-   *  Stops internal listeners/polling that refresh network state and watch for epoch changes
+   *  Stops internal listeners/polling that refresh network state and watch for epoch changes.
+   *  Removes global objects created internally
    */
   async disconnect() {
+    unloadModules();
+
     this._stopListeningForNewEpoch();
     this._stopNetworkPolling();
+    if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
   _stopNetworkPolling() {
@@ -529,6 +538,11 @@ export class LitCore {
    *
    */
   async connect(): Promise<void> {
+    // If we have never connected on this client instance first load WASM modules.
+    if (!this.ready) {
+      await loadModules();
+    }
+
     // Ensure that multiple closely timed calls to `connect()` don't result in concurrent connect() operations being run
     if (this._connectingPromise) {
       return this._connectingPromise;
