@@ -34,7 +34,6 @@ const optionMaps = new Map([
   ['--find', () => findFunc()],
   ['--build', () => buildFunc()],
   ['--switch', () => switchFunc()],
-  ['--watch', () => watchFunc()],
   ['--comment', () => commentFunc()],
   ['--remove-local-dev', () => removeLocalDevFunc()],
   ['--setup-local-dev', () => setupLocalDevFunc()],
@@ -67,7 +66,6 @@ function helpFunc() {
             --clone: clone a package from ./dist and publish to npm
             --build: build the project
             --dev: run dev stuff
-            --watch: watch for changes
             --remove-local-dev: remove local dev
             --setup-local-dev: setup local dev
             --match-versions: match versions
@@ -528,81 +526,6 @@ async function switchFunc() {
     }
 
     exit();
-  }
-}
-
-async function watchFunc() {
-  const OPTION = args[1];
-
-  if (!OPTION || OPTION === '' || OPTION === '--help') {
-    greenLog(
-      `
-            Usage: node tools/scripts/tools.mjs --watch [option]
-                [option]: the option to use
-                    --all: watch all
-                    --target: watch a target
-        `,
-      true
-    );
-
-    exit();
-  }
-
-  if (OPTION === '--all') {
-    greenLog('Watching all...', true);
-    await childRunCommand(
-      'nodemon --watch packages --ext js,ts --exec "yarn tools --build --packages --async"'
-    );
-  }
-
-  if (OPTION === '--target') {
-    const TARGET = args[2];
-
-    greenLog(
-      `
-            Usage: node tools/scripts/tools.mjs --watch --target [target] [option]
-                [target]: the target to watch
-                [option]: the option to use
-                    --deps: with dependencies
-        `,
-      true
-    );
-
-    if (!TARGET || TARGET === '' || TARGET === '--help') {
-      exit();
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-
-    // check if directory exists
-    const path = `./packages/${TARGET}`;
-    if (!fs.existsSync(path)) {
-      redLog(`Target "${TARGET}" does not exist!`);
-      exit();
-    }
-
-    if (args[3] === '--deps') {
-      const projectNameSpace = (await readFile(`package.json`))
-        .match(/"name": "(.*)"/)[1]
-        .split('/')[0];
-      let res = (await findImportsFromDir(`${path}/src`))
-        .filter((item) => item.includes(projectNameSpace))
-        .map((item) => {
-          return item.replace(projectNameSpace, '').replace('/', '');
-        });
-
-      res.forEach((pkg) => {
-        greenLog(`Watching ${pkg}...`, true);
-        childRunCommand(
-          `nodemon --watch ${pkg} --ext js,ts --exec "yarn tools --build --target ${pkg}"`
-        );
-      });
-    } else {
-      greenLog(`Watching ${TARGET}...`, true);
-      childRunCommand(
-        `nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`
-      );
-    }
   }
 }
 

@@ -29,8 +29,6 @@
     "update:contracts-sdk": "yarn node ./packages/contracts-sdk/tools.mjs",
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
-    "dev:target": "yarn tools --watch --target",
-    "watch": "yarn tools --watch",
     "v": "node ./tools/scripts/get-npm-version.mjs",
     "bump": "yarn tools --v --patch",
     "bump:minor": "yarn tools --v --minor",
