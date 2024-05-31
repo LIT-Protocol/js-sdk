@@ -51,6 +51,22 @@ export class TinnyPerson {
   }
 
   async spawn() {
+    // Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
+    const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
+    if (this.envConfig.network != LIT_TESTNET.LOCALCHAIN) {
+      const transferTx = await this.wallet.sendTransaction({
+        to: fundingWallet.address,
+        value: ethers.utils.parseEther('0.00001'),
+      });
+
+      const transferReciept = await transferTx.wait();
+      console.log(
+        '[𐬺🧪 Tinny Person𐬺] Transfered Assets for person tx: ',
+        transferReciept.transactionHash
+      );
+      this.wallet = fundingWallet;
+    }
+
     console.log('[𐬺🧪 Tinny Person𐬺] Spawning person:', this.wallet.address);
     /**
      * ====================================
@@ -163,6 +179,7 @@ export class TinnyPerson {
     console.log(
       '[𐬺🧪 Tinny Person𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
+
     const capacityTokenId = (
       await this.contractsClient.mintCapacityCreditsNFT({
         requestsPerKilosecond:
@@ -171,6 +188,8 @@ export class TinnyPerson {
       })
     ).capacityTokenIdStr;
 
+    this.contractsClient.signer = this.wallet;
+    await this.contractsClient.connect();
     return (
       await this.envConfig.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: this.wallet,

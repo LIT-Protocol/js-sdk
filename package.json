@@ -21,8 +21,6 @@
     "test:ci": "nx affected --target=test --all --code-coverage",
     "test:e2e": "yarn tools --test --e2e run-html-and-test",
     "test:e2e:web": "yarn test:e2e",
-    "test:e2e:node": "node --no-warnings ./e2e-nodejs/index.mjs",
-    "test:e2e:nodejs": "yarn test:e2e:node",
     "test:local": "node ./local-tests/build.mjs && node ./local-tests/build/test.mjs",
     "test:unit": "yarn test:packages",
     "test:custom": "yarn tools --test --custom",
@@ -85,6 +83,7 @@
     "@playwright/test": "^1.25.2",
     "@simplewebauthn/browser": "^7.2.0",
     "@simplewebauthn/typescript-types": "^7.0.0",
+    "@spruceid/siwe-parser": "2.0.0",
     "@synthetixio/js": "^2.41.0",
     "@testing-library/cypress": "^8.0.3",
     "@testing-library/react": "^13.4.0",
@@ -204,7 +203,8 @@
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
     "typedoc": "^0.23.10",
-    "typescript": "~4.7.2"
+    "typescript": "~4.7.2",
+    "ipfs-unixfs-importer": "12.0.1"
   },
   "workspaces": [
     "packages/*"

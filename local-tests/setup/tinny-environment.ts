@@ -52,7 +52,6 @@ export class TinnyEnvironment {
     // (8) "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f" (10000.000000000000000000 ETH)
     // (9) "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720" (10000.000000000000000000 ETH)
     PRIVATE_KEYS: process.env['PRIVATE_KEYS']?.split(',') || [
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
       '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
       '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
       '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
@@ -215,6 +214,24 @@ export class TinnyEnvironment {
       });
     }
 
+    if (globalThis.wasmExports) {
+      console.warn(
+        'WASM modules already loaded. Will overide when connect is called'
+      );
+    }
+
+    if (globalThis.wasmECDSA) {
+      console.warn(
+        'WASM modules already loaded. wil overide. when connect is called'
+      );
+    }
+
+    if (globalThis.wasmSevSnpUtils) {
+      console.warn(
+        'WASM modules already loaded. wil overide. when connect is called'
+      );
+    }
+
     await this.litNodeClient.connect();
 
     if (!this.litNodeClient.ready) {
@@ -250,15 +267,6 @@ export class TinnyEnvironment {
     const key = await this.getAvailablePrivateKey();
     const privateKey = key.privateKey;
     const envConfig = this.getEnvConfig();
-
-    console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Creating new person with private key:',
-      JSON.stringify(key)
-    );
-    console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Creating new person with envConfig:',
-      envConfig
-    );
 
     const person = new TinnyPerson({
       privateKey,
@@ -351,8 +359,18 @@ export class TinnyEnvironment {
         customContext: networkContext as unknown as LitContractContext,
       });
     } else {
+      // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
+      // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
+      const capacityCreditWallet =
+        ethers.Wallet.createRandom().connect(provider);
+
+      const transferTx = await wallet.sendTransaction({
+        to: capacityCreditWallet.address,
+        value: ethers.utils.parseEther('0.001'),
+      });
+      await transferTx.wait();
       this.contractsClient = new LitContracts({
-        signer: wallet,
+        signer: capacityCreditWallet,
         debug: this.processEnvs.DEBUG,
         network: this.network,
       });
@@ -379,6 +397,8 @@ export class TinnyEnvironment {
       await this.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: wallet,
         capacityTokenId: capacityTokenId,
+        // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+        uses: '200',
       })
     ).capacityDelegationAuthSig;
   };

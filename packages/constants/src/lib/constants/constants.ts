@@ -477,6 +477,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  lit: {
+    contractAddress: null,
+    chainId: 175177,
+    name: 'Chronicle - Lit Protocol Testnet',
+    symbol: 'testLPX',
+    decimals: 18,
+    rpcUrls: ['https://chain-rpc.litprotocol.com/http'],
+    blockExplorerUrls: ['https://chain.litprotocol.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
   chiado: {
     contractAddress: null,
     chainId: 10200,

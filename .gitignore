@@ -70,4 +70,4 @@ storage.test.db
 .yalc
 
 local-tests/build
-local-tests/setup/networkContext.json
+# local-tests/setup/networkContext.json

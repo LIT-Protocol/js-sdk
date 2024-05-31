@@ -21,12 +21,12 @@ import {
   AuthMethodType,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
+  LIT_CURVE,
   LIT_ENDPOINT,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
   LitNetwork,
-  LIT_CURVE,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -50,6 +50,7 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
+  throwErrorV1,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -117,6 +118,7 @@ import type {
   JsonPkpSignSdkParams,
   SigResponse,
   EncryptSdkParams,
+  GetLitActionSessionSigs,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -130,6 +132,7 @@ import { getClaims } from './helpers/get-claims';
 import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -139,6 +142,14 @@ export class LitNodeClientNodeJs
 
   // ========== Constructor ==========
   constructor(args: LitNodeClientConfig | CustomNetwork) {
+    if (!args) {
+      throwError({
+        message: 'must provide LitNodeClient parameters',
+        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+      });
+    }
+
     super(args);
 
     if (args !== undefined && args !== null && 'defaultAuthCallback' in args) {
@@ -176,7 +187,6 @@ export class LitNodeClientNodeJs
     }
 
     const nonce = await this.getLatestBlockhash();
-
     const siweMessage = await createSiweMessageWithCapacityDelegation({
       uri: 'lit:capability:delegation',
       litNodeClient: this,
@@ -309,7 +319,7 @@ export class LitNodeClientNodeJs
 
   /**
    *
-   * Get expiration for session
+   * Get expiration for session default time is 1 day / 24 hours
    *
    */
   static getExpiration = () => {
@@ -1191,6 +1201,12 @@ export class LitNodeClientNodeJs
     const mostCommonResponse = findMostCommonResponse(
       responseData
     ) as NodeShare;
+
+    const responseFromStrategy: any = processLitActionResponseStrategy(
+      responseData,
+      params.responseStrategy ?? { strategy: 'leastCommon' }
+    );
+    mostCommonResponse.response = responseFromStrategy;
 
     const isSuccess = mostCommonResponse.success;
     const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
@@ -2266,28 +2282,6 @@ export class LitNodeClientNodeJs
     });
   };
 
-  generateAuthMethodForWebAuthn = (
-    params: WebAuthnAuthenticationVerificationParams
-  ): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.WEBAUTHN,
-    accessToken: JSON.stringify(params),
-  });
-
-  generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
-    accessToken: access_token,
-  });
-
-  generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
-    accessToken: access_token,
-  });
-
-  generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
-    accessToken: access_token,
-  });
-
   /**
    * Get session signatures for a set of resources
    *
@@ -2306,6 +2300,7 @@ export class LitNodeClientNodeJs
    * ```ts
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
 import { LitAbility } from "@lit-protocol/types";
+import { logWithRequestId } from '../../../misc/src/lib/misc';
 
 const resourceAbilityRequests = [
     {
@@ -2390,6 +2385,13 @@ const resourceAbilityRequests = [
           uri: sessionKeyUri,
           nonce,
           resourceAbilityRequests: params.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(params.litActionCode && { litActionCode: params.litActionCode }),
+          ...(params.litActionIpfsId && {
+            litActionIpfsId: params.litActionIpfsId,
+          }),
+          ...(params.jsParams && { jsParams: params.jsParams }),
         },
       });
     }
@@ -2413,7 +2415,8 @@ const resourceAbilityRequests = [
     // - Let's sign the resources with the session key
     // - 5 minutes is the default expiration for a session signature
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
-    const sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
+    const sessionExpiration =
+      expiration ?? new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
@@ -2428,7 +2431,7 @@ const resourceAbilityRequests = [
       resourceAbilityRequests: params.resourceAbilityRequests,
       capabilities,
       issuedAt: new Date().toISOString(),
-      expiration: sessionExpiration.toISOString(),
+      expiration: sessionExpiration,
     };
 
     const signatures: SessionSigsMap = {};
@@ -2501,10 +2504,16 @@ const resourceAbilityRequests = [
           );
         }
 
+        /**
+         * We must provide an empty array for authMethods even if we are not using any auth methods.
+         * So that the nodes can serialize the request correctly.
+         */
+        const authMethods = params.authMethods || [];
+
         const response = await this.signSessionKey({
           sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
-          authMethods: [...params.authMethods],
+          authMethods: [...authMethods],
           pkpPublicKey: params.pkpPublicKey,
           expiration: props.expiration,
           resources: props.resources,
@@ -2526,6 +2535,29 @@ const resourceAbilityRequests = [
     });
 
     return pkpSessionSigs;
+  };
+
+  /**
+   * Retrieves session signatures specifically for Lit Actions.
+   * Unlike `getPkpSessionSigs`, this function requires either `litActionCode` or `litActionIpfsId`, and `jsParams` must be provided.
+   *
+   * @param params - The parameters required for retrieving the session signatures.
+   * @returns A promise that resolves with the session signatures.
+   */
+  getLitActionSessionSigs = async (params: GetLitActionSessionSigs) => {
+    // Check if either litActionCode or litActionIpfsId is provided
+    if (!params.litActionCode && !params.litActionIpfsId) {
+      throw new Error(
+        "Either 'litActionCode' or 'litActionIpfsId' must be provided."
+      );
+    }
+
+    // Check if jsParams is provided
+    if (!params.jsParams) {
+      throw new Error("'jsParams' is required.");
+    }
+
+    return this.getPkpSessionSigs(params);
   };
 
   /**
