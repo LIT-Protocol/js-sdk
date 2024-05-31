@@ -13,11 +13,23 @@ import {
   getPkpAddressFromSessionSig,
 } from './utils';
 
-export async function importPrivateKey(
-  pkpSessionSigs: SessionSigsMap,
-  privateKey: string,
-  litNodeClient: ILitNodeClient
-): Promise<boolean> {
+interface ImportPrivateKeyParams {
+  pkpSessionSigs: SessionSigsMap;
+  privateKey: string;
+  litNodeClient: ILitNodeClient;
+}
+interface SignWithEncryptedKeyParams<T> {
+  pkpSessionSigs: SessionSigsMap;
+  litActionCid: string;
+  unsignedTransaction: T;
+  litNodeClient: ILitNodeClient;
+}
+
+export async function importPrivateKey({
+  pkpSessionSigs,
+  privateKey,
+  litNodeClient,
+}: ImportPrivateKeyParams): Promise<boolean> {
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
 
@@ -74,12 +86,12 @@ export async function importPrivateKey(
   return false;
 }
 
-export async function signWithEncryptedKey<T = LitMessage | LitTransaction>(
-  pkpSessionSigs: SessionSigsMap,
-  litActionCid: string,
-  unsignedTransaction: T,
-  litNodeClient: ILitNodeClient
-): Promise<string> {
+export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
+  pkpSessionSigs,
+  litActionCid,
+  unsignedTransaction,
+  litNodeClient,
+}: SignWithEncryptedKeyParams<T>): Promise<string> {
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
 
   let responseData;
