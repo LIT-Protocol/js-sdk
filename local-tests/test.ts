@@ -80,8 +80,6 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 
-import { testPeerKickedAboveThresholdShouldSign } from './tests/testPeerKickedAboveThresholdShouldSign'; 
-
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
@@ -202,10 +200,6 @@ import { testPeerKickedAboveThresholdShouldSign } from './tests/testPeerKickedAb
     },
   };
 
-  const networkPeers = {
-
-  };
-
   const testConfig = {
     tests: {
       // testExample,
@@ -220,7 +214,6 @@ import { testPeerKickedAboveThresholdShouldSign } from './tests/testPeerKickedAb
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
-      testPeerKickedAboveThresholdShouldSign
     },
     devEnv,
   };
