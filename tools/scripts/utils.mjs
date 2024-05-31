@@ -586,14 +586,6 @@ export function expect(value) {
   };
 }
 
-export const getTestConfig = async () => {
-  const LITCONFIG = JSON.parse(
-    await fs.promises.readFile(`${process.cwd()}/lit.config.json`, 'utf8')
-  );
-
-  return LITCONFIG;
-};
-
 export const log = Object.assign(
   (...args) => {
     console.log('\x1b[90m', ...args, '\x1b[0m');
