@@ -265,14 +265,6 @@ The following will serve the react testing app and launch the cypress e2e testin
 yarn test:local
 ```
 
-### Environments
-
-There are currently three environments can be tested on, each of which can be generated from a custom command, which would automatically import all the libraries in `./packages/*`. The UI of HTML & React are visually identical but they are using different libraries.
-
-| Environment | Generate Command  | Test Location              |
-| ----------- | ----------------- | -------------------------- |
-| NodeJs      | `yarn gen:nodejs` | `yarn nx run nodejs:serve` |
-
 ### Unit Tests
 
 ```jsx

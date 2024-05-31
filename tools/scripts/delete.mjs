@@ -128,12 +128,4 @@ await question(`Delete '${FILES_TO_MODIFIED.DIST_VANILLA}'?`, {
   },
 });
 
-greenLog('Re-generating your HTML, React, and NodeJs apps');
-
-try {
-  await runCommand(`yarn gen:nodejs`);
-} catch (e) {
-  redLog('Failed to generate your test apps. Try building the apps first.');
-}
-
 exit();

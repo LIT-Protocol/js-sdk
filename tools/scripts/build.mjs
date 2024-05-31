@@ -43,9 +43,6 @@ const build = async (name) => {
   if (!skipGen) {
     greenLog('...mapping dist package name to package.json name');
     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-
-    // greenLog('...generating apps/nodejs/main.ts');
-    // await runCommand('yarn gen:nodejs');
   }
 };
 

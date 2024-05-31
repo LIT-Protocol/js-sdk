@@ -340,7 +340,6 @@ async function buildFunc() {
     await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
     await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
     await childRunCommand(`yarn postBuild:mapDepsToDist`);
-    await childRunCommand(`yarn gen:nodejs`);
   }
 
   if (BUILD_TYPE === '--packages') {
@@ -1224,7 +1223,6 @@ async function postBuild() {
   // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
 
   greenLog('...generating apps/nodejs/main.ts');
-  await runCommand('yarn gen:nodejs');
 
   exit();
 }
