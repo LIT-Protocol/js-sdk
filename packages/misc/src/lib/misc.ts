@@ -1,8 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import Ajv, { JSONSchemaType } from 'ajv';
-//@ts-ignore no tyoe df
-import fetchRetry from 'fetch-retry';
 
 import {
   ABI_ERC20,
@@ -28,10 +26,10 @@ import {
   RelayClaimProcessor,
 } from '@lit-protocol/types';
 
+import { fetchWithRetries, defaultRetryDelayHandler } from './fetchWithRetry';
+
 const logBuffer: any[][] = [];
 const ajv = new Ajv();
-const retryFetch = fetchRetry(globalThis.fetch);
-const RETRYABLE_STATUS_CODES = [408, 502, 503, 504];
 
 /**
  *
@@ -762,37 +760,30 @@ export function getEnv({
   return defaultValue;
 }
 
-export function sendRequest(
+export async function sendRequest(
   url: string,
   req: RequestInit,
   requestId: string
 ): Promise<Response> {
-  const retryReq = {
+  return fetchWithRetries(url, {
     ...req,
-    retries: 3,
-    retryDelay: 100,
-    retryOn: function (attempt: number, error: Error, response: Response) {
-      const isRetryable = RETRYABLE_STATUS_CODES.find((value) => {
-        if (value === response.status) {
-          return true;
-        } else {
-          return false;
-        }
-      });
+    retryDelay: function (
+      attempt: number,
+      error: Error | null,
+      response: Response | null
+    ) {
+      const delay = defaultRetryDelayHandler(attempt, error, response);
 
-      if (url.includes(LIT_ENDPOINT.HANDSHAKE.path) && isRetryable) {
+      if (url.includes(LIT_ENDPOINT.HANDSHAKE.path)) {
         logErrorWithRequestId(
           requestId,
-          `retrying request to url ${url}, attempt number ${attempt + 1}`
+          `retrying request to url ${url} in ${delay}ms - retry #${attempt + 1}`
         );
-        return true;
-      } else {
-        return false;
       }
+
+      return delay;
     },
-  };
-  const retryFetch = fetchRetry(globalThis.fetch);
-  return retryFetch(url, req)
+  })
     .then(async (response: Response) => {
       const isJson = response.headers
         .get('content-type')
