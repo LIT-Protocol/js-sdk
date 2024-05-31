@@ -79,12 +79,17 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
+import { testWrappedKeys } from './tests/testWrappedKeys';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
 
   await devEnv.init();
+
+  const wrappedKeyTests = {
+    testWrappedKeys,
+  };
 
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
@@ -214,6 +219,8 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
+
+      ...wrappedKeyTests,
     },
     devEnv,
   };
