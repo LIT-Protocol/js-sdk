@@ -26,7 +26,6 @@
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:beta": "yarn node ./tools/scripts/pub.mjs --tag beta",
     "publish:staging": "yarn node ./tools/scripts/pub.mjs --tag staging",
-    "bbp": "yarn bump && yarn build && yarn publish:dev",
     "gen:demo": "yarn node ./tools/scripts/gen-demo-app.mjs",
     "gen:html": "yarn node ./tools/scripts/gen-html.mjs",
     "gen:react": "yarn node ./tools/scripts/gen-react.mjs",
