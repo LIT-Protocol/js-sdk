@@ -279,15 +279,6 @@ There are currently three environments can be tested on, each of which can be ge
 yarn test:unit
 ```
 
-### E2E Testing with Metamask using Cypress (for Browser)
-
-<b>React</b>
-
-```jsx
-// E2E React
-yarn tools --test --e2e react
-```
-
 ## Testing with a Local Lit Node
 
 First, deploy your Lit Node Contracts, since the correct addresses will be pulled from the `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json` file.
