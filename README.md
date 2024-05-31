@@ -127,27 +127,6 @@ yarn build:dev
 yarn build
 ```
 
-## Running Test Apps
-
-The test apps are configured to automatically import all modules and expose all module functions. For browsers, you can access these functions using `window.LitJsSdk_<package_name>.<function_name>`
-
-```jsx
-// Running apps...
-// react: http://localhost:4003
-// nodejs: in the terminal
-yarn apps
-```
-
-or running individually
-
-```
-// react
-yarn nx run react:serve
-
-// nodejs
-yarn nx run nodejs:serve
-```
-
 ## Run unit tests
 
 ```

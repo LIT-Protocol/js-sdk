@@ -34,7 +34,6 @@ const optionMaps = new Map([
   ['--find', () => findFunc()],
   ['--build', () => buildFunc()],
   ['--switch', () => switchFunc()],
-  ['--dev', () => devFunc()],
   ['--watch', () => watchFunc()],
   ['--comment', () => commentFunc()],
   ['--remove-local-dev', () => removeLocalDevFunc()],
@@ -308,7 +307,6 @@ async function buildFunc() {
             [option]: the option to run
                 --packages: build packages
                 --target: build a target package
-                --apps: build apps
                 --all: build all
     `,
       true
@@ -628,48 +626,6 @@ async function cloneFunc() {
   }
 
   exit();
-}
-async function devFunc() {
-  const TYPE = args[1];
-
-  if (!TYPE || TYPE === '' || TYPE === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --dev [type]
-            [type]: the type of dev to run
-                --apps: run dev on apps
-    `,
-      true
-    );
-
-    exit();
-  }
-
-  if (TYPE === '--apps' || TYPE === '--app') {
-    // go to apps/react/project.json and find the port
-    const reactPort = JSON.parse(await readFile('./apps/react/project.json'))
-      .targets.serve.options.port;
-    const htmlPort = (await readFile('./apps/html/server.js')).match(
-      /port: (\d+)/
-    )[1];
-
-    greenLog(
-      `
-            Running apps...
-            html: http://localhost:${htmlPort}
-            react: http://localhost:${reactPort}
-            nodejs: in this terminal
-        `,
-      true
-    );
-
-    // wait for 2 seconds before running the apps
-    setTimeout(() => {
-      spawnListener('yarn nx run nodejs:serve', {}, '[nodejs]', 31);
-      spawnListener('yarn nx run react:serve', {}, '[react]', 32);
-      spawnListener('yarn nx run html:serve', {}, '[html]', 33);
-    }, 2000);
-  }
 }
 
 async function watchFunc() {
