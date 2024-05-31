@@ -16,8 +16,8 @@ import {
   createSiweMessageWithRecaps,
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
+import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
-  AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
@@ -40,7 +40,7 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   defaultMintClaimCallback,
   findMostCommonResponse,
-  generateReqeustId,
+  generateRequestId,
   hexPrefixed,
   log,
   logError,
@@ -63,10 +63,21 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
+import { encodeCode } from './helpers/encode-code';
+import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getClaims } from './helpers/get-claims';
+import { getClaimsList } from './helpers/get-claims-list';
+import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { normalizeArray } from './helpers/normalize-array';
+import { normalizeJsParams } from './helpers/normalize-params';
+import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
+import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { removeDoubleQuotes } from './helpers/remove-double-quotes';
+
 import type {
   AuthCallback,
   AuthCallbackParams,
-  AuthMethod,
   AuthSig,
   ClaimKeyResponse,
   ClaimProcessor,
@@ -104,7 +115,6 @@ import type {
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
   ValidateAndSignECDSA,
-  WebAuthnAuthenticationVerificationParams,
   ILitNodeClient,
   GetPkpSessionSigs,
   CapacityCreditsReq,
@@ -120,19 +130,6 @@ import type {
   EncryptSdkParams,
   GetLitActionSessionSigs,
 } from '@lit-protocol/types';
-
-import * as blsSdk from '@lit-protocol/bls-sdk';
-import { normalizeJsParams } from './helpers/normalize-params';
-import { encodeCode } from './helpers/encode-code';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
-import { removeDoubleQuotes } from './helpers/remove-double-quotes';
-import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { getClaimsList } from './helpers/get-claims-list';
-import { getClaims } from './helpers/get-claims';
-import { normalizeArray } from './helpers/normalize-array';
-import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-import { getBlsSignatures } from './helpers/get-bls-signatures';
-import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -852,7 +849,7 @@ export class LitNodeClientNodeJs
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
     const nodePromises = [];
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
       // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
       // const jsParams = params.jsParams || {};
@@ -1108,7 +1105,7 @@ export class LitNodeClientNodeJs
 
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     const nodePromises = this.getNodePromises(async (url: string) => {
       // -- choose the right signature
       const sessionSig = this.getSessionSigByUrl({
@@ -1281,7 +1278,7 @@ export class LitNodeClientNodeJs
         errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     // ========== Get Node Promises ==========
     const nodePromises = this.getNodePromises((url: string) => {
       // -- get the session sig from the url key
@@ -1419,7 +1416,7 @@ export class LitNodeClientNodeJs
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
 
     // ========== Get Node Promises ==========
     const nodePromises = this.getNodePromises((url: string) => {
@@ -1656,7 +1653,7 @@ export class LitNodeClientNodeJs
 
     log('identityParam', identityParam);
 
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     // ========== Get Network Signature ==========
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
@@ -1806,7 +1803,7 @@ export class LitNodeClientNodeJs
       JSON.stringify(formattedAccessControlConditions)
     );
 
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     // ========== Node Promises ==========
     const nodePromises = this.getNodePromises((url: string) => {
       return this.signConditionEcdsa(
@@ -1952,7 +1949,7 @@ export class LitNodeClientNodeJs
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
     };
 
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     logWithRequestId(requestId, 'signSessionKey body', body);
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
@@ -2003,7 +2000,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] curveType is "${curveType}"`);
 
-    let signedDataList = responseData.map((s) => s.dataSigned);
+    const signedDataList = responseData.map((s) => s.dataSigned);
 
     if (signedDataList.length <= 0) {
       const err = `[signSessionKey] signedDataList is empty.`;
@@ -2021,7 +2018,7 @@ export class LitNodeClientNodeJs
     const validatedSignedDataList = responseData
       .map((data: BlsResponseData) => {
         // each of this field cannot be empty
-        let requiredFields = [
+        const requiredFields = [
           'signatureShare',
           'curveType',
           'shareIndex',
@@ -2157,13 +2154,13 @@ export class LitNodeClientNodeJs
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
    *
    * @param { GetSessionSigsProps } params
-   * 
+   *
    * @example
-   * 
+   *
    * ```ts
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
 import { LitAbility } from "@lit-protocol/types";
-import { logWithRequestId, generateReqeustId } from '../../../misc/src/lib/misc';
+import { logWithRequestId, generateRequestId } from '../../../misc/src/lib/misc';
 
 const resourceAbilityRequests = [
     {
@@ -2462,7 +2459,7 @@ const resourceAbilityRequests = [
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
-    let requestId = generateReqeustId();
+    const requestId = generateRequestId();
 
     const nodePromises = await this.getNodePromises((url: string) => {
       const nodeRequestParams = {
