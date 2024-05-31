@@ -64,8 +64,8 @@ export class TinnyEnvironment {
       '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
     ],
     KEY_IN_USE: new Array(),
-    NO_SETUP: Boolean(process.env['NO_SETUP']) || false,
-    STOP_TESTNET: Boolean(process.env['STOP_TESTNET']) || false,
+    NO_SETUP: process.env['NO_SETUP'] === 'false',
+    STOP_TESTNET: process.env[`STOP_TESTNET`] === 'true',
     TESTNET_MANAGER_URL: 'http://0.0.0.0:8000',
     LIT_NODE_BINARY_PATH: process.env['LIT_NODE_BINARY_PATH'] || `./../../../lit-assets/rust/lit-node/target/debug/lit_node`
   };

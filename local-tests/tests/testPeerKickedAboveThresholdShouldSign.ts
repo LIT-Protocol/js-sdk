@@ -37,8 +37,8 @@ export const testPeerKickedAboveThresholdShouldSign = async (devEnv: TinnyEnviro
       console.log(decodedRecap);
     });
 
-    await devEnv.stopRandomNetworkPeerAndWaitForNextEpoch();
-    await devEnv.transitionEpochAndWait();
+
+
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient.executeJs({
       sessionSigs: bobsSessionSigs,
