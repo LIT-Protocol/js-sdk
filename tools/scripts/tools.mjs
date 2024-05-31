@@ -254,27 +254,6 @@ async function testFunc() {
     exit();
   }
 
-  if (TEST_TYPE === '--unit') {
-    // Run the nx run-many command with the --projects flag set to the project names
-    const nx = spawn('nx', ['run-many', '--target=test'], {
-      stdio: 'inherit', // This maintains the log output color
-      shell: true,
-    });
-
-    // Handle errors
-    nx.on('error', (error) => {
-      console.error(`Error: ${error.message}`);
-      process.exit();
-    });
-
-    // Handle exit
-    nx.on('exit', (code) => {
-      console.log(`Child process exited with code ${code}`);
-      // stopServer(serverProcess);
-      process.exit();
-    });
-  }
-
   if (TEST_TYPE === '--e2e') {
     const ENV = args[2];
 
