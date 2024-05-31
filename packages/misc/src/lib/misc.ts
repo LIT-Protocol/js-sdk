@@ -16,17 +16,17 @@ import {
 } from '@lit-protocol/constants';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
 import {
-  Chain,
   AuthSig,
+  Chain,
+  ClaimResult,
+  MintCallback,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeErrorV3,
-  ClaimResult,
-  MintCallback,
   RelayClaimProcessor,
 } from '@lit-protocol/types';
 
-import { fetchWithRetries, defaultRetryDelayHandler } from './fetchWithRetry';
+import { defaultRetryDelayHandler, fetchWithRetries } from './fetchWithRetry';
 
 const logBuffer: any[][] = [];
 const ajv = new Ajv();
@@ -764,7 +764,7 @@ export async function sendRequest(
   url: string,
   req: RequestInit,
   requestId: string
-): Promise<Response> {
+): Promise<unknown> {
   return fetchWithRetries(url, {
     ...req,
     retryDelay: function (
@@ -793,8 +793,7 @@ export async function sendRequest(
 
       if (!response.ok) {
         // get error message from body or default to response status
-        const error = data || response.status;
-        return Promise.reject(error);
+        throw data || response.status;
       }
 
       return data;
@@ -808,7 +807,7 @@ export async function sendRequest(
             : ''
         }`
       );
-      return Promise.reject(error);
+      throw error;
     });
 }
 
