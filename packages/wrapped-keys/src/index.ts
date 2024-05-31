@@ -1,3 +1,1 @@
-export const hello = () => {
-  console.log('Hello from wrapped-keys');
-};
+export * from './lib/wrapped-keys';
