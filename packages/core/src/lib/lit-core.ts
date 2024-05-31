@@ -23,7 +23,6 @@ import {
   StakingStates,
   version,
   LIT_ENDPOINT,
-  CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -34,8 +33,6 @@ import {
 } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
-  generateReqeustId,
-  getIpAddress,
   isBrowser,
   isNode,
   log,
@@ -46,6 +43,8 @@ import {
   sendRequest,
   throwError,
 } from '@lit-protocol/misc';
+
+import { composeLitUrl } from './endpoint-version';
 
 import type {
   AuthSig,
@@ -65,7 +64,6 @@ import type {
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
-import { composeLitUrl } from './endpoint-version';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
