@@ -374,7 +374,7 @@ export class LitCore {
   private async _handleStakingContractStateChange(state: StakingStates) {
     log(`New state detected: "${state}"`);
 
-    if (state === StakingStates.NextValidatorSetLocked) {
+    if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
       this._scheduleEpochNumberUpdate();
 
