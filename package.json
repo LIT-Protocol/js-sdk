@@ -42,9 +42,7 @@
     "b": "git branch --show",
     "txServer": "node tx-handler-server.mjs",
     "prettier": "nx format:write --all",
-    "prettier:check": "nx format:check --all",
-    "cache:enable": "node ./tools/scripts/endisable-cache.mjs --enable=true",
-    "cache:disable": "node ./tools/scripts/endisable-cache.mjs --enable=false"
+    "prettier:check": "nx format:check --all"
   },
   "private": true,
   "dependencies": {
