@@ -13,7 +13,6 @@
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
     "bundles": "yarn node ./esbuilder/lit-connect-modal/esbuild.js",
-    "pipe": "node ./tools/scripts/pipeline.mjs",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
     "test:packages": "yarn tools --test --unit",
