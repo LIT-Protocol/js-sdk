@@ -16,7 +16,6 @@ import {
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
 import {
-  AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
@@ -64,7 +63,6 @@ import {
 import type {
   AuthCallback,
   AuthCallbackParams,
-  AuthMethod,
   AuthSig,
   ClaimKeyResponse,
   ClaimProcessor,
@@ -112,6 +110,9 @@ import type {
   EncryptSdkParams,
   GetLitActionSessionSigs,
   GetSignSessionKeySharesProp,
+  EncryptionSignRequest,
+  SigningAccessControlConditionRequest,
+  JsonPKPClaimKeyRequest,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -126,11 +127,6 @@ import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
-import {
-  EncryptionSignRequest,
-  JsonPKPClaimKeyRequest,
-  SigningAccessControlConditionRequest,
-} from 'packages/types/src/lib/node-interfaces/node-interfaces';
 
 export class LitNodeClientNodeJs
   extends LitCore
