@@ -66,10 +66,13 @@ export class TinnyEnvironment {
     NO_SETUP: process.env['NO_SETUP'] === 'false',
     STOP_TESTNET: process.env[`STOP_TESTNET`] === 'true',
     TESTNET_MANAGER_URL: 'http://0.0.0.0:8000',
-    USE_LIT_NODE_BINARY: process.env[`USE_LIT_NODE_BINARY`] === `true`,
+    USE_LIT_BINARIES: process.env[`USE_LIT_BINARIES`] === `true`,
     LIT_NODE_BINARY_PATH:
       process.env['LIT_NODE_BINARY_PATH'] ||
       `./../../../lit-assets/rust/lit-node/target/debug/lit_node`,
+    LIT_ACTION_BINARY_PATH:
+      process.env['LIT_ACTION_BINARY_PATH'] ||
+      `./../../../lit-assets/rust/lit-actions/target/debug/lit_actions`,
   };
 
   public litNodeClient: LitNodeClient;
@@ -353,10 +356,24 @@ export class TinnyEnvironment {
     });
   }
 
+  //============= SHIVA ENDPOINTS =============
+
   /**
-   * Used to start an instanc of a lit network through the Lit Testnet Manager
+   * Used to start an instance of a lit network through the Lit Testnet Manager
    * if an isntance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
    * If an instance does not exist then we create one
+   * struct reference
+    pub struct TestNetCreateRequest {
+      pub node_count: usize,
+      pub polling_interval: String,
+      pub epoch_length: i32,
+      pub custom_build_path: Option<String>,
+      pub lit_action_server_custom_build_path: Option<String>,
+      pub existing_config_path: Option<String>,
+      pub which: Option<String>,
+      pub ecdsa_round_timeout: Option<String>,
+      pub enable_rate_limiting: Option<String>,
+    }
    */
   async startTestnetManager() {
     const existingTestnetResp = await fetch(
@@ -366,7 +383,26 @@ export class TinnyEnvironment {
     if (existingTestnets.length > 0) {
       this._testnetId = existingTestnets[0];
     } else {
-      console.log('binary path: ', this.processEnvs.LIT_NODE_BINARY_PATH);
+      console.log(
+        'lit node binary path: ',
+        this.processEnvs.LIT_NODE_BINARY_PATH
+      );
+      console.log(
+        'lit action server binary path: ',
+        this.processEnvs.LIT_ACTION_BINARY_PATH
+      );
+      let body: Record<string, any> = {
+        nodeCount: 6,
+        pollingInterval: '2000',
+        epochLength: 100,
+      };
+
+      if (this.processEnvs.USE_LIT_BINARIES) {
+        body.customBuildPath = this.processEnvs.LIT_NODE_BINARY_PATH;
+        body.litActionServerCustomBuildPath =
+          this.processEnvs.LIT_ACTION_BINARY_PATH;
+      }
+      console.log('Testnet create args: ', body);
       const createTestnetResp = await fetch(
         this.processEnvs.TESTNET_MANAGER_URL + '/test/create/testnet',
         {
@@ -374,14 +410,7 @@ export class TinnyEnvironment {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            nodeCount: 6,
-            pollingInterval: '2000',
-            epochLength: 100,
-            customBuildPath: this.processEnvs.USE_LIT_NODE_BINARY
-              ? this.processEnvs.LIT_NODE_BINARY_PATH
-              : undefined,
-          }),
+          body: JSON.stringify(body),
         }
       );
 
@@ -390,6 +419,10 @@ export class TinnyEnvironment {
     }
   }
 
+  /**
+   * Polls a given testnet for the ACTIVE state
+   * polls on a 500 milisecond interval
+   */
   async pollTestnetForActive() {
     let state = 'Busy';
     while (state != 'Active') {
@@ -405,12 +438,21 @@ export class TinnyEnvironment {
         await new Promise<void>((res, _) => {
           setTimeout(() => {
             res();
-          }, 5_000);
+          }, 500);
         });
       }
     }
   }
 
+  /**
+   * returns the config for a given testnet
+   * struct reference for config
+   * pub struct TestNetInfo {
+      pub contract_addresses: ContractAddresses,
+      pub validator_addresses: Vec<String>,
+      pub epoch_length: i32,
+    }
+   */
   async getTestnetConfig() {
     let infoResponse = await fetch(
       this.processEnvs.TESTNET_MANAGER_URL +
@@ -421,6 +463,10 @@ export class TinnyEnvironment {
     console.log('testnet info:', res);
   }
 
+  /**
+   * Will wait for the NEXT epoch and return a resposne when the epoch has fully transitioned.
+   * The return time is directly proportional to the epoch transition time config and where the network is with the current epoch.
+   */
   async transitionEpochAndWait() {
     const stopRandomPeerRes = await fetch(
       this.processEnvs.TESTNET_MANAGER_URL +
@@ -434,6 +480,10 @@ export class TinnyEnvironment {
     }
   }
 
+  /**
+   * Stops a random peer and waits for the next epoc to transiton.
+   * The return time is directly proportional to the epoch transition time config and where the network is with the current epoch.
+   */
   async stopRandomNetworkPeerAndWaitForNextEpoch() {
     const stopRandomPeerRes = await fetch(
       this.processEnvs.TESTNET_MANAGER_URL +
@@ -448,6 +498,9 @@ export class TinnyEnvironment {
     }
   }
 
+  /**
+   * Will stop the testnet that is being used in the test run.
+   */
   async stopTestnet() {
     if (
       this.network === LIT_TESTNET.LOCALCHAIN &&
@@ -465,6 +518,8 @@ export class TinnyEnvironment {
       console.log('skipping testnet shutdown.');
     }
   }
+
+  //============= END SHIVA ENDPOINTS =============
 
   /**
    * Context: the reason this is created instead of individually is because we can't allocate capacity beyond the global

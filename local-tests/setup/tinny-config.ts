@@ -100,10 +100,17 @@ export interface ProcessEnvs {
   LIT_NODE_BINARY_PATH: string;
 
   /**
+   * Path to lit action binary to use,
+   * if flagging not to use the binary path this option will be ignored
+   *
+   */
+  LIT_ACTION_BINARY_PATH: string;
+
+  /**
    * Flag to indicate if the provided binary path should be used
    * or if the testnet should be built from source before starting.
    */
-  USE_LIT_NODE_BINARY: boolean;
+  USE_LIT_BINARIES: boolean;
 }
 
 /**
