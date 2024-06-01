@@ -64,8 +64,12 @@ import type {
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
+  BlockHashErrorResponse,
+  EthBlockhashInfo
 } from '@lit-protocol/types';
 import { composeLitUrl } from './endpoint-version';
+
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -817,23 +821,33 @@ export class LitCore {
     };
   }
 
+  /**
+   * Fetches the latest block hash and log any errors that are returned
+   * @returns void
+   */
   private async _syncBlockhash() {
     log(
       'Syncing state for new blockhash ',
       'current blockhash: ',
       this.latestBlockhash
     );
-    try {
-      const blockHashFetchResp = await fetch(this._blockHashUrl);
-      const blockHashBody: any = await blockHashFetchResp.json();
-      this.latestBlockhash = blockHashBody.blockhash;
-      this.lastBlockHashRetrieved = Date.now();
-      log('Done syncing state new blockhash: ', this.latestBlockhash);
-    } catch (err: unknown) {
-      // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
-      const { message = '' } = err as Error | NodeClientErrorV1;
-      logError('Error while attempting fetch new latestBlockhash:', message);
-    }
+
+    return fetch(this._blockHashUrl)
+      .then(async (resp: Response) => {
+        const blockHashBody: EthBlockhashInfo = await resp.json();
+        this.latestBlockhash = blockHashBody.blockhash;
+        this.lastBlockHashRetrieved = Date.now();
+        log('Done syncing state new blockhash: ', this.latestBlockhash);
+      })
+      .catch((err: BlockHashErrorResponse) => {
+        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+        logError(
+          'Error while attempting fetch new latestBlockhash:',
+          err.messages,
+          'reason: ',
+          err.reason
+        );
+      });
   }
 
   /** Currently, we perform a full sync every 30s, including handshaking with every node
