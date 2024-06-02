@@ -3,7 +3,8 @@ import {
   SessionKeySignedMessage,
   SessionSigsMap,
 } from '@lit-protocol/types';
-import { log } from 'console';
+import { log } from '@lit-protocol/misc';
+// import { log } from 'console';
 
 interface BaseLitTransaction {
   toAddress: string;
@@ -33,8 +34,8 @@ export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
     );
   }
 
-  const firstSessionSig = pkpSessionSigs[keys[0]];
-  log(`Session Sig being used: ${firstSessionSig}`);
+  const firstSessionSig: AuthSig = pkpSessionSigs[keys[0]];
+  log(`Session Sig being used: ${JSON.stringify(firstSessionSig)}`);
 
   return firstSessionSig;
 }
@@ -51,7 +52,12 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
     );
   }
 
-  const delegationAuthSig: AuthSig = JSON.parse(capabilities[0]);
+  const delegationAuthSig: AuthSig = JSON.parse(JSON.stringify(capabilities[0])); // Had to stringify as it was throwing SyntaxError: "[object Object]" is not valid JSON
+
+  if (delegationAuthSig.algo !== 'LIT_BLS') {
+    throw new Error('SessionSig is not from a PKP');
+  }
+
   const pkpAddress = delegationAuthSig.address;
 
   log(`pkpAddress to permit decryption: ${pkpAddress}`);

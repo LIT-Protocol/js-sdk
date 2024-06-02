@@ -79,7 +79,7 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
-import { testWrappedKeys } from './tests/testWrappedKeys';
+import { testImportWrappedKey } from './tests/testImportWrappedKey';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -87,8 +87,8 @@ import { testWrappedKeys } from './tests/testWrappedKeys';
 
   await devEnv.init();
 
-  const wrappedKeyTests = {
-    testWrappedKeys,
+  const wrappedKeysTests = {
+    testImportWrappedKey,
   };
 
   const eoaSessionSigsTests = {
@@ -220,7 +220,7 @@ import { testWrappedKeys } from './tests/testWrappedKeys';
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
 
-      ...wrappedKeyTests,
+      ...wrappedKeysTests,
     },
     devEnv,
   };
