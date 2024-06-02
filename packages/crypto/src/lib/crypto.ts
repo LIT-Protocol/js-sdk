@@ -261,7 +261,11 @@ export const computeHDPubKey = (
         return value.replace('0x', '');
       });
       keyId = keyId.replace('0x', '');
-      const preComputedPubkey = computeHDPubKey(pubkeys, keyId, variant);
+      const preComputedPubkey = ecdsaDeriveKey(
+        variant,
+        Buffer.from(keyId, 'hex'),
+        pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
+      );
       return Buffer.from(preComputedPubkey).toString('hex');
     default:
       throw new Error('Non supported signature type');
