@@ -1,15 +1,15 @@
 import {
   SessionSigsMap,
-  AccessControlConditions,
   ILitNodeClient,
 } from '@lit-protocol/types';
-import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
+import { ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
 import { encryptString } from '@lit-protocol/encryption';
-import { log } from '@lit-protocol/misc';
+import { log, logError } from '@lit-protocol/misc';
 import {
   LitMessage,
   LitTransaction,
   getFirstSessionSig,
+  getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
 } from './utils';
 
@@ -18,6 +18,10 @@ interface ImportPrivateKeyParams {
   privateKey: string;
   litNodeClient: ILitNodeClient;
 }
+interface ImportPrivateKeyResponse {
+  pkpAddress: string;
+}
+
 interface SignWithEncryptedKeyParams<T> {
   pkpSessionSigs: SessionSigsMap;
   litActionCid: string;
@@ -29,23 +33,10 @@ export async function importPrivateKey({
   pkpSessionSigs,
   privateKey,
   litNodeClient,
-}: ImportPrivateKeyParams): Promise<boolean> {
+}: ImportPrivateKeyParams): Promise<string> {
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
-
-  const allowPkpAddressToDecrypt: AccessControlConditions = [
-    {
-      contractAddress: '',
-      standardContractType: '',
-      chain: CHAIN_ETHEREUM,
-      method: '',
-      parameters: [':userAddress'],
-      returnValueTest: {
-        comparator: '=',
-        value: pkpAddress,
-      },
-    },
-  ];
+  const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
   const { ciphertext, dataToEncryptHash } = await encryptString(
     {
@@ -70,20 +61,23 @@ export async function importPrivateKey({
       body: JSON.stringify(data),
     });
 
-    const responseData = await response.json();
-
     if (!response.ok) {
-      log(
-        `Could not import the encrypted key due to the error: ${responseData}`
+      const errorBody = await response.text();
+      logError(
+        `Could not import the encrypted key due to the error: ${errorBody}`
       );
+
+      throw new Error(errorBody);
     }
 
-    return true;
+    const importedPrivateKey: ImportPrivateKeyResponse = await response.json();
+    return importedPrivateKey.pkpAddress;
   } catch (error) {
-    console.error(`There was a problem fetching from the database: ${error}`);
-  }
+    const errorMessage = `There was a problem fetching from the database: ${error}`;
+    console.error(errorMessage);
 
-  return false;
+    throw new Error(errorMessage);
+  }
 }
 
 export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({

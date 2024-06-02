@@ -31,6 +31,7 @@ export const getPkpSessionSigs = async (
   const pkpSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
+    expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 mins
     resourceAbilityRequests: _resourceAbilityRequests,
 
     // -- only add this for manzano network

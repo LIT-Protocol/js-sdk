@@ -16,10 +16,16 @@ export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   console.log(pkpSessionSigs);
 
-  const privateKey = "4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB";
+  const privateKey =
+    '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
 
-  const res = await importPrivateKey({ pkpSessionSigs, privateKey, litNodeClient: devEnv.litNodeClient });
-  console.log("res- ", res);
+  const pkpAddress = await importPrivateKey({
+    pkpSessionSigs,
+    privateKey,
+    litNodeClient: devEnv.litNodeClient,
+  });
+
+  expect(pkpAddress).equal(alice.pkp.ethAddress);
 
   log('✅ testImportWrappedKey');
 };

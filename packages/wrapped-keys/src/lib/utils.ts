@@ -1,9 +1,12 @@
 import {
+  AccessControlConditions,
   AuthSig,
   SessionKeySignedMessage,
   SessionSigsMap,
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
+import { CHAIN_ETHEREUM } from './constants';
+import { ethers } from 'ethers';
 // import { log } from 'console';
 
 interface BaseLitTransaction {
@@ -52,7 +55,9 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
     );
   }
 
-  const delegationAuthSig: AuthSig = JSON.parse(JSON.stringify(capabilities[0])); // Had to stringify as it was throwing SyntaxError: "[object Object]" is not valid JSON
+  const delegationAuthSig: AuthSig = JSON.parse(
+    JSON.stringify(capabilities[0])
+  ); // Had to stringify as it was throwing SyntaxError: "[object Object]" is not valid JSON
 
   if (delegationAuthSig.algo !== 'LIT_BLS') {
     throw new Error('SessionSig is not from a PKP');
@@ -63,4 +68,28 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   log(`pkpAddress to permit decryption: ${pkpAddress}`);
 
   return pkpAddress;
+}
+
+export function getPkpAccessControlCondition(
+  pkpAddress: string
+): AccessControlConditions {
+  if (!ethers.utils.isAddress(pkpAddress)) {
+    throw new Error(
+      `pkpAddress is not a valid Ethereum Address: ${pkpAddress}`
+    );
+  }
+
+  return [
+    {
+      contractAddress: '',
+      standardContractType: '',
+      chain: CHAIN_ETHEREUM,
+      method: '',
+      parameters: [':userAddress'],
+      returnValueTest: {
+        comparator: '=',
+        value: pkpAddress,
+      },
+    },
+  ];
 }
