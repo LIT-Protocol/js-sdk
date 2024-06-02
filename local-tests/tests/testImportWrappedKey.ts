@@ -16,8 +16,8 @@ export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   console.log(pkpSessionSigs);
 
-  const privateKey =
-    '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
+  const privateKey = randomSolanaPrivateKey();
+    // '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
 
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,
@@ -29,3 +29,16 @@ export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   log('✅ testImportWrappedKey');
 };
+
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+const SOLANA_PRIVATE_KEY_LENGTH = 88;
+
+function randomSolanaPrivateKey() {
+    let result = '';
+    const charactersLength = BASE58_ALPHABET.length;
+    for (let i = 0; i < SOLANA_PRIVATE_KEY_LENGTH; i++) {
+        const randomIndex = Math.floor(Math.random() * charactersLength);
+        result += BASE58_ALPHABET.charAt(randomIndex);
+    }
+    return result;
+}
