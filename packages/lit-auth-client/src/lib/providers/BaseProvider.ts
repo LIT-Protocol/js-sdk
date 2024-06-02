@@ -142,6 +142,10 @@ export abstract class BaseProvider {
 
     let authNeededCallback = params.sessionSigsParams.authNeededCallback;
 
+    // If no session key is provided, generate a new session key from the LitNodeClient
+    const sessionKey =
+      params.sessionSigsParams.sessionKey || this.litNodeClient.getSessionKey();
+
     // If no authNeededCallback is provided, create one that uses the provided PKP and auth method
     // to sign a session key and return an auth sig
     if (!authNeededCallback) {
@@ -161,37 +165,31 @@ export abstract class BaseProvider {
 
         let response: SignSessionKeyResponse;
 
+        // common data for the signSessionKey function call
+        const commonData = {
+          sessionKey: sessionKey,
+          statement: authCallbackParams.statement,
+          pkpPublicKey: params.pkpPublicKey,
+          expiration: authCallbackParams.expiration,
+          resources: authCallbackParams.resources,
+          chainId: chainId,
+          ...(params.resourceAbilityRequests && {
+            resourceAbilityRequests: params.resourceAbilityRequests,
+          }),
+        };
+
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
           const authSig = JSON.parse(params.authMethod.accessToken);
-          response = await nodeClient.signSessionKey({
-            statement: authCallbackParams.statement,
-            sessionKey: params.sessionSigsParams.sessionKey,
-            authMethods: [],
-            authSig: authSig,
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
 
-            // optional
-            ...(params.resourceAbilityRequests && {
-              resourceAbilityRequests: params.resourceAbilityRequests,
-            }),
+          response = await nodeClient.signSessionKey({
+            ...commonData,
+            authSig: authSig,
+            authMethods: [],
           });
         } else {
           response = await nodeClient.signSessionKey({
-            sessionKey: params.sessionSigsParams.sessionKey,
-            statement: authCallbackParams.statement,
+            ...commonData,
             authMethods: [params.authMethod],
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
-
-            // optional
-            ...(params.resourceAbilityRequests && {
-              resourceAbilityRequests: params.resourceAbilityRequests,
-            }),
           });
         }
 
@@ -202,6 +200,7 @@ export abstract class BaseProvider {
     // Generate session sigs with the given session params
     const sessionSigs = await this.litNodeClient.getSessionSigs({
       ...params.sessionSigsParams,
+      sessionKey,
       authNeededCallback,
     });
 

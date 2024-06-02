@@ -1,14 +1,14 @@
 import {
   DecryptRequest,
   DecryptResponse,
-  EncryptRequest,
+  EncryptSdkParams,
   EncryptResponse,
-  ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSignedTokenRequest,
   HandshakeWithNode,
   JsonExecutionRequest,
+  JsonExecutionSdkParams,
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
@@ -17,11 +17,9 @@ import {
   NodeCommandServerKeysResponse,
   RejectedNodePromises,
   SendNodeCommand,
-  SignConditionECDSA,
-  SigningAccessControlConditionRequest,
   SuccessNodePromises,
-  ValidateAndSignECDSA,
 } from './interfaces';
+import { ILitResource, ISessionCapabilityObject } from './models';
 import { SupportedJsonRequests } from './types';
 
 export interface ILitNodeClient {
@@ -42,32 +40,12 @@ export interface ILitNodeClient {
 
   /**
    *
-   * (Browser Only) Get the config from browser local storage and override default config
-   *
-   * @returns { void }
-   *
-   */
-  overrideConfigsFromLocalStorage?(): void;
-
-  /**
-   *
    * Set bootstrapUrls to match the network litNetwork unless it's set to custom
    *
    * @returns { void }
    *
    */
   setCustomBootstrapUrls(): void;
-
-  /**
-   *
-   * Get the request body of the lit action
-   *
-   * @param { ExecuteJsProps } params
-   *
-   * @returns { JsonExecutionRequest }
-   *
-   */
-  getLitActionRequestBody(params: ExecuteJsProps): JsonExecutionRequest;
 
   /**
    *
@@ -154,27 +132,6 @@ export interface ILitNodeClient {
   _throwNodeError(res: RejectedNodePromises, requestId: string): void;
 
   // ========== Shares Resolvers ==========
-  /**
-   *
-   * Get signatures from signed data
-   *
-   * @param { Array<any> } signedData
-   *
-   * @returns { any }
-   *
-   */
-  getSignatures(signedData: any[], requestId: string): any;
-
-  /**
-   *
-   * Parse the response string to JSON
-   *
-   * @param { string } responseString
-   *
-   * @returns { any } JSON object
-   *
-   */
-  parseResponses(responseString: string): any;
 
   /**
    *
@@ -198,42 +155,6 @@ export interface ILitNodeClient {
    *
    * @returns { Promise<any> }
    */
-  getJsExecutionShares(
-    url: string,
-    params: JsonExecutionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   * Get Signing Shares for Token containing Access Control Condition
-   *
-   * @param { string } url
-   * @param { SigningAccessControlConditionRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  getSigningShareForToken(
-    url: string,
-    params: SigningAccessControlConditionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Sign Condition ECDSA
-   *
-   * @param { string } url
-   * @param { SignConditionECDSA } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  signConditionEcdsa(
-    url: string,
-    params: SignConditionECDSA,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
 
   /**
    *
@@ -259,7 +180,9 @@ export interface ILitNodeClient {
    * @returns { ExecuteJsResponse }
    *
    */
-  executeJs(params: ExecuteJsProps): Promise<ExecuteJsResponse | undefined>;
+  executeJs(
+    params: JsonExecutionSdkParams
+  ): Promise<ExecuteJsResponse | undefined>;
 
   /**
    *
@@ -277,7 +200,7 @@ export interface ILitNodeClient {
    *
    * @param params
    */
-  encrypt(params: EncryptRequest): Promise<EncryptResponse>;
+  encrypt(params: EncryptSdkParams): Promise<EncryptResponse>;
 
   /**
    * Decrypt data with Lit identity-based Timelock Encryption.
@@ -288,34 +211,20 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Signs a message with Lit threshold ECDSA algorithms.
-   *
-   * @param { `SignWithECDSA } params
-   *
-   * @returns { Promise<string> }
-   *
-   */
-  // signWithEcdsa(params: SignWithECDSA): Promise<string>;
-
-  /**
-   *
-   * Validates a condition, and then signs the condition if the validation returns true.
-   * Before calling this function, you must know the on chain conditions that you wish to validate.
-   *
-   * @param { ValidateAndSignECDSA } params
-   *
-   * @returns { Promise<string> }
-   */
-  validateAndSignEcdsa(
-    params: ValidateAndSignECDSA
-  ): Promise<string | undefined>;
-
-  /**
-   *
    * Connect to the LIT nodes
    *
    * @returns { Promise } A promise that resolves when the nodes are connected.
    *
    */
   connect(): Promise<any>;
+
+  /**
+   * Generates a session capability object
+   *
+   * @param litResources An array of ILitResource to be processed.
+   * @returns A Promise resolving to an ISessionCapabilityObject.
+   */
+  generateSessionCapabilityObjectWithWildcards(
+    litResources: ILitResource[]
+  ): Promise<ISessionCapabilityObject>;
 }

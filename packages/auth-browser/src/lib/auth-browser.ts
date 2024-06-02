@@ -1,3 +1,6 @@
+/**
+ * FIXME: SessionSigs are only supported for EVM chains at the moment.  This will be expanded to other chains in the future.
+ */
 import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
 
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
@@ -8,6 +11,11 @@ import { checkAndSignEVMAuthMessage } from './chains/eth';
 import { checkAndSignSolAuthMessage } from './chains/sol';
 
 /**
+ * SUPPORTED CHAINS: EVM, Solana, Cosmos
+ *
+ * !! NOTE !!
+ * This function is purely used for crafting the authSig for access control conditions & decryption. For SessionSigs, you can pass the `authSig` as `jsParams`
+ * or Eth Wallet Auth Method for `signSessionKey` and claiming, but you won't be able to use this to add resource ability requests in the SIWE message. Instead, you should provide your own signer to the authNeededCallback parameter for the getSessionSigs method.
  *
  * Check for an existing cryptographic authentication signature and create one of it does not exist.  This is used to prove ownership of a given crypto wallet address to the Lit nodes.  The result is stored in LocalStorage so the user doesn't have to sign every time they perform an operation.
  *

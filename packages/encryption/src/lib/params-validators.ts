@@ -22,7 +22,6 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   AuthMethod,
-  AuthSig,
   DecryptFromJsonProps,
   DecryptRequest,
   DecryptZipFileWithMetadataProps,
@@ -34,9 +33,9 @@ import {
   EncryptToJsonProps,
   EncryptZipRequest,
   EvmContractConditions,
-  ExecuteJsProps,
   GetSignedTokenRequest,
-  SessionSigs,
+  JsonExecutionSdkParams,
+  SessionSigsOrAuthSig,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
@@ -71,36 +70,53 @@ export const paramsValidators: Record<
   string,
   (params: any) => ParamsValidator[]
 > = {
-  executeJs: (params: ExecuteJsProps) => [
-    new AuthMaterialValidator('executeJs', params),
-    new ExecuteJsValidator('executeJs', params),
-    new AuthMethodValidator('executeJs', params.authMethods),
-  ],
-
+  // ========== NO AUTH MATERIAL NEEDED FOR CLIENT SIDE ENCRYPTION ==========
   encrypt: (params: EncryptRequest) => [
     new AccessControlConditionsValidator('encrypt', params),
-    new AuthMaterialValidator('encrypt', params, true),
   ],
 
   encryptFile: (params: EncryptFileRequest) => [
     new AccessControlConditionsValidator('encryptFile', params),
-    new AuthMaterialValidator('encryptFile', params),
     new FileValidator('encryptFile', params.file),
   ],
 
   encryptString: (params: EncryptStringRequest) => [
     new AccessControlConditionsValidator('encryptString', params),
-    new AuthMaterialValidator('encryptString', params, true),
     new StringValidator('encryptString', params.dataToEncrypt, 'dataToEncrypt'),
   ],
 
   encryptZip: (params: EncryptZipRequest) => [
     new AccessControlConditionsValidator('encryptZip', params),
-    new AuthMaterialValidator('encryptZip', params),
   ],
 
   zipAndEncryptString: (params: EncryptStringRequest) => [
     new StringValidator('zipAndEncryptString', params.dataToEncrypt),
+  ],
+
+  encryptToJson: (params: EncryptToJsonProps) => [
+    new AccessControlConditionsValidator('encryptToJson', params),
+    new EncryptToJsonValidator('encryptToJson', params),
+  ],
+
+  encryptFileAndZipWithMetadata: (
+    params: EncryptFileAndZipWithMetadataProps
+  ) => [
+    new AccessControlConditionsValidator(
+      'encryptFileAndZipWithMetadata',
+      params
+    ),
+    new FileValidator('encryptFileAndZipWithMetadata', params.file),
+    new StringValidator(
+      'encryptFileAndZipWithMetadata',
+      params.readme,
+      'readme'
+    ),
+  ],
+
+  // ========== REQUIRED AUTH MATERIAL VALIDATORS ==========
+  executeJs: (params: JsonExecutionSdkParams) => [
+    new AuthMaterialValidator('executeJs', params),
+    new ExecuteJsValidator('executeJs', params),
   ],
 
   decrypt: (params: DecryptRequest) => [
@@ -114,31 +130,9 @@ export const paramsValidators: Record<
     new FileValidator('decryptZipFileWithMetadata', params.file),
   ],
 
-  encryptToJson: (params: EncryptToJsonProps) => [
-    new AccessControlConditionsValidator('encryptToJson', params),
-    new AuthMaterialValidator('encryptToJson', params, true),
-    new EncryptToJsonValidator('encryptToJson', params),
-  ],
-
   decryptFromJson: (params: DecryptFromJsonProps) => [
     new AuthMaterialValidator('decryptFromJson', params),
     new DecryptFromJsonValidator('decryptFromJson', params.parsedJsonData),
-  ],
-
-  encryptFileAndZipWithMetadata: (
-    params: EncryptFileAndZipWithMetadataProps
-  ) => [
-    new AuthMaterialValidator('encryptFileAndZipWithMetadata', params, true),
-    new AccessControlConditionsValidator(
-      'encryptFileAndZipWithMetadata',
-      params
-    ),
-    new FileValidator('encryptFileAndZipWithMetadata', params.file),
-    new StringValidator(
-      'encryptFileAndZipWithMetadata',
-      params.readme,
-      'readme'
-    ),
   ],
 
   getSignedToken: (params: GetSignedTokenRequest) => [
@@ -378,9 +372,7 @@ class FileValidator implements ParamsValidator {
   }
 }
 
-export interface AuthMaterialValidatorProps {
-  authSig?: AuthSig;
-  sessionSigs?: SessionSigs;
+export interface AuthMaterialValidatorProps extends SessionSigsOrAuthSig {
   chain?: string;
 }
 

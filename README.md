@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V5.0.0</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V6.0.0</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -16,14 +16,9 @@ The Lit JavaScript SDK provides developers with a framework for implementing Lit
 https://developer.litprotocol.com/SDK/Explanation/installation
 </a>
 
-<br /><br />
-This new V3 SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.
-
 </div>
 
 <div align="left">
-
-[ChangeLog: All notable changes to this project will be documented in this file.](https://github.com/LIT-Protocol/js-sdk/blob/master/CHANGELOG.md)
 
 # Quick Start
 
@@ -91,11 +86,11 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## API Doc
 
-- V5 (Current): https://v3.api-docs.getlit.dev/ <b4/>
-
-### Old APIs Doc(s)
-
-- V2: http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
+| Version          | Link                                                     |
+| ---------------- | -------------------------------------------------------- |
+| V6 (Beta)        | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
+| V5 (**Current**) | [5.x.x docs](https://v3.api-docs.getlit.dev/)            |
+| V2               | [2.x.x docs](http://docs.lit-js-sdk-v2.litprotocol.com/) |
 
 </div>
 
@@ -103,7 +98,7 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## Prerequisite
 
-- node (v18.0.0)
+- node (v19.x or above)
 
 ## Recommended
 
@@ -158,15 +153,10 @@ yarn nx run nodejs:serve
 yarn test:unit
 ```
 
-## Run E2E tests
+## Run E2E tests in nodejs
 
 ```
-
-// -- web
-yarn test:e2e:web
-
-// -- node
-yarn test:e2e:node
+yarn test:local
 ```
 
 # Advanced
@@ -252,7 +242,7 @@ You must have at least nodejs v18 to do this.
 
 3. Build all the packages with `yarn build`
 
-4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:e2e:nodejs` locally & ensure that they pass
+4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally & ensure that they pass
 
 5. Update the docs with `yarn gen:docs --push`
 
@@ -276,9 +266,7 @@ yarn node ./tools/scripts/pub.mjs --tag serrano-jalapeno
 The following will serve the react testing app and launch the cypress e2e testing after
 
 ```sh
-yarn test:e2e:web
-or
-yarn test:e2e:node
+yarn test:local
 ```
 
 ### Environments

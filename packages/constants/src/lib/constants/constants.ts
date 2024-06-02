@@ -472,7 +472,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Chronicle - Lit Protocol Testnet',
     symbol: 'testLPX',
     decimals: 18,
-    rpcUrls: ['https://chain-rpc.litprotocol.com/http'],
+    rpcUrls: ['https://lit-protocol.calderachain.xyz/replica-http'],
     blockExplorerUrls: ['https://chain.litprotocol.com/'],
     type: null,
     vmType: 'EVM',
@@ -483,7 +483,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Chronicle - Lit Protocol Testnet',
     symbol: 'testLPX',
     decimals: 18,
-    rpcUrls: ['https://chain-rpc.litprotocol.com/http'],
+    rpcUrls: ['https://lit-protocol.calderachain.xyz/replica-http'],
     blockExplorerUrls: ['https://chain.litprotocol.com/'],
     type: null,
     vmType: 'EVM',
@@ -599,6 +599,11 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     vmType: 'EVM',
   },
 };
+
+/**
+ * Lit Protocol Chain RPC URL
+ */
+export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
 
@@ -741,6 +746,11 @@ export const SYMM_KEY_ALGO_PARAMS = {
 };
 
 /**
+ * Default node URL for Cayenne network
+ */
+export const CAYENNE_URL = 'https://cayenne.litgateway.com';
+
+/**
  * Default node URLs for each LIT network
  * Note: Dynamic networks such as Habanero have no default node URLS; they are always
  * loaded from the chain during initialization
@@ -749,11 +759,7 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   localhost: string[];
   internalDev: string[];
 } = {
-  [LitNetwork.Cayenne]: [
-    'https://cayenne.litgateway.com:7370',
-    'https://cayenne.litgateway.com:7371',
-    'https://cayenne.litgateway.com:7372',
-  ],
+  [LitNetwork.Cayenne]: [],
   [LitNetwork.Manzano]: [],
   [LitNetwork.Habanero]: [],
   [LitNetwork.Custom]: [],

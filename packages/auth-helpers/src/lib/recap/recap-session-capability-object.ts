@@ -9,7 +9,7 @@ import {
   PlainJSON,
 } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
-import { sanitizeSiweMessage } from '../siwe';
+import { sanitizeSiweMessage } from '../siwe/siwe-helper';
 import { AuthSig } from '../models';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
@@ -22,75 +22,11 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     this.#inner = new Recap(att, prf);
   }
 
-  // static async sha256(data: Buffer): Promise<ArrayBuffer> {
-  //   const digest = await crypto.subtle.digest('SHA-256', data);
-  //   return digest;
-  // }
-
-  // This should ideally be placed in the IPFSBundledSDK package, but for some reasons
-  // there seems to be bundling issues where the jest test would fail, but somehow
-  // works here.
-  // public static async strToCID(
-  //   data: string | Uint8Array | object
-  // ): Promise<string> {
-  //   let content: Uint8Array;
-
-  //   // Check the type of data and convert accordingly
-  //   if (typeof data === 'string') {
-  //     // console.log("Type A");
-  //     // Encode the string directly if data is a string
-  //     content = new TextEncoder().encode(data);
-  //   } else if (data instanceof Uint8Array) {
-  //     // console.log("Type B");
-  //     // Use the Uint8Array directly
-  //     content = data;
-  //   } else if (typeof data === 'object') {
-  //     // console.log("Type C");
-  //     // Stringify and encode if data is an object
-  //     const contentStr = JSON.stringify(data);
-  //     content = new TextEncoder().encode(contentStr);
-  //   } else {
-  //     // console.log("Type D");
-  //     throw new Error('Invalid content type');
-  //   }
-
-  //   // Create the CID
-  //   let ipfsId;
-  //   for await (const { cid } of IPFSBundledSDK.importer(
-  //     [{ content }],
-  //     new IPFSBundledSDK.MemoryBlockstore(),
-  //     { onlyHash: true }
-  //   )) {
-  //     ipfsId = cid;
-  //   }
-
-  //   // Validate the IPFS ID
-  //   if (!ipfsId) {
-  //     throw new Error('Could not create IPFS ID');
-  //   }
-
-  //   // Return the IPFS ID as a string
-  //   return ipfsId.toString();
-  // }
-
   /**
-   * Adds a Rate Limit Authorization Signature (AuthSig) as an proof to the Recap object.
-   * This method serializes the AuthSig object into a JSON string and adds it to the proof
-   * of the Recap object. The AuthSig typically contains authentication details like signature,
-   * method of derivation, the signed message, and the address of the signer. This proof is
-   * used to verify that the user has the necessary authorization, such as a Rate Limit Increase NFT.
-   *
-   * @param authSig The AuthSig object containing the rate limit authorization details.
+   * @deprecated - to be removed, as it's not used.
    */
   async addRateLimitAuthSig(authSig: AuthSig) {
     throw new Error('Not implemented yet. ');
-    // const ipfsId = await RecapSessionCapabilityObject.strToCID(authSig);
-
-    // try {
-    //   this.addProof(ipfsId);
-    // } catch (e: any) {
-    //   throw new Error(e);
-    // }
   }
 
   static decode(encoded: string): RecapSessionCapabilityObject {

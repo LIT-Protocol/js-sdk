@@ -1,4 +1,4 @@
-import { isBrowser, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, log, logError, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -18,7 +18,7 @@ import {
   sevSnpVerify,
 } from '@lit-protocol/wasm';
 
-import { LIT_ERROR, SIGTYPE } from '@lit-protocol/constants';
+import { LIT_ERROR, LIT_CURVE } from '@lit-protocol/constants';
 import { nacl } from '@lit-protocol/nacl';
 import {
   CombinedECDSASignature,
@@ -29,12 +29,11 @@ import {
 import { splitSignature } from 'ethers/lib/utils';
 
 /** ---------- Exports ---------- */
+const LIT_CORS_PROXY = `https://cors.litgateway.com`;
 
 export interface BlsSignatureShare {
   ProofOfPossession: string;
 }
-
-const LIT_CORS_PROXY = `https://cors.litgateway.com`;
 
 /**
  * Encrypt data with a BLS public key.
@@ -143,10 +142,10 @@ export const verifySignature = (
 //   sigName: string; // ignored
 // }
 
-const ecdsaSigntureTypeMap: Partial<Record<SIGTYPE, EcdsaVariant>> = {
-  [SIGTYPE.EcdsaCaitSith]: 'K256',
-  [SIGTYPE.EcdsaK256]: 'K256',
-  [SIGTYPE.EcdsaCAITSITHP256]: 'P256',
+const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE, EcdsaVariant>> = {
+  [LIT_CURVE.EcdsaCaitSith]: 'K256',
+  [LIT_CURVE.EcdsaK256]: 'K256',
+  [LIT_CURVE.EcdsaCAITSITHP256]: 'P256',
 };
 
 /**
@@ -173,11 +172,55 @@ export const combineEcdsaShares = (
     });
   }
 
-  const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as SIGTYPE];
-  if (!variant) {
-    throw new Error(
-      'Unsupported signature type present in signature shares. Please report this issue'
-    );
+  const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE];
+  let sig: CombinedECDSASignature | undefined;
+
+  try {
+    let res: string = '';
+    switch (anyValidShare.sigType) {
+      case LIT_CURVE.EcdsaCaitSith:
+      case LIT_CURVE.EcdsaK256:
+        res = ecdsaCombine(validShares, 2);
+
+        try {
+          sig = JSON.parse(res) as CombinedECDSASignature;
+        } catch (e) {
+          logError('Error while combining signatures shares', validShares);
+          throwError({
+            message: (e as Error).message,
+            errorCode: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.name,
+            errorKind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
+          });
+        }
+
+        /*
+          r and s values of the signature should be maximum of 64 bytes
+          r and s values can have polarity as the first two bits, here we remove
+        */
+        if (sig && sig.r && sig.r.length > 64) {
+          while (sig.r.length > 64) {
+            sig.r = sig.r.slice(1);
+          }
+        }
+        if (sig && sig.s && sig.s.length > 64) {
+          while (sig.s.length > 64) {
+            sig.s = sig.s.slice(1);
+          }
+        }
+        break;
+      case LIT_CURVE.EcdsaCAITSITHP256:
+        res = ecdsaCombine(validShares, 3);
+        log('response from combine_signature', res);
+        sig = JSON.parse(res);
+        break;
+      // if its another sig type, it shouldnt be resolving to this method
+      default:
+        throw new Error(
+          'Unsupported signature type present in signature shares. Please report this issue'
+        );
+    }
+  } catch (e) {
+    log('Failed to combine signatures:', e);
   }
 
   const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
@@ -189,7 +232,7 @@ export const combineEcdsaShares = (
   const [r, s, v] = ecdsaCombine(variant, presignature, signatureShares);
 
   const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
-  const messageHash = Buffer.from(anyValidShare.dataSigned, 'hex');
+  const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
 
   ecdsaVerify(variant, messageHash, publicKey, [r, s, v]);
 
@@ -203,24 +246,26 @@ export const combineEcdsaShares = (
 };
 
 export const computeHDPubKey = (
-  publicKeysHex: string[],
-  keyIdHex: string,
-  sigType: SIGTYPE
+  pubkeys: string[],
+  keyId: string,
+  sigType: LIT_CURVE
 ): string => {
-  const variant = ecdsaSigntureTypeMap[sigType];
-  if (!variant) {
-    throw new Error(
-      'Unsupported signature type present in signature shares. Please report this issue'
-    );
+  // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
+  const variant = ecdsaSigntureTypeMap[sigType]; 
+
+  switch (sigType) {
+    case LIT_CURVE.EcdsaCaitSith:
+    case LIT_CURVE.EcdsaK256:
+      // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
+      pubkeys = pubkeys.map((value: string) => {
+        return value.replace('0x', '');
+      });
+      keyId = keyId.replace('0x', '');
+      const preComputedPubkey = computeHDPubKey(pubkeys, keyId, variant);
+      return Buffer.from(preComputedPubkey).toString('hex');
+    default:
+      throw new Error('Non supported signature type');
   }
-
-  const derivedKey = ecdsaDeriveKey(
-    variant,
-    Buffer.from(keyIdHex, 'hex'),
-    publicKeysHex.map((hex) => Buffer.from(hex, 'hex'))
-  );
-
-  return Buffer.from(derivedKey).toString('hex');
 };
 
 /**

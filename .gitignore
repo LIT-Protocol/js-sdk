@@ -71,3 +71,5 @@ storage.test.db
 
 packages/wasm/rust/target
 packages/wasm/rust/pkg
+local-tests/build
+# local-tests/setup/networkContext.json
