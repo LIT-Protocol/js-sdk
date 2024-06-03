@@ -9,7 +9,9 @@ import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
  * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
  * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
  */
-export const testFailImportWrappedKeysWithEoaSessionSig = async (devEnv: TinnyEnvironment) => {
+export const testFailImportWrappedKeysWithEoaSessionSig = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
@@ -24,7 +26,7 @@ export const testFailImportWrappedKeysWithEoaSessionSig = async (devEnv: TinnyEn
       privateKey,
       litNodeClient: devEnv.litNodeClient,
     });
-  } catch(e: any) {
+  } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
     console.log(e.message);
 

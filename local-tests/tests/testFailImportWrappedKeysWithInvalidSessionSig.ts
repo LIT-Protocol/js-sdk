@@ -10,7 +10,9 @@ import { AuthSig, SessionSigsMap } from '@lit-protocol/types';
  * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithInvalidSessionSig
  * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithInvalidSessionSig
  */
-export const testFailImportWrappedKeysWithInvalidSessionSig = async (devEnv: TinnyEnvironment) => {
+export const testFailImportWrappedKeysWithInvalidSessionSig = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
@@ -25,10 +27,14 @@ export const testFailImportWrappedKeysWithInvalidSessionSig = async (devEnv: Tin
       privateKey,
       litNodeClient: devEnv.litNodeClient,
     });
-  } catch(e: any) {
+  } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
 
-    if (e.message.includes('There was a problem fetching from the database: Error: Invalid pkpSessionSig: bad public key size')) {
+    if (
+      e.message.includes(
+        'There was a problem fetching from the database: Error: Invalid pkpSessionSig: bad public key size'
+      )
+    ) {
       console.log(
         '✅ testFailImportWrappedKeysWithInvalidSessionSig is expected to have an error'
       );
@@ -40,7 +46,9 @@ export const testFailImportWrappedKeysWithInvalidSessionSig = async (devEnv: Tin
   console.log('✅ testFailImportWrappedKeysWithInvalidSessionSig');
 };
 
-const tamperPkpSessionSigs = (pkpSessionSig: SessionSigsMap): SessionSigsMap => {
+const tamperPkpSessionSigs = (
+  pkpSessionSig: SessionSigsMap
+): SessionSigsMap => {
   const tamperedPkpSessionSigs: SessionSigsMap = {};
 
   for (const key in pkpSessionSig) {
@@ -48,7 +56,7 @@ const tamperPkpSessionSigs = (pkpSessionSig: SessionSigsMap): SessionSigsMap => 
       const authSig = pkpSessionSig[key];
       const updatedAuthSig: AuthSig = {
         ...authSig,
-        address: authSig.address.slice(0, -1)
+        address: authSig.address.slice(0, -1),
       };
       tamperedPkpSessionSigs[key] = updatedAuthSig;
     }
@@ -57,4 +65,4 @@ const tamperPkpSessionSigs = (pkpSessionSig: SessionSigsMap): SessionSigsMap => 
   console.log(tamperedPkpSessionSigs);
 
   return tamperedPkpSessionSigs;
-}
+};

@@ -10,7 +10,9 @@ import { AuthSig, SessionSigsMap } from '@lit-protocol/types';
  * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithExpiredSessionSig
  * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithExpiredSessionSig
  */
-export const testFailImportWrappedKeysWithExpiredSessionSig = async (devEnv: TinnyEnvironment) => {
+export const testFailImportWrappedKeysWithExpiredSessionSig = async (
+  devEnv: TinnyEnvironment
+) => {
   const pkpSessionSigs: SessionSigsMap = {
     'https://207.244.70.36:8474': {
       sig: '1827d1c7b79c979ce76d0b9e130f6804dbf7c7838b6dfa41d4cadf690b9a8bec23321dde6cc573e8a592c395193074ade303d94f3c198d8f0017ca0aca91bd0f',
@@ -41,18 +43,22 @@ export const testFailImportWrappedKeysWithExpiredSessionSig = async (devEnv: Tin
   try {
     const privateKey = randomSolanaPrivateKey();
 
-    const res= await importPrivateKey({
+    const res = await importPrivateKey({
       pkpSessionSigs,
       privateKey,
       litNodeClient: devEnv.litNodeClient,
     });
     console.log(res);
-  } catch(e: any) {
+  } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
     console.log(e.message);
 
     // TODO!: Check this again later
-    if (e.message.includes('There was a problem fetching from the database: Error: Invalid pkpSessionSig: Expired sessionSig')) {
+    if (
+      e.message.includes(
+        'There was a problem fetching from the database: Error: Invalid pkpSessionSig: Expired sessionSig'
+      )
+    ) {
       console.log(
         '✅ testFailImportWrappedKeysWithExpiredSessionSig is expected to have an error'
       );

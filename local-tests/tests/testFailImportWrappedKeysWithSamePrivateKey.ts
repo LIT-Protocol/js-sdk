@@ -8,10 +8,17 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
  * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
  */
-export const testFailImportWrappedKeysWithSamePrivateKey = async (devEnv: TinnyEnvironment) => {
+export const testFailImportWrappedKeysWithSamePrivateKey = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice, null, new Date(Date.now() + 1000 * 60 * 10).toISOString()); // 10 mins expiry
+  const pkpSessionSigs = await getPkpSessionSigs(
+    devEnv,
+    alice,
+    null,
+    new Date(Date.now() + 1000 * 60 * 10).toISOString()
+  ); // 10 mins expiry
 
   console.log(pkpSessionSigs);
 
@@ -24,7 +31,7 @@ export const testFailImportWrappedKeysWithSamePrivateKey = async (devEnv: TinnyE
       privateKey,
       litNodeClient: devEnv.litNodeClient,
     });
-  } catch(e: any) {
+  } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
 
     // TODO!: The Lambda isn't updated for this, uncomment it once done

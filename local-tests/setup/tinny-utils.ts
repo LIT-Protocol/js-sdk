@@ -33,14 +33,15 @@ export async function stringToIpfsHash(input: string): Promise<string> {
 }
 
 export function randomSolanaPrivateKey() {
-  const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const BASE58_ALPHABET =
+    '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
   const SOLANA_PRIVATE_KEY_LENGTH = 88;
 
-    let result = '';
-    const charactersLength = BASE58_ALPHABET.length;
-    for (let i = 0; i < SOLANA_PRIVATE_KEY_LENGTH; i++) {
-        const randomIndex = Math.floor(Math.random() * charactersLength);
-        result += BASE58_ALPHABET.charAt(randomIndex);
-    }
-    return result;
+  let result = '';
+  const charactersLength = BASE58_ALPHABET.length;
+  for (let i = 0; i < SOLANA_PRIVATE_KEY_LENGTH; i++) {
+    const randomIndex = Math.floor(Math.random() * charactersLength);
+    result += BASE58_ALPHABET.charAt(randomIndex);
+  }
+  return result;
 }

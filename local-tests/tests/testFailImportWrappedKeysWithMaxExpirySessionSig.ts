@@ -9,7 +9,9 @@ import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
  * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
  * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
  */
-export const testFailImportWrappedKeysWithMaxExpirySessionSig = async (devEnv: TinnyEnvironment) => {
+export const testFailImportWrappedKeysWithMaxExpirySessionSig = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
@@ -24,10 +26,14 @@ export const testFailImportWrappedKeysWithMaxExpirySessionSig = async (devEnv: T
       privateKey,
       litNodeClient: devEnv.litNodeClient,
     });
-  } catch(e: any) {
+  } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
 
-    if (e.message.includes('There was a problem fetching from the database: Error: Invalid pkpSessionSig: Expiration set beyond permitted expiration minutes of 15')) {
+    if (
+      e.message.includes(
+        'There was a problem fetching from the database: Error: Invalid pkpSessionSig: Expiration set beyond permitted expiration minutes of 15'
+      )
+    ) {
       console.log(
         '✅ testFailImportWrappedKeysWithMaxExpirySessionSig is expected to have an error'
       );

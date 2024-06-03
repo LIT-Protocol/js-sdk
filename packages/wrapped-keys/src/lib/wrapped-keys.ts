@@ -1,9 +1,5 @@
-import {
-  SessionSigsMap,
-  ILitNodeClient,
-} from '@lit-protocol/types';
-import { ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
-import { encryptString } from '@lit-protocol/encryption';
+import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
+import { decryptToString, encryptString } from '@lit-protocol/encryption';
 import { log, logError } from '@lit-protocol/misc';
 import {
   LitMessage,
@@ -12,22 +8,13 @@ import {
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
 } from './utils';
-
-interface ImportPrivateKeyParams {
-  pkpSessionSigs: SessionSigsMap;
-  privateKey: string;
-  litNodeClient: ILitNodeClient;
-}
-interface ImportPrivateKeyResponse {
-  pkpAddress: string;
-}
-
-interface SignWithEncryptedKeyParams<T> {
-  pkpSessionSigs: SessionSigsMap;
-  litActionCid: string;
-  unsignedTransaction: T;
-  litNodeClient: ILitNodeClient;
-}
+import {
+  ExportPrivateKeyParams,
+  ExportPrivateKeyResponse,
+  ImportPrivateKeyParams,
+  ImportPrivateKeyResponse,
+  SignWithEncryptedKeyParams,
+} from './interfaces';
 
 export async function importPrivateKey({
   pkpSessionSigs,
@@ -72,6 +59,60 @@ export async function importPrivateKey({
 
     const importedPrivateKey: ImportPrivateKeyResponse = await response.json();
     return importedPrivateKey.pkpAddress;
+  } catch (error) {
+    const errorMessage = `There was a problem fetching from the database: ${error}`;
+    console.error(errorMessage);
+
+    throw new Error(errorMessage);
+  }
+}
+
+export async function exportPrivateKey({
+  pkpSessionSigs,
+  litNodeClient,
+}: ExportPrivateKeyParams): Promise<string> {
+  const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
+  const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
+
+  try {
+    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        pkpsessionsig: JSON.stringify(firstSessionSig),
+      },
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      logError(
+        `Could not import the encrypted key due to the error: ${errorBody}`
+      );
+
+      throw new Error(errorBody);
+    }
+
+    const exportedPrivateKeyData: ExportPrivateKeyResponse =
+      await response.json();
+    console.log('exportedPrivateKeyData');
+    console.log(exportedPrivateKeyData);
+
+    const decryptedPrivateKey = await decryptToString(
+      {
+        accessControlConditions: allowPkpAddressToDecrypt,
+        chain: CHAIN_ETHEREUM,
+        ciphertext: exportedPrivateKeyData.ciphertext,
+        dataToEncryptHash: exportedPrivateKeyData.dataToEncryptHash,
+        sessionSigs: pkpSessionSigs,
+      },
+      litNodeClient
+    );
+
+    console.log('decryptedPrivateKey');
+    console.log(decryptedPrivateKey);
+
+    return decryptedPrivateKey;
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);

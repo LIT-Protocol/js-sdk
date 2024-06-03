@@ -13,12 +13,17 @@ import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
 export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice, null, new Date(Date.now() + 1000 * 60 * 10).toISOString()); // 10 mins expiry
+  const pkpSessionSigs = await getPkpSessionSigs(
+    devEnv,
+    alice,
+    null,
+    new Date(Date.now() + 1000 * 60 * 10).toISOString()
+  ); // 10 mins expiry
 
   console.log(pkpSessionSigs);
 
   const privateKey = randomSolanaPrivateKey();
-    // '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
+  // '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
 
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,

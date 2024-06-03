@@ -9,10 +9,17 @@ import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
  * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithSamePkp
  * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithSamePkp
  */
-export const testFailImportWrappedKeysWithSamePkp = async (devEnv: TinnyEnvironment) => {
+export const testFailImportWrappedKeysWithSamePkp = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice, null, new Date(Date.now() + 1000 * 60 * 10).toISOString()); // 10 mins expiry
+  const pkpSessionSigs = await getPkpSessionSigs(
+    devEnv,
+    alice,
+    null,
+    new Date(Date.now() + 1000 * 60 * 10).toISOString()
+  ); // 10 mins expiry
 
   console.log(pkpSessionSigs);
 
@@ -40,10 +47,13 @@ export const testFailImportWrappedKeysWithSamePkp = async (devEnv: TinnyEnvironm
       privateKey: privateKey2,
       litNodeClient: devEnv.litNodeClient,
     });
-  } catch(e: any) {
+  } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
 
-    if (e.message === 'There was a problem fetching from the database: Error: "The conditional request failed"') {
+    if (
+      e.message ===
+      'There was a problem fetching from the database: Error: "The conditional request failed"'
+    ) {
       console.log(
         '✅ testFailImportWrappedKeysWithSamePkp is expected to have an error'
       );

@@ -9,7 +9,7 @@ export const getPkpSessionSigs = async (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[],
-  expiration?: string,
+  expiration?: string
 ) => {
   if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
     console.warn(
