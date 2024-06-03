@@ -62,7 +62,7 @@
     "cross-fetch": "3.1.4",
     "date-and-time": "^2.4.1",
     "ethers": "^5.7.1",
-    "jose": "^5.3.0",
+    "jose": "^4.14.4",
     "jszip": "^3.10.1",
     "micromodal": "^0.4.10",
     "multiformats": "^9.7.1",
