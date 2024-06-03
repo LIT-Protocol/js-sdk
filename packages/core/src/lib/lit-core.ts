@@ -65,11 +65,9 @@ import type {
   SuccessNodePromises,
   SupportedJsonRequests,
   BlockHashErrorResponse,
-  EthBlockhashInfo
+  EthBlockhashInfo,
 } from '@lit-protocol/types';
 import { composeLitUrl } from './endpoint-version';
-
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
