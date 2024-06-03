@@ -11,6 +11,7 @@ import { TinnyPerson } from './tinny-person';
 import networkContext from './networkContext.json';
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
+import { ShivaClient, TestnetClient } from './shiv-client';
 
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -64,15 +65,6 @@ export class TinnyEnvironment {
     ],
     KEY_IN_USE: new Array(),
     NO_SETUP: process.env['NO_SETUP'] === 'false',
-    STOP_TESTNET: process.env[`STOP_TESTNET`] === 'true',
-    TESTNET_MANAGER_URL: 'http://0.0.0.0:8000',
-    USE_LIT_BINARIES: process.env[`USE_LIT_BINARIES`] === `true`,
-    LIT_NODE_BINARY_PATH:
-      process.env['LIT_NODE_BINARY_PATH'] ||
-      `./../../../lit-assets/rust/lit-node/target/debug/lit_node`,
-    LIT_ACTION_BINARY_PATH:
-      process.env['LIT_ACTION_BINARY_PATH'] ||
-      `./../../../lit-assets/rust/lit-actions/target/debug/lit_actions`,
   };
 
   public litNodeClient: LitNodeClient;
@@ -97,8 +89,8 @@ export class TinnyEnvironment {
   };
 
   //=========== PRIVATE MEMBERS ===========
-  private _testnetId: string | undefined;
-
+  private _shivaClient: ShivaClient = new ShivaClient();
+  private _testnet: TestnetClient | undefined;
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
@@ -324,10 +316,10 @@ export class TinnyEnvironment {
       return;
     }
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      await this.startTestnetManager();
+      this._testnet = await this._shivaClient.startTestnetManager();
       // wait for the testnet to be active before we start the tests.
-      await this.pollTestnetForActive();
-      await this.getTestnetConfig();
+      await this._testnet.pollTestnetForActive();
+      await this._testnet.getTestnetConfig();
     }
 
     await this.setupLitNodeClient();
@@ -357,168 +349,19 @@ export class TinnyEnvironment {
   }
 
   //============= SHIVA ENDPOINTS =============
-
-  /**
-   * Used to start an instance of a lit network through the Lit Testnet Manager
-   * if an isntance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
-   * If an instance does not exist then we create one
-   * struct reference
-    pub struct TestNetCreateRequest {
-      pub node_count: usize,
-      pub polling_interval: String,
-      pub epoch_length: i32,
-      pub custom_build_path: Option<String>,
-      pub lit_action_server_custom_build_path: Option<String>,
-      pub existing_config_path: Option<String>,
-      pub which: Option<String>,
-      pub ecdsa_round_timeout: Option<String>,
-      pub enable_rate_limiting: Option<String>,
-    }
-   */
-  async startTestnetManager() {
-    const existingTestnetResp = await fetch(
-      this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets'
-    );
-    const existingTestnets: string[] = await existingTestnetResp.json();
-    if (existingTestnets.length > 0) {
-      this._testnetId = existingTestnets[0];
-    } else {
-      console.log(
-        'lit node binary path: ',
-        this.processEnvs.LIT_NODE_BINARY_PATH
-      );
-      console.log(
-        'lit action server binary path: ',
-        this.processEnvs.LIT_ACTION_BINARY_PATH
-      );
-      let body: Record<string, any> = {
-        nodeCount: 6,
-        pollingInterval: '2000',
-        epochLength: 100,
-      };
-
-      if (this.processEnvs.USE_LIT_BINARIES) {
-        body.customBuildPath = this.processEnvs.LIT_NODE_BINARY_PATH;
-        body.litActionServerCustomBuildPath =
-          this.processEnvs.LIT_ACTION_BINARY_PATH;
-      }
-      console.log('Testnet create args: ', body);
-      const createTestnetResp = await fetch(
-        this.processEnvs.TESTNET_MANAGER_URL + '/test/create/testnet',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        }
-      );
-
-      const createTestnet = await createTestnetResp.json();
-      this._testnetId = createTestnet.testnetId;
-    }
-  }
-
-  /**
-   * Polls a given testnet for the ACTIVE state
-   * polls on a 500 milisecond interval
-   */
-  async pollTestnetForActive() {
-    let state = 'Busy';
-    while (state != 'Active') {
-      const pollRes = await fetch(
-        this.processEnvs.TESTNET_MANAGER_URL +
-          '/test/poll/testnet/' +
-          this._testnetId
-      );
-      const res = await pollRes.json();
-      state = res.body;
-      console.log('found state to be', state);
-      if (state != 'Active') {
-        await new Promise<void>((res, _) => {
-          setTimeout(() => {
-            res();
-          }, 500);
-        });
-      }
-    }
-  }
-
-  /**
-   * returns the config for a given testnet
-   * struct reference for config
-   * pub struct TestNetInfo {
-      pub contract_addresses: ContractAddresses,
-      pub validator_addresses: Vec<String>,
-      pub epoch_length: i32,
-    }
-   */
-  async getTestnetConfig() {
-    let infoResponse = await fetch(
-      this.processEnvs.TESTNET_MANAGER_URL +
-        '/test/get/info/testnet/' +
-        this._testnetId
-    );
-    const res = await infoResponse.json();
-    console.log('testnet info:', res);
-  }
-
-  /**
-   * Will wait for the NEXT epoch and return a resposne when the epoch has fully transitioned.
-   * The return time is directly proportional to the epoch transition time config and where the network is with the current epoch.
-   */
-  async transitionEpochAndWait() {
-    const stopRandomPeerRes = await fetch(
-      this.processEnvs.TESTNET_MANAGER_URL +
-        '/test/action/transition/epoch/wait/' +
-        this._testnetId
-    );
-
-    if (stopRandomPeerRes.status === 200) {
-      const resp = await stopRandomPeerRes.json();
-      console.log('transition res ', resp);
-    }
-  }
-
-  /**
-   * Stops a random peer and waits for the next epoc to transiton.
-   * The return time is directly proportional to the epoch transition time config and where the network is with the current epoch.
-   */
-  async stopRandomNetworkPeerAndWaitForNextEpoch() {
-    const stopRandomPeerRes = await fetch(
-      this.processEnvs.TESTNET_MANAGER_URL +
-        '/test/action/stop/random/wait/' +
-        this._testnetId
-    );
-
-    if (stopRandomPeerRes.status === 200) {
-      let resp = await stopRandomPeerRes.json();
-      console.log('validator kick response: ', resp);
-      await this.pollTestnetForActive();
-    }
-  }
-
   /**
    * Will stop the testnet that is being used in the test run.
    */
   async stopTestnet() {
     if (
       this.network === LIT_TESTNET.LOCALCHAIN &&
-      this.processEnvs.STOP_TESTNET
+      this._shivaClient.processEnvs.STOP_TESTNET
     ) {
-      console.log('stopping testnet with id:', this._testnetId);
-      const shutdownResp = await fetch(
-        this.processEnvs.TESTNET_MANAGER_URL +
-          '/test/delete/testnet/' +
-          this._testnetId
-      );
-      const existingTestnets: string[] = await shutdownResp.json();
-      console.log('testnet manager shutdown: ', existingTestnets);
+      await this._testnet.stopTestnet();
     } else {
       console.log('skipping testnet shutdown.');
     }
   }
-
   //============= END SHIVA ENDPOINTS =============
 
   /**

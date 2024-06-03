@@ -80,37 +80,6 @@ export interface ProcessEnvs {
    * Ignore setup steps. Usually when you run to quickly run a single test.
    */
   NO_SETUP: boolean;
-
-  /**
-   * If runnnig no localchain this flag will stop the running testnet when the test
-   * run has finished. Which is when all pending task promises have settled.
-   */
-  STOP_TESTNET: boolean;
-
-  /**
-   * url for Testnet manager intigration
-   */
-  TESTNET_MANAGER_URL: string;
-
-  /**
-   * Path to the Lit Node Binary to use,
-   * if flagging to not use the binary path this option will be ignored.
-   * see {@link USE_LIT_NODE_BINARY}
-   */
-  LIT_NODE_BINARY_PATH: string;
-
-  /**
-   * Path to lit action binary to use,
-   * if flagging not to use the binary path this option will be ignored
-   *
-   */
-  LIT_ACTION_BINARY_PATH: string;
-
-  /**
-   * Flag to indicate if the provided binary path should be used
-   * or if the testnet should be built from source before starting.
-   */
-  USE_LIT_BINARIES: boolean;
 }
 
 /**
