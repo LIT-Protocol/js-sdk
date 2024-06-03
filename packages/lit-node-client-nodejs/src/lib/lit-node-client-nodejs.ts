@@ -5,19 +5,19 @@ import { SiweMessage } from 'siwe';
 
 import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
+  createSiweMessage,
+  createSiweMessageWithCapacityDelegation,
+  createSiweMessageWithRecaps,
+  decode,
+  generateAuthSig,
   ILitResource,
   ISessionCapabilityObject,
   LitAccessControlConditionResource,
   LitResourceAbilityRequest,
-  decode,
   RecapSessionCapabilityObject,
-  generateAuthSig,
-  createSiweMessageWithCapacityDelegation,
-  createSiweMessageWithRecaps,
-  createSiweMessage,
 } from '@lit-protocol/auth-helpers';
+import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
-  AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
@@ -25,10 +25,10 @@ import {
   LIT_ENDPOINT,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
-  LOCAL_STORAGE_KEYS,
   LitNetwork,
+  LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
-import { LitCore, composeLitUrl } from '@lit-protocol/core';
+import { composeLitUrl, LitCore } from '@lit-protocol/core';
 import {
   combineEcdsaShares,
   combineSignatureShares,
@@ -40,7 +40,7 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   defaultMintClaimCallback,
   findMostCommonResponse,
-  generateReqeustId,
+  generateRequestId,
   hexPrefixed,
   log,
   logError,
@@ -50,7 +50,6 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
-  throwErrorV1,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -63,11 +62,25 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
+import { encodeCode } from './helpers/encode-code';
+import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getClaims } from './helpers/get-claims';
+import { getClaimsList } from './helpers/get-claims-list';
+import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { normalizeArray } from './helpers/normalize-array';
+import { normalizeJsParams } from './helpers/normalize-params';
+import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
+import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { removeDoubleQuotes } from './helpers/remove-double-quotes';
+
 import type {
   AuthCallback,
   AuthCallbackParams,
-  AuthMethod,
   AuthSig,
+  BlsResponseData,
+  CapacityCreditsReq,
+  CapacityCreditsRes,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -76,15 +89,25 @@ import type {
   DecryptResponse,
   EncryptRequest,
   EncryptResponse,
+  EncryptSdkParams,
+  ExecuteJsNoSigningResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
+  GetLitActionSessionSigs,
+  GetPkpSessionSigs,
   GetSessionSigsProps,
-  GetSignSessionKeySharesProp,
   GetSignedTokenRequest,
   GetSigningShareForDecryptionRequest,
+  GetSignSessionKeySharesProp,
   GetWalletSigProps,
+  ILitNodeClient,
   JsonExecutionRequest,
+  JsonExecutionRequestTargetNode,
+  JsonExecutionSdkParams,
+  JsonExecutionSdkParamsTargetNode,
   JsonPkpSignRequest,
+  JsonPkpSignSdkParams,
+  JsonSignSessionKeyRequestV1,
   LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
@@ -96,43 +119,16 @@ import type {
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
-  SigShare,
+  Signature,
   SignConditionECDSA,
+  SigningAccessControlConditionRequest,
   SignSessionKeyProp,
   SignSessionKeyResponse,
-  Signature,
-  SigningAccessControlConditionRequest,
+  SigResponse,
+  SigShare,
   SuccessNodePromises,
   ValidateAndSignECDSA,
-  WebAuthnAuthenticationVerificationParams,
-  ILitNodeClient,
-  GetPkpSessionSigs,
-  CapacityCreditsReq,
-  CapacityCreditsRes,
-  JsonSignSessionKeyRequestV1,
-  BlsResponseData,
-  JsonExecutionSdkParamsTargetNode,
-  JsonExecutionRequestTargetNode,
-  JsonExecutionSdkParams,
-  ExecuteJsNoSigningResponse,
-  JsonPkpSignSdkParams,
-  SigResponse,
-  EncryptSdkParams,
-  GetLitActionSessionSigs,
 } from '@lit-protocol/types';
-
-import * as blsSdk from '@lit-protocol/bls-sdk';
-import { normalizeJsParams } from './helpers/normalize-params';
-import { encodeCode } from './helpers/encode-code';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
-import { removeDoubleQuotes } from './helpers/remove-double-quotes';
-import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { getClaimsList } from './helpers/get-claims-list';
-import { getClaims } from './helpers/get-claims';
-import { normalizeArray } from './helpers/normalize-array';
-import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-import { getBlsSignatures } from './helpers/get-bls-signatures';
-import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -583,7 +579,7 @@ export class LitNodeClientNodeJs
       throw new Error('authMethod is required');
     }
 
-    return await this.sendCommandToNode({
+    return this.sendCommandToNode({
       url: urlWithPath,
       data: params,
       requestId,
@@ -639,7 +635,7 @@ export class LitNodeClientNodeJs
       endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
     });
 
-    return await this.sendCommandToNode({
+    return this.sendCommandToNode({
       url: urlWithPath,
       data: params,
       requestId,
@@ -852,7 +848,7 @@ export class LitNodeClientNodeJs
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
     const nodePromises = [];
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
       // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
       // const jsParams = params.jsParams || {};
@@ -1108,7 +1104,7 @@ export class LitNodeClientNodeJs
 
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     const nodePromises = this.getNodePromises(async (url: string) => {
       // -- choose the right signature
       const sessionSig = this.getSessionSigByUrl({
@@ -1121,12 +1117,14 @@ export class LitNodeClientNodeJs
         authSig: sessionSig,
       };
 
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.EXECUTE_JS,
+      return this.sendCommandToNode({
+        url: composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.EXECUTE_JS,
+        }),
+        data: reqBody,
+        requestId,
       });
-
-      return this.generatePromise(urlWithPath, reqBody, requestId);
     });
 
     // -- resolve promises
@@ -1228,26 +1226,6 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Generates a promise by sending a command to the Lit node
-   *
-   * @param url - The URL to send the command to.
-   * @param params - The parameters to include in the command.
-   * @param requestId - The ID of the request.
-   * @returns A promise that resolves with the response from the server.
-   */
-  generatePromise = async (
-    url: string,
-    params: any,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    return await this.sendCommandToNode({
-      url,
-      data: params,
-      requestId,
-    });
-  };
-
-  /**
    * Use PKP to sign
    *
    * @param { JsonPkpSignSdkParams } params
@@ -1281,7 +1259,7 @@ export class LitNodeClientNodeJs
         errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     // ========== Get Node Promises ==========
     const nodePromises = this.getNodePromises((url: string) => {
       // -- get the session sig from the url key
@@ -1304,12 +1282,14 @@ export class LitNodeClientNodeJs
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
 
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.PKP_SIGN,
+      return this.sendCommandToNode({
+        url: composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.PKP_SIGN,
+        }),
+        data: reqBody,
+        requestId,
       });
-
-      return this.generatePromise(urlWithPath, reqBody, requestId);
     });
 
     const res = await this.handleNodePromises(
@@ -1419,7 +1399,7 @@ export class LitNodeClientNodeJs
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
 
     // ========== Get Node Promises ==========
     const nodePromises = this.getNodePromises((url: string) => {
@@ -1656,7 +1636,7 @@ export class LitNodeClientNodeJs
 
     log('identityParam', identityParam);
 
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     // ========== Get Network Signature ==========
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
@@ -1806,7 +1786,7 @@ export class LitNodeClientNodeJs
       JSON.stringify(formattedAccessControlConditions)
     );
 
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     // ========== Node Promises ==========
     const nodePromises = this.getNodePromises((url: string) => {
       return this.signConditionEcdsa(
@@ -1952,7 +1932,7 @@ export class LitNodeClientNodeJs
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
     };
 
-    const requestId = generateReqeustId();
+    const requestId = generateRequestId();
     logWithRequestId(requestId, 'signSessionKey body', body);
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
@@ -2003,7 +1983,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] curveType is "${curveType}"`);
 
-    let signedDataList = responseData.map((s) => s.dataSigned);
+    const signedDataList = responseData.map((s) => s.dataSigned);
 
     if (signedDataList.length <= 0) {
       const err = `[signSessionKey] signedDataList is empty.`;
@@ -2021,7 +2001,7 @@ export class LitNodeClientNodeJs
     const validatedSignedDataList = responseData
       .map((data: BlsResponseData) => {
         // each of this field cannot be empty
-        let requiredFields = [
+        const requiredFields = [
           'signatureShare',
           'curveType',
           'shareIndex',
@@ -2134,12 +2114,11 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     log('getSignSessionKeyShares');
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
-    });
-    return await this.sendCommandToNode({
-      url: urlWithPath,
+    return this.sendCommandToNode({
+      url: composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
+      }),
       data: params.body,
       requestId,
     });
@@ -2157,13 +2136,13 @@ export class LitNodeClientNodeJs
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
    *
    * @param { GetSessionSigsProps } params
-   * 
+   *
    * @example
-   * 
+   *
    * ```ts
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
 import { LitAbility } from "@lit-protocol/types";
-import { logWithRequestId, generateReqeustId } from '../../../misc/src/lib/misc';
+import { logWithRequestId, generateRequestId } from '../../../misc/src/lib/misc';
 
 const resourceAbilityRequests = [
     {
@@ -2462,9 +2441,9 @@ const resourceAbilityRequests = [
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
-    let requestId = generateReqeustId();
+    const requestId = generateRequestId();
 
-    const nodePromises = await this.getNodePromises((url: string) => {
+    const nodePromises = this.getNodePromises((url: string) => {
       const nodeRequestParams = {
         authMethod: params.authMethod,
       };

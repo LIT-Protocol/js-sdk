@@ -1,3 +1,7 @@
+import { Contract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
+import Ajv, { JSONSchemaType } from 'ajv';
+
 import {
   ABI_ERC20,
   ILitError,
@@ -10,27 +14,23 @@ import {
   RELAY_URL_HABANERO,
   RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
-
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 import {
-  Chain,
   AuthSig,
+  Chain,
+  ClaimResult,
+  MintCallback,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeErrorV3,
-  ClaimResult,
-  MintCallback,
   RelayClaimProcessor,
 } from '@lit-protocol/types';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
-import Ajv, { JSONSchemaType } from 'ajv';
-//@ts-ignore no tyoe df
-import fetchRetry from 'fetch-retry';
 
-const logBuffer: Array<Array<any>> = [];
+import { defaultRetryDelayHandler, fetchWithRetries } from './fetchWithRetry';
+
+const logBuffer: any[][] = [];
 const ajv = new Ajv();
-const retryFetch = fetchRetry(globalThis.fetch);
+
 const RETRYABLE_STATUS_CODES = [408, 502, 503, 504];
 
 /**
@@ -53,7 +53,7 @@ export const printError = (e: Error): void => {
  * @param { Array<any> } arr
  * @returns { any } the element that appeared the most
  */
-export const mostCommonString = (arr: Array<any>): any => {
+export const mostCommonString = (arr: any[]): any => {
   return arr
     .sort(
       (a: any, b: any) =>
@@ -63,15 +63,15 @@ export const mostCommonString = (arr: Array<any>): any => {
     .pop();
 };
 
-export const findMostCommonResponse = (responses: Array<object>): object => {
-  const result: { [key: string]: any } = {};
+export const findMostCommonResponse = (responses: object[]): object => {
+  const result: Record<string, any> = {};
 
   // Aggregate all values for each key across all responses
   const keys = new Set(responses.flatMap(Object.keys));
 
   for (const key of keys) {
     const values = responses.map(
-      (response: { [key: string]: any }) => response[key]
+      (response: Record<string, any>) => response[key]
     );
 
     // Filter out undefined values before processing
@@ -142,7 +142,7 @@ export const throwErrorV0 = ({
 };
 
 // Map for old error codes to new ones
-const oldErrorToNewErrorMap: { [key: string]: string } = {
+const oldErrorToNewErrorMap: Record<string, string> = {
   not_authorized: 'NodeNotAuthorized',
   storage_error: 'NodeStorageError',
 };
@@ -408,7 +408,7 @@ export const checkType = ({
   throwOnError = true,
 }: {
   value: any;
-  allowedTypes: Array<string> | any;
+  allowedTypes: string[] | any;
   paramName: string;
   functionName: string;
   throwOnError?: boolean;
@@ -570,7 +570,7 @@ export const is = (
   throwOnError = true
 ) => {
   if (getVarType(value) !== type) {
-    let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
+    const message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
     )}" type instead. value: ${
       value instanceof Object ? JSON.stringify(value) : value
@@ -590,7 +590,7 @@ export const is = (
 };
 
 export const isNode = () => {
-  var isNode = false;
+  let isNode = false;
   // @ts-ignore
   if (typeof process === 'object') {
     // @ts-ignore
@@ -679,15 +679,15 @@ export const defaultMintClaimCallback: MintCallback<
     });
 
     if (response.status < 200 || response.status >= 400) {
-      let errResp = (await response.json()) ?? '';
-      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
+      const errResp = (await response.json()) ?? '';
+      const errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
         errResp
       )}`;
       console.warn(errStmt);
       throw new Error(errStmt);
     }
 
-    let body: any = await response.json();
+    const body: any = await response.json();
     return body.requestId;
   } catch (e) {
     console.error((e as Error).message);
@@ -762,37 +762,30 @@ export function getEnv({
   return defaultValue;
 }
 
-export function sendRequest(
+export async function sendRequest(
   url: string,
   req: RequestInit,
   requestId: string
-): Promise<Response> {
-  const retryReq = {
+): Promise<unknown> {
+  return fetchWithRetries(url, {
     ...req,
-    retries: 3,
-    retryDelay: 100,
-    retryOn: function (attempt: number, error: Error, response: Response) {
-      let isRetryable = RETRYABLE_STATUS_CODES.find((value) => {
-        if (value === response.status) {
-          return true;
-        } else {
-          return false;
-        }
-      });
+    retryDelay: function (
+      attempt: number,
+      error: Error | null,
+      response: Response | null
+    ) {
+      const delay = defaultRetryDelayHandler(attempt, error, response);
 
-      if (url.includes(LIT_ENDPOINT.HANDSHAKE.path) && isRetryable) {
+      if (url.includes(LIT_ENDPOINT.HANDSHAKE.path)) {
         logErrorWithRequestId(
           requestId,
-          `retrying request to url ${url}, attempt number ${attempt + 1}`
+          `retrying request to url ${url} in ${delay}ms - retry #${attempt + 1}`
         );
-        return true;
-      } else {
-        return false;
       }
+
+      return delay;
     },
-  };
-  const retryFetch = fetchRetry(globalThis.fetch);
-  return retryFetch(url, req)
+  })
     .then(async (response: Response) => {
       const isJson = response.headers
         .get('content-type')
@@ -802,8 +795,7 @@ export function sendRequest(
 
       if (!response.ok) {
         // get error message from body or default to response status
-        const error = data || response.status;
-        return Promise.reject(error);
+        throw data || response.status;
       }
 
       return data;
@@ -817,7 +809,7 @@ export function sendRequest(
             : ''
         }`
       );
-      return Promise.reject(error);
+      throw error;
     });
 }
 
@@ -825,7 +817,7 @@ export function sendRequest(
  *
  * @returns {string}
  */
-export const generateReqeustId = () => {
+export const generateRequestId = () => {
   return Math.random().toString(16).slice(2);
 };
 

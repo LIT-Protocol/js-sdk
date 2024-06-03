@@ -1,10 +1,8 @@
-// @ts-nocheck
 import { TextEncoder, TextDecoder } from 'util';
 global.TextEncoder = TextEncoder;
-// @ts-ignore
+// @ts-expect-error Type mismatch w/ dom/browser type
 global.TextDecoder = TextDecoder;
 
-import { LitErrorKind, LIT_ERROR, CAYENNE_URL } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
 import { error } from 'console';
 
@@ -99,7 +97,7 @@ describe('utils', () => {
     const fooBool = true;
     const fooNumber = 6;
     const fooList: number[] = [1, 2, 3];
-    const fooArray: Array<string> = ['a', 'b', 'c'];
+    const fooArray: string[] = ['a', 'b', 'c'];
     const fooTuple: [string, number] = ['hello', 10];
     const fooUint8Arr = new Uint8Array([1, 2, 3, 4, 5]);
     const fooUint16Arr = new Uint16Array([1, 2, 3, 4, 5]);
@@ -172,6 +170,7 @@ describe('utils', () => {
     expect(
       utilsModule.checkIfAuthSigRequiresChainParam(
         {
+          // @ts-expect-error authSig doesn't have an ethereum prop defined?
           ethereum: 'foo',
         },
         '123',
@@ -179,120 +178,7 @@ describe('utils', () => {
       )
     ).toBe(true);
   });
-
-  it('should run the same callback as many time as configured for retry', async () => {
-    let cb = async (
-      _id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      cb.count = cb.count ? (cb.count += 1) : 1;
-      return {
-        success: false,
-        error: 'blah blah',
-      };
-    };
-
-    let res = await utilsModule.executeWithRetry(
-      cb,
-      (err: any, requestId: string, isFinal: boolean) => {
-        console.log('errr', err);
-      }
-    );
-
-    // check that the counter matches the retry count.
-    expect(cb.count).toEqual(3);
-    expect(res.requestId).toBeDefined();
-
-    cb.count = 0;
-    res = await utilsModule.executeWithRetry(
-      cb,
-      (err: any, requestId: string, isFinal: boolean) => {
-        console.log('errr', err);
-      },
-      {
-        timeout: 31_000,
-        interval: 100,
-        maxRetryCount: 10,
-      }
-    );
-
-    expect(cb.count).toEqual(10);
-  });
-
-  it('should only run once if request returns success', async () => {
-    let cb = async (
-      _id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      cb.count = cb.count ? (cb.count += 1) : 1;
-      return {
-        success: true,
-        values: [{ foo: 'bar' }],
-      };
-    };
-
-    const res = await utilsModule.executeWithRetry(
-      cb,
-      (err: any, requestId: string, isFinal: boolean) => {
-        console.log('errr', err);
-      }
-    );
-
-    expect(cb.count).toBe(1);
-    expect(res.requestId).toBeDefined();
-  });
 });
-
-it('executeWithRetry should only run up to the configured tollerance if request returns fail', async () => {
-  let MAX_RETRY_COUNT = 3;
-  let cb = async (
-    _id: string
-  ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-    cb.count = cb.count ? (cb.count += 1) : 1;
-    return {
-      success: false,
-      error: 'failed',
-    };
-  };
-
-  const res = await utilsModule.executeWithRetry(
-    cb,
-    (err: any, requestId: string, isFinal: boolean) => {
-      console.log('err', err);
-    },
-    {
-      timeout: 1,
-      interval: 1,
-      maxRetryCount: MAX_RETRY_COUNT,
-    }
-  );
-
-  expect(cb.count).toBe(MAX_RETRY_COUNT);
-  expect(res.requestId).toBeDefined();
-});
-
-it('executeWithRetry should timeout', async () => {
-  let cb = (_id: string): Promise<void> => {
-    return new Promise<void>((resolve, _reject) => {
-      setTimeout(() => {
-        resolve();
-      }, 10_000);
-    });
-  };
-
-  const res = await utilsModule.executeWithRetry(
-    cb,
-    (err: any, requestId: string, isFinal: boolean) => {
-      console.log('err', err);
-    },
-    {
-      timeout: 1,
-      interval: 1,
-      maxRetryCount: 1,
-    }
-  );
-
-  expect(res.requestId).toBeDefined();
-});
-
 describe('double escaped JSON string', () => {
   test('A doubly escaped JSON string', () => {
     const doublyEscapedJson = '{\\"key\\": \\"value\\"}';
