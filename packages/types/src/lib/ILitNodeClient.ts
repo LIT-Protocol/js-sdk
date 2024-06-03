@@ -6,18 +6,10 @@ import {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSignedTokenRequest,
-  HandshakeWithNode,
-  JsonExecutionRequest,
   JsonExecutionSdkParams,
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
-  NodeBlsSigningShare,
-  NodeCommandResponse,
-  NodeCommandServerKeysResponse,
-  RejectedNodePromises,
-  SendNodeCommand,
-  SuccessNodePromises,
 } from './interfaces';
 import { ILitResource, ISessionCapabilityObject } from './models';
 import { SupportedJsonRequests } from './types';
