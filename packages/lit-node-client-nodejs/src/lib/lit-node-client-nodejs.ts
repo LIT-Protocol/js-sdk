@@ -69,7 +69,6 @@ import type {
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
-  EncryptRequest,
   EncryptResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
