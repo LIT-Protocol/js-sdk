@@ -513,7 +513,7 @@ export interface JsonExecutionRequest
    * auto-filled before sending each command to the node, but
    * in the rust struct, this type is required.
    */
-  // epoch: number;
+  epoch: number;
   ipfsId?: string;
   code?: string;
   authMethods?: AuthMethod[];
