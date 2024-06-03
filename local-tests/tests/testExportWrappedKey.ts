@@ -30,11 +30,12 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
     litNodeClient: devEnv.litNodeClient,
   });
 
-  // TODO!: There might be an error in pkpInfo, investigating. Uncomment once fixed
-  // const alicePkpAddress = alice.pkp.ethAddress;
-  // if (pkpAddress !== alicePkpAddress) {
-  //   throw new Error(`Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`);
-  // }
+  const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
+  if (pkpAddress !== alicePkpAddress) {
+    throw new Error(
+      `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+    );
+  }
 
   const pkpSessionSigsExport = await getPkpSessionSigs(
     devEnv,
@@ -51,7 +52,9 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
   });
 
   if (decryptedPrivateKey !== privateKey) {
-    throw new Error(`Decrypted private key: ${decryptedPrivateKey} doesn't match with the original private key: ${privateKey}`);
+    throw new Error(
+      `Decrypted private key: ${decryptedPrivateKey} doesn't match with the original private key: ${privateKey}`
+    );
   }
 
   log('✅ testExportWrappedKey');

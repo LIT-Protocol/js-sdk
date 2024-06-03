@@ -31,11 +31,12 @@ export const testFailImportWrappedKeysWithSamePkp = async (
     litNodeClient: devEnv.litNodeClient,
   });
 
-  // TODO!: There might be an error in pkpInfo, investigating. Uncomment once fixed
-  // const alicePkpAddress = alice.pkp.ethAddress;
-  // if (pkpAddress !== alicePkpAddress) {
-  //   throw new Error(`Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`);
-  // }
+  const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
+  if (pkpAddress !== alicePkpAddress) {
+    throw new Error(
+      `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+    );
+  }
 
   console.log('✅ testFailImportWrappedKeysWithSamePkp');
 
