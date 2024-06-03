@@ -1582,6 +1582,7 @@ const resourceAbilityRequests = [
         const reqBody: JsonExecutionRequest = {
           ...formattedParams,
           authSig: sessionSig,
+          epoch: this.currentEpochNumber!,
         };
 
         const urlWithPath = composeLitUrl({
