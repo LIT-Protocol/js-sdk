@@ -915,3 +915,26 @@ export function normalizeAndStringify(input: string): string {
     return normalizeAndStringify(unescaped);
   }
 }
+
+/**
+ * Retrieves the IP address associated with a given domain.
+ * @param domain - The domain for which to retrieve the IP address.
+ * @returns A Promise that resolves to the IP address.
+ * @throws If no IP address is found or if the domain name is invalid.
+ */
+export async function getIpAddress(domain: string): Promise<string> {
+  const apiURL = `https://dns.google/resolve?name=${domain}&type=A`;
+
+  try {
+    const response = await fetch(apiURL);
+    const data = await response.json();
+
+    if (data.Answer && data.Answer.length > 0) {
+      return data.Answer[0].data;
+    } else {
+      throw new Error('No IP Address found or bad domain name');
+    }
+  } catch (error: any) {
+    throw new Error(error);
+  }
+}
