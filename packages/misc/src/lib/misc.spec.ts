@@ -288,12 +288,3 @@ it('should not remove hex prefix if it is not present', () => {
 
   expect(result).toBe(expectedOutput);
 });
-
-it('should get ip address', async () => {
-  // polyfill fetch
-  const fetch = require('node-fetch');
-  global.fetch = fetch;
-
-  const ipAddres = await utilsModule.getIpAddress('cayenne.litgateway.com');
-  expect(ipAddres).toBe('207.244.70.36');
-});

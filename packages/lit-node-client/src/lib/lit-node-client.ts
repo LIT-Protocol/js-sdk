@@ -26,7 +26,7 @@ export class LitNodeClient extends LitNodeClientNodeJs {
     });
 
     // -- override configs
-    this.overrideConfigsFromLocalStorage();
+    this.#overrideConfigsFromLocalStorage();
   }
 
   /**
@@ -36,7 +36,7 @@ export class LitNodeClient extends LitNodeClientNodeJs {
    * @returns { void }
    *
    */
-  overrideConfigsFromLocalStorage = (): void => {
+  #overrideConfigsFromLocalStorage = (): void => {
     if (isNode()) return;
 
     const storageKey = 'LitNodeClientConfig';
