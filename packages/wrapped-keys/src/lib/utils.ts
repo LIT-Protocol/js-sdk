@@ -9,26 +9,6 @@ import { CHAIN_ETHEREUM } from './constants';
 import { ethers } from 'ethers';
 // import { log } from 'console';
 
-interface BaseLitTransaction {
-  toAddress: string;
-  value: string;
-}
-
-interface EthereumLitTransaction extends BaseLitTransaction {
-  gasPrice?: string;
-  gasLimit?: number;
-  data?: string;
-}
-
-interface SolanaLitTransaction extends BaseLitTransaction {}
-
-export type LitTransaction = EthereumLitTransaction | SolanaLitTransaction;
-
-// Same for both Ethereum & Solana
-export interface LitMessage {
-  message: string;
-}
-
 export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   const keys = Object.keys(pkpSessionSigs);
   if (keys.length === 0) {
