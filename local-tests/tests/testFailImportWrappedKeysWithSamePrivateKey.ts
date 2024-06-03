@@ -11,7 +11,7 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 export const testFailImportWrappedKeysWithSamePrivateKey = async (devEnv: TinnyEnvironment) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice, null, new Date(Date.now() + 1000 * 60 * 10).toISOString()); // 10 mins expiry
 
   console.log(pkpSessionSigs);
 

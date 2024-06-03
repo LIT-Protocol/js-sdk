@@ -8,7 +8,8 @@ import { TinnyPerson } from '../tinny-person';
 export const getPkpSessionSigs = async (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
-  resourceAbilityRequests?: LitResourceAbilityRequest[]
+  resourceAbilityRequests?: LitResourceAbilityRequest[],
+  expiration?: string,
 ) => {
   if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
     console.warn(
@@ -31,7 +32,7 @@ export const getPkpSessionSigs = async (
   const pkpSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
-    expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 mins
+    expiration,
     resourceAbilityRequests: _resourceAbilityRequests,
 
     // -- only add this for manzano network

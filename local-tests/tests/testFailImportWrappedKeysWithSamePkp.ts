@@ -1,6 +1,7 @@
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { importPrivateKey } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
 
 /**
  * Test Commands:
@@ -11,7 +12,7 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 export const testFailImportWrappedKeysWithSamePkp = async (devEnv: TinnyEnvironment) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice, null, new Date(Date.now() + 1000 * 60 * 10).toISOString()); // 10 mins expiry
 
   console.log(pkpSessionSigs);
 
@@ -53,16 +54,3 @@ export const testFailImportWrappedKeysWithSamePkp = async (devEnv: TinnyEnvironm
 
   console.log('✅ testFailImportWrappedKeysWithSamePkp');
 };
-
-const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-const SOLANA_PRIVATE_KEY_LENGTH = 88;
-
-function randomSolanaPrivateKey() {
-    let result = '';
-    const charactersLength = BASE58_ALPHABET.length;
-    for (let i = 0; i < SOLANA_PRIVATE_KEY_LENGTH; i++) {
-        const randomIndex = Math.floor(Math.random() * charactersLength);
-        result += BASE58_ALPHABET.charAt(randomIndex);
-    }
-    return result;
-}

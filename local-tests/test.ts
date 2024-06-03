@@ -83,6 +83,10 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
+import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/testFailImportWrappedKeysWithEoaSessionSig';
+import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/testFailImportWrappedKeysWithMaxExpirySessionSig';
+import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/testFailImportWrappedKeysWithInvalidSessionSig';
+import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFailImportWrappedKeysWithExpiredSessionSig';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -94,6 +98,10 @@ import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImp
     testImportWrappedKey,
     testFailImportWrappedKeysWithSamePkp,
     testFailImportWrappedKeysWithSamePrivateKey,
+    testFailImportWrappedKeysWithEoaSessionSig,
+    testFailImportWrappedKeysWithMaxExpirySessionSig,
+    testFailImportWrappedKeysWithInvalidSessionSig,
+    testFailImportWrappedKeysWithExpiredSessionSig,
   };
 
   const eoaSessionSigsTests = {
