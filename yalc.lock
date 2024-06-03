@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "packages": {
+    "@lit-protocol/core": {
+      "signature": "6ed6ce4c84ee5a4ba14bbbd821b9fa90",
+      "file": true
+    },
+    "@lit-protocol/misc": {
+      "signature": "d8030bab5f588803b9825ad3cbcf80c8",
+      "file": true
+    },
+    "@lit-protocol/lit-node-client-nodejs": {
+      "signature": "43a742ba202517446716214d61586ef4",
+      "file": true
+    }
+  }
+}

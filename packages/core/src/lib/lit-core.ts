@@ -974,7 +974,7 @@ export class LitCore {
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
-    data = { ...data, epochNumber: this.currentEpochNumber };
+    data = { ...data, epoch: this.currentEpochNumber };
 
     logWithRequestId(
       requestId,
