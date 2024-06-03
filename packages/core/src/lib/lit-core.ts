@@ -35,7 +35,6 @@ import {
 import {
   bootstrapLogManager,
   executeWithRetry,
-  getIpAddress,
   isBrowser,
   isNode,
   log,
@@ -64,6 +63,8 @@ import type {
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
+  BlockHashErrorResponse,
+  EthBlockhashInfo,
 } from '@lit-protocol/types';
 import { composeLitUrl } from './endpoint-version';
 
@@ -103,7 +104,7 @@ export type LitNodeClientConfigWithDefaults = Required<
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;
 // This interval is responsible for keeping latest block hash up to date
-const NETWORK_SYNC_INTERVAL = 30_000;
+const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
 export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
@@ -139,7 +140,8 @@ export class LitCore {
     currentNumber: null,
     lastUpdateTime: null,
   };
-
+  private _blockHashUrl =
+    'http://block-indexer.litgateway.com/get_most_recent_valid_block';
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     // Initialize default config based on litNetwork
@@ -173,7 +175,7 @@ export class LitCore {
     }
 
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
-    this.setCustomBootstrapUrls();
+    this.#setCustomBootstrapUrls();
 
     // -- set global variables
     globalThis.litConfig = this.config;
@@ -374,7 +376,7 @@ export class LitCore {
   private async _handleStakingContractStateChange(state: StakingStates) {
     log(`New state detected: "${state}"`);
 
-    if (state === StakingStates.NextValidatorSetLocked) {
+    if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
       this._scheduleEpochNumberUpdate();
 
@@ -437,9 +439,9 @@ export class LitCore {
    * that the client's configuration is always in sync with the current state of the
    * staking contract.
    *
-   * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
+   * @returns { void }
    */
-  private _listenForNewEpoch() {
+  #listenForNewEpoch(): void {
     // Check if we've already set up the listener to avoid duplicates
     if (this._stakingContractListener) {
       // Already listening, do nothing
@@ -473,13 +475,14 @@ export class LitCore {
     if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
-  _stopNetworkPolling() {
+  protected _stopNetworkPolling() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
       this._networkSyncInterval = null;
     }
   }
-  _stopListeningForNewEpoch() {
+
+  protected _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
       this._stakingContractListener = null;
@@ -493,7 +496,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  setCustomBootstrapUrls = (): void => {
+  #setCustomBootstrapUrls = (): void => {
     // -- validate
     if (this.config.litNetwork === 'custom') return;
 
@@ -519,8 +522,15 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   getLatestBlockhash = async (): Promise<string> => {
-    await this.connect();
-
+    console.log(
+      'querying latest blockhash curent value is ',
+      this.latestBlockhash
+    );
+    await this._syncBlockhash();
+    console.log(
+      `querying latest blockhash current value is `,
+      this.latestBlockhash
+    );
     if (!this.latestBlockhash) {
       throw new Error(
         `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
@@ -575,8 +585,8 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this._scheduleNetworkSync();
-    this._listenForNewEpoch();
+    this.#scheduleNetworkSync();
+    this.#listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
     // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
@@ -607,7 +617,7 @@ export class LitCore {
   }): Promise<JsonHandshakeResponse> {
     const challenge = this.getRandomHexString(64);
 
-    const handshakeResult = await this.handshakeWithNode(
+    const handshakeResult = await this.#handshakeWithNode(
       { url, challenge },
       requestId
     );
@@ -697,7 +707,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.getRequestId();
+    const requestId: string = this.#getRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -809,6 +819,35 @@ export class LitCore {
     };
   }
 
+  /**
+   * Fetches the latest block hash and log any errors that are returned
+   * @returns void
+   */
+  private async _syncBlockhash() {
+    log(
+      'Syncing state for new blockhash ',
+      'current blockhash: ',
+      this.latestBlockhash
+    );
+
+    return fetch(this._blockHashUrl)
+      .then(async (resp: Response) => {
+        const blockHashBody: EthBlockhashInfo = await resp.json();
+        this.latestBlockhash = blockHashBody.blockhash;
+        this.lastBlockHashRetrieved = Date.now();
+        log('Done syncing state new blockhash: ', this.latestBlockhash);
+      })
+      .catch((err: BlockHashErrorResponse) => {
+        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+        logError(
+          'Error while attempting fetch new latestBlockhash:',
+          err.messages,
+          'reason: ',
+          err.reason
+        );
+      });
+  }
+
   /** Currently, we perform a full sync every 30s, including handshaking with every node
    * However, we also have a state change listener that watches for staking contract state change events, which
    * _should_ be the only time that we need to perform handshakes with every node.
@@ -819,7 +858,7 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  private _scheduleNetworkSync() {
+  #scheduleNetworkSync() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
     }
@@ -827,32 +866,11 @@ export class LitCore {
     this._networkSyncInterval = setInterval(async () => {
       if (
         !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= NETWORK_SYNC_INTERVAL
+        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
       ) {
-        log(
-          'Syncing state for new network context current config: ',
-          this.config,
-          'current blockhash: ',
-          this.lastBlockHashRetrieved
-        );
-        try {
-          await this.connect();
-          log(
-            'Done syncing state new config: ',
-            this.config,
-            'new blockhash: ',
-            this.lastBlockHashRetrieved
-          );
-        } catch (err: unknown) {
-          // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
-          const { message = '' } = err as Error | NodeClientErrorV1;
-          logError(
-            'Error while attempting to refresh nodes to fetch new latestBlockhash:',
-            message
-          );
-        }
+        await this._syncBlockhash();
       }
-    }, NETWORK_SYNC_INTERVAL);
+    }, BLOCKHASH_SYNC_INTERVAL);
   }
 
   /**
@@ -862,7 +880,7 @@ export class LitCore {
    * @returns { string }
    *
    */
-  getRequestId() {
+  #getRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
@@ -873,7 +891,7 @@ export class LitCore {
    * @returns { string }
    */
 
-  getRandomHexString(size: number) {
+  getRandomHexString(size: number): string {
     return [...Array(size)]
       .map(() => Math.floor(Math.random() * 16).toString(16))
       .join('');
@@ -887,7 +905,7 @@ export class LitCore {
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithNode = async (
+  #handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
@@ -909,7 +927,7 @@ export class LitCore {
           challenge: params.challenge,
         };
 
-        return await this.sendCommandToNode({
+        return await this._sendCommandToNode({
           url: urlWithPath,
           data,
           requestId,
@@ -967,7 +985,7 @@ export class LitCore {
    * @returns { Promise<any> }
    *
    */
-  sendCommandToNode = async ({
+  protected _sendCommandToNode = async ({
     url,
     data,
     requestId,
@@ -1005,7 +1023,7 @@ export class LitCore {
    * @returns { Array<Promise<any>> }
    *
    */
-  getNodePromises = (
+  protected _getNodePromises = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callback: (url: string) => Promise<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1030,7 +1048,7 @@ export class LitCore {
    * @returns The session signature for the given URL.
    * @throws An error if sessionSigs is not provided or if the session signature for the URL is not found.
    */
-  getSessionSigByUrl = ({
+  protected _getSessionSigByUrl = ({
     sessionSigs,
     url,
   }: {
@@ -1136,7 +1154,7 @@ export class LitCore {
    * @param { number } minNodeCount number of nodes we need valid results from in order to resolve
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    */
-  handleNodePromises = async <T>(
+  protected _handleNodePromises = async <T>(
     nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number
@@ -1219,7 +1237,10 @@ export class LitCore {
    * @returns { void }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
+  protected _throwNodeError = (
+    res: RejectedNodePromises,
+    requestId: string
+  ): void => {
     if (res.error) {
       if (
         ((res.error.errorCode &&
