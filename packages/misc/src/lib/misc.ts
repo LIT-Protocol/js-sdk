@@ -67,6 +67,39 @@ export const mostCommonString = (arr: Array<any>): any => {
     .pop();
 };
 
+export const findMostCommonResponse = (responses: Array<object>): object => {
+  const result: { [key: string]: any } = {};
+
+  // Aggregate all values for each key across all responses
+  const keys = new Set(responses.flatMap(Object.keys));
+
+  for (const key of keys) {
+    const values = responses.map(
+      (response: { [key: string]: any }) => response[key]
+    );
+
+    // Filter out undefined values before processing
+    const filteredValues = values.filter(
+      (value) => value !== undefined && value !== ''
+    );
+
+    if (filteredValues.length === 0) {
+      result[key] = undefined; // or set a default value if needed
+    } else if (
+      typeof filteredValues[0] === 'object' &&
+      !Array.isArray(filteredValues[0])
+    ) {
+      // Recursive case for objects
+      result[key] = findMostCommonResponse(filteredValues);
+    } else {
+      // Most common element from filtered values
+      result[key] = mostCommonString(filteredValues);
+    }
+  }
+
+  return result;
+};
+
 export const throwError = (e: NodeClientErrorV0 | NodeClientErrorV1): never => {
   if (isNodeClientErrorV1(e)) {
     return throwErrorV1(e);
@@ -560,40 +593,6 @@ export const is = (
   return true;
 };
 
-/**
- * Convert types before sending to Lit Actions as jsParams, some JS types don't serialize well, so we will convert them before sending to the nodes
- *
- * @param { object } params.jsParams The jsParams you are sending
- * @returns { object } The jsParams object, but with any incompatible types automatically converted
- */
-export const convertLitActionsParams = (jsParams: object): object => {
-  // -- property
-  const convertedParams: KV = {};
-
-  // -- execute
-  for (const [key, value] of Object.entries(jsParams)) {
-    const _key: string = key;
-    const _value: any = value;
-
-    // -- get value type
-    const varType = getVarType(_value);
-
-    // -- case: Unit8Array
-    if (varType === 'Uint8Array') {
-      convertedParams[_key] = Array.from(_value);
-      // -- case: Object, recurse over any objects
-    } else if (varType === 'Object') {
-      convertedParams[_key] = convertLitActionsParams(_value);
-    }
-    // -- default
-    else {
-      convertedParams[_key] = _value;
-    }
-  }
-
-  return convertedParams;
-};
-
 export const isNode = () => {
   var isNode = false;
   // @ts-ignore
@@ -700,12 +699,31 @@ export const defaultMintClaimCallback: MintCallback<
   }
 };
 
-export const hexPrefixed = (str: string) => {
+/**
+ * Adds a '0x' prefix to a string if it doesn't already have one.
+ * @param str - The input string.
+ * @returns The input string with a '0x' prefix.
+ */
+export const hexPrefixed = (str: string): `0x${string}` => {
   if (str.startsWith('0x')) {
-    return str;
+    return str as `0x${string}`;
   }
 
-  return '0x' + str;
+  return ('0x' + str) as `0x${string}`;
+};
+
+/**
+ * Removes the '0x' prefix from a hexadecimal string if it exists.
+ *
+ * @param str - The input string.
+ * @returns The input string with the '0x' prefix removed, if present.
+ */
+export const removeHexPrefix = (str: string) => {
+  if (str.startsWith('0x')) {
+    return str.slice(2);
+  }
+
+  return str;
 };
 
 /**
@@ -858,4 +876,42 @@ export async function executeWithRetry<T>(
     },
     requestId,
   };
+}
+
+/**
+ * Attempts to normalize a string by unescaping it until it can be parsed as a JSON object,
+ * then stringifies it exactly once. If the input is a regular string that does not represent
+ * a JSON object or array, the function will return it as is without modification.
+ * This function is designed to handle cases where strings might be excessively escaped due
+ * to multiple layers of encoding, ensuring that JSON data is stored in a consistent and
+ * predictable format, and regular strings are left unchanged.
+ *
+ * @param input The potentially excessively escaped string.
+ * @return A string that is either the JSON.stringify version of the original JSON object
+ *         or the original string if it does not represent a JSON object or array.
+ */
+export function normalizeAndStringify(input: string): string {
+  try {
+    // Directly return the string if it's not in a JSON format
+    if (!input.startsWith('{') && !input.startsWith('[')) {
+      return input;
+    }
+
+    // Attempt to parse the input as JSON
+    const parsed = JSON.parse(input);
+
+    // If parsing succeeds, return the stringified version of the parsed JSON
+    return JSON.stringify(parsed);
+  } catch (error) {
+    // If parsing fails, it might be due to extra escaping
+    const unescaped = input.replace(/\\(.)/g, '$1');
+
+    // If unescaping doesn't change the string, return it as is
+    if (input === unescaped) {
+      return input;
+    }
+
+    // Otherwise, recursively call the function with the unescaped string
+    return normalizeAndStringify(unescaped);
+  }
 }

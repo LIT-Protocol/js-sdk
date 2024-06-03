@@ -1,4 +1,4 @@
-import 'cross-fetch/polyfill';
+import 'cross-fetch/dist/node-polyfill.js';
 
 import * as _LitNodeClientNodeJs from './lib/lit-node-client-nodejs';
 // ==================== Environment ====================

@@ -19,12 +19,19 @@ import {
   LIT_ERROR_CODE,
   LIT_NETWORKS,
   LitNetwork,
-  SIGTYPE,
+  LIT_CURVE,
   StakingStates,
   version,
+  LIT_ENDPOINT,
+  CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
+import {
+  checkSevSnpAttestation,
+  computeHDPubKey,
+  loadModules,
+  unloadModules,
+} from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   executeWithRetry,
@@ -53,11 +60,13 @@ import type {
   NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
-  SessionSig,
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
+  BlockHashErrorResponse,
+  EthBlockhashInfo,
 } from '@lit-protocol/types';
+import { composeLitUrl } from './endpoint-version';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -87,6 +96,7 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'litNetwork'
     | 'minNodeCount'
     | 'retryTolerance'
+    | 'rpcUrl'
   >
 > &
   Partial<Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext'>>;
@@ -94,7 +104,7 @@ export type LitNodeClientConfigWithDefaults = Required<
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;
 // This interval is responsible for keeping latest block hash up to date
-const NETWORK_SYNC_INTERVAL = 30_000;
+const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
 export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
@@ -110,6 +120,7 @@ export class LitCore {
       maxRetryCount: 3,
       interval: 100,
     },
+    rpcUrl: null,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -129,7 +140,8 @@ export class LitCore {
     currentNumber: null,
     lastUpdateTime: null,
   };
-
+  private _blockHashUrl =
+    'http://block-indexer.litgateway.com/get_most_recent_valid_block';
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     // Initialize default config based on litNetwork
@@ -163,7 +175,7 @@ export class LitCore {
     }
 
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
-    this.setCustomBootstrapUrls();
+    this.#setCustomBootstrapUrls();
 
     // -- set global variables
     globalThis.litConfig = this.config;
@@ -217,7 +229,8 @@ export class LitCore {
   setNewConfig = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Cayenne
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork
@@ -250,25 +263,6 @@ export class LitCore {
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
-    } else if (this.config.litNetwork === LitNetwork.Cayenne) {
-      // Handle on staking contract is used to monitor epoch changes
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork
-      );
-
-      // If the network is cayenne it is a centralized testnet, so we use a static config
-      // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
-      this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
-      this.config.minNodeCount =
-        LIT_NETWORKS.cayenne.length == 2
-          ? 2
-          : (LIT_NETWORKS.cayenne.length * 2) / 3;
-
-      /**
-       * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined
-       * If this is the case we need to bootstrap the network state from the set of contracts given.
-       * So we call to the Staking contract with the address given by the caller to resolve the network state.
-       */
     } else if (
       this.config.litNetwork === LitNetwork.Custom &&
       this.config.bootstrapUrls.length < 1
@@ -310,6 +304,41 @@ export class LitCore {
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
+    } else if (
+      this.config.litNetwork === LitNetwork.Custom &&
+      this.config.bootstrapUrls.length >= 1 &&
+      this.config.rpcUrl
+    ) {
+      log('Using custom bootstrap urls:', this.config.bootstrapUrls);
+
+      // const provider = new ethers.providers.JsonRpcProvider(this.config.rpcUrl);
+
+      const minNodeCount = await LitContracts.getMinNodeCount(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+      this.config.minNodeCount = parseInt(minNodeCount, 10);
+
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+      this.config.bootstrapUrls = bootstrapUrls;
+
+      this._stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+    } else {
+      return throwError({
+        message:
+          'Unsuported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
+      });
     }
   };
 
@@ -347,7 +376,7 @@ export class LitCore {
   private async _handleStakingContractStateChange(state: StakingStates) {
     log(`New state detected: "${state}"`);
 
-    if (state === StakingStates.NextValidatorSetLocked) {
+    if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
       this._scheduleEpochNumberUpdate();
 
@@ -410,9 +439,9 @@ export class LitCore {
    * that the client's configuration is always in sync with the current state of the
    * staking contract.
    *
-   * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
+   * @returns { void }
    */
-  private _listenForNewEpoch() {
+  #listenForNewEpoch(): void {
     // Check if we've already set up the listener to avoid duplicates
     if (this._stakingContractListener) {
       // Already listening, do nothing
@@ -435,20 +464,25 @@ export class LitCore {
   }
 
   /**
-   *  Stops internal listeners/polling that refresh network state and watch for epoch changes
+   *  Stops internal listeners/polling that refresh network state and watch for epoch changes.
+   *  Removes global objects created internally
    */
   async disconnect() {
+    unloadModules();
+
     this._stopListeningForNewEpoch();
     this._stopNetworkPolling();
+    if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
-  _stopNetworkPolling() {
+  protected _stopNetworkPolling() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
       this._networkSyncInterval = null;
     }
   }
-  _stopListeningForNewEpoch() {
+
+  protected _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
       this._stakingContractListener = null;
@@ -462,7 +496,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  setCustomBootstrapUrls = (): void => {
+  #setCustomBootstrapUrls = (): void => {
     // -- validate
     if (this.config.litNetwork === 'custom') return;
 
@@ -488,8 +522,15 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   getLatestBlockhash = async (): Promise<string> => {
-    await this.connect();
-
+    console.log(
+      'querying latest blockhash curent value is ',
+      this.latestBlockhash
+    );
+    await this._syncBlockhash();
+    console.log(
+      `querying latest blockhash current value is `,
+      this.latestBlockhash
+    );
     if (!this.latestBlockhash) {
       throw new Error(
         `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
@@ -507,6 +548,11 @@ export class LitCore {
    *
    */
   async connect(): Promise<void> {
+    // If we have never connected on this client instance first load WASM modules.
+    if (!this.ready) {
+      await loadModules();
+    }
+
     // Ensure that multiple closely timed calls to `connect()` don't result in concurrent connect() operations being run
     if (this._connectingPromise) {
       return this._connectingPromise;
@@ -539,8 +585,8 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this._scheduleNetworkSync();
-    this._listenForNewEpoch();
+    this.#scheduleNetworkSync();
+    this.#listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
     // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
@@ -571,7 +617,7 @@ export class LitCore {
   }): Promise<JsonHandshakeResponse> {
     const challenge = this.getRandomHexString(64);
 
-    const handshakeResult = await this.handshakeWithNode(
+    const handshakeResult = await this.#handshakeWithNode(
       { url, challenge },
       requestId
     );
@@ -661,7 +707,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.getRequestId();
+    const requestId: string = this.#getRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -773,6 +819,35 @@ export class LitCore {
     };
   }
 
+  /**
+   * Fetches the latest block hash and log any errors that are returned
+   * @returns void
+   */
+  private async _syncBlockhash() {
+    log(
+      'Syncing state for new blockhash ',
+      'current blockhash: ',
+      this.latestBlockhash
+    );
+
+    return fetch(this._blockHashUrl)
+      .then(async (resp: Response) => {
+        const blockHashBody: EthBlockhashInfo = await resp.json();
+        this.latestBlockhash = blockHashBody.blockhash;
+        this.lastBlockHashRetrieved = Date.now();
+        log('Done syncing state new blockhash: ', this.latestBlockhash);
+      })
+      .catch((err: BlockHashErrorResponse) => {
+        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+        logError(
+          'Error while attempting fetch new latestBlockhash:',
+          err.messages,
+          'reason: ',
+          err.reason
+        );
+      });
+  }
+
   /** Currently, we perform a full sync every 30s, including handshaking with every node
    * However, we also have a state change listener that watches for staking contract state change events, which
    * _should_ be the only time that we need to perform handshakes with every node.
@@ -783,7 +858,7 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  private _scheduleNetworkSync() {
+  #scheduleNetworkSync() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
     }
@@ -791,32 +866,11 @@ export class LitCore {
     this._networkSyncInterval = setInterval(async () => {
       if (
         !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= NETWORK_SYNC_INTERVAL
+        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
       ) {
-        log(
-          'Syncing state for new network context current config: ',
-          this.config,
-          'current blockhash: ',
-          this.lastBlockHashRetrieved
-        );
-        try {
-          await this.connect();
-          log(
-            'Done syncing state new config: ',
-            this.config,
-            'new blockhash: ',
-            this.lastBlockHashRetrieved
-          );
-        } catch (err: unknown) {
-          // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
-          const { message = '' } = err as Error | NodeClientErrorV1;
-          logError(
-            'Error while attempting to refresh nodes to fetch new latestBlockhash:',
-            message
-          );
-        }
+        await this._syncBlockhash();
       }
-    }, NETWORK_SYNC_INTERVAL);
+    }, BLOCKHASH_SYNC_INTERVAL);
   }
 
   /**
@@ -826,7 +880,7 @@ export class LitCore {
    * @returns { string }
    *
    */
-  getRequestId() {
+  #getRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
@@ -837,7 +891,7 @@ export class LitCore {
    * @returns { string }
    */
 
-  getRandomHexString(size: number) {
+  getRandomHexString(size: number): string {
     return [...Array(size)]
       .map(() => Math.floor(Math.random() * 16).toString(16))
       .join('');
@@ -851,7 +905,7 @@ export class LitCore {
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithNode = async (
+  #handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
@@ -861,7 +915,10 @@ export class LitCore {
         const { url } = params;
 
         // -- create url with path
-        const urlWithPath = `${url}/web/handshake`;
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.HANDSHAKE,
+        });
 
         log(`handshakeWithNode ${urlWithPath}`);
 
@@ -870,7 +927,7 @@ export class LitCore {
           challenge: params.challenge,
         };
 
-        return await this.sendCommandToNode({
+        return await this._sendCommandToNode({
           url: urlWithPath,
           data,
           requestId,
@@ -928,7 +985,7 @@ export class LitCore {
    * @returns { Promise<any> }
    *
    */
-  sendCommandToNode = async ({
+  protected _sendCommandToNode = async ({
     url,
     data,
     requestId,
@@ -966,7 +1023,7 @@ export class LitCore {
    * @returns { Array<Promise<any>> }
    *
    */
-  getNodePromises = (
+  protected _getNodePromises = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callback: (url: string) => Promise<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -983,48 +1040,40 @@ export class LitCore {
   };
 
   /**
+   * Retrieves the session signature for a given URL from the sessionSigs map.
+   * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.
    *
-   * Get either auth sig or session auth sig
-   *
+   * @param sessionSigs - The session signatures map.
+   * @param url - The URL for which to retrieve the session signature.
+   * @returns The session signature for the given URL.
+   * @throws An error if sessionSigs is not provided or if the session signature for the URL is not found.
    */
-  getSessionOrAuthSig = ({
-    authSig,
+  protected _getSessionSigByUrl = ({
     sessionSigs,
     url,
-    mustHave = true,
   }: {
-    authSig?: AuthSig;
-    sessionSigs?: SessionSigsMap;
+    sessionSigs: SessionSigsMap;
     url: string;
-    mustHave?: boolean;
-  }): AuthSig | SessionSig => {
-    if (!authSig && !sessionSigs) {
-      if (mustHave) {
-        throwError({
-          message: `You must pass either authSig, or sessionSigs`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      } else {
-        log(`authSig or sessionSigs not found. This may be using authMethod`);
-      }
+  }): AuthSig => {
+    if (!sessionSigs) {
+      return throwError({
+        message: `You must pass in sessionSigs`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
     }
 
-    if (sessionSigs) {
-      const sigToPassToNode = sessionSigs[url];
+    const sigToPassToNode = sessionSigs[url];
 
-      if (!sigToPassToNode) {
-        throwError({
-          message: `You passed sessionSigs but we could not find session sig for node ${url}`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      }
-
-      return sigToPassToNode;
+    if (!sessionSigs[url]) {
+      throwError({
+        message: `You passed sessionSigs but we could not find session sig for node ${url}`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
     }
 
-    return authSig!;
+    return sigToPassToNode;
   };
 
   validateAccessControlConditionsSchema = async (
@@ -1105,7 +1154,7 @@ export class LitCore {
    * @param { number } minNodeCount number of nodes we need valid results from in order to resolve
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    */
-  handleNodePromises = async <T>(
+  protected _handleNodePromises = async <T>(
     nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number
@@ -1188,7 +1237,10 @@ export class LitCore {
    * @returns { void }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
+  protected _throwNodeError = (
+    res: RejectedNodePromises,
+    requestId: string
+  ): void => {
     if (res.error) {
       if (
         ((res.error.errorCode &&
@@ -1297,12 +1349,12 @@ export class LitCore {
    * Calculates an HD public key from a given keyId
    * The curve type or signature type is assumed to be k256 unless provided
    * @param keyId
-   * @param {SIGTYPE} sigType
+   * @param {LIT_CURVE} sigType
    * @returns {string} public key
    */
   computeHDPubKey = (
     keyId: string,
-    sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
+    sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
   ): string => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');

@@ -17,68 +17,90 @@ import {
 } from '@lit-protocol/uint8arrays';
 
 import { nacl } from '@lit-protocol/nacl';
-import { SIGTYPE } from '@lit-protocol/constants';
+import { LIT_CURVE } from '@lit-protocol/constants';
 import { CombinedECDSASignature } from '@lit-protocol/types';
 
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
 
-// if 'wasmExports' is not available, we need to initialize the BLS SDK
-if (!globalThis.wasmExports) {
-  blsSdk.initWasmBlsSdk().then((exports) => {
-    globalThis.wasmExports = exports;
-
-    if (!globalThis.jestTesting) {
-      log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
-        } functions available. Run 'wasmExports' in the console to see them.`
-      );
-    }
-  });
-}
-
-if (!globalThis.wasmECDSA) {
-  let init = ecdsaSdk.initWasmEcdsaSdk;
-  let env;
-
-  if (isBrowser()) {
-    env = 'Browser';
-  } else {
-    env = 'NodeJS';
-  }
-
-  init().then((sdk: any) => {
-    globalThis.wasmECDSA = sdk;
-
-    if (!globalThis.jestTesting) {
-      log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
-        } functions available. Run 'wasmECDSA' in the console to see them.`
-      );
-    }
-  });
-}
-
-if (!globalThis.wasmSevSnpUtils) {
-  sevSnpUtilsSdk.initWasmSevSnpUtilsSdk().then((exports) => {
-    globalThis.wasmSevSnpUtils = exports;
-
-    if (!globalThis.jestTesting) {
-      log(
-        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-          Object.keys(exports).length
-        } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
-      );
-    }
-  });
-}
-
-/** ---------- Exports ---------- */
-
 export interface BlsSignatureShare {
   ProofOfPossession: string;
 }
+
+/**
+  Loads all wasm modules into the global scope
+
+  - ECDSA utilities - wasmECDSA
+  - BLS utilities - wasmExports
+  - SEV-SNP utilities - wasmSevSnpUtilities
+
+  @returns {Promise<void>}
+*/
+export const loadModules = (): Promise<void> => {
+  // if 'wasmExports' is not available, we need to initialize the BLS SDK
+  if (!globalThis.wasmExports) {
+    blsSdk.initWasmBlsSdk().then((exports) => {
+      globalThis.wasmExports = exports;
+
+      if (!globalThis.jestTesting) {
+        log(
+          `✅ [BLS SDK] wasmExports loaded. ${
+            Object.keys(exports).length
+          } functions available. Run 'wasmExports' in the console to see them.`
+        );
+      }
+    });
+  }
+
+  if (!globalThis.wasmECDSA) {
+    let init = ecdsaSdk.initWasmEcdsaSdk;
+    let env;
+
+    if (isBrowser()) {
+      env = 'Browser';
+    } else {
+      env = 'NodeJS';
+    }
+
+    init().then((sdk: any) => {
+      globalThis.wasmECDSA = sdk;
+
+      if (!globalThis.jestTesting) {
+        log(
+          `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
+            Object.keys(wasmECDSA).length
+          } functions available. Run 'wasmECDSA' in the console to see them.`
+        );
+      }
+    });
+  }
+
+  if (!globalThis.wasmSevSnpUtils) {
+    sevSnpUtilsSdk.initWasmSevSnpUtilsSdk().then((exports) => {
+      globalThis.wasmSevSnpUtils = exports;
+
+      if (!globalThis.jestTesting) {
+        log(
+          `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
+            Object.keys(exports).length
+          } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
+        );
+      }
+    });
+  }
+};
+
+/*
+  Removes wasm modules from global scope
+  if found to be defined. Can be called multiple times safely.
+*/
+export const unloadModules = () => {
+  log('running cleanup for global modules');
+  if (globalThis.wasmExports) delete globalThis.wasmExports;
+
+  if (globalThis.wasmECDSA) delete globalThis.wasmECDSA;
+
+  if (globalThis.wasmSevSnpUtilsSdk) delete globalThis.initWasmSevSnpUtilsSdk;
+};
 
 /**
  * Encrypt data with a BLS public key.
@@ -242,8 +264,8 @@ export const combineEcdsaShares = (
   try {
     let res: string = '';
     switch (type) {
-      case SIGTYPE.EcdsaCaitSith:
-      case SIGTYPE.EcdsaK256:
+      case LIT_CURVE.EcdsaCaitSith:
+      case LIT_CURVE.EcdsaK256:
         res = ecdsaSdk.combine_signature(validShares, 2);
 
         try {
@@ -272,7 +294,7 @@ export const combineEcdsaShares = (
           }
         }
         break;
-      case SIGTYPE.ECDSCAITSITHP256:
+      case LIT_CURVE.ECDSCAITSITHP256:
         res = ecdsaSdk.combine_signature(validShares, 3);
         log('response from combine_signature', res);
         sig = JSON.parse(res);
@@ -295,13 +317,13 @@ export const combineEcdsaShares = (
 export const computeHDPubKey = (
   pubkeys: string[],
   keyId: string,
-  sigType: SIGTYPE
+  sigType: LIT_CURVE
 ): string => {
   // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
   try {
     switch (sigType) {
-      case SIGTYPE.EcdsaCaitSith:
-      case SIGTYPE.EcdsaK256:
+      case LIT_CURVE.EcdsaCaitSith:
+      case LIT_CURVE.EcdsaK256:
         // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
         pubkeys = pubkeys.map((value: string) => {
           return value.replace('0x', '');

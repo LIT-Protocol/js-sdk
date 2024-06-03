@@ -1,15 +1,22 @@
 /* eslint-disable import/order */
-import { BigNumber, BigNumberish, BytesLike, ethers } from 'ethers';
+import {
+  BigNumber,
+  BigNumberish,
+  BytesLike,
+  ContractReceipt,
+  ethers,
+} from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
-  AuthMethod,
-  LIT_NETWORKS_KEYS,
+  CreateCustomAuthMethodRequest,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
   MintCapacityCreditsRes,
+  MintWithAuthParams,
+  MintWithAuthResponse,
 } from '@lit-protocol/types';
 
 // ----- autogen:import-data:start  -----
@@ -45,7 +52,7 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
-import { getAuthIdByAuthMethod } from './auth-utils';
+import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import { Logger, LogManager } from '@lit-protocol/logger';
 import {
   calculateUTCMidnightExpiration,
@@ -57,8 +64,11 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
+import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 
-const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
+const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
 // This function asynchronously executes a provided callback function for each item in the given array.
@@ -239,8 +249,9 @@ export class LitContracts {
     // -------------------------------------------------
     let wallet;
     let SETUP_DONE = false;
-
-    if (isBrowser() && !this.signer) {
+    if (this.provider) {
+      this.log('Using provided provider');
+    } else if (isBrowser() && !this.signer) {
       this.log("----- We're in the browser! -----");
 
       const web3Provider = window.ethereum;
@@ -285,7 +296,7 @@ export class LitContracts {
     // ----------------------------------------------
     //          (Node) Setting up Provider
     // ----------------------------------------------
-    if (isNode()) {
+    else if (isNode()) {
       this.log("----- We're in node! -----");
       this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
     }
@@ -562,10 +573,11 @@ export class LitContracts {
 
   public static async getStakingContract(
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    const rpcUrl = DEFAULT_RPC;
+    rpcUrl = rpcUrl ?? DEFAULT_READ_RPC;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -643,7 +655,7 @@ export class LitContracts {
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
-        case 'Allowlist':
+        case 'Allowlist' || 'AllowList':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
             environment
@@ -842,9 +854,14 @@ export class LitContracts {
 
   public static getMinNodeCount = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ) => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl
+    );
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
 
@@ -856,9 +873,14 @@ export class LitContracts {
 
   public static getValidators = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl
+    );
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
@@ -896,7 +918,11 @@ export class LitContracts {
 
     const networks = activeValidatorStructs.map((item: any) => {
       let proto = 'https://';
-      if (item.port !== 443) {
+      /**
+       * ports in range of 8470 - 8479 are configured for https on custom networks (eg. cayenne)
+       * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
+       */
+      if (item.port !== 443 && (item.port > 8480 || item.port < 8469)) {
         proto = 'http://';
       }
       return `${proto}${intToIP(item.ip)}:${item.port}`;
@@ -965,15 +991,22 @@ export class LitContracts {
     return data;
   }
 
+  /**
+   * Mints a new token with authentication.
+   *
+   * @param authMethod - The authentication method.
+   * @param scopes - The permission scopes.
+   * @param pubkey - The public key.
+   * @param authMethodId - (optional) The authentication ID.
+   * @returns An object containing the PKP information and the transaction receipt.
+   * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
+   */
   mintWithAuth = async ({
     authMethod,
     scopes,
     pubkey,
-  }: {
-    authMethod: AuthMethod;
-    scopes: string[] | number[] | BigNumberish[];
-    pubkey?: string; // only applies to webauthn auth method
-  }) => {
+    authMethodId,
+  }: MintWithAuthParams): Promise<MintWithAuthResponse<ContractReceipt>> => {
     // -- validate
     if (!this.connected) {
       throw new Error(
@@ -989,7 +1022,11 @@ export class LitContracts {
       throw new Error('authMethodType is required');
     }
 
-    if (authMethod && !authMethod?.accessToken) {
+    if (
+      authMethod &&
+      !authMethod?.accessToken &&
+      authMethod?.accessToken !== 'custom-auth'
+    ) {
       throw new Error('accessToken is required');
     }
 
@@ -1017,7 +1054,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       return scope;
     });
 
-    const authId = await getAuthIdByAuthMethod(authMethod);
+    const _authMethodId =
+      authMethodId ?? (await getAuthIdByAuthMethod(authMethod));
 
     // -- go
     const mintCost = await this.pkpNftContract.read.mintCost();
@@ -1026,7 +1064,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
       2, // key type
       [authMethod.authMethodType],
-      [authId],
+      [_authMethodId],
       [_pubkey],
       [[...scopes]],
       true,
@@ -1040,16 +1078,34 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     const events = 'events' in receipt ? receipt.events : receipt.logs;
 
-    if (!events) {
+    if (!events || events.length <= 0) {
       throw new Error('No events found in receipt');
     }
 
     let tokenId;
 
+    if (!events[0].topics || events[0].topics.length < 1) {
+      throw new Error(
+        `No topics found in events, cannot derive pkp information. Transaction hash: ${receipt.transactionHash} If you are using your own contracts please use ethers directly`
+      );
+    }
+
     tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);
-
-    let publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+    let tries = 0;
+    let maxAttempts = 10;
+    let publicKey = '';
+    while (tries < maxAttempts) {
+      publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+      console.log('pkp pub key: ', publicKey);
+      if (publicKey !== '0x') {
+        break;
+      }
+      tries++;
+      await new Promise((resolve, _reject) => {
+        setTimeout(resolve, 10_000);
+      });
+    }
 
     if (publicKey.startsWith('0x')) {
       publicKey = publicKey.slice(2);
@@ -1069,8 +1125,136 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     };
   };
 
-  // Mints a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period.
-  // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
+  /**
+   * Mints a new token with customer authentication.
+   *
+   * @param authMethod - The authentication method.
+   * @param scopes - The permission scopes.
+   * @param authMethodId - The authentication ID.
+   * @returns An object containing the PKP information and the transaction receipt.
+   * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
+   * @example
+   * 
+  const customAuthMethodOwnedPkp =
+    await alice.contractsClient.mintWithCustomAuth({
+      authMethodId: 'custom-app-user-id',
+      authMethod: customAuthMethod,
+      scopes: [AuthMethodScope.SignAnything],
+    });
+  */
+  mintWithCustomAuth = async (
+    params: CreateCustomAuthMethodRequest
+  ): Promise<MintWithAuthResponse<ContractReceipt>> => {
+    const authMethodId =
+      typeof params.authMethodId === 'string'
+        ? stringToArrayify(params.authMethodId)
+        : params.authMethodId;
+
+    return this.mintWithAuth({
+      ...params,
+      authMethodId,
+      authMethod: {
+        authMethodType: params.authMethodType,
+        accessToken: 'custom-auth',
+      },
+    });
+  };
+
+  /**
+   * Adds a permitted authentication method for a given PKP token.
+   *
+   * @param {Object} params - The parameters for adding the permitted authentication method.
+   * @param {string} params.pkpTokenId - The ID of the PKP token.
+   * @param {AuthMethodType | number} params.authMethodType - The type of the authentication method.
+   * @param {string | Uint8Array} params.authMethodId - The ID of the authentication method.
+   * @param {AuthMethodScope[]} params.authMethodScopes - The scopes of the authentication method.
+   * @param {string} [params.webAuthnPubkey] - The public key for WebAuthn.
+   * @returns {Promise<any>} - A promise that resolves with the result of adding the permitted authentication method.
+   * @throws {Error} - If an error occurs while adding the permitted authentication method.
+   */
+  addPermittedAuthMethod = async ({
+    pkpTokenId,
+    authMethodType,
+    authMethodId,
+    authMethodScopes,
+    webAuthnPubkey,
+  }: {
+    pkpTokenId: string;
+    authMethodType: AuthMethodType | number;
+    authMethodId: string | Uint8Array;
+    authMethodScopes: AuthMethodScope[];
+    webAuthnPubkey?: string;
+  }): Promise<ethers.ContractReceipt> => {
+    const _authMethodId =
+      typeof authMethodId === 'string'
+        ? stringToArrayify(authMethodId)
+        : authMethodId;
+
+    const _webAuthnPubkey = webAuthnPubkey ?? '0x';
+
+    try {
+      const res =
+        await this.pkpPermissionsContract.write.addPermittedAuthMethod(
+          pkpTokenId,
+          {
+            authMethodType: authMethodType,
+            id: _authMethodId,
+            userPubkey: _webAuthnPubkey,
+          },
+          authMethodScopes
+        );
+
+      const receipt = await res.wait();
+
+      return receipt;
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  };
+
+  /**
+   * Adds a permitted action to the PKP permissions contract.
+   *
+   * @param ipfsId - The IPFS ID of the action.
+   * @param pkpTokenId - The PKP token ID.
+   * @param authMethodScopes - Optional array of authentication method scopes.
+   * @returns A promise that resolves to the result of the write operation.
+   * @throws If an error occurs during the write operation.
+   */
+  addPermittedAction = async ({
+    ipfsId,
+    pkpTokenId,
+    authMethodScopes,
+  }: {
+    ipfsId: string;
+    pkpTokenId: string;
+    authMethodScopes: AuthMethodScope[];
+  }) => {
+    const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
+    const scopes = authMethodScopes ?? [];
+
+    try {
+      const res = await this.pkpPermissionsContract.write.addPermittedAction(
+        pkpTokenId,
+        ipfsIdBytes,
+        scopes
+      );
+
+      const receipt = await res.wait();
+
+      return receipt;
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  };
+
+  /**
+   * Mint a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period. The expiration date is calculated to be at midnight UTC, a specific number of days from now.
+   *
+   * @param {MintCapacityCreditsContext} context - The minting context.
+   * @returns {Promise<MintCapacityCreditsRes>} - A promise that resolves to the minted capacity credits NFT response.
+   * @throws {Error} - If the input parameters are invalid or an error occurs during the minting process.
+   */
   mintCapacityCreditsNFT = async ({
     requestsPerDay,
     requestsPerSecond,
@@ -1452,11 +1636,24 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         tokenIdFromEvent = events[0].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
+        let tries = 0;
+        let maxAttempts = 10;
+        let publicKey = '';
+        while (tries < maxAttempts) {
+          publicKey = await this.pkpNftContract.read.getPubkey(
+            tokenIdFromEvent
+          );
+          console.log('pkp pub key: ', publicKey);
+          if (publicKey !== '0x') {
+            break;
+          }
+          tries++;
+          await new Promise((resolve, _reject) => {
+            setTimeout(resolve, 10_000);
+          });
+        }
 
-        let publicKey = await this.pkpNftContract.read.getPubkey(
-          tokenIdFromEvent
-        );
-
+        console.warn('public key from token id', publicKey);
         if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
         }

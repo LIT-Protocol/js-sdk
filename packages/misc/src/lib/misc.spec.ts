@@ -4,7 +4,7 @@ global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
-import { LitErrorKind, LIT_ERROR } from '@lit-protocol/constants';
+import { LitErrorKind, LIT_ERROR, CAYENNE_URL } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
 
 describe('utils', () => {
@@ -238,4 +238,53 @@ describe('utils', () => {
     expect(cb.count).toBe(1);
     expect(res.requestId).toBeDefined();
   });
+});
+
+describe('double escaped JSON string', () => {
+  test('A doubly escaped JSON string', () => {
+    const doublyEscapedJson = '{\\"key\\": \\"value\\"}';
+    expect(utilsModule.normalizeAndStringify(doublyEscapedJson)).toBe(
+      '{"key":"value"}'
+    );
+  });
+
+  test('A triply escaped JSON string', () => {
+    const triplyEscapedJson = '{\\\\\\"key\\\\\\": \\\\\\"value\\\\\\"}';
+    expect(utilsModule.normalizeAndStringify(triplyEscapedJson)).toBe(
+      '{"key":"value"}'
+    );
+  });
+
+  test('A correctly escaped JSON string (for comparison)', () => {
+    const correctlyEscapedJson = '{"key":"value"}';
+    expect(utilsModule.normalizeAndStringify(correctlyEscapedJson)).toBe(
+      '{"key":"value"}'
+    );
+  });
+
+  test('regular siwe message', () => {
+    const regularString =
+      'litprotocol.com wants you to sign in with your Ethereum account:\\n0x3edB...';
+
+    expect(utilsModule.normalizeAndStringify(regularString)).toBe(
+      regularString
+    );
+  });
+});
+it('should remove hex prefix from a string', () => {
+  const input = '0xabcdef';
+  const expectedOutput = 'abcdef';
+
+  const result = utilsModule.removeHexPrefix(input);
+
+  expect(result).toBe(expectedOutput);
+});
+
+it('should not remove hex prefix if it is not present', () => {
+  const input = 'abcdef';
+  const expectedOutput = 'abcdef';
+
+  const result = utilsModule.removeHexPrefix(input);
+
+  expect(result).toBe(expectedOutput);
 });

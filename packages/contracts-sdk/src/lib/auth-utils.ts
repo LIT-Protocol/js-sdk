@@ -1,32 +1,33 @@
-import { SessionSig, StytchToken } from '@lit-protocol/types';
+import { StytchToken } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 /**
  * Code here is ported from `packages/lit-auth-client` due to circular dep errors
  */
 export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
-  let authId;
+  let authMethodId;
+
   switch (authMethod.authMethodType) {
     case 1:
-      authId = getEthAuthMethodId(authMethod);
+      authMethodId = getEthAuthMethodId(authMethod);
       break;
     case 4:
-      authId = await getDiscordAuthId(authMethod);
+      authMethodId = await getDiscordAuthId(authMethod);
       break;
     case 3:
-      authId = await getWebauthnAuthId(authMethod);
+      authMethodId = await getWebauthnAuthId(authMethod);
       break;
     case 6:
-      authId = await getGoogleJwtAuthId(authMethod);
+      authMethodId = await getGoogleJwtAuthId(authMethod);
       break;
     case 9:
-      authId = await getStytchAuthId(authMethod);
+      authMethodId = await getStytchAuthId(authMethod);
       break;
     case 10:
     case 11:
     case 12:
     case 13:
-      authId = await getStytchFactorAuthMethodId(authMethod);
+      authMethodId = await getStytchFactorAuthMethodId(authMethod);
       break;
     default:
       throw new Error(
@@ -34,7 +35,7 @@ export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
       );
   }
 
-  return authId;
+  return authMethodId;
 }
 
 /**
@@ -338,3 +339,18 @@ function _resolveAuthFactor(factor: any): {
 
   throw new Error(`Error could not find auth with factor ${factor}`);
 }
+
+/**
+ * Converts a string into a byte array (arrayified value)
+ * @param str - The input string to be converted.
+ * @returns A Uint8Array representing the arrayified value of the string.
+ */
+export const stringToArrayify = (str: string): Uint8Array => {
+  try {
+    // Convert the string to a UTF-8 encoded byte array
+    const encoder = new TextEncoder();
+    return encoder.encode(str);
+  } catch (e) {
+    throw new Error(`Error converting string to arrayify: ${e}`);
+  }
+};

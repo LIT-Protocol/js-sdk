@@ -173,4 +173,5 @@ export interface ILitResource {
 export type LitResourceAbilityRequest = {
   resource: ILitResource;
   ability: LitAbility;
+  data?: any;
 };

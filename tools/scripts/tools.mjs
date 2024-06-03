@@ -2,8 +2,6 @@ import { exit } from 'process';
 import {
   asyncForEach,
   childRunCommand,
-  customSort,
-  findArg,
   findImportsFromDir,
   findStrFromDir,
   getArgs,
@@ -21,7 +19,6 @@ import {
   spawnListener,
   writeFile,
   writeJsonFile,
-  yellowLog,
   checkEmptyDirectories,
 } from './utils.mjs';
 import fs from 'fs';
@@ -258,16 +255,11 @@ async function testFunc() {
   }
 
   if (TEST_TYPE === '--unit') {
-
     // Run the nx run-many command with the --projects flag set to the project names
-    const nx = spawn(
-      'nx',
-      ['run-many', '--target=test'],
-      {
-        stdio: 'inherit', // This maintains the log output color
-        shell: true,
-      }
-    );
+    const nx = spawn('nx', ['run-many', '--target=test'], {
+      stdio: 'inherit', // This maintains the log output color
+      shell: true,
+    });
 
     // Handle errors
     nx.on('error', (error) => {
@@ -1086,7 +1078,7 @@ async function setupLocalDevFunc() {
     const distPackageJson = await readJsonFile(distPackageJsonPath);
 
     packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-    packageJson.typings = "./dist/src/index.d.ts";
+    packageJson.typings = './dist/src/index.d.ts';
 
     greenLog(`Updating ${packageJsonPath}...`);
     greenLog(`packageJson.main: ${packageJson.main}`);
@@ -1329,8 +1321,7 @@ async function validateDependencyVersions() {
       `
     ❗️ Before publishing, make sure you have tested the build!
       - yarn test:unit     | run unit tests
-      - yarn test:e2e      | run e2e tests on browser
-      - yarn test:e2e:node | run e2e tests on nodejs
+      - yarn test:local    | run e2e tests on nodejs 
       `,
       true
     );
@@ -1338,8 +1329,7 @@ async function validateDependencyVersions() {
     console.log(`
     Note: for e2e nodejs test, you can use the following options:
     -------------------------------------------------------------
-    --filter flag to filter tests (eg. yarn test:e2e:node --filter=1-sig)
-    --group flag to test a specific group (yarn test:e2e:node --group=lit-actions)
+    --filter flag to filter tests (eg. yarn test:local --filter=Encryption)
     `);
   }
   process.exit(0);
