@@ -1925,3 +1925,15 @@ export interface MintWithAuthResponse<T> {
   };
   tx: T;
 }
+
+export interface BlockHashErrorResponse {
+  messages: string[];
+  reason: String;
+  codde: Number;
+}
+
+export interface EthBlockhashInfo {
+  blockhash: string;
+  timestamp: string;
+  blockNumber: number;
+}
