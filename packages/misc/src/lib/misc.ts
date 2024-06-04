@@ -3,6 +3,7 @@ import {
   ILitError,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
+  LIT_ENDPOINT,
   LIT_ERROR,
   LitNetwork,
   RELAY_URL_CAYENNE,
@@ -33,6 +34,7 @@ import { Contract } from '@ethersproject/contracts';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
+import { defaultRetryDelayHandler, fetchWithRetries } from './fetchWithRetry';
 
 const logBuffer: Array<Array<any>> = [];
 const ajv = new Ajv();
@@ -771,8 +773,26 @@ export function sendRequest(
   req: RequestInit,
   requestId: string
 ): Promise<Response> {
-  return fetch(url, req)
-    .then(async (response) => {
+  return fetchWithRetries(url, {
+    ...req,
+    retryDelay: function (
+      attempt: number,
+      error: Error | null,
+      response: Response | null
+    ) {
+      const delay = defaultRetryDelayHandler(attempt, error, response);
+
+      if (url.includes(LIT_ENDPOINT.HANDSHAKE.path)) {
+        logErrorWithRequestId(
+          requestId,
+          `retrying request to url ${url} in ${delay}ms - retry #${attempt + 1}`
+        );
+      }
+
+      return delay;
+    },
+  })
+    .then(async (response: Response) => {
       const isJson = response.headers
         .get('content-type')
         ?.includes('application/json');
@@ -781,8 +801,7 @@ export function sendRequest(
 
       if (!response.ok) {
         // get error message from body or default to response status
-        const error = data || response.status;
-        return Promise.reject(error);
+        throw data || response.status;
       }
 
       return data;
@@ -796,86 +815,8 @@ export function sendRequest(
             : ''
         }`
       );
-      return Promise.reject(error);
+      throw error;
     });
-}
-
-/**
- * Allows for invoking a callback and re exucting while re generating a new request identifier
- * @param execCallback
- * @param errorCallback
- * @param opts
- * @returns {T}
- */
-export async function executeWithRetry<T>(
-  execCallback: (requestId: string) => Promise<T>,
-  errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
-  opts?: RetryTolerance
-): Promise<
-  (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
-> {
-  let timer: any | null;
-  let counter = 0;
-  let isTimeout = false;
-  if (!opts) {
-    opts = {};
-  }
-  opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
-  opts.interval = opts.interval ?? 100;
-  opts.maxRetryCount = opts.maxRetryCount ?? 3;
-  let requestId: string = '';
-
-  while (!isTimeout) {
-    requestId = Math.random().toString(16).slice(2);
-    try {
-      timer = setTimeout(() => {
-        isTimeout = true;
-      }, opts.timeout);
-      const response: any = await execCallback(requestId);
-
-      clearTimeout(timer);
-      response.requestId = requestId;
-      // this will work for now as errors should all follow the
-      // RejectedNodePromise type definition which contains an `error` property
-      if ('error' in response) {
-        counter += 1;
-        errorCallback &&
-          errorCallback(
-            response,
-            requestId,
-            counter >= opts.maxRetryCount ? true : false
-          );
-      } else {
-        clearTimeout(timer);
-        return response;
-      }
-
-      if (counter >= opts.maxRetryCount) {
-        return response;
-      }
-    } catch (err: any) {
-      errorCallback &&
-        errorCallback(
-          `Error is ${err.message}-${err.details}`,
-          requestId,
-          counter >= opts.maxRetryCount ? true : false
-        );
-      counter += 1;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, opts?.interval));
-  }
-
-  // If we get here we broke out of the loop on event of a timeout being hit.
-  return {
-    success: false,
-    error: {
-      errorKind: 'Timeout',
-      status: 500,
-      details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
-    },
-    requestId,
-  };
 }
 
 /**
