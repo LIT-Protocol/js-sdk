@@ -172,7 +172,7 @@ export class LitCore {
     }
 
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
-    this.#setCustomBootstrapUrls();
+    this._setCustomBootstrapUrls();
 
     // -- set global variables
     globalThis.litConfig = this.config;
@@ -438,7 +438,7 @@ export class LitCore {
    *
    * @returns { void }
    */
-  #listenForNewEpoch(): void {
+  private _listenForNewEpoch(): void {
     // Check if we've already set up the listener to avoid duplicates
     if (this._stakingContractListener) {
       // Already listening, do nothing
@@ -493,7 +493,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  #setCustomBootstrapUrls = (): void => {
+  private _setCustomBootstrapUrls = (): void => {
     // -- validate
     if (this.config.litNetwork === 'custom') return;
 
@@ -575,8 +575,8 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this.#scheduleNetworkSync();
-    this.#listenForNewEpoch();
+    this._scheduleNetworkSync();
+    this._listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
     // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
@@ -607,7 +607,7 @@ export class LitCore {
   }): Promise<JsonHandshakeResponse> {
     const challenge = this.getRandomHexString(64);
 
-    const handshakeResult = await this.#handshakeWithNode(
+    const handshakeResult = await this._handshakeWithNode(
       { url, challenge },
       requestId
     );
@@ -697,7 +697,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.#getRequestId();
+    const requestId: string = this._getRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -819,7 +819,7 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  #scheduleNetworkSync() {
+  private _scheduleNetworkSync() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
     }
@@ -862,7 +862,7 @@ export class LitCore {
    * @returns { string }
    *
    */
-  #getRequestId(): string {
+  private _getRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
@@ -887,7 +887,7 @@ export class LitCore {
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  #handshakeWithNode = async (
+  private _handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {

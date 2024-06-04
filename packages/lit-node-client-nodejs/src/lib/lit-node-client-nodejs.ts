@@ -156,7 +156,7 @@ export class LitNodeClientNodeJs
    * @returns A promise that resolves to the authentication signature.
    * @throws An error if no default authentication callback is provided.
    */
-  #authCallbackAndUpdateStorageItem = async ({
+  private _authCallbackAndUpdateStorageItem = async ({
     authCallbackParams,
     authCallback,
   }: {
@@ -210,7 +210,7 @@ export class LitNodeClientNodeJs
    * 3. The authSig.signedMessage does not contain at least one session capability object
    *
    */
-  #checkNeedToResignSessionKey = async ({
+  private _checkNeedToResignSessionKey = async ({
     authSig,
     sessionKeyUri,
     resourceAbilityRequests,
@@ -277,7 +277,7 @@ export class LitNodeClientNodeJs
    * @param signatureShares - An array of signature shares.
    * @returns The decrypted data as a Uint8Array.
    */
-  #decryptWithSignatureShares = (
+  private _decryptWithSignatureShares = (
     networkPubKey: string,
     identityParam: Uint8Array,
     ciphertext: string,
@@ -299,7 +299,7 @@ export class LitNodeClientNodeJs
    * @returns A boolean indicating whether the response is a success node promise.
    * @template T - The type of the success node promise.
    */
-  #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
+  private _isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
     return res.success === true;
   };
   /**
@@ -308,7 +308,7 @@ export class LitNodeClientNodeJs
    * @param hashOfPrivateDataStr - The hash of the private data string.
    * @returns The generated identity parameter for encryption.
    */
-  #getIdentityParamForEncryption = (
+  private _getIdentityParamForEncryption = (
     hashOfConditionsStr: string,
     hashOfPrivateDataStr: string
   ): string => {
@@ -322,7 +322,7 @@ export class LitNodeClientNodeJs
    *
    * @returns { { iat: number, exp: number } } the jwt params
    */
-  #getJWTParams = (): {
+  private _getJWTParams = (): {
     iat: number;
     exp: number;
   } => {
@@ -337,7 +337,7 @@ export class LitNodeClientNodeJs
    * Get the signature from local storage, if not, generates one
    *
    */
-  #getWalletSig = async ({
+  private _getWalletSig = async ({
     authNeededCallback,
     chain,
     sessionCapabilityObject,
@@ -463,7 +463,7 @@ export class LitNodeClientNodeJs
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  #combineSharesAndGetJWT = (
+  private _combineSharesAndGetJWT = (
     signatureShares: NodeBlsSigningShare[],
     requestId: string = ''
   ): string => {
@@ -510,7 +510,7 @@ export class LitNodeClientNodeJs
    * @param publicKey is the public key of the session key
    * @returns { string } the session key uri
    */
-  #getSessionKeyUri = (publicKey: string): string => {
+  private _getSessionKeyUri = (publicKey: string): string => {
     return LIT_SESSION_KEY_URI + publicKey;
   };
   /**
@@ -521,7 +521,7 @@ export class LitNodeClientNodeJs
    * @param requestId - The ID of the request.
    * @returns A promise that resolves with the response from the server.
    */
-  #generatePromise = async (
+  private _generatePromise = async (
     url: string,
     params: any,
     requestId: string
@@ -936,7 +936,7 @@ export class LitNodeClientNodeJs
     );
 
     // ========== Assemble identity parameter ==========
-    const identityParam = this.#getIdentityParamForEncryption(
+    const identityParam = this._getIdentityParamForEncryption(
       hashOfConditionsStr,
       hashOfPrivateDataStr
     );
@@ -991,7 +991,7 @@ const resourceAbilityRequests = [
     // Try to get it from local storage, if not generates one~
     const sessionKey = params.sessionKey ?? this.getSessionKey();
 
-    const sessionKeyUri = this.#getSessionKeyUri(sessionKey.publicKey);
+    const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
@@ -1011,7 +1011,7 @@ const resourceAbilityRequests = [
     const nonce = this.latestBlockhash!;
 
     // -- (TRY) to get the wallet signature
-    let authSig = await this.#getWalletSig({
+    let authSig = await this._getWalletSig({
       authNeededCallback: params.authNeededCallback,
       chain: params.chain || 'ethereum',
       sessionCapabilityObject,
@@ -1032,7 +1032,7 @@ const resourceAbilityRequests = [
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
-    const needToResignSessionKey = await this.#checkNeedToResignSessionKey({
+    const needToResignSessionKey = await this._checkNeedToResignSessionKey({
       authSig,
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -1041,7 +1041,7 @@ const resourceAbilityRequests = [
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
       log('need to re-sign session key.  Signing...');
-      authSig = await this.#authCallbackAndUpdateStorageItem({
+      authSig = await this._authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
           chain: params.chain || 'ethereum',
@@ -1345,7 +1345,7 @@ const resourceAbilityRequests = [
           endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
         });
 
-        return this.#generatePromise(urlWithPath, reqBody, id);
+        return this._generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
@@ -1379,7 +1379,7 @@ const resourceAbilityRequests = [
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
-    if (!this.#isSuccessNodePromises(res)) {
+    if (!this._isSuccessNodePromises(res)) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
       return {} as SignSessionKeyResponse;
     }
@@ -1589,7 +1589,7 @@ const resourceAbilityRequests = [
           endpoint: LIT_ENDPOINT.EXECUTE_JS,
         });
 
-        return this.#generatePromise(urlWithPath, reqBody, requestId);
+        return this._generatePromise(urlWithPath, reqBody, requestId);
       });
 
       // -- resolve promises
@@ -1775,7 +1775,7 @@ const resourceAbilityRequests = [
           endpoint: LIT_ENDPOINT.PKP_SIGN,
         });
 
-        return this.#generatePromise(urlWithPath, reqBody, id);
+        return this._generatePromise(urlWithPath, reqBody, id);
       });
 
       const res = await this._handleNodePromises(
@@ -1881,7 +1881,7 @@ const resourceAbilityRequests = [
           endpoint: LIT_ENDPOINT.PKP_CLAIM,
         });
 
-        return this.#generatePromise(urlWithPath, reqBody, id);
+        return this._generatePromise(urlWithPath, reqBody, id);
       });
 
       const responseData = await this._handleNodePromises(
@@ -2029,7 +2029,7 @@ const resourceAbilityRequests = [
     // we need to send jwt params iat (issued at) and exp (expiration)
     // because the nodes may have different wall clock times
     // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.#getJWTParams();
+    const { iat, exp } = this._getJWTParams();
 
     // ========== Formatting Access Control Conditions =========
     const {
@@ -2073,7 +2073,7 @@ const resourceAbilityRequests = [
           endpoint: LIT_ENDPOINT.SIGN_ACCS,
         });
 
-        return this.#generatePromise(urlWithPath, reqBody, id);
+        return this._generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
@@ -2110,7 +2110,7 @@ const resourceAbilityRequests = [
     log('signatureShares', signatureShares);
 
     // ========== Result ==========
-    const finalJwt: string = this.#combineSharesAndGetJWT(
+    const finalJwt: string = this._combineSharesAndGetJWT(
       signatureShares,
       requestId
     );
@@ -2199,7 +2199,7 @@ const resourceAbilityRequests = [
     }
 
     // ========== Assemble identity parameter ==========
-    const identityParam = this.#getIdentityParamForEncryption(
+    const identityParam = this._getIdentityParamForEncryption(
       hashOfConditionsStr,
       dataToEncryptHash
     );
@@ -2239,7 +2239,7 @@ const resourceAbilityRequests = [
           endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
         });
 
-        return this.#generatePromise(urlWithParh, reqBody, id);
+        return this._generatePromise(urlWithParh, reqBody, id);
       });
 
       // -- resolve promises
@@ -2275,7 +2275,7 @@ const resourceAbilityRequests = [
     logWithRequestId(requestId, 'signatureShares', signatureShares);
 
     // ========== Result ==========
-    const decryptedData = this.#decryptWithSignatureShares(
+    const decryptedData = this._decryptWithSignatureShares(
       this.subnetPubKey,
       uint8arrayFromString(identityParam, 'utf8'),
       ciphertext,
