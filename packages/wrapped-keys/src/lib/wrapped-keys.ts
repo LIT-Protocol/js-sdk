@@ -156,17 +156,23 @@ export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
     throw new Error(errorMessage);
   }
 
-  const result = await litNodeClient.executeJs({
-    sessionSigs: pkpSessionSigs,
-    code: litActionCode,
-    jsParams: {
-      ciphertext,
-      dataToEncryptHash,
-      unsignedTransaction,
-      broadcast,
-      accessControlConditions: getPkpAccessControlCondition(pkpAddress),
-    },
-  });
+  let result;
+  try {
+    result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      code: litActionCode,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        unsignedTransaction,
+        broadcast,
+        accessControlConditions: getPkpAccessControlCondition(pkpAddress),
+      },
+    });
+  } catch (err) {
+    throw new Error(`Lit Action threw an unexpected error: ${JSON.stringify(err)}`);
+  }
 
   console.log(`Lit Action result: ${JSON.stringify(result)}`);
 

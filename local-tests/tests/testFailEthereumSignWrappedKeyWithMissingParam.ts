@@ -53,9 +53,11 @@ export const testFailEthereumSignWrappedKeyWithMissingParam = async (
 
   console.log(pkpSessionSigsSigning);
 
+  // Using SolanaLitTransaction to mimic a missing field (chainId) param as Typescript will complain about missing chainId
   const unsignedTransaction: SolanaLitTransaction = {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
+    chain: 'chronicleTestnet',
   };
 
   try {

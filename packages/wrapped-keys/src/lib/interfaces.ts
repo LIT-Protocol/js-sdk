@@ -32,6 +32,7 @@ export interface SignWithEncryptedKeyParams<T> {
 interface BaseLitTransaction {
   toAddress: string;
   value: string;
+  chain: string;
 }
 
 export interface EthereumLitTransaction extends BaseLitTransaction {

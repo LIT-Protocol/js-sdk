@@ -60,6 +60,7 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
+    chain: 'chronicleTestnet',
   };
 
   const signedTx = await signWithEncryptedKey({

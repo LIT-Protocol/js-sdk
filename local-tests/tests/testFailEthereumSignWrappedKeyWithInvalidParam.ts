@@ -60,6 +60,7 @@ export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
     gasPrice: '50',
     gasLimit: 21000,
     dataHex: 'Test transaction from Alice to bob',
+    chain: 'chronicleTestnet',
   };
 
   try {

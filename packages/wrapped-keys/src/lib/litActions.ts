@@ -12,6 +12,11 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
         return;
     }
 
+    if (!unsignedTransaction.chain) {
+        Lit.Actions.setResponse({ response: 'Error: Missing required field: chain' });
+        return;
+    }
+
     if (!unsignedTransaction.value) {
         Lit.Actions.setResponse({ response: 'Error: Missing required field: value' });
         return;
@@ -39,6 +44,12 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
     const gasPrice = unsignedTransaction.gasPrice ? unsignedTransaction.gasPrice : DEFAULT_GAS_PRICE;
     const gasLimit = unsignedTransaction.gasLimit ? unsignedTransaction.gasLimit : DEFAULT_GAS_LIMIT;
 
+    console.log('unsignedTransaction.chain', unsignedTransaction.chain);
+    console.log('pkpAddress', pkpAddress);
+    const nonce = await Lit.Actions.getLatestNonce({ address: pkpAddress, chain: unsignedTransaction.chain });
+    console.log('nonce');
+    console.log(nonce);
+
     const tx = {
         to: unsignedTransaction.toAddress,
         value: ethers.utils.parseEther(unsignedTransaction.value),
@@ -46,6 +57,7 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
         gasPrice: ethers.utils.parseUnits(gasPrice, 'gwei'),
         gasLimit,
         data: unsignedTransaction.dataHex,
+        nonce,
     };
 
     console.log('tx');
