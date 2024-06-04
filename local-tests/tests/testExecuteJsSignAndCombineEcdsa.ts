@@ -90,17 +90,17 @@ export const testExecuteJsSignAndCombineEcdsa = async (
 
   const sig = JSON.parse(res.response as string);
   console.log('signature returned as a response', sig);
-  
+
   if (!sig.r) {
-    throw new Error("invalid signature returned from lit action");
+    throw new Error('invalid signature returned from lit action');
   }
 
   if (!sig.s) {
-    throw new Error("invalid signature returned from lit action");
+    throw new Error('invalid signature returned from lit action');
   }
 
   if (!sig.v) {
-    throw new Error("invalid signature returned from lit action");
+    throw new Error('invalid signature returned from lit action');
   }
   console.log('✅ testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs');
 };
