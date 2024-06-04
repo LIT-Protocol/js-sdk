@@ -80,6 +80,7 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 
+import { testSignWrappedKey } from './tests/testSignWrappedKey';
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
@@ -96,6 +97,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
   await devEnv.init();
 
   const wrappedKeysTests = {
+    testSignWrappedKey,
     testImportWrappedKey,
     testFailImportWrappedKeysWithSamePkp,
     testFailImportWrappedKeysWithSamePrivateKey,

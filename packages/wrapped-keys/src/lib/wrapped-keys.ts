@@ -1,6 +1,6 @@
 import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
 import { decryptToString, encryptString } from '@lit-protocol/encryption';
-import { log, logError } from '@lit-protocol/misc';
+import { logError } from '@lit-protocol/misc';
 import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
@@ -118,7 +118,7 @@ export async function exportPrivateKey({
 
 export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
   pkpSessionSigs,
-  litActionCid,
+  litActionCode,
   unsignedTransaction,
   broadcast,
   litNodeClient,
@@ -148,7 +148,7 @@ export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
     const exportedPrivateKeyData: ExportPrivateKeyResponse =
       await response.json();
 
-    ({ pkpAddress, ciphertext, dataToEncryptHash, } = exportedPrivateKeyData);
+    ({ pkpAddress, ciphertext, dataToEncryptHash } = exportedPrivateKeyData);
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);
@@ -158,25 +158,51 @@ export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
 
   const result = await litNodeClient.executeJs({
     sessionSigs: pkpSessionSigs,
-    ipfsId: litActionCid,
+    code: litActionCode,
     jsParams: {
-      pkpAddress,
       ciphertext,
       dataToEncryptHash,
       unsignedTransaction,
       broadcast,
+      accessControlConditions: getPkpAccessControlCondition(pkpAddress),
     },
   });
 
-  console.log(`Lit Action result: ${result}`);
+  console.log(`Lit Action result: ${JSON.stringify(result)}`);
 
   if (!result) {
     throw new Error('There was some error running the Lit Action');
   }
 
-  if (typeof result.response !== 'string') {
-    throw new Error('Lit Action should return a string response');
+  const response = result.response;
+  console.log('response');
+  console.log(response);
+
+  if (!response) {
+    throw new Error(
+      `Expected "response" in Lit Action result: ${JSON.stringify(result)}`
+    );
   }
 
-  return result.response;
+  if (typeof response !== 'string') {
+    // As the return value is a hex string
+    throw new Error(
+      `Lit Action should return a string response: ${JSON.stringify(result)}`
+    );
+  }
+
+  if (!result.success) {
+    throw new Error(`Expected "success" in res: ${JSON.stringify(result)}`);
+  }
+
+  if (result.success !== true) {
+    throw new Error(`Expected "success" to be true: ${JSON.stringify(result)}`);
+  }
+
+  if (response.startsWith('Error:')) {
+    // Lit Action sets an error response
+    throw new Error(`Error executing the Signing Lit Action: ${response}`);
+  }
+
+  return response;
 }
