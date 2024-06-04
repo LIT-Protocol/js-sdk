@@ -11,11 +11,11 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testSignWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testSignWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testSignWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignWrappedKey
  */
-export const testSignWrappedKey = async (devEnv: TinnyEnvironment) => {
+export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -62,7 +62,7 @@ export const testSignWrappedKey = async (devEnv: TinnyEnvironment) => {
     ),
   };
 
-  const res = await signWithEncryptedKey({
+  const signedTx = await signWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
     litActionCode: signWithEthereumEncryptedKeyLitAction,
     unsignedTransaction,
@@ -70,8 +70,12 @@ export const testSignWrappedKey = async (devEnv: TinnyEnvironment) => {
     litNodeClient: devEnv.litNodeClient,
   });
 
-  console.log('res');
-  console.log(res);
+  console.log('signedTx');
+  console.log(signedTx);
 
-  log('✅ testSignWrappedKey');
+  if (!ethers.utils.isHexString(signedTx)) {
+    throw new Error(`signedTx isn't hex: ${signedTx}`);
+  }
+
+  log('✅ testEthereumSignWrappedKey');
 };

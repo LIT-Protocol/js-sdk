@@ -80,7 +80,9 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 
-import { testSignWrappedKey } from './tests/testSignWrappedKey';
+import { testEthereumSignWrappedKey } from './tests/testEthereumSignWrappedKey';
+import { testFailEthereumSignWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignWrappedKeyWithInvalidParam';
+import { testFailEthereumSignWrappedKeyWithMissingParam } from './tests/testFailEthereumSignWrappedKeyWithMissingParam';
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
@@ -97,7 +99,9 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
   await devEnv.init();
 
   const wrappedKeysTests = {
-    testSignWrappedKey,
+    testEthereumSignWrappedKey,
+    testFailEthereumSignWrappedKeyWithInvalidParam,
+    testFailEthereumSignWrappedKeyWithMissingParam,
     testImportWrappedKey,
     testFailImportWrappedKeysWithSamePkp,
     testFailImportWrappedKeysWithSamePrivateKey,
