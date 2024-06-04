@@ -6,10 +6,18 @@ import {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSignedTokenRequest,
+  HandshakeWithNode,
+  JsonExecutionRequest,
   JsonExecutionSdkParams,
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
+  NodeBlsSigningShare,
+  NodeCommandResponse,
+  NodeCommandServerKeysResponse,
+  RejectedNodePromises,
+  SendNodeCommand,
+  SuccessNodePromises,
 } from './interfaces';
 import { ILitResource, ISessionCapabilityObject } from './models';
 import { SupportedJsonRequests } from './types';
@@ -27,6 +35,26 @@ export interface ILitNodeClient {
   // ========== Constructor ==========
   // ** IMPORTANT !! You have to create your constructor when implementing this class **
   // constructor(customConfig: LitNodeClientConfig);
+
+  // ========== Scoped Class Helpers ==========
+
+  /**
+   *
+   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
+   *
+   */
+  getJWTParams(): { iat: number; exp: number };
+
+  /**
+   *
+   * Combine Shares from signature shares
+   *
+   * @param { NodeBlsSigningShare } signatureShares
+   *
+   * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
+   *
+   */
+  combineSharesAndGetJWT(signatureShares: NodeBlsSigningShare[]): string;
 
   /**
    *
@@ -58,13 +86,56 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Get JS Execution Shares from Nodes
+   * Get and gather node promises
    *
-   * @param { JsonExecutionRequest } params
+   * @param { any } callback
    *
-   * @returns { Promise<any> }
+   * @returns { Array<Promise<any>> }
+   *
    */
+  getNodePromises(callback: Function): Promise<any>[];
 
+  /**
+   * Handle node promises
+   *
+   * @param { Array<Promise<T>> } nodePromises
+   *
+   * @param {string} requestId request Id used for logging
+   * @param {number} minNodeCount The minimum number of nodes we need a successful response from to continue
+   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
+   *
+   */
+  handleNodePromises<T>(
+    nodePromises: Promise<T>[],
+    requestId: string,
+    minNodeCount: number
+  ): Promise<SuccessNodePromises<T> | RejectedNodePromises>;
+
+  /**
+   *
+   * Throw node error
+   *
+   * @param { RejectedNodePromises } res
+   *
+   * @returns { void }
+   *
+   */
+  _throwNodeError(res: RejectedNodePromises, requestId: string): void;
+
+  // ========== Shares Resolvers ==========
+
+  /**
+   *
+   * Get Signature
+   *
+   * @param { Array<any> } shareData from all node promises
+   *
+   * @returns { string } signature
+   *
+   */
+  getSignature(shareData: any[], requestId: string): Promise<any>;
+
+  // ========== Scoped Business Logics ==========
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures

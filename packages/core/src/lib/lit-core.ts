@@ -927,7 +927,7 @@ export class LitCore {
           challenge: params.challenge,
         };
 
-        return await this.sendCommandToNode({
+        return await this._sendCommandToNode({
           url: urlWithPath,
           data,
           requestId,
@@ -985,7 +985,7 @@ export class LitCore {
    * @returns { Promise<any> }
    *
    */
-  sendCommandToNode = async ({
+  protected _sendCommandToNode = async ({
     url,
     data,
     requestId,
