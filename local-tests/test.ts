@@ -204,17 +204,16 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
   };
 
   const litActionCombiningTests = {
-    ecdsaSignAndCombine: {  
+    ecdsaSignAndCombine: {
       testExecuteJsSignAndCombineEcdsa,
-    
     },
     decryptAndCombine: {
       testExecutJsDecryptAndCombine,
     },
     broadcastAndCombine: {
-      testExecuteJsBroadcastAndCollect
-    } 
-  }
+      testExecuteJsBroadcastAndCollect,
+    },
+  };
 
   const testConfig = {
     tests: {
@@ -230,10 +229,10 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
-      
+
       ...litActionCombiningTests.broadcastAndCombine,
       ...litActionCombiningTests.decryptAndCombine,
-      ...litActionCombiningTests.ecdsaSignAndCombine
+      ...litActionCombiningTests.ecdsaSignAndCombine,
     },
     devEnv,
   };

@@ -40,6 +40,6 @@ export const testExecuteJsBroadcastAndCollect = async (
 
   const response = res.response;
   if (!response) {
-    throw new Error("Should contained broadcast data");
-  } 
+    throw new Error('Should contained broadcast data');
+  }
 };
