@@ -21,6 +21,8 @@ export const testFailEthereumBroadcastWrappedKeysInsufficientFunds = async (
   // TODO!: Send funds to the PKP funds
   const alice = await devEnv.createRandomPerson();
 
+  await devEnv.getFunds(alice.pkp.ethAddress);
+
   const pkpSessionSigs = await getPkpSessionSigs(
     devEnv,
     alice,
