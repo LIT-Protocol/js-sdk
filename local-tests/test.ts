@@ -83,6 +83,8 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
 import { testEthereumSignWrappedKey } from './tests/testEthereumSignWrappedKey';
 import { testFailEthereumSignWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignWrappedKeyWithInvalidParam';
 import { testFailEthereumSignWrappedKeyWithMissingParam } from './tests/testFailEthereumSignWrappedKeyWithMissingParam';
+import { testEthereumBroadcastWrappedKey } from './tests/testEthereumBroadcastWrappedKey';
+import { testFailEthereumBroadcastWrappedKeysInsufficientFunds } from './tests/testFailEthereumBroadcastWrappedKeysInsufficientFunds';
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
@@ -102,6 +104,8 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testEthereumSignWrappedKey,
     testFailEthereumSignWrappedKeyWithInvalidParam,
     testFailEthereumSignWrappedKeyWithMissingParam,
+    testEthereumBroadcastWrappedKey,
+    testFailEthereumBroadcastWrappedKeysInsufficientFunds,
     testImportWrappedKey,
     testFailImportWrappedKeysWithSamePkp,
     testFailImportWrappedKeysWithSamePrivateKey,

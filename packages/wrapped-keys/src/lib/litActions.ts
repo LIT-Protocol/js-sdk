@@ -66,6 +66,20 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
     try {
         const signedTx = await wallet.signTransaction(tx);
         Lit.Actions.setResponse({ response: signedTx });
+
+        if (broadcast) {
+            const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
+            console.log('rpcUrl');
+            console.log(rpcUrl);
+
+            const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+            const transactionResponse = await provider.sendTransaction(signedTx);
+            console.log('Transaction sent: ', transactionResponse.hash); // TODO!: Set response instead of logs
+
+            const receipt = await transactionResponse.wait();
+            console.log('receipt');
+            console.log(receipt);
+        }
     } catch (err) {
         const errorMessage = 'Error: When signing transaction- ' + err.message;
         Lit.Actions.setResponse({ response: errorMessage });

@@ -171,7 +171,9 @@ export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
       },
     });
   } catch (err) {
-    throw new Error(`Lit Action threw an unexpected error: ${JSON.stringify(err)}`);
+    throw new Error(
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+    );
   }
 
   console.log(`Lit Action result: ${JSON.stringify(result)}`);
