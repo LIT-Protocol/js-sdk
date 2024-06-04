@@ -207,7 +207,7 @@ export default class DiscordProvider extends BaseProvider {
    *
    * @returns {Promise<string>} - Discord user ID
    */
-  async #fetchDiscordUser(accessToken: string): Promise<string> {
+  private async _fetchDiscordUser(accessToken: string): Promise<string> {
     const meResponse = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
       headers: {
