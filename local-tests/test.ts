@@ -79,6 +79,9 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
+import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
+import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -200,6 +203,19 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
     },
   };
 
+  const litActionCombiningTests = {
+    ecdsaSignAndCombine: {  
+      testExecuteJsSignAndCombineEcdsa,
+    
+    },
+    decryptAndCombine: {
+      testExecutJsDecryptAndCombine,
+    },
+    broadcastAndCombine: {
+      testExecuteJsBroadcastAndCollect
+    } 
+  }
+
   const testConfig = {
     tests: {
       // testExample,
@@ -214,6 +230,10 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
+      
+      ...litActionCombiningTests.broadcastAndCombine,
+      ...litActionCombiningTests.decryptAndCombine,
+      ...litActionCombiningTests.ecdsaSignAndCombine
     },
     devEnv,
   };
