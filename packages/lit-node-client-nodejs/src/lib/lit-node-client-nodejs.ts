@@ -299,7 +299,9 @@ export class LitNodeClientNodeJs
    * @returns A boolean indicating whether the response is a success node promise.
    * @template T - The type of the success node promise.
    */
-  private _isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
+  private _isSuccessNodePromises = <T>(
+    res: any
+  ): res is SuccessNodePromises<T> => {
     return res.success === true;
   };
   /**
