@@ -549,7 +549,7 @@ describe('Lit Action', () => {
       url: 'https://cayenne.litgateway.com:7371/web/execute',
       data,
     };
-    const res = await savedParams.litNodeClient._sendCommandToNode(reqBody);
+    const res = await savedParams.litNodeClient.sendCommandToNode(reqBody);
     expect(res).to.have.property('success', true);
   });
 

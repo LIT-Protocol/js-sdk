@@ -1053,6 +1053,9 @@ export interface SignSessionKeyResponse {
   authSig: AuthSig;
 }
 
+export interface GetSignSessionKeySharesProp {
+  body: SessionRequestBody;
+}
 export interface CommonGetSessionSigsProps {
   pkpPublicKey?: string;
 
@@ -1174,7 +1177,17 @@ export interface LitClientSessionManager {
   getSessionKey: () => SessionKeyPair;
   isSessionKeyPair(obj: any): boolean;
   getExpiration: () => string;
+  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
+  // #authCallbackAndUpdateStorageItem: (params: {
+  //   authCallbackParams: AuthCallbackParams;
+  //   authCallback?: AuthCallback;
+  // }) => Promise<AuthSig>;
   getPkpSessionSigs: (params: GetPkpSessionSigs) => Promise<SessionSigsMap>;
+  checkNeedToResignSessionKey: (params: {
+    authSig: AuthSig;
+    sessionKeyUri: any;
+    resourceAbilityRequests: LitResourceAbilityRequest[];
+  }) => Promise<boolean>;
   getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
   signSessionKey: (
     params: SignSessionKeyProp
@@ -1924,4 +1937,16 @@ export interface MintWithAuthResponse<T> {
     ethAddress: string;
   };
   tx: T;
+}
+
+export interface BlockHashErrorResponse {
+  messages: string[];
+  reason: String;
+  codde: Number;
+}
+
+export interface EthBlockhashInfo {
+  blockhash: string;
+  timestamp: string;
+  blockNumber: number;
 }
