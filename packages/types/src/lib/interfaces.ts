@@ -198,7 +198,6 @@ export interface LitNodeClientConfig {
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
-  retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string | null;
 }
@@ -1672,26 +1671,6 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    Stytch user identifier for a project
   */
   userId?: string;
-}
-
-/**
- * Configuration for retry operations
- */
-export interface RetryTolerance {
-  /**
-   * An amount of time to wait for canceling the operating (in milliseconds)
-   */
-  timeout?: number;
-
-  /**
-   * How long to wait between retries (in milliseconds)
-   */
-  interval?: number;
-
-  /**
-   * How many times to retry the operation
-   */
-  maxRetryCount?: number;
 }
 
 export interface BaseMintCapacityContext {
