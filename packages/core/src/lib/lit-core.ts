@@ -989,7 +989,7 @@ export class LitCore {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'X-Lit-SDK-Version': version,
         'X-Lit-SDK-Type': 'Typescript',
         'X-Request-Id': 'lit_' + requestId,
