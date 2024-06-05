@@ -6,7 +6,13 @@ export enum LIT_NETWORK {
   CAYENNE = 'cayenne',
 }
 
-export interface ProcessEnvs {
+export interface SetupEnvs {
+  SETUP_LIT_NODE_CLIENT: boolean;
+  SETUP_CAPACITY_DELEGATION_AUTHSIG: boolean;
+  SETUP_BARE_AUTHSIG: boolean;
+}
+
+export interface ProcessEnvs extends SetupEnvs {
   /**
    * Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.
    */

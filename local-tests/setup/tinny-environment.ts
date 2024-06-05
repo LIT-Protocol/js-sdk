@@ -1,4 +1,9 @@
-import { LIT_NETWORK, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
+import {
+  LIT_NETWORK,
+  ProcessEnvs,
+  SetupEnvs,
+  TinnyEnvConfig,
+} from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -65,6 +70,11 @@ export class TinnyEnvironment {
     ],
     KEY_IN_USE: new Array(),
     NO_SETUP: process.env['NO_SETUP'] === 'false',
+
+    // -- This give more control for classes extending this class to setup the environment
+    SETUP_LIT_NODE_CLIENT: true,
+    SETUP_CAPACITY_DELEGATION_AUTHSIG: true,
+    SETUP_BARE_AUTHSIG: true,
   };
 
   public litNodeClient: LitNodeClient;
@@ -91,8 +101,9 @@ export class TinnyEnvironment {
   //=========== PRIVATE MEMBERS ===========
   private _shivaClient: ShivaClient = new ShivaClient();
   private _testnet: TestnetClient | undefined;
-  constructor(network?: LIT_NETWORK) {
-    // -- setup networkj
+
+  constructor(network?: LIT_NETWORK, setupEnvs?: SetupEnvs) {
+    // -- setup network
     this.network = network || this.processEnvs.NETWORK;
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
@@ -101,6 +112,11 @@ export class TinnyEnvironment {
           LIT_NETWORK
         )}`
       );
+    }
+
+    // -- setup envs
+    if (setupEnvs) {
+      this.processEnvs = { ...this.processEnvs, ...setupEnvs };
     }
 
     // -- create an empty array to keep track of all keys
@@ -191,7 +207,6 @@ export class TinnyEnvironment {
    *
    * Logs the process and exits if the client is not ready after attempting to connect.
    */
-
   async setupLitNodeClient() {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
@@ -242,6 +257,7 @@ export class TinnyEnvironment {
       console.error('❌ litNodeClient not ready');
       process.exit();
     }
+    console.log('[𐬺🧪 Tinny Environment𐬺] 🎉 LitNodeClient ready');
   }
 
   /**
@@ -301,6 +317,14 @@ export class TinnyEnvironment {
     return await this.createNewPerson('Alice');
   }
 
+  /**
+   * Sets the specified network as unavailable.
+   * Throws an error with the message 'LIT_IGNORE_TEST'. This particular message will be
+   * picked up by Tinny operation and make it as SKIP instead of recording it as an error.
+   *
+   * @param network - The network to set as unavailable.
+   * @throws Error - If the current network matches the specified network.
+   */
   setUnavailable = (network: LIT_NETWORK) => {
     if (this.processEnvs.NETWORK === network) {
       throw new Error('LIT_IGNORE_TEST');
@@ -315,6 +339,7 @@ export class TinnyEnvironment {
       console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
       return;
     }
+
     if (this.network === LIT_NETWORK.LOCALCHAIN) {
       this._testnet = await this._shivaClient.startTestnetManager();
       // wait for the testnet to be active before we start the tests.
@@ -322,9 +347,16 @@ export class TinnyEnvironment {
       await this._testnet.getTestnetConfig();
     }
 
-    await this.setupLitNodeClient();
-    await this.setupSuperCapacityDelegationAuthSig();
-    await this.setupBareEthAuthSig();
+    if (this.processEnvs.SETUP_LIT_NODE_CLIENT) {
+      await this.setupLitNodeClient();
+    }
+
+    if (this.processEnvs.SETUP_CAPACITY_DELEGATION_AUTHSIG) {
+      await this.setupSuperCapacityDelegationAuthSig();
+    }
+    if (this.processEnvs.SETUP_BARE_AUTHSIG) {
+      await this.setupBareEthAuthSig();
+    }
   }
 
   /**
