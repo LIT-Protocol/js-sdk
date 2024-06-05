@@ -255,7 +255,7 @@ export class TinnyEnvironment {
       litNodeClient: this.litNodeClient,
       network: this.network,
       processEnvs: this.processEnvs,
-      contractContext: this?._testnet?.ContractContext ?? undefined
+      contractContext: this?._testnet?.ContractContext ?? undefined,
     };
   }
 
