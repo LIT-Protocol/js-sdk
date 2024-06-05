@@ -1,3 +1,6 @@
+import { LitContractResolverContext } from '@lit-protocol/types';
+import { ethers } from 'ethers';
+
 export interface ShivaEnvs {
   /**
    * If runnnig no localchain this flag will stop the running testnet when the test
@@ -42,6 +45,40 @@ export class TestnetClient {
   constructor(id: string, envs: ShivaEnvs) {
     this._processEnvs = envs;
     this._id = id;
+  }
+
+  /*
+    Returns the testnet information
+    pub struct TestNetInfo {
+      pub contract_addresses: ContractAddresses,
+      pub validator_addresses: Vec<String>,
+      pub contract_resolver_abi: String,
+      pub rpc_url: String,
+      pub epoch_length: i32,
+    }
+  */
+  get Info(): any | undefined {
+    return this._info;
+  }
+
+  get ContractContext(): LitContractResolverContext | undefined {
+    const testNetConfig = this.Info;
+    if (!testNetConfig) {
+      return undefined;
+    }
+
+    const contractResolverAbi: string = testNetConfig.contractResolverAbi;
+    const contractResolverAddress =
+      testNetConfig.contractAddresses[`contract_resolver`];
+    const networkContext = {
+      abi: JSON.parse(contractResolverAbi),
+      resolverAddress: contractResolverAddress,
+      provider: new ethers.providers.JsonRpcProvider(
+        `http://${testNetConfig.rpcUrl}`
+      ),
+      environment: 0, // test deployment uses env value 0 in test common
+    };
+    return networkContext;
   }
 
   /**

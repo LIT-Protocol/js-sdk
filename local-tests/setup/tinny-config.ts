@@ -1,4 +1,5 @@
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { LitContractResolverContext } from '@lit-protocol/types';
 
 export enum LIT_TESTNET {
   LOCALCHAIN = 'localchain',
@@ -96,4 +97,5 @@ export interface TinnyEnvConfig {
   litNodeClient: LitNodeClient;
   network: LIT_TESTNET;
   processEnvs: ProcessEnvs;
+  contractContext?: LitContractResolverContext;
 }
