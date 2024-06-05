@@ -127,27 +127,6 @@ yarn build:dev
 yarn build
 ```
 
-## Running Test Apps
-
-The test apps are configured to automatically import all modules and expose all module functions. For browsers, you can access these functions using `window.LitJsSdk_<package_name>.<function_name>`
-
-```jsx
-// Running apps...
-// react: http://localhost:4003
-// nodejs: in the terminal
-yarn apps
-```
-
-or running individually
-
-```
-// react
-yarn nx run react:serve
-
-// nodejs
-yarn nx run nodejs:serve
-```
-
 ## Run unit tests
 
 ```
@@ -164,12 +143,7 @@ yarn test:local
 
 ## Creating a new library
 
-By default, NX provides a command to generate a library
-`nx generate @nx/js:library`. However, it doesn't have an esbuild built-in so that we've created a custom tool that modify the build commands.
-
-```js
-yarn gen:lib <package-name> <tag>
-```
+`nx generate @nx/js:library`
 
 ## Create a new react demo app using the Lit JS SDK
 
@@ -270,28 +244,10 @@ The following will serve the react testing app and launch the cypress e2e testin
 yarn test:local
 ```
 
-### Environments
-
-There are currently three environments can be tested on, each of which can be generated from a custom command, which would automatically import all the libraries in `./packages/*`. The UI of HTML & React are visually identical but they are using different libraries.
-
-| Environment | Generate Command  | Test Location              |
-| ----------- | ----------------- | -------------------------- |
-| React       | `yarn gen:react`  | http://localhost:4003      |
-| NodeJs      | `yarn gen:nodejs` | `yarn nx run nodejs:serve` |
-
 ### Unit Tests
 
 ```jsx
 yarn test:unit
-```
-
-### E2E Testing with Metamask using Cypress (for Browser)
-
-<b>React</b>
-
-```jsx
-// E2E React
-yarn tools --test --e2e react
 ```
 
 ## Testing with a Local Lit Node

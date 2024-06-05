@@ -1,4 +1,3 @@
-import * as LITCONFIG from './../../../../lit.config.json';
 import { ProviderType } from '@lit-protocol/constants';
 import {
   LitAuthClient,
