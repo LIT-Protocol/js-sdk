@@ -34,7 +34,6 @@ import { Contract } from '@ethersproject/contracts';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
-import { defaultRetryDelayHandler, fetchWithRetries } from './fetchWithRetry';
 
 const logBuffer: Array<Array<any>> = [];
 const ajv = new Ajv();
@@ -773,26 +772,8 @@ export function sendRequest(
   req: RequestInit,
   requestId: string
 ): Promise<Response> {
-  return fetchWithRetries(url, {
-    ...req,
-    retryDelay: function (
-      attempt: number,
-      error: Error | null,
-      response: Response | null
-    ) {
-      const delay = defaultRetryDelayHandler(attempt, error, response);
-
-      if (url.includes(LIT_ENDPOINT.HANDSHAKE.path)) {
-        logErrorWithRequestId(
-          requestId,
-          `retrying request to url ${url} in ${delay}ms - retry #${attempt + 1}`
-        );
-      }
-
-      return delay;
-    },
-  })
-    .then(async (response: Response) => {
+  return fetch(url, req)
+    .then(async (response) => {
       const isJson = response.headers
         .get('content-type')
         ?.includes('application/json');
@@ -801,7 +782,8 @@ export function sendRequest(
 
       if (!response.ok) {
         // get error message from body or default to response status
-        throw data || response.status;
+        const error = data || response.status;
+        return Promise.reject(error);
       }
 
       return data;
@@ -815,7 +797,7 @@ export function sendRequest(
             : ''
         }`
       );
-      throw error;
+      return Promise.reject(error);
     });
 }
 
