@@ -47,6 +47,16 @@ export class TestnetClient {
     this._id = id;
   }
 
+  /*
+    Returns the testnet information
+    pub struct TestNetInfo {
+      pub contract_addresses: ContractAddresses,
+      pub validator_addresses: Vec<String>,
+      pub contract_resolver_abi: String,
+      pub rpc_url: String,
+      pub epoch_length: i32,
+    }
+  */
   get Info(): any | undefined {
     return this._info;
   }
