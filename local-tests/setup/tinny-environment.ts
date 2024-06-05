@@ -203,7 +203,7 @@ export class TinnyEnvironment {
         rpcUrl: this.processEnvs.LIT_RPC_URL,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
-        contractContext: networkContext as LitContractResolverContext,
+        contractContext: networkContext,
       });
     } else if (this.network === LIT_TESTNET.MANZANO) {
       this.litNodeClient = new LitNodeClient({
@@ -386,7 +386,7 @@ export class TinnyEnvironment {
         signer: wallet,
         debug: this.processEnvs.DEBUG,
         rpc: this.processEnvs.LIT_RPC_URL, // anvil rpc
-        customContext: networkContext as unknown as LitContractResolverContext,
+        customContext: networkContext,
       });
     } else {
       // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
