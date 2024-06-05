@@ -236,10 +236,12 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
     },
     devEnv,
   };
-
+  let res;
   if (devEnv.processEnvs.RUN_IN_BAND) {
-    await runInBand(testConfig);
+    res = await runInBand(testConfig);
   } else {
-    await runTestsParallel(testConfig);
+    res = await runTestsParallel(testConfig);
   }
+  await devEnv.stopTestnet();
+  process.exit(res);
 })();
