@@ -11,6 +11,7 @@ import { TinnyPerson } from './tinny-person';
 import networkContext from './networkContext.json';
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
+import { ShivaClient, TestnetClient } from './shiva-client';
 
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -36,7 +37,7 @@ export class TinnyEnvironment {
       process.env['LIT_OFFICIAL_RPC'] ||
       'https://chain-rpc.litprotocol.com/http',
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
-    RUN_IN_BAND: Boolean(process.env['RUN_IN_BAND']) || false,
+    RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'false',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
 
     // Available Accounts
@@ -63,7 +64,7 @@ export class TinnyEnvironment {
       '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
     ],
     KEY_IN_USE: new Array(),
-    NO_SETUP: Boolean(process.env['NO_SETUP']) || false,
+    NO_SETUP: process.env['NO_SETUP'] === 'false',
   };
 
   public litNodeClient: LitNodeClient;
@@ -87,6 +88,9 @@ export class TinnyEnvironment {
     address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
   };
 
+  //=========== PRIVATE MEMBERS ===========
+  private _shivaClient: ShivaClient = new ShivaClient();
+  private _testnet: TestnetClient | undefined;
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
@@ -311,6 +315,13 @@ export class TinnyEnvironment {
       console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
       return;
     }
+    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      this._testnet = await this._shivaClient.startTestnetManager();
+      // wait for the testnet to be active before we start the tests.
+      await this._testnet.pollTestnetForActive();
+      await this._testnet.getTestnetConfig();
+    }
+
     await this.setupLitNodeClient();
     await this.setupSuperCapacityDelegationAuthSig();
     await this.setupBareEthAuthSig();
@@ -336,6 +347,22 @@ export class TinnyEnvironment {
       toSign,
     });
   }
+
+  //============= SHIVA ENDPOINTS =============
+  /**
+   * Will stop the testnet that is being used in the test run.
+   */
+  async stopTestnet() {
+    if (
+      this.network === LIT_TESTNET.LOCALCHAIN &&
+      this._shivaClient.processEnvs.STOP_TESTNET
+    ) {
+      await this._testnet.stopTestnet();
+    } else {
+      console.log('skipping testnet shutdown.');
+    }
+  }
+  //============= END SHIVA ENDPOINTS =============
 
   /**
    * Context: the reason this is created instead of individually is because we can't allocate capacity beyond the global
