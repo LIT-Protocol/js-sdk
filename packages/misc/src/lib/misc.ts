@@ -27,7 +27,6 @@ import {
   RelayClaimProcessor,
   SuccessNodePromises,
   RejectedNodePromises,
-  RetryTolerance,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
