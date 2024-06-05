@@ -22,7 +22,7 @@ export class TinnyEnvironment {
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
-    DEBUG: process.env['DEBUG'] === 'false',
+    DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'] || 'http://127.0.0.1:8545',
@@ -337,7 +337,7 @@ export class TinnyEnvironment {
 
     const toSign = await createSiweMessage({
       walletAddress: wallet.address,
-      nonce: await this.litNodeClient.getLatestBlockhash(),
+      nonce: this.litNodeClient.latestBlockhash,
       expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
       litNodeClient: this.litNodeClient,
     });
