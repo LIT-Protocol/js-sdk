@@ -82,6 +82,7 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
 import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
 import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
+import { testRevamp } from './tests/revamp/test-revamp';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -215,6 +216,10 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
     },
   };
 
+  const revamps = {
+    testRevamp,
+  };
+
   const testConfig = {
     tests: {
       // testExample,
@@ -233,6 +238,8 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
       ...litActionCombiningTests.broadcastAndCombine,
       ...litActionCombiningTests.decryptAndCombine,
       ...litActionCombiningTests.ecdsaSignAndCombine,
+
+      ...revamps,
     },
     devEnv,
   };
