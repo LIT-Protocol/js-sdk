@@ -23,7 +23,6 @@ import {
   StakingStates,
   version,
   LIT_ENDPOINT,
-  CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -34,8 +33,6 @@ import {
 } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
-  executeWithRetry,
-  getIpAddress,
   isBrowser,
   isNode,
   log,
@@ -96,7 +93,6 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'checkNodeAttestation'
     | 'litNetwork'
     | 'minNodeCount'
-    | 'retryTolerance'
     | 'rpcUrl'
   >
 > &
@@ -116,11 +112,6 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
-    retryTolerance: {
-      timeout: 31_000,
-      maxRetryCount: 3,
-      interval: 100,
-    },
     rpcUrl: null,
   };
   connectedNodes = new Set<string>();
@@ -909,42 +900,29 @@ export class LitCore {
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    const res = await executeWithRetry<NodeCommandServerKeysResponse>(
-      async () => {
-        // -- get properties from params
-        const { url } = params;
+    // -- get properties from params
+    const { url } = params;
 
-        // -- create url with path
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.HANDSHAKE,
-        });
+    // -- create url with path
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.HANDSHAKE,
+    });
 
-        log(`handshakeWithNode ${urlWithPath}`);
+    log(`handshakeWithNode ${urlWithPath}`);
 
-        const data = {
-          clientPublicKey: 'test',
-          challenge: params.challenge,
-        };
+    const data = {
+      clientPublicKey: 'test',
+      challenge: params.challenge,
+    };
 
-        return await this.sendCommandToNode({
-          url: urlWithPath,
-          data,
-          requestId,
-        }).catch((err: NodeErrorV3) => {
-          return err;
-        });
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occurred, attempting to retry');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    return res as NodeCommandServerKeysResponse;
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data,
+      requestId,
+    }).catch((err: NodeErrorV3) => {
+      return err;
+    });
   };
 
   private async fetchCurrentEpochNumber() {
@@ -1004,6 +982,7 @@ export class LitCore {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
         'X-Lit-SDK-Version': version,
         'X-Lit-SDK-Type': 'Typescript',
         'X-Request-Id': 'lit_' + requestId,

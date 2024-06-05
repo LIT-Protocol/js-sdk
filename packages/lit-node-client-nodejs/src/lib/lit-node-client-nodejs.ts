@@ -37,7 +37,6 @@ import {
 import { safeParams } from '@lit-protocol/encryption';
 import {
   defaultMintClaimCallback,
-  executeWithRetry,
   findMostCommonResponse,
   hexPrefixed,
   log,
@@ -728,67 +727,51 @@ export class LitNodeClientNodeJs
 
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = [];
+    const requestId = this.getRequestId();
+    const nodePromises = [];
 
-      for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
-        // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
-        // const jsParams = params.jsParams || {};
-        // const jsParamsString = JSON.stringify(jsParams);
+    for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
+      // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
+      // const jsParams = params.jsParams || {};
+      // const jsParamsString = JSON.stringify(jsParams);
 
-        const nodeIndex = randomSelectedNodeIndexes[i];
+      const nodeIndex = randomSelectedNodeIndexes[i];
 
-        // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
-        // should be using something like the list of nodes from the staking contract
-        // because the staking nodes can change, and the rust code will use the same list
-        const url = this.config.bootstrapUrls[nodeIndex];
+      // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
+      // should be using something like the list of nodes from the staking contract
+      // because the staking nodes can change, and the rust code will use the same list
+      const url = this.config.bootstrapUrls[nodeIndex];
 
-        log(`running on node ${nodeIndex} at ${url}`);
+      log(`running on node ${nodeIndex} at ${url}`);
 
-        // -- choose the right signature
-        const sessionSig = this.getSessionSigByUrl({
-          sessionSigs: params.sessionSigs,
-          url,
-        });
+      // -- choose the right signature
+      const sessionSig = this.getSessionSigByUrl({
+        sessionSigs: params.sessionSigs,
+        url,
+      });
 
-        const reqBody: JsonExecutionRequestTargetNode = {
-          ...params,
-          targetNodeRange: params.targetNodeRange,
-          authSig: sessionSig,
-        };
+      const reqBody: JsonExecutionRequestTargetNode = {
+        ...params,
+        targetNodeRange: params.targetNodeRange,
+        authSig: sessionSig,
+      };
 
-        // this return { url: string, data: JsonRequest }
-        // const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
-        const singleNodePromise = this.sendCommandToNode({
-          url: url,
-          data: params,
-          requestId: id,
-        });
+      // this return { url: string, data: JsonRequest }
+      // const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
+      const singleNodePromise = this.sendCommandToNode({
+        url: url,
+        data: params,
+        requestId: requestId,
+      });
 
-        nodePromises.push(singleNodePromise);
-      }
+      nodePromises.push(singleNodePromise);
+    }
 
-      const handledPromise = (await this.handleNodePromises(
-        nodePromises,
-        id,
-        params.targetNodeRange
-      )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
-
-      // -- handle response
-      return handledPromise;
-    };
-
-    return executeWithRetry<RejectedNodePromises | SuccessNodePromises<any>>(
-      wrapper,
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('error has occured, attempting to retry');
-        }
-      },
-      this.config.retryTolerance
-    );
+    return (await this.handleNodePromises(
+      nodePromises,
+      requestId,
+      params.targetNodeRange
+    )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
   };
 
   /**
@@ -997,54 +980,35 @@ export class LitNodeClientNodeJs
       ...(params.code && { code: encodeCode(params.code) }),
     };
 
+    const requestId = this.getRequestId();
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const wrapper = async (
-      requestId: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises(async (url: string) => {
-        // -- choose the right signature
-        const sessionSig = this.getSessionSigByUrl({
-          sessionSigs: formattedParams.sessionSigs,
-          url,
-        });
-
-        const reqBody: JsonExecutionRequest = {
-          ...formattedParams,
-          authSig: sessionSig,
-        };
-
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.EXECUTE_JS,
-        });
-
-        return this.generatePromise(urlWithPath, reqBody, requestId);
+    const nodePromises = this.getNodePromises(async (url: string) => {
+      // -- choose the right signature
+      const sessionSig = this.getSessionSigByUrl({
+        sessionSigs: formattedParams.sessionSigs,
+        url,
       });
 
-      // -- resolve promises
-      const res = await this.handleNodePromises(
-        nodePromises,
-        requestId,
-        this.connectedNodes.size
-      );
+      const reqBody: JsonExecutionRequest = {
+        ...formattedParams,
+        authSig: sessionSig,
+      };
 
-      return res;
-    }; // wrapper end
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.EXECUTE_JS,
+      });
 
-    // ========== Execute with Retry ==========
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
-        logError('an error occured, attempting to retry operation');
-      },
-      this.config.retryTolerance
+      return this.generatePromise(urlWithPath, reqBody, requestId);
+    });
+
+    // -- resolve promises
+    const res = await this.handleNodePromises(
+      nodePromises,
+      requestId,
+      this.connectedNodes.size
     );
-
-    // ========== Handle Response ==========
-    const requestId = res.requestId;
 
     // -- case: promises rejected
     if (!res.success) {
@@ -1192,64 +1156,46 @@ export class LitNodeClientNodeJs
       });
     }
 
+    const requestId = this.getRequestId();
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
-        // -- get the session sig from the url key
-        const sessionSig = this.getSessionSigByUrl({
-          sessionSigs: params.sessionSigs,
-          url,
-        });
 
-        const reqBody: JsonPkpSignRequest = {
-          toSign: normalizeArray(params.toSign),
-          pubkey: hexPrefixed(params.pubKey),
-          authSig: sessionSig,
-
-          // -- optional params
-          ...(params.authMethods &&
-            params.authMethods.length > 0 && {
-              authMethods: params.authMethods,
-            }),
-        };
-
-        logWithRequestId(id, 'reqBody:', reqBody);
-
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.PKP_SIGN,
-        });
-
-        return this.generatePromise(urlWithPath, reqBody, id);
+    const nodePromises = this.getNodePromises((url: string) => {
+      // -- get the session sig from the url key
+      const sessionSig = this.getSessionSigByUrl({
+        sessionSigs: params.sessionSigs,
+        url,
       });
 
-      const res = await this.handleNodePromises(
-        nodePromises,
-        id,
-        this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
-      );
-      return res;
-    }; // wrapper end
+      const reqBody: JsonPkpSignRequest = {
+        toSign: normalizeArray(params.toSign),
+        pubkey: hexPrefixed(params.pubKey),
+        authSig: sessionSig,
 
-    // ========== Execute with Retry ==========
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('errror occured, retrying operation');
-        }
-      },
-      this.config.retryTolerance
+        // -- optional params
+        ...(params.authMethods &&
+          params.authMethods.length > 0 && {
+            authMethods: params.authMethods,
+          }),
+      };
+
+      logWithRequestId(requestId, 'reqBody:', reqBody);
+
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.PKP_SIGN,
+      });
+
+      return this.generatePromise(urlWithPath, reqBody, requestId);
+    });
+
+    const res = await this.handleNodePromises(
+      nodePromises,
+      requestId,
+      this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
     );
 
     // ========== Handle Response ==========
-    const requestId = res.requestId;
-
     // -- case: promises rejected
     if (!res.success) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
@@ -1351,54 +1297,36 @@ export class LitNodeClientNodeJs
     }
 
     // ========== Get Node Promises ==========
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
-        // -- if session key is available, use it
-        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+    const requestId = this.getRequestId();
+    const nodePromises = this.getNodePromises((url: string) => {
+      // -- if session key is available, use it
+      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-        const reqBody: SigningAccessControlConditionRequest = {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          chain,
-          authSig: authSigToSend,
-          iat,
-          exp,
-        };
+      const reqBody: SigningAccessControlConditionRequest = {
+        accessControlConditions: formattedAccessControlConditions,
+        evmContractConditions: formattedEVMContractConditions,
+        solRpcConditions: formattedSolRpcConditions,
+        unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
+        chain,
+        authSig: authSigToSend,
+        iat,
+        exp,
+      };
 
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.SIGN_ACCS,
-        });
-
-        return this.generatePromise(urlWithPath, reqBody, id);
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.SIGN_ACCS,
       });
 
-      // -- resolve promises
-      const res = await this.handleNodePromises(
-        nodePromises,
-        id,
-        this.config.minNodeCount
-      );
-      return res;
-    };
+      return this.generatePromise(urlWithPath, reqBody, requestId);
+    });
 
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occured, attempting to retry ');
-        }
-      },
-      this.config.retryTolerance
+    // -- resolve promises
+    const res = await this.handleNodePromises(
+      nodePromises,
+      requestId,
+      this.config.minNodeCount
     );
-    const requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
@@ -1607,61 +1535,44 @@ export class LitNodeClientNodeJs
     log('identityParam', identityParam);
 
     // ========== Get Network Signature ==========
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
-        // -- if session key is available, use it
-        const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
+    const requestId = this.getRequestId();
+    const nodePromises = this.getNodePromises((url: string) => {
+      // -- if session key is available, use it
+      const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
 
-        if (!authSigToSend) {
-          return throwError({
-            message: `authSig is required`,
-            errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-            errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-          });
-        }
-
-        const reqBody: EncryptionSignRequest = {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          dataToEncryptHash,
-          chain,
-          authSig: authSigToSend,
-          epoch: this.currentEpochNumber!,
-        };
-
-        const urlWithParh = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
+      if (!authSigToSend) {
+        return throwError({
+          message: `authSig is required`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
+      }
 
-        return this.generatePromise(urlWithParh, reqBody, id);
+      const reqBody: EncryptionSignRequest = {
+        accessControlConditions: formattedAccessControlConditions,
+        evmContractConditions: formattedEVMContractConditions,
+        solRpcConditions: formattedSolRpcConditions,
+        unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
+        dataToEncryptHash,
+        chain,
+        authSig: authSigToSend,
+        epoch: this.currentEpochNumber!,
+      };
+
+      const urlWithParh = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
       });
 
-      // -- resolve promises
-      const res = await this.handleNodePromises(
-        nodePromises,
-        id,
-        this.config.minNodeCount
-      );
-      return res;
-    };
+      return this.generatePromise(urlWithParh, reqBody, requestId);
+    });
 
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (_error: string, _requestId: string, _isFinal: boolean) => {
-        logError('an error occured attempting to retry');
-      },
-      this.config.retryTolerance
+    // -- resolve promises
+    const res = await this.handleNodePromises(
+      nodePromises,
+      requestId,
+      this.config.minNodeCount
     );
-
-    const requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
@@ -1837,49 +1748,32 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] body:`, body);
 
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      logWithRequestId(id, 'signSessionKey body', body);
-      const nodePromises = this.getNodePromises((url: string) => {
-        const reqBody: JsonSignSessionKeyRequestV1 = body;
+    const requestId = this.getRequestId();
+    logWithRequestId(requestId, 'signSessionKey body', body);
+    const nodePromises = this.getNodePromises((url: string) => {
+      const reqBody: JsonSignSessionKeyRequestV1 = body;
 
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
-        });
-
-        return this.generatePromise(urlWithPath, reqBody, id);
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
       });
 
-      // -- resolve promises
-      let res;
-      try {
-        res = await this.handleNodePromises(
-          nodePromises,
-          id,
-          this.connectedNodes.size
-        );
-        log('signSessionKey node promises:', res);
-      } catch (e) {
-        throw new Error(`Error when handling node promises: ${e}`);
-      }
-      return res;
-    };
+      return this.generatePromise(urlWithPath, reqBody, requestId);
+    });
 
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occured, attempting to retry ');
-        }
-      },
-      this.config.retryTolerance
-    );
+    // -- resolve promises
+    let res;
+    try {
+      res = await this.handleNodePromises(
+        nodePromises,
+        requestId,
+        this.connectedNodes.size
+      );
+      log('signSessionKey node promises:', res);
+    } catch (e) {
+      throw new Error(`Error when handling node promises: ${e}`);
+    }
 
-    const requestId = res.requestId;
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
@@ -1888,7 +1782,7 @@ export class LitNodeClientNodeJs
       return {} as SignSessionKeyResponse;
     }
 
-    const responseData: BlsResponseData[] = res.values;
+    const responseData: BlsResponseData[] = res.values as BlsResponseData[];
     logWithRequestId(
       requestId,
       '[signSessionKey] responseData',
@@ -2365,48 +2259,31 @@ const resourceAbilityRequests = [
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
-    let requestId;
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
-        if (!params.authMethod) {
-          throw new Error('authMethod is required');
-        }
 
-        const reqBody: JsonPKPClaimKeyRequest = {
-          authMethod: params.authMethod,
-        };
+    const requestId = this.getRequestId();
 
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.PKP_CLAIM,
-        });
+    const nodePromises = this.getNodePromises((url: string) => {
+      if (!params.authMethod) {
+        throw new Error('authMethod is required');
+      }
 
-        return this.generatePromise(urlWithPath, reqBody, id);
+      const reqBody: JsonPKPClaimKeyRequest = {
+        authMethod: params.authMethod,
+      };
+
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.PKP_CLAIM,
       });
 
-      const responseData = await this.handleNodePromises(
-        nodePromises,
-        id,
-        this.connectedNodes.size
-      );
+      return this.generatePromise(urlWithPath, reqBody, requestId);
+    });
 
-      return responseData;
-    };
-
-    const responseData = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occured, attempting to retry');
-        }
-      },
-      this.config.retryTolerance
+    const responseData = await this.handleNodePromises(
+      nodePromises,
+      requestId,
+      this.connectedNodes.size
     );
-    requestId = responseData.requestId;
 
     if (responseData.success === true) {
       const nodeSignatures: Signature[] = (
