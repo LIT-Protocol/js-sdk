@@ -113,6 +113,8 @@ import type {
   EncryptionSignRequest,
   SigningAccessControlConditionRequest,
   JsonPKPClaimKeyRequest,
+  HandshakeWithNode,
+  NodeCommandServerKeysResponse,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -448,7 +450,7 @@ export class LitNodeClientNodeJs
     return walletSig!;
   };
 
-  #authCallbackAndUpdateStorageItem = async ({
+  private _authCallbackAndUpdateStorageItem = async ({
     authCallbackParams,
     authCallback,
   }: {
@@ -614,7 +616,7 @@ export class LitNodeClientNodeJs
     return finalJwt;
   };
 
-  #decryptWithSignatureShares = (
+  private _decryptWithSignatureShares = (
     networkPubKey: string,
     identityParam: Uint8Array,
     ciphertext: string,
@@ -761,7 +763,7 @@ export class LitNodeClientNodeJs
 
         // this return { url: string, data: JsonRequest }
         // const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
-        const singleNodePromise = this.sendCommandToNode({
+        const singleNodePromise = this._sendCommandToNode({
           url: url,
           data: params,
           requestId: id,
@@ -1150,7 +1152,7 @@ export class LitNodeClientNodeJs
     params: any,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    return await this.sendCommandToNode({
+    return await this._sendCommandToNode({
       url,
       data: params,
       requestId,
@@ -1505,7 +1507,7 @@ export class LitNodeClientNodeJs
     );
 
     // ========== Assemble identity parameter ==========
-    const identityParam = this.#getIdentityParamForEncryption(
+    const identityParam = this._getIdentityParamForEncryption(
       hashOfConditionsStr,
       hashOfPrivateDataStr
     );
@@ -1599,7 +1601,7 @@ export class LitNodeClientNodeJs
     }
 
     // ========== Assemble identity parameter ==========
-    const identityParam = this.#getIdentityParamForEncryption(
+    const identityParam = this._getIdentityParamForEncryption(
       hashOfConditionsStr,
       dataToEncryptHash
     );
@@ -1675,7 +1677,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'signatureShares', signatureShares);
 
     // ========== Result ==========
-    const decryptedData = this.#decryptWithSignatureShares(
+    const decryptedData = this._decryptWithSignatureShares(
       this.subnetPubKey,
       uint8arrayFromString(identityParam, 'utf8'),
       ciphertext,
@@ -1722,7 +1724,7 @@ export class LitNodeClientNodeJs
     );
   };
 
-  #getIdentityParamForEncryption = (
+  private _getIdentityParamForEncryption = (
     hashOfConditionsStr: string,
     hashOfPrivateDataStr: string
   ): string => {
@@ -1883,7 +1885,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
-    if (!this.#isSuccessNodePromises(res)) {
+    if (!this._isSuccessNodePromises(res)) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
       return {} as SignSessionKeyResponse;
     }
@@ -2027,7 +2029,9 @@ export class LitNodeClientNodeJs
     return signSessionKeyRes;
   };
 
-  #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
+  private _isSuccessNodePromises = <T>(
+    res: any
+  ): res is SuccessNodePromises<T> => {
     return res.success === true;
   };
 
@@ -2041,7 +2045,7 @@ export class LitNodeClientNodeJs
       url,
       endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
     });
-    return await this.sendCommandToNode({
+    return await this._sendCommandToNode({
       url: urlWithPath,
       data: params.body,
       requestId,
@@ -2139,7 +2143,7 @@ const resourceAbilityRequests = [
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
       log('need to re-sign session key.  Signing...');
-      authSig = await this.#authCallbackAndUpdateStorageItem({
+      authSig = await this._authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
           chain: params.chain || 'ethereum',
