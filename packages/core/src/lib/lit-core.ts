@@ -176,7 +176,7 @@ export class LitCore {
     }
 
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
-    this.setCustomBootstrapUrls();
+    this._setCustomBootstrapUrls();
 
     // -- set global variables
     globalThis.litConfig = this.config;
@@ -442,7 +442,7 @@ export class LitCore {
    *
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
-  private _listenForNewEpoch() {
+  private _listenForNewEpoch(): void {
     // Check if we've already set up the listener to avoid duplicates
     if (this._stakingContractListener) {
       // Already listening, do nothing
@@ -496,7 +496,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  setCustomBootstrapUrls = (): void => {
+  private _setCustomBootstrapUrls = (): void => {
     // -- validate
     if (this.config.litNetwork === 'custom') return;
 
@@ -617,7 +617,7 @@ export class LitCore {
   }): Promise<JsonHandshakeResponse> {
     const challenge = this.getRandomHexString(64);
 
-    const handshakeResult = await this.handshakeWithNode(
+    const handshakeResult = await this._handshakeWithNode(
       { url, challenge },
       requestId
     );
@@ -707,7 +707,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.getRequestId();
+    const requestId: string = this._getRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -880,7 +880,7 @@ export class LitCore {
    * @returns { string }
    *
    */
-  getRequestId() {
+  private _getRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
@@ -905,7 +905,7 @@ export class LitCore {
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithNode = async (
+  private _handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
@@ -927,7 +927,7 @@ export class LitCore {
           challenge: params.challenge,
         };
 
-        return await this.sendCommandToNode({
+        return await this._sendCommandToNode({
           url: urlWithPath,
           data,
           requestId,
@@ -985,7 +985,7 @@ export class LitCore {
    * @returns { Promise<any> }
    *
    */
-  sendCommandToNode = async ({
+  protected _sendCommandToNode = async ({
     url,
     data,
     requestId,

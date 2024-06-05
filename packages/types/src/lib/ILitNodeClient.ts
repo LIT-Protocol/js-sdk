@@ -40,15 +40,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Set bootstrapUrls to match the network litNetwork unless it's set to custom
-   *
-   * @returns { void }
-   *
-   */
-  setCustomBootstrapUrls(): void;
-
-  /**
-   *
    * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
    *
    */
@@ -143,32 +134,6 @@ export interface ILitNodeClient {
    *
    */
   getSignature(shareData: any[], requestId: string): Promise<any>;
-
-  // ========== API Calls to Nodes ==========
-  sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;
-
-  /**
-   *
-   * Get JS Execution Shares from Nodes
-   *
-   * @param { JsonExecutionRequest } params
-   *
-   * @returns { Promise<any> }
-   */
-
-  /**
-   *
-   * Handshake with SGX
-   *
-   * @param { HandshakeWithNode } params
-   *
-   * @returns { Promise<NodeCommandServerKeysResponse> }
-   *
-   */
-  handshakeWithNode(
-    params: HandshakeWithNode,
-    requestId: string
-  ): Promise<NodeCommandServerKeysResponse>;
 
   // ========== Scoped Business Logics ==========
   /**
