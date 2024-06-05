@@ -23,7 +23,6 @@ import {
   StakingStates,
   version,
   LIT_ENDPOINT,
-  CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -34,7 +33,6 @@ import {
 } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
-  executeWithRetry,
   isBrowser,
   isNode,
   log,
@@ -95,7 +93,6 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'checkNodeAttestation'
     | 'litNetwork'
     | 'minNodeCount'
-    | 'retryTolerance'
     | 'rpcUrl'
   >
 > &
@@ -115,11 +112,6 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
-    retryTolerance: {
-      timeout: 31_000,
-      maxRetryCount: 3,
-      interval: 100,
-    },
     rpcUrl: null,
   };
   connectedNodes = new Set<string>();
@@ -175,7 +167,7 @@ export class LitCore {
     }
 
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
-    this.#setCustomBootstrapUrls();
+    this.setCustomBootstrapUrls();
 
     // -- set global variables
     globalThis.litConfig = this.config;
@@ -439,9 +431,9 @@ export class LitCore {
    * that the client's configuration is always in sync with the current state of the
    * staking contract.
    *
-   * @returns { void }
+   * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
-  #listenForNewEpoch(): void {
+  private _listenForNewEpoch() {
     // Check if we've already set up the listener to avoid duplicates
     if (this._stakingContractListener) {
       // Already listening, do nothing
@@ -475,14 +467,13 @@ export class LitCore {
     if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
-  protected _stopNetworkPolling() {
+  _stopNetworkPolling() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
       this._networkSyncInterval = null;
     }
   }
-
-  protected _stopListeningForNewEpoch() {
+  _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
       this._stakingContractListener = null;
@@ -496,7 +487,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  #setCustomBootstrapUrls = (): void => {
+  setCustomBootstrapUrls = (): void => {
     // -- validate
     if (this.config.litNetwork === 'custom') return;
 
@@ -585,8 +576,8 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this.#scheduleNetworkSync();
-    this.#listenForNewEpoch();
+    this._scheduleNetworkSync();
+    this._listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
     // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
@@ -617,7 +608,7 @@ export class LitCore {
   }): Promise<JsonHandshakeResponse> {
     const challenge = this.getRandomHexString(64);
 
-    const handshakeResult = await this.#handshakeWithNode(
+    const handshakeResult = await this.handshakeWithNode(
       { url, challenge },
       requestId
     );
@@ -707,7 +698,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.#getRequestId();
+    const requestId: string = this.getRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -858,7 +849,7 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  #scheduleNetworkSync() {
+  private _scheduleNetworkSync() {
     if (this._networkSyncInterval) {
       clearInterval(this._networkSyncInterval);
     }
@@ -880,7 +871,7 @@ export class LitCore {
    * @returns { string }
    *
    */
-  #getRequestId(): string {
+  getRequestId() {
     return Math.random().toString(16).slice(2);
   }
 
@@ -891,7 +882,7 @@ export class LitCore {
    * @returns { string }
    */
 
-  getRandomHexString(size: number): string {
+  getRandomHexString(size: number) {
     return [...Array(size)]
       .map(() => Math.floor(Math.random() * 16).toString(16))
       .join('');
@@ -905,46 +896,33 @@ export class LitCore {
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  #handshakeWithNode = async (
+  handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    const res = await executeWithRetry<NodeCommandServerKeysResponse>(
-      async () => {
-        // -- get properties from params
-        const { url } = params;
+    // -- get properties from params
+    const { url } = params;
 
-        // -- create url with path
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.HANDSHAKE,
-        });
+    // -- create url with path
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.HANDSHAKE,
+    });
 
-        log(`handshakeWithNode ${urlWithPath}`);
+    log(`handshakeWithNode ${urlWithPath}`);
 
-        const data = {
-          clientPublicKey: 'test',
-          challenge: params.challenge,
-        };
+    const data = {
+      clientPublicKey: 'test',
+      challenge: params.challenge,
+    };
 
-        return await this._sendCommandToNode({
-          url: urlWithPath,
-          data,
-          requestId,
-        }).catch((err: NodeErrorV3) => {
-          return err;
-        });
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occurred, attempting to retry');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    return res as NodeCommandServerKeysResponse;
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data,
+      requestId,
+    }).catch((err: NodeErrorV3) => {
+      return err;
+    });
   };
 
   private async fetchCurrentEpochNumber() {
@@ -985,14 +963,14 @@ export class LitCore {
    * @returns { Promise<any> }
    *
    */
-  protected _sendCommandToNode = async ({
+  sendCommandToNode = async ({
     url,
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
-    data = { ...data, epochNumber: this.currentEpochNumber };
+    data = { ...data, epoch: this.currentEpochNumber };
 
     logWithRequestId(
       requestId,
@@ -1004,6 +982,7 @@ export class LitCore {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
         'X-Lit-SDK-Version': version,
         'X-Lit-SDK-Type': 'Typescript',
         'X-Request-Id': 'lit_' + requestId,
@@ -1023,7 +1002,7 @@ export class LitCore {
    * @returns { Array<Promise<any>> }
    *
    */
-  protected _getNodePromises = (
+  getNodePromises = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callback: (url: string) => Promise<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1048,7 +1027,7 @@ export class LitCore {
    * @returns The session signature for the given URL.
    * @throws An error if sessionSigs is not provided or if the session signature for the URL is not found.
    */
-  protected _getSessionSigByUrl = ({
+  getSessionSigByUrl = ({
     sessionSigs,
     url,
   }: {
@@ -1154,7 +1133,7 @@ export class LitCore {
    * @param { number } minNodeCount number of nodes we need valid results from in order to resolve
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    */
-  protected _handleNodePromises = async <T>(
+  handleNodePromises = async <T>(
     nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number
@@ -1237,10 +1216,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  protected _throwNodeError = (
-    res: RejectedNodePromises,
-    requestId: string
-  ): void => {
+  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
     if (res.error) {
       if (
         ((res.error.errorCode &&

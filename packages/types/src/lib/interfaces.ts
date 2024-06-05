@@ -198,7 +198,6 @@ export interface LitNodeClientConfig {
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
-  retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string | null;
 }
@@ -1053,6 +1052,9 @@ export interface SignSessionKeyResponse {
   authSig: AuthSig;
 }
 
+export interface GetSignSessionKeySharesProp {
+  body: SessionRequestBody;
+}
 export interface CommonGetSessionSigsProps {
   pkpPublicKey?: string;
 
@@ -1174,7 +1176,17 @@ export interface LitClientSessionManager {
   getSessionKey: () => SessionKeyPair;
   isSessionKeyPair(obj: any): boolean;
   getExpiration: () => string;
+  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
+  // #authCallbackAndUpdateStorageItem: (params: {
+  //   authCallbackParams: AuthCallbackParams;
+  //   authCallback?: AuthCallback;
+  // }) => Promise<AuthSig>;
   getPkpSessionSigs: (params: GetPkpSessionSigs) => Promise<SessionSigsMap>;
+  checkNeedToResignSessionKey: (params: {
+    authSig: AuthSig;
+    sessionKeyUri: any;
+    resourceAbilityRequests: LitResourceAbilityRequest[];
+  }) => Promise<boolean>;
   getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
   signSessionKey: (
     params: SignSessionKeyProp
@@ -1659,26 +1671,6 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    Stytch user identifier for a project
   */
   userId?: string;
-}
-
-/**
- * Configuration for retry operations
- */
-export interface RetryTolerance {
-  /**
-   * An amount of time to wait for canceling the operating (in milliseconds)
-   */
-  timeout?: number;
-
-  /**
-   * How long to wait between retries (in milliseconds)
-   */
-  interval?: number;
-
-  /**
-   * How many times to retry the operation
-   */
-  maxRetryCount?: number;
 }
 
 export interface BaseMintCapacityContext {

@@ -3,6 +3,7 @@ import {
   ILitError,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
+  LIT_ENDPOINT,
   LIT_ERROR,
   LitNetwork,
   RELAY_URL_CAYENNE,
@@ -26,7 +27,6 @@ import {
   RelayClaimProcessor,
   SuccessNodePromises,
   RejectedNodePromises,
-  RetryTolerance,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -809,84 +809,6 @@ export function sendRequest(
 }
 
 /**
- * Allows for invoking a callback and re exucting while re generating a new request identifier
- * @param execCallback
- * @param errorCallback
- * @param opts
- * @returns {T}
- */
-export async function executeWithRetry<T>(
-  execCallback: (requestId: string) => Promise<T>,
-  errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
-  opts?: RetryTolerance
-): Promise<
-  (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
-> {
-  let timer: any | null;
-  let counter = 0;
-  let isTimeout = false;
-  if (!opts) {
-    opts = {};
-  }
-  opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
-  opts.interval = opts.interval ?? 100;
-  opts.maxRetryCount = opts.maxRetryCount ?? 3;
-  let requestId: string = '';
-
-  while (!isTimeout) {
-    requestId = Math.random().toString(16).slice(2);
-    try {
-      timer = setTimeout(() => {
-        isTimeout = true;
-      }, opts.timeout);
-      const response: any = await execCallback(requestId);
-
-      clearTimeout(timer);
-      response.requestId = requestId;
-      // this will work for now as errors should all follow the
-      // RejectedNodePromise type definition which contains an `error` property
-      if ('error' in response) {
-        counter += 1;
-        errorCallback &&
-          errorCallback(
-            response,
-            requestId,
-            counter >= opts.maxRetryCount ? true : false
-          );
-      } else {
-        clearTimeout(timer);
-        return response;
-      }
-
-      if (counter >= opts.maxRetryCount) {
-        return response;
-      }
-    } catch (err: any) {
-      errorCallback &&
-        errorCallback(
-          `Error is ${err.message}-${err.details}`,
-          requestId,
-          counter >= opts.maxRetryCount ? true : false
-        );
-      counter += 1;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, opts?.interval));
-  }
-
-  // If we get here we broke out of the loop on event of a timeout being hit.
-  return {
-    success: false,
-    error: {
-      errorKind: 'Timeout',
-      status: 500,
-      details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
-    },
-    requestId,
-  };
-}
-
-/**
  * Attempts to normalize a string by unescaping it until it can be parsed as a JSON object,
  * then stringifies it exactly once. If the input is a regular string that does not represent
  * a JSON object or array, the function will return it as is without modification.
@@ -921,5 +843,28 @@ export function normalizeAndStringify(input: string): string {
 
     // Otherwise, recursively call the function with the unescaped string
     return normalizeAndStringify(unescaped);
+  }
+}
+
+/**
+ * Retrieves the IP address associated with a given domain.
+ * @param domain - The domain for which to retrieve the IP address.
+ * @returns A Promise that resolves to the IP address.
+ * @throws If no IP address is found or if the domain name is invalid.
+ */
+export async function getIpAddress(domain: string): Promise<string> {
+  const apiURL = `https://dns.google/resolve?name=${domain}&type=A`;
+
+  try {
+    const response = await fetch(apiURL);
+    const data = await response.json();
+
+    if (data.Answer && data.Answer.length > 0) {
+      return data.Answer[0].data;
+    } else {
+      throw new Error('No IP Address found or bad domain name');
+    }
+  } catch (error: any) {
+    throw new Error(error);
   }
 }
