@@ -11,7 +11,7 @@ import { TinnyPerson } from './tinny-person';
 import networkContext from './networkContext.json';
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
-import { ShivaClient, TestnetClient } from './shiv-client';
+import { ShivaClient, TestnetClient } from './shiva-client';
 
 export class TinnyEnvironment {
   public network: LIT_NETWORK;

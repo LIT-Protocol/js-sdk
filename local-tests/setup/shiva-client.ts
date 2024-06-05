@@ -6,21 +6,23 @@ export interface ShivaEnvs {
   STOP_TESTNET: boolean;
 
   /**
-   * url for Testnet manager intigration
+   * URL for Testnet manager intigration
    */
   TESTNET_MANAGER_URL: string;
 
   /**
-   * Path to the Lit Node Binary to use,
-   * if flagging to not use the binary path this option will be ignored.
-   * see {@link USE_LIT_NODE_BINARY}
+   * Path to the Lit Node Binary to use. Can be configured through an env variable
+   * LIT_NODE_BINARY_PATH where the value is the local path to a built Lit Action Binary
+   * If flagging to not use the binary path this option will be ignored.
+   * See {@link USE_LIT_BINARIES} and {@link LIT_ACTION_BINARY_PATH}
    */
   LIT_NODE_BINARY_PATH: string;
 
   /**
-   * Path to lit action binary to use,
-   * if flagging not to use the binary path this option will be ignored
-   *
+   * Path to lit action binary to use, Can be defined through env variable
+   * LIT_ACTION_BINARY_PATH where the value is the local path to a built Lit Action Binary.
+   * If flagging not to use the binary path this option will be ignored
+   * See {@link USE_LIT_BINARIES} and {@link LIT_NODE_BINARY_PATH}
    */
   LIT_ACTION_BINARY_PATH: string;
 
