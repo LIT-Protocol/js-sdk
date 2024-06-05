@@ -198,7 +198,6 @@ export interface LitNodeClientConfig {
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
-  retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string | null;
 }
@@ -1674,26 +1673,6 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
   userId?: string;
 }
 
-/**
- * Configuration for retry operations
- */
-export interface RetryTolerance {
-  /**
-   * An amount of time to wait for canceling the operating (in milliseconds)
-   */
-  timeout?: number;
-
-  /**
-   * How long to wait between retries (in milliseconds)
-   */
-  interval?: number;
-
-  /**
-   * How many times to retry the operation
-   */
-  maxRetryCount?: number;
-}
-
 export interface BaseMintCapacityContext {
   daysUntilUTCMidnightExpiration: number;
 }
@@ -1937,4 +1916,16 @@ export interface MintWithAuthResponse<T> {
     ethAddress: string;
   };
   tx: T;
+}
+
+export interface BlockHashErrorResponse {
+  messages: string[];
+  reason: String;
+  codde: Number;
+}
+
+export interface EthBlockhashInfo {
+  blockhash: string;
+  timestamp: string;
+  blockNumber: number;
 }
