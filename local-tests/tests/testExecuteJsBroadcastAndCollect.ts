@@ -1,4 +1,4 @@
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from 'local-tests/setup/tinny-config';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
@@ -13,7 +13,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 export const testExecuteJsBroadcastAndCollect = async (
   devEnv: TinnyEnvironment
 ) => {
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+  devEnv.setUnavailable(LIT_NETWORK.MANZANO);
 
   const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting

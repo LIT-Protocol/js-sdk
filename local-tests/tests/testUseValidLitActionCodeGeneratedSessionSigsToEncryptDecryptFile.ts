@@ -1,4 +1,4 @@
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from 'local-tests/setup/tinny-config';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
@@ -16,7 +16,7 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+    devEnv.setUnavailable(LIT_NETWORK.MANZANO);
     const alice = await devEnv.createRandomPerson();
 
     const message = 'Hello world';

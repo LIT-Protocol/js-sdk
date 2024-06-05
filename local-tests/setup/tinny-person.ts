@@ -10,7 +10,7 @@ import {
   LitContractContext,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
+import { LIT_NETWORK, PKPInfo, TinnyEnvConfig } from './tinny-config';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import networkContext from './networkContext.json';
 import { AuthMethodScope } from '@lit-protocol/constants';
@@ -53,7 +53,7 @@ export class TinnyPerson {
   async spawn() {
     // Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
     const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
-    if (this.envConfig.network != LIT_TESTNET.LOCALCHAIN) {
+    if (this.envConfig.network != LIT_NETWORK.LOCALCHAIN) {
       const transferTx = await this.wallet.sendTransaction({
         to: fundingWallet.address,
         value: ethers.utils.parseEther('0.00001'),
@@ -101,7 +101,7 @@ export class TinnyPerson {
     //  * Setup contracts-sdk client
     //  * ====================================
     //  */
-    if (this.envConfig.network === LIT_TESTNET.LOCALCHAIN) {
+    if (this.envConfig.network === LIT_NETWORK.LOCALCHAIN) {
       this.contractsClient = new LitContracts({
         signer: this.wallet,
         debug: this.envConfig.processEnvs.DEBUG,
