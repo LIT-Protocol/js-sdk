@@ -50,7 +50,6 @@ export const encrypt = (
 ): string => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
-
   switch (publicKeyHex.replace('0x', '').length) {
     case 218:
       return Buffer.from(

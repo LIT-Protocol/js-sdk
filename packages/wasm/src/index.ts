@@ -16,7 +16,6 @@ export {
   sevSnpVerify,
 } from './pkg/wasm-internal';
 
-
 // use wasm-bigen `init sync` for loading wasm modules.
 // synchronously loads the module through `WebAssembly`
 //
