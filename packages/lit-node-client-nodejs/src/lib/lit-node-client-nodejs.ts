@@ -114,7 +114,6 @@ import type {
   JsonPKPClaimKeyRequest,
 } from '@lit-protocol/types';
 
-
 import { normalizeJsParams } from './helpers/normalize-params';
 import { encodeCode } from './helpers/encode-code';
 import { getFlattenShare, getSignatures } from './helpers/get-signatures';
@@ -1881,9 +1880,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] signatureShares:`, signatureShares);
 
-    const blsCombinedSignature = combineSignatureShares(
-      signatureShares
-    );
+    const blsCombinedSignature = combineSignatureShares(signatureShares);
 
     log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
 

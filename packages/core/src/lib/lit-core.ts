@@ -25,10 +25,7 @@ import {
   LIT_ENDPOINT,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import {
-  checkSevSnpAttestation,
-  computeHDPubKey,
-} from '@lit-protocol/crypto';
+import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   isBrowser,

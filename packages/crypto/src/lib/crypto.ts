@@ -200,7 +200,7 @@ export const computeHDPubKey = (
   sigType: LIT_CURVE
 ): string => {
   // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
-  const variant = ecdsaSigntureTypeMap[sigType]; 
+  const variant = ecdsaSigntureTypeMap[sigType];
 
   switch (sigType) {
     case LIT_CURVE.EcdsaCaitSith:

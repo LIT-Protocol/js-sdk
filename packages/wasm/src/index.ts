@@ -1,10 +1,7 @@
 //@ts-ignore source map not found
 import { getModule, initSync } from './pkg/wasm-internal';
 
-export type {
-  BlsVariant,
-  EcdsaVariant,
-} from './pkg/wasm-internal';
+export type { BlsVariant, EcdsaVariant } from './pkg/wasm-internal';
 
 export {
   blsCombine,
@@ -27,5 +24,5 @@ let buffer = getModule();
 
 // use wasm-bigen `init sync` for loading wasm modules.
 // synchronously loads the module through `WebAssembly`
-// 
+//
 initSync(buffer);

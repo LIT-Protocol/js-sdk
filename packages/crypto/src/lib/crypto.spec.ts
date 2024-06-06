@@ -9,7 +9,7 @@ import {
 import * as ethers from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
 
-import { LIT_CURVE} from '@lit-protocol/constants';
+import { LIT_CURVE } from '@lit-protocol/constants';
 import { SigShare } from '@lit-protocol/types';
 
 const publicKey =
