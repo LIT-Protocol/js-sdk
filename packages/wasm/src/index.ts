@@ -4,7 +4,6 @@ import { getModule, initSync } from './pkg/wasm-internal';
 export type {
   BlsVariant,
   EcdsaVariant,
-  FrostVariant,
 } from './pkg/wasm-internal';
 
 export {
@@ -15,8 +14,6 @@ export {
   ecdsaCombine,
   ecdsaDeriveKey,
   ecdsaVerify,
-  frostCombine,
-  frostVerify,
   greet,
   sevSnpGetVcekUrl,
   sevSnpVerify,
@@ -27,4 +24,8 @@ export {
  */
 
 let buffer = getModule();
+
+// use wasm-bigen `init sync` for loading wasm modules.
+// synchronously loads the module through `WebAssembly`
+// 
 initSync(buffer);
