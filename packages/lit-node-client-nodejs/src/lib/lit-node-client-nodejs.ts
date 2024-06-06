@@ -114,7 +114,7 @@ import type {
   JsonPKPClaimKeyRequest,
 } from '@lit-protocol/types';
 
-import * as blsSdk from '@lit-protocol/bls-sdk';
+
 import { normalizeJsParams } from './helpers/normalize-params';
 import { encodeCode } from './helpers/encode-code';
 import { getFlattenShare, getSignatures } from './helpers/get-signatures';
@@ -1881,8 +1881,8 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] signatureShares:`, signatureShares);
 
-    const blsCombinedSignature = blsSdk.combine_signature_shares(
-      signatureShares.map((s) => JSON.stringify(s))
+    const blsCombinedSignature = combineSignatureShares(
+      signatureShares
     );
 
     log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
