@@ -855,6 +855,7 @@ export class LitContracts {
   public static getMinNodeCount = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext,
+    stakingContrac?: ethers.Contract,
     rpcUrl?: string
   ) => {
     const contract = await LitContracts.getStakingContract(
@@ -874,9 +875,10 @@ export class LitContracts {
   public static getValidators = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext,
+    stakingContract?: ethers.Contract,
     rpcUrl?: string
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(
+    const contract = stakingContract ? stakingContract : await LitContracts.getStakingContract(
       network,
       context,
       rpcUrl

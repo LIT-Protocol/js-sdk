@@ -224,16 +224,22 @@ export class LitCore {
       this.config.litNetwork === LitNetwork.Habanero ||
       this.config.litNetwork === LitNetwork.Cayenne
     ) {
-      const minNodeCount = await LitContracts.getMinNodeCount(
-        this.config.litNetwork
-      );
-      const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork
-      );
 
       // Handle on staking contract is used to monitor epoch/validator changes
       this._stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork
+      );
+      
+      const minNodeCount = await LitContracts.getMinNodeCount(
+        this.config.litNetwork,
+        undefined,
+        this._stakingContract
+      );
+
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork,
+        undefined,
+        this._stakingContract
       );
 
       log('Bootstrap urls: ', bootstrapUrls);
@@ -261,20 +267,21 @@ export class LitCore {
     ) {
       log('using custom contracts: ', this.config.contractContext);
 
+      // Handle on staking contract is used to monitor epoch/validator changes
+      this._stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork
+      );
+      
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork,
-        this.config.contractContext
+        undefined,
+        this._stakingContract
       );
 
       const bootstrapUrls = await LitContracts.getValidators(
         this.config.litNetwork,
-        this.config.contractContext
-      );
-
-      // Handle on staking contract is used to monitor epoch/validator changes
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext
+        undefined,
+        this._stakingContract
       );
 
       log('Bootstrap urls: ', bootstrapUrls);
@@ -304,10 +311,17 @@ export class LitCore {
       log('Using custom bootstrap urls:', this.config.bootstrapUrls);
 
       // const provider = new ethers.providers.JsonRpcProvider(this.config.rpcUrl);
+      this._stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+
 
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork,
         this.config.contractContext,
+        this._stakingContract,
         this.config.rpcUrl!
       );
       this.config.minNodeCount = parseInt(minNodeCount, 10);
@@ -315,15 +329,12 @@ export class LitCore {
       const bootstrapUrls = await LitContracts.getValidators(
         this.config.litNetwork,
         this.config.contractContext,
+        this._stakingContract,
         this.config.rpcUrl!
       );
       this.config.bootstrapUrls = bootstrapUrls;
 
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl!
-      );
+
     } else {
       return throwError({
         message:
