@@ -3,6 +3,7 @@ import {
   ILitError,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
+  LIT_ENDPOINT,
   LIT_ERROR,
   LitNetwork,
   RELAY_URL_CAYENNE,
@@ -26,7 +27,6 @@ import {
   RelayClaimProcessor,
   SuccessNodePromises,
   RejectedNodePromises,
-  RetryTolerance,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -192,13 +192,21 @@ export const throwErrorV1 = ({
 };
 
 export const throwGenericError = (e: any): never => {
-  const errConstructorFunc = function (this: any, message: string) {
+  const errConstructorFunc = function (
+    this: any,
+    message: string,
+    requestId: string
+  ) {
     this.message = message;
     this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
     this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
+    this.requestId = requestId;
   };
 
-  throw new (errConstructorFunc as any)(e.message ?? 'Generic Error');
+  throw new (errConstructorFunc as any)(
+    e.message ?? 'Generic Error',
+    e.requestId ?? 'No request ID found'
+  );
 };
 
 export const isNodeClientErrorV1 = (
@@ -798,84 +806,6 @@ export function sendRequest(
       );
       return Promise.reject(error);
     });
-}
-
-/**
- * Allows for invoking a callback and re exucting while re generating a new request identifier
- * @param execCallback
- * @param errorCallback
- * @param opts
- * @returns {T}
- */
-export async function executeWithRetry<T>(
-  execCallback: (requestId: string) => Promise<T>,
-  errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
-  opts?: RetryTolerance
-): Promise<
-  (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
-> {
-  let timer: any | null;
-  let counter = 0;
-  let isTimeout = false;
-  if (!opts) {
-    opts = {};
-  }
-  opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
-  opts.interval = opts.interval ?? 100;
-  opts.maxRetryCount = opts.maxRetryCount ?? 3;
-  let requestId: string = '';
-
-  while (!isTimeout) {
-    requestId = Math.random().toString(16).slice(2);
-    try {
-      timer = setTimeout(() => {
-        isTimeout = true;
-      }, opts.timeout);
-      const response: any = await execCallback(requestId);
-
-      clearTimeout(timer);
-      response.requestId = requestId;
-      // this will work for now as errors should all follow the
-      // RejectedNodePromise type definition which contains an `error` property
-      if ('error' in response) {
-        counter += 1;
-        errorCallback &&
-          errorCallback(
-            response,
-            requestId,
-            counter >= opts.maxRetryCount ? true : false
-          );
-      } else {
-        clearTimeout(timer);
-        return response;
-      }
-
-      if (counter >= opts.maxRetryCount) {
-        return response;
-      }
-    } catch (err: any) {
-      errorCallback &&
-        errorCallback(
-          `Error is ${err.message}-${err.details}`,
-          requestId,
-          counter >= opts.maxRetryCount ? true : false
-        );
-      counter += 1;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, opts?.interval));
-  }
-
-  // If we get here we broke out of the loop on event of a timeout being hit.
-  return {
-    success: false,
-    error: {
-      errorKind: 'Timeout',
-      status: 500,
-      details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
-    },
-    requestId,
-  };
 }
 
 /**

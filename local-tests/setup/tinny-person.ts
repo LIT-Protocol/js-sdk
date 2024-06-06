@@ -12,7 +12,6 @@ import {
 import { ethers } from 'ethers';
 import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
-import networkContext from './networkContext.json';
 import { AuthMethodScope } from '@lit-protocol/constants';
 
 export class TinnyPerson {
@@ -74,7 +73,7 @@ export class TinnyPerson {
      * ====================================
      */
     this.siweMessage = await createSiweMessage<BaseSiweMessage>({
-      nonce: await this.envConfig.litNodeClient.getLatestBlockhash(),
+      nonce: this.envConfig.litNodeClient.latestBlockhash,
       walletAddress: this.wallet.address,
     });
 
@@ -102,6 +101,7 @@ export class TinnyPerson {
     //  * ====================================
     //  */
     if (this.envConfig.network === LIT_TESTNET.LOCALCHAIN) {
+      const networkContext = this.envConfig.contractContext;
       this.contractsClient = new LitContracts({
         signer: this.wallet,
         debug: this.envConfig.processEnvs.DEBUG,
