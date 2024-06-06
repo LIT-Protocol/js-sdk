@@ -173,68 +173,17 @@ export const combineEcdsaShares = (
   }
 
   const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE];
-  let sig: CombinedECDSASignature | undefined;
-
-  try {
-    let res: string = '';
-    switch (anyValidShare.sigType) {
-      case LIT_CURVE.EcdsaCaitSith:
-      case LIT_CURVE.EcdsaK256:
-        res = ecdsaCombine(validShares, 2);
-
-        try {
-          sig = JSON.parse(res) as CombinedECDSASignature;
-        } catch (e) {
-          logError('Error while combining signatures shares', validShares);
-          throwError({
-            message: (e as Error).message,
-            errorCode: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.name,
-            errorKind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
-          });
-        }
-
-        /*
-          r and s values of the signature should be maximum of 64 bytes
-          r and s values can have polarity as the first two bits, here we remove
-        */
-        if (sig && sig.r && sig.r.length > 64) {
-          while (sig.r.length > 64) {
-            sig.r = sig.r.slice(1);
-          }
-        }
-        if (sig && sig.s && sig.s.length > 64) {
-          while (sig.s.length > 64) {
-            sig.s = sig.s.slice(1);
-          }
-        }
-        break;
-      case LIT_CURVE.EcdsaCAITSITHP256:
-        res = ecdsaCombine(validShares, 3);
-        log('response from combine_signature', res);
-        sig = JSON.parse(res);
-        break;
-      // if its another sig type, it shouldnt be resolving to this method
-      default:
-        throw new Error(
-          'Unsupported signature type present in signature shares. Please report this issue'
-        );
-    }
-  } catch (e) {
-    log('Failed to combine signatures:', e);
-  }
-
   const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
-
   const signatureShares = validShares.map((share) =>
     Buffer.from(share.signatureShare, 'hex')
   );
 
-  const [r, s, v] = ecdsaCombine(variant, presignature, signatureShares);
+  const [r, s, v] = ecdsaCombine(variant!, presignature, signatureShares);
 
   const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
   const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
 
-  ecdsaVerify(variant, messageHash, publicKey, [r, s, v]);
+  ecdsaVerify(variant!, messageHash, publicKey, [r, s, v]);
 
   const signature = splitSignature(Buffer.concat([r, s, Buffer.from([v])]));
 
@@ -262,7 +211,7 @@ export const computeHDPubKey = (
       });
       keyId = keyId.replace('0x', '');
       const preComputedPubkey = ecdsaDeriveKey(
-        variant,
+        variant!,
         Buffer.from(keyId, 'hex'),
         pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
       );
