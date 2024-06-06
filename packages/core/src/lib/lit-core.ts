@@ -224,12 +224,11 @@ export class LitCore {
       this.config.litNetwork === LitNetwork.Habanero ||
       this.config.litNetwork === LitNetwork.Cayenne
     ) {
-
       // Handle on staking contract is used to monitor epoch/validator changes
       this._stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork
       );
-      
+
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork,
         undefined,
@@ -271,7 +270,7 @@ export class LitCore {
       this._stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork
       );
-      
+
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork,
         undefined,
@@ -317,7 +316,6 @@ export class LitCore {
         this.config.rpcUrl!
       );
 
-
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork,
         this.config.contractContext,
@@ -333,8 +331,6 @@ export class LitCore {
         this.config.rpcUrl!
       );
       this.config.bootstrapUrls = bootstrapUrls;
-
-
     } else {
       return throwError({
         message:
@@ -752,11 +748,13 @@ export class LitCore {
           return this.handshakeAndVerifyNodeAttestation({
             url,
             requestId,
-          }).then((res) => {
-            serverKeys[url] = res;
-          }).finally(() => {
-            connectedNodes.add(url);
-          }); 
+          })
+            .then((res) => {
+              serverKeys[url] = res;
+            })
+            .finally(() => {
+              connectedNodes.add(url);
+            });
         })
       ).finally(() => {
         clearTimeout(timeoutHandle);

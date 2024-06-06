@@ -878,11 +878,9 @@ export class LitContracts {
     stakingContract?: ethers.Contract,
     rpcUrl?: string
   ): Promise<string[]> => {
-    const contract = stakingContract ? stakingContract : await LitContracts.getStakingContract(
-      network,
-      context,
-      rpcUrl
-    );
+    const contract = stakingContract
+      ? stakingContract
+      : await LitContracts.getStakingContract(network, context, rpcUrl);
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
