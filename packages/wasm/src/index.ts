@@ -16,13 +16,8 @@ export {
   sevSnpVerify,
 } from './pkg/wasm-internal';
 
-/**
- * Initalization for our Web Assembly module
- */
-
-let buffer = getModule();
 
 // use wasm-bigen `init sync` for loading wasm modules.
 // synchronously loads the module through `WebAssembly`
 //
-initSync(buffer);
+initSync(getModule());
