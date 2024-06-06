@@ -28,8 +28,6 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   checkSevSnpAttestation,
   computeHDPubKey,
-  loadModules,
-  unloadModules,
 } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
@@ -461,8 +459,6 @@ export class LitCore {
    *  Removes global objects created internally
    */
   async disconnect() {
-    unloadModules();
-
     this._stopListeningForNewEpoch();
     this._stopNetworkPolling();
     if (globalThis.litConfig) delete globalThis.litConfig;
@@ -540,11 +536,6 @@ export class LitCore {
    *
    */
   async connect(): Promise<void> {
-    // If we have never connected on this client instance first load WASM modules.
-    if (!this.ready) {
-      await loadModules();
-    }
-
     // Ensure that multiple closely timed calls to `connect()` don't result in concurrent connect() operations being run
     if (this._connectingPromise) {
       return this._connectingPromise;
