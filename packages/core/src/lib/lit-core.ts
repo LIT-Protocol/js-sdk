@@ -748,12 +748,15 @@ export class LitCore {
         }, this.config.connectTimeout);
       }),
       Promise.all(
-        this.config.bootstrapUrls.map(async (url) => {
-          serverKeys[url] = await this.handshakeAndVerifyNodeAttestation({
+        this.config.bootstrapUrls.map((url) => {
+          return this.handshakeAndVerifyNodeAttestation({
             url,
             requestId,
-          });
-          connectedNodes.add(url);
+          }).then((res) => {
+            serverKeys[url] = res;
+          }).finally(() => {
+            connectedNodes.add(url);
+          }); 
         })
       ).finally(() => {
         clearTimeout(timeoutHandle);
