@@ -192,13 +192,21 @@ export const throwErrorV1 = ({
 };
 
 export const throwGenericError = (e: any): never => {
-  const errConstructorFunc = function (this: any, message: string) {
+  const errConstructorFunc = function (
+    this: any,
+    message: string,
+    requestId: string
+  ) {
     this.message = message;
     this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
     this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
+    this.requestId = requestId;
   };
 
-  throw new (errConstructorFunc as any)(e.message ?? 'Generic Error');
+  throw new (errConstructorFunc as any)(
+    e.message ?? 'Generic Error',
+    e.requestId ?? 'No request ID found'
+  );
 };
 
 export const isNodeClientErrorV1 = (
