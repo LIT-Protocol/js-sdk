@@ -50,15 +50,15 @@ export const encrypt = (
 ): string => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
-  // TODO(cairomassimo): determine G1/G2 based on the public key size
+
   switch (publicKeyHex.replace('0x', '').length) {
-    case 96:
+    case 218:
       return Buffer.from(
         blsEncrypt('Bls12381G2', publicKey, message, identity)
       ).toString('hex');
-    case 192:
+    case 96:
       return Buffer.from(
-        blsEncrypt('Bls12381G1', publicKey, message, identity)
+        blsEncrypt('Bls12381G2', publicKey, message, identity)
       ).toString('hex');
     default:
       return '';
@@ -199,7 +199,6 @@ export const computeHDPubKey = (
   keyId: string,
   sigType: LIT_CURVE
 ): string => {
-  // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
   const variant = ecdsaSigntureTypeMap[sigType];
 
   switch (sigType) {
