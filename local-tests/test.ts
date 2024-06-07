@@ -87,6 +87,7 @@ import { testEthereumSignWrappedKey } from './tests/testEthereumSignWrappedKey';
 import { testFailEthereumSignWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignWrappedKeyWithInvalidParam';
 import { testFailEthereumSignWrappedKeyWithMissingParam } from './tests/testFailEthereumSignWrappedKeyWithMissingParam';
 import { testEthereumBroadcastWrappedKey } from './tests/testEthereumBroadcastWrappedKey';
+import { testEthereumBroadcastWrappedKeyWithNoGasParams } from './tests/testEthereumBroadcastWrappedKeyWithNoGasParams';
 import { testFailEthereumBroadcastWrappedKeysInsufficientFunds } from './tests/testFailEthereumBroadcastWrappedKeysInsufficientFunds';
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
@@ -108,6 +109,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailEthereumSignWrappedKeyWithInvalidParam,
     testFailEthereumSignWrappedKeyWithMissingParam,
     testEthereumBroadcastWrappedKey,
+    testEthereumBroadcastWrappedKeyWithNoGasParams,
     testFailEthereumBroadcastWrappedKeysInsufficientFunds,
     testImportWrappedKey,
     testFailImportWrappedKeysWithSamePkp,

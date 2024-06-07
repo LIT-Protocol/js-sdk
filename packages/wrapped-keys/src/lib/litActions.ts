@@ -1,7 +1,4 @@
 export const signWithEthereumEncryptedKeyLitAction = `
-const DEFAULT_GAS_LIMIT = 21000;
-const DEFAULT_GAS_PRICE = '50'; // in gwei
-
 (async () => {
     // TODO!: Remove ALL the console.log statements
     console.log('unsignedTransaction');
@@ -38,9 +35,6 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
 
     const wallet = new ethers.Wallet(decryptedPrivateKey);
 
-    const gasPrice = unsignedTransaction.gasPrice ? unsignedTransaction.gasPrice : DEFAULT_GAS_PRICE;
-    const gasLimit = unsignedTransaction.gasLimit ? unsignedTransaction.gasLimit : DEFAULT_GAS_LIMIT;
-
     console.log('unsignedTransaction.chain', unsignedTransaction.chain);
     console.log('pkpAddress', pkpAddress);
     const nonce = await Lit.Actions.getLatestNonce({ address: wallet.address, chain: unsignedTransaction.chain });
@@ -51,41 +45,81 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
         to: unsignedTransaction.toAddress,
         value: ethers.utils.parseEther(unsignedTransaction.value),
         chainId: unsignedTransaction.chainId,
-        gasPrice: ethers.utils.parseUnits(gasPrice, 'gwei'),
-        gasLimit,
+        gasPrice: ethers.utils.parseUnits(unsignedTransaction.gasPrice, 'gwei'),
+        gasLimit: unsignedTransaction.gasLimit,
         data: unsignedTransaction.dataHex,
         nonce,
     };
 
+    if (!tx.gasPrice) {
+        const gasPrice = await Lit.Actions.runOnce(
+            { waitForResponse: true, name: 'gasPrice' },
+            async () => {
+                const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
+                const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    
+                try {
+                    const gasPrice = await provider.getGasPrice();
+                } catch (err) {
+                    const errorMessage = 'Error: When getting gas price- ' + err.message;
+                    Lit.Actions.setResponse({ response: errorMessage });
+                }
+    
+                return gasPrice;
+            }
+        )
+        tx.gasPrice = gasPrice;
+    }
+
+    if (!tx.gasLimit) {
+        const gasEstimate = await Lit.Actions.runOnce(
+            { waitForResponse: true, name: 'gasEstimate' },
+            async () => {
+                const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
+                const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+                
+                try {
+                    const gasEstimate = await provider.estimateGas(tx);
+                } catch (err) {
+                    const errorMessage = 'Error: When estimating gas- ' + err.message;
+                    Lit.Actions.setResponse({ response: errorMessage });
+                }
+    
+                return gasEstimate;
+            }
+        )
+        tx.gasLimit = gasEstimate;
+    }
+
     console.log('tx');
     console.log(tx);
 
-    try {
-        const signedTx = await wallet.signTransaction(tx);
+    // try {
+    //     const signedTx = await wallet.signTransaction(tx);
 
-        if (broadcast) {
-            const resp = await Lit.Actions.runOnce(
-                { waitForResponse: true, name: 'broadcastTx' },
-                async () => {
-                    const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
-                    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    //     if (broadcast) {
+    //         const resp = await Lit.Actions.runOnce(
+    //             { waitForResponse: true, name: 'broadcastTx' },
+    //             async () => {
+    //                 const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
+    //                 const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-                    const transactionResponse = await provider.sendTransaction(signedTx);
-                    const receipt = await transactionResponse.wait();
+    //                 const transactionResponse = await provider.sendTransaction(signedTx);
+    //                 const receipt = await transactionResponse.wait();
 
-                    return JSON.stringify({ txHash: transactionResponse.hash, rpcUrl });
-                }
-            );
+    //                 return JSON.stringify({ txHash: transactionResponse.hash, rpcUrl });
+    //             }
+    //         );
 
-            const { txHash, rpcUrl } = JSON.parse(resp);
-            console.log(rpcUrl);
-            Lit.Actions.setResponse({ response: txHash });
-        } else {
-            Lit.Actions.setResponse({ response: signedTx });
-        }
-    } catch (err) {
-        const errorMessage = 'Error: When signing transaction- ' + err.message;
-        Lit.Actions.setResponse({ response: errorMessage });
-    }
+    //         const { txHash, rpcUrl } = JSON.parse(resp);
+    //         console.log(rpcUrl);
+    //         Lit.Actions.setResponse({ response: txHash });
+    //     } else {
+    //         Lit.Actions.setResponse({ response: signedTx });
+    //     }
+    // } catch (err) {
+    //     const errorMessage = 'Error: When signing transaction- ' + err.message;
+    //     Lit.Actions.setResponse({ response: errorMessage });
+    // }
 })();
 `;
