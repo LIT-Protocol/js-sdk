@@ -24,18 +24,59 @@ import networkContext from './networkContext.json';
 import { AuthMethodScope } from '@lit-protocol/constants';
 
 export class TinnyPerson {
-  // -- Ethereum EOA wallet
+  // ========== Ethereum EOA wallet ==========
+  /**
+   * External Owned Account (EOA) wallet.
+   */
   public ethEoaWallet: ethers.Wallet;
+
+  /**
+   * Siwe message for the EOA wallet.
+   */
   public ethEoaSiweMessage: string;
+
+  /**
+   * AuthSig for the EOA wallet.
+   */
   public ethEoaAuthSig: AuthSig;
+
+  /**
+   * LitContracts client for the EOA wallet.
+   */
   public ethEoaContractsClient: LitContracts;
+
+  /**
+   * Capacity token ID for the EOA wallet.
+   * TODO: Might be deprecated soon.
+   */
   public ethEoaCapacityTokenId: string;
+
+  /**
+   * Capacity delegation authSig for the EOA wallet.
+   * TODO: Might be deprecated soon.
+   */
   public ethEoaCapacityDelegationAuthSig: AuthSig;
+
+  /**
+   * PKP owned by the EOA wallet.
+   */
   public ethEoaOwnedPkp: PKPInfo;
+
+  /**
+   * Private key for the EOA wallet.
+   */
   public ethEoaPrivateKey: string;
 
-  // -- Auth Method --
+  // ========== Ethereum Auth Methods ==========
+
+  /**
+   * Ethereum authentication method.
+   */
   public ethAuthMethod: AuthMethod;
+
+  /**
+   * PKP owned by the Ethereum auth method.
+   */
   public ethAuthMethodOwnedPkp: PKPInfo;
 
   // TODO: add Google auth method
@@ -46,14 +87,26 @@ export class TinnyPerson {
   // public discordAuthMethod: AuthMethod;
   // public discordAuthMethodOwnedPkp: PKPInfo;
 
-  // Pass this to data to sign
+  /**
+   * A test value
+   */
   public loveLetter: Uint8Array = ethers.utils.arrayify(
     ethers.utils.keccak256([1, 2, 3, 4, 5])
   );
 
+  /** ========== Private Fields ========== */
+  /**
+   * Ethers provider.
+   * TODO: We should support other providers as well.
+   */
   private ethersProvider: ethers.providers.JsonRpcProvider;
+
+  /**
+   * Tinny environment configuration.
+   */
   private tinnyEnvConfig: TinnyEnvConfig;
 
+  // ========== Constructor ==========
   constructor({
     privateKey,
     envConfig,
