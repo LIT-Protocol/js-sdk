@@ -72,9 +72,22 @@ export class TinnyEnvironment {
     NO_SETUP: process.env['NO_SETUP'] === 'false',
 
     // -- This give more control for classes extending this class to setup the environment
-    SETUP_LIT_NODE_CLIENT: true,
-    SETUP_CAPACITY_DELEGATION_AUTHSIG: true,
-    SETUP_BARE_AUTHSIG: true,
+    SETUP_LIT_NODE_CLIENT: process.env['SETUP_LIT_NODE_CLIENT'] === 'false',
+    SETUP_CAPACITY_DELEGATION_AUTHSIG:
+      process.env['SETUP_CAPACITY_DELEGATION_AUTHSIG'] === 'false',
+    SETUP_BARE_AUTHSIG: process.env['SETUP_BARE_AUTHSIG'] === 'false',
+
+    PERSON_FUNDING_STRATEGY: 'known-private-keys',
+    PERSON_FUNDED: process.env['PERSON_FUNDED'] === 'false',
+    PERSON_INIT_ETH_EOA_AUTHSIG: process.env['PERSON_INIT_ETH_EOA_AUTHSIG'] === 'false',
+    PERSON_INIT_EOA_AUTH_METHOD:
+      process.env['PERSON_INIT_EOA_AUTH_METHOD'] === 'false',
+    PERSON_INIT_CONTRACT_CLIENT:
+      process.env['PERSON_INIT_CONTRACT_CLIENT'] === 'false',
+    PERSON_MINT_PKP_WITH_EOA_WALLET:
+      process.env['PERSON_MINT_PKP_WITH_EOA_WALLET'] === 'false',
+    PERSON_MINT_PKP_WITH_ETH_WALLET_AUTH_METHOD:
+      process.env['PERSON_MINT_PKP_WITH_ETH_WALLET_AUTH_METHOD'] === 'false',
   };
 
   public litNodeClient: LitNodeClient;
@@ -273,6 +286,57 @@ export class TinnyEnvironment {
     };
   }
 
+  async initPerson(person: TinnyPerson) {
+    console.log(`[𐬺🧪 Tinny Environment𐬺] Initializing person...`);
+
+    // mapping of environment variables to methods
+    const settings = [
+      {
+        env: 'PERSON_FUNDED',
+        method: person.initFundedWallet,
+      },
+      {
+        env: 'PERSON_INIT_ETH_EOA_AUTHSIG',
+        method: person.initEthEoaAuthSig,
+      },
+      {
+        env: 'PERSON_INIT_EOA_AUTH_METHOD',
+        method: person.initEthAuthMethod,
+      },
+      {
+        env: 'PERSON_INIT_CONTRACT_CLIENT',
+        method: person.initEoaContractClient,
+      },
+      {
+        env: 'PERSON_MINT_PKP_WITH_EOA_WALLET',
+        method: person.mintPkpWithEoaWallet,
+      },
+      {
+        env: 'PERSON_MINT_PKP_WITH_ETH_WALLET_AUTH_METHOD',
+        method: person.mintPkpWithEthWalletAuthMethod,
+      },
+    ];
+
+    // Initialize settings and collect status logs
+    const settingsLog: string[] = [];
+
+    for (const setting of settings) {
+      if (this.processEnvs[setting.env]) {
+        await setting.method.call(person);
+        settingsLog.push(`${setting.env}: ✅`);
+      } else {
+        settingsLog.push(`${setting.env}: ❌`);
+      }
+    }
+
+    // Log the ultimate settings
+    console.log(`[𐬺🧪 Tinny Environment𐬺] Settings: ${settingsLog.join('\n')}`);
+    console.log(
+      '[𐬺🧪 Tinny Environment𐬺] 🐣 TinnyPerson spawned:',
+      person.ethEoaWallet.address
+    );
+  }
+
   /**
    * Creates a new person with the given name.
    * @param name - The name of the person.
@@ -293,7 +357,7 @@ export class TinnyEnvironment {
       envConfig,
     });
 
-    await person.spawn();
+    await this.initPerson(person);
 
     this.world.set(name, person);
 

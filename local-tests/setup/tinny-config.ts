@@ -2,11 +2,31 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 export enum LIT_NETWORK {
   LOCALCHAIN = 'localchain',
+
+  /**
+   * @deprecated Use `LIT_NETWORK.DECENTRALIZED_TESTNET` instead.
+   */
   MANZANO = 'manzano',
+
+  /**
+   * @deprecated Use `LIT_NETWORK.DECENTRALIZED_MAINNET` instead.
+   */
   CAYENNE = 'cayenne',
+  CENTRALIZED_TESTNET = 'cayenne',
+  DECENTRALIZED_TESTNET = 'manzano',
+  DECENTRALIZED_MAINNET = 'habanero',
 }
 
-export interface SetupEnvs {
+export interface PersonEnvs {
+  PERSON_FUNDING_STRATEGY: 'faucet' | 'known-private-keys';
+  PERSON_FUNDED: boolean;
+  PERSON_INIT_ETH_EOA_AUTHSIG: boolean;
+  PERSON_INIT_EOA_AUTH_METHOD: boolean;
+  PERSON_INIT_CONTRACT_CLIENT: boolean;
+  PERSON_MINT_PKP_WITH_EOA_WALLET: boolean;
+  PERSON_MINT_PKP_WITH_ETH_WALLET_AUTH_METHOD: boolean;
+}
+export interface SetupEnvs extends PersonEnvs {
   SETUP_LIT_NODE_CLIENT: boolean;
   SETUP_CAPACITY_DELEGATION_AUTHSIG: boolean;
   SETUP_BARE_AUTHSIG: boolean;
