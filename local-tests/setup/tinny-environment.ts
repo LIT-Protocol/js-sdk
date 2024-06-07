@@ -422,7 +422,10 @@ export class TinnyEnvironment {
         daysUntilUTCMidnightExpiration: 2,
       })
     ).capacityTokenIdStr;
-    console.log('[𐬺🧪 Tinny Environment𐬺] signing capacity delegation signatrue with token id: ', capacityTokenId)
+    console.log(
+      '[𐬺🧪 Tinny Environment𐬺] signing capacity delegation signatrue with token id: ',
+      capacityTokenId
+    );
     this.superCapacityDelegationAuthSig = (
       await this.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: wallet,
