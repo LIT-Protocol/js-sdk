@@ -18,7 +18,6 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 export const testEthereumBroadcastWrappedKey = async (
   devEnv: TinnyEnvironment
 ) => {
-  // TODO!: Send funds to the PKP funds
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -82,7 +81,7 @@ export const testEthereumBroadcastWrappedKey = async (
   console.log('signedTx');
   console.log(signedTx);
 
-  // TODO!: Convert hex signedTx to base64 and assert that it contains "nsaction from transaction from Alice to bob"
+  // TODO!: Convert hex signedTx to UTF-8 and assert that it contains "Test transaction from Alice to bob"
   if (!ethers.utils.isHexString(signedTx)) {
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }

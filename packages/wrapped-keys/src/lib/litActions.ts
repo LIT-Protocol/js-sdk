@@ -36,9 +36,6 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
         authSig: null,
     });
 
-    console.log('decryptedPrivateKey');
-    console.log(decryptedPrivateKey);
-
     const wallet = new ethers.Wallet(decryptedPrivateKey);
 
     const gasPrice = unsignedTransaction.gasPrice ? unsignedTransaction.gasPrice : DEFAULT_GAS_PRICE;
@@ -65,20 +62,26 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
 
     try {
         const signedTx = await wallet.signTransaction(tx);
-        Lit.Actions.setResponse({ response: signedTx });
 
         if (broadcast) {
-            const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
-            console.log('rpcUrl');
+            const resp = await Lit.Actions.runOnce(
+                { waitForResponse: true, name: 'broadcastTx' },
+                async () => {
+                    const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
+                    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+                    const transactionResponse = await provider.sendTransaction(signedTx);
+                    const receipt = await transactionResponse.wait();
+
+                    return JSON.stringify({ txHash: transactionResponse.hash, rpcUrl });
+                }
+            );
+
+            const { txHash, rpcUrl } = JSON.parse(resp);
             console.log(rpcUrl);
-
-            const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-            const transactionResponse = await provider.sendTransaction(signedTx);
-            console.log('Transaction sent: ', transactionResponse.hash); // TODO!: Set response instead of logs
-
-            const receipt = await transactionResponse.wait();
-            console.log('receipt');
-            console.log(receipt);
+            Lit.Actions.setResponse({ response: txHash });
+        } else {
+            Lit.Actions.setResponse({ response: signedTx });
         }
     } catch (err) {
         const errorMessage = 'Error: When signing transaction- ' + err.message;
