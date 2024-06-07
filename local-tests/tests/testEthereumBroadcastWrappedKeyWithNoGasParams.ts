@@ -62,6 +62,7 @@ export const testEthereumBroadcastWrappedKeyWithNoGasParams = async (
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
     chainId: 175177, // Chronicle
+    gasLimit: 30_000,
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
