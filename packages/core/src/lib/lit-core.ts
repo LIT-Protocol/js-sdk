@@ -752,6 +752,8 @@ export class LitCore {
           })
             .then((res) => {
               serverKeys[url] = res;
+              // add the node`s url to the connected set 
+              connectedNodes.add(url);
             }).catch((err) => {
               return Promise.reject(err);
             });
