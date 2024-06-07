@@ -45,14 +45,14 @@ export const signWithEthereumEncryptedKeyLitAction = `
         to: unsignedTransaction.toAddress,
         value: ethers.utils.parseEther(unsignedTransaction.value),
         chainId: unsignedTransaction.chainId,
-        gasPrice: ethers.utils.parseUnits(unsignedTransaction.gasPrice, 'gwei'),
-        gasLimit: unsignedTransaction.gasLimit,
         data: unsignedTransaction.dataHex,
         nonce,
     };
 
-    if (!tx.gasPrice) {
-        const gasPrice = await Lit.Actions.runOnce(
+    if (unsignedTransaction.gasPrice) {
+        tx.gasPrice = ethers.utils.parseUnits(unsignedTransaction.gasPrice, 'gwei');
+    } else {
+        tx.gasPrice = await Lit.Actions.runOnce(
             { waitForResponse: true, name: 'gasPrice' },
             async () => {
                 const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
@@ -60,39 +60,41 @@ export const signWithEthereumEncryptedKeyLitAction = `
     
                 try {
                     const gasPrice = await provider.getGasPrice();
+                    return gasPrice;
                 } catch (err) {
                     const errorMessage = 'Error: When getting gas price- ' + err.message;
                     Lit.Actions.setResponse({ response: errorMessage });
+                    return;
                 }
-    
-                return gasPrice;
             }
         )
-        tx.gasPrice = gasPrice;
     }
 
-    if (!tx.gasLimit) {
-        const gasEstimate = await Lit.Actions.runOnce(
-            { waitForResponse: true, name: 'gasEstimate' },
+    if (unsignedTransaction.gasLimit) {
+        tx.gasLimit = unsignedTransaction.gasLimit
+    } else {
+        tx.gasLimit = await Lit.Actions.runOnce(
+            { waitForResponse: true, name: 'gasLimit' },
             async () => {
                 const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
                 const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
                 
                 try {
-                    const gasEstimate = await provider.estimateGas(tx);
+                    const gasLimit = await provider.estimateGas(tx);
+                    return gasLimit;
                 } catch (err) {
                     const errorMessage = 'Error: When estimating gas- ' + err.message;
                     Lit.Actions.setResponse({ response: errorMessage });
+                    return;
                 }
-    
-                return gasEstimate;
             }
         )
-        tx.gasLimit = gasEstimate;
     }
 
     console.log('tx');
     console.log(tx);
+
+    Lit.Actions.setResponse({ response: JSON.stringify(tx) });
 
     // try {
     //     const signedTx = await wallet.signTransaction(tx);
