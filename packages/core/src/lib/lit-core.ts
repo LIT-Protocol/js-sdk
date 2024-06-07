@@ -704,6 +704,7 @@ export class LitCore {
     serverKeys: Record<string, JsonHandshakeResponse>;
     coreNodeConfig: CoreNodeConfig;
   }> {
+
     // -- handshake with each node
     const requestId: string = this.getRequestId();
 
@@ -751,9 +752,8 @@ export class LitCore {
           })
             .then((res) => {
               serverKeys[url] = res;
-            })
-            .finally(() => {
-              connectedNodes.add(url);
+            }).catch((err) => {
+              return Promise.reject(err);
             });
         })
       ).finally(() => {
