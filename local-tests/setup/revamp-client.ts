@@ -2,6 +2,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LIT_NETWORK, PersonEnvs, SetupEnvs } from './tinny-config';
 import { TinnyEnvironment } from './tinny-environment';
 import { TinnyPerson } from './tinny-person';
+import { AuthMethodScope } from '@lit-protocol/constants';
 export interface RevampEnvironmentParams {
   network: LIT_NETWORK;
   personConfig?: {
@@ -108,26 +109,76 @@ export class RevampEnvironment {
     '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
   );
 
-  // -- using the person EOA wallet to get a session
-  const eoaSession = await alice.getEoaSession();
+  // -- encrypt
 
-  // -- using the session to perform actions
+  // -- get various sessions
+  const aliceSessions = [
+    // {
+    //   description: 'Using EOA Session',
+    //   session: await alice.getEthEoaSession(),
+    //   pkpPublicKey: alice.ethEoaOwnedPkp.publicKey,
+    // },
+    // {
+    //   description: 'Using Ethereum Auth Method Session',
+    //   session: await alice.getAuthMethodSession({
+    //     authMethods: [alice.ethAuthMethod],
+    //     pkpPublicKey: alice.ethAuthMethodOwnedPkp.publicKey,
+    //   }),
+    //   pkpPublicKey: alice.ethAuthMethodOwnedPkp.publicKey,
+    // },
+    {
+      description: 'Using Custom Session',
+      session: await alice.getCustomSession({
+        litActionCode: `(async () => {
+          if(foo !== 'bar'){
+            LitActions.setResponse({ response: "false" });
+          }
+          LitActions.setResponse({ response: "true" });
+        })();`,
+        assignedPkp: alice.ethEoaOwnedPkp,
+        jsParams: {
+          publicKey: alice.ethEoaOwnedPkp.publicKey,
+          foo: 'bar',
+        },
+        customAuthMethod: {
+          authMethodType: 89989,
+          authMethodId: 'app-id-xxx:user-id-yyy',
+        },
+        permissions: {
+          permitAuthMethod: true,
+          permitAuthMethodScopes: [AuthMethodScope.SignAnything],
+        },
+      }),
+    },
+  ];
 
-  // Action: Execute JS
-  const executeJsRes = await alice.useSession(eoaSession).toExecute({
-    code: `(async() => {
-      console.log('Hello World!');
+  for (const { session, pkpPublicKey, description } of aliceSessions) {
+    console.log('🧪 Description:', description);
+
+    // Action: Execute JS
+    const executeJsRes = await alice.useSession(session).toExecute({
+      code: `(async () => {
+      const sigShare = await LitActions.signEcdsa({
+        toSign: dataToSign,
+        publicKey,
+        sigName: "sig",
+      });
     })();`,
-  });
+      jsParams: {
+        dataToSign: alice.loveLetter,
+        publicKey: pkpPublicKey,
+      },
+    });
 
-  console.log('executeJsRes:', executeJsRes);
+    console.log('executeJsRes:', executeJsRes);
 
-  // Action: PKP Sign
-  const pkpSignRes = await alice
-    .useSession(eoaSession)
-    .toPkpSign(alice.ethEoaWalletOwnedPkp.publicKey, 'Hello World!');
+    // Action: PKP Sign
+    const pkpSignRes = await alice
+      .useSession(session)
+      .toPkpSign(pkpPublicKey, 'Hello World!');
 
-  console.log('pkpSignRes:', pkpSignRes);
+    console.log('pkpSignRes:', pkpSignRes);
+  }
 
   process.exit();
 })();
