@@ -522,15 +522,24 @@ export class LitNodeClientNodeJs
         log('Need retry because verify failed', e);
         return true;
       }
-    } else if (authSig.algo === `LIT_BLS`){
+    } else if (authSig.algo === `LIT_BLS`) {
       try {
         // TODO: verify the bls signature
         let sigJson = JSON.parse(authSig.sig);
         const messageBytes = uint8arrayFromString(authSig.signedMessage);
         const signatureBytes = uint8arrayFromString(sigJson.ProofOfPossession);
-        log('bls verify command: ',messageBytes, signatureBytes, this.networkPubKey);
-        blsSdk.verify_signature(this.networkPubKey, uint8arrayToString(messageBytes, `base64`), uint8arrayToString(signatureBytes, `base64`));
-      } catch(e) {
+        log(
+          'bls verify command: ',
+          messageBytes,
+          signatureBytes,
+          this.networkPubKey
+        );
+        blsSdk.verify_signature(
+          this.networkPubKey,
+          uint8arrayToString(messageBytes, `base64`),
+          uint8arrayToString(signatureBytes, `base64`)
+        );
+      } catch (e) {
         log('Need retry because bls verification failed', e);
         return true; // if BLS fails should we network retry or just throw an error
       }
