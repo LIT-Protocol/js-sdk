@@ -510,7 +510,7 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
     const capacityTokenId = (
-      await this.contractsClient.mintCapacityCreditsNFT({
+      await this.contractsClient.mintCapacityCreditsNft({
         requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
         daysUntilUTCMidnightExpiration: 2,
       })

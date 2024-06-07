@@ -1,27 +1,32 @@
 import {
   AuthSig,
-  generateAuthSig,
-  createSiweMessage,
   ResourceAbilityRequestBuilder,
+  createSiweMessage,
   createSiweMessageWithRecaps,
+  generateAuthSig,
 } from '@lit-protocol/auth-helpers';
+import {
+  AuthMethodScope,
+  AuthMethodType,
+  LitNetwork,
+} from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import {
   AuthCallbackParams,
   AuthMethod,
   BaseSiweMessage,
   ExecuteJsResponse,
   JsonExecutionSdkParams,
+  LitActionSdkParams,
   LitContractContext,
   LitResourceAbilityRequest,
   SessionSigsMap,
   SigResponse,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { LIT_NETWORK, PKPInfo, TinnyEnvConfig } from './tinny-config';
-import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import networkContext from './networkContext.json';
-import { AuthMethodScope } from '@lit-protocol/constants';
+import { LIT_NETWORK, PKPInfo, TinnyEnvConfig } from './tinny-config';
 
 export class TinnyPerson {
   // ========== Ethereum EOA wallet ==========
@@ -93,6 +98,25 @@ export class TinnyPerson {
   public loveLetter: Uint8Array = ethers.utils.arrayify(
     ethers.utils.keccak256([1, 2, 3, 4, 5])
   );
+
+  /**
+   * A test Lit Action code
+   */
+  public testLitActionCode: string = `(async () => {
+    const sigShare = await LitActions.signEcdsa({
+      toSign: dataToSign,
+      publicKey,
+      sigName: "sig",
+    });
+  })();`;
+
+  public testValidCustomLitActionCode: string = `(async () => {
+    LitActions.setResponse({ response: "true" });
+  })();`;
+
+  public testInValidCustomLitActionCode: string = `(async () => {
+    LitActions.setResponse({ response: "false" });
+  })();`;
 
   /** ========== Private Fields ========== */
   /**
@@ -166,12 +190,57 @@ export class TinnyPerson {
     return { transferReciept };
   }
 
+  /**
+   * Retrieves funding from a faucet API.
+   * @param api The URL of the faucet API.
+   * @throws {Error} If the method is not implemented yet.
+   */
   private async _getFundedFromFacuet(api: string) {
     throw new Error('_getFundedFromFacuet not implemented yet.');
   }
 
+  /**
+   * Retrieves the PKP session signatures.
+   *
+   * @param resourceAbilityRequests - Optional resource ability requests.
+   * @param pkpPublicKey - The PKP public key.
+   * @param authMethods - The authentication methods.
+   * @returns The PKP session signatures.
+   */
+  private async _getPkpSession({
+    resourceAbilityRequests,
+  }: {
+    resourceAbilityRequests?: LitResourceAbilityRequest[];
+    pkpPublicKey?: string;
+    authMethods?: AuthMethod[];
+  }) {
+    const builder = new ResourceAbilityRequestBuilder();
+
+    const _resourceAbilityRequests =
+      resourceAbilityRequests ||
+      builder
+        .addPKPSigningRequest('*')
+        .addLitActionExecutionRequest('*')
+        .build();
+
+    const pkpSessionSigs =
+      await this.tinnyEnvConfig.litNodeClient.getPkpSessionSigs({
+        pkpPublicKey: this.ethEoaOwnedPkp.publicKey,
+        authMethods: [this.ethAuthMethod],
+        resourceAbilityRequests: _resourceAbilityRequests,
+
+        // -- only add this for manzano network
+        ...(this.tinnyEnvConfig.litNodeClient.config.litNetwork ===
+        LitNetwork.Manzano
+          ? { capacityDelegationAuthSig: this.ethEoaCapacityDelegationAuthSig }
+          : {}),
+      });
+
+    return pkpSessionSigs;
+  }
   // ========== Public Methods ==========
 
+  // ========== Init Methods ==========
   /**
    * Initializes the funded wallet.
    * If the PERSON_FUNDING_STRATEGY is set to 'known-private-keys', it gets funded from a known private key.
@@ -249,6 +318,7 @@ export class TinnyPerson {
     await this.ethEoaContractsClient.connect();
   }
 
+  // ========== Smart Contract Methods ==========
   /**
    * Mint a PKP with an EOA wallet.
    * @returns A Promise that resolves when the PKP is minted.
@@ -283,10 +353,10 @@ export class TinnyPerson {
    * Mint a Capacity Credits NFT.
    * @returns The capacity token ID of the minted NFT.
    */
-  async mintCapacityCreditsNFT(): Promise<string> {
+  public async mintCapacityCreditsNft(): Promise<string> {
     console.log('[𐬺🧪 Tinny Person𐬺] Mint a Capacity Credits NFT ');
     const capacityTokenId = (
-      await this.ethEoaContractsClient.mintCapacityCreditsNFT({
+      await this.ethEoaContractsClient.mintCapacityCreditsNft({
         requestsPerKilosecond:
           this.tinnyEnvConfig.processEnvs.REQUEST_PER_KILOSECOND,
         daysUntilUTCMidnightExpiration: 2,
@@ -298,12 +368,13 @@ export class TinnyPerson {
     return capacityTokenId;
   }
 
+  // ========== Person Setter Methods ==========
   /**
    * Creates and sets ˝a capacity delegation authSig by minting a Capacity Credits NFT.
    * @param addresses - An optional array of delegatee addresses.
    * @returns A promise that resolves to the capacity delegation authSig.
    */
-  async setCapacityDelegationAuthSig(
+  public async setCapacityDelegationAuthSig(
     addresses: string[] = []
   ): Promise<AuthSig> {
     console.log(
@@ -311,7 +382,7 @@ export class TinnyPerson {
     );
 
     const capacityTokenId = (
-      await this.ethEoaContractsClient.mintCapacityCreditsNFT({
+      await this.ethEoaContractsClient.mintCapacityCreditsNft({
         requestsPerKilosecond:
           this.tinnyEnvConfig.processEnvs.REQUEST_PER_KILOSECOND,
         daysUntilUTCMidnightExpiration: 2,
@@ -331,12 +402,19 @@ export class TinnyPerson {
     return this.ethEoaCapacityDelegationAuthSig;
   }
 
+  // ========== Session Methods ==========
   /**
    * Retrieves the session signatures for the EOA (Externally Owned Account).
    * @param resourceAbilityRequest - Optional. An array of resource ability requests. If not provided, default requests will be used.
    * @returns A promise that resolves to the session signatures.
    */
-  async getEoaSession(resourceAbilityRequest?: LitResourceAbilityRequest[]) {
+  async getEthEoaSession({
+    resourceAbilityRequest,
+    expiration,
+  }: {
+    resourceAbilityRequest?: LitResourceAbilityRequest[];
+    expiration?: string;
+  } = {}) {
     const builder = new ResourceAbilityRequestBuilder();
 
     const _resourceAbilityRequests =
@@ -370,11 +448,242 @@ export class TinnyPerson {
 
         return authSig;
       },
+      ...(expiration && { expiration }),
     });
 
     return sessionSigs;
   }
 
+  /**
+   * Retrieves the authentication method session.
+   *
+   * @param resourceAbilityRequests - Optional array of resource ability requests.
+   * @param pkpPublicKey - The public key for PKP.
+   * @param authMethods - Array of authentication methods.
+   * @returns A promise that resolves to the PKP session.
+   * @throws {Error} If the authentication method type is not supported or if `authMethods` or `pkpPublicKey` is missing.
+   */
+  async getAuthMethodSession({
+    resourceAbilityRequests,
+    pkpPublicKey,
+    authMethods,
+  }: {
+    resourceAbilityRequests?: LitResourceAbilityRequest[];
+    authMethods: AuthMethod[];
+    pkpPublicKey: string;
+  }) {
+    const supportedAuthMethodTypes = Object.values(AuthMethodType).filter(
+      (v) => typeof v === 'number'
+    );
+
+    // -- validate authMethods
+    authMethods.forEach((authMethod) => {
+      if (!supportedAuthMethodTypes.includes(authMethod.authMethodType)) {
+        const authMethodTypeString =
+          AuthMethodType[authMethod.authMethodType] || 'Unknown';
+        throw new Error(
+          `Unsupported AuthMethodType: ${
+            authMethod.authMethodType
+          } (${authMethodTypeString}). Supported types are: ${supportedAuthMethodTypes
+            .map((type) => `${type} (${AuthMethodType[type]})`)
+            .join(', ')}`
+        );
+      }
+    });
+
+    if (!authMethods || !authMethods.length) {
+      throw new Error('authMethods is required');
+    }
+
+    if (!pkpPublicKey) {
+      throw new Error('pkpPublicKey is required');
+    }
+
+    const builder = new ResourceAbilityRequestBuilder();
+
+    const _resourceAbilityRequests =
+      resourceAbilityRequests ||
+      builder
+        .addPKPSigningRequest('*')
+        .addLitActionExecutionRequest('*')
+        .build();
+
+    return this._getPkpSession({
+      resourceAbilityRequests: _resourceAbilityRequests,
+      pkpPublicKey: pkpPublicKey,
+      authMethods: authMethods,
+    });
+  }
+
+  async getCustomSession({
+    customAuthMethod,
+    resourceAbilityRequests,
+    assignedPkp,
+    jsParams,
+    litActionCode,
+    litActionIpfsId,
+    permissions,
+  }: {
+    /**
+     * This is a custom auth method. You will be handling the logic in the Lit action code yourself.
+     */
+    customAuthMethod: {
+      authMethodType: number;
+      authMethodId: string;
+    };
+
+    /**
+     * The permissions for the custom auth method.
+     */
+    permissions: {
+      /**
+       * This will run the `addPermittedAuthMethod` smart contract function to add
+       * the custom auth method to the PKP token ID.
+       */
+      permitAuthMethod: boolean;
+
+      /**
+       * The scopes that the custom auth method will have access to.
+       * - NoPermissions = 0
+       * - SignAnything = 1
+       * - PersonalSign = 2
+       *
+       * @example
+       * ```
+       * permitAuthMethodScopes: [AuthMethodScope.NoPermissions],
+       * permitAuthMethodScopes: [AuthMethodScope.SignAnything],
+       * permitAuthMethodScopes: [AuthMethodScope.PersonalSign],
+       *
+       * // or
+       * permitAuthMethodScopes: [0],
+       * permitAuthMethodScopes: [1],
+       * permitAuthMethodScopes: [2],
+       * ```
+       */
+      permitAuthMethodScopes: AuthMethodScope[];
+    };
+
+    resourceAbilityRequests?: LitResourceAbilityRequest[];
+
+    /**
+     * The PKP that the custom auth method will have access to.
+     */
+    assignedPkp: {
+      publicKey: string;
+      ethAddress: string;
+      tokenId: string;
+    };
+    jsParams: {
+      [key: string]: any;
+      publicKey?: string;
+    };
+  } & ( // Either litActionCode or litActionIpfsId is required
+    | {
+        litActionCode: string;
+        litActionIpfsId?: never;
+      }
+    | {
+        litActionCode?: never;
+        litActionIpfsId: string;
+      }
+  )) {
+    function _validate() {
+      if (!customAuthMethod) {
+        throw new Error('customAuthMethod is required');
+      }
+
+      if (customAuthMethod) {
+        if (!customAuthMethod.authMethodType) {
+          throw new Error('customAuthMethod.authMethodType is required');
+        }
+        if (!customAuthMethod.authMethodId) {
+          throw new Error('customAuthMethod.authMethodId is required');
+        }
+      }
+
+      if (!assignedPkp) {
+        throw new Error('assignedPkp is required');
+      }
+
+      if (assignedPkp) {
+        if (!assignedPkp.publicKey) {
+          throw new Error('assignedPkp.publicKey is required');
+        }
+        if (!assignedPkp.ethAddress) {
+          throw new Error('assignedPkp.ethAddress is required');
+        }
+        if (!assignedPkp.tokenId) {
+          throw new Error('assignedPkp.tokenId is required');
+        }
+      }
+
+      if (!jsParams) {
+        throw new Error('jsParams is required');
+      }
+
+      // Check if either litActionCode or litActionIpfsId is provided
+      if (!litActionCode && !litActionIpfsId) {
+        throw new Error(
+          "Either 'litActionCode' or 'litActionIpfsId' must be provided."
+        );
+      }
+
+      // Check if both litActionCode and litActionIpfsId are provided
+      if (litActionCode && litActionIpfsId) {
+        throw new Error(
+          "Both 'litActionCode' and 'litActionIpfsId' cannot be provided at the same time."
+        );
+      }
+    }
+
+    _validate();
+
+    // -- permit auth method
+    if (permissions.permitAuthMethod) {
+      const contractClient = this.ethEoaContractsClient;
+      const addPermittedAuthMethodReceipt =
+        await contractClient.addPermittedAuthMethod({
+          pkpTokenId: assignedPkp.tokenId,
+          authMethodType: customAuthMethod.authMethodType,
+          authMethodId: customAuthMethod.authMethodId,
+          authMethodScopes: permissions.permitAuthMethodScopes,
+        });
+
+      console.log(
+        '✅ addPermittedAuthMethodReceipt:',
+        addPermittedAuthMethodReceipt
+      );
+    }
+
+    const builder = new ResourceAbilityRequestBuilder();
+
+    const _resourceAbilityRequests =
+      resourceAbilityRequests ||
+      builder
+        .addPKPSigningRequest('*')
+        .addLitActionExecutionRequest('*')
+        .build();
+
+    if (litActionCode) {
+      return this.tinnyEnvConfig.litNodeClient.getLitActionSessionSigs({
+        pkpPublicKey: assignedPkp.publicKey,
+        resourceAbilityRequests: _resourceAbilityRequests,
+        litActionCode: Buffer.from(litActionCode).toString('base64'),
+        jsParams,
+      });
+    }
+
+    if (litActionIpfsId) {
+      return this.tinnyEnvConfig.litNodeClient.getLitActionSessionSigs({
+        pkpPublicKey: assignedPkp.publicKey,
+        resourceAbilityRequests: _resourceAbilityRequests,
+        litActionIpfsId,
+        jsParams,
+      });
+    }
+  }
+
+  // ========== Session Usages ==========
   /**
    * Use session signatures for various operations.
    *
