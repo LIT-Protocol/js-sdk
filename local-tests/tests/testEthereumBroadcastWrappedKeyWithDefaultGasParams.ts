@@ -11,11 +11,11 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKeyWithNoGasParams
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithNoGasParams
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithNoGasParams
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
  */
-export const testEthereumBroadcastWrappedKeyWithNoGasParams = async (
+export const testEthereumBroadcastWrappedKeyWithDefaultGasParams = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -62,7 +62,7 @@ export const testEthereumBroadcastWrappedKeyWithNoGasParams = async (
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
     chainId: 175177, // Chronicle
-    gasLimit: 30_000,
+    gasLimit: 30_000, // Currently estimate gas on Chronicle is broken, so we have to provide it
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
@@ -85,5 +85,5 @@ export const testEthereumBroadcastWrappedKeyWithNoGasParams = async (
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testEthereumBroadcastWrappedKeyWithNoGasParams');
+  log('✅ testEthereumBroadcastWrappedKeyWithDefaultGasParams');
 };
