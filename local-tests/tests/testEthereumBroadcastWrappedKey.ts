@@ -30,11 +30,16 @@ export const testEthereumBroadcastWrappedKey = async (
 
   console.log(pkpSessionSigs);
 
-  const privateKey = ethers.Wallet.createRandom().privateKey;
+  const wrappedKeysWallet = ethers.Wallet.createRandom();
+  const wrappedKeysWalletPrivateKey = wrappedKeysWallet.privateKey;
+
+  const wrappedKeysWalletAddress = wrappedKeysWallet.address;
+  console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
+  await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
 
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,
-    privateKey,
+    privateKey: wrappedKeysWalletPrivateKey,
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -58,8 +63,8 @@ export const testEthereumBroadcastWrappedKey = async (
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
     chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
+    gasPrice: '0.001',
+    gasLimit: 30000,
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
@@ -77,7 +82,7 @@ export const testEthereumBroadcastWrappedKey = async (
   console.log('signedTx');
   console.log(signedTx);
 
-  // TODO!: Expect on transactionResponse
+  // TODO!: Convert hex signedTx to base64 and assert that it contains "nsaction from transaction from Alice to bob"
   if (!ethers.utils.isHexString(signedTx)) {
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
