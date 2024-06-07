@@ -27,6 +27,7 @@ import {
 import { ethers } from 'ethers';
 import networkContext from './networkContext.json';
 import { LIT_NETWORK, PKPInfo, TinnyEnvConfig } from './tinny-config';
+import { stringToIpfsHash } from './tinny-utils';
 
 export class TinnyPerson {
   // ========== Ethereum EOA wallet ==========
@@ -515,6 +516,20 @@ export class TinnyPerson {
     });
   }
 
+  /**
+   * Retrieves a custom session for a given set of parameters.
+   *
+   * @param customAuthMethod - The custom authentication method for the session.
+   * @param permissions - The permissions for the custom authentication method.
+   * @param resourceAbilityRequests - The resource ability requests for the session.
+   * @param assignedPkp - The PKP (Public Key Pair) for the custom authentication method.
+   * @param contractClient - The contract client for interacting with smart contracts.
+   * @param jsParams - The parameters to be passed to the Lit Action code.
+   * @param litActionCode - The Lit Action code.
+   * @param litActionIpfsId - The IPFS ID of the Lit Action.
+   * @returns A Promise that resolves to the custom session.
+   * @throws An error if any of the required parameters are missing or if the Lit Action code is invalid.
+   */
   async getCustomSession({
     customAuthMethod,
     resourceAbilityRequests,
@@ -523,6 +538,7 @@ export class TinnyPerson {
     litActionCode,
     litActionIpfsId,
     permissions,
+    contractClient,
   }: {
     /**
      * This is a custom auth method. You will be handling the logic in the Lit action code yourself.
@@ -573,19 +589,24 @@ export class TinnyPerson {
       ethAddress: string;
       tokenId: string;
     };
+
+    /**
+     * By default, it will use the `ethEoaContractsClient` to interact with the smart contracts. You can provide a custom contract client.
+     */
+    contractClient?: LitContracts;
+
+    /**
+     * The parameters that will be passed to the Lit Action code.
+     */
     jsParams: {
       [key: string]: any;
       publicKey?: string;
     };
   } & ( // Either litActionCode or litActionIpfsId is required
-    | {
-        litActionCode: string;
-        litActionIpfsId?: never;
-      }
-    | {
-        litActionCode?: never;
-        litActionIpfsId: string;
-      }
+    | (Pick<Required<LitActionSdkParams>, 'litActionCode'> &
+        Pick<LitActionSdkParams, 'litActionIpfsId'>)
+    | (Pick<Required<LitActionSdkParams>, 'litActionIpfsId'> &
+        Pick<LitActionSdkParams, 'litActionCode'>)
   )) {
     function _validate() {
       if (!customAuthMethod) {
@@ -638,21 +659,48 @@ export class TinnyPerson {
 
     _validate();
 
+    const _contractClient = contractClient || this.ethEoaContractsClient;
+
     // -- permit auth method
     if (permissions.permitAuthMethod) {
-      const contractClient = this.ethEoaContractsClient;
-      const addPermittedAuthMethodReceipt =
-        await contractClient.addPermittedAuthMethod({
+      try {
+        const addPermittedAuthMethodReceipt =
+          await _contractClient.addPermittedAuthMethod({
+            pkpTokenId: assignedPkp.tokenId,
+            authMethodType: customAuthMethod.authMethodType,
+            authMethodId: customAuthMethod.authMethodId,
+            authMethodScopes: permissions.permitAuthMethodScopes,
+          });
+
+        console.log(
+          '✅ addPermittedAuthMethodReceipt:',
+          addPermittedAuthMethodReceipt
+        );
+      } catch (e) {
+        console.error('Error:', e);
+        throw new Error('Failed to permit custom auth method');
+      }
+    }
+
+    const IPFSID =
+      litActionIpfsId ||
+      (await stringToIpfsHash(litActionCode).catch((e) => {
+        console.error('Error:', e);
+        throw new Error('Failed to convert litActionCode to IPFSID');
+      }));
+
+    // -- permit lit action | grant an action permission to use the PKP
+    try {
+      const addPermittedActionReceipt =
+        await _contractClient.addPermittedAction({
+          ipfsId: IPFSID,
           pkpTokenId: assignedPkp.tokenId,
-          authMethodType: customAuthMethod.authMethodType,
-          authMethodId: customAuthMethod.authMethodId,
-          authMethodScopes: permissions.permitAuthMethodScopes,
+          authMethodScopes: [AuthMethodScope.SignAnything],
         });
 
-      console.log(
-        '✅ addPermittedAuthMethodReceipt:',
-        addPermittedAuthMethodReceipt
-      );
+      console.log('✅ addPermittedActionReceipt:', addPermittedActionReceipt);
+    } catch (e) {
+      throw new Error(e);
     }
 
     const builder = new ResourceAbilityRequestBuilder();
@@ -671,15 +719,15 @@ export class TinnyPerson {
         litActionCode: Buffer.from(litActionCode).toString('base64'),
         jsParams,
       });
-    }
-
-    if (litActionIpfsId) {
+    } else if (litActionIpfsId) {
       return this.tinnyEnvConfig.litNodeClient.getLitActionSessionSigs({
         pkpPublicKey: assignedPkp.publicKey,
         resourceAbilityRequests: _resourceAbilityRequests,
         litActionIpfsId,
         jsParams,
       });
+    } else {
+      throw new Error('Invalid Lit Action code');
     }
   }
 

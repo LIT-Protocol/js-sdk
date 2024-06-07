@@ -109,36 +109,33 @@ export class RevampEnvironment {
     '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
   );
 
-  // -- encrypt
-
   // -- get various sessions
   const aliceSessions = [
-    // {
-    //   description: 'Using EOA Session',
-    //   session: await alice.getEthEoaSession(),
-    //   pkpPublicKey: alice.ethEoaOwnedPkp.publicKey,
-    // },
-    // {
-    //   description: 'Using Ethereum Auth Method Session',
-    //   session: await alice.getAuthMethodSession({
-    //     authMethods: [alice.ethAuthMethod],
-    //     pkpPublicKey: alice.ethAuthMethodOwnedPkp.publicKey,
-    //   }),
-    //   pkpPublicKey: alice.ethAuthMethodOwnedPkp.publicKey,
-    // },
+    {
+      description: 'Using EOA Session',
+      session: await alice.getEthEoaSession(),
+      pkpPublicKey: alice.ethEoaOwnedPkp.publicKey,
+    },
+    {
+      description: 'Using Ethereum Auth Method Session',
+      session: await alice.getAuthMethodSession({
+        authMethods: [alice.ethAuthMethod],
+        pkpPublicKey: alice.ethAuthMethodOwnedPkp.publicKey,
+      }),
+      pkpPublicKey: alice.ethAuthMethodOwnedPkp.publicKey,
+    },
     {
       description: 'Using Custom Session',
       session: await alice.getCustomSession({
         litActionCode: `(async () => {
-          if(foo !== 'bar'){
-            LitActions.setResponse({ response: "false" });
+          if(foo === 'bar'){
+            LitActions.setResponse({ response: "true" });
           }
-          LitActions.setResponse({ response: "true" });
         })();`,
         assignedPkp: alice.ethEoaOwnedPkp,
         jsParams: {
           publicKey: alice.ethEoaOwnedPkp.publicKey,
-          foo: 'bar',
+          foo: 'bar', // <-- changing this value will fail the authentication
         },
         customAuthMethod: {
           authMethodType: 89989,
@@ -149,6 +146,7 @@ export class RevampEnvironment {
           permitAuthMethodScopes: [AuthMethodScope.SignAnything],
         },
       }),
+      pkpPublicKey: alice.ethEoaOwnedPkp.publicKey,
     },
   ];
 
