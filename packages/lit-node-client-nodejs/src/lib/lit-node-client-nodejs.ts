@@ -524,7 +524,6 @@ export class LitNodeClientNodeJs
       }
     } else if (authSig.algo === `LIT_BLS`) {
       try {
-        // TODO: verify the bls signature
         let sigJson = JSON.parse(authSig.sig);
         const messageBytes = uint8arrayFromString(authSig.signedMessage);
         const signatureBytes = uint8arrayFromString(sigJson.ProofOfPossession);
