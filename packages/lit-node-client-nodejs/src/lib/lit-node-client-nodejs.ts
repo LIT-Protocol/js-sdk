@@ -512,32 +512,17 @@ export class LitNodeClientNodeJs
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
-    // We will either have `ed25519` or `LIT_BLS` as we have deviated from the specification of SIWE and use BLS signatures in some cases
-    // Here we need to check the `algo` of the SIWE to confirm we can validate the signature as if we attempt to validate the BLS signature here
-    // it will fail.
-    if (authSig.algo === `ed25519`) {
-      try {
-        await authSigSiweMessage.validate(authSig.sig);
-      } catch (e) {
-        log('Need retry because verify failed', e);
-        return true;
-      }
-    } else if (authSig.algo === `LIT_BLS`){
-      try {
-        // TODO: verify the bls signature
-        let sigJson = JSON.parse(authSig.sig);
-        const messageBytes = uint8arrayFromString(authSig.signedMessage);
-        const signatureBytes = uint8arrayFromString(sigJson.ProofOfPossession);
-        log('bls verify command: ',messageBytes, signatureBytes, this.networkPubKey);
-        blsSdk.verify_signature(this.networkPubKey, uint8arrayToString(messageBytes, `base64`), uint8arrayToString(signatureBytes, `base64`));
-      } catch(e) {
-        log('Need retry because bls verification failed', e);
-        return true; // if BLS fails should we network retry or just throw an error
-      }
+
+    try {
+      await authSigSiweMessage.validate(authSig.sig);
+    } catch (e) {
+      console.debug('Need retry because verify failed', e);
+      return true;
     }
+
     // make sure the sig is for the correct session key
     if (authSigSiweMessage.uri !== sessionKeyUri) {
-      log('Need retry because uri does not match');
+      console.debug('Need retry because uri does not match');
       return true;
     }
 
@@ -546,7 +531,7 @@ export class LitNodeClientNodeJs
       !authSigSiweMessage.resources ||
       authSigSiweMessage.resources.length === 0
     ) {
-      log('Need retry because empty resources');
+      console.debug('Need retry because empty resources');
       return true;
     }
 
@@ -565,7 +550,7 @@ export class LitNodeClientNodeJs
           resourceAbilityRequest.ability
         )
       ) {
-        log('Need retry because capabilities do not match', {
+        console.debug('Need retry because capabilities do not match', {
           authSigSessionCapabilityObject,
           resourceAbilityRequest,
         });
