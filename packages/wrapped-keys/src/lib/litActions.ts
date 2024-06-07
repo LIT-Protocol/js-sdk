@@ -46,7 +46,7 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
 
     console.log('unsignedTransaction.chain', unsignedTransaction.chain);
     console.log('pkpAddress', pkpAddress);
-    const nonce = await Lit.Actions.getLatestNonce({ address: pkpAddress, chain: unsignedTransaction.chain });
+    const nonce = await Lit.Actions.getLatestNonce({ address: wallet.address, chain: unsignedTransaction.chain });
     console.log('nonce');
     console.log(nonce);
 
