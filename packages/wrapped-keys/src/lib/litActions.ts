@@ -43,7 +43,7 @@ export const signWithEthereumEncryptedKeyLitAction = `
 
     const tx = {
         to: unsignedTransaction.toAddress,
-        value: ethers.utils.parseEther(unsignedTransaction.value),
+        value: ethers.utils.hexlify(ethers.utils.parseEther(unsignedTransaction.value)),
         chainId: unsignedTransaction.chainId,
         data: unsignedTransaction.dataHex,
         nonce,
@@ -60,7 +60,7 @@ export const signWithEthereumEncryptedKeyLitAction = `
     
                 try {
                     const gasPrice = await provider.getGasPrice();
-                    return gasPrice;
+                    return ethers.utils.hexlify(gasPrice);
                 } catch (err) {
                     const errorMessage = 'Error: When getting gas price- ' + err.message;
                     Lit.Actions.setResponse({ response: errorMessage });
@@ -71,7 +71,7 @@ export const signWithEthereumEncryptedKeyLitAction = `
     }
 
     if (unsignedTransaction.gasLimit) {
-        tx.gasLimit = unsignedTransaction.gasLimit
+        tx.gasLimit = ethers.utils.hexlify(unsignedTransaction.gasLimit)
     } else {
         tx.gasLimit = await Lit.Actions.runOnce(
             { waitForResponse: true, name: 'gasLimit' },
@@ -81,7 +81,7 @@ export const signWithEthereumEncryptedKeyLitAction = `
                 
                 try {
                     const gasLimit = await provider.estimateGas(tx);
-                    return gasLimit;
+                    return ethers.utils.hexlify(gasLimit);
                 } catch (err) {
                     const errorMessage = 'Error: When estimating gas- ' + err.message;
                     Lit.Actions.setResponse({ response: errorMessage });
@@ -94,34 +94,44 @@ export const signWithEthereumEncryptedKeyLitAction = `
     console.log('tx');
     console.log(tx);
 
-    Lit.Actions.setResponse({ response: JSON.stringify(tx) });
+    const signedTx = await Lit.Actions.runOnce(
+        { waitForResponse: true, name: "signedTx" },
+        async () => {
+            try {
+                return wallet.signTransaction(tx);
+            } catch (error) {
+                const errorMessage = 'Error: When signing transaction- ' + err.message;
+                Lit.Actions.setResponse({ response: errorMessage });
+                return;
+            }
+        }
+    );
 
-    // try {
-    //     const signedTx = await wallet.signTransaction(tx);
+    if (broadcast) {
+        const resp = await Lit.Actions.runOnce(
+            { waitForResponse: true, name: 'broadcastTx' },
+            async () => {
+                try {
+                    const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
+                    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-    //     if (broadcast) {
-    //         const resp = await Lit.Actions.runOnce(
-    //             { waitForResponse: true, name: 'broadcastTx' },
-    //             async () => {
-    //                 const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
-    //                 const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+                    const transactionResponse = await provider.sendTransaction(signedTx);
+                    const receipt = await transactionResponse.wait();
 
-    //                 const transactionResponse = await provider.sendTransaction(signedTx);
-    //                 const receipt = await transactionResponse.wait();
+                    return JSON.stringify({ txHash: transactionResponse.hash, rpcUrl });
+                } catch (error) {
+                    const errorMessage = 'Error: When broadcasting transaction- ' + err.message;
+                    Lit.Actions.setResponse({ response: errorMessage });
+                    return;
+                }
+            }
+        );
 
-    //                 return JSON.stringify({ txHash: transactionResponse.hash, rpcUrl });
-    //             }
-    //         );
-
-    //         const { txHash, rpcUrl } = JSON.parse(resp);
-    //         console.log(rpcUrl);
-    //         Lit.Actions.setResponse({ response: txHash });
-    //     } else {
-    //         Lit.Actions.setResponse({ response: signedTx });
-    //     }
-    // } catch (err) {
-    //     const errorMessage = 'Error: When signing transaction- ' + err.message;
-    //     Lit.Actions.setResponse({ response: errorMessage });
-    // }
+        const { txHash, rpcUrl } = JSON.parse(resp);
+        console.log(rpcUrl);
+        Lit.Actions.setResponse({ response: txHash });
+    } else {
+        Lit.Actions.setResponse({ response: signedTx });
+    }
 })();
 `;
