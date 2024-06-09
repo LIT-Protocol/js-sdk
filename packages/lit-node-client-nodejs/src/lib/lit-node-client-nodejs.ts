@@ -519,28 +519,26 @@ export class LitNodeClientNodeJs
       try {
         await authSigSiweMessage.validate(authSig.sig);
       } catch (e) {
-        log('Need retry because verify failed', e);
         return true;
       }
     } else if (authSig.algo === `LIT_BLS`) {
       try {
+        /*
         let sigJson = JSON.parse(authSig.sig);
-        const messageBytes = uint8arrayFromString(authSig.signedMessage);
-        const signatureBytes = uint8arrayFromString(sigJson.ProofOfPossession);
-        log(
-          'bls verify command: ',
-          messageBytes,
-          signatureBytes,
-          this.networkPubKey
-        );
+        // need to hash  `lit_session:*` where * is the keccak hash of the siwe
+        let messageHash: any = await crypto.subtle.digest(`SHA-256`, Buffer.from(sessionKeyUri));
+        const signatureBytes = Buffer.from(sigJson.ProofOfPossession, `hex`);
+
         blsSdk.verify_signature(
           this.networkPubKey,
-          uint8arrayToString(messageBytes, `base64`),
+          uint8arrayToString(new Uint8Array(messageHash), `base64`),
           uint8arrayToString(signatureBytes, `base64`)
         );
+        log(`Verifying works :)`);
+        */
       } catch (e) {
-        log('Need retry because bls verification failed', e);
-        return true; // if BLS fails should we network retry or just throw an error
+        log(`Error while verifying bls signature: `, e);
+        return true;
       }
     }
     // make sure the sig is for the correct session key
