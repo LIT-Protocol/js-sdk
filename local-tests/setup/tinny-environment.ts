@@ -4,11 +4,11 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthSig,
   CosmosAuthSig,
-  LitContractContext,
+  LitContractResolverContext,
   SolanaAuthSig,
 } from '@lit-protocol/types';
 import { TinnyPerson } from './tinny-person';
-import networkContext from './networkContext.json';
+
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
@@ -196,13 +196,14 @@ export class TinnyEnvironment {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      const networkContext = this._testnet.ContractContext;
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
         bootstrapUrls: this.processEnvs.BOOTSTRAP_URLS,
         rpcUrl: this.processEnvs.LIT_RPC_URL,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
-        contractContext: networkContext as LitContractContext,
+        contractContext: networkContext,
       });
     } else if (this.network === LIT_TESTNET.MANZANO) {
       this.litNodeClient = new LitNodeClient({
@@ -254,6 +255,7 @@ export class TinnyEnvironment {
       litNodeClient: this.litNodeClient,
       network: this.network,
       processEnvs: this.processEnvs,
+      contractContext: this?._testnet?.ContractContext ?? undefined,
     };
   }
 
@@ -379,11 +381,12 @@ export class TinnyEnvironment {
      * ====================================
      */
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      const networkContext = this._testnet.ContractContext;
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
         rpc: this.processEnvs.LIT_RPC_URL, // anvil rpc
-        customContext: networkContext as unknown as LitContractContext,
+        customContext: networkContext,
       });
     } else {
       // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
