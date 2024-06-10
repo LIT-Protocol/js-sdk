@@ -1,4 +1,5 @@
 import fs from 'fs';
+import * as pako from 'pako';
 
 const WASM_MODULE_PATH = 'rust/pkg/wasm-internal_bg.wasm';
 const WASM_BINDING_PATH = 'rust/pkg/wasm-internal.js';
@@ -20,19 +21,27 @@ function main() {
   const wasmModule = fs.readFileSync(WASM_MODULE_PATH);
   const wasmBindingModule = fs.readFileSync(WASM_BINDING_PATH);
 
-  const wasmModuleB64 = Buffer.from(wasmModule).toString('base64');
+  let wasmModuleBuffer = Buffer.from(wasmModule);
+  wasmModuleBuffer = pako.deflate(new Uint8Array(wasmModuleBuffer));
+  const wasmModuleB64 = Buffer.from(wasmModuleBuffer).toString('base64');
   let buffer = `let moduleBuffer = "";`;
   for (let i = 0; i < wasmModuleB64.length; i += CHUNK_SIZE) {
     const chunk = wasmModuleB64.slice(i, i + CHUNK_SIZE);
     buffer += `\nmoduleBuffer += "${chunk}";`;
   }
 
-  let bindingModuleString = buffer;
+  let bindingModuleString = `
+// @ts-nocheck
+import * as pako from 'pako';
+  `;
+  bindingModuleString += '\n';
+  bindingModuleString += buffer;
   bindingModuleString += '\n';
   bindingModuleString += `
-  export function getModule() {
-    return Uint8Array.from(Buffer.from(moduleBuffer, 'base64'));
-  }
+export function getModule() {
+  let module = pako.inflate(new Uint8Array(Buffer.from(moduleBuffer, 'base64')));
+  return Uint8Array.from(module);
+}
 `;
 
   bindingModuleString += wasmBindingModule;
