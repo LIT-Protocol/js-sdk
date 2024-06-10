@@ -126,6 +126,7 @@ import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -523,19 +524,7 @@ export class LitNodeClientNodeJs
       }
     } else if (authSig.algo === `LIT_BLS`) {
       try {
-        /*
-        let sigJson = JSON.parse(authSig.sig);
-        // need to hash  `lit_session:*` where * is the keccak hash of the siwe
-        let messageHash: any = await crypto.subtle.digest(`SHA-256`, Buffer.from(sessionKeyUri));
-        const signatureBytes = Buffer.from(sigJson.ProofOfPossession, `hex`);
-
-        blsSdk.verify_signature(
-          this.networkPubKey,
-          uint8arrayToString(new Uint8Array(messageHash), `base64`),
-          uint8arrayToString(signatureBytes, `base64`)
-        );
-        log(`Verifying works :)`);
-        */
+        blsSessionSigVerify(blsSdk.verify_signature, this.networkPubKey!, authSig);
       } catch (e) {
         log(`Error while verifying bls signature: `, e);
         return true;
@@ -2052,7 +2041,7 @@ const resourceAbilityRequests = [
     // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
-    if (needToResignSessionKey) {
+    if (needToResignSessionKey && authSig.algo !== `LIT_BLS`) {
       log('need to re-sign session key.  Signing...');
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
