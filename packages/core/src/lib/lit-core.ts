@@ -61,6 +61,7 @@ import type {
   EthBlockhashInfo,
 } from '@lit-protocol/types';
 import { composeLitUrl } from './endpoint-version';
+import { initWASM } from '@lit-protocol/wasm';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -546,6 +547,9 @@ export class LitCore {
   }
 
   private async _connect() {
+    if (!this.ready) {
+      await initWASM();
+    }
     // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
     this._stopListeningForNewEpoch();
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
