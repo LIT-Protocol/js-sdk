@@ -72,8 +72,9 @@ digest = "0.10"
 vsss-rs = { version = "=4.0", features = ["std"] }
 
 [profile.release]
-opt-level = "s"
+opt-level = "z"
 lto = true
+wasm-opt=['-Os']
 
 [package.metadata.wasm-pack.profile.profiling]
 wasm-opt = ['-g', '-O']
