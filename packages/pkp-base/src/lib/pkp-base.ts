@@ -8,6 +8,10 @@
  * initializing the class instances.
  */
 
+import { publicKeyConvert } from 'secp256k1';
+
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { logError } from '@lit-protocol/misc';
 import {
   AuthenticationProps,
   JsonExecutionSdkParams,
@@ -20,9 +24,6 @@ import {
   ExecuteJsResponse,
   SessionSigsMap,
 } from '@lit-protocol/types';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { publicKeyConvert } from 'secp256k1';
-import { logError } from '@lit-protocol/misc';
 
 /**
  * Compresses a given public key.
@@ -105,12 +106,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       (prop.litNodeClient as LitNodeClient) ||
       new LitNodeClient({
         litNetwork: prop.litNetwork ?? 'cayenne',
-        ...(prop.bootstrapUrls &&
-          prop.litNetwork === 'custom' && {
-            bootstrapUrls: prop.bootstrapUrls,
-          }),
-        ...(prop.bootstrapUrls &&
-          prop.litNetwork == 'custom' && { minNodeCount: prop.minNodeCount }),
+        ...(prop.minNodeCount && prop.litNetwork == 'custom'
+          ? { minNodeCount: prop.minNodeCount }
+          : {}),
         debug: this.debug,
         // minNodeCount:
         //   prop.bootstrapUrls && prop.litNetwork == 'custom'

@@ -87,7 +87,6 @@ interface EpochCache {
 export type LitNodeClientConfigWithDefaults = Required<
   Pick<
     LitNodeClientConfig,
-    | 'bootstrapUrls'
     | 'alertWhenUnauthorized'
     | 'debug'
     | 'connectTimeout'
@@ -98,7 +97,9 @@ export type LitNodeClientConfigWithDefaults = Required<
 > &
   Partial<
     Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
-  >;
+  > & {
+    bootstrapUrls: string[];
+  };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;

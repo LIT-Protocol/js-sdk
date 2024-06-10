@@ -193,7 +193,6 @@ export interface LitNodeClientConfig {
   alertWhenUnauthorized?: boolean;
   minNodeCount?: number;
   debug?: boolean;
-  bootstrapUrls?: string[];
   connectTimeout?: number;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
@@ -204,7 +203,7 @@ export interface LitNodeClientConfig {
 
 export type CustomNetwork = Pick<
   LitNodeClientConfig,
-  'litNetwork' | 'bootstrapUrls' | 'contractContext' | 'checkNodeAttestation'
+  'litNetwork' | 'contractContext' | 'checkNodeAttestation'
 > &
   Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
 
@@ -1211,7 +1210,6 @@ export interface PKPBaseProp {
   authContext?: AuthenticationProps;
   litNetwork?: any;
   debug?: boolean;
-  bootstrapUrls?: string[];
   minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
