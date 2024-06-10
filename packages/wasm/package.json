@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "preinstall": "yarn rust:build",
-    "rust:build": "wasm-pack build ./rust --target web --out-name wasm-internal && yarn rust:postbuild",
+    "rust:build": "wasm-pack build ./rust --target web --release --out-name wasm-internal && yarn rust:postbuild",
     "rust:postbuild": "node scripts/copyWasmBinary.mjs && rm -rf src/pkg && mv rust/pkg src/pkg",
     "rust:build:debug": "wasm-pack build ./rust --target web --dev --out-name wasm-internal && yarn rust:postbuild"
   },
