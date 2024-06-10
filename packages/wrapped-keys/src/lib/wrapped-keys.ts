@@ -1,4 +1,4 @@
-import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
+import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT, LIT_PREFIX } from './constants';
 import { decryptToString, encryptString } from '@lit-protocol/encryption';
 import { logError } from '@lit-protocol/misc';
 import {
@@ -25,10 +25,12 @@ export async function importPrivateKey({
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
+  const updatedPrivateKey = LIT_PREFIX + privateKey;
+
   const { ciphertext, dataToEncryptHash } = await encryptString(
     {
       accessControlConditions: allowPkpAddressToDecrypt,
-      dataToEncrypt: privateKey,
+      dataToEncrypt: updatedPrivateKey,
     },
     litNodeClient
   );
@@ -107,7 +109,8 @@ export async function exportPrivateKey({
       litNodeClient
     );
 
-    return decryptedPrivateKey;
+    // It will be of the form lit_<privateKey>
+    return decryptedPrivateKey.startsWith(LIT_PREFIX) ? decryptedPrivateKey.slice(LIT_PREFIX.length) : decryptedPrivateKey;
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);

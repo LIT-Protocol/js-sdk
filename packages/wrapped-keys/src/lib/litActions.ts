@@ -1,6 +1,7 @@
 export const signWithEthereumEncryptedKeyLitAction = `
 const DEFAULT_GAS_LIMIT = 21000;
 const DEFAULT_GAS_PRICE = '50'; // in gwei
+const LIT_PREFIX = 'lit_';
 
 (async () => {
     // TODO!: Remove ALL the console.log statements
@@ -36,7 +37,8 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
         authSig: null,
     });
 
-    const wallet = new ethers.Wallet(decryptedPrivateKey);
+    const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX) ? decryptedPrivateKey.slice(LIT_PREFIX.length) : decryptedPrivateKey;
+    const wallet = new ethers.Wallet(privateKey);
 
     const gasPrice = unsignedTransaction.gasPrice ? unsignedTransaction.gasPrice : DEFAULT_GAS_PRICE;
     const gasLimit = unsignedTransaction.gasLimit ? unsignedTransaction.gasLimit : DEFAULT_GAS_LIMIT;
