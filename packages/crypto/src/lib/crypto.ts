@@ -58,7 +58,7 @@ export const encrypt = (
     case 96:
       return Buffer.from(
         blsEncrypt('Bls12381G2', publicKey, message, identity)
-      ).toString('hex');
+      ).toString('base64');
     default:
       return '';
   }
