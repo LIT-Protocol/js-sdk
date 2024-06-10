@@ -524,7 +524,11 @@ export class LitNodeClientNodeJs
       }
     } else if (authSig.algo === `LIT_BLS`) {
       try {
-        blsSessionSigVerify(blsSdk.verify_signature, this.networkPubKey!, authSig);
+        blsSessionSigVerify(
+          blsSdk.verify_signature,
+          this.networkPubKey!,
+          authSig
+        );
       } catch (e) {
         log(`Error while verifying bls signature: `, e);
         return true;
