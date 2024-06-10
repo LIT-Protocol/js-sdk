@@ -93,10 +93,11 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'checkNodeAttestation'
     | 'litNetwork'
     | 'minNodeCount'
-    | 'rpcUrl'
   >
 > &
-  Partial<Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext'>>;
+  Partial<
+    Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
+  >;
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;
@@ -112,7 +113,6 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
-    rpcUrl: null,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -134,6 +134,7 @@ export class LitCore {
   };
   private _blockHashUrl =
     'http://block-indexer.litgateway.com/get_most_recent_valid_block';
+
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     // Initialize default config based on litNetwork
