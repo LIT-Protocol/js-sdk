@@ -134,7 +134,8 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
   broadcast,
   litNodeClient,
 }: SignTransactionWithEncryptedKeyParams<T>): Promise<string> {
-  const { pkpAddress, ciphertext, dataToEncryptHash } = await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
+  const { pkpAddress, ciphertext, dataToEncryptHash } =
+    await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
   let result;
   try {
@@ -207,7 +208,8 @@ export async function signMessageWithEncryptedKey({
   unsignedMessage,
   litNodeClient,
 }: SignMessageWithEncryptedKeyParams): Promise<string> {
-  const { pkpAddress, ciphertext, dataToEncryptHash } = await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
+  const { pkpAddress, ciphertext, dataToEncryptHash } =
+    await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
   let result;
   try {

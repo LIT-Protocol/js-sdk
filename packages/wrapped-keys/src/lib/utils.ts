@@ -75,7 +75,9 @@ export function getPkpAccessControlCondition(
   ];
 }
 
-export async function fetchPrivateKeyMedataFromDatabase(pkpSessionSigs: SessionSigsMap): Promise<ExportPrivateKeyResponse> {
+export async function fetchPrivateKeyMedataFromDatabase(
+  pkpSessionSigs: SessionSigsMap
+): Promise<ExportPrivateKeyResponse> {
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
 
   try {
@@ -96,7 +98,7 @@ export async function fetchPrivateKeyMedataFromDatabase(pkpSessionSigs: SessionS
       throw new Error(errorBody);
     }
 
-    return await response.json() as ExportPrivateKeyResponse;
+    return (await response.json()) as ExportPrivateKeyResponse;
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);
