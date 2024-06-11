@@ -1880,7 +1880,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] signatureShares:`, signatureShares);
 
-    const blsCombinedSignature = combineSignatureShares(signatureShares);
+    const blsCombinedSignature = await combineSignatureShares(signatureShares);
 
     log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
 
