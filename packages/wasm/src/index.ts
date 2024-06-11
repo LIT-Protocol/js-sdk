@@ -14,6 +14,7 @@ import * as wasmInternal from './pkg/wasm-internal';
 let wasmSdkInstance: InitOutput | undefined;
 // loaded wasm module
 let isWasmModuleLoading = false;
+
 /**
  * Initializes the wasm module and keeps the module in scope within
  * the module context. Does not expose the module context as it is
@@ -72,7 +73,7 @@ export async function blsVerify(
   signature: Uint8Array
 ): Promise<void> {
   await loadModules();
-  return wasmInternal.blsVerify(variant, public_key, message, signature);
+  wasmInternal.blsVerify(variant, public_key, message, signature);
 }
 
 export async function ecdsaCombine(
@@ -100,7 +101,7 @@ export async function ecdsaVerify(
   signature: [Uint8Array, Uint8Array, number]
 ): Promise<void> {
   await loadModules();
-  return wasmInternal.ecdsaVerify(variant, message_hash, public_key, signature);
+  wasmInternal.ecdsaVerify(variant, message_hash, public_key, signature);
 }
 
 export async function sevSnpGetVcekUrl(
