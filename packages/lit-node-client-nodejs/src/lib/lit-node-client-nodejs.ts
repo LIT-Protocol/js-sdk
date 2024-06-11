@@ -2045,7 +2045,7 @@ const resourceAbilityRequests = [
     // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
-    if (needToResignSessionKey && authSig.algo !== `LIT_BLS`) {
+    if (needToResignSessionKey) {
       log('need to re-sign session key.  Signing...');
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
