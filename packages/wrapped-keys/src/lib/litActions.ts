@@ -1,4 +1,4 @@
-export const signWithEthereumEncryptedKeyLitAction = `
+export const signTransactionWithEthereumEncryptedKeyLitAction = `
 const DEFAULT_GAS_LIMIT = 21000;
 const DEFAULT_GAS_PRICE = '50'; // in gwei
 const LIT_PREFIX = 'lit_';
@@ -84,6 +84,54 @@ const LIT_PREFIX = 'lit_';
         }
     } catch (err) {
         const errorMessage = 'Error: When signing transaction- ' + err.message;
+        Lit.Actions.setResponse({ response: errorMessage });
+    }
+})();
+`;
+
+export const signMessageWithEthereumEncryptedKeyLitAction = `
+const LIT_PREFIX = 'lit_';
+
+(async () => {
+    // TODO!: Remove ALL the console.log statements
+    console.log('unsignedMessage');
+    console.log(unsignedMessage);
+
+    const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
+        accessControlConditions,
+        ciphertext,
+        dataToEncryptHash,
+        chain: 'ethereum',
+        authSig: null,
+    });
+
+    console.log('decryptedPrivateKey');
+    console.log(decryptedPrivateKey);
+
+    if (!decryptedPrivateKey) { // Exit the nodes which don't have the decryptedData
+        return;
+    }
+
+    const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX) ? decryptedPrivateKey.slice(LIT_PREFIX.length) : decryptedPrivateKey;
+    const wallet = new ethers.Wallet(privateKey);
+
+    try {
+        const signature = await wallet.signMessage(unsignedMessage);
+        console.log('signature');
+        console.log(signature);
+
+        const recoveredAddress = ethers.utils.verifyMessage(unsignedMessage, signature);
+        console.log('recoveredAddress');
+        console.log(recoveredAddress);
+
+        if (recoveredAddress !== wallet.address) {
+            Lit.Actions.setResponse({ response: 'Error: Recovered address doesn't match the wallet address' });
+            return;
+        }
+
+        Lit.Actions.setResponse({ response: signature });
+    } catch (err) {
+        const errorMessage = 'Error: When signing message- ' + err.message;
         Lit.Actions.setResponse({ response: errorMessage });
     }
 })();

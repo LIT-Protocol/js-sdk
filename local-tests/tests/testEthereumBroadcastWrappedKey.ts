@@ -5,7 +5,7 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
@@ -72,7 +72,7 @@ export const testEthereumBroadcastWrappedKey = async (
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signWithEthereumEncryptedKeyLitAction,
+    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
     unsignedTransaction,
     broadcast: true,
     litNodeClient: devEnv.litNodeClient,

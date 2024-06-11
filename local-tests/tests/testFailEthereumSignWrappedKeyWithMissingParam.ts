@@ -4,7 +4,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
   SolanaLitTransaction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
@@ -63,7 +63,7 @@ export const testFailEthereumSignWrappedKeyWithMissingParam = async (
   try {
     const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signWithEthereumEncryptedKeyLitAction,
+      litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
       unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,

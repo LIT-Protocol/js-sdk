@@ -5,7 +5,7 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
@@ -66,7 +66,7 @@ export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
   try {
     const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signWithEthereumEncryptedKeyLitAction,
+      litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
       unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,
