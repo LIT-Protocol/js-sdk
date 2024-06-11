@@ -5,17 +5,19 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
  */
-export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
+export const testEthereumBroadcastTransactionWrappedKey = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -27,11 +29,16 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   console.log(pkpSessionSigs);
 
-  const privateKey = ethers.Wallet.createRandom().privateKey;
+  const wrappedKeysWallet = ethers.Wallet.createRandom();
+  const wrappedKeysWalletPrivateKey = wrappedKeysWallet.privateKey;
+
+  const wrappedKeysWalletAddress = wrappedKeysWallet.address;
+  console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
+  await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
 
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,
-    privateKey,
+    privateKey: wrappedKeysWalletPrivateKey,
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -55,8 +62,8 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
     chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
+    gasPrice: '0.001',
+    gasLimit: 30000,
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
@@ -65,18 +72,19 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signWithEthereumEncryptedKeyLitAction,
+    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
     unsignedTransaction,
-    broadcast: false,
+    broadcast: true,
     litNodeClient: devEnv.litNodeClient,
   });
 
   console.log('signedTx');
   console.log(signedTx);
 
+  // TODO!: Convert hex signedTx to UTF-8 and assert that it contains "Test transaction from Alice to bob"
   if (!ethers.utils.isHexString(signedTx)) {
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testEthereumSignWrappedKey');
+  log('✅ testEthereumBroadcastTransactionWrappedKey');
 };

@@ -24,7 +24,7 @@ export interface ExportPrivateKeyResponse {
 export interface SignMessageWithEncryptedKeyParams {
   pkpSessionSigs: SessionSigsMap;
   litActionCode: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
-  unsignedMessage: LitMessage;
+  unsignedMessage: string | Uint8Array;
   litNodeClient: ILitNodeClient;
 }
 
@@ -52,8 +52,3 @@ export interface EthereumLitTransaction extends BaseLitTransaction {
 export interface SolanaLitTransaction extends BaseLitTransaction {}
 
 export type LitTransaction = EthereumLitTransaction | SolanaLitTransaction;
-
-// Same for both Ethereum & Solana
-export interface LitMessage {
-  message: string;
-}

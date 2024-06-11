@@ -5,20 +5,19 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumBroadcastWrappedKeysInsufficientFunds
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumBroadcastWrappedKeysInsufficientFunds
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumBroadcastWrappedKeysInsufficientFunds
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignTransactionWrappedKey
  */
-export const testFailEthereumBroadcastWrappedKeysInsufficientFunds = async (
+export const testEthereumSignTransactionWrappedKey = async (
   devEnv: TinnyEnvironment
 ) => {
-  // TODO!: Send funds to the PKP funds
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -66,31 +65,20 @@ export const testFailEthereumBroadcastWrappedKeysInsufficientFunds = async (
     chain: 'chronicleTestnet',
   };
 
-  try {
-    const _res = await signTransactionWithEncryptedKey({
-      pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signWithEthereumEncryptedKeyLitAction,
-      unsignedTransaction,
-      broadcast: true,
-      litNodeClient: devEnv.litNodeClient,
-    });
-  } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-    console.log(e.message);
+  const signedTx = await signTransactionWithEncryptedKey({
+    pkpSessionSigs: pkpSessionSigsSigning,
+    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
+    unsignedTransaction,
+    broadcast: false,
+    litNodeClient: devEnv.litNodeClient,
+  });
 
-    if (
-      e.message.includes(
-        'Error executing the Signing Lit Action: Error: When signing transaction- processing response'
-      ) &&
-      e.message.includes('insufficient FPE funds for gas * price + value')
-    ) {
-      console.log(
-        '✅ testFailEthereumBroadcastWrappedKeysInsufficientFunds is expected to have an error'
-      );
-    } else {
-      throw e;
-    }
+  console.log('signedTx');
+  console.log(signedTx);
+
+  if (!ethers.utils.isHexString(signedTx)) {
+    throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testFailEthereumBroadcastWrappedKeysInsufficientFunds');
+  log('✅ testEthereumSignTransactionWrappedKey');
 };

@@ -12,7 +12,6 @@ import {
   getPkpAddressFromSessionSig,
 } from './utils';
 import {
-  LitMessage,
   LitTransaction,
   ExportPrivateKeyParams,
   ExportPrivateKeyResponse,

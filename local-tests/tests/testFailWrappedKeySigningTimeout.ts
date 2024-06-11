@@ -11,11 +11,11 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testWrappedKeySigningTimeout
- * ✅ NETWORK=manzano yarn test:local --filter=testWrappedKeySigningTimeout
- * ✅ NETWORK=localchain yarn test:local --filter=testWrappedKeySigningTimeout
+ * ✅ NETWORK=cayenne yarn test:local --filter=testFailWrappedKeySigningTimeout
+ * ✅ NETWORK=manzano yarn test:local --filter=testFailWrappedKeySigningTimeout
+ * ✅ NETWORK=localchain yarn test:local --filter=testFailWrappedKeySigningTimeout
  */
-export const testWrappedKeySigningTimeout = async (
+export const testFailWrappedKeySigningTimeout = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -78,12 +78,12 @@ export const testWrappedKeySigningTimeout = async (
       )
     ) {
       console.log(
-        '✅ testWrappedKeySigningTimeout is expected to have an error'
+        '✅ testFailWrappedKeySigningTimeout is expected to have an error'
       );
     } else {
       throw e;
     }
   }
 
-  log('✅ testWrappedKeySigningTimeout');
+  log('✅ testFailWrappedKeySigningTimeout');
 };

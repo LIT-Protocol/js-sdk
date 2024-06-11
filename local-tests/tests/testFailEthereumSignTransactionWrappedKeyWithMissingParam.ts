@@ -4,18 +4,18 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
-  EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
+  SolanaLitTransaction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignWrappedKeyWithInvalidParam
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignWrappedKeyWithInvalidParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignWrappedKeyWithInvalidParam
+ * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
+ * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
+ * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
  */
-export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
+export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -53,20 +53,17 @@ export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
 
   console.log(pkpSessionSigsSigning);
 
-  const unsignedTransaction: EthereumLitTransaction = {
+  // Using SolanaLitTransaction to mimic a missing field (chainId) param as Typescript will complain about missing chainId
+  const unsignedTransaction: SolanaLitTransaction = {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
-    chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
-    dataHex: 'Test transaction from Alice to bob',
     chain: 'chronicleTestnet',
   };
 
   try {
     const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signWithEthereumEncryptedKeyLitAction,
+      litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
       unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,
@@ -77,16 +74,16 @@ export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
 
     if (
       e.message.includes(
-        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
+        'Error executing the Signing Lit Action: Error: Missing required field: chainId'
       )
     ) {
       console.log(
-        '✅ testFailEthereumSignWrappedKeyWithInvalidParam is expected to have an error'
+        '✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam is expected to have an error'
       );
     } else {
       throw e;
     }
   }
 
-  log('✅ testFailEthereumSignWrappedKeyWithInvalidParam');
+  log('✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam');
 };
