@@ -111,7 +111,7 @@ export class PKPWalletConnect {
 
     // Parse the session proposal
     const { id, params } = proposal;
-    const { requiredNamespaces, relays } = params;
+    const { optionalNamespaces, requiredNamespaces, relays } = params;
     let rejected = false;
 
     // Ensure that the PKPClients can support the requested chains
@@ -120,7 +120,7 @@ export class PKPWalletConnect {
     for (const key of requiredNamespaceKeys) {
       if (!this.supportedChains.includes(key)) continue;
 
-      // Check if specified chain networks are supported by Lit. If so, get a list of accounts for the given chain
+      // Check if required chain networks are supported by Lit. If so, get a list of accounts for the given chain
       const accounts: string[] = [];
       const chains = requiredNamespaces[key].chains;
       if (chains) {
@@ -165,15 +165,45 @@ export class PKPWalletConnect {
         events: requiredNamespaces[key].events,
       };
     }
+    const optionalNamespaceKeys = Object.keys(optionalNamespaces);
+    for (const key of optionalNamespaceKeys) {
+      if (!this.supportedChains.includes(key)) continue;
 
-    // Reject session proposal if there are no constructed namespaces for supported chains
-    for (const chain of this.supportedChains) {
-      if (!namespaces[chain]) {
-        return await this.client.rejectSession({
-          id,
-          reason: getSdkError('UNSUPPORTED_CHAINS'),
-        });
+      // Check if optional chain networks are supported by Lit. If so, get a list of accounts for the given chain
+      const accounts: string[] = [];
+      const chains = optionalNamespaces[key].chains;
+      if (chains) {
+        for (const chain of chains) {
+          let accountsByChain: string[] = [];
+          if (this.checkIfChainIsSupported(chain)) {
+            accountsByChain = await this.getAccountsWithPrefix(chain);
+            // If no accounts are found for the given chain, reject the session proposal
+            if (accountsByChain.length !== 0) {
+              // Add accounts with prefix to the list of accounts
+              accounts.push(...accountsByChain);
+            }
+          }
+        }
       }
+
+      // Construct the session namespace
+      namespaces[key] = {
+        accounts,
+        chains: key.includes(':') ? [key] : chains,
+        methods: optionalNamespaces[key].methods,
+        events: optionalNamespaces[key].events,
+      };
+    }
+
+    // Reject session proposal if there are no constructed namespaces for required chains and at least one (if all are optional chains)
+    const supportsAllRequiredChains = requiredNamespaceKeys.every(
+      (namespaceKey) => namespaces[namespaceKey]
+    );
+    if (!supportsAllRequiredChains || Object.keys(namespaces).length === 0) {
+      return await this.client.rejectSession({
+        id,
+        reason: getSdkError('UNSUPPORTED_CHAINS'),
+      });
     }
 
     // Approve session proposal with the constructed session namespace and given relay protocol
