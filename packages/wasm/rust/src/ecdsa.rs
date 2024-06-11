@@ -8,7 +8,7 @@ use elliptic_curve::{
     subtle::ConditionallySelectable as _,
     CurveArithmetic, Field as _, Group, PrimeCurve, PrimeField,
 };
-use hd_keys_curves::{HDDerivable, HDDeriver};
+use hd_keys_curves_wasm::{HDDerivable, HDDeriver};
 use js_sys::Uint8Array;
 use k256::Secp256k1;
 use p256::NistP256;
