@@ -21,7 +21,8 @@ export const blsSessionSigVerify = (
   authSig: AuthSig
 ): void => {
   let sigJson = JSON.parse(authSig.sig);
-
+  // we do not nessesarly need to use ethers here but was a quick way
+  // to get verification working.
   const eip191Hash = ethers.utils.hashMessage(authSig.signedMessage);
   const prefixedStr =
     LIT_SESSION_SIGNED_MESSAGE_PREFIX + eip191Hash.replace('0x', '');
