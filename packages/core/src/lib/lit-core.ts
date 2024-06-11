@@ -62,7 +62,6 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { loadModules } from '@lit-protocol/wasm';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
