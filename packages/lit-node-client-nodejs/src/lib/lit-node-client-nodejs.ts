@@ -515,8 +515,8 @@ export class LitNodeClientNodeJs
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
     // We will either have `ed25519` or `LIT_BLS` as we have deviated from the specification of SIWE and use BLS signatures in some cases
     // Here we need to check the `algo` of the SIWE to confirm we can validate the signature as if we attempt to validate the BLS signature here
-    // it will fail.
-    if (authSig.algo === `ed25519`) {
+    // it will fail. If the  algo is not defined we can assume that it was an EOA wallet signing the message so we can use SIWE.
+    if (authSig.algo === `ed25519` || authSig.algo === undefined) {
       try {
         await authSigSiweMessage.validate(authSig.sig);
       } catch (e) {
