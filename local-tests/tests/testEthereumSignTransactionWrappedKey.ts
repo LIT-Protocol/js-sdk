@@ -15,7 +15,9 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignTransactionWrappedKey
  * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignTransactionWrappedKey
  */
-export const testEthereumSignTransactionWrappedKey = async (devEnv: TinnyEnvironment) => {
+export const testEthereumSignTransactionWrappedKey = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(

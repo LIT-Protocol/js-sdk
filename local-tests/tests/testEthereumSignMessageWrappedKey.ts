@@ -14,7 +14,9 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignMessageWrappedKey
  * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignMessageWrappedKey
  */
-export const testEthereumSignMessageWrappedKey = async (devEnv: TinnyEnvironment) => {
+export const testEthereumSignMessageWrappedKey = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -50,7 +52,7 @@ export const testEthereumSignMessageWrappedKey = async (devEnv: TinnyEnvironment
 
   console.log(pkpSessionSigsSigning);
 
-  const unsignedStringMessage = "This is a test message";
+  const unsignedStringMessage = 'This is a test message';
 
   const signature = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
@@ -66,7 +68,9 @@ export const testEthereumSignMessageWrappedKey = async (devEnv: TinnyEnvironment
     throw new Error(`signature isn't hex: ${signature}`);
   }
 
-  const unsignedBinaryMessage = ethers.utils.arrayify(ethers.utils.toUtf8Bytes(unsignedStringMessage));
+  const unsignedBinaryMessage = ethers.utils.arrayify(
+    ethers.utils.toUtf8Bytes(unsignedStringMessage)
+  );
 
   const signatureBinary = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
@@ -83,7 +87,9 @@ export const testEthereumSignMessageWrappedKey = async (devEnv: TinnyEnvironment
   }
 
   if (signatureBinary !== signature) {
-    throw new Error(`signature: ${signature} doesn't match it's signatureBinary form: ${signatureBinary}`);
+    throw new Error(
+      `signature: ${signature} doesn't match it's signatureBinary form: ${signatureBinary}`
+    );
   }
 
   log('✅ testEthereumSignMessageWrappedKey');
