@@ -24,9 +24,10 @@
     "genReact": false
   },
   "version": "6.0.0-testing.4",
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts",
   "scripts": {
-    "bundle": "yarn node ./esbuild.config.js"
-  }
+    "bundle": "yarn node ./esbuild.config.js",
+    "postinstall": "yarn bundle"
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

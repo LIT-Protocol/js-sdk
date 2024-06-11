@@ -71,3 +71,7 @@ storage.test.db
 
 local-tests/build
 # local-tests/setup/networkContext.json
+
+# These dist files are purposefully being comitted as the Lit Actions are bundled to include the Solana SDK.
+# TODO Remove this when a better solution has been put in place.
+!packages/wrapped-keys/src/lib/litActions/solana/dist/
