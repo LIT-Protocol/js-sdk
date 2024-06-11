@@ -79,7 +79,11 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
+import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
+import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 
+import { testWrappedKeySigningTimeout } from './tests/testWrappedKeySigningTimeout';
 import { testEthereumSignWrappedKey } from './tests/testEthereumSignWrappedKey';
 import { testFailEthereumSignWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignWrappedKeyWithInvalidParam';
 import { testFailEthereumSignWrappedKeyWithMissingParam } from './tests/testFailEthereumSignWrappedKeyWithMissingParam';
@@ -114,6 +118,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailImportWrappedKeysWithInvalidSessionSig,
     testFailImportWrappedKeysWithExpiredSessionSig,
     testExportWrappedKey,
+    testWrappedKeySigningTimeout,
   };
 
   const eoaSessionSigsTests = {
@@ -230,6 +235,18 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     },
   };
 
+  const litActionCombiningTests = {
+    ecdsaSignAndCombine: {
+      testExecuteJsSignAndCombineEcdsa,
+    },
+    decryptAndCombine: {
+      testExecutJsDecryptAndCombine,
+    },
+    broadcastAndCombine: {
+      testExecuteJsBroadcastAndCollect,
+    },
+  };
+
   const testConfig = {
     tests: {
       // testExample,
@@ -245,14 +262,20 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
 
+      ...litActionCombiningTests.broadcastAndCombine,
+      ...litActionCombiningTests.decryptAndCombine,
+      ...litActionCombiningTests.ecdsaSignAndCombine,
+
       ...wrappedKeysTests,
     },
     devEnv,
   };
-
+  let res;
   if (devEnv.processEnvs.RUN_IN_BAND) {
-    await runInBand(testConfig);
+    res = await runInBand(testConfig);
   } else {
-    await runTestsParallel(testConfig);
+    res = await runTestsParallel(testConfig);
   }
+  await devEnv.stopTestnet();
+  process.exit(res);
 })();

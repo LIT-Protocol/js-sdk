@@ -22,7 +22,7 @@ import {
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
-import { executeWithRetry, logError } from '@lit-protocol/misc';
+import { logError } from '@lit-protocol/misc';
 
 /**
  * Compresses a given public key.
@@ -314,36 +314,20 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.log('executeJsArgs:', executeJsArgs);
 
-    try {
-      const res = await executeWithRetry<ExecuteJsResponse>(
-        async (_id: string) =>
-          await this.litNodeClient.executeJs(executeJsArgs),
-        (error: any, requestId: string, isFinal: boolean) => {
-          if (!isFinal) {
-            this.log('an error has occurred, attempting to retry');
-          }
-        }
-      );
+    const res = await this.litNodeClient.executeJs(executeJsArgs);
 
-      if ('error' in res) {
-        return this.throwError(
-          `error while attempting signature operation, request identifier: lit_${res.requestId}`
-        );
-      }
-      const sig = (res as ExecuteJsResponse).signatures[sigName];
+    const sig = (res as ExecuteJsResponse).signatures[sigName];
 
-      this.log('res:', res);
-      this.log('res.signatures[sigName]:', sig);
+    this.log('res:', res);
+    this.log('res.signatures[sigName]:', sig);
 
+    if (sig.r && sig.s) {
       // pad sigs with 0 if length is odd
       sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
       sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
-
-      return sig;
-    } catch (err) {
-      console.log('err:', err);
-      throw err;
     }
+
+    return sig;
   }
 
   /**

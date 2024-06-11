@@ -1,6 +1,7 @@
 export const signAndSendTxWithEthereumEncryptedKeyLitAction = `
 const DEFAULT_GAS_LIMIT = 21000;
 const DEFAULT_GAS_PRICE = '50'; // in gwei
+const LIT_PREFIX = 'lit_';
 
 (async () => {
     // TODO!: Remove ALL the console.log statements
@@ -27,8 +28,7 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
         return;
     }
 
-    // TODO!: Update to use decryptToSingleNode()
-    const decryptedPrivateKey = await Lit.Actions.decryptAndCombine({
+    const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
         accessControlConditions,
         ciphertext,
         dataToEncryptHash,
@@ -39,14 +39,19 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
     console.log('decryptedPrivateKey');
     console.log(decryptedPrivateKey);
 
-    const wallet = new ethers.Wallet(decryptedPrivateKey);
+    if (!decryptedPrivateKey) { // Exit the nodes which don't have the decryptedData
+        return;
+    }
+
+    const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX) ? decryptedPrivateKey.slice(LIT_PREFIX.length) : decryptedPrivateKey;
+    const wallet = new ethers.Wallet(privateKey);
 
     const gasPrice = unsignedTransaction.gasPrice ? unsignedTransaction.gasPrice : DEFAULT_GAS_PRICE;
     const gasLimit = unsignedTransaction.gasLimit ? unsignedTransaction.gasLimit : DEFAULT_GAS_LIMIT;
 
     console.log('unsignedTransaction.chain', unsignedTransaction.chain);
     console.log('pkpAddress', pkpAddress);
-    const nonce = await Lit.Actions.getLatestNonce({ address: pkpAddress, chain: unsignedTransaction.chain });
+    const nonce = await Lit.Actions.getLatestNonce({ address: wallet.address, chain: unsignedTransaction.chain });
     console.log('nonce');
     console.log(nonce);
 
@@ -65,24 +70,27 @@ const DEFAULT_GAS_PRICE = '50'; // in gwei
 
     try {
         const signedTx = await wallet.signTransaction(tx);
-        Lit.Actions.setResponse({ response: signedTx });
 
         if (broadcast) {
             const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
-            console.log('rpcUrl');
-            console.log(rpcUrl);
-
             const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-            const transactionResponse = await provider.sendTransaction(signedTx);
-            console.log('Transaction sent: ', transactionResponse.hash); // TODO!: Set response instead of logs
 
-            const receipt = await transactionResponse.wait();
-            console.log('receipt');
-            console.log(receipt);
+            const transactionResponse = await provider.sendTransaction(signedTx);
+            const receipt = await transactionResponse.wait(); // TODO!: This can timeout. Catch the timeout error and throw a separate message for it
+
+            Lit.Actions.setResponse({ response: transactionResponse.hash });
+        } else {
+            Lit.Actions.setResponse({ response: signedTx });
         }
     } catch (err) {
         const errorMessage = 'Error: When signing transaction- ' + err.message;
         Lit.Actions.setResponse({ response: errorMessage });
     }
+})();
+`;
+
+export const signingTimeoutEncryptedKeyLitAction = `
+(async () => {
+    new Promise(resolve => setTimeout(resolve, 40000)); // Sleep for 40 seconds
 })();
 `;

@@ -41,7 +41,7 @@ export const runInBand = async ({
 }: {
   tests: any;
   devEnv: TinnyEnvironment;
-}): Promise<void> => {
+}): Promise<number> => {
   const filters = getFiltersFlag();
   const testsToRun = Object.entries(tests).filter(
     ([testName]) => filters.length === 0 || filters.includes(testName)
@@ -108,9 +108,9 @@ export const runInBand = async ({
   );
 
   if (failedTests.length > 0) {
-    process.exit(1); // Exit with error code if any test failed
+    return 1; // Exit with error code if any test failed
   } else {
-    process.exit(0); // Exit successfully if all tests passed
+    return 0; // Exit successfully if all tests passed
   }
 };
 
@@ -127,7 +127,7 @@ export const runTestsParallel = async ({
 }: {
   tests: any;
   devEnv: TinnyEnvironment;
-}): Promise<void> => {
+}): Promise<number> => {
   const filters = getFiltersFlag();
   const excludeFilters = getExcludeFlags();
 
@@ -224,8 +224,8 @@ export const runTestsParallel = async ({
   }
 
   if (failedTests.length > 0) {
-    process.exit(1); // Exit with error code if any test failed
+    return 1; // Exit with error code if any test failed
   } else {
-    process.exit(0); // Exit successfully if all tests passed
+    return 0; // Exit successfully if all tests passed
   }
 };

@@ -5,17 +5,17 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signingTimeoutEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testWrappedKeySigningTimeout
+ * ✅ NETWORK=manzano yarn test:local --filter=testWrappedKeySigningTimeout
+ * ✅ NETWORK=localchain yarn test:local --filter=testWrappedKeySigningTimeout
  */
-export const testEthereumBroadcastWrappedKey = async (
+export const testWrappedKeySigningTimeout = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -32,10 +32,6 @@ export const testEthereumBroadcastWrappedKey = async (
   const wrappedKeysWallet = ethers.Wallet.createRandom();
   const wrappedKeysWalletPrivateKey = wrappedKeysWallet.privateKey;
 
-  const wrappedKeysWalletAddress = wrappedKeysWallet.address;
-  console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
-  await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
-
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,
     privateKey: wrappedKeysWalletPrivateKey,
@@ -49,15 +45,6 @@ export const testEthereumBroadcastWrappedKey = async (
     );
   }
 
-  const pkpSessionSigsSigning = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
-
-  console.log(pkpSessionSigsSigning);
-
   const unsignedTransaction: EthereumLitTransaction = {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
@@ -70,21 +57,33 @@ export const testEthereumBroadcastWrappedKey = async (
     chain: 'chronicleTestnet',
   };
 
-  const signedTx = await signTransactionWithEncryptedKey({
-    pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signWithEthereumEncryptedKeyLitAction,
-    unsignedTransaction,
-    broadcast: true,
-    litNodeClient: devEnv.litNodeClient,
-  });
+  try {
+    const _signedTx = await signTransactionWithEncryptedKey({
+      pkpSessionSigs,
+      litActionCode: signingTimeoutEncryptedKeyLitAction,
+      unsignedTransaction,
+      broadcast: true,
+      litNodeClient: devEnv.litNodeClient,
+    });
+  } catch (e: any) {
+    console.log('❌ THIS IS EXPECTED: ', e);
+    console.log('❌ e.message: ', e.message);
 
-  console.log('signedTx');
-  console.log(signedTx);
-
-  // TODO!: Convert hex signedTx to UTF-8 and assert that it contains "Test transaction from Alice to bob"
-  if (!ethers.utils.isHexString(signedTx)) {
-    throw new Error(`signedTx isn't hex: ${signedTx}`);
+    if (
+      e.message.includes(
+        'There was a timeout error executing the Javascript for this action'
+      ) &&
+      e.message.includes(
+        "This doesn't mean that your transaction wasn't broadcast but that it took more than 30 secs to confirm. Please confirm whether it went through on the blockchain explorer for your chain."
+      )
+    ) {
+      console.log(
+        '✅ testWrappedKeySigningTimeout is expected to have an error'
+      );
+    } else {
+      throw e;
+    }
   }
 
-  log('✅ testEthereumBroadcastWrappedKey');
+  log('✅ testWrappedKeySigningTimeout');
 };

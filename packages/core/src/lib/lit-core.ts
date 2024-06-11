@@ -23,7 +23,6 @@ import {
   StakingStates,
   version,
   LIT_ENDPOINT,
-  CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -34,8 +33,6 @@ import {
 } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
-  executeWithRetry,
-  getIpAddress,
   isBrowser,
   isNode,
   log,
@@ -64,6 +61,8 @@ import type {
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
+  BlockHashErrorResponse,
+  EthBlockhashInfo,
 } from '@lit-protocol/types';
 import { composeLitUrl } from './endpoint-version';
 
@@ -94,7 +93,6 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'checkNodeAttestation'
     | 'litNetwork'
     | 'minNodeCount'
-    | 'retryTolerance'
     | 'rpcUrl'
   >
 > &
@@ -103,7 +101,7 @@ export type LitNodeClientConfigWithDefaults = Required<
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;
 // This interval is responsible for keeping latest block hash up to date
-const NETWORK_SYNC_INTERVAL = 30_000;
+const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
 export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
@@ -114,11 +112,6 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
-    retryTolerance: {
-      timeout: 31_000,
-      maxRetryCount: 3,
-      interval: 100,
-    },
     rpcUrl: null,
   };
   connectedNodes = new Set<string>();
@@ -139,7 +132,8 @@ export class LitCore {
     currentNumber: null,
     lastUpdateTime: null,
   };
-
+  private _blockHashUrl =
+    'http://block-indexer.litgateway.com/get_most_recent_valid_block';
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     // Initialize default config based on litNetwork
@@ -374,7 +368,7 @@ export class LitCore {
   private async _handleStakingContractStateChange(state: StakingStates) {
     log(`New state detected: "${state}"`);
 
-    if (state === StakingStates.NextValidatorSetLocked) {
+    if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
       this._scheduleEpochNumberUpdate();
 
@@ -519,8 +513,15 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   getLatestBlockhash = async (): Promise<string> => {
-    await this.connect();
-
+    console.log(
+      'querying latest blockhash curent value is ',
+      this.latestBlockhash
+    );
+    await this._syncBlockhash();
+    console.log(
+      `querying latest blockhash current value is `,
+      this.latestBlockhash
+    );
     if (!this.latestBlockhash) {
       throw new Error(
         `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
@@ -809,6 +810,35 @@ export class LitCore {
     };
   }
 
+  /**
+   * Fetches the latest block hash and log any errors that are returned
+   * @returns void
+   */
+  private async _syncBlockhash() {
+    log(
+      'Syncing state for new blockhash ',
+      'current blockhash: ',
+      this.latestBlockhash
+    );
+
+    return fetch(this._blockHashUrl)
+      .then(async (resp: Response) => {
+        const blockHashBody: EthBlockhashInfo = await resp.json();
+        this.latestBlockhash = blockHashBody.blockhash;
+        this.lastBlockHashRetrieved = Date.now();
+        log('Done syncing state new blockhash: ', this.latestBlockhash);
+      })
+      .catch((err: BlockHashErrorResponse) => {
+        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+        logError(
+          'Error while attempting fetch new latestBlockhash:',
+          err.messages,
+          'reason: ',
+          err.reason
+        );
+      });
+  }
+
   /** Currently, we perform a full sync every 30s, including handshaking with every node
    * However, we also have a state change listener that watches for staking contract state change events, which
    * _should_ be the only time that we need to perform handshakes with every node.
@@ -827,32 +857,11 @@ export class LitCore {
     this._networkSyncInterval = setInterval(async () => {
       if (
         !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= NETWORK_SYNC_INTERVAL
+        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
       ) {
-        log(
-          'Syncing state for new network context current config: ',
-          this.config,
-          'current blockhash: ',
-          this.lastBlockHashRetrieved
-        );
-        try {
-          await this.connect();
-          log(
-            'Done syncing state new config: ',
-            this.config,
-            'new blockhash: ',
-            this.lastBlockHashRetrieved
-          );
-        } catch (err: unknown) {
-          // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
-          const { message = '' } = err as Error | NodeClientErrorV1;
-          logError(
-            'Error while attempting to refresh nodes to fetch new latestBlockhash:',
-            message
-          );
-        }
+        await this._syncBlockhash();
       }
-    }, NETWORK_SYNC_INTERVAL);
+    }, BLOCKHASH_SYNC_INTERVAL);
   }
 
   /**
@@ -891,42 +900,29 @@ export class LitCore {
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    const res = await executeWithRetry<NodeCommandServerKeysResponse>(
-      async () => {
-        // -- get properties from params
-        const { url } = params;
+    // -- get properties from params
+    const { url } = params;
 
-        // -- create url with path
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.HANDSHAKE,
-        });
+    // -- create url with path
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.HANDSHAKE,
+    });
 
-        log(`handshakeWithNode ${urlWithPath}`);
+    log(`handshakeWithNode ${urlWithPath}`);
 
-        const data = {
-          clientPublicKey: 'test',
-          challenge: params.challenge,
-        };
+    const data = {
+      clientPublicKey: 'test',
+      challenge: params.challenge,
+    };
 
-        return await this.sendCommandToNode({
-          url: urlWithPath,
-          data,
-          requestId,
-        }).catch((err: NodeErrorV3) => {
-          return err;
-        });
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occurred, attempting to retry');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    return res as NodeCommandServerKeysResponse;
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data,
+      requestId,
+    }).catch((err: NodeErrorV3) => {
+      return err;
+    });
   };
 
   private async fetchCurrentEpochNumber() {
@@ -974,7 +970,7 @@ export class LitCore {
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
-    data = { ...data, epochNumber: this.currentEpochNumber };
+    data = { ...data, epoch: this.currentEpochNumber };
 
     logWithRequestId(
       requestId,
@@ -986,6 +982,7 @@ export class LitCore {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
         'X-Lit-SDK-Version': version,
         'X-Lit-SDK-Type': 'Typescript',
         'X-Request-Id': 'lit_' + requestId,

@@ -4,13 +4,14 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthSig,
   CosmosAuthSig,
-  LitContractContext,
+  LitContractResolverContext,
   SolanaAuthSig,
 } from '@lit-protocol/types';
 import { TinnyPerson } from './tinny-person';
-import networkContext from './networkContext.json';
+
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
+import { ShivaClient, TestnetClient } from './shiva-client';
 
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -21,7 +22,7 @@ export class TinnyEnvironment {
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
-    DEBUG: Boolean(process.env['DEBUG']) || false,
+    DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'] || 'http://127.0.0.1:8545',
@@ -36,7 +37,7 @@ export class TinnyEnvironment {
       process.env['LIT_OFFICIAL_RPC'] ||
       'https://chain-rpc.litprotocol.com/http',
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
-    RUN_IN_BAND: Boolean(process.env['RUN_IN_BAND']) || false,
+    RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'false',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
 
     // Available Accounts
@@ -63,7 +64,7 @@ export class TinnyEnvironment {
       '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
     ],
     KEY_IN_USE: new Array(),
-    NO_SETUP: Boolean(process.env['NO_SETUP']) || false,
+    NO_SETUP: process.env['NO_SETUP'] === 'false',
   };
 
   public litNodeClient: LitNodeClient;
@@ -87,6 +88,9 @@ export class TinnyEnvironment {
     address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
   };
 
+  //=========== PRIVATE MEMBERS ===========
+  private _shivaClient: ShivaClient = new ShivaClient();
+  private _testnet: TestnetClient | undefined;
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
@@ -192,13 +196,14 @@ export class TinnyEnvironment {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      const networkContext = this._testnet.ContractContext;
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
         bootstrapUrls: this.processEnvs.BOOTSTRAP_URLS,
         rpcUrl: this.processEnvs.LIT_RPC_URL,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
-        contractContext: networkContext as LitContractContext,
+        contractContext: networkContext,
       });
     } else if (this.network === LIT_TESTNET.MANZANO) {
       this.litNodeClient = new LitNodeClient({
@@ -250,6 +255,7 @@ export class TinnyEnvironment {
       litNodeClient: this.litNodeClient,
       network: this.network,
       processEnvs: this.processEnvs,
+      contractContext: this?._testnet?.ContractContext ?? undefined,
     };
   }
 
@@ -311,6 +317,13 @@ export class TinnyEnvironment {
       console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
       return;
     }
+    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      this._testnet = await this._shivaClient.startTestnetManager();
+      // wait for the testnet to be active before we start the tests.
+      await this._testnet.pollTestnetForActive();
+      await this._testnet.getTestnetConfig();
+    }
+
     await this.setupLitNodeClient();
     await this.setupSuperCapacityDelegationAuthSig();
     await this.setupBareEthAuthSig();
@@ -326,7 +339,7 @@ export class TinnyEnvironment {
 
     const toSign = await createSiweMessage({
       walletAddress: wallet.address,
-      nonce: await this.litNodeClient.getLatestBlockhash(),
+      nonce: this.litNodeClient.latestBlockhash,
       expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
       litNodeClient: this.litNodeClient,
     });
@@ -336,6 +349,22 @@ export class TinnyEnvironment {
       toSign,
     });
   }
+
+  //============= SHIVA ENDPOINTS =============
+  /**
+   * Will stop the testnet that is being used in the test run.
+   */
+  async stopTestnet() {
+    if (
+      this.network === LIT_TESTNET.LOCALCHAIN &&
+      this._shivaClient.processEnvs.STOP_TESTNET
+    ) {
+      await this._testnet.stopTestnet();
+    } else {
+      console.log('skipping testnet shutdown.');
+    }
+  }
+  //============= END SHIVA ENDPOINTS =============
 
   /**
    * Sends funds from the current wallet to the specified wallet address.
@@ -375,11 +404,12 @@ export class TinnyEnvironment {
      * ====================================
      */
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      const networkContext = this._testnet.ContractContext;
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
         rpc: this.processEnvs.LIT_RPC_URL, // anvil rpc
-        customContext: networkContext as unknown as LitContractContext,
+        customContext: networkContext,
       });
     } else {
       // TODO: This wallet should be cached somehwere and reused to create delegation signatures.

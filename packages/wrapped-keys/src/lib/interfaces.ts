@@ -21,7 +21,14 @@ export interface ExportPrivateKeyResponse {
   dataToEncryptHash: string;
 }
 
-export interface SignWithEncryptedKeyParams<T> {
+export interface SignMessageWithEncryptedKeyParams {
+  pkpSessionSigs: SessionSigsMap;
+  litActionCode: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
+  unsignedMessage: LitMessage;
+  litNodeClient: ILitNodeClient;
+}
+
+export interface SignTransactionWithEncryptedKeyParams<T> {
   pkpSessionSigs: SessionSigsMap;
   litActionCode: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
   unsignedTransaction: T;

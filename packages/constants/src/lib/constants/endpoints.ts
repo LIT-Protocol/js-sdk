@@ -32,8 +32,4 @@ export const LIT_ENDPOINT = {
     path: '/web/encryption/sign',
     version: LIT_ENDPOINT_VERSION.V0,
   },
-  SIGN_ECDSA: {
-    path: '/web/signing/signConditionEcdsa',
-    version: LIT_ENDPOINT_VERSION.V0,
-  },
 };
