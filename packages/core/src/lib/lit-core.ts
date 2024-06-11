@@ -491,6 +491,10 @@ export class LitCore {
           this.config.rpcUrl || LIT_CHAINS['lit'].rpcUrls[0]
         )
       );
+    } else if (!this.config.contractContext.Staking) {
+      throw new Error(
+        'The provided contractContext was missing the "Staking" contract`'
+      );
     }
 
     if (this.config.contractContext) {
