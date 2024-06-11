@@ -520,6 +520,7 @@ export class LitNodeClientNodeJs
       try {
         await authSigSiweMessage.validate(authSig.sig);
       } catch (e) {
+        log(`Error while verifying ECDSA signature: `, e);
         return true;
       }
     } else if (authSig.algo === `LIT_BLS`) {
