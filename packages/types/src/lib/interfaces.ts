@@ -3,6 +3,8 @@ import { Provider } from '@ethersproject/abstract-provider';
 import * as JSZip from 'jszip/dist/jszip.js';
 
 import { ILitNodeClient } from './ILitNodeClient';
+import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
+import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -18,8 +20,6 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
-import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -193,18 +193,17 @@ export interface LitNodeClientConfig {
   alertWhenUnauthorized?: boolean;
   minNodeCount?: number;
   debug?: boolean;
-  bootstrapUrls?: string[];
   connectTimeout?: number;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
-  rpcUrl?: string | null;
+  rpcUrl?: string;
 }
 
 export type CustomNetwork = Pick<
   LitNodeClientConfig,
-  'litNetwork' | 'bootstrapUrls' | 'contractContext' | 'checkNodeAttestation'
+  'litNetwork' | 'contractContext' | 'checkNodeAttestation'
 > &
   Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
 
@@ -237,7 +236,7 @@ pub struct JsonExecutionRequest {
   pub auth_sig: AuthSigItem,
   #[serde(default = "default_epoch")]
   pub epoch: u64,
-  
+
   pub ipfs_id: Option<String>,
   pub code: Option<String>,
     pub js_params: Option<Value>,
@@ -1211,7 +1210,6 @@ export interface PKPBaseProp {
   authContext?: AuthenticationProps;
   litNetwork?: any;
   debug?: boolean;
-  bootstrapUrls?: string[];
   minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
@@ -1871,19 +1869,17 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
       })
   );
 
-export type SessionKeyCache = {
+export interface SessionKeyCache {
   value: SessionKeyPair;
   timestamp: number;
-};
+}
 
 export interface SignatureData {
   signature: string;
   derivedKeyId: string;
 }
 
-export type ClaimsList = {
-  [key: string]: SignatureData;
-}[];
+export type ClaimsList = Record<string, SignatureData>[];
 
 export interface MintWithAuthParams {
   /**
@@ -1920,8 +1916,8 @@ export interface MintWithAuthResponse<T> {
 
 export interface BlockHashErrorResponse {
   messages: string[];
-  reason: String;
-  codde: Number;
+  reason: string;
+  codde: number;
 }
 
 export interface EthBlockhashInfo {

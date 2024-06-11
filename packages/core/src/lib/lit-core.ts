@@ -15,14 +15,15 @@ import {
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 import {
+  LIT_CHAINS,
+  LIT_CURVE,
+  LIT_ENDPOINT,
   LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORKS,
   LitNetwork,
-  LIT_CURVE,
   StakingStates,
   version,
-  LIT_ENDPOINT,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -38,10 +39,11 @@ import {
   sendRequest,
   throwError,
 } from '@lit-protocol/misc';
-
-import type {
+import {
   AuthSig,
+  BlockHashErrorResponse,
   CustomNetwork,
+  EthBlockhashInfo,
   FormattedMultipleAccs,
   HandshakeWithNode,
   JsonHandshakeResponse,
@@ -57,9 +59,8 @@ import type {
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
-  BlockHashErrorResponse,
-  EthBlockhashInfo,
 } from '@lit-protocol/types';
+
 import { composeLitUrl } from './endpoint-version';
 import { initWASM } from '@lit-protocol/wasm';
 
@@ -83,17 +84,19 @@ interface EpochCache {
 export type LitNodeClientConfigWithDefaults = Required<
   Pick<
     LitNodeClientConfig,
-    | 'bootstrapUrls'
     | 'alertWhenUnauthorized'
     | 'debug'
     | 'connectTimeout'
     | 'checkNodeAttestation'
     | 'litNetwork'
     | 'minNodeCount'
-    | 'rpcUrl'
   >
 > &
-  Partial<Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext'>>;
+  Partial<
+    Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
+  > & {
+    bootstrapUrls: string[];
+  };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;
@@ -109,7 +112,6 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
-    rpcUrl: null,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -131,8 +133,18 @@ export class LitCore {
   };
   private _blockHashUrl =
     'http://block-indexer.litgateway.com/get_most_recent_valid_block';
+
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
+    if (!(config.litNetwork in LIT_NETWORKS)) {
+      return throwError({
+        message:
+          'Unsupported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
+      });
+    }
+
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
       case LitNetwork.Cayenne:
@@ -200,137 +212,45 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
-  // ========== Scoped Class Helpers ==========
-  /**
-   * Asynchronously updates the configuration settings for the LitNodeClient.
-   * This function fetches the minimum node count and bootstrap URLs for the
-   * specified Lit network.
-   *
-   * It validates these values and updates the client's
-   * configuration accordingly.
-   *
-   * It also stashes a handle on the Staking Contract so that we can use it for polling for epoch-related state changes
-   *
-   * @throws Will throw an error if the minimum node count is invalid or if
-   *         the bootstrap URLs array is empty.
-   * @returns {Promise<void>} A promise that resolves when the configuration is updated.
-   */
-  setNewConfig = async (): Promise<void> => {
-    if (
-      this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero ||
-      this.config.litNetwork === LitNetwork.Cayenne
-    ) {
-      const minNodeCount = await LitContracts.getMinNodeCount(
-        this.config.litNetwork
-      );
-      const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork
-      );
-
-      // Handle on staking contract is used to monitor epoch/validator changes
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork
-      );
-
-      log('Bootstrap urls: ', bootstrapUrls);
-      if (minNodeCount <= 0) {
-        throwError({
-          message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      }
-
-      if (bootstrapUrls.length <= 0) {
-        throwError({
-          message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      }
-
-      this.config.minNodeCount = parseInt(minNodeCount, 10);
-      this.config.bootstrapUrls = bootstrapUrls;
-    } else if (
-      this.config.litNetwork === LitNetwork.Custom &&
-      this.config.bootstrapUrls.length < 1
-    ) {
-      log('using custom contracts: ', this.config.contractContext);
-
-      const minNodeCount = await LitContracts.getMinNodeCount(
-        this.config.litNetwork,
-        this.config.contractContext
-      );
-
-      const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork,
-        this.config.contractContext
-      );
-
-      // Handle on staking contract is used to monitor epoch/validator changes
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext
-      );
-
-      log('Bootstrap urls: ', bootstrapUrls);
-      if (minNodeCount <= 0) {
-        throwError({
-          message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      }
-
-      if (bootstrapUrls.length <= 0) {
-        throwError({
-          message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      }
-
-      this.config.minNodeCount = parseInt(minNodeCount, 10);
-      this.config.bootstrapUrls = bootstrapUrls;
-    } else if (
-      this.config.litNetwork === LitNetwork.Custom &&
-      this.config.bootstrapUrls.length >= 1 &&
-      this.config.rpcUrl
-    ) {
-      log('Using custom bootstrap urls:', this.config.bootstrapUrls);
-
-      // const provider = new ethers.providers.JsonRpcProvider(this.config.rpcUrl);
-
-      const minNodeCount = await LitContracts.getMinNodeCount(
+  private async _getValidatorData() {
+    const [minNodeCount, bootstrapUrls] = await Promise.all([
+      LitContracts.getMinNodeCount(
         this.config.litNetwork,
         this.config.contractContext,
-        this.config.rpcUrl!
-      );
-      this.config.minNodeCount = parseInt(minNodeCount, 10);
-
-      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.rpcUrl
+      ),
+      LitContracts.getValidators(
         this.config.litNetwork,
         this.config.contractContext,
-        this.config.rpcUrl!
-      );
-      this.config.bootstrapUrls = bootstrapUrls;
+        this.config.rpcUrl
+      ),
+    ]);
 
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl!
-      );
-    } else {
-      return throwError({
-        message:
-          'Unsuported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
+    if (minNodeCount <= 0) {
+      throwError({
+        message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
-  };
 
+    if (bootstrapUrls.length <= 0) {
+      throwError({
+        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    log('Bootstrap urls: ', bootstrapUrls);
+
+    return {
+      minNodeCount: parseInt(minNodeCount, 10),
+      bootstrapUrls,
+    };
+  }
+
+  // ========== Scoped Class Helpers ==========
   /** Schedule an update to the current epoch number for EPOCH_PROPAGATION_DELAY seconds from now
    * We don't immediately update this value on `NextValidatorSetLocked` state changes because we want to give the nodes
    * a few seconds to update to the new epoch before we start sending the new epoch number with requests
@@ -379,11 +299,11 @@ export class LitCore {
           log(
             'State found to be new validator set locked, checking validator set'
           );
-          const oldNodeUrls: string[] = [...this.config.bootstrapUrls].sort();
-          await this.setNewConfig();
-          const currentNodeUrls: string[] = this.config.bootstrapUrls.sort();
-          const delta: string[] = currentNodeUrls.filter((item) =>
-            oldNodeUrls.includes(item)
+          const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
+          const { bootstrapUrls: newNodeUrls } = await this._getValidatorData();
+
+          const delta: string[] = newNodeUrls.filter((item) =>
+            existingNodeUrls.includes(item)
           );
           // if the sets differ we reconnect.
           if (delta.length > 1) {
@@ -555,7 +475,51 @@ export class LitCore {
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
     this._stopNetworkPolling();
 
-    await this.setNewConfig();
+    // Initialize a contractContext if we were not given one; this allows interaction against the staking contract
+    // to be handled locally from then on
+    if (!this.config.contractContext) {
+      this.config.contractContext = await LitContracts.getContractAddresses(
+        this.config.litNetwork,
+        new ethers.providers.JsonRpcProvider(
+          this.config.rpcUrl || LIT_CHAINS['lit'].rpcUrls[0]
+        )
+      );
+    } else if (!this.config.contractContext.Staking) {
+      throw new Error(
+        'The provided contractContext was missing the "Staking" contract`'
+      );
+    }
+
+    if (this.config.contractContext) {
+      const logAddresses = Object.entries(this.config.contractContext).reduce(
+        (output, [key, val]) => {
+          // @ts-expect-error since the object hash returned by `getContractAddresses` is `any`, we have no types here
+          output[key] = val.address;
+          return output;
+        },
+        {}
+      );
+      if (this.config.litNetwork === LitNetwork.Custom) {
+        log('using custom contracts: ', logAddresses);
+      }
+    }
+
+    // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
+    // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
+    const getStakingContract =
+      this._stakingContract ||
+      LitContracts.getStakingContract(
+        this.config.litNetwork,
+        this.config.contractContext, // We've already primed the `contractContext`
+        this.config.rpcUrl
+      );
+
+    const [{ minNodeCount, bootstrapUrls }, stakingContract] =
+      await Promise.all([this._getValidatorData(), getStakingContract]);
+
+    this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
+    this.config.minNodeCount = minNodeCount;
+    this.config.bootstrapUrls = bootstrapUrls;
 
     // Already scheduled update for current epoch number (due to a recent epoch change)
     // Skip setting it right now, because we haven't waited long enough for nodes to propagate the new epoch
@@ -700,14 +664,6 @@ export class LitCore {
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
     const serverKeys: Record<string, JsonHandshakeResponse> = {};
-
-    if (this.config.bootstrapUrls.length <= 0) {
-      throwError({
-        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
 
     let timeoutHandle: ReturnType<typeof setTimeout>;
     await Promise.race([
