@@ -28,14 +28,20 @@ const LIT_PREFIX = 'lit_';
         return;
     }
 
-    // TODO!: Update to use decryptToSingleNode()
-    const decryptedPrivateKey = await Lit.Actions.decryptAndCombine({
+    const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
         accessControlConditions,
         ciphertext,
         dataToEncryptHash,
         chain: 'ethereum',
         authSig: null,
     });
+
+    console.log('decryptedPrivateKey');
+    console.log(decryptedPrivateKey);
+
+    if (!decryptedPrivateKey) { // Exit the nodes which don't have the decryptedData
+        return;
+    }
 
     const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX) ? decryptedPrivateKey.slice(LIT_PREFIX.length) : decryptedPrivateKey;
     const wallet = new ethers.Wallet(privateKey);
@@ -66,22 +72,13 @@ const LIT_PREFIX = 'lit_';
         const signedTx = await wallet.signTransaction(tx);
 
         if (broadcast) {
-            const resp = await Lit.Actions.runOnce(
-                { waitForResponse: true, name: 'broadcastTx' },
-                async () => {
-                    const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
-                    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+            const rpcUrl = await Lit.Actions.getRpcUrl({ chain: unsignedTransaction.chain });
+            const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-                    const transactionResponse = await provider.sendTransaction(signedTx);
-                    const receipt = await transactionResponse.wait();
+            const transactionResponse = await provider.sendTransaction(signedTx);
+            const receipt = await transactionResponse.wait(); // TODO!: This can timeout. Catch the timeout error and throw a separate message for it
 
-                    return JSON.stringify({ txHash: transactionResponse.hash, rpcUrl });
-                }
-            );
-
-            const { txHash, rpcUrl } = JSON.parse(resp);
-            console.log(rpcUrl);
-            Lit.Actions.setResponse({ response: txHash });
+            Lit.Actions.setResponse({ response: transactionResponse.hash });
         } else {
             Lit.Actions.setResponse({ response: signedTx });
         }
