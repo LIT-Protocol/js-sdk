@@ -4,7 +4,18 @@ import { ethers } from 'ethers';
 
 const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
 
+/**
+ * Verifies a BLS session signature.
+ *
+ * @param {Function} verifier - A wasm function that takes a public key, message, and signature to verify. NOTE: `public_key` is snake cased because it's a wasm parameter
+ * @param {string} networkPubKey - The public key of the network.
+ * @param {AuthSig} authSig
+ * @typedef {Object} AuthSig
+ * @property {string} sig - The signature in string format.
+ * @property {string} signedMessage - The message that was signed.
+ */
 export const blsSessionSigVerify = (
+  // TODO: refactor type with merger of PR 'https://github.com/LIT-Protocol/js-sdk/pull/503`
   verifier: (public_key: any, message: any, signature: any) => void,
   networkPubKey: string,
   authSig: AuthSig

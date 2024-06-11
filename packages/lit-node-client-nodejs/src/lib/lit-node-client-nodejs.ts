@@ -533,7 +533,14 @@ export class LitNodeClientNodeJs
         log(`Error while verifying bls signature: `, e);
         return true;
       }
+    } else {
+      throwError({
+        message: `Unsupported signature algo for session signature. Expected ed25519 or LIT_BLS recieved ${authSig.algo}`,
+        errorKind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
+        errorCode: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.code,
+      });
     }
+
     // make sure the sig is for the correct session key
     if (authSigSiweMessage.uri !== sessionKeyUri) {
       log('Need retry because uri does not match');
@@ -1895,6 +1902,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] signatureShares:`, signatureShares);
 
+    // TODO: refactor type with merger of PR 'https://github.com/LIT-Protocol/js-sdk/pull/503`
     const blsCombinedSignature = blsSdk.combine_signature_shares(
       signatureShares.map((s) => JSON.stringify(s))
     );
