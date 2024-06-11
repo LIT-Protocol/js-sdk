@@ -1286,7 +1286,11 @@ export class LitCore {
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
       });
     }
-    return await computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
+    return await computeHDPubKey(
+      this.hdRootPubkeys as string[],
+      keyId,
+      sigType
+    );
   };
 
   /**

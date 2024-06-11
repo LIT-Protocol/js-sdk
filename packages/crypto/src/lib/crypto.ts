@@ -53,11 +53,11 @@ export const encrypt = async (
   switch (publicKeyHex.replace('0x', '').length) {
     case 218:
       return Buffer.from(
-        (await blsEncrypt('Bls12381G2', publicKey, message, identity))
+        await blsEncrypt('Bls12381G2', publicKey, message, identity)
       ).toString('hex');
     case 96:
       return Buffer.from(
-        (await blsEncrypt('Bls12381G2', publicKey, message, identity))
+        await blsEncrypt('Bls12381G2', publicKey, message, identity)
       ).toString('base64');
     default:
       return '';
@@ -108,7 +108,9 @@ export const verifyAndDecryptWithSignatureShares = async (
  * @param shares hex-encoded array of the BLS signature shares
  * @returns hex-encoded string of the combined signature
  */
-export const combineSignatureShares = async (shares: BlsSignatureShare[]): Promise<string> => {
+export const combineSignatureShares = async (
+  shares: BlsSignatureShare[]
+): Promise<string> => {
   const signature = await doCombineSignatureShares(shares);
 
   return Buffer.from(signature).toString('hex');
@@ -236,13 +238,18 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   return sessionKeyPair;
 };
 
-function doDecrypt(ciphertextBase64: string, signature: Uint8Array): Promise<Uint8Array> {
+function doDecrypt(
+  ciphertextBase64: string,
+  signature: Uint8Array
+): Promise<Uint8Array> {
   console.log('signature from encrypt op: ', signature);
   const ciphertext = Buffer.from(ciphertextBase64, 'base64');
   return blsDecrypt('Bls12381G2', ciphertext, signature);
 }
 
-function doCombineSignatureShares(shares: BlsSignatureShare[]): Promise<Uint8Array> {
+function doCombineSignatureShares(
+  shares: BlsSignatureShare[]
+): Promise<Uint8Array> {
   const sigShares = shares.map((s) => Buffer.from(s.ProofOfPossession, 'hex'));
   const signature = blsCombine('Bls12381G2', sigShares);
   return signature;

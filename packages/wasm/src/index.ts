@@ -11,7 +11,6 @@ export type { BlsVariant, EcdsaVariant } from './pkg/wasm-internal';
 
 import * as wasmInternal from './pkg/wasm-internal';
 
-
 let wasmSdkInstance: InitOutput | undefined;
 // loaded wasm module
 let isWasmModuleLoading = false;

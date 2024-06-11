@@ -6,7 +6,11 @@ import {
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';
-import { CombinedECDSASignature, SigResponse, SigShare } from '@lit-protocol/types';
+import {
+  CombinedECDSASignature,
+  SigResponse,
+  SigShare,
+} from '@lit-protocol/types';
 import { joinSignature } from 'ethers/lib/utils';
 
 export const getFlattenShare = (share: any): SigShare => {
