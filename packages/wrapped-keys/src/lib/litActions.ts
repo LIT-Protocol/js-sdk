@@ -125,7 +125,7 @@ const LIT_PREFIX = 'lit_';
         console.log(recoveredAddress);
 
         if (recoveredAddress !== wallet.address) {
-            Lit.Actions.setResponse({ response: 'Error: Recovered address doesn't match the wallet address' });
+            Lit.Actions.setResponse({ response: "Error: Recovered address doesn't match the wallet address" });
             return;
         }
 
