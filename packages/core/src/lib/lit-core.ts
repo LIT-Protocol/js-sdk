@@ -482,10 +482,6 @@ export class LitCore {
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
     this._stopNetworkPolling();
 
-    if (this.config.litNetwork === LitNetwork.Custom) {
-      log('using custom contracts: ', this.config.contractContext);
-    }
-
     // Initialize a contractContext if we were not given one; this allows interaction against the staking contract
     // to be handled locally from then on
     if (!this.config.contractContext) {
@@ -495,6 +491,20 @@ export class LitCore {
           this.config.rpcUrl || LIT_CHAINS['lit'].rpcUrls[0]
         )
       );
+    }
+
+    if (this.config.contractContext) {
+      const logAddresses = Object.entries(this.config.contractContext).reduce(
+        (output, [key, val]) => {
+          // @ts-expect-error since the object hash returned by `getContractAddresses` is `any`, we have no types here
+          output[key] = val.address;
+          return output;
+        },
+        {}
+      );
+      if (this.config.litNetwork === LitNetwork.Custom) {
+        log('using custom contracts: ', logAddresses);
+      }
     }
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
