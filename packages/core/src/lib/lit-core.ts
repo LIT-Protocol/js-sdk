@@ -239,9 +239,9 @@ export class LitCore {
 
     if (bootstrapUrls.length <= 0) {
       throwError({
-        message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
       });
     }
 
@@ -653,14 +653,6 @@ export class LitCore {
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
     const serverKeys: Record<string, JsonHandshakeResponse> = {};
-
-    if (this.config.bootstrapUrls.length <= 0) {
-      throwError({
-        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
 
     let timeoutHandle: ReturnType<typeof setTimeout>;
     await Promise.race([
