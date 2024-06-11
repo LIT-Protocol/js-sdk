@@ -91,6 +91,7 @@ import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tes
 import { testEthereumBroadcastTransactionWrappedKey } from './tests/testEthereumBroadcastTransactionWrappedKey';
 import { testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds } from './tests/testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds';
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
+import { testGenerateWrappedKey } from './tests/testGenerateWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
 import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/testFailImportWrappedKeysWithEoaSessionSig';
@@ -113,6 +114,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testEthereumBroadcastTransactionWrappedKey,
     testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds,
     testImportWrappedKey,
+    testGenerateWrappedKey,
     testFailImportWrappedKeysWithSamePkp,
     testFailImportWrappedKeysWithSamePrivateKey,
     testFailImportWrappedKeysWithEoaSessionSig,

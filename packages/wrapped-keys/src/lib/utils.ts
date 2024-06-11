@@ -1,6 +1,7 @@
 import {
   AccessControlConditions,
   AuthSig,
+  ExecuteJsResponse,
   SessionKeySignedMessage,
   SessionSigsMap,
 } from '@lit-protocol/types';
@@ -105,4 +106,44 @@ export async function fetchPrivateKeyMedataFromDatabase(
 
     throw new Error(errorMessage);
   }
+}
+
+export function postLitActionValidation(result: ExecuteJsResponse | undefined): string {
+  console.log(`Lit Action result: ${JSON.stringify(result)}`);
+
+  if (!result) {
+    throw new Error('There was some error running the Lit Action');
+  }
+
+  const response = result.response;
+  console.log('response');
+  console.log(response);
+
+  if (!response) {
+    throw new Error(
+      `Expected "response" in Lit Action result: ${JSON.stringify(result)}`
+    );
+  }
+
+  if (typeof response !== 'string') {
+    // As the return value is a hex string
+    throw new Error(
+      `Lit Action should return a string response: ${JSON.stringify(result)}`
+    );
+  }
+
+  if (!result.success) {
+    throw new Error(`Expected "success" in res: ${JSON.stringify(result)}`);
+  }
+
+  if (result.success !== true) {
+    throw new Error(`Expected "success" to be true: ${JSON.stringify(result)}`);
+  }
+
+  if (response.startsWith('Error:')) {
+    // Lit Action sets an error response
+    throw new Error(`Error executing the Signing Lit Action: ${response}`);
+  }
+
+  return response;
 }

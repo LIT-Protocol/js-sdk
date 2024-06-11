@@ -1,5 +1,11 @@
 import { ILitNodeClient, SessionSigsMap } from '@lit-protocol/types';
 
+export interface GeneratePrivateKeyParams {
+  pkpSessionSigs: SessionSigsMap;
+  litActionCode: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
+  litNodeClient: ILitNodeClient;
+}
+
 export interface ImportPrivateKeyParams {
   pkpSessionSigs: SessionSigsMap;
   privateKey: string;

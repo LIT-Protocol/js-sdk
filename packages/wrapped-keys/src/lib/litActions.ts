@@ -1,3 +1,37 @@
+export const generatePrivateKeyLitAction = `
+const LIT_PREFIX = 'lit_';
+
+(async () => {
+    const resp = await Lit.Actions.runOnce(
+        { waitForResponse: true, name: 'encryptedPrivateKey' },
+        async () => {
+            const wallet = ethers.Wallet.createRandom();
+            const privateKey = LIT_PREFIX + wallet.privateKey.toString();
+            console.log('privateKey');
+            console.log(privateKey);
+            let utf8Encode = new TextEncoder();
+            const to_encrypt = utf8Encode.encode(privateKey);
+            console.log('to_encrypt');
+            console.log(to_encrypt);
+
+            const { ciphertext, dataToEncryptHash } = await Lit.Actions.encrypt({
+                accessControlConditions,
+                to_encrypt,
+            });
+            console.log('ciphertext in runOnce:', ciphertext);
+            console.log('dataToEncryptHash in runOnce:', dataToEncryptHash);
+            return JSON.stringify({ ciphertext, dataToEncryptHash });
+        }
+    );
+
+    // const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
+    Lit.Actions.setResponse({
+        // response: JSON.stringify({ ciphertext, dataToEncryptHash }),
+        response: resp,
+    });
+})();
+`;
+
 export const signTransactionWithEthereumEncryptedKeyLitAction = `
 const DEFAULT_GAS_LIMIT = 21000;
 const DEFAULT_GAS_PRICE = '50'; // in gwei
