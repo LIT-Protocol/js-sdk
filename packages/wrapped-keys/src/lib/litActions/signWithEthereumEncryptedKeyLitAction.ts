@@ -1,4 +1,4 @@
-export const signAndSendTxWithEthereumEncryptedKeyLitAction = `
+export const signWithEthereumEncryptedKeyLitAction = `
 const DEFAULT_GAS_LIMIT = 21000;
 const DEFAULT_GAS_PRICE = '50'; // in gwei
 const LIT_PREFIX = 'lit_';
