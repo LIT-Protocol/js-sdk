@@ -1,14 +1,8 @@
-import { initWasmEcdsaSdk } from '@lit-protocol/ecdsa-sdk';
-
 import { getSignatures } from './get-signatures';
 import { SigResponse } from '@lit-protocol/types';
 
 describe('getSignatures', () => {
-  beforeAll(async () => {
-    await initWasmEcdsaSdk();
-  });
-
-  it('should return signatures object', () => {
+  it('should return signatures object', async () => {
     const networkPubKeySet = 'testing';
     const minNodeCount = 1;
     const signedData = [
@@ -54,7 +48,7 @@ describe('getSignatures', () => {
     ];
     const requestId = '';
 
-    const signatures = getSignatures<{ sig: SigResponse }>({
+    const signatures = await getSignatures<{ sig: SigResponse }>({
       networkPubKeySet,
       minNodeCount,
       signedData,
