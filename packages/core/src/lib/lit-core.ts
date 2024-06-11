@@ -62,7 +62,7 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { initWASM } from '@lit-protocol/wasm';
+import { loadModules } from '@lit-protocol/wasm';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -467,9 +467,6 @@ export class LitCore {
   }
 
   private async _connect() {
-    if (!this.ready) {
-      await initWASM();
-    }
     // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
     this._stopListeningForNewEpoch();
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
@@ -483,10 +480,6 @@ export class LitCore {
         new ethers.providers.JsonRpcProvider(
           this.config.rpcUrl || LIT_CHAINS['lit'].rpcUrls[0]
         )
-      );
-    } else if (!this.config.contractContext.Staking) {
-      throw new Error(
-        'The provided contractContext was missing the "Staking" contract`'
       );
     }
 
@@ -1281,10 +1274,10 @@ export class LitCore {
    * @param {LIT_CURVE} sigType
    * @returns {string} public key
    */
-  computeHDPubKey = (
+  computeHDPubKey = async (
     keyId: string,
     sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
-  ): string => {
+  ): Promise<string> => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');
       throwError({
@@ -1293,7 +1286,7 @@ export class LitCore {
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
       });
     }
-    return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
+    return await computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
   };
 
   /**

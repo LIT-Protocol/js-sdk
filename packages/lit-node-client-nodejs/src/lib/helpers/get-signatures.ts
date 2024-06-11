@@ -6,7 +6,7 @@ import {
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';
-import { SigResponse, SigShare } from '@lit-protocol/types';
+import { CombinedECDSASignature, SigResponse, SigShare } from '@lit-protocol/types';
 import { joinSignature } from 'ethers/lib/utils';
 
 export const getFlattenShare = (share: any): SigShare => {
@@ -91,7 +91,7 @@ export const getFlattenShare = (share: any): SigShare => {
  * executeJs: getSignatures<{ signature: SigResponse }>
  * pkpSign: getSignatures<{ sig: SigResponse }>
  */
-export const getSignatures = <T>({
+export const getSignatures = async <T>({
   networkPubKeySet,
   minNodeCount,
   signedData,
@@ -101,7 +101,7 @@ export const getSignatures = <T>({
   minNodeCount: number;
   signedData: any[];
   requestId: string;
-}): T | { signature: SigResponse; sig: SigResponse } => {
+}): Promise<T | { signature: SigResponse; sig: SigResponse }> => {
   const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
   // processing signature shares for failed or invalid contents.  mutates the signedData object.
@@ -227,8 +227,7 @@ export const getSignatures = <T>({
       });
     }
 
-    const signature = combineEcdsaShares(shares);
-
+    const signature = await combineEcdsaShares(shares);
     if (!signature.r) {
       throwError({
         message: 'siganture could not be combined',

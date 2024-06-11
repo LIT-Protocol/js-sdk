@@ -571,10 +571,10 @@ export class LitNodeClientNodeJs
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT = (
+  combineSharesAndGetJWT = async (
     signatureShares: NodeBlsSigningShare[],
     requestId: string = ''
-  ): string => {
+  ): Promise<string> => {
     // ========== Shares Validations ==========
     // -- sanity check
     if (
@@ -592,7 +592,7 @@ export class LitNodeClientNodeJs
     signatureShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
     // ========== Combine Shares ==========
-    const signature = combineSignatureShares(
+    const signature = await combineSignatureShares(
       signatureShares.map((s) => s.signatureShare)
     );
 
@@ -617,7 +617,7 @@ export class LitNodeClientNodeJs
     identityParam: Uint8Array,
     ciphertext: string,
     signatureShares: NodeBlsSigningShare[]
-  ): Uint8Array => {
+  ): Promise<Uint8Array> => {
     const sigShares = signatureShares.map((s: any) => s.signatureShare);
 
     return verifyAndDecryptWithSignatureShares(
@@ -1067,7 +1067,7 @@ export class LitNodeClientNodeJs
       signedDataList
     );
 
-    const signatures = getSignatures({
+    const signatures = await getSignatures({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
       minNodeCount: this.config.minNodeCount,
@@ -1213,7 +1213,7 @@ export class LitNodeClientNodeJs
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = parsePkpSignResponse(responseData);
 
-    const signatures = getSignatures<{ signature: SigResponse }>({
+    const signatures = await getSignatures<{ signature: SigResponse }>({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
       minNodeCount: this.config.minNodeCount,
@@ -1339,7 +1339,7 @@ export class LitNodeClientNodeJs
     log('signatureShares', signatureShares);
 
     // ========== Result ==========
-    const finalJwt: string = this.combineSharesAndGetJWT(
+    const finalJwt: string = await this.combineSharesAndGetJWT(
       signatureShares,
       requestId
     );
@@ -1438,7 +1438,7 @@ export class LitNodeClientNodeJs
     );
 
     // ========== Encrypt ==========
-    const ciphertext = encrypt(
+    const ciphertext = await encrypt(
       this.subnetPubKey,
       params.dataToEncrypt,
       uint8arrayFromString(identityParam, 'utf8')
@@ -1585,7 +1585,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'signatureShares', signatureShares);
 
     // ========== Result ==========
-    const decryptedData = this.#decryptWithSignatureShares(
+    const decryptedData = await this.#decryptWithSignatureShares(
       this.subnetPubKey,
       uint8arrayFromString(identityParam, 'utf8'),
       ciphertext,
@@ -2302,7 +2302,7 @@ const resourceAbilityRequests = [
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
         .derivedKeyId;
 
-      const pubkey: string = this.computeHDPubKey(derivedKeyId);
+      const pubkey: string = await this.computeHDPubKey(derivedKeyId);
       logWithRequestId(
         requestId,
         `pubkey ${pubkey} derived from key id ${derivedKeyId}`

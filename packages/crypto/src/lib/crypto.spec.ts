@@ -26,7 +26,7 @@ const identityParam = new Uint8Array([
 describe('crypto', () => {
   it('should encrypt', async () => {
     // execute
-    const ciphertext = encrypt(publicKey, secretMessage, identityParam);
+    const ciphertext = await encrypt(publicKey, secretMessage, identityParam);
 
     // assert
     expect(ciphertext.length).toBeGreaterThan(0);
@@ -43,7 +43,7 @@ describe('crypto', () => {
     ];
 
     // execute
-    const plaintext = decryptWithSignatureShares(
+    const plaintext = await decryptWithSignatureShares(
       ciphertext,
       signatureShares.map((s) => ({
         ProofOfPossession: s,
@@ -64,7 +64,7 @@ describe('crypto', () => {
     ];
 
     // execute
-    const plaintext = verifyAndDecryptWithSignatureShares(
+    const plaintext = await verifyAndDecryptWithSignatureShares(
       publicKey,
       identityParam,
       ciphertext,
@@ -87,7 +87,7 @@ describe('crypto', () => {
     }));
 
     // execute
-    const combinedSignature = combineSignatureShares(signatureShares);
+    const combinedSignature = await combineSignatureShares(signatureShares);
 
     // assert
     expect(combinedSignature.length).toEqual(192);
@@ -146,7 +146,7 @@ describe('crypto', () => {
     ]);
 
     // execute
-    verifySignature(publicKey, message, signature);
+    await verifySignature(publicKey, message, signature);
   });
 });
 
@@ -191,7 +191,7 @@ describe('combine ECDSA Shares', () => {
       },
     ];
 
-    let sig = combineEcdsaShares(sigShares);
+    let sig = await combineEcdsaShares(sigShares);
     expect(sig.r).toBeDefined();
     expect(sig.s).toBeDefined();
     expect(sig.recid).toBeDefined();

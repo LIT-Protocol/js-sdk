@@ -43,21 +43,21 @@ export interface BlsSignatureShare {
  * @param identity Uint8Array of the identity parameter used during encryption
  * @returns base64 encoded string of the ciphertext
  */
-export const encrypt = (
+export const encrypt = async (
   publicKeyHex: string,
   message: Uint8Array,
   identity: Uint8Array
-): string => {
+): Promise<string> => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
   switch (publicKeyHex.replace('0x', '').length) {
     case 218:
       return Buffer.from(
-        blsEncrypt('Bls12381G2', publicKey, message, identity)
+        (await blsEncrypt('Bls12381G2', publicKey, message, identity))
       ).toString('hex');
     case 96:
       return Buffer.from(
-        blsEncrypt('Bls12381G2', publicKey, message, identity)
+        (await blsEncrypt('Bls12381G2', publicKey, message, identity))
       ).toString('base64');
     default:
       return '';
@@ -71,11 +71,11 @@ export const encrypt = (
  * @param shares hex-encoded array of the BLS signature shares
  * @returns Uint8Array of the decrypted data
  */
-export const decryptWithSignatureShares = (
+export const decryptWithSignatureShares = async (
   ciphertextBase64: string,
   shares: BlsSignatureShare[]
-): Uint8Array => {
-  const signature = doCombineSignatureShares(shares);
+): Promise<Uint8Array> => {
+  const signature = await doCombineSignatureShares(shares);
 
   return doDecrypt(ciphertextBase64, signature);
 };
@@ -89,15 +89,15 @@ export const decryptWithSignatureShares = (
  * @param shares hex-encoded array of the BLS signature shares
  * @returns base64-encoded string of the decrypted data
  */
-export const verifyAndDecryptWithSignatureShares = (
+export const verifyAndDecryptWithSignatureShares = async (
   publicKeyHex: string,
   identity: Uint8Array,
   ciphertextBase64: string,
   shares: BlsSignatureShare[]
-): Uint8Array => {
+): Promise<Uint8Array> => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
-  const signature = doCombineSignatureShares(shares);
-  blsVerify('Bls12381G2', publicKey, identity, signature);
+  const signature = await doCombineSignatureShares(shares);
+  await blsVerify('Bls12381G2', publicKey, identity, signature);
 
   return doDecrypt(ciphertextBase64, signature);
 };
@@ -108,8 +108,8 @@ export const verifyAndDecryptWithSignatureShares = (
  * @param shares hex-encoded array of the BLS signature shares
  * @returns hex-encoded string of the combined signature
  */
-export const combineSignatureShares = (shares: BlsSignatureShare[]): string => {
-  const signature = doCombineSignatureShares(shares);
+export const combineSignatureShares = async (shares: BlsSignatureShare[]): Promise<string> => {
+  const signature = await doCombineSignatureShares(shares);
 
   return Buffer.from(signature).toString('hex');
 };
@@ -121,14 +121,14 @@ export const combineSignatureShares = (shares: BlsSignatureShare[]): string => {
  * @param message Uint8Array of the message to verify.
  * @param signature Uint8Array of the signature to verify.
  */
-export const verifySignature = (
+export const verifySignature = async (
   publicKeyHex: string,
   message: Uint8Array,
   signature: Uint8Array
-): void => {
+): Promise<void> => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
-  blsVerify('Bls12381G2', publicKey, message, signature);
+  await blsVerify('Bls12381G2', publicKey, message, signature);
 };
 
 // export interface EcdsaSignatureShare {
@@ -156,9 +156,9 @@ const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE, EcdsaVariant>> = {
  * @returns { any }
  *
  */
-export const combineEcdsaShares = (
+export const combineEcdsaShares = async (
   sigShares: Array<SigShare>
-): CombinedECDSASignature => {
+): Promise<CombinedECDSASignature> => {
   const validShares = sigShares.filter((share) => share.signatureShare);
 
   const anyValidShare = validShares[0];
@@ -177,7 +177,7 @@ export const combineEcdsaShares = (
     Buffer.from(share.signatureShare, 'hex')
   );
 
-  const [r, s, v] = ecdsaCombine(variant!, presignature, signatureShares);
+  const [r, s, v] = await ecdsaCombine(variant!, presignature, signatureShares);
 
   const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
   const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
@@ -193,11 +193,11 @@ export const combineEcdsaShares = (
   };
 };
 
-export const computeHDPubKey = (
+export const computeHDPubKey = async (
   pubkeys: string[],
   keyId: string,
   sigType: LIT_CURVE
-): string => {
+): Promise<string> => {
   const variant = ecdsaSigntureTypeMap[sigType];
 
   switch (sigType) {
@@ -208,7 +208,7 @@ export const computeHDPubKey = (
         return value.replace('0x', '');
       });
       keyId = keyId.replace('0x', '');
-      const preComputedPubkey = ecdsaDeriveKey(
+      const preComputedPubkey = await ecdsaDeriveKey(
         variant!,
         Buffer.from(keyId, 'hex'),
         pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
@@ -236,13 +236,13 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   return sessionKeyPair;
 };
 
-function doDecrypt(ciphertextBase64: string, signature: Uint8Array) {
+function doDecrypt(ciphertextBase64: string, signature: Uint8Array): Promise<Uint8Array> {
   console.log('signature from encrypt op: ', signature);
   const ciphertext = Buffer.from(ciphertextBase64, 'base64');
   return blsDecrypt('Bls12381G2', ciphertext, signature);
 }
 
-function doCombineSignatureShares(shares: BlsSignatureShare[]) {
+function doCombineSignatureShares(shares: BlsSignatureShare[]): Promise<Uint8Array> {
   const sigShares = shares.map((s) => Buffer.from(s.ProofOfPossession, 'hex'));
   const signature = blsCombine('Bls12381G2', sigShares);
   return signature;
@@ -358,7 +358,7 @@ export const checkSevSnpAttestation = async (
 
   // get the VCEK certificate
   let vcekCert;
-  const vcekUrl = sevSnpGetVcekUrl(report);
+  const vcekUrl = await sevSnpGetVcekUrl(report);
   // use local storage if we have one available
   if (globalThis.localStorage) {
     log('Using local storage for certificate caching');
