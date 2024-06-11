@@ -11,11 +11,13 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
  */
-export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
+export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -57,26 +59,34 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
     chainId: 175177, // Chronicle
     gasPrice: '50',
     gasLimit: 21000,
-    dataHex: ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
-    ),
+    dataHex: 'Test transaction from Alice to bob',
     chain: 'chronicleTestnet',
   };
 
-  const signedTx = await signTransactionWithEncryptedKey({
-    pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
-    unsignedTransaction,
-    broadcast: false,
-    litNodeClient: devEnv.litNodeClient,
-  });
+  try {
+    const _res = await signTransactionWithEncryptedKey({
+      pkpSessionSigs: pkpSessionSigsSigning,
+      litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
+      unsignedTransaction,
+      broadcast: false,
+      litNodeClient: devEnv.litNodeClient,
+    });
+  } catch (e: any) {
+    console.log('❌ THIS IS EXPECTED: ', e);
+    console.log(e.message);
 
-  console.log('signedTx');
-  console.log(signedTx);
-
-  if (!ethers.utils.isHexString(signedTx)) {
-    throw new Error(`signedTx isn't hex: ${signedTx}`);
+    if (
+      e.message.includes(
+        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
+      )
+    ) {
+      console.log(
+        '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
+      );
+    } else {
+      throw e;
+    }
   }
 
-  log('✅ testEthereumSignWrappedKey');
+  log('✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam');
 };

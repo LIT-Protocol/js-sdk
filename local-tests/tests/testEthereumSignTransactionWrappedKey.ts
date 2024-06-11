@@ -11,13 +11,11 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignTransactionWrappedKey
  */
-export const testEthereumBroadcastWrappedKey = async (
-  devEnv: TinnyEnvironment
-) => {
+export const testEthereumSignTransactionWrappedKey = async (devEnv: TinnyEnvironment) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -29,16 +27,11 @@ export const testEthereumBroadcastWrappedKey = async (
 
   console.log(pkpSessionSigs);
 
-  const wrappedKeysWallet = ethers.Wallet.createRandom();
-  const wrappedKeysWalletPrivateKey = wrappedKeysWallet.privateKey;
-
-  const wrappedKeysWalletAddress = wrappedKeysWallet.address;
-  console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
-  await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
+  const privateKey = ethers.Wallet.createRandom().privateKey;
 
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,
-    privateKey: wrappedKeysWalletPrivateKey,
+    privateKey,
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -62,8 +55,8 @@ export const testEthereumBroadcastWrappedKey = async (
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
     chainId: 175177, // Chronicle
-    gasPrice: '0.001',
-    gasLimit: 30000,
+    gasPrice: '50',
+    gasLimit: 21000,
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
@@ -74,17 +67,16 @@ export const testEthereumBroadcastWrappedKey = async (
     pkpSessionSigs: pkpSessionSigsSigning,
     litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
     unsignedTransaction,
-    broadcast: true,
+    broadcast: false,
     litNodeClient: devEnv.litNodeClient,
   });
 
   console.log('signedTx');
   console.log(signedTx);
 
-  // TODO!: Convert hex signedTx to UTF-8 and assert that it contains "Test transaction from Alice to bob"
   if (!ethers.utils.isHexString(signedTx)) {
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testEthereumBroadcastWrappedKey');
+  log('✅ testEthereumSignTransactionWrappedKey');
 };

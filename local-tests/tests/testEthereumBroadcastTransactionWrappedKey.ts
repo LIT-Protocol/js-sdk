@@ -11,11 +11,11 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignWrappedKeyWithInvalidParam
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignWrappedKeyWithInvalidParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignWrappedKeyWithInvalidParam
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
  */
-export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
+export const testEthereumBroadcastTransactionWrappedKey = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -29,11 +29,16 @@ export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
 
   console.log(pkpSessionSigs);
 
-  const privateKey = ethers.Wallet.createRandom().privateKey;
+  const wrappedKeysWallet = ethers.Wallet.createRandom();
+  const wrappedKeysWalletPrivateKey = wrappedKeysWallet.privateKey;
+
+  const wrappedKeysWalletAddress = wrappedKeysWallet.address;
+  console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
+  await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
 
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,
-    privateKey,
+    privateKey: wrappedKeysWalletPrivateKey,
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -57,36 +62,29 @@ export const testFailEthereumSignWrappedKeyWithInvalidParam = async (
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
     chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
-    dataHex: 'Test transaction from Alice to bob',
+    gasPrice: '0.001',
+    gasLimit: 30000,
+    dataHex: ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
+    ),
     chain: 'chronicleTestnet',
   };
 
-  try {
-    const _res = await signTransactionWithEncryptedKey({
-      pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
-      unsignedTransaction,
-      broadcast: false,
-      litNodeClient: devEnv.litNodeClient,
-    });
-  } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-    console.log(e.message);
+  const signedTx = await signTransactionWithEncryptedKey({
+    pkpSessionSigs: pkpSessionSigsSigning,
+    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
+    unsignedTransaction,
+    broadcast: true,
+    litNodeClient: devEnv.litNodeClient,
+  });
 
-    if (
-      e.message.includes(
-        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
-      )
-    ) {
-      console.log(
-        '✅ testFailEthereumSignWrappedKeyWithInvalidParam is expected to have an error'
-      );
-    } else {
-      throw e;
-    }
+  console.log('signedTx');
+  console.log(signedTx);
+
+  // TODO!: Convert hex signedTx to UTF-8 and assert that it contains "Test transaction from Alice to bob"
+  if (!ethers.utils.isHexString(signedTx)) {
+    throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testFailEthereumSignWrappedKeyWithInvalidParam');
+  log('✅ testEthereumBroadcastTransactionWrappedKey');
 };

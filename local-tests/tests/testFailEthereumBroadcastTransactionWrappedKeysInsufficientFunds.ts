@@ -4,20 +4,21 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
+  EthereumLitTransaction,
   signTransactionWithEthereumEncryptedKeyLitAction,
-  SolanaLitTransaction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignWrappedKeyWithMissingParam
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignWrappedKeyWithMissingParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignWrappedKeyWithMissingParam
+ * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds
+ * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds
+ * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds
  */
-export const testFailEthereumSignWrappedKeyWithMissingParam = async (
+export const testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds = async (
   devEnv: TinnyEnvironment
 ) => {
+  // TODO!: Send funds to the PKP funds
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -53,10 +54,15 @@ export const testFailEthereumSignWrappedKeyWithMissingParam = async (
 
   console.log(pkpSessionSigsSigning);
 
-  // Using SolanaLitTransaction to mimic a missing field (chainId) param as Typescript will complain about missing chainId
-  const unsignedTransaction: SolanaLitTransaction = {
+  const unsignedTransaction: EthereumLitTransaction = {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
+    chainId: 175177, // Chronicle
+    gasPrice: '50',
+    gasLimit: 21000,
+    dataHex: ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
+    ),
     chain: 'chronicleTestnet',
   };
 
@@ -65,7 +71,7 @@ export const testFailEthereumSignWrappedKeyWithMissingParam = async (
       pkpSessionSigs: pkpSessionSigsSigning,
       litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
       unsignedTransaction,
-      broadcast: false,
+      broadcast: true,
       litNodeClient: devEnv.litNodeClient,
     });
   } catch (e: any) {
@@ -74,16 +80,17 @@ export const testFailEthereumSignWrappedKeyWithMissingParam = async (
 
     if (
       e.message.includes(
-        'Error executing the Signing Lit Action: Error: Missing required field: chainId'
-      )
+        'Error executing the Signing Lit Action: Error: When signing transaction- processing response'
+      ) &&
+      e.message.includes('insufficient FPE funds for gas * price + value')
     ) {
       console.log(
-        '✅ testFailEthereumSignWrappedKeyWithMissingParam is expected to have an error'
+        '✅ testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds is expected to have an error'
       );
     } else {
       throw e;
     }
   }
 
-  log('✅ testFailEthereumSignWrappedKeyWithMissingParam');
+  log('✅ testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds');
 };
