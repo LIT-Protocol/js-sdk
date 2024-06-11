@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
-  signWithEncryptedKey,
+  signTransactionWithEncryptedKey,
   EthereumLitTransaction,
   signingTimeoutEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
@@ -58,7 +58,7 @@ export const testWrappedKeySigningTimeout = async (
   };
 
   try {
-    const _signedTx = await signWithEncryptedKey({
+    const _signedTx = await signTransactionWithEncryptedKey({
       pkpSessionSigs,
       litActionCode: signingTimeoutEncryptedKeyLitAction,
       unsignedTransaction,

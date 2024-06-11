@@ -17,7 +17,7 @@ import {
   ExportPrivateKeyResponse,
   ImportPrivateKeyParams,
   ImportPrivateKeyResponse,
-  SignWithEncryptedKeyParams,
+  SignTransactionWithEncryptedKeyParams,
 } from './interfaces';
 
 export async function importPrivateKey({
@@ -125,13 +125,13 @@ export async function exportPrivateKey({
   }
 }
 
-export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
+export async function signTransactionWithEncryptedKey<T = LitTransaction>({
   pkpSessionSigs,
   litActionCode,
   unsignedTransaction,
   broadcast,
   litNodeClient,
-}: SignWithEncryptedKeyParams<T>): Promise<string> {
+}: SignTransactionWithEncryptedKeyParams<T>): Promise<string> {
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
 
   let pkpAddress: string, ciphertext: string, dataToEncryptHash: string;
