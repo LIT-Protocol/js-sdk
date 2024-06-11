@@ -88,3 +88,9 @@ const LIT_PREFIX = 'lit_';
     }
 })();
 `;
+
+export const signingTimeoutEncryptedKeyLitAction = `
+(async () => {
+    new Promise(resolve => setTimeout(resolve, 40000)); // Sleep for 40 seconds
+})();
+`;

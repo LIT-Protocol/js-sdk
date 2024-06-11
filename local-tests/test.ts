@@ -83,6 +83,7 @@ import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCo
 import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 
+import { testWrappedKeySigningTimeout } from './tests/testWrappedKeySigningTimeout';
 import { testEthereumSignWrappedKey } from './tests/testEthereumSignWrappedKey';
 import { testFailEthereumSignWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignWrappedKeyWithInvalidParam';
 import { testFailEthereumSignWrappedKeyWithMissingParam } from './tests/testFailEthereumSignWrappedKeyWithMissingParam';
@@ -117,6 +118,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailImportWrappedKeysWithInvalidSessionSig,
     testFailImportWrappedKeysWithExpiredSessionSig,
     testExportWrappedKey,
+    testWrappedKeySigningTimeout,
   };
 
   const eoaSessionSigsTests = {

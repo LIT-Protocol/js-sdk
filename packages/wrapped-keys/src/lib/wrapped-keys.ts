@@ -173,10 +173,16 @@ export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
         accessControlConditions: getPkpAccessControlCondition(pkpAddress),
       },
     });
-  } catch (err) {
-    throw new Error(
-      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
-    );
+  } catch (err: any) {
+    if (broadcast && err.errorCode === "NodeJsTimeoutError") {
+      throw new Error(
+        `The action timed out: ${err.message}. This doesn't mean that your transaction wasn't broadcast but that it took more than 30 secs to confirm. Please confirm whether it went through on the blockchain explorer for your chain.`
+      );
+    } else {
+      throw new Error(
+        `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+      );
+    }
   }
 
   console.log(`Lit Action result: ${JSON.stringify(result)}`);
