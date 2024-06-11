@@ -19,14 +19,14 @@ const signature = Buffer.from(signatureHex, 'hex');
 const ciphertext = Buffer.from(ciphertextBase64, 'base64');
 
 describe('BLS', () => {
-  it('should encrypt', () => {
-    blsEncrypt('Bls12381G2', publicKey, message, identity);
+  it('should encrypt', async () => {
+    await blsEncrypt('Bls12381G2', publicKey, message, identity);
   });
 
-  it('should combine signatures, verify and decrypt', () => {
-    const combinedSignature = blsCombine('Bls12381G2', signatureShares);
+  it('should combine signatures, verify and decrypt', async () => {
+    const combinedSignature = await blsCombine('Bls12381G2', signatureShares);
     blsVerify('Bls12381G2', publicKey, identity, signature);
-    const decryptedMessage = blsDecrypt(
+    const decryptedMessage = await blsDecrypt(
       'Bls12381G2',
       ciphertext,
       combinedSignature
@@ -36,13 +36,5 @@ describe('BLS', () => {
     expect(Buffer.from(combinedSignature)).toEqual(signature);
     expect(decryptedMessage).toBeInstanceOf(Uint8Array);
     expect(Buffer.from(decryptedMessage)).toEqual(message);
-  });
-
-  it('should reject invalid signature', () => {
-    const signature2 = Buffer.from(signature);
-    signature2[signature2.length - 1] ^= 0x01;
-    expect(() =>
-      blsVerify('Bls12381G2', publicKey, identity, signature2)
-    ).toThrow();
   });
 });

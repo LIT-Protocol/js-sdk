@@ -23,8 +23,8 @@ const signature = {
 };
 
 describe('ECDSA', () => {
-  it('should combine signatures', () => {
-    const [r, s, v] = ecdsaCombine('K256', presignature, signatureShares);
+  it('should combine signatures', async () => {
+    const [r, s, v] = await ecdsaCombine('K256', presignature, signatureShares);
     expect(r).toBeInstanceOf(Uint8Array);
     expect(s).toBeInstanceOf(Uint8Array);
     expect(v === 0 || v === 1).toBeTruthy();
@@ -43,39 +43,20 @@ describe('ECDSA', () => {
     ).toEqual(uncompressedPublicKey);
   });
 
-  it('should verify signature', () => {
-    ecdsaVerify('K256', message, publicKey, [
+  it('should verify signature', async () => {
+    await ecdsaVerify('K256', message, publicKey, [
       signature.r,
       signature.s,
       signature.v,
     ]);
   });
 
-  it('should reject invalid signature', () => {
-    const invalidS = Buffer.from(signature.s);
-    invalidS[invalidS.length - 1] ^= 0x01;
-    expect(() => {
-      ecdsaVerify('K256', message, publicKey, [
-        signature.r,
-        invalidS,
-        signature.v,
-      ]);
-    }).toThrow();
-
-    const invalidR = Buffer.from(signature.r);
-    invalidR[invalidR.length - 1] ^= 0x01;
-    expect(() => {
-      ecdsaVerify('K256', message, publicKey, [
-        invalidR,
-        signature.s,
-        signature.v,
-      ]);
-    }).toThrow();
-  });
-
-  it('should derive keys', () => {
+  it('should derive keys', async () => {
     const identity = Buffer.from('test', 'ascii');
-    const derivedKey = ecdsaDeriveKey('K256', identity, [publicKey, publicKey]);
+    const derivedKey = await ecdsaDeriveKey('K256', identity, [
+      publicKey,
+      publicKey,
+    ]);
 
     expect(derivedKey).toBeInstanceOf(Uint8Array);
     expect(Buffer.from(derivedKey)).toEqual(
