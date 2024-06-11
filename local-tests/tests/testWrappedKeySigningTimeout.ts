@@ -58,13 +58,13 @@ export const testWrappedKeySigningTimeout = async (
   };
 
   try {
-      const _signedTx = await signWithEncryptedKey({
-        pkpSessionSigs,
-        litActionCode: signingTimeoutEncryptedKeyLitAction,
-        unsignedTransaction,
-        broadcast: true,
-        litNodeClient: devEnv.litNodeClient,
-      });
+    const _signedTx = await signWithEncryptedKey({
+      pkpSessionSigs,
+      litActionCode: signingTimeoutEncryptedKeyLitAction,
+      unsignedTransaction,
+      broadcast: true,
+      litNodeClient: devEnv.litNodeClient,
+    });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
     console.log('❌ e.message: ', e.message);
@@ -73,7 +73,9 @@ export const testWrappedKeySigningTimeout = async (
       e.message.includes(
         'There was a timeout error executing the Javascript for this action'
       ) &&
-      e.message.includes("This doesn't mean that your transaction wasn't broadcast but that it took more than 30 secs to confirm. Please confirm whether it went through on the blockchain explorer for your chain.")
+      e.message.includes(
+        "This doesn't mean that your transaction wasn't broadcast but that it took more than 30 secs to confirm. Please confirm whether it went through on the blockchain explorer for your chain."
+      )
     ) {
       console.log(
         '✅ testWrappedKeySigningTimeout is expected to have an error'

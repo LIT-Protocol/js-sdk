@@ -1,4 +1,8 @@
-import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT, LIT_PREFIX } from './constants';
+import {
+  CHAIN_ETHEREUM,
+  ENCRYPTED_PRIVATE_KEY_ENDPOINT,
+  LIT_PREFIX,
+} from './constants';
 import { decryptToString, encryptString } from '@lit-protocol/encryption';
 import { logError } from '@lit-protocol/misc';
 import {
@@ -110,7 +114,9 @@ export async function exportPrivateKey({
     );
 
     // It will be of the form lit_<privateKey>
-    return decryptedPrivateKey.startsWith(LIT_PREFIX) ? decryptedPrivateKey.slice(LIT_PREFIX.length) : decryptedPrivateKey;
+    return decryptedPrivateKey.startsWith(LIT_PREFIX)
+      ? decryptedPrivateKey.slice(LIT_PREFIX.length)
+      : decryptedPrivateKey;
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);
@@ -174,7 +180,7 @@ export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
       },
     });
   } catch (err: any) {
-    if (broadcast && err.errorCode === "NodeJsTimeoutError") {
+    if (broadcast && err.errorCode === 'NodeJsTimeoutError') {
       throw new Error(
         `The action timed out: ${err.message}. This doesn't mean that your transaction wasn't broadcast but that it took more than 30 secs to confirm. Please confirm whether it went through on the blockchain explorer for your chain.`
       );
