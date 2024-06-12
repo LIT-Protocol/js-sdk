@@ -125,6 +125,7 @@ import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -511,17 +512,38 @@ export class LitNodeClientNodeJs
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
-
-    try {
-      await authSigSiweMessage.validate(authSig.sig);
-    } catch (e) {
-      console.debug('Need retry because verify failed', e);
-      return true;
+    // We will either have `ed25519` or `LIT_BLS` as we have deviated from the specification of SIWE and use BLS signatures in some cases
+    // Here we need to check the `algo` of the SIWE to confirm we can validate the signature as if we attempt to validate the BLS signature here
+    // it will fail. If the  algo is not defined we can assume that it was an EOA wallet signing the message so we can use SIWE.
+    if (authSig.algo === `ed25519` || authSig.algo === undefined) {
+      try {
+        await authSigSiweMessage.validate(authSig.sig);
+      } catch (e) {
+        log(`Error while verifying ECDSA signature: `, e);
+        return true;
+      }
+    } else if (authSig.algo === `LIT_BLS`) {
+      try {
+        blsSessionSigVerify(
+          blsSdk.verify_signature,
+          this.networkPubKey!,
+          authSig
+        );
+      } catch (e) {
+        log(`Error while verifying bls signature: `, e);
+        return true;
+      }
+    } else {
+      throwError({
+        message: `Unsupported signature algo for session signature. Expected ed25519 or LIT_BLS recieved ${authSig.algo}`,
+        errorKind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
+        errorCode: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.code,
+      });
     }
 
     // make sure the sig is for the correct session key
     if (authSigSiweMessage.uri !== sessionKeyUri) {
-      console.debug('Need retry because uri does not match');
+      log('Need retry because uri does not match');
       return true;
     }
 
@@ -530,7 +552,7 @@ export class LitNodeClientNodeJs
       !authSigSiweMessage.resources ||
       authSigSiweMessage.resources.length === 0
     ) {
-      console.debug('Need retry because empty resources');
+      log('Need retry because empty resources');
       return true;
     }
 
@@ -549,7 +571,7 @@ export class LitNodeClientNodeJs
           resourceAbilityRequest.ability
         )
       ) {
-        console.debug('Need retry because capabilities do not match', {
+        log('Need retry because capabilities do not match', {
           authSigSessionCapabilityObject,
           resourceAbilityRequest,
         });
