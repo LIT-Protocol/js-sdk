@@ -39,17 +39,16 @@ async function loadModules() {
   }
 }
 
-
 /**
  * Combines bls signature shares to decrypt
- * 
+ *
  * Supports:
  * - 12381G2
- * - 12381G1 
-* @param {BlsVariant} variant
-* @param {(Uint8Array)[]} signature_shares
-* @returns {Uint8Array}
-*/
+ * - 12381G1
+ * @param {BlsVariant} variant
+ * @param {(Uint8Array)[]} signature_shares
+ * @returns {Uint8Array}
+ */
 export async function blsCombine(
   variant: BlsVariant,
   signature_shares: Uint8Array[]
@@ -58,19 +57,18 @@ export async function blsCombine(
   return wasmInternal.blsCombine(variant, signature_shares);
 }
 
-
 /**
  * Uses a combined BLS signature to decrypt with the
  * given ciphertext from {@link blsEncrypt}
- * 
+ *
  * Supports:
  * - 12381G2
- * - 12381G1 
-* @param {BlsVariant} variant
-* @param {Uint8Array} ciphertext
-* @param {Uint8Array} decryption_key
-* @returns {Uint8Array}
-*/
+ * - 12381G1
+ * @param {BlsVariant} variant
+ * @param {Uint8Array} ciphertext
+ * @param {Uint8Array} decryption_key
+ * @returns {Uint8Array}
+ */
 export async function blsDecrypt(
   variant: BlsVariant,
   ciphertext: Uint8Array,
@@ -80,19 +78,18 @@ export async function blsDecrypt(
   return wasmInternal.blsDecrypt(variant, ciphertext, decryption_key);
 }
 
-
 /**
  * Used for BLS encryption
- * 
+ *
  * Supports:
  * - 12381G2
- * - 12381G1 
-* @param {BlsVariant} variant
-* @param {Uint8Array} encryption_key
-* @param {Uint8Array} message
-* @param {Uint8Array} identity
-* @returns {Uint8Array}
-*/
+ * - 12381G1
+ * @param {BlsVariant} variant
+ * @param {Uint8Array} encryption_key
+ * @param {Uint8Array} message
+ * @param {Uint8Array} identity
+ * @returns {Uint8Array}
+ */
 export async function blsEncrypt(
   variant: BlsVariant,
   encryption_key: Uint8Array,
@@ -103,18 +100,17 @@ export async function blsEncrypt(
   return wasmInternal.blsEncrypt(variant, encryption_key, message, identity);
 }
 
-
 /**
  * Verifies a BLS signature
- * 
+ *
  * Supports:
  * - 12381G2
- * - 12381G1 
-* @param {BlsVariant} variant
-* @param {Uint8Array} public_key
-* @param {Uint8Array} message
-* @param {Uint8Array} signature
-*/
+ * - 12381G1
+ * @param {BlsVariant} variant
+ * @param {Uint8Array} public_key
+ * @param {Uint8Array} message
+ * @param {Uint8Array} signature
+ */
 export async function blsVerify(
   variant: BlsVariant,
   public_key: Uint8Array,
@@ -126,16 +122,16 @@ export async function blsVerify(
 }
 
 /**
-* Combine ECDSA signatures shares
-*  
-* Supports:
-*  - K256
-*  - P256
-* @param {EcdsaVariant} variant
-* @param {Uint8Array} presignature
-* @param {(Uint8Array)[]} signature_shares
-* @returns {[Uint8Array, Uint8Array, number]}
-*/
+ * Combine ECDSA signatures shares
+ *
+ * Supports:
+ *  - K256
+ *  - P256
+ * @param {EcdsaVariant} variant
+ * @param {Uint8Array} presignature
+ * @param {(Uint8Array)[]} signature_shares
+ * @returns {[Uint8Array, Uint8Array, number]}
+ */
 export async function ecdsaCombine(
   variant: EcdsaVariant,
   presignature: Uint8Array,
@@ -145,18 +141,17 @@ export async function ecdsaCombine(
   return wasmInternal.ecdsaCombine(variant, presignature, signature_shares);
 }
 
-
 /**
-* HD key derivation
-* 
-* Supports:
-* - k256
-* - p256
-* @param {EcdsaVariant} variant ecdsa scheme
-* @param {Uint8Array} id keyid which will be used for the key derivation
-* @param {(Uint8Array)[]} public_keys ecdsa root keys
-* @returns {Uint8Array}
-*/
+ * HD key derivation
+ *
+ * Supports:
+ * - k256
+ * - p256
+ * @param {EcdsaVariant} variant ecdsa scheme
+ * @param {Uint8Array} id keyid which will be used for the key derivation
+ * @param {(Uint8Array)[]} public_keys ecdsa root keys
+ * @returns {Uint8Array}
+ */
 export async function ecdsaDeriveKey(
   variant: EcdsaVariant,
   id: Uint8Array,
@@ -166,18 +161,17 @@ export async function ecdsaDeriveKey(
   return wasmInternal.ecdsaDeriveKey(variant, id, public_keys);
 }
 
-
 /**
-* Verifier for ECDSA signatures
-* 
-* Supports:
-* - k256
-* - p256
-* @param {EcdsaVariant} variant
-* @param {Uint8Array} message_hash
-* @param {Uint8Array} public_key
-* @param {[Uint8Array, Uint8Array, number]} signature
-*/
+ * Verifier for ECDSA signatures
+ *
+ * Supports:
+ * - k256
+ * - p256
+ * @param {EcdsaVariant} variant
+ * @param {Uint8Array} message_hash
+ * @param {Uint8Array} public_key
+ * @param {[Uint8Array, Uint8Array, number]} signature
+ */
 export async function ecdsaVerify(
   variant: EcdsaVariant,
   message_hash: Uint8Array,
@@ -188,12 +182,11 @@ export async function ecdsaVerify(
   wasmInternal.ecdsaVerify(variant, message_hash, public_key, signature);
 }
 
-
 /**
-* Gets the vcek url for the given attestation report.  You can fetch this certificate yourself, and pass it in to verify_attestation_report
-* @param {Uint8Array} attestation_report
-* @returns {string}
-*/
+ * Gets the vcek url for the given attestation report.  You can fetch this certificate yourself, and pass it in to verify_attestation_report
+ * @param {Uint8Array} attestation_report
+ * @returns {string}
+ */
 export async function sevSnpGetVcekUrl(
   attestation_report: Uint8Array
 ): Promise<string> {
@@ -203,13 +196,13 @@ export async function sevSnpGetVcekUrl(
 
 /**
  * Checks attestation from a node with AMD certs
-* @param {Uint8Array} attestation_report
-* @param {Record<string, Uint8Array>} attestation_data
-* @param {(Uint8Array)[]} signatures
-* @param {Uint8Array} challenge
-* @param {Uint8Array} vcek_certificate
-* @returns {Promise<void>}
-*/
+ * @param {Uint8Array} attestation_report
+ * @param {Record<string, Uint8Array>} attestation_data
+ * @param {(Uint8Array)[]} signatures
+ * @param {Uint8Array} challenge
+ * @param {Uint8Array} vcek_certificate
+ * @returns {Promise<void>}
+ */
 export async function sevSnpVerify(
   attestation_report: Uint8Array,
   attestation_data: Record<string, Uint8Array>,
