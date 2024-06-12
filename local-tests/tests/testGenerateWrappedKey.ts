@@ -1,6 +1,11 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { exportPrivateKey, generatePrivateKey, generatePrivateKeyLitAction, importPrivateKey } from '@lit-protocol/wrapped-keys';
+import {
+  exportPrivateKey,
+  generatePrivateKey,
+  generatePrivateKeyLitAction,
+  importPrivateKey,
+} from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { ethers } from 'ethers';
 

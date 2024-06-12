@@ -24,11 +24,18 @@ import {
   GeneratePrivateKeyResponse,
 } from './interfaces';
 
-export async function generatePrivateKey({ pkpSessionSigs, litActionCode, litNodeClient }: GeneratePrivateKeyParams): Promise<GeneratePrivateKeyResponse> {
+export async function generatePrivateKey({
+  pkpSessionSigs,
+  litActionCode,
+  litNodeClient,
+}: GeneratePrivateKeyParams): Promise<GeneratePrivateKeyResponse> {
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
-  console.log('accessControlConditions: ', JSON.stringify(allowPkpAddressToDecrypt));
+  console.log(
+    'accessControlConditions: ',
+    JSON.stringify(allowPkpAddressToDecrypt)
+  );
 
   let ciphertext, dataToEncryptHash, publicKey;
   try {
@@ -70,7 +77,10 @@ export async function generatePrivateKey({ pkpSessionSigs, litActionCode, litNod
     }
 
     const importedPrivateKey: ImportPrivateKeyResponse = await response.json();
-    return { pkpAddress: importedPrivateKey.pkpAddress, generatedPublicKey: publicKey };
+    return {
+      pkpAddress: importedPrivateKey.pkpAddress,
+      generatedPublicKey: publicKey,
+    };
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);
@@ -160,8 +170,7 @@ export async function exportPrivateKey({
       throw new Error(errorBody);
     }
 
-    exportedPrivateKeyData =
-      await response.json();
+    exportedPrivateKeyData = await response.json();
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);

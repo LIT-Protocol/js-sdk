@@ -108,7 +108,9 @@ export async function fetchPrivateKeyMedataFromDatabase(
   }
 }
 
-export function postLitActionValidation(result: ExecuteJsResponse | undefined): string {
+export function postLitActionValidation(
+  result: ExecuteJsResponse | undefined
+): string {
   console.log(`Lit Action result: ${JSON.stringify(result)}`);
 
   if (!result) {
