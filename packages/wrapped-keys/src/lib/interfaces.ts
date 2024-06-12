@@ -6,6 +6,11 @@ export interface GeneratePrivateKeyParams {
   litNodeClient: ILitNodeClient;
 }
 
+export interface GeneratePrivateKeyResponse {
+  pkpAddress: string;
+  generatedPublicKey: string;
+}
+
 export interface ImportPrivateKeyParams {
   pkpSessionSigs: SessionSigsMap;
   privateKey: string;

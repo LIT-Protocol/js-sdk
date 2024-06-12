@@ -7,26 +7,18 @@ const LIT_PREFIX = 'lit_';
         async () => {
             const wallet = ethers.Wallet.createRandom();
             const privateKey = LIT_PREFIX + wallet.privateKey.toString();
-            console.log('privateKey');
-            console.log(privateKey);
             let utf8Encode = new TextEncoder();
             const to_encrypt = utf8Encode.encode(privateKey);
-            console.log('to_encrypt');
-            console.log(to_encrypt);
 
             const { ciphertext, dataToEncryptHash } = await Lit.Actions.encrypt({
                 accessControlConditions,
                 to_encrypt,
             });
-            console.log('ciphertext in runOnce:', ciphertext);
-            console.log('dataToEncryptHash in runOnce:', dataToEncryptHash);
-            return JSON.stringify({ ciphertext, dataToEncryptHash });
+            return JSON.stringify({ ciphertext, dataToEncryptHash, publicKey: wallet.publicKey });
         }
     );
 
-    // const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
     Lit.Actions.setResponse({
-        // response: JSON.stringify({ ciphertext, dataToEncryptHash }),
         response: resp,
     });
 })();
