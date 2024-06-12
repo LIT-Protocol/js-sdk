@@ -3,8 +3,15 @@ import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { ethers } from 'ethers';
-import { CHAIN_ETHEREUM, LIT_PREFIX } from 'packages/wrapped-keys/src/lib/constants';
-import { getFirstSessionSig, getPkpAccessControlCondition, getPkpAddressFromSessionSig } from 'packages/wrapped-keys/src/lib/utils';
+import {
+  CHAIN_ETHEREUM,
+  LIT_PREFIX,
+} from 'packages/wrapped-keys/src/lib/constants';
+import {
+  getFirstSessionSig,
+  getPkpAccessControlCondition,
+  getPkpAddressFromSessionSig,
+} from 'packages/wrapped-keys/src/lib/utils';
 import { decryptToString } from '@lit-protocol/encryption';
 import { generatePrivateKeyLitAction } from '@lit-protocol/wrapped-keys';
 
@@ -14,7 +21,9 @@ import { generatePrivateKeyLitAction } from '@lit-protocol/wrapped-keys';
  * ✅ NETWORK=manzano yarn test:local --filter=testRemoveDecryptFailingOutsideLitAction
  * ✅ NETWORK=localchain yarn test:local --filter=testRemoveDecryptFailingOutsideLitAction
  */
-export const testRemoveDecryptFailingOutsideLitAction = async (devEnv: TinnyEnvironment) => {
+export const testRemoveDecryptFailingOutsideLitAction = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -76,7 +85,7 @@ export const testRemoveDecryptFailingOutsideLitAction = async (devEnv: TinnyEnvi
       dataToEncryptHash,
       sessionSigs: pkpSessionSigs,
     },
-    devEnv.litNodeClient,
+    devEnv.litNodeClient
   );
 
   console.log('decryptedPrivateKey');

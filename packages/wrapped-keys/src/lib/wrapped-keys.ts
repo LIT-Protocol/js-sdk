@@ -58,7 +58,10 @@ export async function generatePrivateKey({
 
   const data = { ciphertext, dataToEncryptHash };
 
-  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(data, firstSessionSig);
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(
+    data,
+    firstSessionSig
+  );
   return {
     pkpAddress: importedPrivateKey.pkpAddress,
     generatedPublicKey: publicKey,
@@ -89,7 +92,10 @@ export async function importPrivateKey({
     dataToEncryptHash,
   };
 
-  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(data, firstSessionSig);
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(
+    data,
+    firstSessionSig
+  );
   return importedPrivateKey.pkpAddress;
 }
 
