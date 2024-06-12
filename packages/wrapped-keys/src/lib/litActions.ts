@@ -18,6 +18,20 @@ const LIT_PREFIX = 'lit_';
         }
     );
 
+    const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
+    const decrypted = await Lit.Actions.decryptAndCombine({
+        accessControlConditions,
+        ciphertext,
+        dataToEncryptHash,
+        authSig: null,
+        chain: 'ethereum',
+    });
+
+    console.log('accessControlConditions: ', accessControlConditions);
+    console.log('ciphertext: ', ciphertext);
+    console.log('dataToEncryptHash: ', dataToEncryptHash);
+    console.log('decrypted: ', decrypted);
+
     Lit.Actions.setResponse({
         response: resp,
     });
