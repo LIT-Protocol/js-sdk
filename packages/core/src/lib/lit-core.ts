@@ -135,7 +135,7 @@ export class LitCore {
     lastUpdateTime: null,
   };
   private _blockHashUrl =
-    'http://block-indexer.litgateway.com/get_most_recent_valid_block';
+    'https://block-indexer.litgateway.com/get_most_recent_valid_block';
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
