@@ -1105,6 +1105,15 @@ export interface CommonGetSessionSigsProps {
   capabilityAuthSigs?: AuthSig[];
 }
 
+export interface BaseProviderGetSessionSigsProps
+  extends CommonGetSessionSigsProps,
+    LitActionSdkParams {
+  /**
+   * This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
+   */
+  authNeededCallback?: AuthCallback;
+}
+
 export interface GetSessionSigsProps
   extends CommonGetSessionSigsProps,
     LitActionSdkParams {
@@ -1589,7 +1598,7 @@ export interface BaseProviderSessionSigsParams {
   /**
    * Params for getSessionSigs function
    */
-  sessionSigsParams: GetSessionSigsProps;
+  sessionSigsParams: BaseProviderGetSessionSigsProps;
   /**
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
