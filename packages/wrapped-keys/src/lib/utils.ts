@@ -8,7 +8,7 @@ import {
 import { log, logError } from '@lit-protocol/misc';
 import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
 import { ethers } from 'ethers';
-import { ExportPrivateKeyResponse } from './interfaces';
+import { ExportPrivateKeyResponse, ImportPrivateKeyResponse, StoreToDatabaseParams } from './interfaces';
 // import { log } from 'console';
 
 export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
@@ -99,7 +99,36 @@ export async function fetchPrivateKeyMedataFromDatabase(
       throw new Error(errorBody);
     }
 
-    return (await response.json()) as ExportPrivateKeyResponse;
+    return await response.json();
+  } catch (error) {
+    const errorMessage = `There was a problem fetching from the database: ${error}`;
+    console.error(errorMessage);
+
+    throw new Error(errorMessage);
+  }
+}
+
+export async function storePrivateKeyMetadataToDatabase(data: StoreToDatabaseParams, firstSessionSig: AuthSig): Promise<ImportPrivateKeyResponse> {
+  try {
+    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        pkpsessionsig: JSON.stringify(firstSessionSig),
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      logError(
+        `Could not import the encrypted key due to the error: ${errorBody}`
+      );
+
+      throw new Error(errorBody);
+    }
+
+    return await response.json();
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);

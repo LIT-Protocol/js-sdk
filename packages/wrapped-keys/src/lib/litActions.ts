@@ -18,6 +18,7 @@ const LIT_PREFIX = 'lit_';
         }
     );
 
+    // TODO: Remove the below which is only for demonstrating the error
     const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
     const decrypted = await Lit.Actions.decryptAndCombine({
         accessControlConditions,
@@ -27,6 +28,7 @@ const LIT_PREFIX = 'lit_';
         chain: 'ethereum',
     });
 
+    // TODO: Remove the below which is only for demonstrating the error
     console.log('accessControlConditions: ', accessControlConditions);
     console.log('ciphertext: ', ciphertext);
     console.log('dataToEncryptHash: ', dataToEncryptHash);

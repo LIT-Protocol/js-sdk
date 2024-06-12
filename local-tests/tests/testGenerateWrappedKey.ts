@@ -4,7 +4,6 @@ import {
   exportPrivateKey,
   generatePrivateKey,
   generatePrivateKeyLitAction,
-  importPrivateKey,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { ethers } from 'ethers';

@@ -11,13 +11,13 @@ import {
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
   postLitActionValidation,
+  storePrivateKeyMetadataToDatabase,
 } from './utils';
 import {
   LitTransaction,
   ExportPrivateKeyParams,
   ExportPrivateKeyResponse,
   ImportPrivateKeyParams,
-  ImportPrivateKeyResponse,
   SignTransactionWithEncryptedKeyParams,
   SignMessageWithEncryptedKeyParams,
   GeneratePrivateKeyParams,
@@ -57,36 +57,12 @@ export async function generatePrivateKey({
   }
 
   const data = { ciphertext, dataToEncryptHash };
-  try {
-    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        pkpsessionsig: JSON.stringify(firstSessionSig),
-      },
-      body: JSON.stringify(data),
-    });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      logError(
-        `Could not import the encrypted key due to the error: ${errorBody}`
-      );
-
-      throw new Error(errorBody);
-    }
-
-    const importedPrivateKey: ImportPrivateKeyResponse = await response.json();
-    return {
-      pkpAddress: importedPrivateKey.pkpAddress,
-      generatedPublicKey: publicKey,
-    };
-  } catch (error) {
-    const errorMessage = `There was a problem fetching from the database: ${error}`;
-    console.error(errorMessage);
-
-    throw new Error(errorMessage);
-  }
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(data, firstSessionSig);
+  return {
+    pkpAddress: importedPrivateKey.pkpAddress,
+    generatedPublicKey: publicKey,
+  };
 }
 
 export async function importPrivateKey({
@@ -113,33 +89,8 @@ export async function importPrivateKey({
     dataToEncryptHash,
   };
 
-  try {
-    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        pkpsessionsig: JSON.stringify(firstSessionSig),
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      logError(
-        `Could not import the encrypted key due to the error: ${errorBody}`
-      );
-
-      throw new Error(errorBody);
-    }
-
-    const importedPrivateKey: ImportPrivateKeyResponse = await response.json();
-    return importedPrivateKey.pkpAddress;
-  } catch (error) {
-    const errorMessage = `There was a problem fetching from the database: ${error}`;
-    console.error(errorMessage);
-
-    throw new Error(errorMessage);
-  }
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(data, firstSessionSig);
+  return importedPrivateKey.pkpAddress;
 }
 
 export async function exportPrivateKey({
