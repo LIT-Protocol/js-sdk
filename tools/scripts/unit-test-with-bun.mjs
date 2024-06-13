@@ -5,11 +5,11 @@ import { bunSpawn, greenLog, redLog } from './utils.mjs';
 
 /**
  * This script recursively looks for files in the directory ./packages that ends with .spec.ts or .test.ts.
- * When run with node ./tools/scripts/test-scripts.mjs <file-name-without-extension>, it runs the script with command 'bun test <path-of-the-test-file>'
+ * When run with node ./tools/scripts/unit-test-with-bun.mjs <file-name-without-extension>, it runs the script with command 'bun test <path-of-the-test-file>'
  *
  * Arguments can be provided in the format "--<command>=<value>"
  *
- * Example: node ./tools/scripts/test-scripts.mjs --dir=./packages --ext=.spec.ts,.test.ts
+ * Example: node ./tools/scripts/unit-test-with-bun.mjs --dir=./packages --ext=.spec.ts,.test.ts
  */
 
 const args = process.argv.slice(2);

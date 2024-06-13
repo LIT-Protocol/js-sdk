@@ -14,16 +14,13 @@ import {
   redLog,
   replaceAutogen,
   replaceFileContent,
-  runCommand,
   spawnCommand,
   spawnListener,
   writeFile,
   writeJsonFile,
   checkEmptyDirectories,
 } from './utils.mjs';
-import fs from 'fs';
-import path from 'path';
-import { spawn } from 'child_process';
+import fs, { readFileSync } from 'fs';
 
 const args = getArgs();
 
@@ -35,17 +32,12 @@ const optionMaps = new Map([
   ['--path', () => pathFunc()],
   ['--test', () => testFunc()],
   ['--find', () => findFunc()],
-  ['--build', () => buildFunc()],
   ['--switch', () => switchFunc()],
-  ['--dev', () => devFunc()],
-  ['--watch', () => watchFunc()],
   ['--comment', () => commentFunc()],
   ['--remove-local-dev', () => removeLocalDevFunc()],
   ['--setup-local-dev', () => setupLocalDevFunc()],
   ['--match-versions', () => matchVersionsFunc()],
   ['default', () => helpFunc()],
-  ['--v', () => versionFunc()],
-  ['--version', () => versionFunc()],
   ['--verify', () => validateDependencyVersions()],
   ['--postBuild', () => postBuild()],
   ['fixTsConfig', () => fixTsConfigFunc()],
@@ -71,10 +63,8 @@ function helpFunc() {
             --find: different search options
             --publish: publish to npm
             --clone: clone a package from ./dist and publish to npm
-            --yalc: publish to yalc
             --build: build the project
             --dev: run dev stuff
-            --watch: watch for changes
             --remove-local-dev: remove local dev
             --setup-local-dev: setup local dev
             --match-versions: match versions
@@ -246,124 +236,10 @@ async function testFunc() {
       Usage: node tools/scripts/tools.mjs --test [test-type]
           [test-type]: the type of test to run
               --unit: run unit tests
-              --e2e: run e2e tests
-              --custom: run custom tests
   `,
       true
     );
     exit();
-  }
-
-  if (TEST_TYPE === '--unit') {
-    // Run the nx run-many command with the --projects flag set to the project names
-    const nx = spawn('nx', ['run-many', '--target=test'], {
-      stdio: 'inherit', // This maintains the log output color
-      shell: true,
-    });
-
-    // Handle errors
-    nx.on('error', (error) => {
-      console.error(`Error: ${error.message}`);
-      process.exit();
-    });
-
-    // Handle exit
-    nx.on('exit', (code) => {
-      console.log(`Child process exited with code ${code}`);
-      // stopServer(serverProcess);
-      process.exit();
-    });
-  }
-
-  if (TEST_TYPE === '--e2e') {
-    const ENV = args[2];
-
-    if (!ENV || ENV === '' || ENV === '--help') {
-      greenLog(
-        `
-          Usage: node tools/scripts/tools.mjs --test --e2e [env]
-              [env]: the environment to run the tests in
-                  react: run tests on react app on port 4003
-                  html: run tests on html app on port 4002
-                  run-react-and-test: run the react app and run e2e tests on it
-                  run-html-and-test: run the html app and run e2e tests on it
-      `,
-        true
-      );
-      exit();
-    }
-
-    if (ENV === 'react') {
-      await childRunCommand(
-        'cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4003 yarn cypress open'
-      );
-    }
-
-    if (ENV === 'html') {
-      await childRunCommand(
-        'cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 yarn cypress open'
-      );
-    }
-
-    if (ENV === 'run-react-and-test') {
-      // spawnListener('yarn tools --dev --apps');
-      spawnListener('yarn nx run react:serve');
-
-      // wait 3 seconds for the apps to start
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      spawnListener('yarn tools --test --e2e react');
-    }
-
-    if (ENV === 'run-html-and-test') {
-      // spawnListener('yarn tools --dev --apps');
-      spawnListener('yarn nx run html:serve');
-
-      // wait 3 seconds for the apps to start
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      spawnListener('yarn tools --test --e2e html');
-    }
-  }
-
-  if (TEST_TYPE === '--custom') {
-    function formatNxLine(path) {
-      const bold = '\x1b[1m';
-      const orangeBg = '\x1b[48;5;208m';
-      const black = '\x1b[30m';
-      const orange = '\x1b[38;5;208m';
-      const reset = '\x1b[0m';
-
-      const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path}${reset}\n`;
-      return formattedLine;
-    }
-
-    function findSpecFiles(directory, filePattern) {
-      const files = fs.readdirSync(directory, { withFileTypes: true });
-      let specFiles = [];
-
-      for (const file of files) {
-        const fullPath = path.join(directory, file.name);
-
-        if (file.isDirectory()) {
-          specFiles = specFiles.concat(findSpecFiles(fullPath, filePattern));
-        } else if (file.isFile() && file.name.match(filePattern)) {
-          specFiles.push(fullPath);
-        }
-      }
-
-      return specFiles;
-    }
-
-    const specFiles = findSpecFiles('./packages', /\.spec\.mjs$/);
-
-    await asyncForEach([...specFiles], async (specFile) => {
-      const output = formatNxLine(specFile);
-      console.log(output);
-      await childRunCommand(`node ${specFile}`);
-    });
-
-    process.exit();
   }
 }
 
@@ -415,79 +291,6 @@ async function findFunc() {
 
     console.log(res);
     exit();
-  }
-}
-
-async function buildFunc() {
-  const BUILD_TYPE = args[1];
-
-  if (!BUILD_TYPE || BUILD_TYPE === '' || BUILD_TYPE === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --build [option]
-            [option]: the option to run
-                --packages: build packages
-                --target: build a target package
-                --apps: build apps
-                --all: build all
-    `,
-      true
-    );
-
-    exit();
-  }
-
-  if (BUILD_TYPE === '--target') {
-    const TARGET = args[2];
-
-    if (!TARGET || TARGET === '' || TARGET === '--help') {
-      greenLog(
-        `
-            Usage: node tools/scripts/tools.mjs --build --target [target]
-                [target]: the target to build
-            `,
-        true
-      );
-      exit();
-    }
-
-    await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
-    await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
-    await childRunCommand(`yarn postBuild:mapDepsToDist`);
-    await childRunCommand(`yarn gen:html`);
-    await childRunCommand(`yarn gen:react`);
-    await childRunCommand(`yarn gen:nodejs`);
-  }
-
-  if (BUILD_TYPE === '--packages') {
-    const MODE = args[2];
-    // console.log('MODE:', MODE);
-
-    if (!MODE || MODE === '' || MODE === '--help') {
-      greenLog(
-        `
-            Usage: node tools/scripts/tools.mjs --build --packages [option]
-
-                [option]: the option to run
-            `,
-        true
-      );
-    }
-
-    await childRunCommand(`yarn tools --match-versions`);
-
-    const ignoreList = (await listDirsRecursive('./apps', false))
-      .map((item) => item.replace('apps/', ''))
-      .join(',');
-
-    const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
-
-    spawnListener(command, {
-      onDone: () => {
-        console.log('Done!');
-        exit();
-      },
-    });
   }
 }
 
@@ -584,68 +387,6 @@ async function publishFunc() {
     exit();
   }
 }
-async function yalcFunc() {
-  const OPTION2 = args[1];
-
-  if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --yalc [option]
-            [option]: the option to run
-                --publish: publish packages to yalc
-                --push: push packages to yalc
-                --remove: remove packages from yalc
-    `,
-      true
-    );
-
-    exit();
-  }
-
-  const dirs = (await listDirsRecursive('./dist/packages', false)).map((item) =>
-    item.replace('dist/packages/', '')
-  );
-
-  if (OPTION2 === '--publish') {
-    dirs.forEach((name) => {
-      spawnCommand(
-        'yalc',
-        ['publish', '--push'],
-        {
-          cwd: `dist/packages/${name}`,
-        },
-        { logExit: false }
-      );
-    });
-  }
-
-  if (OPTION2 === '--push') {
-    dirs.forEach((name) => {
-      spawnCommand(
-        'yalc',
-        ['push'],
-        {
-          cwd: `dist/packages/${name}`,
-        },
-        { logExit: false }
-      );
-    });
-  }
-
-  if (OPTION2 === '--remove') {
-    dirs.forEach((name) => {
-      spawnCommand(
-        'yalc',
-        ['remove', name],
-        {
-          cwd: `dist/packages/${name}`,
-        },
-        { logExit: false }
-      );
-    });
-  }
-  exit();
-}
 
 async function switchFunc() {
   const SCOPE = args[1];
@@ -717,220 +458,6 @@ async function switchFunc() {
     exit();
   }
 }
-async function cloneFunc() {
-  const PROJECT_NAME = args[1];
-  const NPM_NAME = args[2];
-
-  greenLog(
-    `
-        Usage: node tools/scripts/tools.mjs --clone [project-name] [npm-name] [option]
-
-            [project-name]: the name of the project
-            [npm-name]: the npm name of the clone
-
-            [option]: the option to run
-                --publish: publish packages to npm
-        `,
-    true
-  );
-
-  if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
-    exit();
-  } else {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-
-  const dirs = (await listDirsRecursive('./dist/packages', false))
-    .filter((item) => item.includes(PROJECT_NAME))
-    .map((path) => {
-      const name = path.replace('dist/packages/', '');
-
-      const folderName = NPM_NAME.replaceAll('/', '-');
-      let clonePath = path.replace(PROJECT_NAME, folderName);
-
-      let npmName = clonePath.includes('-vanilla')
-        ? `${NPM_NAME}-vanilla`
-        : NPM_NAME;
-
-      return {
-        name,
-        path,
-        projectName: PROJECT_NAME,
-        npmName,
-        clonePath,
-      };
-    });
-
-  // for loop clone a copy from path to clonePath
-  for (let i = 0; i < dirs.length; i++) {
-    greenLog(`Cloning ${dirs[i].name} to ${dirs[i].clonePath}`);
-
-    const dir = dirs[i];
-
-    await childRunCommand(`cp -r ${dir.path} ${dir.clonePath}`);
-
-    // replace the name in package.json
-    const packageJson = JSON.parse(
-      await readFile(`${dir.clonePath}/package.json`)
-    );
-
-    packageJson.name = dir.npmName;
-    packageJson.publishConfig.directory = `../../dist/packages/${dir.npmName}`;
-
-    // bump version
-    // const version = packageJson.version.split('.');
-    // version[2] = parseInt(version[2]) + 1;
-    // packageJson.version = version.join('.');
-    // packageJson.version = packageJson.version;
-
-    await writeFile(
-      `${dir.clonePath}/package.json`,
-      JSON.stringify(packageJson, null, 4)
-    );
-  }
-
-  const OPTION2 = args[3];
-
-  if (OPTION2 === '--publish') {
-    // for loop publish each package
-    for (let i = 0; i < dirs.length; i++) {
-      const dir = dirs[i];
-
-      await childRunCommand(
-        `cd ${dir.clonePath} && npm publish --access public`
-      );
-    }
-
-    // for loop to delete the clone
-    for (let i = 0; i < dirs.length; i++) {
-      const dir = dirs[i];
-
-      // delete the clone
-      if (args[4] === '--remove') {
-        await childRunCommand(`rm -rf ${dir.clonePath}`);
-      }
-    }
-  }
-
-  exit();
-}
-async function devFunc() {
-  const TYPE = args[1];
-
-  if (!TYPE || TYPE === '' || TYPE === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --dev [type]
-            [type]: the type of dev to run
-                --apps: run dev on apps
-    `,
-      true
-    );
-
-    exit();
-  }
-
-  if (TYPE === '--apps' || TYPE === '--app') {
-    // go to apps/react/project.json and find the port
-    const reactPort = JSON.parse(await readFile('./apps/react/project.json'))
-      .targets.serve.options.port;
-    const htmlPort = (await readFile('./apps/html/server.js')).match(
-      /port: (\d+)/
-    )[1];
-
-    greenLog(
-      `
-            Running apps...
-            html: http://localhost:${htmlPort}
-            react: http://localhost:${reactPort}
-            nodejs: in this terminal
-        `,
-      true
-    );
-
-    // wait for 2 seconds before running the apps
-    setTimeout(() => {
-      spawnListener('yarn nx run nodejs:serve', {}, '[nodejs]', 31);
-      spawnListener('yarn nx run react:serve', {}, '[react]', 32);
-      spawnListener('yarn nx run html:serve', {}, '[html]', 33);
-    }, 2000);
-  }
-}
-
-async function watchFunc() {
-  const OPTION = args[1];
-
-  if (!OPTION || OPTION === '' || OPTION === '--help') {
-    greenLog(
-      `
-            Usage: node tools/scripts/tools.mjs --watch [option]
-                [option]: the option to use
-                    --all: watch all
-                    --target: watch a target
-        `,
-      true
-    );
-
-    exit();
-  }
-
-  if (OPTION === '--all') {
-    greenLog('Watching all...', true);
-    await childRunCommand(
-      'nodemon --watch packages --ext js,ts --exec "yarn tools --build --packages --async"'
-    );
-  }
-
-  if (OPTION === '--target') {
-    const TARGET = args[2];
-
-    greenLog(
-      `
-            Usage: node tools/scripts/tools.mjs --watch --target [target] [option]
-                [target]: the target to watch
-                [option]: the option to use
-                    --deps: with dependencies
-        `,
-      true
-    );
-
-    if (!TARGET || TARGET === '' || TARGET === '--help') {
-      exit();
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-
-    // check if directory exists
-    const path = `./packages/${TARGET}`;
-    if (!fs.existsSync(path)) {
-      redLog(`Target "${TARGET}" does not exist!`);
-      exit();
-    }
-
-    if (args[3] === '--deps') {
-      const projectNameSpace = (await readFile(`package.json`))
-        .match(/"name": "(.*)"/)[1]
-        .split('/')[0];
-      let res = (await findImportsFromDir(`${path}/src`))
-        .filter((item) => item.includes(projectNameSpace))
-        .map((item) => {
-          return item.replace(projectNameSpace, '').replace('/', '');
-        });
-
-      res.forEach((pkg) => {
-        greenLog(`Watching ${pkg}...`, true);
-        childRunCommand(
-          `nodemon --watch ${pkg} --ext js,ts --exec "yarn tools --build --target ${pkg}"`
-        );
-      });
-    } else {
-      greenLog(`Watching ${TARGET}...`, true);
-      childRunCommand(
-        `nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`
-      );
-    }
-  }
-}
 
 async function fixTsConfigFunc() {
   const TSCONFIG = JSON.parse(await readFile('tsconfig.json'));
@@ -945,6 +472,9 @@ async function fixTsConfigFunc() {
 }
 
 async function checkFunc() {
+  /**
+   * When you are working on a branch and you switch to another branch, you might have empty directories.
+   */
   if (!getFlag('--no-empty-directories')) {
     redLog('Please use the --no-empty-directories flag to run this command');
     process.exit();
@@ -1046,9 +576,6 @@ async function setupLocalDevFunc() {
               `,
       true
     );
-
-    // await 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   /**
@@ -1085,6 +612,10 @@ async function setupLocalDevFunc() {
     greenLog(`packageJson.typings: ${packageJson.typings}`);
 
     await writeJsonFile(packageJsonPath, packageJson);
+
+    // add a new line to the packageJson content to avoid linting issues
+    const content = readFileSync(packageJsonPath, 'utf8');
+    fs.writeFileSync(packageJsonPath, `${content}\n`);
   };
 
   if (PROJECT_NAME === '--target') {
@@ -1119,151 +650,6 @@ async function matchVersionsFunc() {
     );
     await writeJsonFile(`${pkg}/package.json`, packageJson);
   });
-
-  exit();
-}
-
-async function versionFunc() {
-  const args = process.argv.slice(2);
-  const TAG = args.find((arg) => arg.startsWith('--tag'))?.split('=')[1];
-
-  greenLog(`Getting latest version from npm ${TAG}...`);
-
-  let res = await fetch(
-    'https://registry.npmjs.org/@lit-protocol/lit-node-client'
-  );
-
-  res = await res.json();
-
-  // get the last one
-  let currentVersion;
-
-  if (!TAG) {
-    currentVersion = Object.keys(res.time).pop();
-  } else {
-    currentVersion = res['dist-tags'][TAG];
-  }
-
-  const lernaJson = await readJsonFile(`lerna.json`);
-  const versionTs = (
-    await readFile(`packages/constants/src/lib/version.ts`)
-  ).match(/'([^']+)'/)[1];
-
-  greenLog(`📦 Current NPM version: ${currentVersion}`, true);
-  greenLog(`➡ Current lerna.json version: ${lernaJson.version}`, true);
-  greenLog(`➡ Current version.ts version: ${versionTs}`, true);
-
-  // if lerna.json and version.ts patch version is greater than currentVersion
-  // then console.log that we can upgrade
-  const lernaVersion = lernaJson.version.split('.');
-  const versionTsVersion = versionTs.split('.');
-  const currentVersionVersion = currentVersion.split('.');
-  if (
-    parseInt(lernaVersion[2]) === parseInt(currentVersionVersion[2]) ||
-    parseInt(versionTsVersion[2]) === parseInt(currentVersionVersion[2])
-  ) {
-    greenLog(
-      `Both versions are the same. You can bump your local version`,
-      true
-    );
-  }
-
-  const OPT = args[1];
-
-  const supportedOptions = ['--major', '--minor', '--patch', '--custom'];
-
-  if (
-    !OPT ||
-    OPT === '' ||
-    OPT === '--help' ||
-    !supportedOptions.includes(OPT)
-  ) {
-    greenLog(
-      `
-            Usage: node tools/scripts/tools.mjs --v [options]
-                [options]:
-                    --major: increase major version
-                    --minor: increase minor version
-                    --patch: increase patch version
-                    --custom: run custom tests
-            `,
-      true
-    );
-    exit();
-  }
-
-  let newVersion;
-
-  if (OPT === '--patch') {
-    // increase x from 0.0.x to 0.0.x+1
-    const version = currentVersion.split('.');
-    version[2] = parseInt(version[2]) + 1;
-    const patchVersion = version.join('.');
-    greenLog(`Patch Version: ${patchVersion}`);
-    newVersion = patchVersion;
-  }
-
-  if (OPT === '--minor') {
-    // increase x from 0.x.0 to 0.x+1.0
-    const version = currentVersion.split('.');
-    version[1] = parseInt(version[1]) + 1;
-    version[2] = 0;
-    const minorVersion = version.join('.');
-    greenLog(`Minor Version: ${minorVersion}`);
-    newVersion = minorVersion;
-  }
-
-  if (OPT === '--major') {
-    // increase x from x.0.0 to x+1.0.0
-    const version = currentVersion.split('.');
-    version[0] = parseInt(version[0]) + 1;
-    version[1] = 0;
-    version[2] = 0;
-    const majorVersion = version.join('.');
-    greenLog(`Major Version: ${majorVersion}`);
-    newVersion = majorVersion;
-  }
-
-  if (OPT === '--custom') {
-    // increase x from x.0.0 to x+1.0.0
-    const version = args[2];
-    greenLog(`Custom Version: ${version}`);
-    newVersion = version;
-  }
-
-  greenLog(`New version: ${newVersion}`);
-
-  const OPT2 = args[2];
-  // update lerna.json
-  try {
-    const lernaJson = await readJsonFile(`lerna.json`);
-    lernaJson.version = newVersion;
-
-    if (OPT2 !== '--dry-run') {
-      await writeJsonFile(`lerna.json`, lernaJson);
-    } else {
-      greenLog(`Dry run, not updating lerna.json`);
-      console.log(lernaJson);
-    }
-  } catch (e) {
-    redLog(e);
-    exit();
-  }
-
-  // update version.ts in constants
-  try {
-    const versionTsNew = `export const version = '${newVersion}';`;
-
-    if (OPT2 !== '--dry-run') {
-      await writeFile(`packages/constants/src/lib/version.ts`, versionTsNew);
-    } else {
-      greenLog(`Dry run, not updating packages/constants/src/lib/version.ts`);
-      console.log(versionTsNew);
-    }
-  } catch (e) {
-    redLog(e);
-    exit();
-  }
 
   exit();
 }
@@ -1339,14 +725,7 @@ async function postBuild() {
   // greenLog('...mapping dist package name to package.json name');
   // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
 
-  greenLog('...generating apps/html/index.html');
-  await runCommand('yarn gen:html');
-
-  greenLog('...generating apps/react/src/app/app.tsx');
-  await runCommand('yarn gen:react');
-
   greenLog('...generating apps/nodejs/main.ts');
-  await runCommand('yarn gen:nodejs');
 
   exit();
 }
