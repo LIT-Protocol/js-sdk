@@ -18,21 +18,21 @@ const LIT_PREFIX = 'lit_';
         }
     );
 
-    // TODO: Remove the below which is only for demonstrating the error
-    const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
-    const decrypted = await Lit.Actions.decryptAndCombine({
-        accessControlConditions,
-        ciphertext,
-        dataToEncryptHash,
-        authSig: null,
-        chain: 'ethereum',
-    });
+    // // TODO: Remove the below which is only for demonstrating the error
+    // const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
+    // const decrypted = await Lit.Actions.decryptAndCombine({
+    //     accessControlConditions,
+    //     ciphertext,
+    //     dataToEncryptHash,
+    //     authSig: null,
+    //     chain: 'ethereum',
+    // });
 
-    // TODO: Remove the below which is only for demonstrating the error
-    console.log('accessControlConditions: ', accessControlConditions);
-    console.log('ciphertext: ', ciphertext);
-    console.log('dataToEncryptHash: ', dataToEncryptHash);
-    console.log('decrypted: ', decrypted);
+    // // TODO: Remove the below which is only for demonstrating the error
+    // console.log('accessControlConditions: ', accessControlConditions);
+    // console.log('ciphertext: ', ciphertext);
+    // console.log('dataToEncryptHash: ', dataToEncryptHash);
+    // console.log('decrypted: ', decrypted);
 
     Lit.Actions.setResponse({
         response: resp,

@@ -83,6 +83,8 @@ import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCo
 import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 
+import { testEthereumSignMessageGeneratedKey } from './tests/testEthereumSignMessageGeneratedKey';
+import { testEthereumBroadcastTransactionGeneratedKey } from './tests/testEthereumBroadcastTransactionGeneratedKey';
 import { testEthereumSignMessageWrappedKey } from './tests/testEthereumSignMessageWrappedKey';
 import { testFailWrappedKeySigningTimeout } from './tests/testFailWrappedKeySigningTimeout';
 import { testEthereumSignTransactionWrappedKey } from './tests/testEthereumSignTransactionWrappedKey';
@@ -108,6 +110,8 @@ import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecr
   await devEnv.init();
 
   const wrappedKeysTests = {
+    testEthereumSignMessageGeneratedKey,
+    testEthereumBroadcastTransactionGeneratedKey,
     testRemoveDecryptFailingOutsideLitAction,
     testEthereumSignMessageWrappedKey,
     testEthereumSignTransactionWrappedKey,
