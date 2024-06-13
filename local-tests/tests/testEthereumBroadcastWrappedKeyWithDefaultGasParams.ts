@@ -12,8 +12,8 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
+ * ❌ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
+ * ❌ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithDefaultGasParams
  */
 export const testEthereumBroadcastWrappedKeyWithDefaultGasParams = async (
   devEnv: TinnyEnvironment
