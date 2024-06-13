@@ -98,9 +98,20 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
     : decryptedPrivateKey;
   const wallet = new ethers.Wallet(privateKey);
 
+  console.log('unsignedTransaction.chain', unsignedTransaction.chain);
+  console.log('pkpAddress', pkpAddress);
+  const nonce = await Lit.Actions.getLatestNonce({
+    address: wallet.address,
+    chain: unsignedTransaction.chain,
+  });
+  console.log('nonce');
+  console.log(nonce);
+
   const tx = {
     to: unsignedTransaction.toAddress,
-    value: ethers.utils.parseEther(unsignedTransaction.value),
+    value: ethers.utils.hexlify(
+      ethers.utils.parseEther(unsignedTransaction.value)
+    ),
     chainId: unsignedTransaction.chainId,
     data: unsignedTransaction.dataHex,
     nonce,
@@ -119,7 +130,7 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
 
         try {
           const gasPrice = await provider.getGasPrice();
-          return gasPrice;
+          return ethers.utils.hexlify(gasPrice);
         } catch (err) {
           const errorMessage = 'Error: When getting gas price- ' + err.message;
           Lit.Actions.setResponse({ response: errorMessage });
@@ -142,7 +153,7 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
 
         try {
           const gasLimit = await provider.estimateGas(tx);
-          return gasLimit;
+          return ethers.utils.hexlify(gasLimit);
         } catch (err) {
           const errorMessage = 'Error: When estimating gas- ' + err.message;
           Lit.Actions.setResponse({ response: errorMessage });
@@ -151,15 +162,6 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
       }
     );
   }
-
-  console.log('unsignedTransaction.chain', unsignedTransaction.chain);
-  console.log('pkpAddress', pkpAddress);
-  const nonce = await Lit.Actions.getLatestNonce({
-    address: wallet.address,
-    chain: unsignedTransaction.chain,
-  });
-  console.log('nonce');
-  console.log(nonce);
 
   console.log('tx');
   console.log(tx);
