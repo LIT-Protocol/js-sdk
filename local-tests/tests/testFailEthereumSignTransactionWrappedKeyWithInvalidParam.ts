@@ -3,22 +3,21 @@ import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
-  signWithEncryptedKey,
+  signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumBroadcastWrappedKeysInsufficientFunds
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumBroadcastWrappedKeysInsufficientFunds
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumBroadcastWrappedKeysInsufficientFunds
+ * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
  */
-export const testFailEthereumBroadcastWrappedKeysInsufficientFunds = async (
+export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
   devEnv: TinnyEnvironment
 ) => {
-  // TODO!: Send funds to the PKP funds
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -60,18 +59,16 @@ export const testFailEthereumBroadcastWrappedKeysInsufficientFunds = async (
     chainId: 175177, // Chronicle
     gasPrice: '50',
     gasLimit: 21000,
-    dataHex: ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
-    ),
+    dataHex: 'Test transaction from Alice to bob',
     chain: 'chronicleTestnet',
   };
 
   try {
-    const _res = await signWithEncryptedKey({
+    const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signWithEthereumEncryptedKeyLitAction,
+      litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
       unsignedTransaction,
-      broadcast: true,
+      broadcast: false,
       litNodeClient: devEnv.litNodeClient,
     });
   } catch (e: any) {
@@ -80,17 +77,16 @@ export const testFailEthereumBroadcastWrappedKeysInsufficientFunds = async (
 
     if (
       e.message.includes(
-        'Error executing the Signing Lit Action: Error: When signing transaction- processing response'
-      ) &&
-      e.message.includes('insufficient FPE funds for gas * price + value')
+        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
+      )
     ) {
       console.log(
-        '✅ testFailEthereumBroadcastWrappedKeysInsufficientFunds is expected to have an error'
+        '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
       );
     } else {
       throw e;
     }
   }
 
-  log('✅ testFailEthereumBroadcastWrappedKeysInsufficientFunds');
+  log('✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam');
 };

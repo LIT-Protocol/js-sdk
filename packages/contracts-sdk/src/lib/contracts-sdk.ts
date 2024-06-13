@@ -602,7 +602,7 @@ export class LitContracts {
 
       return new ethers.Contract(address, abi, provider);
     } else {
-      // if we have contract context then we determine if there exists a `resolverAddres`
+      // if we have contract context then we determine if there exists a `resolverAddress`
       // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
         const stakingContract = (context as LitContractContext).Staking;
@@ -642,7 +642,6 @@ export class LitContracts {
     provider: ethers.providers.JsonRpcProvider,
     contractNames?: (keyof LitContractContext)[]
   ): Promise<LitContractContext> {
-    const rpcUrl = DEFAULT_RPC;
     const resolverContract = new ethers.Contract(
       context.resolverAddress,
       context.abi,
@@ -742,16 +741,19 @@ export class LitContracts {
       ];
     }
 
-    const addresses: LitContractContext = {} as LitContractContext;
-    for (const contract of contractNames) {
-      const contracts = context?.contractContext;
-      addresses[contract] = {
-        address: await getContract(contract, context.environment),
-        abi: contracts?.[contract]?.abi ?? undefined,
-      };
-    }
+    const contractContext: LitContractContext = {} as LitContractContext;
+    // Ah, Bluebird.props(), we miss you 🫗
+    await Promise.all(
+      contractNames.map(async (contractName) => {
+        const contracts = context?.contractContext;
+        contractContext[contractName] = {
+          address: await getContract(contractName, context.environment),
+          abi: contracts?.[contractName]?.abi ?? undefined,
+        };
+      })
+    );
 
-    return addresses;
+    return contractContext;
   }
 
   public static async getContractAddresses(
@@ -1082,18 +1084,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       throw new Error('No events found in receipt');
     }
 
-    let tokenId;
-
     if (!events[0].topics || events[0].topics.length < 1) {
       throw new Error(
         `No topics found in events, cannot derive pkp information. Transaction hash: ${receipt.transactionHash} If you are using your own contracts please use ethers directly`
       );
     }
 
-    tokenId = events[0].topics[1];
+    const tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);
     let tries = 0;
-    let maxAttempts = 10;
+    const maxAttempts = 10;
     let publicKey = '';
     while (tries < maxAttempts) {
       publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
@@ -1134,7 +1134,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    * @returns An object containing the PKP information and the transaction receipt.
    * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
    * @example
-   * 
+   *
   const customAuthMethodOwnedPkp =
     await alice.contractsClient.mintWithCustomAuth({
       authMethodId: 'custom-app-user-id',
@@ -1632,12 +1632,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         const events = 'events' in res ? res.events : res.logs;
 
-        let tokenIdFromEvent;
-
-        tokenIdFromEvent = events[0].topics[1];
+        const tokenIdFromEvent = events[0].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
         let tries = 0;
-        let maxAttempts = 10;
+        const maxAttempts = 10;
         let publicKey = '';
         while (tries < maxAttempts) {
           publicKey = await this.pkpNftContract.read.getPubkey(

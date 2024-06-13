@@ -1,12 +1,18 @@
 import {
   AccessControlConditions,
   AuthSig,
+  ExecuteJsResponse,
   SessionKeySignedMessage,
   SessionSigsMap,
 } from '@lit-protocol/types';
-import { log } from '@lit-protocol/misc';
-import { CHAIN_ETHEREUM } from './constants';
+import { log, logError } from '@lit-protocol/misc';
+import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
 import { ethers } from 'ethers';
+import {
+  ExportPrivateKeyResponse,
+  ImportPrivateKeyResponse,
+  StoreToDatabaseParams,
+} from './interfaces';
 // import { log } from 'console';
 
 export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
@@ -72,4 +78,110 @@ export function getPkpAccessControlCondition(
       },
     },
   ];
+}
+
+export async function fetchPrivateKeyMedataFromDatabase(
+  pkpSessionSigs: SessionSigsMap
+): Promise<ExportPrivateKeyResponse> {
+  const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
+
+  try {
+    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        pkpsessionsig: JSON.stringify(firstSessionSig),
+      },
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      logError(
+        `Could not fetch the encrypted key due to the error: ${errorBody}`
+      );
+
+      throw new Error(errorBody);
+    }
+
+    return await response.json();
+  } catch (error) {
+    const errorMessage = `There was a problem fetching from the database: ${error}`;
+    console.error(errorMessage);
+
+    throw new Error(errorMessage);
+  }
+}
+
+export async function storePrivateKeyMetadataToDatabase(
+  data: StoreToDatabaseParams,
+  firstSessionSig: AuthSig
+): Promise<ImportPrivateKeyResponse> {
+  try {
+    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        pkpsessionsig: JSON.stringify(firstSessionSig),
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      logError(
+        `Could not import the encrypted key due to the error: ${errorBody}`
+      );
+
+      throw new Error(errorBody);
+    }
+
+    return await response.json();
+  } catch (error) {
+    const errorMessage = `There was a problem fetching from the database: ${error}`;
+    console.error(errorMessage);
+
+    throw new Error(errorMessage);
+  }
+}
+
+export function postLitActionValidation(
+  result: ExecuteJsResponse | undefined
+): string {
+  console.log(`Lit Action result: ${JSON.stringify(result)}`);
+
+  if (!result) {
+    throw new Error('There was some error running the Lit Action');
+  }
+
+  const response = result.response;
+  console.log('response');
+  console.log(response);
+
+  if (!response) {
+    throw new Error(
+      `Expected "response" in Lit Action result: ${JSON.stringify(result)}`
+    );
+  }
+
+  if (typeof response !== 'string') {
+    // As the return value is a hex string
+    throw new Error(
+      `Lit Action should return a string response: ${JSON.stringify(result)}`
+    );
+  }
+
+  if (!result.success) {
+    throw new Error(`Expected "success" in res: ${JSON.stringify(result)}`);
+  }
+
+  if (result.success !== true) {
+    throw new Error(`Expected "success" to be true: ${JSON.stringify(result)}`);
+  }
+
+  if (response.startsWith('Error:')) {
+    // Lit Action sets an error response
+    throw new Error(`Error executing the Signing Lit Action: ${response}`);
+  }
+
+  return response;
 }

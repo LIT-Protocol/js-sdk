@@ -3,19 +3,19 @@ import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
-  signWithEncryptedKey,
+  signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
  */
-export const testEthereumBroadcastWrappedKey = async (
+export const testEthereumBroadcastTransactionWrappedKey = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -70,9 +70,9 @@ export const testEthereumBroadcastWrappedKey = async (
     chain: 'chronicleTestnet',
   };
 
-  const signedTx = await signWithEncryptedKey({
+  const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signWithEthereumEncryptedKeyLitAction,
+    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
     unsignedTransaction,
     broadcast: true,
     litNodeClient: devEnv.litNodeClient,
@@ -86,5 +86,5 @@ export const testEthereumBroadcastWrappedKey = async (
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testEthereumBroadcastWrappedKey');
+  log('✅ testEthereumBroadcastTransactionWrappedKey');
 };

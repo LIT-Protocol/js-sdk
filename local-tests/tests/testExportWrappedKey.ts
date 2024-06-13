@@ -47,7 +47,7 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
   console.log(pkpSessionSigsExport);
 
   const decryptedPrivateKey = await exportPrivateKey({
-    pkpSessionSigs: pkpSessionSigsImport,
+    pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
   });
 

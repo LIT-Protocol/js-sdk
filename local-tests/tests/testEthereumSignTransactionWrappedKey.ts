@@ -3,19 +3,19 @@ import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
-  signWithEncryptedKey,
-  signWithEthereumEncryptedKeyLitAction,
-  SolanaLitTransaction,
+  signTransactionWithEncryptedKey,
+  EthereumLitTransaction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignWrappedKeyWithMissingParam
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignWrappedKeyWithMissingParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignWrappedKeyWithMissingParam
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignTransactionWrappedKey
  */
-export const testFailEthereumSignWrappedKeyWithMissingParam = async (
+export const testEthereumSignTransactionWrappedKey = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -53,37 +53,32 @@ export const testFailEthereumSignWrappedKeyWithMissingParam = async (
 
   console.log(pkpSessionSigsSigning);
 
-  // Using SolanaLitTransaction to mimic a missing field (chainId) param as Typescript will complain about missing chainId
-  const unsignedTransaction: SolanaLitTransaction = {
+  const unsignedTransaction: EthereumLitTransaction = {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
+    chainId: 175177, // Chronicle
+    gasPrice: '50',
+    gasLimit: 21000,
+    dataHex: ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
+    ),
     chain: 'chronicleTestnet',
   };
 
-  try {
-    const _res = await signWithEncryptedKey({
-      pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signWithEthereumEncryptedKeyLitAction,
-      unsignedTransaction,
-      broadcast: false,
-      litNodeClient: devEnv.litNodeClient,
-    });
-  } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-    console.log(e.message);
+  const signedTx = await signTransactionWithEncryptedKey({
+    pkpSessionSigs: pkpSessionSigsSigning,
+    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
+    unsignedTransaction,
+    broadcast: false,
+    litNodeClient: devEnv.litNodeClient,
+  });
 
-    if (
-      e.message.includes(
-        'Error executing the Signing Lit Action: Error: Missing required field: chainId'
-      )
-    ) {
-      console.log(
-        '✅ testFailEthereumSignWrappedKeyWithMissingParam is expected to have an error'
-      );
-    } else {
-      throw e;
-    }
+  console.log('signedTx');
+  console.log(signedTx);
+
+  if (!ethers.utils.isHexString(signedTx)) {
+    throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testFailEthereumSignWrappedKeyWithMissingParam');
+  log('✅ testEthereumSignTransactionWrappedKey');
 };

@@ -2,20 +2,23 @@ import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
-  importPrivateKey,
-  signWithEncryptedKey,
+  signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
+  generatePrivateKey,
+  generatePrivateKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
  */
-export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
+export const testEthereumBroadcastTransactionGeneratedKey = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -27,13 +30,16 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   console.log(pkpSessionSigs);
 
-  const privateKey = ethers.Wallet.createRandom().privateKey;
-
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
     pkpSessionSigs,
-    privateKey,
+    litActionCode: generatePrivateKeyLitAction,
     litNodeClient: devEnv.litNodeClient,
   });
+
+  const generatedKeysWalletAddress =
+    ethers.utils.computeAddress(generatedPublicKey);
+  console.log(`Sending funds to ${generatedKeysWalletAddress}`);
+  await devEnv.getFunds(generatedKeysWalletAddress, '0.005');
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
   if (pkpAddress !== alicePkpAddress) {
@@ -55,19 +61,19 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
     chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
+    gasPrice: '0.001',
+    gasLimit: 30000,
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
     chain: 'chronicleTestnet',
   };
 
-  const signedTx = await signWithEncryptedKey({
+  const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signWithEthereumEncryptedKeyLitAction,
+    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
     unsignedTransaction,
-    broadcast: false,
+    broadcast: true,
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -78,5 +84,5 @@ export const testEthereumSignWrappedKey = async (devEnv: TinnyEnvironment) => {
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testEthereumSignWrappedKey');
+  log('✅ testEthereumBroadcastTransactionGeneratedKey');
 };

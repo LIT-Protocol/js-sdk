@@ -1,20 +1,72 @@
-import { CHAIN_ETHEREUM, ENCRYPTED_PRIVATE_KEY_ENDPOINT } from './constants';
+import {
+  CHAIN_ETHEREUM,
+  ENCRYPTED_PRIVATE_KEY_ENDPOINT,
+  LIT_PREFIX,
+} from './constants';
 import { decryptToString, encryptString } from '@lit-protocol/encryption';
 import { logError } from '@lit-protocol/misc';
 import {
+  fetchPrivateKeyMedataFromDatabase,
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  postLitActionValidation,
+  storePrivateKeyMetadataToDatabase,
 } from './utils';
 import {
-  LitMessage,
   LitTransaction,
   ExportPrivateKeyParams,
   ExportPrivateKeyResponse,
   ImportPrivateKeyParams,
-  ImportPrivateKeyResponse,
-  SignWithEncryptedKeyParams,
+  SignTransactionWithEncryptedKeyParams,
+  SignMessageWithEncryptedKeyParams,
+  GeneratePrivateKeyParams,
+  GeneratePrivateKeyResponse,
 } from './interfaces';
+
+export async function generatePrivateKey({
+  pkpSessionSigs,
+  litActionCode,
+  litNodeClient,
+}: GeneratePrivateKeyParams): Promise<GeneratePrivateKeyResponse> {
+  const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
+  const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
+  console.log(
+    'accessControlConditions: ',
+    JSON.stringify(allowPkpAddressToDecrypt)
+  );
+
+  let ciphertext, dataToEncryptHash, publicKey;
+  try {
+    const result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      code: litActionCode,
+      jsParams: {
+        pkpAddress,
+        accessControlConditions: allowPkpAddressToDecrypt,
+      },
+    });
+
+    const response = postLitActionValidation(result);
+    ({ ciphertext, dataToEncryptHash, publicKey } = JSON.parse(response));
+  } catch (err: any) {
+    throw new Error(
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+    );
+  }
+
+  const data = { ciphertext, dataToEncryptHash };
+
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(
+    data,
+    firstSessionSig
+  );
+  return {
+    pkpAddress: importedPrivateKey.pkpAddress,
+    generatedPublicKey: publicKey,
+  };
+}
 
 export async function importPrivateKey({
   pkpSessionSigs,
@@ -25,10 +77,12 @@ export async function importPrivateKey({
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
+  const updatedPrivateKey = LIT_PREFIX + privateKey;
+
   const { ciphertext, dataToEncryptHash } = await encryptString(
     {
       accessControlConditions: allowPkpAddressToDecrypt,
-      dataToEncrypt: privateKey,
+      dataToEncrypt: updatedPrivateKey,
     },
     litNodeClient
   );
@@ -38,33 +92,11 @@ export async function importPrivateKey({
     dataToEncryptHash,
   };
 
-  try {
-    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        pkpsessionsig: JSON.stringify(firstSessionSig),
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      logError(
-        `Could not import the encrypted key due to the error: ${errorBody}`
-      );
-
-      throw new Error(errorBody);
-    }
-
-    const importedPrivateKey: ImportPrivateKeyResponse = await response.json();
-    return importedPrivateKey.pkpAddress;
-  } catch (error) {
-    const errorMessage = `There was a problem fetching from the database: ${error}`;
-    console.error(errorMessage);
-
-    throw new Error(errorMessage);
-  }
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(
+    data,
+    firstSessionSig
+  );
+  return importedPrivateKey.pkpAddress;
 }
 
 export async function exportPrivateKey({
@@ -75,6 +107,8 @@ export async function exportPrivateKey({
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
+  let exportedPrivateKeyData: ExportPrivateKeyResponse;
+
   try {
     const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
       method: 'GET',
@@ -93,68 +127,40 @@ export async function exportPrivateKey({
       throw new Error(errorBody);
     }
 
-    const exportedPrivateKeyData: ExportPrivateKeyResponse =
-      await response.json();
-
-    const decryptedPrivateKey = await decryptToString(
-      {
-        accessControlConditions: allowPkpAddressToDecrypt,
-        chain: CHAIN_ETHEREUM,
-        ciphertext: exportedPrivateKeyData.ciphertext,
-        dataToEncryptHash: exportedPrivateKeyData.dataToEncryptHash,
-        sessionSigs: pkpSessionSigs,
-      },
-      litNodeClient
-    );
-
-    return decryptedPrivateKey;
+    exportedPrivateKeyData = await response.json();
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);
 
     throw new Error(errorMessage);
   }
+
+  const decryptedPrivateKey = await decryptToString(
+    {
+      accessControlConditions: allowPkpAddressToDecrypt,
+      chain: CHAIN_ETHEREUM,
+      ciphertext: exportedPrivateKeyData.ciphertext,
+      dataToEncryptHash: exportedPrivateKeyData.dataToEncryptHash,
+      sessionSigs: pkpSessionSigs,
+    },
+    litNodeClient
+  );
+
+  // It will be of the form lit_<privateKey>
+  return decryptedPrivateKey.startsWith(LIT_PREFIX)
+    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
+    : decryptedPrivateKey;
 }
 
-export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
+export async function signTransactionWithEncryptedKey<T = LitTransaction>({
   pkpSessionSigs,
   litActionCode,
   unsignedTransaction,
   broadcast,
   litNodeClient,
-}: SignWithEncryptedKeyParams<T>): Promise<string> {
-  const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
-
-  let pkpAddress: string, ciphertext: string, dataToEncryptHash: string;
-
-  try {
-    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        pkpsessionsig: JSON.stringify(firstSessionSig),
-      },
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      logError(
-        `Could not fetch the encrypted key due to the error: ${errorBody}`
-      );
-
-      throw new Error(errorBody);
-    }
-
-    const exportedPrivateKeyData: ExportPrivateKeyResponse =
-      await response.json();
-
-    ({ pkpAddress, ciphertext, dataToEncryptHash } = exportedPrivateKeyData);
-  } catch (error) {
-    const errorMessage = `There was a problem fetching from the database: ${error}`;
-    console.error(errorMessage);
-
-    throw new Error(errorMessage);
-  }
+}: SignTransactionWithEncryptedKeyParams<T>): Promise<string> {
+  const { pkpAddress, ciphertext, dataToEncryptHash } =
+    await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
   let result;
   try {
@@ -170,47 +176,42 @@ export async function signWithEncryptedKey<T = LitMessage | LitTransaction>({
         accessControlConditions: getPkpAccessControlCondition(pkpAddress),
       },
     });
-  } catch (err) {
+  } catch (err: any) {
     throw new Error(
       `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
     );
   }
 
-  console.log(`Lit Action result: ${JSON.stringify(result)}`);
+  return postLitActionValidation(result);
+}
 
-  if (!result) {
-    throw new Error('There was some error running the Lit Action');
-  }
+export async function signMessageWithEncryptedKey({
+  pkpSessionSigs,
+  litActionCode,
+  unsignedMessage,
+  litNodeClient,
+}: SignMessageWithEncryptedKeyParams): Promise<string> {
+  const { pkpAddress, ciphertext, dataToEncryptHash } =
+    await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
-  const response = result.response;
-  console.log('response');
-  console.log(response);
-
-  if (!response) {
+  let result;
+  try {
+    result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      code: litActionCode,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        unsignedMessage,
+        accessControlConditions: getPkpAccessControlCondition(pkpAddress),
+      },
+    });
+  } catch (err: any) {
     throw new Error(
-      `Expected "response" in Lit Action result: ${JSON.stringify(result)}`
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
     );
   }
 
-  if (typeof response !== 'string') {
-    // As the return value is a hex string
-    throw new Error(
-      `Lit Action should return a string response: ${JSON.stringify(result)}`
-    );
-  }
-
-  if (!result.success) {
-    throw new Error(`Expected "success" in res: ${JSON.stringify(result)}`);
-  }
-
-  if (result.success !== true) {
-    throw new Error(`Expected "success" to be true: ${JSON.stringify(result)}`);
-  }
-
-  if (response.startsWith('Error:')) {
-    // Lit Action sets an error response
-    throw new Error(`Error executing the Signing Lit Action: ${response}`);
-  }
-
-  return response;
+  return postLitActionValidation(result);
 }
