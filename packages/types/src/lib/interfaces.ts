@@ -1481,10 +1481,6 @@ export interface IRelayPKP {
 
 export interface BaseProviderOptions {
   /**
-   * Endpoint to interact with a blockchain network. Defaults to the Lit Chronicle.
-   */
-  rpcUrl: string;
-  /**
    * Relay server to use
    */
   relay: IRelay;

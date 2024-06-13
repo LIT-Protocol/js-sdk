@@ -111,19 +111,13 @@ export default class WebAuthnProvider extends BaseProvider {
    * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
    */
   public async authenticate(): Promise<AuthMethod> {
-    const provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
-
-    const block = await provider.getBlock('latest');
-    const blockHash = block.hash;
-
-    // Turn into byte array
-    const blockHashBytes = ethers.utils.arrayify(blockHash);
+    const blockHash = await this.litNodeClient.getLatestBlockhash();
 
     // Construct authentication options
     const rpId = getRPIdFromOrigin(window.location.origin);
 
     const authenticationOptions = {
-      challenge: base64url(Buffer.from(blockHashBytes)),
+      challenge: blockHash,
       timeout: 60000,
       userVerification: 'required' as UserVerificationRequirement,
       rpId,
