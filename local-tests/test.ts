@@ -86,7 +86,7 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
 import { testEthereumSignMessageGeneratedKey } from './tests/testEthereumSignMessageGeneratedKey';
 import { testEthereumBroadcastTransactionGeneratedKey } from './tests/testEthereumBroadcastTransactionGeneratedKey';
 import { testEthereumSignMessageWrappedKey } from './tests/testEthereumSignMessageWrappedKey';
-import { testFailWrappedKeySigningTimeout } from './tests/testFailWrappedKeySigningTimeout';
+// import { testFailWrappedKeySigningTimeout } from './tests/testFailWrappedKeySigningTimeout';
 import { testEthereumSignTransactionWrappedKey } from './tests/testEthereumSignTransactionWrappedKey';
 import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
 import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
@@ -128,7 +128,7 @@ import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecr
     testFailImportWrappedKeysWithInvalidSessionSig,
     testFailImportWrappedKeysWithExpiredSessionSig,
     testExportWrappedKey,
-    testFailWrappedKeySigningTimeout,
+    // testFailWrappedKeySigningTimeout,
   };
 
   const eoaSessionSigsTests = {

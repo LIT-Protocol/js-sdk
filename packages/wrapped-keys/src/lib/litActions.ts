@@ -118,7 +118,6 @@ const LIT_PREFIX = 'lit_';
             const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
             const transactionResponse = await provider.sendTransaction(signedTx);
-            const receipt = await transactionResponse.wait(); // TODO!: This can timeout. Catch the timeout error and throw a separate message for it
 
             Lit.Actions.setResponse({ response: transactionResponse.hash });
         } else {
@@ -179,8 +178,8 @@ const LIT_PREFIX = 'lit_';
 })();
 `;
 
-export const signingTimeoutEncryptedKeyLitAction = `
-(async () => {
-    new Promise(resolve => setTimeout(resolve, 40000)); // Sleep for 40 seconds
-})();
-`;
+// export const signingTimeoutEncryptedKeyLitAction = `
+// (async () => {
+//     new Promise(resolve => setTimeout(resolve, 40000)); // Sleep for 40 seconds
+// })();
+// `;

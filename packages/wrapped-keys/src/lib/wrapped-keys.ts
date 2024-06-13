@@ -178,15 +178,9 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
 
     return postLitActionValidation(result);
   } catch (err: any) {
-    if (broadcast && err.errorCode === 'NodeJsTimeoutError') {
-      throw new Error(
-        `The action timed out: ${err.message}. This doesn't mean that your transaction wasn't broadcast but that it took more than 30 secs to confirm. Please confirm whether it went through on the blockchain explorer for your chain.`
-      );
-    } else {
-      throw new Error(
-        `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
-      );
-    }
+    throw new Error(
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+    );
   }
 }
 
