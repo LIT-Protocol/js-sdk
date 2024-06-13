@@ -33,6 +33,7 @@ import {
   encrypt,
   generateSessionKeyPair,
   verifyAndDecryptWithSignatureShares,
+  verifySignature,
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
@@ -524,8 +525,8 @@ export class LitNodeClientNodeJs
       }
     } else if (authSig.algo === `LIT_BLS`) {
       try {
-        blsSessionSigVerify(
-          blsSdk.verify_signature,
+       await blsSessionSigVerify(
+          verifySignature,
           this.networkPubKey!,
           authSig
         );
