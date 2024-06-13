@@ -1,5 +1,8 @@
 import { AuthSig } from '@lit-protocol/types';
-import { uint8arrayFromString, uint8arrayToString } from '@lit-protocol/uint8arrays';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@lit-protocol/uint8arrays';
 import { ethers } from 'ethers';
 
 const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
@@ -7,7 +10,7 @@ const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
 /**
  * Verifies a BLS session signature.
  *
- * @param {Function} verifier - A wasm function that takes a public key, message, and signature to verify. 
+ * @param {Function} verifier - A wasm function that takes a public key, message, and signature to verify.
  * @param {string} networkPubKey - The public key of the network.
  * @param {AuthSig} authSig
  * @typedef {Object} AuthSig
@@ -15,7 +18,11 @@ const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
  * @property {string} signedMessage - The message that was signed.
  */
 export const blsSessionSigVerify = async (
-  verifier:  (publicKeyHex: string, message: Uint8Array, signature: Uint8Array) => Promise<void>,
+  verifier: (
+    publicKeyHex: string,
+    message: Uint8Array,
+    signature: Uint8Array
+  ) => Promise<void>,
   networkPubKey: string,
   authSig: AuthSig
 ): Promise<void> => {

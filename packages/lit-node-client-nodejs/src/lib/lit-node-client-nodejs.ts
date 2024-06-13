@@ -525,7 +525,7 @@ export class LitNodeClientNodeJs
       }
     } else if (authSig.algo === `LIT_BLS`) {
       try {
-       await blsSessionSigVerify(
+        await blsSessionSigVerify(
           verifySignature,
           this.networkPubKey!,
           authSig
