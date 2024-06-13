@@ -112,12 +112,14 @@ export default class WebAuthnProvider extends BaseProvider {
    */
   public async authenticate(): Promise<AuthMethod> {
     const blockHash = await this.litNodeClient.getLatestBlockhash();
+    // Turn into byte array
+    const blockHashBytes = ethers.utils.arrayify(blockHash);
 
     // Construct authentication options
     const rpId = getRPIdFromOrigin(window.location.origin);
 
     const authenticationOptions = {
-      challenge: blockHash,
+      challenge: base64url(Buffer.from(blockHashBytes)),
       timeout: 60000,
       userVerification: 'required' as UserVerificationRequirement,
       rpId,

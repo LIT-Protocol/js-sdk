@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/pkp-base",
-  "version": "6.0.2",
+  "version": "6.0.2-beta.6",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
