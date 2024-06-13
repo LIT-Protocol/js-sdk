@@ -162,8 +162,9 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
   const { pkpAddress, ciphertext, dataToEncryptHash } =
     await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
+  let result;
   try {
-    const result = await litNodeClient.executeJs({
+    result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
       code: litActionCode,
       jsParams: {
@@ -175,13 +176,13 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
         accessControlConditions: getPkpAccessControlCondition(pkpAddress),
       },
     });
-
-    return postLitActionValidation(result);
   } catch (err: any) {
     throw new Error(
       `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
     );
   }
+
+  return postLitActionValidation(result);
 }
 
 export async function signMessageWithEncryptedKey({
@@ -193,8 +194,9 @@ export async function signMessageWithEncryptedKey({
   const { pkpAddress, ciphertext, dataToEncryptHash } =
     await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
+  let result;
   try {
-    const result = await litNodeClient.executeJs({
+    result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
       code: litActionCode,
       jsParams: {
@@ -205,11 +207,11 @@ export async function signMessageWithEncryptedKey({
         accessControlConditions: getPkpAccessControlCondition(pkpAddress),
       },
     });
-
-    return postLitActionValidation(result);
   } catch (err: any) {
     throw new Error(
       `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
     );
   }
+
+  return postLitActionValidation(result);
 }

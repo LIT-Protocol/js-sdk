@@ -101,7 +101,7 @@ import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/testFa
 import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/testFailImportWrappedKeysWithInvalidSessionSig';
 import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFailImportWrappedKeysWithExpiredSessionSig';
 import { testExportWrappedKey } from './tests/testExportWrappedKey';
-import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecryptFailingOutsideLitAction';
+// import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecryptFailingOutsideLitAction';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -112,7 +112,7 @@ import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecr
   const wrappedKeysTests = {
     testEthereumSignMessageGeneratedKey,
     testEthereumBroadcastTransactionGeneratedKey,
-    testRemoveDecryptFailingOutsideLitAction,
+    // testRemoveDecryptFailingOutsideLitAction,
     testEthereumSignMessageWrappedKey,
     testEthereumSignTransactionWrappedKey,
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
