@@ -199,7 +199,6 @@ export class TinnyEnvironment {
       const networkContext = this._testnet.ContractContext;
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
-        bootstrapUrls: this.processEnvs.BOOTSTRAP_URLS,
         rpcUrl: this.processEnvs.LIT_RPC_URL,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing

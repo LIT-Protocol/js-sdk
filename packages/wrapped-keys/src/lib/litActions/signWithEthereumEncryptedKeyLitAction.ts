@@ -1,3 +1,45 @@
+export const generatePrivateKeyLitAction = `
+const LIT_PREFIX = 'lit_';
+
+(async () => {
+    const resp = await Lit.Actions.runOnce(
+        { waitForResponse: true, name: 'encryptedPrivateKey' },
+        async () => {
+            const wallet = ethers.Wallet.createRandom();
+            const privateKey = LIT_PREFIX + wallet.privateKey.toString();
+            let utf8Encode = new TextEncoder();
+            const to_encrypt = utf8Encode.encode(privateKey);
+
+            const { ciphertext, dataToEncryptHash } = await Lit.Actions.encrypt({
+                accessControlConditions,
+                to_encrypt,
+            });
+            return JSON.stringify({ ciphertext, dataToEncryptHash, publicKey: wallet.publicKey });
+        }
+    );
+
+    // // TODO: Remove the below which is only for demonstrating the error
+    // const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
+    // const decrypted = await Lit.Actions.decryptAndCombine({
+    //     accessControlConditions,
+    //     ciphertext,
+    //     dataToEncryptHash,
+    //     authSig: null,
+    //     chain: 'ethereum',
+    // });
+
+    // // TODO: Remove the below which is only for demonstrating the error
+    // console.log('accessControlConditions: ', accessControlConditions);
+    // console.log('ciphertext: ', ciphertext);
+    // console.log('dataToEncryptHash: ', dataToEncryptHash);
+    // console.log('decrypted: ', decrypted);
+
+    Lit.Actions.setResponse({
+        response: resp,
+    });
+})();
+`;
+
 export const signTransactionWithEthereumEncryptedKeyLitAction = `
 const DEFAULT_GAS_LIMIT = 21000;
 const DEFAULT_GAS_PRICE = '50'; // in gwei
@@ -76,7 +118,6 @@ const LIT_PREFIX = 'lit_';
             const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
             const transactionResponse = await provider.sendTransaction(signedTx);
-            const receipt = await transactionResponse.wait(); // TODO!: This can timeout. Catch the timeout error and throw a separate message for it
 
             Lit.Actions.setResponse({ response: transactionResponse.hash });
         } else {
@@ -137,8 +178,8 @@ const LIT_PREFIX = 'lit_';
 })();
 `;
 
-export const signingTimeoutEncryptedKeyLitAction = `
-(async () => {
-    new Promise(resolve => setTimeout(resolve, 40000)); // Sleep for 40 seconds
-})();
-`;
+// export const signingTimeoutEncryptedKeyLitAction = `
+// (async () => {
+//     new Promise(resolve => setTimeout(resolve, 40000)); // Sleep for 40 seconds
+// })();
+// `;

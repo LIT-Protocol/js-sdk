@@ -10,16 +10,63 @@ import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  postLitActionValidation,
+  storePrivateKeyMetadataToDatabase,
 } from './utils';
 import {
   LitTransaction,
   ExportPrivateKeyParams,
   ExportPrivateKeyResponse,
   ImportPrivateKeyParams,
-  ImportPrivateKeyResponse,
   SignTransactionWithEncryptedKeyParams,
   SignMessageWithEncryptedKeyParams,
+  GeneratePrivateKeyParams,
+  GeneratePrivateKeyResponse,
 } from './interfaces';
+
+export async function generatePrivateKey({
+  pkpSessionSigs,
+  litActionCode,
+  litNodeClient,
+}: GeneratePrivateKeyParams): Promise<GeneratePrivateKeyResponse> {
+  const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
+  const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
+  console.log(
+    'accessControlConditions: ',
+    JSON.stringify(allowPkpAddressToDecrypt)
+  );
+
+  let ciphertext, dataToEncryptHash, publicKey;
+  try {
+    const result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      code: litActionCode,
+      jsParams: {
+        pkpAddress,
+        accessControlConditions: allowPkpAddressToDecrypt,
+      },
+    });
+
+    const response = postLitActionValidation(result);
+    ({ ciphertext, dataToEncryptHash, publicKey } = JSON.parse(response));
+  } catch (err: any) {
+    throw new Error(
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+    );
+  }
+
+  const data = { ciphertext, dataToEncryptHash };
+
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(
+    data,
+    firstSessionSig
+  );
+  return {
+    pkpAddress: importedPrivateKey.pkpAddress,
+    generatedPublicKey: publicKey,
+  };
+}
 
 export async function importPrivateKey({
   pkpSessionSigs,
@@ -45,33 +92,11 @@ export async function importPrivateKey({
     dataToEncryptHash,
   };
 
-  try {
-    const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        pkpsessionsig: JSON.stringify(firstSessionSig),
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      logError(
-        `Could not import the encrypted key due to the error: ${errorBody}`
-      );
-
-      throw new Error(errorBody);
-    }
-
-    const importedPrivateKey: ImportPrivateKeyResponse = await response.json();
-    return importedPrivateKey.pkpAddress;
-  } catch (error) {
-    const errorMessage = `There was a problem fetching from the database: ${error}`;
-    console.error(errorMessage);
-
-    throw new Error(errorMessage);
-  }
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(
+    data,
+    firstSessionSig
+  );
+  return importedPrivateKey.pkpAddress;
 }
 
 export async function exportPrivateKey({
@@ -81,6 +106,8 @@ export async function exportPrivateKey({
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
+
+  let exportedPrivateKeyData: ExportPrivateKeyResponse;
 
   try {
     const response = await fetch(ENCRYPTED_PRIVATE_KEY_ENDPOINT, {
@@ -100,30 +127,29 @@ export async function exportPrivateKey({
       throw new Error(errorBody);
     }
 
-    const exportedPrivateKeyData: ExportPrivateKeyResponse =
-      await response.json();
-
-    const decryptedPrivateKey = await decryptToString(
-      {
-        accessControlConditions: allowPkpAddressToDecrypt,
-        chain: CHAIN_ETHEREUM,
-        ciphertext: exportedPrivateKeyData.ciphertext,
-        dataToEncryptHash: exportedPrivateKeyData.dataToEncryptHash,
-        sessionSigs: pkpSessionSigs,
-      },
-      litNodeClient
-    );
-
-    // It will be of the form lit_<privateKey>
-    return decryptedPrivateKey.startsWith(LIT_PREFIX)
-      ? decryptedPrivateKey.slice(LIT_PREFIX.length)
-      : decryptedPrivateKey;
+    exportedPrivateKeyData = await response.json();
   } catch (error) {
     const errorMessage = `There was a problem fetching from the database: ${error}`;
     console.error(errorMessage);
 
     throw new Error(errorMessage);
   }
+
+  const decryptedPrivateKey = await decryptToString(
+    {
+      accessControlConditions: allowPkpAddressToDecrypt,
+      chain: CHAIN_ETHEREUM,
+      ciphertext: exportedPrivateKeyData.ciphertext,
+      dataToEncryptHash: exportedPrivateKeyData.dataToEncryptHash,
+      sessionSigs: pkpSessionSigs,
+    },
+    litNodeClient
+  );
+
+  // It will be of the form lit_<privateKey>
+  return decryptedPrivateKey.startsWith(LIT_PREFIX)
+    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
+    : decryptedPrivateKey;
 }
 
 export async function signTransactionWithEncryptedKey<T = LitTransaction>({
@@ -151,54 +177,12 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
       },
     });
   } catch (err: any) {
-    if (broadcast && err.errorCode === 'NodeJsTimeoutError') {
-      throw new Error(
-        `The action timed out: ${err.message}. This doesn't mean that your transaction wasn't broadcast but that it took more than 30 secs to confirm. Please confirm whether it went through on the blockchain explorer for your chain.`
-      );
-    } else {
-      throw new Error(
-        `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
-      );
-    }
-  }
-
-  console.log(`Lit Action result: ${JSON.stringify(result)}`);
-
-  if (!result) {
-    throw new Error('There was some error running the Lit Action');
-  }
-
-  const response = result.response;
-  console.log('response');
-  console.log(response);
-
-  if (!response) {
     throw new Error(
-      `Expected "response" in Lit Action result: ${JSON.stringify(result)}`
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
     );
   }
 
-  if (typeof response !== 'string') {
-    // As the return value is a hex string
-    throw new Error(
-      `Lit Action should return a string response: ${JSON.stringify(result)}`
-    );
-  }
-
-  if (!result.success) {
-    throw new Error(`Expected "success" in res: ${JSON.stringify(result)}`);
-  }
-
-  if (result.success !== true) {
-    throw new Error(`Expected "success" to be true: ${JSON.stringify(result)}`);
-  }
-
-  if (response.startsWith('Error:')) {
-    // Lit Action sets an error response
-    throw new Error(`Error executing the Signing Lit Action: ${response}`);
-  }
-
-  return response;
+  return postLitActionValidation(result);
 }
 
 export async function signMessageWithEncryptedKey({
@@ -229,41 +213,5 @@ export async function signMessageWithEncryptedKey({
     );
   }
 
-  console.log(`Lit Action result: ${JSON.stringify(result)}`);
-
-  if (!result) {
-    throw new Error('There was some error running the Lit Action');
-  }
-
-  const response = result.response;
-  console.log('response');
-  console.log(response);
-
-  if (!response) {
-    throw new Error(
-      `Expected "response" in Lit Action result: ${JSON.stringify(result)}`
-    );
-  }
-
-  if (typeof response !== 'string') {
-    // As the return value is a hex string
-    throw new Error(
-      `Lit Action should return a string response: ${JSON.stringify(result)}`
-    );
-  }
-
-  if (!result.success) {
-    throw new Error(`Expected "success" in res: ${JSON.stringify(result)}`);
-  }
-
-  if (result.success !== true) {
-    throw new Error(`Expected "success" to be true: ${JSON.stringify(result)}`);
-  }
-
-  if (response.startsWith('Error:')) {
-    // Lit Action sets an error response
-    throw new Error(`Error executing the Signing Lit Action: ${response}`);
-  }
-
-  return response;
+  return postLitActionValidation(result);
 }

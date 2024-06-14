@@ -83,14 +83,17 @@ import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCo
 import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 
+import { testEthereumSignMessageGeneratedKey } from './tests/testEthereumSignMessageGeneratedKey';
+import { testEthereumBroadcastTransactionGeneratedKey } from './tests/testEthereumBroadcastTransactionGeneratedKey';
 import { testEthereumSignMessageWrappedKey } from './tests/testEthereumSignMessageWrappedKey';
-import { testFailWrappedKeySigningTimeout } from './tests/testFailWrappedKeySigningTimeout';
+// import { testFailWrappedKeySigningTimeout } from './tests/testFailWrappedKeySigningTimeout';
 import { testEthereumSignTransactionWrappedKey } from './tests/testEthereumSignTransactionWrappedKey';
 import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
 import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
 import { testEthereumBroadcastTransactionWrappedKey } from './tests/testEthereumBroadcastTransactionWrappedKey';
 import { testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds } from './tests/testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds';
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
+import { testGenerateWrappedKey } from './tests/testGenerateWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
 import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/testFailImportWrappedKeysWithEoaSessionSig';
@@ -98,6 +101,7 @@ import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/testFa
 import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/testFailImportWrappedKeysWithInvalidSessionSig';
 import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFailImportWrappedKeysWithExpiredSessionSig';
 import { testExportWrappedKey } from './tests/testExportWrappedKey';
+// import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecryptFailingOutsideLitAction';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -106,6 +110,9 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
   await devEnv.init();
 
   const wrappedKeysTests = {
+    testEthereumSignMessageGeneratedKey,
+    testEthereumBroadcastTransactionGeneratedKey,
+    // testRemoveDecryptFailingOutsideLitAction,
     testEthereumSignMessageWrappedKey,
     testEthereumSignTransactionWrappedKey,
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
@@ -113,6 +120,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testEthereumBroadcastTransactionWrappedKey,
     testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds,
     testImportWrappedKey,
+    testGenerateWrappedKey,
     testFailImportWrappedKeysWithSamePkp,
     testFailImportWrappedKeysWithSamePrivateKey,
     testFailImportWrappedKeysWithEoaSessionSig,
@@ -120,7 +128,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailImportWrappedKeysWithInvalidSessionSig,
     testFailImportWrappedKeysWithExpiredSessionSig,
     testExportWrappedKey,
-    testFailWrappedKeySigningTimeout,
+    // testFailWrappedKeySigningTimeout,
   };
 
   const eoaSessionSigsTests = {
