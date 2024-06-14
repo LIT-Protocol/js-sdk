@@ -1,12 +1,2 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-
-const bundledFilePath = resolve(
-  __dirname,
-  './dist/signMessageWithSolanaEncryptedKey.js'
-);
-
-export const signMessageWithSolanaEncryptedKeyLitAction = readFileSync(
-  bundledFilePath,
-  'utf-8'
-);
+export const signMessageWithSolanaEncryptedKeyLitAction =
+  'QmdDhDWNdDp6SoQvHgD9S6yJw2tRh1ueJ5489q3mcLUirY';
