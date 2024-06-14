@@ -1,5 +1,5 @@
 export * from './lib/wrapped-keys';
-export * from './lib/litActions/signWithEthereumEncryptedKeyLitAction';
+export * from './lib/litActions/litActions';
 export * from './lib/interfaces';
 
 export const signTransactionWithSolanaEncryptedKeyLitActionIpfsCid =
