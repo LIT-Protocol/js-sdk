@@ -103,6 +103,7 @@ import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFail
 import { testExportWrappedKey } from './tests/testExportWrappedKey';
 // import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecryptFailingOutsideLitAction';
 import { testSignMessageWithSolanaEncryptedKey } from './tests/testSignMessageWithSolanaEncryptedKey';
+import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTransactionWithSolanaEncryptedKey';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -131,6 +132,7 @@ import { testSignMessageWithSolanaEncryptedKey } from './tests/testSignMessageWi
     testExportWrappedKey,
     // testFailWrappedKeySigningTimeout,
     testSignMessageWithSolanaEncryptedKey,
+    testSignTransactionWithSolanaEncryptedKey,
   };
 
   const eoaSessionSigsTests = {

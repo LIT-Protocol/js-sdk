@@ -2,40 +2,59 @@ const {
   clusterApiUrl,
   Connection,
   Keypair,
-  PublicKey,
-  SystemProgram,
   Transaction,
 } = require('@solana/web3.js');
-const bs58 = require('bs58');
 
 (async () => {
-  const solanaPrivateKey = await Lit.Actions.decryptAndCombine({
-    accessControlConditions,
-    chain: 'ethereum',
-    ciphertext,
-    dataToEncryptHash,
-    authSig: null,
-    sessionSigs,
-  });
-  const solanaKeyPair = Keypair.fromSecretKey(bs58.decode(solanaPrivateKey));
+  const LIT_PREFIX = 'lit_';
 
-  const transaction = new Transaction();
-  transaction.add(
-    SystemProgram.transfer({
-      fromPubkey: solanaKeyPair.publicKey,
-      toPubkey: new PublicKey(transactionRecipient),
-      lamports: transactionAmount,
-    })
+  let decryptedPrivateKey;
+  try {
+    decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
+      accessControlConditions,
+      chain: 'ethereum',
+      ciphertext,
+      dataToEncryptHash,
+      authSig: null,
+    });
+  } catch (error) {
+    Lit.Actions.setResponse({
+      response: `Error decrypting data to private key: ${error.message}`,
+    });
+    return;
+  }
+
+  if (!decryptedPrivateKey) {
+    // Exit the nodes which don't have the decryptedData
+    return;
+  }
+
+  const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
+    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
+    : decryptedPrivateKey;
+  const solanaKeyPair = Keypair.fromSecretKey(
+    Uint8Array.from(Buffer.from(privateKey, 'hex'))
   );
 
-  const solanaConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-  const { blockhash } = await solanaConnection.getLatestBlockhash();
-  transaction.recentBlockhash = blockhash;
+  try {
+    const transaction = Transaction.from(
+      Buffer.from(serializedTransaction, 'base64')
+    );
 
-  transaction.sign(solanaKeyPair);
-  const signature = await solanaConnection.sendRawTransaction(
-    transaction.serialize()
-  );
+    transaction.sign(solanaKeyPair);
+    const signature = transaction.signature.toString('base64');
+    Lit.Actions.setResponse({ response: signature });
 
-  Lit.Actions.setResponse({ response: signature });
+    if (broadcast) {
+      const solanaConnection = new Connection(
+        clusterApiUrl(solanaNetwork),
+        'confirmed'
+      );
+      await solanaConnection.sendRawTransaction(transaction.serialize());
+    }
+  } catch (error) {
+    Lit.Actions.setResponse({
+      response: `Error during transaction signing and submission: ${error.message}`,
+    });
+  }
 })();
