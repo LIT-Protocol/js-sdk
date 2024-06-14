@@ -433,10 +433,6 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   getLatestBlockhash = async (): Promise<string> => {
-    console.log(
-      'querying latest blockhash curent value is ',
-      this.latestBlockhash
-    );
     await this._syncBlockhash();
     console.log(
       `querying latest blockhash current value is `,
