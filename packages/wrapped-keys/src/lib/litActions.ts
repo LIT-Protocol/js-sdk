@@ -118,50 +118,33 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
     nonce,
   };
 
+  const rpcUrl = await Lit.Actions.getRpcUrl({
+    chain: unsignedTransaction.chain,
+  });
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
   if (unsignedTransaction.gasPrice) {
     tx.gasPrice = ethers.utils.parseUnits(unsignedTransaction.gasPrice, 'gwei');
   } else {
-    tx.gasPrice = await Lit.Actions.runOnce(
-      { waitForResponse: true, name: 'gasPrice' },
-      async () => {
-        const rpcUrl = await Lit.Actions.getRpcUrl({
-          chain: unsignedTransaction.chain,
-        });
-        const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-
-        try {
-          const gasPrice = await provider.getGasPrice();
-          return ethers.utils.hexlify(gasPrice);
-        } catch (err) {
-          const errorMessage = 'Error: When getting gas price- ' + err.message;
-          Lit.Actions.setResponse({ response: errorMessage });
-          return;
-        }
-      }
-    );
+    try {
+      tx.gasPrice = await provider.getGasPrice();
+    } catch (err) {
+      const errorMessage = 'Error: When getting gas price- ' + err.message;
+      Lit.Actions.setResponse({ response: errorMessage });
+      return;
+    }
   }
 
   if (unsignedTransaction.gasLimit) {
     tx.gasLimit = unsignedTransaction.gasLimit;
   } else {
-    tx.gasLimit = await Lit.Actions.runOnce(
-      { waitForResponse: true, name: 'gasLimit' },
-      async () => {
-        const rpcUrl = await Lit.Actions.getRpcUrl({
-          chain: unsignedTransaction.chain,
-        });
-        const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-
-        try {
-          const gasLimit = await provider.estimateGas(tx);
-          return ethers.utils.hexlify(gasLimit);
-        } catch (err) {
-          const errorMessage = 'Error: When estimating gas- ' + err.message;
-          Lit.Actions.setResponse({ response: errorMessage });
-          return;
-        }
-      }
-    );
+    try {
+      tx.gasLimit = await provider.estimateGas(tx);
+    } catch (err) {
+      const errorMessage = 'Error: When estimating gas- ' + err.message;
+      Lit.Actions.setResponse({ response: errorMessage });
+      return;
+    }
   }
 
   console.log('tx');
@@ -171,11 +154,6 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
     const signedTx = await wallet.signTransaction(tx);
 
     if (broadcast) {
-      const rpcUrl = await Lit.Actions.getRpcUrl({
-        chain: unsignedTransaction.chain,
-      });
-      const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-
       const transactionResponse = await provider.sendTransaction(signedTx);
 
       Lit.Actions.setResponse({ response: transactionResponse.hash });
