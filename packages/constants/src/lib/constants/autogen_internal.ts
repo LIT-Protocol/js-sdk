@@ -3,11 +3,10 @@ export const INTERNAL_DEV = [
   'https://167.114.17.201:443',
   'https://64.131.85.108:443',
   'https://167.114.17.202:443',
-  'https://167.114.17.205:443',
+  'https://64.131.85.106:443',
   'https://167.114.17.203:443',
   'https://108.62.0.105:443',
   'https://167.114.17.204:443',
-  'https://64.131.85.106:443',
 ];
 
 export const INTERNAL_MIN_NODE_COUNT = 2;
@@ -20,11 +19,10 @@ export const INTERNAL_DEFAULT_CONFIG = {
     'https://167.114.17.201:443',
     'https://64.131.85.108:443',
     'https://167.114.17.202:443',
-    'https://167.114.17.205:443',
+    'https://64.131.85.106:443',
     'https://167.114.17.203:443',
     'https://108.62.0.105:443',
     'https://167.114.17.204:443',
-    'https://64.131.85.106:443',
   ],
   litNetwork: 'internalDev',
   connectTimeout: 20000,
