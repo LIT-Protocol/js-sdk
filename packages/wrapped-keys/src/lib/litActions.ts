@@ -1,46 +1,50 @@
 // @ts-nocheck
 
-export const generatePrivateKeyLitAction = `
-const LIT_PREFIX = 'lit_';
+export const _generatePrivateKeyLitAction = (async () => {
+  const LIT_PREFIX = 'lit_';
 
-(async () => {
-    const resp = await Lit.Actions.runOnce(
-        { waitForResponse: true, name: 'encryptedPrivateKey' },
-        async () => {
-            const wallet = ethers.Wallet.createRandom();
-            const privateKey = LIT_PREFIX + wallet.privateKey.toString();
-            let utf8Encode = new TextEncoder();
-            const to_encrypt = utf8Encode.encode(privateKey);
+  const resp = await Lit.Actions.runOnce(
+    { waitForResponse: true, name: 'encryptedPrivateKey' },
+    async () => {
+      const wallet = ethers.Wallet.createRandom();
+      const privateKey = LIT_PREFIX + wallet.privateKey.toString();
+      let utf8Encode = new TextEncoder();
+      const to_encrypt = utf8Encode.encode(privateKey);
 
-            const { ciphertext, dataToEncryptHash } = await Lit.Actions.encrypt({
-                accessControlConditions,
-                to_encrypt,
-            });
-            return JSON.stringify({ ciphertext, dataToEncryptHash, publicKey: wallet.publicKey });
-        }
-    );
+      const { ciphertext, dataToEncryptHash } = await Lit.Actions.encrypt({
+        accessControlConditions,
+        to_encrypt,
+      });
+      return JSON.stringify({
+        ciphertext,
+        dataToEncryptHash,
+        publicKey: wallet.publicKey,
+      });
+    }
+  );
 
-    // // TODO: Remove the below which is only for demonstrating the error
-    // const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
-    // const decrypted = await Lit.Actions.decryptAndCombine({
-    //     accessControlConditions,
-    //     ciphertext,
-    //     dataToEncryptHash,
-    //     authSig: null,
-    //     chain: 'ethereum',
-    // });
+  // // TODO: Remove the below which is only for demonstrating the error
+  // const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
+  // const decrypted = await Lit.Actions.decryptAndCombine({
+  //     accessControlConditions,
+  //     ciphertext,
+  //     dataToEncryptHash,
+  //     authSig: null,
+  //     chain: 'ethereum',
+  // });
 
-    // // TODO: Remove the below which is only for demonstrating the error
-    // console.log('accessControlConditions: ', accessControlConditions);
-    // console.log('ciphertext: ', ciphertext);
-    // console.log('dataToEncryptHash: ', dataToEncryptHash);
-    // console.log('decrypted: ', decrypted);
+  // // TODO: Remove the below which is only for demonstrating the error
+  // console.log('accessControlConditions: ', accessControlConditions);
+  // console.log('ciphertext: ', ciphertext);
+  // console.log('dataToEncryptHash: ', dataToEncryptHash);
+  // console.log('decrypted: ', decrypted);
 
-    Lit.Actions.setResponse({
-        response: resp,
-    });
-})();
-`;
+  Lit.Actions.setResponse({
+    response: resp,
+  });
+}).toString();
+
+export const generatePrivateKeyLitAction = `(${_generatePrivateKeyLitAction})();`;
 
 const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
   const LIT_PREFIX = 'lit_';
@@ -168,53 +172,61 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
 
 export const signTransactionWithEthereumEncryptedKeyLitAction = `(${_signTransactionWithEthereumEncryptedKeyLitAction})();`;
 
-export const signMessageWithEthereumEncryptedKeyLitAction = `
-const LIT_PREFIX = 'lit_';
+export const _signMessageWithEthereumEncryptedKeyLitAction = (async () => {
+  const LIT_PREFIX = 'lit_';
 
-(async () => {
-    // TODO!: Remove ALL the console.log statements
-    console.log('unsignedMessage');
-    console.log(unsignedMessage);
+  // TODO!: Remove ALL the console.log statements
+  console.log('unsignedMessage');
+  console.log(unsignedMessage);
 
-    const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
-        accessControlConditions,
-        ciphertext,
-        dataToEncryptHash,
-        chain: 'ethereum',
-        authSig: null,
-    });
+  const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+    chain: 'ethereum',
+    authSig: null,
+  });
 
-    console.log('decryptedPrivateKey');
-    console.log(decryptedPrivateKey);
+  console.log('decryptedPrivateKey');
+  console.log(decryptedPrivateKey);
 
-    if (!decryptedPrivateKey) { // Exit the nodes which don't have the decryptedData
-        return;
+  if (!decryptedPrivateKey) {
+    // Exit the nodes which don't have the decryptedData
+    return;
+  }
+
+  const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
+    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
+    : decryptedPrivateKey;
+  const wallet = new ethers.Wallet(privateKey);
+
+  try {
+    const signature = await wallet.signMessage(unsignedMessage);
+    console.log('signature');
+    console.log(signature);
+
+    const recoveredAddress = ethers.utils.verifyMessage(
+      unsignedMessage,
+      signature
+    );
+    console.log('recoveredAddress');
+    console.log(recoveredAddress);
+
+    if (recoveredAddress !== wallet.address) {
+      Lit.Actions.setResponse({
+        response: "Error: Recovered address doesn't match the wallet address",
+      });
+      return;
     }
 
-    const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX) ? decryptedPrivateKey.slice(LIT_PREFIX.length) : decryptedPrivateKey;
-    const wallet = new ethers.Wallet(privateKey);
+    Lit.Actions.setResponse({ response: signature });
+  } catch (err) {
+    const errorMessage = 'Error: When signing message- ' + err.message;
+    Lit.Actions.setResponse({ response: errorMessage });
+  }
+}).toString();
 
-    try {
-        const signature = await wallet.signMessage(unsignedMessage);
-        console.log('signature');
-        console.log(signature);
-
-        const recoveredAddress = ethers.utils.verifyMessage(unsignedMessage, signature);
-        console.log('recoveredAddress');
-        console.log(recoveredAddress);
-
-        if (recoveredAddress !== wallet.address) {
-            Lit.Actions.setResponse({ response: "Error: Recovered address doesn't match the wallet address" });
-            return;
-        }
-
-        Lit.Actions.setResponse({ response: signature });
-    } catch (err) {
-        const errorMessage = 'Error: When signing message- ' + err.message;
-        Lit.Actions.setResponse({ response: errorMessage });
-    }
-})();
-`;
+export const signMessageWithEthereumEncryptedKeyLitAction = `(${_signMessageWithEthereumEncryptedKeyLitAction})();`;
 
 // export const signingTimeoutEncryptedKeyLitAction = `
 // (async () => {
