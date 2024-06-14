@@ -109,6 +109,7 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
 
   const tx = {
     to: unsignedTransaction.toAddress,
+    from: wallet.address,
     value: ethers.utils.hexlify(
       ethers.utils.parseEther(unsignedTransaction.value)
     ),
