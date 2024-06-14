@@ -138,8 +138,7 @@ export function getProviderFromUrl(): string | null {
  * @returns {Promise<string>} - State param
  */
 export async function setStateParam(): Promise<string> {
-  const { nanoid } = await import('nanoid');
-  const state = nanoid(15);
+  const state = Math.random().toString(36).substring(2, 17);
   sessionStorage.setItem(STATE_PARAM_KEY, state);
   return state;
 }

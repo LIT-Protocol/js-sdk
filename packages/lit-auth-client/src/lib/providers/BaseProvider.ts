@@ -24,10 +24,6 @@ import { validateMintRequestBody } from '../validators';
 
 export abstract class BaseProvider {
   /**
-   * Endpoint to interact with a blockchain network. Defaults to the Lit Chronicle.
-   */
-  public rpcUrl: string;
-  /**
    * Relay server to subsidize minting of PKPs
    */
   public relay: IRelay;
@@ -37,7 +33,6 @@ export abstract class BaseProvider {
   public litNodeClient: LitNodeClient;
 
   constructor(options: BaseProviderOptions) {
-    this.rpcUrl = options.rpcUrl;
     this.relay = options.relay;
     this.litNodeClient = options.litNodeClient;
   }
