@@ -23,7 +23,6 @@ import {
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResponse,
 } from './interfaces';
-import { JsonExecutionSdkParams } from '@lit-protocol/types';
 
 export async function generatePrivateKey({
   pkpSessionSigs,
@@ -191,31 +190,23 @@ export async function signMessageWithEncryptedKey({
   litActionCode,
   unsignedMessage,
   litNodeClient,
-  ipfsCid,
 }: SignMessageWithEncryptedKeyParams): Promise<string> {
   const { pkpAddress, ciphertext, dataToEncryptHash } =
     await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
-  const executeJsParams: JsonExecutionSdkParams = {
-    sessionSigs: pkpSessionSigs,
-    jsParams: {
-      pkpAddress,
-      ciphertext,
-      dataToEncryptHash,
-      unsignedMessage,
-      accessControlConditions: getPkpAccessControlCondition(pkpAddress),
-    },
-  };
-
-  if (ipfsCid) {
-    executeJsParams.ipfsId = ipfsCid;
-  } else {
-    executeJsParams.code = litActionCode;
-  }
-
   let result;
   try {
-    result = await litNodeClient.executeJs(executeJsParams);
+    result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      code: litActionCode,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        unsignedMessage,
+        accessControlConditions: getPkpAccessControlCondition(pkpAddress),
+      },
+    });
   } catch (err: any) {
     throw new Error(
       `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
