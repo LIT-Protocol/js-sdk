@@ -7,7 +7,7 @@ const esbuild = require('esbuild');
       './src/lib/litActions/solana/src/signMessageWithSolanaEncryptedKey.js',
     ],
     bundle: true,
-    minify: true,
+    minify: false,
     sourcemap: false,
     outdir: './src/lib/litActions/solana/dist',
     inject: ['./buffer.shim.js'],

@@ -1,2 +1,0 @@
-export const signMessageWithSolanaEncryptedKeyLitAction =
-  'QmdDhDWNdDp6SoQvHgD9S6yJw2tRh1ueJ5489q3mcLUirY';

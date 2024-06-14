@@ -1,2 +1,0 @@
-export const signAndSendTxWithSolanaEncryptedKeyLitAction =
-  'QmSR6VVa9VtjYnuJvRpr3wJvfVxraeaQnWPJpd2yB6U9xB';
