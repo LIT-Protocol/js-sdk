@@ -14,7 +14,8 @@ import {
   createSiweMessageWithRecaps,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
-import * as bs58 from 'bs58';
+import bs58 from 'bs58';
+import nacl from 'tweetnacl';
 
 /**
  * Test Commands:
@@ -45,7 +46,7 @@ export const testSignMessageWithSolanaEncryptedKey = async (
   const { ciphertext, dataToEncryptHash } = await encryptString(
     {
       accessControlConditions: decryptionAccessControlConditions,
-      dataToEncrypt: bs58.encode(solanaKeypair.secretKey),
+      dataToEncrypt: Buffer.from(solanaKeypair.secretKey).toString('hex'),
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
@@ -78,18 +79,29 @@ export const testSignMessageWithSolanaEncryptedKey = async (
     },
   });
 
-  const signature = await devEnv.litNodeClient.executeJs({
+  const result = await devEnv.litNodeClient.executeJs({
     sessionSigs,
     ipfsId: signMessageWithSolanaEncryptedKeyLitActionIpfsCid,
     jsParams: {
       accessControlConditions: decryptionAccessControlConditions,
       ciphertext,
       dataToEncryptHash,
-      sessionSigs,
-      message: messageToSign,
+      messageToSign,
     },
   });
-  console.log('signature', signature);
+
+  const signatureIsValidForPublicKey = nacl.sign.detached.verify(
+    Buffer.from(messageToSign),
+    bs58.decode(result.response as string),
+    solanaKeypair.publicKey.toBuffer()
+  );
+
+  if (!signatureIsValidForPublicKey)
+    throw new Error(
+      `signature: ${
+        result.response
+      } doesn't validate for the Solana public key: ${solanaKeypair.publicKey.toString()}`
+    );
 
   log('✅ testSignMessageWithSolanaEncryptedKey');
 };

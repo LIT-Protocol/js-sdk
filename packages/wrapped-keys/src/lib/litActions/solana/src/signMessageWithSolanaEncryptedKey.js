@@ -5,14 +5,21 @@ const nacl = require('tweetnacl');
 (async () => {
   const LIT_PREFIX = 'lit_';
 
-  const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
-    accessControlConditions,
-    chain: 'ethereum',
-    ciphertext,
-    dataToEncryptHash,
-    authSig: null,
-    sessionSigs,
-  });
+  let decryptedPrivateKey;
+  try {
+    decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
+      accessControlConditions,
+      chain: 'ethereum',
+      ciphertext,
+      dataToEncryptHash,
+      authSig: null,
+    });
+  } catch (error) {
+    Lit.Actions.setResponse({
+      response: `Error decrypting data to private key: ${error.message}`,
+    });
+    return;
+  }
 
   if (!decryptedPrivateKey) {
     // Exit the nodes which don't have the decryptedData
@@ -22,21 +29,39 @@ const nacl = require('tweetnacl');
   const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
     ? decryptedPrivateKey.slice(LIT_PREFIX.length)
     : decryptedPrivateKey;
-  const solanaKeyPair = Keypair.fromSecretKey(bs58.decode(privateKey));
-
-  const signature = nacl.sign.detached(
-    new TextEncoder().encode(messageToSign),
-    solanaKeyPair.secretKey
+  const solanaKeyPair = Keypair.fromSecretKey(
+    Uint8Array.from(Buffer.from(privateKey, 'hex'))
   );
 
-  const isValid = nacl.sign.detached.verify(
-    Buffer.from(messageToSign),
-    bs58.decode(signature),
-    solanaKeyPair.publicKey.toBuffer()
-  );
-  if (!isValid) {
+  let signature;
+  try {
+    signature = nacl.sign.detached(
+      new TextEncoder().encode(messageToSign),
+      solanaKeyPair.secretKey
+    );
+  } catch (error) {
     Lit.Actions.setResponse({
-      response: 'Error: Signature did not verify to expected Solana public key',
+      response: `Error signing message: ${error.message}`,
+    });
+    return;
+  }
+
+  try {
+    const isValid = nacl.sign.detached.verify(
+      Buffer.from(messageToSign),
+      signature,
+      solanaKeyPair.publicKey.toBuffer()
+    );
+    if (!isValid) {
+      Lit.Actions.setResponse({
+        response:
+          'Error: Signature did not verify to expected Solana public key',
+      });
+      return;
+    }
+  } catch (error) {
+    Lit.Actions.setResponse({
+      response: `Error checking if signed message is valid: ${error.message}`,
     });
     return;
   }

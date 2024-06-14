@@ -6,4 +6,4 @@ export const signAndSendTxWithSolanaEncryptedKeyLitActionIpfsCid =
   'QmSR6VVa9VtjYnuJvRpr3wJvfVxraeaQnWPJpd2yB6U9xB';
 
 export const signMessageWithSolanaEncryptedKeyLitActionIpfsCid =
-  'QmZtWqQZiNKVUzxJyzx3scwHCJa8g58K5CnBMozogqS7iq';
+  'QmdsLYF5YqH3NzzJSVzeygREQrQzHmdiJJgx9DKfmz2w2b';
