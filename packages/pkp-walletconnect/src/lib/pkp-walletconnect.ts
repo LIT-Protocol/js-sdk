@@ -44,8 +44,6 @@ export class PKPWalletConnect {
   private client: IWeb3Wallet | undefined;
   // List of PKPClients
   private pkpClients: PKPClient[] = [];
-  // Supported chains
-  private supportedChains: string[] = ['eip155'];
 
   // For logging
   private readonly debug: boolean = false;
@@ -175,23 +173,27 @@ export class PKPWalletConnect {
     }
     const optionalNamespaceKeys = Object.keys(optionalNamespaces);
     for (const key of optionalNamespaceKeys) {
-      if (!this.supportedChains.includes(key)) continue;
-
       // Check if optional chain networks are supported by Lit. If so, get a list of accounts for the given chain
       const accounts: string[] = [];
       const chains = optionalNamespaces[key].chains;
       if (chains) {
         for (const chain of chains) {
           let accountsByChain: string[] = [];
-          if (this.checkIfChainIsSupported(chain)) {
-            accountsByChain = await this.getAccountsWithPrefix(chain);
-            // If no accounts are found for the given chain, reject the session proposal
-            if (accountsByChain.length !== 0) {
-              // Add accounts with prefix to the list of accounts
-              accounts.push(...accountsByChain);
-            }
+          if (!this.checkIfChainIsSupported(chain)) {
+            continue;
+          }
+
+          accountsByChain = await this.getAccountsWithPrefix(chain);
+          // If no accounts are found for the given chain, reject the session proposal
+          if (accountsByChain.length !== 0) {
+            // Add accounts with prefix to the list of accounts
+            accounts.push(...accountsByChain);
           }
         }
+      }
+
+      if (!accounts.length) {
+        continue;
       }
 
       // Add to the session namespace but considering what we previously had (a chain can require some methods and have other optional methods)
