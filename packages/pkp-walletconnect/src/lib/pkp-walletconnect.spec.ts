@@ -165,9 +165,13 @@ describe('PKPWalletConnect', () => {
   });
 
   describe('approveSessionProposal', () => {
-    const buildEIP155SessionApprovalParams = (eip155SessionProposal: SignClientTypes.EventArguments['session_proposal']) => {
-      const requiredChains = eip155SessionProposal.params.requiredNamespaces['eip155']?.chains || [];
-      const optionalChains = eip155SessionProposal.params.optionalNamespaces['eip155']?.chains || [];
+    const buildEIP155SessionApprovalParams = (
+      eip155SessionProposal: SignClientTypes.EventArguments['session_proposal']
+    ) => {
+      const requiredChains =
+        eip155SessionProposal.params.requiredNamespaces['eip155']?.chains || [];
+      const optionalChains =
+        eip155SessionProposal.params.optionalNamespaces['eip155']?.chains || [];
 
       const namespaces = {
         eip155: {
@@ -177,28 +181,30 @@ describe('PKPWalletConnect', () => {
               ...optionalChains.map((chain) => `${chain}:${PKP_ETH_ADDRESS}`),
             ]),
           ],
-          chains: [
-            ...new Set([...requiredChains, ...optionalChains]),
-          ],
+          chains: [...new Set([...requiredChains, ...optionalChains])],
           methods: pkpWalletConnect.filterUnsupportedMethods([
-            ...eip155SessionProposal.params.requiredNamespaces['eip155']?.methods || [],
-            ...eip155SessionProposal.params.optionalNamespaces['eip155']?.methods || [],
+            ...(eip155SessionProposal.params.requiredNamespaces['eip155']
+              ?.methods || []),
+            ...(eip155SessionProposal.params.optionalNamespaces['eip155']
+              ?.methods || []),
           ]),
           events: [
             ...new Set([
-              ...eip155SessionProposal.params.requiredNamespaces['eip155']?.events || [],
-              ...eip155SessionProposal.params.optionalNamespaces['eip155']?.events || [],
+              ...(eip155SessionProposal.params.requiredNamespaces['eip155']
+                ?.events || []),
+              ...(eip155SessionProposal.params.optionalNamespaces['eip155']
+                ?.events || []),
             ]),
           ],
         },
-      }
+      };
 
       return {
         id: eip155SessionProposal.id,
         namespaces,
         relayProtocol: eip155SessionProposal.params.relays[0].protocol,
-      }
-    }
+      };
+    };
 
     it('should approve a valid session proposal removing the unsupported methods and chains', async () => {
       const sessionProposal = {
@@ -255,7 +261,8 @@ describe('PKPWalletConnect', () => {
           },
         },
       } as SignClientTypes.EventArguments['session_proposal'];
-      const sessionApprovalParams = buildEIP155SessionApprovalParams(sessionProposal);
+      const sessionApprovalParams =
+        buildEIP155SessionApprovalParams(sessionProposal);
 
       const approveSessionSpy = jest.spyOn(web3WalletMock, 'approveSession');
 
@@ -309,8 +316,9 @@ describe('PKPWalletConnect', () => {
             origin: 'https://react-app.walletconnect.com',
           },
         },
-      } as SignClientTypes.EventArguments['session_proposal']
-      const sessionApprovalParams = buildEIP155SessionApprovalParams(sessionProposal);
+      } as SignClientTypes.EventArguments['session_proposal'];
+      const sessionApprovalParams =
+        buildEIP155SessionApprovalParams(sessionProposal);
 
       const approveSessionSpy = jest.spyOn(web3WalletMock, 'approveSession');
 
