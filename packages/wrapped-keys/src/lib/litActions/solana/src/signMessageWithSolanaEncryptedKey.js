@@ -16,7 +16,7 @@ const nacl = require('tweetnacl');
     });
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error decrypting data to private key: ${error.message}`,
+      response: `Error: When decrypting data to private key: ${error.message}`,
     });
     return;
   }
