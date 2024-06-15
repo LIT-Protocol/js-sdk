@@ -19,7 +19,7 @@ const {
     });
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error decrypting data to private key: ${error.message}`,
+      response: `Error: When decrypting data to private key: ${error.message}`,
     });
     return;
   }
@@ -54,7 +54,7 @@ const {
     }
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error during transaction signing and submission: ${error.message}`,
+      response: `Error: During transaction signing and submission: ${error.message}`,
     });
   }
 })();

@@ -16,7 +16,7 @@ const nacl = require('tweetnacl');
     });
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error decrypting data to private key: ${error.message}`,
+      response: `Error: When decrypting data to private key: ${error.message}`,
     });
     return;
   }
@@ -39,7 +39,7 @@ const nacl = require('tweetnacl');
     );
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error signing message: ${error.message}`,
+      response: `Error: When signing message: ${error.message}`,
     });
     return;
   }
@@ -59,7 +59,7 @@ const nacl = require('tweetnacl');
     }
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error checking if signed message is valid: ${error.message}`,
+      response: `Error: When validating signed message is valid: ${error.message}`,
     });
     return;
   }
