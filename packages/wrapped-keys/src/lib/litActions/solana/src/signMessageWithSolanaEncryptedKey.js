@@ -41,7 +41,7 @@ const nacl = require('tweetnacl');
     );
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error signing message: ${error.message}`,
+      response: `Error: When signing message: ${error.message}`,
     });
     return;
   }
