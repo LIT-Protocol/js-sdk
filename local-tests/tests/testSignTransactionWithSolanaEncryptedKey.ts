@@ -19,9 +19,9 @@ import {
 import {
   LitAccessControlConditionResource,
   LitActionResource,
-  createSiweMessageWithRecaps,
-  generateAuthSig,
+  LitPKPResource,
 } from '@lit-protocol/auth-helpers';
+import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
  * Test Commands:
@@ -56,33 +56,16 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
-    chain: 'ethereum',
-    resourceAbilityRequests: [
-      {
-        resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
-      },
-      {
-        resource: new LitAccessControlConditionResource('*'),
-        ability: LitAbility.AccessControlConditionDecryption,
-      },
-    ],
-    authNeededCallback: async ({ uri, resourceAbilityRequests }) => {
-      const toSign = await createSiweMessageWithRecaps({
-        uri: uri!,
-        expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
-        resources: resourceAbilityRequests!,
-        walletAddress: await alice.wallet.getAddress(),
-        nonce: await devEnv.litNodeClient!.getLatestBlockhash(),
-        litNodeClient: devEnv.litNodeClient,
-      });
-      return await generateAuthSig({
-        signer: alice.wallet,
-        toSign,
-      });
+  const sessionSigs = await getEoaSessionSigs(devEnv, alice, [
+    {
+      resource: new LitActionResource('*'),
+      ability: LitAbility.LitActionExecution,
     },
-  });
+    {
+      resource: new LitAccessControlConditionResource('*'),
+      ability: LitAbility.AccessControlConditionDecryption,
+    },
+  ]);
 
   const solanaTransaction = new Transaction();
   solanaTransaction.add(
