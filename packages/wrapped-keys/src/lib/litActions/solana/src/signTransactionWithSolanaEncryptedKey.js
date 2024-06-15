@@ -54,7 +54,7 @@ const {
     }
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error during transaction signing and submission: ${error.message}`,
+      response: `Error: During transaction signing and submission: ${error.message}`,
     });
   }
 })();
