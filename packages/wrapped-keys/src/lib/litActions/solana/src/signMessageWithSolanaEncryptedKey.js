@@ -29,9 +29,7 @@ const nacl = require('tweetnacl');
   const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
     ? decryptedPrivateKey.slice(LIT_PREFIX.length)
     : decryptedPrivateKey;
-  const solanaKeyPair = Keypair.fromSecretKey(
-    Uint8Array.from(Buffer.from(privateKey, 'hex'))
-  );
+  const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
   let signature;
   try {
