@@ -61,7 +61,7 @@ const nacl = require('tweetnacl');
     }
   } catch (error) {
     Lit.Actions.setResponse({
-      response: `Error checking if signed message is valid: ${error.message}`,
+      response: `Error: When validating signed message is valid: ${error.message}`,
     });
     return;
   }
