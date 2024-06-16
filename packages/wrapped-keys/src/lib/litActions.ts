@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-export const _generatePrivateKeyLitAction = (async () => {
+const _generatePrivateKeyLitAction = async () => {
   const LIT_PREFIX = 'lit_';
 
   const resp = await Lit.Actions.runOnce(
@@ -23,30 +23,12 @@ export const _generatePrivateKeyLitAction = (async () => {
     }
   );
 
-  // // TODO: Remove the below which is only for demonstrating the error
-  // const { ciphertext, dataToEncryptHash } = JSON.parse(resp);
-  // const decrypted = await Lit.Actions.decryptAndCombine({
-  //     accessControlConditions,
-  //     ciphertext,
-  //     dataToEncryptHash,
-  //     authSig: null,
-  //     chain: 'ethereum',
-  // });
-
-  // // TODO: Remove the below which is only for demonstrating the error
-  // console.log('accessControlConditions: ', accessControlConditions);
-  // console.log('ciphertext: ', ciphertext);
-  // console.log('dataToEncryptHash: ', dataToEncryptHash);
-  // console.log('decrypted: ', decrypted);
-
   Lit.Actions.setResponse({
     response: resp,
   });
-}).toString();
+};
 
-export const generatePrivateKeyLitAction = `(${_generatePrivateKeyLitAction})();`;
-
-const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
+const _signTransactionWithEthereumEncryptedKeyLitAction = async () => {
   const LIT_PREFIX = 'lit_';
 
   // TODO!: Remove ALL the console.log statements
@@ -81,13 +63,21 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
     return;
   }
 
-  const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
-    accessControlConditions,
-    ciphertext,
-    dataToEncryptHash,
-    chain: 'ethereum',
-    authSig: null,
-  });
+  let decryptedPrivateKey;
+  try {
+    decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
+      accessControlConditions,
+      ciphertext,
+      dataToEncryptHash,
+      chain: 'ethereum',
+      authSig: null,
+    });
+  } catch (err) {
+    const errorMessage =
+      'Error: When decrypting to a single node- ' + err.message;
+    Lit.Actions.setResponse({ response: errorMessage });
+    return;
+  }
 
   console.log('decryptedPrivateKey');
   console.log(decryptedPrivateKey);
@@ -104,12 +94,20 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
 
   console.log('unsignedTransaction.chain', unsignedTransaction.chain);
   console.log('pkpAddress', pkpAddress);
-  const nonce = await Lit.Actions.getLatestNonce({
-    address: wallet.address,
-    chain: unsignedTransaction.chain,
-  });
-  console.log('nonce');
-  console.log(nonce);
+
+  let nonce;
+  try {
+    nonce = await Lit.Actions.getLatestNonce({
+      address: wallet.address,
+      chain: unsignedTransaction.chain,
+    });
+    console.log('nonce');
+    console.log(nonce);
+  } catch (err) {
+    const errorMessage = 'Error: Unable to get the nonce- ' + err.message;
+    Lit.Actions.setResponse({ response: errorMessage });
+    return;
+  }
 
   const tx = {
     to: unsignedTransaction.toAddress,
@@ -122,10 +120,19 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
     nonce,
   };
 
-  const rpcUrl = await Lit.Actions.getRpcUrl({
-    chain: unsignedTransaction.chain,
-  });
-  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+  let provider;
+  try {
+    const rpcUrl = await Lit.Actions.getRpcUrl({
+      chain: unsignedTransaction.chain,
+    });
+    provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+  } catch (err) {
+    const errorMessage =
+      `Error: Getting the rpc for the chain: ${unsignedTransaction.chain}- ` +
+      err.message;
+    Lit.Actions.setResponse({ response: errorMessage });
+    return;
+  }
 
   if (unsignedTransaction.gasPrice) {
     tx.gasPrice = ethers.utils.parseUnits(unsignedTransaction.gasPrice, 'gwei');
@@ -168,24 +175,30 @@ const _signTransactionWithEthereumEncryptedKeyLitAction = (async () => {
     const errorMessage = 'Error: When signing transaction- ' + err.message;
     Lit.Actions.setResponse({ response: errorMessage });
   }
-}).toString();
+};
 
-export const signTransactionWithEthereumEncryptedKeyLitAction = `(${_signTransactionWithEthereumEncryptedKeyLitAction})();`;
-
-export const _signMessageWithEthereumEncryptedKeyLitAction = (async () => {
+const _signMessageWithEthereumEncryptedKeyLitAction = async () => {
   const LIT_PREFIX = 'lit_';
 
   // TODO!: Remove ALL the console.log statements
   console.log('unsignedMessage');
   console.log(unsignedMessage);
 
-  const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
-    accessControlConditions,
-    ciphertext,
-    dataToEncryptHash,
-    chain: 'ethereum',
-    authSig: null,
-  });
+  let decryptedPrivateKey;
+  try {
+    decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
+      accessControlConditions,
+      ciphertext,
+      dataToEncryptHash,
+      chain: 'ethereum',
+      authSig: null,
+    });
+  } catch (err) {
+    const errorMessage =
+      'Error: When decrypting to a single node- ' + err.message;
+    Lit.Actions.setResponse({ response: errorMessage });
+    return;
+  }
 
   console.log('decryptedPrivateKey');
   console.log(decryptedPrivateKey);
@@ -224,12 +237,14 @@ export const _signMessageWithEthereumEncryptedKeyLitAction = (async () => {
     const errorMessage = 'Error: When signing message- ' + err.message;
     Lit.Actions.setResponse({ response: errorMessage });
   }
-}).toString();
+};
 
-export const signMessageWithEthereumEncryptedKeyLitAction = `(${_signMessageWithEthereumEncryptedKeyLitAction})();`;
+const generatePrivateKeyLitAction = `(${_generatePrivateKeyLitAction.toString})();`;
+const signTransactionWithEthereumEncryptedKeyLitAction = `(${_signTransactionWithEthereumEncryptedKeyLitAction.toString()})();`;
+const signMessageWithEthereumEncryptedKeyLitAction = `(${_signMessageWithEthereumEncryptedKeyLitAction.toString()})();`;
 
-// export const signingTimeoutEncryptedKeyLitAction = `
-// (async () => {
-//     new Promise(resolve => setTimeout(resolve, 40000)); // Sleep for 40 seconds
-// })();
-// `;
+export {
+  generatePrivateKeyLitAction,
+  signMessageWithEthereumEncryptedKeyLitAction,
+  signTransactionWithEthereumEncryptedKeyLitAction,
+};
