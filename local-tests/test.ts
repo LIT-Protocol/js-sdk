@@ -86,11 +86,13 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
 import { testEthereumSignMessageGeneratedKey } from './tests/testEthereumSignMessageGeneratedKey';
 import { testEthereumBroadcastTransactionGeneratedKey } from './tests/testEthereumBroadcastTransactionGeneratedKey';
 import { testEthereumSignMessageWrappedKey } from './tests/testEthereumSignMessageWrappedKey';
+import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
 // import { testFailWrappedKeySigningTimeout } from './tests/testFailWrappedKeySigningTimeout';
 import { testEthereumSignTransactionWrappedKey } from './tests/testEthereumSignTransactionWrappedKey';
 import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
 import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
 import { testEthereumBroadcastTransactionWrappedKey } from './tests/testEthereumBroadcastTransactionWrappedKey';
+import { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/testEthereumBroadcastWrappedKeyWithFetchGasParams';
 import { testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds } from './tests/testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds';
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
 import { testGenerateWrappedKey } from './tests/testGenerateWrappedKey';
@@ -110,6 +112,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
   await devEnv.init();
 
   const wrappedKeysTests = {
+    testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
     testEthereumSignMessageGeneratedKey,
     testEthereumBroadcastTransactionGeneratedKey,
     // testRemoveDecryptFailingOutsideLitAction,
@@ -118,6 +121,7 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
     testFailEthereumSignTransactionWrappedKeyWithMissingParam,
     testEthereumBroadcastTransactionWrappedKey,
+    testEthereumBroadcastWrappedKeyWithFetchGasParams,
     testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds,
     testImportWrappedKey,
     testGenerateWrappedKey,
