@@ -1,6 +1,7 @@
 import {
   SupportedETHSigningMethods,
   ethRequestHandler,
+  methodHandlers,
   isEthRequest,
 } from '@lit-protocol/pkp-ethers';
 import { LIT_CHAINS } from '@lit-protocol/constants';
@@ -43,8 +44,6 @@ export class PKPWalletConnect {
   private client: IWeb3Wallet | undefined;
   // List of PKPClients
   private pkpClients: PKPClient[] = [];
-  // Supported chains
-  private supportedChains: string[] = ['eip155'];
 
   // For logging
   private readonly debug: boolean = false;
@@ -111,51 +110,58 @@ export class PKPWalletConnect {
 
     // Parse the session proposal
     const { id, params } = proposal;
-    const { requiredNamespaces, relays } = params;
-    let rejected = false;
+    const { optionalNamespaces, requiredNamespaces, relays } = params;
 
-    // Ensure that the PKPClients can support the requested chains
+    // Ensure that the PKPClients can support the requested session proposal
     const namespaces: SessionTypes.Namespaces = {};
     const requiredNamespaceKeys = Object.keys(requiredNamespaces);
     for (const key of requiredNamespaceKeys) {
-      if (!this.supportedChains.includes(key)) continue;
-
-      // Check if specified chain networks are supported by Lit. If so, get a list of accounts for the given chain
+      // Check if required chain networks are supported by Lit. If so, get a list of accounts for the given chain
       const accounts: string[] = [];
       const chains = requiredNamespaces[key].chains;
       if (chains) {
         for (const chain of chains) {
           let accountsByChain: string[] = [];
-          if (this.checkIfChainIsSupported(chain)) {
-            accountsByChain = await this.getAccountsWithPrefix(chain);
-            // If no accounts are found for the given chain, reject the session proposal
-            if (accountsByChain.length === 0) {
-              await this.client.rejectSession({
-                id,
-                reason: getSdkError('UNSUPPORTED_ACCOUNTS'),
-              });
-              rejected = true;
-              break;
-            } else {
-              // Add accounts with prefix to the list of accounts
-              accounts.push(...accountsByChain);
-            }
-          } else {
-            await this.client.rejectSession({
+          if (!this.checkIfChainIsSupported(chain)) {
+            return await this.client.rejectSession({
               id,
               reason: getSdkError(
                 'UNSUPPORTED_CHAINS',
                 `${chain} is not supported`
               ),
             });
-            rejected = true;
-            break;
+          }
+          const supportedMethods = this.filterUnsupportedMethods(
+            requiredNamespaces[key].methods
+          );
+          if (
+            requiredNamespaces[key].methods.length !== supportedMethods.length
+          ) {
+            const unsupportedMethods = requiredNamespaces[key].methods.filter(
+              (method) => !supportedMethods.includes(method)
+            );
+            return await this.client.rejectSession({
+              id,
+              reason: getSdkError(
+                'UNSUPPORTED_METHODS',
+                `Unsupported methods: ${unsupportedMethods.join(', ')}`
+              ),
+            });
+          }
+
+          accountsByChain = await this.getAccountsWithPrefix(chain);
+          // If no accounts are found for the given chain, reject the session proposal
+          if (accountsByChain.length === 0) {
+            await this.client.rejectSession({
+              id,
+              reason: getSdkError('UNSUPPORTED_ACCOUNTS'),
+            });
+          } else {
+            // Add accounts with prefix to the list of accounts
+            accounts.push(...accountsByChain);
           }
         }
       }
-
-      // Break if session proposal was rejected
-      if (rejected) break;
 
       // Construct the session namespace
       namespaces[key] = {
@@ -165,14 +171,61 @@ export class PKPWalletConnect {
         events: requiredNamespaces[key].events,
       };
     }
+    const optionalNamespaceKeys = Object.keys(optionalNamespaces);
+    for (const key of optionalNamespaceKeys) {
+      // Check if optional chain networks are supported by Lit. If so, get a list of accounts for the given chain
+      const accounts: string[] = [];
+      const chains = optionalNamespaces[key].chains;
+      if (chains) {
+        for (const chain of chains) {
+          let accountsByChain: string[] = [];
+          if (!this.checkIfChainIsSupported(chain)) {
+            continue;
+          }
 
-    // Reject session proposal if there are no constructed namespaces for supported chains
-    for (const chain of this.supportedChains) {
-      if (!namespaces[chain]) {
-        return await this.client.rejectSession({
-          id,
-          reason: getSdkError('UNSUPPORTED_CHAINS'),
-        });
+          accountsByChain = await this.getAccountsWithPrefix(chain);
+          // If no accounts are found for the given chain, reject the session proposal
+          if (accountsByChain.length !== 0) {
+            // Add accounts with prefix to the list of accounts
+            accounts.push(...accountsByChain);
+          }
+        }
+      }
+
+      if (!accounts.length) {
+        continue;
+      }
+
+      // Add to the session namespace but considering what we previously had (a chain can require some methods and have other optional methods)
+      const optionalNamespaceSupportedMethods = this.filterUnsupportedMethods(
+        optionalNamespaces[key].methods
+      );
+      if (!namespaces[key]) {
+        namespaces[key] = {
+          accounts,
+          chains: key.includes(':') ? [key] : chains,
+          methods: optionalNamespaceSupportedMethods,
+          events: optionalNamespaces[key].events,
+        };
+      } else {
+        namespaces[key].accounts = [
+          ...new Set([...namespaces[key].accounts, ...accounts]),
+        ];
+        namespaces[key].chains = [
+          ...new Set([...(namespaces[key].chains || []), ...(chains || [])]),
+        ];
+        namespaces[key].methods = [
+          ...new Set([
+            ...namespaces[key].methods,
+            ...optionalNamespaceSupportedMethods,
+          ]),
+        ];
+        namespaces[key].events = [
+          ...new Set([
+            ...namespaces[key].events,
+            ...optionalNamespaces[key].events,
+          ]),
+        ];
       }
     }
 
@@ -547,6 +600,11 @@ export class PKPWalletConnect {
     } else {
       return false;
     }
+  }
+
+  public filterUnsupportedMethods(methods: string[]): string[] {
+    const pkpSupportedMethods = Object.keys(methodHandlers);
+    return methods.filter((method) => pkpSupportedMethods.includes(method));
   }
 
   /**
