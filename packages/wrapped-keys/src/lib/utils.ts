@@ -42,9 +42,7 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   }
 
   for (const innerAuthSig of capabilities) {
-    const delegationAuthSig: AuthSig = JSON.parse(
-      JSON.stringify(innerAuthSig)
-    ); // Had to stringify as it was throwing SyntaxError: "[object Object]" is not valid JSON
+    const delegationAuthSig: AuthSig = JSON.parse(JSON.stringify(innerAuthSig)); // Had to stringify as it was throwing SyntaxError: "[object Object]" is not valid JSON
 
     if (delegationAuthSig.algo !== 'LIT_BLS') {
       continue;
