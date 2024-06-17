@@ -87,7 +87,6 @@ import { testEthereumSignMessageGeneratedKey } from './tests/testEthereumSignMes
 import { testEthereumBroadcastTransactionGeneratedKey } from './tests/testEthereumBroadcastTransactionGeneratedKey';
 import { testEthereumSignMessageWrappedKey } from './tests/testEthereumSignMessageWrappedKey';
 import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
-// import { testFailWrappedKeySigningTimeout } from './tests/testFailWrappedKeySigningTimeout';
 import { testEthereumSignTransactionWrappedKey } from './tests/testEthereumSignTransactionWrappedKey';
 import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
 import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
@@ -103,7 +102,6 @@ import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/testFa
 import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/testFailImportWrappedKeysWithInvalidSessionSig';
 import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFailImportWrappedKeysWithExpiredSessionSig';
 import { testExportWrappedKey } from './tests/testExportWrappedKey';
-// import { testRemoveDecryptFailingOutsideLitAction } from './tests/testRemoveDecryptFailingOutsideLitAction';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -115,7 +113,6 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
     testEthereumSignMessageGeneratedKey,
     testEthereumBroadcastTransactionGeneratedKey,
-    // testRemoveDecryptFailingOutsideLitAction,
     testEthereumSignMessageWrappedKey,
     testEthereumSignTransactionWrappedKey,
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
@@ -132,7 +129,6 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailImportWrappedKeysWithInvalidSessionSig,
     testFailImportWrappedKeysWithExpiredSessionSig,
     testExportWrappedKey,
-    // testFailWrappedKeySigningTimeout,
   };
 
   const eoaSessionSigsTests = {
