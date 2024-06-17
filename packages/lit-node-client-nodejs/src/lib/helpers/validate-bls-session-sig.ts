@@ -1,3 +1,4 @@
+import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -33,17 +34,8 @@ export const blsSessionSigVerify = async (
   const prefixedStr =
     LIT_SESSION_SIGNED_MESSAGE_PREFIX + eip191Hash.replace('0x', '');
   const prefixedEncoded = ethers.utils.toUtf8Bytes(prefixedStr);
-  const shaHashed = ethers.utils.base64.encode(
-    ethers.utils.sha256(prefixedEncoded)
-  );
-
+  const shaHashed = ethers.utils.sha256(prefixedEncoded).replace('0x', '');
   const signatureBytes = Buffer.from(sigJson.ProofOfPossession, `hex`);
-  // TODO: Verification currently fails with 'invalid signature`
-  /*
-  await verifier(
-    networkPubKey,
-    uint8arrayFromString(shaHashed),
-    signatureBytes
-  );
-  */
+
+  await verifier(networkPubKey, Buffer.from(shaHashed, 'hex'), signatureBytes);
 };
