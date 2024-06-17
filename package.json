@@ -125,7 +125,6 @@
     "jszip": "^3.10.1",
     "micromodal": "^0.4.10",
     "multiformats": "^9.7.1",
-    "nanoid": "3.3.4",
     "next": "13.3.0",
     "pako": "^2.1.0",
     "react": "18.0.0",
