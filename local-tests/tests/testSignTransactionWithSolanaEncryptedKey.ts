@@ -1,12 +1,11 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { signTransactionWithSolanaEncryptedKeyLitActionIpfsCid } from '@lit-protocol/wrapped-keys';
 import {
-  AccessControlConditions,
-  ILitNodeClient,
-  LitAbility,
-} from '@lit-protocol/types';
-import { encryptString } from '@lit-protocol/lit-node-client-nodejs';
+  SolanaLitTransaction,
+  importPrivateKey,
+  signTransactionWithEncryptedKey,
+  signTransactionWithSolanaEncryptedKeyLitActionIpfsCid,
+} from '@lit-protocol/wrapped-keys';
 import {
   Connection,
   Keypair,
@@ -16,56 +15,50 @@ import {
   Transaction,
   clusterApiUrl,
 } from '@solana/web3.js';
-import {
-  LitAccessControlConditionResource,
-  LitActionResource,
-  LitPKPResource,
-} from '@lit-protocol/auth-helpers';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
  * ✅ NETWORK=manzano yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
- * ❔ NETWORK=localchain yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
  */
 export const testSignTransactionWithSolanaEncryptedKey = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
+
+  const pkpSessionSigs = await getPkpSessionSigs(
+    devEnv,
+    alice,
+    null,
+    new Date(Date.now() + 1000 * 60 * 10).toISOString()
+  ); // 10 mins expiry
+
+  console.log(pkpSessionSigs);
+
   const solanaKeypair = Keypair.generate();
-  const decryptionAccessControlConditions: AccessControlConditions = [
-    {
-      contractAddress: '',
-      standardContractType: '',
-      chain: 'ethereum',
-      method: '',
-      parameters: [':userAddress', 'latest'],
-      returnValueTest: {
-        comparator: '=',
-        value: await alice.wallet.getAddress(),
-      },
-    },
-  ];
+  const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
 
-  const { ciphertext, dataToEncryptHash } = await encryptString(
-    {
-      accessControlConditions: decryptionAccessControlConditions,
-      dataToEncrypt: Buffer.from(solanaKeypair.secretKey).toString('hex'),
-    },
-    devEnv.litNodeClient as unknown as ILitNodeClient
-  );
+  const pkpAddress = await importPrivateKey({
+    pkpSessionSigs,
+    privateKey,
+    litNodeClient: devEnv.litNodeClient,
+  });
 
-  const sessionSigs = await getEoaSessionSigs(devEnv, alice, [
-    {
-      resource: new LitActionResource('*'),
-      ability: LitAbility.LitActionExecution,
-    },
-    {
-      resource: new LitAccessControlConditionResource('*'),
-      ability: LitAbility.AccessControlConditionDecryption,
-    },
-  ]);
+  const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
+  if (pkpAddress !== alicePkpAddress) {
+    throw new Error(
+      `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+    );
+  }
+
+  const pkpSessionSigsSigning = await getPkpSessionSigs(
+    devEnv,
+    alice,
+    null,
+    new Date(Date.now() + 1000 * 60 * 10).toISOString()
+  ); // 10 mins expiry
 
   const solanaTransaction = new Transaction();
   solanaTransaction.add(
@@ -83,30 +76,33 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
 
   const serializedTransaction = solanaTransaction
     .serialize({
-      requireAllSignatures: false,
-      verifySignatures: false,
+      requireAllSignatures: false, // should be false as we're not signing the message
+      verifySignatures: false, // should be false as we're not signing the message
     })
     .toString('base64');
 
-  const result = await devEnv.litNodeClient.executeJs({
-    sessionSigs,
-    ipfsId: signTransactionWithSolanaEncryptedKeyLitActionIpfsCid,
-    jsParams: {
-      accessControlConditions: decryptionAccessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-      serializedTransaction,
-      broadcast: false,
-      solanaNetwork: 'devnet',
-    },
+  const unsignedTransaction: SolanaLitTransaction = {
+    serializedTransaction,
+    chain: 'devnet',
+  };
+
+  const signedTx = await signTransactionWithEncryptedKey({
+    pkpSessionSigs: pkpSessionSigsSigning,
+    ipfsCid: signTransactionWithSolanaEncryptedKeyLitActionIpfsCid,
+    unsignedTransaction,
+    broadcast: false,
+    litNodeClient: devEnv.litNodeClient,
   });
 
-  const signatureBuffer = Buffer.from(result.response as string, 'base64');
+  console.log('signedTx');
+  console.log(signedTx);
+
+  const signatureBuffer = Buffer.from(signedTx, 'base64');
   solanaTransaction.addSignature(solanaKeypair.publicKey, signatureBuffer);
 
   if (!solanaTransaction.verifySignatures()) {
     throw new Error(
-      `Signature: ${result.response} doesn't validate for the Solana transaction.`
+      `Signature: ${signedTx} doesn't validate for the Solana transaction.`
     );
   }
 

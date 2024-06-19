@@ -155,10 +155,19 @@ export async function exportPrivateKey({
 export async function signTransactionWithEncryptedKey<T = LitTransaction>({
   pkpSessionSigs,
   litActionCode,
+  ipfsCid,
   unsignedTransaction,
   broadcast,
   litNodeClient,
 }: SignTransactionWithEncryptedKeyParams<T>): Promise<string> {
+  if (!ipfsCid && !litActionCode) {
+    throw new Error('Need to provide either ipfsCid or litActionCode');
+  }
+
+  if (ipfsCid && litActionCode) {
+    throw new Error("Can't provide both ipfsCid and litActionCode");
+  }
+
   const { pkpAddress, ciphertext, dataToEncryptHash } =
     await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
 
@@ -166,7 +175,8 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
   try {
     result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
-      code: litActionCode,
+      code: litActionCode ?? undefined,
+      ipfsId: ipfsCid ?? undefined,
       jsParams: {
         pkpAddress,
         ciphertext,

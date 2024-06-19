@@ -7,6 +7,24 @@ const {
 
 (async () => {
   const LIT_PREFIX = 'lit_';
+  const VALID_NETWORKS = ['devnet', 'testnet', 'mainnet-beta'];
+
+  if (!VALID_NETWORKS.includes(unsignedTransaction.chain)) {
+    Lit.Actions.setResponse({
+      response: `Error: Invalid Solana network: ${unsignedTransaction.chain}`,
+    });
+    return;
+  }
+
+  if (
+    !unsignedTransaction.serializedTransaction ||
+    !unsignedTransaction.serializedTransaction.length === 0
+  ) {
+    Lit.Actions.setResponse({
+      response: `Error: Invalid serializedTransaction: ${unsignedTransaction.serializedTransaction}`,
+    });
+    return;
+  }
 
   let decryptedPrivateKey;
   try {
@@ -38,7 +56,7 @@ const {
 
   try {
     const transaction = Transaction.from(
-      Buffer.from(serializedTransaction, 'base64')
+      Buffer.from(unsignedTransaction.serializedTransaction, 'base64')
     );
 
     transaction.sign(solanaKeyPair);
@@ -47,7 +65,7 @@ const {
 
     if (broadcast) {
       const solanaConnection = new Connection(
-        clusterApiUrl(solanaNetwork),
+        clusterApiUrl(unsignedTransaction.chain),
         'confirmed'
       );
       await solanaConnection.sendRawTransaction(transaction.serialize());
