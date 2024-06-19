@@ -12,4 +12,16 @@ const esbuild = require('esbuild');
     outdir: './src/lib/litActions/solana/dist',
     inject: ['./buffer.shim.js'],
   });
+  await esbuild.build({
+    entryPoints: [
+      './src/lib/litActions/ethereum/src/signTransactionWithEthereumEncryptedKey.js',
+      './src/lib/litActions/ethereum/src/signMessageWithEthereumEncryptedKey.js',
+      './src/lib/litActions/ethereum/src/generateEncryptedEthereumPrivateKey.js',
+    ],
+    bundle: true,
+    minify: true,
+    sourcemap: false,
+    outdir: './src/lib/litActions/ethereum/dist',
+    inject: ['./buffer.shim.js'],
+  });
 })();
