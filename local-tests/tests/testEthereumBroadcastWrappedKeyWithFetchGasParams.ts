@@ -12,7 +12,7 @@ import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams Fails with Error: Error: There should be exactly 1 element in the capabilities array but there are: 2
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
  * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
  */
 export const testEthereumBroadcastWrappedKeyWithFetchGasParams = async (

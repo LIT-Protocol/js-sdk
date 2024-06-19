@@ -12,11 +12,11 @@ const LIT_ACTION_CID_REPOSITORY = Object.freeze({
   signTransactionWithSolanaEncryptedKey:
     'QmSi9GL2weCFEP1SMAUw5PDpZRr436Zt3tLUNrSECPA5dT',
   signTransactionWithEthereumEncryptedKey:
-    'QmeGMHWVt33UmMGfoWGjMuzDpp99Zwn3Ji2EeTmaeyX2CK',
+    'QmdYUhPCCK5hpDWMK1NiDLNLG6RZQy61QE4J7dBm1Y2nbA',
   signMessageWithSolanaEncryptedKey:
     'QmYQC6cd4EMvyB4XPkfEEAwNXJupRZWU5JsTCUrjey4ovp',
   signMessageWithEthereumEncryptedKey:
-    'QmbEtysXRUwszmVxKgyWTTkF9PaWWakKxpf7dXp3drTxQv',
+    'QmTMGcyp77NeppGaqF2DmE1F8GXTSxQYzXCrbE7hNudUWx',
   generateEncryptedSolanaPrivateKey:
     'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd', // TODO!: Create Lit Action and Update
   generateEncryptedEthereumPrivateKey:

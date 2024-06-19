@@ -1,10 +1,6 @@
 (async () => {
   const LIT_PREFIX = 'lit_';
 
-  // TODO!: Remove ALL the console.log statements
-  console.log('unsignedTransaction');
-  console.log(unsignedTransaction);
-
   if (!unsignedTransaction.toAddress) {
     Lit.Actions.setResponse({
       response: 'Error: Missing required field: toAddress',
@@ -49,9 +45,6 @@
     return;
   }
 
-  console.log('decryptedPrivateKey');
-  console.log(decryptedPrivateKey);
-
   if (!decryptedPrivateKey) {
     // Exit the nodes which don't have the decryptedData
     return;
@@ -62,17 +55,12 @@
     : decryptedPrivateKey;
   const wallet = new ethers.Wallet(privateKey);
 
-  console.log('unsignedTransaction.chain', unsignedTransaction.chain);
-  console.log('pkpAddress', pkpAddress);
-
   let nonce;
   try {
     nonce = await Lit.Actions.getLatestNonce({
       address: wallet.address,
       chain: unsignedTransaction.chain,
     });
-    console.log('nonce');
-    console.log(nonce);
   } catch (err) {
     const errorMessage = 'Error: Unable to get the nonce- ' + err.message;
     Lit.Actions.setResponse({ response: errorMessage });
@@ -127,9 +115,6 @@
       return;
     }
   }
-
-  console.log('tx');
-  console.log(tx);
 
   try {
     const signedTx = await wallet.signTransaction(tx);

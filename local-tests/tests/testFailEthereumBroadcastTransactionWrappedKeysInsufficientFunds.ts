@@ -17,7 +17,6 @@ import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
  */
 export const testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds =
   async (devEnv: TinnyEnvironment) => {
-    // TODO!: Send funds to the PKP funds
     const alice = await devEnv.createRandomPerson();
 
     const pkpSessionSigs = await getPkpSessionSigs(

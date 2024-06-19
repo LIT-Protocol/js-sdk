@@ -1,10 +1,6 @@
 (async () => {
   const LIT_PREFIX = 'lit_';
 
-  // TODO!: Remove ALL the console.log statements
-  console.log('messageToSign');
-  console.log(messageToSign);
-
   let decryptedPrivateKey;
   try {
     decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
@@ -21,9 +17,6 @@
     return;
   }
 
-  console.log('decryptedPrivateKey');
-  console.log(decryptedPrivateKey);
-
   if (!decryptedPrivateKey) {
     // Exit the nodes which don't have the decryptedData
     return;
@@ -36,15 +29,11 @@
 
   try {
     const signature = await wallet.signMessage(messageToSign);
-    console.log('signature');
-    console.log(signature);
 
     const recoveredAddress = ethers.utils.verifyMessage(
       messageToSign,
       signature
     );
-    console.log('recoveredAddress');
-    console.log(recoveredAddress);
 
     if (recoveredAddress !== wallet.address) {
       Lit.Actions.setResponse({
