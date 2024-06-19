@@ -181,8 +181,8 @@ const _signMessageWithEthereumEncryptedKeyLitAction = async () => {
   const LIT_PREFIX = 'lit_';
 
   // TODO!: Remove ALL the console.log statements
-  console.log('unsignedMessage');
-  console.log(unsignedMessage);
+  console.log('messageToSign');
+  console.log(messageToSign);
 
   let decryptedPrivateKey;
   try {
@@ -214,12 +214,12 @@ const _signMessageWithEthereumEncryptedKeyLitAction = async () => {
   const wallet = new ethers.Wallet(privateKey);
 
   try {
-    const signature = await wallet.signMessage(unsignedMessage);
+    const signature = await wallet.signMessage(messageToSign);
     console.log('signature');
     console.log(signature);
 
     const recoveredAddress = ethers.utils.verifyMessage(
-      unsignedMessage,
+      messageToSign,
       signature
     );
     console.log('recoveredAddress');

@@ -102,6 +102,8 @@ import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/testFa
 import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/testFailImportWrappedKeysWithInvalidSessionSig';
 import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFailImportWrappedKeysWithExpiredSessionSig';
 import { testExportWrappedKey } from './tests/testExportWrappedKey';
+import { testSignMessageWithSolanaEncryptedKey } from './tests/testSignMessageWithSolanaEncryptedKey';
+import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTransactionWithSolanaEncryptedKey';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -129,6 +131,8 @@ import { testExportWrappedKey } from './tests/testExportWrappedKey';
     testFailImportWrappedKeysWithInvalidSessionSig,
     testFailImportWrappedKeysWithExpiredSessionSig,
     testExportWrappedKey,
+    testSignMessageWithSolanaEncryptedKey,
+    testSignTransactionWithSolanaEncryptedKey,
   };
 
   const eoaSessionSigsTests = {
