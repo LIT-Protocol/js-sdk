@@ -68,19 +68,17 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
       console.log('❌ THIS IS EXPECTED: ', e);
       console.log(e.message);
 
-      // TODO!: Add appropriate assertions based on the above error message
-      // if (
-      //   e.message.includes(
-      //     'Error executing the Signing Lit Action: Error: When signing transaction- processing response'
-      //   ) &&
-      //   e.message.includes('insufficient FPE funds for gas * price + value')
-      // ) {
-      //   console.log(
-      //     '✅ testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds is expected to have an error'
-      //   );
-      // } else {
-      //   throw e;
-      // }
+      if (
+        e.message.includes(
+          'There was an error getting the signing shares from the nodes'
+        )
+      ) {
+        console.log(
+          '✅ testFailEthereumSignTransactionWrappedKeyInvalidDecryption is expected to have an error'
+        );
+      } else {
+        throw e;
+      }
     }
 
     log('✅ testFailEthereumSignTransactionWrappedKeyInvalidDecryption');

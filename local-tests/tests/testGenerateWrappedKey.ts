@@ -2,7 +2,6 @@ import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { generatePrivateKey } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { ethers } from 'ethers';
 import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
@@ -45,7 +44,7 @@ export const testGenerateWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   console.log(pkpSessionSigsExport);
 
-  // FIX: export broken as we can't decrypt data encrypted inside a Lit Action
+  // FIX: Export broken as we can't decrypt data encrypted inside a Lit Action
   // const decryptedPrivateKey = await exportPrivateKey({
   //   pkpSessionSigs: pkpSessionSigsExport,
   //   litNodeClient: devEnv.litNodeClient,

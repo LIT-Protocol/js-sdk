@@ -8,7 +8,7 @@ import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
+import { NETWORK_SOLANA } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -59,7 +59,7 @@ export const testSignMessageWithSolanaEncryptedKey = async (
 
   const signature = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_EVM,
+    network: NETWORK_SOLANA,
     messageToSign,
     litNodeClient: devEnv.litNodeClient,
   });
