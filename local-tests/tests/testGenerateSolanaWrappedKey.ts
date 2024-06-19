@@ -1,16 +1,23 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { generatePrivateKey } from '@lit-protocol/wrapped-keys';
+import {
+  generatePrivateKey,
+  signMessageWithEncryptedKey,
+} from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
+import { NETWORK_SOLANA } from 'packages/wrapped-keys/src/lib/constants';
+import nacl from 'tweetnacl';
+import bs58 from 'bs58';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testGenerateWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testGenerateWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testGenerateWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testGenerateSolanaWrappedKey
+ * ✅ NETWORK=manzano yarn test:local --filter=testGenerateSolanaWrappedKey
+ * ✅ NETWORK=localchain yarn test:local --filter=testGenerateSolanaWrappedKey
  */
-export const testGenerateWrappedKey = async (devEnv: TinnyEnvironment) => {
+export const testGenerateSolanaWrappedKey = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const pkpSessionSigs = await getPkpSessionSigs(
@@ -24,9 +31,11 @@ export const testGenerateWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
     pkpSessionSigs,
-    network: NETWORK_EVM,
+    network: NETWORK_SOLANA,
     litNodeClient: devEnv.litNodeClient,
   });
+
+  console.log(`generatedPublicKey: ${generatedPublicKey}`);
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
   if (pkpAddress !== alicePkpAddress) {
@@ -35,14 +44,37 @@ export const testGenerateWrappedKey = async (devEnv: TinnyEnvironment) => {
     );
   }
 
-  const pkpSessionSigsExport = await getPkpSessionSigs(
+  const pkpSessionSigsSigning = await getPkpSessionSigs(
     devEnv,
     alice,
     null,
     new Date(Date.now() + 1000 * 60 * 10).toISOString()
   ); // 10 mins expiry
 
-  console.log(pkpSessionSigsExport);
+  console.log(pkpSessionSigsSigning);
+
+  const messageToSign = 'This is a test message';
+
+  const signature = await signMessageWithEncryptedKey({
+    pkpSessionSigs: pkpSessionSigsSigning,
+    network: NETWORK_SOLANA,
+    messageToSign,
+    litNodeClient: devEnv.litNodeClient,
+  });
+
+  console.log('signature');
+  console.log(signature);
+
+  const signatureIsValidForPublicKey = nacl.sign.detached.verify(
+    Buffer.from(messageToSign),
+    bs58.decode(signature),
+    bs58.decode(generatedPublicKey)
+  );
+
+  if (!signatureIsValidForPublicKey)
+    throw new Error(
+      `signature: ${signature} doesn't validate for the Solana public key: ${generatedPublicKey}`
+    );
 
   // FIX: Export broken as we can't decrypt data encrypted inside a Lit Action
   // const decryptedPrivateKey = await exportPrivateKey({
@@ -59,5 +91,5 @@ export const testGenerateWrappedKey = async (devEnv: TinnyEnvironment) => {
   //   );
   // }
 
-  log('✅ testGenerateWrappedKey');
+  log('✅ testGenerateSolanaWrappedKey');
 };

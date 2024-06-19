@@ -18,7 +18,7 @@ const LIT_ACTION_CID_REPOSITORY = Object.freeze({
   signMessageWithEthereumEncryptedKey:
     'QmTMGcyp77NeppGaqF2DmE1F8GXTSxQYzXCrbE7hNudUWx',
   generateEncryptedSolanaPrivateKey:
-    'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd', // TODO!: Create Lit Action and Update
+    'QmdRBXYLYvcNHrChmsZ2jFDY8dA99CcSdqHo3p1ES3UThL',
   generateEncryptedEthereumPrivateKey:
     'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd',
 });

@@ -81,7 +81,7 @@ export const testEthereumBroadcastTransactionWrappedKey = async (
   console.log('signedTx');
   console.log(signedTx);
 
-  // TODO!: Convert hex signedTx to UTF-8 and assert that it contains "Test transaction from Alice to bob"
+  // TODO: Get the raw input from the tx hash, convert it to UTF-8 and assert that it contains "Test transaction from Alice to bob"
   if (!ethers.utils.isHexString(signedTx)) {
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }

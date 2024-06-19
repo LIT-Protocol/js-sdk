@@ -5,6 +5,7 @@ const esbuild = require('esbuild');
     entryPoints: [
       './src/lib/litActions/solana/src/signTransactionWithSolanaEncryptedKey.js',
       './src/lib/litActions/solana/src/signMessageWithSolanaEncryptedKey.js',
+      './src/lib/litActions/solana/src/generateEncryptedSolanaPrivateKey.js',
     ],
     bundle: true,
     minify: true,
