@@ -4,7 +4,6 @@ import {
   SolanaLitTransaction,
   importPrivateKey,
   signTransactionWithEncryptedKey,
-  signTransactionWithSolanaEncryptedKeyLitActionIpfsCid,
 } from '@lit-protocol/wrapped-keys';
 import {
   Connection,
@@ -16,6 +15,7 @@ import {
   clusterApiUrl,
 } from '@solana/web3.js';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { LIT_ACTION_CID_REPOSITORY } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -88,7 +88,7 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    ipfsCid: signTransactionWithSolanaEncryptedKeyLitActionIpfsCid,
+    ipfsCid: LIT_ACTION_CID_REPOSITORY.signTransactionWithSolanaEncryptedKeyLitActionIpfsCid,
     unsignedTransaction,
     broadcast: false,
     litNodeClient: devEnv.litNodeClient,

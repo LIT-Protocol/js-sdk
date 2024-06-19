@@ -3,12 +3,12 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
   signMessageWithEncryptedKey,
-  signMessageWithSolanaEncryptedKeyLitActionIpfsCid,
 } from '@lit-protocol/wrapped-keys';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { LIT_ACTION_CID_REPOSITORY } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -59,7 +59,7 @@ export const testSignMessageWithSolanaEncryptedKey = async (
 
   const signature = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    ipfsCid: signMessageWithSolanaEncryptedKeyLitActionIpfsCid,
+    ipfsCid: LIT_ACTION_CID_REPOSITORY.signMessageWithSolanaEncryptedKeyLitActionIpfsCid,
     messageToSign,
     litNodeClient: devEnv.litNodeClient,
   });
