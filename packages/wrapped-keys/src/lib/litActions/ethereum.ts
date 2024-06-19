@@ -135,8 +135,8 @@ const LIT_PREFIX = 'lit_';
 
 (async () => {
     // TODO!: Remove ALL the console.log statements
-    console.log('unsignedMessage');
-    console.log(unsignedMessage);
+    console.log('messageToSign');
+    console.log(messageToSign);
 
     const decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
         accessControlConditions,
@@ -157,11 +157,11 @@ const LIT_PREFIX = 'lit_';
     const wallet = new ethers.Wallet(privateKey);
 
     try {
-        const signature = await wallet.signMessage(unsignedMessage);
+        const signature = await wallet.signMessage(messageToSign);
         console.log('signature');
         console.log(signature);
 
-        const recoveredAddress = ethers.utils.verifyMessage(unsignedMessage, signature);
+        const recoveredAddress = ethers.utils.verifyMessage(messageToSign, signature);
         console.log('recoveredAddress');
         console.log(recoveredAddress);
 

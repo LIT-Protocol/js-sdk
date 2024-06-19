@@ -41,7 +41,7 @@ export interface SignMessageWithEncryptedKeyParams {
   pkpSessionSigs: SessionSigsMap;
   litActionCode?: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
   ipfsCid?: string;
-  unsignedMessage: string | Uint8Array;
+  messageToSign: string | Uint8Array;
   litNodeClient: ILitNodeClient;
 }
 

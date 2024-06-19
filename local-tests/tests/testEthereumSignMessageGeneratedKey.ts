@@ -56,7 +56,7 @@ export const testEthereumSignMessageGeneratedKey = async (
   const signature = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
     litActionCode: signMessageWithEthereumEncryptedKeyLitAction,
-    unsignedMessage: unsignedStringMessage,
+    messageToSign: unsignedStringMessage,
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -74,7 +74,7 @@ export const testEthereumSignMessageGeneratedKey = async (
   const signatureBinary = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
     litActionCode: signMessageWithEthereumEncryptedKeyLitAction,
-    unsignedMessage: unsignedBinaryMessage,
+    messageToSign: unsignedBinaryMessage,
     litNodeClient: devEnv.litNodeClient,
   });
 
