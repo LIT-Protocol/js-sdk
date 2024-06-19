@@ -59,10 +59,17 @@ export class PKPSuiWallet extends PKPBase implements Signer {
     const digest = blake2b(data, { dkLen: 32 });
     const msgHash = sha256(digest);
     const signature = await this.runSign(msgHash);
-    const numToNByteStr = (num: bigint): string =>
+    const numToNByteStr = (num: number | bigint): string =>
       bytesToHex(numberToBytesBE(num, secp256k1.CURVE.nByteLength));
 
-    const compactHex = numToNByteStr(signature.r) + numToNByteStr(signature.s);
+    // TODO response from PKPBase.runSign has this values defined as strings
+    const compactHex =
+      (typeof signature.r === 'string'
+        ? signature.r
+        : numToNByteStr(signature.r)) +
+      (typeof signature.s === 'string'
+        ? signature.s
+        : numToNByteStr(signature.s));
     const compactRawBytes = hexToBytes(compactHex);
 
     const result = toSerializedSignature({
