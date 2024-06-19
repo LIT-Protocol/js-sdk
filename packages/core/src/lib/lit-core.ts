@@ -135,7 +135,7 @@ export class LitCore {
     lastUpdateTime: null,
   };
   private _blockHashUrl =
-    'http://block-indexer.litgateway.com/get_most_recent_valid_block';
+    'https://block-indexer.litgateway.com/get_most_recent_valid_block';
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
@@ -433,10 +433,6 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   getLatestBlockhash = async (): Promise<string> => {
-    console.log(
-      'querying latest blockhash curent value is ',
-      this.latestBlockhash
-    );
     await this._syncBlockhash();
     console.log(
       `querying latest blockhash current value is `,
