@@ -13,7 +13,6 @@ import {
   ImportPrivateKeyResponse,
   StoreToDatabaseParams,
 } from './interfaces';
-// import { log } from 'console';
 
 export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   const keys = Object.keys(pkpSessionSigs);

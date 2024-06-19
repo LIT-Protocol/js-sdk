@@ -4,9 +4,9 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
   signMessageWithEncryptedKey,
-  signMessageWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -56,7 +56,7 @@ export const testEthereumSignMessageWrappedKey = async (
 
   const signature = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signMessageWithEthereumEncryptedKeyLitAction,
+    network: NETWORK_EVM,
     messageToSign: unsignedStringMessage,
     litNodeClient: devEnv.litNodeClient,
   });
@@ -74,7 +74,7 @@ export const testEthereumSignMessageWrappedKey = async (
 
   const signatureBinary = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signMessageWithEthereumEncryptedKeyLitAction,
+    network: NETWORK_EVM,
     messageToSign: unsignedBinaryMessage,
     litNodeClient: devEnv.litNodeClient,
   });

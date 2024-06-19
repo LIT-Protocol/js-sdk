@@ -1,7 +1,9 @@
 import {
   CHAIN_ETHEREUM,
   ENCRYPTED_PRIVATE_KEY_ENDPOINT,
+  LIT_ACTION_CID_REPOSITORY,
   LIT_PREFIX,
+  NETWORK_SOLANA,
 } from './constants';
 import { decryptToString, encryptString } from '@lit-protocol/encryption';
 import { logError } from '@lit-protocol/misc';
@@ -26,7 +28,7 @@ import {
 
 export async function generatePrivateKey({
   pkpSessionSigs,
-  litActionCode,
+  network,
   litNodeClient,
 }: GeneratePrivateKeyParams): Promise<GeneratePrivateKeyResponse> {
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
@@ -37,11 +39,16 @@ export async function generatePrivateKey({
     JSON.stringify(allowPkpAddressToDecrypt)
   );
 
+  const ipfsId =
+    network === NETWORK_SOLANA
+      ? LIT_ACTION_CID_REPOSITORY.generateEncryptedSolanaPrivateKey
+      : LIT_ACTION_CID_REPOSITORY.generateEncryptedEthereumPrivateKey;
+
   let ciphertext, dataToEncryptHash, publicKey;
   try {
     const result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
-      code: litActionCode,
+      ipfsId,
       jsParams: {
         pkpAddress,
         accessControlConditions: allowPkpAddressToDecrypt,
@@ -154,29 +161,24 @@ export async function exportPrivateKey({
 
 export async function signTransactionWithEncryptedKey<T = LitTransaction>({
   pkpSessionSigs,
-  litActionCode,
-  ipfsCid,
+  network,
   unsignedTransaction,
   broadcast,
   litNodeClient,
 }: SignTransactionWithEncryptedKeyParams<T>): Promise<string> {
-  if (!ipfsCid && !litActionCode) {
-    throw new Error('Need to provide either ipfsCid or litActionCode');
-  }
-
-  if (ipfsCid && litActionCode) {
-    throw new Error("Can't provide both ipfsCid and litActionCode");
-  }
-
   const { pkpAddress, ciphertext, dataToEncryptHash } =
     await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
+
+  const ipfsId =
+    network === NETWORK_SOLANA
+      ? LIT_ACTION_CID_REPOSITORY.signTransactionWithSolanaEncryptedKey
+      : LIT_ACTION_CID_REPOSITORY.signTransactionWithEthereumEncryptedKey;
 
   let result;
   try {
     result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
-      code: litActionCode ?? undefined,
-      ipfsId: ipfsCid ?? undefined,
+      ipfsId,
       jsParams: {
         pkpAddress,
         ciphertext,
@@ -197,28 +199,23 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
 
 export async function signMessageWithEncryptedKey({
   pkpSessionSigs,
-  litActionCode,
-  ipfsCid,
+  network,
   messageToSign,
   litNodeClient,
 }: SignMessageWithEncryptedKeyParams): Promise<string> {
-  if (!ipfsCid && !litActionCode) {
-    throw new Error('Need to provide either ipfsCid or litActionCode');
-  }
-
-  if (ipfsCid && litActionCode) {
-    throw new Error("Can't provide both ipfsCid and litActionCode");
-  }
-
   const { pkpAddress, ciphertext, dataToEncryptHash } =
     await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
+
+  const ipfsId =
+    network === NETWORK_SOLANA
+      ? LIT_ACTION_CID_REPOSITORY.signMessageWithSolanaEncryptedKey
+      : LIT_ACTION_CID_REPOSITORY.signMessageWithEthereumEncryptedKey;
 
   let result;
   try {
     result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
-      code: litActionCode ?? undefined,
-      ipfsId: ipfsCid ?? undefined,
+      ipfsId,
       jsParams: {
         pkpAddress,
         ciphertext,

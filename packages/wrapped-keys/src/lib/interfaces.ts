@@ -1,4 +1,5 @@
 import { ILitNodeClient, SessionSigsMap } from '@lit-protocol/types';
+import { Network } from './constants';
 
 export interface StoreToDatabaseParams {
   ciphertext: string;
@@ -7,7 +8,7 @@ export interface StoreToDatabaseParams {
 
 export interface GeneratePrivateKeyParams {
   pkpSessionSigs: SessionSigsMap;
-  litActionCode: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
+  network: Network;
   litNodeClient: ILitNodeClient;
 }
 
@@ -39,16 +40,14 @@ export interface ExportPrivateKeyResponse {
 
 export interface SignMessageWithEncryptedKeyParams {
   pkpSessionSigs: SessionSigsMap;
-  litActionCode?: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
-  ipfsCid?: string;
+  network: Network;
   messageToSign: string | Uint8Array;
   litNodeClient: ILitNodeClient;
 }
 
 export interface SignTransactionWithEncryptedKeyParams<T> {
   pkpSessionSigs: SessionSigsMap;
-  litActionCode?: string; // TODO!: Update to use ipfsCid only when the Lit Actions are published
-  ipfsCid?: string;
+  network: Network;
   unsignedTransaction: T;
   broadcast: boolean;
   litNodeClient: ILitNodeClient;

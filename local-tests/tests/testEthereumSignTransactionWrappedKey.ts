@@ -5,9 +5,9 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
   EthereumLitTransaction,
-  signTransactionWithEthereumEncryptedKeyLitAction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -67,7 +67,7 @@ export const testEthereumSignTransactionWrappedKey = async (
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
+    network: NETWORK_EVM,
     unsignedTransaction,
     broadcast: false,
     litNodeClient: devEnv.litNodeClient,

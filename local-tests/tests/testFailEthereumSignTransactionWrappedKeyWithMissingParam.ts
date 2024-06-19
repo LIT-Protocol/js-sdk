@@ -4,10 +4,10 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
-  signTransactionWithEthereumEncryptedKeyLitAction,
   SolanaLitTransaction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -55,15 +55,14 @@ export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
 
   // Using SolanaLitTransaction to mimic a missing field (chainId) param as Typescript will complain about missing chainId
   const unsignedTransaction: SolanaLitTransaction = {
-    toAddress: alice.wallet.address,
-    value: '0.0001', // in ethers (Lit tokens)
     chain: 'chronicleTestnet',
+    serializedTransaction: 'random-value',
   };
 
   try {
     const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
-      litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
+      network: NETWORK_EVM,
       unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,

@@ -1,14 +1,14 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  EthereumLitTransaction,
-  signTransactionWithEthereumEncryptedKeyLitAction,
-} from '@lit-protocol/wrapped-keys';
+import { EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { getPkpAccessControlCondition } from 'packages/wrapped-keys/src/lib/utils';
 import { encryptString } from '@lit-protocol/encryption';
-import { LIT_PREFIX } from 'packages/wrapped-keys/src/lib/constants';
+import {
+  LIT_ACTION_CID_REPOSITORY,
+  LIT_PREFIX,
+} from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -55,7 +55,8 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
     try {
       const _res = await devEnv.litNodeClient.executeJs({
         sessionSigs: pkpSessionSigsSigning,
-        code: signTransactionWithEthereumEncryptedKeyLitAction,
+        ipfsId:
+          LIT_ACTION_CID_REPOSITORY.signTransactionWithEthereumEncryptedKey,
         jsParams: {
           ciphertext,
           dataToEncryptHash,

@@ -4,16 +4,16 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
   importPrivateKey,
   EthereumLitTransaction,
-  signTransactionWithEthereumEncryptedKeyLitAction,
   signTransactionWithEncryptedKey,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
- * ❌ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams Fails with Error: Error: There should be exactly 1 element in the capabilities array but there are: 2
- * ❌ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams Fails with Error: Error: There should be exactly 1 element in the capabilities array but there are: 2
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
  */
 export const testEthereumBroadcastWrappedKeyWithFetchGasParams = async (
   devEnv: TinnyEnvironment
@@ -70,7 +70,7 @@ export const testEthereumBroadcastWrappedKeyWithFetchGasParams = async (
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    litActionCode: signTransactionWithEthereumEncryptedKeyLitAction,
+    network: NETWORK_EVM,
     unsignedTransaction,
     broadcast: true,
     litNodeClient: devEnv.litNodeClient,

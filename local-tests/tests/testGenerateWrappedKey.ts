@@ -1,12 +1,9 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  exportPrivateKey,
-  generatePrivateKey,
-  generatePrivateKeyLitAction,
-} from '@lit-protocol/wrapped-keys';
+import { generatePrivateKey } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { ethers } from 'ethers';
+import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 
 /**
  * Test Commands:
@@ -28,7 +25,7 @@ export const testGenerateWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
     pkpSessionSigs,
-    litActionCode: generatePrivateKeyLitAction,
+    network: NETWORK_EVM,
     litNodeClient: devEnv.litNodeClient,
   });
 
