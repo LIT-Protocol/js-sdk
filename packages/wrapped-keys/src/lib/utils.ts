@@ -35,25 +35,27 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   );
 
   const capabilities = sessionSignedMessage.capabilities;
-  if (capabilities.length !== 1) {
+  if (capabilities.length > 3) {
     throw new Error(
-      `There should be exactly 1 element in the capabilities array but there are: ${capabilities.length}`
+      `At max 3 elements can be in the capabilities array but there are: ${capabilities.length}`
     );
   }
 
-  const delegationAuthSig: AuthSig = JSON.parse(
-    JSON.stringify(capabilities[0])
-  ); // Had to stringify as it was throwing SyntaxError: "[object Object]" is not valid JSON
+  for (const innerAuthSig of capabilities) {
+    const delegationAuthSig: AuthSig = JSON.parse(JSON.stringify(innerAuthSig)); // Had to stringify as it was throwing SyntaxError: "[object Object]" is not valid JSON
 
-  if (delegationAuthSig.algo !== 'LIT_BLS') {
-    throw new Error('SessionSig is not from a PKP');
+    if (delegationAuthSig.algo !== 'LIT_BLS') {
+      continue;
+    }
+
+    const pkpAddress = delegationAuthSig.address;
+
+    log(`pkpAddress to permit decryption: ${pkpAddress}`);
+
+    return pkpAddress;
   }
 
-  const pkpAddress = delegationAuthSig.address;
-
-  log(`pkpAddress to permit decryption: ${pkpAddress}`);
-
-  return pkpAddress;
+  throw new Error('SessionSig is not from a PKP');
 }
 
 export function getPkpAccessControlCondition(
