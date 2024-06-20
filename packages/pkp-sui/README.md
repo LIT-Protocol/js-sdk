@@ -1,6 +1,6 @@
 # pkp-sui
 
-The `PKPSuiWallet` class is a specialized wallet for the SUI blockchain using signing scheme based on ECDSA Secp256k1. It's modified version of `SignerWithProvider` class from the `@mysten/sui.js` library. This class extends the 'PKPBase' class and implements the 'Signer' interface. Unlike `RawSigner` from the `@mysten/sui.js`, `PKPSuiWallet` does not store private keys. Despite these differences, it retains all functionality.
+The `PKPSuiWallet` class is a specialized wallet for the SUI blockchain using signing scheme based on ECDSA Secp256k1. It's modified version of `SignerWithProvider` class from the `@mysten/sui.js` library. This class wraps the 'PKPBase' class and implements the 'Signer' interface. Unlike `RawSigner` from the `@mysten/sui.js`, `PKPSuiWallet` does not store private keys. Despite these differences, it retains all functionality.
 
 Note: Since LitAction uses WebAssembly, additional settings are required to use it in Chrome extension.
 
