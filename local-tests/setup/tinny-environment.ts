@@ -13,6 +13,8 @@ import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 
+import networkContext from './networkContext.datilDev.json';
+
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 
@@ -196,7 +198,8 @@ export class TinnyEnvironment {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const networkContext = this._testnet.ContractContext;
+      // const networkContext = this._testnet.ContractContext;
+      // const networkContext = import('./networks/localchain.json');
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
         rpcUrl: this.processEnvs.LIT_RPC_URL,
@@ -317,10 +320,10 @@ export class TinnyEnvironment {
       return;
     }
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      this._testnet = await this._shivaClient.startTestnetManager();
-      // wait for the testnet to be active before we start the tests.
-      await this._testnet.pollTestnetForActive();
-      await this._testnet.getTestnetConfig();
+      // this._testnet = await this._shivaClient.startTestnetManager();
+      // // wait for the testnet to be active before we start the tests.
+      // await this._testnet.pollTestnetForActive();
+      // await this._testnet.getTestnetConfig();
     }
 
     await this.setupLitNodeClient();
@@ -380,7 +383,7 @@ export class TinnyEnvironment {
      * ====================================
      */
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const networkContext = this._testnet.ContractContext;
+      // const networkContext = this._testnet.ContractContext;
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
