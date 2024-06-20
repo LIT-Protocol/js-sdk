@@ -1,15 +1,18 @@
 'use client';
 
 import { ProviderType } from '@lit-protocol/constants';
+import { Long, PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+import { PKPSuiWallet } from '@lit-protocol/pkp-sui';
 import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { GoogleProvider, LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { AuthCallbackParams } from '@lit-protocol/types';
+import { JsonRpcProvider, testnetConnection } from '@mysten/sui.js';
 import { ethers } from 'ethers';
 import { useState } from 'react';
 
-import { LitLogo } from '@/components/LitLogo'
+import { LitLogo } from '@/components/LitLogo';
 
 export default function Home() {
   const [status, setStatus] = useState('');
@@ -24,7 +27,7 @@ export default function Home() {
       const litNodeClient = new LitNodeClient({
         litNetwork: 'cayenne',
         debug: true,
-      })
+      });
 
       await litNodeClient.connect();
 
@@ -40,7 +43,9 @@ export default function Home() {
       setStatus('Creating an auth provider...');
 
       // -- 3. Create an auth provider
-      const authProvider = litAuthClient.initProvider<GoogleProvider>(ProviderType.Google);
+      const authProvider = litAuthClient.initProvider<GoogleProvider>(
+        ProviderType.Google
+      );
 
       setStatus('Checking if user is already signed in...');
       // -- 4. Check if user is already signed in
@@ -106,13 +111,15 @@ export default function Home() {
           chain: 'ethereum',
           resourceAbilityRequests,
           authNeededCallback,
-        }
-      })
+        },
+      });
       setResponse(`sessionSigs: ${JSON.stringify(sessionSigs)}`);
 
       setStatus('Using pkpSign with the session sigs...');
       // -- 7. Try to use pkpSign with the session sigs
-      const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
+      const TO_SIGN = ethers.utils.arrayify(
+        ethers.utils.keccak256([1, 2, 3, 4, 5])
+      );
 
       const pkpSignRes = await litNodeClient?.pkpSign({
         toSign: TO_SIGN,
@@ -121,9 +128,10 @@ export default function Home() {
       });
       setResponse(`pkpSignRes: ${JSON.stringify(pkpSignRes)}`);
 
-      setStatus('Creating a PKPEthersWallet instance...');
-      // -- 8. Create a PKPEthersWallet instance
-      const pkpWallet = new PKPEthersWallet({
+      // -- 8. Create PKPWallet instances
+      setStatus('Creating a PKP*Wallet instances...');
+      // -- 8.1 Create a PKPEthersWallet instance
+      const pkpEthersWallet = new PKPEthersWallet({
         authContext: {
           client: litNodeClient,
           getSessionSigsProps: {
@@ -136,13 +144,68 @@ export default function Home() {
         pkpPubKey: pkp.publicKey,
         litNodeClient,
       });
-      await pkpWallet.init();
 
-      setStatus('Using the PKPEthersWallet instance to sign a message...');
-      // -- 9. Use the PKPEthersWallet instance to sign a message
-      const signature = await pkpWallet.signMessage(TO_SIGN);
+      // -- 8.2 Create a PKPCosmosWallet instance
+      const pkpCosmosWallet = new PKPCosmosWallet({
+        addressPrefix: 'cosmos',
+        authContext: {
+          client: litNodeClient,
+          getSessionSigsProps: {
+            chain: 'cosmos',
+            expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
+            resourceAbilityRequests,
+            authNeededCallback,
+          },
+        },
+        pkpPubKey: pkp.publicKey,
+        litNodeClient,
+      });
+      const pkpSuiWallet = new PKPSuiWallet(
+        {
+          authContext: {
+            client: litNodeClient,
+            getSessionSigsProps: {
+              chain: 'sui',
+              expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
+              resourceAbilityRequests,
+              authNeededCallback,
+            },
+          },
+          pkpPubKey: pkp.publicKey,
+          litNodeClient,
+        },
+        new JsonRpcProvider(testnetConnection)
+      );
 
-      setResponse(`signature: ${JSON.stringify(signature)}`);
+      await Promise.all([
+        pkpEthersWallet.init(),
+        pkpCosmosWallet.init(),
+        pkpSuiWallet.init(),
+      ]);
+
+      setStatus(
+        'Using those PKP*Wallet instances to sign a message...'
+      );
+      // -- 9.1 Use the PKPEthersWallet instance to sign a message
+      const signature = await pkpEthersWallet.signMessage(TO_SIGN);
+
+      // -- 9.2 Use the PKPCosmosWallet instance to sign a message
+      const cosmosAddress = await pkpCosmosWallet.getAddress();
+      const cosmosSignature = await pkpCosmosWallet.signDirect(cosmosAddress, {
+        chainId: 'cosmos',
+        accountNumber: new Long(1),
+        authInfoBytes: TO_SIGN, // We just want the PKP to sign the msg, we are not sending a tx. This is not important then
+        bodyBytes: TO_SIGN,
+      });
+      const suiSignature = await pkpSuiWallet.signData(TO_SIGN);
+      setResponse(`
+      Eth signature: ${JSON.stringify(signature)}
+      ------------------------------------------------------
+      Cosmos signature: ${JSON.stringify(cosmosSignature)}
+      ------------------------------------------------------
+      Sui signature: ${JSON.stringify(suiSignature)}
+      `);
+
       setStatus('Signed message:');
     } catch (error) {
       console.error(error);
@@ -164,7 +227,9 @@ export default function Home() {
       </div>
 
       <div className="flex justify-center mt-10">
-        <button onClick={go} className="lit-button">Go</button>
+        <button onClick={go} className="lit-button">
+          Go
+        </button>
       </div>
 
       <div className="flex justify-center mt-10 text-white w-full px-4">
@@ -175,5 +240,5 @@ export default function Home() {
         <p className="break-all">{response}</p>
       </div>
     </main>
-  )
+  );
 }
