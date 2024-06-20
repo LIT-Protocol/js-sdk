@@ -1,1 +1,1 @@
-export const version = '6.0.3-wrapped-keys.beta.1';
+export const version = '6.0.3-wrapped-keys.beta.2';
