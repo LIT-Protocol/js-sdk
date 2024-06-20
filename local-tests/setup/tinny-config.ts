@@ -5,6 +5,7 @@ export enum LIT_TESTNET {
   LOCALCHAIN = 'localchain',
   MANZANO = 'manzano',
   CAYENNE = 'cayenne',
+  DATIL_DEV = 'datil-dev',
 }
 
 export interface ProcessEnvs {
@@ -18,6 +19,7 @@ export interface ProcessEnvs {
    * - `LIT_TESTNET.LOCALCHAIN`
    * - `LIT_TESTNET.MANZANO`
    * - `LIT_TESTNET.CAYENNE`
+   * - `LIT_TESTNET.DATIL_DEV`
    */
   NETWORK: LIT_TESTNET;
 

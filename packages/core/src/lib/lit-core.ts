@@ -150,6 +150,7 @@ export class LitCore {
 
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
+      case LitNetwork.DatilDev:
       case LitNetwork.Cayenne:
         this.config = {
           ...this.config,

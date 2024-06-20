@@ -11,6 +11,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
  * ❌ NOT AVAILABLE IN HABANERO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: TinnyEnvironment) => {

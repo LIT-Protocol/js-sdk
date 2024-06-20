@@ -114,7 +114,13 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost';
+  network:
+    | 'cayenne'
+    | 'manzano'
+    | 'habanero'
+    | 'custom'
+    | 'localhost'
+    | 'datil-dev';
   customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -190,7 +196,13 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero';
+    network?:
+      | 'cayenne'
+      | 'custom'
+      | 'localhost'
+      | 'manzano'
+      | 'habanero'
+      | 'datil-dev';
   }) {
     // this.provider = args?.provider;
     this.customContext = args?.customContext;
@@ -572,7 +584,13 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'datil-dev',
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
@@ -757,7 +775,13 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero',
+    network:
+      | 'cayenne'
+      | 'custom'
+      | 'localhost'
+      | 'manzano'
+      | 'habanero'
+      | 'datil-dev',
     provider: ethers.providers.JsonRpcProvider,
     context?: LitContractContext | LitContractResolverContext
   ) {
@@ -855,7 +879,13 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'datil-dev',
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) => {
@@ -874,7 +904,13 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'datil-dev',
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ): Promise<string[]> => {
@@ -934,7 +970,13 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'datil-dev',
     context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
