@@ -147,6 +147,9 @@ export class PKPEthersWallet
     return Promise.resolve(addr);
   }
 
+  /**
+   * Initializes the PKPEthersWallet instance and its dependencies
+   */
   async init(): Promise<void> {
     await this.pkpBase.init();
   }
@@ -158,9 +161,8 @@ export class PKPEthersWallet
   async signTransaction(transaction: TransactionRequest): Promise<string> {
     this.pkpBase.log('signTransaction => transaction:', transaction);
 
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    // Check if the LIT node client is connected, and connect if it's not.
+    await this.pkpBase.ensureLitNodeClientReady();
 
     const addr = await this.getAddress();
     this.pkpBase.log('signTransaction => addr:', addr);
@@ -248,9 +250,9 @@ export class PKPEthersWallet
   }
 
   async signMessage(message: Bytes | string): Promise<string> {
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    // Check if the LIT node client is connected, and connect if it's not.
+    await this.pkpBase.ensureLitNodeClientReady();
+
     const toSign = arrayify(hashMessage(message));
     let signature;
     if (this.pkpBase.useAction) {
@@ -273,9 +275,8 @@ export class PKPEthersWallet
     types: Record<string, TypedDataField[]>,
     value: Record<string, any>
   ): Promise<string> {
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    // Check if the LIT node client is connected, and connect if it's not.
+    await this.pkpBase.ensureLitNodeClientReady();
 
     // Populate any ENS names
     const populated = await _TypedDataEncoder.resolveNames(
