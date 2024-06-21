@@ -52,18 +52,15 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | `USE_SHIVA`              | A flag to determine if `Shiva` should be used for the `localchain` network.                                                                                              |
 | `PRIVATE_KEYS`           | A set of private keys to use which will be used to perform chain operations.                                                                                             |
 
-
 Below is te API Documentation forthe `ProccessEnvs` interface for the `shiva-client` detailing the configurable enviorment variables and their purposes:
 
-| Variable                 | Description                                                                                                                                                              |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `TESTNET_MAANGER_URL`    | URl to connect to Shiva (our testing tool for network management).                                                                                                       |
-| `LIT_NODE_BINARY_PATH`   | Binary path for the lit node version you wish to run.                                                                                                                    |
-| `LIT_Action_BINARY_PATH` | Binary path for the lit node version you wish to run.                                                                                                                    |
-| `USE_LIT_BINARIES`       | Flag to indicate if a binary path should be used for testnet spawning or if it should be built from source.                                                              |
-| `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                                                                                      |
-
-
+| Variable                 | Description                                                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `TESTNET_MAANGER_URL`    | URl to connect to Shiva (our testing tool for network management).                                          |
+| `LIT_NODE_BINARY_PATH`   | Binary path for the lit node version you wish to run.                                                       |
+| `LIT_Action_BINARY_PATH` | Binary path for the lit node version you wish to run.                                                       |
+| `USE_LIT_BINARIES`       | Flag to indicate if a binary path should be used for testnet spawning or if it should be built from source. |
+| `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                         |
 
 # Writing a test
 
