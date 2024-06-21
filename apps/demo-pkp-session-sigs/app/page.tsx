@@ -64,7 +64,7 @@ export default function Home() {
       const authMethod = await authProvider.authenticate();
       setResponse(`authMethod: ${JSON.stringify(authMethod)}`);
 
-      setStatus('Fetching user pkps...');
+      setStatus('Fetching user PKPs...');
       // -- 5. fetch user pkps, if none, create one, and use it
       let pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
 
@@ -76,7 +76,7 @@ export default function Home() {
           setStatus('Failed to mint PKP');
           return;
         }
-        setStatus('Fetching user pkps...');
+        setStatus('Fetching user PKPs...');
         pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
       }
 
@@ -129,7 +129,7 @@ export default function Home() {
       setResponse(`pkpSignRes: ${JSON.stringify(pkpSignRes)}`);
 
       // -- 8. Create PKPWallet instances
-      setStatus('Creating a PKP*Wallet instances...');
+      setStatus('Creating PKP*Wallet instances...');
       // -- 8.1 Create a PKPEthersWallet instance
       const pkpEthersWallet = new PKPEthersWallet({
         authContext: {
@@ -160,6 +160,7 @@ export default function Home() {
         pkpPubKey: pkp.publicKey,
         litNodeClient,
       });
+      // -- 8.3 Create a PKPSuiWallet instance
       const pkpSuiWallet = new PKPSuiWallet(
         {
           authContext: {
@@ -197,6 +198,7 @@ export default function Home() {
         authInfoBytes: TO_SIGN, // We just want the PKP to sign the msg, we are not sending a tx. This is not important then
         bodyBytes: TO_SIGN,
       });
+      // -- 9.2 Use the PKPSuiWallet instance to sign a message
       const suiSignature = await pkpSuiWallet.signData(TO_SIGN);
       setResponse(`
       Eth signature: ${JSON.stringify(signature)}
@@ -206,7 +208,7 @@ export default function Home() {
       Sui signature: ${JSON.stringify(suiSignature)}
       `);
 
-      setStatus('Signed message:');
+      setStatus('Signed messages:');
     } catch (error) {
       console.error(error);
       setStatus('Error');
