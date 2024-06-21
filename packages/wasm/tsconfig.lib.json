@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "allowJs": true,
+    "declaration": true,
+    "types": []
+  },
+  "include": ["**/*"],
+  "exclude": [
+    "./jest.config.ts",
+    "./src/**/*.spec.ts",
+    "./src/**/*.test.ts",
+    "./rust/**/*"
+  ]
+}
