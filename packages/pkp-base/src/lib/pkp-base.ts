@@ -53,7 +53,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   controllerAuthSig?: AuthSig;
   controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigsMap;
-  sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
 
   uncompressedPubKey!: string;
@@ -62,7 +61,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   compressedPubKeyBuffer!: Uint8Array;
 
   litNodeClient!: LitNodeClient;
-  litNodeClientReady: boolean = false;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams!: T;
@@ -75,45 +73,51 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   private reset = '\x1b[0m';
   private red = '\x1b[31m';
 
+  get litNodeClientReady(): boolean {
+    return this.litNodeClient.ready;
+  }
+
   /**
    * Constructor for the PKPBase class.
    * Initializes the instance with the provided properties.
+   * Marked as private to make class final. When creating an instance use PKPBase.createInstance
    *
-   * @param { PKPBaseProp } prop - The properties for the PKPBase instance.
+   * @param { PKPBaseProp } pkpBaseProp - The properties for the PKPBase instance.
    */
-  constructor(prop: PKPBaseProp) {
+  private constructor(pkpBaseProp: PKPBaseProp) {
+    const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
+
+    this.debug = prop.debug || false;
+
     if (prop.pkpPubKey.startsWith('0x')) {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
     }
 
-    this.setUncompressPubKeyAndBuffer(prop);
+    this.setUncompressedPubKeyAndBuffer(prop);
     this.setCompressedPubKeyAndBuffer(prop);
 
     this.rpcs = prop.rpcs;
     this.controllerAuthSig = prop.controllerAuthSig;
     this.controllerAuthMethods = prop.controllerAuthMethods;
     this.controllerSessionSigs = prop.controllerSessionSigs;
-    this.sessionSigsExpiration = prop.sessionSigsExpiration;
     this.authContext = prop.authContext;
 
     this.validateAuthContext();
 
-    this.debug = prop.debug || false;
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
-    this.litNodeClient =
-      (prop.litNodeClient as LitNodeClient) ||
-      new LitNodeClient({
-        litNetwork: prop.litNetwork ?? 'cayenne',
-        ...(prop.minNodeCount && prop.litNetwork == 'custom'
-          ? { minNodeCount: prop.minNodeCount }
-          : {}),
-        debug: this.debug,
-        // minNodeCount:
-        //   prop.bootstrapUrls && prop.litNetwork == 'custom'
-        //     ? prop.minNodeCount
-        //     : defaultLitnodeClientConfig.minNodeCount,
-      });
+    this.litNodeClient = prop.litNodeClient as LitNodeClient;
+  }
+
+  /**
+   * Creates a new instance of the PKPBase class with the provided properties.
+   *
+   * @param { PKPBaseProp } pkpBaseProp - The properties for the PKPBase instance.
+   *
+   * @returns { PKPBase } - A new instance of the PKPBase class.
+   * */
+  static createInstance(pkpBaseProp: PKPBaseProp): PKPBase {
+    return new PKPBase(pkpBaseProp);
   }
 
   /**
@@ -121,7 +125,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @param { PKPBaseProp } prop - The properties for the PKPBase instance.
    */
-  setUncompressPubKeyAndBuffer(prop: PKPBaseProp): void | never {
+  private setUncompressedPubKeyAndBuffer(prop: PKPBaseProp): void | never {
     try {
       this.uncompressedPubKey = prop.pkpPubKey;
       this.uncompressedPubKeyBuffer = Buffer.from(prop.pkpPubKey, 'hex');
@@ -137,7 +141,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @param {PKPBaseProp} prop - The properties for the PKPBase instance.
    */
-  setCompressedPubKeyAndBuffer(prop: PKPBaseProp): void | never {
+  private setCompressedPubKeyAndBuffer(prop: PKPBaseProp): void | never {
     try {
       this.compressedPubKey = compressPubKey(prop.pkpPubKey);
       this.compressedPubKeyBuffer = Buffer.from(this.compressedPubKey, 'hex');
@@ -149,22 +153,22 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   /**
    * Sets the Lit action to be executed by the LitNode client.
    *
-   * @param {PKPBaseProp} prop - An object containing the parameters for the Lit action.
+   * @param {PKPBaseProp} pkpBaseProp - An object containing the parameters for the Lit action.
    *
-   * @returns {never | void} - If both `litActionCode` and `litActionIPFS` are present, throws an Error. Otherwise, does not return a value.
+   * @returns {void} - If both `litActionCode` and `litActionIPFS` are present, throws an Error. Otherwise, does not return a value.
    */
 
-  setLitAction(prop: PKPBaseProp): never | void {
-    this.litActionCode = prop.litActionCode;
-    this.litActionIPFS = prop.litActionIPFS;
+  private setLitAction(pkpBaseProp: PKPBaseProp): void {
+    this.litActionCode = pkpBaseProp.litActionCode;
+    this.litActionIPFS = pkpBaseProp.litActionIPFS;
 
-    if (prop.litActionCode && prop.litActionIPFS) {
+    if (pkpBaseProp.litActionCode && pkpBaseProp.litActionIPFS) {
       return this.throwError(
         'Both litActionCode and litActionIPFS cannot be present at the same time.'
       );
     }
 
-    if (!prop.litActionCode && !prop.litActionIPFS) {
+    if (!pkpBaseProp.litActionCode && !pkpBaseProp.litActionIPFS) {
       this.log(
         'No lit action code or IPFS hash provided. Using default action.'
       );
@@ -180,30 +184,18 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @returns { void }
    */
-  setLitActionJsParams<CustomType extends T = T>(params: CustomType): void {
+  private setLitActionJsParams<CustomType extends T = T>(
+    params: CustomType
+  ): void {
     this.litActionJsParams = params;
-  }
-
-  /**
-   * Base method to be overridden by subclasses.
-   *
-   * @returns {Promise<string>} - Address associated with concrete type of PKPBase
-   */
-  getAddress(): Promise<string> {
-    return Promise.reject(
-      this.throwError(
-        'getAddress not implemented. Please use a subclass of PKPBase.'
-      )
-    );
   }
 
   /**
    * Initializes the PKPBase instance by connecting to the LIT node.
    */
-  async init(): Promise<void | never> {
+  async init(): Promise<void> {
     try {
       await this.litNodeClient.connect();
-      this.litNodeClientReady = true;
       this.log('Connected to Lit Node');
     } catch (e) {
       return this.throwError('Failed to connect to Lit Node');
@@ -231,27 +223,27 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         logError('authContext is provided');
       }
 
-      this.throwError(
-        'Multiple authentications are defined, can only use one at a time'
-      );
+      this.throwError('Must specify one, and only one, authentication method ');
     }
 
-    // Check if authContext is provided
-    if (this.authContext) {
-      // Try to assign litNodeClient to authContext.client if it's not already set and litNodeClient is available
-      if (!this.authContext.client && this.litNodeClient) {
-        this.authContext.client = this.litNodeClient;
-      }
-      // Ensure authContext has a valid client and getSessionSigsProps
-      if (
-        !(this.authContext.client instanceof LitNodeClientNodeJs) ||
-        !this.authContext.getSessionSigsProps
-      ) {
-        this.throwError(
-          'authContext must be an object with a lit client and getSessionSigsProps'
-        );
-      }
+    // Check if authContext is provided correctly
+    if (this.authContext && !this.authContext.getSessionSigsProps) {
+      this.throwError('authContext must be an object with getSessionSigsProps');
     }
+  }
+
+  private async getSessionSigs(): Promise<SessionSigsMap> {
+    const sessionSigs = this.authContext
+      ? await this.litNodeClient.getSessionSigs(
+          this.authContext.getSessionSigsProps
+        )
+      : this.controllerSessionSigs;
+
+    if (!sessionSigs) {
+      this.throwError('Could not get sessionSigs');
+    }
+
+    return sessionSigs!;
   }
 
   /**
@@ -272,21 +264,16 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       );
     }
 
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    await this.ensureLitNodeClientReady();
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
+      this.throwError('pkpPubKey (aka. uncompressesPubKey) is required');
     }
 
     this.validateAuthContext();
 
-    const controllerSessionSigs =
-      (await this.authContext?.client?.getSessionSigs(
-        this.authContext.getSessionSigsProps
-      )) || this.controllerSessionSigs;
+    const controllerSessionSigs = await this.getSessionSigs();
 
     const executeJsArgs: JsonExecutionSdkParams = {
       ...(this.litActionCode && { code: this.litActionCode }),
@@ -337,34 +324,22 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
   async runSign(toSign: Uint8Array): Promise<SigResponse> {
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    await this.ensureLitNodeClientReady();
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
+      this.throwError('pkpPubKey (aka. uncompressedPubKey) is required');
     }
 
     this.validateAuthContext();
 
-    const sessionSigsFromAuthContext =
-      await this.authContext?.client?.getSessionSigs({
-        ...this.authContext.getSessionSigsProps,
-      });
-
-    const controllerSessionSigs =
-      sessionSigsFromAuthContext || this.controllerSessionSigs;
-
-    if (!controllerSessionSigs) {
-      this.throwError('controllerSessionSigs is required');
-    }
+    const controllerSessionSigs = await this.getSessionSigs();
 
     try {
       const sig = await this.litNodeClient.pkpSign({
         toSign,
         pubKey: this.uncompressedPubKey,
-        sessionSigs: controllerSessionSigs as SessionSigsMap,
+        sessionSigs: controllerSessionSigs,
       });
 
       if (!sig) {

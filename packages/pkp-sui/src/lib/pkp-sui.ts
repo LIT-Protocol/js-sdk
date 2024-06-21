@@ -31,11 +31,11 @@ import { blake2b } from '@noble/hashes/blake2b';
 import { sha256 } from '@noble/hashes/sha256';
 
 import { PKPBase } from '@lit-protocol/pkp-base';
-import { PKPBaseProp, SigResponse } from '@lit-protocol/types';
+import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
 
 import { getDigestFromBytes } from './TransactionBlockData';
 
-export class PKPSuiWallet implements Signer {
+export class PKPSuiWallet implements PKPWallet, Signer {
   private readonly pkpBase: PKPBase;
 
   readonly provider: JsonRpcProvider;
@@ -46,7 +46,7 @@ export class PKPSuiWallet implements Signer {
   defaultSigName: string = 'pkp-sui-sign-tx';
 
   constructor(prop: PKPBaseProp, provider: JsonRpcProvider) {
-    this.pkpBase = new PKPBase(prop);
+    this.pkpBase = PKPBase.createInstance(prop);
 
     this.prop = prop;
     this.provider = provider;

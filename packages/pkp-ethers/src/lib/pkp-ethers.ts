@@ -40,6 +40,7 @@ import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
   PKPEthersWalletProp,
+  PKPWallet,
   SigResponse,
 } from '@lit-protocol/types';
 
@@ -54,7 +55,12 @@ import {
 const logger = new Logger(version);
 
 export class PKPEthersWallet
-  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers
+  implements
+    PKPWallet,
+    Signer,
+    ExternallyOwnedAccount,
+    TypedDataSigner,
+    PKPClientHelpers
 {
   private readonly pkpBase: PKPBase;
 
@@ -75,7 +81,7 @@ export class PKPEthersWallet
   }
 
   constructor(prop: PKPEthersWalletProp) {
-    this.pkpBase = new PKPBase(prop);
+    this.pkpBase = PKPBase.createInstance(prop);
 
     this.rpcProvider = new ethers.providers.JsonRpcProvider(
       prop.rpc ?? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]

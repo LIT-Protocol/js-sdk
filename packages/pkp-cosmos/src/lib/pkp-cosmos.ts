@@ -37,6 +37,7 @@ import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
   PKPCosmosWalletProp,
+  PKPWallet,
   SigResponse,
 } from '@lit-protocol/types';
 
@@ -48,7 +49,9 @@ const DEFAULT_COSMOS_RPC_URL =
 /**
  * Similar to "DirectSecp256k1HdWallet", but uses PKP to sign
  */
-export class PKPCosmosWallet implements OfflineDirectSigner, PKPClientHelpers {
+export class PKPCosmosWallet
+  implements PKPWallet, OfflineDirectSigner, PKPClientHelpers
+{
   private readonly pkpBase: PKPBase;
 
   // Address prefix for Bech32 addresses
@@ -65,7 +68,7 @@ export class PKPCosmosWallet implements OfflineDirectSigner, PKPClientHelpers {
   }
 
   constructor(prop: PKPCosmosWalletProp) {
-    this.pkpBase = new PKPBase(prop);
+    this.pkpBase = PKPBase.createInstance(prop);
 
     // Set the address prefix and RPC URL based on the provided properties
     this.addressPrefix = prop.addressPrefix ?? 'cosmos';
