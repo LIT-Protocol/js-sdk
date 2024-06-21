@@ -133,7 +133,6 @@ export default function Home() {
       // -- 8.1 Create a PKPEthersWallet instance
       const pkpEthersWallet = new PKPEthersWallet({
         authContext: {
-          client: litNodeClient,
           getSessionSigsProps: {
             chain: 'ethereum',
             expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
@@ -149,7 +148,6 @@ export default function Home() {
       const pkpCosmosWallet = new PKPCosmosWallet({
         addressPrefix: 'cosmos',
         authContext: {
-          client: litNodeClient,
           getSessionSigsProps: {
             chain: 'cosmos',
             expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
@@ -164,7 +162,6 @@ export default function Home() {
       const pkpSuiWallet = new PKPSuiWallet(
         {
           authContext: {
-            client: litNodeClient,
             getSessionSigsProps: {
               chain: 'sui',
               expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
