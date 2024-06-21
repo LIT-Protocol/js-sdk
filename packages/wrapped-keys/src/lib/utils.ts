@@ -14,6 +14,14 @@ import {
   StoreToDatabaseParams,
 } from './interfaces';
 
+/**
+ *
+ * Extracts the first SessionSig from the SessionSigsMap since we only pass a single SessionSig to the AWS endpoint
+ *
+ * @param pkpSessionSigs - The PKP sessionSigs (map) used to associated the PKP with the generated private key
+ *
+ * @returns { AuthSig } - The first SessionSig from the map
+ */
 export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   const keys = Object.keys(pkpSessionSigs);
   if (keys.length === 0) {
@@ -28,6 +36,14 @@ export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   return firstSessionSig;
 }
 
+/**
+ *
+ * Extracts the wallet address from an individual SessionSig
+ *
+ * @param pkpSessionSig - The first PKP sessionSig from the function getFirstSessionSig
+ *
+ * @returns { string } - The wallet address that signed the capabilites AuthSig (BLS)
+ */
 export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   const sessionSignedMessage: SessionKeySignedMessage = JSON.parse(
     pkpSessionSig.signedMessage
@@ -57,6 +73,14 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   throw new Error('SessionSig is not from a PKP');
 }
 
+/**
+ *
+ * Creates the access control condition used to gate the access for Wrapped Key decryption
+ *
+ * @param pkpAddress - The wallet address of the PKP which can decrypt the encrypted Wrapped Key
+ *
+ * @returns { AccessControlConditions } - The access control condition that only allows the PKP address to decrypt
+ */
 export function getPkpAccessControlCondition(
   pkpAddress: string
 ): AccessControlConditions {
@@ -81,6 +105,14 @@ export function getPkpAccessControlCondition(
   ];
 }
 
+/**
+ *
+ * Extracts the first SessionSig item from the map and uses it to fetch the stored database item
+ *
+ * @param pkpSessionSigs - The PKP which is used to fetch the DynamoDB item
+ *
+ * @returns { ExportPrivateKeyResponse } - The DynamoDB item with all its attributes
+ */
 export async function fetchPrivateKeyMedataFromDatabase(
   pkpSessionSigs: SessionSigsMap
 ): Promise<ExportPrivateKeyResponse> {
@@ -113,6 +145,15 @@ export async function fetchPrivateKeyMedataFromDatabase(
   }
 }
 
+/**
+ *
+ * Store the encrypted private key into the database
+ *
+ * @param data - The encrypted data to be stored in the database (ciphertext, dataToEncryptHash)
+ * @param pkpSessionSigs - The PKP which is used to fetch the DynamoDB item
+ *
+ * @returns { ImportPrivateKeyResponse } - The PKP EthAddress of the associated PKP
+ */
 export async function storePrivateKeyMetadataToDatabase(
   data: StoreToDatabaseParams,
   firstSessionSig: AuthSig
@@ -145,6 +186,14 @@ export async function storePrivateKeyMetadataToDatabase(
   }
 }
 
+/**
+ *
+ * Post processes the Lit Action result to ensure that the result is non-empty and a valid string
+ *
+ * @param result - The Lit Action result to be processes
+ *
+ * @returns { string } - The response field in the Lit Action result object
+ */
 export function postLitActionValidation(
   result: ExecuteJsResponse | undefined
 ): string {
