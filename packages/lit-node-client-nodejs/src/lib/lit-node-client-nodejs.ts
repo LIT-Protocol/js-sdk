@@ -518,7 +518,7 @@ export class LitNodeClientNodeJs
     // it will fail. If the  algo is not defined we can assume that it was an EOA wallet signing the message so we can use SIWE.
     if (authSig.algo === `ed25519` || authSig.algo === undefined) {
       try {
-        await authSigSiweMessage.validate(authSig.sig);
+        await authSigSiweMessage.verify(authSig.sig);
       } catch (e) {
         log(`Error while verifying ECDSA signature: `, e);
         return true;
@@ -528,7 +528,8 @@ export class LitNodeClientNodeJs
         blsSessionSigVerify(
           blsSdk.verify_signature,
           this.networkPubKey!,
-          authSig
+          authSig,
+          authSigSiweMessage
         );
       } catch (e) {
         log(`Error while verifying bls signature: `, e);
