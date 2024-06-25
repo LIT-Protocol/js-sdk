@@ -85,6 +85,7 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
 
 import { testEthereumSignMessageGeneratedKey } from './tests/testEthereumSignMessageGeneratedKey';
 import { testEthereumBroadcastTransactionGeneratedKey } from './tests/testEthereumBroadcastTransactionGeneratedKey';
+import { testCustomignMessageWrappedKey } from './tests/testCustomSignMessageWrappedKey';
 import { testEthereumSignMessageWrappedKey } from './tests/testEthereumSignMessageWrappedKey';
 import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
 import { testEthereumSignTransactionWrappedKey } from './tests/testEthereumSignTransactionWrappedKey';
@@ -119,6 +120,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTrans
     testEthereumSignMessageGeneratedKey,
     testEthereumBroadcastTransactionGeneratedKey,
     testEthereumSignMessageWrappedKey,
+    testCustomignMessageWrappedKey,
     testEthereumSignTransactionWrappedKey,
     testEthereumBroadcastTransactionWrappedKey,
     testEthereumBroadcastWrappedKeyWithFetchGasParams,

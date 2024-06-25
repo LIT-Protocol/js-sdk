@@ -45,6 +45,14 @@ export interface ExportPrivateKeyResponse {
   dataToEncryptHash: string;
 }
 
+export interface CustomSignMessageWithEncryptedKeyParams {
+  pkpSessionSigs: SessionSigsMap;
+  litActionIpfsCid?: string;
+  litActionCode?: string;
+  messageToSign: string | Uint8Array;
+  litNodeClient: ILitNodeClient;
+}
+
 export interface SignMessageWithEncryptedKeyParams {
   pkpSessionSigs: SessionSigsMap;
   network: Network;

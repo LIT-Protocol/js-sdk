@@ -197,15 +197,15 @@ export async function storePrivateKeyMetadataToDatabase(
 export function postLitActionValidation(
   result: ExecuteJsResponse | undefined
 ): string {
-  console.log(`Lit Action result: ${JSON.stringify(result)}`);
+  // console.log(`Lit Action result: ${JSON.stringify(result)}`);
 
   if (!result) {
     throw new Error('There was some error running the Lit Action');
   }
 
   const response = result.response;
-  console.log('response');
-  console.log(response);
+  // console.log('response');
+  // console.log(response);
 
   if (!response) {
     throw new Error(

@@ -25,6 +25,7 @@ import {
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResponse,
   CustomGeneratePrivateKeyParams,
+  CustomSignMessageWithEncryptedKeyParams,
 } from './interfaces';
 
 /**
@@ -338,6 +339,62 @@ export async function signMessageWithEncryptedKey({
     result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
       ipfsId,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        messageToSign,
+        accessControlConditions: getPkpAccessControlCondition(pkpAddress),
+      },
+    });
+  } catch (err: any) {
+    throw new Error(
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+    );
+  }
+
+  return postLitActionValidation(result);
+}
+
+/**
+ *
+ * Signs a message inside the provided Lit Action. First it fetches the encrypted key from database and then executes a Lit Action that signed the tx
+ * Lit Action should bundle the required wallet packages and decrypt the private key which may be prepended with "lit_".
+ * It should create the corresponding wallet instance with the bundled package and sign the passed message with it.
+ * It should return the signed message.
+ *
+ * @param pkpSessionSigs - The PKP sessionSigs used to associated the PKP with the generated private key
+ * @param litActionIpfsCid - The IPFS CID of the Lit Action to be executed for generating the Wrapped Key. Can't provide this if already provided litActionCode
+ * @param litActionCode - The Lit Action code to be executed for generating the Wrapped Key. Can't provide this if already provided litActionIpfsCid
+ * @param messageToSign - The unsigned message which will be signed inside the Lit Action
+ * @param litNodeClient - The Lit Node Client used for executing the Lit Action
+ *
+ * @returns { Promise<string> } - The signed message by the Wrapped Key
+ */
+export async function customSignMessageWithEncryptedKey({
+  pkpSessionSigs,
+  litActionIpfsCid,
+  litActionCode,
+  messageToSign,
+  litNodeClient,
+}: CustomSignMessageWithEncryptedKeyParams): Promise<string> {
+  if (!litActionIpfsCid && !litActionCode) {
+    throw new Error("Have to provide either the litActionIpfsCid or litActionCode");
+  }
+
+  if (litActionIpfsCid && litActionCode) {
+    throw new Error("Can't provide both the litActionIpfsCid or litActionCode");
+  }
+
+  const { pkpAddress, ciphertext, dataToEncryptHash } =
+    await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
+
+  let result;
+  try {
+    result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      ipfsId: litActionIpfsCid,
+      code: litActionCode,
       jsParams: {
         pkpAddress,
         ciphertext,
