@@ -103,6 +103,7 @@ import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/testFailImpo
 import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/testFailImportWrappedKeysWithMaxExpirySessionSig';
 import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/testFailImportWrappedKeysWithInvalidSessionSig';
 import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFailImportWrappedKeysWithExpiredSessionSig';
+import { testFailCustomGenerateKeyWithBothIpfsAndCode } from './tests/testFailCustomGenerateKeyWithBothIpfsAndCode';
 import { testExportWrappedKey } from './tests/testExportWrappedKey';
 import { testSignMessageWithSolanaEncryptedKey } from './tests/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTransactionWithSolanaEncryptedKey';
@@ -143,6 +144,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTrans
       testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
       testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
       testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds,
+      testFailCustomGenerateKeyWithBothIpfsAndCode,
 
       // -- import wrapped keys
       testFailImportWrappedKeysWithSamePkp,
