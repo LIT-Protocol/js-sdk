@@ -50,6 +50,7 @@ export interface CustomSignMessageWithEncryptedKeyParams {
   litActionIpfsCid?: string;
   litActionCode?: string;
   messageToSign: string | Uint8Array;
+  params?: Record<string, any>;
   litNodeClient: ILitNodeClient;
 }
 
@@ -72,8 +73,9 @@ export interface CustomSignTransactionWithEncryptedKeyParams {
   pkpSessionSigs: SessionSigsMap;
   litActionIpfsCid?: string;
   litActionCode?: string;
-  unsignedTransaction: SolanaLitTransaction;
+  serializedTransaction: string;
   broadcast: boolean;
+  params?: Record<string, any>;
   litNodeClient: ILitNodeClient;
 }
 

@@ -320,8 +320,9 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
  * @param pkpSessionSigs - The PKP sessionSigs used to associated the PKP with the generated private key
  * @param litActionIpfsCid - The IPFS CID of the Lit Action to be executed for generating the Wrapped Key. Can't provide this if already provided litActionCode
  * @param litActionCode - The Lit Action code to be executed for generating the Wrapped Key. Can't provide this if already provided litActionIpfsCid
- * @param unsignedTransaction - The unsigned transaction which will be signed inside the Lit Action. It should be a serialized unsigned transaction
+ * @param serializedTransaction - The unsigned transaction which will be signed inside the Lit Action. It should be a serialized unsigned transaction
  * @param broadcast - Flag used to determine whether the Lit Action should broadcast the signed transaction or only return the signed transaction
+ * @param params - Any other params passes to the Lit Action
  * @param litNodeClient - The Lit Node Client used for executing the Lit Action
  *
  * @returns { Promise<string> } - The signed signed transaction or the transaction hash of the broadcasted transaction by the Wrapped Key
@@ -330,8 +331,9 @@ export async function customSignTransactionWithEncryptedKey({
   pkpSessionSigs,
   litActionIpfsCid,
   litActionCode,
-  unsignedTransaction,
+  serializedTransaction,
   broadcast,
+  params,
   litNodeClient,
 }: CustomSignTransactionWithEncryptedKeyParams): Promise<string> {
   if (!litActionIpfsCid && !litActionCode) {
@@ -355,9 +357,10 @@ export async function customSignTransactionWithEncryptedKey({
         pkpAddress,
         ciphertext,
         dataToEncryptHash,
-        unsignedTransaction,
+        serializedTransaction,
         broadcast,
         accessControlConditions: getPkpAccessControlCondition(pkpAddress),
+        ...params,
       },
     });
   } catch (err: any) {
@@ -427,6 +430,7 @@ export async function signMessageWithEncryptedKey({
  * @param litActionIpfsCid - The IPFS CID of the Lit Action to be executed for generating the Wrapped Key. Can't provide this if already provided litActionCode
  * @param litActionCode - The Lit Action code to be executed for generating the Wrapped Key. Can't provide this if already provided litActionIpfsCid
  * @param messageToSign - The unsigned message which will be signed inside the Lit Action
+ * @param params - Any other params passes to the Lit Action
  * @param litNodeClient - The Lit Node Client used for executing the Lit Action
  *
  * @returns { Promise<string> } - The signed message by the Wrapped Key
@@ -436,6 +440,7 @@ export async function customSignMessageWithEncryptedKey({
   litActionIpfsCid,
   litActionCode,
   messageToSign,
+  params,
   litNodeClient,
 }: CustomSignMessageWithEncryptedKeyParams): Promise<string> {
   if (!litActionIpfsCid && !litActionCode) {
@@ -461,6 +466,7 @@ export async function customSignMessageWithEncryptedKey({
         dataToEncryptHash,
         messageToSign,
         accessControlConditions: getPkpAccessControlCondition(pkpAddress),
+        ...params,
       },
     });
   } catch (err: any) {
