@@ -96,6 +96,7 @@ import { testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds } from
 import { testImportWrappedKey } from './tests/testImportWrappedKey';
 import { testGenerateEthereumWrappedKey } from './tests/testGenerateEthereumWrappedKey';
 import { testGenerateSolanaWrappedKey } from './tests/testGenerateSolanaWrappedKey';
+import { testCustomGenerateWrappedKey } from './tests/testCustomGenerateWrappedKey';
 import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
 import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/testFailImportWrappedKeysWithEoaSessionSig';
@@ -124,6 +125,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTrans
     // -- generate wrapped keys
     testGenerateEthereumWrappedKey,
     testGenerateSolanaWrappedKey,
+    testCustomGenerateWrappedKey,
 
     // -- import wrapped keys
     testImportWrappedKey,
