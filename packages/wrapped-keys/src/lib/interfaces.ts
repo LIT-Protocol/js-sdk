@@ -6,6 +6,13 @@ export interface StoreToDatabaseParams {
   dataToEncryptHash: string;
 }
 
+export interface CustomGeneratePrivateKeyParams {
+  pkpSessionSigs: SessionSigsMap;
+  litActionIpfsCid?: string;
+  litActionCode?: string;
+  litNodeClient: ILitNodeClient;
+}
+
 export interface GeneratePrivateKeyParams {
   pkpSessionSigs: SessionSigsMap;
   network: Network;

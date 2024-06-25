@@ -24,6 +24,7 @@ import {
   SignMessageWithEncryptedKeyParams,
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResponse,
+  CustomGeneratePrivateKeyParams,
 } from './interfaces';
 
 /**
@@ -87,7 +88,75 @@ export async function generatePrivateKey({
 
 /**
  *
- * Import a provided Solana/EVM private key into our DynamoDB instance. First the key is pre-pended with LIT_PREFIX for security reasons. Then the updated key is encrypted and stored in the database
+ * Generates a random private key inside the provided Lit Action and returns the publicKey of the random private key.
+ * Lit Action should bundle the required wallet packages and encrypt the private key after prepending "lit_" to it.
+ * Access control condition should only allow the PKP Eth address of the provided PKP sessionSigs to decrypt.
+ * Lit Action should return a stringified JSON with ciphertext, dataToEncryptHash, publicKey.
+ *
+ * @param pkpSessionSigs - The PKP sessionSigs used to associated the PKP with the generated private key
+ * @param litActionIpfsCid - The IPFS CID of the Lit Action to be executed for generating the Wrapped Key. Can't provide this if already provided litActionCode
+ * @param litActionCode - The Lit Action code to be executed for generating the Wrapped Key. Can't provide this if already provided litActionIpfsCid
+ * @param litNodeClient - The Lit Node Client used for executing the Lit Action
+ *
+ * @returns { Promise<GeneratePrivateKeyResponse> } - The publicKey of the generated random private key along with the PKP EthAddres associated with the Wrapped Key
+ */
+export async function customGeneratePrivateKey({
+  pkpSessionSigs,
+  litActionIpfsCid,
+  litActionCode,
+  litNodeClient,
+}: CustomGeneratePrivateKeyParams): Promise<GeneratePrivateKeyResponse> {
+  if (!litActionIpfsCid && !litActionCode) {
+    throw new Error("Have to provide either the litActionIpfsCid or litActionCode");
+  }
+
+  if (litActionIpfsCid && litActionCode) {
+    throw new Error("Can't provide both the litActionIpfsCid or litActionCode");
+  }
+
+  const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
+  const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
+  console.log(
+    'accessControlConditions: ',
+    JSON.stringify(allowPkpAddressToDecrypt)
+  );
+
+  let ciphertext, dataToEncryptHash, publicKey;
+  try {
+    const result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      ipfsId: litActionIpfsCid,
+      code: litActionCode,
+      jsParams: {
+        pkpAddress,
+        accessControlConditions: allowPkpAddressToDecrypt,
+      },
+    });
+
+    const response = postLitActionValidation(result);
+    ({ ciphertext, dataToEncryptHash, publicKey } = JSON.parse(response));
+  } catch (err: any) {
+    throw new Error(
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+    );
+  }
+
+  const data = { ciphertext, dataToEncryptHash };
+
+  const importedPrivateKey = await storePrivateKeyMetadataToDatabase(
+    data,
+    firstSessionSig
+  );
+  return {
+    pkpAddress: importedPrivateKey.pkpAddress,
+    generatedPublicKey: publicKey,
+  };
+}
+
+/**
+ *
+ * Import any provided private key into our DynamoDB instance. First the key is pre-pended with LIT_PREFIX for security reasons. Then the updated key is encrypted and stored in the database
  *
  * @param pkpSessionSigs - The PKP sessionSigs used to associated the PKP with the generated private key
  * @param privateKey - The private key imported into the database
@@ -128,7 +197,7 @@ export async function importPrivateKey({
 
 /**
  *
- * Exports the imported Solana/EVM private key. First the stored encrypted private key is fetched from the database. Then it's decrypted and returned to the user
+ * Exports any imported private key. First the stored encrypted private key is fetched from the database. Then it's decrypted and returned to the user
  *
  * @param pkpSessionSigs - The PKP sessionSigs used to associated the PKP with the generated private key
  * @param privateKey - The private key imported into the database
