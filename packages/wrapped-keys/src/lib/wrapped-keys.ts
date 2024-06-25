@@ -26,6 +26,7 @@ import {
   GeneratePrivateKeyResponse,
   CustomGeneratePrivateKeyParams,
   CustomSignMessageWithEncryptedKeyParams,
+  CustomSignTransactionWithEncryptedKeyParams,
 } from './interfaces';
 
 /**
@@ -261,7 +262,7 @@ export async function exportPrivateKey({
 
 /**
  *
- * Signs a transaction inside the Lit Action using the Solana/EVM key. First it fetches the encrypted key from database and then executes a Lit Action that signed the tx
+ * Signs a transaction inside the Lit Action using the Solana/EVM key. First it fetches the encrypted key from database and then executes a Lit Action that signed the tx.
  *
  * @param pkpSessionSigs - The PKP sessionSigs used to associated the PKP with the generated private key
  * @param network - The network for which the private key needs to be generated. This is used to call different Lit Actions since the keys will be of different types
@@ -291,6 +292,65 @@ export async function signTransactionWithEncryptedKey<T = LitTransaction>({
     result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
       ipfsId,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        unsignedTransaction,
+        broadcast,
+        accessControlConditions: getPkpAccessControlCondition(pkpAddress),
+      },
+    });
+  } catch (err: any) {
+    throw new Error(
+      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
+    );
+  }
+
+  return postLitActionValidation(result);
+}
+
+/**
+ *
+ * Signs a transaction inside the provided Lit Action. First it fetches the encrypted key from database and then executes a Lit Action that signed the tx.
+ * Lit Action should bundle the required wallet packages and decrypt the private key which may be prepended with "lit_".
+ * It should create the corresponding wallet instance with the bundled package and sign the passed message with it.
+ * It should either return the signed transaction or the transaction hash of the broadcasted transaction.
+ *
+ * @param pkpSessionSigs - The PKP sessionSigs used to associated the PKP with the generated private key
+ * @param litActionIpfsCid - The IPFS CID of the Lit Action to be executed for generating the Wrapped Key. Can't provide this if already provided litActionCode
+ * @param litActionCode - The Lit Action code to be executed for generating the Wrapped Key. Can't provide this if already provided litActionIpfsCid
+ * @param unsignedTransaction - The unsigned transaction which will be signed inside the Lit Action. It should be a serialized unsigned transaction
+ * @param broadcast - Flag used to determine whether the Lit Action should broadcast the signed transaction or only return the signed transaction
+ * @param litNodeClient - The Lit Node Client used for executing the Lit Action
+ *
+ * @returns { Promise<string> } - The signed signed transaction or the transaction hash of the broadcasted transaction by the Wrapped Key
+ */
+export async function customSignTransactionWithEncryptedKey({
+  pkpSessionSigs,
+  litActionIpfsCid,
+  litActionCode,
+  unsignedTransaction,
+  broadcast,
+  litNodeClient,
+}: CustomSignTransactionWithEncryptedKeyParams): Promise<string> {
+  if (!litActionIpfsCid && !litActionCode) {
+    throw new Error("Have to provide either the litActionIpfsCid or litActionCode");
+  }
+
+  if (litActionIpfsCid && litActionCode) {
+    throw new Error("Can't provide both the litActionIpfsCid or litActionCode");
+  }
+
+  const { pkpAddress, ciphertext, dataToEncryptHash } =
+    await fetchPrivateKeyMedataFromDatabase(pkpSessionSigs);
+
+  let result;
+  try {
+    result = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      ipfsId: litActionIpfsCid,
+      code: litActionCode,
       jsParams: {
         pkpAddress,
         ciphertext,

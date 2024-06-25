@@ -68,6 +68,15 @@ export interface SignTransactionWithEncryptedKeyParams<T> {
   litNodeClient: ILitNodeClient;
 }
 
+export interface CustomSignTransactionWithEncryptedKeyParams {
+  pkpSessionSigs: SessionSigsMap;
+  litActionIpfsCid?: string;
+  litActionCode?: string;
+  unsignedTransaction: SolanaLitTransaction;
+  broadcast: boolean;
+  litNodeClient: ILitNodeClient;
+}
+
 interface BaseLitTransaction {
   chain: string;
 }
