@@ -44,6 +44,7 @@ export type ConditionItem = AccsParams | AccsOperatorParams;
 
 export type AccessControlConditions = (
   | AccsDefaultParams
+  | AccsParams
   | AccsOperatorParams
   | AccessControlConditions
 )[];
