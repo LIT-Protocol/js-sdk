@@ -1,8 +1,6 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  customGeneratePrivateKey,
-} from '@lit-protocol/wrapped-keys';
+import { customGeneratePrivateKey } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { LIT_ACTION_CID_REPOSITORY } from 'packages/wrapped-keys/src/lib/constants';
 
@@ -34,7 +32,7 @@ const CUSTOM_LIT_ACTION_CODE = `
     response: resp,
   });
 })();
-`
+`;
 
 /**
  * Test Commands:
@@ -54,18 +52,20 @@ export const testFailCustomGenerateKeyWithBothIpfsAndCode = async (
     new Date(Date.now() + 1000 * 60 * 10).toISOString()
   ); // 10 mins expiry
 
-
   try {
     await customGeneratePrivateKey({
-        pkpSessionSigs: alicePkpSessionSigs,
-        litActionIpfsCid: LIT_ACTION_CID_REPOSITORY.generateEncryptedSolanaPrivateKey,
-        litActionCode: CUSTOM_LIT_ACTION_CODE,
-        litNodeClient: devEnv.litNodeClient,
+      pkpSessionSigs: alicePkpSessionSigs,
+      litActionIpfsCid:
+        LIT_ACTION_CID_REPOSITORY.generateEncryptedSolanaPrivateKey,
+      litActionCode: CUSTOM_LIT_ACTION_CODE,
+      litNodeClient: devEnv.litNodeClient,
     });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
 
-    if (e.message === "Can't provide both the litActionIpfsCid or litActionCode") {
+    if (
+      e.message === "Can't provide both the litActionIpfsCid or litActionCode"
+    ) {
       console.log(
         '✅ testFailImportWrappedKeysWithSamePrivateKey is expected to have an error'
       );

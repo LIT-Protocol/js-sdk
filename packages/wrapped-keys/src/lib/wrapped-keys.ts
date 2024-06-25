@@ -109,7 +109,9 @@ export async function customGeneratePrivateKey({
   litNodeClient,
 }: CustomGeneratePrivateKeyParams): Promise<GeneratePrivateKeyResponse> {
   if (!litActionIpfsCid && !litActionCode) {
-    throw new Error("Have to provide either the litActionIpfsCid or litActionCode");
+    throw new Error(
+      'Have to provide either the litActionIpfsCid or litActionCode'
+    );
   }
 
   if (litActionIpfsCid && litActionCode) {
@@ -337,7 +339,9 @@ export async function customSignTransactionWithEncryptedKey({
   litNodeClient,
 }: CustomSignTransactionWithEncryptedKeyParams): Promise<string> {
   if (!litActionIpfsCid && !litActionCode) {
-    throw new Error("Have to provide either the litActionIpfsCid or litActionCode");
+    throw new Error(
+      'Have to provide either the litActionIpfsCid or litActionCode'
+    );
   }
 
   if (litActionIpfsCid && litActionCode) {
@@ -444,7 +448,9 @@ export async function customSignMessageWithEncryptedKey({
   litNodeClient,
 }: CustomSignMessageWithEncryptedKeyParams): Promise<string> {
   if (!litActionIpfsCid && !litActionCode) {
-    throw new Error("Have to provide either the litActionIpfsCid or litActionCode");
+    throw new Error(
+      'Have to provide either the litActionIpfsCid or litActionCode'
+    );
   }
 
   if (litActionIpfsCid && litActionCode) {

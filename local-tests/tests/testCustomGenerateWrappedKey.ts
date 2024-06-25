@@ -1,8 +1,6 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  customGeneratePrivateKey,
-} from '@lit-protocol/wrapped-keys';
+import { customGeneratePrivateKey } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { LIT_ACTION_CID_REPOSITORY } from 'packages/wrapped-keys/src/lib/constants';
 
@@ -34,7 +32,7 @@ const CUSTOM_LIT_ACTION_CODE = `
     response: resp,
   });
 })();
-`
+`;
 
 /**
  * Test Commands:
@@ -57,11 +55,14 @@ export const testCustomGenerateWrappedKey = async (
 
   const ipfsCustomPrivateKeys = await customGeneratePrivateKey({
     pkpSessionSigs: alicePkpSessionSigs,
-    litActionIpfsCid: LIT_ACTION_CID_REPOSITORY.generateEncryptedSolanaPrivateKey,
+    litActionIpfsCid:
+      LIT_ACTION_CID_REPOSITORY.generateEncryptedSolanaPrivateKey,
     litNodeClient: devEnv.litNodeClient,
   });
 
-  console.log(`IPFS CID generatedPublicKey: ${ipfsCustomPrivateKeys.generatedPublicKey}`);
+  console.log(
+    `IPFS CID generatedPublicKey: ${ipfsCustomPrivateKeys.generatedPublicKey}`
+  );
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
   if (ipfsCustomPrivateKeys.pkpAddress !== alicePkpAddress) {
@@ -86,7 +87,9 @@ export const testCustomGenerateWrappedKey = async (
     litNodeClient: devEnv.litNodeClient,
   });
 
-  console.log(`Code generatedPublicKey: ${codeCustomPrivateKeys.generatedPublicKey}`);
+  console.log(
+    `Code generatedPublicKey: ${codeCustomPrivateKeys.generatedPublicKey}`
+  );
 
   const bobPkpAddress = bob.authMethodOwnedPkp.ethAddress;
   if (codeCustomPrivateKeys.pkpAddress !== bobPkpAddress) {
