@@ -47,7 +47,7 @@ export async function generatePrivateKey(
       dataToEncryptHash,
       pkpAddress,
     },
-    litNodeClient,
+    litNetwork: litNodeClient.config.litNetwork,
   });
 
   return {

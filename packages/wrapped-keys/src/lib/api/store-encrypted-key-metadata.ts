@@ -26,6 +26,6 @@ export async function storeEncryptedKeyMetadata(
       pkpAddress,
     },
     sessionSig: getFirstSessionSig(pkpSessionSigs),
-    litNodeClient,
+    litNetwork: litNodeClient.config.litNetwork,
   });
 }

@@ -1,12 +1,8 @@
-import {
-  AuthSig,
-  ILitNodeClient,
-  LIT_NETWORKS_KEYS,
-} from '@lit-protocol/types';
+import { AuthSig, LIT_NETWORKS_KEYS } from '@lit-protocol/types';
 
 interface BaseApiParams {
   sessionSig: AuthSig;
-  litNodeClient: ILitNodeClient;
+  litNetwork: LIT_NETWORKS_KEYS;
 }
 
 export type FetchKeyParams = BaseApiParams;
@@ -31,7 +27,7 @@ export interface StoredKeyMetadata {
   publicKey: string;
   pkpAddress: string;
   keyType: string;
-  litNetwork: SupportedNetworks;
+  litNetwork: LIT_NETWORKS_KEYS;
 }
 
 export interface StoreKeyParams extends BaseApiParams {

@@ -9,10 +9,10 @@ import { getBaseRequestParams, makeRequest } from './utils';
 export async function fetchPrivateKeyMetadata(
   params: FetchKeyParams
 ): Promise<StoredKeyMetadata> {
-  const { litNodeClient, sessionSig } = params;
+  const { litNetwork, sessionSig } = params;
 
   const { url, initParams } = getBaseRequestParams({
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
     sessionSig,
     method: 'GET',
   });
@@ -31,10 +31,10 @@ export async function fetchPrivateKeyMetadata(
 export async function storePrivateKeyMetadata(
   params: StoreKeyParams
 ): Promise<boolean> {
-  const { litNodeClient, sessionSig, storedKeyMetadata } = params;
+  const { litNetwork, sessionSig, storedKeyMetadata } = params;
 
   const { url, initParams } = getBaseRequestParams({
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
     sessionSig,
     method: 'POST',
   });

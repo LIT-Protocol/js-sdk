@@ -14,6 +14,6 @@ export async function getEncryptedKeyMetadata(
   const { pkpSessionSigs, litNodeClient } = params;
   return fetchPrivateKeyMetadata({
     sessionSig: getFirstSessionSig(pkpSessionSigs),
-    litNodeClient,
+    litNetwork: litNodeClient.config.litNetwork,
   });
 }

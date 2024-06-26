@@ -21,7 +21,7 @@ export async function signMessageWithEncryptedKey(
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const storedKeyMetadata = await fetchPrivateKeyMetadata({
     sessionSig,
-    litNodeClient,
+    litNetwork: litNodeClient.config.litNetwork,
   });
 
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(

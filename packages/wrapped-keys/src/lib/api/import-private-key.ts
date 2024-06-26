@@ -40,7 +40,7 @@ export async function importPrivateKey(
 
   await storePrivateKeyMetadata({
     sessionSig: firstSessionSig,
-    litNodeClient,
+    litNetwork: litNodeClient.config.litNetwork,
     storedKeyMetadata: {
       ciphertext,
       publicKey,

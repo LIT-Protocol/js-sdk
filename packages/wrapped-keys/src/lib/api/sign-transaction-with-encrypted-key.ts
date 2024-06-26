@@ -22,7 +22,7 @@ export async function signTransactionWithEncryptedKey(
 
   const storedKeyMetadata = await fetchPrivateKeyMetadata({
     sessionSig,
-    litNodeClient,
+    litNetwork: litNodeClient.config.litNetwork,
   });
 
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(

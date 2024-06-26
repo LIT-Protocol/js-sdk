@@ -24,7 +24,7 @@ export async function exportPrivateKey(
 
   const privateKeyMetadata = await fetchPrivateKeyMetadata({
     sessionSig,
-    litNodeClient,
+    litNetwork: litNodeClient.config.litNetwork,
   });
 
   const { ciphertext, dataToEncryptHash, ...privateKeyMetadataMinusEncrypted } =
