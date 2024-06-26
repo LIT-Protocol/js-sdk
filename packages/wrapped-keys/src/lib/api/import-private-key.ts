@@ -21,7 +21,8 @@ import {
 export async function importPrivateKey(
   params: ImportPrivateKeyParams
 ): Promise<string> {
-  const { pkpSessionSigs, privateKey, address, algo, litNodeClient } = params;
+  const { pkpSessionSigs, privateKey, address, keyType, litNodeClient } =
+    params;
 
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
@@ -43,7 +44,7 @@ export async function importPrivateKey(
     storedKeyMetadata: {
       ciphertext,
       address,
-      algo,
+      keyType,
       dataToEncryptHash,
       pkpAddress,
     },

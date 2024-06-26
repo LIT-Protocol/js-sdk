@@ -21,14 +21,14 @@ export interface StoredKeyMetadata {
   dataToEncryptHash: string;
   address: string;
   pkpAddress: string;
-  algo: string;
+  keyType: string;
   litNetwork: SupportedNetworks;
 }
 
 export interface StoreKeyParams extends BaseApiParams {
   storedKeyMetadata: Pick<
     StoredKeyMetadata,
-    'pkpAddress' | 'address' | 'algo' | 'dataToEncryptHash' | 'ciphertext'
+    'pkpAddress' | 'address' | 'keyType' | 'dataToEncryptHash' | 'ciphertext'
   >;
 }
 

@@ -38,7 +38,7 @@ export const testEthereumBroadcastTransactionWrappedKey = async (
     privateKey: wrappedKeysWalletPrivateKey,
     litNodeClient: devEnv.litNodeClient,
     address: '0xdeadbeef',
-    algo: 'K256',
+    keyType: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;

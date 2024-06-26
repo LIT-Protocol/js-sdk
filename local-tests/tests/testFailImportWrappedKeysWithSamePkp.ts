@@ -32,7 +32,7 @@ export const testFailImportWrappedKeysWithSamePkp = async (
     privateKey: privateKey1,
     litNodeClient: devEnv.litNodeClient,
     address: '0xdeadbeef',
-    algo: 'K256',
+    keyType: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -52,7 +52,7 @@ export const testFailImportWrappedKeysWithSamePkp = async (
       privateKey: privateKey2,
       litNodeClient: devEnv.litNodeClient,
       address: '0xdeadbeef',
-      algo: 'K256',
+      keyType: 'K256',
     });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);

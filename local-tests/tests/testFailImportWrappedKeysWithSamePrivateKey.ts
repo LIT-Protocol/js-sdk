@@ -32,7 +32,7 @@ export const testFailImportWrappedKeysWithSamePrivateKey = async (
       privateKey,
       litNodeClient: devEnv.litNodeClient,
       address: '0xdeadbeef',
-      algo: 'K256',
+      keyType: 'K256',
     });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);

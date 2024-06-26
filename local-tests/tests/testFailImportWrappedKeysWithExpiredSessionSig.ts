@@ -49,7 +49,7 @@ export const testFailImportWrappedKeysWithExpiredSessionSig = async (
       privateKey,
       litNodeClient: devEnv.litNodeClient,
       address: '0xdeadbeef',
-      algo: 'K256',
+      keyType: 'K256',
     });
     console.log(res);
   } catch (e: any) {
