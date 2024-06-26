@@ -1,11 +1,10 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  customSignMessageWithEncryptedKey,
-  importPrivateKey,
-} from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+
+const { signMessageWithEncryptedKey, importPrivateKey } = api;
 
 const CUSTOM_LIT_ACTION_CODE = `
 (async () => {
@@ -86,6 +85,8 @@ export const testCustomignMessageWrappedKey = async (
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
+    address: '0xdeadbeef',
+    algo: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -106,7 +107,8 @@ export const testCustomignMessageWrappedKey = async (
 
   const unsignedStringMessage = 'This is a test message';
 
-  const signature = await customSignMessageWithEncryptedKey({
+  const signature = await signMessageWithEncryptedKey({
+    network: 'custom',
     pkpSessionSigs: pkpSessionSigsSigning,
     litActionCode: CUSTOM_LIT_ACTION_CODE,
     messageToSign: unsignedStringMessage,

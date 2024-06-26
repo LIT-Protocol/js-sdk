@@ -1,8 +1,10 @@
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { importPrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
 import { AuthSig, SessionSigsMap } from '@lit-protocol/types';
+
+const { importPrivateKey } = api;
 
 /**
  * Test Commands:
@@ -26,6 +28,8 @@ export const testFailImportWrappedKeysWithInvalidSessionSig = async (
       pkpSessionSigs: tamperPkpSessionSigs(pkpSessionSigs),
       privateKey,
       litNodeClient: devEnv.litNodeClient,
+      address: '0xdeadbeef',
+      algo: 'K256',
     });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);

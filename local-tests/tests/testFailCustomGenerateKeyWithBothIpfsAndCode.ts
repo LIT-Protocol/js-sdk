@@ -1,8 +1,11 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { customGeneratePrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { LIT_ACTION_CID_REPOSITORY } from 'packages/wrapped-keys/src/lib/constants';
+
+const { generatePrivateKey } = api;
+
+import { LIT_ACTION_CID_REPOSITORY } from '../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
 
 const CUSTOM_LIT_ACTION_CODE = `
 (async () => {
@@ -53,10 +56,10 @@ export const testFailCustomGenerateKeyWithBothIpfsAndCode = async (
   ); // 10 mins expiry
 
   try {
-    await customGeneratePrivateKey({
+    await generatePrivateKey({
+      network: 'custom',
       pkpSessionSigs: alicePkpSessionSigs,
-      litActionIpfsCid:
-        LIT_ACTION_CID_REPOSITORY.generateEncryptedSolanaPrivateKey,
+      litActionIpfsCid: LIT_ACTION_CID_REPOSITORY.generateEncryptedKey.solana,
       litActionCode: CUSTOM_LIT_ACTION_CODE,
       litNodeClient: devEnv.litNodeClient,
     });
