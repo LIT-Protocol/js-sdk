@@ -31,7 +31,7 @@ export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
-    address: '0xdeadbeef',
+    publicKey: '0xdeadbeef',
     keyType: 'K256',
   });
 

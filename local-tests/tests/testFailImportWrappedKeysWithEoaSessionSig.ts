@@ -27,7 +27,7 @@ export const testFailImportWrappedKeysWithEoaSessionSig = async (
       pkpSessionSigs: eoaSessionSigs,
       privateKey,
       litNodeClient: devEnv.litNodeClient,
-      address: '0xdeadbeef',
+      publicKey: '0xdeadbeef',
       keyType: 'K256',
     });
   } catch (e: any) {

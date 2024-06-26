@@ -37,7 +37,7 @@ export const testEthereumBroadcastTransactionWrappedKey = async (
     pkpSessionSigs,
     privateKey: wrappedKeysWalletPrivateKey,
     litNodeClient: devEnv.litNodeClient,
-    address: '0xdeadbeef',
+    publicKey: '0xdeadbeef',
     keyType: 'K256',
   });
 

@@ -31,7 +31,7 @@ export const testFailImportWrappedKeysWithSamePkp = async (
     pkpSessionSigs,
     privateKey: privateKey1,
     litNodeClient: devEnv.litNodeClient,
-    address: '0xdeadbeef',
+    publicKey: '0xdeadbeef',
     keyType: 'K256',
   });
 
@@ -51,7 +51,7 @@ export const testFailImportWrappedKeysWithSamePkp = async (
       pkpSessionSigs,
       privateKey: privateKey2,
       litNodeClient: devEnv.litNodeClient,
-      address: '0xdeadbeef',
+      publicKey: '0xdeadbeef',
       keyType: 'K256',
     });
   } catch (e: any) {

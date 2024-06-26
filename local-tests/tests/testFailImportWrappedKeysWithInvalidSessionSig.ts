@@ -28,7 +28,7 @@ export const testFailImportWrappedKeysWithInvalidSessionSig = async (
       pkpSessionSigs: tamperPkpSessionSigs(pkpSessionSigs),
       privateKey,
       litNodeClient: devEnv.litNodeClient,
-      address: '0xdeadbeef',
+      publicKey: '0xdeadbeef',
       keyType: 'K256',
     });
   } catch (e: any) {

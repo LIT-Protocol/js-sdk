@@ -48,7 +48,7 @@ export const testFailImportWrappedKeysWithExpiredSessionSig = async (
       pkpSessionSigs,
       privateKey,
       litNodeClient: devEnv.litNodeClient,
-      address: '0xdeadbeef',
+      publicKey: '0xdeadbeef',
       keyType: 'K256',
     });
     console.log(res);
