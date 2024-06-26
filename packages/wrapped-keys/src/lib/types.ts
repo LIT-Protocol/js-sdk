@@ -1,4 +1,8 @@
-import { ILitNodeClient, SessionSigsMap } from '@lit-protocol/types';
+import {
+  ILitNodeClient,
+  LIT_NETWORKS_KEYS,
+  SessionSigsMap,
+} from '@lit-protocol/types';
 
 /** @typedef Network
  * The network type that the wrapped key is for.
@@ -50,6 +54,24 @@ export type GetEncryptedKeyMetadataParams = BaseApiParams;
  */
 export type ExportPrivateKeyParams = BaseApiParams;
 
+/** Includes the decrypted private key and metadata that was stored alongside it in the wrapped keys service
+ *
+ * @typedef ExportPrivateKeyResult
+ * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the LIT Node Client was configured for when the key was persisted to the wrapped keys service
+ * @property { string } decryptedPrivateKey The decrypted, plain text private key that was persisted to the wrapped keys service
+ * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
+ * @property { string } address The 'address' is typically based on the public key of the key being imported into the wrapped keys service
+ * @property { string } algo The algorithm type of the key; this might be K256, ed25519, or other key formats.  The `algo` will be included in the metadata returned from the wrapped keys service
+ *
+ */
+export interface ExportPrivateKeyResult {
+  pkpAddress: string;
+  decryptedPrivateKey: string;
+  address: string;
+  litNetwork: LIT_NETWORKS_KEYS;
+  algo: string;
+}
+
 type GeneratePrivateKeyParamsSupportedNetworks = BaseApiParams &
   ApiParamsSupportedNetworks;
 type GeneratePrivateKeyParamsCustomIpfs = BaseApiParams & ApiParamsCustomIpfs;
@@ -81,7 +103,7 @@ export interface GeneratePrivateKeyResult {
  * @extends BaseApiParams
  *
  * @property { string } privateKey The private key to be imported into the wrapped keys service
- * @property { string } address The 'address' is typically the public key of the key being imported into the wrapped keys service
+ * @property { string } address The 'address' is typically based on the public key of the key being imported into the wrapped keys service
  * @property { string } algo The algorithm type of the key; this might be K256, ed25519, or other key formats.  The `algo` will be included in the metadata returned from the wrapped keys service
  */
 export interface ImportPrivateKeyParams extends BaseApiParams {
