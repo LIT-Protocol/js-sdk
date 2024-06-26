@@ -61,35 +61,35 @@ export const runInBand = async ({
     while (attempts < maxAttempts && !testPassed) {
       const startTime = performance.now();
 
-      try {
-        console.log(`Attempt ${attempts + 1} for ${testName}...`);
+      // try {
+      console.log(`Attempt ${attempts + 1} for ${testName}...`);
 
-        // @ts-ignore
-        await testFunction(devEnv);
-        testPassed = true;
+      // @ts-ignore
+      await testFunction(devEnv);
+      testPassed = true;
 
-        const endTime = performance.now();
-        const timeTaken = (endTime - startTime).toFixed(2);
-        console.log(`${testName} - Passed (${timeTaken} ms)`);
-        passedTests.push(`${testName} (Passed in ${timeTaken} ms)`);
-      } catch (error) {
-        if (error.message === 'LIT_IGNORE_TEST') {
-          skippedTests.push(`${testName} (Skipped)`);
-          break;
-        }
-        attempts++;
-        if (attempts >= maxAttempts) {
-          const endTime = performance.now();
-          const timeTaken = (endTime - startTime).toFixed(2);
-          console.error(
-            `${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)`
-          );
-          console.error(`Error: ${error}`);
-          failedTests.push(
-            `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`
-          );
-        }
-      }
+      const endTime = performance.now();
+      const timeTaken = (endTime - startTime).toFixed(2);
+      console.log(`${testName} - Passed (${timeTaken} ms)`);
+      passedTests.push(`${testName} (Passed in ${timeTaken} ms)`);
+      // } catch (error) {
+      //   if (error.message === 'LIT_IGNORE_TEST') {
+      //     skippedTests.push(`${testName} (Skipped)`);
+      //     break;
+      //   }
+      //   attempts++;
+      //   if (attempts >= maxAttempts) {
+      //     const endTime = performance.now();
+      //     const timeTaken = (endTime - startTime).toFixed(2);
+      //     console.error(
+      //       `${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)`
+      //     );
+      //     console.error(`Error: ${error}`);
+      //     failedTests.push(
+      //       `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`
+      //     );
+      //   }
+      // }
 
       await new Promise((resolve) =>
         setTimeout(resolve, devEnv.processEnvs.RUN_IN_BAND_INTERVAL)
@@ -154,44 +154,44 @@ export const runTestsParallel = async ({
 
       while (attempts < maxAttempts && !testPassed) {
         const startTime = performance.now();
-        try {
-          console.log(
-            `\x1b[90m[runTestsParallel] Attempt ${attempts + 1} for ${
-              testIndex + 1
-            }. ${testName}...\x1b[0m`
-          );
+        // try {
+        console.log(
+          `\x1b[90m[runTestsParallel] Attempt ${attempts + 1} for ${
+            testIndex + 1
+          }. ${testName}...\x1b[0m`
+        );
 
-          // @ts-ignore
-          await testFunction(devEnv);
-          testPassed = true;
+        // @ts-ignore
+        await testFunction(devEnv);
+        testPassed = true;
 
-          const endTime = performance.now();
-          const timeTaken = (endTime - startTime).toFixed(2);
-          console.log(
-            `\x1b[32m✔\x1b[90m ${
-              testIndex + 1
-            }. ${testName} - Passed (${timeTaken} ms)\x1b[0m`
-          );
-          return `${testName} (Passed in ${timeTaken} ms)`;
-        } catch (error) {
-          if (error.message === 'LIT_IGNORE_TEST') {
-            return `${testName} (Skipped)`;
-          }
-          attempts++;
-
-          // wait for at least 5 seconds
-          if (attempts >= maxAttempts) {
-            const endTime = performance.now();
-            const timeTaken = (endTime - startTime).toFixed(2);
-            console.error(
-              `\x1b[31m✖\x1b[90m ${
-                testIndex + 1
-              }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
-            );
-            console.error(`\x1b[31m❌Error:\x1b[90m ${error}\x1b[0m`);
-            return `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`;
-          }
-        }
+        const endTime = performance.now();
+        const timeTaken = (endTime - startTime).toFixed(2);
+        console.log(
+          `\x1b[32m✔\x1b[90m ${
+            testIndex + 1
+          }. ${testName} - Passed (${timeTaken} ms)\x1b[0m`
+        );
+        return `${testName} (Passed in ${timeTaken} ms)`;
+        // } catch (error) {
+        //   if (error.message === 'LIT_IGNORE_TEST') {
+        //     return `${testName} (Skipped)`;
+        //   }
+        //   attempts++;
+        //
+        //   // wait for at least 5 seconds
+        //   if (attempts >= maxAttempts) {
+        //     const endTime = performance.now();
+        //     const timeTaken = (endTime - startTime).toFixed(2);
+        //     console.error(
+        //       `\x1b[31m✖\x1b[90m ${
+        //         testIndex + 1
+        //       }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
+        //     );
+        //     console.error(`\x1b[31m❌Error:\x1b[90m ${error}\x1b[0m`);
+        //     return `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`;
+        //   }
+        // }
       }
     }
   );
