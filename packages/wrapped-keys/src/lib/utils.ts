@@ -2,8 +2,8 @@ import { ethers } from 'ethers';
 
 import { log } from '@lit-protocol/misc';
 import {
+  AccsDefaultParams,
   AuthSig,
-  ConditionItem,
   SessionKeySignedMessage,
   SessionSigsMap,
 } from '@lit-protocol/types';
@@ -74,11 +74,11 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
  *
  * @param { string } pkpAddress - The wallet address of the PKP which can decrypt the encrypted Wrapped Key
  *
- * @returns { ConditionItem } - The access control condition that only allows the PKP address to decrypt
+ * @returns { AccsDefaultParams } - The access control condition that only allows the PKP address to decrypt
  */
 export function getPkpAccessControlCondition(
   pkpAddress: string
-): ConditionItem {
+): AccsDefaultParams {
   if (!ethers.utils.isAddress(pkpAddress)) {
     throw new Error(
       `pkpAddress is not a valid Ethereum Address: ${pkpAddress}`

@@ -1,5 +1,5 @@
 import {
-  ConditionItem,
+  AccessControlConditions,
   ILitNodeClient,
   SessionSigsMap,
 } from '@lit-protocol/types';
@@ -11,7 +11,7 @@ interface GeneratePrivateKeyLitActionParams {
   pkpAddress: string;
   litActionIpfsCid?: string;
   litActionCode?: string;
-  accessControlConditions: ConditionItem[];
+  accessControlConditions: AccessControlConditions;
   litNodeClient: ILitNodeClient;
 }
 
