@@ -33,7 +33,7 @@ export async function signMessageWithEncryptedKey(
 
   return signMessageWithLitAction({
     ...params,
-    ...(network === 'evm' || network == 'solana'
+    ...(network === 'evm' || network === 'solana'
       ? { litActionIpfsCid: getLitActionCid(network, 'signMessage') }
       : {}),
     accessControlConditions: [allowPkpAddressToDecrypt],

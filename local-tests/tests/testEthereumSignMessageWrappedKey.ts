@@ -1,12 +1,10 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  importPrivateKey,
-  signMessageWithEncryptedKey,
-} from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
+
+const { importPrivateKey, signMessageWithEncryptedKey } = api;
 
 /**
  * Test Commands:
@@ -34,6 +32,8 @@ export const testEthereumSignMessageWrappedKey = async (
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
+    address: '0xdeadbeef',
+    algo: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -56,7 +56,7 @@ export const testEthereumSignMessageWrappedKey = async (
 
   const signature = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_EVM,
+    network: 'evm',
     messageToSign: unsignedStringMessage,
     litNodeClient: devEnv.litNodeClient,
   });
@@ -74,7 +74,7 @@ export const testEthereumSignMessageWrappedKey = async (
 
   const signatureBinary = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_EVM,
+    network: 'evm',
     messageToSign: unsignedBinaryMessage,
     litNodeClient: devEnv.litNodeClient,
   });

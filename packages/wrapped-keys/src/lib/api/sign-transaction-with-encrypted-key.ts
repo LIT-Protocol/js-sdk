@@ -34,7 +34,7 @@ export async function signTransactionWithEncryptedKey(
 
   return signTransactionWithLitAction({
     ...params,
-    ...(network === 'evm' || network == 'solana'
+    ...(network === 'evm' || network === 'solana'
       ? { litActionIpfsCid: getLitActionCid(network, 'signTransaction') }
       : {}),
     storedKeyMetadata,

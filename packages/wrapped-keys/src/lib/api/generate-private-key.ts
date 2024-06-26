@@ -32,10 +32,9 @@ export async function generatePrivateKey(
 
   const { ciphertext, dataToEncryptHash, publicKey } =
     await generateKeyWithLitAction({
-      litNodeClient,
-      pkpSessionSigs,
+      ...params,
       pkpAddress,
-      ...(network === 'evm' || network == 'solana'
+      ...(network === 'evm' || network === 'solana'
         ? { litActionIpfsCid: getLitActionCid(network, 'generateEncryptedKey') }
         : {}),
       accessControlConditions: [allowPkpAddressToDecrypt],

@@ -1,13 +1,11 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  generatePrivateKey,
-  signMessageWithEncryptedKey,
-} from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_SOLANA } from 'packages/wrapped-keys/src/lib/constants';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
+
+const { generatePrivateKey, signMessageWithEncryptedKey } = api;
 
 /**
  * Test Commands:
@@ -31,7 +29,7 @@ export const testGenerateSolanaWrappedKey = async (
 
   const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
     pkpSessionSigs,
-    network: NETWORK_SOLANA,
+    network: 'solana',
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -57,7 +55,7 @@ export const testGenerateSolanaWrappedKey = async (
 
   const signature = await signMessageWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_SOLANA,
+    network: 'solana',
     messageToSign,
     litNodeClient: devEnv.litNodeClient,
   });

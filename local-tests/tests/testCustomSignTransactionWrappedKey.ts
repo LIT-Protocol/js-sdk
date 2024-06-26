@@ -2,12 +2,22 @@ import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import {
-  importPrivateKey,
-  signTransactionWithEncryptedKey,
+  api,
   EthereumLitTransaction,
+  SerializedTransaction,
 } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
+import {
+  clusterApiUrl,
+  Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from '@solana/web3.js';
+
+const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
 const CUSTOM_LIT_ACTION_CODE = `(async () => {
   const LIT_PREFIX = 'lit_';
@@ -77,7 +87,7 @@ const CUSTOM_LIT_ACTION_CODE = `(async () => {
  * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignTransactionWrappedKey
  * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignTransactionWrappedKey
  */
-export const testEthereumSignTransactionWrappedKey = async (
+export const testCustomSignTransactionWrappedKey = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -91,12 +101,15 @@ export const testEthereumSignTransactionWrappedKey = async (
 
   console.log(pkpSessionSigs);
 
-  const privateKey = ethers.Wallet.createRandom().privateKey;
+  const solanaKeypair = Keypair.generate();
+  const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
 
   const pkpAddress = await importPrivateKey({
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
+    address: '0xdeadbeef',
+    algo: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -115,24 +128,39 @@ export const testEthereumSignTransactionWrappedKey = async (
 
   console.log(pkpSessionSigsSigning);
 
-  const unsignedTransaction: EthereumLitTransaction = {
-    toAddress: alice.wallet.address,
-    value: '0.0001', // in ethers (Lit tokens)
-    chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
-    dataHex: ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
-    ),
-    chain: 'chronicleTestnet',
+  const solanaTransaction = new Transaction();
+  solanaTransaction.add(
+    SystemProgram.transfer({
+      fromPubkey: solanaKeypair.publicKey,
+      toPubkey: new PublicKey(solanaKeypair.publicKey),
+      lamports: LAMPORTS_PER_SOL / 100, // Transfer 0.01 SOL
+    })
+  );
+  solanaTransaction.feePayer = solanaKeypair.publicKey;
+
+  const solanaConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+  const { blockhash } = await solanaConnection.getLatestBlockhash();
+  solanaTransaction.recentBlockhash = blockhash;
+
+  const serializedTransaction = solanaTransaction
+    .serialize({
+      requireAllSignatures: false, // should be false as we're not signing the message
+      verifySignatures: false, // should be false as we're not signing the message
+    })
+    .toString('base64');
+
+  const unsignedTransaction: SerializedTransaction = {
+    serializedTransaction,
+    chain: 'devnet',
   };
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_EVM,
+    network: 'custom',
     unsignedTransaction,
     broadcast: false,
     litNodeClient: devEnv.litNodeClient,
+    litActionCode: CUSTOM_LIT_ACTION_CODE,
   });
 
   console.log('signedTx');

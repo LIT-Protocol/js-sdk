@@ -1,8 +1,10 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { customGeneratePrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { LIT_ACTION_CID_REPOSITORY } from 'packages/wrapped-keys/src/lib/constants';
+
+import { LIT_ACTION_CID_REPOSITORY } from '../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
+const { generatePrivateKey } = api;
 
 const CUSTOM_LIT_ACTION_CODE = `
 (async () => {
@@ -53,10 +55,10 @@ export const testCustomGenerateWrappedKey = async (
     new Date(Date.now() + 1000 * 60 * 10).toISOString()
   ); // 10 mins expiry
 
-  const ipfsCustomPrivateKeys = await customGeneratePrivateKey({
+  const ipfsCustomPrivateKeys = await generatePrivateKey({
+    network: 'custom',
     pkpSessionSigs: alicePkpSessionSigs,
-    litActionIpfsCid:
-      LIT_ACTION_CID_REPOSITORY.generateEncryptedSolanaPrivateKey,
+    litActionIpfsCid: LIT_ACTION_CID_REPOSITORY.generateEncryptedKey.solana,
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -81,7 +83,8 @@ export const testCustomGenerateWrappedKey = async (
     new Date(Date.now() + 1000 * 60 * 10).toISOString()
   ); // 10 mins expiry
 
-  const codeCustomPrivateKeys = await customGeneratePrivateKey({
+  const codeCustomPrivateKeys = await generatePrivateKey({
+    network: 'custom',
     pkpSessionSigs: bobPkpSessionSigs,
     litActionCode: CUSTOM_LIT_ACTION_CODE,
     litNodeClient: devEnv.litNodeClient,
