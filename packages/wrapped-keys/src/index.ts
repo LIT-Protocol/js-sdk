@@ -6,13 +6,7 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
 } from './lib/api';
-import {
-  NETWORK_SOLANA,
-  NETWORK_EVM,
-  NETWORK_CUSTOM,
-  CHAIN_ETHEREUM,
-  LIT_PREFIX,
-} from './lib/constants';
+import { CHAIN_ETHEREUM, LIT_PREFIX } from './lib/constants';
 
 import type {
   StoredKeyMetadata,
@@ -27,12 +21,11 @@ import type {
   SignTransactionWithEncryptedKeyParams,
   ExportPrivateKeyResult,
   GeneratePrivateKeyResult,
+  EthereumLitTransaction,
+  SerializedTransaction,
 } from './lib/types';
 
 export const constants = {
-  NETWORK_SOLANA,
-  NETWORK_EVM,
-  NETWORK_CUSTOM,
   CHAIN_ETHEREUM,
   LIT_PREFIX,
 };
@@ -47,6 +40,8 @@ export const api = {
 };
 
 export {
+  EthereumLitTransaction,
+  SerializedTransaction,
   StoredKeyMetadata,
   SupportedNetworks,
   SignMessageWithEncryptedKeyParams,
