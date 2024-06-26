@@ -1,23 +1,14 @@
-import {
-  AccessControlConditions,
-  ILitNodeClient,
-  SessionSigsMap,
-} from '@lit-protocol/types';
+import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
 import { StoredKeyMetadata } from '../service-client';
-import { Network } from '../types';
+import { SignMessageWithEncryptedKeyParams } from '../types';
 
-interface SignMessageWithLitActionParams {
-  pkpSessionSigs: SessionSigsMap;
-  litNodeClient: ILitNodeClient;
+interface SignMessageWithLitActionParams
+  extends SignMessageWithEncryptedKeyParams {
   accessControlConditions: AccessControlConditions;
   storedKeyMetadata: StoredKeyMetadata;
-  network: Network;
-  litActionIpfsCid?: string;
-  litActionCode?: string;
-  params?: Record<string, unknown>;
-  messageToSign: string | Uint8Array;
+  litActionIpfsCid: string;
 }
 
 export async function signMessageWithLitAction(
@@ -29,9 +20,7 @@ export async function signMessageWithLitAction(
     messageToSign,
     pkpSessionSigs,
     litActionIpfsCid,
-    litActionCode,
     storedKeyMetadata,
-    params,
   } = args;
 
   try {
@@ -39,14 +28,12 @@ export async function signMessageWithLitAction(
     const result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
       ipfsId: litActionIpfsCid,
-      code: litActionCode,
       jsParams: {
         pkpAddress,
         ciphertext,
         dataToEncryptHash,
         messageToSign,
         accessControlConditions,
-        ...params,
       },
     });
     return postLitActionValidation(result);

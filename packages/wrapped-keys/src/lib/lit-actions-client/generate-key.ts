@@ -1,18 +1,12 @@
-import {
-  AccessControlConditions,
-  ILitNodeClient,
-  SessionSigsMap,
-} from '@lit-protocol/types';
+import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
+import { GeneratePrivateKeyParams } from '../../index';
 
-interface GeneratePrivateKeyLitActionParams {
-  pkpSessionSigs: SessionSigsMap;
+interface GeneratePrivateKeyLitActionParams extends GeneratePrivateKeyParams {
   pkpAddress: string;
-  litActionIpfsCid?: string;
-  litActionCode?: string;
   accessControlConditions: AccessControlConditions;
-  litNodeClient: ILitNodeClient;
+  litActionIpfsCid: string;
 }
 
 interface GeneratePrivateKeyLitActionResult {
@@ -25,25 +19,13 @@ export async function generateKeyWithLitAction({
   litNodeClient,
   pkpSessionSigs,
   litActionIpfsCid,
-  litActionCode,
   accessControlConditions,
   pkpAddress,
 }: GeneratePrivateKeyLitActionParams): Promise<GeneratePrivateKeyLitActionResult> {
-  if (!litActionIpfsCid && !litActionCode) {
-    throw new Error(
-      'Have to provide either the litActionIpfsCid or litActionCode'
-    );
-  }
-
-  if (litActionIpfsCid && litActionCode) {
-    throw new Error("Can't provide both a litActionIpfsCid or litActionCode");
-  }
-
   try {
     const result = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
       ipfsId: litActionIpfsCid,
-      code: litActionCode,
       jsParams: {
         pkpAddress,
         accessControlConditions,

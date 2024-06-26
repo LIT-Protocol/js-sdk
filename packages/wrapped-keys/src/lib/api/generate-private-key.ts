@@ -34,9 +34,7 @@ export async function generatePrivateKey(
     await generateKeyWithLitAction({
       ...params,
       pkpAddress,
-      ...(network === 'evm' || network === 'solana'
-        ? { litActionIpfsCid: getLitActionCid(network, 'generateEncryptedKey') }
-        : {}),
+      litActionIpfsCid: getLitActionCid(network, 'generateEncryptedKey'),
       accessControlConditions: [allowPkpAddressToDecrypt],
     });
 

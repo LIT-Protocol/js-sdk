@@ -5,11 +5,9 @@ import {
 } from '@lit-protocol/types';
 
 /** @typedef Network
- * The network type that the wrapped key is for.
- * In case of 'evm' or 'solana', pre-written LIT actions will be used to perform operations
- * In case of 'custom', you will need to provide a LIT action source code or an IPFS CID where LIT action source code exists in order to perform the operation when you call API methods
+ * The network type that the wrapped key will be used on.
  */
-export type Network = 'evm' | 'solana' | 'custom';
+export type Network = 'evm' | 'solana';
 
 /** All API calls for the wrapped keys service require these arguments.
  *
@@ -23,19 +21,7 @@ export interface BaseApiParams {
 }
 
 export interface ApiParamsSupportedNetworks {
-  network: Extract<Network, 'evm' | 'solana'>;
-}
-
-export interface ApiParamsCustomIpfs extends BaseApiParams {
-  network: Extract<Network, 'custom'>;
-  litActionIpfsCid: string;
-  params?: Record<string, unknown>;
-}
-
-export interface ApiParamsCustomCode extends BaseApiParams {
-  network: Extract<Network, 'custom'>;
-  litActionCode: string;
-  params?: Record<string, unknown>;
+  network: Network;
 }
 
 /** Fetching a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
@@ -74,20 +60,13 @@ export interface ExportPrivateKeyResult {
 
 type GeneratePrivateKeyParamsSupportedNetworks = BaseApiParams &
   ApiParamsSupportedNetworks;
-type GeneratePrivateKeyParamsCustomIpfs = BaseApiParams & ApiParamsCustomIpfs;
-type GeneratePrivateKeyParamsCustomCode = BaseApiParams & ApiParamsCustomCode;
 
 /** @typedef GeneratePrivateKeyParams
  * @extends BaseApiParams
  * @property {Network} network The network for which the private key needs to be generated; keys are generated differently for different networks
- * @property {string} [litActionIpfsCid] The IPFS CID of the LIT Action to run which will be responsible for generating the key
- * @property {string} [litActionCode] A string of the raw source code of the LIT Action to run which will be responsible for generating the key
- * @property {object} [params] Additional parameters to be passed through to the LIT action that is performing the key generation
  */
 export type GeneratePrivateKeyParams =
-  | GeneratePrivateKeyParamsSupportedNetworks
-  | GeneratePrivateKeyParamsCustomIpfs
-  | GeneratePrivateKeyParamsCustomCode;
+  GeneratePrivateKeyParamsSupportedNetworks;
 
 /** @typedef GeneratePrivateKeyResult
  * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
@@ -120,26 +99,13 @@ type SignMessageWithEncryptedKeyParamsSupportedNetworks = BaseApiParams &
   ApiParamsSupportedNetworks &
   SignMessageParams;
 
-type SignMessageWithEncryptedKeyParamsCustomIpfs = BaseApiParams &
-  ApiParamsCustomIpfs &
-  SignMessageParams;
-
-type SignMessageWithEncryptedKeyParamsCustomCode = BaseApiParams &
-  ApiParamsCustomCode &
-  SignMessageParams;
-
 /** @typedef SignMessageWithEncryptedKeyParams
  * @extends BaseApiParams
  *
  * @property { string | Uint8Array } messageToSign The message to be signed
- * @property {string} [litActionIpfsCid] The IPFS CID of the LIT Action to run which will be responsible for generating the key. Only relevant when using network is `custom`. You can only include this OR litActionCode.
- * @property {string} [litActionCode] A string of the raw source code of the LIT Action to run which will be responsible for generating the key. Only relevant when using `custom` network. You can only include this OR litActionIpfsCid.
- * @property {object} [params] Additional parameters to be passed through to the LIT action that is signing the provided message
  */
 export type SignMessageWithEncryptedKeyParams =
-  | SignMessageWithEncryptedKeyParamsSupportedNetworks
-  | SignMessageWithEncryptedKeyParamsCustomIpfs
-  | SignMessageWithEncryptedKeyParamsCustomCode;
+  SignMessageWithEncryptedKeyParamsSupportedNetworks;
 
 interface BaseLitTransaction {
   chain: string;
@@ -184,29 +150,11 @@ interface SignTransactionParamsSupportedSolana extends SignTransactionParams {
   network: Extract<Network, 'solana'>;
 }
 
-interface SignTransactionWithEncryptedKeyParamsCustomIpfs
-  extends SignTransactionParams,
-    ApiParamsCustomIpfs {
-  unsignedTransaction: SerializedTransaction;
-}
-
-interface SignTransactionWithEncryptedKeyParamsCustomCode
-  extends SignTransactionParams,
-    ApiParamsCustomCode {
-  unsignedTransaction: SerializedTransaction;
-}
-
 /** @typedef SignTransactionWithEncryptedKeyParams
  * @extends BaseApiParams
  * @property { boolean } broadcast Whether the LIT action should broadcast the signed transaction to RPC, or only sign the transaction and return the signed transaction to the caller
  * @property { EthereumLitTransaction | SerializedTransaction } unsignedTransaction The unsigned transaction to be signed. When network is 'solana' or 'custom', be sure to provided a {@link SerializedTransaction} instance.
- * @property {string} [litActionIpfsCid] The IPFS CID of the LIT Action to run which will be responsible for generating the key. Only relevant when using network is `custom`. You can only include this OR litActionCode.
- * @property {string} [litActionCode] A string of the raw source code of the LIT Action to run which will be responsible for generating the key. Only relevant when using `custom` network. You can only include this OR litActionIpfsCid.
- * @property {object} [params] Additional parameters to be passed through to the LIT action that is signing the provided transaction
- *
  */
 export type SignTransactionWithEncryptedKeyParams =
   | SignTransactionParamsSupportedEvm
-  | SignTransactionParamsSupportedSolana
-  | SignTransactionWithEncryptedKeyParamsCustomIpfs
-  | SignTransactionWithEncryptedKeyParamsCustomCode;
+  | SignTransactionParamsSupportedSolana;

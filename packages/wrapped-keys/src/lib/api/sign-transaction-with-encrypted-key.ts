@@ -10,9 +10,6 @@ import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
  * the decrypted key to sign the provided transaction
  * Optionally, if you pass `broadcast: true`, the LIT action will also submit the signed transaction to the associated RPC endpoint on your behalf
  *
- * * NOTE: If you use `custom` as `network`, you must provide either an IPFS CID or the direct source code of the LIT action you want
- * to be responsible for decrypting the encrypted key, signing the message, and supporting `broadcast: true` if you set it.
- *
  * @param { SignTransactionWithEncryptedKeyParams } params Parameters required to sign the requested transaction
  *
  * @returns { string } The signed transaction OR its transaction hash if you set `broadcast: true` and the LIT action supports this functionality.
@@ -34,9 +31,7 @@ export async function signTransactionWithEncryptedKey(
 
   return signTransactionWithLitAction({
     ...params,
-    ...(network === 'evm' || network === 'solana'
-      ? { litActionIpfsCid: getLitActionCid(network, 'signTransaction') }
-      : {}),
+    litActionIpfsCid: getLitActionCid(network, 'signTransaction'),
     storedKeyMetadata,
     accessControlConditions: [allowPkpAddressToDecrypt],
   });

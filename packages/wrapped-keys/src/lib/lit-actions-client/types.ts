@@ -5,12 +5,7 @@ export type LitActionType =
   | 'signMessage'
   | 'generateEncryptedKey';
 
-export type LitActionSupportedNetworks = Extract<Network, 'solana' | 'evm'>;
-
-// 'custom' have no entries in the CID repository, by definition they are external resources.
-export type LitCidRepositoryEntry = Readonly<
-  Record<LitActionSupportedNetworks, string>
->;
+export type LitCidRepositoryEntry = Readonly<Record<Network, string>>;
 
 export type LitCidRepository = Readonly<
   Record<LitActionType, LitCidRepositoryEntry>
