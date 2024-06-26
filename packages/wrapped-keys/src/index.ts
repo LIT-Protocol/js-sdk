@@ -5,6 +5,7 @@ import {
   generatePrivateKey,
   importPrivateKey,
   signTransactionWithEncryptedKey,
+  storeEncryptedKeyMetadata,
 } from './lib/api';
 import { CHAIN_ETHEREUM, LIT_PREFIX } from './lib/constants';
 
@@ -28,6 +29,7 @@ import type {
   SignTransactionParams,
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
+  StoreEncryptedKeyMetadataParams,
 } from './lib/types';
 
 export const constants = {
@@ -36,30 +38,32 @@ export const constants = {
 };
 
 export const api = {
-  signMessageWithEncryptedKey,
-  getEncryptedKeyMetadata,
   exportPrivateKey,
   generatePrivateKey,
+  getEncryptedKeyMetadata,
   importPrivateKey,
+  signMessageWithEncryptedKey,
   signTransactionWithEncryptedKey,
+  storeEncryptedKeyMetadata,
 };
 
 export {
-  SignTransactionParams,
-  SignTransactionParamsSupportedEvm,
-  SignTransactionParamsSupportedSolana,
   ApiParamsSupportedNetworks,
   BaseApiParams,
   EthereumLitTransaction,
-  SerializedTransaction,
-  StoredKeyMetadata,
-  SupportedNetworks,
-  SignMessageWithEncryptedKeyParams,
-  GetEncryptedKeyMetadataParams,
   ExportPrivateKeyParams,
   ExportPrivateKeyResult,
+  GetEncryptedKeyMetadataParams,
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResult,
   ImportPrivateKeyParams,
+  SerializedTransaction,
+  SignTransactionParams,
+  SignTransactionParamsSupportedEvm,
+  SignTransactionParamsSupportedSolana,
+  SignMessageWithEncryptedKeyParams,
   SignTransactionWithEncryptedKeyParams,
+  StoreEncryptedKeyMetadataParams,
+  StoredKeyMetadata,
+  SupportedNetworks,
 };

@@ -4,6 +4,8 @@ import {
   SessionSigsMap,
 } from '@lit-protocol/types';
 
+import { StoredKeyMetadata } from '../index';
+
 /** @typedef Network
  * The network type that the wrapped key will be used on.
  */
@@ -24,13 +26,25 @@ export interface ApiParamsSupportedNetworks {
   network: Network;
 }
 
-/** Fetching a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
+/** Fetch a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
  *
  * @typedef GetEncryptedKeyMetadataParams
  * @extends BaseApiParams
  *
  */
+
 export type GetEncryptedKeyMetadataParams = BaseApiParams;
+/** Fetching a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
+ *
+ * @typedef StoreEncryptedKeyMetadataParams
+ * @extends BaseApiParams
+ *
+ */
+export type StoreEncryptedKeyMetadataParams = BaseApiParams &
+  Pick<
+    StoredKeyMetadata,
+    'address' | 'keyType' | 'dataToEncryptHash' | 'ciphertext'
+  >;
 
 /** Exporting a previously persisted key only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
  *

@@ -16,6 +16,15 @@ export type SupportedNetworks = Extract<
   'cayenne' | 'manzano' | 'habanero'
 >;
 
+/** Metadata for a key that has been stored, encrypted, on the wrapped keys backend service
+ *
+ * @property { string } ciphertext The base64 encoded, salted & encrypted private key
+ * @property { string } dataToEncryptHash SHA-256 of the ciphertext
+ * @property { string } address The public address of the encrypted private key
+ * @property { string } pkpAddress The LIT PKP address that is associated with the encrypted private key
+ * @property { string } keyType The type of key that was encrypted -- e.g. ed25519, K256, etc.
+ * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the client who stored the key was connected to
+ */
 export interface StoredKeyMetadata {
   ciphertext: string;
   dataToEncryptHash: string;
