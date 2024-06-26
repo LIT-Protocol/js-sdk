@@ -23,6 +23,11 @@ import type {
   GeneratePrivateKeyResult,
   EthereumLitTransaction,
   SerializedTransaction,
+  BaseApiParams,
+  ApiParamsSupportedNetworks,
+  SignTransactionParams,
+  SignTransactionParamsSupportedEvm,
+  SignTransactionParamsSupportedSolana,
 } from './lib/types';
 
 export const constants = {
@@ -40,6 +45,11 @@ export const api = {
 };
 
 export {
+  SignTransactionParams,
+  SignTransactionParamsSupportedEvm,
+  SignTransactionParamsSupportedSolana,
+  ApiParamsSupportedNetworks,
+  BaseApiParams,
   EthereumLitTransaction,
   SerializedTransaction,
   StoredKeyMetadata,

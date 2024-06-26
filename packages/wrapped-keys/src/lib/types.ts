@@ -58,15 +58,12 @@ export interface ExportPrivateKeyResult {
   keyType: string;
 }
 
-type GeneratePrivateKeyParamsSupportedNetworks = BaseApiParams &
-  ApiParamsSupportedNetworks;
-
 /** @typedef GeneratePrivateKeyParams
  * @extends BaseApiParams
  * @property {Network} network The network for which the private key needs to be generated; keys are generated differently for different networks
  */
-export type GeneratePrivateKeyParams =
-  GeneratePrivateKeyParamsSupportedNetworks;
+export type GeneratePrivateKeyParams = BaseApiParams &
+  ApiParamsSupportedNetworks;
 
 /** @typedef GeneratePrivateKeyResult
  * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
@@ -95,17 +92,14 @@ interface SignMessageParams {
   messageToSign: string | Uint8Array;
 }
 
-type SignMessageWithEncryptedKeyParamsSupportedNetworks = BaseApiParams &
-  ApiParamsSupportedNetworks &
-  SignMessageParams;
-
 /** @typedef SignMessageWithEncryptedKeyParams
  * @extends BaseApiParams
  *
  * @property { string | Uint8Array } messageToSign The message to be signed
  */
-export type SignMessageWithEncryptedKeyParams =
-  SignMessageWithEncryptedKeyParamsSupportedNetworks;
+export type SignMessageWithEncryptedKeyParams = BaseApiParams &
+  ApiParamsSupportedNetworks &
+  SignMessageParams;
 
 interface BaseLitTransaction {
   chain: string;
@@ -136,16 +130,18 @@ export interface SerializedTransaction extends BaseLitTransaction {
   serializedTransaction: string;
 }
 
-interface SignTransactionParams extends BaseApiParams {
+export interface SignTransactionParams extends BaseApiParams {
   broadcast: boolean;
 }
 
-interface SignTransactionParamsSupportedEvm extends SignTransactionParams {
+export interface SignTransactionParamsSupportedEvm
+  extends SignTransactionParams {
   unsignedTransaction: EthereumLitTransaction;
   network: Extract<Network, 'evm'>;
 }
 
-interface SignTransactionParamsSupportedSolana extends SignTransactionParams {
+export interface SignTransactionParamsSupportedSolana
+  extends SignTransactionParams {
   unsignedTransaction: SerializedTransaction;
   network: Extract<Network, 'solana'>;
 }
