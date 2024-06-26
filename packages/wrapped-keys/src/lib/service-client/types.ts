@@ -20,7 +20,7 @@ export type SupportedNetworks = Extract<
  *
  * @property { string } ciphertext The base64 encoded, salted & encrypted private key
  * @property { string } dataToEncryptHash SHA-256 of the ciphertext
- * @property { string } address The public address of the encrypted private key
+ * @property { string } publicKey The public key of the encrypted private key
  * @property { string } pkpAddress The LIT PKP address that is associated with the encrypted private key
  * @property { string } keyType The type of key that was encrypted -- e.g. ed25519, K256, etc.
  * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the client who stored the key was connected to
@@ -28,7 +28,7 @@ export type SupportedNetworks = Extract<
 export interface StoredKeyMetadata {
   ciphertext: string;
   dataToEncryptHash: string;
-  address: string;
+  publicKey: string;
   pkpAddress: string;
   keyType: string;
   litNetwork: SupportedNetworks;
@@ -37,7 +37,7 @@ export interface StoredKeyMetadata {
 export interface StoreKeyParams extends BaseApiParams {
   storedKeyMetadata: Pick<
     StoredKeyMetadata,
-    'pkpAddress' | 'address' | 'keyType' | 'dataToEncryptHash' | 'ciphertext'
+    'pkpAddress' | 'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext'
   >;
 }
 

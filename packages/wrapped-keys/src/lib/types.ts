@@ -43,7 +43,7 @@ export type GetEncryptedKeyMetadataParams = BaseApiParams;
 export type StoreEncryptedKeyMetadataParams = BaseApiParams &
   Pick<
     StoredKeyMetadata,
-    'address' | 'keyType' | 'dataToEncryptHash' | 'ciphertext'
+    'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext'
   >;
 
 /** Exporting a previously persisted key only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
@@ -60,14 +60,14 @@ export type ExportPrivateKeyParams = BaseApiParams;
  * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the LIT Node Client was configured for when the key was persisted to the wrapped keys service
  * @property { string } decryptedPrivateKey The decrypted, plain text private key that was persisted to the wrapped keys service
  * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
- * @property { string } address The 'address' is typically based on the public key of the key being imported into the wrapped keys service
+ * @property { string } publicKey The public key of the key being imported into the wrapped keys service
  * @property { string } keyType The algorithm type of the key; this might be K256, ed25519, or other key formats.  The `keyType` will be included in the metadata returned from the wrapped keys service
  *
  */
 export interface ExportPrivateKeyResult {
   pkpAddress: string;
   decryptedPrivateKey: string;
-  address: string;
+  publicKey: string;
   litNetwork: LIT_NETWORKS_KEYS;
   keyType: string;
 }
@@ -93,12 +93,12 @@ export interface GeneratePrivateKeyResult {
  * @extends BaseApiParams
  *
  * @property { string } privateKey The private key to be imported into the wrapped keys service
- * @property { string } address The 'address' is typically based on the public key of the key being imported into the wrapped keys service
+ * @property { string } publicKey The public key of the key being imported into the wrapped keys service
  * @property { string } keyType The algorithm type of the key; this might be K256, ed25519, or other key formats.  The `keyType` will be included in the metadata returned from the wrapped keys service
  */
 export interface ImportPrivateKeyParams extends BaseApiParams {
   privateKey: string;
-  address: string;
+  publicKey: string;
   keyType: string;
 }
 

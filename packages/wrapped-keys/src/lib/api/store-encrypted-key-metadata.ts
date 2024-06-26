@@ -15,11 +15,11 @@ export async function storeEncryptedKeyMetadata(
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
-  const { address, keyType, dataToEncryptHash, ciphertext } = params;
+  const { publicKey, keyType, dataToEncryptHash, ciphertext } = params;
 
   return storePrivateKeyMetadata({
     storedKeyMetadata: {
-      address,
+      publicKey,
       keyType,
       dataToEncryptHash,
       ciphertext,

@@ -42,7 +42,7 @@ export async function generatePrivateKey(
     sessionSig: firstSessionSig,
     storedKeyMetadata: {
       ciphertext,
-      address: publicKey, // FIXME: If we're storing address and it is _not_ the publicKey directly, then we need the generate LIT action to return it for us
+      publicKey,
       keyType: LIT_CURVE.EcdsaK256, // FIXME: Should be returned by the LIT action; we won't know what it is unless it's provided.
       dataToEncryptHash,
       pkpAddress,
