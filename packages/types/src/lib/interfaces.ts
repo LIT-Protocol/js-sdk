@@ -5,7 +5,7 @@ import * as JSZip from 'jszip/dist/jszip.js';
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
-import { LogLevel } from '../../../logger/src/lib/logger';
+
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -21,6 +21,8 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
+
+import { LogLevel } from './enums';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {

@@ -24,6 +24,7 @@ import {
   LitNetwork,
   StakingStates,
   version,
+  LogLevel
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -66,7 +67,7 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { LogLevel } from '@lit-protocol/logger';
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;

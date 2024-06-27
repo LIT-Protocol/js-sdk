@@ -6,6 +6,7 @@ import {
   LIT_ENDPOINT,
   LIT_ERROR,
   LitNetwork,
+  LogLevel,
   RELAY_URL_CAYENNE,
   RELAY_URL_HABANERO,
   RELAY_URL_MANZANO,
@@ -30,7 +31,7 @@ import {
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
+import { LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
 

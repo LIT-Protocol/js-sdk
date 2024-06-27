@@ -75,3 +75,14 @@ export enum ProviderType {
   StytchWhatsAppFactorOtp = 'stytchWhatsAppFactorOtp',
   StytchTotpFactor = 'stytchTotpFactor',
 }
+
+export enum LogLevel {
+  INFO = 0,
+  DEBUG = 1,
+  WARN = 2,
+  ERROR = 3,
+  FATAL = 4,
+  TIMING_START = 5,
+  TIMING_END = 6,
+  OFF = -1,
+}

@@ -1,16 +1,6 @@
-import { version } from '@lit-protocol/constants';
+import { version, LogLevel } from '@lit-protocol/constants';
 import { hashMessage } from 'ethers/lib/utils';
 
-export enum LogLevel {
-  INFO = 0,
-  DEBUG = 1,
-  WARN = 2,
-  ERROR = 3,
-  FATAL = 4,
-  TIMING_START = 5,
-  TIMING_END = 6,
-  OFF = -1,
-}
 
 const colours = {
   reset: '\x1b[0m',
