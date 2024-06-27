@@ -14,8 +14,6 @@ import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import { AuthMethodScope } from '@lit-protocol/constants';
 
-import networkContext from './networkContext.datilDev.json';
-
 export class TinnyPerson {
   public privateKey: string;
   public wallet: ethers.Wallet;
@@ -103,7 +101,7 @@ export class TinnyPerson {
     //  * ====================================
     //  */
     if (this.envConfig.network === LIT_TESTNET.LOCALCHAIN) {
-      // const networkContext = this.envConfig.contractContext;
+      const networkContext = this.envConfig.contractContext;
       this.contractsClient = new LitContracts({
         signer: this.wallet,
         debug: this.envConfig.processEnvs.DEBUG,
