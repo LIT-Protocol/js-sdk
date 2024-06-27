@@ -115,7 +115,7 @@ export const runInBand = async ({
 };
 
 /**
- * Runs tests in parallel and reports the results.
+ * Runs tests in parallel with a limit of 5 concurrent tests and reports the results.
  * @param {Object} options - The options for running the tests.
  * @param {any} options.tests - The tests to run.
  * @param {TinnyEnvironment} options.devEnv - The development environment.
@@ -124,10 +124,13 @@ export const runInBand = async ({
 export const runTestsParallel = async ({
   tests,
   devEnv,
+  chunkSize,
 }: {
   tests: any;
   devEnv: TinnyEnvironment;
+  chunkSize?: number;
 }): Promise<number> => {
+  const CHUNK_SIZE = chunkSize || parseInt(process.env.CHUNK_SIZE) || 5;
   const filters = getFiltersFlag();
   const excludeFilters = getExcludeFlags();
 
@@ -146,57 +149,69 @@ export const runTestsParallel = async ({
     );
   }
 
-  const testPromises = testsToRun.map(
-    async ([testName, testFunction], testIndex) => {
-      const maxAttempts = devEnv.processEnvs.MAX_ATTEMPTS;
-      let attempts = 0;
-      let testPassed = false;
+  const runTest = async (
+    [testName, testFunction]: [string, any],
+    testIndex: number
+  ): Promise<string> => {
+    const maxAttempts = devEnv.processEnvs.MAX_ATTEMPTS;
+    let attempts = 0;
+    let testPassed = false;
 
-      while (attempts < maxAttempts && !testPassed) {
-        const startTime = performance.now();
-        try {
-          console.log(
-            `\x1b[90m[runTestsParallel] Attempt ${attempts + 1} for ${
-              testIndex + 1
-            }. ${testName}...\x1b[0m`
-          );
+    while (attempts < maxAttempts && !testPassed) {
+      const startTime = performance.now();
+      try {
+        console.log(
+          `\x1b[90m[runTestsParallel] Attempt ${attempts + 1} for ${
+            testIndex + 1
+          }. ${testName}...\x1b[0m`
+        );
 
-          // @ts-ignore
-          await testFunction(devEnv);
-          testPassed = true;
+        // @ts-ignore
+        await testFunction(devEnv);
+        testPassed = true;
 
+        const endTime = performance.now();
+        const timeTaken = (endTime - startTime).toFixed(2);
+        console.log(
+          `\x1b[32m✔\x1b[90m ${
+            testIndex + 1
+          }. ${testName} - Passed (${timeTaken} ms)\x1b[0m`
+        );
+        return `${testName} (Passed in ${timeTaken} ms)`;
+      } catch (error) {
+        if (error.message === 'LIT_IGNORE_TEST') {
+          return `${testName} (Skipped)`;
+        }
+        attempts++;
+
+        if (attempts >= maxAttempts) {
           const endTime = performance.now();
           const timeTaken = (endTime - startTime).toFixed(2);
-          console.log(
-            `\x1b[32m✔\x1b[90m ${
+          console.error(
+            `\x1b[31m✖\x1b[90m ${
               testIndex + 1
-            }. ${testName} - Passed (${timeTaken} ms)\x1b[0m`
+            }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
           );
-          return `${testName} (Passed in ${timeTaken} ms)`;
-        } catch (error) {
-          if (error.message === 'LIT_IGNORE_TEST') {
-            return `${testName} (Skipped)`;
-          }
-          attempts++;
-
-          // wait for at least 5 seconds
-          if (attempts >= maxAttempts) {
-            const endTime = performance.now();
-            const timeTaken = (endTime - startTime).toFixed(2);
-            console.error(
-              `\x1b[31m✖\x1b[90m ${
-                testIndex + 1
-              }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
-            );
-            console.error(`\x1b[31m❌Error:\x1b[90m ${error}\x1b[0m`);
-            return `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`;
-          }
+          console.error(`\x1b[31m❌Error:\x1b[90m ${error}\x1b[0m`);
+          return `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`;
         }
       }
     }
-  );
+  };
 
-  const results = await Promise.all(testPromises);
+  const results: string[] = [];
+
+  for (let i = 0; i < testsToRun.length; i += CHUNK_SIZE) {
+    const chunk = testsToRun.slice(i, i + CHUNK_SIZE);
+    const chunkResults = await Promise.all(
+      chunk.map((test, index) => runTest(test, i + index))
+    );
+
+    // wait for 3 seconds before running the next chunk
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    results.push(...chunkResults);
+  }
 
   const skippedTests = results.filter((result) => result.includes('Skipped'));
   const failedTests = results.filter((result) => result.includes('Failed'));

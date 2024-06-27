@@ -37,20 +37,21 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 
 **NOTE: a `.env.sample` is contained in the repository root for the below env tables**
 
-| Variable                 | Description                                                                                                                                                              |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MAX_ATTEMPTS`           | Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.                                                        |
-| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_TESTNET.LOCALCHAIN`, `LIT_TESTNET.MANZANO`, or `LIT_TESTNET.CAYENNE`.                            |
-| `DEBUG`                  | Specifies whether to enable debug mode.                                                                                                                                  |
-| `REQUEST_PER_KILOSECOND` | To execute a transaction with Lit, you must reserve capacity on the network using Capacity Credits. These allow a set number of requests over a period (default 2 days). |
-| `WAIT_FOR_KEY_INTERVAL`  | Wait time in milliseconds if no private keys are available.                                                                                                              |
-| `TIME_TO_RELEASE_KEY`    | Time to wait before releasing the key after requesting it.                                                                                                               |
-| `RUN_IN_BAND`            | Run all tests in a single thread.                                                                                                                                        |
-| `RUN_IN_BAND_INTERVAL`   | The interval in milliseconds to run the tests in a single thread.                                                                                                        |
-| `LIT_RPC_URL`            | The URL of the Lit RPC server: <br> - For local Anvil: `http://127.0.0.1:8545` <br> - For Chronical: `https://chain-rpc.litprotocol.com/http` <br> - For Vesuvius: `https://vesuvius-rpc.litprotocol.com`                                                                        |
-| `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                                                                                      |
-| `USE_SHIVA`              | A flag to determine if `Shiva` should be used for the `localchain` network.                                                                                              |
-| `PRIVATE_KEYS`           | A set of private keys to use which will be used to perform chain operations.                                                                                             |
+| Variable                 | Description                                                                                                                                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MAX_ATTEMPTS`           | Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.                                                                                         |
+| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_TESTNET.LOCALCHAIN`, `LIT_TESTNET.MANZANO`, or `LIT_TESTNET.CAYENNE`.                                                             |
+| `DEBUG`                  | Specifies whether to enable debug mode.                                                                                                                                                                   |
+| `REQUEST_PER_KILOSECOND` | To execute a transaction with Lit, you must reserve capacity on the network using Capacity Credits. These allow a set number of requests over a period (default 2 days).                                  |
+| `WAIT_FOR_KEY_INTERVAL`  | Wait time in milliseconds if no private keys are available.                                                                                                                                               |
+| `TIME_TO_RELEASE_KEY`    | Time to wait before releasing the key after requesting it.                                                                                                                                                |
+| `RUN_IN_BAND`            | Run all tests in a single thread.                                                                                                                                                                         |
+| `RUN_IN_BAND_INTERVAL`   | The interval in milliseconds to run the tests in a single thread.                                                                                                                                         |
+| `LIT_RPC_URL`            | The URL of the Lit RPC server: <br> - For local Anvil: `http://127.0.0.1:8545` <br> - For Chronical: `https://chain-rpc.litprotocol.com/http` <br> - For Vesuvius: `https://vesuvius-rpc.litprotocol.com` |
+| `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                                                                                                                       |
+| `USE_SHIVA`              | A flag to determine if `Shiva` should be used for the `localchain` network.                                                                                                                               |
+| `PRIVATE_KEYS`           | A set of private keys to use which will be used to perform chain operations.                                                                                                                              |
+| `CHUNK_SIZE`             | Determines the number of tests run concurrently during parallel execution                                                                                                                                 |
 
 Below is te API Documentation forthe `ProccessEnvs` interface for the `shiva-client` detailing the configurable enviorment variables and their purposes:
 
