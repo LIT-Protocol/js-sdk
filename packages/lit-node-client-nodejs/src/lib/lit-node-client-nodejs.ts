@@ -127,6 +127,7 @@ import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
+import { LogLevel } from '@lit-protocol/logger';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -165,6 +166,7 @@ export class LitNodeClientNodeJs
     // Useful log for debugging
     if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
       log(
+        LogLevel.INFO,
         `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
       );
     }
@@ -246,6 +248,7 @@ export class LitNodeClientNodeJs
         localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
       } catch (e) {
         log(
+          LogLevel.INFO,
           `[getSessionKey] Localstorage not available.Not a problem.Contiune...`
         );
       }
@@ -354,7 +357,9 @@ export class LitNodeClientNodeJs
 
     // -- (TRY) to get it in the local storage
     // -- IF NOT: Generates one
-    log(`getWalletSig - flow starts
+    log(
+      LogLevel.INFO,
+      `getWalletSig - flow starts
         storageKey: ${storageKey}
         storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
     `);
@@ -364,13 +369,12 @@ export class LitNodeClientNodeJs
       !storedWalletSigOrError.result ||
       storedWalletSigOrError.result == ''
     ) {
-      log('getWalletSig - flow 1');
-      console.warn(
+
+      log(
+        LogLevel.WARN,
         `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
       if (authNeededCallback) {
-        log('getWalletSig - flow 1.1');
-
         const body = {
           chain,
           statement: sessionCapabilityObject?.statement,
@@ -396,9 +400,9 @@ export class LitNodeClientNodeJs
 
         walletSig = await authNeededCallback(body);
       } else {
-        log('getWalletSig - flow 1.2');
+
         if (!this.defaultAuthCallback) {
-          log('getWalletSig - flow 1.2.1');
+          log('');
           return throwError({
             message: 'No default auth callback provided',
             errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,

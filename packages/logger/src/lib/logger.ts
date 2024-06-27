@@ -1,7 +1,5 @@
 import { version } from '@lit-protocol/constants';
 import { hashMessage } from 'ethers/lib/utils';
-import { encode } from 'punycode';
-import { toString as uint8arrayToString } from 'uint8arrays';
 
 export enum LogLevel {
   INFO = 0,

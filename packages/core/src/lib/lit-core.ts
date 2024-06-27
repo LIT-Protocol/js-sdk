@@ -66,6 +66,7 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
+import { LogLevel } from '@lit-protocol/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -93,6 +94,7 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'checkNodeAttestation'
     | 'litNetwork'
     | 'minNodeCount'
+    | 'logLevel'
   >
 > &
   Partial<
@@ -115,6 +117,7 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
+    logLevel: LogLevel.DEBUG
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -183,7 +186,7 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
-    bootstrapLogManager('core');
+    bootstrapLogManager('core', this.config.logLevel);
 
     // -- configure local storage if not present
     // LitNodeClientNodejs is a base for LitNodeClient
@@ -192,6 +195,7 @@ export class LitCore {
     // If the user sets a new file path, we respect it over the default path.
     if (this.config.storageProvider?.provider) {
       log(
+        LogLevel.DEBUG,
         'localstorage api not found, injecting persistence instance found in config'
       );
       // using Object defineProperty in order to set a property previously defined as readonly.
@@ -205,6 +209,7 @@ export class LitCore {
       !this.config.storageProvider?.provider
     ) {
       log(
+        LogLevel.DEBUG,
         'Looks like you are running in NodeJS and did not provide a storage provider, your sessions will not be cached'
       );
     }
@@ -245,7 +250,7 @@ export class LitCore {
       });
     }
 
-    log('Bootstrap urls: ', bootstrapUrls);
+    log(LogLevel.INFO, 'Bootstrap urls: ', bootstrapUrls);
 
     return {
       minNodeCount: parseInt(minNodeCount, 10),
@@ -286,7 +291,7 @@ export class LitCore {
     }
   }
   private async _handleStakingContractStateChange(state: StakingStates) {
-    log(`New state detected: "${state}"`);
+    log(LogLevel.INFO, `New state detected: "${state}"`);
 
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
@@ -300,6 +305,7 @@ export class LitCore {
         // But we don't need to handle node urls changing on Cayenne, since it is static
         try {
           log(
+            LogLevel.INFO,
             'State found to be new validator set locked, checking validator set'
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
@@ -320,6 +326,7 @@ export class LitCore {
                 network request to the previous epoch's node set before changing over.
               */
             log(
+              LogLevel.INFO,
               'Active validator sets changed, new validators ',
               delta,
               'starting node connection'
@@ -362,6 +369,7 @@ export class LitCore {
 
     if (this._stakingContract) {
       log(
+        LogLevel.DEBUG,
         'listening for state change on staking contract: ',
         this._stakingContract.address
       );
@@ -507,7 +515,7 @@ export class LitCore {
         {}
       );
       if (this.config.litNetwork === LitNetwork.Custom) {
-        log('using custom contracts: ', logAddresses);
+        log(LogLevel.DEBUG, 'Using custom contracts: ', logAddresses);
       }
     }
 
@@ -548,8 +556,8 @@ export class LitCore {
     globalThis.litNodeClient = this;
     this.ready = true;
 
-    log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
-    log('current network config', {
+    log(LogLevel.INFO, `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
+    log(LogLevel.DEBUG, 'current network config', {
       networkPubkey: this.networkPubKey,
       networkPubKeySet: this.networkPubKeySet,
       hdRootPubkeys: this.hdRootPubkeys,
@@ -606,7 +614,7 @@ export class LitCore {
       );
     }
 
-    log(`Handshake with ${url} returned keys: `, keys);
+    log(LogLevel.DEBUG, `Handshake with ${url} returned keys: `, keys);
     if (!keys.latestBlockhash) {
       logErrorWithRequestId(
         requestId,
@@ -630,12 +638,12 @@ export class LitCore {
       }
 
       // actually verify the attestation by checking the signature against AMD certs
-      log('Checking attestation against amd certs...');
+      log(LogLevel.DEBUG, 'Checking attestation against amd certs...');
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
         await checkSevSnpAttestation(attestation, challenge, url);
-        log(`Lit Node Attestation verified for ${url}`);
+        log(LogLevel.DEBUG, `Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         throwError({
@@ -772,6 +780,7 @@ export class LitCore {
    */
   private async _syncBlockhash() {
     log(
+      LogLevel.DEBUG,
       'Syncing state for new blockhash ',
       'current blockhash: ',
       this.latestBlockhash
@@ -782,7 +791,7 @@ export class LitCore {
         const blockHashBody: EthBlockhashInfo = await resp.json();
         this.latestBlockhash = blockHashBody.blockhash;
         this.lastBlockHashRetrieved = Date.now();
-        log('Done syncing state new blockhash: ', this.latestBlockhash);
+        log(LogLevel.DEBUG, 'Done syncing state new blockhash: ', this.latestBlockhash);
       })
       .catch((err: BlockHashErrorResponse) => {
         // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
@@ -865,7 +874,7 @@ export class LitCore {
       endpoint: LIT_ENDPOINT.HANDSHAKE,
     });
 
-    log(`handshakeWithNode ${urlWithPath}`);
+    log(LogLevel.DEBUG, `handshakeWithNode ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
@@ -1180,7 +1189,7 @@ export class LitCore {
           res.error.errorCode === 'not_authorized') &&
         this.config.alertWhenUnauthorized
       ) {
-        log('You are not authorized to access this content');
+        log(LogLevel.INFO, 'You are not authorized to access this content');
       }
 
       throwError({
@@ -1234,6 +1243,7 @@ export class LitCore {
         canonicalAccessControlConditionFormatter(c)
       );
       log(
+        LogLevel.INFO,
         'formattedAccessControlConditions',
         JSON.stringify(formattedAccessControlConditions)
       );
@@ -1242,6 +1252,7 @@ export class LitCore {
         canonicalEVMContractConditionFormatter(c)
       );
       log(
+        LogLevel.INFO,
         'formattedEVMContractConditions',
         JSON.stringify(formattedEVMContractConditions)
       );
@@ -1252,6 +1263,7 @@ export class LitCore {
         canonicalSolRpcConditionFormatter(c)
       );
       log(
+        LogLevel.INFO,
         'formattedSolRpcConditions',
         JSON.stringify(formattedSolRpcConditions)
       );
@@ -1261,6 +1273,7 @@ export class LitCore {
           canonicalUnifiedAccessControlConditionFormatter(c)
         );
       log(
+        LogLevel.INFO,
         'formattedUnifiedAccessControlConditions',
         JSON.stringify(formattedUnifiedAccessControlConditions)
       );

@@ -5,6 +5,7 @@ import * as JSZip from 'jszip/dist/jszip.js';
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
+import { LogLevel } from '../../../logger/src/lib/logger';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -199,6 +200,7 @@ export interface LitNodeClientConfig {
   storageProvider?: StorageProvider;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string;
+  logLevel?: LogLevel
 }
 
 export type CustomNetwork = Pick<

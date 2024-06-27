@@ -267,7 +267,7 @@ export const getLoggerbyId = (id: string) => {
  *
  * @returns { void }
  */
-export const log = (...args: any): void => {
+export const log = (level?: LogLevel, ...args: any): void => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -281,9 +281,7 @@ export const log = (...args: any): void => {
     return;
   }
 
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
+
   // config is loaded, and debug is true
 
   // if there are there are logs in buffer, print them first and empty the buffer.
@@ -506,7 +504,7 @@ export const checkIfAuthSigRequiresChainParam = (
   chain: string,
   functionName: string
 ): boolean => {
-  log('checkIfAuthSigRequiresChainParam');
+  log(LogLevel.INFO, 'checkIfAuthSigRequiresChainParam');
   for (const key of LIT_AUTH_SIG_CHAIN_KEYS) {
     if (key in authSig) {
       return true;
