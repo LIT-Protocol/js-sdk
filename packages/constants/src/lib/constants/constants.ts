@@ -481,7 +481,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     contractAddress: null,
     chainId: 2311,
     name: 'Chronicle - Lit Protocol V1 Devnet',
-    symbol: 'tstLIT',
+    symbol: 'testLIT',
     decimals: 18,
     rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
     blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
