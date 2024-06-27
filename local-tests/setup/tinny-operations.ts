@@ -119,7 +119,7 @@ export const runInBand = async ({
  * @param {Object} options - The options for running the tests.
  * @param {any} options.tests - The tests to run.
  * @param {TinnyEnvironment} options.devEnv - The development environment.
- * @returns {Promise<void>} - A promise that resolves when all tests have been run.
+ * @returns {Promise<number>} - A promise that resolves to 0 if all tests passed, 1 otherwise.
  */
 export const runTestsParallel = async ({
   tests,
@@ -217,15 +217,21 @@ export const runTestsParallel = async ({
   }
 
   if (passedTests.length > 0) {
+    console.log(
+      `\x1b[32mTest Report: ${passedTests.length} test(s) passed.\x1b[0m`
+    );
     passedTests.forEach((passedTest) =>
       console.log(`\x1b[32m- ${passedTest}\x1b[0m`)
     );
-    console.log('\x1b[32mTest Report: All tests passed.\x1b[0m');
   }
 
   if (failedTests.length > 0) {
+    console.log(
+      `\x1b[31mTest Report: ${failedTests.length} test(s) failed.\x1b[0m`
+    );
     return 1; // Exit with error code if any test failed
   } else {
+    console.log('\x1b[32mTest Report: All tests passed.\x1b[0m');
     return 0; // Exit successfully if all tests passed
   }
 };
