@@ -1,7 +1,7 @@
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
-import { GeneratePrivateKeyParams } from '../../index';
+import { GeneratePrivateKeyParams } from '../types';
 
 interface GeneratePrivateKeyLitActionParams extends GeneratePrivateKeyParams {
   pkpAddress: string;

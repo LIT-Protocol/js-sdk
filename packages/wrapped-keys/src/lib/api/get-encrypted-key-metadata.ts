@@ -1,5 +1,5 @@
-import { fetchPrivateKeyMetadata, StoredKeyMetadata } from '../service-client';
-import { GetEncryptedKeyMetadataParams } from '../types';
+import { fetchPrivateKeyMetadata } from '../service-client';
+import { GetEncryptedKeyMetadataParams, StoredKeyMetadata } from '../types';
 import { getFirstSessionSig } from '../utils';
 
 /** Get a previously encrypted and persisted private key and its metadata.

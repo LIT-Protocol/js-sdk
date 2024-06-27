@@ -5,8 +5,11 @@ import {
 } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
-import { StoredKeyMetadata } from '../service-client';
-import { EthereumLitTransaction, SerializedTransaction } from '../types';
+import {
+  EthereumLitTransaction,
+  SerializedTransaction,
+  StoredKeyMetadata,
+} from '../types';
 
 interface SignTransactionWithLitActionParams {
   litNodeClient: ILitNodeClient;

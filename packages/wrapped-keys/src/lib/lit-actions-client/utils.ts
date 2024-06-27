@@ -1,7 +1,8 @@
 import { ExecuteJsResponse } from '@lit-protocol/types';
 
 import { LIT_ACTION_CID_REPOSITORY } from './constants';
-import { LitActionSupportedNetworks, LitActionType } from './types';
+import { LitActionType } from './types';
+import { Network } from '../types';
 
 /**
  *
@@ -47,9 +48,6 @@ export function postLitActionValidation(
   return response;
 }
 
-export function getLitActionCid(
-  network: LitActionSupportedNetworks,
-  actionType: LitActionType
-) {
+export function getLitActionCid(network: Network, actionType: LitActionType) {
   return LIT_ACTION_CID_REPOSITORY[actionType][network];
 }

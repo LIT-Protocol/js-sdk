@@ -1,5 +1,6 @@
-import { FetchKeyParams, StoredKeyMetadata, StoreKeyParams } from './types';
+import { FetchKeyParams, StoreKeyParams } from './types';
 import { getBaseRequestParams, makeRequest } from './utils';
+import { StoredKeyMetadata } from '../types';
 
 /** Fetches previously stored private key metadata from the wrapped keys service
  *

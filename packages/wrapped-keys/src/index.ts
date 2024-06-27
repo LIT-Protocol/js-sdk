@@ -9,10 +9,7 @@ import {
 } from './lib/api';
 import { CHAIN_ETHEREUM, LIT_PREFIX } from './lib/constants';
 
-import type {
-  StoredKeyMetadata,
-  SupportedNetworks,
-} from './lib/service-client';
+import type { SupportedNetworks } from './lib/service-client/types';
 import type {
   SignMessageWithEncryptedKeyParams,
   GetEncryptedKeyMetadataParams,
@@ -30,6 +27,7 @@ import type {
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
   StoreEncryptedKeyMetadataParams,
+  StoredKeyMetadata,
 } from './lib/types';
 
 export const constants = {
