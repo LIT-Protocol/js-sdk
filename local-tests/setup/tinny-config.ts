@@ -87,6 +87,20 @@ export interface ProcessEnvs {
    * Ignore setup steps. Usually when you run to quickly run a single test.
    */
   NO_SETUP: boolean;
+
+  /**
+   * Use shiva as a test network which will spawn before the test run starts
+   */
+  USE_SHIVA: boolean;
+
+  /**
+   * The network configuration which will be used for `contract context` if provided.
+   * it is assumed the context will work with the {@link NETWORK} provided. If the configuration
+   * is not for the provided network then there could be undefined behavior.
+   * If {@link USE_SHIVA} is set to true then the network configuration will be loaded implicitly and
+   * this value will be ignored
+   */
+  NETWORK_CONFIG: string;
 }
 
 /**

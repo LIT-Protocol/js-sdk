@@ -1,5 +1,11 @@
 import { LitContractResolverContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import {
+  TestNetCreateRequest,
+  TestNetInfo,
+  TestNetResponse,
+  TestNetState,
+} from './shiva-client.d';
 
 export interface ShivaEnvs {
   /**
@@ -36,11 +42,16 @@ export interface ShivaEnvs {
   USE_LIT_BINARIES: boolean;
 }
 
+/**
+ * Client implementation for a single testnet instance managed by the Shiva tool
+ * Is essentially a localchain setup but allows for programmatic operations to be preformed
+ * on the network from the implementation wthin this class. Each testnet is a unique network
+ */
 export class TestnetClient {
   private _id: string;
-  private _info: any;
+  private _info: TestNetInfo;
   private _processEnvs: ShivaEnvs;
-  private _currentState: string;
+  private _currentState: TestNetState;
 
   constructor(id: string, envs: ShivaEnvs) {
     this._processEnvs = envs;
@@ -57,7 +68,7 @@ export class TestnetClient {
       pub epoch_length: i32,
     }
   */
-  get Info(): any | undefined {
+  get Info(): TestNetInfo | undefined {
     return this._info;
   }
 
@@ -69,7 +80,7 @@ export class TestnetClient {
 
     const contractResolverAbi: string = testNetConfig.contractResolverAbi;
     const contractResolverAddress =
-      testNetConfig.contractAddresses[`contract_resolver`];
+      testNetConfig.contractAddresses[`contractResolver`];
     const networkContext = {
       abi: JSON.parse(contractResolverAbi),
       resolverAddress: contractResolverAddress,
@@ -85,33 +96,32 @@ export class TestnetClient {
    * Polls a given testnet for the ACTIVE state
    * polls on a 500 milisecond interval
    */
-  public async pollTestnetForActive() {
+  public async pollTestnetForActive(): Promise<string> {
     let state = 'Busy';
-    while (state != 'Active') {
+    while (state != 'Active' && state != `UNKNOWN`) {
       const pollRes = await fetch(
         this._processEnvs.TESTNET_MANAGER_URL + '/test/poll/testnet/' + this._id
       );
       const res = await pollRes.json();
       state = res.body;
       console.log('found state to be', res);
-      if (state != 'Active') {
+      if (state != 'Active' && state != 'UNKNOWN') {
         await new Promise<void>((res, _) => {
           setTimeout(() => {
             res();
           }, 500);
         });
+      } else {
+        break;
       }
     }
+
+    return state;
   }
 
   /**
    * returns the config for a given testnet
    * struct reference for config
-   * pub struct TestNetInfo {
-      pub contract_addresses: ContractAddresses,
-      pub validator_addresses: Vec<String>,
-      pub epoch_length: i32,
-    }
    */
   public getTestnetConfig() {
     return fetch(
@@ -122,9 +132,9 @@ export class TestnetClient {
       .then((res: Response) => {
         return res.json();
       })
-      .then((info: any) => {
+      .then((info: TestNetResponse<TestNetInfo>) => {
         this._info = info.body;
-        this._currentState = info.lastStateObserved;
+        this._currentState = info.lastStateObserved as TestNetState;
         console.log('setting testnet info: ', this._info);
       });
   }
@@ -162,10 +172,13 @@ export class TestnetClient {
       .then((res: Response) => {
         if (res.status === 200) {
           return res.json();
+        } else {
+          return Promise.reject(res);
         }
       })
-      .then((body: any) => {
+      .then((body: TestNetResponse<boolean>) => {
         console.log('validator kick response: ', body);
+        return body;
       });
   }
 
@@ -180,7 +193,7 @@ export class TestnetClient {
       .then((res: Response) => {
         return res.json();
       })
-      .then((body: any) => {
+      .then((body: TestNetResponse<void>) => {
         console.log('shutdown respone: ', body);
       });
   }
@@ -195,14 +208,15 @@ export class ShivaClient {
     USE_LIT_BINARIES: process.env[`USE_LIT_BINARIES`] === `true`,
     LIT_NODE_BINARY_PATH:
       process.env['LIT_NODE_BINARY_PATH'] ||
-      `./../../../lit-assets/rust/lit-node/target/debug/lit_node`,
+      `./../../lit-assets/rust/lit-node/target/debug/lit_node`,
     LIT_ACTION_BINARY_PATH:
       process.env['LIT_ACTION_BINARY_PATH'] ||
-      `./../../../lit-assets/rust/lit-actions/target/debug/lit_actions`,
+      `./../../lit-assets/rust/lit-actions/target/debug/lit_actions`,
   };
 
   constructor() {
     this._clients = new Map();
+    console.log('Shiva enviorment loaded current config: ', this.processEnvs);
   }
 
   /**
@@ -222,7 +236,9 @@ export class ShivaClient {
         pub enable_rate_limiting: Option<String>,
        }
    */
-  async startTestnetManager(): Promise<TestnetClient> {
+  async startTestnetManager(
+    createReq?: TestNetCreateRequest
+  ): Promise<TestnetClient> {
     const existingTestnetResp = await fetch(
       this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets'
     );
@@ -242,8 +258,8 @@ export class ShivaClient {
         'lit action server binary path: ',
         this.processEnvs.LIT_ACTION_BINARY_PATH
       );
-      let body: Record<string, any> = {
-        nodeCount: 6,
+      let body: Partial<TestNetCreateRequest> = createReq ?? {
+        nodeCount: 3,
         pollingInterval: '2000',
         epochLength: 100,
       };
