@@ -611,10 +611,26 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
 };
 
+
 /**
- * Lit Protocol Chain RPC URL
+ * Enum representing the available LIT RPC endpoints.
  */
-export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
+export enum LIT_RPC {
+  /**
+   * Local Anvil RPC endpoint.
+   */
+  LOCAL_ANVIL = 'http://127.0.0.1:8545',
+
+  /**
+   * Chronical RPC endpoint.
+   */
+  CHRONICAL = 'https://chain-rpc.litprotocol.com/http',
+
+  /**
+   * Vesuvius RPC endpoint.
+   */
+  VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
+}
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
 

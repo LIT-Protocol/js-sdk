@@ -34,7 +34,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
-    LIT_RPC_URL: process.env['LIT_RPC_URL'] || 'http://127.0.0.1:8545',
+    LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
     BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
@@ -48,7 +48,6 @@ export class TinnyEnvironment {
 
     // Available Accounts
     // ==================
-    // (0) "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" (10000.000000000000000000 ETH)
     // (1) "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" (10000.000000000000000000 ETH)
     // (2) "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" (10000.000000000000000000 ETH)
     // (3) "0x90F79bf6EB2c4f870365E785982E1f101E93b906" (10000.000000000000000000 ETH)
@@ -235,7 +234,7 @@ export class TinnyEnvironment {
         this?.testnet?.ContractContext ?? this._contractContext;
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
-        rpcUrl: this.processEnvs.LIT_RPC_URL,
+        rpcUrl: this.processEnvs.LIT_RPC_URL ?? LIT_RPC.LOCAL_ANVIL,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
@@ -433,7 +432,7 @@ export class TinnyEnvironment {
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
-        rpc: this.processEnvs.LIT_RPC_URL, // anvil rpc
+        rpc: this.processEnvs.LIT_RPC_URL || LIT_RPC.LOCAL_ANVIL, // anvil rpc
         customContext: networkContext,
       });
     } else {
@@ -441,6 +440,13 @@ export class TinnyEnvironment {
       // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
       const capacityCreditWallet =
         ethers.Wallet.createRandom().connect(provider);
+
+      // get wallet balance
+      // const balance = await wallet.getBalance();
+      // console.log("this.rpc:", this.rpc);
+      // console.log('this.wallet.address', wallet.address);
+      // console.log('Balance:', balance.toString());
+      // process.exit();
 
       const transferTx = await wallet.sendTransaction({
         to: capacityCreditWallet.address,

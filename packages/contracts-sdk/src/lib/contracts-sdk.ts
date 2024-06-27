@@ -64,10 +64,15 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import {
+  AuthMethodScope,
+  AuthMethodType,
+  LIT_RPC,
+} from '@lit-protocol/constants';
+import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
 
-const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
-const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+// const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+// const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
@@ -217,7 +222,7 @@ export class LitContracts {
     this.network = args?.network || 'cayenne';
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
-      this.rpc = DEFAULT_RPC;
+      this.rpc = LIT_RPC.VESUVIUS;
     }
 
     if (!this.rpcs) {
@@ -595,17 +600,22 @@ export class LitContracts {
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl = rpcUrl ?? DEFAULT_READ_RPC;
+    rpcUrl = rpcUrl ?? LIT_RPC.VESUVIUS;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
       provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     }
 
+    if (network === 'datil-dev') {
+      // @ts-ignore
+      context!.Staking!.abi = minStakingAbi;
+    }
+
     if (!context) {
       const contractData = await LitContracts._resolveContractContext(
-        network,
-        context
+        network
+        // context
       );
 
       const stakingContract = contractData.find(
@@ -976,8 +986,8 @@ export class LitContracts {
       | 'habanero'
       | 'custom'
       | 'localhost'
-      | 'datil-dev',
-    context?: LitContractContext | LitContractResolverContext
+      | 'datil-dev'
+    // context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
     const CAYENNE_API =
@@ -986,53 +996,51 @@ export class LitContracts {
       'https://lit-general-worker.getlit.dev/manzano-contract-addresses';
     const HABANERO_API =
       'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
+    const DATIL_DEV_API =
+      'https://lit-general-worker-staging.onrender.com/datil-dev/contracts';
 
-    if (network === 'cayenne') {
+    const fetchData = async (url: string) => {
       try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(CAYENNE_API).then((res) => res.json());
+        return await fetch(url).then((res) => res.json());
       } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
+        throw new Error(`Error fetching data from ${url}: ${e.toString()}`);
       }
-    } else if (network === 'manzano') {
-      try {
-        data = await fetch(MANZANO_API).then((res) => res.json());
-      } catch (e: any) {
+    };
+
+    switch (network) {
+      case 'cayenne':
+        data = await fetchData(CAYENNE_API);
+        break;
+      case 'manzano':
+        data = await fetchData(MANZANO_API);
+        break;
+      case 'habanero':
+        data = await fetchData(HABANERO_API);
+        break;
+      case 'datil-dev':
+        data = await fetchData(DATIL_DEV_API);
+        break;
+      case 'custom':
+      case 'localhost':
+        // just use cayenne abis for custom and localhost
+        data = await fetchData(CAYENNE_API);
+        break;
+      default:
         throw new Error(
-          `Error fetching data from ${MANZANO_API}: ${e.toString()}`
+          `[_resolveContractContext] Unsupported network: ${network}`
         );
-      }
-    } else if (network === 'habanero') {
-      try {
-        data = await fetch(HABANERO_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${HABANERO_API}: ${e.toString()}`
-        );
-      }
-    } else if (network === 'custom' || network === 'localhost') {
-      try {
-        // Fetch and parse the JSON data in one step
-        // just use cayenne abis
-        data = await fetch(CAYENNE_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
-      }
     }
-    // Data pulled over http is formatted differently than
-    // what the type expects. Here we normmalize to the LitContractContext type.
-    data = data.data.map((c: any) => {
-      return {
-        address: c.contracts[0].address_hash,
-        abi: c.contracts[0].ABI,
-        name: c.name,
-      };
-    });
-    return data;
+
+    if (!data) {
+      throw new Error('[_resolveContractContext] No data found');
+    }
+
+    // Normalize the data to the LitContractContext type
+    return data.data.map((c: any) => ({
+      address: c.contracts[0].address_hash,
+      abi: c.contracts[0].ABI,
+      name: c.name,
+    }));
   }
 
   /**
@@ -1390,8 +1398,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       });
 
       const txHash = res.hash;
+
       const tx = await res.wait();
-      this.log('Transaction:', tx);
+      this.log('xx Transaction:', tx);
 
       const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
 

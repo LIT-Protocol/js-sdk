@@ -11,6 +11,7 @@ import {
 } from '@lit-protocol/types';
 import {
   AuthMethodType,
+  LIT_RPC,
   ProviderType,
   RELAY_URL_CAYENNE,
   RELAY_URL_HABANERO,
@@ -139,7 +140,7 @@ export class LitAuthClient {
 
     // Set RPC URL
     this.rpcUrl =
-      options?.rpcUrl || 'https://lit-protocol.calderachain.xyz/replica-http';
+      options?.rpcUrl || LIT_RPC.VESUVIUS;
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);

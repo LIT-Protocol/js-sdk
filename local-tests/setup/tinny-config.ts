@@ -66,7 +66,7 @@ export interface ProcessEnvs {
    * - If it's running on Chronical, it should be 'https://chain-rpc.litprotocol.com/http'
    * - If it's running on Vesuvius, it should be 'https://vesuvius-rpc.litprotocol.com'
    */
-  LIT_RPC_URL: string;
+  LIT_RPC_URL: string | null;
 
   /**
    * This is usually used when you're running tests locally depending how many nodes you are running.
