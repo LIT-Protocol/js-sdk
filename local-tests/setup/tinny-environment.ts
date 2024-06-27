@@ -1,4 +1,9 @@
-import { LIT_TESTNET, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
+import {
+  LIT_RPC,
+  LIT_TESTNET,
+  ProcessEnvs,
+  TinnyEnvConfig,
+} from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -12,8 +17,6 @@ import { TinnyPerson } from './tinny-person';
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
-
-import networkContext from './networkContext.datilDev.json';
 
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -35,9 +38,6 @@ export class TinnyEnvironment {
       'http://127.0.0.1:7471',
       'http://127.0.0.1:7472',
     ],
-    LIT_OFFICIAL_RPC:
-      process.env['LIT_OFFICIAL_RPC'] ||
-      'https://chain-rpc.litprotocol.com/http',
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'false',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
@@ -111,10 +111,30 @@ export class TinnyEnvironment {
     ).fill(false);
 
     // -- setup rpc
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    // Map of network names to their corresponding RPC URLs
+    const RPC_MAP = {
+      [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
+      [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICAL,
+      [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
+    };
+
+    // -- setup rpc
+    // Priority:
+    // 1. Use environment variable if set
+    // 2. Use RPC_MAP if network is recognized
+    // 3. Throw error if neither condition is met
+    if (this.processEnvs.LIT_RPC_URL) {
+      // If LIT_RPC_URL is set in the environment, use it
       this.rpc = this.processEnvs.LIT_RPC_URL;
+    } else if (this.network in RPC_MAP) {
+      // If the network is recognized in RPC_MAP, use the corresponding RPC URL
+      this.rpc = RPC_MAP[this.network];
     } else {
-      this.rpc = this.processEnvs.LIT_OFFICIAL_RPC;
+      // If neither condition is met, throw an error with available options
+      const availableNetworks = Object.keys(RPC_MAP).join(', ');
+      throw new Error(
+        `No RPC URL found for network "${this.network}". Available networks are: ${availableNetworks}`
+      );
     }
   }
 
@@ -198,7 +218,7 @@ export class TinnyEnvironment {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      // const networkContext = this._testnet.ContractContext;
+      const networkContext = this._testnet.ContractContext;
       // const networkContext = import('./networks/localchain.json');
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
@@ -383,7 +403,7 @@ export class TinnyEnvironment {
      * ====================================
      */
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      // const networkContext = this._testnet.ContractContext;
+      const networkContext = this._testnet.ContractContext;
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,

@@ -8,6 +8,12 @@ export enum LIT_TESTNET {
   DATIL_DEV = 'datil-dev',
 }
 
+export enum LIT_RPC {
+  LOCAL_ANVIL = 'http://127.0.0.1:8545',
+  CHRONICAL = 'https://chain-rpc.litprotocol.com/http',
+  VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
+}
+
 export interface ProcessEnvs {
   /**
    * Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.
@@ -55,14 +61,12 @@ export interface ProcessEnvs {
 
   // =========== In most cases you won't need to change the following values ===========
   /**
-   * The URL of Lit RPC server. If it's running locally on Anvil, it should be 'http://127.0.0.1:8545'
+   * The URL of Lit RPC server.
+   * - If it's running locally on Anvil, it should be 'http://127.0.0.1:8545'
+   * - If it's running on Chronical, it should be 'https://chain-rpc.litprotocol.com/http'
+   * - If it's running on Vesuvius, it should be 'https://vesuvius-rpc.litprotocol.com'
    */
   LIT_RPC_URL: string;
-
-  /**
-   * The URL of the official Lit RPC server. Usually 'https://chain-rpc.litprotocol.com/http' but can be changed if needed
-   */
-  LIT_OFFICIAL_RPC: string;
 
   /**
    * This is usually used when you're running tests locally depending how many nodes you are running.
