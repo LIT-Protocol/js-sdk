@@ -53,7 +53,7 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | `PRIVATE_KEYS`           | A set of private keys to use which will be used to perform chain operations.                                                                                                                              |
 | `CHUNK_SIZE`             | Determines the number of tests run concurrently during parallel execution                                                                                                                                 |
 
-Below is te API Documentation forthe `ProccessEnvs` interface for the `shiva-client` detailing the configurable enviorment variables and their purposes:
+Below is the API Documentation for the `ProccessEnvs` interface for the `shiva-client` detailing the configurable environment variables and their purposes:
 
 | Variable                 | Description                                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
