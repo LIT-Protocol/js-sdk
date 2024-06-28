@@ -607,7 +607,8 @@ export class LitContracts {
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl = rpcUrl ?? LIT_RPC.VESUVIUS;
+    rpcUrl =
+      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
