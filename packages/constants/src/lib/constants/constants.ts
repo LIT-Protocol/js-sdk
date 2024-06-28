@@ -480,7 +480,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   datilDevnet: {
     contractAddress: null,
     chainId: 2311,
-    name: 'Chronicle - Lit Protocol V1 Devnet',
+    name: 'Vesuvius - Lit Protocol Devnet',
     symbol: 'testLIT',
     decimals: 18,
     rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
