@@ -181,7 +181,7 @@ export interface SignTransactionParamsSupportedSolana
 /** @typedef SignTransactionWithEncryptedKeyParams
  * @extends BaseApiParams
  * @property { boolean } broadcast Whether the LIT action should broadcast the signed transaction to RPC, or only sign the transaction and return the signed transaction to the caller
- * @property { EthereumLitTransaction | SerializedTransaction } unsignedTransaction The unsigned transaction to be signed. When network is 'solana' or 'custom', be sure to provided a {@link SerializedTransaction} instance.
+ * @property { EthereumLitTransaction | SerializedTransaction } unsignedTransaction The unsigned transaction to be signed. When network is 'solana', be sure to provide a {@link SerializedTransaction} instance.
  */
 export type SignTransactionWithEncryptedKeyParams =
   | SignTransactionParamsSupportedEvm

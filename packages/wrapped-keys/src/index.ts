@@ -7,7 +7,14 @@ import {
   signTransactionWithEncryptedKey,
   storeEncryptedKeyMetadata,
 } from './lib/api';
-import { CHAIN_ETHEREUM, LIT_PREFIX } from './lib/constants';
+import {
+  CHAIN_ETHEREUM,
+  LIT_PREFIX,
+  NETWORK_EVM,
+  NETWORK_SOLANA,
+  KEYTYPE_K256,
+  KEYTYPE_ED25519,
+} from './lib/constants';
 
 import type { SupportedNetworks } from './lib/service-client/types';
 import type {
@@ -33,6 +40,10 @@ import type {
 export const constants = {
   CHAIN_ETHEREUM,
   LIT_PREFIX,
+  NETWORK_EVM,
+  NETWORK_SOLANA,
+  KEYTYPE_K256,
+  KEYTYPE_ED25519,
 };
 
 export const api = {

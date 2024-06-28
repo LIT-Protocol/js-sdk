@@ -1,3 +1,4 @@
+import { NETWORK_EVM, NETWORK_SOLANA } from '../constants';
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCid } from '../lit-actions-client/utils';
 import { storePrivateKeyMetadata } from '../service-client';
@@ -14,9 +15,9 @@ import {
 } from '../utils';
 
 function getKeyTypeFromNetwork(network: Network): KeyType {
-  if (network === 'evm') {
+  if (network === NETWORK_EVM) {
     return 'K256';
-  } else if (network === 'solana') {
+  } else if (network === NETWORK_SOLANA) {
     return 'ed25519';
   } else {
     throw new Error('Network not implemented in generate-private-key');
