@@ -793,13 +793,7 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network:
-      | 'cayenne'
-      | 'custom'
-      | 'localhost'
-      | 'manzano'
-      | 'habanero'
-      | 'datil-dev',
+    network: LIT_NETWORKS_KEYS,
     provider: ethers.providers.JsonRpcProvider,
     context?: LitContractContext | LitContractResolverContext
   ) {
