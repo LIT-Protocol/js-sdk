@@ -8,6 +8,7 @@ import {
   LIT_COSMOS_CHAINS,
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
+  LogLevel,
 } from '@lit-protocol/constants';
 
 import { AuthSig, CosmosWalletType } from '@lit-protocol/types';
@@ -142,7 +143,7 @@ export const checkAndSignCosmosAuthMessage = async ({
 
   // -- if not found in local storage
   if (!authSig) {
-    log('signing auth message because sig is not in local storage');
+    log(LogLevel.INFO, 'signing auth message because sig is not in local storage');
 
     await signAndSaveAuthMessage(connectedCosmosProvider);
 
@@ -155,6 +156,7 @@ export const checkAndSignCosmosAuthMessage = async ({
   // -- validate
   if (connectedCosmosProvider.account != authSig.address) {
     log(
+      LogLevel.INFO,
       'signing auth message because account is not the same as the address in the auth sig'
     );
     await signAndSaveAuthMessage(connectedCosmosProvider);
@@ -162,7 +164,7 @@ export const checkAndSignCosmosAuthMessage = async ({
     authSig = JSON.parse(authSig);
   }
 
-  log('authSig', authSig);
+  log(LogLevel.DEBUG, 'authSig', authSig);
 
   return authSig;
 };
