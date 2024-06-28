@@ -209,7 +209,8 @@ export class LitContracts {
     this.network = args?.network || 'cayenne';
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
-      this.rpc = LIT_RPC.VESUVIUS;
+      this.rpc =
+        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
     }
 
     if (!this.rpcs) {
