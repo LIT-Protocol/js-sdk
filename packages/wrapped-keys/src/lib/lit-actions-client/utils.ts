@@ -15,8 +15,6 @@ import { Network } from '../types';
 export function postLitActionValidation(
   result: ExecuteJsResponse | undefined
 ): string {
-  // console.log(`Lit Action result: ${JSON.stringify(result)}`);
-
   if (!result) {
     throw new Error('There was an unknown error running the Lit Action.');
   }
@@ -27,7 +25,6 @@ export function postLitActionValidation(
       `Expected "response" in Lit Action result: ${JSON.stringify(result)}`
     );
   }
-  console.log('response', response);
 
   if (typeof response !== 'string') {
     // As the return value is a hex string
