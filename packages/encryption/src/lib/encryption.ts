@@ -1,7 +1,7 @@
 // @ts-expect-error jszip types don't resolve. :sad_panda:
 import * as JSZip from 'jszip/dist/jszip.js';
 
-import { EITHER_TYPE, ILitError, LIT_ERROR } from '@lit-protocol/constants';
+import { EITHER_TYPE, ILitError, LIT_ERROR, LogLevel } from '@lit-protocol/constants';
 import { verifySignature } from '@lit-protocol/crypto';
 import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 import {
@@ -332,7 +332,7 @@ export const zipAndEncryptFiles = async (
     const folder: JSZip | null = zip.folder('encryptedAssets');
 
     if (!folder) {
-      log("Failed to get 'encryptedAssets' from zip.folder() ");
+      log(LogLevel.ERROR, "Failed to get 'encryptedAssets' from zip.folder() ");
       return throwError({
         message: "Failed to get 'encryptedAssets' from zip.folder() ",
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
@@ -514,7 +514,7 @@ export const encryptFileAndZipWithMetadata = async (
   const folder: JSZip | null = zip.folder('encryptedAssets');
 
   if (!folder) {
-    log("Failed to get 'encryptedAssets' from zip.folder() ");
+    log(LogLevel.ERROR, "Failed to get 'encryptedAssets' from zip.folder() ");
     return throwError({
       message: `Failed to get 'encryptedAssets' from zip.folder()`,
       errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
@@ -572,25 +572,25 @@ export const decryptZipFileWithMetadata = async (
   );
 
   if (!jsonFile) {
-    log(`Failed to read lit_protocol_metadata.json while zip.file()`);
+    log(LogLevel.ERROR, `Failed to read lit_protocol_metadata.json while zip.file()`);
     return;
   }
 
   const metadata: MetadataForFile = JSON.parse(await jsonFile.async('string'));
 
-  log('zip metadata', metadata);
+  log(LogLevel.INFO, 'zip metadata', metadata);
 
   const folder: JSZip | null = zip.folder('encryptedAssets');
 
   if (!folder) {
-    log("Failed to get 'encryptedAssets' from zip.folder() ");
+    log(LogLevel.ERROR, "Failed to get 'encryptedAssets' from zip.folder() ");
     return;
   }
 
   const _file: JSZip.JSZipObject | null = folder.file(metadata.name);
 
   if (!_file) {
-    log("Failed to get 'metadata.name' while zip.folder().file()");
+    log(LogLevel.ERROR, "Failed to get 'metadata.name' while zip.folder().file()");
     return;
   }
 
@@ -723,11 +723,11 @@ export const verifyJwt = ({
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
-  log('verifyJwt', jwt);
+  log(LogLevel.DEBUG, 'verifyJwt', jwt);
 
   // verify that the wasm was loaded
   if (!globalThis.wasmExports) {
-    log('wasmExports is not loaded.');
+    log(LogLevel.ERROR, 'wasmExports is not loaded.');
   }
 
   const jwtParts = jwt.split('.');

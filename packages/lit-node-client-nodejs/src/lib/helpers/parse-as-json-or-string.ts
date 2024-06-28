@@ -1,3 +1,4 @@
+import { LogLevel } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 
 /**
@@ -13,6 +14,7 @@ export const parseAsJsonOrString = (
     return JSON.parse(responseString);
   } catch (e) {
     log(
+      LogLevel.INFO,
       '[parseResponses] Error parsing response as json.  Swallowing and returning as string.',
       responseString
     );

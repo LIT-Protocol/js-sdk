@@ -1,3 +1,4 @@
+import { LogLevel } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 import { BlsResponseData, BlsSignatureShare } from '@lit-protocol/types';
 
@@ -17,7 +18,7 @@ export function getBlsSignatures(
   const signatureShares = responseData.map((s) => ({
     ProofOfPossession: s.signatureShare.ProofOfPossession,
   }));
-  log(`[getBlsSignatures] signatureShares:`, signatureShares);
+  log(LogLevel.DEBUG, `[getBlsSignatures] signatureShares:`, signatureShares);
 
   if (!signatureShares || signatureShares.length <= 0) {
     throw new Error('[getBlsSignatures] No signature shares provided');

@@ -1,4 +1,4 @@
-import { LIT_ERROR } from '@lit-protocol/constants';
+import { LIT_ERROR, LogLevel } from '@lit-protocol/constants';
 
 import {
   AccessControlConditions,
@@ -59,7 +59,7 @@ export const humanizeComparator = (comparator: string): string | undefined => {
   const selected: string | undefined = list[comparator];
 
   if (!selected) {
-    log(`Unregonized comparator ${comparator}`);
+    log(LogLevel.ERROR, `Unregonized comparator ${comparator}`);
     return;
   }
 
@@ -85,9 +85,9 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing evm basic access control conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('accessControlConditions', accessControlConditions);
+  log(LogLevel.INFO, 'humanizing evm basic access control conditions');
+  log(LogLevel. INFO, 'myWalletAddress', myWalletAddress);
+  log(LogLevel.INFO, 'accessControlConditions', accessControlConditions);
 
   let fixedConditions = accessControlConditions;
 
@@ -234,7 +234,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
             console.log(`Failed to get decimals for ${acc.contractAddress}`);
           }
         }
-        log('decimals', decimals);
+        log(LogLevel.DEBUG, 'decimals', decimals);
         return `Owns ${humanizeComparator(
           acc.returnValueTest.comparator
         )} ${formatUnits(acc.returnValueTest.value, decimals)} of ${
@@ -285,9 +285,9 @@ export const humanizeEvmContractConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing evm contract conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('evmContractConditions', evmContractConditions);
+  log(LogLevel.INFO, 'humanizing evm contract conditions');
+  log(LogLevel.INFO, 'myWalletAddress', myWalletAddress);
+  log(LogLevel.INFO, 'evmContractConditions', evmContractConditions);
 
   const promises = await Promise.all(
     evmContractConditions.map(async (acc: any) => {
@@ -346,9 +346,9 @@ export const humanizeSolRpcConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing sol rpc conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('solRpcConditions', solRpcConditions);
+  log(LogLevel.INFO, 'humanizing sol rpc conditions');
+  log(LogLevel.INFO, 'myWalletAddress', myWalletAddress);
+  log(LogLevel.INFO, 'solRpcConditions', solRpcConditions);
 
   const promises = await Promise.all(
     solRpcConditions.map(async (acc: any) => {
@@ -420,9 +420,9 @@ export const humanizeCosmosConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing cosmos conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('cosmosConditions', cosmosConditions);
+  log(LogLevel.INFO, 'humanizing cosmos conditions');
+  log(LogLevel.INFO, 'myWalletAddress', myWalletAddress);
+  log(LogLevel.INFO, 'cosmosConditions', cosmosConditions);
 
   const promises = await Promise.all(
     cosmosConditions.map(async (acc: any) => {

@@ -11,6 +11,7 @@ import {
 } from '@lit-protocol/types';
 import {
   AuthMethodType,
+  LogLevel,
   ProviderType,
   RELAY_URL_CAYENNE,
   RELAY_URL_HABANERO,
@@ -140,9 +141,9 @@ export class LitAuthClient {
     // Set RPC URL
     this.rpcUrl =
       options?.rpcUrl || 'https://lit-protocol.calderachain.xyz/replica-http';
-    log('rpc url: ', this.rpcUrl);
-    log('relay config: ', options.litRelayConfig);
-    log('relay instance: ', this.relay);
+    log(LogLevel.DEBUG, 'rpc url: ', this.rpcUrl);
+    log(LogLevel.DEBUG, 'relay config: ', options.litRelayConfig);
+    log(LogLevel.DEBUG, 'relay instance: ', this.relay);
   }
 
   /**
@@ -164,7 +165,7 @@ export class LitAuthClient {
     };
 
     let provider: T;
-    log('resolving provider of type: ', type);
+    log(LogLevel.INFO, 'resolving provider of type: ', type);
     switch (type) {
       case 'google':
         provider = new GoogleProvider({
@@ -287,7 +288,7 @@ export class LitAuthClient {
         authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
         break;
       default:
-        log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
+        log(LogLevel.ERROR, `unsupported AuthMethodType: ${authMethod.authMethodType}`);
         throw new Error(
           `Unsupported auth method type: ${authMethod.authMethodType}`
         );

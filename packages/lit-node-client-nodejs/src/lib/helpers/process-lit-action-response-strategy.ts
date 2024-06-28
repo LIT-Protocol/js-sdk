@@ -4,6 +4,7 @@ import {
   NodeShare,
 } from '@lit-protocol/types';
 import { log, logError } from '@lit-protocol/misc';
+import { LogLevel } from '@lit-protocol/constants';
 
 /**
  * Finds the most and least common object within an of objects array
@@ -53,16 +54,19 @@ export const processLitActionResponseStrategy = (
   let respFrequency = _findFrequency(copiedExecutionResponses);
   if (strategy?.strategy === 'leastCommon') {
     log(
+      LogLevel.INFO,
       'strategy found to be most common, taking most common response from execution results'
     );
     return respFrequency.min;
   } else if (strategy?.strategy === 'mostCommon') {
     log(
+      LogLevel.INFO,
       'strategy found to be most common, taking most common response from execution results'
     );
     return respFrequency.max;
   } else {
     log(
+      LogLevel.INFO,
       'no strategy found, using least common response object from execution results'
     );
     respFrequency.min;

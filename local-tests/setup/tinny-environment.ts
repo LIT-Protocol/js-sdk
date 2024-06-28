@@ -15,6 +15,7 @@ import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 
 import 'dotenv/config';
+import { LogLevel } from '@lit-protocol/constants';
 console.log('Loading env vars from dot config...');
 console.log('Done loading env', process.env['DEBUG']);
 export class TinnyEnvironment {
@@ -215,6 +216,7 @@ export class TinnyEnvironment {
         litNetwork: 'custom',
         rpcUrl: this.processEnvs.LIT_RPC_URL,
         debug: this.processEnvs.DEBUG,
+        logLevel: LogLevel.INFO,
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
       });

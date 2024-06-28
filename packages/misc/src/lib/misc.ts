@@ -284,14 +284,31 @@ export const log = (level?: LogLevel, ...args: any): void => {
 
 
   // config is loaded, and debug is true
-
+  const resolveLogLevel = (level: LogLevel = LogLevel.DEBUG) => {
+    switch(level) {
+      case LogLevel.DEBUG:
+        globalThis?.logger && globalThis?.logger.debug(...args);
+        return;
+      case LogLevel.INFO:
+        globalThis?.logger && globalThis?.logger.info(...args);
+        return;
+      case LogLevel.ERROR:
+        globalThis?.logger && globalThis?.logger.error(...args);
+        return;
+      case LogLevel.FATAL:
+        globalThis?.logger && globalThis?.logger.fatal(...args);
+        return;
+      case LogLevel.WARN:
+        globalThis?.logger && globalThis?.logger.warn(...args);
+    }
+  }
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
     globalThis?.logger && globalThis?.logger.debug(...log);
   }
 
-  globalThis?.logger && globalThis?.logger.debug(...args);
+  resolveLogLevel(level);
 };
 
 export const logWithRequestId = (id: string, ...args: any) => {
@@ -308,11 +325,27 @@ export const logWithRequestId = (id: string, ...args: any) => {
     return;
   }
 
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
   // config is loaded, and debug is true
-
+    // config is loaded, and debug is true
+    const resolveLogLevel = (level: LogLevel = LogLevel.DEBUG) => {
+      switch(level) {
+        case LogLevel.DEBUG:
+          globalThis?.logger && globalThis?.logger.debug(...args);
+          return;
+        case LogLevel.INFO:
+          globalThis?.logger && globalThis?.logger.info(...args);
+          return;
+        case LogLevel.ERROR:
+          globalThis?.logger && globalThis?.logger.error(...args);
+          return;
+        case LogLevel.FATAL:
+          globalThis?.logger && globalThis?.logger.fatal(...args);
+          return;
+        case LogLevel.WARN:
+          globalThis?.logger && globalThis?.logger.warn(...args);
+      }
+    }
+  
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';

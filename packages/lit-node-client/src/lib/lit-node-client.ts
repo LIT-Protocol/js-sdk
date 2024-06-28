@@ -1,5 +1,5 @@
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
-import { EITHER_TYPE } from '@lit-protocol/constants';
+import { EITHER_TYPE, LogLevel } from '@lit-protocol/constants';
 import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { isNode, log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
@@ -44,7 +44,7 @@ export class LitNodeClient extends LitNodeClientNodeJs {
 
     // -- validate
     if (storageConfigOrError.type === EITHER_TYPE.ERROR) {
-      log(`Storage key "${storageKey}" is missing. `);
+      log(LogLevel.WARN, `Storage key "${storageKey}" is missing. `);
       return;
     }
 

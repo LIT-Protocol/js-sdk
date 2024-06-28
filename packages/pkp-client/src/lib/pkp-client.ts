@@ -4,7 +4,7 @@ import { PKPClientProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { WalletFactory } from './wallet-factory';
 import { log } from '@lit-protocol/misc';
-import { PKP_CLIENT_SUPPORTED_CHAINS } from '@lit-protocol/constants';
+import { LogLevel, PKP_CLIENT_SUPPORTED_CHAINS } from '@lit-protocol/constants';
 
 export class PKPClient {
   public readonly pkpPubKey: string;
@@ -116,6 +116,7 @@ export class PKPClient {
 
     if (successfulInits !== this._wallets.size) {
       log(
+        LogLevel.WARN,
         `Not all wallets initialized successfully. Details: ${JSON.stringify(
           walletStatus,
           null,

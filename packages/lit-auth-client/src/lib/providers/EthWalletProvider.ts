@@ -5,7 +5,7 @@ import {
   EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
-import { LIT_CHAINS, AuthMethodType, LIT_ERROR } from '@lit-protocol/constants';
+import { LIT_CHAINS, AuthMethodType, LIT_ERROR, LogLevel } from '@lit-protocol/constants';
 import { SiweMessage } from 'siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
@@ -33,6 +33,7 @@ export default class EthWalletProvider extends BaseProvider {
       this.origin = options.origin || window.location.origin;
     } catch (e) {
       log(
+        LogLevel.ERROR,
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       this.domain = options.domain || 'localhost';
