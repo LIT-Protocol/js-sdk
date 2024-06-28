@@ -74,8 +74,6 @@ import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 
-const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
-
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
 // The resulting array of callback return values is then returned.
@@ -280,14 +278,26 @@ export class LitContracts {
         throw new Error(msg);
       }
 
-      const chainInfo = {
+      const chronicleChainInfo = {
         chainId: '0x2AC49',
         chainName: 'Chronicle - Lit Protocol Testnet',
         nativeCurrency: { name: 'LIT', symbol: 'LIT', decimals: 18 },
         rpcUrls: this.rpcs,
-        blockExplorerUrls: [BLOCK_EXPLORER],
+        blockExplorerUrls: ['https://chain.litprotocol.com/'],
         iconUrls: ['future'],
       };
+
+      const vesuviusChainInfo = {
+        chainId: '0x907',
+        chainName: 'Vesuvius - Lit Protocol Devnet',
+        nativeCurrency: { name: 'testLit', symbol: 'testLit', decimals: 18 },
+        rpcUrls: this.rpcs,
+        blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
+        iconUrls: ['future'],
+      };
+
+      const chainInfo =
+        this.network === 'datil-dev' ? vesuviusChainInfo : chronicleChainInfo;
 
       try {
         await web3Provider.send('wallet_switchEthereumChain', [
