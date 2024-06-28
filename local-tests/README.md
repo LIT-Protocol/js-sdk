@@ -57,7 +57,7 @@ Below is te API Documentation forthe `ProccessEnvs` interface for the `shiva-cli
 
 | Variable                 | Description                                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `TESTNET_MAANGER_URL`    | URl to connect to Shiva (our testing tool for network management).                                          |
+| `TESTNET_MANANGER_URL`    | URl to connect to Shiva (our testing tool for network management).                                          |
 | `LIT_NODE_BINARY_PATH`   | Binary path for the lit node version you wish to run.                                                       |
 | `LIT_Action_BINARY_PATH` | Binary path for the lit node version you wish to run.                                                       |
 | `USE_LIT_BINARIES`       | Flag to indicate if a binary path should be used for testnet spawning or if it should be built from source. |
