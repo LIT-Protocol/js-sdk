@@ -53,7 +53,7 @@ export class TinnyPerson {
    * FIXME: Enabling this is causing the test to fail
    * Switches the current wallet to a new funding wallet by creating a new funding wallet,
    * funding it with a small amount of ethers, and updating the current wallet to the new one.
-   * 
+   *
    * @private
    * @returns {Promise<void>} A promise that resolves once the wallet has been switched.
    */

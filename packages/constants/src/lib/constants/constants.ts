@@ -611,7 +611,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
 };
 
-
 /**
  * Enum representing the available LIT RPC endpoints.
  */
@@ -830,8 +829,7 @@ export const RELAY_URL_CAYENNE =
   'https://relayer-server-staging-cayenne.getlit.dev';
 export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
 export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
-export const RELAY_URL_DATIL_DEV =
-  'https://relayer-server-datil-dev.getlit.dev';
+export const RELAY_URL_DATIL_DEV = 'https://datil-dev-relayer.getlit.dev';
 
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =

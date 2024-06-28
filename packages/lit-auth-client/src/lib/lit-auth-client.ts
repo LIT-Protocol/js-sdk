@@ -14,6 +14,7 @@ import {
   LIT_RPC,
   ProviderType,
   RELAY_URL_CAYENNE,
+  RELAY_URL_DATIL_DEV,
   RELAY_URL_HABANERO,
   RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
@@ -94,7 +95,7 @@ export class LitAuthClient {
         );
       }
 
-      const supportedNetworks = ['cayenne', 'habanero', 'manzano'];
+      const supportedNetworks = ['cayenne', 'habanero', 'manzano', 'datil-dev'];
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
@@ -115,6 +116,9 @@ export class LitAuthClient {
           break;
         case 'manzano':
           url = RELAY_URL_MANZANO;
+          break;
+        case 'datil-dev':
+          url = RELAY_URL_DATIL_DEV;
           break;
       }
 
@@ -139,8 +143,7 @@ export class LitAuthClient {
     }
 
     // Set RPC URL
-    this.rpcUrl =
-      options?.rpcUrl || LIT_RPC.VESUVIUS;
+    this.rpcUrl = options?.rpcUrl || LIT_RPC.VESUVIUS;
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);

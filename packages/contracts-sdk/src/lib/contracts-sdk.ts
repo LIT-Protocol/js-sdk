@@ -1659,6 +1659,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tx =
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
+              // gasLimit: ethers.utils.hexlify(500000), // Adjust as needed
             });
           this.log('tx:', tx);
 
@@ -1728,17 +1729,22 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         signatures: IPubkeyRouter.SignatureStruct[],
         txOpts?: any
       ) => {
-        const cost = await this.pkpNftContract.read.mintCost();
-        const tx = await this.pkpNftContract.write.claimAndMint(
-          2,
-          derivedKeyId,
-          signatures,
-          txOpts ?? { value: cost }
-        );
-        const txRec = await tx.wait();
-        const events: any = 'events' in txRec ? txRec.events : txRec.logs;
-        const tokenId = events[1].topics[1];
-        return { tx, res: txRec, tokenId };
+        try {
+          const cost = await this.pkpNftContract.read.mintCost();
+          const tx = await this.pkpNftContract.write.claimAndMint(
+            2,
+            derivedKeyId,
+            signatures,
+            txOpts ?? { value: cost }
+          );
+          const txRec = await tx.wait();
+          const events: any = 'events' in txRec ? txRec.events : txRec.logs;
+          const tokenId = events[1].topics[1];
+          return { tx, res: txRec, tokenId };
+        } catch (e: any) {
+          this.log(`[claimAndMint] error: ${e.message}`);
+          throw new Error(e);
+        }
       },
     },
   };

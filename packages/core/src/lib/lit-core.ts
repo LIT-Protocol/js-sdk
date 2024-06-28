@@ -247,7 +247,6 @@ export class LitCore {
     }
 
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
-    console.log("xx minNodeCount:", minNodeCount);
 
     return {
       minNodeCount: parseInt(minNodeCount, 10),
@@ -306,7 +305,7 @@ export class LitCore {
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
           const { bootstrapUrls: newNodeUrls } = await this._getValidatorData();
-          
+
           const delta: string[] = newNodeUrls.filter((item) =>
             existingNodeUrls.includes(item)
           );
@@ -525,7 +524,7 @@ export class LitCore {
 
     const [{ minNodeCount, bootstrapUrls }, stakingContract] =
       await Promise.all([this._getValidatorData(), getStakingContract]);
-      
+
     this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
     this.config.minNodeCount = minNodeCount;
     this.config.bootstrapUrls = bootstrapUrls;
@@ -535,7 +534,7 @@ export class LitCore {
     if (!this._epochUpdateTimeout) {
       this.currentEpochNumber = await this.fetchCurrentEpochNumber();
     }
-    
+
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
     const { connectedNodes, serverKeys, coreNodeConfig } =
@@ -884,7 +883,6 @@ export class LitCore {
   };
 
   private async fetchCurrentEpochNumber() {
-    
     if (!this._stakingContract) {
       return throwError({
         message:
@@ -893,7 +891,7 @@ export class LitCore {
         errorCode: LIT_ERROR.INIT_ERROR.name,
       });
     }
-    
+
     try {
       const epoch = await this._stakingContract['epoch']();
       return epoch.number.toNumber() as number;
