@@ -434,7 +434,7 @@ export class TinnyEnvironment {
         debug: this.processEnvs.DEBUG,
         rpc: this.rpc,
         customContext: networkContext,
-      });F
+      });
     } else {
       async function _switchWallet() {
         // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
