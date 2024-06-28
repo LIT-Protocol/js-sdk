@@ -68,6 +68,7 @@ import {
 import {
   AuthMethodScope,
   AuthMethodType,
+  LIT_CHAINS,
   LIT_RPC,
 } from '@lit-protocol/constants';
 import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
@@ -268,21 +269,33 @@ export class LitContracts {
         throw new Error(msg);
       }
 
+      function _decimalToHex(decimal: number): string {
+        return '0x' + decimal.toString(16);
+      }
+
       const chronicleChainInfo = {
-        chainId: '0x2AC49',
-        chainName: 'Chronicle - Lit Protocol Testnet',
-        nativeCurrency: { name: 'LIT', symbol: 'LIT', decimals: 18 },
-        rpcUrls: this.rpcs,
-        blockExplorerUrls: ['https://chain.litprotocol.com/'],
+        chainId: _decimalToHex(LIT_CHAINS['chronicleTestnet'].chainId),
+        chainName: LIT_CHAINS['chronicleTestnet'].name,
+        nativeCurrency: {
+          name: LIT_CHAINS['chronicleTestnet'].symbol,
+          symbol: LIT_CHAINS['chronicleTestnet'].symbol,
+          decimals: LIT_CHAINS['chronicleTestnet'].decimals,
+        },
+        rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
+        blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
         iconUrls: ['future'],
       };
 
       const vesuviusChainInfo = {
-        chainId: '0x907',
-        chainName: 'Vesuvius - Lit Protocol Devnet',
-        nativeCurrency: { name: 'testLit', symbol: 'testLit', decimals: 18 },
-        rpcUrls: this.rpcs,
-        blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
+        chainId: _decimalToHex(LIT_CHAINS['datilDevnet'].chainId),
+        chainName: LIT_CHAINS['datilDevnet'].name,
+        nativeCurrency: {
+          name: LIT_CHAINS['datilDevnet'].symbol,
+          symbol: LIT_CHAINS['datilDevnet'].symbol,
+          decimals: LIT_CHAINS['datilDevnet'].decimals,
+        },
+        rpcUrls: LIT_CHAINS['datilDevnet'].rpcUrls,
+        blockExplorerUrls: LIT_CHAINS['datilDevnet'].blockExplorerUrls,
         iconUrls: ['future'],
       };
 
