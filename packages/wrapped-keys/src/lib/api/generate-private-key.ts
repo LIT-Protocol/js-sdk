@@ -1,15 +1,27 @@
-import { LIT_CURVE } from '@lit-protocol/constants';
-
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCid } from '../lit-actions-client/utils';
 import { storePrivateKeyMetadata } from '../service-client';
-import { GeneratePrivateKeyParams, GeneratePrivateKeyResult } from '../types';
+import {
+  GeneratePrivateKeyParams,
+  GeneratePrivateKeyResult,
+  KeyType,
+  Network,
+} from '../types';
 import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
 } from '../utils';
 
+function getKeyTypeFromNetwork(network: Network): KeyType {
+  if (network === 'evm') {
+    return 'K256';
+  } else if (network === 'solana') {
+    return 'ed25519';
+  } else {
+    throw new Error('Network not implemented in generate-private-key');
+  }
+}
 /**
  * Generates a random private key inside a Lit Action, and persists the key and its metadata to the wrapped keys service.
  * Returns the public key of the random private key, and the PKP address that it was associated with.
@@ -43,7 +55,7 @@ export async function generatePrivateKey(
     storedKeyMetadata: {
       ciphertext,
       publicKey,
-      keyType: LIT_CURVE.EcdsaK256, // FIXME: Should be returned by the LIT action; we won't know what it is unless it's provided.
+      keyType: getKeyTypeFromNetwork(network),
       dataToEncryptHash,
       pkpAddress,
     },

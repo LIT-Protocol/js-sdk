@@ -8,6 +8,7 @@ import {
  * The network type that the wrapped key will be used on.
  */
 export type Network = 'evm' | 'solana';
+export type KeyType = 'K256' | 'ed25519';
 
 /** All API calls for the wrapped keys service require these arguments.
  *
@@ -47,7 +48,7 @@ export interface StoredKeyMetadata {
   dataToEncryptHash: string;
   publicKey: string;
   pkpAddress: string;
-  keyType: string;
+  keyType: KeyType;
   litNetwork: LIT_NETWORKS_KEYS;
 }
 
@@ -86,7 +87,7 @@ export interface ExportPrivateKeyResult {
   decryptedPrivateKey: string;
   publicKey: string;
   litNetwork: LIT_NETWORKS_KEYS;
-  keyType: string;
+  keyType: KeyType;
 }
 
 /** @typedef GeneratePrivateKeyParams
@@ -116,7 +117,7 @@ export interface GeneratePrivateKeyResult {
 export interface ImportPrivateKeyParams extends BaseApiParams {
   privateKey: string;
   publicKey: string;
-  keyType: string;
+  keyType: KeyType;
 }
 
 interface SignMessageParams {
