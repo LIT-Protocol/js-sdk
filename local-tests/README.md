@@ -35,6 +35,8 @@ yarn test:local --filter=testExample,testBundleSpeed
 
 Below is the API documentation for the `ProcessEnvs` interface, detailing the configurable environment variables and their purposes:
 
+**NOTE: a `.env.sample` is contained in the repository root for the below env tables**
+
 | Variable                 | Description                                                                                                                                                              |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `MAX_ATTEMPTS`           | Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.                                                        |
@@ -47,10 +49,18 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | `RUN_IN_BAND_INTERVAL`   | The interval in milliseconds to run the tests in a single thread.                                                                                                        |
 | `LIT_RPC_URL`            | The URL of the Lit RPC server. If running locally on Anvil, it should be 'http://127.0.0.1:8545'.                                                                        |
 | `LIT_OFFICIAL_RPC`       | The URL of the official Lit RPC server, usually 'https://chain-rpc.litprotocol.com/http' but can be changed if needed.                                                   |
-| `SHIVA_URL`              | URl to connect to Shiva (our testing tool for network management).                                                                                                       |
-| `LIT_NODE_BINARY_PATH`   | URl to connect to Shiva (our testing tool for network management).                                                                                                       |
-| `USE_LIT_NODE_BINARY`    | Flag to indicate if a binary path should be used for testnet spawning or if it should be built from source.                                                              |
-| `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                                                                                      |
+| `USE_SHIVA`              | A flag to determine if `Shiva` should be used for the `localchain` network.                                                                                              |
+| `PRIVATE_KEYS`           | A set of private keys to use which will be used to perform chain operations.                                                                                             |
+
+Below is te API Documentation forthe `ProccessEnvs` interface for the `shiva-client` detailing the configurable enviorment variables and their purposes:
+
+| Variable                 | Description                                                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `TESTNET_MAANGER_URL`    | URl to connect to Shiva (our testing tool for network management).                                          |
+| `LIT_NODE_BINARY_PATH`   | Binary path for the lit node version you wish to run.                                                       |
+| `LIT_Action_BINARY_PATH` | Binary path for the lit node version you wish to run.                                                       |
+| `USE_LIT_BINARIES`       | Flag to indicate if a binary path should be used for testnet spawning or if it should be built from source. |
+| `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                         |
 
 # Writing a test
 
