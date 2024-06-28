@@ -11,6 +11,7 @@ import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
   CreateCustomAuthMethodRequest,
+  LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
@@ -117,13 +118,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network:
-    | 'cayenne'
-    | 'manzano'
-    | 'habanero'
-    | 'custom'
-    | 'localhost'
-    | 'datil-dev';
+  network: LIT_NETWORKS_KEYS;
   customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
