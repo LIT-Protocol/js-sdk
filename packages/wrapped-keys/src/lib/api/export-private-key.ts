@@ -33,7 +33,7 @@ export async function exportPrivateKey(
   const decryptedPrivateKey = await decryptToString(
     {
       accessControlConditions: [allowPkpAddressToDecrypt],
-      chain: CHAIN_ETHEREUM, // FIXME: This won't always be true.
+      chain: CHAIN_ETHEREUM,
       ciphertext,
       dataToEncryptHash,
       sessionSigs: pkpSessionSigs,
