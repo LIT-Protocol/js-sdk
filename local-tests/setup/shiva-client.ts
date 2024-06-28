@@ -216,7 +216,7 @@ export class ShivaClient {
 
   constructor() {
     this._clients = new Map();
-    console.log('Shiva enviorment loaded current config: ', this.processEnvs);
+    console.log('Shiva environment loaded current config: ', this.processEnvs);
   }
 
   /**
