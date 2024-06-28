@@ -173,7 +173,7 @@ export class TestnetClient {
         if (res.status === 200) {
           return res.json();
         } else {
-          return Promise.reject(res);
+          throw res;
         }
       })
       .then((body: TestNetResponse<boolean>) => {
