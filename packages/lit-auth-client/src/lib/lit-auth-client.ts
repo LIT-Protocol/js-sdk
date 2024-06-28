@@ -143,7 +143,10 @@ export class LitAuthClient {
     }
 
     // Set RPC URL
-    this.rpcUrl = options?.rpcUrl || LIT_RPC.VESUVIUS;
+    this.rpcUrl =
+      options?.rpcUrl || this.litNodeClient.config.litNetwork === 'datil-dev'
+        ? LIT_RPC.VESUVIUS
+        : LIT_RPC.CHRONICAL;
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);
