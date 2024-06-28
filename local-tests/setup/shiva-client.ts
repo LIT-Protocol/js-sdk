@@ -44,8 +44,8 @@ export interface ShivaEnvs {
 
 /**
  * Client implementation for a single testnet instance managed by the Shiva tool
- * Is essentially a localchain setup but allows for programmatic operations to be preformed
- * on the network from the implementation wthin this class. Each testnet is a unique network
+ * Is essentially a localchain setup but allows for programmatic operations to be performed
+ * on the network from the implementation within this class. Each testnet is a unique network
  */
 export class TestnetClient {
   private _id: string;
