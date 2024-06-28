@@ -602,13 +602,7 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network:
-      | 'cayenne'
-      | 'manzano'
-      | 'habanero'
-      | 'custom'
-      | 'localhost'
-      | 'datil-dev',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
