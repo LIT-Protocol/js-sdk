@@ -194,13 +194,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?:
-      | 'cayenne'
-      | 'custom'
-      | 'localhost'
-      | 'manzano'
-      | 'habanero'
-      | 'datil-dev';
+    network?: LIT_NETWORKS_KEYS;
   }) {
     // this.provider = args?.provider;
     this.customContext = args?.customContext;
