@@ -436,25 +436,30 @@ export class TinnyEnvironment {
         customContext: networkContext,
       });
     } else {
-      // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
-      // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
-      const capacityCreditWallet =
-        ethers.Wallet.createRandom().connect(provider);
+      async function _switchWallet() {
+        // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
+        // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
+        const capacityCreditWallet =
+          ethers.Wallet.createRandom().connect(provider);
 
-      // get wallet balance
-      // const balance = await wallet.getBalance();
-      // console.log("this.rpc:", this.rpc);
-      // console.log('this.wallet.address', wallet.address);
-      // console.log('Balance:', balance.toString());
-      // process.exit();
+        // get wallet balance
+        const balance = await wallet.getBalance();
+        console.log('this.rpc:', this.rpc);
+        console.log('this.wallet.address', wallet.address);
+        console.log('Balance:', balance.toString());
 
-      const transferTx = await wallet.sendTransaction({
-        to: capacityCreditWallet.address,
-        value: ethers.utils.parseEther('0.001'),
-      });
-      await transferTx.wait();
+        const transferTx = await wallet.sendTransaction({
+          to: capacityCreditWallet.address,
+          value: ethers.utils.parseEther('0.001'),
+        });
+        await transferTx.wait();
+      }
+
+      // await _switchWallet();
+
       this.contractsClient = new LitContracts({
-        signer: capacityCreditWallet,
+        // signer: capacityCreditWallet, // disabled switch wallet for now
+        signer: wallet,
         debug: this.processEnvs.DEBUG,
         network: this.network,
       });
@@ -467,23 +472,40 @@ export class TinnyEnvironment {
      * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
      * ====================================
      */
-    console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
-    );
-    const capacityTokenId = (
-      await this.contractsClient.mintCapacityCreditsNFT({
-        requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
-      })
-    ).capacityTokenIdStr;
 
-    this.superCapacityDelegationAuthSig = (
-      await this.litNodeClient.createCapacityDelegationAuthSig({
-        dAppOwnerWallet: wallet,
-        capacityTokenId: capacityTokenId,
-        // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
-        uses: '200',
-      })
-    ).capacityDelegationAuthSig;
+    // Disabled for now
+    async function _mintSuperCapacityDelegationAuthSig() {
+      console.log(
+        '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
+      );
+      try {
+        const capacityTokenId = (
+          await this.contractsClient.mintCapacityCreditsNFT({
+            requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
+            daysUntilUTCMidnightExpiration: 2,
+          })
+        ).capacityTokenIdStr;
+
+        this.superCapacityDelegationAuthSig = (
+          await this.litNodeClient.createCapacityDelegationAuthSig({
+            dAppOwnerWallet: wallet,
+            capacityTokenId: capacityTokenId,
+            // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+            uses: '200',
+          })
+        ).capacityDelegationAuthSig;
+      } catch (e: any) {
+        if (
+          e.message.includes(`Can't allocate capacity beyond the global max`)
+        ) {
+          console.log('❗️Skipping capacity delegation auth sig setup.', e);
+        } else {
+          console.log(
+            '❗️Error while setting up capacity delegation auth sig',
+            e
+          );
+        }
+      }
+    }
   };
 }
