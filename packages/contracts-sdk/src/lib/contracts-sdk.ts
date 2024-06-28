@@ -970,13 +970,7 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network:
-      | 'cayenne'
-      | 'manzano'
-      | 'habanero'
-      | 'custom'
-      | 'localhost'
-      | 'datil-dev'
+    network: LIT_NETWORKS_KEYS
     // context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
