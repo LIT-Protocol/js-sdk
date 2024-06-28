@@ -14,6 +14,15 @@ export enum LIT_RPC {
   VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
 }
 
+/**
+ * Mapping of testnet names to corresponding RPC endpoints.
+ */
+export const RPC_MAP = {
+  [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
+  [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICAL,
+  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
+};
+
 export interface ProcessEnvs {
   /**
    * Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.

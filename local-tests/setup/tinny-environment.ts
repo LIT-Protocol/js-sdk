@@ -1,7 +1,7 @@
 import {
-  LIT_RPC,
   LIT_TESTNET,
   ProcessEnvs,
+  RPC_MAP,
   TinnyEnvConfig,
 } from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -116,14 +116,6 @@ export class TinnyEnvironment {
     this.processEnvs.KEY_IN_USE = new Array(
       this.processEnvs.PRIVATE_KEYS.length
     ).fill(false);
-
-    // -- setup rpc
-    // Map of network names to their corresponding RPC URLs
-    const RPC_MAP = {
-      [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
-      [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICAL,
-      [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
-    };
 
     // -- setup rpc
     // Priority:
