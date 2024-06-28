@@ -34,7 +34,7 @@ export const testFailImportWrappedKeysWithEoaSessionSig = async (
     console.log('❌ THIS IS EXPECTED: ', e);
     console.log(e.message);
 
-    if (e.message === 'SessionSig is not from a PKP') {
+    if (e.message.includes('SessionSig is not from a PKP')) {
       console.log(
         '✅ testFailImportWrappedKeysWithEoaSessionSig is expected to have an error'
       );
