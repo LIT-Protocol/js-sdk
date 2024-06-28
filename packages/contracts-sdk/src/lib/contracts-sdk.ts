@@ -891,13 +891,7 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network:
-      | 'cayenne'
-      | 'manzano'
-      | 'habanero'
-      | 'custom'
-      | 'localhost'
-      | 'datil-dev',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) => {
