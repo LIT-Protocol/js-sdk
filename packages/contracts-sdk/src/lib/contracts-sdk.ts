@@ -981,7 +981,7 @@ export class LitContracts {
     const HABANERO_API =
       'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
     const DATIL_DEV_API =
-      'https://lit-general-worker-staging.onrender.com/datil-dev/contracts';
+      'https://lit-general-worker.getlit.dev/datil-dev/contracts';
 
     const fetchData = async (url: string) => {
       try {
