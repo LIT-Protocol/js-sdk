@@ -351,7 +351,7 @@ export class TinnyEnvironment {
       let state = await this.testnet.pollTestnetForActive();
       if (state === `UNKNOWN`) {
         console.log(
-          'Testnet state found to be Unknown meannig there was an error with testnet creation. shutting downn'
+          'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
         );
         throw new Error(`Error while creating testnet, aborting test run`);
       }
