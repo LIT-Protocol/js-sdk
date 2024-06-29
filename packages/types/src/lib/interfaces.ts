@@ -1202,8 +1202,6 @@ export interface LitClientSessionManager {
 }
 
 export interface AuthenticationProps {
-  client?: LitClientSessionManager;
-
   /**
    * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
    */
@@ -1211,19 +1209,14 @@ export interface AuthenticationProps {
 }
 
 export interface PKPBaseProp {
-  litNodeClient?: ILitNodeClient;
+  litNodeClient: ILitNodeClient;
   pkpPubKey: string;
-  rpc?: string;
   rpcs?: RPCUrls;
-  sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
-  litNetwork?: any;
   debug?: boolean;
-  minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
-  provider?: Provider;
   controllerSessionSigs?: SessionSigs;
 
   // -- soon to be deprecated
@@ -1244,15 +1237,25 @@ export interface RPCUrls {
   btc?: string;
 }
 
+export interface PKPWallet {
+  getAddress: () => Promise<string>;
+  init: () => Promise<void>;
+  runLitAction: (toSign: Uint8Array, sigName: string) => Promise<any>;
+  runSign: (toSign: Uint8Array) => Promise<SigResponse>;
+}
+
 export type PKPEthersWalletProp = Omit<
   PKPBaseProp,
   'controllerAuthSig' | 'controllerAuthMethods'
 > & {
   litNodeClient: ILitNodeClient;
+  provider?: Provider;
+  rpc?: string;
 };
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
+  rpc?: string;
 }
 
 // note: Omit removes the 'addressPrefix' from PKPCosmosWalletProp

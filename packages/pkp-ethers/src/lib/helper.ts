@@ -24,8 +24,10 @@ export function convertHexToUtf8(value: string): string {
  * @param {any} txParams - The original transaction parameters.
  * @returns {any} The transaction object with 'gas' and 'from' fields removed.
  */
-export const getTransactionToSign = (txParams: any): any => {
-  let formattedTx = Object.assign({}, txParams);
+export const getTransactionToSign = <T>(
+  txParams: T & { gas?: string; from?: string }
+): T => {
+  const formattedTx = Object.assign({}, txParams);
 
   if (formattedTx.gas) {
     delete formattedTx.gas;

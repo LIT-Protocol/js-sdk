@@ -1,6 +1,6 @@
 # Quick Start
 
-This submodule defines a PKPBase class, providing shared wallet functionality for Ethers and Cosmos signers, responsible for managing public key compression, initializing and connecting to the LIT node, running LIT actions, and offering debug functions for logging and error handling.
+This submodule defines a PKPBase class, providing shared wallet functionality for PKP signers, responsible for managing public key compression, initializing and connecting to the LIT node, running LIT actions, and offering debug functions for logging and error handling.
 
 | Method/Property                                                      | Description                                                                    |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------ |

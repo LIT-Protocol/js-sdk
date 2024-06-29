@@ -1,13 +1,10 @@
-import { PKPEthersWallet } from './pkp-ethers';
 import {
-  ExternallyOwnedAccount,
-  Signer,
-  TypedDataDomain,
   TypedDataField,
   TypedDataSigner,
 } from '@ethersproject/abstract-signer';
-import { SignatureLike } from '@ethersproject/bytes';
 import { Transaction } from 'ethers';
+
+import { PKPEthersWallet } from './pkp-ethers';
 
 export type LitTypeDataSigner = PKPEthersWallet | TypedDataSigner;
 
@@ -54,11 +51,11 @@ export interface ETHRequestSigningPayload {
   params: any[];
 }
 
-export type ETHHandlerReq = {
+export interface ETHHandlerReq {
   signer: LitTypeDataSigner;
   payload: ETHRequestSigningPayload;
   capability?: any;
-};
+}
 
 export type ETHRequestHandler = (
   request: ETHHandlerReq
