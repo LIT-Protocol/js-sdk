@@ -1,7 +1,9 @@
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { importPrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
+
+const { importPrivateKey } = api;
 
 /**
  * Test Commands:
@@ -29,6 +31,8 @@ export const testFailImportWrappedKeysWithSamePkp = async (
     pkpSessionSigs,
     privateKey: privateKey1,
     litNodeClient: devEnv.litNodeClient,
+    publicKey: '0xdeadbeef',
+    keyType: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -47,6 +51,8 @@ export const testFailImportWrappedKeysWithSamePkp = async (
       pkpSessionSigs,
       privateKey: privateKey2,
       litNodeClient: devEnv.litNodeClient,
+      publicKey: '0xdeadbeef',
+      keyType: 'K256',
     });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);

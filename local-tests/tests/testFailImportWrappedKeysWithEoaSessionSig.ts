@@ -1,7 +1,9 @@
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { importPrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
+
+const { importPrivateKey } = api;
 
 /**
  * Test Commands:
@@ -25,12 +27,14 @@ export const testFailImportWrappedKeysWithEoaSessionSig = async (
       pkpSessionSigs: eoaSessionSigs,
       privateKey,
       litNodeClient: devEnv.litNodeClient,
+      publicKey: '0xdeadbeef',
+      keyType: 'K256',
     });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
     console.log(e.message);
 
-    if (e.message === 'SessionSig is not from a PKP') {
+    if (e.message.includes('SessionSig is not from a PKP')) {
       console.log(
         '✅ testFailImportWrappedKeysWithEoaSessionSig is expected to have an error'
       );

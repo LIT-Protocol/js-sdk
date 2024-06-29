@@ -1,13 +1,10 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  importPrivateKey,
-  EthereumLitTransaction,
-  signTransactionWithEncryptedKey,
-} from '@lit-protocol/wrapped-keys';
+import { api, EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
+
+const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
 /**
  * Test Commands:
@@ -40,6 +37,8 @@ export const testEthereumBroadcastWrappedKeyWithFetchGasParams = async (
     pkpSessionSigs,
     privateKey: wrappedKeysWalletPrivateKey,
     litNodeClient: devEnv.litNodeClient,
+    publicKey: '0xdeadbeef',
+    keyType: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -70,7 +69,7 @@ export const testEthereumBroadcastWrappedKeyWithFetchGasParams = async (
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_EVM,
+    network: 'evm',
     unsignedTransaction,
     broadcast: true,
     litNodeClient: devEnv.litNodeClient,

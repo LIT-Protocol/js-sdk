@@ -1,9 +1,10 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { exportPrivateKey, importPrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
 
+const { exportPrivateKey, importPrivateKey } = api;
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testExportWrappedKey
@@ -28,6 +29,8 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
     pkpSessionSigs: pkpSessionSigsImport,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
+    publicKey: '0xdeadbeef',
+    keyType: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -46,7 +49,7 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   console.log(pkpSessionSigsExport);
 
-  const decryptedPrivateKey = await exportPrivateKey({
+  const { decryptedPrivateKey } = await exportPrivateKey({
     pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
   });

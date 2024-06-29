@@ -1,13 +1,10 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  signTransactionWithEncryptedKey,
-  EthereumLitTransaction,
-  generatePrivateKey,
-} from '@lit-protocol/wrapped-keys';
+import { api, EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
+
+const { signTransactionWithEncryptedKey, generatePrivateKey } = api;
 
 /**
  * Test Commands:
@@ -31,7 +28,7 @@ export const testEthereumBroadcastTransactionGeneratedKey = async (
 
   const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
     pkpSessionSigs,
-    network: NETWORK_EVM,
+    network: 'evm',
     litNodeClient: devEnv.litNodeClient,
   });
 
@@ -70,7 +67,7 @@ export const testEthereumBroadcastTransactionGeneratedKey = async (
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_EVM,
+    network: 'evm',
     unsignedTransaction,
     broadcast: true,
     litNodeClient: devEnv.litNodeClient,

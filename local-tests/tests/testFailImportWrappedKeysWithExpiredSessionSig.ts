@@ -1,7 +1,9 @@
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { importPrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
 import { SessionSigsMap } from '@lit-protocol/types';
+
+const { importPrivateKey } = api;
 
 /**
  * Test Commands:
@@ -46,6 +48,8 @@ export const testFailImportWrappedKeysWithExpiredSessionSig = async (
       pkpSessionSigs,
       privateKey,
       litNodeClient: devEnv.litNodeClient,
+      publicKey: '0xdeadbeef',
+      keyType: 'K256',
     });
     console.log(res);
   } catch (e: any) {

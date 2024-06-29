@@ -5,10 +5,8 @@ import { EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { getPkpAccessControlCondition } from 'packages/wrapped-keys/src/lib/utils';
 import { encryptString } from '@lit-protocol/encryption';
-import {
-  LIT_ACTION_CID_REPOSITORY,
-  LIT_PREFIX,
-} from 'packages/wrapped-keys/src/lib/constants';
+import { LIT_PREFIX } from 'packages/wrapped-keys/src/lib/constants';
+import { LIT_ACTION_CID_REPOSITORY } from '../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
 
 /**
  * Test Commands:
@@ -21,11 +19,11 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
     const alice = await devEnv.createRandomPerson();
     const privateKey = ethers.Wallet.createRandom().privateKey;
     const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
-    const decryptionAccessControlConditions =
+    const decryptionAccessControlCondition =
       getPkpAccessControlCondition(alicePkpAddress);
     const { ciphertext, dataToEncryptHash } = await encryptString(
       {
-        accessControlConditions: decryptionAccessControlConditions,
+        accessControlConditions: [decryptionAccessControlCondition],
         dataToEncrypt: LIT_PREFIX + privateKey,
       },
       devEnv.litNodeClient
@@ -55,13 +53,12 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
     try {
       const _res = await devEnv.litNodeClient.executeJs({
         sessionSigs: pkpSessionSigsSigning,
-        ipfsId:
-          LIT_ACTION_CID_REPOSITORY.signTransactionWithEthereumEncryptedKey,
+        ipfsId: LIT_ACTION_CID_REPOSITORY.signTransaction.evm,
         jsParams: {
           ciphertext,
           dataToEncryptHash,
           unsignedTransaction,
-          accessControlConditions: decryptionAccessControlConditions,
+          accessControlConditions: [decryptionAccessControlCondition],
         },
       });
     } catch (e: any) {

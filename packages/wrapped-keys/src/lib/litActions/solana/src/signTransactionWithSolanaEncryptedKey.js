@@ -82,7 +82,7 @@ const {
         clusterApiUrl(unsignedTransaction.chain),
         'confirmed'
       );
-      await solanaConnection.sendRawTransaction(transaction.serialize());
+      await solanaConnection.sendRawTransaction(transaction.serialize()); // FIXME: Shouldn't this return the tx hash for consistency with the evm action?
     }
   } catch (error) {
     Lit.Actions.setResponse({

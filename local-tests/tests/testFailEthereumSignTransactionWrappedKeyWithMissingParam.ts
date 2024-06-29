@@ -1,14 +1,10 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  importPrivateKey,
-  signTransactionWithEncryptedKey,
-  SolanaLitTransaction,
-} from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_EVM } from 'packages/wrapped-keys/src/lib/constants';
 
+const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
@@ -35,6 +31,8 @@ export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
+    publicKey: '0xdeadbeef',
+    keyType: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -53,17 +51,15 @@ export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
 
   console.log(pkpSessionSigsSigning);
 
-  // Using SolanaLitTransaction to mimic a missing field (chainId) param as Typescript will complain about missing chainId
-  const unsignedTransaction: SolanaLitTransaction = {
-    chain: 'chronicleTestnet',
-    serializedTransaction: 'random-value',
-  };
-
   try {
     const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
-      network: NETWORK_EVM,
-      unsignedTransaction,
+      network: 'evm',
+      unsignedTransaction: {
+        chain: 'chronicleTestnet',
+        // @ts-expect-error This test is intentionally using the type incorrectly.
+        serializedTransaction: 'random-value',
+      },
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,
     });

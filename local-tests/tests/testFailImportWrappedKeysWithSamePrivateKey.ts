@@ -1,7 +1,8 @@
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { importPrivateKey } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
+const { importPrivateKey } = api;
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
@@ -30,6 +31,8 @@ export const testFailImportWrappedKeysWithSamePrivateKey = async (
       pkpSessionSigs,
       privateKey,
       litNodeClient: devEnv.litNodeClient,
+      publicKey: '0xdeadbeef',
+      keyType: 'K256',
     });
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);

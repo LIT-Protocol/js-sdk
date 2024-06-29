@@ -1,10 +1,6 @@
 import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  SolanaLitTransaction,
-  importPrivateKey,
-  signTransactionWithEncryptedKey,
-} from '@lit-protocol/wrapped-keys';
+import { SerializedTransaction, api } from '@lit-protocol/wrapped-keys';
 import {
   Connection,
   Keypair,
@@ -15,7 +11,8 @@ import {
   clusterApiUrl,
 } from '@solana/web3.js';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { NETWORK_SOLANA } from 'packages/wrapped-keys/src/lib/constants';
+
+const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
 /**
  * Test Commands:
@@ -44,6 +41,8 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
+    publicKey: '0xdeadbeef',
+    keyType: 'K256',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -81,14 +80,14 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
     })
     .toString('base64');
 
-  const unsignedTransaction: SolanaLitTransaction = {
+  const unsignedTransaction: SerializedTransaction = {
     serializedTransaction,
     chain: 'devnet',
   };
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,
-    network: NETWORK_SOLANA,
+    network: 'solana',
     unsignedTransaction,
     broadcast: false,
     litNodeClient: devEnv.litNodeClient,
