@@ -43,6 +43,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys =
     })();`,
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+
     // Expected output:
     // {
     //   claims: {
