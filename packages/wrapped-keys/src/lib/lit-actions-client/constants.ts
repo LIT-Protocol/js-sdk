@@ -7,7 +7,7 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = {
   }),
   signMessage: Object.freeze({
     evm: 'QmTMGcyp77NeppGaqF2DmE1F8GXTSxQYzXCrbE7hNudUWx',
-    solana: 'QmYQC6cd4EMvyB4XPkfEEAwNXJupRZWU5JsTCUrjey4ovp',
+    solana: 'QmUxnWS8VU9QwZRdyfwsEtvhJZcvcdrannjokgZoA1sesy',
   }),
   generateEncryptedKey: Object.freeze({
     evm: 'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd',
