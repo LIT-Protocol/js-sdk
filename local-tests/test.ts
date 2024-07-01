@@ -135,21 +135,19 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTrans
     testSignMessageWithSolanaEncryptedKey,
     testSignTransactionWithSolanaEncryptedKey,
 
-    failedTests: {
-      // -- invalid cases
-      testFailEthereumSignTransactionWrappedKeyWithMissingParam,
-      testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
-      testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
-      testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds,
+    // -- invalid cases
+    testFailEthereumSignTransactionWrappedKeyWithMissingParam,
+    testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
+    testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
+    testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds,
 
-      // -- import wrapped keys
-      testFailImportWrappedKeysWithSamePkp,
-      testFailImportWrappedKeysWithSamePrivateKey,
-      testFailImportWrappedKeysWithEoaSessionSig,
-      testFailImportWrappedKeysWithMaxExpirySessionSig,
-      testFailImportWrappedKeysWithInvalidSessionSig,
-      testFailImportWrappedKeysWithExpiredSessionSig,
-    },
+    // -- import wrapped keys
+    testFailImportWrappedKeysWithSamePkp,
+    testFailImportWrappedKeysWithSamePrivateKey,
+    testFailImportWrappedKeysWithEoaSessionSig,
+    testFailImportWrappedKeysWithMaxExpirySessionSig,
+    testFailImportWrappedKeysWithInvalidSessionSig,
+    testFailImportWrappedKeysWithExpiredSessionSig,
   };
 
   const eoaSessionSigsTests = {
@@ -298,7 +296,6 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTrans
       ...litActionCombiningTests.ecdsaSignAndCombine,
 
       ...wrappedKeysTests,
-      ...wrappedKeysTests.failedTests,
     },
     devEnv,
   };
