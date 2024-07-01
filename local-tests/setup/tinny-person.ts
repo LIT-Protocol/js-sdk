@@ -49,10 +49,26 @@ export class TinnyPerson {
     this.wallet = new ethers.Wallet(privateKey, this.provider);
   }
 
-  async spawn() {
+  /**
+   * FIXME: Enabling this is causing the test to fail
+   * Switches the current wallet to a new funding wallet by creating a new funding wallet,
+   * funding it with a small amount of ethers, and updating the current wallet to the new one.
+   *
+   * @private
+   * @returns {Promise<void>} A promise that resolves once the wallet has been switched.
+   */
+  private async _switchWallet() {
     // Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
     const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
+
     if (this.envConfig.network != LIT_TESTNET.LOCALCHAIN) {
+      // check balance this.wallet
+      const balance = await this.wallet.getBalance();
+      console.log(
+        '[𐬺🧪 Tinny Person𐬺] Wallet balance:',
+        ethers.utils.formatEther(balance)
+      );
+
       const transferTx = await this.wallet.sendTransaction({
         to: fundingWallet.address,
         value: ethers.utils.parseEther('0.00001'),
@@ -65,7 +81,10 @@ export class TinnyPerson {
       );
       this.wallet = fundingWallet;
     }
+  }
 
+  async spawn() {
+    // await this._switchWallet();
     console.log('[𐬺🧪 Tinny Person𐬺] Spawning person:', this.wallet.address);
     /**
      * ====================================
@@ -95,11 +114,11 @@ export class TinnyPerson {
       litNodeClient: this.envConfig.litNodeClient,
     });
 
-    // /**
-    //  * ====================================
-    //  * Setup contracts-sdk client
-    //  * ====================================
-    //  */
+    /**
+     * ====================================
+     * Setup contracts-sdk client
+     * ====================================
+     */
     if (this.envConfig.network === LIT_TESTNET.LOCALCHAIN) {
       const networkContext = this.envConfig.contractContext;
       this.contractsClient = new LitContracts({

@@ -58,6 +58,7 @@ export enum LitNetwork {
   Manzano = 'manzano',
   Habanero = 'habanero',
   Custom = 'custom',
+  DatilDev = 'datil-dev',
 }
 
 /**

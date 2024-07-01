@@ -123,6 +123,7 @@ export type LITChain<T> = {
 
 export type LIT_NETWORKS_KEYS =
   | 'cayenne'
+  | 'datil-dev'
   | 'localhost'
   | 'custom'
   | 'habanero'

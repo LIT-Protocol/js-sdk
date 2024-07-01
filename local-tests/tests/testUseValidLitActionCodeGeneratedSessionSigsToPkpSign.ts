@@ -11,6 +11,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  * ❌ NOT AVAILABLE IN HABANERO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  *
  **/
 export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (

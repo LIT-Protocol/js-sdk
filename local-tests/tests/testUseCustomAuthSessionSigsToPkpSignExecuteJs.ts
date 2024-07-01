@@ -134,6 +134,4 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   } catch (e) {
     throw new Error(e);
   }
-
-  process.exit();
 };

@@ -11,6 +11,7 @@ import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
   CreateCustomAuthMethodRequest,
+  LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
@@ -64,12 +65,16 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import {
+  AuthMethodScope,
+  AuthMethodType,
+  LIT_CHAINS,
+  LIT_RPC,
+} from '@lit-protocol/constants';
+import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
 
-const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
-const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
-
-const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
+// const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+// const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
@@ -114,7 +119,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost';
+  network: LIT_NETWORKS_KEYS;
   customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -190,7 +195,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero';
+    network?: LIT_NETWORKS_KEYS;
   }) {
     // this.provider = args?.provider;
     this.customContext = args?.customContext;
@@ -205,7 +210,8 @@ export class LitContracts {
     this.network = args?.network || 'cayenne';
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
-      this.rpc = DEFAULT_RPC;
+      this.rpc =
+        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
     }
 
     if (!this.rpcs) {
@@ -263,14 +269,38 @@ export class LitContracts {
         throw new Error(msg);
       }
 
-      const chainInfo = {
-        chainId: '0x2AC49',
-        chainName: 'Chronicle - Lit Protocol Testnet',
-        nativeCurrency: { name: 'LIT', symbol: 'LIT', decimals: 18 },
-        rpcUrls: this.rpcs,
-        blockExplorerUrls: [BLOCK_EXPLORER],
+      function _decimalToHex(decimal: number): string {
+        return '0x' + decimal.toString(16);
+      }
+
+      const chronicleChainInfo = {
+        chainId: _decimalToHex(LIT_CHAINS['chronicleTestnet'].chainId),
+        chainName: LIT_CHAINS['chronicleTestnet'].name,
+        nativeCurrency: {
+          name: LIT_CHAINS['chronicleTestnet'].symbol,
+          symbol: LIT_CHAINS['chronicleTestnet'].symbol,
+          decimals: LIT_CHAINS['chronicleTestnet'].decimals,
+        },
+        rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
+        blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
         iconUrls: ['future'],
       };
+
+      const vesuviusChainInfo = {
+        chainId: _decimalToHex(LIT_CHAINS['datilDevnet'].chainId),
+        chainName: LIT_CHAINS['datilDevnet'].name,
+        nativeCurrency: {
+          name: LIT_CHAINS['datilDevnet'].symbol,
+          symbol: LIT_CHAINS['datilDevnet'].symbol,
+          decimals: LIT_CHAINS['datilDevnet'].decimals,
+        },
+        rpcUrls: LIT_CHAINS['datilDevnet'].rpcUrls,
+        blockExplorerUrls: LIT_CHAINS['datilDevnet'].blockExplorerUrls,
+        iconUrls: ['future'],
+      };
+
+      const chainInfo =
+        this.network === 'datil-dev' ? vesuviusChainInfo : chronicleChainInfo;
 
       try {
         await web3Provider.send('wallet_switchEthereumChain', [
@@ -572,22 +602,28 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl = rpcUrl ?? DEFAULT_READ_RPC;
+    rpcUrl =
+      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
       provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     }
 
+    if (network === 'datil-dev') {
+      // @ts-ignore
+      context!.Staking!.abi = minStakingAbi;
+    }
+
     if (!context) {
       const contractData = await LitContracts._resolveContractContext(
-        network,
-        context
+        network
+        // context
       );
 
       const stakingContract = contractData.find(
@@ -757,7 +793,7 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero',
+    network: LIT_NETWORKS_KEYS,
     provider: ethers.providers.JsonRpcProvider,
     context?: LitContractContext | LitContractResolverContext
   ) {
@@ -855,7 +891,7 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) => {
@@ -874,7 +910,7 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ): Promise<string[]> => {
@@ -934,8 +970,8 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    network: LIT_NETWORKS_KEYS
+    // context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
     const CAYENNE_API =
@@ -944,53 +980,51 @@ export class LitContracts {
       'https://lit-general-worker.getlit.dev/manzano-contract-addresses';
     const HABANERO_API =
       'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
+    const DATIL_DEV_API =
+      'https://lit-general-worker.getlit.dev/datil-dev/contracts';
 
-    if (network === 'cayenne') {
+    const fetchData = async (url: string) => {
       try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(CAYENNE_API).then((res) => res.json());
+        return await fetch(url).then((res) => res.json());
       } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
+        throw new Error(`Error fetching data from ${url}: ${e.toString()}`);
       }
-    } else if (network === 'manzano') {
-      try {
-        data = await fetch(MANZANO_API).then((res) => res.json());
-      } catch (e: any) {
+    };
+
+    switch (network) {
+      case 'cayenne':
+        data = await fetchData(CAYENNE_API);
+        break;
+      case 'manzano':
+        data = await fetchData(MANZANO_API);
+        break;
+      case 'habanero':
+        data = await fetchData(HABANERO_API);
+        break;
+      case 'datil-dev':
+        data = await fetchData(DATIL_DEV_API);
+        break;
+      case 'custom':
+      case 'localhost':
+        // just use cayenne abis for custom and localhost
+        data = await fetchData(CAYENNE_API);
+        break;
+      default:
         throw new Error(
-          `Error fetching data from ${MANZANO_API}: ${e.toString()}`
+          `[_resolveContractContext] Unsupported network: ${network}`
         );
-      }
-    } else if (network === 'habanero') {
-      try {
-        data = await fetch(HABANERO_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${HABANERO_API}: ${e.toString()}`
-        );
-      }
-    } else if (network === 'custom' || network === 'localhost') {
-      try {
-        // Fetch and parse the JSON data in one step
-        // just use cayenne abis
-        data = await fetch(CAYENNE_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
-      }
     }
-    // Data pulled over http is formatted differently than
-    // what the type expects. Here we normmalize to the LitContractContext type.
-    data = data.data.map((c: any) => {
-      return {
-        address: c.contracts[0].address_hash,
-        abi: c.contracts[0].ABI,
-        name: c.name,
-      };
-    });
-    return data;
+
+    if (!data) {
+      throw new Error('[_resolveContractContext] No data found');
+    }
+
+    // Normalize the data to the LitContractContext type
+    return data.data.map((c: any) => ({
+      address: c.contracts[0].address_hash,
+      abi: c.contracts[0].ABI,
+      name: c.name,
+    }));
   }
 
   /**
@@ -1348,8 +1382,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       });
 
       const txHash = res.hash;
+
       const tx = await res.wait();
-      this.log('Transaction:', tx);
+      this.log('xx Transaction:', tx);
 
       const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
 
@@ -1608,6 +1643,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tx =
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
+              // gasLimit: ethers.utils.hexlify(500000), // Adjust as needed
             });
           this.log('tx:', tx);
 
@@ -1677,17 +1713,22 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         signatures: IPubkeyRouter.SignatureStruct[],
         txOpts?: any
       ) => {
-        const cost = await this.pkpNftContract.read.mintCost();
-        const tx = await this.pkpNftContract.write.claimAndMint(
-          2,
-          derivedKeyId,
-          signatures,
-          txOpts ?? { value: cost }
-        );
-        const txRec = await tx.wait();
-        const events: any = 'events' in txRec ? txRec.events : txRec.logs;
-        const tokenId = events[1].topics[1];
-        return { tx, res: txRec, tokenId };
+        try {
+          const cost = await this.pkpNftContract.read.mintCost();
+          const tx = await this.pkpNftContract.write.claimAndMint(
+            2,
+            derivedKeyId,
+            signatures,
+            txOpts ?? { value: cost }
+          );
+          const txRec = await tx.wait();
+          const events: any = 'events' in txRec ? txRec.events : txRec.logs;
+          const tokenId = events[1].topics[1];
+          return { tx, res: txRec, tokenId };
+        } catch (e: any) {
+          this.log(`[claimAndMint] error: ${e.message}`);
+          throw new Error(e);
+        }
       },
     },
   };

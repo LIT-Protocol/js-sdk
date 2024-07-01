@@ -11,8 +11,10 @@ import {
 } from '@lit-protocol/types';
 import {
   AuthMethodType,
+  LIT_RPC,
   ProviderType,
   RELAY_URL_CAYENNE,
+  RELAY_URL_DATIL_DEV,
   RELAY_URL_HABANERO,
   RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
@@ -93,7 +95,7 @@ export class LitAuthClient {
         );
       }
 
-      const supportedNetworks = ['cayenne', 'habanero', 'manzano'];
+      const supportedNetworks = ['cayenne', 'habanero', 'manzano', 'datil-dev'];
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
@@ -114,6 +116,9 @@ export class LitAuthClient {
           break;
         case 'manzano':
           url = RELAY_URL_MANZANO;
+          break;
+        case 'datil-dev':
+          url = RELAY_URL_DATIL_DEV;
           break;
       }
 
@@ -139,7 +144,9 @@ export class LitAuthClient {
 
     // Set RPC URL
     this.rpcUrl =
-      options?.rpcUrl || 'https://lit-protocol.calderachain.xyz/replica-http';
+      options?.rpcUrl || this.litNodeClient.config.litNetwork === 'datil-dev'
+        ? LIT_RPC.VESUVIUS
+        : LIT_RPC.CHRONICAL;
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);

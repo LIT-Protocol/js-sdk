@@ -150,6 +150,7 @@ export class LitCore {
 
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
+      case LitNetwork.DatilDev:
       case LitNetwork.Cayenne:
         this.config = {
           ...this.config,
@@ -245,7 +246,7 @@ export class LitCore {
       });
     }
 
-    log('Bootstrap urls: ', bootstrapUrls);
+    log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
 
     return {
       minNodeCount: parseInt(minNodeCount, 10),
@@ -890,12 +891,13 @@ export class LitCore {
         errorCode: LIT_ERROR.INIT_ERROR.name,
       });
     }
+
     try {
       const epoch = await this._stakingContract['epoch']();
       return epoch.number.toNumber() as number;
     } catch (error) {
       return throwError({
-        message: `Error getting current epoch number: ${error}`,
+        message: `[fetchCurrentEpochNumber] Error getting current epoch number: ${error}`,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });

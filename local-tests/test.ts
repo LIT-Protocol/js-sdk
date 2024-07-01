@@ -82,12 +82,17 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
 import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
 import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
+import { testRelayer } from './tests/testRelayer';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
 
   await devEnv.init();
+
+  const relayerTests = {
+    testRelayer,
+  };
 
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
@@ -233,6 +238,8 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
       ...litActionCombiningTests.broadcastAndCombine,
       ...litActionCombiningTests.decryptAndCombine,
       ...litActionCombiningTests.ecdsaSignAndCombine,
+
+      ...relayerTests,
     },
     devEnv,
   };
