@@ -1,3 +1,16 @@
+import { ethers } from 'ethers';
+
+import {
+  AuthMethodType,
+  LIT_RPC,
+  ProviderType,
+  RELAY_URL_CAYENNE,
+  RELAY_URL_DATIL_DEV,
+  RELAY_URL_HABANERO,
+  RELAY_URL_MANZANO,
+} from '@lit-protocol/constants';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
 import {
   EthWalletProviderOptions,
   IRelay,
@@ -9,27 +22,16 @@ import {
   AuthMethod,
   MintRequestBody,
 } from '@lit-protocol/types';
-import {
-  AuthMethodType,
-  LIT_RPC,
-  ProviderType,
-  RELAY_URL_CAYENNE,
-  RELAY_URL_DATIL_DEV,
-  RELAY_URL_HABANERO,
-  RELAY_URL_MANZANO,
-} from '@lit-protocol/constants';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitRelay } from './relay';
+
+import AppleProvider from './providers/AppleProvider';
 import { BaseProvider } from './providers/BaseProvider';
-import GoogleProvider from './providers/GoogleProvider';
 import DiscordProvider from './providers/DiscordProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
-import WebAuthnProvider from './providers/WebAuthnProvider';
-import { StytchOtpProvider } from './providers/StytchOtpProvider';
-import AppleProvider from './providers/AppleProvider';
+import GoogleProvider from './providers/GoogleProvider';
 import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
-import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
-import { ethers } from 'ethers';
+import { StytchOtpProvider } from './providers/StytchOtpProvider';
+import WebAuthnProvider from './providers/WebAuthnProvider';
+import { LitRelay } from './relay';
 
 /**
  * Class that handles authentication through Lit login
@@ -146,7 +148,7 @@ export class LitAuthClient {
     this.rpcUrl =
       options?.rpcUrl || this.litNodeClient.config.litNetwork === 'datil-dev'
         ? LIT_RPC.VESUVIUS
-        : LIT_RPC.CHRONICAL;
+        : LIT_RPC.CHRONICLE;
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);
