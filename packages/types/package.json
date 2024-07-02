@@ -23,7 +23,7 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "6.0.4-beta.1",
+  "version": "6.0.5",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
