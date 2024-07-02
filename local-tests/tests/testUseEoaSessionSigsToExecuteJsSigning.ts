@@ -32,6 +32,8 @@ export const testUseEoaSessionSigsToExecuteJsSigning = async (
     },
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // -- Expected output:
   // {
   //   claims: {},

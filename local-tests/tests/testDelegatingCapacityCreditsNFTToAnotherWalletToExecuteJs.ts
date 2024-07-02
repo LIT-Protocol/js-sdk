@@ -64,6 +64,9 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
       },
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+    devEnv.releasePrivateKeyFromUser(bob);
+
     // Expected output:
     // {
     //   claims: {},

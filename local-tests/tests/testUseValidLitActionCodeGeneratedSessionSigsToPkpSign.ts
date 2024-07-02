@@ -27,6 +27,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
     sessionSigs: litActionSessionSigs,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // -- Expected output:
   // {
   //   r: "ab2cef959db920d56f001c3b05637ee49af4c4441f2867ea067c413594a4c87b",

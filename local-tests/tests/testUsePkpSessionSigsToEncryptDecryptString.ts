@@ -71,6 +71,8 @@ export const testUsePkpSessionSigsToEncryptDecryptString = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   if (decryptRes !== 'Hello world') {
     throw new Error(
       `Expected decryptRes to be 'Hello world' but got ${decryptRes}`

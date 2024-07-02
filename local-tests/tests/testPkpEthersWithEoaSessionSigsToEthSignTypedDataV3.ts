@@ -101,5 +101,7 @@ export const testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3 = async (
     }
   } catch (e) {
     throw new Error(`❌ ${e.toString()}`);
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

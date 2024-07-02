@@ -85,6 +85,9 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
 
   console.log('✅ res:', res);
 
+  devEnv.releasePrivateKeyFromUser(alice);
+  devEnv.releasePrivateKeyFromUser(bob);
+
   // -- Expected output:
   // {
   //   claims: {},

@@ -23,6 +23,8 @@ export const testUsePkpSessionSigsToPkpSign = async (
     sessionSigs: pkpSessionSigs,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // -- Expected output:
   // {
   //   r: "f67785b9c516a1fdbd224e9591554171d594bb1fb9799c851bac56212956838a",

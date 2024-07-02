@@ -103,5 +103,7 @@ export const testPkpEthersWithLitActionSessionSigsToEthSignTransaction = async (
     } else {
       throw new Error(`❌ Error: ${e.toString()}`);
     }
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

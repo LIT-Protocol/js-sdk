@@ -23,6 +23,8 @@ export const testUsePkpSessionSigsToExecuteJsConsoleLog = async (
     })();`,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // Expected output:
   // {
   //   success: true,

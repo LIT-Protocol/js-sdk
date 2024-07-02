@@ -73,5 +73,7 @@ export const testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1 = async (
     console.log('recoveredAddr: ', recoveredAddr);
   } catch (e) {
     throw new Error(`❌ ${e.toString()}`);
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

@@ -28,6 +28,8 @@ export const testUsePkpSessionSigsToExecuteJsJsonResponse = async (
     })();`,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // Expected output:
   // {
   //   success: true,

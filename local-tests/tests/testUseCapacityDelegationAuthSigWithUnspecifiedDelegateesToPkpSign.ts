@@ -56,6 +56,9 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign 
       sessionSigs: bobsSessionSigs,
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+    devEnv.releasePrivateKeyFromUser(bob);
+
     // -- Expected output:
     // {
     //   r: "36bd0039b4e4d1dae488a63437318790df86b8023ac4ffa842c8983245b7f629",

@@ -58,5 +58,7 @@ export const testPkpEthersWithPkpSessionSigsToSendTx = async (
     } else {
       throw new Error(`❌ Error: ${e.toString()}`);
     }
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

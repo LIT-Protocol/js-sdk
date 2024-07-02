@@ -44,6 +44,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
       },
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+
     // -- Expected output:
     // {
     //   claims: {},

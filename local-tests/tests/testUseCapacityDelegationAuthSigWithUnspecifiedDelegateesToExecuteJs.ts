@@ -66,6 +66,9 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJ
       },
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+    devEnv.releasePrivateKeyFromUser(bob);
+
     // Expected output:
     // {
     //   claims: {},

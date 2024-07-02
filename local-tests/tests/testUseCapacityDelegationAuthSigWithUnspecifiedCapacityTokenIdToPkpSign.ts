@@ -58,6 +58,9 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkp
       pubKey: bob.pkp.publicKey,
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+    devEnv.releasePrivateKeyFromUser(bob);
+
     // -- Expected output:
     // {
     //   r: "25e04b2abdf220b1374b19228bc292bab71a3224a635726a46d4cbe3a62bb636",

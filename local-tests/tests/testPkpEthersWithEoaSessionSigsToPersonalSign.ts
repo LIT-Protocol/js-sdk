@@ -57,5 +57,7 @@ export const testPkpEthersWithEoaSessionSigsToPersonalSign = async (
     console.log('✅ personal_sign recoveredAddr:', recoveredAddr);
   } catch (e) {
     throw new Error('❌ Error: ' + e.message);
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

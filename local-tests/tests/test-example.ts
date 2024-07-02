@@ -30,6 +30,8 @@ export const testExample = async (devEnv: TinnyEnvironment) => {
 
   console.log('aliceExecuteJsRes:', aliceExecuteJsRes);
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // console.log('aliceEoaSessionSigs: ', aliceEoaSessionSigs);
 
   // const alicePkpSessionSigs = await getPkpSessionSigs(devEnv, alice);

@@ -32,6 +32,8 @@ export const testUseEoaSessionSigsToExecuteJsClaimMultipleKeys = async (
     })();`,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // Expected output:
   // {
   //   claims: {
