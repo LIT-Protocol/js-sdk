@@ -405,6 +405,29 @@ export class TinnyEnvironment {
   //============= END SHIVA ENDPOINTS =============
 
   /**
+   * Sends funds from the current wallet to the specified wallet address.
+   * @param walletAddress - The address of the recipient wallet.
+   * @param amount - The amount of funds to send (default: '0.001').
+   * @throws If there is an error sending the funds.
+   */
+  getFunds = async (walletAddress: string, amount = '0.001') => {
+    try {
+      const privateKey = await this.getAvailablePrivateKey();
+      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+      const wallet = new ethers.Wallet(privateKey.privateKey, provider);
+
+      const tx = await wallet.sendTransaction({
+        to: walletAddress,
+        value: ethers.utils.parseEther(amount),
+      });
+
+      await tx.wait();
+    } catch (e) {
+      throw new Error(`Failed to send funds to ${walletAddress}: ${e}`);
+    }
+  };
+
+  /**
    * Context: the reason this is created instead of individually is because we can't allocate capacity beyond the global
    * max capacity.
    */

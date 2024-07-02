@@ -948,7 +948,7 @@ export interface DecryptZipFileWithMetadataProps extends SessionSigsOrAuthSig {
 export interface SessionKeySignedMessage {
   sessionKey: string;
   resources?: any[];
-  capabilities: string[];
+  capabilities: AuthSig[];
   issuedAt: string;
   expiration: string;
   nodeAddress: string;

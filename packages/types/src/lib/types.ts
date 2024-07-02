@@ -1,4 +1,3 @@
-import { AuthMethodType } from './enums';
 import * as ethers from 'ethers';
 
 import {
@@ -7,6 +6,8 @@ import {
   LPACC_SOL,
   LPACC_EVM_BASIC,
 } from '@lit-protocol/accs-schemas';
+
+import { AuthMethodType } from './enums';
 import {
   AuthMethod,
   LitRelayConfig,
@@ -14,8 +15,6 @@ import {
   Signature,
   StytchOtpProviderOptions,
   WebAuthnProviderOptions,
-} from './interfaces';
-import {
   AccsOperatorParams,
   EthWalletProviderOptions,
   JsonEncryptionRetrieveRequest,
@@ -78,14 +77,14 @@ export type Chain = string;
  *
  * @typedef { Object } LITChainRequiredProps
  */
-export type LITChainRequiredProps = {
+export interface LITChainRequiredProps {
   name: string;
   symbol: string;
   decimals: number;
-  rpcUrls: Array<string>;
-  blockExplorerUrls: Array<string>;
+  rpcUrls: string[];
+  blockExplorerUrls: string[];
   vmType: string;
-};
+}
 
 /**
  * @typedef { Object } LITEVMChain
@@ -117,9 +116,7 @@ export type LITCosmosChain = LITChainRequiredProps & {
  * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
  * @property {string} name - The human readable name of the chain
  */
-export type LITChain<T> = {
-  [chainName: string]: T;
-};
+export type LITChain<T> = Record<string, T>;
 
 export type LIT_NETWORKS_KEYS =
   | 'cayenne'
@@ -200,18 +197,18 @@ export type ClaimResult<T = ClaimProcessor> = {
   pubkey: string;
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
-export type LitContract = {
+export interface LitContract {
   address?: string;
   abi?: any;
   name?: string;
-};
+}
 
 /**
  * Defines a set of contract metadata for bootstrapping
  * network context and interfacing with contracts on Chroncile blockchain
  *
  */
-export type LitContractContext = {
+export interface LitContractContext {
   [index: string]: string | any;
 
   Allowlist: LitContract;
@@ -225,7 +222,7 @@ export type LitContractContext = {
   RateLimitNFT: LitContract;
   Staking: LitContract;
   StakingBalances: LitContract;
-};
+}
 
 /**
  * Type for a contract resolver instance which will be used
@@ -233,7 +230,7 @@ export type LitContractContext = {
  * an instance of LitContractContext can still be provided. which will be used for abi data.
  *
  */
-export type LitContractResolverContext = {
+export interface LitContractResolverContext {
   [index: string]:
     | string
     | LitContractContext
@@ -245,6 +242,6 @@ export type LitContractResolverContext = {
   environment: number;
   contractContext?: LitContractContext;
   provider?: ethers.providers.JsonRpcProvider;
-};
+}
 
 export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
