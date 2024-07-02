@@ -1693,7 +1693,8 @@ export interface MintCapacityCreditsPerKilosecond
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
     MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond {}
+    MintCapacityCreditsPerKilosecond,
+    GasLimitParam {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1886,7 +1887,11 @@ export interface SignatureData {
 
 export type ClaimsList = Record<string, SignatureData>[];
 
-export interface MintWithAuthParams {
+export interface GasLimitParam {
+  gasLimit?: number;
+}
+
+export interface MintWithAuthParams extends GasLimitParam {
   /**
    * auth method to use for minting
    */
