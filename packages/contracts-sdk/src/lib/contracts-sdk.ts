@@ -1620,7 +1620,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       },
     },
     write: {
-      mint: async ({ gasLimit }: GasLimitParam) => {
+      mint: async (param?: GasLimitParam) => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1650,7 +1650,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tx =
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
-              gasLimit: gasLimit || GAS_LIMIT,
+              gasLimit: param?.gasLimit || GAS_LIMIT,
             });
           this.log('tx:', tx);
 
@@ -1665,7 +1665,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         } else {
           sentTx = await this.pkpNftContract.write.mintNext(2, {
             value: mintCost,
-            gasLimit: gasLimit || GAS_LIMIT,
+            gasLimit: param?.gasLimit || GAS_LIMIT,
           });
         }
 
