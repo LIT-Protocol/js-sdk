@@ -38,7 +38,7 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 **NOTE: a `.env.sample` is contained in the repository root for the below env tables**
 
 | Variable                 | Description                                                                                                                                                                                               |
-| ------------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `MAX_ATTEMPTS`           | Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.                                                                                         |
 | `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_TESTNET.LOCALCHAIN`, `LIT_TESTNET.MANZANO`, or `LIT_TESTNET.CAYENNE`.                                                             |
 | `DEBUG`                  | Specifies whether to enable debug mode.                                                                                                                                                                   |
