@@ -1741,7 +1741,7 @@ export interface CapacityDelegationFields extends BaseSiweMessage {
 export interface CapacityDelegationRequest {
   nft_id?: string[]; // Optional array of strings
   delegate_to?: string[]; // Optional array of modified address strings
-  uses?: string; 
+  uses?: string;
 }
 
 export interface CapacityCreditsReq {
