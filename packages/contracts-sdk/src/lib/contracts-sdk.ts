@@ -17,6 +17,7 @@ import {
   LitContractResolverContext,
   MintCapacityCreditsContext,
   MintCapacityCreditsRes,
+  MintNextAndAddAuthMethods,
   MintWithAuthParams,
   MintWithAuthResponse,
 } from '@lit-protocol/types';
@@ -1114,7 +1115,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         gasLimit: gasLimit || GAS_LIMIT, // Adjust as needed
       }
     );
-
     const receipt = await tx.wait();
 
     const events = 'events' in receipt ? receipt.events : receipt.logs;
@@ -1650,7 +1650,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tx =
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
-              gasLimit: gasLimit || GAS_LIMIT
+              gasLimit: gasLimit || GAS_LIMIT,
             });
           this.log('tx:', tx);
 
@@ -1665,7 +1665,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         } else {
           sentTx = await this.pkpNftContract.write.mintNext(2, {
             value: mintCost,
-            gasLimit: gasLimit || GAS_LIMIT
+            gasLimit: gasLimit || GAS_LIMIT,
           });
         }
 
@@ -2413,15 +2413,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         permittedAuthMethodScopes,
         addPkpEthAddressAsPermittedAddress,
         sendPkpToItself,
-      }: {
-        keyType: string;
-        permittedAuthMethodTypes: string[];
-        permittedAuthMethodIds: string[];
-        permittedAuthMethodPubkeys: string[];
-        permittedAuthMethodScopes: string[][];
-        addPkpEthAddressAsPermittedAddress: boolean;
-        sendPkpToItself: boolean;
-      }): Promise<any> => {
+        gasLimit,
+      }: MintNextAndAddAuthMethods): Promise<any> => {
         // first get mint cost
         const mintCost = await this.pkpNftContract.read.mintCost();
         const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
@@ -2435,7 +2428,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
           {
             value: mintCost,
-            gasLimit: gasLimit || GAS_LIMIT
+            gasLimit: gasLimit || GAS_LIMIT,
           }
         );
         return tx;

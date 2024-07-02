@@ -1891,6 +1891,16 @@ export interface GasLimitParam {
   gasLimit?: number;
 }
 
+export interface MintNextAndAddAuthMethods extends GasLimitParam {
+  keyType: string;
+  permittedAuthMethodTypes: string[];
+  permittedAuthMethodIds: string[];
+  permittedAuthMethodPubkeys: string[];
+  permittedAuthMethodScopes: string[][];
+  addPkpEthAddressAsPermittedAddress: boolean;
+  sendPkpToItself: boolean;
+}
+
 export interface MintWithAuthParams extends GasLimitParam {
   /**
    * auth method to use for minting
