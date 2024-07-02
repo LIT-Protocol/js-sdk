@@ -78,6 +78,8 @@ export const testUsePkpSessionSigsToEncryptDecryptFile = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   if (blobArray.length !== decriptedFile.length) {
     throw new Error(
       `decrypted file should match the original file but received ${decriptedFile}`

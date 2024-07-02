@@ -28,6 +28,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonRespons
     })();`,
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+
     // Expected output:
     // {
     //   success: true,
