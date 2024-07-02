@@ -214,7 +214,7 @@ export class LitContracts {
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc =
-        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
+        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
     }
 
     if (!this.rpcs) {
@@ -611,7 +611,7 @@ export class LitContracts {
   ) {
     let provider: ethers.providers.JsonRpcProvider;
     rpcUrl =
-      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
+      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -1111,7 +1111,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       true,
       {
         value: mintCost,
-        gasLimit: gasLimit || 5000000,
+        gasLimit: gasLimit || GAS_LIMIT, // Adjust as needed
       }
     );
 
@@ -1650,8 +1650,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tx =
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
-              gasLimit: gasLimit || GAS_LIMIT,
-              // gasLimit: ethers.utils.hexlify(500000), // Adjust as needed
+              gasLimit: gasLimit || GAS_LIMIT
             });
           this.log('tx:', tx);
 
@@ -1666,7 +1665,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         } else {
           sentTx = await this.pkpNftContract.write.mintNext(2, {
             value: mintCost,
-            gasLimit: gasLimit || GAS_LIMIT,
+            gasLimit: gasLimit || GAS_LIMIT
           });
         }
 
@@ -2433,7 +2432,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           permittedAuthMethodScopes,
           addPkpEthAddressAsPermittedAddress,
           sendPkpToItself,
-          { value: mintCost }
+
+          {
+            value: mintCost,
+            gasLimit: gasLimit || GAS_LIMIT
+          }
         );
         return tx;
       },
