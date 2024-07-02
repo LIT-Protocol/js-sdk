@@ -104,7 +104,7 @@ declare global {
   }
 }
 
-const GAS_LIMIT = ethers.utils.hexlify(500000);
+const GAS_LIMIT = ethers.utils.hexlify(500000); // Adjust as needed
 
 // This code defines a LitContracts class that acts as a container for a collection of smart contracts. The class has a constructor that accepts an optional args object with provider and rpc properties. If no provider is specified, the class will create a default provider using the specified rpc URL. If no rpc URL is specified, the class will use a default URL.
 // The class has a number of properties that represent the smart contract instances, such as accessControlConditionsContract, litTokenContract, pkpNftContract, etc. These smart contract instances are created by passing the contract address, ABI, and provider to the ethers.Contract constructor.
