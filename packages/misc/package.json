@@ -24,7 +24,7 @@
   "tags": [
     "universal"
   ],
-  "version": "6.0.3-wrapped-keys.beta.5",
+  "version": "6.0.4",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
