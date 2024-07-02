@@ -71,3 +71,4 @@ storage.test.db
 
 local-tests/build
 # local-tests/setup/networkContext.json
+.env

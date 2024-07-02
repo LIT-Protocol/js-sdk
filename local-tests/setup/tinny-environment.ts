@@ -4,6 +4,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthSig,
   CosmosAuthSig,
+  LitContractContext,
   LitContractResolverContext,
   SolanaAuthSig,
 } from '@lit-protocol/types';
@@ -13,6 +14,9 @@ import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 
+import 'dotenv/config';
+console.log('Loading env vars from dot config...');
+console.log('Done loading env', process.env['DEBUG']);
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 
@@ -37,7 +41,7 @@ export class TinnyEnvironment {
       process.env['LIT_OFFICIAL_RPC'] ||
       'https://chain-rpc.litprotocol.com/http',
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
-    RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'false',
+    RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
 
     // Available Accounts
@@ -64,7 +68,9 @@ export class TinnyEnvironment {
       '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
     ],
     KEY_IN_USE: new Array(),
-    NO_SETUP: process.env['NO_SETUP'] === 'false',
+    NO_SETUP: process.env['NO_SETUP'] === 'true',
+    USE_SHIVA: process.env['USE_SHIVA'] === 'true',
+    NETWORK_CONFIG: process.env['NETWORK_CONFIG'] ?? './networkContext.json',
   };
 
   public litNodeClient: LitNodeClient;
@@ -88,9 +94,11 @@ export class TinnyEnvironment {
     address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
   };
 
+  public testnet: TestnetClient | undefined;
   //=========== PRIVATE MEMBERS ===========
   private _shivaClient: ShivaClient = new ShivaClient();
-  private _testnet: TestnetClient | undefined;
+  private _contractContext: LitContractContext | LitContractResolverContext;
+
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
@@ -114,6 +122,11 @@ export class TinnyEnvironment {
     } else {
       this.rpc = this.processEnvs.LIT_OFFICIAL_RPC;
     }
+
+    console.log(
+      '[𐬺🧪 Tinny Environment𐬺] Done configuring enviorment current config: ',
+      this.processEnvs
+    );
   }
 
   world: Map<string, TinnyPerson> = new Map();
@@ -196,7 +209,8 @@ export class TinnyEnvironment {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const networkContext = this._testnet.ContractContext;
+      const networkContext =
+        this?.testnet?.ContractContext ?? this._contractContext;
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
         rpcUrl: this.processEnvs.LIT_RPC_URL,
@@ -249,12 +263,14 @@ export class TinnyEnvironment {
    * @returns The TinnyEnvConfig object containing the environment configuration.
    */
   getEnvConfig(): TinnyEnvConfig {
+    const contractContext =
+      this?.testnet?.ContractContext ?? this._contractContext;
     return {
       rpc: this.rpc,
       litNodeClient: this.litNodeClient,
       network: this.network,
       processEnvs: this.processEnvs,
-      contractContext: this?._testnet?.ContractContext ?? undefined,
+      contractContext: contractContext as LitContractResolverContext,
     };
   }
 
@@ -316,11 +332,21 @@ export class TinnyEnvironment {
       console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
       return;
     }
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      this._testnet = await this._shivaClient.startTestnetManager();
+    if (this.network === LIT_TESTNET.LOCALCHAIN && this.processEnvs.USE_SHIVA) {
+      this.testnet = await this._shivaClient.startTestnetManager();
       // wait for the testnet to be active before we start the tests.
-      await this._testnet.pollTestnetForActive();
-      await this._testnet.getTestnetConfig();
+      let state = await this.testnet.pollTestnetForActive();
+      if (state === `UNKNOWN`) {
+        console.log(
+          'Testnet state found to be Unknown meannig there was an error with testnet creation. shutting downn'
+        );
+        throw new Error(`Error while creating testnet, aborting test run`);
+      }
+
+      await this.testnet.getTestnetConfig();
+    } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      const context = await import('./networkContext.json');
+      this._contractContext = context;
     }
 
     await this.setupLitNodeClient();
@@ -358,12 +384,35 @@ export class TinnyEnvironment {
       this.network === LIT_TESTNET.LOCALCHAIN &&
       this._shivaClient.processEnvs.STOP_TESTNET
     ) {
-      await this._testnet.stopTestnet();
+      await this.testnet.stopTestnet();
     } else {
       console.log('skipping testnet shutdown.');
     }
   }
   //============= END SHIVA ENDPOINTS =============
+
+  /**
+   * Sends funds from the current wallet to the specified wallet address.
+   * @param walletAddress - The address of the recipient wallet.
+   * @param amount - The amount of funds to send (default: '0.001').
+   * @throws If there is an error sending the funds.
+   */
+  getFunds = async (walletAddress: string, amount = '0.001') => {
+    try {
+      const privateKey = await this.getAvailablePrivateKey();
+      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+      const wallet = new ethers.Wallet(privateKey.privateKey, provider);
+
+      const tx = await wallet.sendTransaction({
+        to: walletAddress,
+        value: ethers.utils.parseEther(amount),
+      });
+
+      await tx.wait();
+    } catch (e) {
+      throw new Error(`Failed to send funds to ${walletAddress}: ${e}`);
+    }
+  };
 
   /**
    * Context: the reason this is created instead of individually is because we can't allocate capacity beyond the global
@@ -380,7 +429,8 @@ export class TinnyEnvironment {
      * ====================================
      */
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const networkContext = this._testnet.ContractContext;
+      const networkContext =
+        this?.testnet?.ContractContext ?? this._contractContext;
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
