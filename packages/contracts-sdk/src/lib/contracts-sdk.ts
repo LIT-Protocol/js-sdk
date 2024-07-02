@@ -211,7 +211,7 @@ export class LitContracts {
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc =
-        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
+        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
     }
 
     if (!this.rpcs) {
@@ -608,7 +608,7 @@ export class LitContracts {
   ) {
     let provider: ethers.providers.JsonRpcProvider;
     rpcUrl =
-      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICAL;
+      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {

@@ -611,6 +611,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
 };
 
+export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
+
 /**
  * Enum representing the available LIT RPC endpoints.
  */
@@ -621,12 +623,12 @@ export enum LIT_RPC {
   LOCAL_ANVIL = 'http://127.0.0.1:8545',
 
   /**
-   * Chronical RPC endpoint.
+   * Chronicle RPC endpoint - Used for Cayenne, Manzano, Habanero
    */
-  CHRONICAL = 'https://chain-rpc.litprotocol.com/http',
+  CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
 
   /**
-   * Vesuvius RPC endpoint.
+   * Vesuvius RPC endpoint - used for >= Datil-dev
    */
   VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
 }
