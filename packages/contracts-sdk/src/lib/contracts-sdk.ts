@@ -1107,6 +1107,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       true,
       {
         value: mintCost,
+        gasLimit: ethers.utils.hexlify(5000000), // Adjust as needed
       }
     );
 
@@ -1643,7 +1644,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tx =
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
-              // gasLimit: ethers.utils.hexlify(500000), // Adjust as needed
+              gasLimit: ethers.utils.hexlify(5000000), // Adjust as needed
             });
           this.log('tx:', tx);
 
@@ -1658,6 +1659,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         } else {
           sentTx = await this.pkpNftContract.write.mintNext(2, {
             value: mintCost,
+            gasLimit: ethers.utils.hexlify(5000000), // Adjust as needed
           });
         }
 
@@ -2424,7 +2426,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           permittedAuthMethodScopes,
           addPkpEthAddressAsPermittedAddress,
           sendPkpToItself,
-          { value: mintCost }
+
+          {
+            value: mintCost,
+            gasLimit: ethers.utils.hexlify(5000000), // Adjust as needed
+          }
         );
         return tx;
       },
