@@ -7,6 +7,21 @@ import {
   TestNetState,
 } from './shiva-client.d';
 
+class ShivaError extends Error {
+  constructor (shivaResponse: TestNetResponse<any>) {
+    let message = `An error occured on request to testnet with id: ${shivaResponse.testnetId}`;
+    for (const error of shivaResponse.errors) {
+      message += ' ' + error;
+    }
+
+    super(message);
+    this.name = 'ShivaError';
+    this.message = message;
+  }
+}
+
+
+
 export interface ShivaEnvs {
   /**
    * If runnnig no localchain this flag will stop the running testnet when the test
@@ -102,26 +117,25 @@ export class TestnetClient {
       const pollRes = await fetch(
         this._processEnvs.TESTNET_MANAGER_URL + '/test/poll/testnet/' + this._id
       );
-      const res = await pollRes.json();
+      const res: TestNetResponse<TestNetState> = await pollRes.json();
+      if (pollRes.status != 200) {
+        throw new ShivaError(res); // throw the response as an error
+      }
       state = res.body;
       console.log('found state to be', res);
-      if (state != 'Active' && state != 'UNKNOWN') {
-        await new Promise<void>((res, _) => {
-          setTimeout(() => {
-            res();
-          }, 500);
-        });
-      } else {
-        break;
-      }
+
+      await new Promise<void>((res, _) => {
+        setTimeout(() => {
+          res();
+        }, 500);
+      });
     }
 
     return state;
   }
 
   /**
-   * returns the config for a given testnet
-   * struct reference for config
+   * Returns the config for a given testnet
    */
   public getTestnetConfig() {
     return fetch(
@@ -133,6 +147,10 @@ export class TestnetClient {
         return res.json();
       })
       .then((info: TestNetResponse<TestNetInfo>) => {
+        if (info.errors != null) {
+          throw new ShivaError(info); 
+        }
+
         this._info = info.body;
         this._currentState = info.lastStateObserved as TestNetState;
         console.log('setting testnet info: ', this._info);
@@ -152,10 +170,15 @@ export class TestnetClient {
       .then((res: Response) => {
         if (res.status === 200) {
           return res.json();
+        }  else {
+          throw res; // throw as an error to the caller
         }
       })
-      .then((body: any) => {
-        console.log('Stopped random peer: ', body);
+      .then((res: TestNetResponse<boolean>) => {
+        if (res.errors != null) {
+          throw new ShivaError(res); 
+        }
+        console.log('Stopped random peer: ', res);
       });
   }
 
@@ -170,15 +193,14 @@ export class TestnetClient {
         this._id
     )
       .then((res: Response) => {
-        if (res.status === 200) {
-          return res.json();
-        } else {
-          throw res;
-        }
+        return res.json();
       })
-      .then((body: TestNetResponse<boolean>) => {
-        console.log('validator kick response: ', body);
-        return body;
+      .then((res: TestNetResponse<boolean>) => {
+        if (res.errors != null) {
+          throw new ShivaError(res); 
+        }
+        console.log('validator kick response: ', res);
+        return res;
       });
   }
 
@@ -223,18 +245,6 @@ export class ShivaClient {
      * Used to start an instance of a lit network through the Lit Testnet Manager
      * if an isntance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
      * If an instance does not exist then we create one
-     * struct reference
-        pub struct TestNetCreateRequest {
-        pub node_count: usize,
-        pub polling_interval: String,
-        pub epoch_length: i32,
-        pub custom_build_path: Option<String>,
-        pub lit_action_server_custom_build_path: Option<String>,
-        pub existing_config_path: Option<String>,
-        pub which: Option<String>,
-        pub ecdsa_round_timeout: Option<String>,
-        pub enable_rate_limiting: Option<String>,
-       }
    */
   async startTestnetManager(
     createReq?: TestNetCreateRequest
@@ -270,7 +280,7 @@ export class ShivaClient {
           this.processEnvs.LIT_ACTION_BINARY_PATH;
       }
       console.log('Testnet create args: ', body);
-      const createTestnetResp = await fetch(
+      const createTestnetResp: Response = await fetch(
         this.processEnvs.TESTNET_MANAGER_URL + '/test/create/testnet',
         {
           method: 'POST',
@@ -281,7 +291,10 @@ export class ShivaClient {
         }
       );
 
-      const createTestnet = await createTestnetResp.json();
+      const createTestnet = await createTestnetResp.json() as TestNetResponse<void>;
+      if (createTestnetResp.status != 200) {
+        throw new ShivaError(createTestnet); // throw the object as an error if the status was not 200
+      }
       this._clients.set(
         createTestnet.testnetId,
         new TestnetClient(createTestnet.testnetId, this.processEnvs)
