@@ -4,8 +4,10 @@ import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
+import { ethers } from 'ethers';
 
-const { generatePrivateKey, signMessageWithEncryptedKey } = api;
+const { generatePrivateKey, signMessageWithEncryptedKey, exportPrivateKey } =
+  api;
 
 /**
  * Test Commands:
@@ -74,20 +76,27 @@ export const testGenerateSolanaWrappedKey = async (
       `signature: ${signature} doesn't validate for the Solana public key: ${generatedPublicKey}`
     );
 
-  // FIX: Export broken as we can't decrypt data encrypted inside a Lit Action
-  // const decryptedPrivateKey = await exportPrivateKey({
-  //   pkpSessionSigs: pkpSessionSigsExport,
-  //   litNodeClient: devEnv.litNodeClient,
-  // });
+  const pkpSessionSigsExport = await getPkpSessionSigs(
+    devEnv,
+    alice,
+    null,
+    new Date(Date.now() + 1000 * 60 * 10).toISOString()
+  ); // 10 mins expiry
 
-  // const wallet = new ethers.Wallet(decryptedPrivateKey);
-  // const decryptedPublicKey = wallet.publicKey;
+  // FIXME: Export broken as we can't decrypt data encrypted inside a Lit Action
+  const { decryptedPrivateKey } = await exportPrivateKey({
+    pkpSessionSigs: pkpSessionSigsExport,
+    litNodeClient: devEnv.litNodeClient,
+  });
 
-  // if (decryptedPublicKey !== generatedPublicKey) {
-  //   throw new Error(
-  //     `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
-  //   );
-  // }
+  const wallet = new ethers.Wallet(decryptedPrivateKey);
+  const decryptedPublicKey = wallet.publicKey;
+
+  if (decryptedPublicKey !== generatedPublicKey) {
+    throw new Error(
+      `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
+    );
+  }
 
   log('✅ testGenerateSolanaWrappedKey');
 };

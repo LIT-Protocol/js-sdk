@@ -2,6 +2,8 @@ import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { ethers } from 'ethers';
+import { exportPrivateKey } from '../../../packages/wrapped-keys/src/lib/api';
 
 const { generatePrivateKey } = api;
 
@@ -47,20 +49,20 @@ export const testGenerateEthereumWrappedKey = async (
 
   console.log(pkpSessionSigsExport);
 
-  // FIX: Export broken as we can't decrypt data encrypted inside a Lit Action
-  // const decryptedPrivateKey = await exportPrivateKey({
-  //   pkpSessionSigs: pkpSessionSigsExport,
-  //   litNodeClient: devEnv.litNodeClient,
-  // });
+  // FIXME: Export broken as we can't decrypt data encrypted inside a Lit Action
+  const { decryptedPrivateKey } = await exportPrivateKey({
+    pkpSessionSigs: pkpSessionSigsExport,
+    litNodeClient: devEnv.litNodeClient,
+  });
 
-  // const wallet = new ethers.Wallet(decryptedPrivateKey);
-  // const decryptedPublicKey = wallet.publicKey;
+  const wallet = new ethers.Wallet(decryptedPrivateKey);
+  const decryptedPublicKey = wallet.publicKey;
 
-  // if (decryptedPublicKey !== generatedPublicKey) {
-  //   throw new Error(
-  //     `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
-  //   );
-  // }
+  if (decryptedPublicKey !== generatedPublicKey) {
+    throw new Error(
+      `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
+    );
+  }
 
   log('✅ testGenerateEthereumWrappedKey');
 };
