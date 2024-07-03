@@ -22,23 +22,17 @@ export async function signMessageWithLitAction(
     storedKeyMetadata,
   } = args;
 
-  try {
-    const { pkpAddress, ciphertext, dataToEncryptHash } = storedKeyMetadata;
-    const result = await litNodeClient.executeJs({
-      sessionSigs: pkpSessionSigs,
-      ipfsId: litActionIpfsCid,
-      jsParams: {
-        pkpAddress,
-        ciphertext,
-        dataToEncryptHash,
-        messageToSign,
-        accessControlConditions,
-      },
-    });
-    return postLitActionValidation(result);
-  } catch (err: any) {
-    throw new Error(
-      `Lit Action threw an unexpected error: ${JSON.stringify(err)}`
-    );
-  }
+  const { pkpAddress, ciphertext, dataToEncryptHash } = storedKeyMetadata;
+  const result = await litNodeClient.executeJs({
+    sessionSigs: pkpSessionSigs,
+    ipfsId: litActionIpfsCid,
+    jsParams: {
+      pkpAddress,
+      ciphertext,
+      dataToEncryptHash,
+      messageToSign,
+      accessControlConditions,
+    },
+  });
+  return postLitActionValidation(result);
 }
