@@ -83,7 +83,7 @@ interface CoreNodeConfig {
 
 interface EpochCache {
   currentNumber: null | number;
-  lastUpdateTime: null | number;
+  startTime: null | number;
 }
 
 export type LitNodeClientConfigWithDefaults = Required<
@@ -153,7 +153,7 @@ export class LitCore {
   private _connectingPromise: null | Promise<void> = null;
   private _epochCache: EpochCache = {
     currentNumber: null,
-    lastUpdateTime: null,
+    epochStartTime: null,
   };
   private _blockHashUrl =
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
@@ -269,43 +269,12 @@ export class LitCore {
   }
 
   // ========== Scoped Class Helpers ==========
-  /** Schedule an update to the current epoch number for EPOCH_PROPAGATION_DELAY seconds from now
-   * We don't immediately update this value on `NextValidatorSetLocked` state changes because we want to give the nodes
-   * a few seconds to update to the new epoch before we start sending the new epoch number with requests
-   *
-   * This function should only be called as a result of a rare state change (`NextValidatorSetLocked`)
-   * So we don't debounce setting the timeout handler.
-   * @private
-   */
-  private _scheduleEpochNumberUpdate() {
-    if (this._epochUpdateTimeout) {
-      clearTimeout(this._epochUpdateTimeout);
-    }
-
-    this._epochUpdateTimeout = setTimeout(async () => {
-      try {
-        this.currentEpochNumber = await this._fetchCurrentEpochNumber();
-      } catch (e) {
-        // Don't let errors here bubble up to be unhandle rejections in the runtime!
-        logError('Error while attempting to fetch current epoch number');
-      }
-    }, EPOCH_PROPAGATION_DELAY);
-
-    // If nothing else is pending, don't keep node process open just for this timer to fire!
-    // unref doesn't exist in the browser; guard it :)
-    if (
-      this._epochUpdateTimeout.unref &&
-      typeof this._epochUpdateTimeout.unref === 'function'
-    ) {
-      this._epochUpdateTimeout.unref();
-    }
-  }
   private async _handleStakingContractStateChange(state: StakingStates) {
     log(`New state detected: "${state}"`);
 
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
-      this._scheduleEpochNumberUpdate();
+      await this.setCurrentEpochNumber();
 
       if (NETWORKS_WITH_EPOCH_CHANGES.includes(this.config.litNetwork)) {
         // But we don't need to handle node urls changing on Cayenne, since it is static
@@ -528,17 +497,15 @@ export class LitCore {
       );
 
     const [{ minNodeCount, bootstrapUrls }, stakingContract] =
-      await Promise.all([this._getValidatorData(), getStakingContract]);
+      await Promise.all([
+        this._getValidatorData(),
+        getStakingContract,
+        this.setCurrentEpochNumber(),
+      ]);
 
     this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
     this.config.minNodeCount = minNodeCount;
     this.config.bootstrapUrls = bootstrapUrls;
-
-    // Already scheduled update for current epoch number (due to a recent epoch change)
-    // Skip setting it right now, because we haven't waited long enough for nodes to propagate the new epoch
-    if (!this._epochUpdateTimeout) {
-      this.currentEpochNumber = await this._fetchCurrentEpochNumber();
-    }
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
@@ -891,7 +858,7 @@ export class LitCore {
     });
   };
 
-  private async _fetchCurrentEpochNumber() {
+  private async setCurrentEpochNumber() {
     if (!this._stakingContract) {
       return throwError({
         message:
@@ -903,21 +870,34 @@ export class LitCore {
 
     try {
       const epoch = await this._stakingContract['epoch']();
-      return epoch.number.toNumber() as number;
+      this._epochCache.currentNumber = epoch.number.toNumber() as number;
+      // when we transition to the new epoch, we don't store the start time.  but we
+      // set the endTime to the current timestamp + epochLength.
+      // by reversing this and subtracting epochLength from the endTime, we get the start time
+      this._epochCache.startTime =
+        (epoch.endTime.toNumber() as number) -
+        (epoch.epochLength.toNumber() as number);
     } catch (error) {
       return throwError({
-        message: `[fetchCurrentEpochNumber] Error getting current epoch number: ${error}`,
+        message: `[setCurrentEpochNumber] Error getting current epoch number: ${error}`,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });
     }
   }
   get currentEpochNumber(): number | null {
+    if (!this._epochCache.currentNumber) {
+      return null;
+    }
+    // if the epoch started less than 30s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
+    // this gives the nodes time to sync with the chain and see the new epoch before we try to use it
+    if (
+      this._epochCache.startTime &&
+      Date.now() < this._epochCache.startTime + EPOCH_PROPAGATION_DELAY
+    ) {
+      return this._epochCache.currentNumber - 1;
+    }
     return this._epochCache.currentNumber;
-  }
-  set currentEpochNumber(epochNumber: number | null) {
-    this._epochCache.currentNumber = epochNumber;
-    this._epochCache.lastUpdateTime = Date.now();
   }
 
   // ==================== SENDING COMMAND ====================
