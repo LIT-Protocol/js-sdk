@@ -30,8 +30,6 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
     const encryptRes = await LitJsSdk.encryptString(
       {
         accessControlConditions: accs,
-        chain: 'ethereum',
-        sessionSigs: litActionSessionSigs,
         dataToEncrypt: 'Hello world',
       },
       devEnv.litNodeClient as unknown as ILitNodeClient
