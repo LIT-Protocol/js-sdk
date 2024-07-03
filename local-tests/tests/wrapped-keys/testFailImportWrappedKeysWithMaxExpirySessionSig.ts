@@ -31,11 +31,7 @@ export const testFailImportWrappedKeysWithMaxExpirySessionSig = async (
       keyType: 'K256',
     });
   } catch (e: any) {
-    if (
-      e.message.includes(
-        'There was a problem fetching from the database: Error: Invalid pkpSessionSig: Expiration set beyond permitted expiration minutes of 15'
-      )
-    ) {
+    if (e.message.includes('Expires too far in the future')) {
       console.log('✅ THIS IS EXPECTED: ', e);
       console.log(e.message);
       console.log(
