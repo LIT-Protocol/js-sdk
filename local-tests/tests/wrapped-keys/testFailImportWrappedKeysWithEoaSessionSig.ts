@@ -31,10 +31,9 @@ export const testFailImportWrappedKeysWithEoaSessionSig = async (
       keyType: 'K256',
     });
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-    console.log(e.message);
-
     if (e.message.includes('SessionSig is not from a PKP')) {
+      console.log('✅ THIS IS EXPECTED: ', e);
+      console.log(e.message);
       console.log(
         '✅ testFailImportWrappedKeysWithEoaSessionSig is expected to have an error'
       );

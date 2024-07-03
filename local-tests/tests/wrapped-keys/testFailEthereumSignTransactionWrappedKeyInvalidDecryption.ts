@@ -6,7 +6,8 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 import { getPkpAccessControlCondition } from 'packages/wrapped-keys/src/lib/utils';
 import { encryptString } from '@lit-protocol/encryption';
 import { LIT_PREFIX } from 'packages/wrapped-keys/src/lib/constants';
-import { LIT_ACTION_CID_REPOSITORY } from '../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
+import { LIT_ACTION_CID_REPOSITORY } from '../../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
+import { getBaseTransactionForNetwork } from './util';
 
 /**
  * Test Commands:
@@ -38,17 +39,10 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
     ); // 10 mins expiry
     console.log(pkpSessionSigsSigning);
 
-    const unsignedTransaction: EthereumLitTransaction = {
+    const unsignedTransaction = getBaseTransactionForNetwork({
+      network: devEnv.litNodeClient.config.litNetwork,
       toAddress: alice.wallet.address,
-      value: '0.0001', // in ethers (Lit tokens)
-      chainId: 175177, // Chronicle
-      gasPrice: '50',
-      gasLimit: 21000,
-      dataHex: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
-      ),
-      chain: 'chronicleTestnet',
-    };
+    });
 
     try {
       const _res = await devEnv.litNodeClient.executeJs({
@@ -62,14 +56,13 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
         },
       });
     } catch (e: any) {
-      console.log('❌ THIS IS EXPECTED: ', e);
-      console.log(e.message);
-
       if (
         e.message.includes(
           'There was an error getting the signing shares from the nodes'
         )
       ) {
+        console.log('✅ THIS IS EXPECTED: ', e);
+        console.log(e.message);
         console.log(
           '✅ testFailEthereumSignTransactionWrappedKeyInvalidDecryption is expected to have an error'
         );

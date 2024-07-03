@@ -5,6 +5,7 @@ import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 import type { EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
+import { getBaseTransactionForNetwork } from './util';
 
 const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
@@ -54,17 +55,10 @@ export const testEthereumSignTransactionWrappedKey = async (
 
   console.log(pkpSessionSigsSigning);
 
-  const unsignedTransaction: EthereumLitTransaction = {
+  const unsignedTransaction = getBaseTransactionForNetwork({
+    network: devEnv.litNodeClient.config.litNetwork,
     toAddress: alice.wallet.address,
-    value: '0.0001', // in ethers (Lit tokens)
-    chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
-    dataHex: ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
-    ),
-    chain: 'chronicleTestnet',
-  };
+  });
 
   const signedTx = await signTransactionWithEncryptedKey({
     pkpSessionSigs: pkpSessionSigsSigning,

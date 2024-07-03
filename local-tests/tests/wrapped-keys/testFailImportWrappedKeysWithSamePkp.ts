@@ -55,12 +55,13 @@ export const testFailImportWrappedKeysWithSamePkp = async (
       keyType: 'K256',
     });
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-
     if (
-      e.message ===
-      'There was a problem fetching from the database: Error: "The conditional request failed"'
+      e.message.includes(
+        'There is already a wrapped key stored, either for the provided pkpAddress, or with the same dataToEncryptHash; a pkpAddress may only have 1 wrapped key, and a wrapped key may only be associated with a single pkpAddress.'
+      )
     ) {
+      console.log('✅ THIS IS EXPECTED: ', e);
+      console.log(e.message);
       console.log(
         '✅ testFailImportWrappedKeysWithSamePkp is expected to have an error'
       );

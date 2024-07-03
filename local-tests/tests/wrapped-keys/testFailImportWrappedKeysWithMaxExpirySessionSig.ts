@@ -31,13 +31,13 @@ export const testFailImportWrappedKeysWithMaxExpirySessionSig = async (
       keyType: 'K256',
     });
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-
     if (
       e.message.includes(
         'There was a problem fetching from the database: Error: Invalid pkpSessionSig: Expiration set beyond permitted expiration minutes of 15'
       )
     ) {
+      console.log('✅ THIS IS EXPECTED: ', e);
+      console.log(e.message);
       console.log(
         '✅ testFailImportWrappedKeysWithMaxExpirySessionSig is expected to have an error'
       );

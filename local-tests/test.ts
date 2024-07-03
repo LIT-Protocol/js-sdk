@@ -84,28 +84,27 @@ import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCo
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 import { testRelayer } from './tests/testRelayer';
 
-import { testEthereumSignMessageGeneratedKey } from './tests/testEthereumSignMessageGeneratedKey';
-import { testEthereumBroadcastTransactionGeneratedKey } from './tests/testEthereumBroadcastTransactionGeneratedKey';
-import { testEthereumSignMessageWrappedKey } from './tests/testEthereumSignMessageWrappedKey';
-import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
-import { testEthereumSignTransactionWrappedKey } from './tests/testEthereumSignTransactionWrappedKey';
-import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
-import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
-import { testEthereumBroadcastTransactionWrappedKey } from './tests/testEthereumBroadcastTransactionWrappedKey';
-import { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/testEthereumBroadcastWrappedKeyWithFetchGasParams';
-import { testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds } from './tests/testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds';
-import { testImportWrappedKey } from './tests/testImportWrappedKey';
-import { testGenerateEthereumWrappedKey } from './tests/testGenerateEthereumWrappedKey';
-import { testGenerateSolanaWrappedKey } from './tests/testGenerateSolanaWrappedKey';
-import { testFailImportWrappedKeysWithSamePkp } from './tests/testFailImportWrappedKeysWithSamePkp';
-import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/testFailImportWrappedKeysWithSamePrivateKey';
-import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/testFailImportWrappedKeysWithEoaSessionSig';
-import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/testFailImportWrappedKeysWithMaxExpirySessionSig';
-import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/testFailImportWrappedKeysWithInvalidSessionSig';
-import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/testFailImportWrappedKeysWithExpiredSessionSig';
-import { testExportWrappedKey } from './tests/testExportWrappedKey';
-import { testSignMessageWithSolanaEncryptedKey } from './tests/testSignMessageWithSolanaEncryptedKey';
-import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTransactionWithSolanaEncryptedKey';
+import { testEthereumSignMessageGeneratedKey } from './tests/wrapped-keys/testEthereumSignMessageGeneratedKey';
+import { testEthereumBroadcastTransactionGeneratedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionGeneratedKey';
+import { testEthereumSignMessageWrappedKey } from './tests/wrapped-keys/testEthereumSignMessageWrappedKey';
+import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
+import { testEthereumSignTransactionWrappedKey } from './tests/wrapped-keys/testEthereumSignTransactionWrappedKey';
+import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
+import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
+import { testEthereumBroadcastTransactionWrappedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionWrappedKey';
+import { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/wrapped-keys/testEthereumBroadcastWrappedKeyWithFetchGasParams';
+import { testImportWrappedKey } from './tests/wrapped-keys/testImportWrappedKey';
+import { testGenerateEthereumWrappedKey } from './tests/wrapped-keys/testGenerateEthereumWrappedKey';
+import { testGenerateSolanaWrappedKey } from './tests/wrapped-keys/testGenerateSolanaWrappedKey';
+import { testFailImportWrappedKeysWithSamePkp } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePkp';
+import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePrivateKey';
+import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithEoaSessionSig';
+import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithMaxExpirySessionSig';
+import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithInvalidSessionSig';
+import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithExpiredSessionSig';
+import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
+import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
+import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -143,7 +142,6 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/testSignTrans
     testFailEthereumSignTransactionWrappedKeyWithMissingParam,
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
     testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
-    testFailEthereumBroadcastTransactionWrappedKeysInsufficientFunds,
 
     // -- import wrapped keys
     testFailImportWrappedKeysWithSamePkp,

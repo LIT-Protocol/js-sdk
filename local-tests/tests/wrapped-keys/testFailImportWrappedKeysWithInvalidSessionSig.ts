@@ -32,13 +32,13 @@ export const testFailImportWrappedKeysWithInvalidSessionSig = async (
       keyType: 'K256',
     });
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-
     if (
       e.message.includes(
         'There was a problem fetching from the database: Error: Invalid pkpSessionSig: bad public key size'
       )
     ) {
+      console.log('✅ THIS IS EXPECTED: ', e);
+      console.log(e.message);
       console.log(
         '✅ testFailImportWrappedKeysWithInvalidSessionSig is expected to have an error'
       );

@@ -1,8 +1,8 @@
 import { log } from '@lit-protocol/misc';
-import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+import { TinnyEnvironment } from '../../setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
-import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
+import { getPkpSessionSigs } from '../../setup/session-sigs/get-pkp-session-sigs';
+import { randomSolanaPrivateKey } from '../../setup/tinny-utils';
 
 const { exportPrivateKey, importPrivateKey } = api;
 /**
