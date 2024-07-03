@@ -8,7 +8,7 @@ import {
 } from './shiva-client.d';
 
 class ShivaError extends Error {
-  constructor (shivaResponse: TestNetResponse<any>) {
+  constructor(shivaResponse: TestNetResponse<any>) {
     let message = `An error occured on request to testnet with id: ${shivaResponse.testnetId}`;
     for (const error of shivaResponse.errors) {
       message += ' ' + error;
@@ -19,8 +19,6 @@ class ShivaError extends Error {
     this.message = message;
   }
 }
-
-
 
 export interface ShivaEnvs {
   /**
@@ -148,7 +146,7 @@ export class TestnetClient {
       })
       .then((info: TestNetResponse<TestNetInfo>) => {
         if (info.errors != null) {
-          throw new ShivaError(info); 
+          throw new ShivaError(info);
         }
 
         this._info = info.body;
@@ -170,13 +168,13 @@ export class TestnetClient {
       .then((res: Response) => {
         if (res.status === 200) {
           return res.json();
-        }  else {
+        } else {
           throw res; // throw as an error to the caller
         }
       })
       .then((res: TestNetResponse<boolean>) => {
         if (res.errors != null) {
-          throw new ShivaError(res); 
+          throw new ShivaError(res);
         }
         console.log('Stopped random peer: ', res);
       });
@@ -197,7 +195,7 @@ export class TestnetClient {
       })
       .then((res: TestNetResponse<boolean>) => {
         if (res.errors != null) {
-          throw new ShivaError(res); 
+          throw new ShivaError(res);
         }
         console.log('validator kick response: ', res);
         return res;
@@ -242,9 +240,9 @@ export class ShivaClient {
   }
 
   /**
-     * Used to start an instance of a lit network through the Lit Testnet Manager
-     * if an isntance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
-     * If an instance does not exist then we create one
+   * Used to start an instance of a lit network through the Lit Testnet Manager
+   * if an isntance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
+   * If an instance does not exist then we create one
    */
   async startTestnetManager(
     createReq?: TestNetCreateRequest
@@ -291,7 +289,8 @@ export class ShivaClient {
         }
       );
 
-      const createTestnet = await createTestnetResp.json() as TestNetResponse<void>;
+      const createTestnet =
+        (await createTestnetResp.json()) as TestNetResponse<void>;
       if (createTestnetResp.status != 200) {
         throw new ShivaError(createTestnet); // throw the object as an error if the status was not 200
       }
