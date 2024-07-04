@@ -106,7 +106,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
-const EPOCH_PROPAGATION_DELAY = 30_000;
+const EPOCH_PROPAGATION_DELAY = 15_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
@@ -890,7 +890,7 @@ export class LitCore {
     if (!this._epochCache.currentNumber) {
       return null;
     }
-    // if the epoch started less than 30s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
+    // if the epoch started less than 15s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
     // this gives the nodes time to sync with the chain and see the new epoch before we try to use it
     if (
       this._epochCache.startTime &&
