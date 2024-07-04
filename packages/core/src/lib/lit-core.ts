@@ -153,7 +153,7 @@ export class LitCore {
   private _connectingPromise: null | Promise<void> = null;
   private _epochCache: EpochCache = {
     currentNumber: null,
-    epochStartTime: null,
+    startTime: null,
   };
   private _blockHashUrl =
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
@@ -860,12 +860,13 @@ export class LitCore {
 
   private async setCurrentEpochNumber() {
     if (!this._stakingContract) {
-      return throwError({
+      throwError({
         message:
           'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?',
         errorKind: LIT_ERROR.INIT_ERROR.kind,
         errorCode: LIT_ERROR.INIT_ERROR.name,
       });
+      return;
     }
 
     try {
