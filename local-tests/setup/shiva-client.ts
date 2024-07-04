@@ -9,7 +9,7 @@ import {
 
 class ShivaError extends Error {
   constructor(shivaResponse: TestNetResponse<any>) {
-    let message = `An error occured on request to testnet with id: ${shivaResponse.testnetId}`;
+    let message = `An error occurred on request to testnet with id: ${shivaResponse.testnetId}`;
     for (const error of shivaResponse.errors) {
       message += ' ' + error;
     }
