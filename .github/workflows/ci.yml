@@ -54,7 +54,7 @@ jobs:
         id: build
         run: yarn build:dev
       - name: Copy ENV File
-        run: cp .env.sample.ci .env
+        run: cp .env.ci .env
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
         run: yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString,testExecuteJsSignAndCombineEcdsa,testExecutJsDecryptAndCombine,testExecuteJsBroadcastAndCollect  --exclude=Parallel
