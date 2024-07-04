@@ -481,7 +481,18 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     contractAddress: null,
     chainId: 2311,
     name: 'Vesuvius - Lit Protocol Devnet',
-    symbol: 'testLIT',
+    symbol: 'tstLit',
+    decimals: 18,
+    rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
+    blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  datilTestnet: {
+    contractAddress: null,
+    chainId: 2311,
+    name: 'Vesuvius - Lit Protocol Testnet',
+    symbol: 'tstLit',
     decimals: 18,
     rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
     blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
@@ -628,7 +639,7 @@ export enum LIT_RPC {
   CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
 
   /**
-   * Vesuvius RPC endpoint - used for >= Datil-dev
+   * Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
    */
   VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
 }
@@ -790,6 +801,7 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   [LitNetwork.Cayenne]: [],
   [LitNetwork.Manzano]: [],
   [LitNetwork.DatilDev]: [],
+  [LitNetwork.DatilTest]: [],
   [LitNetwork.Habanero]: [],
   [LitNetwork.Custom]: [],
   // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
@@ -832,6 +844,7 @@ export const RELAY_URL_CAYENNE =
 export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
 export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
 export const RELAY_URL_DATIL_DEV = 'https://datil-dev-relayer.getlit.dev';
+export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =

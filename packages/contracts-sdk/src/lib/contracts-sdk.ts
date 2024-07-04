@@ -215,7 +215,9 @@ export class LitContracts {
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc =
-        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
+        args?.network === 'datil-dev' || args?.network === 'datil-test'
+          ? LIT_RPC.VESUVIUS
+          : LIT_RPC.CHRONICLE;
     }
 
     if (!this.rpcs) {
@@ -304,7 +306,9 @@ export class LitContracts {
       };
 
       const chainInfo =
-        this.network === 'datil-dev' ? vesuviusChainInfo : chronicleChainInfo;
+        this.network === 'datil-dev' || this.network === 'datil-test'
+          ? vesuviusChainInfo
+          : chronicleChainInfo;
 
       try {
         await web3Provider.send('wallet_switchEthereumChain', [
@@ -612,14 +616,16 @@ export class LitContracts {
   ) {
     let provider: ethers.providers.JsonRpcProvider;
     rpcUrl =
-      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
+      rpcUrl ?? (network === 'datil-dev' || network === 'datil-test')
+        ? LIT_RPC.VESUVIUS
+        : LIT_RPC.CHRONICLE;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
       provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     }
 
-    if (network === 'datil-dev') {
+    if (network === 'datil-dev' || network === 'datil-test') {
       // @ts-ignore
       context!.Staking!.abi = minStakingAbi;
     }
@@ -987,6 +993,9 @@ export class LitContracts {
     const DATIL_DEV_API =
       'https://lit-general-worker.getlit.dev/datil-dev/contracts';
 
+    const DATIL_TEST_API =
+      'https://lit-general-worker.getlit.dev/datil-test/contracts';
+
     const fetchData = async (url: string) => {
       try {
         return await fetch(url).then((res) => res.json());
@@ -1007,6 +1016,9 @@ export class LitContracts {
         break;
       case 'datil-dev':
         data = await fetchData(DATIL_DEV_API);
+        break;
+      case 'datil-test':
+        data = await fetchData(DATIL_TEST_API);
         break;
       case 'custom':
       case 'localhost':

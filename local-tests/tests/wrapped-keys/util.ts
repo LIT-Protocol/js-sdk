@@ -17,6 +17,8 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
       };
     case 'datil-dev':
       return { chain: 'vesuvius', chainId: LIT_CHAINS['datilDevnet'].chainId };
+    case 'datil-test':
+      return { chain: 'vesuvius', chainId: LIT_CHAINS['datilTestnet'].chainId };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
   }
@@ -35,6 +37,8 @@ export function getGasParamsForNetwork(network: LIT_NETWORKS_KEYS): {
         gasLimit: 30000,
       };
     case 'datil-dev':
+      return { gasLimit: 5000000 };
+    case 'datil-test':
       return { gasLimit: 5000000 };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);

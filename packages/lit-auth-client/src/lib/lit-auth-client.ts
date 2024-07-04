@@ -6,6 +6,7 @@ import {
   ProviderType,
   RELAY_URL_CAYENNE,
   RELAY_URL_DATIL_DEV,
+  RELAY_URL_DATIL_TEST,
   RELAY_URL_HABANERO,
   RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
@@ -97,7 +98,7 @@ export class LitAuthClient {
         );
       }
 
-      const supportedNetworks = ['cayenne', 'habanero', 'manzano', 'datil-dev'];
+      const supportedNetworks = ['cayenne', 'habanero', 'manzano', 'datil-dev', 'datil-test'];
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
@@ -121,6 +122,9 @@ export class LitAuthClient {
           break;
         case 'datil-dev':
           url = RELAY_URL_DATIL_DEV;
+          break;
+        case 'datil-test':
+          url = RELAY_URL_DATIL_TEST;
           break;
       }
 
@@ -146,7 +150,7 @@ export class LitAuthClient {
 
     // Set RPC URL
     this.rpcUrl =
-      options?.rpcUrl || this.litNodeClient.config.litNetwork === 'datil-dev'
+      options?.rpcUrl || (this.litNodeClient.config.litNetwork === 'datil-dev' || this.litNodeClient.config.litNetwork === 'datil-test')
         ? LIT_RPC.VESUVIUS
         : LIT_RPC.CHRONICLE;
     log('rpc url: ', this.rpcUrl);
