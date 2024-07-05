@@ -8,6 +8,7 @@ import {
   LitNetwork,
   RELAY_URL_CAYENNE,
   RELAY_URL_DATIL_DEV,
+  RELAY_URL_DATIL_TEST,
   RELAY_URL_HABANERO,
   RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
@@ -680,6 +681,10 @@ export const defaultMintClaimCallback: MintCallback<
         break;
       case LitNetwork.DatilDev:
         relayUrl = RELAY_URL_DATIL_DEV + '/auth/claim';
+        break;
+        break;
+      case LitNetwork.DatilTest:
+        relayUrl = RELAY_URL_DATIL_TEST + '/auth/claim';
         break;
     }
 
