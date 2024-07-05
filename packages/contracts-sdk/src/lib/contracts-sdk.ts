@@ -992,9 +992,8 @@ export class LitContracts {
       'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
     const DATIL_DEV_API =
       'https://lit-general-worker.getlit.dev/datil-dev/contracts';
-
     const DATIL_TEST_API =
-      'https://lit-general-worker.getlit.dev/datil-test/contracts';
+      'https://staging.apis.getlit.dev/datil-test/contracts';
 
     const fetchData = async (url: string) => {
       try {
@@ -2437,7 +2436,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           permittedAuthMethodScopes,
           addPkpEthAddressAsPermittedAddress,
           sendPkpToItself,
-
           {
             value: mintCost,
             gasLimit: gasLimit || GAS_LIMIT,
