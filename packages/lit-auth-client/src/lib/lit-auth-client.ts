@@ -98,7 +98,13 @@ export class LitAuthClient {
         );
       }
 
-      const supportedNetworks = ['cayenne', 'habanero', 'manzano', 'datil-dev', 'datil-test'];
+      const supportedNetworks = [
+        'cayenne',
+        'habanero',
+        'manzano',
+        'datil-dev',
+        'datil-test',
+      ];
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
@@ -150,7 +156,9 @@ export class LitAuthClient {
 
     // Set RPC URL
     this.rpcUrl =
-      options?.rpcUrl || (this.litNodeClient.config.litNetwork === 'datil-dev' || this.litNodeClient.config.litNetwork === 'datil-test')
+      options?.rpcUrl ||
+      this.litNodeClient.config.litNetwork === 'datil-dev' ||
+      this.litNodeClient.config.litNetwork === 'datil-test'
         ? LIT_RPC.VESUVIUS
         : LIT_RPC.CHRONICLE;
     log('rpc url: ', this.rpcUrl);
