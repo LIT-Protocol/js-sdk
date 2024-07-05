@@ -1,3 +1,5 @@
+const { removeSaltFromDecryptedKey } = require('../../utils');
+
 /**
  *
  * Signs a transaction with the Ethers wallet whose private key is decrypted inside the Lit Action.
@@ -11,10 +13,7 @@
  *
  * @returns { Promise<string> } - Returns the transaction hash if broadcast is set as true else returns only the signed transaction. Or returns errors if any.
  */
-
 (async () => {
-  const LIT_PREFIX = 'lit_';
-
   if (!unsignedTransaction.toAddress) {
     Lit.Actions.setResponse({
       response: 'Error: Missing required field: toAddress',
@@ -64,9 +63,7 @@
     return;
   }
 
-  const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
-    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
-    : decryptedPrivateKey;
+  const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
   const wallet = new ethers.Wallet(privateKey);
 
   let nonce;

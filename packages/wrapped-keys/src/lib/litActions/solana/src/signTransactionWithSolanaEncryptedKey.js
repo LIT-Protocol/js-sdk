@@ -1,3 +1,12 @@
+const {
+  clusterApiUrl,
+  Connection,
+  Keypair,
+  Transaction,
+} = require('@solana/web3.js');
+
+const { removeSaltFromDecryptedKey } = require('../../utils');
+
 /**
  *
  * Bundles solana/web3.js package as it's required to sign a transaction with the Solana wallet which is also decrypted inside the Lit Action.
@@ -12,15 +21,7 @@
  * @returns { Promise<string> } - Returns the transaction signature. Or returns errors if any.
  */
 
-const {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  Transaction,
-} = require('@solana/web3.js');
-
 (async () => {
-  const LIT_PREFIX = 'lit_';
   const VALID_NETWORKS = ['devnet', 'testnet', 'mainnet-beta'];
 
   if (!VALID_NETWORKS.includes(unsignedTransaction.chain)) {
@@ -61,9 +62,8 @@ const {
     return;
   }
 
-  const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
-    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
-    : decryptedPrivateKey;
+  const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
+
   const solanaKeyPair = Keypair.fromSecretKey(
     Uint8Array.from(Buffer.from(privateKey, 'hex'))
   );
