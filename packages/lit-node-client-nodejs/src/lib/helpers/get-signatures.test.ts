@@ -1,7 +1,7 @@
 import { initWasmEcdsaSdk } from '@lit-protocol/ecdsa-sdk';
+import { SigResponse } from '@lit-protocol/types';
 
 import { getSignatures } from './get-signatures';
-import { SigResponse } from '@lit-protocol/types';
 
 describe('getSignatures', () => {
   beforeAll(async () => {
