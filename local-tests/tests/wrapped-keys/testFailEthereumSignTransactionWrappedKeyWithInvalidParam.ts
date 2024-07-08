@@ -1,17 +1,18 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { api } from '@lit-protocol/wrapped-keys';
+import { api, EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getBaseTransactionForNetwork } from './util';
 
 const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
+ * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
  */
-export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
+export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -51,34 +52,37 @@ export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
 
   console.log(pkpSessionSigsSigning);
 
+  const unsignedTransaction: EthereumLitTransaction = {
+    ...getBaseTransactionForNetwork({
+      network: devEnv.litNodeClient.config.litNetwork,
+      toAddress: alice.wallet.address,
+    }),
+    dataHex: 'Test transaction from Alice to bob',
+  };
+
   try {
     const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
       network: 'evm',
-      unsignedTransaction: {
-        chain: 'chronicleTestnet',
-        // @ts-expect-error This test is intentionally using the type incorrectly.
-        serializedTransaction: 'random-value',
-      },
+      unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,
     });
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-    console.log(e.message);
-
     if (
       e.message.includes(
-        'Error executing the Signing Lit Action: Error: Missing required field: toAddress'
+        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
       )
     ) {
+      console.log('✅ THIS IS EXPECTED: ', e);
+      console.log(e.message);
       console.log(
-        '✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam is expected to have an error'
+        '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
       );
     } else {
       throw e;
     }
   }
 
-  log('✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam');
+  log('✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam');
 };

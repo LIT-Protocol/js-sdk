@@ -53,14 +53,9 @@ export const testFailImportWrappedKeysWithExpiredSessionSig = async (
     });
     console.log(res);
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-    console.log(e.message);
-
-    if (
-      e.message.includes(
-        'There was a problem fetching from the database: Error: Invalid pkpSessionSig: Expired sessionSig'
-      )
-    ) {
+    if (e.message.includes('Invalid sessionSig: Expired')) {
+      console.log('✅ THIS IS EXPECTED: ', e);
+      console.log(e.message);
       console.log(
         '✅ testFailImportWrappedKeysWithExpiredSessionSig is expected to have an error'
       );

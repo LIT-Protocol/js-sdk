@@ -3,16 +3,17 @@ import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api, EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getChainForNetwork } from './util';
 
 const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastTransactionWrappedKey
+ * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
+ * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
+ * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
  */
-export const testEthereumBroadcastTransactionWrappedKey = async (
+export const testEthereumBroadcastWrappedKeyWithFetchGasParams = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -60,13 +61,10 @@ export const testEthereumBroadcastTransactionWrappedKey = async (
   const unsignedTransaction: EthereumLitTransaction = {
     toAddress: alice.wallet.address,
     value: '0.0001', // in ethers (Lit tokens)
-    chainId: 175177, // Chronicle
-    gasPrice: '0.001',
-    gasLimit: 30000,
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
-    chain: 'chronicleTestnet',
+    ...getChainForNetwork(devEnv.litNodeClient.config.litNetwork),
   };
 
   const signedTx = await signTransactionWithEncryptedKey({
@@ -85,5 +83,5 @@ export const testEthereumBroadcastTransactionWrappedKey = async (
     throw new Error(`signedTx isn't hex: ${signedTx}`);
   }
 
-  log('✅ testEthereumBroadcastTransactionWrappedKey');
+  log('✅ testEthereumBroadcastWrappedKeyWithDefaultGasParams');
 };

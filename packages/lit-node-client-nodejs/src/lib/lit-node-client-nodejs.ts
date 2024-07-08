@@ -2339,8 +2339,7 @@ const resourceAbilityRequests = [
         `pubkey ${pubkey} derived from key id ${derivedKeyId}`
       );
 
-      const relayParams: ClaimRequest<'relay'> =
-        params as ClaimRequest<'relay'>;
+      const relayParams = params as ClaimRequest<'relay'>;
 
       let mintTx = '';
       if (params.mintCallback && 'signer' in params) {

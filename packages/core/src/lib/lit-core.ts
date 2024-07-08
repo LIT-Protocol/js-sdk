@@ -106,6 +106,20 @@ const EPOCH_PROPAGATION_DELAY = 30_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
+// Intentionally not including datil-dev here per discussion with Howard
+const NETWORKS_REQUIRING_SEV: string[] = [
+  LitNetwork.Habanero,
+  LitNetwork.Manzano,
+];
+
+// The only network we consider entirely static, and thus ignore EPOCH changes for, is Cayenne
+const NETWORKS_WITH_EPOCH_CHANGES: string[] = [
+  LitNetwork.DatilDev,
+  LitNetwork.Habanero,
+  LitNetwork.Manzano,
+  LitNetwork.Custom,
+];
+
 export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
@@ -150,28 +164,21 @@ export class LitCore {
 
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
+      // Official networks; default value for `checkNodeAttestation` according to network provided.
       case LitNetwork.Cayenne:
-        this.config = {
-          ...this.config,
-          ...config,
-        };
-        break;
+      case LitNetwork.DatilDev:
       case LitNetwork.Manzano:
-        this.config = {
-          ...this.config,
-          checkNodeAttestation: true,
-          ...config,
-        };
-        break;
       case LitNetwork.Habanero:
         this.config = {
           ...this.config,
-          checkNodeAttestation: true,
+          checkNodeAttestation: NETWORKS_REQUIRING_SEV.includes(
+            config?.litNetwork
+          ),
           ...config,
         };
         break;
       default:
-        // Probably `custom` or `localhost`
+        // `custom` or `localhost`; no opinion about checkNodeAttestation
         this.config = {
           ...this.config,
           ...config,
@@ -245,7 +252,7 @@ export class LitCore {
       });
     }
 
-    log('Bootstrap urls: ', bootstrapUrls);
+    log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
 
     return {
       minNodeCount: parseInt(minNodeCount, 10),
@@ -292,11 +299,7 @@ export class LitCore {
       // We always want to track the most recent epoch number on _all_ networks
       this._scheduleEpochNumberUpdate();
 
-      if (
-        this.config.litNetwork === LitNetwork.Manzano ||
-        this.config.litNetwork === LitNetwork.Habanero ||
-        this.config.litNetwork === LitNetwork.Custom
-      ) {
+      if (NETWORKS_WITH_EPOCH_CHANGES.includes(this.config.litNetwork)) {
         // But we don't need to handle node urls changing on Cayenne, since it is static
         try {
           log(
@@ -614,10 +617,10 @@ export class LitCore {
       );
     }
 
+    // We force SEV checks on some networks even if the caller attempts to construct the client with them disabled
     if (
       this.config.checkNodeAttestation ||
-      this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      NETWORKS_REQUIRING_SEV.includes(this.config.litNetwork)
     ) {
       const attestation = handshakeResult.attestation;
 
@@ -644,6 +647,10 @@ export class LitCore {
           errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
         });
       }
+    } else if (this.config.litNetwork === 'custom') {
+      log(
+        `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
+      );
     }
 
     return keys;
@@ -890,12 +897,13 @@ export class LitCore {
         errorCode: LIT_ERROR.INIT_ERROR.name,
       });
     }
+
     try {
       const epoch = await this._stakingContract['epoch']();
       return epoch.number.toNumber() as number;
     } catch (error) {
       return throwError({
-        message: `Error getting current epoch number: ${error}`,
+        message: `[fetchCurrentEpochNumber] Error getting current epoch number: ${error}`,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });

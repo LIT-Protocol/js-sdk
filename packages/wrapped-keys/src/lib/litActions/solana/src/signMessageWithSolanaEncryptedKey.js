@@ -1,3 +1,9 @@
+const { Keypair } = require('@solana/web3.js');
+const bs58 = require('bs58');
+const nacl = require('tweetnacl');
+
+const { removeSaltFromDecryptedKey } = require('../../utils');
+
 /**
  *
  * Bundles solana/web3.js package as it's required to sign a message with the Solana wallet which is also decrypted inside the Lit Action.
@@ -11,13 +17,7 @@
  * @returns { Promise<string> } - Returns a message signed by the Solana Wrapped key. Or returns errors if any.
  */
 
-const { Keypair } = require('@solana/web3.js');
-const bs58 = require('bs58');
-const nacl = require('tweetnacl');
-
 (async () => {
-  const LIT_PREFIX = 'lit_';
-
   let decryptedPrivateKey;
   try {
     decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
@@ -39,9 +39,7 @@ const nacl = require('tweetnacl');
     return;
   }
 
-  const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
-    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
-    : decryptedPrivateKey;
+  const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
   const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
   let signature;

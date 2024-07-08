@@ -44,8 +44,8 @@ export interface ShivaEnvs {
 
 /**
  * Client implementation for a single testnet instance managed by the Shiva tool
- * Is essentially a localchain setup but allows for programmatic operations to be preformed
- * on the network from the implementation wthin this class. Each testnet is a unique network
+ * Is essentially a localchain setup but allows for programmatic operations to be performed
+ * on the network from the implementation within this class. Each testnet is a unique network
  */
 export class TestnetClient {
   private _id: string;
@@ -173,7 +173,7 @@ export class TestnetClient {
         if (res.status === 200) {
           return res.json();
         } else {
-          return Promise.reject(res);
+          throw res;
         }
       })
       .then((body: TestNetResponse<boolean>) => {
@@ -216,7 +216,7 @@ export class ShivaClient {
 
   constructor() {
     this._clients = new Map();
-    console.log('Shiva enviorment loaded current config: ', this.processEnvs);
+    console.log('Shiva environment loaded current config: ', this.processEnvs);
   }
 
   /**

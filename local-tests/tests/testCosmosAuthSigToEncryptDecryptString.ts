@@ -9,6 +9,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ❌ NETWORK=cayenne yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  * ❌ NETWORK=manzano yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  * ❌ NETWORK=localchain yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
+ * ❌ NETWORK=datil-dev yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  */
 export const testCosmosAuthSigToEncryptDecryptString = async (
   devEnv: TinnyEnvironment
@@ -18,6 +19,7 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
   devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
   devEnv.setUnavailable(LIT_TESTNET.LOCALCHAIN);
   devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+  devEnv.setUnavailable(LIT_TESTNET.DATIL_DEV);
 
   const accs = AccessControlConditions.getCosmosBasicAccessControlConditions({
     userAddress: devEnv.bareCosmosAuthSig.address,

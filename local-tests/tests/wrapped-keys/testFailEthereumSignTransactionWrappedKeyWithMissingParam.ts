@@ -1,17 +1,18 @@
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { api, EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
+import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getChainForNetwork } from './util';
 
 const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
+ * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
+ * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
  */
-export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
+export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -51,40 +52,33 @@ export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
 
   console.log(pkpSessionSigsSigning);
 
-  const unsignedTransaction: EthereumLitTransaction = {
-    toAddress: alice.wallet.address,
-    value: '0.0001', // in ethers (Lit tokens)
-    chainId: 175177, // Chronicle
-    gasPrice: '50',
-    gasLimit: 21000,
-    dataHex: 'Test transaction from Alice to bob',
-    chain: 'chronicleTestnet',
-  };
-
   try {
     const _res = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,
       network: 'evm',
-      unsignedTransaction,
+      unsignedTransaction: {
+        ...getChainForNetwork(devEnv.litNodeClient.config.litNetwork),
+        // @ts-expect-error This test is intentionally using the type incorrectly.
+        serializedTransaction: 'random-value',
+      },
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,
     });
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
-    console.log(e.message);
-
     if (
       e.message.includes(
-        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
+        'Error executing the Signing Lit Action: Error: Missing required field: toAddress'
       )
     ) {
+      console.log('✅ THIS IS EXPECTED: ', e);
+      console.log(e.message);
       console.log(
-        '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
+        '✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam is expected to have an error'
       );
     } else {
       throw e;
     }
   }
 
-  log('✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam');
+  log('✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam');
 };
