@@ -7,9 +7,10 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ❌ Not supported on cayenne
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog
  * ❌ Not supported on manzano
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog =
   async (devEnv: TinnyEnvironment) => {

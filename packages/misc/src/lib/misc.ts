@@ -7,6 +7,7 @@ import {
   LIT_ERROR,
   LitNetwork,
   RELAY_URL_CAYENNE,
+  RELAY_URL_DATIL_DEV,
   RELAY_URL_HABANERO,
   RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
@@ -676,6 +677,10 @@ export const defaultMintClaimCallback: MintCallback<
         break;
       case LitNetwork.Manzano:
         relayUrl = RELAY_URL_MANZANO + 'auth/claim';
+        break;
+      case LitNetwork.DatilDev:
+        relayUrl = RELAY_URL_DATIL_DEV + '/auth/claim';
+        break;
     }
 
     const url = params.relayUrl ? params.relayUrl : relayUrl;

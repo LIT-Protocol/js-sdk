@@ -138,6 +138,4 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }
-
-  process.exit();
 };

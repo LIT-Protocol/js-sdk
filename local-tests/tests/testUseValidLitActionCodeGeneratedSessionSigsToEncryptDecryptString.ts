@@ -12,6 +12,7 @@ import { log } from '@lit-protocol/misc';
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ❌ NOT AVAILABLE IN MANZANO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString =
@@ -29,8 +30,6 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
     const encryptRes = await LitJsSdk.encryptString(
       {
         accessControlConditions: accs,
-        chain: 'ethereum',
-        sessionSigs: litActionSessionSigs,
         dataToEncrypt: 'Hello world',
       },
       devEnv.litNodeClient as unknown as ILitNodeClient

@@ -13,6 +13,7 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=manzano yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
   async (devEnv: TinnyEnvironment) => {

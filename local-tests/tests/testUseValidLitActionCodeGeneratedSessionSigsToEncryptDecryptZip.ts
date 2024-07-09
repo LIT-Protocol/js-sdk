@@ -9,9 +9,10 @@ import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
- * ❌ Not supported in Cayenne
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
  * ❌ Not supported in Manzano
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip =
   async (devEnv: TinnyEnvironment) => {

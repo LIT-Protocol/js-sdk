@@ -246,7 +246,7 @@ export class LitNodeClientNodeJs
         localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
       } catch (e) {
         log(
-          `[getSessionKey] Localstorage not available.Not a problem.Contiune...`
+          `[getSessionKey] Localstorage not available.Not a problem. Contiune...`
         );
       }
 
@@ -518,7 +518,10 @@ export class LitNodeClientNodeJs
     // it will fail. If the  algo is not defined we can assume that it was an EOA wallet signing the message so we can use SIWE.
     if (authSig.algo === `ed25519` || authSig.algo === undefined) {
       try {
-        await authSigSiweMessage.validate(authSig.sig);
+        await authSigSiweMessage.verify(
+          { signature: authSig.sig },
+          { suppressExceptions: false }
+        );
       } catch (e) {
         log(`Error while verifying ECDSA signature: `, e);
         return true;
@@ -528,7 +531,8 @@ export class LitNodeClientNodeJs
         blsSessionSigVerify(
           blsSdk.verify_signature,
           this.networkPubKey!,
-          authSig
+          authSig,
+          authSigSiweMessage
         );
       } catch (e) {
         log(`Error while verifying bls signature: `, e);
@@ -536,7 +540,7 @@ export class LitNodeClientNodeJs
       }
     } else {
       throwError({
-        message: `Unsupported signature algo for session signature. Expected ed25519 or LIT_BLS recieved ${authSig.algo}`,
+        message: `Unsupported signature algo for session signature. Expected ed25519 or LIT_BLS received ${authSig.algo}`,
         errorKind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
         errorCode: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.code,
       });
@@ -602,7 +606,7 @@ export class LitNodeClientNodeJs
     // -- sanity check
     if (
       !signatureShares.every(
-        (val: any, i: any, arr: any) => val.unsignedJwt === arr[0].unsignedJwt
+        (val, i, arr) => val.unsignedJwt === arr[0].unsignedJwt
       )
     ) {
       const msg =
@@ -612,7 +616,7 @@ export class LitNodeClientNodeJs
 
     // ========== Sorting ==========
     // -- sort the sig shares by share index.  this is important when combining the shares.
-    signatureShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
+    signatureShares.sort((a, b) => a.shareIndex - b.shareIndex);
 
     // ========== Combine Shares ==========
     const signature = combineSignatureShares(
@@ -622,7 +626,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'signature is', signature);
 
     const unsignedJwt = mostCommonString(
-      signatureShares.map((s: any) => s.unsignedJwt)
+      signatureShares.map((s) => s.unsignedJwt)
     );
 
     // ========== Result ==========
@@ -641,7 +645,7 @@ export class LitNodeClientNodeJs
     ciphertext: string,
     signatureShares: NodeBlsSigningShare[]
   ): Uint8Array => {
-    const sigShares = signatureShares.map((s: any) => s.signatureShare);
+    const sigShares = signatureShares.map((s) => s.signatureShare);
 
     return verifyAndDecryptWithSignatureShares(
       networkPubKey,
@@ -826,16 +830,16 @@ export class LitNodeClientNodeJs
     };
 
     // -- execute
-    keys.forEach((key: any) => {
+    keys.forEach((key) => {
       log('key:', key);
 
-      const shares = signedData.map((r: any) => r[key]);
+      const shares = signedData.map((r) => r[key]);
 
       log('shares:', shares);
 
-      shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
+      shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
-      const sigShares: SigShare[] = shares.map((s: any, index: number) => {
+      const sigShares: SigShare[] = shares.map((s, index: number) => {
         log('Original Share Struct:', s);
 
         const share = getFlattenShare(s);
@@ -871,7 +875,7 @@ export class LitNodeClientNodeJs
 
       log('getSessionSignatures - sigShares', sigShares);
 
-      const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
+      const sigType = mostCommonString(sigShares.map((s) => s.sigType));
 
       // -- validate if this.networkPubKeySet is null
       if (this.networkPubKeySet === null) {
@@ -897,7 +901,7 @@ export class LitNodeClientNodeJs
         return;
       }
 
-      const signature: any = combineEcdsaShares(sigShares);
+      const signature = combineEcdsaShares(sigShares);
       if (!signature.r) {
         throwError({
           message: 'siganture could not be combined',
@@ -915,8 +919,8 @@ export class LitNodeClientNodeJs
       signatures[key] = {
         ...signature,
         signature: encodedSig,
-        publicKey: mostCommonString(sigShares.map((s: any) => s.publicKey)),
-        dataSigned: mostCommonString(sigShares.map((s: any) => s.dataSigned)),
+        publicKey: mostCommonString(sigShares.map((s) => s.publicKey)),
+        dataSigned: mostCommonString(sigShares.map((s) => s.dataSigned)),
         siweMessage: mostCommonString(sigShares.map((s) => s.siweMessage)),
       };
     });
@@ -929,6 +933,7 @@ export class LitNodeClientNodeJs
    * Get a single signature
    *
    * @param { Array<any> } shareData from all node promises
+   * @param { string } requestId
    *
    * @returns { string } signature
    *
@@ -938,7 +943,7 @@ export class LitNodeClientNodeJs
     const R_x = shareData[0].local_x;
     const R_y = shareData[0].local_y;
 
-    const valid_shares = shareData.map((s: any) => s.signature_share);
+    const valid_shares = shareData.map((s) => s.signature_share);
     const shares = JSON.stringify(valid_shares);
 
     await wasmECDSA.initWasmEcdsaSdk(); // init WASM
@@ -1051,7 +1056,7 @@ export class LitNodeClientNodeJs
       responseData
     ) as NodeShare;
 
-    const responseFromStrategy: any = processLitActionResponseStrategy(
+    const responseFromStrategy = processLitActionResponseStrategy(
       responseData,
       params.responseStrategy ?? { strategy: 'leastCommon' }
     );
@@ -1351,7 +1356,7 @@ export class LitNodeClientNodeJs
     );
 
     // -- case: promises rejected
-    if (res.success === false) {
+    if (!res.success) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
@@ -1597,7 +1602,7 @@ export class LitNodeClientNodeJs
     );
 
     // -- case: promises rejected
-    if (res.success === false) {
+    if (!res.success) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
@@ -1822,7 +1827,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] curveType is "${curveType}"`);
 
-    let signedDataList = responseData.map((s) => s.dataSigned);
+    const signedDataList = responseData.map((s) => s.dataSigned);
 
     if (signedDataList.length <= 0) {
       const err = `[signSessionKey] signedDataList is empty.`;
@@ -1840,7 +1845,7 @@ export class LitNodeClientNodeJs
     const validatedSignedDataList = responseData
       .map((data: BlsResponseData) => {
         // each of this field cannot be empty
-        let requiredFields = [
+        const requiredFields = [
           'signatureShare',
           'curveType',
           'shareIndex',
@@ -1913,13 +1918,11 @@ export class LitNodeClientNodeJs
     const publicKey = removeHexPrefix(params.pkpPublicKey);
     log(`[signSessionKey] publicKey:`, publicKey);
 
-    const dataSigned = mostCommonString(
-      blsSignedData.map((s: any) => s.dataSigned)
-    );
+    const dataSigned = mostCommonString(blsSignedData.map((s) => s.dataSigned));
     log(`[signSessionKey] dataSigned:`, dataSigned);
 
     const mostCommonSiweMessage = mostCommonString(
-      blsSignedData.map((s: any) => s.siweMessage)
+      blsSignedData.map((s) => s.siweMessage)
     );
 
     log(`[signSessionKey] mostCommonSiweMessage:`, mostCommonSiweMessage);
@@ -1944,8 +1947,10 @@ export class LitNodeClientNodeJs
     return signSessionKeyRes;
   };
 
-  #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
-    return res.success === true;
+  #isSuccessNodePromises = <T>(
+    res: SuccessNodePromises<T> | RejectedNodePromises
+  ): res is SuccessNodePromises<T> => {
+    return res.success;
   };
 
   getSignSessionKeyShares = async (
@@ -1977,9 +1982,9 @@ export class LitNodeClientNodeJs
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
    *
    * @param { GetSessionSigsProps } params
-   * 
+   *
    * @example
-   * 
+   *
    * ```ts
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
 import { LitAbility } from "@lit-protocol/types";
@@ -2055,7 +2060,7 @@ const resourceAbilityRequests = [
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
-      log('need to re-sign session key.  Signing...');
+      log('need to re-sign session key. Signing...');
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
@@ -2308,10 +2313,10 @@ const resourceAbilityRequests = [
       this.connectedNodes.size
     );
 
-    if (responseData.success === true) {
+    if (responseData.success) {
       const nodeSignatures: Signature[] = (
         responseData as SuccessNodePromises<any>
-      ).values.map((r: any) => {
+      ).values.map((r) => {
         const sig = ethers.utils.splitSignature(`0x${r.signature}`);
         return {
           r: sig.r,
@@ -2334,8 +2339,7 @@ const resourceAbilityRequests = [
         `pubkey ${pubkey} derived from key id ${derivedKeyId}`
       );
 
-      const relayParams: ClaimRequest<'relay'> =
-        params as ClaimRequest<'relay'>;
+      const relayParams = params as ClaimRequest<'relay'>;
 
       let mintTx = '';
       if (params.mintCallback && 'signer' in params) {
