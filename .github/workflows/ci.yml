@@ -11,7 +11,7 @@ on:
       - feature/**
 jobs:
   master:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-x4-8x
     timeout-minutes: 30
     steps:
       - name: Checkout repo
