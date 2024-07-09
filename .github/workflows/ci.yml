@@ -52,7 +52,7 @@ jobs:
           repository: LIT-Protocol/lit-assets
           token: ${{secrets.GH_PAT}}
           path: lit-assets/
-          submodules: true
+          submodules: false
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
