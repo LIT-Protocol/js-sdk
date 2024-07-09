@@ -46,6 +46,7 @@ jobs:
           fetch-depth: 0
       - name: Checkout Lit Actions
         uses: actions/checkout@v2
+        id: checkout
         with: 
           fetch-depth: 0
           repository: LIT-Protocol/lit-assets
@@ -60,6 +61,7 @@ jobs:
         run: yarn install
       - name: Build packages
         id: build
+        if: steps.checkout.outputs.exit_code == 0
         run: yarn build:dev
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
