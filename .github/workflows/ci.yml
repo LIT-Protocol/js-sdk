@@ -30,7 +30,7 @@ jobs:
           sparse-checkout: .
       - name: Pull Shiva Container
         id: shiva-pull
-        run: docker pull ghcr.io/lit-protocol/shiva:latest --username ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
+        run: docker pull ghcr.io/lit-protocol/shiva:latest -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
       - name: Run Shiva Container
         id: shiva-run
         run: docker run  -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH="7a67a98c3648e0a4c38a210a084a5ca8bef577ae" -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}}
