@@ -40,21 +40,21 @@ jobs:
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
         run: yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString,testExecuteJsSignAndCombineEcdsa,testExecutJsDecryptAndCombine,testExecuteJsBroadcastAndCollect  --exclude=Parallel
-      services:
-          shiva:  
-            image: ghcr.io/lit-protocol/shiva:latest
-            ports:  
-              - 8000:8000
-              - 8545:8545
-              - 7470:7470
-              - 7471:7471
-              - 7472:7472
-              - 7473:7473
-              - 7474:7474
-              - 7475:7475
-            volumes:
-              - ${{github.workspace}}/lit-assets:/data
-            enviorment:
-              HASH: 7a67a98c3648e0a4c38a210a084a5ca8bef577ae
-              IPFS_API_KEY: ${{secrets.IPFS_API_KEY}}
-              GH_PAT: ${{secrets.GH_PAT}}
+    services:
+      shiva:  
+        image: ghcr.io/lit-protocol/shiva:latest
+        ports:  
+          - 8000:8000
+          - 8545:8545
+          - 7470:7470
+          - 7471:7471
+          - 7472:7472
+          - 7473:7473
+          - 7474:7474
+          - 7475:7475
+        volumes:
+          - ${{github.workspace}}/lit-assets:/data
+        env:
+          HASH: 7a67a98c3648e0a4c38a210a084a5ca8bef577ae
+          IPFS_API_KEY: ${{secrets.IPFS_API_KEY}}
+          GH_PAT: ${{secrets.GH_PAT}}
