@@ -1,4 +1,9 @@
-import { LIT_TESTNET, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
+import {
+  LIT_TESTNET,
+  ProcessEnvs,
+  RPC_MAP,
+  TinnyEnvConfig,
+} from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -29,7 +34,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
-    LIT_RPC_URL: process.env['LIT_RPC_URL'] || 'http://127.0.0.1:8545',
+    LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
     BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
@@ -37,16 +42,12 @@ export class TinnyEnvironment {
       'http://127.0.0.1:7471',
       'http://127.0.0.1:7472',
     ],
-    LIT_OFFICIAL_RPC:
-      process.env['LIT_OFFICIAL_RPC'] ||
-      'https://chain-rpc.litprotocol.com/http',
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
 
     // Available Accounts
     // ==================
-    // (0) "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" (10000.000000000000000000 ETH)
     // (1) "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" (10000.000000000000000000 ETH)
     // (2) "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" (10000.000000000000000000 ETH)
     // (3) "0x90F79bf6EB2c4f870365E785982E1f101E93b906" (10000.000000000000000000 ETH)
@@ -117,10 +118,22 @@ export class TinnyEnvironment {
     ).fill(false);
 
     // -- setup rpc
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    // Priority:
+    // 1. Use environment variable if set
+    // 2. Use RPC_MAP if network is recognized
+    // 3. Throw error if neither condition is met
+    if (this.processEnvs.LIT_RPC_URL) {
+      // If LIT_RPC_URL is set in the environment, use it
       this.rpc = this.processEnvs.LIT_RPC_URL;
+    } else if (this.network in RPC_MAP) {
+      // If the network is recognized in RPC_MAP, use the corresponding RPC URL
+      this.rpc = RPC_MAP[this.network];
     } else {
-      this.rpc = this.processEnvs.LIT_OFFICIAL_RPC;
+      // If neither condition is met, throw an error with available options
+      const availableNetworks = Object.keys(RPC_MAP).join(', ');
+      throw new Error(
+        `No RPC URL found for network "${this.network}". Available networks are: ${availableNetworks}`
+      );
     }
 
     console.log(
@@ -161,16 +174,6 @@ export class TinnyEnvironment {
         this.processEnvs.KEY_IN_USE[index] = true; // Mark the key as in use
         // console.log('[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index); // Log a message indicating that we have selected a key
 
-        // Set a timer to automatically release the key after 10 seconds
-        setTimeout(() => {
-          this.releasePrivateKey(index);
-          // console.log(
-          //   '[𐬺🧪 Tinny Environment𐬺] 🔓 Automatically released key at index',
-          //   index,
-          //   `after ${this.processEnvs.TIME_TO_RELEASE_KEY / 10000} seconds`
-          // );
-        }, this.processEnvs.TIME_TO_RELEASE_KEY);
-
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
         // console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
@@ -180,6 +183,18 @@ export class TinnyEnvironment {
         );
       }
     }
+  }
+
+  /**
+   * Marks a private key as available again after use.
+   * @param {number} index - The index of the key to mark as available.
+   */
+  releasePrivateKeyFromUser(user: TinnyPerson) {
+    const index = this.processEnvs.PRIVATE_KEYS.indexOf(user.privateKey);
+    this.processEnvs.KEY_IN_USE[index] = false;
+    // console.log(
+    //   `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
+    // );
   }
 
   /**
@@ -213,7 +228,7 @@ export class TinnyEnvironment {
         this?.testnet?.ContractContext ?? this._contractContext;
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
-        rpcUrl: this.processEnvs.LIT_RPC_URL,
+        rpcUrl: this.rpc,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
@@ -338,7 +353,7 @@ export class TinnyEnvironment {
       let state = await this.testnet.pollTestnetForActive();
       if (state === `UNKNOWN`) {
         console.log(
-          'Testnet state found to be Unknown meannig there was an error with testnet creation. shutting downn'
+          'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
         );
         throw new Error(`Error while creating testnet, aborting test run`);
       }
@@ -434,22 +449,34 @@ export class TinnyEnvironment {
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
-        rpc: this.processEnvs.LIT_RPC_URL, // anvil rpc
+        rpc: this.rpc,
         customContext: networkContext,
       });
     } else {
-      // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
-      // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
-      const capacityCreditWallet =
-        ethers.Wallet.createRandom().connect(provider);
+      async function _switchWallet() {
+        // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
+        // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
+        const capacityCreditWallet =
+          ethers.Wallet.createRandom().connect(provider);
 
-      const transferTx = await wallet.sendTransaction({
-        to: capacityCreditWallet.address,
-        value: ethers.utils.parseEther('0.001'),
-      });
-      await transferTx.wait();
+        // get wallet balance
+        const balance = await wallet.getBalance();
+        console.log('this.rpc:', this.rpc);
+        console.log('this.wallet.address', wallet.address);
+        console.log('Balance:', balance.toString());
+
+        const transferTx = await wallet.sendTransaction({
+          to: capacityCreditWallet.address,
+          value: ethers.utils.parseEther('0.001'),
+        });
+        await transferTx.wait();
+      }
+
+      // await _switchWallet();
+
       this.contractsClient = new LitContracts({
-        signer: capacityCreditWallet,
+        // signer: capacityCreditWallet, // disabled switch wallet for now
+        signer: wallet,
         debug: this.processEnvs.DEBUG,
         network: this.network,
       });
@@ -462,23 +489,40 @@ export class TinnyEnvironment {
      * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
      * ====================================
      */
-    console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
-    );
-    const capacityTokenId = (
-      await this.contractsClient.mintCapacityCreditsNFT({
-        requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
-      })
-    ).capacityTokenIdStr;
 
-    this.superCapacityDelegationAuthSig = (
-      await this.litNodeClient.createCapacityDelegationAuthSig({
-        dAppOwnerWallet: wallet,
-        capacityTokenId: capacityTokenId,
-        // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
-        uses: '200',
-      })
-    ).capacityDelegationAuthSig;
+    // Disabled for now
+    async function _mintSuperCapacityDelegationAuthSig() {
+      console.log(
+        '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
+      );
+      try {
+        const capacityTokenId = (
+          await this.contractsClient.mintCapacityCreditsNFT({
+            requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
+            daysUntilUTCMidnightExpiration: 2,
+          })
+        ).capacityTokenIdStr;
+
+        this.superCapacityDelegationAuthSig = (
+          await this.litNodeClient.createCapacityDelegationAuthSig({
+            dAppOwnerWallet: wallet,
+            capacityTokenId: capacityTokenId,
+            // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+            uses: '200',
+          })
+        ).capacityDelegationAuthSig;
+      } catch (e: any) {
+        if (
+          e.message.includes(`Can't allocate capacity beyond the global max`)
+        ) {
+          console.log('❗️Skipping capacity delegation auth sig setup.', e);
+        } else {
+          console.log(
+            '❗️Error while setting up capacity delegation auth sig',
+            e
+          );
+        }
+      }
+    }
   };
 }

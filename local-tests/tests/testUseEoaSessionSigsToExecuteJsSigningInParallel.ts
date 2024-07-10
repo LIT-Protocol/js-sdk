@@ -37,6 +37,7 @@ export const testUseEoaSessionSigsToExecuteJsSigningInParallel = async (
   };
 
   const res = await Promise.all([fn(1), fn(2), fn(3)]);
+  devEnv.releasePrivateKeyFromUser(alice);
   log('res:', res);
 
   // -- Expected output:

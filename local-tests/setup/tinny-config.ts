@@ -5,7 +5,24 @@ export enum LIT_TESTNET {
   LOCALCHAIN = 'localchain',
   MANZANO = 'manzano',
   CAYENNE = 'cayenne',
+  DATIL_DEV = 'datil-dev',
 }
+
+export enum LIT_RPC {
+  LOCAL_ANVIL = 'http://127.0.0.1:8545',
+  CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
+  VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
+}
+
+/**
+ * Mapping of testnet names to corresponding RPC endpoints.
+ */
+export const RPC_MAP = {
+  [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
+  [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICLE,
+  [LIT_TESTNET.CAYENNE]: LIT_RPC.CHRONICLE,
+  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
+};
 
 export interface ProcessEnvs {
   /**
@@ -18,6 +35,7 @@ export interface ProcessEnvs {
    * - `LIT_TESTNET.LOCALCHAIN`
    * - `LIT_TESTNET.MANZANO`
    * - `LIT_TESTNET.CAYENNE`
+   * - `LIT_TESTNET.DATIL_DEV`
    */
   NETWORK: LIT_TESTNET;
 
@@ -53,14 +71,12 @@ export interface ProcessEnvs {
 
   // =========== In most cases you won't need to change the following values ===========
   /**
-   * The URL of Lit RPC server. If it's running locally on Anvil, it should be 'http://127.0.0.1:8545'
+   * The URL of Lit RPC server.
+   * - If it's running locally on Anvil, it should be 'http://127.0.0.1:8545'
+   * - If it's running on Chronicle, it should be 'https://chain-rpc.litprotocol.com/http'
+   * - If it's running on Vesuvius, it should be 'https://vesuvius-rpc.litprotocol.com'
    */
   LIT_RPC_URL: string;
-
-  /**
-   * The URL of the official Lit RPC server. Usually 'https://chain-rpc.litprotocol.com/http' but can be changed if needed
-   */
-  LIT_OFFICIAL_RPC: string;
 
   /**
    * This is usually used when you're running tests locally depending how many nodes you are running.

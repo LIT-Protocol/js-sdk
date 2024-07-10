@@ -120,6 +120,7 @@ export type LITChain<T> = Record<string, T>;
 
 export type LIT_NETWORKS_KEYS =
   | 'cayenne'
+  | 'datil-dev'
   | 'localhost'
   | 'custom'
   | 'habanero'

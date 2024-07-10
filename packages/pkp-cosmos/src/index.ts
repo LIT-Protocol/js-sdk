@@ -1,3 +1,3 @@
-import { PKPCosmosWallet } from './lib/pkp-cosmos';
+import { Long, PKPCosmosWallet } from './lib/pkp-cosmos';
 
-export { PKPCosmosWallet };
+export { Long, PKPCosmosWallet };
