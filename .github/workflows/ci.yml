@@ -28,6 +28,8 @@ jobs:
           path: ${{ github.workspace }}/lit-assets/
           submodules: false
           sparse-checkout: .
+      - name: Check LA dir
+        run: ls -la ${{github.workspace}}/lit-assets
       - name: Docker login
         id: login
         run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
