@@ -259,7 +259,7 @@ export class ShivaClient {
         this.processEnvs.LIT_ACTION_BINARY_PATH
       );
       let body: Partial<TestNetCreateRequest> = createReq ?? {
-        nodeCount: 3,
+        nodeCount: 6,
         pollingInterval: '2000',
         epochLength: 100,
       };
