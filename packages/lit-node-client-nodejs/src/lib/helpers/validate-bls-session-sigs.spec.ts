@@ -28,10 +28,10 @@ describe('BlsSessionSigVerify', () => {
   it(`should verify valid bls signatrue`, () => {
     expect(
       blsSessionSigVerify(
-        (public_key: any, message: any, signature: any) => {
-          expect(typeof public_key).toBe('string');
-          expect(typeof message).toBe('string');
-          expect(typeof signature).toBe('string');
+        async (publicKey: String, message: Uint8Array, signature: Uint8Array): Promise<void> => {
+          expect(typeof publicKey).toBe('string');
+          expect(typeof message).toBe('object');
+          expect(typeof signature).toBe('object');
         },
         networkPubKey,
         authSig

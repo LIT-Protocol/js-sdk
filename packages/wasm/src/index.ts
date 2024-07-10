@@ -11,33 +11,44 @@ export type { BlsVariant, EcdsaVariant } from './pkg/wasm-internal';
 
 import * as wasmInternal from './pkg/wasm-internal';
 
-let wasmSdkInstance: InitOutput | undefined;
-// loaded wasm module
-let isWasmModuleLoading = false;
+let loadingPromise: Promise<any> | null = null;  
+let wasmSdkInstance: InitOutput | undefined;  
 
-/**
- * Initializes the wasm module and keeps the module in scope within
- * the module context. Does not expose the module context as it is
- * not intended to be used directly.
- * @returns {Promise<void>}
- */
-async function loadModules() {
-  if (wasmSdkInstance || isWasmModuleLoading) {
-    return;
-  }
-  try {
-    isWasmModuleLoading = true;
-    // use wasm-bindgen `init sync` for loading wasm modules.
-    // synchronously loads the module through `WebAssembly.Module`
-    wasmSdkInstance = initSync(getModule());
-    isWasmModuleLoading = false;
-  } catch (e) {
-    wasmSdkInstance = undefined;
-    isWasmModuleLoading = false;
-    // Catch the error and rethrow which looses the stack trace context from `wasm-internal`
-    throw e;
-  }
-}
+// Give us a promise that _just_ encapsulates initializing the modules so we can wrap it in other logic  
+async function initWasm() {  
+  await initSync(getModule());  
+}  
+
+/**  
+ * Initializes the wasm module and keeps the module in scope within  
+ * the module context. Does not expose the module context as it is  
+ * not intended to be used directly.  
+ * @returns {Promise<void>}  
+ */  
+async function loadModules() {  
+  if (wasmSdkInstance) {  
+    // Runtime is 'hot'; already have loaded WASM modules  
+    return wasmSdkInstance;  
+  }  
+
+  if (loadingPromise) {  
+    // Runtime is currently loading the WASM modules; chain on the result of that load attempt  
+    return loadingPromise;  
+  }  
+
+  // If we got here, we need to load the wasmSdkInstance -- but we want to avoid any other concurrent  
+  // requests loading it in parallel, so we stash this promise for those to check for  
+  loadingPromise = initWasm();  
+
+  try {  
+    wasmSdkInstance = await loadingPromise;  
+  } finally {  
+    loadingPromise = null;  
+  }  
+
+  // If we got here, the SDK loaded successfully; just return the instance to the caller  
+  return;  
+}  
 
 /**
  * Combines bls signature shares to decrypt
