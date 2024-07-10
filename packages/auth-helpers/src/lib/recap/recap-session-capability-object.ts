@@ -13,13 +13,13 @@ import { sanitizeSiweMessage } from '../siwe/siwe-helper';
 import { AuthSig } from '../models';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
-  #inner: Recap;
+  private _inner: Recap;
 
   constructor(
     att: AttenuationsObject = {},
     prf: Array<CIDString> | Array<string> = []
   ) {
-    this.#inner = new Recap(att, prf);
+    this._inner = new Recap(att, prf);
   }
 
   /**
@@ -46,19 +46,19 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   get attenuations(): AttenuationsObject {
-    return this.#inner.attenuations;
+    return this._inner.attenuations;
   }
 
   get proofs(): Array<CIDString> {
-    return this.#inner.proofs.map((cid: any) => cid.toString());
+    return this._inner.proofs.map((cid: any) => cid.toString());
   }
 
   get statement(): string {
-    return sanitizeSiweMessage(this.#inner.statement);
+    return sanitizeSiweMessage(this._inner.statement);
   }
 
   addProof(proof: string): void {
-    return this.#inner.addProof(proof);
+    return this._inner.addProof(proof);
   }
 
   addAttenuation(
@@ -67,15 +67,15 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     name: string = '*',
     restriction: { [key: string]: PlainJSON } = {}
   ) {
-    return this.#inner.addAttenuation(resource, namespace, name, restriction);
+    return this._inner.addAttenuation(resource, namespace, name, restriction);
   }
 
   addToSiweMessage(siwe: SiweMessage): SiweMessage {
-    return this.#inner.add_to_siwe_message(siwe);
+    return this._inner.add_to_siwe_message(siwe);
   }
 
   encodeAsSiweResource(): string {
-    return this.#inner.encode();
+    return this._inner.encode();
   }
 
   /** LIT specific methods */
@@ -129,7 +129,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
     // Find an attenuated resource key to match against.
     const attenuatedResourceKey =
-      this.#getResourceKeyToMatchAgainst(litResource);
+      this._getResourceKeyToMatchAgainst(litResource);
 
     if (!attenuations[attenuatedResourceKey]) {
       // No attenuations specified for this resource.
@@ -171,7 +171,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
    *
    * Then, if the provided litResource is 'lit-acc://123', the method will return 'lit-acc://*'.
    */
-  #getResourceKeyToMatchAgainst(litResource: ILitResource): string {
+  private _getResourceKeyToMatchAgainst(litResource: ILitResource): string {
     const attenuatedResourceKeysToMatchAgainst: string[] = [
       `${litResource.resourcePrefix}://*`,
       litResource.getResourceKey(),
