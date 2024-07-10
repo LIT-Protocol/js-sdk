@@ -11,7 +11,7 @@ on:
       - feature/**
 jobs:
   e2e-connection:
-    runs-on: ubuntu-latest-x4-8x
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       NETWORK: cayenne
