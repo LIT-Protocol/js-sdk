@@ -27,7 +27,7 @@ jobs:
           token: ${{secrets.GH_PAT}}
           path: ${{ github.workspace }}/lit-assets/
           submodules: false
-          sparse-checkout: .
+          sparse-checkout: blockchain
       - name: Check LA dir
         run: ls -la ${{github.workspace}}/lit-assets
       - name: Docker login
