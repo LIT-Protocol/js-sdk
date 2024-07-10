@@ -5,9 +5,10 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ❌ Not supported on cayenne
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
  * ❌ Not supported on manzano
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse =
   async (devEnv: TinnyEnvironment) => {
@@ -27,6 +28,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonRespons
 
     })();`,
     });
+
+    devEnv.releasePrivateKeyFromUser(alice);
 
     // Expected output:
     // {

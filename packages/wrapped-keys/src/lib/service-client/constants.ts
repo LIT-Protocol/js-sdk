@@ -9,6 +9,7 @@ const SERVICE_URL_BY_NETWORKTYPE: Record<NETWORK_TYPES, string> = {
 };
 
 export const SERVICE_URL_BY_LIT_NETWORK: Record<SupportedNetworks, string> = {
+  [LitNetwork.DatilDev]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
   [LitNetwork.Cayenne]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
   [LitNetwork.Manzano]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
   [LitNetwork.Habanero]: SERVICE_URL_BY_NETWORKTYPE.Production,

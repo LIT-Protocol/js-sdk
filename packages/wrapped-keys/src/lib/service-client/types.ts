@@ -11,7 +11,7 @@ export type FetchKeyParams = BaseApiParams;
 
 export type SupportedNetworks = Extract<
   LIT_NETWORKS_KEYS,
-  'cayenne' | 'manzano' | 'habanero'
+  'cayenne' | 'manzano' | 'habanero' | 'datil-dev'
 >;
 
 export interface StoreKeyParams extends BaseApiParams {

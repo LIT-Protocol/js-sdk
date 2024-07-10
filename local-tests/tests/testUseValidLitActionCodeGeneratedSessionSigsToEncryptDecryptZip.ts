@@ -9,9 +9,10 @@ import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
- * ❌ Not supported in Cayenne
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
  * ❌ Not supported in Manzano
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip =
   async (devEnv: TinnyEnvironment) => {
@@ -76,6 +77,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip =
       },
       devEnv.litNodeClient as unknown as ILitNodeClient
     );
+
+    devEnv.releasePrivateKeyFromUser(alice);
 
     const decryptedMessage = await decryptedZip['string.txt'].async('string');
 

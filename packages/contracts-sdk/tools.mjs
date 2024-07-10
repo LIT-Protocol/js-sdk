@@ -3,6 +3,7 @@ import {
   childRunCommand,
   getArgs,
   greenLog,
+  redLog,
 } from '../../tools/scripts/utils.mjs';
 
 const args = getArgs();
@@ -25,6 +26,10 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
 
 if (OPTION === '--gen') {
   await childRunCommand('node packages/contracts-sdk/gen-code.mjs');
+}
+
+if (OPTION === '--fetch') {
+  redLog('Not implemented yet');
 }
 
 if (OPTION === '--update') {

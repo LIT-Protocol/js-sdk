@@ -33,6 +33,8 @@ export const testUsePkpSessionSigsToExecuteJsClaimKeys = async (
     })();`,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   console.log('res:', res);
 
   // Expected output:
