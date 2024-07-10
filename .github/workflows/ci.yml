@@ -58,3 +58,6 @@ jobs:
           HASH: 7a67a98c3648e0a4c38a210a084a5ca8bef577ae
           IPFS_API_KEY: ${{secrets.IPFS_API_KEY}}
           GH_PAT: ${{secrets.GH_PAT}}
+        credentials:
+          username: ${{secrets.GH_USER}}
+          password: ${{secrets.GH_PAT}}  
