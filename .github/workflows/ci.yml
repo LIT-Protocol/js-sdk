@@ -30,7 +30,7 @@ jobs:
           sparse-checkout: .
       - name: Pull Shiva Container
         id: login
-        run: docker login -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
+        run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
       - name: Pull Shiva Container
         id: shiva-pull
         run: docker pull ghcr.io/lit-protocol/shiva:latest -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
