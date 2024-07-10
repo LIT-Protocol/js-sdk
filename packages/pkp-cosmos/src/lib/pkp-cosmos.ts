@@ -1,6 +1,6 @@
 /**
  * This module defines the PKPCosmosWallet class, which is a modified version of the DirectSecp256k1HdWallet class
- * from "@cosmjs/proto-signing". The class extends the PKPBaseWallet class and implements the OfflineDirectSigner
+ * from "@cosmjs/proto-signing". The class wraps the PKPBase class and implements the OfflineDirectSigner
  * interface, enabling it to use PKP for signing. The class handles the creation of a Cosmos wallet, management of
  * account data, and signing transactions with the wallet.
  *
@@ -9,7 +9,6 @@
  *
  * Source: https://github.com/cosmos/cosmjs/blob/4c8b278c1d988be3de415f767ce2f65ab3d40bd9/packages/proto-signing/src/directsecp256k1wallet.ts
  */
-
 import {
   Coin,
   encodeSecp256k1Signature,
@@ -17,18 +16,6 @@ import {
 } from '@cosmjs/amino';
 import { Secp256k1, sha256, ExtendedSecp256k1Signature } from '@cosmjs/crypto';
 import { toBech32, fromHex } from '@cosmjs/encoding';
-import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-
-import {
-  assertIsDeliverTxSuccess,
-  SigningStargateClient,
-  StdFee,
-  calculateFee,
-  GasPrice,
-  coins,
-  SignerData,
-} from '@cosmjs/stargate';
-
 import {
   makeSignBytes,
   AccountData,
@@ -36,9 +23,25 @@ import {
   OfflineDirectSigner,
   EncodeObject,
 } from '@cosmjs/proto-signing';
+import {
+  SigningStargateClient,
+  StdFee,
+  calculateFee,
+  GasPrice,
+  coins,
+  SignerData,
+} from '@cosmjs/stargate';
+import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { PKPBase } from '@lit-protocol/pkp-base';
-import { PKPClientHelpers, PKPCosmosWalletProp } from '@lit-protocol/types';
+import {
+  PKPClientHelpers,
+  PKPCosmosWalletProp,
+  PKPWallet,
+  SigResponse,
+} from '@lit-protocol/types';
+
+export { Long } from 'cosmjs-types/helpers';
 
 const DEFAULT_COSMOS_RPC_URL =
   'https://cosmos-mainnet-rpc.allthatnode.com:26657';
@@ -47,9 +50,10 @@ const DEFAULT_COSMOS_RPC_URL =
  * Similar to "DirectSecp256k1HdWallet", but uses PKP to sign
  */
 export class PKPCosmosWallet
-  extends PKPBase
-  implements OfflineDirectSigner, PKPClientHelpers
+  implements PKPWallet, OfflineDirectSigner, PKPClientHelpers
 {
+  private readonly pkpBase: PKPBase;
+
   // Address prefix for Bech32 addresses
   addressPrefix: string;
 
@@ -59,8 +63,12 @@ export class PKPCosmosWallet
   // Default Lit Action signanture name
   defaultSigName: string = 'pkp-cosmos-sign-tx';
 
+  get litNodeClientReady(): boolean {
+    return this.pkpBase.litNodeClientReady;
+  }
+
   constructor(prop: PKPCosmosWalletProp) {
-    super(prop);
+    this.pkpBase = PKPBase.createInstance(prop);
 
     // Set the address prefix and RPC URL based on the provided properties
     this.addressPrefix = prop.addressPrefix ?? 'cosmos';
@@ -77,7 +85,7 @@ export class PKPCosmosWallet
     this.rpc = rpc;
   };
 
-  handleRequest = async (payload: any): Promise<any> => {
+  handleRequest = async (): Promise<void> => {
     throw new Error('Method not implemented.');
   };
 
@@ -88,7 +96,7 @@ export class PKPCosmosWallet
     return toBech32(
       this.addressPrefix,
       rawSecp256k1PubkeyToRawAddress(
-        Secp256k1.compressPubkey(this.uncompressedPubKeyBuffer)
+        Secp256k1.compressPubkey(this.pkpBase.uncompressedPubKeyBuffer)
       )
     );
   }
@@ -98,8 +106,15 @@ export class PKPCosmosWallet
    *
    * @returns {Promise<string>} - Cosmos address
    */
-  override getAddress(): Promise<string> {
+  getAddress(): Promise<string> {
     return Promise.resolve(this.address);
+  }
+
+  /**
+   * Initializes the PKPCosmosWallet instance and its dependencies
+   */
+  async init(): Promise<void> {
+    await this.pkpBase.init();
   }
 
   /**
@@ -110,7 +125,7 @@ export class PKPCosmosWallet
       {
         algo: 'secp256k1',
         address: this.address,
-        pubkey: this.compressedPubKeyBuffer,
+        pubkey: this.pkpBase.compressedPubKeyBuffer,
       },
     ];
   }
@@ -129,14 +144,14 @@ export class PKPCosmosWallet
     signDoc: SignDoc
   ): Promise<DirectSignResponse> {
     // Check if the LIT node client is connected, and connect if it's not.
-    await this.ensureLitNodeClientReady();
+    await this.pkpBase.ensureLitNodeClientReady();
 
     // Convert the SignDoc to binary format for signing.
     const signBytes = makeSignBytes(signDoc);
 
     // Check if the provided address matches the wallet address, and throw an error if it doesn't.
     if (address !== this.address) {
-      return this.throwError(`Address ${address} not found in wallet`);
+      return this.pkpBase.throwError(`Address ${address} not found in wallet`);
     }
 
     // Hash the binary format of the transaction data.
@@ -144,7 +159,7 @@ export class PKPCosmosWallet
 
     // Run the LIT action to obtain the signature.
     let signature;
-    if (this.useAction) {
+    if (this.pkpBase.useAction) {
       signature = await this.runLitAction(hashedMessage, this.defaultSigName);
     } else {
       signature = await this.runSign(hashedMessage);
@@ -165,12 +180,12 @@ export class PKPCosmosWallet
 
     // Encode the signature in the Cosmos-compatible format.
     const stdSignature = encodeSecp256k1Signature(
-      this.compressedPubKeyBuffer,
+      this.pkpBase.compressedPubKeyBuffer,
       signatureBytes
     );
 
     // Log the encoded signature.
-    this.log('stdSignature:', stdSignature);
+    this.pkpBase.log('stdSignature:', stdSignature);
 
     // Return the signed transaction and encoded signature.
     return {
@@ -280,4 +295,31 @@ export class PKPCosmosWallet
       explicitSignerData
     );
   };
+
+  /**
+   * Runs the specified Lit action with the given parameters.
+   *
+   * @param {Uint8Array} toSign - The data to be signed by the Lit action.
+   * @param {string} sigName - The name of the signature to be returned by the Lit action.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
+   */
+  async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+    return this.pkpBase.runLitAction(toSign, sigName);
+  }
+
+  /**
+   * Sign the provided data with the PKP private key.
+   *
+   * @param {Uint8Array} toSign - The data to be signed.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
+   */
+  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+    return this.pkpBase.runSign(toSign);
+  }
 }

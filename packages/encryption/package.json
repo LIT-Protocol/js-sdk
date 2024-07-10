@@ -25,7 +25,7 @@
     "crypto": false,
     "stream": false
   },
-  "version": "6.0.0-tslib-test",
+  "version": "6.1.0",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

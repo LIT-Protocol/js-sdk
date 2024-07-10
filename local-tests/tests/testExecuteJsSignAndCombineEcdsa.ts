@@ -72,6 +72,9 @@ export const testExecuteJsSignAndCombineEcdsa = async (
     },
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+  devEnv.releasePrivateKeyFromUser(bob);
+
   /**
         Response format
        {
@@ -99,7 +102,7 @@ export const testExecuteJsSignAndCombineEcdsa = async (
     throw new Error('invalid signature returned from lit action');
   }
 
-  if (!sig.v) {
+  if (sig.v === undefined) {
     throw new Error('invalid signature returned from lit action');
   }
   console.log('✅ testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs');

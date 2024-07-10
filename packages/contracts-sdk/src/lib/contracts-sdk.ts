@@ -11,10 +11,13 @@ import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
   CreateCustomAuthMethodRequest,
+  GasLimitParam,
+  LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
   MintCapacityCreditsRes,
+  MintNextAndAddAuthMethods,
   MintWithAuthParams,
   MintWithAuthResponse,
 } from '@lit-protocol/types';
@@ -64,12 +67,16 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import {
+  AuthMethodScope,
+  AuthMethodType,
+  LIT_CHAINS,
+  LIT_RPC,
+} from '@lit-protocol/constants';
+import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
 
-const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
-const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
-
-const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
+// const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
+// const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
@@ -98,6 +105,8 @@ declare global {
   }
 }
 
+const GAS_LIMIT = ethers.utils.hexlify(5000000); // Adjust as needed
+
 // This code defines a LitContracts class that acts as a container for a collection of smart contracts. The class has a constructor that accepts an optional args object with provider and rpc properties. If no provider is specified, the class will create a default provider using the specified rpc URL. If no rpc URL is specified, the class will use a default URL.
 // The class has a number of properties that represent the smart contract instances, such as accessControlConditionsContract, litTokenContract, pkpNftContract, etc. These smart contract instances are created by passing the contract address, ABI, and provider to the ethers.Contract constructor.
 // The class also has a utils object with helper functions for converting between hexadecimal and decimal representation of numbers, as well as functions for working with multihashes and timestamps.
@@ -114,7 +123,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost';
+  network: LIT_NETWORKS_KEYS;
   customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -190,7 +199,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero';
+    network?: LIT_NETWORKS_KEYS;
   }) {
     // this.provider = args?.provider;
     this.customContext = args?.customContext;
@@ -205,7 +214,8 @@ export class LitContracts {
     this.network = args?.network || 'cayenne';
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
-      this.rpc = DEFAULT_RPC;
+      this.rpc =
+        args?.network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
     }
 
     if (!this.rpcs) {
@@ -263,14 +273,38 @@ export class LitContracts {
         throw new Error(msg);
       }
 
-      const chainInfo = {
-        chainId: '0x2AC49',
-        chainName: 'Chronicle - Lit Protocol Testnet',
-        nativeCurrency: { name: 'LIT', symbol: 'LIT', decimals: 18 },
-        rpcUrls: this.rpcs,
-        blockExplorerUrls: [BLOCK_EXPLORER],
+      function _decimalToHex(decimal: number): string {
+        return '0x' + decimal.toString(16);
+      }
+
+      const chronicleChainInfo = {
+        chainId: _decimalToHex(LIT_CHAINS['chronicleTestnet'].chainId),
+        chainName: LIT_CHAINS['chronicleTestnet'].name,
+        nativeCurrency: {
+          name: LIT_CHAINS['chronicleTestnet'].symbol,
+          symbol: LIT_CHAINS['chronicleTestnet'].symbol,
+          decimals: LIT_CHAINS['chronicleTestnet'].decimals,
+        },
+        rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
+        blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
         iconUrls: ['future'],
       };
+
+      const vesuviusChainInfo = {
+        chainId: _decimalToHex(LIT_CHAINS['datilDevnet'].chainId),
+        chainName: LIT_CHAINS['datilDevnet'].name,
+        nativeCurrency: {
+          name: LIT_CHAINS['datilDevnet'].symbol,
+          symbol: LIT_CHAINS['datilDevnet'].symbol,
+          decimals: LIT_CHAINS['datilDevnet'].decimals,
+        },
+        rpcUrls: LIT_CHAINS['datilDevnet'].rpcUrls,
+        blockExplorerUrls: LIT_CHAINS['datilDevnet'].blockExplorerUrls,
+        iconUrls: ['future'],
+      };
+
+      const chainInfo =
+        this.network === 'datil-dev' ? vesuviusChainInfo : chronicleChainInfo;
 
       try {
         await web3Provider.send('wallet_switchEthereumChain', [
@@ -572,22 +606,28 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl = rpcUrl ?? DEFAULT_READ_RPC;
+    rpcUrl =
+      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
       provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     }
 
+    if (network === 'datil-dev') {
+      // @ts-ignore
+      context!.Staking!.abi = minStakingAbi;
+    }
+
     if (!context) {
       const contractData = await LitContracts._resolveContractContext(
-        network,
-        context
+        network
+        // context
       );
 
       const stakingContract = contractData.find(
@@ -602,7 +642,7 @@ export class LitContracts {
 
       return new ethers.Contract(address, abi, provider);
     } else {
-      // if we have contract context then we determine if there exists a `resolverAddres`
+      // if we have contract context then we determine if there exists a `resolverAddress`
       // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
         const stakingContract = (context as LitContractContext).Staking;
@@ -642,7 +682,6 @@ export class LitContracts {
     provider: ethers.providers.JsonRpcProvider,
     contractNames?: (keyof LitContractContext)[]
   ): Promise<LitContractContext> {
-    const rpcUrl = DEFAULT_RPC;
     const resolverContract = new ethers.Contract(
       context.resolverAddress,
       context.abi,
@@ -742,20 +781,23 @@ export class LitContracts {
       ];
     }
 
-    const addresses: LitContractContext = {} as LitContractContext;
-    for (const contract of contractNames) {
-      const contracts = context?.contractContext;
-      addresses[contract] = {
-        address: await getContract(contract, context.environment),
-        abi: contracts?.[contract]?.abi ?? undefined,
-      };
-    }
+    const contractContext: LitContractContext = {} as LitContractContext;
+    // Ah, Bluebird.props(), we miss you 🫗
+    await Promise.all(
+      contractNames.map(async (contractName) => {
+        const contracts = context?.contractContext;
+        contractContext[contractName] = {
+          address: await getContract(contractName, context.environment),
+          abi: contracts?.[contractName]?.abi ?? undefined,
+        };
+      })
+    );
 
-    return addresses;
+    return contractContext;
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero',
+    network: LIT_NETWORKS_KEYS,
     provider: ethers.providers.JsonRpcProvider,
     context?: LitContractContext | LitContractResolverContext
   ) {
@@ -853,7 +895,7 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) => {
@@ -872,7 +914,7 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ): Promise<string[]> => {
@@ -932,8 +974,8 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    network: LIT_NETWORKS_KEYS
+    // context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
     const CAYENNE_API =
@@ -942,53 +984,51 @@ export class LitContracts {
       'https://lit-general-worker.getlit.dev/manzano-contract-addresses';
     const HABANERO_API =
       'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
+    const DATIL_DEV_API =
+      'https://lit-general-worker.getlit.dev/datil-dev/contracts';
 
-    if (network === 'cayenne') {
+    const fetchData = async (url: string) => {
       try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(CAYENNE_API).then((res) => res.json());
+        return await fetch(url).then((res) => res.json());
       } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
+        throw new Error(`Error fetching data from ${url}: ${e.toString()}`);
       }
-    } else if (network === 'manzano') {
-      try {
-        data = await fetch(MANZANO_API).then((res) => res.json());
-      } catch (e: any) {
+    };
+
+    switch (network) {
+      case 'cayenne':
+        data = await fetchData(CAYENNE_API);
+        break;
+      case 'manzano':
+        data = await fetchData(MANZANO_API);
+        break;
+      case 'habanero':
+        data = await fetchData(HABANERO_API);
+        break;
+      case 'datil-dev':
+        data = await fetchData(DATIL_DEV_API);
+        break;
+      case 'custom':
+      case 'localhost':
+        // just use cayenne abis for custom and localhost
+        data = await fetchData(CAYENNE_API);
+        break;
+      default:
         throw new Error(
-          `Error fetching data from ${MANZANO_API}: ${e.toString()}`
+          `[_resolveContractContext] Unsupported network: ${network}`
         );
-      }
-    } else if (network === 'habanero') {
-      try {
-        data = await fetch(HABANERO_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${HABANERO_API}: ${e.toString()}`
-        );
-      }
-    } else if (network === 'custom' || network === 'localhost') {
-      try {
-        // Fetch and parse the JSON data in one step
-        // just use cayenne abis
-        data = await fetch(CAYENNE_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
-      }
     }
-    // Data pulled over http is formatted differently than
-    // what the type expects. Here we normmalize to the LitContractContext type.
-    data = data.data.map((c: any) => {
-      return {
-        address: c.contracts[0].address_hash,
-        abi: c.contracts[0].ABI,
-        name: c.name,
-      };
-    });
-    return data;
+
+    if (!data) {
+      throw new Error('[_resolveContractContext] No data found');
+    }
+
+    // Normalize the data to the LitContractContext type
+    return data.data.map((c: any) => ({
+      address: c.contracts[0].address_hash,
+      abi: c.contracts[0].ABI,
+      name: c.name,
+    }));
   }
 
   /**
@@ -1006,6 +1046,7 @@ export class LitContracts {
     scopes,
     pubkey,
     authMethodId,
+    gasLimit,
   }: MintWithAuthParams): Promise<MintWithAuthResponse<ContractReceipt>> => {
     // -- validate
     if (!this.connected) {
@@ -1071,9 +1112,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       true,
       {
         value: mintCost,
+        gasLimit: gasLimit || GAS_LIMIT, // Adjust as needed
       }
     );
-
     const receipt = await tx.wait();
 
     const events = 'events' in receipt ? receipt.events : receipt.logs;
@@ -1082,18 +1123,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       throw new Error('No events found in receipt');
     }
 
-    let tokenId;
-
     if (!events[0].topics || events[0].topics.length < 1) {
       throw new Error(
         `No topics found in events, cannot derive pkp information. Transaction hash: ${receipt.transactionHash} If you are using your own contracts please use ethers directly`
       );
     }
 
-    tokenId = events[0].topics[1];
+    const tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);
     let tries = 0;
-    let maxAttempts = 10;
+    const maxAttempts = 10;
     let publicKey = '';
     while (tries < maxAttempts) {
       publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
@@ -1134,7 +1173,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    * @returns An object containing the PKP information and the transaction receipt.
    * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
    * @example
-   * 
+   *
   const customAuthMethodOwnedPkp =
     await alice.contractsClient.mintWithCustomAuth({
       authMethodId: 'custom-app-user-id',
@@ -1260,6 +1299,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     requestsPerSecond,
     requestsPerKilosecond,
     daysUntilUTCMidnightExpiration,
+    gasLimit,
   }: MintCapacityCreditsContext): Promise<MintCapacityCreditsRes> => {
     this.log('Minting Capacity Credits NFT...');
 
@@ -1345,11 +1385,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     try {
       const res = await this.rateLimitNftContract.write.mint(expiresAt, {
         value: mintCost,
+        gasLimit: gasLimit || GAS_LIMIT,
       });
 
       const txHash = res.hash;
+
       const tx = await res.wait();
-      this.log('Transaction:', tx);
+      this.log('xx Transaction:', tx);
 
       const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
 
@@ -1578,7 +1620,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       },
     },
     write: {
-      mint: async () => {
+      mint: async (param?: GasLimitParam) => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1608,6 +1650,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tx =
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
+              gasLimit: param?.gasLimit || GAS_LIMIT,
             });
           this.log('tx:', tx);
 
@@ -1622,6 +1665,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         } else {
           sentTx = await this.pkpNftContract.write.mintNext(2, {
             value: mintCost,
+            gasLimit: param?.gasLimit || GAS_LIMIT,
           });
         }
 
@@ -1632,12 +1676,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         const events = 'events' in res ? res.events : res.logs;
 
-        let tokenIdFromEvent;
-
-        tokenIdFromEvent = events[0].topics[1];
+        const tokenIdFromEvent = events[0].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
         let tries = 0;
-        let maxAttempts = 10;
+        const maxAttempts = 10;
         let publicKey = '';
         while (tries < maxAttempts) {
           publicKey = await this.pkpNftContract.read.getPubkey(
@@ -1679,17 +1721,22 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         signatures: IPubkeyRouter.SignatureStruct[],
         txOpts?: any
       ) => {
-        const cost = await this.pkpNftContract.read.mintCost();
-        const tx = await this.pkpNftContract.write.claimAndMint(
-          2,
-          derivedKeyId,
-          signatures,
-          txOpts ?? { value: cost }
-        );
-        const txRec = await tx.wait();
-        const events: any = 'events' in txRec ? txRec.events : txRec.logs;
-        const tokenId = events[1].topics[1];
-        return { tx, res: txRec, tokenId };
+        try {
+          const cost = await this.pkpNftContract.read.mintCost();
+          const tx = await this.pkpNftContract.write.claimAndMint(
+            2,
+            derivedKeyId,
+            signatures,
+            txOpts ?? { value: cost }
+          );
+          const txRec = await tx.wait();
+          const events: any = 'events' in txRec ? txRec.events : txRec.logs;
+          const tokenId = events[1].topics[1];
+          return { tx, res: txRec, tokenId };
+        } catch (e: any) {
+          this.log(`[claimAndMint] error: ${e.message}`);
+          throw new Error(e);
+        }
       },
     },
   };
@@ -2366,15 +2413,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         permittedAuthMethodScopes,
         addPkpEthAddressAsPermittedAddress,
         sendPkpToItself,
-      }: {
-        keyType: string;
-        permittedAuthMethodTypes: string[];
-        permittedAuthMethodIds: string[];
-        permittedAuthMethodPubkeys: string[];
-        permittedAuthMethodScopes: string[][];
-        addPkpEthAddressAsPermittedAddress: boolean;
-        sendPkpToItself: boolean;
-      }): Promise<any> => {
+        gasLimit,
+      }: MintNextAndAddAuthMethods): Promise<any> => {
         // first get mint cost
         const mintCost = await this.pkpNftContract.read.mintCost();
         const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
@@ -2385,7 +2425,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           permittedAuthMethodScopes,
           addPkpEthAddressAsPermittedAddress,
           sendPkpToItself,
-          { value: mintCost }
+
+          {
+            value: mintCost,
+            gasLimit: gasLimit || GAS_LIMIT,
+          }
         );
         return tx;
       },

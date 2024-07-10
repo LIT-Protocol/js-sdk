@@ -82,12 +82,75 @@ import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseC
 import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
 import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
+import { testRelayer } from './tests/testRelayer';
+
+import { testEthereumSignMessageGeneratedKey } from './tests/wrapped-keys/testEthereumSignMessageGeneratedKey';
+import { testEthereumBroadcastTransactionGeneratedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionGeneratedKey';
+import { testEthereumSignMessageWrappedKey } from './tests/wrapped-keys/testEthereumSignMessageWrappedKey';
+import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
+import { testEthereumSignTransactionWrappedKey } from './tests/wrapped-keys/testEthereumSignTransactionWrappedKey';
+import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
+import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
+import { testEthereumBroadcastTransactionWrappedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionWrappedKey';
+import { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/wrapped-keys/testEthereumBroadcastWrappedKeyWithFetchGasParams';
+import { testImportWrappedKey } from './tests/wrapped-keys/testImportWrappedKey';
+import { testGenerateEthereumWrappedKey } from './tests/wrapped-keys/testGenerateEthereumWrappedKey';
+import { testGenerateSolanaWrappedKey } from './tests/wrapped-keys/testGenerateSolanaWrappedKey';
+import { testFailImportWrappedKeysWithSamePkp } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePkp';
+import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePrivateKey';
+import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithEoaSessionSig';
+import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithMaxExpirySessionSig';
+import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithInvalidSessionSig';
+import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithExpiredSessionSig';
+import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
+import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
+import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
 
   await devEnv.init();
+
+  const relayerTests = {
+    testRelayer,
+  };
+  const wrappedKeysTests = {
+    // -- valid cases
+    testEthereumSignMessageGeneratedKey,
+    testEthereumBroadcastTransactionGeneratedKey,
+    testEthereumSignMessageWrappedKey,
+    testEthereumSignTransactionWrappedKey,
+    testEthereumBroadcastTransactionWrappedKey,
+    testEthereumBroadcastWrappedKeyWithFetchGasParams,
+
+    // -- generate wrapped keys
+    testGenerateEthereumWrappedKey,
+    testGenerateSolanaWrappedKey,
+
+    // -- import wrapped keys
+    testImportWrappedKey,
+
+    // -- export wrapped keys
+    testExportWrappedKey,
+
+    // -- solana wrapped keys
+    testSignMessageWithSolanaEncryptedKey,
+    testSignTransactionWithSolanaEncryptedKey,
+
+    // -- invalid cases
+    testFailEthereumSignTransactionWrappedKeyWithMissingParam,
+    testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
+    testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
+
+    // -- import wrapped keys
+    testFailImportWrappedKeysWithSamePkp,
+    testFailImportWrappedKeysWithSamePrivateKey,
+    testFailImportWrappedKeysWithEoaSessionSig,
+    testFailImportWrappedKeysWithMaxExpirySessionSig,
+    testFailImportWrappedKeysWithInvalidSessionSig,
+    testFailImportWrappedKeysWithExpiredSessionSig,
+  };
 
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
@@ -233,13 +296,18 @@ import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcast
       ...litActionCombiningTests.broadcastAndCombine,
       ...litActionCombiningTests.decryptAndCombine,
       ...litActionCombiningTests.ecdsaSignAndCombine,
+
+      ...relayerTests,
+      ...wrappedKeysTests,
     },
     devEnv,
   };
-
+  let res;
   if (devEnv.processEnvs.RUN_IN_BAND) {
-    await runInBand(testConfig);
+    res = await runInBand(testConfig);
   } else {
-    await runTestsParallel(testConfig);
+    res = await runTestsParallel(testConfig);
   }
+  await devEnv.stopTestnet();
+  process.exit(res);
 })();

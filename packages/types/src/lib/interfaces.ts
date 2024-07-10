@@ -3,6 +3,8 @@ import { Provider } from '@ethersproject/abstract-provider';
 import * as JSZip from 'jszip/dist/jszip.js';
 
 import { ILitNodeClient } from './ILitNodeClient';
+import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
+import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -18,8 +20,6 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
-import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -193,19 +193,17 @@ export interface LitNodeClientConfig {
   alertWhenUnauthorized?: boolean;
   minNodeCount?: number;
   debug?: boolean;
-  bootstrapUrls?: string[];
   connectTimeout?: number;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
-  retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
-  rpcUrl?: string | null;
+  rpcUrl?: string;
 }
 
 export type CustomNetwork = Pick<
   LitNodeClientConfig,
-  'litNetwork' | 'bootstrapUrls' | 'contractContext' | 'checkNodeAttestation'
+  'litNetwork' | 'contractContext' | 'checkNodeAttestation'
 > &
   Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
 
@@ -238,7 +236,7 @@ pub struct JsonExecutionRequest {
   pub auth_sig: AuthSigItem,
   #[serde(default = "default_epoch")]
   pub epoch: u64,
-  
+
   pub ipfs_id: Option<String>,
   pub code: Option<String>,
     pub js_params: Option<Value>,
@@ -950,7 +948,7 @@ export interface DecryptZipFileWithMetadataProps extends SessionSigsOrAuthSig {
 export interface SessionKeySignedMessage {
   sessionKey: string;
   resources?: any[];
-  capabilities: string[];
+  capabilities: AuthSig[];
   issuedAt: string;
   expiration: string;
   nodeAddress: string;
@@ -1107,6 +1105,15 @@ export interface CommonGetSessionSigsProps {
   capabilityAuthSigs?: AuthSig[];
 }
 
+export interface BaseProviderGetSessionSigsProps
+  extends CommonGetSessionSigsProps,
+    LitActionSdkParams {
+  /**
+   * This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
+   */
+  authNeededCallback?: AuthCallback;
+}
+
 export interface GetSessionSigsProps
   extends CommonGetSessionSigsProps,
     LitActionSdkParams {
@@ -1195,8 +1202,6 @@ export interface LitClientSessionManager {
 }
 
 export interface AuthenticationProps {
-  client?: LitClientSessionManager;
-
   /**
    * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
    */
@@ -1204,20 +1209,14 @@ export interface AuthenticationProps {
 }
 
 export interface PKPBaseProp {
-  litNodeClient?: ILitNodeClient;
+  litNodeClient: ILitNodeClient;
   pkpPubKey: string;
-  rpc?: string;
   rpcs?: RPCUrls;
-  sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
-  litNetwork?: any;
   debug?: boolean;
-  bootstrapUrls?: string[];
-  minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
-  provider?: Provider;
   controllerSessionSigs?: SessionSigs;
 
   // -- soon to be deprecated
@@ -1238,15 +1237,25 @@ export interface RPCUrls {
   btc?: string;
 }
 
+export interface PKPWallet {
+  getAddress: () => Promise<string>;
+  init: () => Promise<void>;
+  runLitAction: (toSign: Uint8Array, sigName: string) => Promise<any>;
+  runSign: (toSign: Uint8Array) => Promise<SigResponse>;
+}
+
 export type PKPEthersWalletProp = Omit<
   PKPBaseProp,
   'controllerAuthSig' | 'controllerAuthMethods'
 > & {
   litNodeClient: ILitNodeClient;
+  provider?: Provider;
+  rpc?: string;
 };
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
+  rpc?: string;
 }
 
 // note: Omit removes the 'addressPrefix' from PKPCosmosWalletProp
@@ -1484,10 +1493,6 @@ export interface IRelayPKP {
 
 export interface BaseProviderOptions {
   /**
-   * Endpoint to interact with a blockchain network. Defaults to the Lit Chronicle.
-   */
-  rpcUrl: string;
-  /**
    * Relay server to use
    */
   relay: IRelay;
@@ -1592,7 +1597,7 @@ export interface BaseProviderSessionSigsParams {
   /**
    * Params for getSessionSigs function
    */
-  sessionSigsParams: GetSessionSigsProps;
+  sessionSigsParams: BaseProviderGetSessionSigsProps;
   /**
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
@@ -1674,26 +1679,6 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
   userId?: string;
 }
 
-/**
- * Configuration for retry operations
- */
-export interface RetryTolerance {
-  /**
-   * An amount of time to wait for canceling the operating (in milliseconds)
-   */
-  timeout?: number;
-
-  /**
-   * How long to wait between retries (in milliseconds)
-   */
-  interval?: number;
-
-  /**
-   * How many times to retry the operation
-   */
-  maxRetryCount?: number;
-}
-
 export interface BaseMintCapacityContext {
   daysUntilUTCMidnightExpiration: number;
 }
@@ -1711,7 +1696,8 @@ export interface MintCapacityCreditsPerKilosecond
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
     MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond {}
+    MintCapacityCreditsPerKilosecond,
+    GasLimitParam {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1759,7 +1745,7 @@ export interface CapacityDelegationFields extends BaseSiweMessage {
 export interface CapacityDelegationRequest {
   nft_id?: string[]; // Optional array of strings
   delegate_to?: string[]; // Optional array of modified address strings
-  uses: string; // Always present, default to '1' if undefined
+  uses?: string;
 }
 
 export interface CapacityCreditsReq {
@@ -1892,21 +1878,33 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
       })
   );
 
-export type SessionKeyCache = {
+export interface SessionKeyCache {
   value: SessionKeyPair;
   timestamp: number;
-};
+}
 
 export interface SignatureData {
   signature: string;
   derivedKeyId: string;
 }
 
-export type ClaimsList = {
-  [key: string]: SignatureData;
-}[];
+export type ClaimsList = Record<string, SignatureData>[];
 
-export interface MintWithAuthParams {
+export interface GasLimitParam {
+  gasLimit?: number;
+}
+
+export interface MintNextAndAddAuthMethods extends GasLimitParam {
+  keyType: string;
+  permittedAuthMethodTypes: string[];
+  permittedAuthMethodIds: string[];
+  permittedAuthMethodPubkeys: string[];
+  permittedAuthMethodScopes: string[][];
+  addPkpEthAddressAsPermittedAddress: boolean;
+  sendPkpToItself: boolean;
+}
+
+export interface MintWithAuthParams extends GasLimitParam {
   /**
    * auth method to use for minting
    */
@@ -1941,8 +1939,8 @@ export interface MintWithAuthResponse<T> {
 
 export interface BlockHashErrorResponse {
   messages: string[];
-  reason: String;
-  codde: Number;
+  reason: string;
+  codde: number;
 }
 
 export interface EthBlockhashInfo {

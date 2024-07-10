@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V6.0.0</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V6.1.x</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -80,6 +80,7 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 | [@lit-protocol/sev-snp-utils-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/sev-snp-utils-sdk)                 | ![sev-snp-utils-sdk](https://img.shields.io/badge/-universal-8A6496 'sev-snp-utils-sdk')                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/sev-snp-utils-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/sev-snp-utils-sdk"/></a>                 |
 | [@lit-protocol/types](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/types)                                         | ![types](https://img.shields.io/badge/-universal-8A6496 'types')                                         | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/types"><img src="https://img.shields.io/npm/v/@lit-protocol/types"/></a>                                         |
 | [@lit-protocol/uint8arrays](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/uint8arrays)                             | ![uint8arrays](https://img.shields.io/badge/-universal-8A6496 'uint8arrays')                             | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/uint8arrays"><img src="https://img.shields.io/npm/v/@lit-protocol/uint8arrays"/></a>                             |
+| [@lit-protocol/wrapped-keys](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/wrapped-keys)                           | ![wrapped-keys](https://img.shields.io/badge/-universal-8A6496 'wrapped-keys')                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/wrapped-keys"><img src="https://img.shields.io/npm/v/@lit-protocol/wrapped-keys"/></a>                           |
 | [@lit-protocol/auth-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-browser)                           | ![auth-browser](https://img.shields.io/badge/-browser-E98869 'auth-browser')                             | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-browser"><img src="https://img.shields.io/npm/v/@lit-protocol/auth-browser"/></a>                           |
 | [@lit-protocol/misc-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc-browser)                           | ![misc-browser](https://img.shields.io/badge/-browser-E98869 'misc-browser')                             | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc-browser"><img src="https://img.shields.io/npm/v/@lit-protocol/misc-browser"/></a>                           |
 
