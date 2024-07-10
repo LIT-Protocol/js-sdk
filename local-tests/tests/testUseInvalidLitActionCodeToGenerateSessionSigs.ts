@@ -28,5 +28,7 @@ export const testUseInvalidLitActionCodeToGenerateSessionSigs = async (
     } else {
       throw e;
     }
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

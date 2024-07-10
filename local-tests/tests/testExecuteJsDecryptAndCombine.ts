@@ -78,6 +78,8 @@ export const testExecutJsDecryptAndCombine = async (
     },
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   if (res.response !== 'Hello world') {
     throw new Error('content does not match what was expected');
   }

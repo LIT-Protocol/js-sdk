@@ -34,6 +34,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultip
     })();`,
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+
     // Expected output:
     // {
     //   claims: {

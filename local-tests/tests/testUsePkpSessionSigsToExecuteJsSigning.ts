@@ -32,6 +32,8 @@ export const testUsePkpSessionSigsToExecuteJsSigning = async (
     },
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // -- Expected output:
   // {
   //   claims: {},
