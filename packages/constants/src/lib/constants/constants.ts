@@ -679,13 +679,13 @@ export const LIT_RPC = {
   CHRONICLE: 'https://chain-rpc.litprotocol.com/http',
 
   /**
-   * Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
+   * Chronicle Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
    * @deprecated Will be removed in version 7.x. - Use CHRONICLE_VESUVIUS instead
    */
   VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
 
   /**
-   * Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
+   * Chronicle Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
    */
   CHRONICLE_VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
 } as const;
