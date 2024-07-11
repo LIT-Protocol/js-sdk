@@ -1,3 +1,5 @@
+import { joinSignature } from 'ethers/lib/utils';
+
 import { LIT_CURVE, LIT_ERROR } from '@lit-protocol/constants';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
 import {

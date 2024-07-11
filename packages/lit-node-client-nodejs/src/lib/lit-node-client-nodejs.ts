@@ -531,7 +531,8 @@ export class LitNodeClientNodeJs
         await blsSessionSigVerify(
           verifySignature,
           this.networkPubKey!,
-          authSig
+          authSig,
+          authSigSiweMessage
         );
       } catch (e) {
         log(`Error while verifying bls signature: `, e);

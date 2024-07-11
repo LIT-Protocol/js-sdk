@@ -24,9 +24,12 @@
     "genReact": false
   },
   "version": "6.1.0",
+<<<<<<<< HEAD:packages/wrapped-keys/package.json
   "scripts": {
     "bundle": "yarn node ./esbuild.config.js"
   },
+========
+>>>>>>>> fix/build-process-match-package-versions:packages/bls-sdk/package.json
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

@@ -1,5 +1,6 @@
 import { AuthSig } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import { SiweError, SiweErrorType, SiweMessage } from 'siwe';
 
 const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
 
