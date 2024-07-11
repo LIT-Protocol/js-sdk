@@ -475,7 +475,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'tstLPX',
+    symbol: 'tstLIT',
     decimals: 18,
     rpcUrls: [
       'https://lit-protocol.calderachain.xyz/replica-http',
@@ -520,7 +520,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'tstLPX',
+    symbol: 'tstLIT',
     decimals: 18,
     rpcUrls: [
       'https://lit-protocol.calderachain.xyz/replica-http',
