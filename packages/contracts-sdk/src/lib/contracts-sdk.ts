@@ -70,6 +70,7 @@ import {
 import {
   AuthMethodScope,
   AuthMethodType,
+  GENERAL_WORKER_URL_BY_NETWORK,
   LIT_CHAINS,
   LIT_RPC,
 } from '@lit-protocol/constants';
@@ -984,15 +985,6 @@ export class LitContracts {
     // context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
-    const CAYENNE_API =
-      'https://lit-general-worker.getlit.dev/contract-addresses';
-    const MANZANO_API =
-      'https://lit-general-worker.getlit.dev/manzano-contract-addresses';
-    const HABANERO_API =
-      'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
-    const DATIL_DEV_API =
-      'https://lit-general-worker.getlit.dev/datil-dev/contracts';
-    const DATIL_TEST_API = 'https://apis.getlit.dev/datil-test/contracts';
 
     const fetchData = async (url: string) => {
       try {
@@ -1004,24 +996,24 @@ export class LitContracts {
 
     switch (network) {
       case 'cayenne':
-        data = await fetchData(CAYENNE_API);
+        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Cayenne);
         break;
       case 'manzano':
-        data = await fetchData(MANZANO_API);
+        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Manzano);
         break;
       case 'habanero':
-        data = await fetchData(HABANERO_API);
+        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Habanero);
         break;
       case 'datil-dev':
-        data = await fetchData(DATIL_DEV_API);
+        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.DatilDev);
         break;
       case 'datil-test':
-        data = await fetchData(DATIL_TEST_API);
+        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.DatilTest);
         break;
       case 'custom':
       case 'localhost':
         // just use cayenne abis for custom and localhost
-        data = await fetchData(CAYENNE_API);
+        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Cayenne);
         break;
       default:
         throw new Error(

@@ -4,11 +4,7 @@ import {
   AuthMethodType,
   LIT_RPC,
   ProviderType,
-  RELAY_URL_CAYENNE,
-  RELAY_URL_DATIL_DEV,
-  RELAY_URL_DATIL_TEST,
-  RELAY_URL_HABANERO,
-  RELAY_URL_MANZANO,
+  RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
@@ -118,19 +114,19 @@ export class LitAuthClient {
 
       switch (this.litNodeClient.config.litNetwork) {
         case 'cayenne':
-          url = RELAY_URL_CAYENNE;
+          url = RELAYER_URL_BY_NETWORK.Cayenne;
           break;
         case 'habanero':
-          url = RELAY_URL_HABANERO;
+          url = RELAYER_URL_BY_NETWORK.Habanero;
           break;
         case 'manzano':
-          url = RELAY_URL_MANZANO;
+          url = RELAYER_URL_BY_NETWORK.Manzano;
           break;
         case 'datil-dev':
-          url = RELAY_URL_DATIL_DEV;
+          url = RELAYER_URL_BY_NETWORK.DatilDev;
           break;
         case 'datil-test':
-          url = RELAY_URL_DATIL_TEST;
+          url = RELAYER_URL_BY_NETWORK.DatilTest;
           break;
       }
 

@@ -625,26 +625,135 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
 export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 
 /**
- * Enum representing the available LIT RPC endpoints.
+ * Constants representing the available LIT RPC endpoints.
  */
-export enum LIT_RPC {
+export const LIT_RPC = {
   /**
    * Local Anvil RPC endpoint.
    */
-  LOCAL_ANVIL = 'http://127.0.0.1:8545',
+  LOCAL_ANVIL: 'http://127.0.0.1:8545',
 
   /**
    * Chronicle RPC endpoint - Used for Cayenne, Manzano, Habanero
    */
-  CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
+  CHRONICLE: 'https://chain-rpc.litprotocol.com/http',
+
+  /**
+   * Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
+   * @deprecated Will be removed in version 7.x. - Use CHRONICLE_VESUVIUS instead
+   */
+  VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
 
   /**
    * Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
    */
-  VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
-}
+  CHRONICLE_VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
+} as const;
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
+
+/**
+ * Represents the Lit Network constants.
+ */
+export const LIT_NETWORK: { [key in keyof typeof LitNetwork]: string } = {
+  Cayenne: 'cayenne',
+  Manzano: 'manzano',
+  Habanero: 'habanero',
+  Custom: 'custom',
+  DatilDev: 'datil-dev',
+  DatilTest: 'datil-test',
+};
+
+/**
+ * The type representing the keys of the LIT_NETWORK object.
+ *
+ * Possible values are:
+ * - 'Cayenne'
+ * - 'Manzano'
+ * - 'Habanero'
+ * - 'Custom'
+ * - 'DatilDev'
+ * - 'DatilTest'
+ * etc.
+ */
+export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
+
+/**
+ * The type representing the values of the LIT_NETWORK object.
+ *
+ * Possible values are:
+ * - 'cayenne'
+ * - 'manzano'
+ * - 'habanero'
+ * - 'custom'
+ * - 'datil-dev'
+ * - 'datil-test'
+ * etc.
+ */
+export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[LIT_NETWORK_TYPES];
+
+/**
+ * RPC URL by Network
+ *
+ * A mapping of network names to their corresponding RPC URLs.
+ */
+export const RPC_URL_BY_NETWORK: Record<LIT_NETWORK_TYPES, string> = {
+  Cayenne: LIT_RPC.CHRONICLE,
+  Manzano: LIT_RPC.CHRONICLE,
+  Habanero: LIT_RPC.CHRONICLE,
+  DatilDev: LIT_RPC.CHRONICLE_VESUVIUS,
+  DatilTest: LIT_RPC.CHRONICLE_VESUVIUS,
+  Custom: LIT_RPC.LOCAL_ANVIL,
+};
+
+/**
+ * Mapping of network names to their corresponding relayer URLs.
+ */
+export const RELAYER_URL_BY_NETWORK: Record<LIT_NETWORK_TYPES, string> = {
+  Cayenne: 'https://relayer-server-staging-cayenne.getlit.dev',
+  Manzano: 'https://manzano-relayer.getlit.dev',
+  Habanero: 'https://habanero-relayer.getlit.dev',
+  DatilDev: 'https://datil-dev-relayer.getlit.dev',
+  DatilTest: 'https://datil-test-relayer.getlit.dev',
+  Custom: 'http://localhost:3000',
+};
+
+/**
+ * URL mappings for general worker URLs by network.
+ */
+export const GENERAL_WORKER_URL_BY_NETWORK: Record<
+  keyof typeof LIT_NETWORK,
+  string
+> = {
+  Cayenne: 'https://apis.getlit.dev/cayenne/contracts',
+  Manzano: 'https://apis.getlit.dev/manzano/contracts',
+  Habanero: 'https://apis.getlit.dev/habanero/contracts',
+  DatilDev: 'https://apis.getlit.dev/datil-dev/contracts',
+  DatilTest: 'https://apis.getlit.dev/datil-test/contracts',
+
+  // just use cayenne abis for custom and localhost
+  Custom: 'https://apis.getlit.dev/cayenne/contracts',
+};
+
+/**
+ * URL constants for the staging worker by network.
+ *
+ * @remarks
+ * This constant maps each network to its corresponding staging worker URL.
+ */
+export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: Record<
+  keyof typeof LIT_NETWORK,
+  string
+> = {
+  Cayenne: 'https://staging.apis.getlit.dev/cayenne/contracts',
+  Manzano: 'https://staging.apis.getlit.dev/manzano/contracts',
+  Habanero: 'https://staging.apis.getlit.dev/habanero/contracts',
+  DatilDev: 'https://staging.apis.getlit.dev/datil-dev/contracts',
+  DatilTest: 'https://staging.apis.getlit.dev/datil-test/contracts',
+
+  // just use cayenne abis for custom and localhost
+  Custom: 'https://apis.getlit.dev/cayenne/contracts',
+};
 
 /**
  * Solana Chains supported by the LIT protocol.  Use the chain name as a key in this object.
@@ -839,11 +948,30 @@ export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
 
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Cayenne instead
+ */
 export const RELAY_URL_CAYENNE =
   'https://relayer-server-staging-cayenne.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Habanero instead
+ */
 export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Manzano instead
+ */
 export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilDev instead
+ */
 export const RELAY_URL_DATIL_DEV = 'https://datil-dev-relayer.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilTest instead
+ */
 export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 
 // ========== Lit Actions ==========
