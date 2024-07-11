@@ -49,7 +49,7 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 import {
   AuthMethodScope,
   AuthMethodType,
-  CHAIN_INFO_BY_NETWORK,
+  METAMASK_CHAIN_INFO_BY_NETWORK,
   GENERAL_WORKER_URL_BY_NETWORK,
   LIT_NETWORK_VALUES,
   RPC_URL_BY_NETWORK,
@@ -268,7 +268,7 @@ export class LitContracts {
         return '0x' + decimal.toString(16);
       }
 
-      let chainInfo = CHAIN_INFO_BY_NETWORK[this.network];
+      const chainInfo = METAMASK_CHAIN_INFO_BY_NETWORK[this.network];
 
       const metamaskChainInfo = {
         ...chainInfo,

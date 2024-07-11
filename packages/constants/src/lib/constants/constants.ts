@@ -784,7 +784,7 @@ export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
 /**
  * Mapping of network values to corresponding chain info.
  */
-export const CHAIN_INFO_BY_NETWORK: Record<
+export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   | typeof metamaskChainInfo.chronicle
   | typeof metamaskChainInfo.chronicleVesuvius
