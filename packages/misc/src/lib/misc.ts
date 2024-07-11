@@ -668,7 +668,7 @@ export const defaultMintClaimCallback: MintCallback<
     const AUTH_CLAIM_PATH = '/auth/claim';
 
     const relayUrl: string =
-      RELAYER_URL_BY_NETWORK[network as LIT_NETWORK_VALUES] + AUTH_CLAIM_PATH;
+      RELAYER_URL_BY_NETWORK[network as LIT_NETWORK_VALUES];
 
     if (!params.relayUrl && !relayUrl) {
       throw new Error(
@@ -676,8 +676,9 @@ export const defaultMintClaimCallback: MintCallback<
       );
     }
 
-    const url = params.relayUrl ? params.relayUrl : relayUrl;
-    const response = await fetch(url, {
+    const relayUrlWithPath = relayUrl + AUTH_CLAIM_PATH;
+
+    const response = await fetch(relayUrlWithPath, {
       method: 'POST',
       body: JSON.stringify(params),
       headers: {
