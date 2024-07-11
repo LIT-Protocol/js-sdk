@@ -112,6 +112,8 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
     console.log('✅ pkpSign res:', res);
   } catch (e) {
     throw new Error(e);
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 
   // -- execute js
@@ -133,7 +135,7 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
     console.log('✅ executeJs res:', res);
   } catch (e) {
     throw new Error(e);
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
-
-  process.exit();
 };

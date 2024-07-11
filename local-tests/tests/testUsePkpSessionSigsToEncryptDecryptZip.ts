@@ -76,6 +76,8 @@ export const testUsePkpSessionSigsToEncryptDecryptZip = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   const decryptedMessage = await decryptedZip['string.txt'].async('string');
 
   if (message !== decryptedMessage) {

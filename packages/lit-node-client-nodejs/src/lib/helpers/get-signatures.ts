@@ -1,3 +1,5 @@
+import { joinSignature } from 'ethers/lib/utils';
+
 import { LIT_CURVE, LIT_ERROR } from '@lit-protocol/constants';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
 import {
@@ -7,11 +9,10 @@ import {
   throwError,
 } from '@lit-protocol/misc';
 import { SigResponse, SigShare } from '@lit-protocol/types';
-import { joinSignature } from 'ethers/lib/utils';
 
 export const getFlattenShare = (share: any): SigShare => {
   // flatten the signature object so that the properties of the signature are top level
-  const flattenObj = Object.entries(share).map(([key, item]) => {
+  const flattenObj = Object.values(share).map((item) => {
     if (item === null || item === undefined) {
       return null;
     }
@@ -37,8 +38,8 @@ export const getFlattenShare = (share: any): SigShare => {
       'sigName',
     ] as const;
 
-    const hasProps = (props: any) => {
-      return [...props].every(
+    const hasProps = (props: readonly string[]) => {
+      return props.every(
         (prop) =>
           typedItem[prop as keyof SigShare] !== undefined &&
           typedItem[prop as keyof SigShare] !== null
@@ -91,17 +92,14 @@ export const getFlattenShare = (share: any): SigShare => {
  * executeJs: getSignatures<{ signature: SigResponse }>
  * pkpSign: getSignatures<{ sig: SigResponse }>
  */
-export const getSignatures = <T>({
-  networkPubKeySet,
-  minNodeCount,
-  signedData,
-  requestId = '',
-}: {
+export const getSignatures = <T>(params: {
   networkPubKeySet: any;
   minNodeCount: number;
   signedData: any[];
   requestId: string;
 }): T | { signature: SigResponse; sig: SigResponse } => {
+  const { networkPubKeySet, minNodeCount, signedData, requestId } = params;
+
   const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
   // processing signature shares for failed or invalid contents.  mutates the signedData object.
@@ -162,10 +160,10 @@ export const getSignatures = <T>({
     // but this allows for incomplete sets of signature shares to be aggregated
     // and then checked against threshold
     const shares = validatedSignedData
-      .map((r: any) => r[allKeys[i]])
-      .filter((r: any) => r !== undefined);
+      .map((r) => r[allKeys[i]])
+      .filter((r) => r !== undefined);
 
-    shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
+    shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
     const sigName = shares[0].sigName;
     logWithRequestId(
@@ -203,7 +201,7 @@ export const getSignatures = <T>({
       });
     }
 
-    const sigType = mostCommonString(shares.map((s: any) => s.sigType));
+    const sigType = mostCommonString(shares.map((s) => s.sigType));
 
     // -- validate if this.networkPubKeySet is null
     if (networkPubKeySet === null) {
@@ -246,8 +244,8 @@ export const getSignatures = <T>({
     signatures[allKeys[i]] = {
       ...signature,
       signature: encodedSig,
-      publicKey: mostCommonString(shares.map((s: any) => s.publicKey)),
-      dataSigned: mostCommonString(shares.map((s: any) => s.dataSigned)),
+      publicKey: mostCommonString(shares.map((s) => s.publicKey)),
+      dataSigned: mostCommonString(shares.map((s) => s.dataSigned)),
     };
   }
 
