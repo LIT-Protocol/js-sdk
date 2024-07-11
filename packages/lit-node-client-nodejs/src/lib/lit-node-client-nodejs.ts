@@ -1612,7 +1612,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'signatureShares', signatureShares);
 
     // ========== Result ==========
-    const decryptedData = this._decryptWithSignatureShares(
+    const decryptedData = await this._decryptWithSignatureShares(
       this.subnetPubKey,
       uint8arrayFromString(identityParam, 'utf8'),
       ciphertext,
