@@ -466,13 +466,21 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+
+  /**
+   * Chainlist entry for the Chronicle Testnet.
+   * https://chainlist.org/chain/175177
+   */
   chronicleTestnet: {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'testLPX',
+    symbol: 'tstLPX',
     decimals: 18,
-    rpcUrls: ['https://lit-protocol.calderachain.xyz/replica-http'],
+    rpcUrls: [
+      'https://lit-protocol.calderachain.xyz/replica-http',
+      'https://chain-rpc.litprotocol.com/http',
+    ],
     blockExplorerUrls: ['https://chain.litprotocol.com/'],
     type: null,
     vmType: 'EVM',
@@ -492,6 +500,11 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+
+  /**
+   * Chainlist entry for the Chronicle Vesuvius Testnet.
+   * https://chainlist.org/chain/2311
+   */
   chronicleVesuviusTestnet: {
     contractAddress: null,
     chainId: 2311,
@@ -507,9 +520,12 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'testLPX',
+    symbol: 'tstLit',
     decimals: 18,
-    rpcUrls: ['https://lit-protocol.calderachain.xyz/replica-http'],
+    rpcUrls: [
+      'https://lit-protocol.calderachain.xyz/replica-http',
+      'https://chain-rpc.litprotocol.com/http',
+    ],
     blockExplorerUrls: ['https://chain.litprotocol.com/'],
     type: null,
     vmType: 'EVM',
@@ -707,7 +723,6 @@ export const LIT_NETWORK = {
 
 /**
  * The type representing the keys of the LIT_NETWORK object.
- *
  */
 export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
 
@@ -763,9 +778,6 @@ export const GENERAL_WORKER_URL_BY_NETWORK: {
 
 /**
  * URL constants for the staging worker by network.
- *
- * @remarks
- * This constant maps each network to its corresponding staging worker URL.
  */
 export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
   [key in LIT_NETWORK_VALUES]: string;
@@ -782,7 +794,7 @@ export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
 };
 
 /**
- * Mapping of network values to corresponding chain info.
+ * Mapping of network values to corresponding Metamask chain info.
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
