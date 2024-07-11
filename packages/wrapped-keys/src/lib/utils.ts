@@ -9,6 +9,7 @@ import {
 } from '@lit-protocol/types';
 
 import { CHAIN_ETHEREUM } from './constants';
+import { LogLevel } from '@lit-protocol/constants';
 
 /**
  *
@@ -28,7 +29,7 @@ export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   }
 
   const [[, sessionSig]] = sessionSigsEntries;
-  log(`Session Sig being used: ${JSON.stringify(sessionSig)}`);
+  log(LogLevel.INFO, `Session Sig being used: ${JSON.stringify(sessionSig)}`);
 
   return sessionSig;
 }
@@ -63,7 +64,7 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   }
 
   const pkpAddress = delegationAuthSig.address;
-  log(`pkpAddress to permit decryption: ${pkpAddress}`);
+  log(LogLevel.INFO, `pkpAddress to permit decryption: ${pkpAddress}`);
 
   return pkpAddress;
 }

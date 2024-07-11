@@ -658,6 +658,7 @@ export class LitCore {
       }
     } else if (this.config.litNetwork === 'custom') {
       log(
+        LogLevel.INFO,
         `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
       );
     }
