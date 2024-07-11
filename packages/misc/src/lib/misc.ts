@@ -676,7 +676,8 @@ export const defaultMintClaimCallback: MintCallback<
       Custom: RELAYER_URL_BY_NETWORK.Cayenne + AUTH_CLAIM_PATH,
     };
 
-    const relayUrl : LIT_NETWORK_VALUES = AUTH_CLAIM_URL_BY_NETWORK[network as LIT_NETWORK_TYPES];
+    const relayUrl: LIT_NETWORK_VALUES =
+      AUTH_CLAIM_URL_BY_NETWORK[network as LIT_NETWORK_TYPES];
 
     if (!params.relayUrl && !relayUrl) {
       throw new Error(
