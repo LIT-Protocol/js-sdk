@@ -241,7 +241,7 @@ export class ShivaClient {
 
   /**
    * Used to start an instance of a lit network through the Lit Testnet Manager
-   * if an isntance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
+   * if an instance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
    * If an instance does not exist then we create one
    */
   async startTestnetManager(
