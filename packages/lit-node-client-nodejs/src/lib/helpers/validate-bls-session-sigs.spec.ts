@@ -1,3 +1,4 @@
+import { SiweMessage } from 'siwe';
 import { blsSessionSigVerify } from './validate-bls-session-sig';
 
 describe('BlsSessionSigVerify', () => {
@@ -38,8 +39,22 @@ describe('BlsSessionSigVerify', () => {
           expect(typeof signature).toBe('object');
         },
         networkPubKey,
-        authSig
-      )
+        authSig,
+        new SiweMessage({
+          domain: 'localhost',
+          statement: 'litprotocol.com wants you to sign in with your Ethereum account:\n' +
+      '0xf087a967D9eA9445D9182692C2944DcC0Af57341\n' +
+      '\n' +
+      "Lit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n",
+          address: authSig.address,
+          uri: 'lit:session:efebafcc9063827a49dffdb11c36b2d64a33330631ac7f5825e2960946bcc8ff',
+          version: '1',
+          nonce: '0x1f623ab8dfe6bbd3b3dc22c7a041deb697c14817bce471b1bd1d86a25d5a319c',
+          expirationTime:   new Date(
+            Date.now() + 1000 * 60 * 60 * 24 * 7
+          ).toISOString(),
+          notBefore: new Date(Date.now()).toISOString() 
+        }))
     ).toBeUndefined();
   });
 });

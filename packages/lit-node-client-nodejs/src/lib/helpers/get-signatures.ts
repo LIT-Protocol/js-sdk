@@ -92,12 +92,12 @@ export const getFlattenShare = (share: any): SigShare => {
  * executeJs: getSignatures<{ signature: SigResponse }>
  * pkpSign: getSignatures<{ sig: SigResponse }>
  */
-export const getSignatures = <T>(params: {
+export const getSignatures = async <T>(params: {
   networkPubKeySet: any;
   minNodeCount: number;
   signedData: any[];
   requestId: string;
-}): T | { signature: SigResponse; sig: SigResponse } => {
+}): Promise<T | { signature: SigResponse; sig: SigResponse }> => {
   const { networkPubKeySet, minNodeCount, signedData, requestId } = params;
 
   const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];

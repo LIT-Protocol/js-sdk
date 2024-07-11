@@ -28,7 +28,7 @@ export const blsSessionSigVerify = async (
   networkPubKey: string,
   authSig: AuthSig,
   authSigSiweMessage: SiweMessage
-): void => {
+): Promise<void> => {
   let sigJson = JSON.parse(authSig.sig);
   // we do not nessesarly need to use ethers here but was a quick way
   // to get verification working.

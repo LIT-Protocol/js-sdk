@@ -809,7 +809,7 @@ export class LitNodeClientNodeJs
    * @returns { any }
    *
    */
-  getSessionSignatures = (signedData: any[]): any => {
+  getSessionSignatures = async (signedData: any[]): Promise<any> => {
     // -- prepare
     const signatures: any = {};
 
@@ -830,7 +830,7 @@ export class LitNodeClientNodeJs
     };
 
     // -- execute
-    keys.forEach((key) => {
+    keys.forEach(async (key) => {
       log('key:', key);
 
       const shares = signedData.map((r) => r[key]);
@@ -901,7 +901,7 @@ export class LitNodeClientNodeJs
         return;
       }
 
-      const signature = combineEcdsaShares(sigShares);
+      const signature = await combineEcdsaShares(sigShares);
       if (!signature.r) {
         throwError({
           message: 'siganture could not be combined',
