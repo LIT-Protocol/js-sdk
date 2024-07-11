@@ -110,7 +110,7 @@ export class LitAuthClient {
         );
       }
 
-      let url = RELAYER_URL_BY_NETWORK[this.litNodeClient.config.litNetwork];
+      const url = RELAYER_URL_BY_NETWORK[this.litNodeClient.config.litNetwork];
 
       this.relay = new LitRelay({
         relayUrl: url,
