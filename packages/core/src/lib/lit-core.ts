@@ -116,6 +116,7 @@ const NETWORKS_REQUIRING_SEV: string[] = [
 // The only network we consider entirely static, and thus ignore EPOCH changes for, is Cayenne
 const NETWORKS_WITH_EPOCH_CHANGES: string[] = [
   LitNetwork.DatilDev,
+  LitNetwork.DatilTest,
   LitNetwork.Habanero,
   LitNetwork.Manzano,
   LitNetwork.Custom,
