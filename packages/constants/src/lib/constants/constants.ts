@@ -466,21 +466,33 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+
+  /**
+   * Chainlist entry for the Chronicle Testnet.
+   * https://chainlist.org/chain/175177
+   */
   chronicleTestnet: {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'testLPX',
+    symbol: 'tstLPX',
     decimals: 18,
-    rpcUrls: ['https://lit-protocol.calderachain.xyz/replica-http'],
+    rpcUrls: [
+      'https://lit-protocol.calderachain.xyz/replica-http',
+      'https://chain-rpc.litprotocol.com/http',
+    ],
     blockExplorerUrls: ['https://chain.litprotocol.com/'],
     type: null,
     vmType: 'EVM',
   },
+
+  /**
+   * @deprecated Will be removed in version 7.x. - Use `chronicleVesuviusTestnet` instead.
+   */
   datilDevnet: {
     contractAddress: null,
     chainId: 2311,
-    name: 'Vesuvius - Lit Protocol Devnet',
+    name: 'Chronicle Vesuvius - Lit Protocol Testnet',
     symbol: 'tstLit',
     decimals: 18,
     rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
@@ -488,10 +500,15 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  datilTestnet: {
+
+  /**
+   * Chainlist entry for the Chronicle Vesuvius Testnet.
+   * https://chainlist.org/chain/2311
+   */
+  chronicleVesuviusTestnet: {
     contractAddress: null,
     chainId: 2311,
-    name: 'Vesuvius - Lit Protocol Testnet',
+    name: 'Chronicle Vesuvius - Lit Protocol Testnet',
     symbol: 'tstLit',
     decimals: 18,
     rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
@@ -503,9 +520,12 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'testLPX',
+    symbol: 'tstLit',
     decimals: 18,
-    rpcUrls: ['https://lit-protocol.calderachain.xyz/replica-http'],
+    rpcUrls: [
+      'https://lit-protocol.calderachain.xyz/replica-http',
+      'https://chain-rpc.litprotocol.com/http',
+    ],
     blockExplorerUrls: ['https://chain.litprotocol.com/'],
     type: null,
     vmType: 'EVM',
@@ -625,26 +645,170 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
 export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 
 /**
- * Enum representing the available LIT RPC endpoints.
+ * Object containing information to submit to Metamask
  */
-export enum LIT_RPC {
+export const metamaskChainInfo = {
+  /**
+   * Information about the "chronicle" chain.
+   */
+  chronicle: {
+    chainId: LIT_CHAINS['chronicleTestnet'].chainId,
+    chainName: LIT_CHAINS['chronicleTestnet'].name,
+    nativeCurrency: {
+      name: LIT_CHAINS['chronicleTestnet'].symbol,
+      symbol: LIT_CHAINS['chronicleTestnet'].symbol,
+      decimals: LIT_CHAINS['chronicleTestnet'].decimals,
+    },
+    rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
+    blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
+    iconUrls: ['future'],
+  },
+  /**
+   * Information about the "chronicleVesuvius" chain.
+   */
+  chronicleVesuvius: {
+    chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
+    chainName: LIT_CHAINS['chronicleVesuviusTestnet'].name,
+    nativeCurrency: {
+      name: LIT_CHAINS['chronicleVesuviusTestnet'].symbol,
+      symbol: LIT_CHAINS['chronicleVesuviusTestnet'].symbol,
+      decimals: LIT_CHAINS['chronicleVesuviusTestnet'].decimals,
+    },
+    rpcUrls: LIT_CHAINS['chronicleVesuviusTestnet'].rpcUrls,
+    blockExplorerUrls: LIT_CHAINS['chronicleVesuviusTestnet'].blockExplorerUrls,
+    iconUrls: ['future'],
+  },
+};
+
+/**
+ * Constants representing the available LIT RPC endpoints.
+ */
+export const LIT_RPC = {
   /**
    * Local Anvil RPC endpoint.
    */
-  LOCAL_ANVIL = 'http://127.0.0.1:8545',
+  LOCAL_ANVIL: 'http://127.0.0.1:8545',
 
   /**
    * Chronicle RPC endpoint - Used for Cayenne, Manzano, Habanero
    */
-  CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
+  CHRONICLE: 'https://chain-rpc.litprotocol.com/http',
 
   /**
-   * Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
+   * Chronicle Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
+   * @deprecated Will be removed in version 7.x. - Use CHRONICLE_VESUVIUS instead
    */
-  VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
-}
+  VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
+
+  /**
+   * Chronicle Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
+   */
+  CHRONICLE_VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
+} as const;
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
+
+/**
+ * Represents the Lit Network constants.
+ */
+export const LIT_NETWORK = {
+  Cayenne: 'cayenne',
+  Manzano: 'manzano',
+  Habanero: 'habanero',
+  DatilDev: 'datil-dev',
+  DatilTest: 'datil-test',
+  Custom: 'custom',
+  Localhost: 'localhost',
+} as const;
+
+/**
+ * The type representing the keys of the LIT_NETWORK object.
+ */
+export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
+
+/**
+ * The type representing the values of the LIT_NETWORK object.
+ */
+export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
+
+/**
+ * RPC URL by Network
+ *
+ * A mapping of network names to their corresponding RPC URLs.
+ */
+export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
+  cayenne: LIT_RPC.CHRONICLE,
+  manzano: LIT_RPC.CHRONICLE,
+  habanero: LIT_RPC.CHRONICLE,
+  'datil-dev': LIT_RPC.CHRONICLE_VESUVIUS,
+  'datil-test': LIT_RPC.CHRONICLE_VESUVIUS,
+  custom: LIT_RPC.LOCAL_ANVIL,
+  localhost: LIT_RPC.LOCAL_ANVIL,
+};
+
+/**
+ * Mapping of network names to their corresponding relayer URLs.
+ */
+export const RELAYER_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
+  cayenne: 'https://relayer-server-staging-cayenne.getlit.dev',
+  manzano: 'https://manzano-relayer.getlit.dev',
+  habanero: 'https://habanero-relayer.getlit.dev',
+  'datil-dev': 'https://datil-dev-relayer.getlit.dev',
+  'datil-test': 'https://datil-test-relayer.getlit.dev',
+  custom: 'http://localhost:3000',
+  localhost: 'http://localhost:3000',
+};
+
+/**
+ * URL mappings for general worker URLs by network.
+ */
+export const GENERAL_WORKER_URL_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: string;
+} = {
+  cayenne: 'https://apis.getlit.dev/cayenne/contracts',
+  manzano: 'https://apis.getlit.dev/manzano/contracts',
+  habanero: 'https://apis.getlit.dev/habanero/contracts',
+  'datil-dev': 'https://apis.getlit.dev/datil-dev/contracts',
+  'datil-test': 'https://apis.getlit.dev/datil-test/contracts',
+
+  // just use cayenne abis for custom and localhost
+  custom: 'https://apis.getlit.dev/cayenne/contracts',
+  localhost: 'https://apis.getlit.dev/cayenne/contracts',
+};
+
+/**
+ * URL constants for the staging worker by network.
+ */
+export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: string;
+} = {
+  cayenne: 'https://staging.apis.getlit.dev/cayenne/contracts',
+  manzano: 'https://staging.apis.getlit.dev/manzano/contracts',
+  habanero: 'https://staging.apis.getlit.dev/habanero/contracts',
+  'datil-dev': 'https://staging.apis.getlit.dev/datil-dev/contracts',
+  'datil-test': 'https://staging.apis.getlit.dev/datil-test/contracts',
+
+  // just use cayenne abis for custom and localhost
+  custom: 'https://apis.getlit.dev/cayenne/contracts',
+  localhost: 'https://apis.getlit.dev/cayenne/contracts',
+};
+
+/**
+ * Mapping of network values to corresponding Metamask chain info.
+ */
+export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
+  LIT_NETWORK_VALUES,
+  | typeof metamaskChainInfo.chronicle
+  | typeof metamaskChainInfo.chronicleVesuvius
+> = {
+  cayenne: metamaskChainInfo.chronicle,
+  manzano: metamaskChainInfo.chronicle,
+  habanero: metamaskChainInfo.chronicle,
+  'datil-dev': metamaskChainInfo.chronicleVesuvius,
+  'datil-test': metamaskChainInfo.chronicleVesuvius,
+  custom: metamaskChainInfo.chronicleVesuvius,
+  localhost: metamaskChainInfo.chronicleVesuvius,
+};
 
 /**
  * Solana Chains supported by the LIT protocol.  Use the chain name as a key in this object.
@@ -839,11 +1003,30 @@ export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
 
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Cayenne instead
+ */
 export const RELAY_URL_CAYENNE =
   'https://relayer-server-staging-cayenne.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Habanero instead
+ */
 export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Manzano instead
+ */
 export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilDev instead
+ */
 export const RELAY_URL_DATIL_DEV = 'https://datil-dev-relayer.getlit.dev';
+
+/**
+ * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilTest instead
+ */
 export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 
 // ========== Lit Actions ==========

@@ -3,14 +3,12 @@ import {
   ILitError,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
-  LIT_ENDPOINT,
   LIT_ERROR,
+  LIT_NETWORK,
+  LIT_NETWORK_TYPES,
+  LIT_NETWORK_VALUES,
   LitNetwork,
-  RELAY_URL_CAYENNE,
-  RELAY_URL_DATIL_DEV,
-  RELAY_URL_DATIL_TEST,
-  RELAY_URL_HABANERO,
-  RELAY_URL_MANZANO,
+  RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 
 import {
@@ -667,29 +665,20 @@ export const defaultMintClaimCallback: MintCallback<
   network: string = 'cayenne'
 ): Promise<string> => {
   try {
-    let relayUrl: string = '';
+    const AUTH_CLAIM_PATH = '/auth/claim';
 
-    switch (network) {
-      case LitNetwork.Cayenne:
-        relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
-        break;
-      case LitNetwork.Habanero:
-        relayUrl = RELAY_URL_HABANERO + 'auth/claim';
-        break;
-      case LitNetwork.Manzano:
-        relayUrl = RELAY_URL_MANZANO + 'auth/claim';
-        break;
-      case LitNetwork.DatilDev:
-        relayUrl = RELAY_URL_DATIL_DEV + '/auth/claim';
-        break;
-        break;
-      case LitNetwork.DatilTest:
-        relayUrl = RELAY_URL_DATIL_TEST + '/auth/claim';
-        break;
+    const relayUrl: string =
+      RELAYER_URL_BY_NETWORK[network as LIT_NETWORK_VALUES];
+
+    if (!params.relayUrl && !relayUrl) {
+      throw new Error(
+        'No relayUrl provided and no default relayUrl found for network'
+      );
     }
 
-    const url = params.relayUrl ? params.relayUrl : relayUrl;
-    const response = await fetch(url, {
+    const relayUrlWithPath = relayUrl + AUTH_CLAIM_PATH;
+
+    const response = await fetch(relayUrlWithPath, {
       method: 'POST',
       body: JSON.stringify(params),
       headers: {

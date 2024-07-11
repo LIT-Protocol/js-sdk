@@ -1,13 +1,4 @@
 /* eslint-disable import/order */
-import {
-  BigNumber,
-  BigNumberish,
-  BytesLike,
-  ContractReceipt,
-  ethers,
-} from 'ethers';
-import { hexToDec, decToHex, intToIP } from './hex2dec';
-import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
   CreateCustomAuthMethodRequest,
@@ -21,6 +12,9 @@ import {
   MintWithAuthParams,
   MintWithAuthResponse,
 } from '@lit-protocol/types';
+import bs58 from 'bs58';
+import { BytesLike, ContractReceipt, ethers } from 'ethers';
+import { decToHex, hexToDec, intToIP } from './hex2dec';
 
 // ----- autogen:import-data:start  -----
 // Generated at 2023-11-07T01:50:52.460Z
@@ -52,28 +46,26 @@ import * as stakingContract from '../abis/Staking.sol/Staking';
 import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBalances';
 // ----- autogen:imports:end  -----
 
-import { TokenInfo, derivedAddresses } from './addresses';
-import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
-import { computeAddress } from 'ethers/lib/utils';
-import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
-import { Logger, LogManager } from '@lit-protocol/logger';
 import {
-  calculateUTCMidnightExpiration,
-  convertRequestsPerDayToPerSecond,
-  requestsToKilosecond,
-} from './utils';
+  AuthMethodScope,
+  AuthMethodType,
+  METAMASK_CHAIN_INFO_BY_NETWORK,
+  GENERAL_WORKER_URL_BY_NETWORK,
+  LIT_NETWORK_VALUES,
+  RPC_URL_BY_NETWORK,
+} from '@lit-protocol/constants';
+import { LogManager, Logger } from '@lit-protocol/logger';
+import { computeAddress } from 'ethers/lib/utils';
+import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
+import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
+import { TokenInfo, derivedAddresses } from './addresses';
+import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import {
-  AuthMethodScope,
-  AuthMethodType,
-  LIT_CHAINS,
-  LIT_RPC,
-} from '@lit-protocol/constants';
-import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
+import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -214,10 +206,7 @@ export class LitContracts {
     this.network = args?.network || 'cayenne';
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
-      this.rpc =
-        args?.network === 'datil-dev' || args?.network === 'datil-test'
-          ? LIT_RPC.VESUVIUS
-          : LIT_RPC.CHRONICLE;
+      this.rpc = RPC_URL_BY_NETWORK[this.network];
     }
 
     if (!this.rpcs) {
@@ -279,45 +268,21 @@ export class LitContracts {
         return '0x' + decimal.toString(16);
       }
 
-      const chronicleChainInfo = {
-        chainId: _decimalToHex(LIT_CHAINS['chronicleTestnet'].chainId),
-        chainName: LIT_CHAINS['chronicleTestnet'].name,
-        nativeCurrency: {
-          name: LIT_CHAINS['chronicleTestnet'].symbol,
-          symbol: LIT_CHAINS['chronicleTestnet'].symbol,
-          decimals: LIT_CHAINS['chronicleTestnet'].decimals,
-        },
-        rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
-        blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
-        iconUrls: ['future'],
-      };
+      const chainInfo = METAMASK_CHAIN_INFO_BY_NETWORK[this.network];
 
-      const vesuviusChainInfo = {
-        chainId: _decimalToHex(LIT_CHAINS['datilDevnet'].chainId),
-        chainName: LIT_CHAINS['datilDevnet'].name,
-        nativeCurrency: {
-          name: LIT_CHAINS['datilDevnet'].symbol,
-          symbol: LIT_CHAINS['datilDevnet'].symbol,
-          decimals: LIT_CHAINS['datilDevnet'].decimals,
-        },
-        rpcUrls: LIT_CHAINS['datilDevnet'].rpcUrls,
-        blockExplorerUrls: LIT_CHAINS['datilDevnet'].blockExplorerUrls,
-        iconUrls: ['future'],
+      const metamaskChainInfo = {
+        ...chainInfo,
+        chainId: _decimalToHex(chainInfo.chainId),
       };
-
-      const chainInfo =
-        this.network === 'datil-dev' || this.network === 'datil-test'
-          ? vesuviusChainInfo
-          : chronicleChainInfo;
 
       try {
         await web3Provider.send('wallet_switchEthereumChain', [
-          { chainId: chainInfo.chainId },
+          { chainId: metamaskChainInfo.chainId },
         ]);
       } catch (e) {
         await web3Provider.request({
           method: 'wallet_addEthereumChain',
-          params: [chainInfo],
+          params: [metamaskChainInfo],
         });
       }
 
@@ -615,10 +580,7 @@ export class LitContracts {
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl =
-      rpcUrl ?? (network === 'datil-dev' || network === 'datil-test')
-        ? LIT_RPC.VESUVIUS
-        : LIT_RPC.CHRONICLE;
+    rpcUrl = RPC_URL_BY_NETWORK[network];
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -980,20 +942,9 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: LIT_NETWORKS_KEYS
+    network: LIT_NETWORK_VALUES
     // context?: LitContractContext | LitContractResolverContext
   ) {
-    let data;
-    const CAYENNE_API =
-      'https://lit-general-worker.getlit.dev/contract-addresses';
-    const MANZANO_API =
-      'https://lit-general-worker.getlit.dev/manzano-contract-addresses';
-    const HABANERO_API =
-      'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
-    const DATIL_DEV_API =
-      'https://lit-general-worker.getlit.dev/datil-dev/contracts';
-    const DATIL_TEST_API = 'https://apis.getlit.dev/datil-test/contracts';
-
     const fetchData = async (url: string) => {
       try {
         return await fetch(url).then((res) => res.json());
@@ -1002,32 +953,14 @@ export class LitContracts {
       }
     };
 
-    switch (network) {
-      case 'cayenne':
-        data = await fetchData(CAYENNE_API);
-        break;
-      case 'manzano':
-        data = await fetchData(MANZANO_API);
-        break;
-      case 'habanero':
-        data = await fetchData(HABANERO_API);
-        break;
-      case 'datil-dev':
-        data = await fetchData(DATIL_DEV_API);
-        break;
-      case 'datil-test':
-        data = await fetchData(DATIL_TEST_API);
-        break;
-      case 'custom':
-      case 'localhost':
-        // just use cayenne abis for custom and localhost
-        data = await fetchData(CAYENNE_API);
-        break;
-      default:
-        throw new Error(
-          `[_resolveContractContext] Unsupported network: ${network}`
-        );
+    // -- check if it's supported network
+    if (!GENERAL_WORKER_URL_BY_NETWORK[network]) {
+      throw new Error(
+        `[_resolveContractContext] Unsupported network: ${network}`
+      );
     }
+
+    const data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK[network]);
 
     if (!data) {
       throw new Error('[_resolveContractContext] No data found');
