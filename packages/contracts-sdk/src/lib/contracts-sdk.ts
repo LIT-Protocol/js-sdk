@@ -13,11 +13,7 @@ import {
   MintWithAuthResponse,
 } from '@lit-protocol/types';
 import bs58 from 'bs58';
-import {
-  BytesLike,
-  ContractReceipt,
-  ethers
-} from 'ethers';
+import { BytesLike, ContractReceipt, ethers } from 'ethers';
 import { decToHex, hexToDec, intToIP } from './hex2dec';
 
 // ----- autogen:import-data:start  -----
@@ -55,7 +51,8 @@ import {
   AuthMethodType,
   CHAIN_INFO_BY_NETWORK,
   GENERAL_WORKER_URL_BY_NETWORK,
-  RPC_URL_BY_NETWORK
+  LIT_NETWORK_VALUES,
+  RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
@@ -68,10 +65,7 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import {
-  calculateUTCMidnightExpiration,
-  requestsToKilosecond
-} from './utils';
+import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -948,11 +942,9 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: LIT_NETWORKS_KEYS
+    network: LIT_NETWORK_VALUES
     // context?: LitContractContext | LitContractResolverContext
   ) {
-    let data;
-
     const fetchData = async (url: string) => {
       try {
         return await fetch(url).then((res) => res.json());
@@ -961,32 +953,14 @@ export class LitContracts {
       }
     };
 
-    switch (network) {
-      case 'cayenne':
-        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Cayenne);
-        break;
-      case 'manzano':
-        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Manzano);
-        break;
-      case 'habanero':
-        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Habanero);
-        break;
-      case 'datil-dev':
-        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.DatilDev);
-        break;
-      case 'datil-test':
-        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.DatilTest);
-        break;
-      case 'custom':
-      case 'localhost':
-        // just use cayenne abis for custom and localhost
-        data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK.Cayenne);
-        break;
-      default:
-        throw new Error(
-          `[_resolveContractContext] Unsupported network: ${network}`
-        );
+    // -- check if it's supported network
+    if (!GENERAL_WORKER_URL_BY_NETWORK[network]) {
+      throw new Error(
+        `[_resolveContractContext] Unsupported network: ${network}`
+      );
     }
+
+    const data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK[network]);
 
     if (!data) {
       throw new Error('[_resolveContractContext] No data found');

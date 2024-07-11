@@ -708,28 +708,11 @@ export const LIT_NETWORK = {
 /**
  * The type representing the keys of the LIT_NETWORK object.
  *
- * Possible values are:
- * - 'Cayenne'
- * - 'Manzano'
- * - 'Habanero'
- * - 'Custom'
- * - 'DatilDev'
- * - 'DatilTest'
- * etc.
  */
 export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
 
 /**
  * The type representing the values of the LIT_NETWORK object.
- *
- * Possible values are:
- * - 'cayenne'
- * - 'manzano'
- * - 'habanero'
- * - 'custom'
- * - 'datil-dev'
- * - 'datil-test'
- * etc.
  */
 export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
 
@@ -751,32 +734,31 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
 /**
  * Mapping of network names to their corresponding relayer URLs.
  */
-export const RELAYER_URL_BY_NETWORK: Record<LIT_NETWORK_TYPES, string> = {
-  Cayenne: 'https://relayer-server-staging-cayenne.getlit.dev',
-  Manzano: 'https://manzano-relayer.getlit.dev',
-  Habanero: 'https://habanero-relayer.getlit.dev',
-  DatilDev: 'https://datil-dev-relayer.getlit.dev',
-  DatilTest: 'https://datil-test-relayer.getlit.dev',
-  Custom: 'http://localhost:3000',
-  Localhost: 'http://localhost:3000',
+export const RELAYER_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
+  cayenne: 'https://relayer-server-staging-cayenne.getlit.dev',
+  manzano: 'https://manzano-relayer.getlit.dev',
+  habanero: 'https://habanero-relayer.getlit.dev',
+  'datil-dev': 'https://datil-dev-relayer.getlit.dev',
+  'datil-test': 'https://datil-test-relayer.getlit.dev',
+  custom: 'http://localhost:3000',
+  localhost: 'http://localhost:3000',
 };
 
 /**
  * URL mappings for general worker URLs by network.
  */
-export const GENERAL_WORKER_URL_BY_NETWORK: Record<
-  keyof typeof LIT_NETWORK,
-  string
-> = {
-  Cayenne: 'https://apis.getlit.dev/cayenne/contracts',
-  Manzano: 'https://apis.getlit.dev/manzano/contracts',
-  Habanero: 'https://apis.getlit.dev/habanero/contracts',
-  DatilDev: 'https://apis.getlit.dev/datil-dev/contracts',
-  DatilTest: 'https://apis.getlit.dev/datil-test/contracts',
+export const GENERAL_WORKER_URL_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: string;
+} = {
+  cayenne: 'https://apis.getlit.dev/cayenne/contracts',
+  manzano: 'https://apis.getlit.dev/manzano/contracts',
+  habanero: 'https://apis.getlit.dev/habanero/contracts',
+  'datil-dev': 'https://apis.getlit.dev/datil-dev/contracts',
+  'datil-test': 'https://apis.getlit.dev/datil-test/contracts',
 
   // just use cayenne abis for custom and localhost
-  Custom: 'https://apis.getlit.dev/cayenne/contracts',
-  Localhost: 'https://apis.getlit.dev/cayenne/contracts',
+  custom: 'https://apis.getlit.dev/cayenne/contracts',
+  localhost: 'https://apis.getlit.dev/cayenne/contracts',
 };
 
 /**
@@ -785,19 +767,18 @@ export const GENERAL_WORKER_URL_BY_NETWORK: Record<
  * @remarks
  * This constant maps each network to its corresponding staging worker URL.
  */
-export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: Record<
-  keyof typeof LIT_NETWORK,
-  string
-> = {
-  Cayenne: 'https://staging.apis.getlit.dev/cayenne/contracts',
-  Manzano: 'https://staging.apis.getlit.dev/manzano/contracts',
-  Habanero: 'https://staging.apis.getlit.dev/habanero/contracts',
-  DatilDev: 'https://staging.apis.getlit.dev/datil-dev/contracts',
-  DatilTest: 'https://staging.apis.getlit.dev/datil-test/contracts',
+export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: string;
+} = {
+  cayenne: 'https://staging.apis.getlit.dev/cayenne/contracts',
+  manzano: 'https://staging.apis.getlit.dev/manzano/contracts',
+  habanero: 'https://staging.apis.getlit.dev/habanero/contracts',
+  'datil-dev': 'https://staging.apis.getlit.dev/datil-dev/contracts',
+  'datil-test': 'https://staging.apis.getlit.dev/datil-test/contracts',
 
   // just use cayenne abis for custom and localhost
-  Custom: 'https://apis.getlit.dev/cayenne/contracts',
-  Localhost: 'https://apis.getlit.dev/cayenne/contracts',
+  custom: 'https://apis.getlit.dev/cayenne/contracts',
+  localhost: 'https://apis.getlit.dev/cayenne/contracts',
 };
 
 /**

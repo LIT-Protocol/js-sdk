@@ -110,25 +110,7 @@ export class LitAuthClient {
         );
       }
 
-      let url;
-
-      switch (this.litNodeClient.config.litNetwork) {
-        case 'cayenne':
-          url = RELAYER_URL_BY_NETWORK.Cayenne;
-          break;
-        case 'habanero':
-          url = RELAYER_URL_BY_NETWORK.Habanero;
-          break;
-        case 'manzano':
-          url = RELAYER_URL_BY_NETWORK.Manzano;
-          break;
-        case 'datil-dev':
-          url = RELAYER_URL_BY_NETWORK.DatilDev;
-          break;
-        case 'datil-test':
-          url = RELAYER_URL_BY_NETWORK.DatilTest;
-          break;
-      }
+      let url = RELAYER_URL_BY_NETWORK[this.litNodeClient.config.litNetwork];
 
       this.relay = new LitRelay({
         relayUrl: url,

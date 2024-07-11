@@ -662,22 +662,13 @@ export const defaultMintClaimCallback: MintCallback<
   RelayClaimProcessor
 > = async (
   params: ClaimResult<RelayClaimProcessor>,
-  network: LIT_NETWORK_VALUES = 'cayenne'
+  network: string = 'cayenne'
 ): Promise<string> => {
   try {
     const AUTH_CLAIM_PATH = '/auth/claim';
 
-    const AUTH_CLAIM_URL_BY_NETWORK: Record<LIT_NETWORK_TYPES, string> = {
-      Cayenne: RELAYER_URL_BY_NETWORK.Cayenne + AUTH_CLAIM_PATH,
-      Manzano: RELAYER_URL_BY_NETWORK.Manzano + AUTH_CLAIM_PATH,
-      Habanero: RELAYER_URL_BY_NETWORK.Habanero + AUTH_CLAIM_PATH,
-      DatilDev: RELAYER_URL_BY_NETWORK.DatilDev + AUTH_CLAIM_PATH,
-      DatilTest: RELAYER_URL_BY_NETWORK.DatilTest + AUTH_CLAIM_PATH,
-      Custom: RELAYER_URL_BY_NETWORK.Cayenne + AUTH_CLAIM_PATH,
-    };
-
-    const relayUrl: LIT_NETWORK_VALUES =
-      AUTH_CLAIM_URL_BY_NETWORK[network as LIT_NETWORK_TYPES];
+    const relayUrl: string =
+      RELAYER_URL_BY_NETWORK[network as LIT_NETWORK_VALUES] + AUTH_CLAIM_PATH;
 
     if (!params.relayUrl && !relayUrl) {
       throw new Error(
