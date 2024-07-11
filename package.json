@@ -124,7 +124,7 @@
     "jest": "27.5.1",
     "lerna": "^5.4.3",
     "live-server": "^1.2.2",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.7.0",
     "node-localstorage": "^3.0.5",
     "nx": "17.3.0",
     "path": "^0.12.7",
