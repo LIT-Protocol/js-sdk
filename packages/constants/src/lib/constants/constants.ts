@@ -719,7 +719,7 @@ export const LIT_NETWORK = {
   DatilTest: 'datil-test',
   Custom: 'custom',
   Localhost: 'localhost',
-} as const;
+};
 
 /**
  * The type representing the keys of the LIT_NETWORK object.
@@ -749,7 +749,9 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
 /**
  * Mapping of network names to their corresponding relayer URLs.
  */
-export const RELAYER_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
+export const RELAYER_URL_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: string;
+} = {
   cayenne: 'https://relayer-server-staging-cayenne.getlit.dev',
   manzano: 'https://manzano-relayer.getlit.dev',
   habanero: 'https://habanero-relayer.getlit.dev',
