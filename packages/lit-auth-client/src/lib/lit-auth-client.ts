@@ -136,6 +136,11 @@ export class LitAuthClient {
     this.rpcUrl =
       options?.rpcUrl ||
       RPC_URL_BY_NETWORK[this.litNodeClient.config.litNetwork];
+
+    if (!this.rpcUrl) {
+      throw new Error('No RPC URL provided');
+    }
+
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);
