@@ -16,6 +16,7 @@ import * as accessControlConditions from '@lit-protocol/access-control-condition
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ❌ NOT AVAILABLE IN MANZANO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
 export const testExecutJsDecryptAndCombine = async (
@@ -76,6 +77,8 @@ export const testExecutJsDecryptAndCombine = async (
       ciphertext: encryptRes.ciphertext,
     },
   });
+
+  devEnv.releasePrivateKeyFromUser(alice);
 
   if (res.response !== 'Hello world') {
     throw new Error('content does not match what was expected');

@@ -14,3 +14,4 @@
 tools
 /packages/wasm/rust/*
 /packages/wasm/src/pkg/*
+**/*/dist

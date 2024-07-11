@@ -5,6 +5,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import { ethers } from 'ethers';
+import { SiweError, SiweErrorType, SiweMessage } from 'siwe';
 
 const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
 
@@ -25,8 +26,9 @@ export const blsSessionSigVerify = async (
     signature: Uint8Array
   ) => Promise<void>,
   networkPubKey: string,
-  authSig: AuthSig
-): Promise<void> => {
+  authSig: AuthSig,
+  authSigSiweMessage: SiweMessage
+): void => {
   let sigJson = JSON.parse(authSig.sig);
   // we do not nessesarly need to use ethers here but was a quick way
   // to get verification working.
@@ -36,6 +38,34 @@ export const blsSessionSigVerify = async (
   const prefixedEncoded = ethers.utils.toUtf8Bytes(prefixedStr);
   const shaHashed = ethers.utils.sha256(prefixedEncoded).replace('0x', '');
   const signatureBytes = Buffer.from(sigJson.ProofOfPossession, `hex`);
+
+  /** Check time or now */
+  const checkTime = new Date();
+
+  if (!authSigSiweMessage.expirationTime || !authSigSiweMessage.notBefore) {
+    throw new Error(
+      'Invalid SIWE message. Missing expirationTime or notBefore.'
+    );
+  }
+
+  // check timestamp of SIWE
+  const expirationDate = new Date(authSigSiweMessage.expirationTime);
+  if (checkTime.getTime() >= expirationDate.getTime()) {
+    throw new SiweError(
+      SiweErrorType.EXPIRED_MESSAGE,
+      `${checkTime.toISOString()} < ${expirationDate.toISOString()}`,
+      `${checkTime.toISOString()} >= ${expirationDate.toISOString()}`
+    );
+  }
+
+  const notBefore = new Date(authSigSiweMessage.notBefore);
+  if (checkTime.getTime() < notBefore.getTime()) {
+    throw new SiweError(
+      SiweErrorType.NOT_YET_VALID_MESSAGE,
+      `${checkTime.toISOString()} >= ${notBefore.toISOString()}`,
+      `${checkTime.toISOString()} < ${notBefore.toISOString()}`
+    );
+  }
 
   await verifier(networkPubKey, Buffer.from(shaHashed, 'hex'), signatureBytes);
 };

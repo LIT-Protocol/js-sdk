@@ -9,6 +9,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
  * ❌ Not available in Habanero
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel =
   async (devEnv: TinnyEnvironment) => {
@@ -36,6 +37,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInPa
         },
       });
     };
+
+    devEnv.releasePrivateKeyFromUser(alice);
 
     const res = await Promise.all([fn(1), fn(2), fn(3)]);
     log('res:', res);
