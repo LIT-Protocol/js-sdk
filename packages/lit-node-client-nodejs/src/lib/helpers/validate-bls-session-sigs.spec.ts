@@ -25,10 +25,14 @@ describe('BlsSessionSigVerify', () => {
   let networkPubKey =
     'a43499a4b786da2dd28af9f209eb152ff6f646b34b68a02954967271e17fb4c511fd67b81e067f690c6f38acab70585d';
 
-  it(`should verify valid bls signatrue`, () => {
+  it(`should verify valid bls signatrue`, async () => {
     expect(
-      blsSessionSigVerify(
-        async (publicKey: String, message: Uint8Array, signature: Uint8Array): Promise<void> => {
+      await blsSessionSigVerify(
+        async (
+          publicKey: String,
+          message: Uint8Array,
+          signature: Uint8Array
+        ): Promise<void> => {
           expect(typeof publicKey).toBe('string');
           expect(typeof message).toBe('object');
           expect(typeof signature).toBe('object');
