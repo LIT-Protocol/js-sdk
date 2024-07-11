@@ -477,10 +477,14 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+
+  /**
+   * @deprecated Will be removed in version 7.x. - Use `chronicleVesuviusTestnet` instead.
+   */
   datilDevnet: {
     contractAddress: null,
     chainId: 2311,
-    name: 'Vesuvius - Lit Protocol Devnet',
+    name: 'Chronicle Vesuvius - Lit Protocol Testnet',
     symbol: 'tstLit',
     decimals: 18,
     rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
@@ -488,10 +492,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  datilTestnet: {
+  chronicleVesuviusTestnet: {
     contractAddress: null,
     chainId: 2311,
-    name: 'Vesuvius - Lit Protocol Testnet',
+    name: 'Chronicle Vesuvius - Lit Protocol Testnet',
     symbol: 'tstLit',
     decimals: 18,
     rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
@@ -625,6 +629,42 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
 export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 
 /**
+ * Object containing information to submit to Metamask
+ */
+export const metamaskChainInfo = {
+  /**
+   * Information about the "chronicle" chain.
+   */
+  chronicle: {
+    chainId: LIT_CHAINS['chronicleTestnet'].chainId,
+    chainName: LIT_CHAINS['chronicleTestnet'].name,
+    nativeCurrency: {
+      name: LIT_CHAINS['chronicleTestnet'].symbol,
+      symbol: LIT_CHAINS['chronicleTestnet'].symbol,
+      decimals: LIT_CHAINS['chronicleTestnet'].decimals,
+    },
+    rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
+    blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
+    iconUrls: ['future'],
+  },
+  /**
+   * Information about the "chronicleVesuvius" chain.
+   */
+  chronicleVesuvius: {
+    chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
+    chainName: LIT_CHAINS['chronicleVesuviusTestnet'].name,
+    nativeCurrency: {
+      name: LIT_CHAINS['chronicleVesuviusTestnet'].symbol,
+      symbol: LIT_CHAINS['chronicleVesuviusTestnet'].symbol,
+      decimals: LIT_CHAINS['chronicleVesuviusTestnet'].decimals,
+    },
+    rpcUrls: LIT_CHAINS['chronicleVesuviusTestnet'].rpcUrls,
+    blockExplorerUrls: LIT_CHAINS['chronicleVesuviusTestnet'].blockExplorerUrls,
+    iconUrls: ['future'],
+  },
+};
+
+/**
  * Constants representing the available LIT RPC endpoints.
  */
 export const LIT_RPC = {
@@ -655,14 +695,15 @@ export const LIT_EVM_CHAINS = LIT_CHAINS;
 /**
  * Represents the Lit Network constants.
  */
-export const LIT_NETWORK: { [key in keyof typeof LitNetwork]: string } = {
+export const LIT_NETWORK = {
   Cayenne: 'cayenne',
   Manzano: 'manzano',
   Habanero: 'habanero',
-  Custom: 'custom',
   DatilDev: 'datil-dev',
   DatilTest: 'datil-test',
-};
+  Custom: 'custom',
+  Localhost: 'localhost',
+} as const;
 
 /**
  * The type representing the keys of the LIT_NETWORK object.
@@ -690,20 +731,21 @@ export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
  * - 'datil-test'
  * etc.
  */
-export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[LIT_NETWORK_TYPES];
+export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
 
 /**
  * RPC URL by Network
  *
  * A mapping of network names to their corresponding RPC URLs.
  */
-export const RPC_URL_BY_NETWORK: Record<LIT_NETWORK_TYPES, string> = {
-  Cayenne: LIT_RPC.CHRONICLE,
-  Manzano: LIT_RPC.CHRONICLE,
-  Habanero: LIT_RPC.CHRONICLE,
-  DatilDev: LIT_RPC.CHRONICLE_VESUVIUS,
-  DatilTest: LIT_RPC.CHRONICLE_VESUVIUS,
-  Custom: LIT_RPC.LOCAL_ANVIL,
+export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
+  cayenne: LIT_RPC.CHRONICLE,
+  manzano: LIT_RPC.CHRONICLE,
+  habanero: LIT_RPC.CHRONICLE,
+  'datil-dev': LIT_RPC.CHRONICLE_VESUVIUS,
+  'datil-test': LIT_RPC.CHRONICLE_VESUVIUS,
+  custom: LIT_RPC.LOCAL_ANVIL,
+  localhost: LIT_RPC.LOCAL_ANVIL,
 };
 
 /**
@@ -716,6 +758,7 @@ export const RELAYER_URL_BY_NETWORK: Record<LIT_NETWORK_TYPES, string> = {
   DatilDev: 'https://datil-dev-relayer.getlit.dev',
   DatilTest: 'https://datil-test-relayer.getlit.dev',
   Custom: 'http://localhost:3000',
+  Localhost: 'http://localhost:3000',
 };
 
 /**
@@ -733,6 +776,7 @@ export const GENERAL_WORKER_URL_BY_NETWORK: Record<
 
   // just use cayenne abis for custom and localhost
   Custom: 'https://apis.getlit.dev/cayenne/contracts',
+  Localhost: 'https://apis.getlit.dev/cayenne/contracts',
 };
 
 /**
@@ -753,6 +797,24 @@ export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: Record<
 
   // just use cayenne abis for custom and localhost
   Custom: 'https://apis.getlit.dev/cayenne/contracts',
+  Localhost: 'https://apis.getlit.dev/cayenne/contracts',
+};
+
+/**
+ * Mapping of network values to corresponding chain info.
+ */
+export const CHAIN_INFO_BY_NETWORK: Record<
+  LIT_NETWORK_VALUES,
+  | typeof metamaskChainInfo.chronicle
+  | typeof metamaskChainInfo.chronicleVesuvius
+> = {
+  cayenne: metamaskChainInfo.chronicle,
+  manzano: metamaskChainInfo.chronicle,
+  habanero: metamaskChainInfo.chronicle,
+  'datil-dev': metamaskChainInfo.chronicleVesuvius,
+  'datil-test': metamaskChainInfo.chronicleVesuvius,
+  custom: metamaskChainInfo.chronicleVesuvius,
+  localhost: metamaskChainInfo.chronicleVesuvius,
 };
 
 /**

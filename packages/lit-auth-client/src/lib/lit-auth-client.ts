@@ -2,22 +2,22 @@ import { ethers } from 'ethers';
 
 import {
   AuthMethodType,
-  LIT_RPC,
   ProviderType,
   RELAYER_URL_BY_NETWORK,
+  RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
+import { bootstrapLogManager, log } from '@lit-protocol/misc';
 import {
+  AuthMethod,
   EthWalletProviderOptions,
   IRelay,
   LitAuthClientOptions,
-  OAuthProviderOptions,
-  StytchOtpProviderOptions,
-  ProviderOptions,
-  WebAuthnProviderOptions,
-  AuthMethod,
   MintRequestBody,
+  OAuthProviderOptions,
+  ProviderOptions,
+  StytchOtpProviderOptions,
+  WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 
 import AppleProvider from './providers/AppleProvider';
@@ -153,10 +153,7 @@ export class LitAuthClient {
     // Set RPC URL
     this.rpcUrl =
       options?.rpcUrl ||
-      this.litNodeClient.config.litNetwork === 'datil-dev' ||
-      this.litNodeClient.config.litNetwork === 'datil-test'
-        ? LIT_RPC.VESUVIUS
-        : LIT_RPC.CHRONICLE;
+      RPC_URL_BY_NETWORK[this.litNodeClient.config.litNetwork];
     log('rpc url: ', this.rpcUrl);
     log('relay config: ', options.litRelayConfig);
     log('relay instance: ', this.relay);
