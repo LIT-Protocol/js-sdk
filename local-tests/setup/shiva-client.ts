@@ -7,6 +7,19 @@ import {
   TestNetState,
 } from './shiva-client.d';
 
+import http from 'node:http';
+import https from 'node:https';
+
+const httpAgent = new http.Agent({ keepAlive: true });
+const httpsAgent = new https.Agent({ keepAlive: true });
+const agentSelector = function(_parsedURL: any) {
+    if (_parsedURL.protocol == 'http:') {
+        return httpAgent;
+    } else {
+        return httpsAgent;
+    }
+}
+
 export interface ShivaEnvs {
   /**
    * If runnnig no localchain this flag will stop the running testnet when the test
@@ -240,7 +253,9 @@ export class ShivaClient {
     createReq?: TestNetCreateRequest
   ): Promise<TestnetClient> {
     const existingTestnetResp = await fetch(
-      this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets'
+      this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets',
+      //@ts-ignore
+      {agent: agentSelector}
     );
     const existingTestnets: string[] = await existingTestnetResp.json();
     if (existingTestnets.length > 0) {
