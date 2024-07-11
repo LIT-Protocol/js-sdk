@@ -16,9 +16,15 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
         chainId: LIT_CHAINS['chronicleTestnet'].chainId,
       };
     case 'datil-dev':
-      return { chain: 'vesuvius', chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId };
+      return {
+        chain: 'vesuvius',
+        chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
+      };
     case 'datil-test':
-      return { chain: 'vesuvius', chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId };
+      return {
+        chain: 'vesuvius',
+        chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
+      };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
   }
