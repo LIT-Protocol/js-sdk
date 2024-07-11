@@ -8,6 +8,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ❌ NOT AVAILABLE IN MANZANO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
 export const testExecuteJsBroadcastAndCollect = async (
@@ -37,6 +38,7 @@ export const testExecuteJsBroadcastAndCollect = async (
       })();`,
     jsParams: {},
   });
+  devEnv.releasePrivateKeyFromUser(alice);
 
   const response = res.response;
   if (!response) {

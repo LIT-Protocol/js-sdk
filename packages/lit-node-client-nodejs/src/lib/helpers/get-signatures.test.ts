@@ -1,5 +1,4 @@
 import { getSignatures } from './get-signatures';
-import { SigResponse } from '@lit-protocol/types';
 
 describe('getSignatures', () => {
   it('should return signatures object', async () => {

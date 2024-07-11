@@ -23,6 +23,8 @@ export const testUseEoaSessionSigsToExecuteJsConsoleLog = async (
     })();`,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   console.log('res:', res);
 
   // Expected output:

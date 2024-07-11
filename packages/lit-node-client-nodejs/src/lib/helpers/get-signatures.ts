@@ -6,16 +6,13 @@ import {
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';
-import {
-  CombinedECDSASignature,
-  SigResponse,
-  SigShare,
-} from '@lit-protocol/types';
+
 import { joinSignature } from 'ethers/lib/utils';
+import { SigResponse, SigShare } from '@lit-protocol/types';
 
 export const getFlattenShare = (share: any): SigShare => {
   // flatten the signature object so that the properties of the signature are top level
-  const flattenObj = Object.entries(share).map(([key, item]) => {
+  const flattenObj = Object.values(share).map((item) => {
     if (item === null || item === undefined) {
       return null;
     }
@@ -41,8 +38,8 @@ export const getFlattenShare = (share: any): SigShare => {
       'sigName',
     ] as const;
 
-    const hasProps = (props: any) => {
-      return [...props].every(
+    const hasProps = (props: readonly string[]) => {
+      return props.every(
         (prop) =>
           typedItem[prop as keyof SigShare] !== undefined &&
           typedItem[prop as keyof SigShare] !== null
@@ -166,10 +163,10 @@ export const getSignatures = async <T>({
     // but this allows for incomplete sets of signature shares to be aggregated
     // and then checked against threshold
     const shares = validatedSignedData
-      .map((r: any) => r[allKeys[i]])
-      .filter((r: any) => r !== undefined);
+      .map((r) => r[allKeys[i]])
+      .filter((r) => r !== undefined);
 
-    shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
+    shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
     const sigName = shares[0].sigName;
     logWithRequestId(
@@ -207,7 +204,7 @@ export const getSignatures = async <T>({
       });
     }
 
-    const sigType = mostCommonString(shares.map((s: any) => s.sigType));
+    const sigType = mostCommonString(shares.map((s) => s.sigType));
 
     // -- validate if this.networkPubKeySet is null
     if (networkPubKeySet === null) {
@@ -249,8 +246,8 @@ export const getSignatures = async <T>({
     signatures[allKeys[i]] = {
       ...signature,
       signature: encodedSig,
-      publicKey: mostCommonString(shares.map((s: any) => s.publicKey)),
-      dataSigned: mostCommonString(shares.map((s: any) => s.dataSigned)),
+      publicKey: mostCommonString(shares.map((s) => s.publicKey)),
+      dataSigned: mostCommonString(shares.map((s) => s.dataSigned)),
     };
   }
 

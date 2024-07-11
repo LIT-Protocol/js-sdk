@@ -164,7 +164,7 @@ export default class DiscordProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    const userId = await this.#fetchDiscordUser(authMethod.accessToken);
+    const userId = await this._fetchDiscordUser(authMethod.accessToken);
     const authMethodId = ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`${userId}:${this.clientId}`)
     );
@@ -207,7 +207,7 @@ export default class DiscordProvider extends BaseProvider {
    *
    * @returns {Promise<string>} - Discord user ID
    */
-  async #fetchDiscordUser(accessToken: string): Promise<string> {
+  private async _fetchDiscordUser(accessToken: string): Promise<string> {
     const meResponse = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
       headers: {

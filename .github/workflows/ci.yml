@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      NETWORK: cayenne
+      NETWORK: datil-dev
       DEBUG: true
       MAX_ATTEMPTS: 3
     steps:

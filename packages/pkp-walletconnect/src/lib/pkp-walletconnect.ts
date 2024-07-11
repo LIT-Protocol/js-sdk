@@ -532,12 +532,10 @@ export class PKPWalletConnect {
     }
     // TODO: Update this once we support more JSON RPC handlers
     for (const pkpClient of this.pkpClients) {
-      let wallet: PKPBase;
       let address: string;
       switch (chainName) {
         case 'eip155':
-          wallet = pkpClient.getEthWallet();
-          address = await wallet.getAddress();
+          address = await pkpClient.getEthWallet().getAddress();
           addresses.push(address);
           break;
         default:
@@ -563,12 +561,10 @@ export class PKPWalletConnect {
     const chainName = parsedChain.namespace;
     // TODO: Update this once we support more JSON RPC handlers
     for (const pkpClient of this.pkpClients) {
-      let wallet: PKPBase;
       let address: string;
       switch (chainName) {
         case 'eip155':
-          wallet = pkpClient.getEthWallet();
-          address = await wallet.getAddress();
+          address = await pkpClient.getEthWallet().getAddress();
           addresses.push(formatAccountWithChain(address, chain));
           break;
         default:

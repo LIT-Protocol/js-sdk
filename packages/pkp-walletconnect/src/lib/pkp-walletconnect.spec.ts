@@ -10,6 +10,19 @@ import { Web3Wallet } from '@walletconnect/web3wallet';
 
 import { PKPWalletConnect } from './pkp-walletconnect';
 
+const LITCONFIG = {
+  PKP_PUBKEY:
+    '04b5caf00c9f5adc9b22ca460b88482bad44ed4fac8ee63014b727cf60efc568dbdfe498a94fbd9cd294d651529f9fe76e057e9736150eea038415b06f64a87939',
+  PKP_ETH_ADDRESS: '0xDd66eE5E696911F92e19B8612F711FA508816a6e',
+  CONTROLLER_AUTHSIG: {
+    sig: '0x137b66529678d1fc58ab5b340ad036082af5b9912f823ba22c2851b8f50990a666ad8f2ab2328e8c94414c0a870163743bde91a5f96e9f967fd45d5e0c17c3911b',
+    derivedVia: 'web3.eth.personal.sign',
+    signedMessage:
+      'localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: eoeo0dsvyLL2gcHsC\nIssued At: 2023-11-17T15:04:20.324Z\nExpiration Time: 2215-07-14T15:04:20.323Z',
+    address: '0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37',
+  },
+};
+
 jest.setTimeout(120000);
 
 jest.mock('@walletconnect/core');
