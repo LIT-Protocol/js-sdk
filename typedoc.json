@@ -27,7 +27,8 @@
     "./packages/sev-snp-utils-sdk/src/index.ts",
     "./packages/types/src/index.ts",
     "./packages/uint8arrays/src/index.ts",
-    "./packages/wrapped-keys/src/index.ts"
+    "./packages/wrapped-keys/src/index.ts",
+    "./packages/wasm/src/index.ts"
   ],
   "out": "doc",
   "skipErrorChecking": true
