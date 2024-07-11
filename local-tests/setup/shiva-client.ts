@@ -9,6 +9,7 @@ import {
 
 import http from 'node:http';
 import https from 'node:https';
+import { error } from 'node:console';
 
 const httpAgent = new http.Agent({ keepAlive: true });
 const httpsAgent = new https.Agent({ keepAlive: true });
@@ -252,11 +253,22 @@ export class ShivaClient {
   async startTestnetManager(
     createReq?: TestNetCreateRequest
   ): Promise<TestnetClient> {
-    const existingTestnetResp = await fetch(
-      this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets',
-      //@ts-ignore
-      {agent: agentSelector}
-    );
+    let existingTestnetResp = undefined; 
+    let retryCount = 0;
+    while (!existingTestnetResp && retryCount < 100) {
+      try{
+        existingTestnetResp = await fetch(
+          this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets',
+          //@ts-ignore
+          {agent: agentSelector}
+        );
+      } catch (e) {
+        console.error('error while fetching testnets: ', error);
+        retryCount += 1;
+        await new Promise((res) => setTimeout(res, 1000));
+      }
+    }
+
     const existingTestnets: string[] = await existingTestnetResp.json();
     if (existingTestnets.length > 0) {
       this._clients.set(
