@@ -7,7 +7,11 @@ import {
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { bootstrapLogManager, log } from '@lit-protocol/misc';
+import {
+  bootstrapLogManager,
+  isSupportedLitNetwork,
+  log,
+} from '@lit-protocol/misc';
 import {
   AuthMethod,
   EthWalletProviderOptions,
@@ -94,21 +98,7 @@ export class LitAuthClient {
         );
       }
 
-      const supportedNetworks = [
-        'cayenne',
-        'habanero',
-        'manzano',
-        'datil-dev',
-        'datil-test',
-      ];
-
-      if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
-        throw new Error(
-          `Unsupported litNetwork: ${
-            this.litNodeClient.config.litNetwork
-          }. Supported networks are: ${supportedNetworks.join(', ')}`
-        );
-      }
+      isSupportedLitNetwork(this.litNodeClient.config.litNetwork);
 
       const url = RELAYER_URL_BY_NETWORK[this.litNodeClient.config.litNetwork];
 
