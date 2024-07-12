@@ -46,7 +46,7 @@ async function loadModules() {
     loadingPromise = null;
   }
 
-  // If we got here, the SDK loaded successfully 
+  // If we got here, the SDK loaded successfully
   return;
 }
 
