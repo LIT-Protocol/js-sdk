@@ -155,7 +155,7 @@ export const runTestsParallel = async ({
     testIndex: number
   ): Promise<string> => {
     const maxAttempts = devEnv.processEnvs.MAX_ATTEMPTS;
-    const testTimeout = devEnv.processEnvs.TEST_TIMEOUT || 60000;
+    const testTimeout = devEnv.processEnvs.TEST_TIMEOUT;
 
     let attempts = 0;
     let testPassed = false;
