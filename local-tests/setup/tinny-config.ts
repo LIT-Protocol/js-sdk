@@ -33,6 +33,9 @@ export interface ProcessEnvs {
    */
   MAX_ATTEMPTS: number;
 
+  /**
+   * The maximum number of milliseconds to wait for a test to complete.
+   */
   TEST_TIMEOUT: number;
 
   /**
