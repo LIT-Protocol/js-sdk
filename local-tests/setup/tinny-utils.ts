@@ -45,3 +45,18 @@ export function randomSolanaPrivateKey() {
   }
   return result;
 }
+
+/**
+ * Wraps a promise with a timeout.
+ * If the promise does not resolve or reject within the specified time, it will be rejected with a "Timed out" error.
+ *
+ * @param promise - The promise to wrap with a timeout.
+ * @param ms - The timeout duration in milliseconds.
+ * @returns A new promise that resolves or rejects based on the original promise or the timeout.
+ */
+export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  const timeout = new Promise<T>((_, reject) =>
+    setTimeout(() => reject(new Error('Timed out')), ms)
+  );
+  return Promise.race([promise, timeout]);
+}

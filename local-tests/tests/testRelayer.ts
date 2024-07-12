@@ -10,6 +10,7 @@ import {
   LitAuthClient,
 } from '@lit-protocol/lit-auth-client';
 import { ProviderType } from '@lit-protocol/constants';
+import { withTimeout } from 'local-tests/setup/tinny-utils';
 
 /**
  * Test Commands:
@@ -40,7 +41,7 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
   if (pkps.length <= 0) {
     throw new Error('No PKPs found');
   } else {
-    console.log('✅ [testRelayer] /fetch-pkps-by-auth-method works');
+    console.log('✅ 1. [testRelayer] /fetch-pkps-by-auth-method works');
   }
 
   // -- test claims
@@ -49,7 +50,21 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     signer: alice.wallet,
   };
 
-  const claimRes = await devEnv.litNodeClient.claimKeyId(claimRequest);
+  let claimRes;
+
+  console.log('Initiating claimKeyId call');
+  try {
+    claimRes = await withTimeout(
+      devEnv.litNodeClient.claimKeyId(claimRequest),
+      10000
+    ); // 10 seconds timeout
+    console.log('claimKeyId call completed');
+    // process claimRes as before
+  } catch (error) {
+    console.error('❗️ claimKeyId call failed or timed out');
+    devEnv.litNodeClient.disconnect();
+    throw new Error(error);
+  }
 
   // Expected output:
   // {
@@ -112,5 +127,5 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     }
   });
 
-  log('✅ testRelayer');
+  log('✅ 2. [testRelayer] Claim works');
 };

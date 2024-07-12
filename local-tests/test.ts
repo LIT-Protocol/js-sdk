@@ -115,6 +115,8 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
   const relayerTests = {
     testRelayer,
   };
+
+  // --filter=WrappedKey
   const wrappedKeysTests = {
     // -- valid cases
     testEthereumSignMessageGeneratedKey,

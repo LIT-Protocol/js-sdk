@@ -1,4 +1,5 @@
 import { TinnyEnvironment } from './tinny-environment';
+import { withTimeout } from './tinny-utils';
 
 /**
  * Retrieves filter flags from the command line arguments to determine which tests to run.
@@ -154,6 +155,8 @@ export const runTestsParallel = async ({
     testIndex: number
   ): Promise<string> => {
     const maxAttempts = devEnv.processEnvs.MAX_ATTEMPTS;
+    const testTimeout = devEnv.processEnvs.TEST_TIMEOUT || 60000;
+
     let attempts = 0;
     let testPassed = false;
 
@@ -166,8 +169,7 @@ export const runTestsParallel = async ({
           }. ${testName}...\x1b[0m`
         );
 
-        // @ts-ignore
-        await testFunction(devEnv);
+        await withTimeout(testFunction(devEnv), testTimeout);
         testPassed = true;
 
         const endTime = performance.now();
@@ -184,9 +186,19 @@ export const runTestsParallel = async ({
         }
         attempts++;
 
+        const endTime = performance.now();
+        const timeTaken = (endTime - startTime).toFixed(2);
+
+        if (error.message === 'Timed out') {
+          console.error(
+            `\x1b[31m✖\x1b[90m ${
+              testIndex + 1
+            }. ${testName} - Timed out after ${testTimeout}ms (${timeTaken} ms)\x1b[0m`
+          );
+          return `${testName} (Timed out in ${timeTaken} ms)`;
+        }
+
         if (attempts >= maxAttempts) {
-          const endTime = performance.now();
-          const timeTaken = (endTime - startTime).toFixed(2);
           console.error(
             `\x1b[31m✖\x1b[90m ${
               testIndex + 1
@@ -214,7 +226,7 @@ export const runTestsParallel = async ({
   }
 
   const skippedTests = results.filter((result) => result.includes('Skipped'));
-  const failedTests = results.filter((result) => result.includes('Failed'));
+  const failedTests = results.filter((result) => result.includes('Failed') || result.includes('Timed out'));
   const passedTests = results.filter((result) => result.includes('Passed'));
 
   if (skippedTests.length > 0) {
