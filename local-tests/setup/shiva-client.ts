@@ -255,7 +255,7 @@ export class ShivaClient {
   ): Promise<TestnetClient> {
     let existingTestnetResp = undefined; 
     let retryCount = 0;
-    while (!existingTestnetResp && retryCount < 100) {
+    while (!existingTestnetResp && retryCount < 200) {
       try{
         existingTestnetResp = await fetch(
           this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets',
