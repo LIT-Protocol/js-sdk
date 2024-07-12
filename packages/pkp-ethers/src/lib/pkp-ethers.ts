@@ -83,10 +83,21 @@ export class PKPEthersWallet
   constructor(prop: PKPEthersWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
 
-    this.rpcProvider = new ethers.providers.JsonRpcProvider(
-      prop.rpc ?? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]
-    );
+    /**
+     * @depreacted This is a quick patch for 6.1.1 - Proper fix is handled in this PR
+     * https://github.com/LIT-Protocol/js-sdk/pull/523
+     */
+    const rpcUrl =
+      prop.rpc ||
+      (prop.litNodeClient.config.litNetwork === 'datil-dev'
+        ? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]
+        : LIT_CHAINS['datilDevnet'].rpcUrls[0]);
 
+    if (!rpcUrl) {
+      throw new Error('rpcUrl is required');
+    }
+
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
     this.provider = prop.provider ?? this.rpcProvider;
 
     defineReadOnly(this, '_isSigner', true);
