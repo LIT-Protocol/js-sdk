@@ -91,5 +91,7 @@ export const testPkpEthersWithPkpSessionSigsToEthSignTypedData = async (
     }
   } catch (e) {
     throw new Error(`❌ ${e.toString()}`);
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

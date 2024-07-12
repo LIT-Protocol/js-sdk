@@ -110,11 +110,13 @@ const BLOCKHASH_SYNC_INTERVAL = 30_000;
 const NETWORKS_REQUIRING_SEV: string[] = [
   LitNetwork.Habanero,
   LitNetwork.Manzano,
+  LitNetwork.DatilTest,
 ];
 
 // The only network we consider entirely static, and thus ignore EPOCH changes for, is Cayenne
 const NETWORKS_WITH_EPOCH_CHANGES: string[] = [
   LitNetwork.DatilDev,
+  LitNetwork.DatilTest,
   LitNetwork.Habanero,
   LitNetwork.Manzano,
   LitNetwork.Custom,
@@ -276,7 +278,7 @@ export class LitCore {
 
     this._epochUpdateTimeout = setTimeout(async () => {
       try {
-        this.currentEpochNumber = await this.fetchCurrentEpochNumber();
+        this.currentEpochNumber = await this._fetchCurrentEpochNumber();
       } catch (e) {
         // Don't let errors here bubble up to be unhandle rejections in the runtime!
         logError('Error while attempting to fetch current epoch number');
@@ -534,7 +536,7 @@ export class LitCore {
     // Already scheduled update for current epoch number (due to a recent epoch change)
     // Skip setting it right now, because we haven't waited long enough for nodes to propagate the new epoch
     if (!this._epochUpdateTimeout) {
-      this.currentEpochNumber = await this.fetchCurrentEpochNumber();
+      this.currentEpochNumber = await this._fetchCurrentEpochNumber();
     }
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
@@ -566,7 +568,7 @@ export class LitCore {
     }
   }
 
-  private async handshakeAndVerifyNodeAttestation({
+  private async _handshakeAndVerifyNodeAttestation({
     url,
     requestId,
   }: {
@@ -701,7 +703,7 @@ export class LitCore {
       }),
       Promise.all(
         this.config.bootstrapUrls.map(async (url) => {
-          serverKeys[url] = await this.handshakeAndVerifyNodeAttestation({
+          serverKeys[url] = await this._handshakeAndVerifyNodeAttestation({
             url,
             requestId,
           });
@@ -888,7 +890,7 @@ export class LitCore {
     });
   };
 
-  private async fetchCurrentEpochNumber() {
+  private async _fetchCurrentEpochNumber() {
     if (!this._stakingContract) {
       return throwError({
         message:

@@ -173,16 +173,6 @@ export class TinnyEnvironment {
         this.processEnvs.KEY_IN_USE[index] = true; // Mark the key as in use
         // console.log('[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index); // Log a message indicating that we have selected a key
 
-        // Set a timer to automatically release the key after 10 seconds
-        setTimeout(() => {
-          this.releasePrivateKey(index);
-          // console.log(
-          //   '[𐬺🧪 Tinny Environment𐬺] 🔓 Automatically released key at index',
-          //   index,
-          //   `after ${this.processEnvs.TIME_TO_RELEASE_KEY / 10000} seconds`
-          // );
-        }, this.processEnvs.TIME_TO_RELEASE_KEY);
-
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
         // console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
@@ -192,6 +182,18 @@ export class TinnyEnvironment {
         );
       }
     }
+  }
+
+  /**
+   * Marks a private key as available again after use.
+   * @param {number} index - The index of the key to mark as available.
+   */
+  releasePrivateKeyFromUser(user: TinnyPerson) {
+    const index = this.processEnvs.PRIVATE_KEYS.indexOf(user.privateKey);
+    this.processEnvs.KEY_IN_USE[index] = false;
+    // console.log(
+    //   `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
+    // );
   }
 
   /**

@@ -41,6 +41,8 @@ export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
     })();`,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   console.log('res:', res);
 
   // Expected output:

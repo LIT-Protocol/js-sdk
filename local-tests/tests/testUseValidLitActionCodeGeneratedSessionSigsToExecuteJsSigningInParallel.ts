@@ -38,6 +38,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInPa
       });
     };
 
+    devEnv.releasePrivateKeyFromUser(alice);
+
     const res = await Promise.all([fn(1), fn(2), fn(3)]);
     log('res:', res);
 

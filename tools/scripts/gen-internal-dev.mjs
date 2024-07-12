@@ -112,7 +112,7 @@ export const INTERNAL_DEFAULT_CONFIG = {
   alertWhenUnauthorized: false,
   minNodeCount: ${minNodeCount},
   debug: true,
-  bootstrapUrls: ${JSON.stringify(networks, null, 2)},
+  bootstrapUrls: ${content},
   litNetwork: 'internalDev',
   connectTimeout: 20000,
 };`
