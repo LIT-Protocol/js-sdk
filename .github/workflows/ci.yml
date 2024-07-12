@@ -37,9 +37,14 @@ jobs:
           token: ${{secrets.GH_PAT}}
           path: ${{ github.workspace }}/lit-assets/
           submodules: false
-          sparse-checkout: blockchain
+          sparse-checkout: |
+           blockchain
+           rust/lit-node
       - name: Check LA dir
         run: ls -la ${{github.workspace}}/lit-assets
+      - name: Install LA Blockchain Dependencies
+        run: npm i
+        working-directory: ${{ github.workspace }}/lit-assets/blockchain/contracts
       - name: Docker login
         id: login
         run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
@@ -62,4 +67,5 @@ jobs:
         if: steps.build.outputs.exit_code == 0
         run: docker ps -a && yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString,testExecuteJsSignAndCombineEcdsa,testExecutJsDecryptAndCombine,testExecuteJsBroadcastAndCollect  --exclude=Parallel
       - name: Get Container Logs
+        if: always()
         run: docker logs shiva
