@@ -54,7 +54,10 @@ export function randomSolanaPrivateKey() {
  * @param ms - The timeout duration in milliseconds.
  * @returns A new promise that resolves or rejects based on the original promise or the timeout.
  */
-export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+export function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number
+): Promise<T | void> {
   const timeout = new Promise<T>((_, reject) =>
     setTimeout(() => reject(new Error('Timed out')), ms)
   );
