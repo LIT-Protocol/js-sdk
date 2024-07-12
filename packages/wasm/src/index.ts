@@ -16,7 +16,7 @@ let wasmSdkInstance: InitOutput | undefined;
 
 // Give us a promise that _just_ encapsulates initializing the modules so we can wrap it in other logic
 async function initWasm() {
-  await initSync(getModule());
+  return initSync(getModule());
 }
 
 /**
@@ -46,7 +46,7 @@ async function loadModules() {
     loadingPromise = null;
   }
 
-  // If we got here, the SDK loaded successfully; just return the instance to the caller
+  // If we got here, the SDK loaded successfully 
   return;
 }
 
