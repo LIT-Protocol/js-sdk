@@ -93,6 +93,11 @@ export class PKPEthersWallet
 
     this.rpcProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
+    if (!rpcUrl) {
+      throw new Error('rpcUrl is required');
+    }
+
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
     this.provider = prop.provider ?? this.rpcProvider;
 
     defineReadOnly(this, '_isSigner', true);
