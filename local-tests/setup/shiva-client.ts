@@ -71,15 +71,10 @@ export class TestnetClient {
     this._id = id;
   }
 
-  /*
-    Returns the testnet information
-    pub struct TestNetInfo {
-      pub contract_addresses: ContractAddresses,
-      pub validator_addresses: Vec<String>,
-      pub contract_resolver_abi: String,
-      pub rpc_url: String,
-      pub epoch_length: i32,
-    }
+  /**
+    Returns info on a given testnet instance
+    if information cannot be accessed we retured undefined
+    @returns TestNetInfo | undefined
   */
   get Info(): TestNetInfo | undefined {
     return this._info;
@@ -142,16 +137,21 @@ export class TestnetClient {
         this._id
     )
       .then((res: Response) => {
-        return res.json();
-      })
-      .then((info: TestNetResponse<TestNetInfo>) => {
-        if (info.errors != null) {
-          throw new ShivaError(info);
+        if (res.status === 200 || res.status === 500) {
+          return res.json();
+        } else {
+          return res.text();
         }
-
-        this._info = info.body;
-        this._currentState = info.lastStateObserved as TestNetState;
-        console.log('setting testnet info: ', this._info);
+      })
+      .then((res: TestNetResponse<boolean>) => {
+        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
+        if (typeof res === 'string') {
+          throw new Error(res);
+        }
+        if (res.errors != null) {
+          throw new ShivaError(res);
+        }
+        console.log('Stopped random peer: ', res);
       });
   }
 
@@ -166,13 +166,17 @@ export class TestnetClient {
         this._id
     )
       .then((res: Response) => {
-        if (res.status === 200) {
+        if (res.status === 200 || res.status === 500) {
           return res.json();
         } else {
-          throw res; // throw as an error to the caller
+          return res.text();
         }
       })
       .then((res: TestNetResponse<boolean>) => {
+        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
+        if (typeof res === 'string') {
+          throw new Error(res);
+        }
         if (res.errors != null) {
           throw new ShivaError(res);
         }
@@ -191,14 +195,21 @@ export class TestnetClient {
         this._id
     )
       .then((res: Response) => {
-        return res.json();
+        if (res.status === 200 || res.status === 500) {
+          return res.json();
+        } else {
+          return res.text();
+        }
       })
       .then((res: TestNetResponse<boolean>) => {
+        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
+        if (typeof res === 'string') {
+          throw new Error(res);
+        }
         if (res.errors != null) {
           throw new ShivaError(res);
         }
-        console.log('validator kick response: ', res);
-        return res;
+        console.log('Stopped random peer: ', res);
       });
   }
 
@@ -211,10 +222,21 @@ export class TestnetClient {
       this._processEnvs.TESTNET_MANAGER_URL + '/test/delete/testnet/' + this._id
     )
       .then((res: Response) => {
-        return res.json();
+        if (res.status === 200) {
+          return res.json();
+        } else {
+          return res.text();
+        }
       })
-      .then((body: TestNetResponse<void>) => {
-        console.log('shutdown respone: ', body);
+      .then((res: TestNetResponse<boolean>) => {
+        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
+        if (typeof res === 'string') {
+          throw new Error(res);
+        }
+        if (res.errors != null) {
+          throw new ShivaError(res);
+        }
+        console.log('Stopped random peer: ', res);
       });
   }
 }
@@ -289,11 +311,20 @@ export class ShivaClient {
         }
       );
 
-      const createTestnet =
-        (await createTestnetResp.json()) as TestNetResponse<void>;
-      if (createTestnetResp.status != 200) {
-        throw new ShivaError(createTestnet); // throw the object as an error if the status was not 200
+      let createTestnet: TestNetResponse<void>;
+      try {
+        createTestnet =
+          (await createTestnetResp.json()) as TestNetResponse<void>;
+      } catch (err) {
+        let message = await createTestnetResp.text();
+        console.error('Error while creating testnet instance:', message);
+        throw new Error(message);
       }
+      // if we get a 500 status and the JSON parsed we know that we should
+      if (createTestnetResp.status === 500) {
+        throw new ShivaError(createTestnet); // throw the object as an error if the status was not 200 and we could parse as JSON
+      }
+
       this._clients.set(
         createTestnet.testnetId,
         new TestnetClient(createTestnet.testnetId, this.processEnvs)
