@@ -1,3 +1,5 @@
+const { removeSaltFromDecryptedKey } = require('../../utils');
+
 /**
  *
  * Signs a message with the Ethers wallet which is also decrypted inside the Lit Action.
@@ -12,8 +14,6 @@
  */
 
 (async () => {
-  const LIT_PREFIX = 'lit_';
-
   let decryptedPrivateKey;
   try {
     decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
@@ -35,10 +35,7 @@
     return;
   }
 
-  const privateKey = decryptedPrivateKey.startsWith(LIT_PREFIX)
-    ? decryptedPrivateKey.slice(LIT_PREFIX.length)
-    : decryptedPrivateKey;
-  const wallet = new ethers.Wallet(privateKey);
+  const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
 
   try {
     const signature = await wallet.signMessage(messageToSign);

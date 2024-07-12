@@ -32,6 +32,8 @@ export const testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (
     })();`,
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+
   // Expected output:
   // {
   //   claims: {

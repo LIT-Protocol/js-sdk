@@ -29,7 +29,7 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign =
       pubKey: alice.authMethodOwnedPkp.publicKey,
       sessionSigs: litActionSessionSigs,
     });
-
+    devEnv.releasePrivateKeyFromUser(alice);
     console.log('✅ res:', res);
 
     // -- Expected output:

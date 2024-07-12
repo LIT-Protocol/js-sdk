@@ -1,4 +1,3 @@
-import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   DevInspectResults,
   DryRunTransactionBlockResponse,
@@ -22,47 +21,69 @@ import {
   toSerializedSignature,
   getTotalGasUsedUpperBound,
 } from '@mysten/sui.js';
-import { PKPBaseProp } from '@lit-protocol/types';
-import { getDigestFromBytes } from './TransactionBlockData';
-import { blake2b } from '@noble/hashes/blake2b';
-import { sha256 } from '@noble/hashes/sha256';
 import {
   hexToBytes,
   numberToBytesBE,
   bytesToHex,
 } from '@noble/curves/abstract/utils';
 import { secp256k1 } from '@noble/curves/secp256k1';
+import { blake2b } from '@noble/hashes/blake2b';
+import { sha256 } from '@noble/hashes/sha256';
 
-export class PKPSuiWallet extends PKPBase implements Signer {
+import { PKPBase } from '@lit-protocol/pkp-base';
+import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
+
+import { getDigestFromBytes } from './TransactionBlockData';
+
+export class PKPSuiWallet implements PKPWallet, Signer {
+  private readonly pkpBase: PKPBase;
+
   readonly provider: JsonRpcProvider;
   readonly prop: PKPBaseProp;
   readonly publicKey: Secp256k1PublicKey;
 
-  // Default Lit Action signanture name
+  // Default Lit Action signature name
   defaultSigName: string = 'pkp-sui-sign-tx';
 
   constructor(prop: PKPBaseProp, provider: JsonRpcProvider) {
-    super(prop);
+    this.pkpBase = PKPBase.createInstance(prop);
+
     this.prop = prop;
     this.provider = provider;
-    this.publicKey = new Secp256k1PublicKey(this.compressedPubKeyBuffer);
+    this.publicKey = new Secp256k1PublicKey(
+      this.pkpBase.compressedPubKeyBuffer
+    );
   }
 
-  override async getAddress(): Promise<SuiAddress> {
+  /**
+   * Initializes the PKPSuiWallet instance and its dependencies
+   */
+  async init(): Promise<void> {
+    await this.pkpBase.init();
+  }
+
+  async getAddress(): Promise<SuiAddress> {
     return this.publicKey.toSuiAddress();
   }
 
   async signData(data: Uint8Array): Promise<string> {
     // Check if the LIT node client is connected, and connect if it's not.
-    await this.ensureLitNodeClientReady();
+    await this.pkpBase.ensureLitNodeClientReady();
 
     const digest = blake2b(data, { dkLen: 32 });
     const msgHash = sha256(digest);
     const signature = await this.runSign(msgHash);
-    const numToNByteStr = (num: bigint): string =>
+    const numToNByteStr = (num: number | bigint): string =>
       bytesToHex(numberToBytesBE(num, secp256k1.CURVE.nByteLength));
 
-    const compactHex = numToNByteStr(signature.r) + numToNByteStr(signature.s);
+    // TODO response from PKPBase.runSign has this values defined as strings
+    const compactHex =
+      (typeof signature.r === 'string'
+        ? signature.r
+        : numToNByteStr(signature.r)) +
+      (typeof signature.s === 'string'
+        ? signature.s
+        : numToNByteStr(signature.s));
     const compactRawBytes = hexToBytes(compactHex);
 
     const result = toSerializedSignature({
@@ -253,5 +274,32 @@ export class PKPSuiWallet extends PKPBase implements Signer {
       throw new Error('Failed to estimate the gas cost from transaction');
     }
     return gasEstimation;
+  }
+
+  /**
+   * Runs the specified Lit action with the given parameters.
+   *
+   * @param {Uint8Array} toSign - The data to be signed by the Lit action.
+   * @param {string} sigName - The name of the signature to be returned by the Lit action.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
+   */
+  async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+    return this.pkpBase.runLitAction(toSign, sigName);
+  }
+
+  /**
+   * Sign the provided data with the PKP private key.
+   *
+   * @param {Uint8Array} toSign - The data to be signed.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
+   */
+  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+    return this.pkpBase.runSign(toSign);
   }
 }

@@ -29,5 +29,7 @@ export const testPkpEthersWithEoaSessionSigsToSignMessage = async (
     console.log('✅ signature:', signature);
   } catch (e) {
     throw new Error('❌ Error: ' + e.message);
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
 };

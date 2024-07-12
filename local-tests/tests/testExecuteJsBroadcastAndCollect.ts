@@ -38,6 +38,7 @@ export const testExecuteJsBroadcastAndCollect = async (
       })();`,
     jsParams: {},
   });
+  devEnv.releasePrivateKeyFromUser(alice);
 
   const response = res.response;
   if (!response) {

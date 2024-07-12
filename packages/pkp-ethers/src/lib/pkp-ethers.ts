@@ -1,4 +1,3 @@
-import { getAddress } from '@ethersproject/address';
 import { Provider, TransactionRequest } from '@ethersproject/abstract-provider';
 import {
   ExternallyOwnedAccount,
@@ -7,6 +6,7 @@ import {
   TypedDataField,
   TypedDataSigner,
 } from '@ethersproject/abstract-signer';
+import { getAddress } from '@ethersproject/address';
 import {
   arrayify,
   Bytes,
@@ -16,42 +16,55 @@ import {
 } from '@ethersproject/bytes';
 import { hashMessage, _TypedDataEncoder } from '@ethersproject/hash';
 import { defaultPath, HDNode, entropyToMnemonic } from '@ethersproject/hdnode';
-import { keccak256 } from '@ethersproject/keccak256';
-import { defineReadOnly, resolveProperties } from '@ethersproject/properties';
-import { randomBytes } from '@ethersproject/random';
 import {
   decryptJsonWallet,
   decryptJsonWalletSync,
   encryptKeystore,
+  EncryptOptions,
   ProgressCallback,
 } from '@ethersproject/json-wallets';
+import { keccak256 } from '@ethersproject/keccak256';
+import { Logger } from '@ethersproject/logger';
+import { defineReadOnly, resolveProperties } from '@ethersproject/properties';
+import { randomBytes } from '@ethersproject/random';
 import {
   computeAddress,
   serialize,
   UnsignedTransaction,
 } from '@ethersproject/transactions';
 import { Wordlist } from '@ethersproject/wordlists';
-import { Logger } from '@ethersproject/logger';
-import { version } from 'ethers';
+import { ethers, version, Wallet } from 'ethers';
 
-import { ethers, Wallet } from 'ethers';
-import { PKPClientHelpers, PKPEthersWalletProp } from '@lit-protocol/types';
+import { LIT_CHAINS } from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
+import {
+  PKPClientHelpers,
+  PKPEthersWalletProp,
+  PKPWallet,
+  SigResponse,
+} from '@lit-protocol/types';
+
 import { ethRequestHandler } from './handler';
+import { getTransactionToSign, isSignedTransaction } from './helper';
 import {
   ETHRequestSigningPayload,
   ETHSignature,
   ETHTxRes,
 } from './pkp-ethers-types';
 import { RPC_URL_BY_NETWORK } from '@lit-protocol/constants';
-import { getTransactionToSign, isSignedTransaction } from './helper';
 
 const logger = new Logger(version);
 
 export class PKPEthersWallet
-  extends PKPBase
-  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers
+  implements
+    PKPWallet,
+    Signer,
+    ExternallyOwnedAccount,
+    TypedDataSigner,
+    PKPClientHelpers
 {
+  private readonly pkpBase: PKPBase;
+
   readonly address!: string;
   readonly _isSigner!: boolean;
 
@@ -64,8 +77,12 @@ export class PKPEthersWallet
   nonce?: string;
   chainId?: number;
 
+  get litNodeClientReady(): boolean {
+    return this.pkpBase.litNodeClientReady;
+  }
+
   constructor(prop: PKPEthersWalletProp) {
-    super(prop);
+    this.pkpBase = PKPBase.createInstance(prop);
 
     const rpcUrl =
       prop.rpc || RPC_URL_BY_NETWORK[prop.litNodeClient.config.litNetwork];
@@ -83,7 +100,7 @@ export class PKPEthersWallet
     defineReadOnly(
       this,
       'address',
-      computeAddress(this.uncompressedPubKeyBuffer)
+      computeAddress(this.pkpBase.uncompressedPubKeyBuffer)
     );
   }
 
@@ -134,12 +151,19 @@ export class PKPEthersWallet
   };
 
   get publicKey(): string {
-    return this.uncompressedPubKey;
+    return this.pkpBase.uncompressedPubKey;
   }
 
-  override getAddress(): Promise<string> {
-    const addr = computeAddress(this.uncompressedPubKeyBuffer);
+  getAddress(): Promise<string> {
+    const addr = computeAddress(this.pkpBase.uncompressedPubKeyBuffer);
     return Promise.resolve(addr);
+  }
+
+  /**
+   * Initializes the PKPEthersWallet instance and its dependencies
+   */
+  async init(): Promise<void> {
+    await this.pkpBase.init();
   }
 
   connect(): never {
@@ -147,14 +171,13 @@ export class PKPEthersWallet
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
-    this.log('signTransaction => transaction:', transaction);
+    this.pkpBase.log('signTransaction => transaction:', transaction);
 
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    // Check if the LIT node client is connected, and connect if it's not.
+    await this.pkpBase.ensureLitNodeClientReady();
 
     const addr = await this.getAddress();
-    this.log('signTransaction => addr:', addr);
+    this.pkpBase.log('signTransaction => addr:', addr);
 
     // if manual settings are set, use them
     if (this.manualGasPrice) {
@@ -176,33 +199,33 @@ export class PKPEthersWallet
     try {
       if (!transaction['gasLimit']) {
         transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-        this.log('signTransaction => gasLimit:', transaction.gasLimit);
+        this.pkpBase.log('signTransaction => gasLimit:', transaction.gasLimit);
       }
 
       if (!transaction['nonce']) {
         transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
-        this.log('signTransaction => nonce:', transaction.nonce);
+        this.pkpBase.log('signTransaction => nonce:', transaction.nonce);
       }
 
       if (!transaction['chainId']) {
         transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
-        this.log('signTransaction => chainId:', transaction.chainId);
+        this.pkpBase.log('signTransaction => chainId:', transaction.chainId);
       }
 
       if (!transaction['gasPrice']) {
         transaction.gasPrice = await this.getGasPrice();
-        this.log('signTransaction => gasPrice:', transaction.gasPrice);
+        this.pkpBase.log('signTransaction => gasPrice:', transaction.gasPrice);
       }
     } catch (err) {
-      this.log(
+      this.pkpBase.log(
         'signTransaction => unable to populate transaction with details:',
         err
       );
     }
 
     return resolveProperties(transaction).then(async (tx) => {
-      this.log('tx.from:', tx.from);
-      this.log('this.address:', this.address);
+      this.pkpBase.log('tx.from:', tx.from);
+      this.pkpBase.log('this.address:', this.address);
 
       if (tx.from != null) {
         if (getAddress(tx.from) !== this.address) {
@@ -215,40 +238,40 @@ export class PKPEthersWallet
         delete tx.from;
       }
 
-      const serializedTx = serialize(<UnsignedTransaction>tx);
+      const serializedTx = serialize(tx as UnsignedTransaction);
       const unsignedTxn = keccak256(serializedTx);
 
       // -- lit action --
       const toSign = arrayify(unsignedTxn);
       let signature;
 
-      if (this.useAction) {
-        this.log('running lit action => sigName: pkp-eth-sign-tx');
-        signature = (await this.runLitAction(toSign, 'pkp-eth-sign-tx'))
+      if (this.pkpBase.useAction) {
+        this.pkpBase.log('running lit action => sigName: pkp-eth-sign-tx');
+        signature = (await this.pkpBase.runLitAction(toSign, 'pkp-eth-sign-tx'))
           .signature;
       } else {
-        this.log('requesting signature from nodes');
-        signature = (await this.runSign(toSign)).signature;
+        this.pkpBase.log('requesting signature from nodes');
+        signature = (await this.pkpBase.runSign(toSign)).signature;
       }
 
       // -- reset manual settings --
       this.resetManualSettings();
 
-      return serialize(<UnsignedTransaction>tx, signature);
+      return serialize(tx as UnsignedTransaction, signature);
     });
   }
 
   async signMessage(message: Bytes | string): Promise<string> {
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    // Check if the LIT node client is connected, and connect if it's not.
+    await this.pkpBase.ensureLitNodeClientReady();
+
     const toSign = arrayify(hashMessage(message));
     let signature;
-    if (this.useAction) {
-      this.log('running lit action => sigName: pkp-eth-sign-message');
+    if (this.pkpBase.useAction) {
+      this.pkpBase.log('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');
     } else {
-      this.log('requesting signature from nodes');
+      this.pkpBase.log('requesting signature from nodes');
       signature = await this.runSign(toSign);
     }
 
@@ -261,12 +284,11 @@ export class PKPEthersWallet
 
   async _signTypedData(
     domain: TypedDataDomain,
-    types: Record<string, Array<TypedDataField>>,
+    types: Record<string, TypedDataField[]>,
     value: Record<string, any>
   ): Promise<string> {
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    // Check if the LIT node client is connected, and connect if it's not.
+    await this.pkpBase.ensureLitNodeClientReady();
 
     // Populate any ENS names
     const populated = await _TypedDataEncoder.resolveNames(
@@ -299,11 +321,11 @@ export class PKPEthersWallet
     const toSignBuffer = arrayify(toSign);
     let signature;
 
-    if (this.useAction) {
-      this.log('running lit action => sigName: pkp-eth-sign-message');
+    if (this.pkpBase.useAction) {
+      this.pkpBase.log('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSignBuffer, 'pkp-eth-sign-message');
     } else {
-      this.log('requesting signature from nodes');
+      this.pkpBase.log('requesting signature from nodes');
       signature = await this.runSign(toSignBuffer);
     }
 
@@ -316,7 +338,7 @@ export class PKPEthersWallet
 
   encrypt(
     password: Bytes | string,
-    options?: any,
+    options?: EncryptOptions | ProgressCallback,
     progressCallback?: ProgressCallback
   ): Promise<string> {
     if (typeof options === 'function' && !progressCallback) {
@@ -332,11 +354,17 @@ export class PKPEthersWallet
       options = {};
     }
 
-    return encryptKeystore(this, password, options, progressCallback);
+    return encryptKeystore(
+      this,
+      password,
+      options as EncryptOptions,
+      progressCallback
+    );
   }
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
-    this.log('sendTransaction => transaction:', transaction);
+    // : Promise<TransactionResponse>
+    this.pkpBase.log('sendTransaction => transaction:', transaction);
 
     let res;
     let signedTxn;
@@ -351,7 +379,7 @@ export class PKPEthersWallet
 
       res = await this.rpcProvider.sendTransaction(signedTxn);
     } catch (e) {
-      this.log('sendTransaction => error:', e);
+      this.pkpBase.log('sendTransaction => error:', e);
       throw e;
     }
 
@@ -361,7 +389,11 @@ export class PKPEthersWallet
   /**
    *  Static methods to create Wallet instances.
    */
-  static createRandom(options?: any): Wallet {
+  static createRandom(options?: {
+    extraEntropy?: Uint8Array;
+    locale?: Wordlist;
+    path?: string;
+  }): Wallet {
     let entropy: Uint8Array = randomBytes(16);
 
     if (!options) {
@@ -432,7 +464,7 @@ export class PKPEthersWallet
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<string> {
     if (!blockTag) {
-      return this.throwError(`blockTag is required`);
+      return this.pkpBase.throwError(`blockTag is required`);
     }
 
     const resolved = await resolveProperties({
@@ -441,7 +473,6 @@ export class PKPEthersWallet
       ccipReadEnabled: Promise.resolve(transaction.ccipReadEnabled),
     });
 
-    // @ts-ignore
     return this.rpcProvider._call(
       resolved.transaction as TransactionRequest,
       resolved.blockTag,
@@ -460,33 +491,58 @@ export class PKPEthersWallet
     return this.rpcProvider.getFeeData();
   }
 
-  resolveName(name: string): Promise<string> {
-    return this.throwError(`Not available in PKPEthersWallet`);
+  resolveName(): Promise<string> {
+    return this.pkpBase.throwError(`Not available in PKPEthersWallet`);
   }
 
-  checkTransaction(
-    transaction: ethers.utils.Deferrable<TransactionRequest>
-  ): ethers.utils.Deferrable<TransactionRequest> {
-    return this.throwError(`Not available in PKPEthersWallet`);
+  checkTransaction(): ethers.utils.Deferrable<TransactionRequest> {
+    return this.pkpBase.throwError(`Not available in PKPEthersWallet`);
   }
 
-  populateTransaction(
-    transaction: ethers.utils.Deferrable<TransactionRequest>
-  ): Promise<TransactionRequest> {
-    return this.throwError(`Not available in PKPEthersWallet`);
+  populateTransaction(): Promise<TransactionRequest> {
+    return this.pkpBase.throwError(`Not available in PKPEthersWallet`);
   }
 
-  _checkProvider(operation?: string | undefined): void {
-    this.log('This function is not implemented yet, but will skip it for now.');
+  _checkProvider(): void {
+    this.pkpBase.log(
+      'This function is not implemented yet, but will skip it for now.'
+    );
   }
 
   get mnemonic() {
-    return this.throwError(`There's no mnemonic for a PKPWallet`);
+    return this.pkpBase.throwError(`There's no mnemonic for a PKPWallet`);
   }
 
   get privateKey(): string {
-    return this.throwError(
+    return this.pkpBase.throwError(
       `This PKP contains no private key (can you imagine!?)`
     );
+  }
+
+  /**
+   * Runs the specified Lit action with the given parameters.
+   *
+   * @param {Uint8Array} toSign - The data to be signed by the Lit action.
+   * @param {string} sigName - The name of the signature to be returned by the Lit action.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
+   */
+  async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+    return this.pkpBase.runLitAction(toSign, sigName);
+  }
+
+  /**
+   * Sign the provided data with the PKP private key.
+   *
+   * @param {Uint8Array} toSign - The data to be signed.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
+   */
+  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+    return this.pkpBase.runSign(toSign);
   }
 }

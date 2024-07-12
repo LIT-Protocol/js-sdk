@@ -72,6 +72,9 @@ export const testExecuteJsSignAndCombineEcdsa = async (
     },
   });
 
+  devEnv.releasePrivateKeyFromUser(alice);
+  devEnv.releasePrivateKeyFromUser(bob);
+
   /**
         Response format
        {

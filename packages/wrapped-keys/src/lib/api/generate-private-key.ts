@@ -39,6 +39,11 @@ export async function generatePrivateKey(
 ): Promise<GeneratePrivateKeyResult> {
   const { pkpSessionSigs, network, litNodeClient } = params;
 
+  if (litNodeClient.config.litNetwork === 'habanero') {
+    throw new Error(
+      'generatePrivateKey is not available for `habanero`; this feature is still in beta and should not be used for production data yet.'
+    );
+  }
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);

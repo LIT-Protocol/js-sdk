@@ -36,6 +36,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog 
     })();`,
     });
 
+    devEnv.releasePrivateKeyFromUser(alice);
+
     console.log('res:', res);
 
     // Expected output:

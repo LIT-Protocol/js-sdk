@@ -1,14 +1,18 @@
-import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
-import { PKPClientProp } from '@lit-protocol/types';
-import { PKPBase } from '@lit-protocol/pkp-base';
-import { WalletFactory } from './wallet-factory';
-import { log } from '@lit-protocol/misc';
 import { PKP_CLIENT_SUPPORTED_CHAINS } from '@lit-protocol/constants';
+import { log } from '@lit-protocol/misc';
+import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+import {
+  PKPClientProp,
+  PKPCosmosWalletProp,
+  PKPEthersWalletProp,
+} from '@lit-protocol/types';
 
 export class PKPClient {
+  private cosmosWallet: PKPCosmosWallet | undefined;
+  private ethWallet: PKPEthersWallet | undefined;
+
   public readonly pkpPubKey: string;
-  private _wallets: Map<string, PKPBase> = new Map();
 
   /**
    * Constructs a new PKPClient instance with the provided properties.
@@ -18,20 +22,9 @@ export class PKPClient {
    */
   constructor(prop: PKPClientProp) {
     this.pkpPubKey = prop.pkpPubKey;
-    this._registerSupportedWallets(prop);
-  }
 
-  /**
-   * Registers supported wallets using the WalletFactory.
-   *
-   * @param {PKPClientProp} prop - The properties required for the PKPClient instance.
-   * @private
-   */
-  private _registerSupportedWallets(prop: PKPClientProp): void {
-    const chains = PKP_CLIENT_SUPPORTED_CHAINS; // Add other chains as needed
-    for (const chain of chains) {
-      this._wallets.set(chain, WalletFactory.createWallet(chain, prop));
-    }
+    this.ethWallet = new PKPEthersWallet({ ...prop } as PKPEthersWalletProp);
+    this.cosmosWallet = new PKPCosmosWallet({ ...prop } as PKPCosmosWalletProp);
   }
 
   /**
@@ -40,7 +33,7 @@ export class PKPClient {
    * @returns {string[]} An array of supported chain names.
    */
   getSupportedChains(): string[] {
-    return Array.from(this._wallets.keys());
+    return PKP_CLIENT_SUPPORTED_CHAINS;
   }
 
   /**
@@ -51,12 +44,25 @@ export class PKPClient {
    * @returns {T} The wallet instance for the specified chain.
    * @throws Will throw an error if the chain is not supported.
    */
-  getWallet<T extends PKPBase = PKPBase>(chain: string): T {
-    const wallet = this._wallets.get(chain);
-    if (!wallet) {
-      throw new Error(`Unsupported chain: ${chain}`);
+  getWallet(chain: 'eth'): PKPEthersWallet;
+  getWallet(chain: 'cosmos'): PKPCosmosWallet;
+  getWallet(chain: string): PKPEthersWallet | PKPCosmosWallet {
+    switch (chain) {
+      case 'eth':
+        if (!this.ethWallet) {
+          throw new Error('Ethereum wallet not initialized');
+        }
+        return this.ethWallet;
+      case 'cosmos':
+        if (!this.cosmosWallet) {
+          throw new Error('Cosmos wallet not initialized');
+        }
+        return this.cosmosWallet;
+      case 'btc':
+        throw new Error('BTC wallet not supported yet');
+      default:
+        throw new Error(`Unsupported chain: ${chain}`);
     }
-    return wallet as T;
   }
 
   /**
@@ -65,7 +71,7 @@ export class PKPClient {
    * @returns {PKPEthersWallet} The Ethereum wallet instance.
    */
   getEthWallet = (): PKPEthersWallet => {
-    return this.getWallet<PKPEthersWallet>('eth');
+    return this.getWallet('eth');
   };
 
   /**
@@ -74,7 +80,7 @@ export class PKPClient {
    * @returns {PKPCosmosWallet} The Cosmos wallet instance.
    */
   getCosmosWallet = (): PKPCosmosWallet => {
-    return this.getWallet<PKPCosmosWallet>('cosmos');
+    return this.getWallet('cosmos');
   };
 
   /**
@@ -97,14 +103,20 @@ export class PKPClient {
    */
   public async connect(): Promise<{
     ready: boolean;
-    res: Array<{ chain: string; success: boolean }>;
+    res: { chain: string; success: boolean }[];
   }> {
     const walletStatus: { chain: string; success: boolean }[] = [];
 
-    for (const [chain, wallet] of this._wallets.entries()) {
+    const wallets = {
+      eth: this.ethWallet,
+      cosmos: this.cosmosWallet,
+    };
+    const walletEntries = Object.entries(wallets);
+
+    for (const [chain, wallet] of walletEntries) {
       try {
-        await wallet.init();
-        walletStatus.push({ chain, success: wallet.litNodeClientReady });
+        await wallet!.init();
+        walletStatus.push({ chain, success: wallet!.litNodeClientReady });
       } catch (error) {
         walletStatus.push({ chain, success: false });
       }
@@ -114,7 +126,7 @@ export class PKPClient {
       (status) => status.success
     ).length;
 
-    if (successfulInits !== this._wallets.size) {
+    if (successfulInits !== walletEntries.length) {
       log(
         `Not all wallets initialized successfully. Details: ${JSON.stringify(
           walletStatus,
@@ -125,7 +137,7 @@ export class PKPClient {
     }
 
     return {
-      ready: successfulInits === this._wallets.size,
+      ready: successfulInits === walletEntries.length,
       res: walletStatus,
     };
   }
