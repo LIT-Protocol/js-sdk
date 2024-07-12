@@ -50,21 +50,7 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     signer: alice.wallet,
   };
 
-  let claimRes;
-
-  console.log('Initiating claimKeyId call');
-  try {
-    claimRes = await withTimeout(
-      devEnv.litNodeClient.claimKeyId(claimRequest),
-      10000
-    ); // 10 seconds timeout
-    console.log('claimKeyId call completed');
-    // process claimRes as before
-  } catch (error) {
-    console.error('❗️ claimKeyId call failed or timed out');
-    devEnv.litNodeClient.disconnect();
-    throw new Error(error);
-  }
+  const claimRes = await devEnv.litNodeClient.claimKeyId(claimRequest);
 
   // Expected output:
   // {
