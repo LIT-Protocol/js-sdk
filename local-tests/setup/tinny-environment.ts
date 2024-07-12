@@ -30,7 +30,7 @@ export class TinnyEnvironment {
    */
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
-    TEST_TIMEOUT:  parseInt(process.env['TEST_TIMEOUT']) || 60000,
+    TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT']) || 60000,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:

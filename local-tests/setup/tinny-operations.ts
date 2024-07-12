@@ -226,7 +226,9 @@ export const runTestsParallel = async ({
   }
 
   const skippedTests = results.filter((result) => result.includes('Skipped'));
-  const failedTests = results.filter((result) => result.includes('Failed') || result.includes('Timed out'));
+  const failedTests = results.filter(
+    (result) => result.includes('Failed') || result.includes('Timed out')
+  );
   const passedTests = results.filter((result) => result.includes('Passed'));
 
   if (skippedTests.length > 0) {
