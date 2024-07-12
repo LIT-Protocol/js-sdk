@@ -642,6 +642,9 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
 };
 
+/**
+ * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['chronicleVesuviusTestnet']` for the new Chronicle Vesuvius Testnet (Jul 2024).
+ */
 export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 
 /**

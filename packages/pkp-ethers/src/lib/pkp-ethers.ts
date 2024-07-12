@@ -43,7 +43,7 @@ import {
   ETHSignature,
   ETHTxRes,
 } from './pkp-ethers-types';
-import { LIT_CHAINS } from '@lit-protocol/constants';
+import { RPC_URL_BY_NETWORK } from '@lit-protocol/constants';
 import { getTransactionToSign, isSignedTransaction } from './helper';
 
 const logger = new Logger(version);
@@ -67,9 +67,14 @@ export class PKPEthersWallet
   constructor(prop: PKPEthersWalletProp) {
     super(prop);
 
-    this.rpcProvider = new ethers.providers.JsonRpcProvider(
-      prop.rpc ?? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]
-    );
+    const rpcUrl =
+      prop.rpc || RPC_URL_BY_NETWORK[prop.litNodeClient.config.litNetwork];
+
+    if (!rpcUrl) {
+      throw new Error('No RPC URL provided');
+    }
+
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
     this.provider = prop.provider ?? this.rpcProvider;
 
