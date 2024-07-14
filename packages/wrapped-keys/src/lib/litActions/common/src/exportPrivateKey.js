@@ -35,9 +35,9 @@ const { removeSaltFromDecryptedKey } = require('../../utils');
   }
 
   try {
-      const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-      Lit.Actions.setResponse({ response: privateKey });
+    const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
+    Lit.Actions.setResponse({ response: privateKey });
   } catch (err) {
-      Lit.Actions.setResponse({ response: err.message });
+    Lit.Actions.setResponse({ response: err.message });
   }
 })();

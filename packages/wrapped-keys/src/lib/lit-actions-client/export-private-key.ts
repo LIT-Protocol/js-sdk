@@ -3,8 +3,7 @@ import { AccessControlConditions } from '@lit-protocol/types';
 import { postLitActionValidation } from './utils';
 import { ExportPrivateKeyParams, StoredKeyMetadata } from '../types';
 
-interface SignMessageWithLitActionParams
-  extends ExportPrivateKeyParams {
+interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
   accessControlConditions: AccessControlConditions;
   storedKeyMetadata: StoredKeyMetadata;
   litActionIpfsCid: string;
@@ -21,7 +20,12 @@ export async function exportPrivateKeyWithLitAction(
     storedKeyMetadata,
   } = args;
 
-  const { pkpAddress, ciphertext, dataToEncryptHash, ...storeKeyMetadataMinusEncryptedAndPkp } = storedKeyMetadata;
+  const {
+    pkpAddress,
+    ciphertext,
+    dataToEncryptHash,
+    ...storeKeyMetadataMinusEncryptedAndPkp
+  } = storedKeyMetadata;
   const result = await litNodeClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
@@ -33,7 +37,7 @@ export async function exportPrivateKeyWithLitAction(
     },
   });
 
-  const decryptedPrivateKey =  postLitActionValidation(result);
+  const decryptedPrivateKey = postLitActionValidation(result);
 
   return {
     decryptedPrivateKey,

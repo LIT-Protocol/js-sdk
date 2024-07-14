@@ -2,10 +2,7 @@ import { exportPrivateKeyWithLitAction } from '../lit-actions-client';
 
 import { fetchPrivateKeyMetadata } from '../service-client';
 import { ExportPrivateKeyParams, ExportPrivateKeyResult } from '../types';
-import {
-  getFirstSessionSig,
-  getPkpAccessControlCondition,
-} from '../utils';
+import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 import { getLitActionCid } from '../lit-actions-client/utils';
 
 /**
@@ -20,7 +17,6 @@ import { getLitActionCid } from '../lit-actions-client/utils';
 export async function exportPrivateKey(
   params: ExportPrivateKeyParams
 ): Promise<ExportPrivateKeyResult> {
-
   const { litNodeClient, network, pkpSessionSigs } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
