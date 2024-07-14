@@ -36,6 +36,7 @@ const { removeSaltFromDecryptedKey } = require('../../utils');
   }
 
   const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
+  const wallet = new ethers.Wallet(privateKey);
 
   try {
     const signature = await wallet.signMessage(messageToSign);
