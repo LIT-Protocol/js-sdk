@@ -13,6 +13,10 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
     evm: 'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd',
     solana: 'QmdRBXYLYvcNHrChmsZ2jFDY8dA99CcSdqHo3p1ES3UThL',
   }),
+  exportPrivateKey: Object.freeze({
+    evm: 'Qmb5ZAm1EZRL7dYTtyYxkPxx4kBmoCjjzcgdrJH9cKMXxR',
+    solana: 'Qmb5ZAm1EZRL7dYTtyYxkPxx4kBmoCjjzcgdrJH9cKMXxR',
+  }),
 });
 
 export { LIT_ACTION_CID_REPOSITORY };

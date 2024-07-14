@@ -70,7 +70,8 @@ export type StoreEncryptedKeyMetadataParams = BaseApiParams &
  * @extends BaseApiParams
  *
  */
-export type ExportPrivateKeyParams = BaseApiParams;
+export type ExportPrivateKeyParams = BaseApiParams &
+  ApiParamsSupportedNetworks;
 
 /** Includes the decrypted private key and metadata that was stored alongside it in the wrapped keys service
  *
