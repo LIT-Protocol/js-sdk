@@ -34,6 +34,7 @@ jobs:
         with: 
           fetch-depth: 0
           repository: LIT-Protocol/lit-assets
+          ref: feature/lit-3506-create-docker-image-for-running-shiva-in-ci
           token: ${{secrets.GH_PAT}}
           path: ${{ github.workspace }}/lit-assets/
           submodules: false
