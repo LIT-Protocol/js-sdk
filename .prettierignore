@@ -12,4 +12,6 @@
 /packages/*/dist
 .nx
 tools
+/packages/wasm/rust/*
+/packages/wasm/src/pkg/*
 **/*/dist

@@ -63,7 +63,9 @@ export interface ILitNodeClient {
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT(signatureShares: NodeBlsSigningShare[]): string;
+  combineSharesAndGetJWT(
+    signatureShares: NodeBlsSigningShare[]
+  ): Promise<string>;
 
   /**
    *

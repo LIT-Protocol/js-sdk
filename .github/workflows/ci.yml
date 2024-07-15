@@ -23,6 +23,12 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@1.76.0
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
       - name: Install project dependencies
         run: yarn --frozen-lockfile
       - uses: nrwl/nx-set-shas@v3
@@ -48,6 +54,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
       - name: Install project dependencies
         run: yarn install
       - name: Build packages
