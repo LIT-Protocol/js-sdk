@@ -6,8 +6,10 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
     solana: 'QmSi9GL2weCFEP1SMAUw5PDpZRr436Zt3tLUNrSECPA5dT',
   }),
   signMessage: Object.freeze({
-    evm: 'QmTMGcyp77NeppGaqF2DmE1F8GXTSxQYzXCrbE7hNudUWx',
-    solana: 'QmUxnWS8VU9QwZRdyfwsEtvhJZcvcdrannjokgZoA1sesy',
+    // evm: 'QmTMGcyp77NeppGaqF2DmE1F8GXTSxQYzXCrbE7hNudUWx',
+    evm: 'QmTbyRQJTK83nsuFizZZsSLtTgbK7jgLZYbEKRtUAQEwAX',
+    // solana: 'QmUxnWS8VU9QwZRdyfwsEtvhJZcvcdrannjokgZoA1sesy',
+    solana: 'QmNfC9oEsj72hEvLSviDMYG97omne2XBs3mn3SXsRAsJBq',
   }),
   generateEncryptedKey: Object.freeze({
     evm: 'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd',
