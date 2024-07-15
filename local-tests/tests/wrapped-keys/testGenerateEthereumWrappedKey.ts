@@ -49,10 +49,10 @@ export const testGenerateEthereumWrappedKey = async (
 
   console.log(pkpSessionSigsExport);
 
-  // FIXME: Export broken as we can't decrypt data encrypted inside a Lit Action
   const { decryptedPrivateKey } = await exportPrivateKey({
     pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
+    network: 'evm',
   });
 
   const wallet = new ethers.Wallet(decryptedPrivateKey);

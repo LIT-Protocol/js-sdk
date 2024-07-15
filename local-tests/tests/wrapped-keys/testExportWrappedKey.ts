@@ -52,6 +52,7 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
   const { decryptedPrivateKey } = await exportPrivateKey({
     pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
+    network: 'solana',
   });
 
   if (decryptedPrivateKey !== privateKey) {

@@ -4,7 +4,7 @@ import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
-import { ethers } from 'ethers';
+import { Keypair } from '@solana/web3.js';
 
 const { generatePrivateKey, signMessageWithEncryptedKey, exportPrivateKey } =
   api;
@@ -83,16 +83,18 @@ export const testGenerateSolanaWrappedKey = async (
     new Date(Date.now() + 1000 * 60 * 10).toISOString()
   ); // 10 mins expiry
 
-  // FIXME: Export broken as we can't decrypt data encrypted inside a Lit Action
   const { decryptedPrivateKey } = await exportPrivateKey({
     pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
+    network: 'solana',
   });
 
-  const wallet = new ethers.Wallet(decryptedPrivateKey);
-  const decryptedPublicKey = wallet.publicKey;
+  const solanaKeyPair = Keypair.fromSecretKey(
+    Buffer.from(decryptedPrivateKey, 'hex')
+  );
+  const decryptedPublicKey = solanaKeyPair.publicKey;
 
-  if (decryptedPublicKey !== generatedPublicKey) {
+  if (decryptedPublicKey.toString() !== generatedPublicKey) {
     throw new Error(
       `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
     );

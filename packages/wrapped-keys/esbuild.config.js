@@ -25,4 +25,12 @@ const esbuild = require('esbuild');
     outdir: './src/lib/litActions/ethereum/dist',
     inject: ['./buffer.shim.js'],
   });
+  await esbuild.build({
+    entryPoints: ['./src/lib/litActions/common/src/exportPrivateKey.js'],
+    bundle: true,
+    minify: true,
+    sourcemap: false,
+    outdir: './src/lib/litActions/common/dist',
+    inject: ['./buffer.shim.js'],
+  });
 })();
