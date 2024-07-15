@@ -24,6 +24,7 @@ const supportedNetworks: SupportedNetworks[] = [
   'manzano',
   'habanero',
   'datil-dev',
+  'datil-test',
 ];
 
 function isSupportedLitNetwork(

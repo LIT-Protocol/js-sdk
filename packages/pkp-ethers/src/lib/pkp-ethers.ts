@@ -51,6 +51,7 @@ import {
   ETHSignature,
   ETHTxRes,
 } from './pkp-ethers-types';
+import { RPC_URL_BY_NETWORK } from '@lit-protocol/constants';
 
 const logger = new Logger(version);
 
@@ -83,15 +84,14 @@ export class PKPEthersWallet
   constructor(prop: PKPEthersWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
 
-    /**
-     * @depreacted This is a quick patch for 6.1.1 - Proper fix is handled in this PR
-     * https://github.com/LIT-Protocol/js-sdk/pull/523
-     */
     const rpcUrl =
-      prop.rpc ||
-      (prop.litNodeClient.config.litNetwork === 'datil-dev'
-        ? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]
-        : LIT_CHAINS['datilDevnet'].rpcUrls[0]);
+      prop.rpc || RPC_URL_BY_NETWORK[prop.litNodeClient.config.litNetwork];
+
+    if (!rpcUrl) {
+      throw new Error('No RPC URL provided');
+    }
+
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
     if (!rpcUrl) {
       throw new Error('rpcUrl is required');
