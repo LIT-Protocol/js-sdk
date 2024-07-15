@@ -26,11 +26,19 @@ export const RPC_MAP = {
   [LIT_TESTNET.DATIL_TEST]: LIT_RPC.VESUVIUS,
 };
 
+/**
+ * Represents the configuration options for the process environment.
+ */
 export interface ProcessEnvs {
   /**
    * Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.
    */
   MAX_ATTEMPTS: number;
+
+  /**
+   * The maximum number of milliseconds to wait for a test to complete.
+   */
+  TEST_TIMEOUT: number;
 
   /**
    * The network to use for testing. This can be one of the following:
