@@ -130,114 +130,62 @@ export class TestnetClient {
   /**
    * Returns the config for a given testnet
    */
-  public getTestnetConfig() {
-    return fetch(
+  public async getTestnetConfig() {
+    const res = await fetch(
       this._processEnvs.TESTNET_MANAGER_URL +
         '/test/get/info/testnet/' +
         this._id
-    )
-      .then((res: Response) => {
-        if (res.status === 200 || res.status === 500) {
-          return res.json();
-        } else {
-          return res.text();
-        }
-      })
-      .then((res: TestNetResponse<boolean>) => {
-        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
-        if (typeof res === 'string') {
-          throw new Error(res);
-        }
-        if (res.errors != null) {
-          throw new ShivaError(res);
-        }
-        console.log('Stopped random peer: ', res);
-      });
+    );
+
+    let testnetConfigRes = _processTestnetResponse<boolean>(res);
+
+    return testnetConfigRes;
   }
 
   /**
    * Will wait for the NEXT epoch and return a resposne when the epoch has fully transitioned.
    * The return time is directly proportional to the epoch transition time config and where the network is with the current epoch.
    */
-  public transitionEpochAndWait() {
-    return fetch(
+  public async transitionEpochAndWait() {
+    const res = await fetch(
       this._processEnvs.TESTNET_MANAGER_URL +
         '/test/action/transition/epoch/wait/' +
         this._id
-    )
-      .then((res: Response) => {
-        if (res.status === 200 || res.status === 500) {
-          return res.json();
-        } else {
-          return res.text();
-        }
-      })
-      .then((res: TestNetResponse<boolean>) => {
-        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
-        if (typeof res === 'string') {
-          throw new Error(res);
-        }
-        if (res.errors != null) {
-          throw new ShivaError(res);
-        }
-        console.log('Stopped random peer: ', res);
-      });
+    );
+
+    let transitionEpochAndWaitRes = _processTestnetResponse<boolean>(res);
+
+    return transitionEpochAndWaitRes;
   }
 
   /**
    * Stops a random peer and waits for the next epoc to transiton.
    * The return time is directly proportional to the epoch transition time config and where the network is with the current epoch.
    */
-  public stopRandomNetworkPeerAndWaitForNextEpoch() {
-    return fetch(
+  public async stopRandomNetworkPeerAndWaitForNextEpoch() {
+    const res = await fetch(
       this._processEnvs.TESTNET_MANAGER_URL +
         '/test/action/stop/random/wait/' +
         this._id
-    )
-      .then((res: Response) => {
-        if (res.status === 200 || res.status === 500) {
-          return res.json();
-        } else {
-          return res.text();
-        }
-      })
-      .then((res: TestNetResponse<boolean>) => {
-        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
-        if (typeof res === 'string') {
-          throw new Error(res);
-        }
-        if (res.errors != null) {
-          throw new ShivaError(res);
-        }
-        console.log('Stopped random peer: ', res);
-      });
+    );
+
+    let randomPeerStopRes = _processTestnetResponse<boolean>(res);
+
+    return randomPeerStopRes;
   }
 
   /*
     Stops the testnet
   */
-  public stopTestnet() {
+  public async stopTestnet() {
     console.log('stopping testnet with id:', this._id);
-    return fetch(
+    const res = await fetch(
       this._processEnvs.TESTNET_MANAGER_URL + '/test/delete/testnet/' + this._id
-    )
-      .then((res: Response) => {
-        if (res.status === 200) {
-          return res.json();
-        } else {
-          return res.text();
-        }
-      })
-      .then((res: TestNetResponse<boolean>) => {
-        // if we find the type of the eror is not an object we throw wrapped in a geenric error type
-        if (typeof res === 'string') {
-          throw new Error(res);
-        }
-        if (res.errors != null) {
-          throw new ShivaError(res);
-        }
-        console.log('Stopped random peer: ', res);
-      });
+    );
+
+    let testnetResp = _processTestnetResponse<boolean>(res);
+
+    return testnetResp;
   }
 }
 
@@ -311,19 +259,7 @@ export class ShivaClient {
         }
       );
 
-      let createTestnet: TestNetResponse<void>;
-      try {
-        createTestnet =
-          (await createTestnetResp.json()) as TestNetResponse<void>;
-      } catch (err) {
-        let message = await createTestnetResp.text();
-        console.error('Error while creating testnet instance:', message);
-        throw new Error(message);
-      }
-      // if we get a 500 status and the JSON parsed we know that we should
-      if (createTestnetResp.status === 500) {
-        throw new ShivaError(createTestnet); // throw the object as an error if the status was not 200 and we could parse as JSON
-      }
+      const createTestnet = await _processTestnetResponse(createTestnetResp);
 
       this._clients.set(
         createTestnet.testnetId,
@@ -333,4 +269,24 @@ export class ShivaClient {
       return this._clients.get(createTestnet.testnetId);
     }
   }
+}
+
+async function _processTestnetResponse<T>(
+  response: Response
+): Promise<TestNetResponse<T>> {
+  let createTestnet: TestNetResponse<T>;
+  try {
+    createTestnet = (await response.json()) as TestNetResponse<T>;
+  } catch (err) {
+    let message = await response.text();
+    console.error('Error while creating testnet instance:', message);
+    throw new Error(message);
+  }
+  // if we get a 500 status and the JSON parsed we know that we should
+  // throw the custom error type
+  if (response.status === 500) {
+    throw new ShivaError(createTestnet);
+  }
+
+  return createTestnet;
 }
