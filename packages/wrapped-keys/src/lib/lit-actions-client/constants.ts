@@ -2,14 +2,12 @@ import { LitCidRepository } from './types';
 
 const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   signTransaction: Object.freeze({
-    evm: 'QmdYUhPCCK5hpDWMK1NiDLNLG6RZQy61QE4J7dBm1Y2nbA',
-    solana: 'QmSi9GL2weCFEP1SMAUw5PDpZRr436Zt3tLUNrSECPA5dT',
+    evm: 'QmSsgmy1N1zFZ5yNPCY7QWQZwrYRLuYUJF1VDygJc7L26o',
+    solana: 'QmdkcMmrtqWSQ8VrPr8KwzuzZnAxGJoVDeZP3NKTWCMZCg',
   }),
   signMessage: Object.freeze({
-    // evm: 'QmTMGcyp77NeppGaqF2DmE1F8GXTSxQYzXCrbE7hNudUWx',
-    evm: 'QmTbyRQJTK83nsuFizZZsSLtTgbK7jgLZYbEKRtUAQEwAX',
-    // solana: 'QmUxnWS8VU9QwZRdyfwsEtvhJZcvcdrannjokgZoA1sesy',
-    solana: 'QmNfC9oEsj72hEvLSviDMYG97omne2XBs3mn3SXsRAsJBq',
+    evm: 'QmWVW51FBH5j3wwaMVy8MR1QyzJgEjuaPh1yqwSGXRCENx',
+    solana: 'QmSPcfFhLofjhNDd5ZdVbhw53zmbR8oV4C2585Bm7C8izH',
   }),
   generateEncryptedKey: Object.freeze({
     evm: 'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd',
