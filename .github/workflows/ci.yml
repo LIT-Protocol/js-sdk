@@ -44,7 +44,7 @@ jobs:
         run: ls -la ${{github.workspace}}/lit-assets
       - name: Install LA Blockchain Dependencies
         run: npm i
-        working-directory: ${{ github.workspace }}/lit-assets/blockchain/contracts
+        working-directory: ${{github.workspace}}/lit-assets/blockchain/contracts
       - name: Docker login
         id: login
         run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
@@ -53,7 +53,7 @@ jobs:
         run: docker pull ghcr.io/lit-protocol/shiva:latest 
       - name: Run Shiva Container
         id: shiva-run
-        run: docker run -d -p 0.0.0.0:8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH="7a67a98c3648e0a4c38a210a084a5ca8bef577ae" -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:latest
+        run: docker run -d -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH="7a67a98c3648e0a4c38a210a084a5ca8bef577ae" -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:latest
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
