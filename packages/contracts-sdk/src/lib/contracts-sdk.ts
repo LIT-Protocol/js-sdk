@@ -584,7 +584,10 @@ export class LitContracts {
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
-      provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+      provider = new ethers.providers.JsonRpcProvider({
+        rpcUrl,
+        skipFetchSetup: true,
+      });
     }
 
     if (network === 'datil-dev' || network === 'datil-test') {
