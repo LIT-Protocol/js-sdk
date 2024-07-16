@@ -1,12 +1,12 @@
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+import { Secp256k1 } from '@cosmjs/crypto';
+import { toBech32 } from '@cosmjs/encoding';
 import * as bitcoinjs from 'bitcoinjs-lib';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
-import { toBech32 } from '@cosmjs/encoding';
-import { Secp256k1 } from '@cosmjs/crypto';
 
-import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-export type TokenInfo = {
+import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
+export interface TokenInfo {
   tokenId: string;
   publicKey: string;
   publicKeyBuffer: Buffer;
@@ -14,7 +14,7 @@ export type TokenInfo = {
   btcAddress: string;
   cosmosAddress: string;
   isNewPKP: boolean;
-};
+}
 
 export const derivedAddresses = async ({
   publicKey,
@@ -64,7 +64,9 @@ export const derivedAddresses = async ({
         if (cachedPkpJSON[pkpTokenId]) {
           publicKey = cachedPkpJSON[pkpTokenId];
         } else {
-          const provider = new ethers.providers.JsonRpcProvider(defaultRPCUrl);
+          const provider = new ethers.providers.StaticJsonRpcProvider(
+            defaultRPCUrl
+          );
 
           const contract = new Contract(
             pkpContractAddress,
@@ -89,7 +91,7 @@ export const derivedAddresses = async ({
           cachedPkpJSON[pkpTokenId] = publicKey;
           localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
         } else {
-          const cachedPkpJSON: { [key: string]: any } = {};
+          const cachedPkpJSON: Record<string, any> = {};
           cachedPkpJSON[pkpTokenId] = publicKey;
           localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
         }
