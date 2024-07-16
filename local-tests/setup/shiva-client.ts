@@ -107,15 +107,13 @@ export class TestnetClient {
   public async pollTestnetForActive(): Promise<string> {
     let state = 'Busy';
     while (state != 'Active' && state != `UNKNOWN`) {
-      const pollRes = await fetch(
+      const res = await fetch(
         this._processEnvs.TESTNET_MANAGER_URL + '/test/poll/testnet/' + this._id
       );
-      const res: TestNetResponse<TestNetState> = await pollRes.json();
-      if (pollRes.status != 200) {
-        throw new ShivaError(res); // throw the response as an error
-      }
-      state = res.body;
-      console.log('found state to be', res);
+      const stateRes: TestNetResponse<TestNetState> =
+        await _processTestnetResponse<TestNetState>(res);
+      state = stateRes.body;
+      console.log('found state to be', state);
 
       await new Promise<void>((res, _) => {
         setTimeout(() => {
@@ -137,9 +135,7 @@ export class TestnetClient {
         this._id
     );
 
-    let testnetConfigRes = _processTestnetResponse<boolean>(res);
-
-    return testnetConfigRes;
+    return _processTestnetResponse<boolean>(res);
   }
 
   /**
@@ -169,9 +165,7 @@ export class TestnetClient {
         this._id
     );
 
-    let randomPeerStopRes = _processTestnetResponse<boolean>(res);
-
-    return randomPeerStopRes;
+    return _processTestnetResponse<boolean>(res);
   }
 
   /*
@@ -183,9 +177,7 @@ export class TestnetClient {
       this._processEnvs.TESTNET_MANAGER_URL + '/test/delete/testnet/' + this._id
     );
 
-    let testnetResp = _processTestnetResponse<boolean>(res);
-
-    return testnetResp;
+    return _processTestnetResponse<boolean>(res);
   }
 }
 
@@ -259,7 +251,9 @@ export class ShivaClient {
         }
       );
 
-      const createTestnet = await _processTestnetResponse(createTestnetResp);
+      const createTestnet = await _processTestnetResponse<void>(
+        createTestnetResp
+      );
 
       this._clients.set(
         createTestnet.testnetId,
@@ -279,9 +273,9 @@ async function _processTestnetResponse<T>(
     createTestnet = (await response.json()) as TestNetResponse<T>;
   } catch (err) {
     let message = await response.text();
-    console.error('Error while creating testnet instance:', message);
-    throw new Error(message);
+    throw new Error('Error while performing testnet request: ' + message);
   }
+
   // if we get a 500 status and the JSON parsed we know that we should
   // throw the custom error type
   if (response.status === 500) {
