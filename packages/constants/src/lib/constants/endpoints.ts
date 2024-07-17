@@ -15,7 +15,7 @@ export const LIT_ENDPOINT = {
   },
   EXECUTE_JS: {
     path: '/web/execute',
-    version: LIT_ENDPOINT_VERSION.V1,
+    version: LIT_ENDPOINT_VERSION.V2,
   },
   PKP_SIGN: {
     path: '/web/pkp/sign',
