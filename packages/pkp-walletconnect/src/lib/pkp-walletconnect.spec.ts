@@ -1,45 +1,68 @@
 // @ts-expect-error - set global variable for testing
 global.jestTesting = true;
 
-import * as LITCONFIG from 'lit.config.json';
-import { PKPClient } from '@lit-protocol/pkp-client';
 import { Core } from '@walletconnect/core';
 import { SignClientTypes } from '@walletconnect/types';
 import { getSdkError } from '@walletconnect/utils';
 import { Web3Wallet } from '@walletconnect/web3wallet';
+import { ethers } from 'ethers';
+
+import {
+  createSiweMessageWithRecaps,
+  generateAuthSig,
+  LitAbility,
+  LitPKPResource,
+} from '@lit-protocol/auth-helpers';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
 import { PKPWalletConnect } from './pkp-walletconnect';
 
-const LITCONFIG = {
-  PKP_PUBKEY:
-    '04b5caf00c9f5adc9b22ca460b88482bad44ed4fac8ee63014b727cf60efc568dbdfe498a94fbd9cd294d651529f9fe76e057e9736150eea038415b06f64a87939',
-  PKP_ETH_ADDRESS: '0xDd66eE5E696911F92e19B8612F711FA508816a6e',
-  CONTROLLER_AUTHSIG: {
-    sig: '0x137b66529678d1fc58ab5b340ad036082af5b9912f823ba22c2851b8f50990a666ad8f2ab2328e8c94414c0a870163743bde91a5f96e9f967fd45d5e0c17c3911b',
-    derivedVia: 'web3.eth.personal.sign',
-    signedMessage:
-      'localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: eoeo0dsvyLL2gcHsC\nIssued At: 2023-11-17T15:04:20.324Z\nExpiration Time: 2215-07-14T15:04:20.323Z',
-    address: '0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37',
-  },
-};
+const wallet = ethers.Wallet.createRandom();
 
 jest.setTimeout(120000);
 
 jest.mock('@walletconnect/core');
 jest.mock('@walletconnect/web3wallet');
 
-const PKP_PUBKEY = LITCONFIG.PKP_PUBKEY;
-const PKP_ETH_ADDRESS = LITCONFIG.PKP_ETH_ADDRESS;
-
 describe('PKPWalletConnect', () => {
-  let pkpClient: PKPClient;
+  let pkpEthersWallet: PKPEthersWallet;
   let pkpWalletConnect: PKPWalletConnect;
 
   beforeAll(() => {
-    pkpClient = new PKPClient({
-      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      pkpPubKey: PKP_PUBKEY,
-      cosmosAddressPrefix: 'cosmos',
+    const litNodeClient = new LitNodeClient({ litNetwork: 'localhost' });
+
+    pkpEthersWallet = new PKPEthersWallet({
+      litNodeClient,
+      pkpPubKey: wallet.publicKey,
+      authContext: {
+        getSessionSigsProps: {
+          authNeededCallback: async function (
+            params: AuthCallbackParams
+          ): Promise<AuthSig> {
+            const toSign = await createSiweMessageWithRecaps({
+              uri: params.uri!,
+              expiration: params.expiration!,
+              resources: params.resourceAbilityRequests!,
+              walletAddress: wallet.address,
+              nonce: await litNodeClient.getLatestBlockhash(),
+              litNodeClient,
+            });
+
+            return await generateAuthSig({
+              signer: wallet,
+              toSign,
+            });
+          },
+          resourceAbilityRequests: [
+            {
+              resource: new LitPKPResource('*'),
+              ability: LitAbility.PKPSigning,
+            },
+          ],
+        },
+      },
     });
 
     pkpWalletConnect = new PKPWalletConnect(true);
@@ -47,16 +70,15 @@ describe('PKPWalletConnect', () => {
 
   describe('getPKPClients', () => {
     it('should return the current list of PKPClients', () => {
-      expect(pkpWalletConnect.getPKPClients()).toEqual([]);
-      pkpWalletConnect.addPKPClient(pkpClient);
-      expect(pkpWalletConnect.getPKPClients()).toEqual([pkpClient]);
+      expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([]);
+      pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
+      expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([pkpEthersWallet]);
     });
   });
 
   describe('with a PKPClient', () => {
     beforeAll(async () => {
-      await pkpClient.connect();
-      pkpWalletConnect.addPKPClient(pkpClient);
+      pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
     });
 
     afterEach(() => {
@@ -66,14 +88,14 @@ describe('PKPWalletConnect', () => {
     describe('getAccounts', () => {
       it('should return an array of addresses for the given chain', async () => {
         const result = await pkpWalletConnect.getAccounts('eip155');
-        expect(result).toEqual([PKP_ETH_ADDRESS]);
+        expect(result).toEqual([wallet.address]);
       });
     });
 
     describe('getAccountsWithPrefix', () => {
       it('should return an array of addresses with prefix for the given chain', async () => {
         const result = await pkpWalletConnect.getAccountsWithPrefix('eip155:1');
-        expect(result).toEqual([`eip155:1:${PKP_ETH_ADDRESS}`]);
+        expect(result).toEqual([`eip155:1:${wallet.address}`]);
       });
     });
 
@@ -96,7 +118,7 @@ describe('PKPWalletConnect', () => {
           method: 'personal_sign',
           params: ['0xdeadbeaf', '0x9b2055d370f73ec7d8a03e965129118dc8f5bf83'],
         };
-        const result = await pkpWalletConnect.findPKPClientByRequestParams(
+        const result = await pkpWalletConnect.findPKPEthersWalletByRequestParams(
           request
         );
         expect(result).toBeNull();
@@ -105,25 +127,25 @@ describe('PKPWalletConnect', () => {
       it('should return the PKPClient if its address is found within the request params', async () => {
         const request = {
           method: 'personal_sign',
-          params: ['0xdeadbeaf', PKP_ETH_ADDRESS],
+          params: ['0xdeadbeaf', wallet.address],
         };
-        const result = await pkpWalletConnect.findPKPClientByRequestParams(
+        const result = await pkpWalletConnect.findPKPEthersWalletByRequestParams(
           request
         );
-        expect(result).toEqual(pkpClient);
+        expect(result).toEqual(pkpEthersWallet);
       });
     });
 
     describe('addPKPClient', () => {
       it('should add the PKPClient if it is not already in the list', () => {
-        pkpWalletConnect.addPKPClient(pkpClient);
-        expect(pkpWalletConnect.getPKPClients()).toEqual([pkpClient]);
+        pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
+        expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([pkpEthersWallet]);
       });
 
       it('should not add the PKPClient if it is already in the list', () => {
-        pkpWalletConnect.addPKPClient(pkpClient);
-        pkpWalletConnect.addPKPClient(pkpClient);
-        expect(pkpWalletConnect.getPKPClients()).toEqual([pkpClient]);
+        pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
+        pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
+        expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([pkpEthersWallet]);
       });
     });
   });
@@ -190,8 +212,8 @@ describe('PKPWalletConnect', () => {
         eip155: {
           accounts: [
             ...new Set([
-              ...requiredChains.map((chain) => `${chain}:${PKP_ETH_ADDRESS}`),
-              ...optionalChains.map((chain) => `${chain}:${PKP_ETH_ADDRESS}`),
+              ...requiredChains.map((chain) => `${chain}:${wallet.address}`),
+              ...optionalChains.map((chain) => `${chain}:${wallet.address}`),
             ]),
           ],
           chains: [...new Set([...requiredChains, ...optionalChains])],

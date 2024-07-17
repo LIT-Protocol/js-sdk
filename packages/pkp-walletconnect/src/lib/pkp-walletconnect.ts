@@ -1,21 +1,4 @@
-import {
-  SupportedETHSigningMethods,
-  ethRequestHandler,
-  methodHandlers,
-  isEthRequest,
-} from '@lit-protocol/pkp-ethers';
-import { LIT_CHAINS } from '@lit-protocol/constants';
 import { Core } from '@walletconnect/core';
-import {
-  IWeb3Wallet,
-  Web3Wallet,
-  Web3WalletTypes,
-} from '@walletconnect/web3wallet';
-import {
-  formatAccountWithChain,
-  getSdkError,
-  parseChainId,
-} from '@walletconnect/utils';
 import {
   ErrorResponse,
   formatJsonRpcError,
@@ -28,8 +11,25 @@ import {
   SessionTypes,
   SignClientTypes,
 } from '@walletconnect/types';
-import { PKPClient } from '@lit-protocol/pkp-client';
-import { PKPBase } from '@lit-protocol/pkp-base';
+import {
+  formatAccountWithChain,
+  getSdkError,
+  parseChainId,
+} from '@walletconnect/utils';
+import {
+  IWeb3Wallet,
+  Web3Wallet,
+  Web3WalletTypes,
+} from '@walletconnect/web3wallet';
+
+import { LIT_CHAINS } from '@lit-protocol/constants';
+import {
+  PKPEthersWallet,
+  SupportedETHSigningMethods,
+  ethRequestHandler,
+  methodHandlers,
+  isEthRequest,
+} from '@lit-protocol/pkp-ethers';
 
 const DEFAULT_RELAY_URL = 'wss://relay.walletconnect.com';
 
@@ -42,8 +42,8 @@ export interface InitWalletConnectParams
 export class PKPWalletConnect {
   // WalletConnect client
   private client: IWeb3Wallet | undefined;
-  // List of PKPClients
-  private pkpClients: PKPClient[] = [];
+  // List of PKP wallets
+  private pkpEthersWallets: PKPEthersWallet[] = [];
 
   // For logging
   private readonly debug: boolean = false;
@@ -76,10 +76,7 @@ export class PKPWalletConnect {
       ...(this.debug && { logger: 'debug' }),
     };
 
-    // we might have a version mismatch here due to multiple versions of WalletConnect
-    // libs `@walletconnect/types` hence temp fix with `any` for now. but above `coreOpts`
-    // type is enforced
-    const core = new Core(coreOpts as any);
+    const core = new Core(coreOpts);
 
     this.client = await Web3Wallet.init({
       core,
@@ -304,10 +301,10 @@ export class PKPWalletConnect {
 
     const { id, topic, params } = requestEvent;
     const { request } = params;
-    const pkpClient = await this.findPKPClientByRequestParams(request);
+    const pkpEthersWallet = await this.findPKPEthersWalletByRequestParams(request);
 
-    // Find the PKPClient corresponding to the account in the request
-    if (!pkpClient) {
+    // Find the PKPEthersWallet corresponding to the account in the request
+    if (!pkpEthersWallet) {
       response = formatJsonRpcError(id, getSdkError('UNSUPPORTED_ACCOUNTS'));
       return await this.respondSessionRequest({
         topic,
@@ -319,9 +316,8 @@ export class PKPWalletConnect {
     try {
       // Handle Ethereum request
       if (isEthRequest(request.method)) {
-        const wallet = pkpClient.getEthWallet();
         const result = await ethRequestHandler({
-          signer: wallet,
+          signer: pkpEthersWallet,
           payload: {
             method: request.method as SupportedETHSigningMethods,
             params: request.params,
@@ -440,7 +436,7 @@ export class PKPWalletConnect {
    */
   public emitSessionEvent: IWeb3Wallet['emitSessionEvent'] = async (params: {
     topic: string;
-    event: any;
+    event: unknown; // It is defined as any in IWeb3Wallet, we don't care here
     chainId: string;
   }): Promise<void> => {
     this.client = this._isWalletConnectInitialized(this.client);
@@ -493,24 +489,24 @@ export class PKPWalletConnect {
 
   // ----------------- WalletConnect event handlers -----------------
 
-  public on(name: Web3WalletTypes.Event, listener: (args: any) => void) {
+  public on<E extends Web3WalletTypes.Event>(name: E, listener: (args: Web3WalletTypes.EventArguments[E]) => void) {
     this.client = this._isWalletConnectInitialized(this.client);
     return this.client.on(name, listener);
   }
 
-  public once(name: Web3WalletTypes.Event, listener: (args: any) => void) {
+  public once<E extends Web3WalletTypes.Event>(name: E, listener: (args: Web3WalletTypes.EventArguments[E]) => void) {
     this.client = this._isWalletConnectInitialized(this.client);
     return this.client.once(name, listener);
   }
 
-  public off(name: Web3WalletTypes.Event, listener: (args: any) => void) {
+  public off<E extends Web3WalletTypes.Event>(name: E, listener: (args: Web3WalletTypes.EventArguments[E]) => void) {
     this.client = this._isWalletConnectInitialized(this.client);
     return this.client.off(name, listener);
   }
 
-  public removeListener(
-    name: Web3WalletTypes.Event,
-    listener: (args: any) => void
+  public removeListener<E extends Web3WalletTypes.Event>(
+    name: E,
+    listener: (args: Web3WalletTypes.EventArguments[E]) => void
   ) {
     this.client = this._isWalletConnectInitialized(this.client);
     return this.client.removeListener(name, listener);
@@ -527,15 +523,11 @@ export class PKPWalletConnect {
    */
   public async getAccounts(chainName: string): Promise<string[]> {
     const addresses: string[] = [];
-    if (this.pkpClients.length === 0) {
-      return addresses;
-    }
-    // TODO: Update this once we support more JSON RPC handlers
-    for (const pkpClient of this.pkpClients) {
+    for (const pkpEthersWallet of this.pkpEthersWallets) {
       let address: string;
       switch (chainName) {
         case 'eip155':
-          address = await pkpClient.getEthWallet().getAddress();
+          address = await pkpEthersWallet.getAddress();
           addresses.push(address);
           break;
         default:
@@ -554,17 +546,14 @@ export class PKPWalletConnect {
    */
   public async getAccountsWithPrefix(chain: string): Promise<string[]> {
     const addresses: string[] = [];
-    if (this.pkpClients.length === 0) {
-      return addresses;
-    }
     const parsedChain = parseChainId(chain);
     const chainName = parsedChain.namespace;
     // TODO: Update this once we support more JSON RPC handlers
-    for (const pkpClient of this.pkpClients) {
+    for (const pkpEtheresWallet of this.pkpEthersWallets) {
       let address: string;
       switch (chainName) {
         case 'eip155':
-          address = await pkpClient.getEthWallet().getAddress();
+          address = await pkpEtheresWallet.getAddress();
           addresses.push(formatAccountWithChain(address, chain));
           break;
         default:
@@ -604,57 +593,56 @@ export class PKPWalletConnect {
   }
 
   /**
-   * Find PKPClient by request event params
+   * Find PKPEthersWallet by request event params
    *
    * @param {any} params - Request event params
    */
-  public async findPKPClientByRequestParams(
-    params: any
-  ): Promise<PKPClient | null> {
+  public async findPKPEthersWalletByRequestParams(
+    params: unknown // We don't care, we just stringify it to search for the address
+  ): Promise<PKPEthersWallet | null> {
     const paramsString = JSON.stringify(params);
 
     // Loop through all wallets and find the one that has an address that can be found within the request params
-    for (const pkpClient of this.pkpClients) {
+    for (const pkpEthersWallet of this.pkpEthersWallets) {
       // TODO: Update this once we support more JSON RPC handlers
-      const ethWallet = pkpClient.getEthWallet();
-      const ethAddress = await ethWallet.getAddress();
+      const ethAddress = await pkpEthersWallet.getAddress();
       if (paramsString.toLowerCase().includes(ethAddress.toLowerCase())) {
-        return pkpClient;
+        return pkpEthersWallet;
       }
     }
     return null;
   }
 
   /**
-   * Add a PKPClient to list of PKPClients if not already added
+   * Add a PKPEthersWallet to list of PKPEthersWallet if not already added
    *
-   * @param {PKPClient} pkpClient - The PKPClient instance
+   * @param {PKPEthersWallet} pkpEthersWallet - The PKPEthersWallet instance
    */
-  public addPKPClient(pkpClient: PKPClient): void {
-    const existingClient = this.pkpClients.find(
-      (client) => client.pkpPubKey === pkpClient.pkpPubKey
+  public addPKPEthersWallet(pkpEthersWallet: PKPEthersWallet): void {
+    const existingWallet = this.pkpEthersWallets.find(
+      (wallet) => wallet.publicKey === pkpEthersWallet.publicKey
     );
-    if (!existingClient) {
-      this.pkpClients.push(pkpClient);
+    if (!existingWallet) {
+      this.pkpEthersWallets.push(pkpEthersWallet);
     }
   }
 
   /**
-   * Get current list of PKPClients
+   * Get current list of PKPEthersWallet
    *
-   * @returns {PKPClient[]} - List of PKPClients
+   * @returns {PKPEthersWallet[]} - List of PKPEthersWallet
    */
-  public getPKPClients(): PKPClient[] {
-    return this.pkpClients;
+  public getPKPEthersWallets(): PKPEthersWallet[] {
+    return this.pkpEthersWallets;
   }
 
   /**
-   * Replace list of PKPClients
+   * Replace list of PKPEthersWallet
    *
-   * @param {PKPClient[]} clients - List of PKPClients
+   * @param {PKPEthersWallet[]} pkpEthersWallets - List of PKPEthersWallet
    */
-  public setPKPClients(clients: PKPClient[]): void {
-    this.pkpClients = clients;
+  public setPKPEthersWallets(pkpEthersWallets: PKPEthersWallet[]): void {
+    this.pkpEthersWallets = pkpEthersWallets;
   }
 
   // ----------------- Private methods -----------------
