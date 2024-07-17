@@ -162,6 +162,17 @@ export const throwErrorV1 = ({
   errorCode,
   requestId,
 }: NodeClientErrorV1): never => {
+  throw new Error(
+    JSON.stringify({
+      errorKind,
+      details,
+      status,
+      message,
+      errorCode,
+      requestId,
+    }) as any
+  );
+
   const errConstructorFunc = function (
     this: any,
     errorKind: string,
