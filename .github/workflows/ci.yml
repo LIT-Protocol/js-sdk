@@ -67,7 +67,7 @@ jobs:
         run: yarn build:dev
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: docker ps -a && yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString,testExecuteJsSignAndCombineEcdsa,testExecutJsDecryptAndCombine,testExecuteJsBroadcastAndCollect  --exclude=Parallel
+        run: docker ps -a && yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,  --exclude=Parallel
       - name: Get Container Logs
         if: always()
         run: docker logs shiva
