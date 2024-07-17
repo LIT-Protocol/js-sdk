@@ -74,7 +74,6 @@ import {
   LIT_RPC,
 } from '@lit-protocol/constants';
 import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
-import { Allowlist } from '../../dist/src/abis/Allowlist.sol/Allowlist';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
