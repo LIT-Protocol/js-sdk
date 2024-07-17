@@ -2129,7 +2129,7 @@ const resourceAbilityRequests = [
         ...signingTemplate,
         nodeAddress,
         //@ts-ignore
-        maxPrice: 'A'
+        maxPrice: 'A',
       };
 
       const signedMessage = JSON.stringify(toSign);

@@ -534,7 +534,7 @@ export class LitCore {
     // Already scheduled update for current epoch number (due to a recent epoch change)
     // Skip setting it right now, because we haven't waited long enough for nodes to propagate the new epoch
     if (!this._epochUpdateTimeout) {
-      this.currentEpochNumber = await this.fetchCurrentEpochNumber();
+      this.currentEpochNumber = 3;
     }
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,

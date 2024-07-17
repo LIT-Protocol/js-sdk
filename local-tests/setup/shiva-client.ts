@@ -1,4 +1,7 @@
-import { LitContractResolverContext } from '@lit-protocol/types';
+import {
+  LitContractContext,
+  LitContractResolverContext,
+} from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import {
   TestNetCreateRequest,
@@ -13,13 +16,13 @@ import { error } from 'node:console';
 
 const httpAgent = new http.Agent({ keepAlive: true });
 const httpsAgent = new https.Agent({ keepAlive: true });
-const agentSelector = function(_parsedURL: any) {
-    if (_parsedURL.protocol == 'http:') {
-        return httpAgent;
-    } else {
-        return httpsAgent;
-    }
-}
+const agentSelector = function (_parsedURL: any) {
+  if (_parsedURL.protocol == 'http:') {
+    return httpAgent;
+  } else {
+    return httpsAgent;
+  }
+};
 
 export interface ShivaEnvs {
   /**
@@ -86,22 +89,56 @@ export class TestnetClient {
     return this._info;
   }
 
-  get ContractContext(): LitContractResolverContext | undefined {
+  get ContractContext(): LitContractContext | undefined {
     const testNetConfig = this.Info;
     if (!testNetConfig) {
       return undefined;
     }
 
-    const contractResolverAbi: string = testNetConfig.contractResolverAbi;
-    const contractResolverAddress =
-      testNetConfig.contractAddresses[`contractResolver`];
     const networkContext = {
-      abi: JSON.parse(contractResolverAbi),
-      resolverAddress: contractResolverAddress,
-      provider: new ethers.providers.JsonRpcProvider(
-        `http://${testNetConfig.rpcUrl}`
-      ),
-      environment: 0, // test deployment uses env value 0 in test common
+      Staking: {
+        name: 'Staking',
+        address: testNetConfig.contractAddresses.staking,
+        abi: JSON.parse(testNetConfig.contractAbis.staking),
+      },
+      Allowlist: {},
+      RateLimitNFT: {
+        name: 'RateLimitNFT',
+        abi: JSON.parse(testNetConfig.contractAbis.rateLimitNft),
+        address: testNetConfig.contractAddresses.rateLimitNft,
+      },
+      PubkeyRouter: {
+        name: 'PubkeyRouter',
+        abi: JSON.parse(testNetConfig.contractAbis.pubkeyRouter),
+        address: testNetConfig.contractAddresses.pubkeyRouter,
+      },
+      PKPHelper: {
+        name: 'PKPHelper',
+        abi: JSON.parse(testNetConfig.contractAbis.pkpHelper),
+        address: testNetConfig.contractAddresses.pkpHelper,
+      },
+      PKPPermissions: {
+        name: 'PKPPermissions',
+        abi: JSON.parse(testNetConfig.contractAbis.pkpPermissions),
+        address: testNetConfig.contractAddresses.pkpPermissions,
+      },
+      PKPNFTMetadata: {},
+      PKPNFT: {
+        name: 'PKPNFT',
+        address: testNetConfig.contractAddresses.pkpnft,
+        abi: JSON.parse(testNetConfig.contractAbis.pkpnft),
+      },
+      Multisender: {},
+      LITToken: {
+        name: 'LITToken',
+        abi: JSON.parse(testNetConfig.contractAbis.litToken),
+        address: testNetConfig.contractAddresses.litToken,
+      },
+      StakingBalances: {
+        name: 'StakingBalances',
+        abi: JSON.parse(testNetConfig.contractAbis.stakingBalances),
+        address: testNetConfig.contractAddresses.stakingBalances,
+      },
     };
     return networkContext;
   }
@@ -253,14 +290,14 @@ export class ShivaClient {
   async startTestnetManager(
     createReq?: TestNetCreateRequest
   ): Promise<TestnetClient> {
-    let existingTestnetResp = undefined; 
+    let existingTestnetResp = undefined;
     let retryCount = 0;
     while (!existingTestnetResp && retryCount < 200) {
-      try{
+      try {
         existingTestnetResp = await fetch(
           this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets',
           //@ts-ignore
-          {agent: agentSelector}
+          { agent: agentSelector }
         );
       } catch (e) {
         console.error('error while fetching testnets: ', error);

@@ -74,6 +74,7 @@ import {
   LIT_RPC,
 } from '@lit-protocol/constants';
 import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
+import { Allowlist } from '../../dist/src/abis/Allowlist.sol/Allowlist';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -446,19 +447,6 @@ export class LitContracts {
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
-    this.allowlistContract = {
-      read: new ethers.Contract(
-        addresses.Allowlist.address,
-        addresses.Allowlist.abi as any,
-        this.provider
-      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
-      write: new ethers.Contract(
-        addresses.Allowlist.address,
-        addresses.Allowlist.abi as any,
-        this.signer
-      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
-    };
-
     this.litTokenContract = {
       read: new ethers.Contract(
         addresses.LITToken.address,
@@ -470,21 +458,6 @@ export class LitContracts {
         addresses.LITToken.abi as any,
         this.signer
       ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
-    };
-
-    this.multisenderContract = {
-      read: new ethers.Contract(
-        addresses.Multisender.address,
-        addresses.Multisender.abi as any,
-        this.provider
-      ) as unknown as multisenderContract.Multisender &
-        multisenderContract.Multisender,
-      write: new ethers.Contract(
-        addresses.Multisender.address,
-        addresses.Multisender.abi as any,
-        this.signer
-      ) as unknown as multisenderContract.Multisender &
-        multisenderContract.Multisender,
     };
 
     this.pkpHelperContract = {
@@ -511,21 +484,6 @@ export class LitContracts {
         addresses.PKPNFT.abi as any,
         this.signer
       ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
-    };
-
-    this.pkpNftMetadataContract = {
-      read: new ethers.Contract(
-        addresses.PKPNFTMetadata.address,
-        addresses.PKPNFTMetadata.abi as any,
-        this.provider
-      ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
-        pkpNftMetadataContract.PKPNFTMetadata,
-      write: new ethers.Contract(
-        addresses.PKPNFTMetadata.address,
-        addresses.PKPNFTMetadata.abi as any,
-        this.signer
-      ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
-        pkpNftMetadataContract.PKPNFTMetadata,
     };
 
     this.pkpPermissionsContract = {
@@ -611,8 +569,7 @@ export class LitContracts {
     rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    rpcUrl =
-      rpcUrl ?? network === 'datil-dev' ? LIT_RPC.VESUVIUS : LIT_RPC.CHRONICLE;
+
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -793,6 +750,11 @@ export class LitContracts {
       })
     );
 
+    LitContracts.logger.debug(
+      'built contract context',
+      contractContext['PKPNFT']
+    );
+
     return contractContext;
   }
 
@@ -924,6 +886,7 @@ export class LitContracts {
       rpcUrl
     );
 
+    LitContracts.logger.debug('rpc url', rpcUrl);
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
       await Promise.all([
@@ -959,15 +922,18 @@ export class LitContracts {
     );
 
     const networks = activeValidatorStructs.map((item: any) => {
+      LitContracts.logger.info('Parsing validator info: ', item[0], item[2]);
       let proto = 'https://';
+      const ip = item[0];
+      const port = item[2];
       /**
        * ports in range of 8470 - 8479 are configured for https on custom networks (eg. cayenne)
        * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
        */
-      if (item.port !== 443 && (item.port > 8480 || item.port < 8469)) {
+      if (port !== 443 && (port > 8480 || port < 8469)) {
         proto = 'http://';
       }
-      return `${proto}${intToIP(item.ip)}:${item.port}`;
+      return `${proto}${intToIP(ip)}:${port}`;
     });
 
     return networks;
@@ -1011,7 +977,7 @@ export class LitContracts {
       case 'custom':
       case 'localhost':
         // just use cayenne abis for custom and localhost
-        data = await fetchData(CAYENNE_API);
+        data = await fetchData(DATIL_DEV_API);
         break;
       default:
         throw new Error(
@@ -1636,7 +1602,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         try {
           mintCost = await this.pkpNftContract.read.mintCost();
         } catch (e) {
-          throw new Error('Could not get mint cost');
+          throw e;
         }
 
         let sentTx;
