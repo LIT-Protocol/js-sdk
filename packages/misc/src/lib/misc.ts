@@ -163,7 +163,8 @@ export const throwErrorV1 = ({
   requestId,
 }: NodeClientErrorV1): never => {
   // TODO: to refactor such that we do not need a wrapper function to construct the error, since it gets added to all stack traces it does technically pollute.
-  throw new Error(
+  console.log(
+    `❌`,
     JSON.stringify({
       errorKind,
       details,
@@ -172,6 +173,32 @@ export const throwErrorV1 = ({
       errorCode,
       requestId,
     }) as any
+  );
+
+  const errConstructorFunc = function (
+    this: any,
+    errorKind: string,
+    status: number,
+    details: string[],
+    message?: string,
+    errorCode?: string,
+    requestId?: string
+  ) {
+    this.message = message;
+    this.errorCode = errorCode;
+    this.errorKind = errorKind;
+    this.status = status;
+    this.details = details;
+    this.requestId = requestId;
+  };
+
+  throw new (errConstructorFunc as any)(
+    errorKind,
+    status,
+    details,
+    message,
+    errorCode,
+    requestId
   );
 };
 
