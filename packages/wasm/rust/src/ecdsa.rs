@@ -14,7 +14,6 @@ use k256::Secp256k1;
 use p256::NistP256;
 use serde::Deserialize;
 use serde_bytes::Bytes;
-use std::env::var;
 use tsify::Tsify;
 use wasm_bindgen::{prelude::*, JsError};
 
@@ -47,13 +46,13 @@ extern "C" {
     pub type EcdsaSignature;
 }
 
-impl<C: PrimeCurve + CurveArithmetic> Ecdsa<C>
+impl<C> Ecdsa<C>
 where
+    C: PrimeCurve + CurveArithmetic + HdCtx,
     C::AffinePoint: GroupEncoding + FromEncodedPoint<C>,
     C::Scalar: HDDeriver,
     C::FieldBytesSize: ModulusSize,
     C::ProjectivePoint: CofactorGroup + HDDerivable + FromEncodedPoint<C> + ToEncodedPoint<C>,
-    C: HdCtx,
 {
     pub fn combine(
         presignature: Uint8Array,
@@ -125,7 +124,7 @@ where
         into_uint8array(k.as_bytes())
     }
 
-    pub(crate) fn derive_key_inner(
+    fn derive_key_inner(
         id: Uint8Array,
         public_keys: Vec<Uint8Array>,
     ) -> JsResult<C::ProjectivePoint> {
@@ -136,7 +135,7 @@ where
             .collect::<JsResult<Vec<_>>>()?;
 
         let deriver = C::Scalar::create(&id, C::CTX);
-        deriver.hd_derive_public_key(&public_keys)
+        Ok(deriver.hd_derive_public_key(&public_keys))
     }
 
     fn scalar_from_js(s: Uint8Array) -> JsResult<C::Scalar> {
@@ -175,7 +174,7 @@ where
         let v = u8::conditional_select(&0, &1, big_r.y_is_odd());
 
         Ok(EcdsaSignature {
-            obj: into_js(&(Bytes::new(&r.to_vec()), Bytes::new(&s.to_vec()), v))?,
+            obj: into_js(&(Bytes::new(&r), Bytes::new(&s), v))?,
         })
     }
 
@@ -183,7 +182,7 @@ where
         <C::Scalar as Reduce<<C as ECurve>::Uint>>::reduce_bytes(&pt.x())
     }
 
-    pub(crate) fn scalar_from_hash(msg_digest: Uint8Array) -> JsResult<C::Scalar> {
+    pub fn scalar_from_hash(msg_digest: Uint8Array) -> JsResult<C::Scalar> {
         let digest = from_js::<Vec<u8>>(msg_digest)?;
         if digest.len() != C::FieldBytesSize::to_usize() {
             return Err(JsError::new("invalid message digest length"));
@@ -193,6 +192,59 @@ where
         Ok(<C::Scalar as Reduce<<C as ECurve>::Uint>>::reduce_bytes(
             z_bytes,
         ))
+    }
+
+    pub fn combine_and_verify_with_derived_key(
+        pre_signature: Uint8Array,
+        signature_shares: Vec<Uint8Array>,
+        message_hash: Uint8Array,
+        id: Uint8Array,
+        public_keys: Vec<Uint8Array>,
+    ) -> JsResult<EcdsaSignature> {
+        let public_key = Self::derive_key_inner(id, public_keys)?;
+        Self::combine_and_verify(pre_signature, signature_shares, message_hash, public_key)
+    }
+
+    pub fn combine_and_verify_with_specified_key(
+        pre_signature: Uint8Array,
+        signature_shares: Vec<Uint8Array>,
+        message_hash: Uint8Array,
+        public_key: Uint8Array,
+    ) -> JsResult<EcdsaSignature> {
+        let public_key: C::ProjectivePoint = Self::point_from_js(public_key)?;
+        Self::combine_and_verify(pre_signature, signature_shares, message_hash, public_key)
+    }
+
+    fn combine_and_verify(
+        pre_signature: Uint8Array,
+        signature_shares: Vec<Uint8Array>,
+        message_hash: Uint8Array,
+        public_key: C::ProjectivePoint,
+    ) -> JsResult<EcdsaSignature> {
+        let z = Self::scalar_from_hash(message_hash)?;
+        let (big_r, s) = Self::combine_inner(pre_signature, signature_shares)?;
+        let r = Self::x_coordinate(&big_r.to_affine());
+
+        if z.is_zero().into() {
+            return Err(JsError::new("invalid message digest"));
+        }
+        if (s.is_zero() | big_r.is_identity()).into() {
+            return Err(JsError::new("invalid signature"));
+        }
+        if r.is_zero().into() {
+            return Err(JsError::new("invalid r coordinate"));
+        }
+        // sR == zG * rY =
+        // (z + rx/k) * k * G == zG + rxG =
+        // (z + rx) G == (z + rx) G
+        if (big_r * s - (public_key * r + C::ProjectivePoint::generator() * z))
+            .is_identity()
+            .into()
+        {
+            Self::signature_into_js(big_r.to_affine(), s)
+        } else {
+            Err(JsError::new("invalid signature"))
+        }
     }
 }
 
@@ -207,14 +259,14 @@ pub fn ecdsa_combine_and_verify_with_derived_key(
     public_keys: Vec<Uint8Array>,
 ) -> JsResult<EcdsaSignature> {
     match variant {
-        EcdsaVariant::K256 => combine_and_verify_with_derived_key::<Secp256k1>(
+        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine_and_verify_with_derived_key(
             pre_signature,
             signature_shares,
             message_hash,
             id,
             public_keys,
         ),
-        EcdsaVariant::P256 => combine_and_verify_with_derived_key::<NistP256>(
+        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine_and_verify_with_derived_key(
             pre_signature,
             signature_shares,
             message_hash,
@@ -224,45 +276,28 @@ pub fn ecdsa_combine_and_verify_with_derived_key(
     }
 }
 
-fn combine_and_verify_with_derived_key<C>(
+/// Perform combine and verify with a specified public key
+#[wasm_bindgen(js_name = "ecdsaCombineAndVerify")]
+pub fn ecdsa_combine_and_verify(
+    variant: EcdsaVariant,
     pre_signature: Uint8Array,
     signature_shares: Vec<Uint8Array>,
     message_hash: Uint8Array,
-    id: Uint8Array,
-    public_keys: Vec<Uint8Array>,
-) -> JsResult<EcdsaSignature>
-where
-    C: PrimeCurve + CurveArithmetic,
-    C::AffinePoint: GroupEncoding + FromEncodedPoint<C>,
-    C::Scalar: HDDeriver,
-    C::FieldBytesSize: ModulusSize,
-    C::ProjectivePoint: CofactorGroup + HDDerivable + FromEncodedPoint<C> + ToEncodedPoint<C>,
-    C: HdCtx,
-{
-    let public_key = Ecdsa::<C>::derive_key_inner(id, public_keys)?;
-    let z = Ecdsa::<C>::scalar_from_hash(message_hash)?;
-    let (big_r, s) = Ecdsa::<C>::combine_inner(pre_signature, signature_shares)?;
-    let r = Ecdsa::<C>::x_coordinate(&big_r.to_affine());
-
-    if z.is_zero().into() {
-        return Err(JsError::new("invalid message digest"));
-    }
-    if (s.is_zero() | big_r.is_identity()).into() {
-        return Err(JsError::new("invalid signature"));
-    }
-    if r.is_zero().into() {
-        return Err(JsError::new("invalid r coordinate"));
-    }
-    // sR == zG * rY =
-    // (z + rx/k) * k * G == zG + rxG =
-    // (z + rx) G == (z + rx) G
-    if (big_r * s - (public_key * r + C::ProjectivePoint::generator() * z))
-        .is_identity()
-        .into()
-    {
-        Ok(())
-    } else {
-        Err(JsError::new("invalid signature"))
+    public_key: Uint8Array,
+) -> JsResult<EcdsaSignature> {
+    match variant {
+        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine_and_verify_with_specified_key(
+            pre_signature,
+            signature_shares,
+            message_hash,
+            public_key,
+        ),
+        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine_and_verify_with_specified_key(
+            pre_signature,
+            signature_shares,
+            message_hash,
+            public_key,
+        ),
     }
 }
 

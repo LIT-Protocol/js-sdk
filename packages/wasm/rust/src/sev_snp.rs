@@ -89,7 +89,7 @@ fn parse_attestation_report(attestation_report: &[u8]) -> JsResult<AttestationRe
 }
 
 fn parse_certificate(vcek_certificate: &[u8]) -> JsResult<Certificate> {
-    Certificate::from_der(&vcek_certificate).map_err(|e| JsError::new(e.to_string().as_str()))
+    Certificate::from_der(vcek_certificate).map_err(|e| JsError::new(e.to_string().as_str()))
 }
 
 fn verify_certificate(vcek: Certificate, report: AttestationReport) -> JsResult<()> {
@@ -140,7 +140,7 @@ fn get_expected_report_data(
     }
 
     // FIXME: can we really have `signatures.len() == 0`?
-    if signatures.len() > 0 {
+    if signatures.is_empty() {
         hasher.update("signatures");
 
         // FIXME: why is the slice needed?
