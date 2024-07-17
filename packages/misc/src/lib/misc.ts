@@ -172,32 +172,6 @@ export const throwErrorV1 = ({
       requestId,
     }) as any
   );
-
-  const errConstructorFunc = function (
-    this: any,
-    errorKind: string,
-    status: number,
-    details: string[],
-    message?: string,
-    errorCode?: string,
-    requestId?: string
-  ) {
-    this.message = message;
-    this.errorCode = errorCode;
-    this.errorKind = errorKind;
-    this.status = status;
-    this.details = details;
-    this.requestId = requestId;
-  };
-
-  throw new (errConstructorFunc as any)(
-    errorKind,
-    status,
-    details,
-    message,
-    errorCode,
-    requestId
-  );
 };
 
 export const throwGenericError = (e: any): never => {
