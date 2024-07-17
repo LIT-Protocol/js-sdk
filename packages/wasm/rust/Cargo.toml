@@ -15,31 +15,15 @@ blsful = { version = "2.5.7", default-features = false, features = ["rust"] }
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
+hd-keys-curves-wasm = { version = "0.1", default-features = false, features = ["k256", "p256"], git = "https://github.com/LIT-Protocol/hd-keys-curves-wasm.git" }
 serde = "1.0"
 serde_json = "1.0"
 serde_bare = "0.5"
-serde-wasm-bindgen = "0.5"
+serde-wasm-bindgen = "0.6"
 
-num-bigint = { version = "0.2.2", features = ["rand"] }
-num-integer = "0.1"
-num-traits = "0.2.15"
-
-elliptic-curve = { version = "0.13.5", features = ["serde"] }
-k256 = { version = "0.13.0", features = [
-  "sha256",
-  "ecdsa",
-  "serde",
-  "ecdsa-core",
-  "expose-field",
-  "hash2curve",
-], optional = false }
-p256 = { version = "0.13", features = [
-  "ecdsa-core",
-  "expose-field",
-  "hash2curve",
-  "sha256",
-  "serde",
-] }
+elliptic-curve = "0.13"
+k256 = { version = "0.13", features = ["arithmetic"] }
+p256 = { version = "0.13", features = ["arithmetic"] }
 sha2 = "0.10"
 
 wee_alloc = { version = "0.4.5", optional = true }
@@ -54,12 +38,8 @@ sev = { version = "2.0.2", default-features = false, features = [
 ] }
 rand = "0.8"
 serde_bytes = "0.11.14"
-vsss-rs = { version = "4.0", features = ["std"] }
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
 jubjub = { version = "0.10.4", git = "https://github.com/LIT-Protocol/jubjub.git", branch = "main"}
-
-# TODO(cairomassimo): remove branch once merged
-hd-keys-curves-wasm = { git = "https://github.com/LIT-Protocol/hd-keys-curves-wasm.git", version = "0.1.0", features = ["k256", "p256"]}
 
 
 [dev-dependencies]
@@ -69,7 +49,6 @@ k256 = "0.13"
 rand = "0.8"
 rand_chacha = "0.3"
 digest = "0.10"
-vsss-rs = { version = "=4.0", features = ["std"] }
 
 [profile.release]
 opt-level = "z"
