@@ -530,11 +530,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   vesuvius: vesuviusChain,
 
   /**
-   * @deprecated Will be removed in version 7.x. - Use `yellowstone` instead.
-   */
-  chronicleYellowstoneTestnet: yellowstoneChain,
-
-  /**
    * Use this for `>= DatilTest` network.
    * Chainlist entry for the Chronicle Yellowstone Testnet.
    * https://chainlist.org/chain/175188
