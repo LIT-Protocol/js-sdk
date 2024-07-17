@@ -23,7 +23,7 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
     case 'datil-test':
       return {
         chain: 'vesuvius',
-        chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
+        chainId: LIT_CHAINS['chronicleYellowstoneTestnet'].chainId,
       };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
