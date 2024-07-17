@@ -693,7 +693,7 @@ export const metamaskChainInfo = {
   /**
    * Information about the "chronicleYellowstone" chain.
    */
-  chronicleYellowstone: {
+  yellowstone: {
     chainId: LIT_CHAINS['yellowstone'].chainId,
     chainName: LIT_CHAINS['yellowstone'].name,
     nativeCurrency: {
@@ -841,7 +841,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   manzano: metamaskChainInfo.chronicle,
   habanero: metamaskChainInfo.chronicle,
   'datil-dev': metamaskChainInfo.chronicleVesuvius,
-  'datil-test': metamaskChainInfo.chronicleYellowstone,
+  'datil-test': metamaskChainInfo.yellowstone,
   custom: metamaskChainInfo.chronicleVesuvius,
   localhost: metamaskChainInfo.chronicleVesuvius,
 };
