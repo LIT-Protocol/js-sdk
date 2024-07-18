@@ -23,7 +23,7 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "6.2.0",
+  "version": "6.2.1",
   "scripts": {
     "bundle": "yarn node ./esbuild.config.js"
   },
