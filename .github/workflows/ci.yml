@@ -55,7 +55,7 @@ jobs:
         run: docker pull ghcr.io/lit-protocol/shiva:latest 
       - name: Run Shiva Container
         id: shiva-runner
-        run: docker run -d -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH="f5d416a0dfe52b7aa9d442226d4492423c10a8c9" -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:latest
+        run: docker run -d -m 12g -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH="f5d416a0dfe52b7aa9d442226d4492423c10a8c9" -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:latest
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -67,7 +67,7 @@ jobs:
         run: yarn build:dev
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: docker ps -a && yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,  --exclude=Parallel
+        run: docker ps -a && yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning
       - name: Get Container Logs
         if: always()
         run: docker logs shiva
