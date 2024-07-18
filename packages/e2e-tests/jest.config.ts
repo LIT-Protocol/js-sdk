@@ -8,4 +8,5 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/e2e-tests',
   setupFilesAfterEnv: ['../../jest.setup.js'],
+  diagnostics: false,
 };

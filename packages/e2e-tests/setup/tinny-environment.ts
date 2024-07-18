@@ -22,6 +22,8 @@ import { ShivaClient, TestnetClient } from './shiva-client';
 import 'dotenv/config';
 console.log('Loading env vars from dot config...');
 console.log('Done loading env', process.env['DEBUG']);
+
+declare var globalThis: any;
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 
@@ -29,23 +31,25 @@ export class TinnyEnvironment {
    * Environment variables used in the process.
    */
   public processEnvs: ProcessEnvs = {
-    MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
-    TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT']) || 45000,
+    MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS'] as string) || 1,
+    TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT'] as string) || 45000,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
-      parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
-    LIT_RPC_URL: process.env['LIT_RPC_URL'],
+      parseInt(process.env['REQUEST_PER_KILOSECOND'] ?? '') || 200,
+    LIT_RPC_URL: process.env['LIT_RPC_URL'] ?? 'http://127.0.0.1:8545', // localhost rpc if not provided
     WAIT_FOR_KEY_INTERVAL:
-      parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
+      parseInt(process.env['WAIT_FOR_KEY_INTERVAL'] ?? '') || 3000,
     BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
       'http://127.0.0.1:7470',
       'http://127.0.0.1:7471',
       'http://127.0.0.1:7472',
     ],
-    TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
+    TIME_TO_RELEASE_KEY:
+      parseInt(process.env['TIME_TO_RELEASE_KEY'] ?? '') || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
-    RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
+    RUN_IN_BAND_INTERVAL:
+      parseInt(process.env['RUN_IN_BAND_INTERVAL'] ?? '') || 5000,
 
     // Available Accounts
     // ==================
@@ -75,11 +79,11 @@ export class TinnyEnvironment {
     NETWORK_CONFIG: process.env['NETWORK_CONFIG'] ?? './networkContext.json',
   };
 
-  public litNodeClient: LitNodeClient;
-  public contractsClient: LitContracts;
+  public litNodeClient: LitNodeClient | undefined;
+  public contractsClient: LitContracts | undefined;
   public rpc: string;
-  public superCapacityDelegationAuthSig: AuthSig;
-  public bareEthAuthSig: AuthSig;
+  public superCapacityDelegationAuthSig: AuthSig | undefined;
+  public bareEthAuthSig: AuthSig | undefined;
   public bareSolAuthSig: SolanaAuthSig = {
     sig: '706047fcab06ada3cbfeb6990617c1705d59bafb20f5f1c8103d764fb5eaec297328d164e2b891095866b28acc1ab2df288a8729cf026228ef3c4970238b190a',
     derivedVia: 'solana.signMessage',
@@ -99,7 +103,10 @@ export class TinnyEnvironment {
   public testnet: TestnetClient | undefined;
   //=========== PRIVATE MEMBERS ===========
   private _shivaClient: ShivaClient = new ShivaClient();
-  private _contractContext: LitContractContext | LitContractResolverContext;
+  private _contractContext:
+    | LitContractContext
+    | LitContractResolverContext
+    | undefined;
 
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
@@ -283,7 +290,7 @@ export class TinnyEnvironment {
       this?.testnet?.ContractContext ?? this._contractContext;
     return {
       rpc: this.rpc,
-      litNodeClient: this.litNodeClient,
+      litNodeClient: this.litNodeClient!,
       network: this.network,
       processEnvs: this.processEnvs,
       contractContext: contractContext as LitContractResolverContext,
@@ -380,7 +387,7 @@ export class TinnyEnvironment {
 
     const toSign = await createSiweMessage({
       walletAddress: wallet.address,
-      nonce: this.litNodeClient.latestBlockhash,
+      nonce: this.litNodeClient?.latestBlockhash!,
       expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
       litNodeClient: this.litNodeClient,
     });
@@ -400,7 +407,7 @@ export class TinnyEnvironment {
       this.network === LIT_TESTNET.LOCALCHAIN &&
       this._shivaClient.processEnvs.STOP_TESTNET
     ) {
-      await this.testnet.stopTestnet();
+      await this.testnet?.stopTestnet();
     } else {
       console.log('skipping testnet shutdown.');
     }
@@ -454,6 +461,8 @@ export class TinnyEnvironment {
         customContext: networkContext,
       });
     } else {
+      // scoping `this` for function scope
+      const me = this;
       async function _switchWallet() {
         // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
         // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
@@ -462,7 +471,7 @@ export class TinnyEnvironment {
 
         // get wallet balance
         const balance = await wallet.getBalance();
-        console.log('this.rpc:', this.rpc);
+        console.log('this.rpc:', me.rpc);
         console.log('this.wallet.address', wallet.address);
         console.log('Balance:', balance.toString());
 
@@ -484,5 +493,46 @@ export class TinnyEnvironment {
     }
 
     await this.contractsClient.connect();
+
+    /**
+     * ====================================
+     * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
+     * ====================================
+     */
+    const me = this;
+    // Disabled for now
+    const _mintSuperCapacityDelegationAuthSig = async () => {
+      console.log(
+        '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
+      );
+      try {
+        const capacityTokenId = (
+          await me.contractsClient?.mintCapacityCreditsNFT({
+            requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
+            daysUntilUTCMidnightExpiration: 2,
+          })
+        )?.capacityTokenIdStr;
+
+        this.superCapacityDelegationAuthSig = (
+          await this.litNodeClient?.createCapacityDelegationAuthSig({
+            dAppOwnerWallet: wallet,
+            capacityTokenId: capacityTokenId,
+            // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+            uses: '200',
+          })
+        )?.capacityDelegationAuthSig;
+      } catch (e: any) {
+        if (
+          e.message.includes(`Can't allocate capacity beyond the global max`)
+        ) {
+          console.log('❗️Skipping capacity delegation auth sig setup.', e);
+        } else {
+          console.log(
+            '❗️Error while setting up capacity delegation auth sig',
+            e
+          );
+        }
+      }
+    };
   };
 }
