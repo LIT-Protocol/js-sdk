@@ -62,9 +62,10 @@ export const derivedAddresses = async ({
         if (cachedPkpJSON[pkpTokenId]) {
           publicKey = cachedPkpJSON[pkpTokenId];
         } else {
-          const provider = new ethers.providers.StaticJsonRpcProvider(
-            defaultRPCUrl
-          );
+          const provider = new ethers.providers.StaticJsonRpcProvider({
+            url: defaultRPCUrl,
+            skipFetchSetup: true,
+          });
 
           const contract = new Contract(
             pkpContractAddress,

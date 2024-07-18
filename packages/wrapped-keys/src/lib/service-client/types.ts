@@ -34,4 +34,5 @@ export interface BaseRequestParams {
   sessionSig: AuthSig;
   method: 'GET' | 'POST';
   litNetwork: LIT_NETWORKS_KEYS;
+  requestId: string;
 }

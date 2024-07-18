@@ -25,8 +25,6 @@ export async function signMessageWithEncryptedKey(
     litNetwork: litNodeClient.config.litNetwork,
   });
 
-  console.log('fetched metadata', storedKeyMetadata);
-
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(
     storedKeyMetadata.pkpAddress
   );

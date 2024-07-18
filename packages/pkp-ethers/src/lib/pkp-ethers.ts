@@ -92,7 +92,10 @@ export class PKPEthersWallet
       );
     }
 
-    this.rpcProvider = new ethers.providers.StaticJsonRpcProvider(rpcUrl);
+    this.rpcProvider = new ethers.providers.StaticJsonRpcProvider({
+      url: rpcUrl,
+      skipFetchSetup: true,
+    });
     this.provider = prop.provider ?? this.rpcProvider;
 
     defineReadOnly(this, '_isSigner', true);
@@ -109,7 +112,10 @@ export class PKPEthersWallet
   };
 
   setRpc = async (rpc: string): Promise<void> => {
-    this.rpcProvider = new ethers.providers.StaticJsonRpcProvider(rpc);
+    this.rpcProvider = new ethers.providers.StaticJsonRpcProvider({
+      url: rpc,
+      skipFetchSetup: true,
+    });
   };
 
   handleRequest = async <T = ETHSignature | ETHTxRes>(

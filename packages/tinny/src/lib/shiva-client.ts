@@ -103,10 +103,36 @@ export class TestnetClient {
     const networkContext = {
       abi: JSON.parse(contractResolverAbi),
       resolverAddress: contractResolverAddress,
-      provider: new ethers.providers.StaticJsonRpcProvider(
-        `http://${testNetConfig.rpcUrl}`
-      ),
+      provider: new ethers.providers.StaticJsonRpcProvider({
+        url: `http://${testNetConfig.rpcUrl}`,
+        skipFetchSetup: true,
+      }),
       environment: 0, // test deployment uses env value 0 in test common
+      contractContext: {
+        Allowlist: {},
+        Multisender: {},
+        Staking: {
+          abi: JSON.parse(testNetConfig.contractAbis.staking),
+        },
+        StakingBalances: {
+          abi: JSON.parse(testNetConfig.contractAbis.stakingBalances),
+        },
+        PKPNFT: {
+          abi: JSON.parse(testNetConfig.contractAbis.pkpnft),
+        },
+        PKPPermissions: {
+          abi: JSON.parse(testNetConfig.contractAbis.pkpPermissions),
+        },
+        PKPHelper: {
+          abi: JSON.parse(testNetConfig.contractAbis.pkpHelper),
+        },
+        LITToken: {
+          abi: JSON.parse(testNetConfig.contractAbis.litToken),
+        },
+        PKPNFTMetadata: {},
+        RateLimitNFT: {},
+        PubkeyRouter: {},
+      },
     };
     return networkContext;
   }

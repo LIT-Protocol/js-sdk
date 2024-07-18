@@ -504,6 +504,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  lineaSepolia: {
+    contractAddress: null,
+    chainId: 59141,
+    name: 'Linea Sepolia Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.sepolia.linea.build'],
+    blockExplorerUrls: ['https://explorer.sepolia.linea.build'],
+    type: null,
+    vmType: 'EVM',
+  },
 
   /**
    * Chainlist entry for the Chronicle Testnet.
@@ -724,6 +735,19 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  skaleCalypso: {
+    contractAddress: null,
+    chainId: 1564830818,
+    name: 'SKALE Calypso Hub Mainnet',
+    symbol: 'sFUEL',
+    decimals: 18,
+    rpcUrls: ['https://mainnet.skalenodes.com/v1/honorable-steel-rasalhague'],
+    blockExplorerUrls: [
+      'https://giant-half-dual-testnet.explorer.testnet.skalenodes.com/',
+    ],
+    type: null,
+    vmType: 'EVM',
+  },
   fhenixHelium: {
     contractAddress: null,
     chainId: 8008135,
@@ -754,17 +778,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     decimals: 18,
     rpcUrls: ['https://test-rpc.bittorrentchain.io'],
     blockExplorerUrls: ['https://testnet.bttcscan.com'],
-    type: null,
-    vmType: 'EVM',
-  },
-  kintoTestnet: {
-    contractAddress: null,
-    chainId: 88882,
-    name: 'Kinto Testnet',
-    symbol: 'ETH',
-    decimals: 18,
-    rpcUrls: ['http://35.215.120.180:8545'],
-    blockExplorerUrls: ['https://kintoscan.io/'],
     type: null,
     vmType: 'EVM',
   },
