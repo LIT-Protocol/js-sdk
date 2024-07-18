@@ -68,15 +68,15 @@ describe('PKPWalletConnect', () => {
     pkpWalletConnect = new PKPWalletConnect(true);
   });
 
-  describe('getPKPClients', () => {
-    it('should return the current list of PKPClients', () => {
+  describe('getPKPEthersWallets', () => {
+    it('should return the current list of PKPEthersWallets', () => {
       expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([]);
       pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
       expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([pkpEthersWallet]);
     });
   });
 
-  describe('with a PKPClient', () => {
+  describe('with a PKPEthersWallet', () => {
     beforeAll(async () => {
       pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
     });
@@ -112,8 +112,8 @@ describe('PKPWalletConnect', () => {
       });
     });
 
-    describe('findPKPClientByRequestParams', () => {
-      it('should return null if no PKPClient has an address found within the request params', async () => {
+    describe('findPKPEthersWalletByRequestParams', () => {
+      it('should return null if no PKPEthersWallet has an address found within the request params', async () => {
         const request = {
           method: 'personal_sign',
           params: ['0xdeadbeaf', '0x9b2055d370f73ec7d8a03e965129118dc8f5bf83'],
@@ -123,7 +123,7 @@ describe('PKPWalletConnect', () => {
         expect(result).toBeNull();
       });
 
-      it('should return the PKPClient if its address is found within the request params', async () => {
+      it('should return the PKPEthersWallet if its address is found within the request params', async () => {
         const request = {
           method: 'personal_sign',
           params: ['0xdeadbeaf', wallet.address],
@@ -134,15 +134,15 @@ describe('PKPWalletConnect', () => {
       });
     });
 
-    describe('addPKPClient', () => {
-      it('should add the PKPClient if it is not already in the list', () => {
+    describe('addPKPEthersWallet', () => {
+      it('should add the PKPEthersWallet if it is not already in the list', () => {
         pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
         expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([
           pkpEthersWallet,
         ]);
       });
 
-      it('should not add the PKPClient if it is already in the list', () => {
+      it('should not add the PKPEthersWallet if it is already in the list', () => {
         pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
         pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
         expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([
