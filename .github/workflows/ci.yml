@@ -24,6 +24,7 @@ jobs:
       USE_LIT_BINARIES: true
       LIT_NODE_BINARY_PATH: /usr/bin/lit_node
       LIT_ACTION_BINARY_PATH: /usr/bin/lit_actions
+      LIT_RPC_URL: http://127.0.0.1:8545
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
