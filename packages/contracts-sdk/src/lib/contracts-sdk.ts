@@ -65,7 +65,11 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
+import {
+  calculateUTCMidnightExpiration,
+  determineProtocol,
+  requestsToKilosecond,
+} from './utils';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -927,15 +931,9 @@ export class LitContracts {
     );
 
     const networks = activeValidatorStructs.map((item: any) => {
-      let proto = 'https://';
-      /**
-       * ports in range of 8470 - 8479 are configured for https on custom networks (eg. cayenne)
-       * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
-       */
-      if (item.port !== 443 && (item.port > 8480 || item.port < 8469)) {
-        proto = 'http://';
-      }
-      return `${proto}${intToIP(item.ip)}:${item.port}`;
+      const protocol = determineProtocol(item.protocol, network);
+      const ip = `${protocol}${intToIP(item.ip)}:${item.port}`;
+      return ip;
     });
 
     return networks;

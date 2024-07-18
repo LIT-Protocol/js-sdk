@@ -1,3 +1,6 @@
+import { LIT_NETWORK } from '@lit-protocol/constants';
+import { LIT_NETWORKS_KEYS } from '@lit-protocol/types';
+
 // Converts the number of requests per day to requests per second.
 export function convertRequestsPerDayToPerSecond(
   requestsPerDay: number
@@ -81,4 +84,36 @@ export function requestsToSecond({
     default:
       throw new Error('Invalid period');
   }
+}
+
+export function determineProtocol(
+  port: number,
+  network: LIT_NETWORKS_KEYS
+): string {
+  const HTTP = 'http://';
+  const HTTPS = 'https://';
+
+  // Standard HTTPS port
+  const HTTPS_PORT = 443;
+
+  // Custom HTTPS port range for specific networks (e.g., cayenne)
+  // We should respect https on these ports as they are using trusted ZeroSSL certs
+  const CUSTOM_HTTPS_PORT_START = 8470;
+  const CUSTOM_HTTPS_PORT_END = 8479;
+
+  // Always use HTTP for localhost and custom networks
+  if (network === LIT_NETWORK.Localhost || network === LIT_NETWORK.Custom) {
+    return HTTP;
+  }
+
+  // For Cayenne network, use HTTPS for the standard HTTPS port or the custom port range
+  if (network === LIT_NETWORK.Cayenne) {
+    return port === HTTPS_PORT ||
+      (port >= CUSTOM_HTTPS_PORT_START && port <= CUSTOM_HTTPS_PORT_END)
+      ? HTTPS
+      : HTTP;
+  }
+
+  // For all other networks, use HTTPS for the standard HTTPS port or any other port
+  return HTTPS;
 }
