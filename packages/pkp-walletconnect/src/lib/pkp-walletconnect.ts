@@ -301,7 +301,9 @@ export class PKPWalletConnect {
 
     const { id, topic, params } = requestEvent;
     const { request } = params;
-    const pkpEthersWallet = await this.findPKPEthersWalletByRequestParams(request);
+    const pkpEthersWallet = await this.findPKPEthersWalletByRequestParams(
+      request
+    );
 
     // Find the PKPEthersWallet corresponding to the account in the request
     if (!pkpEthersWallet) {
@@ -489,17 +491,26 @@ export class PKPWalletConnect {
 
   // ----------------- WalletConnect event handlers -----------------
 
-  public on<E extends Web3WalletTypes.Event>(name: E, listener: (args: Web3WalletTypes.EventArguments[E]) => void) {
+  public on<E extends Web3WalletTypes.Event>(
+    name: E,
+    listener: (args: Web3WalletTypes.EventArguments[E]) => void
+  ) {
     this.client = this._isWalletConnectInitialized(this.client);
     return this.client.on(name, listener);
   }
 
-  public once<E extends Web3WalletTypes.Event>(name: E, listener: (args: Web3WalletTypes.EventArguments[E]) => void) {
+  public once<E extends Web3WalletTypes.Event>(
+    name: E,
+    listener: (args: Web3WalletTypes.EventArguments[E]) => void
+  ) {
     this.client = this._isWalletConnectInitialized(this.client);
     return this.client.once(name, listener);
   }
 
-  public off<E extends Web3WalletTypes.Event>(name: E, listener: (args: Web3WalletTypes.EventArguments[E]) => void) {
+  public off<E extends Web3WalletTypes.Event>(
+    name: E,
+    listener: (args: Web3WalletTypes.EventArguments[E]) => void
+  ) {
     this.client = this._isWalletConnectInitialized(this.client);
     return this.client.off(name, listener);
   }

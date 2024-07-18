@@ -118,9 +118,8 @@ describe('PKPWalletConnect', () => {
           method: 'personal_sign',
           params: ['0xdeadbeaf', '0x9b2055d370f73ec7d8a03e965129118dc8f5bf83'],
         };
-        const result = await pkpWalletConnect.findPKPEthersWalletByRequestParams(
-          request
-        );
+        const result =
+          await pkpWalletConnect.findPKPEthersWalletByRequestParams(request);
         expect(result).toBeNull();
       });
 
@@ -129,9 +128,8 @@ describe('PKPWalletConnect', () => {
           method: 'personal_sign',
           params: ['0xdeadbeaf', wallet.address],
         };
-        const result = await pkpWalletConnect.findPKPEthersWalletByRequestParams(
-          request
-        );
+        const result =
+          await pkpWalletConnect.findPKPEthersWalletByRequestParams(request);
         expect(result).toEqual(pkpEthersWallet);
       });
     });
@@ -139,13 +137,17 @@ describe('PKPWalletConnect', () => {
     describe('addPKPClient', () => {
       it('should add the PKPClient if it is not already in the list', () => {
         pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
-        expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([pkpEthersWallet]);
+        expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([
+          pkpEthersWallet,
+        ]);
       });
 
       it('should not add the PKPClient if it is already in the list', () => {
         pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
         pkpWalletConnect.addPKPEthersWallet(pkpEthersWallet);
-        expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([pkpEthersWallet]);
+        expect(pkpWalletConnect.getPKPEthersWallets()).toEqual([
+          pkpEthersWallet,
+        ]);
       });
     });
   });
