@@ -13,6 +13,7 @@ export enum LIT_RPC {
   LOCAL_ANVIL = 'http://127.0.0.1:8545',
   CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
   VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
+  YELLOWSTONE = 'https://yellowstone-rpc.litprotocol.com',
 }
 
 /**
@@ -23,7 +24,7 @@ export const RPC_MAP = {
   [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICLE,
   [LIT_TESTNET.CAYENNE]: LIT_RPC.CHRONICLE,
   [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
-  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.VESUVIUS,
+  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.YELLOWSTONE,
 };
 
 /**
