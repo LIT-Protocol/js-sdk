@@ -69,7 +69,6 @@ import {
 } from './helpers/getBytes32FromMultihash';
 import {
   calculateUTCMidnightExpiration,
-  // determineProtocol,
   requestsToKilosecond,
 } from './utils';
 import { ValidatorStruct } from './types';
