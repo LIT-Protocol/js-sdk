@@ -811,6 +811,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   habanero: metamaskChainInfo.chronicle,
   'datil-dev': metamaskChainInfo.chronicleVesuvius,
   'datil-test': metamaskChainInfo.yellowstone,
+  'datil': metamaskChainInfo.yellowstone,
   custom: metamaskChainInfo.chronicleVesuvius,
   localhost: metamaskChainInfo.chronicleVesuvius,
 };
