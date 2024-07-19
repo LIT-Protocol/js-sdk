@@ -141,7 +141,7 @@ const HTTP = 'http://';
 const HTTPS = 'https://';
 
 /**
- * Mapping of network values to corresponding http portocol.
+ * Mapping of network values to corresponding http protocol.
  */
 export const HTTP_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
