@@ -55,6 +55,7 @@ import {
   RPC_URL_BY_NETWORK,
   HTTP_BY_NETWORK,
   CENTRALISATION_BY_NETWORK,
+  LIT_NETWORK,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
@@ -943,14 +944,21 @@ export class LitContracts {
       const protocol = HTTP_BY_NETWORK[network];
       const centralisation = CENTRALISATION_BY_NETWORK[network];
       const ip = intToIP(item.ip);
-      const port = item.port;
+      let port = item.port;
 
       if (centralisation === 'centralised') {
-        // -- validate if port range is 8470 - 8479, if not, throw error
-        if (!port.toString().startsWith('8')) {
+        // -- validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
+        if (
+          network === LIT_NETWORK.Cayenne &&
+          !port.toString().startsWith('8')
+        ) {
           throw new Error(
             `Invalid port: ${port} for the ${centralisation} ${network} network. Expected range: 8470 - 8479`
           );
+        }
+
+        if (network === LIT_NETWORK.DatilDev) {
+          port = port - 100;
         }
       }
 
