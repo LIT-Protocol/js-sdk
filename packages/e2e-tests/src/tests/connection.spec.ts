@@ -10,7 +10,7 @@ try {
 
 const NETWORKS: string[] = ['manzano', 'datil-dev', 'cayenne'];
 
-describe('connections', () => {
+describe('Connections', () => {
   test.each(NETWORKS)('Testing network: %s', async (network) => {
     const devEnv = new TinnyEnvironment(network as LIT_TESTNET);
     await devEnv.init();
