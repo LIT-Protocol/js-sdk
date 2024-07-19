@@ -7,6 +7,7 @@ import {
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
   listEncryptedKeyMetadata,
+  batchGeneratePrivateKeys,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -16,9 +17,13 @@ import {
   KEYTYPE_K256,
   KEYTYPE_ED25519,
 } from './lib/constants';
-import { setLitActionsCode } from './lib/lit-actions-client/code-repository';
+import {
+  setLitActionsCode,
+  setLitActionsCodeCommon,
+} from './lib/lit-actions-client/code-repository';
 import {
   LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
   LitActionCodeRepositoryEntry,
 } from './lib/lit-actions-client/types';
 
@@ -65,10 +70,12 @@ export const api = {
   signMessageWithEncryptedKey,
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
+  batchGeneratePrivateKeys,
 };
 
 export const config = {
   setLitActionsCode,
+  setLitActionsCodeCommon,
 };
 
 export {
@@ -84,6 +91,7 @@ export {
   ImportPrivateKeyResult,
   ListEncryptedKeyMetadataParams,
   LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
   LitActionCodeRepositoryEntry,
   SerializedTransaction,
   SignTransactionParams,

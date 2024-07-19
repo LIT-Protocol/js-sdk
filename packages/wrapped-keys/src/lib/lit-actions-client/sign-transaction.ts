@@ -1,3 +1,4 @@
+import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 import {
   AccessControlConditions,
   ILitNodeClient,
@@ -10,7 +11,6 @@ import {
   SerializedTransaction,
   StoredKeyData,
 } from '../types';
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 
 interface SignTransactionWithLitActionParams {
   litNodeClient: ILitNodeClient;
