@@ -1,9 +1,7 @@
 import { ethers } from 'ethers';
 import fs from 'fs/promises';
 import path from 'path';
-
-const API =
-  'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
+import { _internalDev } from '@lit-protocol/contracts';
 
 function removeKickedValidators(activeValidators, kickedValidators) {
   return activeValidators.filter(
@@ -14,8 +12,7 @@ function removeKickedValidators(activeValidators, kickedValidators) {
 const getValidators = async () => {
   let data;
   try {
-    // Fetch and parse the JSON data in one step
-    data = await fetch(API).then((res) => res.json());
+    data = _internalDev;
   } catch (e) {
     throw new Error(`Error fetching data from ${API}: ${e.toString()}`);
   }

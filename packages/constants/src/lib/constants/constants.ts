@@ -751,6 +751,7 @@ export const LIT_NETWORK = {
   Habanero: 'habanero',
   DatilDev: 'datil-dev',
   DatilTest: 'datil-test',
+  Datil: 'datil',
   Custom: 'custom',
   Localhost: 'localhost',
 };
@@ -793,40 +794,6 @@ export const RELAYER_URL_BY_NETWORK: {
   'datil-test': 'https://datil-test-relayer.getlit.dev',
   custom: 'http://localhost:3000',
   localhost: 'http://localhost:3000',
-};
-
-/**
- * URL mappings for general worker URLs by network.
- */
-export const GENERAL_WORKER_URL_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: string;
-} = {
-  cayenne: 'https://apis.getlit.dev/cayenne/contracts',
-  manzano: 'https://apis.getlit.dev/manzano/contracts',
-  habanero: 'https://apis.getlit.dev/habanero/contracts',
-  'datil-dev': 'https://apis.getlit.dev/datil-dev/contracts',
-  'datil-test': 'https://apis.getlit.dev/datil-test/contracts',
-
-  // just use cayenne abis for custom and localhost
-  custom: 'https://apis.getlit.dev/cayenne/contracts',
-  localhost: 'https://apis.getlit.dev/cayenne/contracts',
-};
-
-/**
- * URL constants for the staging worker by network.
- */
-export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: string;
-} = {
-  cayenne: 'https://staging.apis.getlit.dev/cayenne/contracts',
-  manzano: 'https://staging.apis.getlit.dev/manzano/contracts',
-  habanero: 'https://staging.apis.getlit.dev/habanero/contracts',
-  'datil-dev': 'https://staging.apis.getlit.dev/datil-dev/contracts',
-  'datil-test': 'https://staging.apis.getlit.dev/datil-test/contracts',
-
-  // just use cayenne abis for custom and localhost
-  custom: 'https://apis.getlit.dev/cayenne/contracts',
-  localhost: 'https://apis.getlit.dev/cayenne/contracts',
 };
 
 /**
@@ -1034,7 +1001,6 @@ export const AUTH_METHOD_TYPE_IDS = {
 
 // ========== PKP Client ==========
 export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
-export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
 
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';

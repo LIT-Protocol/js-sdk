@@ -3,6 +3,7 @@ export * from './lib/version';
 
 // ----------- Constants -----------
 export * from './lib/constants/constants';
+export * from './lib/constants/mappers';
 export * from './lib/constants/endpoints';
 export * from './lib/constants/autogen_internal';
 

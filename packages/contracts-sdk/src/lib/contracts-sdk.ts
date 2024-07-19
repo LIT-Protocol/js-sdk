@@ -50,14 +50,13 @@ import {
   AuthMethodScope,
   AuthMethodType,
   METAMASK_CHAIN_INFO_BY_NETWORK,
-  GENERAL_WORKER_URL_BY_NETWORK,
+  NETWORK_CONTEXT_BY_NETWORK,
   LIT_NETWORK_VALUES,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
-import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
 import { TokenInfo, derivedAddresses } from './addresses';
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
@@ -587,11 +586,6 @@ export class LitContracts {
       provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     }
 
-    if (network === 'datil-dev' || network === 'datil-test') {
-      // @ts-ignore
-      context!.Staking!.abi = minStakingAbi;
-    }
-
     if (!context) {
       const contractData = await LitContracts._resolveContractContext(
         network
@@ -945,22 +939,14 @@ export class LitContracts {
     network: LIT_NETWORK_VALUES
     // context?: LitContractContext | LitContractResolverContext
   ) {
-    const fetchData = async (url: string) => {
-      try {
-        return await fetch(url).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(`Error fetching data from ${url}: ${e.toString()}`);
-      }
-    };
-
     // -- check if it's supported network
-    if (!GENERAL_WORKER_URL_BY_NETWORK[network]) {
+    if (!NETWORK_CONTEXT_BY_NETWORK[network]) {
       throw new Error(
         `[_resolveContractContext] Unsupported network: ${network}`
       );
     }
 
-    const data = await fetchData(GENERAL_WORKER_URL_BY_NETWORK[network]);
+    const data = await NETWORK_CONTEXT_BY_NETWORK[network];
 
     if (!data) {
       throw new Error('[_resolveContractContext] No data found');

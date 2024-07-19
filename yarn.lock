@@ -3088,6 +3088,11 @@
   dependencies:
     ajv "^8.12.0"
 
+"@lit-protocol/contracts@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.20.tgz#e482b1876cc5de77e64fe7adfceb991303943ac5"
+  integrity sha512-8QXhWxumIyAfwD81MTpT9kMjVxjWEG5Zv0ox4EtUFfp3WumlY2z9KPNotDTHdKUcOPzA9np/J3h/VHYZztGHXw==
+
 "@lit/reactive-element@^1.3.0", "@lit/reactive-element@^1.6.0":
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/@lit/reactive-element/-/reactive-element-1.6.3.tgz#25b4eece2592132845d303e091bad9b04cdcfe03"
