@@ -67,10 +67,7 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import {
-  calculateUTCMidnightExpiration,
-  requestsToKilosecond,
-} from './utils';
+import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 import { ValidatorStruct } from './types';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -946,8 +943,17 @@ export class LitContracts {
       const protocol = HTTP_BY_NETWORK[network];
       const centralisation = CENTRALISATION_BY_NETWORK[network];
       const ip = intToIP(item.ip);
-      const port =
-        centralisation === 'centralised' ? item.port + 1000 : item.port;
+      const port = item.port;
+
+      if (centralisation === 'centralised') {
+        // -- validate if port range is 8470 - 8479, if not, throw error
+        if (!port.toString().startsWith('8')) {
+          throw new Error(
+            `Invalid port: ${port} for the ${centralisation} ${network} network. Expected range: 8470 - 8479`
+          );
+        }
+      }
+
       const url = `${protocol}${ip}:${port}`;
 
       LitContracts.logger.debug("Validator's URL:", url);
