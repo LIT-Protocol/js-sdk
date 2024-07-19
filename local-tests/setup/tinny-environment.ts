@@ -19,9 +19,6 @@ import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 
-import 'dotenv/config';
-console.log('Loading env vars from dot config...');
-console.log('Done loading env', process.env['DEBUG']);
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 
@@ -32,10 +29,11 @@ export class TinnyEnvironment {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT']) || 45000,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
-    DEBUG: process.env['DEBUG'] === 'true',
+    DEBUG: true,
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
-    LIT_RPC_URL: process.env['LIT_RPC_URL'],
+    LIT_RPC_URL:
+      process.env['LIT_RPC_URL'] || 'https://vesuvius-rpc.litprotocol.com',
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
     BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [

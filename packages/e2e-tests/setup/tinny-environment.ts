@@ -19,10 +19,6 @@ import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 
-import 'dotenv/config';
-console.log('Loading env vars from dot config...');
-console.log('Done loading env', process.env['DEBUG']);
-
 declare var globalThis: any;
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -37,7 +33,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND'] ?? '') || 200,
-    LIT_RPC_URL: process.env['LIT_RPC_URL'] ?? 'http://127.0.0.1:8545', // localhost rpc if not provided
+    LIT_RPC_URL: process.env['LIT_RPC_URL'] ?? '', // localhost rpc if not provided
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL'] ?? '') || 3000,
     BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
