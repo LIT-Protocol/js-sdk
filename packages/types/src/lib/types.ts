@@ -135,13 +135,6 @@ export type AcceptedFileType = File | Blob;
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 
-export type ProviderOptions =
-  | OAuthProviderOptions
-  | EthWalletProviderOptions
-  | SignInWithOTPParams
-  | StytchOtpProviderOptions
-  | WebAuthnProviderOptions;
-
 export type AuthenticateOptions = BaseAuthenticateOptions;
 
 /**

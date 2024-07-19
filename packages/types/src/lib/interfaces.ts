@@ -1276,34 +1276,8 @@ export interface PKPClientHelpers {
 }
 
 /**
- * ========== LitAuthClient ==========
+ * ========== Lit Auth Client ==========
  */
-export interface LitAuthClientOptions {
-  /**
-   * Endpoint to interact with a blockchain network. Defaults to the Lit Chronicle.
-   */
-  rpcUrl?: string;
-  /**
-   * Options for Lit's relay server
-   */
-  litRelayConfig?: LitRelayConfig;
-  /**
-   * Pass in a custom relay server
-   */
-  customRelay?: IRelay;
-  /**
-   * Lit Node Client
-   */
-  litNodeClient?: any;
-
-  /**
-   * If enable will turn on logging
-   */
-  debug?: boolean;
-
-  litOtpConfig?: OtpProviderOptions;
-}
-
 export interface OtpSessionResult {
   /**
    * Status message of the request
@@ -1604,29 +1578,6 @@ export interface BaseProviderSessionSigsParams {
   litNodeClient?: ILitNodeClient;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
-}
-
-export interface LoginUrlParams {
-  /**
-   * Auth method name
-   */
-  provider: string | null;
-  /**
-   * Access token
-   */
-  accessToken: string | null;
-  /**
-   * ID token
-   */
-  idToken: string | null;
-  /**
-   * OAuth state param
-   */
-  state: string | null;
-  /**
-   * Error codes from Lit's login server
-   */
-  error: string | null;
 }
 
 export interface BaseAuthenticateOptions {}
