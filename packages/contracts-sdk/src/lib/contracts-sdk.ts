@@ -53,6 +53,8 @@ import {
   GENERAL_WORKER_URL_BY_NETWORK,
   LIT_NETWORK_VALUES,
   RPC_URL_BY_NETWORK,
+  HTTP_BY_NETWORK,
+  CENTRALISATION_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
@@ -67,9 +69,10 @@ import {
 } from './helpers/getBytes32FromMultihash';
 import {
   calculateUTCMidnightExpiration,
-  determineProtocol,
+  // determineProtocol,
   requestsToKilosecond,
 } from './utils';
+import { ValidatorStruct } from './types';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -926,14 +929,31 @@ export class LitContracts {
       (av: any) => !kickedValidators.some((kv: any) => kv === av)
     );
 
-    const activeValidatorStructs = await contract['getValidatorsStructs'](
-      cleanedActiveValidators
-    );
+    const activeValidatorStructs: ValidatorStruct[] = (
+      await contract['getValidatorsStructs'](cleanedActiveValidators)
+    ).map((item: any) => {
+      return {
+        ip: item[0],
+        ipv6: item[1],
+        port: item[2],
+        nodeAddress: item[3],
+        reward: item[4],
+        seconderPubkey: item[5],
+        receiverPubkey: item[6],
+      };
+    });
 
-    const networks = activeValidatorStructs.map((item: any) => {
-      const protocol = determineProtocol(item.protocol, network);
-      const ip = `${protocol}${intToIP(item.ip)}:${item.port}`;
-      return ip;
+    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
+      const protocol = HTTP_BY_NETWORK[network];
+      const centralisation = CENTRALISATION_BY_NETWORK[network];
+      const ip = intToIP(item.ip);
+      const port =
+        centralisation === 'centralised' ? item.port + 1000 : item.port;
+      const url = `${protocol}${ip}:${port}`;
+
+      LitContracts.logger.debug("Validator's URL:", url);
+
+      return url;
     });
 
     return networks;

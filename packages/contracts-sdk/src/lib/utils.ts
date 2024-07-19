@@ -96,7 +96,7 @@ export function determineProtocol(
   // Standard HTTPS port
   const HTTPS_PORT = 443;
 
-  // Custom HTTPS port range for specific networks (e.g., cayenne)
+  // Custom HTTPS port range for centralised 3 nodes test networks (e.g., cayenne, datil-dev)
   // We should respect https on these ports as they are using trusted ZeroSSL certs
   const CUSTOM_HTTPS_PORT_START = 8470;
   const CUSTOM_HTTPS_PORT_END = 8479;
@@ -106,7 +106,7 @@ export function determineProtocol(
     return HTTP;
   }
 
-  // For Cayenne network, use HTTPS for the standard HTTPS port or the custom port range
+  // For Cayenne & Datil Networks network, use HTTPS for the standard HTTPS port or the custom port range
   if (network === LIT_NETWORK.Cayenne) {
     return port === HTTPS_PORT ||
       (port >= CUSTOM_HTTPS_PORT_START && port <= CUSTOM_HTTPS_PORT_END)
