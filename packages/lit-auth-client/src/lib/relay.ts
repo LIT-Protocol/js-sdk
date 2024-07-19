@@ -1,16 +1,36 @@
 import {
+  LitNetwork,
+  RELAY_URL_CAYENNE,
+  RELAY_URL_HABANERO,
+  RELAY_URL_MANZANO,
+  RELAY_URL_DATIL_DEV,
+} from '@lit-protocol/constants';
+import {
   IRelay,
   IRelayFetchResponse,
   IRelayMintResponse,
   IRelayPollStatusResponse,
   LitRelayConfig,
 } from '@lit-protocol/types';
+
 import { log } from './utils';
 
 /**
  * Class that communicates with Lit relay server
  */
 export class LitRelay implements IRelay {
+  /** URL for Lit's relay server */
+  static getRelayUrl(litNetwork: LitNetwork): string {
+    const networkMap: Record<LitNetwork, string | undefined> = {
+      [LitNetwork.Cayenne]: RELAY_URL_CAYENNE,
+      [LitNetwork.Manzano]: RELAY_URL_MANZANO,
+      [LitNetwork.Habanero]: RELAY_URL_HABANERO,
+      [LitNetwork.DatilDev]: RELAY_URL_DATIL_DEV,
+      [LitNetwork.Custom]: undefined,
+    };
+    return networkMap[litNetwork] || RELAY_URL_CAYENNE;
+  }
+
   /**
    * URL for Lit's relay server
    */

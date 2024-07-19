@@ -3,7 +3,6 @@ import {
   AuthMethodType,
   LIT_ENDPOINT_VERSION,
 } from '@lit-protocol/constants';
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
@@ -30,9 +29,7 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
   const bob = await devEnv.createRandomPerson();
 
   // Checking the scopes of the PKP owned by Bob
-  const bobsAuthMethodAuthId = await LitAuthClient.getAuthIdByAuthMethod(
-    bob.authMethod
-  );
+  const bobsAuthMethodAuthId = await bob.getAuthMethodId();
 
   const scopes =
     await bob.contractsClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
