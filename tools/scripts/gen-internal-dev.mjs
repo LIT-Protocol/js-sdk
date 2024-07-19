@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import fs from 'fs/promises';
-import path from 'path';
 import { _internalDev } from '@lit-protocol/contracts';
 
 function removeKickedValidators(activeValidators, kickedValidators) {
