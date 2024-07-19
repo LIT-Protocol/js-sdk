@@ -777,6 +777,7 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   habanero: LIT_RPC.CHRONICLE,
   'datil-dev': LIT_RPC.CHRONICLE_VESUVIUS,
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
+  datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
   localhost: LIT_RPC.LOCAL_ANVIL,
 };
@@ -792,6 +793,7 @@ export const RELAYER_URL_BY_NETWORK: {
   habanero: 'https://habanero-relayer.getlit.dev',
   'datil-dev': 'https://datil-dev-relayer.getlit.dev',
   'datil-test': 'https://datil-test-relayer.getlit.dev',
+  datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
   localhost: 'http://localhost:3000',
 };
@@ -969,6 +971,7 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   [LitNetwork.Manzano]: [],
   [LitNetwork.DatilDev]: [],
   [LitNetwork.DatilTest]: [],
+  [LitNetwork.Datil]: [],
   [LitNetwork.Habanero]: [],
   [LitNetwork.Custom]: [],
   // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks

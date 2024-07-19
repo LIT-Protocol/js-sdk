@@ -7,6 +7,7 @@ export enum LIT_TESTNET {
   CAYENNE = 'cayenne',
   DATIL_DEV = 'datil-dev',
   DATIL_TEST = 'datil-test',
+  DATIL_PROD = 'datil',
 }
 
 export enum LIT_RPC {
@@ -25,6 +26,7 @@ export const RPC_MAP = {
   [LIT_TESTNET.CAYENNE]: LIT_RPC.CHRONICLE,
   [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
   [LIT_TESTNET.DATIL_TEST]: LIT_RPC.YELLOWSTONE,
+  [LIT_TESTNET.DATIL_PROD]: LIT_RPC.YELLOWSTONE,
 };
 
 /**

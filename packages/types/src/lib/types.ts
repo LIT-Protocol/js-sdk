@@ -122,6 +122,7 @@ export type LIT_NETWORKS_KEYS =
   | 'cayenne'
   | 'datil-dev'
   | 'datil-test'
+  | 'datil'
   | 'localhost'
   | 'custom'
   | 'habanero'
