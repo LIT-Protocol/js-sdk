@@ -144,10 +144,38 @@ export const throwErrorV0 = ({
 };
 
 // Map for old error codes to new ones
-const oldErrorToNewErrorMap: { [key: string]: string } = {
+const oldErrorToNewErrorMap: Record<string, string> = {
   not_authorized: 'NodeNotAuthorized',
   storage_error: 'NodeStorageError',
 };
+
+class GenericError extends Error {
+  readonly requestId?: string;
+  readonly errorCode: string;
+  readonly errorKind: string;
+
+  constructor(message: string, requestId?: string) {
+    super(message);
+    this.requestId = requestId;
+    this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
+    this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
+  }
+}
+
+class ErrorV1 extends GenericError {
+  override readonly errorCode: string;
+  override readonly errorKind: string;
+  readonly status: number | undefined;
+  readonly details: string[] | undefined;
+
+  constructor(message: string, errorKind: string, errorCode: string, status?: number, details?: string[], requestId?: string) {
+    super(message, requestId);
+    this.status = status;
+    this.details = details;
+    this.errorCode = errorCode;
+    this.errorKind = errorKind;
+  }
+}
 
 /**
  *
@@ -162,64 +190,33 @@ export const throwErrorV1 = ({
   errorCode,
   requestId,
 }: NodeClientErrorV1): never => {
-  const errConstructorFunc = function (
-    this: any,
-    errorKind: string,
-    status: number,
-    details: string[],
-    message?: string,
-    errorCode?: string,
-    requestId?: string
-  ) {
-    this.message = message;
-    this.errorCode = errorCode;
-    this.errorKind = errorKind;
-    this.status = status;
-    this.details = details;
-    this.requestId = requestId;
-  };
-
-  throw new (errConstructorFunc as any)(
+  throw new ErrorV1(
+    message,
     errorKind,
+    errorCode,
     status,
     details,
-    message,
-    errorCode,
     requestId
-  );
+  )
 };
 
-export const throwGenericError = (e: any): never => {
-  const errConstructorFunc = function (
-    this: any,
-    message: string,
-    requestId: string
-  ) {
-    this.message = message;
-    this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
-    this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
-    this.requestId = requestId;
-  };
-
-  throw new (errConstructorFunc as any)(
-    e.message ?? 'Generic Error',
-    e.requestId ?? 'No request ID found'
-  );
+export const throwGenericError = (e: { message?: string, requestId?: string }): never => {
+  throw new GenericError(e.message ?? 'Generic Error', e.requestId ?? 'No request ID found');
 };
 
 export const isNodeClientErrorV1 = (
   nodeError: NodeClientErrorV0 | NodeClientErrorV1
 ): nodeError is NodeClientErrorV1 => {
   return (
-    nodeError.hasOwnProperty('errorCode') &&
-    nodeError.hasOwnProperty('errorKind')
+    'errorCode' in nodeError &&
+    'errorKind' in nodeError
   );
 };
 
 export const isNodeClientErrorV0 = (
   nodeError: NodeClientErrorV0 | NodeClientErrorV1
 ): nodeError is NodeClientErrorV0 => {
-  return nodeError.hasOwnProperty('errorCode');
+  return 'nodeError' in nodeError;
 };
 
 declare global {

@@ -1178,11 +1178,11 @@ export class LitCore {
    * Throw node error
    *
    * @param { RejectedNodePromises } res
-   *
-   * @returns { void }
+   * @param { string } requestId
+   * @returns { never } This function should never return, it will throw an error
    *
    */
-  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
+  _throwNodeError = (res: RejectedNodePromises, requestId: string): never => {
     if (res.error) {
       if (
         ((res.error.errorCode &&
@@ -1193,18 +1193,20 @@ export class LitCore {
         log('You are not authorized to access this content');
       }
 
-      throwError({
+      return throwError({
         ...res.error,
         message:
           res.error.message ||
-          'There was an error getting the signing shares from the nodes',
+          `There was an error getting the signing shares from the nodes. Response from the nodes: ${JSON.stringify(
+            res.error, null, 2
+          )}`,
         errorCode: res.error.errorCode || LIT_ERROR.UNKNOWN_ERROR.code,
         requestId,
-      } as NodeClientErrorV0 | NodeClientErrorV1);
+      });
     } else {
-      throwError({
-        message: `There was an error getting the signing shares from the nodes.  Response from the nodes: ${JSON.stringify(
-          res
+      return throwError({
+        message: `There was an error getting the signing shares from the nodes. Response from the nodes: ${JSON.stringify(
+          res, null, 2
         )}`,
         error: LIT_ERROR.UNKNOWN_ERROR,
         requestId,
