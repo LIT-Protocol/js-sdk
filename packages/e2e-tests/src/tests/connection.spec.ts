@@ -11,6 +11,10 @@ try {
 const NETWORKS: string[] = ['manzano', 'datil-dev', 'cayenne'];
 
 describe('Connections', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
   test.each(NETWORKS)('Testing network: %s', async (network) => {
     const devEnv = new TinnyEnvironment(network as LIT_TESTNET);
     await devEnv.init();
