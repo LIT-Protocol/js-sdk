@@ -33,6 +33,9 @@ export const derivedAddresses = async ({
     cacheContractCall?: boolean;
   };
 }): Promise<TokenInfo | any> => {
+  if (!defaultRPCUrl) {
+    throw new Error('defaultRPCUrl must be provided');
+  }
   let pubkeyBuffer: Buffer;
 
   // one of the two must be provided
@@ -43,11 +46,6 @@ export const derivedAddresses = async ({
   // if pkp contract address is not provided, use the default one 0xF5cB699652cED3781Dd75575EDBe075d6212DF98
   if (!pkpContractAddress) {
     pkpContractAddress = PKPNFTData.address;
-  }
-
-  // if default RPC url is not provided, use the default one https://endpoints.omniatech.io/v1/matic/mumbai/public
-  if (!defaultRPCUrl) {
-    defaultRPCUrl = 'https://lit-protocol.calderachain.xyz/replica-http';
   }
 
   // if pkpTokenId is provided, get the public key from it

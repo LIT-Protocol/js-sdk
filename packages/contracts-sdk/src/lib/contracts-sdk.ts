@@ -1557,6 +1557,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const addrs = await derivedAddresses({
             pkpTokenId: tokenId,
             publicKey: pubKey,
+            defaultRPCUrl: this.rpc,
           });
 
           arr.push(addrs);
