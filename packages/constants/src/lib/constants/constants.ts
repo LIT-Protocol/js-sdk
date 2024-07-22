@@ -789,6 +789,41 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   localhost: metamaskChainInfo.yellowstone,
 };
 
+const HTTP = 'http://';
+const HTTPS = 'https://';
+
+/**
+ * Mapping of network values to corresponding http protocol.
+ */
+export const HTTP_BY_NETWORK: Record<
+  LIT_NETWORK_VALUES,
+  typeof HTTP | typeof HTTPS
+> = {
+  cayenne: HTTPS,
+  manzano: HTTPS,
+  habanero: HTTPS,
+  'datil-dev': HTTPS,
+  'datil-test': HTTPS,
+  custom: HTTP,
+  localhost: HTTP,
+};
+
+/**
+ * Mapping of network values to their corresponding centralisation status.
+ */
+export const CENTRALISATION_BY_NETWORK: Record<
+  LIT_NETWORK_VALUES,
+  'centralised' | 'decentralised' | 'unknown'
+> = {
+  cayenne: 'centralised',
+  manzano: 'decentralised',
+  habanero: 'decentralised',
+  'datil-dev': 'centralised',
+  'datil-test': 'decentralised',
+  custom: 'unknown',
+  localhost: 'unknown',
+} as const;
+
 /**
  * Solana Chains supported by the LIT protocol.  Use the chain name as a key in this object.
  * @constant
