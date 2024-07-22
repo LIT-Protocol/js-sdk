@@ -41,18 +41,6 @@ const oldChronicleChain = {
   vmType: 'EVM',
 };
 
-const vesuviusChain = {
-  contractAddress: null,
-  chainId: 2311,
-  name: 'Chronicle Vesuvius - Lit Protocol Testnet',
-  symbol: 'tstLPX',
-  decimals: 18,
-  rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
-  blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
-  type: null,
-  vmType: 'EVM',
-};
-
 const yellowstoneChain = {
   contractAddress: null,
   chainId: 175188,
@@ -513,23 +501,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   chronicleTestnet: oldChronicleChain,
 
   /**
-   * @deprecated Will be removed in version 7.x. - Use `vesuvius` instead.
-   */
-  datilDevnet: vesuviusChain,
-
-  /**
-   * @deprecated Will be removed in version 7.x. - Use `vesuvius` instead.
-   */
-  chronicleVesuviusTestnet: vesuviusChain,
-
-  /**
-   * Use this for `DatilDev` network.
-   * Chainlist entry for the Chronicle Vesuvius Testnet.
-   * https://chainlist.org/chain/2311
-   */
-  vesuvius: vesuviusChain,
-
-  /**
    * Use this for `>= DatilTest` network.
    * Chainlist entry for the Chronicle Yellowstone Testnet.
    * https://chainlist.org/chain/175188
@@ -651,7 +622,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
 };
 
 /**
- * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['chronicleVesuviusTestnet']` for the new Chronicle Vesuvius Testnet (Jul 2024).
+ * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['yellowstone']` for the new Chronicle Yellowstone Testnet (Jul 2024). (Updated to use `yellowstone` chain instead 22 July 2024)
  */
 export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 
@@ -672,21 +643,6 @@ export const metamaskChainInfo = {
     },
     rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
     blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
-    iconUrls: ['future'],
-  },
-  /**
-   * Information about the "chronicleVesuvius" chain.
-   */
-  chronicleVesuvius: {
-    chainId: LIT_CHAINS['vesuvius'].chainId,
-    chainName: LIT_CHAINS['vesuvius'].name,
-    nativeCurrency: {
-      name: LIT_CHAINS['vesuvius'].symbol,
-      symbol: LIT_CHAINS['vesuvius'].symbol,
-      decimals: LIT_CHAINS['vesuvius'].decimals,
-    },
-    rpcUrls: LIT_CHAINS['vesuvius'].rpcUrls,
-    blockExplorerUrls: LIT_CHAINS['vesuvius'].blockExplorerUrls,
     iconUrls: ['future'],
   },
 
@@ -720,18 +676,6 @@ export const LIT_RPC = {
    * Chronicle RPC endpoint - Used for Cayenne, Manzano, Habanero
    */
   CHRONICLE: 'https://chain-rpc.litprotocol.com/http',
-
-  /**
-   * Chronicle Vesuvius RPC endpoint - used for Datil-dev
-   * @deprecated Will be removed in version 7.x. - Use CHRONICLE_VESUVIUS instead
-   */
-  VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
-
-  /**
-   * Chronicle Vesuvius RPC endpoint - used for Datil-dev
-   * More info: https://app.conduit.xyz/published/view/vesuvius-as793xpg5g
-   */
-  CHRONICLE_VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
 
   /**
    * Chronicle Yellowstone RPC endpoint - used for >= Datil-test
@@ -774,7 +718,7 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   cayenne: LIT_RPC.CHRONICLE,
   manzano: LIT_RPC.CHRONICLE,
   habanero: LIT_RPC.CHRONICLE,
-  'datil-dev': LIT_RPC.CHRONICLE_VESUVIUS,
+  'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
   localhost: LIT_RPC.LOCAL_ANVIL,
@@ -834,16 +778,15 @@ export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
-  | typeof metamaskChainInfo.chronicle
-  | typeof metamaskChainInfo.chronicleVesuvius
+  typeof metamaskChainInfo.chronicle | typeof metamaskChainInfo.yellowstone
 > = {
   cayenne: metamaskChainInfo.chronicle,
   manzano: metamaskChainInfo.chronicle,
   habanero: metamaskChainInfo.chronicle,
-  'datil-dev': metamaskChainInfo.chronicleVesuvius,
+  'datil-dev': metamaskChainInfo.yellowstone,
   'datil-test': metamaskChainInfo.yellowstone,
-  custom: metamaskChainInfo.chronicleVesuvius,
-  localhost: metamaskChainInfo.chronicleVesuvius,
+  custom: metamaskChainInfo.yellowstone,
+  localhost: metamaskChainInfo.yellowstone,
 };
 
 /**
