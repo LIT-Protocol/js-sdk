@@ -21,6 +21,8 @@ export const testPkpEthersWithPkpSessionSigsToSendTx = async (
     controllerSessionSigs: pkpSessionSigs,
   });
 
+  await devEnv.getFunds(alice.pkp.ethAddress);
+
   await pkpEthersWallet.init();
 
   // -- eth_sendTransaction parameters
