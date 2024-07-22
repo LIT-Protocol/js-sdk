@@ -1198,7 +1198,9 @@ export class LitCore {
         message:
           res.error.message ||
           `There was an error getting the signing shares from the nodes. Response from the nodes: ${JSON.stringify(
-            res.error, null, 2
+            res.error,
+            null,
+            2
           )}`,
         errorCode: res.error.errorCode || LIT_ERROR.UNKNOWN_ERROR.code,
         requestId,
@@ -1206,7 +1208,9 @@ export class LitCore {
     } else {
       return throwError({
         message: `There was an error getting the signing shares from the nodes. Response from the nodes: ${JSON.stringify(
-          res, null, 2
+          res,
+          null,
+          2
         )}`,
         error: LIT_ERROR.UNKNOWN_ERROR,
         requestId,

@@ -168,7 +168,14 @@ class ErrorV1 extends GenericError {
   readonly status: number | undefined;
   readonly details: string[] | undefined;
 
-  constructor(message: string, errorKind: string, errorCode: string, status?: number, details?: string[], requestId?: string) {
+  constructor(
+    message: string,
+    errorKind: string,
+    errorCode: string,
+    status?: number,
+    details?: string[],
+    requestId?: string
+  ) {
     super(message, requestId);
     this.status = status;
     this.details = details;
@@ -190,27 +197,23 @@ export const throwErrorV1 = ({
   errorCode,
   requestId,
 }: NodeClientErrorV1): never => {
-  throw new ErrorV1(
-    message,
-    errorKind,
-    errorCode,
-    status,
-    details,
-    requestId
-  )
+  throw new ErrorV1(message, errorKind, errorCode, status, details, requestId);
 };
 
-export const throwGenericError = (e: { message?: string, requestId?: string }): never => {
-  throw new GenericError(e.message ?? 'Generic Error', e.requestId ?? 'No request ID found');
+export const throwGenericError = (e: {
+  message?: string;
+  requestId?: string;
+}): never => {
+  throw new GenericError(
+    e.message ?? 'Generic Error',
+    e.requestId ?? 'No request ID found'
+  );
 };
 
 export const isNodeClientErrorV1 = (
   nodeError: NodeClientErrorV0 | NodeClientErrorV1
 ): nodeError is NodeClientErrorV1 => {
-  return (
-    'errorCode' in nodeError &&
-    'errorKind' in nodeError
-  );
+  return 'errorCode' in nodeError && 'errorKind' in nodeError;
 };
 
 export const isNodeClientErrorV0 = (
