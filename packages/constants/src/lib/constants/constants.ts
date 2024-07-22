@@ -515,7 +515,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   /**
    * @deprecated Will be removed in version 7.x. - Use `vesuvius` instead.
    */
-  datilDevnet: vesuviusChain,
+  datilDevnet: yellowstoneChain,
 
   /**
    * @deprecated Will be removed in version 7.x. - Use `vesuvius` instead.
@@ -523,14 +523,13 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   chronicleVesuviusTestnet: vesuviusChain,
 
   /**
-   * Use this for `DatilDev` network.
    * Chainlist entry for the Chronicle Vesuvius Testnet.
    * https://chainlist.org/chain/2311
    */
   vesuvius: vesuviusChain,
 
   /**
-   * Use this for `>= DatilTest` network.
+   * Use this for `>= DatilDev` network.
    * Chainlist entry for the Chronicle Yellowstone Testnet.
    * https://chainlist.org/chain/175188
    */
@@ -774,7 +773,7 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   cayenne: LIT_RPC.CHRONICLE,
   manzano: LIT_RPC.CHRONICLE,
   habanero: LIT_RPC.CHRONICLE,
-  'datil-dev': LIT_RPC.CHRONICLE_VESUVIUS,
+  'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
   localhost: LIT_RPC.LOCAL_ANVIL,
@@ -840,7 +839,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   cayenne: metamaskChainInfo.chronicle,
   manzano: metamaskChainInfo.chronicle,
   habanero: metamaskChainInfo.chronicle,
-  'datil-dev': metamaskChainInfo.chronicleVesuvius,
+  'datil-dev': metamaskChainInfo.yellowstone,
   'datil-test': metamaskChainInfo.yellowstone,
   custom: metamaskChainInfo.chronicleVesuvius,
   localhost: metamaskChainInfo.chronicleVesuvius,
