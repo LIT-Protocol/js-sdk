@@ -19,66 +19,66 @@ export const testSignMessageWithSolanaEncryptedKey = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
+  try {
+    const pkpSessionSigs = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
 
-  console.log(pkpSessionSigs);
+    const solanaKeypair = Keypair.generate();
+    const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
 
-  const solanaKeypair = Keypair.generate();
-  const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
+    const { pkpAddress, id } = await importPrivateKey({
+      pkpSessionSigs,
+      privateKey,
+      litNodeClient: devEnv.litNodeClient,
+      publicKey: '0xdeadbeef',
+      keyType: 'K256',
+      memo: 'Test key',
+    });
 
-  const { pkpAddress, id } = await importPrivateKey({
-    pkpSessionSigs,
-    privateKey,
-    litNodeClient: devEnv.litNodeClient,
-    publicKey: '0xdeadbeef',
-    keyType: 'K256',
-    memo: 'Test key',
-  });
+    const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
+    if (pkpAddress !== alicePkpAddress) {
+      throw new Error(
+        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+      );
+    }
 
-  const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
-  if (pkpAddress !== alicePkpAddress) {
-    throw new Error(
-      `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+    const pkpSessionSigsSigning = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
+
+    const messageToSign = 'This is a test message';
+
+    const signature = await signMessageWithEncryptedKey({
+      pkpSessionSigs: pkpSessionSigsSigning,
+      network: 'solana',
+      messageToSign,
+      litNodeClient: devEnv.litNodeClient,
+      id,
+    });
+
+    console.log('signature');
+    console.log(signature);
+
+    const signatureIsValidForPublicKey = nacl.sign.detached.verify(
+      Buffer.from(messageToSign),
+      bs58.decode(signature),
+      solanaKeypair.publicKey.toBuffer()
     );
+
+    if (!signatureIsValidForPublicKey)
+      throw new Error(
+        `signature: ${signature} doesn't validate for the Solana public key: ${solanaKeypair.publicKey.toString()}`
+      );
+
+    log('✅ testSignMessageWithSolanaEncryptedKey');
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
-
-  const pkpSessionSigsSigning = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
-
-  console.log(pkpSessionSigsSigning);
-
-  const messageToSign = 'This is a test message';
-
-  const signature = await signMessageWithEncryptedKey({
-    pkpSessionSigs: pkpSessionSigsSigning,
-    network: 'solana',
-    messageToSign,
-    litNodeClient: devEnv.litNodeClient,
-    id,
-  });
-
-  console.log('signature');
-  console.log(signature);
-
-  const signatureIsValidForPublicKey = nacl.sign.detached.verify(
-    Buffer.from(messageToSign),
-    bs58.decode(signature),
-    solanaKeypair.publicKey.toBuffer()
-  );
-
-  if (!signatureIsValidForPublicKey)
-    throw new Error(
-      `signature: ${signature} doesn't validate for the Solana public key: ${solanaKeypair.publicKey.toString()}`
-    );
-
-  log('✅ testSignMessageWithSolanaEncryptedKey');
 };

@@ -20,62 +20,64 @@ export const testEthereumSignTransactionWrappedKey = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
+  try {
+    const pkpSessionSigs = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
 
-  console.log(pkpSessionSigs);
+    const privateKey = ethers.Wallet.createRandom().privateKey;
 
-  const privateKey = ethers.Wallet.createRandom().privateKey;
+    const { pkpAddress, id } = await importPrivateKey({
+      pkpSessionSigs,
+      privateKey,
+      litNodeClient: devEnv.litNodeClient,
+      publicKey: '0xdeadbeef',
+      keyType: 'K256',
+      memo: 'Test key',
+    });
 
-  const { pkpAddress, id } = await importPrivateKey({
-    pkpSessionSigs,
-    privateKey,
-    litNodeClient: devEnv.litNodeClient,
-    publicKey: '0xdeadbeef',
-    keyType: 'K256',
-    memo: 'Test key',
-  });
+    const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
+    if (pkpAddress !== alicePkpAddress) {
+      throw new Error(
+        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+      );
+    }
 
-  const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
-  if (pkpAddress !== alicePkpAddress) {
-    throw new Error(
-      `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-    );
+    const pkpSessionSigsSigning = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
+
+    // console.log(pkpSessionSigsSigning);
+
+    const unsignedTransaction = getBaseTransactionForNetwork({
+      network: devEnv.litNodeClient.config.litNetwork,
+      toAddress: alice.wallet.address,
+    });
+
+    const signedTx = await signTransactionWithEncryptedKey({
+      pkpSessionSigs: pkpSessionSigsSigning,
+      network: 'evm',
+      unsignedTransaction,
+      broadcast: false,
+      litNodeClient: devEnv.litNodeClient,
+      id,
+    });
+
+    // console.log('signedTx');
+    // console.log(signedTx);
+
+    if (!ethers.utils.isHexString(signedTx)) {
+      throw new Error(`signedTx isn't hex: ${signedTx}`);
+    }
+
+    log('✅ testEthereumSignTransactionWrappedKey');
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
-
-  const pkpSessionSigsSigning = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
-
-  console.log(pkpSessionSigsSigning);
-
-  const unsignedTransaction = getBaseTransactionForNetwork({
-    network: devEnv.litNodeClient.config.litNetwork,
-    toAddress: alice.wallet.address,
-  });
-
-  const signedTx = await signTransactionWithEncryptedKey({
-    pkpSessionSigs: pkpSessionSigsSigning,
-    network: 'evm',
-    unsignedTransaction,
-    broadcast: false,
-    litNodeClient: devEnv.litNodeClient,
-    id,
-  });
-
-  console.log('signedTx');
-  console.log(signedTx);
-
-  if (!ethers.utils.isHexString(signedTx)) {
-    throw new Error(`signedTx isn't hex: ${signedTx}`);
-  }
-
-  log('✅ testEthereumSignTransactionWrappedKey');
 };

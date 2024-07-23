@@ -17,74 +17,76 @@ export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
-
-  console.log(pkpSessionSigs);
-
-  const privateKey = ethers.Wallet.createRandom().privateKey;
-
-  const { pkpAddress, id } = await importPrivateKey({
-    pkpSessionSigs,
-    privateKey,
-    litNodeClient: devEnv.litNodeClient,
-    publicKey: '0xdeadbeef',
-    keyType: 'K256',
-    memo: 'Test key',
-  });
-
-  const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
-  if (pkpAddress !== alicePkpAddress) {
-    throw new Error(
-      `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-    );
-  }
-
-  const pkpSessionSigsSigning = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
-
-  console.log(pkpSessionSigsSigning);
-
-  const unsignedTransaction: EthereumLitTransaction = {
-    ...getBaseTransactionForNetwork({
-      network: devEnv.litNodeClient.config.litNetwork,
-      toAddress: alice.wallet.address,
-    }),
-    dataHex: 'Test transaction from Alice to bob',
-  };
-
   try {
-    const _res = await signTransactionWithEncryptedKey({
-      pkpSessionSigs: pkpSessionSigsSigning,
-      network: 'evm',
-      unsignedTransaction,
-      broadcast: false,
-      litNodeClient: devEnv.litNodeClient,
-      id,
-    });
-  } catch (e: any) {
-    if (
-      e.message.includes(
-        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
-      )
-    ) {
-      console.log('✅ THIS IS EXPECTED: ', e);
-      console.log(e.message);
-      console.log(
-        '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
-      );
-    } else {
-      throw e;
-    }
-  }
+    const pkpSessionSigs = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
 
-  log('✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam');
+    const privateKey = ethers.Wallet.createRandom().privateKey;
+
+    const { pkpAddress, id } = await importPrivateKey({
+      pkpSessionSigs,
+      privateKey,
+      litNodeClient: devEnv.litNodeClient,
+      publicKey: '0xdeadbeef',
+      keyType: 'K256',
+      memo: 'Test key',
+    });
+
+    const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
+    if (pkpAddress !== alicePkpAddress) {
+      throw new Error(
+        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+      );
+    }
+
+    const pkpSessionSigsSigning = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
+
+    // console.log(pkpSessionSigsSigning);
+
+    const unsignedTransaction: EthereumLitTransaction = {
+      ...getBaseTransactionForNetwork({
+        network: devEnv.litNodeClient.config.litNetwork,
+        toAddress: alice.wallet.address,
+      }),
+      dataHex: 'Test transaction from Alice to bob',
+    };
+
+    try {
+      const _res = await signTransactionWithEncryptedKey({
+        pkpSessionSigs: pkpSessionSigsSigning,
+        network: 'evm',
+        unsignedTransaction,
+        broadcast: false,
+        litNodeClient: devEnv.litNodeClient,
+        id,
+      });
+    } catch (e: any) {
+      if (
+        e.message.includes(
+          'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
+        )
+      ) {
+        console.log('✅ THIS IS EXPECTED: ', e);
+        console.log(e.message);
+        console.log(
+          '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
+        );
+      } else {
+        throw e;
+      }
+    }
+
+    log('✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam');
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
+  }
 };

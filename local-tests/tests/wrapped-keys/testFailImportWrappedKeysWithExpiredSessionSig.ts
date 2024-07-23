@@ -52,7 +52,7 @@ export const testFailImportWrappedKeysWithExpiredSessionSig = async (
       keyType: 'K256',
       memo: 'Test key',
     });
-    console.log(res);
+    // console.log(res);
   } catch (e: any) {
     if (e.message.includes('Invalid sessionSig: Expired')) {
       console.log('✅ THIS IS EXPECTED: ', e);

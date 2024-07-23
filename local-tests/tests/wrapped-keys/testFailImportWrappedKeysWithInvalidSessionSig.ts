@@ -17,34 +17,36 @@ export const testFailImportWrappedKeysWithInvalidSessionSig = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
-
-  console.log(pkpSessionSigs);
-
   try {
-    const privateKey = randomSolanaPrivateKey();
+    const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
 
-    await importPrivateKey({
-      pkpSessionSigs: tamperPkpSessionSigs(pkpSessionSigs),
-      privateKey,
-      litNodeClient: devEnv.litNodeClient,
-      publicKey: '0xdeadbeef',
-      keyType: 'K256',
-      memo: 'Test key',
-    });
-  } catch (e: any) {
-    if (e.message.includes('bad public key size')) {
-      console.log('✅ THIS IS EXPECTED: ', e);
-      console.log(e.message);
-      console.log(
-        '✅ testFailImportWrappedKeysWithInvalidSessionSig is expected to have an error'
-      );
-    } else {
-      throw e;
+    try {
+      const privateKey = randomSolanaPrivateKey();
+
+      await importPrivateKey({
+        pkpSessionSigs: tamperPkpSessionSigs(pkpSessionSigs),
+        privateKey,
+        litNodeClient: devEnv.litNodeClient,
+        publicKey: '0xdeadbeef',
+        keyType: 'K256',
+        memo: 'Test key',
+      });
+    } catch (e: any) {
+      if (e.message.includes('bad public key size')) {
+        console.log('✅ THIS IS EXPECTED: ', e);
+        console.log(e.message);
+        console.log(
+          '✅ testFailImportWrappedKeysWithInvalidSessionSig is expected to have an error'
+        );
+      } else {
+        throw e;
+      }
     }
-  }
 
-  console.log('✅ testFailImportWrappedKeysWithInvalidSessionSig');
+    console.log('✅ testFailImportWrappedKeysWithInvalidSessionSig');
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
+  }
 };
 
 const tamperPkpSessionSigs = (
@@ -63,7 +65,7 @@ const tamperPkpSessionSigs = (
     }
   }
 
-  console.log(tamperedPkpSessionSigs);
+  // console.log(tamperedPkpSessionSigs);
 
   return tamperedPkpSessionSigs;
 };

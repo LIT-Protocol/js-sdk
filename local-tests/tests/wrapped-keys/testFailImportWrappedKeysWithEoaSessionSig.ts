@@ -16,32 +16,36 @@ export const testFailImportWrappedKeysWithEoaSessionSig = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
-  console.log(eoaSessionSigs);
-
-  const privateKey = randomSolanaPrivateKey();
-
   try {
-    await importPrivateKey({
-      pkpSessionSigs: eoaSessionSigs,
-      privateKey,
-      litNodeClient: devEnv.litNodeClient,
-      publicKey: '0xdeadbeef',
-      keyType: 'K256',
-      memo: 'Test key',
-    });
-  } catch (e: any) {
-    if (e.message.includes('SessionSig is not from a PKP')) {
-      console.log('✅ THIS IS EXPECTED: ', e);
-      console.log(e.message);
-      console.log(
-        '✅ testFailImportWrappedKeysWithEoaSessionSig is expected to have an error'
-      );
-    } else {
-      throw e;
-    }
-  }
+    const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
-  console.log('✅ testFailImportWrappedKeysWithEoaSessionSig');
+    // console.log(eoaSessionSigs);
+
+    const privateKey = randomSolanaPrivateKey();
+
+    try {
+      await importPrivateKey({
+        pkpSessionSigs: eoaSessionSigs,
+        privateKey,
+        litNodeClient: devEnv.litNodeClient,
+        publicKey: '0xdeadbeef',
+        keyType: 'K256',
+        memo: 'Test key',
+      });
+    } catch (e: any) {
+      if (e.message.includes('SessionSig is not from a PKP')) {
+        console.log('✅ THIS IS EXPECTED: ', e);
+        console.log(e.message);
+        console.log(
+          '✅ testFailImportWrappedKeysWithEoaSessionSig is expected to have an error'
+        );
+      } else {
+        throw e;
+      }
+    }
+
+    console.log('✅ testFailImportWrappedKeysWithEoaSessionSig');
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
+  }
 };
