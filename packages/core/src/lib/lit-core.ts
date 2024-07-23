@@ -101,7 +101,7 @@ export type LitNodeClientConfigWithDefaults = Required<
     bootstrapUrls: string[];
   } & {
     nodeProtocol?: `http://` | `https://` | null;
-  }
+  };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;

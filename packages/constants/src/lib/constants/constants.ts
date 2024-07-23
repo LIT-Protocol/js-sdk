@@ -804,7 +804,7 @@ export const HTTP_BY_NETWORK: Record<
   habanero: HTTPS,
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
-  internalDev: HTTPS, 
+  internalDev: HTTPS,
   custom: HTTP, // default, can be changed by config
   localhost: HTTP, // default, can be changed by config
 };
