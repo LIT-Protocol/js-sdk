@@ -12,7 +12,7 @@ export enum LIT_TESTNET {
 export enum LIT_RPC {
   LOCAL_ANVIL = 'http://127.0.0.1:8545',
   CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
-  VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
+  YELLOWSTONE = 'https://yellowstone-rpc.litprotocol.com',
 }
 
 /**
@@ -22,8 +22,8 @@ export const RPC_MAP = {
   [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
   [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICLE,
   [LIT_TESTNET.CAYENNE]: LIT_RPC.CHRONICLE,
-  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
-  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.VESUVIUS,
+  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.YELLOWSTONE,
+  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.YELLOWSTONE,
 };
 
 /**
@@ -84,7 +84,7 @@ export interface ProcessEnvs {
    * The URL of Lit RPC server.
    * - If it's running locally on Anvil, it should be 'http://127.0.0.1:8545'
    * - If it's running on Chronicle, it should be 'https://chain-rpc.litprotocol.com/http'
-   * - If it's running on Vesuvius, it should be 'https://vesuvius-rpc.litprotocol.com'
+   * - If it's running on Yellowstone, it should be 'https://yellowstone-rpc.litprotocol.com'
    */
   LIT_RPC_URL: string;
 

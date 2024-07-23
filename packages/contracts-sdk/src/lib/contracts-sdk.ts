@@ -53,6 +53,9 @@ import {
   GENERAL_WORKER_URL_BY_NETWORK,
   LIT_NETWORK_VALUES,
   RPC_URL_BY_NETWORK,
+  HTTP_BY_NETWORK,
+  CENTRALISATION_BY_NETWORK,
+  LIT_NETWORK,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
@@ -66,6 +69,7 @@ import {
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
 import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
+import { ValidatorStruct } from './types';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -922,20 +926,43 @@ export class LitContracts {
       (av: any) => !kickedValidators.some((kv: any) => kv === av)
     );
 
-    const activeValidatorStructs = await contract['getValidatorsStructs'](
-      cleanedActiveValidators
-    );
+    const activeValidatorStructs: ValidatorStruct[] = (
+      await contract['getValidatorsStructs'](cleanedActiveValidators)
+    ).map((item: any) => {
+      return {
+        ip: item[0],
+        ipv6: item[1],
+        port: item[2],
+        nodeAddress: item[3],
+        reward: item[4],
+        seconderPubkey: item[5],
+        receiverPubkey: item[6],
+      };
+    });
 
-    const networks = activeValidatorStructs.map((item: any) => {
-      let proto = 'https://';
-      /**
-       * ports in range of 8470 - 8479 are configured for https on custom networks (eg. cayenne)
-       * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
-       */
-      if (item.port !== 443 && (item.port > 8480 || item.port < 8469)) {
-        proto = 'http://';
+    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
+      const protocol = HTTP_BY_NETWORK[network];
+      const centralisation = CENTRALISATION_BY_NETWORK[network];
+      const ip = intToIP(item.ip);
+      const port = item.port;
+
+      if (centralisation === 'centralised') {
+        // -- validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
+        if (
+          network === LIT_NETWORK.Cayenne &&
+          !port.toString().startsWith('8')
+        ) {
+          throw new Error(
+            `Invalid port: ${port} for the ${centralisation} ${network} network. Expected range: 8470 - 8479`
+          );
+        }
       }
-      return `${proto}${intToIP(item.ip)}:${item.port}`;
+
+      const url = `${protocol}${ip}:${port}`;
+
+      LitContracts.logger.debug("Validator's URL:", url);
+
+      return url;
     });
 
     return networks;
@@ -1554,6 +1581,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const addrs = await derivedAddresses({
             pkpTokenId: tokenId,
             publicKey: pubKey,
+            defaultRPCUrl: this.rpc,
           });
 
           arr.push(addrs);

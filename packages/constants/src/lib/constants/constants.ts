@@ -26,6 +26,33 @@ export const LIT_AUTH_SIG_CHAIN_KEYS: string[] = [
 export const AUTH_SIGNATURE_BODY =
   'I am creating an account to use Lit Protocol at {{timestamp}}';
 
+const oldChronicleChain = {
+  contractAddress: null,
+  chainId: 175177,
+  name: 'Chronicle - Lit Protocol Testnet',
+  symbol: 'tstLIT',
+  decimals: 18,
+  rpcUrls: [
+    'https://lit-protocol.calderachain.xyz/replica-http',
+    'https://chain-rpc.litprotocol.com/http',
+  ],
+  blockExplorerUrls: ['https://chain.litprotocol.com/'],
+  type: null,
+  vmType: 'EVM',
+};
+
+const yellowstoneChain = {
+  contractAddress: null,
+  chainId: 175188,
+  name: 'Chronicle Yellowstone - Lit Protocol Testnet',
+  symbol: 'tstLPX',
+  decimals: 18,
+  rpcUrls: ['https://yellowstone-rpc.litprotocol.com/'],
+  blockExplorerUrls: ['https://yellowstone-explorer.litprotocol.com/'],
+  type: null,
+  vmType: 'EVM',
+};
+
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
  * @constant
@@ -471,65 +498,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
    * Chainlist entry for the Chronicle Testnet.
    * https://chainlist.org/chain/175177
    */
-  chronicleTestnet: {
-    contractAddress: null,
-    chainId: 175177,
-    name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'tstLIT',
-    decimals: 18,
-    rpcUrls: [
-      'https://lit-protocol.calderachain.xyz/replica-http',
-      'https://chain-rpc.litprotocol.com/http',
-    ],
-    blockExplorerUrls: ['https://chain.litprotocol.com/'],
-    type: null,
-    vmType: 'EVM',
-  },
+  chronicleTestnet: oldChronicleChain,
 
   /**
-   * @deprecated Will be removed in version 7.x. - Use `chronicleVesuviusTestnet` instead.
+   * Use this for `>= DatilTest` network.
+   * Chainlist entry for the Chronicle Yellowstone Testnet.
+   * https://chainlist.org/chain/175188
    */
-  datilDevnet: {
-    contractAddress: null,
-    chainId: 2311,
-    name: 'Chronicle Vesuvius - Lit Protocol Testnet',
-    symbol: 'tstLPX',
-    decimals: 18,
-    rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
-    blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
-    type: null,
-    vmType: 'EVM',
-  },
+  yellowstone: yellowstoneChain,
 
-  /**
-   * Chainlist entry for the Chronicle Vesuvius Testnet.
-   * https://chainlist.org/chain/2311
-   */
-  chronicleVesuviusTestnet: {
-    contractAddress: null,
-    chainId: 2311,
-    name: 'Chronicle Vesuvius - Lit Protocol Testnet',
-    symbol: 'tstLPX',
-    decimals: 18,
-    rpcUrls: ['https://vesuvius-rpc.litprotocol.com/'],
-    blockExplorerUrls: ['https://vesuvius-explorer.litprotocol.com/'],
-    type: null,
-    vmType: 'EVM',
-  },
-  lit: {
-    contractAddress: null,
-    chainId: 175177,
-    name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'tstLIT',
-    decimals: 18,
-    rpcUrls: [
-      'https://lit-protocol.calderachain.xyz/replica-http',
-      'https://chain-rpc.litprotocol.com/http',
-    ],
-    blockExplorerUrls: ['https://chain.litprotocol.com/'],
-    type: null,
-    vmType: 'EVM',
-  },
+  lit: oldChronicleChain,
+
   chiado: {
     contractAddress: null,
     chainId: 10200,
@@ -643,7 +622,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
 };
 
 /**
- * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['chronicleVesuviusTestnet']` for the new Chronicle Vesuvius Testnet (Jul 2024).
+ * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['yellowstone']` for the new Chronicle Yellowstone Testnet (Jul 2024). (Updated to use `yellowstone` chain instead 22 July 2024)
  */
 export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 
@@ -666,19 +645,20 @@ export const metamaskChainInfo = {
     blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
     iconUrls: ['future'],
   },
+
   /**
-   * Information about the "chronicleVesuvius" chain.
+   * Information about the "chronicleYellowstone" chain.
    */
-  chronicleVesuvius: {
-    chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
-    chainName: LIT_CHAINS['chronicleVesuviusTestnet'].name,
+  yellowstone: {
+    chainId: LIT_CHAINS['yellowstone'].chainId,
+    chainName: LIT_CHAINS['yellowstone'].name,
     nativeCurrency: {
-      name: LIT_CHAINS['chronicleVesuviusTestnet'].symbol,
-      symbol: LIT_CHAINS['chronicleVesuviusTestnet'].symbol,
-      decimals: LIT_CHAINS['chronicleVesuviusTestnet'].decimals,
+      name: LIT_CHAINS['yellowstone'].symbol,
+      symbol: LIT_CHAINS['yellowstone'].symbol,
+      decimals: LIT_CHAINS['yellowstone'].decimals,
     },
-    rpcUrls: LIT_CHAINS['chronicleVesuviusTestnet'].rpcUrls,
-    blockExplorerUrls: LIT_CHAINS['chronicleVesuviusTestnet'].blockExplorerUrls,
+    rpcUrls: LIT_CHAINS['yellowstone'].rpcUrls,
+    blockExplorerUrls: LIT_CHAINS['yellowstone'].blockExplorerUrls,
     iconUrls: ['future'],
   },
 };
@@ -698,15 +678,10 @@ export const LIT_RPC = {
   CHRONICLE: 'https://chain-rpc.litprotocol.com/http',
 
   /**
-   * Chronicle Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
-   * @deprecated Will be removed in version 7.x. - Use CHRONICLE_VESUVIUS instead
+   * Chronicle Yellowstone RPC endpoint - used for >= Datil-test
+   * More info: https://app.conduit.xyz/published/view/chronicle-yellowstone-testnet-9qgmzfcohk
    */
-  VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
-
-  /**
-   * Chronicle Vesuvius RPC endpoint - used for >= Datil-dev, Datil-test
-   */
-  CHRONICLE_VESUVIUS: 'https://vesuvius-rpc.litprotocol.com',
+  CHRONICLE_YELLOWSTONE: 'https://yellowstone-rpc.litprotocol.com',
 } as const;
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
@@ -743,8 +718,8 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   cayenne: LIT_RPC.CHRONICLE,
   manzano: LIT_RPC.CHRONICLE,
   habanero: LIT_RPC.CHRONICLE,
-  'datil-dev': LIT_RPC.CHRONICLE_VESUVIUS,
-  'datil-test': LIT_RPC.CHRONICLE_VESUVIUS,
+  'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
+  'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
   localhost: LIT_RPC.LOCAL_ANVIL,
 };
@@ -803,17 +778,51 @@ export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
-  | typeof metamaskChainInfo.chronicle
-  | typeof metamaskChainInfo.chronicleVesuvius
+  typeof metamaskChainInfo.chronicle | typeof metamaskChainInfo.yellowstone
 > = {
   cayenne: metamaskChainInfo.chronicle,
   manzano: metamaskChainInfo.chronicle,
   habanero: metamaskChainInfo.chronicle,
-  'datil-dev': metamaskChainInfo.chronicleVesuvius,
-  'datil-test': metamaskChainInfo.chronicleVesuvius,
-  custom: metamaskChainInfo.chronicleVesuvius,
-  localhost: metamaskChainInfo.chronicleVesuvius,
+  'datil-dev': metamaskChainInfo.yellowstone,
+  'datil-test': metamaskChainInfo.yellowstone,
+  custom: metamaskChainInfo.yellowstone,
+  localhost: metamaskChainInfo.yellowstone,
 };
+
+const HTTP = 'http://';
+const HTTPS = 'https://';
+
+/**
+ * Mapping of network values to corresponding http protocol.
+ */
+export const HTTP_BY_NETWORK: Record<
+  LIT_NETWORK_VALUES,
+  typeof HTTP | typeof HTTPS
+> = {
+  cayenne: HTTPS,
+  manzano: HTTPS,
+  habanero: HTTPS,
+  'datil-dev': HTTPS,
+  'datil-test': HTTPS,
+  custom: HTTP,
+  localhost: HTTP,
+};
+
+/**
+ * Mapping of network values to their corresponding centralisation status.
+ */
+export const CENTRALISATION_BY_NETWORK: Record<
+  LIT_NETWORK_VALUES,
+  'centralised' | 'decentralised' | 'unknown'
+> = {
+  cayenne: 'centralised',
+  manzano: 'decentralised',
+  habanero: 'decentralised',
+  'datil-dev': 'centralised',
+  'datil-test': 'decentralised',
+  custom: 'unknown',
+  localhost: 'unknown',
+} as const;
 
 /**
  * Solana Chains supported by the LIT protocol.  Use the chain name as a key in this object.
