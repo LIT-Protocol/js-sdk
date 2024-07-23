@@ -9,7 +9,6 @@ import {
   SERVICE_URL_BY_LIT_NETWORK,
 } from './constants';
 import { BaseRequestParams, SupportedNetworks } from './types';
-import { getPkpAddressFromSessionSig } from '../utils';
 
 function composeAuthHeader(sessionSig: AuthSig) {
   const sessionSigUintArr = uint8arrayFromString(JSON.stringify(sessionSig));
@@ -38,27 +37,22 @@ function isSupportedLitNetwork(
   }
 }
 
-function getServiceUrl({ sessionSig, method, litNetwork }: BaseRequestParams) {
+function getServiceUrl({ litNetwork }: BaseRequestParams) {
   isSupportedLitNetwork(litNetwork);
 
-  if (method === 'POST') {
-    return SERVICE_URL_BY_LIT_NETWORK[litNetwork];
-  }
-
-  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
-  return `${SERVICE_URL_BY_LIT_NETWORK[litNetwork]}/${pkpAddress}`;
+  return SERVICE_URL_BY_LIT_NETWORK[litNetwork];
 }
 
 export function getBaseRequestParams(requestParams: BaseRequestParams): {
   initParams: RequestInit;
-  url: string;
+  baseUrl: string;
 } {
   const { sessionSig, method, litNetwork } = requestParams;
 
   // NOTE: Although HTTP conventions use capitalized letters for header names
   // Lambda backend events from API gateway receive all lowercased header keys
   return {
-    url: getServiceUrl(requestParams),
+    baseUrl: getServiceUrl(requestParams),
     initParams: {
       method,
       headers: {

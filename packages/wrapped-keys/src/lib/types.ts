@@ -35,21 +35,35 @@ export interface ApiParamsSupportedNetworks {
 export type GetEncryptedKeyMetadataParams = BaseApiParams;
 
 /** Metadata for a key that has been stored, encrypted, on the wrapped keys backend service
+ * Returned by `listEncryptedKeyMetadata`; to get full stored key data including `ciphertext` and `dataToEncryptHash`
+ * use `getEncryptedKeyMetadata()`
  *
- * @property { string } ciphertext The base64 encoded, salted & encrypted private key
- * @property { string } dataToEncryptHash SHA-256 of the ciphertext
+ * @typedef StoredKeyMetadata
  * @property { string } publicKey The public key of the encrypted private key
  * @property { string } pkpAddress The LIT PKP address that is associated with the encrypted private key
  * @property { string } keyType The type of key that was encrypted -- e.g. ed25519, K256, etc.
+ * @property { string } memo A (typically) user-provided descriptor for the encrypted private key
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the client who stored the key was connected to
  */
 export interface StoredKeyMetadata {
-  ciphertext: string;
-  dataToEncryptHash: string;
   publicKey: string;
   pkpAddress: string;
   keyType: KeyType;
   litNetwork: LIT_NETWORKS_KEYS;
+  memo: string;
+  id: string;
+}
+
+/** Complete encrypted private key data, including the `ciphertext` and `dataToEncryptHash` necessary to decrypt the key
+ *
+ * @extends StoredKeyMetadata
+ * @property { string } ciphertext The base64 encoded, salted & encrypted private key
+ * @property { string } dataToEncryptHash SHA-256 of the ciphertext
+ */
+export interface StoredKeyData extends StoredKeyMetadata {
+  ciphertext: string;
+  dataToEncryptHash: string;
 }
 
 /** Fetching a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
@@ -60,8 +74,8 @@ export interface StoredKeyMetadata {
  */
 export type StoreEncryptedKeyMetadataParams = BaseApiParams &
   Pick<
-    StoredKeyMetadata,
-    'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext'
+    StoredKeyData,
+    'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext' | 'memo'
   >;
 
 /** Exporting a previously persisted key only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
@@ -80,7 +94,8 @@ export type ExportPrivateKeyParams = BaseApiParams & ApiParamsSupportedNetworks;
  * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
  * @property { string } publicKey The public key of the key being imported into the wrapped keys service
  * @property { string } keyType The algorithm type of the key; this might be K256, ed25519, or other key formats.  The `keyType` will be included in the metadata returned from the wrapped keys service
- *
+ * @property { string } memo A (typically) user-provided descriptor for the encrypted private key
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  */
 export interface ExportPrivateKeyResult {
   pkpAddress: string;
@@ -88,6 +103,8 @@ export interface ExportPrivateKeyResult {
   publicKey: string;
   litNetwork: LIT_NETWORKS_KEYS;
   keyType: KeyType;
+  memo: string;
+  id: string;
 }
 
 /** @typedef GeneratePrivateKeyParams
@@ -113,6 +130,7 @@ export interface GeneratePrivateKeyResult {
  * @property { string } privateKey The private key to be imported into the wrapped keys service
  * @property { string } publicKey The public key of the key being imported into the wrapped keys service
  * @property { string } keyType The algorithm type of the key; this might be K256, ed25519, or other key formats.  The `keyType` will be included in the metadata returned from the wrapped keys service
+ * @property { string } memo A (typically) user-provided descriptor for the encrypted private key
  */
 export interface ImportPrivateKeyParams extends BaseApiParams {
   privateKey: string;

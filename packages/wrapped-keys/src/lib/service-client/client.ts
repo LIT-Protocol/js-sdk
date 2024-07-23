@@ -1,25 +1,54 @@
-import { FetchKeyParams, StoreKeyParams } from './types';
+import { FetchKeyParams, ListKeysParams, StoreKeyParams } from './types';
 import { getBaseRequestParams, makeRequest } from './utils';
-import { StoredKeyMetadata } from '../types';
+import { StoredKeyData, StoredKeyMetadata } from '../types';
+import { getPkpAddressFromSessionSig } from '../utils';
 
-/** Fetches previously stored private key metadata from the wrapped keys service
+/** Fetches previously stored private key metadata from the wrapped keys service.
+ * Note that this list will not include `cipherText` or `dataToEncryptHash` necessary to decrypt the keys.
+ * Use `fetchPrivateKeyMetadata()` to get those values.
  *
  * @param { FetchKeyParams } params Parameters required to fetch the private key metadata
  * @returns { Promise<StoredKeyMetadata> } The private key metadata object
  */
-export async function fetchPrivateKeyMetadata(
-  params: FetchKeyParams
-): Promise<StoredKeyMetadata> {
+export async function listPrivateKeyMetadata(
+  params: ListKeysParams
+): Promise<StoredKeyMetadata[]> {
   const { litNetwork, sessionSig } = params;
 
-  const { url, initParams } = getBaseRequestParams({
+  const { baseUrl, initParams } = getBaseRequestParams({
     litNetwork,
     sessionSig,
     method: 'GET',
   });
 
-  return makeRequest<StoredKeyMetadata>({
-    url,
+  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+
+  return makeRequest<StoredKeyMetadata[]>({
+    url: `${baseUrl}/${pkpAddress}`,
+    init: initParams,
+  });
+}
+
+/** Fetches complete previously stored private key data from the wrapped keys service.
+ * Includes the `ciphertext` and `dataToEncryptHash` necessarily to decrypt the key.
+ *
+ * @param { FetchKeyParams } params Parameters required to fetch the private key data
+ * @returns { Promise<StoredKeyMetadata> } The private key metadata object
+ */
+export async function fetchPrivateKeyMetadata(
+  params: FetchKeyParams
+): Promise<StoredKeyData> {
+  const { litNetwork, sessionSig, id } = params;
+
+  const { baseUrl, initParams } = getBaseRequestParams({
+    litNetwork,
+    sessionSig,
+    method: 'GET',
+  });
+  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+
+  return makeRequest<StoredKeyData>({
+    url: `${baseUrl}/${pkpAddress}/${id}`,
     init: initParams,
   });
 }
@@ -34,14 +63,14 @@ export async function storePrivateKeyMetadata(
 ): Promise<boolean> {
   const { litNetwork, sessionSig, storedKeyMetadata } = params;
 
-  const { url, initParams } = getBaseRequestParams({
+  const { baseUrl, initParams } = getBaseRequestParams({
     litNetwork,
     sessionSig,
     method: 'POST',
   });
 
   await makeRequest<StoredKeyMetadata>({
-    url,
+    url: baseUrl,
     init: {
       ...initParams,
       body: JSON.stringify(storedKeyMetadata),
