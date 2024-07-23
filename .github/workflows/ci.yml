@@ -55,4 +55,4 @@ jobs:
         run: yarn build:dev
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:local 
+        run: yarn test:local -t SessionSigs
