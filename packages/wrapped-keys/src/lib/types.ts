@@ -25,14 +25,25 @@ export interface ApiParamsSupportedNetworks {
   network: Network;
 }
 
-/** Fetch a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
+/** Get a list of encrypted key metadata for a specific PKP.
+ * This only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
+ *
+ * Note that this list will not include `ciphertext` or `dataToEncryptHash` for the keys; to get those values call
+ * `getEncryptedKeyMetadata()` with the `id` of the appropriate key returned by this call.
+ */
+export type ListEncryptedKeyMetadataParams = BaseApiParams;
+
+/** Fetching a previously persisted key's metadata requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
+ * You must also provide the unique identifier (`id`) of the key to be fetched.  Ids are returned from `listEncryptedKeyMetadata()`.
  *
  * @typedef GetEncryptedKeyMetadataParams
  * @extends BaseApiParams
  *
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  */
-
-export type GetEncryptedKeyMetadataParams = BaseApiParams;
+export type GetEncryptedKeyMetadataParams = BaseApiParams & {
+  id: string;
+};
 
 /** Metadata for a key that has been stored, encrypted, on the wrapped keys backend service
  * Returned by `listEncryptedKeyMetadata`; to get full stored key data including `ciphertext` and `dataToEncryptHash`
@@ -78,13 +89,29 @@ export type StoreEncryptedKeyMetadataParams = BaseApiParams &
     'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext' | 'memo'
   >;
 
+/** Result of storing a private key in the wrapped keys backend service
+ * Includes the unique identifier which is necessary to get the encrypted ciphertext and dataToEncryptHash in the future
+ *
+ * @typedef StoreEncryptedKeyResult
+ * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
+ */
+export interface StoreEncryptedKeyResult {
+  id: string;
+  pkpAddress: string;
+}
+
 /** Exporting a previously persisted key only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
  *
  * @typedef ExportPrivateKeyParams
  * @extends BaseApiParams
  *
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  */
-export type ExportPrivateKeyParams = BaseApiParams & ApiParamsSupportedNetworks;
+export type ExportPrivateKeyParams = BaseApiParams &
+  ApiParamsSupportedNetworks & {
+    id: string;
+  };
 
 /** Includes the decrypted private key and metadata that was stored alongside it in the wrapped keys service
  *
@@ -110,18 +137,22 @@ export interface ExportPrivateKeyResult {
 /** @typedef GeneratePrivateKeyParams
  * @extends BaseApiParams
  * @property {Network} network The network for which the private key needs to be generated; keys are generated differently for different networks
+ * @property { string } memo A (typically) user-provided descriptor for the encrypted private key
  */
 export type GeneratePrivateKeyParams = BaseApiParams &
-  ApiParamsSupportedNetworks;
+  ApiParamsSupportedNetworks & {
+    memo: string;
+  };
 
 /** @typedef GeneratePrivateKeyResult
  * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
  * @property { string } generatedPublicKey The public key component of the newly generated keypair
- *
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  */
 export interface GeneratePrivateKeyResult {
   pkpAddress: string;
   generatedPublicKey: string;
+  id: string;
 }
 
 /** @typedef ImportPrivateKeyParams
@@ -136,15 +167,27 @@ export interface ImportPrivateKeyParams extends BaseApiParams {
   privateKey: string;
   publicKey: string;
   keyType: KeyType;
+  memo: string;
+}
+
+/** @typedef ImportPrivateKeyResult
+ * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
+ */
+export interface ImportPrivateKeyResult {
+  pkpAddress: string;
+  id: string;
 }
 
 interface SignMessageParams {
   messageToSign: string | Uint8Array;
+  id: string;
 }
 
 /** @typedef SignMessageWithEncryptedKeyParams
  * @extends BaseApiParams
  *
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  * @property { string | Uint8Array } messageToSign The message to be signed
  */
 export type SignMessageWithEncryptedKeyParams = BaseApiParams &
@@ -181,6 +224,7 @@ export interface SerializedTransaction extends BaseLitTransaction {
 }
 
 export interface SignTransactionParams extends BaseApiParams {
+  id: string;
   broadcast: boolean;
 }
 
@@ -198,6 +242,8 @@ export interface SignTransactionParamsSupportedSolana
 
 /** @typedef SignTransactionWithEncryptedKeyParams
  * @extends BaseApiParams
+ *
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  * @property { boolean } broadcast Whether the LIT action should broadcast the signed transaction to RPC, or only sign the transaction and return the signed transaction to the caller
  * @property { EthereumLitTransaction | SerializedTransaction } unsignedTransaction The unsigned transaction to be signed. When network is 'solana', be sure to provide a {@link SerializedTransaction} instance.
  */

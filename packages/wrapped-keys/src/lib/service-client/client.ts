@@ -1,6 +1,10 @@
 import { FetchKeyParams, ListKeysParams, StoreKeyParams } from './types';
 import { getBaseRequestParams, makeRequest } from './utils';
-import { StoredKeyData, StoredKeyMetadata } from '../types';
+import {
+  StoredKeyData,
+  StoredKeyMetadata,
+  StoreEncryptedKeyResult,
+} from '../types';
 import { getPkpAddressFromSessionSig } from '../utils';
 
 /** Fetches previously stored private key metadata from the wrapped keys service.
@@ -60,7 +64,7 @@ export async function fetchPrivateKeyMetadata(
  */
 export async function storePrivateKeyMetadata(
   params: StoreKeyParams
-): Promise<boolean> {
+): Promise<StoreEncryptedKeyResult> {
   const { litNetwork, sessionSig, storedKeyMetadata } = params;
 
   const { baseUrl, initParams } = getBaseRequestParams({
@@ -69,13 +73,11 @@ export async function storePrivateKeyMetadata(
     method: 'POST',
   });
 
-  await makeRequest<StoredKeyMetadata>({
+  return await makeRequest<StoredKeyMetadata>({
     url: baseUrl,
     init: {
       ...initParams,
       body: JSON.stringify(storedKeyMetadata),
     },
   });
-
-  return true;
 }

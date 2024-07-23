@@ -17,10 +17,11 @@ import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 export async function signTransactionWithEncryptedKey(
   params: SignTransactionWithEncryptedKeyParams
 ): Promise<string> {
-  const { litNodeClient, network, pkpSessionSigs } = params;
+  const { litNodeClient, network, pkpSessionSigs, id } = params;
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
 
   const storedKeyMetadata = await fetchPrivateKeyMetadata({
+    id,
     sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
   });

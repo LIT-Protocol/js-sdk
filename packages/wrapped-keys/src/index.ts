@@ -6,6 +6,7 @@ import {
   importPrivateKey,
   signTransactionWithEncryptedKey,
   storeEncryptedKeyMetadata,
+  listEncryptedKeyMetadata,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -35,6 +36,9 @@ import type {
   SignTransactionParamsSupportedSolana,
   StoreEncryptedKeyMetadataParams,
   StoredKeyMetadata,
+  ListEncryptedKeyMetadataParams,
+  StoreEncryptedKeyResult,
+  ImportPrivateKeyResult,
 } from './lib/types';
 
 export const constants = {
@@ -50,6 +54,7 @@ export const api = {
   exportPrivateKey,
   generatePrivateKey,
   getEncryptedKeyMetadata,
+  listEncryptedKeyMetadata,
   importPrivateKey,
   signMessageWithEncryptedKey,
   signTransactionWithEncryptedKey,
@@ -66,6 +71,8 @@ export {
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResult,
   ImportPrivateKeyParams,
+  ImportPrivateKeyResult,
+  ListEncryptedKeyMetadataParams,
   SerializedTransaction,
   SignTransactionParams,
   SignTransactionParamsSupportedEvm,
@@ -73,6 +80,7 @@ export {
   SignMessageWithEncryptedKeyParams,
   SignTransactionWithEncryptedKeyParams,
   StoreEncryptedKeyMetadataParams,
+  StoreEncryptedKeyResult,
   StoredKeyMetadata,
   SupportedNetworks,
 };

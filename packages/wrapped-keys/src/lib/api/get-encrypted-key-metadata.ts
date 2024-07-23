@@ -1,5 +1,5 @@
 import { fetchPrivateKeyMetadata } from '../service-client';
-import { GetEncryptedKeyMetadataParams, StoredKeyMetadata } from '../types';
+import { GetEncryptedKeyMetadataParams, StoredKeyData } from '../types';
 import { getFirstSessionSig } from '../utils';
 
 /** Get a previously encrypted and persisted private key and its metadata.
@@ -10,9 +10,11 @@ import { getFirstSessionSig } from '../utils';
  */
 export async function getEncryptedKeyMetadata(
   params: GetEncryptedKeyMetadataParams
-): Promise<StoredKeyMetadata> {
-  const { pkpSessionSigs, litNodeClient } = params;
+): Promise<StoredKeyData> {
+  const { pkpSessionSigs, litNodeClient, id } = params;
+
   return fetchPrivateKeyMetadata({
+    id,
     sessionSig: getFirstSessionSig(pkpSessionSigs),
     litNetwork: litNodeClient.config.litNetwork,
   });
