@@ -22,6 +22,7 @@ import {
 } from '../../setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyPerson } from '../../setup/tinny-person';
 import { getEoaSessionSigs } from '../../setup/session-sigs/get-eoa-session-sigs';
+import { getPkpSessionSigs } from '../../setup/session-sigs/get-pkp-session-sigs';
 
 try {
   jest.setTimeout(60000);
@@ -58,7 +59,7 @@ describe('SessionSigs', () => {
     });
 
     it('PKP Session', async () => {
-      await decryptString(devEnv, getEoaSessionSigs);
+      await decryptString(devEnv, getPkpSessionSigs);
     });
   });
 
@@ -76,7 +77,7 @@ describe('SessionSigs', () => {
     });
 
     it('PKP Session', async () => {
-      await executeJsCLaimKeys(devEnv, getEoaSessionSigs);
+      await executeJsCLaimKeys(devEnv, getPkpSessionSigs);
     });
   });
 
@@ -94,25 +95,25 @@ describe('SessionSigs', () => {
     });
 
     it('PKP Session', async () => {
-      await executeJsCLaimKey(devEnv, getEoaSessionSigs);
+      await executeJsCLaimKey(devEnv, getPkpSessionSigs);
     });
   });
   
   describe('ExecuteJS JSON Response', () => {
     it('LitAction Session', async () => {
-      await pkpSign(devEnv, getLitActionSessionSigs);
+      await executeJsJSONResponse(devEnv, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await pkpSign(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await executeJsJSONResponse(devEnv, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await pkpSign(devEnv, getEoaSessionSigs);
+      await executeJsJSONResponse(devEnv, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await pkpSign(devEnv, getEoaSessionSigs);
+      await executeJsJSONResponse(devEnv, getPkpSessionSigs);
     });
   });
 
@@ -130,7 +131,7 @@ describe('SessionSigs', () => {
     });
 
     it('PKP Session', async () => {
-      await pkpSign(devEnv, getEoaSessionSigs);
+      await pkpSign(devEnv, getPkpSessionSigs);
     });
   });
   describe('ExecuteJS Signing', () => {
@@ -147,7 +148,7 @@ describe('SessionSigs', () => {
     });
 
     it('PKP Session', async () => {
-      await executeJsSigning(devEnv, getEoaSessionSigs);
+      await executeJsSigning(devEnv, getPkpSessionSigs);
     });
   });
 
@@ -165,7 +166,7 @@ describe('SessionSigs', () => {
     });
 
     it('PKP Session', async () => {
-      await executeJsSigningParallel(devEnv, getEoaSessionSigs);
+      await executeJsSigningParallel(devEnv, getPkpSessionSigs);
     });
   });
 
@@ -569,7 +570,7 @@ const decryptString = async (
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
     userAddress:
-      generator.name === 'EOA'
+      generator.name === 'getEoaSessionSigs'
         ? alice.wallet.address
         : alice.authMethodOwnedPkp?.ethAddress!,
   });
