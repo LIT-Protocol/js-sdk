@@ -1249,7 +1249,7 @@ describe('Wrapped Keys', () => {
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
-      null,
+      undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
