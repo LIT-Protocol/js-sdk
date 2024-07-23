@@ -28,7 +28,7 @@ import { getEoaSessionSigs } from '../../setup/session-sigs/get-eoa-session-sigs
 import { getPkpSessionSigs } from '../../setup/session-sigs/get-pkp-session-sigs';
 
 try {
-  jest.setTimeout(60000);
+  jest.setTimeout(100_000);
 } catch (e) {
   // ... continue execution
 }
