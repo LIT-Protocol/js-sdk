@@ -757,23 +757,6 @@ export const GENERAL_WORKER_URL_BY_NETWORK: {
 };
 
 /**
- * URL constants for the staging worker by network.
- */
-export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: string;
-} = {
-  cayenne: 'https://staging.apis.getlit.dev/cayenne/contracts',
-  manzano: 'https://staging.apis.getlit.dev/manzano/contracts',
-  habanero: 'https://staging.apis.getlit.dev/habanero/contracts',
-  'datil-dev': 'https://staging.apis.getlit.dev/datil-dev/contracts',
-  'datil-test': 'https://staging.apis.getlit.dev/datil-test/contracts',
-
-  // just use cayenne abis for custom and localhost
-  custom: 'https://apis.getlit.dev/cayenne/contracts',
-  localhost: 'https://apis.getlit.dev/cayenne/contracts',
-};
-
-/**
  * Mapping of network values to corresponding Metamask chain info.
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
