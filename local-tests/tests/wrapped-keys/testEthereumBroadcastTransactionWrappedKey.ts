@@ -34,12 +34,13 @@ export const testEthereumBroadcastTransactionWrappedKey = async (
   console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
   await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
 
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, id } = await importPrivateKey({
     pkpSessionSigs,
     privateKey: wrappedKeysWalletPrivateKey,
     litNodeClient: devEnv.litNodeClient,
     publicKey: '0xdeadbeef',
     keyType: 'K256',
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -69,6 +70,7 @@ export const testEthereumBroadcastTransactionWrappedKey = async (
     unsignedTransaction,
     broadcast: true,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signedTx');

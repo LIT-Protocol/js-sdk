@@ -3,6 +3,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
+import { listPrivateKeyMetadata } from '../../../packages/wrapped-keys/src/lib/service-client';
 
 const { importPrivateKey } = api;
 
@@ -27,18 +28,30 @@ export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {
   const privateKey = randomSolanaPrivateKey();
   // '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
 
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, id } = await importPrivateKey({
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
     publicKey: '0xdeadbeef',
     keyType: 'K256',
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
   if (pkpAddress !== alicePkpAddress) {
     throw new Error(
       `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+    );
+  }
+
+  const keys = await listPrivateKeyMetadata({
+    sessionSig: pkpSessionSigs[0],
+    litNetwork: devEnv.litNodeClient.config.litNetwork,
+  });
+
+  if (keys.length !== 1 || keys[0].id !== id) {
+    throw new Error(
+      'Keys returned by `listPrivateKeyMetadata()` do not match expected result.'
     );
   }
 

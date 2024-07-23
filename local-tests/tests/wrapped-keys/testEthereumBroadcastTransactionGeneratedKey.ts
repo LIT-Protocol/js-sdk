@@ -27,10 +27,11 @@ export const testEthereumBroadcastTransactionGeneratedKey = async (
 
   console.log(pkpSessionSigs);
 
-  const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
+  const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
     pkpSessionSigs,
     network: 'evm',
     litNodeClient: devEnv.litNodeClient,
+    memo: 'Test key',
   });
 
   const generatedKeysWalletAddress =
@@ -65,6 +66,7 @@ export const testEthereumBroadcastTransactionGeneratedKey = async (
     unsignedTransaction,
     broadcast: true,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signedTx');

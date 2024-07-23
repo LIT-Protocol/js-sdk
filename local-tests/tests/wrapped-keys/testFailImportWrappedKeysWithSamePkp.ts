@@ -27,12 +27,13 @@ export const testFailImportWrappedKeysWithSamePkp = async (
 
   const privateKey1 = randomSolanaPrivateKey();
 
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, id } = await importPrivateKey({
     pkpSessionSigs,
     privateKey: privateKey1,
     litNodeClient: devEnv.litNodeClient,
     publicKey: '0xdeadbeef',
     keyType: 'K256',
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -53,6 +54,7 @@ export const testFailImportWrappedKeysWithSamePkp = async (
       litNodeClient: devEnv.litNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
   } catch (e: any) {
     if (

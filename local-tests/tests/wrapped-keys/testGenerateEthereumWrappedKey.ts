@@ -27,10 +27,11 @@ export const testGenerateEthereumWrappedKey = async (
 
   console.log(pkpSessionSigs);
 
-  const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
+  const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
     pkpSessionSigs,
     network: 'evm',
     litNodeClient: devEnv.litNodeClient,
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -53,6 +54,7 @@ export const testGenerateEthereumWrappedKey = async (
     pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
     network: 'evm',
+    id,
   });
 
   const wallet = new ethers.Wallet(decryptedPrivateKey);

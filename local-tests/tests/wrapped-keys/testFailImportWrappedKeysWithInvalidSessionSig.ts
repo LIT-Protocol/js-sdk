@@ -30,6 +30,7 @@ export const testFailImportWrappedKeysWithInvalidSessionSig = async (
       litNodeClient: devEnv.litNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
   } catch (e: any) {
     if (e.message.includes('bad public key size')) {

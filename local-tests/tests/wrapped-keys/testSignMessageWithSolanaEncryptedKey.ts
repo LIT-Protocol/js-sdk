@@ -31,12 +31,13 @@ export const testSignMessageWithSolanaEncryptedKey = async (
   const solanaKeypair = Keypair.generate();
   const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
 
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, id } = await importPrivateKey({
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
     publicKey: '0xdeadbeef',
     keyType: 'K256',
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -62,6 +63,7 @@ export const testSignMessageWithSolanaEncryptedKey = async (
     network: 'solana',
     messageToSign,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signature');

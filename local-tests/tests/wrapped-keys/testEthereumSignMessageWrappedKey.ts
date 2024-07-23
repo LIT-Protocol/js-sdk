@@ -28,12 +28,13 @@ export const testEthereumSignMessageWrappedKey = async (
 
   const privateKey = ethers.Wallet.createRandom().privateKey;
 
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, id } = await importPrivateKey({
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
     publicKey: '0xdeadbeef',
     keyType: 'K256',
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -59,6 +60,7 @@ export const testEthereumSignMessageWrappedKey = async (
     network: 'evm',
     messageToSign: unsignedStringMessage,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signature');
@@ -77,6 +79,7 @@ export const testEthereumSignMessageWrappedKey = async (
     network: 'evm',
     messageToSign: unsignedBinaryMessage,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signatureBinary');

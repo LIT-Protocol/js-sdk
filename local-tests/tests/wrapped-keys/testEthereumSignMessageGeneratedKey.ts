@@ -26,10 +26,11 @@ export const testEthereumSignMessageGeneratedKey = async (
 
   console.log(pkpSessionSigs);
 
-  const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
+  const { pkpAddress, id, generatedPublicKey } = await generatePrivateKey({
     pkpSessionSigs,
     network: 'evm',
     litNodeClient: devEnv.litNodeClient,
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -55,6 +56,7 @@ export const testEthereumSignMessageGeneratedKey = async (
     network: 'evm',
     messageToSign: unsignedStringMessage,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signature');
@@ -73,6 +75,7 @@ export const testEthereumSignMessageGeneratedKey = async (
     network: 'evm',
     messageToSign: unsignedBinaryMessage,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signatureBinary');

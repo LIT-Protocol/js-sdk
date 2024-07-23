@@ -25,12 +25,13 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
 
   const privateKey = randomSolanaPrivateKey();
 
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, id } = await importPrivateKey({
     pkpSessionSigs: pkpSessionSigsImport,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
     publicKey: '0xdeadbeef',
     keyType: 'K256',
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -53,6 +54,7 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
     pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
     network: 'solana',
+    id,
   });
 
   if (decryptedPrivateKey !== privateKey) {

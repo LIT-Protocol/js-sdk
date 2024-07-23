@@ -29,6 +29,7 @@ export const testFailImportWrappedKeysWithEoaSessionSig = async (
       litNodeClient: devEnv.litNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
   } catch (e: any) {
     if (e.message.includes('SessionSig is not from a PKP')) {

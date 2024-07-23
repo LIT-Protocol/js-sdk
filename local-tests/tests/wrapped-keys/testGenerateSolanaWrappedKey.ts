@@ -29,10 +29,11 @@ export const testGenerateSolanaWrappedKey = async (
 
   console.log(pkpSessionSigs);
 
-  const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
+  const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
     pkpSessionSigs,
     network: 'solana',
     litNodeClient: devEnv.litNodeClient,
+    memo: 'Test key',
   });
 
   console.log(`generatedPublicKey: ${generatedPublicKey}`);
@@ -60,6 +61,7 @@ export const testGenerateSolanaWrappedKey = async (
     network: 'solana',
     messageToSign,
     litNodeClient: devEnv.litNodeClient,
+    id,
   });
 
   console.log('signature');
@@ -87,6 +89,7 @@ export const testGenerateSolanaWrappedKey = async (
     pkpSessionSigs: pkpSessionSigsExport,
     litNodeClient: devEnv.litNodeClient,
     network: 'solana',
+    id,
   });
 
   const solanaKeyPair = Keypair.fromSecretKey(

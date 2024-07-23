@@ -33,6 +33,7 @@ export const testFailImportWrappedKeysWithSamePrivateKey = async (
       litNodeClient: devEnv.litNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
   } catch (e: any) {
     if (

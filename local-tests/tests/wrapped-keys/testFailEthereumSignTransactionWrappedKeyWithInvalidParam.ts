@@ -28,12 +28,13 @@ export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
 
   const privateKey = ethers.Wallet.createRandom().privateKey;
 
-  const pkpAddress = await importPrivateKey({
+  const { pkpAddress, id } = await importPrivateKey({
     pkpSessionSigs,
     privateKey,
     litNodeClient: devEnv.litNodeClient,
     publicKey: '0xdeadbeef',
     keyType: 'K256',
+    memo: 'Test key',
   });
 
   const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
@@ -67,6 +68,7 @@ export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
       unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv.litNodeClient,
+      id,
     });
   } catch (e: any) {
     if (
