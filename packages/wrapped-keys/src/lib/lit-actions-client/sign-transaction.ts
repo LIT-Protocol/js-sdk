@@ -8,7 +8,7 @@ import { postLitActionValidation } from './utils';
 import {
   EthereumLitTransaction,
   SerializedTransaction,
-  StoredKeyMetadata,
+  StoredKeyData,
 } from '../types';
 
 interface SignTransactionWithLitActionParams {
@@ -16,7 +16,7 @@ interface SignTransactionWithLitActionParams {
   pkpSessionSigs: SessionSigsMap;
   litActionIpfsCid: string;
   unsignedTransaction: EthereumLitTransaction | SerializedTransaction;
-  storedKeyMetadata: StoredKeyMetadata;
+  storedKeyMetadata: StoredKeyData;
   accessControlConditions: AccessControlConditions;
   broadcast: boolean;
 }

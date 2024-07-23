@@ -1,11 +1,11 @@
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
-import { ExportPrivateKeyParams, StoredKeyMetadata } from '../types';
+import { ExportPrivateKeyParams, StoredKeyData } from '../types';
 
 interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
   accessControlConditions: AccessControlConditions;
-  storedKeyMetadata: StoredKeyMetadata;
+  storedKeyMetadata: StoredKeyData;
   litActionIpfsCid: string;
 }
 

@@ -1,12 +1,12 @@
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
-import { SignMessageWithEncryptedKeyParams, StoredKeyMetadata } from '../types';
+import { SignMessageWithEncryptedKeyParams, StoredKeyData } from '../types';
 
 interface SignMessageWithLitActionParams
   extends SignMessageWithEncryptedKeyParams {
   accessControlConditions: AccessControlConditions;
-  storedKeyMetadata: StoredKeyMetadata;
+  storedKeyMetadata: StoredKeyData;
   litActionIpfsCid: string;
 }
 
