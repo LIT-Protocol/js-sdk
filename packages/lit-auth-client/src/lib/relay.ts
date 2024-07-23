@@ -1,4 +1,7 @@
+import { ethers } from 'ethers';
+
 import {
+  AuthMethodType,
   LitNetwork,
   RELAY_URL_CAYENNE,
   RELAY_URL_HABANERO,
@@ -6,6 +9,8 @@ import {
   RELAY_URL_DATIL_DEV,
 } from '@lit-protocol/constants';
 import {
+  AuthMethod,
+  MintRequestBody,
   IRelay,
   IRelayFetchResponse,
   IRelayMintResponse,
@@ -13,6 +18,7 @@ import {
   LitRelayConfig,
 } from '@lit-protocol/types';
 
+import WebAuthnProvider from './providers/WebAuthnProvider';
 import { log } from './utils';
 
 /**
@@ -94,6 +100,96 @@ export class LitRelay implements IRelay {
       log('Successfully initiated minting PKP with relayer');
       return resBody;
     }
+  }
+
+  /**
+   * Mints a new pkp with all AuthMethods provided. Allows for permissions and flags to be set separately.
+   * If no permissions are provided then each auth method will be assigned `1` for sign anything
+   * If no flags are provided then `sendPkpToitself` will be false, and `addPkpEthAddressAsPermittedAddress` will be true
+   * It is then up to the implementor to transfer the pkp nft to the pkp address.
+   * **note** When adding permissions, each permission should be added in the same order the auth methods are ordered
+   *
+   * @throws {Error} - Throws an error if no AuthMethods are given
+   * @param {AuthMethod[]} authMethods - AuthMethods authentication methods to be added to the pkp
+   * @param {{ pkpPermissionScopes?: number[][]; sendPkpToitself?: boolean; addPkpEthAddressAsPermittedAddress?: boolean;}} options
+   *
+   * @returns {Promise<{pkpTokenId?: string; pkpEthAddress?: string; pkpPublicKey?: string}>} pkp information
+   */
+  public async mintPKPWithAuthMethods(
+    authMethods: AuthMethod[],
+    options: {
+      pkpPermissionScopes?: number[][];
+      sendPkpToitself?: boolean;
+      addPkpEthAddressAsPermittedAddress?: boolean;
+    }
+  ): Promise<{
+    pkpTokenId?: string;
+    pkpEthAddress?: string;
+    pkpPublicKey?: string;
+  }> {
+    if (authMethods.length < 1) {
+      throw new Error('Must provide at least one auth method');
+    }
+
+    if (
+      !options.pkpPermissionScopes ||
+      options.pkpPermissionScopes.length < 1
+    ) {
+      options.pkpPermissionScopes = [];
+      for (let i = 0; i < authMethods.length; i++) {
+        options.pkpPermissionScopes.push([
+          ethers.BigNumber.from('1').toNumber(),
+        ]);
+      }
+    }
+
+    const reqBody: MintRequestBody = {
+      keyType: 2,
+      permittedAuthMethodTypes: authMethods.map((value) => {
+        return value.authMethodType;
+      }),
+      permittedAuthMethodScopes: options.pkpPermissionScopes,
+      addPkpEthAddressAsPermittedAddress:
+        options.addPkpEthAddressAsPermittedAddress ?? true,
+      sendPkpToItself: options.sendPkpToitself ?? false,
+    };
+
+    const permittedAuthMethodIds = [];
+    const permittedAuthMethodPubkeys = [];
+    for (const authMethod of authMethods) {
+      const id = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
+      permittedAuthMethodIds.push(id);
+      if (authMethod.authMethodType === AuthMethodType.WebAuthn) {
+        permittedAuthMethodPubkeys.push(
+          WebAuthnProvider.getPublicKeyFromRegistration(
+            JSON.parse(authMethod.accessToken)
+          )
+        );
+      } else {
+        // only webauthn has a `authMethodPubkey`
+        permittedAuthMethodPubkeys.push('0x');
+      }
+    }
+
+    reqBody.permittedAuthMethodIds = permittedAuthMethodIds;
+    reqBody.permittedAuthMethodPubkeys = permittedAuthMethodPubkeys;
+
+    const mintRes = await this.mintPKP(JSON.stringify(reqBody));
+    if (!mintRes || !mintRes.requestId) {
+      throw new Error(
+        `Missing mint response or request ID from mint response ${mintRes.error}`
+      );
+    }
+
+    const pollerResult = await this.pollRequestUntilTerminalState(
+      mintRes.requestId
+    );
+
+    return {
+      pkpTokenId: pollerResult.pkpTokenId,
+      pkpPublicKey: pollerResult.pkpPublicKey,
+      pkpEthAddress: pollerResult.pkpEthAddress,
+    };
   }
 
   /**

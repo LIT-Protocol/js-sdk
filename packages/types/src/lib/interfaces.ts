@@ -1326,6 +1326,27 @@ export interface IRelay {
    */
   mintPKP(body: string): Promise<IRelayMintResponse>;
   /**
+   * Mint a new PKP for the given auth method
+   *
+   * @throws {Error} - Throws an error if no AuthMethods are given
+   * @param {AuthMethod[]} authMethods - AuthMethods authentication methods to be added to the pkp
+   * @param {{ pkpPermissionScopes?: number[][]; sendPkpToitself?: boolean; addPkpEthAddressAsPermittedAddress?: boolean;}} options
+   *
+   * @returns {Promise<{pkpTokenId?: string; pkpEthAddress?: string; pkpPublicKey?: string}>} pkp information
+   */
+  mintPKPWithAuthMethods(
+    authMethods: AuthMethod[],
+    options: {
+      pkpPermissionScopes?: number[][];
+      sendPkpToitself?: boolean;
+      addPkpEthAddressAsPermittedAddress?: boolean;
+    }
+  ): Promise<{
+    pkpTokenId?: string;
+    pkpEthAddress?: string;
+    pkpPublicKey?: string;
+  }>;
+  /**
    * Poll the relay server for status of minting request
    *
    * @param {string} requestId - Request ID to poll, likely the minting transaction hash
