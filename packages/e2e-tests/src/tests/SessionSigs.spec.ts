@@ -11,8 +11,11 @@ import {
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { ILitNodeClient, LitResourceAbilityRequest, SessionSigsMap } from '@lit-protocol/types';
-
+import {
+  ILitNodeClient,
+  LitResourceAbilityRequest,
+  SessionSigsMap,
+} from '@lit-protocol/types';
 
 import {
   getInvalidLitActionIpfsSessionSigs,
@@ -98,7 +101,7 @@ describe('SessionSigs', () => {
       await executeJsCLaimKey(devEnv, getPkpSessionSigs);
     });
   });
-  
+
   describe('ExecuteJS JSON Response', () => {
     it('LitAction Session', async () => {
       await executeJsJSONResponse(devEnv, getLitActionSessionSigs);
@@ -158,7 +161,10 @@ describe('SessionSigs', () => {
     });
 
     it('LitAction IPFS Session', async () => {
-      await executeJsSigningParallel(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await executeJsSigningParallel(
+        devEnv,
+        getLitActionSessionSigsUsingIpfsId
+      );
     });
 
     it('EOA Wallet', async () => {
@@ -315,7 +321,6 @@ const executeJsCLaimKeys = async (
   });
 };
 
-
 const executeJsCLaimKey = async (
   devEnv: TinnyEnvironment,
   generator: (
@@ -397,8 +402,7 @@ const executeJsCLaimKey = async (
   });
 };
 
-
-const pkpSign =  async (
+const pkpSign = async (
   devEnv: TinnyEnvironment,
   generator: (
     devEnv: TinnyEnvironment,
@@ -433,9 +437,9 @@ const pkpSign =  async (
   expect(res?.s).toBeDefined();
   expect(res?.dataSigned).toBeDefined();
   expect(res?.publicKey).toBeDefined();
-}
+};
 
-const executeJsJSONResponse =  async (
+const executeJsJSONResponse = async (
   devEnv: TinnyEnvironment,
   generator: (
     devEnv: TinnyEnvironment,
@@ -466,7 +470,7 @@ const executeJsJSONResponse =  async (
   expect(res?.logs).toBeDefined();
   expect(res?.logs.includes('hello world')).toBeTruthy();
   expect(res?.success).toBeTruthy();
-}
+};
 
 const executeJsSigning = async (
   devEnv: TinnyEnvironment,
@@ -509,7 +513,7 @@ const executeJsSigning = async (
   expect(res?.signatures?.sig.s).toBeDefined();
   expect(res?.signatures?.sig.dataSigned).toBeDefined();
   expect(res?.signatures?.sig.publicKey).toBeDefined();
-}
+};
 
 const executeJsSigningParallel = async (
   devEnv: TinnyEnvironment,
@@ -552,9 +556,7 @@ const executeJsSigningParallel = async (
     expect(r?.signatures?.sig.dataSigned).toBeDefined();
     expect(r?.signatures?.sig.publicKey).toBeDefined();
   });
-}
-
-
+};
 
 const decryptString = async (
   devEnv: TinnyEnvironment,
@@ -624,4 +626,4 @@ const decryptString = async (
   devEnv.releasePrivateKeyFromUser(alice);
 
   expect(decryptRes).toEqual('Hello world');
-}
+};
