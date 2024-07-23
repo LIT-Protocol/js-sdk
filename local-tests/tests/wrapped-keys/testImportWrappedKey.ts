@@ -4,6 +4,7 @@ import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { randomSolanaPrivateKey } from 'local-tests/setup/tinny-utils';
 import { listPrivateKeyMetadata } from '../../../packages/wrapped-keys/src/lib/service-client';
+import { getFirstSessionSig } from '../../../packages/wrapped-keys/src/lib/utils';
 
 const { importPrivateKey } = api;
 
@@ -45,7 +46,7 @@ export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {
   }
 
   const keys = await listPrivateKeyMetadata({
-    sessionSig: pkpSessionSigs[0],
+    sessionSig: getFirstSessionSig(pkpSessionSigs),
     litNetwork: devEnv.litNodeClient.config.litNetwork,
   });
 
