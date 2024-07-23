@@ -55,11 +55,10 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
-import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
+import { getAuthIdByAuthMethod } from '@lit-protocol/lit-auth-client';
 import { Logger, LogManager } from '@lit-protocol/logger';
 import {
   calculateUTCMidnightExpiration,
-  convertRequestsPerDayToPerSecond,
   requestsToKilosecond,
 } from './utils';
 import {
@@ -1186,7 +1185,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   ): Promise<MintWithAuthResponse<ContractReceipt>> => {
     const authMethodId =
       typeof params.authMethodId === 'string'
-        ? stringToArrayify(params.authMethodId)
+        ? this.stringToArrayify(params.authMethodId)
         : params.authMethodId;
 
     return this.mintWithAuth({
@@ -1226,7 +1225,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   }): Promise<ethers.ContractReceipt> => {
     const _authMethodId =
       typeof authMethodId === 'string'
-        ? stringToArrayify(authMethodId)
+        ? this.stringToArrayify(authMethodId)
         : authMethodId;
 
     const _webAuthnPubkey = webAuthnPubkey ?? '0x';
@@ -2460,4 +2459,19 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       // },
     },
   };
+
+  /**
+   * Converts a string into a byte array (arrayified value)
+   * @param str - The input string to be converted.
+   * @returns A Uint8Array representing the arrayified value of the string.
+   */
+  private stringToArrayify(str: string): Uint8Array {
+    try {
+      // Convert the string to a UTF-8 encoded byte array
+      const encoder = new TextEncoder();
+      return encoder.encode(str);
+    } catch (e) {
+      throw new Error(`Error converting string to arrayify: ${e}`);
+    }
+  }
 }

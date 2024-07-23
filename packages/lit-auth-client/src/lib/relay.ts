@@ -19,7 +19,7 @@ import {
 } from '@lit-protocol/types';
 
 import WebAuthnProvider from './providers/WebAuthnProvider';
-import { log } from './utils';
+import { getAuthIdByAuthMethod, log } from './utils';
 
 /**
  * Class that communicates with Lit relay server
@@ -68,8 +68,7 @@ export class LitRelay implements IRelay {
    * @param {string} [config.relayUrl] - URL for Lit's relay server. If not provided, will default to the Cayenne relay server.
    */
   constructor(config: LitRelayConfig) {
-    this.relayUrl =
-      config.relayUrl || LitRelay.getRelayUrl(LitNetwork.Cayenne);
+    this.relayUrl = config.relayUrl || LitRelay.getRelayUrl(LitNetwork.Cayenne);
     this.relayApiKey = config.relayApiKey || '';
     log("Lit's relay server URL:", this.relayUrl);
   }
@@ -157,7 +156,7 @@ export class LitRelay implements IRelay {
     const permittedAuthMethodIds = [];
     const permittedAuthMethodPubkeys = [];
     for (const authMethod of authMethods) {
-      const id = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
+      const id = await getAuthIdByAuthMethod(authMethod);
       permittedAuthMethodIds.push(id);
       if (authMethod.authMethodType === AuthMethodType.WebAuthn) {
         permittedAuthMethodPubkeys.push(

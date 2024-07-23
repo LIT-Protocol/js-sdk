@@ -7,7 +7,11 @@ import StytchAuthFactorOtpProvider from './lib/providers/StytchAuthFactorOtp';
 import { StytchOtpProvider } from './lib/providers/StytchOtpProvider';
 import WebAuthnProvider from './lib/providers/WebAuthnProvider';
 import { LitRelay } from './lib/relay';
-import { isSignInRedirect, getProviderFromUrl } from './lib/utils';
+import {
+  isSignInRedirect,
+  getProviderFromUrl,
+  getAuthIdByAuthMethod,
+} from './lib/utils';
 
 export {
   AppleProvider,
@@ -21,4 +25,5 @@ export {
   WebAuthnProvider,
   isSignInRedirect,
   getProviderFromUrl,
+  getAuthIdByAuthMethod,
 };
