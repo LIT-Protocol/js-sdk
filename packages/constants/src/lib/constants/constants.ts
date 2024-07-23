@@ -789,8 +789,8 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   localhost: metamaskChainInfo.yellowstone,
 };
 
-const HTTP = 'http://';
-const HTTPS = 'https://';
+export const HTTP = 'http://';
+export const HTTPS = 'https://';
 
 /**
  * Mapping of network values to corresponding http protocol.
@@ -804,8 +804,9 @@ export const HTTP_BY_NETWORK: Record<
   habanero: HTTPS,
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
-  custom: HTTP,
-  localhost: HTTP,
+  internalDev: HTTPS, 
+  custom: HTTP, // default, can be changed by config
+  localhost: HTTP, // default, can be changed by config
 };
 
 /**
