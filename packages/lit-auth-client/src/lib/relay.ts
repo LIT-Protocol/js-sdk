@@ -28,7 +28,13 @@ export class LitRelay implements IRelay {
       [LitNetwork.DatilDev]: RELAY_URL_DATIL_DEV,
       [LitNetwork.Custom]: undefined,
     };
-    return networkMap[litNetwork] || RELAY_URL_CAYENNE;
+
+    const relayUrl = networkMap[litNetwork];
+    if (!relayUrl) {
+      throw new Error(`Relay URL not found for network ${litNetwork}`);
+    }
+
+    return relayUrl;
   }
 
   /**
@@ -53,11 +59,11 @@ export class LitRelay implements IRelay {
    *
    * @param {LitRelayConfig} config
    * @param {string} [config.relayApiKey] - API key for Lit's relay server
-   * @param {string} [config.relayUrl] - URL for Lit's relay server
+   * @param {string} [config.relayUrl] - URL for Lit's relay server. If not provided, will default to the Cayenne relay server.
    */
   constructor(config: LitRelayConfig) {
     this.relayUrl =
-      config.relayUrl || 'https://relayer-server-staging-cayenne.getlit.dev';
+      config.relayUrl || LitRelay.getRelayUrl(LitNetwork.Cayenne);
     this.relayApiKey = config.relayApiKey || '';
     log("Lit's relay server URL:", this.relayUrl);
   }
