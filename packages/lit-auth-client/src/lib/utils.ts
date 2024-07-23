@@ -335,33 +335,33 @@ export async function getAuthIdByAuthMethod(
   let authId;
 
   switch (authMethod.authMethodType) {
-case AuthMethodType.EthWallet:
-  authId = await EthWalletProvider.authMethodId(authMethod);
-  break;
-case AuthMethodType.Discord:
-  authId = await DiscordProvider.authMethodId(authMethod);
-  break;
-case AuthMethodType.WebAuthn:
-  authId = await WebAuthnProvider.authMethodId(authMethod);
-  break;
-case AuthMethodType.GoogleJwt:
-  authId = await GoogleProvider.authMethodId(authMethod);
-  break;
-case AuthMethodType.StytchOtp:
-  authId = await StytchOtpProvider.authMethodId(authMethod);
-  break;
-case AuthMethodType.StytchEmailFactorOtp:
-case AuthMethodType.StytchSmsFactorOtp:
-case AuthMethodType.StytchTotpFactorOtp:
-case AuthMethodType.StytchWhatsAppFactorOtp:
-  authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
-  break;
-default:
-  log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
-  throw new Error(
-    `Unsupported auth method type: ${authMethod.authMethodType}`
-  );
-}
+    case AuthMethodType.EthWallet:
+      authId = await EthWalletProvider.authMethodId(authMethod);
+      break;
+    case AuthMethodType.Discord:
+      authId = await DiscordProvider.authMethodId(authMethod);
+      break;
+    case AuthMethodType.WebAuthn:
+      authId = await WebAuthnProvider.authMethodId(authMethod);
+      break;
+    case AuthMethodType.GoogleJwt:
+      authId = await GoogleProvider.authMethodId(authMethod);
+      break;
+    case AuthMethodType.StytchOtp:
+      authId = await StytchOtpProvider.authMethodId(authMethod);
+      break;
+    case AuthMethodType.StytchEmailFactorOtp:
+    case AuthMethodType.StytchSmsFactorOtp:
+    case AuthMethodType.StytchTotpFactorOtp:
+    case AuthMethodType.StytchWhatsAppFactorOtp:
+      authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
+      break;
+    default:
+      log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
+      throw new Error(
+        `Unsupported auth method type: ${authMethod.authMethodType}`
+      );
+  }
 
-return authId;
+  return authId;
 }
