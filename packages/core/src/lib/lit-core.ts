@@ -22,6 +22,7 @@ import {
   LIT_ERROR_CODE,
   LIT_NETWORKS,
   LitNetwork,
+  RPC_URL_BY_NETWORK,
   StakingStates,
   version,
 } from '@lit-protocol/constants';
@@ -489,7 +490,7 @@ export class LitCore {
       this.config.contractContext = await LitContracts.getContractAddresses(
         this.config.litNetwork,
         new ethers.providers.JsonRpcProvider(
-          this.config.rpcUrl || LIT_CHAINS['lit'].rpcUrls[0]
+          this.config.rpcUrl || RPC_URL_BY_NETWORK[this.config.litNetwork]
         )
       );
     } else if (
