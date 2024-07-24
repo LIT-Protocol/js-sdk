@@ -88,10 +88,16 @@ export class LitPKPResource extends LitResourceBase implements ILitResource {
     // in some cases, if the token id is smaller than 32 bytes,
     // the nodes will throw an error.
     // so we pad the token id with leading zeros to make it 32 bytes.
-    let fixedResource = resource;
+    let fixedResource = resource.startsWith('0x')
+      ? resource.slice(2)
+      : resource;
     const hexRegex = /[0-9A-Fa-f]{6}/g;
-    if (resource !== '*' && resource.length < 64 && hexRegex.test(resource)) {
-      fixedResource = resource.padStart(64, '0');
+    if (
+      fixedResource !== '*' &&
+      fixedResource.length < 64 &&
+      hexRegex.test(fixedResource)
+    ) {
+      fixedResource = fixedResource.padStart(64, '0');
     }
     super(fixedResource);
   }
