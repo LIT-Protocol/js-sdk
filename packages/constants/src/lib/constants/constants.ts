@@ -740,40 +740,6 @@ export const RELAYER_URL_BY_NETWORK: {
 };
 
 /**
- * URL mappings for general worker URLs by network.
- */
-export const GENERAL_WORKER_URL_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: string;
-} = {
-  cayenne: 'https://apis.getlit.dev/cayenne/contracts',
-  manzano: 'https://apis.getlit.dev/manzano/contracts',
-  habanero: 'https://apis.getlit.dev/habanero/contracts',
-  'datil-dev': 'https://apis.getlit.dev/datil-dev/contracts',
-  'datil-test': 'https://apis.getlit.dev/datil-test/contracts',
-
-  // just use cayenne abis for custom and localhost
-  custom: 'https://apis.getlit.dev/cayenne/contracts',
-  localhost: 'https://apis.getlit.dev/cayenne/contracts',
-};
-
-/**
- * URL constants for the staging worker by network.
- */
-export const GENERAL_STAGING_WORKER_URL_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: string;
-} = {
-  cayenne: 'https://staging.apis.getlit.dev/cayenne/contracts',
-  manzano: 'https://staging.apis.getlit.dev/manzano/contracts',
-  habanero: 'https://staging.apis.getlit.dev/habanero/contracts',
-  'datil-dev': 'https://staging.apis.getlit.dev/datil-dev/contracts',
-  'datil-test': 'https://staging.apis.getlit.dev/datil-test/contracts',
-
-  // just use cayenne abis for custom and localhost
-  custom: 'https://apis.getlit.dev/cayenne/contracts',
-  localhost: 'https://apis.getlit.dev/cayenne/contracts',
-};
-
-/**
  * Mapping of network values to corresponding Metamask chain info.
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
@@ -789,8 +755,8 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   localhost: metamaskChainInfo.yellowstone,
 };
 
-const HTTP = 'http://';
-const HTTPS = 'https://';
+export const HTTP = 'http://';
+export const HTTPS = 'https://';
 
 /**
  * Mapping of network values to corresponding http protocol.
@@ -804,8 +770,9 @@ export const HTTP_BY_NETWORK: Record<
   habanero: HTTPS,
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
-  custom: HTTP,
-  localhost: HTTP,
+  internalDev: HTTPS,
+  custom: HTTP, // default, can be changed by config
+  localhost: HTTP, // default, can be changed by config
 };
 
 /**
