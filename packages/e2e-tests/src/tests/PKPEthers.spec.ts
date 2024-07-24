@@ -1,6 +1,6 @@
 import { expect, jest, test } from '@jest/globals';
-import { TinnyEnvironment } from '../../setup/tinny-environment';
-import { getEoaSessionSigs } from './../../setup/session-sigs/get-eoa-session-sigs';
+import { TinnyEnvironment, getEoaSessionSigs, TinnyPerson, getLitActionSessionSigs, getLitActionSessionSigsUsingIpfsId } from '@lit-protocol/tinny';
+
 import {
   createSiweMessageWithRecaps,
   generateAuthSig,
@@ -25,11 +25,7 @@ import {
   SignTypedDataVersion,
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
-import {
-  getLitActionSessionSigs,
-  getLitActionSessionSigsUsingIpfsId,
-} from '../../setup/session-sigs/get-lit-action-session-sigs';
-import { TinnyPerson } from 'packages/e2e-tests/setup/tinny-person';
+
 
 try {
   jest.setTimeout(60000);

@@ -1,6 +1,5 @@
 import { expect, jest, test } from '@jest/globals';
-import { TinnyEnvironment } from '../../setup/tinny-environment';
-import { LIT_TESTNET } from 'packages/e2e-tests/setup/tinny-config';
+import { TinnyEnvironment, LIT_TESTNET } from '@lit-protocol/tinny';
 
 try {
   jest.setTimeout(60000);

@@ -1,4 +1,4 @@
-import { TinnyEnvironment } from '../../setup/tinny-environment';
+import { TinnyEnvironment } from '@lit-protocol/tinny';
 import { AccessControlConditions } from '../../setup/accs/accs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';

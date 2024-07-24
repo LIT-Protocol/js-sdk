@@ -1,4 +1,4 @@
-import { TinnyEnvironment } from '../../setup/tinny-environment';
+import { TinnyEnvironment } from '@lit-protocol/tinny';
 import {
   EthWalletProvider,
   LitAuthClient,

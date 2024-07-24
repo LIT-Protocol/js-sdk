@@ -1,8 +1,8 @@
 import { expect, jest } from '@jest/globals';
-import { TinnyEnvironment } from '../../setup/tinny-environment';
+import { AccessControlConditions, TinnyEnvironment, TinnyPerson, getLitActionSessionSigs, getEoaSessionSigs, getPkpSessionSigs, getLitActionSessionSigsUsingIpfsId, getInvalidLitActionIpfsSessionSigs, getInvalidLitActionSessionSigs } from '@lit-protocol/tinny';
 
-import { LIT_TESTNET } from '../../setup/tinny-config';
-import { AccessControlConditions } from '../../setup/accs/accs';
+import { LIT_TESTNET } from '@lit-protocol/tinny';
+
 
 import {
   LitAbility,
@@ -16,16 +16,6 @@ import {
   LitResourceAbilityRequest,
   SessionSigsMap,
 } from '@lit-protocol/types';
-
-import {
-  getInvalidLitActionIpfsSessionSigs,
-  getInvalidLitActionSessionSigs,
-  getLitActionSessionSigs,
-  getLitActionSessionSigsUsingIpfsId,
-} from '../../setup/session-sigs/get-lit-action-session-sigs';
-import { TinnyPerson } from '../../setup/tinny-person';
-import { getEoaSessionSigs } from '../../setup/session-sigs/get-eoa-session-sigs';
-import { getPkpSessionSigs } from '../../setup/session-sigs/get-pkp-session-sigs';
 
 try {
   jest.setTimeout(100_000);

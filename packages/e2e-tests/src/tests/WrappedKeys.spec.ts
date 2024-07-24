@@ -1,5 +1,5 @@
 import { expect, jest } from '@jest/globals';
-import { TinnyEnvironment } from '../../setup/tinny-environment';
+import { TinnyEnvironment, getPkpSessionSigs, getEoaSessionSigs } from '@lit-protocol/tinny';
 import {
   EthereumLitTransaction,
   SerializedTransaction,
@@ -14,7 +14,6 @@ import {
   Transaction,
   clusterApiUrl,
 } from '@solana/web3.js';
-import { getPkpSessionSigs } from '../../setup/session-sigs/get-pkp-session-sigs';
 
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
@@ -25,7 +24,7 @@ import {
   SessionSigsMap,
 } from '@lit-protocol/types';
 import { encryptString } from '@lit-protocol/encryption';
-import { getEoaSessionSigs } from '../../setup/session-sigs/get-eoa-session-sigs';
+
 import { LIT_CHAINS } from '@lit-protocol/constants';
 import { LIT_ACTION_CID_REPOSITORY } from '../../../wrapped-keys/src/lib/lit-actions-client/constants';
 import { getPkpAccessControlCondition } from '../../../wrapped-keys/src/lib/utils';
