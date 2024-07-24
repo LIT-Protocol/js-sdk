@@ -31,7 +31,7 @@ export class TinnyPerson {
     ethers.utils.keccak256([1, 2, 3, 4, 5])
   );
 
-  public provider: ethers.providers.JsonRpcProvider;
+  public provider: ethers.providers.StaticJsonRpcProvider;
 
   public envConfig: TinnyEnvConfig;
 
@@ -45,7 +45,9 @@ export class TinnyPerson {
     this.envConfig = envConfig;
 
     this.privateKey = privateKey;
-    this.provider = new ethers.providers.JsonRpcProvider(this.envConfig.rpc);
+    this.provider = new ethers.providers.StaticJsonRpcProvider(
+      this.envConfig.rpc
+    );
     this.wallet = new ethers.Wallet(privateKey, this.provider);
   }
 

@@ -15,13 +15,13 @@ import {
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 import {
-  LIT_CHAINS,
   LIT_CURVE,
   LIT_ENDPOINT,
   LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORKS,
   LitNetwork,
+  RPC_URL_BY_NETWORK,
   StakingStates,
   version,
 } from '@lit-protocol/constants';
@@ -439,10 +439,6 @@ export class LitCore {
    */
   getLatestBlockhash = async (): Promise<string> => {
     await this._syncBlockhash();
-    console.log(
-      `querying latest blockhash current value is `,
-      this.latestBlockhash
-    );
     if (!this.latestBlockhash) {
       throw new Error(
         `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
@@ -488,15 +484,14 @@ export class LitCore {
     if (!this.config.contractContext) {
       this.config.contractContext = await LitContracts.getContractAddresses(
         this.config.litNetwork,
-        new ethers.providers.JsonRpcProvider(
-          this.config.rpcUrl || LIT_CHAINS['lit'].rpcUrls[0]
+        new ethers.providers.StaticJsonRpcProvider(
+          this.config.rpcUrl || RPC_URL_BY_NETWORK[this.config.litNetwork]
         )
       );
     } else if (
       !this.config.contractContext.Staking &&
       !this.config.contractContext.resolverAddress
     ) {
-      console.log(this.config.contractContext);
       throw new Error(
         'The provided contractContext was missing the "Staking" contract`'
       );

@@ -1,10 +1,7 @@
 import { LitContracts } from './contracts-sdk';
-import { ethers } from 'ethers';
-import { LitContract } from '../../../types/src/lib/types';
 
 describe('contractsSdk', () => {
   let litContracts: LitContracts;
-  let litContracts_privateKeySigner: LitContracts;
 
   beforeEach(() => {
     litContracts = new LitContracts();
@@ -29,8 +26,6 @@ describe('contractsSdk', () => {
   });
 
   it('Test that  connection from custom context resolves contracts in correct mapping', async () => {
-    const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
-    const provider = new ethers.providers.JsonRpcProvider(DEFAULT_RPC);
     litContracts = new LitContracts({
       customContext: {
         Allowlist: {
