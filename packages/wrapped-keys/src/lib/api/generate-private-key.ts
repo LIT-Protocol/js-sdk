@@ -1,7 +1,7 @@
 import { NETWORK_EVM, NETWORK_SOLANA } from '../constants';
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCid } from '../lit-actions-client/utils';
-import { storePrivateKeyMetadata } from '../service-client';
+import { storePrivateKey } from '../service-client';
 import {
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResult,
@@ -56,7 +56,7 @@ export async function generatePrivateKey(
       accessControlConditions: [allowPkpAddressToDecrypt],
     });
 
-  const { id } = await storePrivateKeyMetadata({
+  const { id } = await storePrivateKey({
     sessionSig: firstSessionSig,
     storedKeyMetadata: {
       ciphertext,

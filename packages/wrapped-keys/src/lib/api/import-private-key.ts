@@ -1,7 +1,7 @@
 import { encryptString } from '@lit-protocol/encryption';
 
 import { LIT_PREFIX } from '../constants';
-import { storePrivateKeyMetadata } from '../service-client';
+import { storePrivateKey } from '../service-client';
 import { ImportPrivateKeyParams, ImportPrivateKeyResult } from '../types';
 import {
   getFirstSessionSig,
@@ -16,7 +16,7 @@ import {
  *
  * @param { ImportPrivateKeyParams } params The parameters required to import the private key into the wrapped keys backend service
  *
- * @returns { Promise<string> } - The LIT PKP Address associated with the Wrapped Key
+ * @returns { Promise<ImportPrivateKeyResult> } - The LIT PKP Address associated with the Wrapped Key
  */
 export async function importPrivateKey(
   params: ImportPrivateKeyParams
@@ -44,7 +44,7 @@ export async function importPrivateKey(
     litNodeClient
   );
 
-  const { id } = await storePrivateKeyMetadata({
+  const { id } = await storePrivateKey({
     sessionSig: firstSessionSig,
     litNetwork: litNodeClient.config.litNetwork,
     storedKeyMetadata: {

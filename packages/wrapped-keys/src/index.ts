@@ -1,11 +1,11 @@
 import {
   signMessageWithEncryptedKey,
-  getEncryptedKeyData,
+  getEncryptedKey,
   exportPrivateKey,
   generatePrivateKey,
   importPrivateKey,
   signTransactionWithEncryptedKey,
-  storeEncryptedKeyMetadata,
+  storeEncryptedKey,
   listEncryptedKeyMetadata,
 } from './lib/api';
 import {
@@ -34,7 +34,7 @@ import type {
   SignTransactionParams,
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
-  StoreEncryptedKeyMetadataParams,
+  StoreEncryptedKeyParams,
   StoredKeyData,
   StoredKeyMetadata,
   ListEncryptedKeyMetadataParams,
@@ -54,12 +54,12 @@ export const constants = {
 export const api = {
   exportPrivateKey,
   generatePrivateKey,
-  getEncryptedKeyData,
+  getEncryptedKey,
   listEncryptedKeyMetadata,
   importPrivateKey,
   signMessageWithEncryptedKey,
   signTransactionWithEncryptedKey,
-  storeEncryptedKeyMetadata,
+  storeEncryptedKey,
 };
 
 export {
@@ -80,7 +80,7 @@ export {
   SignTransactionParamsSupportedSolana,
   SignMessageWithEncryptedKeyParams,
   SignTransactionWithEncryptedKeyParams,
-  StoreEncryptedKeyMetadataParams,
+  StoreEncryptedKeyParams,
   StoreEncryptedKeyResult,
   StoredKeyData,
   StoredKeyMetadata,

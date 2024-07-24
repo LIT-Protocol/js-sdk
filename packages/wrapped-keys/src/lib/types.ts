@@ -29,7 +29,7 @@ export interface ApiParamsSupportedNetworks {
  * This only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
  *
  * Note that this list will not include `ciphertext` or `dataToEncryptHash` for the keys; to get those values call
- * `getEncryptedKeyData()` with the `id` of the appropriate key returned by this call.
+ * `getEncryptedKey()` with the `id` of the appropriate key returned by this call.
  */
 export type ListEncryptedKeyMetadataParams = BaseApiParams;
 
@@ -47,7 +47,7 @@ export type GetEncryptedKeyDataParams = BaseApiParams & {
 
 /** Metadata for a key that has been stored, encrypted, on the wrapped keys backend service
  * Returned by `listEncryptedKeyMetadata`; to get full stored key data including `ciphertext` and `dataToEncryptHash`
- * use `getEncryptedKeyData()`
+ * use `getEncryptedKey()`
  *
  * @typedef StoredKeyMetadata
  * @property { string } publicKey The public key of the encrypted private key
@@ -79,11 +79,11 @@ export interface StoredKeyData extends StoredKeyMetadata {
 
 /** Fetching a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
  *
- * @typedef StoreEncryptedKeyMetadataParams
+ * @typedef StoreEncryptedKeyParams
  * @extends BaseApiParams
  *
  */
-export type StoreEncryptedKeyMetadataParams = BaseApiParams &
+export type StoreEncryptedKeyParams = BaseApiParams &
   Pick<
     StoredKeyData,
     'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext' | 'memo'

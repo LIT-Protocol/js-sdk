@@ -1,7 +1,7 @@
 import {
-  fetchPrivateKeyData,
-  storePrivateKeyMetadata,
+  fetchPrivateKey,
+  storePrivateKey,
   listPrivateKeyMetadata,
 } from './client';
 
-export { fetchPrivateKeyData, storePrivateKeyMetadata, listPrivateKeyMetadata };
+export { fetchPrivateKey, storePrivateKey, listPrivateKeyMetadata };
