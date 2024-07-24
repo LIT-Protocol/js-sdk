@@ -26,6 +26,8 @@ import {
 import { encryptString } from '@lit-protocol/encryption';
 
 import { LIT_CHAINS } from '@lit-protocol/constants';
+
+// Using absolute pathing as these members are not exported from the module
 import { LIT_ACTION_CID_REPOSITORY } from '../../../wrapped-keys/src/lib/lit-actions-client/constants';
 import { getPkpAccessControlCondition } from '../../../wrapped-keys/src/lib/utils';
 import { LIT_PREFIX } from '../../../wrapped-keys/src/lib/constants';
