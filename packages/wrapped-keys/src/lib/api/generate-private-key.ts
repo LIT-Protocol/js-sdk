@@ -1,7 +1,7 @@
 import { NETWORK_EVM, NETWORK_SOLANA } from '../constants';
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCid } from '../lit-actions-client/utils';
-import { storePrivateKeyMetadata } from '../service-client';
+import { storePrivateKey } from '../service-client';
 import {
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResult,
@@ -37,7 +37,7 @@ function getKeyTypeFromNetwork(network: Network): KeyType {
 export async function generatePrivateKey(
   params: GeneratePrivateKeyParams
 ): Promise<GeneratePrivateKeyResult> {
-  const { pkpSessionSigs, network, litNodeClient } = params;
+  const { pkpSessionSigs, network, litNodeClient, memo } = params;
 
   if (litNodeClient.config.litNetwork === 'habanero') {
     throw new Error(
@@ -56,7 +56,7 @@ export async function generatePrivateKey(
       accessControlConditions: [allowPkpAddressToDecrypt],
     });
 
-  await storePrivateKeyMetadata({
+  const { id } = await storePrivateKey({
     sessionSig: firstSessionSig,
     storedKeyMetadata: {
       ciphertext,
@@ -64,12 +64,14 @@ export async function generatePrivateKey(
       keyType: getKeyTypeFromNetwork(network),
       dataToEncryptHash,
       pkpAddress,
+      memo,
     },
     litNetwork: litNodeClient.config.litNetwork,
   });
 
   return {
     pkpAddress,
+    id,
     generatedPublicKey: publicKey,
   };
 }
