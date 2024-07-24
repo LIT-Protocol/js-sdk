@@ -28,7 +28,7 @@
       "options": {
         "jestConfig": "packages/e2e-tests/jest.config.ts",
         "passWithNoTests": true,
-        "runInBand": true
+        "runInBand": false
       }
     },
     "testWatch": {
