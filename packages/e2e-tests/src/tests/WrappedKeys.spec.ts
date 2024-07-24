@@ -1,5 +1,9 @@
 import { expect, jest } from '@jest/globals';
-import { TinnyEnvironment, getPkpSessionSigs, getEoaSessionSigs } from '@lit-protocol/tinny';
+import {
+  TinnyEnvironment,
+  getPkpSessionSigs,
+  getEoaSessionSigs,
+} from '@lit-protocol/tinny';
 import {
   EthereumLitTransaction,
   SerializedTransaction,
