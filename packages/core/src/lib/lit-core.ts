@@ -24,6 +24,8 @@ import {
   RPC_URL_BY_NETWORK,
   StakingStates,
   version,
+  HTTP,
+  HTTPS,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -99,6 +101,8 @@ export type LitNodeClientConfigWithDefaults = Required<
     Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
   > & {
     bootstrapUrls: string[];
+  } & {
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
@@ -131,6 +135,7 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
+    nodeProtocol: null,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -234,7 +239,8 @@ export class LitCore {
       LitContracts.getValidators(
         this.config.litNetwork,
         this.config.contractContext,
-        this.config.rpcUrl
+        this.config.rpcUrl,
+        this.config.nodeProtocol
       ),
     ]);
 

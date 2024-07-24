@@ -56,6 +56,8 @@ import {
   HTTP_BY_NETWORK,
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
+  HTTP,
+  HTTPS,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
@@ -888,7 +890,8 @@ export class LitContracts {
   public static getValidators = async (
     network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string
+    rpcUrl?: string,
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null
   ): Promise<string[]> => {
     const contract = await LitContracts.getStakingContract(
       network,
@@ -941,13 +944,24 @@ export class LitContracts {
     });
 
     const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
-      const protocol = HTTP_BY_NETWORK[network];
       const centralisation = CENTRALISATION_BY_NETWORK[network];
-      const ip = intToIP(item.ip);
-      const port = item.port;
 
+      // Convert the integer IP to a string format
+      const ip = intToIP(item.ip);
+      let port = item.port;
+
+      // Determine the protocol to use based on various conditions
+      const protocol =
+        // If nodeProtocol is defined, use it
+        nodeProtocol ||
+        // If port is 443, use HTTPS, otherwise use network-specific HTTP
+        (port === 443 ? HTTPS : HTTP_BY_NETWORK[network]) ||
+        // Fallback to HTTP if no other conditions are met
+        HTTP;
+
+      // Check for specific conditions in centralised networks
       if (centralisation === 'centralised') {
-        // -- validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
+        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
         if (
           network === LIT_NETWORK.Cayenne &&
           !port.toString().startsWith('8')
