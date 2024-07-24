@@ -24,6 +24,8 @@ import {
   LitNetwork,
   StakingStates,
   version,
+  HTTP,
+  HTTPS,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -100,7 +102,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   > & {
     bootstrapUrls: string[];
   } & {
-    nodeProtocol?: `http://` | `https://` | null;
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
