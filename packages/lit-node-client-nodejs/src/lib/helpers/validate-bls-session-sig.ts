@@ -37,9 +37,9 @@ export const blsSessionSigVerify = (
   /** Check time or now */
   const checkTime = new Date();
 
-  if (!authSigSiweMessage.expirationTime || !authSigSiweMessage.notBefore) {
+  if (!authSigSiweMessage.expirationTime || !authSigSiweMessage.issuedAt) {
     throw new Error(
-      'Invalid SIWE message. Missing expirationTime or notBefore.'
+      'Invalid SIWE message. Missing expirationTime or issuedAt.'
     );
   }
 
@@ -53,12 +53,12 @@ export const blsSessionSigVerify = (
     );
   }
 
-  const notBefore = new Date(authSigSiweMessage.notBefore);
-  if (checkTime.getTime() < notBefore.getTime()) {
+  const issuedAt = new Date(authSigSiweMessage.issuedAt);
+  if (checkTime.getTime() < issuedAt.getTime()) {
     throw new SiweError(
       SiweErrorType.NOT_YET_VALID_MESSAGE,
-      `${checkTime.toISOString()} >= ${notBefore.toISOString()}`,
-      `${checkTime.toISOString()} < ${notBefore.toISOString()}`
+      `${checkTime.toISOString()} >= ${issuedAt.toISOString()}`,
+      `${checkTime.toISOString()} < ${issuedAt.toISOString()}`
     );
   }
 
