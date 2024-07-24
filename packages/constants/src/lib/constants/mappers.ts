@@ -23,3 +23,20 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
   custom: datilDev,
   localhost: datilDev,
 };
+
+/**
+ * @deprecated Will be removed in version 7.x.
+ */
+export const GENERAL_WORKER_URL_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: string;
+} = {
+  cayenne: 'https://apis.getlit.dev/cayenne/contracts',
+  manzano: 'https://apis.getlit.dev/manzano/contracts',
+  habanero: 'https://apis.getlit.dev/habanero/contracts',
+  'datil-dev': 'https://apis.getlit.dev/datil-dev/contracts',
+  'datil-test': 'https://apis.getlit.dev/datil-test/contracts',
+
+  // just use cayenne abis for custom and localhost
+  custom: 'https://apis.getlit.dev/cayenne/contracts',
+  localhost: 'https://apis.getlit.dev/cayenne/contracts',
+};
