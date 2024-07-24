@@ -3083,10 +3083,10 @@
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.0.37":
-  version "0.0.37"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.37.tgz#ecd88240a47d8047979d9e7d1de6d7d21892b675"
-  integrity sha512-clEXCX1po6a7mqzxaiezp9FDJsclL9c+CsuZlPtm7wLcem+91QqXhCQvkNwpGENwOZloYXH/GZozYtLFGKSbIg==
+"@lit-protocol/contracts@^0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.39.tgz#e2483f1ef3df63bd434bcc7c00414b8f2e8d9ec5"
+  integrity sha512-zz/TaKWUqFK2n7BqwKj9PeV0px89G7dnjkRJ9BM/eri356zodd/W5d5iGQUVdaFiCYKd/cibm4004BnuMlXLeg==
 
 "@lit/reactive-element@^1.3.0", "@lit/reactive-element@^1.6.0":
   version "1.6.3"
