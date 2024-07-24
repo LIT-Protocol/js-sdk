@@ -84,7 +84,16 @@ export class LitPKPResource extends LitResourceBase implements ILitResource {
    * PKP token ID.
    */
   constructor(resource: string) {
-    super(resource);
+    // the nodes expect a 32 byte token id in hex.
+    // in some cases, if the token id is smaller than 32 bytes,
+    // the nodes will throw an error.
+    // so we pad the token id with leading zeros to make it 32 bytes.
+    let fixedResource = resource;
+    const hexRegex = /[0-9A-Fa-f]{6}/g;
+    if (resource !== '*' && resource.length < 64 && hexRegex.test(resource)) {
+      fixedResource = resource.padStart(64, '0');
+    }
+    super(fixedResource);
   }
 
   isValidLitAbility(litAbility: LitAbility): boolean {
