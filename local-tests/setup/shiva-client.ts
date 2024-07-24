@@ -84,7 +84,7 @@ export class TestnetClient {
     const networkContext = {
       abi: JSON.parse(contractResolverAbi),
       resolverAddress: contractResolverAddress,
-      provider: new ethers.providers.JsonRpcProvider(
+      provider: new ethers.providers.StaticJsonRpcProvider(
         `http://${testNetConfig.rpcUrl}`
       ),
       environment: 0, // test deployment uses env value 0 in test common

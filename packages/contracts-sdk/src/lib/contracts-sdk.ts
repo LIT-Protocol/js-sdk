@@ -56,6 +56,8 @@ import {
   HTTP_BY_NETWORK,
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
+  HTTP,
+  HTTPS,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
@@ -107,7 +109,7 @@ const GAS_LIMIT = ethers.utils.hexlify(5000000); // Adjust as needed
 // The class has a number of properties that represent the smart contract instances, such as accessControlConditionsContract, litTokenContract, pkpNftContract, etc. These smart contract instances are created by passing the contract address, ABI, and provider to the ethers.Contract constructor.
 // The class also has a utils object with helper functions for converting between hexadecimal and decimal representation of numbers, as well as functions for working with multihashes and timestamps.
 export class LitContracts {
-  provider: ethers.providers.JsonRpcProvider | any;
+  provider: ethers.providers.StaticJsonRpcProvider | any;
   rpc: string;
   rpcs: string[];
   signer: ethers.Signer | ethers.Wallet;
@@ -184,7 +186,7 @@ export class LitContracts {
 
   // make the constructor args optional
   constructor(args?: {
-    provider?: ethers.providers.JsonRpcProvider | any;
+    provider?: ethers.providers.StaticJsonRpcProvider | any;
     customContext?: LitContractContext | LitContractResolverContext;
     rpcs?: string[] | any;
     rpc?: string | any;
@@ -305,7 +307,7 @@ export class LitContracts {
     // ----------------------------------------------
     else if (isNode()) {
       this.log("----- We're in node! -----");
-      this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
+      this.provider = new ethers.providers.StaticJsonRpcProvider(this.rpc);
     }
 
     // ======================================
@@ -583,12 +585,12 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
-    let provider: ethers.providers.JsonRpcProvider;
+    let provider: ethers.providers.StaticJsonRpcProvider;
     rpcUrl = RPC_URL_BY_NETWORK[network];
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
-      provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+      provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl);
     }
 
     if (network === 'datil-dev' || network === 'datil-test') {
@@ -651,7 +653,7 @@ export class LitContracts {
 
   private static async _getContractsFromResolver(
     context: LitContractResolverContext,
-    provider: ethers.providers.JsonRpcProvider,
+    provider: ethers.providers.StaticJsonRpcProvider,
     contractNames?: (keyof LitContractContext)[]
   ): Promise<LitContractContext> {
     const resolverContract = new ethers.Contract(
@@ -770,7 +772,7 @@ export class LitContracts {
 
   public static async getContractAddresses(
     network: LIT_NETWORKS_KEYS,
-    provider: ethers.providers.JsonRpcProvider,
+    provider: ethers.providers.StaticJsonRpcProvider,
     context?: LitContractContext | LitContractResolverContext
   ) {
     let contractData;
@@ -888,7 +890,8 @@ export class LitContracts {
   public static getValidators = async (
     network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string
+    rpcUrl?: string,
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null
   ): Promise<string[]> => {
     const contract = await LitContracts.getStakingContract(
       network,
@@ -941,13 +944,24 @@ export class LitContracts {
     });
 
     const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
-      const protocol = HTTP_BY_NETWORK[network];
       const centralisation = CENTRALISATION_BY_NETWORK[network];
-      const ip = intToIP(item.ip);
-      const port = item.port;
 
+      // Convert the integer IP to a string format
+      const ip = intToIP(item.ip);
+      let port = item.port;
+
+      // Determine the protocol to use based on various conditions
+      const protocol =
+        // If nodeProtocol is defined, use it
+        nodeProtocol ||
+        // If port is 443, use HTTPS, otherwise use network-specific HTTP
+        (port === 443 ? HTTPS : HTTP_BY_NETWORK[network]) ||
+        // Fallback to HTTP if no other conditions are met
+        HTTP;
+
+      // Check for specific conditions in centralised networks
       if (centralisation === 'centralised') {
-        // -- validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
+        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
         if (
           network === LIT_NETWORK.Cayenne &&
           !port.toString().startsWith('8')
@@ -1375,7 +1389,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   //   if (isBrowser()) {
   //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
   //   } else {
-  //     provider = new ethers.providers.JsonRpcProvider(this.rpc);
+  //     provider = new ethers.providers.StaticJsonRpcProvider(this.rpc);
   //   }
   //   const signer = new ethers.Wallet(privateKey, provider);
 
@@ -1388,7 +1402,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   //   if (isBrowser()) {
   //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
   //   } else {
-  //     provider = new ethers.providers.JsonRpcProvider(this.rpc);
+  //     provider = new ethers.providers.StaticJsonRpcProvider(this.rpc);
   //   }
   //   const signer = new ethers.Wallet(privateKey, provider);
 
