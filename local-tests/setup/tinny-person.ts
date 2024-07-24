@@ -50,7 +50,7 @@ export class TinnyPerson {
   }
 
   async getAuthMethodId(): Promise<string> {
-    return await EthWalletProvider.authMethodId(this.authMethod);
+    return EthWalletProvider.authMethodId(this.authMethod);
   }
 
   /**
