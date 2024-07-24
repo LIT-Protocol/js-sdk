@@ -1,6 +1,6 @@
 import { signMessageWithLitAction } from '../lit-actions-client';
 import { getLitActionCid } from '../lit-actions-client/utils';
-import { fetchPrivateKeyMetadata } from '../service-client';
+import { fetchPrivateKeyData } from '../service-client';
 import { SignMessageWithEncryptedKeyParams } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 
@@ -19,11 +19,13 @@ export async function signMessageWithEncryptedKey(
   const { litNodeClient, network, pkpSessionSigs, id } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
-  const storedKeyMetadata = await fetchPrivateKeyMetadata({
+  const storedKeyMetadata = await fetchPrivateKeyData({
     id,
     sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
   });
+
+  console.log('fetched metadata', storedKeyMetadata);
 
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(
     storedKeyMetadata.pkpAddress

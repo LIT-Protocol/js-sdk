@@ -110,6 +110,7 @@ export async function makeRequest<T>({
   url: string;
   init: RequestInit;
 }) {
+  console.log('Fetching from URL', url);
   const response = await fetch(url, { ...init });
 
   if (!response.ok) {

@@ -29,25 +29,25 @@ export interface ApiParamsSupportedNetworks {
  * This only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
  *
  * Note that this list will not include `ciphertext` or `dataToEncryptHash` for the keys; to get those values call
- * `getEncryptedKeyMetadata()` with the `id` of the appropriate key returned by this call.
+ * `getEncryptedKeyData()` with the `id` of the appropriate key returned by this call.
  */
 export type ListEncryptedKeyMetadataParams = BaseApiParams;
 
 /** Fetching a previously persisted key's metadata requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
  * You must also provide the unique identifier (`id`) of the key to be fetched.  Ids are returned from `listEncryptedKeyMetadata()`.
  *
- * @typedef GetEncryptedKeyMetadataParams
+ * @typedef GetEncryptedKeyDataParams
  * @extends BaseApiParams
  *
  * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  */
-export type GetEncryptedKeyMetadataParams = BaseApiParams & {
+export type GetEncryptedKeyDataParams = BaseApiParams & {
   id: string;
 };
 
 /** Metadata for a key that has been stored, encrypted, on the wrapped keys backend service
  * Returned by `listEncryptedKeyMetadata`; to get full stored key data including `ciphertext` and `dataToEncryptHash`
- * use `getEncryptedKeyMetadata()`
+ * use `getEncryptedKeyData()`
  *
  * @typedef StoredKeyMetadata
  * @property { string } publicKey The public key of the encrypted private key

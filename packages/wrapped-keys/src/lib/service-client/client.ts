@@ -9,7 +9,7 @@ import { getPkpAddressFromSessionSig } from '../utils';
 
 /** Fetches previously stored private key metadata from the wrapped keys service.
  * Note that this list will not include `cipherText` or `dataToEncryptHash` necessary to decrypt the keys.
- * Use `fetchPrivateKeyMetadata()` to get those values.
+ * Use `fetchPrivateKeyData()` to get those values.
  *
  * @param { FetchKeyParams } params Parameters required to fetch the private key metadata
  * @returns { Promise<StoredKeyMetadata> } The private key metadata object
@@ -37,9 +37,9 @@ export async function listPrivateKeyMetadata(
  * Includes the `ciphertext` and `dataToEncryptHash` necessarily to decrypt the key.
  *
  * @param { FetchKeyParams } params Parameters required to fetch the private key data
- * @returns { Promise<StoredKeyMetadata> } The private key metadata object
+ * @returns { Promise<StoredKeyData> } The private key metadata object
  */
-export async function fetchPrivateKeyMetadata(
+export async function fetchPrivateKeyData(
   params: FetchKeyParams
 ): Promise<StoredKeyData> {
   const { litNetwork, sessionSig, id } = params;

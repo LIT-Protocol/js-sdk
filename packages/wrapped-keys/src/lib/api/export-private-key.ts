@@ -1,6 +1,6 @@
 import { exportPrivateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCid } from '../lit-actions-client/utils';
-import { fetchPrivateKeyMetadata } from '../service-client';
+import { fetchPrivateKeyData } from '../service-client';
 import { ExportPrivateKeyParams, ExportPrivateKeyResult } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 
@@ -19,7 +19,7 @@ export async function exportPrivateKey(
   const { litNodeClient, network, pkpSessionSigs, id } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
-  const storedKeyMetadata = await fetchPrivateKeyMetadata({
+  const storedKeyMetadata = await fetchPrivateKeyData({
     id,
     sessionSig,
     litNetwork: litNodeClient.config.litNetwork,

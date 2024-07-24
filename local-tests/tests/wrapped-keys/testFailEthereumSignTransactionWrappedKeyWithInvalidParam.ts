@@ -81,6 +81,7 @@ export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
           '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
         );
       } else {
+        console.log('ERROR', e.message);
         throw e;
       }
     }

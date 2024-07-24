@@ -1,6 +1,6 @@
 import {
   signMessageWithEncryptedKey,
-  getEncryptedKeyMetadata,
+  getEncryptedKeyData,
   exportPrivateKey,
   generatePrivateKey,
   importPrivateKey,
@@ -20,7 +20,7 @@ import {
 import type { SupportedNetworks } from './lib/service-client/types';
 import type {
   SignMessageWithEncryptedKeyParams,
-  GetEncryptedKeyMetadataParams,
+  GetEncryptedKeyDataParams,
   ExportPrivateKeyParams,
   GeneratePrivateKeyParams,
   ImportPrivateKeyParams,
@@ -35,6 +35,7 @@ import type {
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
   StoreEncryptedKeyMetadataParams,
+  StoredKeyData,
   StoredKeyMetadata,
   ListEncryptedKeyMetadataParams,
   StoreEncryptedKeyResult,
@@ -53,7 +54,7 @@ export const constants = {
 export const api = {
   exportPrivateKey,
   generatePrivateKey,
-  getEncryptedKeyMetadata,
+  getEncryptedKeyData,
   listEncryptedKeyMetadata,
   importPrivateKey,
   signMessageWithEncryptedKey,
@@ -67,7 +68,7 @@ export {
   EthereumLitTransaction,
   ExportPrivateKeyParams,
   ExportPrivateKeyResult,
-  GetEncryptedKeyMetadataParams,
+  GetEncryptedKeyDataParams,
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResult,
   ImportPrivateKeyParams,
@@ -81,6 +82,7 @@ export {
   SignTransactionWithEncryptedKeyParams,
   StoreEncryptedKeyMetadataParams,
   StoreEncryptedKeyResult,
+  StoredKeyData,
   StoredKeyMetadata,
   SupportedNetworks,
 };

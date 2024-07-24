@@ -1,6 +1,6 @@
 import { exportPrivateKey } from './export-private-key';
 import { generatePrivateKey } from './generate-private-key';
-import { getEncryptedKeyMetadata } from './get-encrypted-key-metadata';
+import { getEncryptedKeyData } from './get-encrypted-key-data';
 import { importPrivateKey } from './import-private-key';
 import { listEncryptedKeyMetadata } from './list-encrypted-key-metadata';
 import { signMessageWithEncryptedKey } from './sign-message-with-encrypted-key';
@@ -15,5 +15,5 @@ export {
   exportPrivateKey,
   signMessageWithEncryptedKey,
   storeEncryptedKeyMetadata,
-  getEncryptedKeyMetadata,
+  getEncryptedKeyData,
 };
