@@ -177,7 +177,7 @@ export class TinnyEnvironment {
 
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
-        // console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
+        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
         await new Promise((resolve) =>
           setTimeout(resolve, this.processEnvs.WAIT_FOR_KEY_INTERVAL)

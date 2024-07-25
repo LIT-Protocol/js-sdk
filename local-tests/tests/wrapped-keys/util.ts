@@ -17,8 +17,8 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
       };
     case 'datil-dev':
       return {
-        chain: 'vesuvius',
-        chainId: LIT_CHAINS['vesuvius'].chainId,
+        chain: 'yellowstone',
+        chainId: LIT_CHAINS['yellowstone'].chainId,
       };
     case 'datil-test':
       return {
