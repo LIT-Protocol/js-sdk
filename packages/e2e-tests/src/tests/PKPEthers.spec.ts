@@ -33,7 +33,7 @@ import {
 } from '@metamask/eth-sig-util';
 
 try {
-  jest.setTimeout(60000);
+  jest.setTimeout(100_000);
 } catch (e) {
   // ... continue execution
 }

@@ -4,7 +4,7 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 
 try {
-  jest.setTimeout(60000);
+  jest.setTimeout(100_000);
 } catch (e) {
   // ... continue execution
 }

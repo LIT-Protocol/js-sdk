@@ -64,7 +64,7 @@ export function randomSolanaPrivateKey() {
 }
 
 try {
-  jest.setTimeout(60000);
+  jest.setTimeout(100_0000);
 } catch (e) {
   // ... continue execution
 }
@@ -98,12 +98,13 @@ describe('Wrapped Keys', () => {
     const solanaKeypair = Keypair.generate();
     const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv?.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -155,6 +156,7 @@ describe('Wrapped Keys', () => {
       unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv?.litNodeClient!,
+      id,
     });
 
     console.log('signedTx');
@@ -185,12 +187,13 @@ describe('Wrapped Keys', () => {
     const solanaKeypair = Keypair.generate();
     const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv?.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -216,6 +219,7 @@ describe('Wrapped Keys', () => {
       network: 'solana',
       messageToSign,
       litNodeClient: devEnv?.litNodeClient!,
+      id,
     });
 
     console.log('signature');
@@ -248,12 +252,13 @@ describe('Wrapped Keys', () => {
     const privateKey = randomSolanaPrivateKey();
     // '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv?.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -276,10 +281,11 @@ describe('Wrapped Keys', () => {
 
     console.log(pkpSessionSigs);
 
-    const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
+    const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       network: 'solana',
       litNodeClient: devEnv?.litNodeClient!,
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -305,6 +311,7 @@ describe('Wrapped Keys', () => {
       litNodeClient: devEnv?.litNodeClient!,
       network: 'solana',
       messageToSign,
+      id,
     });
 
     const signatureIsValidForPublicKey = nacl.sign.detached.verify(
@@ -329,6 +336,7 @@ describe('Wrapped Keys', () => {
       pkpSessionSigs: pkpSessionSigsExport!,
       litNodeClient: devEnv?.litNodeClient!,
       network: 'solana',
+      id,
     });
 
     const solanaKeyPair = Keypair.fromSecretKey(
@@ -355,10 +363,11 @@ describe('Wrapped Keys', () => {
 
     console.log(pkpSessionSigs);
 
-    const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
+    const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       network: 'evm',
       litNodeClient: devEnv.litNodeClient!,
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -381,6 +390,7 @@ describe('Wrapped Keys', () => {
       pkpSessionSigs: pkpSessionSigsExport!,
       litNodeClient: devEnv.litNodeClient!,
       network: 'evm',
+      id,
     });
 
     const wallet = new ethers.Wallet(decryptedPrivateKey);
@@ -415,6 +425,7 @@ describe('Wrapped Keys', () => {
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
+        memo: 'Test Key',
       });
     } catch (e: any) {
       if (
@@ -447,12 +458,13 @@ describe('Wrapped Keys', () => {
 
     const privateKey1 = randomSolanaPrivateKey();
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey: privateKey1,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -473,6 +485,7 @@ describe('Wrapped Keys', () => {
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
+        memo: 'Test Key',
       });
     } catch (e: any) {
       if (
@@ -507,6 +520,7 @@ describe('Wrapped Keys', () => {
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
+        memo: 'Test Key',
       });
     } catch (e: any) {
       if (e.message.includes('Expires too far in the future')) {
@@ -558,6 +572,7 @@ describe('Wrapped Keys', () => {
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
+        memo: 'Test Key',
       });
     } catch (e: any) {
       if (e.message.includes('bad public key size')) {
@@ -609,6 +624,7 @@ describe('Wrapped Keys', () => {
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
+        memo: 'Test Key',
       });
       console.log(res);
     } catch (e: any) {
@@ -640,6 +656,7 @@ describe('Wrapped Keys', () => {
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
+        memo: 'Test Key',
       });
     } catch (e: any) {
       if (e.message.includes('SessionSig is not from a PKP')) {
@@ -666,12 +683,13 @@ describe('Wrapped Keys', () => {
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -733,12 +751,13 @@ describe('Wrapped Keys', () => {
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -772,6 +791,7 @@ describe('Wrapped Keys', () => {
         unsignedTransaction,
         broadcast: false,
         litNodeClient: devEnv.litNodeClient!,
+        id,
       });
     } catch (e: any) {
       if (
@@ -860,12 +880,13 @@ describe('Wrapped Keys', () => {
 
     const privateKey = randomSolanaPrivateKey();
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigsImport!,
       privateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -888,6 +909,7 @@ describe('Wrapped Keys', () => {
       pkpSessionSigs: pkpSessionSigsExport!,
       litNodeClient: devEnv.litNodeClient!,
       network: 'solana',
+      id,
     });
 
     if (decryptedPrivateKey !== privateKey) {
@@ -911,12 +933,13 @@ describe('Wrapped Keys', () => {
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -946,6 +969,7 @@ describe('Wrapped Keys', () => {
       unsignedTransaction,
       broadcast: false,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signedTx');
@@ -970,12 +994,13 @@ describe('Wrapped Keys', () => {
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -1001,6 +1026,7 @@ describe('Wrapped Keys', () => {
       network: 'evm',
       messageToSign: unsignedStringMessage,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signature');
@@ -1019,6 +1045,7 @@ describe('Wrapped Keys', () => {
       network: 'evm',
       messageToSign: unsignedBinaryMessage,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signatureBinary');
@@ -1049,12 +1076,13 @@ describe('Wrapped Keys', () => {
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -1080,6 +1108,7 @@ describe('Wrapped Keys', () => {
       network: 'evm',
       messageToSign: unsignedStringMessage,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signature');
@@ -1098,6 +1127,7 @@ describe('Wrapped Keys', () => {
       network: 'evm',
       messageToSign: unsignedBinaryMessage,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signatureBinary');
@@ -1133,12 +1163,13 @@ describe('Wrapped Keys', () => {
     console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
     await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey: wrappedKeysWalletPrivateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -1172,6 +1203,7 @@ describe('Wrapped Keys', () => {
       unsignedTransaction,
       broadcast: true,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signedTx');
@@ -1202,12 +1234,13 @@ describe('Wrapped Keys', () => {
     console.log(`Sending funds to ${wrappedKeysWalletAddress}`);
     await devEnv.getFunds(wrappedKeysWallet.address, '0.005');
 
-    const pkpAddress = await importPrivateKey({
+    const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey: wrappedKeysWalletPrivateKey,
       litNodeClient: devEnv.litNodeClient!,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test Key',
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
@@ -1237,6 +1270,7 @@ describe('Wrapped Keys', () => {
       unsignedTransaction,
       broadcast: true,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signedTx');
@@ -1260,10 +1294,11 @@ describe('Wrapped Keys', () => {
 
     console.log(pkpSessionSigs);
 
-    const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
+    const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       network: 'evm',
       litNodeClient: devEnv.litNodeClient!,
+      memo: 'Test Key',
     });
 
     const generatedKeysWalletAddress =
@@ -1298,6 +1333,7 @@ describe('Wrapped Keys', () => {
       unsignedTransaction,
       broadcast: true,
       litNodeClient: devEnv.litNodeClient!,
+      id,
     });
 
     console.log('signedTx');
