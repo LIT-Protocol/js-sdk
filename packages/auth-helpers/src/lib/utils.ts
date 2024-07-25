@@ -13,7 +13,10 @@ export function formaPKPResource(resource: string): string {
     throw new Error('Resource ID exceeds 64 characters (32 bytes) in length.');
   }
 
-  // Regex to validate hex strings
+/**
+ * The pattern matches any sequence of 6 characters that are
+ * either digits (0-9) or letters A-F (both uppercase and lowercase).
+ */
   const hexRegex = /^[0-9A-Fa-f]+$/;
 
   // Ensure the resource is a valid hex string and not a wildcard '*'
