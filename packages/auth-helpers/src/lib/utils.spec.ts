@@ -1,4 +1,4 @@
-import { formaPKPResource } from './utils'; // Adjust the import path as necessary
+import { formaPKPResource } from './utils';
 
 describe('formaPKPResource', () => {
   it('should remove the 0x prefix', () => {
