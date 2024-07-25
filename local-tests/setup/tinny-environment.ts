@@ -344,28 +344,31 @@ export class TinnyEnvironment {
    * Init
    */
   async init() {
-    if (this.processEnvs.NO_SETUP) {
-      console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
-      return;
-    }
-    if (this.network === LIT_TESTNET.LOCALCHAIN && this.processEnvs.USE_SHIVA) {
-      this.testnet = await this._shivaClient.startTestnetManager();
-      // wait for the testnet to be active before we start the tests.
-      let state = await this.testnet.pollTestnetForActive();
-      if (state === `UNKNOWN`) {
-        console.log(
-          'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
-        );
-        throw new Error(`Error while creating testnet, aborting test run`);
+    try {
+      if (this.processEnvs.NO_SETUP) {
+        console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
+        return;
+      }
+      if (
+        this.network === LIT_TESTNET.LOCALCHAIN &&
+        this.processEnvs.USE_SHIVA
+      ) {
+        this.testnet = await this._shivaClient.startTestnetManager();
+        // wait for the testnet to be active before we start the tests.
+        let state = await this.testnet.pollTestnetForActive();
+        if (state === `UNKNOWN`) {
+          console.log(
+            'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
+          );
+          throw new Error(`Error while creating testnet, aborting test run`);
+        }
+
+        await this.testnet.getTestnetConfig();
+      } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
+        const context = await import('./networkContext.json');
+        this._contractContext = context;
       }
 
-      await this.testnet.getTestnetConfig();
-    } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const context = await import('./networkContext.json');
-      this._contractContext = context;
-    }
-
-    try {
       await this.setupLitNodeClient();
       await this.setupSuperCapacityDelegationAuthSig();
       await this.setupBareEthAuthSig();
