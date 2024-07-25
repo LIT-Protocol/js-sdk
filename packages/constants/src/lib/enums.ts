@@ -59,6 +59,7 @@ export enum LitNetwork {
   Habanero = 'habanero',
   Custom = 'custom',
   DatilDev = 'datil-dev',
+  DatilTest = 'datil-test',
 }
 
 /**

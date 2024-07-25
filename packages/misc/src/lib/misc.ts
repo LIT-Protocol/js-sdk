@@ -3,13 +3,10 @@ import {
   ILitError,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
-  LIT_ENDPOINT,
   LIT_ERROR,
-  LitNetwork,
-  RELAY_URL_CAYENNE,
-  RELAY_URL_DATIL_DEV,
-  RELAY_URL_HABANERO,
-  RELAY_URL_MANZANO,
+  LIT_NETWORK,
+  LIT_NETWORK_VALUES,
+  RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 
 import {
@@ -659,32 +656,45 @@ export const genRandomPath = (): string => {
   );
 };
 
+/**
+ * Checks if the given LitNetwork value is supported.
+ * @param litNetwork - The LitNetwork value to check.
+ * @throws {Error} - Throws an error if the LitNetwork value is not supported.
+ */
+export function isSupportedLitNetwork(
+  litNetwork: LIT_NETWORK_VALUES
+): asserts litNetwork is LIT_NETWORK_VALUES {
+  const supportedNetworks = Object.values(LIT_NETWORK);
+
+  if (!supportedNetworks.includes(litNetwork)) {
+    throw new Error(
+      `Unsupported LitNetwork! (${supportedNetworks.join('|')}) are supported.`
+    );
+  }
+}
+
 export const defaultMintClaimCallback: MintCallback<
   RelayClaimProcessor
 > = async (
   params: ClaimResult<RelayClaimProcessor>,
-  network: string = 'cayenne'
+  network: LIT_NETWORK_VALUES = 'cayenne'
 ): Promise<string> => {
-  try {
-    let relayUrl: string = '';
+  isSupportedLitNetwork(network);
 
-    switch (network) {
-      case LitNetwork.Cayenne:
-        relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
-        break;
-      case LitNetwork.Habanero:
-        relayUrl = RELAY_URL_HABANERO + 'auth/claim';
-        break;
-      case LitNetwork.Manzano:
-        relayUrl = RELAY_URL_MANZANO + 'auth/claim';
-        break;
-      case LitNetwork.DatilDev:
-        relayUrl = RELAY_URL_DATIL_DEV + '/auth/claim';
-        break;
+  try {
+    const AUTH_CLAIM_PATH = '/auth/claim';
+
+    const relayUrl: string = params.relayUrl || RELAYER_URL_BY_NETWORK[network];
+
+    if (!relayUrl) {
+      throw new Error(
+        'No relayUrl provided and no default relayUrl found for network'
+      );
     }
 
-    const url = params.relayUrl ? params.relayUrl : relayUrl;
-    const response = await fetch(url, {
+    const relayUrlWithPath = relayUrl + AUTH_CLAIM_PATH;
+
+    const response = await fetch(relayUrlWithPath, {
       method: 'POST',
       body: JSON.stringify(params),
       headers: {
