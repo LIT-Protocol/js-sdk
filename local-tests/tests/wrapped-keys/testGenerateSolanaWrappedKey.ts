@@ -4,7 +4,7 @@ import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
-import { ethers } from 'ethers';
+import { Keypair } from '@solana/web3.js';
 
 const { generatePrivateKey, signMessageWithEncryptedKey, exportPrivateKey } =
   api;
@@ -20,83 +20,90 @@ export const testGenerateSolanaWrappedKey = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
+  try {
+    const pkpSessionSigs = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
 
-  console.log(pkpSessionSigs);
+    const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
+      pkpSessionSigs,
+      network: 'solana',
+      litNodeClient: devEnv.litNodeClient,
+      memo: 'Test key',
+    });
 
-  const { pkpAddress, generatedPublicKey } = await generatePrivateKey({
-    pkpSessionSigs,
-    network: 'solana',
-    litNodeClient: devEnv.litNodeClient,
-  });
+    console.log(`generatedPublicKey: ${generatedPublicKey}`);
 
-  console.log(`generatedPublicKey: ${generatedPublicKey}`);
+    const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
+    if (pkpAddress !== alicePkpAddress) {
+      throw new Error(
+        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+      );
+    }
 
-  const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
-  if (pkpAddress !== alicePkpAddress) {
-    throw new Error(
-      `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
+    const pkpSessionSigsSigning = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
+
+    // console.log(pkpSessionSigsSigning);
+
+    const messageToSign = 'This is a test message';
+
+    const signature = await signMessageWithEncryptedKey({
+      pkpSessionSigs: pkpSessionSigsSigning,
+      network: 'solana',
+      messageToSign,
+      litNodeClient: devEnv.litNodeClient,
+      id,
+    });
+
+    // console.log('signature');
+    // console.log(signature);
+
+    const signatureIsValidForPublicKey = nacl.sign.detached.verify(
+      Buffer.from(messageToSign),
+      bs58.decode(signature),
+      bs58.decode(generatedPublicKey)
     );
+
+    if (!signatureIsValidForPublicKey)
+      throw new Error(
+        `signature: ${signature} doesn't validate for the Solana public key: ${generatedPublicKey}`
+      );
+
+    const pkpSessionSigsExport = await getPkpSessionSigs(
+      devEnv,
+      alice,
+      null,
+      new Date(Date.now() + 1000 * 60 * 10).toISOString()
+    ); // 10 mins expiry
+
+    const { decryptedPrivateKey } = await exportPrivateKey({
+      pkpSessionSigs: pkpSessionSigsExport,
+      litNodeClient: devEnv.litNodeClient,
+      network: 'solana',
+      id,
+    });
+
+    const solanaKeyPair = Keypair.fromSecretKey(
+      Buffer.from(decryptedPrivateKey, 'hex')
+    );
+    const decryptedPublicKey = solanaKeyPair.publicKey;
+
+    if (decryptedPublicKey.toString() !== generatedPublicKey) {
+      throw new Error(
+        `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
+      );
+    }
+
+    log('✅ testGenerateSolanaWrappedKey');
+  } finally {
+    devEnv.releasePrivateKeyFromUser(alice);
   }
-
-  const pkpSessionSigsSigning = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
-
-  console.log(pkpSessionSigsSigning);
-
-  const messageToSign = 'This is a test message';
-
-  const signature = await signMessageWithEncryptedKey({
-    pkpSessionSigs: pkpSessionSigsSigning,
-    network: 'solana',
-    messageToSign,
-    litNodeClient: devEnv.litNodeClient,
-  });
-
-  console.log('signature');
-  console.log(signature);
-
-  const signatureIsValidForPublicKey = nacl.sign.detached.verify(
-    Buffer.from(messageToSign),
-    bs58.decode(signature),
-    bs58.decode(generatedPublicKey)
-  );
-
-  if (!signatureIsValidForPublicKey)
-    throw new Error(
-      `signature: ${signature} doesn't validate for the Solana public key: ${generatedPublicKey}`
-    );
-
-  const pkpSessionSigsExport = await getPkpSessionSigs(
-    devEnv,
-    alice,
-    null,
-    new Date(Date.now() + 1000 * 60 * 10).toISOString()
-  ); // 10 mins expiry
-
-  // FIXME: Export broken as we can't decrypt data encrypted inside a Lit Action
-  const { decryptedPrivateKey } = await exportPrivateKey({
-    pkpSessionSigs: pkpSessionSigsExport,
-    litNodeClient: devEnv.litNodeClient,
-  });
-
-  const wallet = new ethers.Wallet(decryptedPrivateKey);
-  const decryptedPublicKey = wallet.publicKey;
-
-  if (decryptedPublicKey !== generatedPublicKey) {
-    throw new Error(
-      `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
-    );
-  }
-
-  log('✅ testGenerateSolanaWrappedKey');
 };

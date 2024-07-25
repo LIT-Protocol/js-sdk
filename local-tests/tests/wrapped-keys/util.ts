@@ -17,13 +17,13 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
       };
     case 'datil-dev':
       return {
-        chain: 'vesuvius',
-        chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
+        chain: 'yellowstone',
+        chainId: LIT_CHAINS['yellowstone'].chainId,
       };
     case 'datil-test':
       return {
-        chain: 'vesuvius',
-        chainId: LIT_CHAINS['chronicleVesuviusTestnet'].chainId,
+        chain: 'yellowstone',
+        chainId: LIT_CHAINS['yellowstone'].chainId,
       };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
