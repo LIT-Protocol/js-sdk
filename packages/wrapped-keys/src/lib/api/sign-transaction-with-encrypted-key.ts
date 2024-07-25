@@ -1,6 +1,6 @@
 import { signTransactionWithLitAction } from '../lit-actions-client';
 import { getLitActionCid } from '../lit-actions-client/utils';
-import { fetchPrivateKeyMetadata } from '../service-client';
+import { fetchPrivateKey } from '../service-client';
 import { SignTransactionWithEncryptedKeyParams } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 
@@ -17,10 +17,11 @@ import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 export async function signTransactionWithEncryptedKey(
   params: SignTransactionWithEncryptedKeyParams
 ): Promise<string> {
-  const { litNodeClient, network, pkpSessionSigs } = params;
+  const { litNodeClient, network, pkpSessionSigs, id } = params;
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
 
-  const storedKeyMetadata = await fetchPrivateKeyMetadata({
+  const storedKeyMetadata = await fetchPrivateKey({
+    id,
     sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
   });

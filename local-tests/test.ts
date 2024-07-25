@@ -96,7 +96,6 @@ import { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/wrapp
 import { testImportWrappedKey } from './tests/wrapped-keys/testImportWrappedKey';
 import { testGenerateEthereumWrappedKey } from './tests/wrapped-keys/testGenerateEthereumWrappedKey';
 import { testGenerateSolanaWrappedKey } from './tests/wrapped-keys/testGenerateSolanaWrappedKey';
-import { testFailImportWrappedKeysWithSamePkp } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePkp';
 import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePrivateKey';
 import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithEoaSessionSig';
 import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithMaxExpirySessionSig';
@@ -115,6 +114,8 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
   const relayerTests = {
     testRelayer,
   };
+
+  // --filter=WrappedKey
   const wrappedKeysTests = {
     // -- valid cases
     testEthereumSignMessageGeneratedKey,
@@ -144,7 +145,6 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
     testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
 
     // -- import wrapped keys
-    testFailImportWrappedKeysWithSamePkp,
     testFailImportWrappedKeysWithSamePrivateKey,
     testFailImportWrappedKeysWithEoaSessionSig,
     testFailImportWrappedKeysWithMaxExpirySessionSig,

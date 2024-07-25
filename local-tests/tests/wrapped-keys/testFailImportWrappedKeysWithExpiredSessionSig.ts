@@ -50,8 +50,9 @@ export const testFailImportWrappedKeysWithExpiredSessionSig = async (
       litNodeClient: devEnv.litNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
+      memo: 'Test key',
     });
-    console.log(res);
+    // console.log(res);
   } catch (e: any) {
     if (e.message.includes('Invalid sessionSig: Expired')) {
       console.log('✅ THIS IS EXPECTED: ', e);

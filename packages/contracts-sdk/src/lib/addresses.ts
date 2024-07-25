@@ -1,12 +1,12 @@
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+import { Secp256k1 } from '@cosmjs/crypto';
+import { toBech32 } from '@cosmjs/encoding';
 import * as bitcoinjs from 'bitcoinjs-lib';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
-import { toBech32 } from '@cosmjs/encoding';
-import { Secp256k1 } from '@cosmjs/crypto';
 
-import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-export type TokenInfo = {
+import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
+export interface TokenInfo {
   tokenId: string;
   publicKey: string;
   publicKeyBuffer: Buffer;
@@ -14,7 +14,7 @@ export type TokenInfo = {
   btcAddress: string;
   cosmosAddress: string;
   isNewPKP: boolean;
-};
+}
 
 export const derivedAddresses = async ({
   publicKey,
@@ -33,6 +33,9 @@ export const derivedAddresses = async ({
     cacheContractCall?: boolean;
   };
 }): Promise<TokenInfo | any> => {
+  if (!defaultRPCUrl) {
+    throw new Error('defaultRPCUrl must be provided');
+  }
   let pubkeyBuffer: Buffer;
 
   // one of the two must be provided
@@ -43,11 +46,6 @@ export const derivedAddresses = async ({
   // if pkp contract address is not provided, use the default one 0xF5cB699652cED3781Dd75575EDBe075d6212DF98
   if (!pkpContractAddress) {
     pkpContractAddress = PKPNFTData.address;
-  }
-
-  // if default RPC url is not provided, use the default one https://endpoints.omniatech.io/v1/matic/mumbai/public
-  if (!defaultRPCUrl) {
-    defaultRPCUrl = 'https://lit-protocol.calderachain.xyz/replica-http';
   }
 
   // if pkpTokenId is provided, get the public key from it
@@ -64,7 +62,9 @@ export const derivedAddresses = async ({
         if (cachedPkpJSON[pkpTokenId]) {
           publicKey = cachedPkpJSON[pkpTokenId];
         } else {
-          const provider = new ethers.providers.JsonRpcProvider(defaultRPCUrl);
+          const provider = new ethers.providers.StaticJsonRpcProvider(
+            defaultRPCUrl
+          );
 
           const contract = new Contract(
             pkpContractAddress,
@@ -89,7 +89,7 @@ export const derivedAddresses = async ({
           cachedPkpJSON[pkpTokenId] = publicKey;
           localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
         } else {
-          const cachedPkpJSON: { [key: string]: any } = {};
+          const cachedPkpJSON: Record<string, any> = {};
           cachedPkpJSON[pkpTokenId] = publicKey;
           localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
         }
