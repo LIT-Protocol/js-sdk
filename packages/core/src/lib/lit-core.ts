@@ -15,6 +15,8 @@ import {
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 import {
+  HTTP,
+  HTTPS,
   LIT_CURVE,
   LIT_ENDPOINT,
   LIT_ERROR,
@@ -24,8 +26,6 @@ import {
   RPC_URL_BY_NETWORK,
   StakingStates,
   version,
-  HTTP,
-  HTTPS,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -147,7 +147,6 @@ export class LitCore {
   latestBlockhash: string | null = null;
   lastBlockHashRetrieved: number | null = null;
   private _networkSyncInterval: ReturnType<typeof setInterval> | null = null;
-  private _epochUpdateTimeout: ReturnType<typeof setTimeout> | null = null;
   private _stakingContract: ethers.Contract | null = null;
   private _stakingContractListener: null | Listener = null;
   private _connectingPromise: null | Promise<void> = null;
@@ -274,7 +273,7 @@ export class LitCore {
 
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
-      await this.setCurrentEpochNumber();
+      this._epochState = await this._fetchCurrentEpochState();
 
       if (NETWORKS_WITH_EPOCH_CHANGES.includes(this.config.litNetwork)) {
         // But we don't need to handle node urls changing on Cayenne, since it is static
@@ -497,15 +496,13 @@ export class LitCore {
       );
 
     const [{ minNodeCount, bootstrapUrls }, stakingContract] =
-      await Promise.all([
-        this._getValidatorData(),
-        getStakingContract,
-        this.setCurrentEpochNumber(),
-      ]);
+      await Promise.all([this._getValidatorData(), getStakingContract]);
 
     this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
     this.config.minNodeCount = minNodeCount;
     this.config.bootstrapUrls = bootstrapUrls;
+
+    this._epochState = await this._fetchCurrentEpochState();
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
@@ -858,26 +855,32 @@ export class LitCore {
     });
   };
 
-  private async setCurrentEpochNumber() {
+  private async _fetchCurrentEpochState(): Promise<
+    Pick<EpochCache, 'startTime' | 'currentNumber'>
+  > {
     if (!this._stakingContract) {
-      throwError({
+      return throwError({
         message:
           'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?',
         errorKind: LIT_ERROR.INIT_ERROR.kind,
         errorCode: LIT_ERROR.INIT_ERROR.name,
       });
-      return;
     }
 
     try {
-      const epoch = await this._stakingContract['epoch']();
-      this._epochCache.currentNumber = epoch.number.toNumber() as number;
+      const epoch = this._stakingContract['epoch']();
+
       // when we transition to the new epoch, we don't store the start time.  but we
       // set the endTime to the current timestamp + epochLength.
       // by reversing this and subtracting epochLength from the endTime, we get the start time
-      this._epochCache.startTime =
+      const startTime =
         (epoch.endTime.toNumber() as number) -
         (epoch.epochLength.toNumber() as number);
+
+      return {
+        currentNumber: epoch.number.toNumber() as number,
+        startTime,
+      };
     } catch (error) {
       return throwError({
         message: `[setCurrentEpochNumber] Error getting current epoch number: ${error}`,
@@ -886,19 +889,26 @@ export class LitCore {
       });
     }
   }
+
   get currentEpochNumber(): number | null {
-    if (!this._epochCache.currentNumber) {
-      return null;
-    }
     // if the epoch started less than 15s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
     // this gives the nodes time to sync with the chain and see the new epoch before we try to use it
     if (
+      this._epochCache.currentNumber &&
       this._epochCache.startTime &&
       Date.now() < this._epochCache.startTime + EPOCH_PROPAGATION_DELAY
     ) {
       return this._epochCache.currentNumber - 1;
     }
     return this._epochCache.currentNumber;
+  }
+
+  private set _epochState({
+    currentNumber,
+    startTime,
+  }: Pick<EpochCache, 'startTime' | 'currentNumber'>) {
+    this._epochCache.currentNumber = currentNumber;
+    this._epochCache.startTime = startTime;
   }
 
   // ==================== SENDING COMMAND ====================
