@@ -10,7 +10,7 @@
  * - Adds zeros to make short hex strings 64 characters.
  * - Returns the original if it partly matches hex.
  * - Throws an error if the string is too long.
- * 
+ *
  * @param resource The identifier for the resource. This should be the PKP token ID.
  * @returns A 32-byte hex string representing the resource ID.
  * @throws Will throw an error if the input exceeds 64 characters.
@@ -24,10 +24,10 @@ export function formaPKPResource(resource: string): string {
     throw new Error('Resource ID exceeds 64 characters (32 bytes) in length.');
   }
 
-/**
- * The pattern matches any sequence of 6 characters that are
- * either digits (0-9) or letters A-F (both uppercase and lowercase).
- */
+  /**
+   * The pattern matches any sequence of 6 characters that are
+   * either digits (0-9) or letters A-F (both uppercase and lowercase).
+   */
   const hexRegex = /^[0-9A-Fa-f]+$/;
 
   // Ensure the resource is a valid hex string and not a wildcard '*'
