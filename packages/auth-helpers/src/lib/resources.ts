@@ -6,6 +6,7 @@ import {
 } from '@lit-protocol/types';
 import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
+import { formaPKPResource } from './utils';
 
 abstract class LitResourceBase {
   abstract resourcePrefix: LitResourcePrefix;
@@ -84,21 +85,7 @@ export class LitPKPResource extends LitResourceBase implements ILitResource {
    * PKP token ID.
    */
   constructor(resource: string) {
-    // the nodes expect a 32 byte token id in hex.
-    // in some cases, if the token id is smaller than 32 bytes,
-    // the nodes will throw an error.
-    // so we pad the token id with leading zeros to make it 32 bytes.
-    let fixedResource = resource.startsWith('0x')
-      ? resource.slice(2)
-      : resource;
-    const hexRegex = /[0-9A-Fa-f]{6}/g;
-    if (
-      fixedResource !== '*' &&
-      fixedResource.length < 64 &&
-      hexRegex.test(fixedResource)
-    ) {
-      fixedResource = fixedResource.padStart(64, '0');
-    }
+    const fixedResource = formaPKPResource(resource);
     super(fixedResource);
   }
 
