@@ -877,7 +877,7 @@ export class LitCore {
       };
     } catch (error) {
       return throwError({
-        message: `[setCurrentEpochNumber] Error getting current epoch number: ${error}`,
+        message: `[_fetchCurrentEpochState] Error getting current epoch number: ${error}`,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });
