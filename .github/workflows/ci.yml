@@ -58,13 +58,13 @@ jobs:
         run: cp .env.ci .env
       - name: End Tests Connection
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:local -t `Connections`
+        run: yarn test:local -t 'Connections'
       - name: End Tests Session Compaitiblity
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:local -t SessionSigs
+        run: yarn test:local -t 'SessionSigs'
       - name: End Tests PKP Ethers
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:local -t `PKP Ethers`
+        run: yarn test:local -t 'PKP Ethers'
       - name: End Tests Session Compaitiblity
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:local -t `Lit Action Ops`
+        run: yarn test:local -t 'Lit Action Ops'
