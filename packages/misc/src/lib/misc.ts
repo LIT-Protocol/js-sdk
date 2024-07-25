@@ -677,14 +677,15 @@ export const defaultMintClaimCallback: MintCallback<
   RelayClaimProcessor
 > = async (
   params: ClaimResult<RelayClaimProcessor>,
-  network: LIT_NETWORK_VALUES = 'cayenne'
+  network: string
 ): Promise<string> => {
-  isSupportedLitNetwork(network);
+  isSupportedLitNetwork(network as LIT_NETWORK_VALUES);
 
   try {
     const AUTH_CLAIM_PATH = '/auth/claim';
 
-    const relayUrl: string = params.relayUrl || RELAYER_URL_BY_NETWORK[network];
+    const relayUrl: string =
+      params.relayUrl || RELAYER_URL_BY_NETWORK[network as LIT_NETWORK_VALUES];
 
     if (!relayUrl) {
       throw new Error(
