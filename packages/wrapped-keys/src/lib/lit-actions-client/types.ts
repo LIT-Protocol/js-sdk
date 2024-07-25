@@ -3,7 +3,8 @@ import { Network } from '../types';
 export type LitActionType =
   | 'signTransaction'
   | 'signMessage'
-  | 'generateEncryptedKey';
+  | 'generateEncryptedKey'
+  | 'exportPrivateKey';
 
 export type LitCidRepositoryEntry = Readonly<Record<Network, string>>;
 

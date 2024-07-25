@@ -5,6 +5,7 @@ export * from './lib/version';
 export * from './lib/constants/constants';
 export * from './lib/constants/endpoints';
 export * from './lib/constants/autogen_internal';
+export * from './lib/constants/mappers';
 
 // ----------- Interfaces -----------
 export * from './lib/interfaces/i-errors';
