@@ -15,6 +15,7 @@ import {
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 import {
+  CENTRALISATION_BY_NETWORK,
   HTTP,
   HTTPS,
   LIT_CURVE,
@@ -115,15 +116,6 @@ const NETWORKS_REQUIRING_SEV: string[] = [
   LitNetwork.Habanero,
   LitNetwork.Manzano,
   LitNetwork.DatilTest,
-];
-
-// The only network we consider entirely static, and thus ignore EPOCH changes for, is Cayenne
-const NETWORKS_WITH_EPOCH_CHANGES: string[] = [
-  LitNetwork.DatilDev,
-  LitNetwork.DatilTest,
-  LitNetwork.Habanero,
-  LitNetwork.Manzano,
-  LitNetwork.Custom,
 ];
 
 export class LitCore {
@@ -275,8 +267,10 @@ export class LitCore {
       // We always want to track the most recent epoch number on _all_ networks
       this._epochState = await this._fetchCurrentEpochState();
 
-      if (NETWORKS_WITH_EPOCH_CHANGES.includes(this.config.litNetwork)) {
-        // But we don't need to handle node urls changing on Cayenne, since it is static
+      if (
+        CENTRALISATION_BY_NETWORK[this.config.litNetwork] === 'decentralised'
+      ) {
+        // We don't need to handle node urls changing on centralised networks, since their validator sets are static
         try {
           log(
             'State found to be new validator set locked, checking validator set'
