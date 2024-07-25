@@ -6,7 +6,6 @@ import { ILitNodeClient } from '@lit-protocol/types';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { getEoaSessionSigsWithCapacityDelegations } from '@lit-protocol/tinny';
 
-
 try {
   jest.setTimeout(100_000);
 } catch (e) {
