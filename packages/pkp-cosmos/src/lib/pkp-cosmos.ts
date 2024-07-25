@@ -196,7 +196,7 @@ export class PKPCosmosWallet
 
   /**
    * The following methods do not exists in the original DirectSecp256k1HdWallet class, but are
-   * added to the PKPCosmosWallet class to enable it to be used as a PKPClient instance.
+   * added to the PKPCosmosWallet class to enable it to be used along other PKP wallets.
    */
 
   /**

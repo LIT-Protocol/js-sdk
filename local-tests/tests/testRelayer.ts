@@ -3,6 +3,7 @@ import { ClaimRequest, ClientClaimProcessor } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { EthWalletProvider, LitRelay } from '@lit-protocol/lit-auth-client';
 import { LitNetwork } from '@lit-protocol/constants';
+import { withTimeout } from 'local-tests/setup/tinny-utils';
 
 /**
  * Test Commands:
@@ -32,7 +33,7 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
   if (pkps.length <= 0) {
     throw new Error('No PKPs found');
   } else {
-    console.log('✅ [testRelayer] /fetch-pkps-by-auth-method works');
+    console.log('✅ 1. [testRelayer] /fetch-pkps-by-auth-method works');
   }
 
   // -- test claims
@@ -104,5 +105,5 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     }
   });
 
-  log('✅ testRelayer');
+  log('✅ 2. [testRelayer] Claim works');
 };

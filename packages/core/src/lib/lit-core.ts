@@ -15,15 +15,17 @@ import {
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 import {
-  LIT_CHAINS,
   LIT_CURVE,
   LIT_ENDPOINT,
   LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORKS,
   LitNetwork,
+  RPC_URL_BY_NETWORK,
   StakingStates,
   version,
+  HTTP,
+  HTTPS,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -95,6 +97,8 @@ export type LitNodeClientConfigWithDefaults = Required<
     Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
   > & {
     bootstrapUrls: string[];
+  } & {
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
@@ -106,11 +110,13 @@ const BLOCKHASH_SYNC_INTERVAL = 30_000;
 const NETWORKS_REQUIRING_SEV: string[] = [
   LitNetwork.Habanero,
   LitNetwork.Manzano,
+  LitNetwork.DatilTest,
 ];
 
 // The only network we consider entirely static, and thus ignore EPOCH changes for, is Cayenne
 const NETWORKS_WITH_EPOCH_CHANGES: string[] = [
   LitNetwork.DatilDev,
+  LitNetwork.DatilTest,
   LitNetwork.Habanero,
   LitNetwork.Manzano,
   LitNetwork.Custom,
@@ -125,6 +131,7 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
+    nodeProtocol: null,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -228,7 +235,8 @@ export class LitCore {
       LitContracts.getValidators(
         this.config.litNetwork,
         this.config.contractContext,
-        this.config.rpcUrl
+        this.config.rpcUrl,
+        this.config.nodeProtocol
       ),
     ]);
 
@@ -431,10 +439,6 @@ export class LitCore {
    */
   getLatestBlockhash = async (): Promise<string> => {
     await this._syncBlockhash();
-    console.log(
-      `querying latest blockhash current value is `,
-      this.latestBlockhash
-    );
     if (!this.latestBlockhash) {
       throw new Error(
         `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
@@ -475,15 +479,14 @@ export class LitCore {
     if (!this.config.contractContext) {
       this.config.contractContext = await LitContracts.getContractAddresses(
         this.config.litNetwork,
-        new ethers.providers.JsonRpcProvider(
-          this.config.rpcUrl || LIT_CHAINS['lit'].rpcUrls[0]
+        new ethers.providers.StaticJsonRpcProvider(
+          this.config.rpcUrl || RPC_URL_BY_NETWORK[this.config.litNetwork]
         )
       );
     } else if (
       !this.config.contractContext.Staking &&
       !this.config.contractContext.resolverAddress
     ) {
-      console.log(this.config.contractContext);
       throw new Error(
         'The provided contractContext was missing the "Staking" contract`'
       );

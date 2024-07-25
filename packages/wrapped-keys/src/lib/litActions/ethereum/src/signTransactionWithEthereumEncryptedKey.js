@@ -63,7 +63,14 @@ const { removeSaltFromDecryptedKey } = require('../../utils');
     return;
   }
 
-  const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
+  let privateKey;
+  try {
+    privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
+    Lit.Actions.setResponse({ response: privateKey });
+  } catch (err) {
+    Lit.Actions.setResponse({ response: err.message });
+    return;
+  }
   const wallet = new ethers.Wallet(privateKey);
 
   let nonce;
