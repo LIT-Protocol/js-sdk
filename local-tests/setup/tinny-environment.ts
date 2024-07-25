@@ -18,6 +18,7 @@ import { TinnyPerson } from './tinny-person';
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
+import { toErrorWithMessage } from './tinny-utils';
 
 console.log('Loading env vars from dot config...');
 console.log('Done loading env', process.env['DEBUG']);
@@ -364,9 +365,18 @@ export class TinnyEnvironment {
       this._contractContext = context;
     }
 
-    await this.setupLitNodeClient();
-    await this.setupSuperCapacityDelegationAuthSig();
-    await this.setupBareEthAuthSig();
+    try {
+      await this.setupLitNodeClient();
+      await this.setupSuperCapacityDelegationAuthSig();
+      await this.setupBareEthAuthSig();
+    } catch (e) {
+      const err = toErrorWithMessage(e);
+      console.log(
+        `[𐬺🧪 Tinny Environment𐬺] Failed to init() tinny ${err.message}`
+      );
+      console.log(err.stack);
+      process.exit(1);
+    }
   }
 
   /**
