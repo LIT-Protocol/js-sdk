@@ -697,7 +697,7 @@ export const LIT_NETWORK = {
   DatilTest: 'datil-test',
   Custom: 'custom',
   Localhost: 'localhost',
-};
+} as const;
 
 /**
  * The type representing the keys of the LIT_NETWORK object.
