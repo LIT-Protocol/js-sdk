@@ -40,3 +40,20 @@ export const GENERAL_WORKER_URL_BY_NETWORK: {
   custom: 'https://apis.getlit.dev/cayenne/contracts',
   localhost: 'https://apis.getlit.dev/cayenne/contracts',
 };
+
+const CHRONICLE_FAUCET_URL = 'https://chronicle-faucet-app.vercel.app';
+const YELLOWSTONE_FAUCET_URL =
+  'https://chronicle-yellowstone-faucet.getlit.dev';
+
+/**
+ * URL mapping for faucet endpoints based on network.
+ */
+export const FAUCET_URL_BY_NETWORK: {
+  [key in Exclude<LIT_NETWORK_VALUES, 'custom' | 'localhost'>]: string;
+} = {
+  cayenne: CHRONICLE_FAUCET_URL,
+  manzano: CHRONICLE_FAUCET_URL,
+  habanero: CHRONICLE_FAUCET_URL,
+  'datil-dev': YELLOWSTONE_FAUCET_URL,
+  'datil-test': YELLOWSTONE_FAUCET_URL,
+};
