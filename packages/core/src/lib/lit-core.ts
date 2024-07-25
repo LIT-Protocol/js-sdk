@@ -860,7 +860,7 @@ export class LitCore {
     }
 
     try {
-      const epoch = this._stakingContract['epoch']();
+      const epoch = await this._stakingContract['epoch']();
 
       // when we transition to the new epoch, we don't store the start time.  but we
       // set the endTime to the current timestamp + epochLength.
