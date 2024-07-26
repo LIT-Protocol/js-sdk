@@ -15,7 +15,7 @@
  * @returns A 32-byte hex string representing the resource ID.
  * @throws Will throw an error if the input exceeds 64 characters.
  */
-export function formaPKPResource(resource: string): string {
+export function formatPKPResource(resource: string): string {
   // Remove the '0x' prefix if present
   let fixedResource = resource.startsWith('0x') ? resource.slice(2) : resource;
 
