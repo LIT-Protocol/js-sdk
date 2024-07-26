@@ -34,6 +34,8 @@ describe('Connections', () => {
     expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
       devEnv.litNodeClient?.config?.minNodeCount!
     );
+
+    devEnv.litNodeClient?.disconnect();
   });
 
   it('Testing network: Datil Dev', async () => {
@@ -47,6 +49,8 @@ describe('Connections', () => {
     expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
       devEnv.litNodeClient?.config?.minNodeCount!
     );
+
+    devEnv.litNodeClient?.disconnect();
   });
 
   it('Testing network: Cayenne', async () => {
@@ -60,5 +64,7 @@ describe('Connections', () => {
     expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
       devEnv.litNodeClient?.config?.minNodeCount!
     );
+
+    devEnv.litNodeClient?.disconnect();
   });
 });
