@@ -197,7 +197,6 @@ describe('Delegation', () => {
       appOwnersCapacityDelegationAuthSig
     );
 
-
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient?.pkpSign({
       sessionSigs: bobsSessionSigs!,

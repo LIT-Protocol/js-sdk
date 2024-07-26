@@ -88,7 +88,6 @@ describe('Wrapped Keys', () => {
     devEnv.litNodeClient?.disconnect();
   });
 
-
   it('Sign Tx Sol Encrypted Key', async () => {
     const alice = await devEnv.createRandomPerson();
 
@@ -98,7 +97,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
 
     const solanaKeypair = Keypair.generate();
     const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
@@ -164,7 +162,6 @@ describe('Wrapped Keys', () => {
     solanaTransaction.addSignature(solanaKeypair.publicKey, signatureBuffer);
 
     expect(solanaTransaction.verifySignatures()).toBeTruthy();
-
   });
 
   it('Sign Message Sol Encryption Key', async () => {
@@ -250,7 +247,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    expect(pkpAddress).toEqual(alicePkpAddress) 
+    expect(pkpAddress).toEqual(alicePkpAddress);
   });
 
   it('Generate Solana Wrapped Key', async () => {
@@ -355,7 +352,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
 
     const { decryptedPrivateKey } = await exportPrivateKey({
       pkpSessionSigs: pkpSessionSigsExport!,
@@ -563,7 +559,6 @@ describe('Wrapped Keys', () => {
         keyType: 'K256',
         memo: 'Test Key',
       });
-
     } catch (e: any) {
       if (e.message.includes('Invalid sessionSig: Expired')) {
         console.log('✅ THIS IS EXPECTED: ', e);
@@ -650,7 +645,6 @@ describe('Wrapped Keys', () => {
         )
       ) {
         console.log('✅ THIS IS EXPECTED: ', e);
-
       } else {
         throw e;
       }
@@ -681,7 +675,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    expect(pkpAddress).toEqual(alicePkpAddress); 
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -793,7 +787,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    expect(pkpAddress).toEqual(alicePkpAddress)
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsExport = await getPkpSessionSigs(
       devEnv,
@@ -809,7 +803,7 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    expect(decryptedPrivateKey).toEqual(privateKey); 
+    expect(decryptedPrivateKey).toEqual(privateKey);
   });
 
   it('Eth Sign Tx', async () => {
@@ -858,7 +852,7 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    expect(!ethers.utils.isHexString(signedTx)).toBeTruthy(); 
+    expect(!ethers.utils.isHexString(signedTx)).toBeTruthy();
   });
 
   it('Eth Sign Message', async () => {
@@ -870,7 +864,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
@@ -922,7 +915,7 @@ describe('Wrapped Keys', () => {
 
     expect(ethers.utils.isHexString(signatureBinary)).toBeTruthy();
 
-    expect(signatureBinary).toEqual(signature)
+    expect(signatureBinary).toEqual(signature);
   });
 
   it('Eth Sign Message Generate Key', async () => {
@@ -956,7 +949,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-
     const unsignedStringMessage = 'This is a test message';
 
     const signature = await signMessageWithEncryptedKey({
@@ -967,8 +959,7 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-
-    expect(ethers.utils.isHexString(signature)).toBeTruthy(); 
+    expect(ethers.utils.isHexString(signature)).toBeTruthy();
 
     const unsignedBinaryMessage = ethers.utils.arrayify(
       ethers.utils.toUtf8Bytes(unsignedStringMessage)
@@ -982,9 +973,9 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    expect(ethers.utils.isHexString(signature)).toBeTruthy(); 
+    expect(ethers.utils.isHexString(signature)).toBeTruthy();
 
-    expect(signatureBinary).toEqual(signature); 
+    expect(signatureBinary).toEqual(signature);
   });
 
   it('Eth Broadcast With Fetch Gas Params', async () => {
@@ -1045,8 +1036,6 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-
-
     // TODO: Get the raw input from the tx hash, convert it to UTF-8 and assert that it contains "Test transaction from Alice to bob"
     expect(ethers.utils.isHexString(signedTx)).toBeTruthy();
   });
@@ -1086,7 +1075,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
 
     const unsignedTransaction = getBaseTransactionForNetwork({
       network: devEnv.litNodeClient?.config.litNetwork!,
@@ -1152,7 +1140,7 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    expect(ethers.utils.isHexString(signedTx)).toBeTruthy(); 
+    expect(ethers.utils.isHexString(signedTx)).toBeTruthy();
   });
 });
 

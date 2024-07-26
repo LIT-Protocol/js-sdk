@@ -302,7 +302,6 @@ const ethTransaction = async (
     const recoveredAddr = ethers.utils.verifyMessage(message, signature);
     expect(signature.length).toEqual(132);
     expect(recoveredAddr).toEqual(alice.pkp?.ethAddress);
-
   } catch (e) {
     throw (new Error('❌ Error: ' + (e as Error).message).stack = (
       e as Error
@@ -555,8 +554,9 @@ const signTypedDataV1 = async (
       throw new Error('❌ signature should be 132 characters long');
     }
 
-    expect(recoveredAddr.toLowerCase()).toEqual(alice.pkp?.ethAddress.toLowerCase()); 
-
+    expect(recoveredAddr.toLowerCase()).toEqual(
+      alice.pkp?.ethAddress.toLowerCase()
+    );
   } catch (e) {
     throw new Error(`❌ ${(e as Error).toString()}`);
   } finally {
@@ -648,8 +648,9 @@ const signTypedDatav3 = async (
 
     expect(signature.length).toEqual(132);
 
-    expect(recoveredAddr.toLowerCase()).toEqual(alice.pkp?.ethAddress.toLowerCase()); 
-
+    expect(recoveredAddr.toLowerCase()).toEqual(
+      alice.pkp?.ethAddress.toLowerCase()
+    );
   } catch (e) {
     throw new Error(`❌ ${(e as Error).toString()}`);
   } finally {
@@ -741,8 +742,9 @@ const signTypedDatav4 = async (
 
     expect(signature.length).toEqual(132);
 
-    expect(recoveredAddr.toLowerCase()).toEqual(alice.pkp?.ethAddress.toLowerCase()); 
-
+    expect(recoveredAddr.toLowerCase()).toEqual(
+      alice.pkp?.ethAddress.toLowerCase()
+    );
   } catch (e) {
     throw new Error(`❌ ${(e as Error).toString()}`);
   } finally {
