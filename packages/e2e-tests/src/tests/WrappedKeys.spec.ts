@@ -83,6 +83,12 @@ describe('Wrapped Keys', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
+
+  afterAll(() => {
+    devEnv.litNodeClient?.disconnect();
+  });
+
+
   it('Sign Tx Sol Encrypted Key', async () => {
     const alice = await devEnv.createRandomPerson();
 
@@ -93,7 +99,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigs);
 
     const solanaKeypair = Keypair.generate();
     const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
@@ -108,11 +113,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -159,17 +160,11 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signedTx');
-    console.log(signedTx);
-
     const signatureBuffer = Buffer.from(signedTx, 'base64');
     solanaTransaction.addSignature(solanaKeypair.publicKey, signatureBuffer);
 
-    if (!solanaTransaction.verifySignatures()) {
-      throw new Error(
-        `Signature: ${signedTx} doesn't validate for the Solana transaction.`
-      );
-    }
+    expect(solanaTransaction.verifySignatures()).toBeTruthy();
+
   });
 
   it('Sign Message Sol Encryption Key', async () => {
@@ -181,8 +176,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const solanaKeypair = Keypair.generate();
     const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
@@ -210,8 +203,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigsSigning);
-
     const messageToSign = 'This is a test message';
 
     const signature = await signMessageWithEncryptedKey({
@@ -231,10 +222,7 @@ describe('Wrapped Keys', () => {
       solanaKeypair.publicKey.toBuffer()
     );
 
-    if (!signatureIsValidForPublicKey)
-      throw new Error(
-        `signature: ${signature} doesn't validate for the Solana public key: ${solanaKeypair.publicKey.toString()}`
-      );
+    expect(signatureIsValidForPublicKey).toBeTruthy();
   });
 
   it('Import Key', async () => {
@@ -262,11 +250,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress) 
   });
 
   it('Generate Solana Wrapped Key', async () => {
@@ -289,11 +273,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -301,8 +281,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigsSigning);
 
     const messageToSign = 'This is a test message';
 
@@ -344,11 +322,7 @@ describe('Wrapped Keys', () => {
     );
     const decryptedPublicKey = solanaKeyPair.publicKey;
 
-    if (decryptedPublicKey.toString() !== generatedPublicKey) {
-      throw new Error(
-        `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
-      );
-    }
+    expect(decryptedPublicKey.toString()).toEqual(generatedPublicKey);
   });
 
   it('Generate ETH Wrapped Key', async () => {
@@ -360,8 +334,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
@@ -384,7 +356,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigsExport);
 
     const { decryptedPrivateKey } = await exportPrivateKey({
       pkpSessionSigs: pkpSessionSigsExport!,
@@ -396,11 +367,7 @@ describe('Wrapped Keys', () => {
     const wallet = new ethers.Wallet(decryptedPrivateKey);
     const decryptedPublicKey = wallet.publicKey;
 
-    if (decryptedPublicKey !== generatedPublicKey) {
-      throw new Error(
-        `Decrypted decryptedPublicKey: ${decryptedPublicKey} doesn't match with the original generatedPublicKey: ${generatedPublicKey}`
-      );
-    }
+    expect(decryptedPublicKey).toEqual(generatedPublicKey);
   });
 
   it('Fail Import Wrapped Key Same Private Key', async () => {
@@ -412,8 +379,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const privateKey =
       '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB'; // Already exists in the DB
@@ -434,10 +399,6 @@ describe('Wrapped Keys', () => {
         )
       ) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailImportWrappedKeysWithSamePrivateKey is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -468,14 +429,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
-
-    console.log('✅ testFailImportWrappedKeysWithSamePkp');
-
+    expect(pkpAddress).toEqual(alicePkpAddress);
     try {
       const privateKey2 = randomSolanaPrivateKey();
 
@@ -494,10 +448,6 @@ describe('Wrapped Keys', () => {
         )
       ) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailImportWrappedKeysWithSamePkp is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -524,11 +474,6 @@ describe('Wrapped Keys', () => {
       });
     } catch (e: any) {
       if (e.message.includes('Expires too far in the future')) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailImportWrappedKeysWithMaxExpirySessionSig is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -552,16 +497,12 @@ describe('Wrapped Keys', () => {
         }
       }
 
-      console.log(tamperedPkpSessionSigs);
-
       return tamperedPkpSessionSigs;
     };
 
     const alice = await devEnv.createRandomPerson();
 
     const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
-
-    console.log(pkpSessionSigs);
 
     try {
       const privateKey = randomSolanaPrivateKey();
@@ -577,10 +518,6 @@ describe('Wrapped Keys', () => {
     } catch (e: any) {
       if (e.message.includes('bad public key size')) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailImportWrappedKeysWithInvalidSessionSig is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -618,7 +555,7 @@ describe('Wrapped Keys', () => {
     try {
       const privateKey = randomSolanaPrivateKey();
 
-      const res = await importPrivateKey({
+      await importPrivateKey({
         pkpSessionSigs,
         privateKey,
         litNodeClient: devEnv.litNodeClient!,
@@ -626,14 +563,10 @@ describe('Wrapped Keys', () => {
         keyType: 'K256',
         memo: 'Test Key',
       });
-      console.log(res);
+
     } catch (e: any) {
       if (e.message.includes('Invalid sessionSig: Expired')) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailImportWrappedKeysWithExpiredSessionSig is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -661,10 +594,6 @@ describe('Wrapped Keys', () => {
     } catch (e: any) {
       if (e.message.includes('SessionSig is not from a PKP')) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailImportWrappedKeysWithEoaSessionSig is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -693,11 +622,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -706,10 +631,8 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigsSigning);
-
     try {
-      const _res = await signTransactionWithEncryptedKey({
+      await signTransactionWithEncryptedKey({
         pkpSessionSigs: pkpSessionSigsSigning!,
         network: 'evm',
         unsignedTransaction: {
@@ -727,10 +650,7 @@ describe('Wrapped Keys', () => {
         )
       ) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam is expected to have an error'
-        );
+
       } else {
         throw e;
       }
@@ -761,11 +681,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress); 
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -773,8 +689,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigsSigning);
 
     const unsignedTransaction: EthereumLitTransaction = {
       ...getBaseTransactionForNetwork({
@@ -785,7 +699,7 @@ describe('Wrapped Keys', () => {
     };
 
     try {
-      const _res = await signTransactionWithEncryptedKey({
+      await signTransactionWithEncryptedKey({
         pkpSessionSigs: pkpSessionSigsSigning!,
         network: 'evm',
         unsignedTransaction,
@@ -800,10 +714,6 @@ describe('Wrapped Keys', () => {
         )
       ) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailEthereumSignTransactionWrappedKeyWithInvalidParam is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -831,7 +741,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-    console.log(pkpSessionSigsSigning);
 
     const unsignedTransaction = getBaseTransactionForNetwork({
       network: devEnv.litNodeClient?.config.litNetwork!,
@@ -839,7 +748,7 @@ describe('Wrapped Keys', () => {
     });
 
     try {
-      const _res = await devEnv.litNodeClient?.executeJs({
+      await devEnv.litNodeClient?.executeJs({
         sessionSigs: pkpSessionSigsSigning,
         ipfsId: LIT_ACTION_CID_REPOSITORY.signTransaction.evm,
         jsParams: {
@@ -856,10 +765,6 @@ describe('Wrapped Keys', () => {
         )
       ) {
         console.log('✅ THIS IS EXPECTED: ', e);
-        console.log(e.message);
-        console.log(
-          '✅ testFailEthereumSignTransactionWrappedKeyInvalidDecryption is expected to have an error'
-        );
       } else {
         throw e;
       }
@@ -876,8 +781,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigsImport);
-
     const privateKey = randomSolanaPrivateKey();
 
     const { pkpAddress, id } = await importPrivateKey({
@@ -890,11 +793,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress)
 
     const pkpSessionSigsExport = await getPkpSessionSigs(
       devEnv,
@@ -903,8 +802,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigsExport);
-
     const { decryptedPrivateKey } = await exportPrivateKey({
       pkpSessionSigs: pkpSessionSigsExport!,
       litNodeClient: devEnv.litNodeClient!,
@@ -912,11 +809,7 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    if (decryptedPrivateKey !== privateKey) {
-      throw new Error(
-        `Decrypted private key: ${decryptedPrivateKey} doesn't match with the original private key: ${privateKey}`
-      );
-    }
+    expect(decryptedPrivateKey).toEqual(privateKey); 
   });
 
   it('Eth Sign Tx', async () => {
@@ -928,8 +821,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
@@ -943,11 +834,8 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -955,8 +843,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigsSigning);
 
     const unsignedTransaction = getBaseTransactionForNetwork({
       network: devEnv.litNodeClient?.config.litNetwork!,
@@ -972,12 +858,7 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signedTx');
-    console.log(signedTx);
-
-    if (!ethers.utils.isHexString(signedTx)) {
-      throw new Error(`signedTx isn't hex: ${signedTx}`);
-    }
+    expect(!ethers.utils.isHexString(signedTx)).toBeTruthy(); 
   });
 
   it('Eth Sign Message', async () => {
@@ -990,7 +871,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigs);
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
@@ -1004,11 +884,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -1016,8 +892,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigsSigning);
 
     const unsignedStringMessage = 'This is a test message';
 
@@ -1032,9 +906,7 @@ describe('Wrapped Keys', () => {
     console.log('signature');
     console.log(signature);
 
-    if (!ethers.utils.isHexString(signature)) {
-      throw new Error(`signature isn't hex: ${signature}`);
-    }
+    expect(ethers.utils.isHexString(signature)).toBeTruthy();
 
     const unsignedBinaryMessage = ethers.utils.arrayify(
       ethers.utils.toUtf8Bytes(unsignedStringMessage)
@@ -1048,18 +920,9 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signatureBinary');
-    console.log(signatureBinary);
+    expect(ethers.utils.isHexString(signatureBinary)).toBeTruthy();
 
-    if (!ethers.utils.isHexString(signatureBinary)) {
-      throw new Error(`signatureBinary isn't hex: ${signatureBinary}`);
-    }
-
-    if (signatureBinary !== signature) {
-      throw new Error(
-        `signature: ${signature} doesn't match it's signatureBinary form: ${signatureBinary}`
-      );
-    }
+    expect(signatureBinary).toEqual(signature)
   });
 
   it('Eth Sign Message Generate Key', async () => {
@@ -1072,8 +935,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigs);
-
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
     const { pkpAddress, id } = await importPrivateKey({
@@ -1086,11 +947,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -1099,7 +956,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigsSigning);
 
     const unsignedStringMessage = 'This is a test message';
 
@@ -1111,12 +967,8 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signature');
-    console.log(signature);
 
-    if (!ethers.utils.isHexString(signature)) {
-      throw new Error(`signature isn't hex: ${signature}`);
-    }
+    expect(ethers.utils.isHexString(signature)).toBeTruthy(); 
 
     const unsignedBinaryMessage = ethers.utils.arrayify(
       ethers.utils.toUtf8Bytes(unsignedStringMessage)
@@ -1130,18 +982,9 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signatureBinary');
-    console.log(signatureBinary);
+    expect(ethers.utils.isHexString(signature)).toBeTruthy(); 
 
-    if (!ethers.utils.isHexString(signatureBinary)) {
-      throw new Error(`signatureBinary isn't hex: ${signatureBinary}`);
-    }
-
-    if (signatureBinary !== signature) {
-      throw new Error(
-        `signature: ${signature} doesn't match it's signatureBinary form: ${signatureBinary}`
-      );
-    }
+    expect(signatureBinary).toEqual(signature); 
   });
 
   it('Eth Broadcast With Fetch Gas Params', async () => {
@@ -1153,8 +996,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const wrappedKeysWallet = ethers.Wallet.createRandom();
     const wrappedKeysWalletPrivateKey = wrappedKeysWallet.privateKey;
@@ -1185,8 +1026,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigsSigning);
 
     const unsignedTransaction: EthereumLitTransaction = {
       toAddress: alice.wallet.address,
@@ -1206,13 +1045,10 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signedTx');
-    console.log(signedTx);
+
 
     // TODO: Get the raw input from the tx hash, convert it to UTF-8 and assert that it contains "Test transaction from Alice to bob"
-    if (!ethers.utils.isHexString(signedTx)) {
-      throw new Error(`signedTx isn't hex: ${signedTx}`);
-    }
+    expect(ethers.utils.isHexString(signedTx)).toBeTruthy();
   });
 
   it('Eth Broadcast Tx', async () => {
@@ -1224,8 +1060,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const wrappedKeysWallet = ethers.Wallet.createRandom();
     const wrappedKeysWalletPrivateKey = wrappedKeysWallet.privateKey;
@@ -1244,11 +1078,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -1257,7 +1087,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigsSigning);
 
     const unsignedTransaction = getBaseTransactionForNetwork({
       network: devEnv.litNodeClient?.config.litNetwork!,
@@ -1273,13 +1102,8 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signedTx');
-    console.log(signedTx);
-
     // TODO: Get the raw input from the tx hash, convert it to UTF-8 and assert that it contains "Test transaction from Alice to bob"
-    if (!ethers.utils.isHexString(signedTx)) {
-      throw new Error(`signedTx isn't hex: ${signedTx}`);
-    }
+    expect(ethers.utils.isHexString(signedTx)).toBeTruthy();
   });
 
   it('Eth Broadcast Tx Generated Key', async () => {
@@ -1291,8 +1115,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
@@ -1307,11 +1129,7 @@ describe('Wrapped Keys', () => {
     await devEnv.getFunds(generatedKeysWalletAddress, '0.005');
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
@@ -1319,8 +1137,6 @@ describe('Wrapped Keys', () => {
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigsSigning);
 
     const unsignedTransaction = getBaseTransactionForNetwork({
       network: devEnv.litNodeClient?.config.litNetwork!,
@@ -1336,12 +1152,7 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signedTx');
-    console.log(signedTx);
-
-    if (!ethers.utils.isHexString(signedTx)) {
-      throw new Error(`signedTx isn't hex: ${signedTx}`);
-    }
+    expect(ethers.utils.isHexString(signedTx)).toBeTruthy(); 
   });
 });
 
