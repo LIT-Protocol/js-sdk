@@ -19,8 +19,7 @@ import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 
-console.log('Loading env vars from dot config...');
-console.log('Done loading env', process.env['DEBUG']);
+console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 
