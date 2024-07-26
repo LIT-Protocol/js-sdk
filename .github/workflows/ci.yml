@@ -57,14 +57,18 @@ jobs:
       - name: Copy ENV File
         run: cp .env.ci .env
       - name: End Tests Connection
+        id: connection
         if: steps.build.outputs.exit_code == 0
         run: yarn test:local -t 'Connections'
       - name: End Tests Session Compaitiblity
-        if: steps.build.outputs.exit_code == 0
+        id: session
+        if: steps.connection.outputs.exit_code == 0
         run: yarn test:local -t 'SessionSigs'
       - name: End Tests PKP Ethers
-        if: steps.build.outputs.exit_code == 0
+        if: steps.session.outputs.exit_code == 0
+        id: pkp
         run: yarn test:local -t 'PKP Ethers'
-      - name: End Tests Session Compaitiblity
-        if: steps.build.outputs.exit_code == 0
+      - name: End Tests Lit Action Combiners
+        id: combiners
+        if: steps.pkp.outputs.exit_code == 0
         run: yarn test:local -t 'Lit Action Ops'
