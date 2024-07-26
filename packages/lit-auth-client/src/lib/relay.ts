@@ -2,11 +2,9 @@ import { ethers } from 'ethers';
 
 import {
   AuthMethodType,
-  LitNetwork,
-  RELAY_URL_CAYENNE,
-  RELAY_URL_HABANERO,
-  RELAY_URL_MANZANO,
-  RELAY_URL_DATIL_DEV,
+  LIT_NETWORK_VALUES,
+  LIT_NETWORK,
+  RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import {
   AuthMethod,
@@ -26,21 +24,13 @@ import { getAuthIdByAuthMethod, log } from './utils';
  */
 export class LitRelay implements IRelay {
   /** URL for Lit's relay server */
-  static getRelayUrl(litNetwork: LitNetwork): string {
-    const networkMap: Record<LitNetwork, string | undefined> = {
-      [LitNetwork.Cayenne]: RELAY_URL_CAYENNE,
-      [LitNetwork.Manzano]: RELAY_URL_MANZANO,
-      [LitNetwork.Habanero]: RELAY_URL_HABANERO,
-      [LitNetwork.DatilDev]: RELAY_URL_DATIL_DEV,
-      [LitNetwork.Custom]: undefined,
-    };
-
-    const relayUrl = networkMap[litNetwork];
-    if (!relayUrl) {
+  static getRelayUrl(litNetwork: LIT_NETWORK_VALUES): string {
+    const relayerUrl = RELAYER_URL_BY_NETWORK[litNetwork];
+    if (!relayerUrl) {
       throw new Error(`Relay URL not found for network ${litNetwork}`);
     }
 
-    return relayUrl;
+    return relayerUrl;
   }
 
   /**
@@ -68,7 +58,8 @@ export class LitRelay implements IRelay {
    * @param {string} [config.relayUrl] - URL for Lit's relay server. If not provided, will default to the Cayenne relay server.
    */
   constructor(config: LitRelayConfig) {
-    this.relayUrl = config.relayUrl || LitRelay.getRelayUrl(LitNetwork.Cayenne);
+    this.relayUrl =
+      config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.Cayenne);
     this.relayApiKey = config.relayApiKey || '';
     log("Lit's relay server URL:", this.relayUrl);
   }
