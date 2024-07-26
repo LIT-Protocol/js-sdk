@@ -23,6 +23,10 @@ describe('Delegation', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
+  afterAll(() => {
+    devEnv.litNodeClient?.disconnect();
+  });
+
   it('PKP to PKP delegation executeJS', async () => {
     const alice = await devEnv.createRandomPerson();
     const bob = await devEnv.createRandomPerson();
@@ -80,8 +84,6 @@ describe('Delegation', () => {
       },
     });
 
-    console.log('✅ res:', res);
-
     devEnv.releasePrivateKeyFromUser(alice);
     devEnv.releasePrivateKeyFromUser(bob);
 
@@ -130,18 +132,6 @@ describe('Delegation', () => {
     // -- printing out the recaps from the session sigs
     const bobsSingleSessionSig =
       bobsSessionSigs![devEnv.litNodeClient?.config?.bootstrapUrls[0]!];
-
-    console.log('bobsSingleSessionSig:', bobsSingleSessionSig);
-
-    const regex = /urn:recap:[\w+\/=]+/g;
-
-    const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
-
-    recaps.forEach((r) => {
-      const encodedRecap = r.split(':')[2];
-      const decodedRecap = Buffer.from(encodedRecap, 'base64').toString();
-      console.log(decodedRecap);
-    });
 
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient?.executeJs({
@@ -207,21 +197,6 @@ describe('Delegation', () => {
       appOwnersCapacityDelegationAuthSig
     );
 
-    // -- printing out the recaps from the session sigs
-    const bobsSingleSessionSig =
-      bobsSessionSigs![devEnv.litNodeClient?.config?.bootstrapUrls[0]!];
-
-    console.log('bobsSingleSessionSig:', bobsSingleSessionSig);
-
-    const regex = /urn:recap:[\w+\/=]+/g;
-
-    const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
-
-    recaps.forEach((r) => {
-      const encodedRecap = r.split(':')[2];
-      const decodedRecap = Buffer.from(encodedRecap, 'base64').toString();
-      console.log(decodedRecap);
-    });
 
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient?.pkpSign({

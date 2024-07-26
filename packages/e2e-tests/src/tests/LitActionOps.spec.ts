@@ -27,6 +27,10 @@ describe('Lit Action Ops', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
+  afterAll(() => {
+    devEnv.litNodeClient?.disconnect();
+  });
+
   it('Broadcast and Collect', async () => {
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
 

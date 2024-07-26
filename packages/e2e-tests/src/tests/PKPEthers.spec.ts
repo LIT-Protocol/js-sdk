@@ -303,7 +303,6 @@ const ethTransaction = async (
     expect(signature.length).toEqual(132);
     expect(recoveredAddr).toEqual(alice.pkp?.ethAddress);
 
-    console.log('✅ recoveredAddr:', recoveredAddr);
   } catch (e) {
     throw (new Error('❌ Error: ' + (e as Error).message).stack = (
       e as Error
@@ -556,14 +555,8 @@ const signTypedDataV1 = async (
       throw new Error('❌ signature should be 132 characters long');
     }
 
-    if (recoveredAddr.toLowerCase() !== alice.pkp?.ethAddress.toLowerCase()) {
-      throw new Error(
-        `❌ recoveredAddr ${recoveredAddr} should be ${alice.pkp?.ethAddress}`
-      );
-    }
+    expect(recoveredAddr.toLowerCase()).toEqual(alice.pkp?.ethAddress.toLowerCase()); 
 
-    console.log('signature: ', signature);
-    console.log('recoveredAddr: ', recoveredAddr);
   } catch (e) {
     throw new Error(`❌ ${(e as Error).toString()}`);
   } finally {
@@ -653,15 +646,10 @@ const signTypedDatav3 = async (
       version: SignTypedDataVersion.V3,
     });
 
-    if (signature.length !== 132) {
-      throw new Error('❌ signature should be 132 characters long');
-    }
+    expect(signature.length).toEqual(132);
 
-    if (recoveredAddr.toLowerCase() !== alice.pkp?.ethAddress.toLowerCase()) {
-      throw new Error(
-        `❌ recoveredAddr ${recoveredAddr} should be ${alice.pkp?.ethAddress}`
-      );
-    }
+    expect(recoveredAddr.toLowerCase()).toEqual(alice.pkp?.ethAddress.toLowerCase()); 
+
   } catch (e) {
     throw new Error(`❌ ${(e as Error).toString()}`);
   } finally {
@@ -751,15 +739,10 @@ const signTypedDatav4 = async (
       version: SignTypedDataVersion.V4,
     });
 
-    if (signature.length !== 132) {
-      throw new Error('❌ signature should be 132 characters long');
-    }
+    expect(signature.length).toEqual(132);
 
-    if (recoveredAddr.toLowerCase() !== alice.pkp?.ethAddress.toLowerCase()) {
-      throw new Error(
-        `❌ recoveredAddr ${recoveredAddr} should be ${alice.pkp?.ethAddress}`
-      );
-    }
+    expect(recoveredAddr.toLowerCase()).toEqual(alice.pkp?.ethAddress.toLowerCase()); 
+
   } catch (e) {
     throw new Error(`❌ ${(e as Error).toString()}`);
   } finally {

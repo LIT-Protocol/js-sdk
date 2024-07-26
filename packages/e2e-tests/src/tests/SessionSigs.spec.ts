@@ -47,6 +47,10 @@ describe('SessionSigs', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
+  afterAll(() => {
+    devEnv.litNodeClient?.disconnect();
+  });
+
   describe('DecryptString', () => {
     it('LitAction Session', async () => {
       await decryptString(devEnv, getLitActionSessionSigs);
