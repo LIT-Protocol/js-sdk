@@ -136,8 +136,8 @@ export abstract class BaseProvider {
     }
 
     const litContracts = new LitContracts({
-      // Using a random wallet, we just need to read
-      signer: ethers.Wallet.createRandom(),
+      randomPrivatekey: true,
+      network: this.litNodeClient.config.litNetwork,
     });
     try {
       await litContracts.connect();
