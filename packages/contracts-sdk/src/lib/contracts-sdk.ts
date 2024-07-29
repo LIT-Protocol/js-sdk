@@ -1080,19 +1080,22 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     let _gasLimit: BigNumberish | undefined = gasLimit;
     if (!_gasLimit) {
-      const txData = await this.pkpHelperContract.write.populateTransaction.mintNextAndAddAuthMethods(
-        2, // key type
-        [authMethod.authMethodType],
-        [_authMethodId],
-        [_pubkey],
-        [[..._scopes]],
-        true,
-        true,
-        { value: mintCost }
-      );
+      const txData =
+        await this.pkpHelperContract.write.populateTransaction.mintNextAndAddAuthMethods(
+          2, // key type
+          [authMethod.authMethodType],
+          [_authMethodId],
+          [_pubkey],
+          [[..._scopes]],
+          true,
+          true,
+          { value: mintCost }
+        );
 
-      const gasEstimation = await this.signer.estimateGas(txData);
-      const adjustedGasLimit = gasEstimation.mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE).div(100);
+      const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(txData);
+      const adjustedGasLimit = gasEstimation
+        .mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE)
+        .div(100);
 
       _gasLimit = adjustedGasLimit;
     }
@@ -1643,15 +1646,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         }
 
         this.log('...populating tx');
-        const tx =
-          await this.pkpNftContract.write.populateTransaction.mintNext(2, {
+        const tx = await this.pkpNftContract.write.populateTransaction.mintNext(
+          2,
+          {
             value: mintCost,
-            gasLimit: param?.gasLimit,
-          });
+          }
+        );
 
         if (!param?.gasLimit) {
-          const gasEstimation = await this.signer.estimateGas(tx);
-          const adjustedGasLimit = gasEstimation.mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE).div(100);
+          const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(tx);
+          const adjustedGasLimit = gasEstimation
+            .mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE)
+            .div(100);
           tx.gasLimit = adjustedGasLimit;
         }
 
@@ -2417,18 +2423,21 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         let _gasLimit: BigNumberish | undefined = gasLimit;
         if (!_gasLimit) {
-          const txData = await this.pkpHelperContract.write.populateTransaction.mintNextAndAddAuthMethods(
-            keyType,
-            permittedAuthMethodTypes,
-            permittedAuthMethodIds as BytesLike[],
-            permittedAuthMethodPubkeys as BytesLike[],
-            permittedAuthMethodScopes,
-            addPkpEthAddressAsPermittedAddress,
-            sendPkpToItself,
-            { value: mintCost }
-          );
-          const gasEstimation = await this.signer.estimateGas(txData);
-          const adjustedGasLimit = gasEstimation.mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE).div(100);
+          const txData =
+            await this.pkpHelperContract.write.populateTransaction.mintNextAndAddAuthMethods(
+              keyType,
+              permittedAuthMethodTypes,
+              permittedAuthMethodIds as BytesLike[],
+              permittedAuthMethodPubkeys as BytesLike[],
+              permittedAuthMethodScopes,
+              addPkpEthAddressAsPermittedAddress,
+              sendPkpToItself,
+              { value: mintCost }
+            );
+          const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(txData);
+          const adjustedGasLimit = gasEstimation
+            .mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE)
+            .div(100);
           _gasLimit = adjustedGasLimit;
         }
 
