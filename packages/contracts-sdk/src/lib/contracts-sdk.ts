@@ -1653,23 +1653,24 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           }
         );
 
-        if (!param?.gasLimit) {
+        let _gasLimit: BigNumberish | undefined = param?.gasLimit;
+        if (!_gasLimit) {
           const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(tx);
           const adjustedGasLimit = gasEstimation
             .mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE)
             .div(100);
-          tx.gasLimit = adjustedGasLimit;
+          _gasLimit = adjustedGasLimit;
         }
 
         this.log('tx:', tx);
 
-        this.log('...signing tx');
-        const signedTx = await this.signer.signTransaction(tx);
-        this.log('signedTx:', signedTx);
-
-        this.log('sending signed tx...');
-        const sentTx = await this.signer.sendTransaction(
-          signedTx as ethers.providers.TransactionRequest
+        this.log('...signing and sending tx');
+        const sentTx = await this.pkpNftContract.write.mintNext(
+          2,
+          {
+            value: mintCost,
+            gasLimit: _gasLimit,
+          }
         );
 
         this.log('sentTx:', sentTx);
