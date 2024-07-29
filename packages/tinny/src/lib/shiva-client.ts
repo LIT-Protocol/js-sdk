@@ -101,7 +101,7 @@ export class TestnetClient {
         `http://${testNetConfig.rpcUrl}`
       ),
       environment: 0, // test deployment uses env value 0 in test common
-    }
+    };
 
     return networkContext;
   }
