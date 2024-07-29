@@ -72,20 +72,17 @@ try {
 describe('Wrapped Keys', () => {
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    devEnv = new TinnyEnvironment();
-    await devEnv.init();
-  });
-
-  afterAll(async () => {
-    await devEnv.litNodeClient?.disconnect();
+    //@ts-ignore
+    devEnv = global.devEnv;
   });
 
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  afterAll(() => {
-    devEnv.litNodeClient?.disconnect();
+  afterAll(async () => {
+    //@ts-ignore
+    await global.devEnv.litNodeClient?.disconnect();
   });
 
   it('Sign Tx Sol Encrypted Key', async () => {
