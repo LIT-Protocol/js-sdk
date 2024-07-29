@@ -21,7 +21,9 @@ import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 
 console.log('Loading env vars from dot config...');
+import 'dotenv/config';
 console.log('Done loading env', process.env['DEBUG']);
+
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 

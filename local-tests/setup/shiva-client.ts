@@ -90,13 +90,51 @@ export class TestnetClient {
     }
 
     const networkContext = {
-      abi: JSON.parse(contractResolverAbi),
-      resolverAddress: contractResolverAddress,
-      provider: new ethers.providers.StaticJsonRpcProvider(
-        `http://${testNetConfig.rpcUrl}`
-      ),
-      environment: 0, // test deployment uses env value 0 in test common
+      Staking: {
+        name: 'Staking',
+        address: testNetConfig.contractAddresses.staking,
+        abi: JSON.parse(testNetConfig.contractAbis.staking),
+      },
+      Allowlist: {},
+      RateLimitNFT: {
+        name: 'RateLimitNFT',
+        abi: JSON.parse(testNetConfig.contractAbis.rateLimitNft),
+        address: testNetConfig.contractAddresses.rateLimitNft,
+      },
+      PubkeyRouter: {
+        name: 'PubkeyRouter',
+        abi: JSON.parse(testNetConfig.contractAbis.pubkeyRouter),
+        address: testNetConfig.contractAddresses.pubkeyRouter,
+      },
+      PKPHelper: {
+        name: 'PKPHelper',
+        abi: JSON.parse(testNetConfig.contractAbis.pkpHelper),
+        address: testNetConfig.contractAddresses.pkpHelper,
+      },
+      PKPPermissions: {
+        name: 'PKPPermissions',
+        abi: JSON.parse(testNetConfig.contractAbis.pkpPermissions),
+        address: testNetConfig.contractAddresses.pkpPermissions,
+      },
+      PKPNFTMetadata: {},
+      PKPNFT: {
+        name: 'PKPNFT',
+        address: testNetConfig.contractAddresses.pkpnft,
+        abi: JSON.parse(testNetConfig.contractAbis.pkpnft),
+      },
+      Multisender: {},
+      LITToken: {
+        name: 'LITToken',
+        abi: JSON.parse(testNetConfig.contractAbis.litToken),
+        address: testNetConfig.contractAddresses.litToken,
+      },
+      StakingBalances: {
+        name: 'StakingBalances',
+        abi: JSON.parse(testNetConfig.contractAbis.stakingBalances),
+        address: testNetConfig.contractAddresses.stakingBalances,
+      },
     };
+
     return networkContext;
   }
 
@@ -215,11 +253,9 @@ export class ShivaClient {
       try {
         existingTestnetResp = await fetch(
           this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets',
-          //@ts-ignore
-          { agent: agentSelector }
         );
       } catch (e) {
-        console.error('error while fetching testnets: ', error);
+        console.error('error while fetching testnets: ', e);
         retryCount += 1;
         await new Promise((res) => setTimeout(res, 1000));
       }
