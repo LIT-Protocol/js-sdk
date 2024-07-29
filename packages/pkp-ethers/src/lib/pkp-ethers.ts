@@ -35,7 +35,7 @@ import {
 import { Wordlist } from '@ethersproject/wordlists';
 import { ethers, version, Wallet } from 'ethers';
 
-import { LIT_CHAINS } from '@lit-protocol/constants';
+import { RPC_URL_BY_NETWORK } from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
@@ -67,7 +67,7 @@ export class PKPEthersWallet
   readonly address!: string;
   readonly _isSigner!: boolean;
 
-  rpcProvider: ethers.providers.JsonRpcProvider;
+  rpcProvider: ethers.providers.StaticJsonRpcProvider;
   provider!: Provider;
 
   // -- manual tx settings --
@@ -83,10 +83,16 @@ export class PKPEthersWallet
   constructor(prop: PKPEthersWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
 
-    this.rpcProvider = new ethers.providers.JsonRpcProvider(
-      prop.rpc ?? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]
-    );
+    const rpcUrl =
+      prop.rpc || RPC_URL_BY_NETWORK[prop.litNodeClient.config.litNetwork];
 
+    if (!rpcUrl) {
+      throw new Error(
+        `No RPC URL provided, and none could be found for ${prop.litNodeClient.config.litNetwork}`
+      );
+    }
+
+    this.rpcProvider = new ethers.providers.StaticJsonRpcProvider(rpcUrl);
     this.provider = prop.provider ?? this.rpcProvider;
 
     defineReadOnly(this, '_isSigner', true);
@@ -103,7 +109,7 @@ export class PKPEthersWallet
   };
 
   setRpc = async (rpc: string): Promise<void> => {
-    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpc);
+    this.rpcProvider = new ethers.providers.StaticJsonRpcProvider(rpc);
   };
 
   handleRequest = async <T = ETHSignature | ETHTxRes>(

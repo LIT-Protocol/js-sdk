@@ -6,12 +6,13 @@ export enum LIT_TESTNET {
   MANZANO = 'manzano',
   CAYENNE = 'cayenne',
   DATIL_DEV = 'datil-dev',
+  DATIL_TEST = 'datil-test',
 }
 
 export enum LIT_RPC {
   LOCAL_ANVIL = 'http://127.0.0.1:8545',
   CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
-  VESUVIUS = 'https://vesuvius-rpc.litprotocol.com',
+  YELLOWSTONE = 'https://yellowstone-rpc.litprotocol.com',
 }
 
 /**
@@ -21,14 +22,23 @@ export const RPC_MAP = {
   [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
   [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICLE,
   [LIT_TESTNET.CAYENNE]: LIT_RPC.CHRONICLE,
-  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.VESUVIUS,
+  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.YELLOWSTONE,
+  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.YELLOWSTONE,
 };
 
+/**
+ * Represents the configuration options for the process environment.
+ */
 export interface ProcessEnvs {
   /**
    * Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.
    */
   MAX_ATTEMPTS: number;
+
+  /**
+   * The maximum number of milliseconds to wait for a test to complete.
+   */
+  TEST_TIMEOUT: number;
 
   /**
    * The network to use for testing. This can be one of the following:
@@ -74,7 +84,7 @@ export interface ProcessEnvs {
    * The URL of Lit RPC server.
    * - If it's running locally on Anvil, it should be 'http://127.0.0.1:8545'
    * - If it's running on Chronicle, it should be 'https://chain-rpc.litprotocol.com/http'
-   * - If it's running on Vesuvius, it should be 'https://vesuvius-rpc.litprotocol.com'
+   * - If it's running on Yellowstone, it should be 'https://yellowstone-rpc.litprotocol.com'
    */
   LIT_RPC_URL: string;
 
