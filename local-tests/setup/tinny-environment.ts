@@ -18,6 +18,7 @@ import { TinnyPerson } from './tinny-person';
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
+import { toErrorWithMessage } from './tinny-utils';
 
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
@@ -342,30 +343,42 @@ export class TinnyEnvironment {
    * Init
    */
   async init() {
-    if (this.processEnvs.NO_SETUP) {
-      console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
-      return;
-    }
-    if (this.network === LIT_TESTNET.LOCALCHAIN && this.processEnvs.USE_SHIVA) {
-      this.testnet = await this._shivaClient.startTestnetManager();
-      // wait for the testnet to be active before we start the tests.
-      let state = await this.testnet.pollTestnetForActive();
-      if (state === `UNKNOWN`) {
-        console.log(
-          'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
-        );
-        throw new Error(`Error while creating testnet, aborting test run`);
+    try {
+      if (this.processEnvs.NO_SETUP) {
+        console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
+        return;
+      }
+      if (
+        this.network === LIT_TESTNET.LOCALCHAIN &&
+        this.processEnvs.USE_SHIVA
+      ) {
+        this.testnet = await this._shivaClient.startTestnetManager();
+        // wait for the testnet to be active before we start the tests.
+        let state = await this.testnet.pollTestnetForActive();
+        if (state === `UNKNOWN`) {
+          console.log(
+            'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
+          );
+          throw new Error(`Error while creating testnet, aborting test run`);
+        }
+
+        await this.testnet.getTestnetConfig();
+      } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
+        const context = await import('./networkContext.json');
+        this._contractContext = context;
       }
 
-      await this.testnet.getTestnetConfig();
-    } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const context = await import('./networkContext.json');
-      this._contractContext = context;
+      await this.setupLitNodeClient();
+      await this.setupSuperCapacityDelegationAuthSig();
+      await this.setupBareEthAuthSig();
+    } catch (e) {
+      const err = toErrorWithMessage(e);
+      console.log(
+        `[𐬺🧪 Tinny Environment𐬺] Failed to init() tinny ${err.message}`
+      );
+      console.log(err.stack);
+      process.exit(1);
     }
-
-    await this.setupLitNodeClient();
-    await this.setupSuperCapacityDelegationAuthSig();
-    await this.setupBareEthAuthSig();
   }
 
   /**
