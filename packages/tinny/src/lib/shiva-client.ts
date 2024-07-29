@@ -84,57 +84,25 @@ export class TestnetClient {
     return this._info;
   }
 
-  get ContractContext(): LitContractContext | undefined {
+  get ContractContext(): LitContractResolverContext | undefined {
     const testNetConfig = this.Info;
     if (!testNetConfig) {
       return undefined;
     }
 
+    const contractResolverAbi: string = testNetConfig.contractResolverAbi;
+    const contractResolverAddress =
+      testNetConfig.contractAddresses[`contractResolver`];
+
     const networkContext = {
-      Staking: {
-        name: 'Staking',
-        address: testNetConfig.contractAddresses.staking,
-        //abi: JSON.parse(testNetConfig.contractAbis.staking),
-      },
-      Allowlist: {},
-      RateLimitNFT: {
-        name: 'RateLimitNFT',
-        //abi: JSON.parse(testNetConfig.contractAbis.rateLimitNft),
-        address: testNetConfig.contractAddresses.rateLimitNft,
-      },
-      PubkeyRouter: {
-        name: 'PubkeyRouter',
-        //abi: JSON.parse(testNetConfig.contractAbis.pubkeyRouter),
-        address: testNetConfig.contractAddresses.pubkeyRouter,
-      },
-      PKPHelper: {
-        name: 'PKPHelper',
-        //abi: JSON.parse(testNetConfig.contractAbis.pkpHelper),
-        address: testNetConfig.contractAddresses.pkpHelper,
-      },
-      PKPPermissions: {
-        name: 'PKPPermissions',
-        //abi: JSON.parse(testNetConfig.contractAbis.pkpPermissions),
-        address: testNetConfig.contractAddresses.pkpPermissions,
-      },
-      PKPNFTMetadata: {},
-      PKPNFT: {
-        name: 'PKPNFT',
-        address: testNetConfig.contractAddresses.pkpnft,
-        //abi: JSON.parse(testNetConfig.contractAbis.pkpnft),
-      },
-      Multisender: {},
-      LITToken: {
-        name: 'LITToken',
-        //abi: JSON.parse(testNetConfig.contractAbis.litToken),
-        address: testNetConfig.contractAddresses.litToken,
-      },
-      StakingBalances: {
-        name: 'StakingBalances',
-        //abi: JSON.parse(testNetConfig.contractAbis.stakingBalances),
-        address: testNetConfig.contractAddresses.stakingBalances,
-      },
-    };
+      abi: JSON.parse(contractResolverAbi),
+      resolverAddress: contractResolverAddress,
+      provider: new ethers.providers.StaticJsonRpcProvider(
+        `http://${testNetConfig.rpcUrl}`
+      ),
+      environment: 0, // test deployment uses env value 0 in test common
+    }
+
     return networkContext;
   }
 
@@ -190,7 +158,7 @@ export class TestnetClient {
         this._id
     );
 
-    let transitionEpochAndWaitRes = _processTestnetResponse<boolean>(res);
+    const transitionEpochAndWaitRes = _processTestnetResponse<boolean>(res);
 
     return transitionEpochAndWaitRes;
   }
@@ -269,7 +237,7 @@ export class ShivaClient {
         'lit action server binary path: ',
         this.processEnvs.LIT_ACTION_BINARY_PATH
       );
-      let body: Partial<TestNetCreateRequest> = createReq ?? {
+      const body: Partial<TestNetCreateRequest> = createReq ?? {
         nodeCount: 3,
         pollingInterval: '2000',
         epochLength: 100,
@@ -313,7 +281,7 @@ async function _processTestnetResponse<T>(
   try {
     createTestnet = (await response.json()) as TestNetResponse<T>;
   } catch (err) {
-    let message = await response.text();
+    const message = await response.text();
     throw new Error('Error while performing testnet request: ' + message);
   }
 
