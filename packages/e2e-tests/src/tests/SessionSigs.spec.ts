@@ -66,39 +66,39 @@ describe('SessionSigs', () => {
     });
   });
 
-  describe('Claim Keys', () => {
+  describe('Claim Key', () => {
     it('LitAction Session', async () => {
-      await executeJsCLaimKeys(devEnv, getLitActionSessionSigs);
+      await executeJsClaimKey(devEnv, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await executeJsCLaimKeys(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await executeJsClaimKey(devEnv, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await executeJsCLaimKeys(devEnv, getEoaSessionSigs);
+      await executeJsClaimKey(devEnv, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await executeJsCLaimKeys(devEnv, getPkpSessionSigs);
+      await executeJsClaimKey(devEnv, getPkpSessionSigs);
     });
   });
 
-  describe('Claim Keys Multiple', () => {
+  describe('Claim Key Multiple', () => {
     it('LitAction Session', async () => {
-      await executeJsCLaimKey(devEnv, getLitActionSessionSigs);
+      await executeJsClaimKeys(devEnv, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await executeJsCLaimKey(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await executeJsClaimKeys(devEnv, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await executeJsCLaimKey(devEnv, getEoaSessionSigs);
+      await executeJsClaimKeys(devEnv, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await executeJsCLaimKey(devEnv, getPkpSessionSigs);
+      await executeJsClaimKeys(devEnv, getPkpSessionSigs);
     });
   });
 
@@ -137,6 +137,7 @@ describe('SessionSigs', () => {
       await pkpSign(devEnv, getPkpSessionSigs);
     });
   });
+
   describe('ExecuteJS Signing', () => {
     it('LitAction Session', async () => {
       await pkpSign(devEnv, getLitActionSessionSigs);
@@ -155,7 +156,7 @@ describe('SessionSigs', () => {
     });
   });
 
-  describe('ExecteJS Signing Parallel', () => {
+  describe('ExecuteJS Signing Parallel', () => {
     it('LitAction Session', async () => {
       await executeJsSigningParallel(devEnv, getLitActionSessionSigs);
     });
@@ -174,6 +175,71 @@ describe('SessionSigs', () => {
     it('PKP Session', async () => {
       await executeJsSigningParallel(devEnv, getPkpSessionSigs);
     });
+  });
+
+  describe("Broadcast And Collect", () => {
+    it('LitAction Session', async () => {
+      await broadcastAndCollect(devEnv, getLitActionSessionSigs);
+    });
+
+    it('LitAction IPFS Session', async () => {
+      await broadcastAndCollect(
+        devEnv,
+        getLitActionSessionSigsUsingIpfsId
+      );
+    });
+
+    it('EOA Wallet', async () => {
+      await broadcastAndCollect(devEnv, getEoaSessionSigs);
+    });
+
+    it('PKP Session', async () => {
+      await broadcastAndCollect(devEnv, getPkpSessionSigs);
+    }); 
+  });
+
+
+
+  describe("Decrypt And Combine", () => {
+    it('LitAction Session', async () => {
+      await decryptAndCombine(devEnv, getLitActionSessionSigs);
+    });
+
+    it('LitAction IPFS Session', async () => {
+      await decryptAndCombine(
+        devEnv,
+        getLitActionSessionSigsUsingIpfsId
+      );
+    });
+
+    it('EOA Wallet', async () => {
+      await decryptAndCombine(devEnv, getEoaSessionSigs);
+    });
+
+    it('PKP Session', async () => {
+      await decryptAndCombine(devEnv, getPkpSessionSigs);
+    });      
+  });
+
+  describe("Sign And Combine ECDSA", () => {
+    it('LitAction Session', async () => {
+      await signAndCombine(devEnv, getLitActionSessionSigs);
+    });
+
+    it('LitAction IPFS Session', async () => {
+      await signAndCombine(
+        devEnv,
+        getLitActionSessionSigsUsingIpfsId
+      );
+    });
+
+    it('EOA Wallet', async () => {
+      await signAndCombine(devEnv, getEoaSessionSigs);
+    });
+
+    it('PKP Session', async () => {
+      await signAndCombine(devEnv, getPkpSessionSigs);
+    }); 
   });
 
   it('Invalid lit action Custom Auth SessionSigs', async () => {
@@ -221,7 +287,7 @@ describe('SessionSigs', () => {
   });
 });
 
-const executeJsCLaimKeys = async (
+const executeJsClaimKeys = async (
   devEnv: TinnyEnvironment,
   generator: (
     devEnv: TinnyEnvironment,
@@ -321,7 +387,7 @@ const executeJsCLaimKeys = async (
   });
 };
 
-const executeJsCLaimKey = async (
+const executeJsClaimKey = async (
   devEnv: TinnyEnvironment,
   generator: (
     devEnv: TinnyEnvironment,
@@ -364,25 +430,7 @@ const executeJsCLaimKey = async (
   //         }
   //       ],
   //       derivedKeyId: "0961c21c8a46c4992003a7b7af9449c15f772a269633ae3242f6ed146708a819",
-  //     },
-  //     foo: {
-  //       signatures: [
-  //         {
-  //           r: "0xc39c073d69c8878bf06c813af9d090b41e15319abc9677e20f07085c96451e98",
-  //           s: "0x6ef6a3d4b365119f4a9613a89fd57af01c4a350a20222935581be306b4c8aba4",
-  //           v: 27,
-  //         }, {
-  //           r: "0xa2473911de4b252349cadde340de121ce3195929cd1ebb4c717f3d9d65c67988",
-  //           s: "0x597a45d27a3100fa0bb144644f6bdec62c8a827f35427814cea64f8d3d9a9fa8",
-  //           v: 27,
-  //         }, {
-  //           r: "0x97c393fb1f733b946bfaafdbb13c46192f4cf5ad2b2a9fcf9ff0355a7a2dc5fa",
-  //           s: "0x152737c1b0aba904182bb5ac70e3a99ba4301b631df55bd21b91d705eb5ef4d2",
-  //           v: 27,
-  //         }
-  //       ],
-  //       derivedKeyId: "7698c828a5e4ae6dd6f98ae72fcb5a96bc83f53fa6a09c614e28ceab8198d5ca",
-  //     },
+  //     }
   //   },
   //   signatures: {},
   //   decryptions: [],
@@ -626,4 +674,160 @@ const decryptString = async (
   devEnv.releasePrivateKeyFromUser(alice);
 
   expect(decryptRes).toEqual('Hello world');
+};
+
+
+const broadcastAndCollect = async (
+  devEnv: TinnyEnvironment,
+  generator: (
+    devEnv: TinnyEnvironment,
+    person: TinnyPerson,
+    resources?: LitResourceAbilityRequest[]
+  ) => Promise<SessionSigsMap | undefined>) => {
+    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+
+    const alice = await devEnv.createRandomPerson();
+    // set access control conditions for encrypting and decrypting
+    const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+      userAddress: alice.authMethodOwnedPkp?.ethAddress!,
+    });
+
+    const litActionSessionSigs = await generator(devEnv, alice);
+
+    const res = await devEnv.litNodeClient?.executeJs({
+      sessionSigs: litActionSessionSigs,
+      code: `(async () => {
+              let rand = Math.floor(Math.random() * 100);
+              const resp = await Lit.Actions.broadcastAndCollect({
+                  name: "temperature",
+                  value: rand.toString(),
+              });
+              Lit.Actions.setResponse({
+                  response: JSON.stringify(resp)
+              });
+            })();`,
+      jsParams: {},
+    });
+    devEnv.releasePrivateKeyFromUser(alice);
+
+    const response = res?.response;
+    expect(response).toBeDefined();    
+};
+
+
+const decryptAndCombine = async (
+  devEnv: TinnyEnvironment,
+  generator: (
+    devEnv: TinnyEnvironment,
+    person: TinnyPerson,
+    resources?: LitResourceAbilityRequest[]
+  ) => Promise<SessionSigsMap | undefined>) => {
+  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+
+  const alice = await devEnv.createRandomPerson();
+  // set access control conditions for encrypting and decrypting
+  const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+    userAddress: generator.name === "getEoaSessionSigs" ? alice.authSig?.address! : alice.authMethodOwnedPkp?.ethAddress!,
+  });
+
+  const litActionSessionSigs = await generator(devEnv, alice);
+
+  const encryptRes = await LitJsSdk.encryptString(
+    {
+      accessControlConditions: accs,
+      dataToEncrypt: 'Hello world',
+    },
+    devEnv.litNodeClient as unknown as ILitNodeClient
+  );
+
+  // -- Expected output:
+  // {
+  //   ciphertext: "pSP1Rq4xdyLBzSghZ3DtTtHp2UL7/z45U2JDOQho/WXjd2ntr4IS8BJfqJ7TC2U4CmktrvbVT3edoXJgFqsE7vy9uNrBUyUSTuUdHLfDVMIgh4a7fqMxsdQdkWZjHign3JOaVBihtOjAF5VthVena28D",
+  //   dataToEncryptHash: "64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c",
+  // }
+
+  // -- assertions
+  if (!encryptRes.ciphertext) {
+    throw new Error(`Expected "ciphertext" in encryptRes`);
+  }
+
+  if (!encryptRes.dataToEncryptHash) {
+    throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
+  }
+
+  const res = await devEnv.litNodeClient?.executeJs({
+    sessionSigs: litActionSessionSigs,
+    code: `(async () => {
+            const resp = await Lit.Actions.decryptAndCombine({
+              accessControlConditions,
+              ciphertext,
+              dataToEncryptHash,
+              authSig: null,
+              chain: 'ethereum',
+            });
+            Lit.Actions.setResponse({
+                response: resp
+            });
+          })();`,
+    jsParams: {
+      accessControlConditions: accs,
+      dataToEncryptHash: encryptRes.dataToEncryptHash,
+      ciphertext: encryptRes.ciphertext,
+    },
+  });
+
+  devEnv.releasePrivateKeyFromUser(alice);
+
+  expect(res?.response).toEqual('Hello world');
+}
+
+const signAndCombine = async (
+  devEnv: TinnyEnvironment,
+  generator: (
+    devEnv: TinnyEnvironment,
+    person: TinnyPerson,
+    resources?: LitResourceAbilityRequest[]
+  ) => Promise<SessionSigsMap | undefined>) => {
+  const alice = await devEnv.createRandomPerson();
+
+  const litActionSessionSigs = await generator(devEnv, alice);
+
+  const res = await devEnv.litNodeClient?.executeJs({
+    sessionSigs: litActionSessionSigs,
+    code: `(async () => {
+            const sigShare = await LitActions.signAndCombineEcdsa({
+              toSign: dataToSign,
+              publicKey,
+              sigName: "sig",
+            });
+            Lit.Actions.setResponse({
+                response: sigShare
+            });
+          })();`,
+    jsParams: {
+      dataToSign: alice.loveLetter,
+      publicKey: alice.pkp?.publicKey,
+    },
+  });
+
+  devEnv.releasePrivateKeyFromUser(alice);
+
+
+  /**
+    Response format
+    {
+        "success": true,
+        "signedData": {},
+        "decryptedData": {},
+        "claimData": {},
+        "response": "{\"r\":\"026eede14267ca76064a7e22dbe6f9e44d786c7b5917b7d023f45ee4e84ce1ea47\",\"s\":\"22a6048bcb88d724d45bdb6161fefd151483f41d592d167e5c33f42e9fe6dac6\",\"v\":0}",
+        "logs": ""
+    }
+  */
+
+  expect(res?.response).toBeDefined();
+  const sig = JSON.parse(res?.response as string);
+  expect(sig.r).toBeDefined();
+  expect(sig.s).toBeDefined();
+  expect(sig.v).toBeDefined();
 };
