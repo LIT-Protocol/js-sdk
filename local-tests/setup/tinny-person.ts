@@ -51,6 +51,10 @@ export class TinnyPerson {
     this.wallet = new ethers.Wallet(privateKey, this.provider);
   }
 
+  async getAuthMethodId(): Promise<string> {
+    return EthWalletProvider.authMethodId(this.authMethod);
+  }
+
   /**
    * FIXME: Enabling this is causing the test to fail
    * Switches the current wallet to a new funding wallet by creating a new funding wallet,
