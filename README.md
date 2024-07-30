@@ -131,14 +131,14 @@ yarn build
 
 ## Run unit tests
 
-```
+```sh
 yarn test:unit
 ```
 
 ## Run E2E tests in nodejs
 
-```
-yarn test:local
+```sh
+yarn test:e2e
 ```
 
 # Advanced
