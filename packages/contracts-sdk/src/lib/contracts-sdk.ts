@@ -1091,7 +1091,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           true,
           { value: mintCost }
         );
-      _gasLimit = await this.estimateGasWithMargin(txData);
+      _gasLimit = await this._estimateGasWithMargin(txData);
     }
 
     // -- start minting
@@ -1647,7 +1647,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
             });
-          _gasLimit = await this.estimateGasWithMargin(tx);
+          _gasLimit = await this._estimateGasWithMargin(tx);
         }
 
         this.log('...signing and sending tx');
@@ -2418,7 +2418,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
               sendPkpToItself,
               { value: mintCost }
             );
-          _gasLimit = await this.estimateGasWithMargin(txData);
+          _gasLimit = await this._estimateGasWithMargin(txData);
         }
 
         const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
@@ -2464,7 +2464,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     },
   };
 
-  private estimateGasWithMargin = async (
+  private _estimateGasWithMargin = async (
     txData: ethers.PopulatedTransaction,
     porcentualIncrease: number = GAS_LIMIT_INCREASE_PERCENTAGE
   ) => {
