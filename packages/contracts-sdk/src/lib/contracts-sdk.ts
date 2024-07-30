@@ -1092,7 +1092,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           { value: mintCost }
         );
 
-      const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(txData);
+      const gasEstimation =
+        await this.pkpNftContract.write.provider.estimateGas(txData);
       const adjustedGasLimit = gasEstimation
         .mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE)
         .div(100);
@@ -1655,7 +1656,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         let _gasLimit: BigNumberish | undefined = param?.gasLimit;
         if (!_gasLimit) {
-          const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(tx);
+          const gasEstimation =
+            await this.pkpNftContract.write.provider.estimateGas(tx);
           const adjustedGasLimit = gasEstimation
             .mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE)
             .div(100);
@@ -1665,13 +1667,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         this.log('tx:', tx);
 
         this.log('...signing and sending tx');
-        const sentTx = await this.pkpNftContract.write.mintNext(
-          2,
-          {
-            value: mintCost,
-            gasLimit: _gasLimit,
-          }
-        );
+        const sentTx = await this.pkpNftContract.write.mintNext(2, {
+          value: mintCost,
+          gasLimit: _gasLimit,
+        });
 
         this.log('sentTx:', sentTx);
 
@@ -2435,7 +2434,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
               sendPkpToItself,
               { value: mintCost }
             );
-          const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(txData);
+          const gasEstimation =
+            await this.pkpNftContract.write.provider.estimateGas(txData);
           const adjustedGasLimit = gasEstimation
             .mul(100 + GAS_LIMIT_INCREASE_PERCENTAGE)
             .div(100);
