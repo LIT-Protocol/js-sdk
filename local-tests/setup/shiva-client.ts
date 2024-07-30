@@ -224,7 +224,7 @@ export class ShivaClient {
           { agent: agentSelector }
         );
       } catch (e) {
-        console.error('error while fetching testnets: ', error);
+        console.error('error while fetching testnets: ', e);
         retryCount += 1;
         await new Promise((res) => setTimeout(res, 1000));
       }
