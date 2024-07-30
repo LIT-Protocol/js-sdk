@@ -2,7 +2,7 @@
  * Taken from https://github.com/nrwl/nx/blob/master/packages/jest/preset/jest-preset.ts
  */
 module.exports = {
-      // This is one of the patterns that jest finds by default https://jestjs.io/docs/configuration#testmatch-arraystring
+  // This is one of the patterns that jest finds by default https://jestjs.io/docs/configuration#testmatch-arraystring
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
   resolver: '@nx/jest/plugins/resolver',
   moduleFileExtensions: ['ts', 'js', 'mjs', 'html'],

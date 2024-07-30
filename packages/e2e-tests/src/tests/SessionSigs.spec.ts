@@ -177,16 +177,13 @@ describe('SessionSigs', () => {
     });
   });
 
-  describe("Broadcast And Collect", () => {
+  describe('Broadcast And Collect', () => {
     it('LitAction Session', async () => {
       await broadcastAndCollect(devEnv, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await broadcastAndCollect(
-        devEnv,
-        getLitActionSessionSigsUsingIpfsId
-      );
+      await broadcastAndCollect(devEnv, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
@@ -195,21 +192,16 @@ describe('SessionSigs', () => {
 
     it('PKP Session', async () => {
       await broadcastAndCollect(devEnv, getPkpSessionSigs);
-    }); 
+    });
   });
 
-
-
-  describe("Decrypt And Combine", () => {
+  describe('Decrypt And Combine', () => {
     it('LitAction Session', async () => {
       await decryptAndCombine(devEnv, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await decryptAndCombine(
-        devEnv,
-        getLitActionSessionSigsUsingIpfsId
-      );
+      await decryptAndCombine(devEnv, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
@@ -218,19 +210,16 @@ describe('SessionSigs', () => {
 
     it('PKP Session', async () => {
       await decryptAndCombine(devEnv, getPkpSessionSigs);
-    });      
+    });
   });
 
-  describe("Sign And Combine ECDSA", () => {
+  describe('Sign And Combine ECDSA', () => {
     it('LitAction Session', async () => {
       await signAndCombine(devEnv, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signAndCombine(
-        devEnv,
-        getLitActionSessionSigsUsingIpfsId
-      );
+      await signAndCombine(devEnv, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
@@ -239,7 +228,7 @@ describe('SessionSigs', () => {
 
     it('PKP Session', async () => {
       await signAndCombine(devEnv, getPkpSessionSigs);
-    }); 
+    });
   });
 
   it('Invalid lit action Custom Auth SessionSigs', async () => {
@@ -676,27 +665,27 @@ const decryptString = async (
   expect(decryptRes).toEqual('Hello world');
 };
 
-
 const broadcastAndCollect = async (
   devEnv: TinnyEnvironment,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
-  ) => Promise<SessionSigsMap | undefined>) => {
-    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+  ) => Promise<SessionSigsMap | undefined>
+) => {
+  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
 
-    const alice = await devEnv.createRandomPerson();
-    // set access control conditions for encrypting and decrypting
-    const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-      userAddress: alice.authMethodOwnedPkp?.ethAddress!,
-    });
+  const alice = await devEnv.createRandomPerson();
+  // set access control conditions for encrypting and decrypting
+  const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+    userAddress: alice.authMethodOwnedPkp?.ethAddress!,
+  });
 
-    const litActionSessionSigs = await generator(devEnv, alice);
+  const litActionSessionSigs = await generator(devEnv, alice);
 
-    const res = await devEnv.litNodeClient?.executeJs({
-      sessionSigs: litActionSessionSigs,
-      code: `(async () => {
+  const res = await devEnv.litNodeClient?.executeJs({
+    sessionSigs: litActionSessionSigs,
+    code: `(async () => {
               let rand = Math.floor(Math.random() * 100);
               const resp = await Lit.Actions.broadcastAndCollect({
                   name: "temperature",
@@ -706,14 +695,13 @@ const broadcastAndCollect = async (
                   response: JSON.stringify(resp)
               });
             })();`,
-      jsParams: {},
-    });
-    devEnv.releasePrivateKeyFromUser(alice);
+    jsParams: {},
+  });
+  devEnv.releasePrivateKeyFromUser(alice);
 
-    const response = res?.response;
-    expect(response).toBeDefined();    
+  const response = res?.response;
+  expect(response).toBeDefined();
 };
-
 
 const decryptAndCombine = async (
   devEnv: TinnyEnvironment,
@@ -721,13 +709,17 @@ const decryptAndCombine = async (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
-  ) => Promise<SessionSigsMap | undefined>) => {
+  ) => Promise<SessionSigsMap | undefined>
+) => {
   devEnv.setUnavailable(LIT_TESTNET.MANZANO);
 
   const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-    userAddress: generator.name === "getEoaSessionSigs" ? alice.authSig?.address! : alice.authMethodOwnedPkp?.ethAddress!,
+    userAddress:
+      generator.name === 'getEoaSessionSigs'
+        ? alice.authSig?.address!
+        : alice.authMethodOwnedPkp?.ethAddress!,
   });
 
   const litActionSessionSigs = await generator(devEnv, alice);
@@ -779,7 +771,7 @@ const decryptAndCombine = async (
   devEnv.releasePrivateKeyFromUser(alice);
 
   expect(res?.response).toEqual('Hello world');
-}
+};
 
 const signAndCombine = async (
   devEnv: TinnyEnvironment,
@@ -787,7 +779,8 @@ const signAndCombine = async (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
-  ) => Promise<SessionSigsMap | undefined>) => {
+  ) => Promise<SessionSigsMap | undefined>
+) => {
   const alice = await devEnv.createRandomPerson();
 
   const litActionSessionSigs = await generator(devEnv, alice);
@@ -811,7 +804,6 @@ const signAndCombine = async (
   });
 
   devEnv.releasePrivateKeyFromUser(alice);
-
 
   /**
     Response format
