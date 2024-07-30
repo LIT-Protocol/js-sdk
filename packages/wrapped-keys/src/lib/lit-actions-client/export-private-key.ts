@@ -1,28 +1,31 @@
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
-import { SignMessageWithEncryptedKeyParams, StoredKeyData } from '../types';
+import { ExportPrivateKeyParams, StoredKeyData } from '../types';
 
-interface SignMessageWithLitActionParams
-  extends SignMessageWithEncryptedKeyParams {
+interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
   accessControlConditions: AccessControlConditions;
   storedKeyMetadata: StoredKeyData;
   litActionIpfsCid: string;
 }
 
-export async function signMessageWithLitAction(
+export async function exportPrivateKeyWithLitAction(
   args: SignMessageWithLitActionParams
 ) {
   const {
     accessControlConditions,
     litNodeClient,
-    messageToSign,
     pkpSessionSigs,
     litActionIpfsCid,
     storedKeyMetadata,
   } = args;
 
-  const { pkpAddress, ciphertext, dataToEncryptHash } = storedKeyMetadata;
+  const {
+    pkpAddress,
+    ciphertext,
+    dataToEncryptHash,
+    ...storeKeyMetadataMinusEncryptedAndPkp
+  } = storedKeyMetadata;
   const result = await litNodeClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
@@ -30,9 +33,15 @@ export async function signMessageWithLitAction(
       pkpAddress,
       ciphertext,
       dataToEncryptHash,
-      messageToSign,
       accessControlConditions,
     },
   });
-  return postLitActionValidation(result);
+
+  const decryptedPrivateKey = postLitActionValidation(result);
+
+  return {
+    decryptedPrivateKey,
+    pkpAddress,
+    ...storeKeyMetadataMinusEncryptedAndPkp,
+  };
 }

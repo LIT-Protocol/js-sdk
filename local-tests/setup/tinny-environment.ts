@@ -19,10 +19,9 @@ import { TinnyPerson } from './tinny-person';
 import { ethers } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
+import { toErrorWithMessage } from './tinny-utils';
 
-import 'dotenv/config';
-console.log('Loading env vars from dot config...');
-console.log('Done loading env', process.env['DEBUG']);
+console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 
@@ -31,6 +30,7 @@ export class TinnyEnvironment {
    */
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
+    TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT']) || 45000,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
@@ -177,7 +177,7 @@ export class TinnyEnvironment {
 
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
-        // console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
+        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
         await new Promise((resolve) =>
           setTimeout(resolve, this.processEnvs.WAIT_FOR_KEY_INTERVAL)
@@ -344,30 +344,42 @@ export class TinnyEnvironment {
    * Init
    */
   async init() {
-    if (this.processEnvs.NO_SETUP) {
-      console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
-      return;
-    }
-    if (this.network === LIT_TESTNET.LOCALCHAIN && this.processEnvs.USE_SHIVA) {
-      this.testnet = await this._shivaClient.startTestnetManager();
-      // wait for the testnet to be active before we start the tests.
-      let state = await this.testnet.pollTestnetForActive();
-      if (state === `UNKNOWN`) {
-        console.log(
-          'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
-        );
-        throw new Error(`Error while creating testnet, aborting test run`);
+    try {
+      if (this.processEnvs.NO_SETUP) {
+        console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
+        return;
+      }
+      if (
+        this.network === LIT_TESTNET.LOCALCHAIN &&
+        this.processEnvs.USE_SHIVA
+      ) {
+        this.testnet = await this._shivaClient.startTestnetManager();
+        // wait for the testnet to be active before we start the tests.
+        let state = await this.testnet.pollTestnetForActive();
+        if (state === `UNKNOWN`) {
+          console.log(
+            'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
+          );
+          throw new Error(`Error while creating testnet, aborting test run`);
+        }
+
+        await this.testnet.getTestnetConfig();
+      } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
+        const context = await import('./networkContext.json');
+        this._contractContext = context;
       }
 
-      await this.testnet.getTestnetConfig();
-    } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const context = await import('./networkContext.json');
-      this._contractContext = context;
+      await this.setupLitNodeClient();
+      await this.setupSuperCapacityDelegationAuthSig();
+      await this.setupBareEthAuthSig();
+    } catch (e) {
+      const err = toErrorWithMessage(e);
+      console.log(
+        `[𐬺🧪 Tinny Environment𐬺] Failed to init() tinny ${err.message}`
+      );
+      console.log(err.stack);
+      process.exit(1);
     }
-
-    await this.setupLitNodeClient();
-    await this.setupSuperCapacityDelegationAuthSig();
-    await this.setupBareEthAuthSig();
   }
 
   /**

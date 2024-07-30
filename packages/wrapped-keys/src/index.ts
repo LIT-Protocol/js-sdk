@@ -1,11 +1,12 @@
 import {
   signMessageWithEncryptedKey,
-  getEncryptedKeyMetadata,
+  getEncryptedKey,
   exportPrivateKey,
   generatePrivateKey,
   importPrivateKey,
   signTransactionWithEncryptedKey,
-  storeEncryptedKeyMetadata,
+  storeEncryptedKey,
+  listEncryptedKeyMetadata,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -19,7 +20,7 @@ import {
 import type { SupportedNetworks } from './lib/service-client/types';
 import type {
   SignMessageWithEncryptedKeyParams,
-  GetEncryptedKeyMetadataParams,
+  GetEncryptedKeyDataParams,
   ExportPrivateKeyParams,
   GeneratePrivateKeyParams,
   ImportPrivateKeyParams,
@@ -33,8 +34,12 @@ import type {
   SignTransactionParams,
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
-  StoreEncryptedKeyMetadataParams,
+  StoreEncryptedKeyParams,
+  StoredKeyData,
   StoredKeyMetadata,
+  ListEncryptedKeyMetadataParams,
+  StoreEncryptedKeyResult,
+  ImportPrivateKeyResult,
 } from './lib/types';
 
 export const constants = {
@@ -49,11 +54,12 @@ export const constants = {
 export const api = {
   exportPrivateKey,
   generatePrivateKey,
-  getEncryptedKeyMetadata,
+  getEncryptedKey,
+  listEncryptedKeyMetadata,
   importPrivateKey,
   signMessageWithEncryptedKey,
   signTransactionWithEncryptedKey,
-  storeEncryptedKeyMetadata,
+  storeEncryptedKey,
 };
 
 export {
@@ -62,17 +68,21 @@ export {
   EthereumLitTransaction,
   ExportPrivateKeyParams,
   ExportPrivateKeyResult,
-  GetEncryptedKeyMetadataParams,
+  GetEncryptedKeyDataParams,
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResult,
   ImportPrivateKeyParams,
+  ImportPrivateKeyResult,
+  ListEncryptedKeyMetadataParams,
   SerializedTransaction,
   SignTransactionParams,
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
   SignMessageWithEncryptedKeyParams,
   SignTransactionWithEncryptedKeyParams,
-  StoreEncryptedKeyMetadataParams,
+  StoreEncryptedKeyParams,
+  StoreEncryptedKeyResult,
+  StoredKeyData,
   StoredKeyMetadata,
   SupportedNetworks,
 };
