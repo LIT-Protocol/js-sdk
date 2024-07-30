@@ -140,7 +140,7 @@ describe('SessionSigs', () => {
 
   describe('ExecuteJS Signing', () => {
     it('LitAction Session', async () => {
-      await pkpSign(devEnv, getLitActionSessionSigs);
+      await executeJsSigning(devEnv, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
