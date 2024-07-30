@@ -70,7 +70,7 @@ jobs:
         run: cp .env.ci .env
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: docker ps -a && yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning
+        run: docker ps -a && yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
       - name: Get Container Logs
         if: always()
         run: docker logs shiva
