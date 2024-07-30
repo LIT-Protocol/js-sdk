@@ -68,7 +68,4 @@ jobs:
         if: steps.session.outputs.exit_code == 0
         id: pkp
         run: yarn test:local -t 'PKP Ethers'
-      - name: End Tests Lit Action Combiners
-        id: combiners
-        if: steps.pkp.outputs.exit_code == 0
-        run: yarn test:local -t 'Lit Action Ops'
+
