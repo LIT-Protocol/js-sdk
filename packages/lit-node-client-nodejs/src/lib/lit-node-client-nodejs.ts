@@ -2128,8 +2128,6 @@ const resourceAbilityRequests = [
       const toSign: SessionSigningTemplate = {
         ...signingTemplate,
         nodeAddress,
-        //@ts-ignore
-        maxPrice: 'A',
       };
 
       const signedMessage = JSON.stringify(toSign);
