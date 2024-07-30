@@ -59,13 +59,13 @@ jobs:
       - name: End Tests Connection
         id: connection
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:local -t 'Connections'
+        run: yarn test:e2e -t 'Connections'
       - name: End Tests Session Compaitiblity
         id: session
         if: steps.connection.outputs.exit_code == 0
-        run: yarn test:local -t 'SessionSigs'
+        run: yarn test:e2e -t 'SessionSigs'
       - name: End Tests PKP Ethers
         if: steps.session.outputs.exit_code == 0
         id: pkp
-        run: yarn test:local -t 'PKP Ethers'
+        run: yarn test:e2e -t 'PKP Ethers'
 
