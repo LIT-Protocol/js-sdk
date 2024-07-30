@@ -1,7 +1,6 @@
 export enum LIT_ENDPOINT_VERSION {
   V0 = '/',
   V1 = '/v1',
-  V2 = '/v2',
 }
 
 export const LIT_ENDPOINT = {
@@ -15,11 +14,11 @@ export const LIT_ENDPOINT = {
   },
   EXECUTE_JS: {
     path: '/web/execute',
-    version: LIT_ENDPOINT_VERSION.V2,
+    version: LIT_ENDPOINT_VERSION.V1,
   },
   PKP_SIGN: {
     path: '/web/pkp/sign',
-    version: LIT_ENDPOINT_VERSION.V2,
+    version: LIT_ENDPOINT_VERSION.V1,
   },
   PKP_CLAIM: {
     path: '/web/pkp/claim',
