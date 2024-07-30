@@ -220,8 +220,6 @@ export class ShivaClient {
       try {
         existingTestnetResp = await fetch(
           this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets',
-          //@ts-ignore
-          { agent: agentSelector }
         );
       } catch (e) {
         console.error('error while fetching testnets: ', e);
