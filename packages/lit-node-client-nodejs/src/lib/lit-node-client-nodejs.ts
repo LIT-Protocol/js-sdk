@@ -1978,10 +1978,10 @@ export class LitNodeClientNodeJs
    * 2. Generate or retrieve the `AuthSig` that specifies the session capabilities and resources
    * 3. Sign the specific resources with the session key
    *
-   * :::note
-   * When generating session signatures for different PKPs or auth methods,
+   * 
+   * Note: When generating session signatures for different PKPs or auth methods,
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
-   * :::
+   * 
    * 
    * @param { GetSessionSigsProps } params
    *
