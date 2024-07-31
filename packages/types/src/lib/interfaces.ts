@@ -33,7 +33,11 @@ export interface AccsOperatorParams {
 
 /** ---------- Auth Sig ---------- */
 
+/**
+ * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
+ */
 export interface AuthSig {
+
   /**
    * The signature produced by signing the `signMessage` property with the `address` property. 
    */
@@ -1077,19 +1081,20 @@ export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
 export interface CommonGetSessionSigsProps {
+  // If you want to pass the `authNeededCallback`, having a PKP public key is necessary. This can be used if you do not have a wallet and wish to authenticate with your PKP.
   pkpPublicKey?: string;
 
-  // When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
+  // When this session signature will expire. After this time is up, you will need to reauthenticate using the same authentication method, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
   expiration?: any;
 
-  //   The chain to use for the session signature.  This is the chain that will be used to sign the session key.  If you're using EVM then this probably doesn't matter at all.
+  // The chain to use for the session signature and sign the session key. If you're using EVM, this parameter isn't very important.
   chain?: Chain;
 
   /**
    * An array of resource abilities that you want to request for this session. These will be signed with the session key.
-   *
-   * @example If you want to request the ability to decrypt an access control condition, then you would pass
-   * [{ resource: new LitAccessControlConditionResource('someResource), ability: LitAbility.AccessControlConditionDecryption }]
+   * If you want to request the ability to decrypt an access control condition, then you would pass something similar to the example:
+   * @example 
+   * [{ resource: new LitAccessControlConditionResource('someResource`), ability: LitAbility.AccessControlConditionDecryption }]
    */
   resourceAbilityRequests: LitResourceAbilityRequest[];
 
@@ -1097,14 +1102,14 @@ export interface CommonGetSessionSigsProps {
    * The session capability object that you want to request for this session.
    * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
    *
-   * @example If you passed nothing, and you're requesting to perform a decryption operation for an access
+   * If you passed nothing, and you're requesting to perform a decryption operation for an access
    * control condition, then the session capability object will be a wildcard for the access control condition,
    * which grants this session signature the ability to decrypt this access control condition.
    */
   sessionCapabilityObject?: ISessionCapabilityObject;
 
   /**
-   * If you want to ask Metamask to try and switch the user's chain, you may pass true here.  This will only work if the user is using Metamask.  If the user is not using Metamask, then this will be ignored.
+   * If you want to ask MetaMask to try and switch the user's chain, you may pass true here.  This will only work if the user is using MetaMask.  If the user is not using MetaMask, then this will be ignored.
    */
   switchChain?: boolean;
   /**
@@ -1116,13 +1121,13 @@ export interface CommonGetSessionSigsProps {
   /**
    * @deprecated - use capabilityAuthSigs instead
    *  Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * on both manzano and habanero networks capacity credit proof is required.
-   * see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
+   * on both Datil-test and Datil networks capacity credit proof is required.
+   * see more [here](https://deploy-preview-311--lit-dev-docs.netlify.app/sdk/capacity-credits).
    */
   capacityDelegationAuthSig?: AuthSig;
 
   /**
-   * Not limited to capacityDelegationAuthSig, we want to be able to pass in any other authSigs for other purposes.
+   * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
    */
   capabilityAuthSigs?: AuthSig[];
 }
@@ -1149,6 +1154,19 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 /**
  * A map of node addresses to the session signature payload
  * for that node specifically.
+ * 
+ * Each individual session signature for each node includes the following properties:
+ * `sig`: The signature produced by the ed25519 key pair signing the `signedMessage` payload.
+ * 
+ * `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
+ * 
+ * `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
+ * 
+ * 
+ * 
+ * `address`: The session key pair public key.
+ * 
+ * `algo`: The signing algorithm used to generate the session signature.
  */
 export type SessionSigsMap = Record<string, AuthSig>;
 

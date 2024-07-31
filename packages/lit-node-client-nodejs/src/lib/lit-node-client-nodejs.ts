@@ -1971,36 +1971,23 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Get session signatures for a set of resources
+   * This is one of the methods that can be used to get session signatures. 
    *
-   * High level, how this works:
-   * 1. Generate or retrieve session key
-   * 2. Generate or retrieve the wallet signature of the session key
+   * How this function works on a high level:
+   * 1. Generate or retrieve session keys (a public and private key pair)
+   * 2. Generate or retrieve the `AuthSig` that specifies the session capabilities and resources
    * 3. Sign the specific resources with the session key
    *
-   * Note: When generating session signatures for different PKPs or auth methods,
+   * :::note
+   * When generating session signatures for different PKPs or auth methods,
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
-   *
+   * :::
+   * 
    * @param { GetSessionSigsProps } params
    *
    * @example
-   *
-   * ```ts
-   * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
-import { LitAbility } from "@lit-protocol/types";
-import { logWithRequestId } from '../../../misc/src/lib/misc';
-
-const resourceAbilityRequests = [
-    {
-      resource: new LitPKPResource("*"),
-      ability: LitAbility.PKPSigning,
-    },
-    {
-      resource: new LitActionResource("*"),
-      ability: LitAbility.LitActionExecution,
-    },
-  ];
-   * ```
+   * An example of how this function is used can be found in the Lit developer-guides-code repository [here](https://github.com/LIT-Protocol/developer-guides-code/tree/master/session-signatures/getSessionSigs).
+   * 
    */
   getSessionSigs = async (
     params: GetSessionSigsProps
