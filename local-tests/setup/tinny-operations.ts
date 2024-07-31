@@ -207,7 +207,9 @@ export const runTestsParallel = async ({
           console.error(
             `\x1b[31m❌Error:\x1b[90m ${JSON.stringify(error) || error}\x1b[0m`
           );
-          return `${testName} (Failed in ${timeTaken} ms) - Error: ${JSON.stringify(error)}`;
+          return `${testName} (Failed in ${timeTaken} ms) - Error: ${JSON.stringify(
+            error
+          )}`;
         }
       }
     }
