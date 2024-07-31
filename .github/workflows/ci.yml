@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 30
     env:
       DATIL_COMMIT_HASH: b5cfe7489275dbed5e9098818d0bd441c8918903
-
+      DATIL_BRANCH_NAME: datil-cherrypick-shiva-changes 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -90,3 +90,10 @@ jobs:
       - name: Get Container Logs
         if: always()
         run: docker logs shiva
+      - name: Post Step Stop Shiva Container
+        id: container-stop
+        if: steps.shiva-pull.outputs.exit_code == 0
+        run: docker stop shiva
+      - name: Post Step Remove Shiva Image
+        if: steps.shiva-pull.outputs.exit_code == 0
+        run: docker rmi ghcr.io/lit-protocol/shiva 
