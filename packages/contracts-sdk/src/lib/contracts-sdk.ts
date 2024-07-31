@@ -1078,24 +1078,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     // -- go
     const mintCost = await this.pkpNftContract.read.mintCost();
 
-    let _gasLimit: BigNumberish | undefined = gasLimit;
-    if (!_gasLimit) {
-      const txData =
-        await this.pkpHelperContract.write.populateTransaction.mintNextAndAddAuthMethods(
-          2, // key type
-          [authMethod.authMethodType],
-          [_authMethodId],
-          [_pubkey],
-          [[..._scopes]],
-          true,
-          true,
-          { value: mintCost }
-        );
-      _gasLimit = await this._estimateGasWithMargin(this.pkpHelperContract.write, txData);
-    }
-
     // -- start minting
-    const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
+    const tx = await this.callWithGasMargin(this.pkpHelperContract.write, 'mintNextAndAddAuthMethods', [
       2, // key type
       [authMethod.authMethodType],
       [_authMethodId],
@@ -1103,11 +1087,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       [[..._scopes]],
       true,
       true,
-      {
-        value: mintCost,
-        gasLimit: _gasLimit,
-      }
-    );
+    ], { value: mintCost, gasLimit });
     const receipt = await tx.wait();
 
     const events = 'events' in receipt ? receipt.events : receipt.logs;
@@ -1219,28 +1199,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const _webAuthnPubkey = webAuthnPubkey ?? '0x';
 
     try {
-      const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAuthMethod(
-        pkpTokenId,
-        {
-          authMethodType: authMethodType,
-          id: _authMethodId,
-          userPubkey: _webAuthnPubkey,
-        },
-        authMethodScopes
-      );
-      const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
-
-      const res =
-        await this.pkpPermissionsContract.write.addPermittedAuthMethod(
-          pkpTokenId,
-          {
-            authMethodType: authMethodType,
-            id: _authMethodId,
-            userPubkey: _webAuthnPubkey,
-          },
-          authMethodScopes,
-          { gasLimit: _gasLimit }
-        );
+      const res = await this.callWithGasMargin(this.pkpPermissionsContract.write, 'addPermittedAuthMethod', [pkpTokenId, {
+        authMethodType: authMethodType,
+        id: _authMethodId,
+        userPubkey: _webAuthnPubkey,
+      }, authMethodScopes]);
 
       const receipt = await res.wait();
 
@@ -1272,19 +1235,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const scopes = authMethodScopes ?? [];
 
     try {
-      const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAction(
-        pkpTokenId,
-        ipfsIdBytes,
-        scopes
-      );
-      const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
-
-      const res = await this.pkpPermissionsContract.write.addPermittedAction(
-        pkpTokenId,
-        ipfsIdBytes,
-        scopes,
-        { gasLimit: _gasLimit }
-      );
+      const res = await this.callWithGasMargin(this.pkpPermissionsContract.write, 'addPermittedAction', [pkpTokenId, ipfsIdBytes, scopes]);
 
       const receipt = await res.wait();
 
@@ -1390,16 +1341,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     this.log('Expiration Date (UTC):', expirationDate.toUTCString());
 
     try {
-      let _gasLimit: BigNumberish | undefined = gasLimit;
-      if (!_gasLimit) {
-        const txData = await this.rateLimitNftContract.write.populateTransaction.mint(expiresAt);
-        _gasLimit = await this._estimateGasWithMargin(this.rateLimitNftContract.write,txData);
-      }
-
-      const res = await this.rateLimitNftContract.write.mint(expiresAt, {
-        value: mintCost,
-        gasLimit: _gasLimit,
-      });
+      const res = await this.callWithGasMargin(this.rateLimitNftContract.write, 'mint', [expiresAt], { value: mintCost, gasLimit });
 
       const txHash = res.hash;
 
@@ -1659,22 +1601,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        this.log('...populating tx');
-
-        let _gasLimit: BigNumberish | undefined = param?.gasLimit;
-        if (!_gasLimit) {
-          const tx =
-            await this.pkpNftContract.write.populateTransaction.mintNext(2, {
-              value: mintCost,
-            });
-          _gasLimit = await this._estimateGasWithMargin(this.pkpHelperContract.write,tx);
-        }
-
         this.log('...signing and sending tx');
-        const sentTx = await this.pkpNftContract.write.mintNext(2, {
-          value: mintCost,
-          gasLimit: _gasLimit,
-        });
+        const sentTx = await this.callWithGasMargin(this.pkpNftContract.write, 'mintNext', [2], { value: mintCost, ...param });
 
         this.log('sentTx:', sentTx);
 
@@ -1733,24 +1661,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             const cost = await this.pkpNftContract.read.mintCost();
             txOpts.value = cost;
           }
+          const tx = await this.callWithGasMargin(this.pkpNftContract.write, 'claimAndMint', [2, derivedKeyId, signatures], txOpts);
 
-          if (!txOpts.gasLimit) {
-            const txData = await this.pkpNftContract.write.populateTransaction.claimAndMint(
-              2,
-              derivedKeyId,
-              signatures,
-              txOpts
-            );
-            txOpts.gasLimit = await this._estimateGasWithMargin(this.pkpNftContract.write,txData);
-          }
-
-          const tx = await this.pkpNftContract.write.claimAndMint(
-            2,
-            derivedKeyId,
-            signatures,
-            txOpts
-          );
           const txRec = await tx.wait();
+
           const events: any = 'events' in txRec ? txRec.events : txRec.logs;
           const tokenId = events[1].topics[1];
           return { tx, res: txRec, tokenId };
@@ -1976,19 +1890,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
         this.log('[addPermittedAction] converted<ipfsIdBytes>:', ipfsIdBytes);
 
-        const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAction(
-          tokenId,
-          ipfsIdBytes,
-          [1]
-        );
-        const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
+        const tx = await this.callWithGasMargin(this.pkpPermissionsContract.write, 'addPermittedAction', [tokenId, ipfsIdBytes, [1]]);
 
-        const tx = await this.pkpPermissionsContract.write.addPermittedAction(
-          tokenId,
-          ipfsIdBytes,
-          [1],
-          { gasLimit: _gasLimit }
-        );
         this.log('[addPermittedAction] output<tx>:', tx);
 
         return tx;
@@ -2022,19 +1925,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('[addPermittedAddress] input<pkpId>:', pkpId);
 
-        const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAddress(
-          pkpId,
-          ownerAddress,
-          [1]
-        );
-        const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
-
-        const tx = await this.pkpPermissionsContract.write.addPermittedAddress(
-          pkpId,
-          ownerAddress,
-          [1],
-          { gasLimit: _gasLimit }
-        );
+        const tx = await this.callWithGasMargin(this.pkpPermissionsContract.write, 'addPermittedAddress', [pkpId, ownerAddress, [1]]);
 
         this.log('[addPermittedAddress] output<tx>:', tx);
 
@@ -2069,18 +1960,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
         this.log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
 
-        const txData = await this.pkpPermissionsContract.write.populateTransaction.removePermittedAction(
-          pkpId,
-          ipfsHash
-        );
-        const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
+        const tx = await this.callWithGasMargin(this.pkpPermissionsContract.write, 'removePermittedAction', [pkpId, ipfsHash]);
 
-        const tx =
-          await this.pkpPermissionsContract.write.removePermittedAction(
-            pkpId,
-            ipfsHash,
-            { gasLimit: _gasLimit }
-          );
         this.log('[revokePermittedAction] output<tx>:', tx);
 
         return tx;
@@ -2307,8 +2188,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        let total: any = await this.rateLimitNftContract.read.totalSupply();
-        total = parseInt(total.toString());
+        const bigTotal: ethers.BigNumber = await this.rateLimitNftContract.read.totalSupply();
+        const total = parseInt(bigTotal.toString());
 
         const tokens = await asyncForEachReturn(
           [...new Array(total)],
@@ -2368,17 +2249,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        if (!txOpts.gasLimit) {
-          const txData = await this.rateLimitNftContract.write.populateTransaction.mint(
-            timestamp
-          );
-          txOpts.gasLimit = await this._estimateGasWithMargin(this.rateLimitNftContract.write,txData);
-        }
-
-        const tx = await this.rateLimitNftContract.write.mint(
-          timestamp,
-          txOpts
-        );
+        const tx = await this.callWithGasMargin(this.rateLimitNftContract.write, 'mint', [timestamp], txOpts);
 
         const res = await tx.wait();
 
@@ -2414,19 +2285,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        const txData = await this.rateLimitNftContract.write.populateTransaction.transferFrom(
-          fromAddress,
-          toAddress,
-          RLITokenAddress
-        );
-        const _gasLimit = await this._estimateGasWithMargin(this.rateLimitNftContract.write,txData);
-
-        const tx = await this.rateLimitNftContract.write.transferFrom(
+        const tx = await this.callWithGasMargin(this.rateLimitNftContract.write, 'transferFrom', [
           fromAddress,
           toAddress,
           RLITokenAddress,
-          { gasLimit: _gasLimit }
-        );
+        ]);
 
         this.log('tx:', tx);
 
@@ -2486,23 +2349,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         // first get mint cost
         const mintCost = await this.pkpNftContract.read.mintCost();
 
-        let _gasLimit: BigNumberish | undefined = gasLimit;
-        if (!_gasLimit) {
-          const txData =
-            await this.pkpHelperContract.write.populateTransaction.mintNextAndAddAuthMethods(
-              keyType,
-              permittedAuthMethodTypes,
-              permittedAuthMethodIds as BytesLike[],
-              permittedAuthMethodPubkeys as BytesLike[],
-              permittedAuthMethodScopes,
-              addPkpEthAddressAsPermittedAddress,
-              sendPkpToItself,
-              { value: mintCost }
-            );
-          _gasLimit = await this._estimateGasWithMargin(this.pkpHelperContract.write,txData);
-        }
-
-        const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
+        const tx = await this.callWithGasMargin(this.pkpHelperContract.write, 'mintNextAndAddAuthMethods', [
           keyType,
           permittedAuthMethodTypes,
           permittedAuthMethodIds as BytesLike[],
@@ -2510,10 +2357,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           permittedAuthMethodScopes,
           addPkpEthAddressAsPermittedAddress,
           sendPkpToItself,
-          {
-            value: mintCost,
-            gasLimit: _gasLimit,
-          }
+        ],
+        { value: mintCost, gasLimit },
         );
         return tx;
       },
@@ -2545,17 +2390,22 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     },
   };
 
-  private _estimateGasWithMargin = async (
+  private callWithGasMargin = async (
     contract: ethers.Contract,
-    txData: ethers.PopulatedTransaction,
+    method: string,
+    args: any[],
+    overrides: ethers.PayableOverrides & { from?: string } = {},
     percentageIncrease: number = GAS_LIMIT_INCREASE_PERCENTAGE
   ) => {
-    const gasEstimation = await contract.provider.estimateGas(
-      txData
-    );
-    const adjustedGasLimit = gasEstimation
-      .mul(100 + percentageIncrease)
-      .div(100);
-    return adjustedGasLimit;
+    if (!overrides.gasLimit) {
+      const txData = await contract.populateTransaction[method](...args, overrides);
+      const gasEstimation = await contract.provider.estimateGas(txData);
+      const adjustedGasLimit = gasEstimation
+        .mul(100 + percentageIncrease)
+        .div(100);
+      overrides.gasLimit = adjustedGasLimit;
+    }
+
+    return contract[method](...args, overrides);
   };
 }
