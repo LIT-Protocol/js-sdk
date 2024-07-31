@@ -34,7 +34,10 @@ export class TinnyEnvironment {
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
-      parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
+      parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
+      (process.env['NETWORK'] as LIT_TESTNET) === 'datil-dev'
+        ? 1
+        : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
@@ -473,13 +476,19 @@ export class TinnyEnvironment {
         rpc: this.rpc,
         customContext: networkContext,
       });
-    } else if (CENTRALISATION_BY_NETWORK[this.network] === 'decentralised') {
+    } else if (
+      CENTRALISATION_BY_NETWORK[this.network] === 'decentralised' ||
+      CENTRALISATION_BY_NETWORK[this.network] === 'centralised'
+    ) {
       this.contractsClient = new LitContracts({
         signer: wallet,
         debug: this.processEnvs.DEBUG,
         network: this.network,
       });
-    } else {
+    }
+
+    // THE FOLLOWING WILL TECHNICALLY NEVER BE CALLED, BUT IT'S HERE FOR FUTURE REFERENCE FOR SWITCHING WALLETS
+    else {
       async function _switchWallet() {
         // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
         // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
@@ -521,10 +530,11 @@ export class TinnyEnvironment {
      * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
      * ====================================
      */
-
-    // Disabled for now
-    await this.mintSuperCapacityDelegationAuthSig(wallet);
+    if (CENTRALISATION_BY_NETWORK[this.network] === 'decentralised') {
+      await this.mintSuperCapacityDelegationAuthSig(wallet);
+    }
   };
+
   async mintSuperCapacityDelegationAuthSig(wallet: Signer) {
     console.log(
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
