@@ -104,6 +104,15 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
   fromWallet: ethers.Wallet,
   capacityDelegationAuthSig: AuthSig
 ) => {
+  const centralisation =
+    CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
+
+  if (centralisation === 'decentralised') {
+    console.warn(
+      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
+    );
+  }
+
   const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
     chain: 'ethereum',
     resourceAbilityRequests: [
@@ -149,7 +158,11 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
 
       return authSig;
     },
-    capacityDelegationAuthSig: capacityDelegationAuthSig,
+    ...(centralisation === 'decentralised' && {
+      capabilityAuthSigs: [
+        capacityDelegationAuthSig ?? devEnv.superCapacityDelegationAuthSig,
+      ],
+    }),
   });
 
   log('[getEoaSessionSigs]: ', getEoaSessionSigs);

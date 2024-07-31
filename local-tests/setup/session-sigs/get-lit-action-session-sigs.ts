@@ -83,9 +83,12 @@ export const getLitActionSessionSigsUsingIpfsId = async (
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
-  if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
+  const centralisation =
+    CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
+
+  if (centralisation === 'decentralised') {
     console.warn(
-      'Manzano network detected. Adding capacityDelegationAuthSig to litActionSessionSigs'
+      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
     );
   }
 
@@ -111,10 +114,9 @@ export const getLitActionSessionSigsUsingIpfsId = async (
       sigName: 'unified-auth-sig',
     },
 
-    // -- only add this for manzano network
-    ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-      ? { capacityDelegationAuthSig: devEnv.superCapacityDelegationAuthSig }
-      : {}),
+    ...(centralisation === 'decentralised' && {
+      capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
+    }),
   });
 
   return litActionSessionSigs;
