@@ -9,6 +9,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthSig,
   CosmosAuthSig,
+  LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
   SolanaAuthSig,
@@ -459,6 +460,7 @@ export class TinnyEnvironment {
       const networkContext =
         this?.testnet?.ContractContext ?? this._contractContext;
       this.contractsClient = new LitContracts({
+        network: this.processEnvs.NETWORK as LIT_NETWORKS_KEYS,
         signer: wallet,
         debug: this.processEnvs.DEBUG,
         rpc: this.rpc,
