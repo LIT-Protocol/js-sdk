@@ -1985,7 +1985,6 @@ export class LitNodeClientNodeJs
    * 
    * @param { GetSessionSigsProps } params
    *
-   * @example
    * An example of how this function is used can be found in the Lit developer-guides-code repository [here](https://github.com/LIT-Protocol/developer-guides-code/tree/master/session-signatures/getSessionSigs).
    * 
    */

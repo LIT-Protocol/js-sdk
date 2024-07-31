@@ -50,9 +50,9 @@ export interface AuthSig {
 
   /**
    * A SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
-   * [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
-   * [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
-   * [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
+   * -  [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
+   * -  [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
+   * -  [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
    */
   signedMessage: string;
 
@@ -1122,7 +1122,7 @@ export interface CommonGetSessionSigsProps {
    * @deprecated - use capabilityAuthSigs instead
    *  Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
    * on both Datil-test and Datil networks capacity credit proof is required.
-   * see more [here](https://deploy-preview-311--lit-dev-docs.netlify.app/sdk/capacity-credits).
+   * see more [here](https://developer.litprotocol.com/sdk/capacity-credits).
    */
   capacityDelegationAuthSig?: AuthSig;
 
@@ -1156,17 +1156,15 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  * for that node specifically.
  * 
  * Each individual session signature for each node includes the following properties:
- * `sig`: The signature produced by the ed25519 key pair signing the `signedMessage` payload.
+ * -  `sig`: The signature produced by the ed25519 key pair signing the `signedMessage` payload.
  * 
- * `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
+ * -  `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
  * 
- * `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
+ * -  `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
  * 
+ * -  `address`: The session key pair public key.
  * 
- * 
- * `address`: The session key pair public key.
- * 
- * `algo`: The signing algorithm used to generate the session signature.
+ * -  `algo`: The signing algorithm used to generate the session signature.
  */
 export type SessionSigsMap = Record<string, AuthSig>;
 
