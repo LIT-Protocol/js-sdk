@@ -34,10 +34,32 @@ export interface AccsOperatorParams {
 /** ---------- Auth Sig ---------- */
 
 export interface AuthSig {
+  /**
+   * The signature produced by signing the `signMessage` property with the `address` property. 
+   */
   sig: any;
+
+  /**
+   * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
+   */
   derivedVia: string;
+
+  /**
+   * A SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
+   * [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
+   * [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
+   * [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
+   */
   signedMessage: string;
+
+  /**
+   * The Ethereum public key address that was used to sign `signedMessage` and create the `sig`.
+   */
   address: string;
+
+  /**
+   * An optional property only seen when generating session signatures, this is the signing algorithm used to generate session signatures.
+   */
   algo?: string;
 }
 
