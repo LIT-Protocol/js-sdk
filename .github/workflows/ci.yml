@@ -1,4 +1,4 @@
-name: CI
+name: Testing
 on:
   push:
     branches:
@@ -75,7 +75,10 @@ jobs:
         with:
           node-version: '20'
       - name: Install project dependencies
-        run: yarn install
+        run: yarn --frozen-lockfile
+      - uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: 'master'
       - name: Build packages
         id: build
         run: yarn build:dev
