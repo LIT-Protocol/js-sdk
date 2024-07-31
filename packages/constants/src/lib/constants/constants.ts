@@ -790,6 +790,7 @@ export const CENTRALISATION_BY_NETWORK: Record<
   habanero: 'decentralised',
   'datil-dev': 'centralised',
   'datil-test': 'decentralised',
+  'datil': 'decentralised',
   custom: 'unknown',
   localhost: 'unknown',
 } as const;

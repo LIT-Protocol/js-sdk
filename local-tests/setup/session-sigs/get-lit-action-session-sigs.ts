@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
-import { LitNetwork } from '@lit-protocol/constants';
+import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 
@@ -36,9 +36,12 @@ export const getLitActionSessionSigs = async (
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
-  if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
+  const centralisation =
+    CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
+
+  if (centralisation === 'decentralised') {
     console.warn(
-      'Manzano network detected. Adding capacityDelegationAuthSig to litActionSessionSigs'
+      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
     );
   }
 
@@ -67,10 +70,9 @@ export const getLitActionSessionSigs = async (
         sigName: 'unified-auth-sig',
       },
 
-      // -- only add this for manzano network
-      ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-        ? { capacityDelegationAuthSig: devEnv.superCapacityDelegationAuthSig }
-        : {}),
+      ...(centralisation === 'decentralised' && {
+        capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
+      }),
     });
 
   return litActionSessionSigs;
