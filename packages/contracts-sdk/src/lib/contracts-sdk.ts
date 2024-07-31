@@ -1091,7 +1091,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           true,
           { value: mintCost }
         );
-      _gasLimit = await this._estimateGasWithMargin(txData);
+      _gasLimit = await this._estimateGasWithMargin(this.pkpHelperContract.write, txData);
     }
 
     // -- start minting
@@ -1160,20 +1160,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   /**
    * Mints a new token with customer authentication.
    *
-   * @param authMethod - The authentication method.
-   * @param scopes - The permission scopes.
-   * @param authMethodId - The authentication ID.
-   * @returns An object containing the PKP information and the transaction receipt.
-   * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
-   * @example
+   * @param { Object } params - The parameters for minting a new token with customer authentication.
+   * @param { string } params.authMethodId - The authentication method id.
+   * @param { string[] | number[] } params.scopes - The permission scopes.
+   * @param { string } params.authMethodType - The authentication method type.
+   * @returns { Promise<MintWithAuthResponse<ContractReceipt>> } - An object containing the PKP information and the transaction receipt.
+   * @throws { Error } - If the contracts are not connected, the contract is not available, authMethodType, or permission scopes are required.
    *
-  const customAuthMethodOwnedPkp =
-    await alice.contractsClient.mintWithCustomAuth({
-      authMethodId: 'custom-app-user-id',
-      authMethod: customAuthMethod,
-      scopes: [AuthMethodScope.SignAnything],
-    });
-  */
+   */
   mintWithCustomAuth = async (
     params: CreateCustomAuthMethodRequest
   ): Promise<MintWithAuthResponse<ContractReceipt>> => {
@@ -1225,6 +1219,17 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const _webAuthnPubkey = webAuthnPubkey ?? '0x';
 
     try {
+      const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAuthMethod(
+        pkpTokenId,
+        {
+          authMethodType: authMethodType,
+          id: _authMethodId,
+          userPubkey: _webAuthnPubkey,
+        },
+        authMethodScopes
+      );
+      const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
+
       const res =
         await this.pkpPermissionsContract.write.addPermittedAuthMethod(
           pkpTokenId,
@@ -1233,7 +1238,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             id: _authMethodId,
             userPubkey: _webAuthnPubkey,
           },
-          authMethodScopes
+          authMethodScopes,
+          { gasLimit: _gasLimit }
         );
 
       const receipt = await res.wait();
@@ -1266,10 +1272,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const scopes = authMethodScopes ?? [];
 
     try {
-      const res = await this.pkpPermissionsContract.write.addPermittedAction(
+      const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAction(
         pkpTokenId,
         ipfsIdBytes,
         scopes
+      );
+      const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
+
+      const res = await this.pkpPermissionsContract.write.addPermittedAction(
+        pkpTokenId,
+        ipfsIdBytes,
+        scopes,
+        { gasLimit: _gasLimit }
       );
 
       const receipt = await res.wait();
@@ -1376,9 +1390,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     this.log('Expiration Date (UTC):', expirationDate.toUTCString());
 
     try {
+      let _gasLimit: BigNumberish | undefined = gasLimit;
+      if (!_gasLimit) {
+        const txData = await this.rateLimitNftContract.write.populateTransaction.mint(expiresAt);
+        _gasLimit = await this._estimateGasWithMargin(this.rateLimitNftContract.write,txData);
+      }
+
       const res = await this.rateLimitNftContract.write.mint(expiresAt, {
         value: mintCost,
-        gasLimit: gasLimit,
+        gasLimit: _gasLimit,
       });
 
       const txHash = res.hash;
@@ -1433,7 +1453,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * Partition multihash string into object representing multihash
      *
      * @param {string} multihash A base58 encoded multihash string
-     * @returns {Multihash}
+     * @returns {string}
      */
     getBytesFromMultihash: (multihash: string) => {
       const decoded = bs58.decode(multihash);
@@ -1450,7 +1470,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     getMultihashFromBytes: (byte32: string): string => {
       const text = byte32.replace('0x', '');
 
-      const hashFunction = parseInt(text.slice(0, 2), 16);
+      // const hashFunction = parseInt(text.slice(0, 2), 16);
       const digestSize = parseInt(text.slice(2, 4), 16);
       const digest = text.slice(4, 4 + digestSize * 2);
 
@@ -1647,7 +1667,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             await this.pkpNftContract.write.populateTransaction.mintNext(2, {
               value: mintCost,
             });
-          _gasLimit = await this._estimateGasWithMargin(tx);
+          _gasLimit = await this._estimateGasWithMargin(this.pkpHelperContract.write,tx);
         }
 
         this.log('...signing and sending tx');
@@ -1706,15 +1726,29 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       claimAndMint: async (
         derivedKeyId: BytesLike,
         signatures: IPubkeyRouter.SignatureStruct[],
-        txOpts?: any
+        txOpts: ethers.PayableOverrides & { from?: string } = {}
       ) => {
         try {
-          const cost = await this.pkpNftContract.read.mintCost();
+          if (!txOpts.value) {
+            const cost = await this.pkpNftContract.read.mintCost();
+            txOpts.value = cost;
+          }
+
+          if (!txOpts.gasLimit) {
+            const txData = await this.pkpNftContract.write.populateTransaction.claimAndMint(
+              2,
+              derivedKeyId,
+              signatures,
+              txOpts
+            );
+            txOpts.gasLimit = await this._estimateGasWithMargin(this.pkpNftContract.write,txData);
+          }
+
           const tx = await this.pkpNftContract.write.claimAndMint(
             2,
             derivedKeyId,
             signatures,
-            txOpts ?? { value: cost }
+            txOpts
           );
           const txRec = await tx.wait();
           const events: any = 'events' in txRec ? txRec.events : txRec.logs;
@@ -1753,16 +1787,24 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        const pkpIdHex = this.utils.decToHex(tokenId, null);
+        const pkpIdHex = this.utils.decToHex(tokenId, null) as string;
 
         const bool = await this.pkpPermissionsContract.read.isPermittedAddress(
-          pkpIdHex as any,
+          pkpIdHex,
           address
         );
 
         return bool;
       },
 
+      /**
+       * Get permitted addresses
+       *
+       * @param { string } tokenId
+       *
+       * @returns { Promise<Array<string>> }
+       *
+       */
       getPermittedAddresses: async (tokenId: string): Promise<string[]> => {
         if (!this.connected) {
           throw new Error(
@@ -1787,7 +1829,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
                 tokenId
               );
             if (addresses.length <= 0) {
-              await new Promise((resolve: any) => setTimeout(resolve, 1000));
+              await new Promise((resolve) => setTimeout(resolve, 1000));
               tries++;
               continue;
             } else {
@@ -1809,12 +1851,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        *
        * Get permitted action
        *
-       * @param { any } id
+       * @param { any } tokenId
        *
-       * @returns { Promise<Array<any>> }
+       * @returns { Promise<Array<string>> }
        *
        */
-      getPermittedActions: async (tokenId: any): Promise<any[]> => {
+      getPermittedActions: async (tokenId: BigNumberish): Promise<string[]> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1825,7 +1867,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        let actions: any[] = [];
+        let actions: string[] = [];
 
         const maxTries = 5;
         let tries = 0;
@@ -1838,7 +1880,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
               );
 
             if (actions.length <= 0) {
-              await new Promise((resolve: any) => setTimeout(resolve, 1000));
+              await new Promise((resolve) => setTimeout(resolve, 1000));
               tries++;
               continue;
             } else {
@@ -1887,7 +1929,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         const bool = await this.pkpPermissionsContract.read.isPermittedAction(
           pkpId,
-          ipfsHash as any
+          ipfsHash
         );
 
         return bool;
@@ -1907,7 +1949,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       addPermittedAction: async (
         pkpId: string,
         ipfsId: string
-      ): Promise<any> => {
+      ): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1934,10 +1976,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
         this.log('[addPermittedAction] converted<ipfsIdBytes>:', ipfsIdBytes);
 
+        const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAction(
+          tokenId,
+          ipfsIdBytes,
+          [1]
+        );
+        const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
+
         const tx = await this.pkpPermissionsContract.write.addPermittedAction(
           tokenId,
-          ipfsIdBytes as any,
-          [1]
+          ipfsIdBytes,
+          [1],
+          { gasLimit: _gasLimit }
         );
         this.log('[addPermittedAction] output<tx>:', tx);
 
@@ -1956,7 +2006,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       addPermittedAddress: async (
         pkpId: string,
         ownerAddress: string
-      ): Promise<any> => {
+      ): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1972,10 +2022,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('[addPermittedAddress] input<pkpId>:', pkpId);
 
-        const tx = await this.pkpPermissionsContract.write.addPermittedAddress(
+        const txData = await this.pkpPermissionsContract.write.populateTransaction.addPermittedAddress(
           pkpId,
           ownerAddress,
           [1]
+        );
+        const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
+
+        const tx = await this.pkpPermissionsContract.write.addPermittedAddress(
+          pkpId,
+          ownerAddress,
+          [1],
+          { gasLimit: _gasLimit }
         );
 
         this.log('[addPermittedAddress] output<tx>:', tx);
@@ -1994,7 +2052,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       revokePermittedAction: async (
         pkpId: string,
         ipfsId: string
-      ): Promise<any> => {
+      ): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -2011,10 +2069,17 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
         this.log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
 
+        const txData = await this.pkpPermissionsContract.write.populateTransaction.removePermittedAction(
+          pkpId,
+          ipfsHash
+        );
+        const _gasLimit = await this._estimateGasWithMargin(this.pkpPermissionsContract.write,txData);
+
         const tx =
           await this.pkpPermissionsContract.write.removePermittedAction(
             pkpId,
-            ipfsHash as any
+            ipfsHash,
+            { gasLimit: _gasLimit }
           );
         this.log('[revokePermittedAction] output<tx>:', tx);
 
@@ -2284,11 +2349,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     },
     write: {
       mint: async ({
-        mintCost,
+        txOpts,
         timestamp,
       }: {
-        mintCost: {
-          value: any;
+        txOpts: {
+          value: BigNumberish | Promise<BigNumberish>;
+          gasLimit: BigNumberish | Promise<BigNumberish> | undefined;
         };
         timestamp: number;
       }) => {
@@ -2302,14 +2368,21 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
+        if (!txOpts.gasLimit) {
+          const txData = await this.rateLimitNftContract.write.populateTransaction.mint(
+            timestamp
+          );
+          txOpts.gasLimit = await this._estimateGasWithMargin(this.rateLimitNftContract.write,txData);
+        }
+
         const tx = await this.rateLimitNftContract.write.mint(
           timestamp,
-          mintCost
+          txOpts
         );
 
-        const res: any = await tx.wait();
+        const res = await tx.wait();
 
-        const tokenIdFromEvent = res.events[0].topics[1];
+        const tokenIdFromEvent = res.events?.[0].topics[1];
 
         return { tx, tokenId: tokenIdFromEvent };
       },
@@ -2318,7 +2391,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        *
        * @property { string } fromAddress
        * @property { string } toAddress
-       * @property  { stsring } RLITokenAddress
+       * @property { string } RLITokenAddress
        *
        * @return { <Promise<void>> } void
        */
@@ -2330,7 +2403,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         fromAddress: string;
         toAddress: string;
         RLITokenAddress: string;
-      }): Promise<any> => {
+      }): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -2341,10 +2414,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        const tx = await this.rateLimitNftContract.write.transferFrom(
+        const txData = await this.rateLimitNftContract.write.populateTransaction.transferFrom(
           fromAddress,
           toAddress,
           RLITokenAddress
+        );
+        const _gasLimit = await this._estimateGasWithMargin(this.rateLimitNftContract.write,txData);
+
+        const tx = await this.rateLimitNftContract.write.transferFrom(
+          fromAddress,
+          toAddress,
+          RLITokenAddress,
+          { gasLimit: _gasLimit }
         );
 
         this.log('tx:', tx);
@@ -2401,7 +2482,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         addPkpEthAddressAsPermittedAddress,
         sendPkpToItself,
         gasLimit,
-      }: MintNextAndAddAuthMethods): Promise<any> => {
+      }: MintNextAndAddAuthMethods): Promise<ethers.ContractTransaction> => {
         // first get mint cost
         const mintCost = await this.pkpNftContract.read.mintCost();
 
@@ -2418,7 +2499,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
               sendPkpToItself,
               { value: mintCost }
             );
-          _gasLimit = await this._estimateGasWithMargin(txData);
+          _gasLimit = await this._estimateGasWithMargin(this.pkpHelperContract.write,txData);
         }
 
         const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
@@ -2465,14 +2546,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   };
 
   private _estimateGasWithMargin = async (
+    contract: ethers.Contract,
     txData: ethers.PopulatedTransaction,
-    porcentualIncrease: number = GAS_LIMIT_INCREASE_PERCENTAGE
+    percentageIncrease: number = GAS_LIMIT_INCREASE_PERCENTAGE
   ) => {
-    const gasEstimation = await this.pkpNftContract.write.provider.estimateGas(
+    const gasEstimation = await contract.provider.estimateGas(
       txData
     );
     const adjustedGasLimit = gasEstimation
-      .mul(100 + porcentualIncrease)
+      .mul(100 + percentageIncrease)
       .div(100);
     return adjustedGasLimit;
   };
