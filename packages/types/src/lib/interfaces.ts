@@ -1054,7 +1054,8 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
   authSig?: AuthSig;
 
   /**
-   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now. */
+   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now. 
+   */
   expiration?: string;
 
   resources: any;
@@ -1081,13 +1082,19 @@ export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
 export interface CommonGetSessionSigsProps {
-  // If you want to pass the `authNeededCallback`, having a PKP public key is necessary. This can be used if you do not have a wallet and wish to authenticate with your PKP.
+  /**
+   * If you want to pass the `authNeededCallback`, having a PKP public key is necessary. This can be used if you do not have a wallet and wish to authenticate with your PKP.
+   */
   pkpPublicKey?: string;
 
-  // When this session signature will expire. After this time is up, you will need to reauthenticate using the same authentication method, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
+  /**
+   * When this session signature will expire. After this time is up, you will need to reauthenticate using the same authentication method, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
+   */
   expiration?: any;
 
-  // The chain to use for the session signature and sign the session key. If you're using EVM, this parameter isn't very important.
+  /**
+   * The chain to use for the session signature and sign the session key. If you're using EVM, this parameter isn't very important.
+   */ 
   chain?: Chain;
 
   /**
