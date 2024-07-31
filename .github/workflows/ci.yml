@@ -90,10 +90,10 @@ jobs:
       - name: Get Container Logs
         if: always()
         run: docker logs shiva
-      - name: Post Step Stop Shiva Container
+      - name: Post Pull Shiva Container
         id: container-stop
         if: steps.shiva-pull.outputs.exit_code == 0
-        run: docker stop shiva
-      - name: Post Step Remove Shiva Image
+        run: docker stop shiva && docker rm shiva
+      - name: Post Pull Shiva Image
         if: steps.shiva-pull.outputs.exit_code == 0
         run: docker rmi ghcr.io/lit-protocol/shiva 
