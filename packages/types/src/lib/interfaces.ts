@@ -1093,7 +1093,7 @@ export interface CommonGetSessionSigsProps {
   expiration?: any;
 
   /**
-   * The chain to use for the session signature and sign the session key. If you're using EVM, this parameter isn't very important.
+   * The chain to use for the session signature and sign the session key. This value is almost always `ethereum`. If you're using EVM, this parameter isn't very important.
    */ 
   chain?: Chain;
 
