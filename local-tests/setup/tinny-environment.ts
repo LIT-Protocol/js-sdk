@@ -15,10 +15,11 @@ import {
 } from '@lit-protocol/types';
 import { TinnyPerson } from './tinny-person';
 
-import { ethers } from 'ethers';
+import { ethers, Signer } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 import { toErrorWithMessage } from './tinny-utils';
+import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
 
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
@@ -33,7 +34,10 @@ export class TinnyEnvironment {
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
-      parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
+      parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
+      (process.env['NETWORK'] as LIT_TESTNET) === 'datil-dev'
+        ? 1
+        : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
@@ -223,7 +227,13 @@ export class TinnyEnvironment {
   async setupLitNodeClient() {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    console.log('this.network:', this.network);
+    const centralisation = CENTRALISATION_BY_NETWORK[this.network];
+
+    if (
+      this.network === LIT_TESTNET.LOCALCHAIN ||
+      centralisation === 'unknown'
+    ) {
       const networkContext =
         this?.testnet?.ContractContext ?? this._contractContext;
       this.litNodeClient = new LitNodeClient({
@@ -233,18 +243,20 @@ export class TinnyEnvironment {
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
       });
-    } else if (this.network === LIT_TESTNET.MANZANO) {
+    } else if (centralisation === 'decentralised') {
       this.litNodeClient = new LitNodeClient({
-        litNetwork: this.network, // 'habanero' or 'manzano'
+        litNetwork: this.network,
         checkNodeAttestation: true,
         debug: this.processEnvs.DEBUG,
       });
-    } else {
+    } else if (centralisation === 'centralised') {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: false,
         debug: this.processEnvs.DEBUG,
       });
+    } else {
+      throw new Error(`Network not supported: "${this.network}"`);
     }
 
     if (globalThis.wasmExports) {
@@ -464,7 +476,19 @@ export class TinnyEnvironment {
         rpc: this.rpc,
         customContext: networkContext,
       });
-    } else {
+    } else if (
+      CENTRALISATION_BY_NETWORK[this.network] === 'decentralised' ||
+      CENTRALISATION_BY_NETWORK[this.network] === 'centralised'
+    ) {
+      this.contractsClient = new LitContracts({
+        signer: wallet,
+        debug: this.processEnvs.DEBUG,
+        network: this.network,
+      });
+    }
+
+    // THE FOLLOWING WILL TECHNICALLY NEVER BE CALLED, BUT IT'S HERE FOR FUTURE REFERENCE FOR SWITCHING WALLETS
+    else {
       async function _switchWallet() {
         // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
         // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
@@ -494,6 +518,11 @@ export class TinnyEnvironment {
       });
     }
 
+    if (!this.contractsClient) {
+      console.log('❗️Contracts client not initialized');
+      process.exit();
+    }
+
     await this.contractsClient.connect();
 
     /**
@@ -501,40 +530,41 @@ export class TinnyEnvironment {
      * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
      * ====================================
      */
-
-    // Disabled for now
-    async function _mintSuperCapacityDelegationAuthSig() {
-      console.log(
-        '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
-      );
-      try {
-        const capacityTokenId = (
-          await this.contractsClient.mintCapacityCreditsNFT({
-            requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-            daysUntilUTCMidnightExpiration: 2,
-          })
-        ).capacityTokenIdStr;
-
-        this.superCapacityDelegationAuthSig = (
-          await this.litNodeClient.createCapacityDelegationAuthSig({
-            dAppOwnerWallet: wallet,
-            capacityTokenId: capacityTokenId,
-            // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
-            uses: '200',
-          })
-        ).capacityDelegationAuthSig;
-      } catch (e: any) {
-        if (
-          e.message.includes(`Can't allocate capacity beyond the global max`)
-        ) {
-          console.log('❗️Skipping capacity delegation auth sig setup.', e);
-        } else {
-          console.log(
-            '❗️Error while setting up capacity delegation auth sig',
-            e
-          );
-        }
-      }
+    if (CENTRALISATION_BY_NETWORK[this.network] === 'decentralised') {
+      await this.mintSuperCapacityDelegationAuthSig(wallet);
     }
   };
+
+  async mintSuperCapacityDelegationAuthSig(wallet: Signer) {
+    console.log(
+      '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
+    );
+
+    const capacityTokenId = (
+      await this.contractsClient.mintCapacityCreditsNFT({
+        requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
+        daysUntilUTCMidnightExpiration: 2,
+      })
+    ).capacityTokenIdStr;
+
+    try {
+      this.superCapacityDelegationAuthSig = (
+        await this.litNodeClient.createCapacityDelegationAuthSig({
+          dAppOwnerWallet: wallet,
+          capacityTokenId: capacityTokenId,
+          // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+          uses: '200',
+        })
+      ).capacityDelegationAuthSig;
+    } catch (e: any) {
+      if (e.message.includes(`Can't allocate capacity beyond the global max`)) {
+        console.log('❗️Skipping capacity delegation auth sig setup.', e);
+      } else {
+        console.log(
+          '❗️Error while setting up capacity delegation auth sig',
+          e
+        );
+      }
+    }
+  }
 }
