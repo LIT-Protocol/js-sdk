@@ -1,8 +1,11 @@
 [package]
 name = "lit-utilities-wasm"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 publish = true
+description = "Cryptographic utilities used by Lit Protocol network for client side operations"
+homepage = "https://github.com/LIT-Protocol/js-sdk"
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
