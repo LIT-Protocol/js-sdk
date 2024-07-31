@@ -1971,11 +1971,11 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * This is one of the methods that can be used to get session signatures. 
+   * Get session signatures for a set of [Lit resources](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.ILitResource.html#resource).
    *
    * How this function works on a high level:
-   * 1. Generate or retrieve session keys (a public and private key pair)
-   * 2. Generate or retrieve the `AuthSig` that specifies the session capabilities and resources
+   * 1. Generate or retrieve [session keys](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.SessionKeyPair.html) (a public and private key pair)
+   * 2. Generate or retrieve the [`AuthSig`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.AuthSig.html) that specifies the session [abilities](https://v6-api-doc-lit-js-sdk.vercel.app/enums/auth_helpers_src.LitAbility.html)
    * 3. Sign the specific resources with the session key
    *
    * 

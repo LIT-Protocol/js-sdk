@@ -39,7 +39,7 @@ export interface AccsOperatorParams {
 export interface AuthSig {
 
   /**
-   * The signature produced by signing the `signMessage` property with the `address` property. 
+   * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property. 
    */
   sig: any;
 
@@ -49,7 +49,7 @@ export interface AuthSig {
   derivedVia: string;
 
   /**
-   * A SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
+   * An [ERC-5573](https://eips.ethereum.org/EIPS/eip-5573) SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
    * -  [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
    * -  [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
    * -  [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
@@ -57,7 +57,7 @@ export interface AuthSig {
   signedMessage: string;
 
   /**
-   * The Ethereum public key address that was used to sign `signedMessage` and create the `sig`.
+   * The Ethereum address that was used to sign `signedMessage` and create the `sig`.
    */
   address: string;
 
@@ -1083,12 +1083,12 @@ export interface GetSignSessionKeySharesProp {
 }
 export interface CommonGetSessionSigsProps {
   /**
-   * If you want to pass the `authNeededCallback`, having a PKP public key is necessary. This can be used if you do not have a wallet and wish to authenticate with your PKP.
+   * 
    */
   pkpPublicKey?: string;
 
   /**
-   * When this session signature will expire. After this time is up, you will need to reauthenticate using the same authentication method, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
+   * When this session signature will expire. After this time is up you will need to reauthenticate, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
    */
   expiration?: any;
 
@@ -1116,7 +1116,7 @@ export interface CommonGetSessionSigsProps {
   sessionCapabilityObject?: ISessionCapabilityObject;
 
   /**
-   * If you want to ask MetaMask to try and switch the user's chain, you may pass true here.  This will only work if the user is using MetaMask.  If the user is not using MetaMask, then this will be ignored.
+   * If you want to ask MetaMask to try and switch the user's chain, you may pass true here. This will only work if the user is using MetaMask, otherwise this will be ignored.
    */
   switchChain?: boolean;
   /**
@@ -1163,7 +1163,7 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  * for that node specifically.
  * 
  * Each individual session signature for each node includes the following properties:
- * -  `sig`: The signature produced by the ed25519 key pair signing the `signedMessage` payload.
+ * -  `sig`: The signature produced by the ECDSA key pair signing the `signedMessage` payload.
  * 
  * -  `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
  * 
