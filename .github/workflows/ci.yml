@@ -32,7 +32,7 @@ jobs:
         run: yarn build:dev
       - name: Run Unit tests
         run: yarn tools --test --unit
-  intigration-tests:
+  integration-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

@@ -28,7 +28,7 @@ export interface ShivaEnvs {
   STOP_TESTNET: boolean;
 
   /**
-   * URL for Testnet manager intigration
+   * URL for Testnet manager integration
    */
   TESTNET_MANAGER_URL: string;
 
