@@ -135,7 +135,10 @@ export class TestnetClient {
         this._id
     );
 
-    return _processTestnetResponse<boolean>(res);
+    let testNetInfoRes = await _processTestnetResponse<TestNetInfo>(res);
+    this._info = testNetInfoRes.body;
+
+    return testNetInfoRes;
   }
 
   /**
