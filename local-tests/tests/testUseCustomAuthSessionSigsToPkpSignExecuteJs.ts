@@ -3,7 +3,10 @@ import {
   LitActionResource,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
-import { AuthMethodScope } from '@lit-protocol/constants';
+import {
+  AuthMethodScope,
+  CENTRALISATION_BY_NETWORK,
+} from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { stringToIpfsHash } from 'local-tests/setup/tinny-utils';
 
@@ -77,6 +80,9 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
 
   console.log('✅ addPermittedActionReceipt:', addPermittedActionReceipt);
 
+  const centralisation =
+    CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
+
   const litActionSessionSigs =
     await devEnv.litNodeClient.getLitActionSessionSigs({
       pkpPublicKey: alice.pkp.publicKey,
@@ -97,9 +103,11 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
         customAuthMethod: customAuthMethod,
         sigName: 'custom-auth-sig',
       },
-    });
 
-  console.log('litActionSessionSigs:', litActionSessionSigs);
+      ...(centralisation === 'decentralised' && {
+        capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
+      }),
+    });
 
   // -- pkp sign test
   try {
@@ -115,7 +123,7 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }
-
+  process.exit();
   // -- execute js
   try {
     const res = await devEnv.litNodeClient.executeJs({

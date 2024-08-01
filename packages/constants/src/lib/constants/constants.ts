@@ -695,6 +695,7 @@ export const LIT_NETWORK = {
   Habanero: 'habanero',
   DatilDev: 'datil-dev',
   DatilTest: 'datil-test',
+  Datil: 'datil',
   Custom: 'custom',
   Localhost: 'localhost',
 };
@@ -720,6 +721,7 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   habanero: LIT_RPC.CHRONICLE,
   'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
+  datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
   localhost: LIT_RPC.LOCAL_ANVIL,
 };
@@ -735,6 +737,7 @@ export const RELAYER_URL_BY_NETWORK: {
   habanero: 'https://habanero-relayer.getlit.dev',
   'datil-dev': 'https://datil-dev-relayer.getlit.dev',
   'datil-test': 'https://datil-test-relayer.getlit.dev',
+  datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
   localhost: 'http://localhost:3000',
 };
@@ -751,6 +754,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   habanero: metamaskChainInfo.chronicle,
   'datil-dev': metamaskChainInfo.yellowstone,
   'datil-test': metamaskChainInfo.yellowstone,
+  datil: metamaskChainInfo.yellowstone,
   custom: metamaskChainInfo.yellowstone,
   localhost: metamaskChainInfo.yellowstone,
 };
@@ -787,6 +791,7 @@ export const CENTRALISATION_BY_NETWORK: Record<
   habanero: 'decentralised',
   'datil-dev': 'centralised',
   'datil-test': 'decentralised',
+  datil: 'decentralised',
   custom: 'unknown',
   localhost: 'unknown',
 } as const;
@@ -947,6 +952,7 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   [LitNetwork.Manzano]: [],
   [LitNetwork.DatilDev]: [],
   [LitNetwork.DatilTest]: [],
+  [LitNetwork.Datil]: [],
   [LitNetwork.Habanero]: [],
   [LitNetwork.Custom]: [],
   // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
@@ -979,7 +985,6 @@ export const AUTH_METHOD_TYPE_IDS = {
 
 // ========== PKP Client ==========
 export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
-export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
 
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
