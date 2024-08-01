@@ -31,7 +31,7 @@ export interface ShivaEnvs {
   STOP_TESTNET: boolean;
 
   /**
-   * URL for Testnet manager integration
+   * URL for Testnet manager intigration
    */
   TESTNET_MANAGER_URL: string;
 
@@ -173,10 +173,7 @@ export class TestnetClient {
         this._id
     );
 
-    let testNetInfoRes = await _processTestnetResponse<TestNetInfo>(res);
-    this._info = testNetInfoRes.body;
-
-    return testNetInfoRes;
+    return _processTestnetResponse<boolean>(res);
   }
 
   /**
