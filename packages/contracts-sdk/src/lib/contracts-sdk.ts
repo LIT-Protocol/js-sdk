@@ -1681,18 +1681,20 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       claimAndMint: async (
         derivedKeyId: BytesLike,
         signatures: IPubkeyRouter.SignatureStruct[],
-        txOpts: ethers.PayableOverrides & { from?: string } = {}
+        txOpts: ethers.PayableOverrides & { from?: string }
       ) => {
         try {
-          if (!txOpts.value) {
+          const overrides = txOpts ?? {};
+
+          if (!overrides.value) {
             const cost = await this.pkpNftContract.read.mintCost();
-            txOpts.value = cost;
+            overrides.value = cost;
           }
           const tx = await this.callWithGasMargin(
             this.pkpNftContract.write,
             'claimAndMint',
             [2, derivedKeyId, signatures],
-            txOpts
+            overrides
           );
 
           const txRec = await tx.wait();
@@ -2446,22 +2448,22 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   private callWithGasMargin = async (
     contract: ethers.Contract,
     method: string,
-    args: any[],
+    args: unknown[],
     overrides: ethers.PayableOverrides & { from?: string } = {},
     percentageIncrease: number = GAS_LIMIT_INCREASE_PERCENTAGE
   ) => {
-    if (!overrides.gasLimit) {
+    const _overrides = overrides;
+
+    if (!_overrides.gasLimit) {
       const txData = await contract.populateTransaction[method](
         ...args,
-        overrides
+        _overrides
       );
       const gasEstimation = await contract.provider.estimateGas(txData);
-      const adjustedGasLimit = gasEstimation
-        .mul(100 + percentageIncrease)
-        .div(100);
-      overrides.gasLimit = adjustedGasLimit;
+      const adjustedGasLimit = gasEstimation.mul(percentageIncrease);
+      _overrides.gasLimit = adjustedGasLimit;
     }
 
-    return contract[method](...args, overrides);
+    return contract[method](...args, _overrides);
   };
 }
