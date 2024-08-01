@@ -1083,7 +1083,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const mintCost = await this.pkpNftContract.read.mintCost();
 
     // -- start minting
-    const tx = await this.callWithGasMargin(
+    const tx = await this._callWithAdjustedOverrides(
       this.pkpHelperContract.write,
       'mintNextAndAddAuthMethods',
       [
@@ -1208,7 +1208,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const _webAuthnPubkey = webAuthnPubkey ?? '0x';
 
     try {
-      const res = await this.callWithGasMargin(
+      const res = await this._callWithAdjustedOverrides(
         this.pkpPermissionsContract.write,
         'addPermittedAuthMethod',
         [
@@ -1252,7 +1252,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const scopes = authMethodScopes ?? [];
 
     try {
-      const res = await this.callWithGasMargin(
+      const res = await this._callWithAdjustedOverrides(
         this.pkpPermissionsContract.write,
         'addPermittedAction',
         [pkpTokenId, ipfsIdBytes, scopes]
@@ -1362,7 +1362,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     this.log('Expiration Date (UTC):', expirationDate.toUTCString());
 
     try {
-      const res = await this.callWithGasMargin(
+      const res = await this._callWithAdjustedOverrides(
         this.rateLimitNftContract.write,
         'mint',
         [expiresAt],
@@ -1628,7 +1628,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         }
 
         this.log('...signing and sending tx');
-        const sentTx = await this.callWithGasMargin(
+        const sentTx = await this._callWithAdjustedOverrides(
           this.pkpNftContract.write,
           'mintNext',
           [2],
@@ -1694,7 +1694,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             const cost = await this.pkpNftContract.read.mintCost();
             overrides.value = cost;
           }
-          const tx = await this.callWithGasMargin(
+          const tx = await this._callWithAdjustedOverrides(
             this.pkpNftContract.write,
             'claimAndMint',
             [2, derivedKeyId, signatures],
@@ -1928,7 +1928,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
         this.log('[addPermittedAction] converted<ipfsIdBytes>:', ipfsIdBytes);
 
-        const tx = await this.callWithGasMargin(
+        const tx = await this._callWithAdjustedOverrides(
           this.pkpPermissionsContract.write,
           'addPermittedAction',
           [tokenId, ipfsIdBytes, [1]]
@@ -1967,7 +1967,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('[addPermittedAddress] input<pkpId>:', pkpId);
 
-        const tx = await this.callWithGasMargin(
+        const tx = await this._callWithAdjustedOverrides(
           this.pkpPermissionsContract.write,
           'addPermittedAddress',
           [pkpId, ownerAddress, [1]]
@@ -2006,7 +2006,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
         this.log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
 
-        const tx = await this.callWithGasMargin(
+        const tx = await this._callWithAdjustedOverrides(
           this.pkpPermissionsContract.write,
           'removePermittedAction',
           [pkpId, ipfsHash]
@@ -2300,7 +2300,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        const tx = await this.callWithGasMargin(
+        const tx = await this._callWithAdjustedOverrides(
           this.rateLimitNftContract.write,
           'mint',
           [timestamp],
@@ -2341,7 +2341,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        const tx = await this.callWithGasMargin(
+        const tx = await this._callWithAdjustedOverrides(
           this.rateLimitNftContract.write,
           'transferFrom',
           [fromAddress, toAddress, RLITokenAddress]
@@ -2405,7 +2405,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         // first get mint cost
         const mintCost = await this.pkpNftContract.read.mintCost();
 
-        const tx = await this.callWithGasMargin(
+        const tx = await this._callWithAdjustedOverrides(
           this.pkpHelperContract.write,
           'mintNextAndAddAuthMethods',
           [
@@ -2449,25 +2449,35 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     },
   };
 
-  private callWithGasMargin = async (
+  private _getAdjustedGasLimit = async (
     contract: ethers.Contract,
     method: string,
     args: unknown[],
     overrides: ethers.PayableOverrides & { from?: string } = {},
     gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
   ) => {
-    const _overrides = overrides;
+    const gasLimit = await contract.estimateGas[method](...args, overrides);
+    return gasLimit.mul(gasLimitAdjustment);
+  };
 
-    if (!_overrides.gasLimit) {
-      const txData = await contract.populateTransaction[method](
-        ...args,
-        _overrides
-      );
-      const gasEstimation = await contract.provider.estimateGas(txData);
-      const adjustedGasLimit = gasEstimation.mul(gasLimitAdjustment);
-      _overrides.gasLimit = adjustedGasLimit;
-    }
-
-    return contract[method](...args, _overrides);
+  private _callWithAdjustedOverrides = async (
+    contract: ethers.Contract,
+    method: string,
+    args: unknown[],
+    overrides: ethers.PayableOverrides & { from?: string } = {},
+    gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
+  ) => {
+    return contract[method](...args, {
+      ...overrides,
+      gasLimit:
+        overrides.gasLimit ??
+        (await this._getAdjustedGasLimit(
+          contract,
+          method,
+          args,
+          overrides,
+          gasLimitAdjustment
+        )),
+    });
   };
 }
