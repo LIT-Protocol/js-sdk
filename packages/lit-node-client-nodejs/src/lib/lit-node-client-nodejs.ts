@@ -1978,15 +1978,15 @@ export class LitNodeClientNodeJs
    * 2. Generate or retrieve the [`AuthSig`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.AuthSig.html) that specifies the session [abilities](https://v6-api-doc-lit-js-sdk.vercel.app/enums/auth_helpers_src.LitAbility.html)
    * 3. Sign the specific resources with the session key
    *
-   * 
+   *
    * Note: When generating session signatures for different PKPs or auth methods,
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
-   * 
-   * 
+   *
+   *
    * @param { GetSessionSigsProps } params
    *
    * An example of how this function is used can be found in the Lit developer-guides-code repository [here](https://github.com/LIT-Protocol/developer-guides-code/tree/master/session-signatures/getSessionSigs).
-   * 
+   *
    */
   getSessionSigs = async (
     params: GetSessionSigsProps

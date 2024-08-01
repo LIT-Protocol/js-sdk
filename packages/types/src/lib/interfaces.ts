@@ -37,9 +37,8 @@ export interface AccsOperatorParams {
  * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
  */
 export interface AuthSig {
-
   /**
-   * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property. 
+   * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
    */
   sig: any;
 
@@ -1054,7 +1053,7 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
   authSig?: AuthSig;
 
   /**
-   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now. 
+   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
    */
   expiration?: string;
 
@@ -1083,7 +1082,7 @@ export interface GetSignSessionKeySharesProp {
 }
 export interface CommonGetSessionSigsProps {
   /**
-   * 
+   *
    */
   pkpPublicKey?: string;
 
@@ -1094,13 +1093,13 @@ export interface CommonGetSessionSigsProps {
 
   /**
    * The chain to use for the session signature and sign the session key. This value is almost always `ethereum`. If you're using EVM, this parameter isn't very important.
-   */ 
+   */
   chain?: Chain;
 
   /**
    * An array of resource abilities that you want to request for this session. These will be signed with the session key.
    * If you want to request the ability to decrypt an access control condition, then you would pass something similar to the example:
-   * @example 
+   * @example
    * [{ resource: new LitAccessControlConditionResource('someResource`), ability: LitAbility.AccessControlConditionDecryption }]
    */
   resourceAbilityRequests: LitResourceAbilityRequest[];
@@ -1161,16 +1160,16 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 /**
  * A map of node addresses to the session signature payload
  * for that node specifically.
- * 
+ *
  * Each individual session signature for each node includes the following properties:
  * -  `sig`: The signature produced by the ECDSA key pair signing the `signedMessage` payload.
- * 
+ *
  * -  `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
- * 
+ *
  * -  `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
- * 
+ *
  * -  `address`: The session key pair public key.
- * 
+ *
  * -  `algo`: The signing algorithm used to generate the session signature.
  */
 export type SessionSigsMap = Record<string, AuthSig>;
