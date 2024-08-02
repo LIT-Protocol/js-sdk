@@ -6,7 +6,7 @@ publish = true
 description = "Cryptographic utilities used by Lit Protocol network for client side operations"
 homepage = "https://github.com/LIT-Protocol/js-sdk"
 license = "MIT"
-
+repository = "https://github.com/LIT-Protocol/js-sdk"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
