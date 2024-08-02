@@ -42,7 +42,7 @@ sev = { version = "2.0.2", default-features = false, features = [
 rand = "0.8"
 serde_bytes = "0.11.14"
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
-jubjub = { version = "0.10.4", git = "https://github.com/LIT-Protocol/jubjub.git", branch = "main"}
+jubjub-plus = { version = "0.10.4" }
 
 
 [dev-dependencies]
