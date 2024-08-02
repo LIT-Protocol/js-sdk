@@ -129,7 +129,7 @@ export async function blsVerify(
   signature: Uint8Array
 ): Promise<void> {
   await loadModules();
-  wasmInternal.blsVerify(variant, public_key, message, signature);
+  return wasmInternal.blsVerify(variant, public_key, message, signature);
 }
 
 /**
@@ -178,6 +178,7 @@ export async function ecdsaDeriveKey(
  * Supports:
  * - k256
  * - p256
+ ** Note ** Not currently supported through the lit network. Please use other ECSDSA signature verification
  * @param {EcdsaVariant} variant
  * @param {Uint8Array} message_hash
  * @param {Uint8Array} public_key
@@ -190,7 +191,38 @@ export async function ecdsaVerify(
   signature: [Uint8Array, Uint8Array, number]
 ): Promise<void> {
   await loadModules();
-  wasmInternal.ecdsaVerify(variant, message_hash, public_key, signature);
+  return wasmInternal.ecdsaVerify(variant, message_hash, public_key, signature);
+}
+
+/**
+ * Combiner and verifier for ECDSA signatures
+ *
+ * Supports:
+ * - k256
+ * - p256
+ *  ** Note ** Not currently supported through the lit network. Please use other ECSDSA signature verification
+ * @param {EcdsaVariant} variant
+ * @param {Uint8Array} pre_signature
+ * @param {Uint8Array[]} signature_shares
+ * @param {Uint8Array} message_hash
+ * @param {Uint8Array} public_key
+ * @param {[Uint8Array, Uint8Array, number]} signature
+ */
+export async function ecdsaCombnieAndVerify(
+  variant: EcdsaVariant,
+  pre_signature: Uint8Array,
+  signature_shares: Uint8Array[],
+  message_hash: Uint8Array,
+  public_key: Uint8Array
+): Promise<[Uint8Array, Uint8Array, number]> {
+  await loadModules();
+  return wasmInternal.ecdsaCombineAndVerify(
+    variant,
+    pre_signature,
+    signature_shares,
+    message_hash,
+    public_key
+  );
 }
 
 /**
