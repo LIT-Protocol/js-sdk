@@ -207,6 +207,10 @@ Having done this setup, this is what the development cycle looks like moving for
 2. Rebuild specific package
 3. Rebuild client application.
 
+### Building changes to Rust source
+If changes are made to `packages/wasm` see [here](./packages/wasm/README.md) for info on building from source.
+
+
 ## Publishing
 
 You must have at least nodejs v18 to do this.
