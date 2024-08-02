@@ -82,7 +82,8 @@
     "tslib": "^2.3.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "verror": "^1.10.1"
   },
   "devDependencies": {
     "@nx/eslint-plugin": "17.3.0",
@@ -99,6 +100,7 @@
     "@types/jest": "27.4.1",
     "@types/node": "18.19.18",
     "@types/secp256k1": "^4.0.6",
+    "@types/verror": "^1.10.10",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
     "babel-jest": "27.5.1",

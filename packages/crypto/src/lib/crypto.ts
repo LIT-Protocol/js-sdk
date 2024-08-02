@@ -1,10 +1,18 @@
-import { isBrowser, log, logError, throwError } from '@lit-protocol/misc';
+import { splitSignature } from 'ethers/lib/utils';
 
+import { LIT_CURVE, NoValidShares } from '@lit-protocol/constants';
+import { log } from '@lit-protocol/misc';
+import { nacl } from '@lit-protocol/nacl';
+import {
+  CombinedECDSASignature,
+  NodeAttestation,
+  SessionKeyPair,
+  SigShare,
+} from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-
 import {
   EcdsaVariant,
   blsCombine,
@@ -17,16 +25,6 @@ import {
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
-
-import { LIT_ERROR, LIT_CURVE } from '@lit-protocol/constants';
-import { nacl } from '@lit-protocol/nacl';
-import {
-  CombinedECDSASignature,
-  NodeAttestation,
-  SessionKeyPair,
-  SigShare,
-} from '@lit-protocol/types';
-import { splitSignature } from 'ethers/lib/utils';
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
@@ -159,18 +157,21 @@ const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE, EcdsaVariant>> = {
  *
  */
 export const combineEcdsaShares = async (
-  sigShares: Array<SigShare>
+  sigShares: SigShare[]
 ): Promise<CombinedECDSASignature> => {
   const validShares = sigShares.filter((share) => share.signatureShare);
 
   const anyValidShare = validShares[0];
 
   if (!anyValidShare) {
-    return throwError({
-      message: 'No valid shares to combine',
-      errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
-      errorCode: LIT_ERROR.NO_VALID_SHARES.name,
-    });
+    throw new NoValidShares(
+      {
+        info: {
+          shares: sigShares,
+        },
+      },
+      'No valid shares to combine'
+    );
   }
 
   const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE];
@@ -184,7 +185,7 @@ export const combineEcdsaShares = async (
   const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
   const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
 
-  ecdsaVerify(variant!, messageHash, publicKey, [r, s, v]);
+  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, v]);
 
   const signature = splitSignature(Buffer.concat([r, s, Buffer.from([v])]));
 

@@ -191,7 +191,7 @@ describe('combine ECDSA Shares', () => {
       },
     ];
 
-    let sig = await combineEcdsaShares(sigShares);
+    const sig = await combineEcdsaShares(sigShares);
     expect(sig.r).toBeDefined();
     expect(sig.s).toBeDefined();
     expect(sig.recid).toBeDefined();
@@ -202,7 +202,7 @@ describe('combine ECDSA Shares', () => {
       v: sig.recid,
     });
 
-    let msg: any = ethers.utils.arrayify('0x' + sigShares[0].dataSigned);
+    const msg = ethers.utils.arrayify('0x' + sigShares[0].dataSigned);
     const recoveredPk = ethers.utils.recoverPublicKey(msg, sigRes);
 
     // normalize the public keys to addresses and compare

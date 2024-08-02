@@ -1,14 +1,21 @@
+import { Contract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
+import Ajv, { JSONSchemaType } from 'ajv';
+
 import {
   ABI_ERC20,
   ILitError,
+  InvalidParamType,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_ERROR,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
   RELAYER_URL_BY_NETWORK,
+  RemovedFunctionError,
+  UnknownError,
 } from '@lit-protocol/constants';
-
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 import {
   Chain,
   AuthSig,
@@ -26,13 +33,8 @@ import {
   SuccessNodePromises,
   RejectedNodePromises,
 } from '@lit-protocol/types';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
-import { version } from '@lit-protocol/constants';
-import Ajv, { JSONSchemaType } from 'ajv';
 
-const logBuffer: Array<Array<any>> = [];
+const logBuffer: any[][] = [];
 const ajv = new Ajv();
 
 /**
@@ -55,25 +57,25 @@ export const printError = (e: Error): void => {
  * @param { Array<any> } arr
  * @returns { any } the element that appeared the most
  */
-export const mostCommonString = (arr: Array<any>): any => {
+export const mostCommonString = <T>(arr: T[]): T | undefined => {
   return arr
     .sort(
-      (a: any, b: any) =>
-        arr.filter((v: any) => v === a).length -
-        arr.filter((v: any) => v === b).length
+      (a: T, b: T) =>
+        arr.filter((v: T) => v === a).length -
+        arr.filter((v: T) => v === b).length
     )
     .pop();
 };
 
-export const findMostCommonResponse = (responses: Array<object>): object => {
-  const result: { [key: string]: any } = {};
+export const findMostCommonResponse = (responses: object[]): object => {
+  const result: Record<string, any> = {};
 
   // Aggregate all values for each key across all responses
   const keys = new Set(responses.flatMap(Object.keys));
 
   for (const key of keys) {
     const values = responses.map(
-      (response: { [key: string]: any }) => response[key]
+      (response: Record<string, any>) => response[key]
     );
 
     // Filter out undefined values before processing
@@ -98,6 +100,11 @@ export const findMostCommonResponse = (responses: Array<object>): object => {
   return result;
 };
 
+/**
+ * Throws a NodeClientErrorV0 or NodeClientErrorV1 error
+ * @deprecated throw error classes
+ * @param e
+ */
 export const throwError = (e: NodeClientErrorV0 | NodeClientErrorV1): never => {
   if (isNodeClientErrorV1(e)) {
     return throwErrorV1(e);
@@ -108,10 +115,9 @@ export const throwError = (e: NodeClientErrorV0 | NodeClientErrorV1): never => {
 };
 
 /**
- *
  * Standardized way to throw error in Lit Protocol projects
  *
- * @deprecated use throwErrorV1
+ * @deprecated throw error classes
  * @param { ILitError }
  * @property { string } message
  * @property { string } name
@@ -144,15 +150,15 @@ export const throwErrorV0 = ({
 };
 
 // Map for old error codes to new ones
-const oldErrorToNewErrorMap: { [key: string]: string } = {
+const oldErrorToNewErrorMap: Record<string, string> = {
   not_authorized: 'NodeNotAuthorized',
   storage_error: 'NodeStorageError',
 };
 
 /**
- *
  * Standardized way to throw error in Lit Protocol projects
  *
+ * @deprecated throw error classes
  */
 export const throwErrorV1 = ({
   errorKind,
@@ -189,6 +195,11 @@ export const throwErrorV1 = ({
   );
 };
 
+/**
+ * Throws a generic error
+ * @deprecated throw error classes
+ * @param e
+ */
 export const throwGenericError = (e: any): never => {
   const errConstructorFunc = function (
     this: any,
@@ -196,8 +207,8 @@ export const throwGenericError = (e: any): never => {
     requestId: string
   ) {
     this.message = message;
-    this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
-    this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
+    this.errorKind = LIT_ERROR['UNKNOWN_ERROR'].name;
+    this.errorCode = LIT_ERROR['UNKNOWN_ERROR'].code;
     this.requestId = requestId;
   };
 
@@ -207,6 +218,11 @@ export const throwGenericError = (e: any): never => {
   );
 };
 
+/**
+ * Checks if the given error is a NodeClientErrorV1
+ * @deprecated throw error classes
+ * @param nodeError
+ */
 export const isNodeClientErrorV1 = (
   nodeError: NodeClientErrorV0 | NodeClientErrorV1
 ): nodeError is NodeClientErrorV1 => {
@@ -216,6 +232,11 @@ export const isNodeClientErrorV1 = (
   );
 };
 
+/**
+ * Checks if the given error is a NodeClientErrorV0
+ * @deprecated throw error classes
+ * @param nodeError
+ */
 export const isNodeClientErrorV0 = (
   nodeError: NodeClientErrorV0 | NodeClientErrorV1
 ): nodeError is NodeClientErrorV0 => {
@@ -231,11 +252,14 @@ declare global {
 }
 
 export const throwRemovedFunctionError = (functionName: string) => {
-  throwError({
-    message: `This function "${functionName}" has been removed. Please use the old SDK.`,
-    errorKind: LIT_ERROR.REMOVED_FUNCTION_ERROR.kind,
-    errorCode: LIT_ERROR.REMOVED_FUNCTION_ERROR.name,
-  });
+  throw new RemovedFunctionError(
+    {
+      info: {
+        functionName,
+      },
+    },
+    `This function "${functionName}" has been removed. Please use the old SDK.`
+  );
 };
 
 export const bootstrapLogManager = (
@@ -418,7 +442,7 @@ export const checkType = ({
   throwOnError = true,
 }: {
   value: any;
-  allowedTypes: Array<string> | any;
+  allowedTypes: string[] | any;
   paramName: string;
   functionName: string;
   throwOnError?: boolean;
@@ -434,11 +458,17 @@ export const checkType = ({
     }`;
 
     if (throwOnError) {
-      throwError({
-        message,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            allowedTypes,
+            value,
+            paramName,
+            functionName,
+          },
+        },
+        message
+      );
     }
     return false;
   }
@@ -479,11 +509,16 @@ export const checkSchema = (
 
   if (!validates) {
     if (throwOnError) {
-      throwError({
-        message,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            value,
+            paramName,
+            functionName,
+          },
+        },
+        message
+      );
     }
     return false;
   }
@@ -544,7 +579,7 @@ export const sortedObject = (obj: any): any => {
   const result: any = {};
 
   // NOTE: Use forEach instead of reduce for performance with large objects eg Wasm code
-  sortedKeys.forEach((key: any) => {
+  sortedKeys.forEach((key) => {
     result[key] = sortedObject(obj[key]);
   });
 
@@ -570,6 +605,7 @@ export const numberToHex = (v: number): string => {
  * @param { string } type
  * @param { string } paramName
  * @param { string } functionName
+ * @param { boolean } throwOnError
  * @returns { Boolean } true/false
  */
 export const is = (
@@ -577,21 +613,26 @@ export const is = (
   type: string,
   paramName: string,
   functionName: string,
-  throwOnError = true
-) => {
+  throwOnError: boolean = true
+): boolean => {
   if (getVarType(value) !== type) {
-    let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
+    const message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
     )}" type instead. value: ${
       value instanceof Object ? JSON.stringify(value) : value
     }`;
 
     if (throwOnError) {
-      throwError({
-        message,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            value,
+            paramName,
+            functionName,
+          },
+        },
+        message
+      );
     }
     return false;
   }
@@ -600,7 +641,7 @@ export const is = (
 };
 
 export const isNode = () => {
-  var isNode = false;
+  let isNode = false;
   // @ts-ignore
   if (typeof process === 'object') {
     // @ts-ignore
@@ -706,15 +747,15 @@ export const defaultMintClaimCallback: MintCallback<
     });
 
     if (response.status < 200 || response.status >= 400) {
-      let errResp = (await response.json()) ?? '';
-      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
+      const errResp = (await response.json()) ?? '';
+      const errStmt = `An error occurred requesting "/auth/claim" endpoint ${JSON.stringify(
         errResp
       )}`;
       console.warn(errStmt);
       throw new Error(errStmt);
     }
 
-    let body: any = await response.json();
+    const body = await response.json();
     return body.requestId;
   } catch (e) {
     console.error((e as Error).message);
@@ -877,9 +918,26 @@ export async function getIpAddress(domain: string): Promise<string> {
     if (data.Answer && data.Answer.length > 0) {
       return data.Answer[0].data;
     } else {
-      throw new Error('No IP Address found or bad domain name');
+      throw new UnknownError(
+        {
+          info: {
+            domain,
+            apiURL,
+          },
+        },
+        'No IP Address found or bad domain name'
+      );
     }
   } catch (error: any) {
-    throw new Error(error);
+    throw new UnknownError(
+      {
+        info: {
+          domain,
+          apiURL,
+        },
+        cause: error,
+      },
+      'message' in error ? error.message : String(error)
+    );
   }
 }

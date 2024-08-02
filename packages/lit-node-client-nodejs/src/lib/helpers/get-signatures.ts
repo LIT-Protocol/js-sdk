@@ -1,12 +1,17 @@
 import { joinSignature } from 'ethers/lib/utils';
 
-import { LIT_CURVE, LIT_ERROR } from '@lit-protocol/constants';
+import {
+  LIT_CURVE,
+  NoValidShares,
+  ParamNullError,
+  UnknownSignatureError,
+  UnknownSignatureType,
+} from '@lit-protocol/constants';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
 import {
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
-  throwError,
 } from '@lit-protocol/misc';
 import { SigResponse, SigShare } from '@lit-protocol/types';
 
@@ -145,22 +150,21 @@ export const getSignatures = async <T>(params: {
   ];
 
   if (allKeys.length !== initialKeys.length) {
-    throwError({
-      message: 'total number of valid signatures does not match requested',
-      errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
-      errorCode: LIT_ERROR.NO_VALID_SHARES.code,
-    });
+    throw new NoValidShares(
+      {},
+      'total number of valid signatures does not match requested'
+    );
   }
 
   // -- combine
-  for (var i = 0; i < allKeys.length; i++) {
+  for (const key of allKeys) {
     // here we use a map filter implementation to find common shares in each node response.
     // we then filter out undefined object from the key access.
     // currently we are unable to know the total signature count requested by the user.
     // but this allows for incomplete sets of signature shares to be aggregated
     // and then checked against threshold
     const shares = validatedSignedData
-      .map((r) => r[allKeys[i]])
+      .map((r) => r[key])
       .filter((r) => r !== undefined);
 
     shares.sort((a, b) => a.shareIndex - b.shareIndex);
@@ -193,23 +197,32 @@ export const getSignatures = async <T>(params: {
         `not enough nodes to get the signatures.  Expected ${minNodeCount}, got ${shares.length}`
       );
 
-      throwError({
-        message: `The total number of valid signatures shares ${shares.length} does not meet the threshold of ${minNodeCount}`,
-        errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
-        errorCode: LIT_ERROR.NO_VALID_SHARES.code,
-        requestId,
-      });
+      throw new NoValidShares(
+        {
+          info: {
+            requestId,
+            shares: shares.length,
+            minNodeCount,
+          },
+        },
+        'The total number of valid signatures shares %s does not meet the threshold of %s',
+        shares.length,
+        minNodeCount
+      );
     }
 
     const sigType = mostCommonString(shares.map((s) => s.sigType));
 
     // -- validate if this.networkPubKeySet is null
     if (networkPubKeySet === null) {
-      return throwError({
-        message: 'networkPubKeySet cannot be null',
-        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-      });
+      throw new ParamNullError(
+        {
+          info: {
+            requestId,
+          },
+        },
+        'networkPubKeySet cannot be null'
+      );
     }
 
     // -- validate if signature type is ECDSA
@@ -218,20 +231,29 @@ export const getSignatures = async <T>(params: {
       sigType !== LIT_CURVE.EcdsaK256 &&
       sigType !== LIT_CURVE.EcdsaCAITSITHP256
     ) {
-      return throwError({
-        message: `signature type is ${sigType} which is invalid`,
-        errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
-        errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
-      });
+      throw new UnknownSignatureType(
+        {
+          info: {
+            requestId,
+            signatureType: sigType,
+          },
+        },
+        'signature type is %s which is invalid',
+        sigType
+      );
     }
 
     const signature = await combineEcdsaShares(shares);
     if (!signature.r) {
-      throwError({
-        message: 'siganture could not be combined',
-        errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
-      });
+      throw new UnknownSignatureError(
+        {
+          info: {
+            requestId,
+            signature,
+          },
+        },
+        'signature could not be combined'
+      );
     }
 
     const encodedSig = joinSignature({
@@ -240,7 +262,7 @@ export const getSignatures = async <T>(params: {
       v: signature.recid,
     });
 
-    signatures[allKeys[i]] = {
+    signatures[key] = {
       ...signature,
       signature: encodedSig,
       publicKey: mostCommonString(shares.map((s) => s.publicKey)),

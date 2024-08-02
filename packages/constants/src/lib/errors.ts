@@ -1,3 +1,5 @@
+import { Options, VError } from 'verror';
+
 export enum LitErrorKind {
   Unknown = 'Unknown',
   Unexpected = 'Unexpected',
@@ -10,7 +12,13 @@ export enum LitErrorKind {
   Timeout = 'Timeout',
 }
 
-export const LIT_ERROR = {
+interface ErrorConfig {
+  name: string;
+  code: string;
+  kind: LitErrorKind;
+}
+
+export const LIT_ERROR: Record<string, ErrorConfig> = {
   INVALID_PARAM_TYPE: {
     name: 'InvalidParamType',
     code: 'invalid_param_type',
@@ -46,9 +54,9 @@ export const LIT_ERROR = {
     code: 'lit_node_client_not_ready_error',
     kind: LitErrorKind.Unexpected,
   },
-  UNAUTHROZIED_EXCEPTION: {
-    name: 'UnauthroziedException',
-    code: 'unauthrozied_exception',
+  UNAUTHORIZED_EXCEPTION: {
+    name: 'UnauthorizedException',
+    code: 'unauthorized_exception',
     kind: LitErrorKind.Validation,
   },
   INVALID_ARGUMENT_EXCEPTION: {
@@ -96,6 +104,11 @@ export const LIT_ERROR = {
     code: 'removed_function_error',
     kind: LitErrorKind.Validation,
   },
+  UNSUPPORTED_METHOD_ERROR: {
+    name: 'UnsupportedMethodError',
+    code: 'unsupported_method_error',
+    kind: LitErrorKind.Validation,
+  },
   LIT_NODE_CLIENT_BAD_CONFIG_ERROR: {
     name: 'LitNodeClientBadConfigError',
     code: 'lit_node_client_bad_config_error',
@@ -141,6 +154,11 @@ export const LIT_ERROR = {
     code: 'nodejs_exception',
     kind: LitErrorKind.Unexpected,
   },
+  NODE_ERROR: {
+    name: 'NodeError',
+    code: 'node_error',
+    kind: LitErrorKind.Unknown,
+  },
   WALLET_SIGNATURE_NOT_FOUND_ERROR: {
     name: 'WalletSignatureNotFoundError',
     code: 'wallet_signature_not_found_error',
@@ -171,3 +189,81 @@ export const LIT_ERROR = {
 export const LIT_ERROR_CODE = {
   NODE_NOT_AUTHORIZED: 'NodeNotAuthorized',
 };
+
+function createErrorClass({
+  name,
+  code,
+  kind,
+}: {
+  name: string;
+  code: string;
+  kind: string;
+}) {
+  return class extends VError {
+    constructor(options: Error | Options, message: string, ...params: any[]) {
+      if (options instanceof Error) {
+        options = {
+          cause: options,
+        };
+      }
+
+      super(
+        {
+          name,
+          ...options,
+          info: {
+            code,
+            kind,
+            ...options.info,
+          },
+        },
+        message,
+        ...params
+      );
+    }
+  };
+}
+
+const errorClasses: Record<string, any> = {};
+for (const key in LIT_ERROR) {
+  if (key in LIT_ERROR) {
+    const errorDef = LIT_ERROR[key];
+    errorClasses[errorDef.name] = createErrorClass(errorDef);
+  }
+}
+
+export const {
+  InitError,
+  InvalidAccessControlConditions,
+  InvalidArgumentException,
+  InvalidBooleanException,
+  InvalidEthBlockhash,
+  InvalidNodeAttestation,
+  InvalidParamType,
+  InvalidSignatureError,
+  InvalidUnifiedConditionType,
+  LitNodeClientBadConfigError,
+  LitNodeClientNotReadyError,
+  LocalStorageItemNotFoundException,
+  LocalStorageItemNotRemovedException,
+  LocalStorageItemNotSetException,
+  MintingNotSupported,
+  NoValidShares,
+  NoWalletException,
+  NodeError,
+  NodejsException,
+  ParamNullError,
+  ParamsMissingError,
+  RemovedFunctionError,
+  UnauthorizedException,
+  UnknownDecryptionAlgorithmTypeError,
+  UnknownError,
+  UnknownSignatureError,
+  UnknownSignatureType,
+  UnsupportedChainException,
+  UnsupportedMethodError,
+  WalletSignatureNotFoundError,
+  WasmInitError,
+  WrongNetworkException,
+  WrongParamFormat,
+} = errorClasses;

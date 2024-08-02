@@ -1,5 +1,9 @@
 import { EITHER_TYPE } from '../enums';
-import { IEither, ILitError } from '../interfaces/i-errors';
+import {
+  IEitherSuccess,
+  IEitherError,
+  ILitError,
+} from '../interfaces/i-errors';
 
 /**
  *
@@ -8,7 +12,7 @@ import { IEither, ILitError } from '../interfaces/i-errors';
  * @param errorMsg is the error message
  * @returns { IEither }
  */
-export function ELeft<T>(errorMsg: ILitError): IEither<T> {
+export function ELeft(errorMsg: ILitError): IEitherError {
   return {
     type: EITHER_TYPE.ERROR,
     result: errorMsg,
@@ -22,7 +26,7 @@ export function ELeft<T>(errorMsg: ILitError): IEither<T> {
  * @param result is the successful return value
  * @returns
  */
-export function ERight<T>(result: T): IEither<T> {
+export function ERight<T>(result: T): IEitherSuccess<T> {
   return {
     type: EITHER_TYPE.SUCCESS,
     result,

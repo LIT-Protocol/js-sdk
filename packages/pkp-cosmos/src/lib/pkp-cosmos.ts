@@ -33,6 +33,7 @@ import {
 } from '@cosmjs/stargate';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
+import { InvalidArgumentException } from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
@@ -151,7 +152,15 @@ export class PKPCosmosWallet
 
     // Check if the provided address matches the wallet address, and throw an error if it doesn't.
     if (address !== this.address) {
-      return this.pkpBase.throwError(`Address ${address} not found in wallet`);
+      throw new InvalidArgumentException(
+        {
+          info: {
+            address,
+            walletAddress: this.address,
+          },
+        },
+        `Address ${address} not found in wallet`
+      );
     }
 
     // Hash the binary format of the transaction data.
