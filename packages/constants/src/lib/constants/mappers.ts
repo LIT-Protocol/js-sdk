@@ -5,6 +5,7 @@ import {
   habanero,
   datilDev,
   datilTest,
+  datil,
 } from '@lit-protocol/contracts';
 
 /**
@@ -18,6 +19,7 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
   habanero: habanero,
   'datil-dev': datilDev,
   'datil-test': datilTest,
+  datil: datil,
 
   // just use datil dev abis for custom and localhost
   custom: datilDev,

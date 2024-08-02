@@ -25,6 +25,11 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
         chain: 'yellowstone',
         chainId: LIT_CHAINS['yellowstone'].chainId,
       };
+    case 'datil':
+      return {
+        chain: 'yellowstone',
+        chainId: LIT_CHAINS['yellowstone'].chainId,
+      };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
   }
@@ -45,6 +50,8 @@ export function getGasParamsForNetwork(network: LIT_NETWORKS_KEYS): {
     case 'datil-dev':
       return { gasLimit: 5000000 };
     case 'datil-test':
+      return { gasLimit: 5000000 };
+    case 'datil':
       return { gasLimit: 5000000 };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
