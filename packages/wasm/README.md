@@ -4,7 +4,7 @@ Core lit utilities implemented in `Rust` and compiled to `WebAssembly` through `
 
 For information on implementations see the [rust](./rust/README.md) directory.
 
-
 ### Building
+
 This package contanis scripts for building the `rust` souce into `WebAssembly` and correctly encoding the binary artifact.
 To perform the entire build / encoding operations you can run `rust:build`. If you wish to only produce the `WebAssembly` binding you can see the `rust` [README](./rust//README.md) for build information.
