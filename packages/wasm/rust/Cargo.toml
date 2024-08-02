@@ -18,7 +18,7 @@ blsful = { version = "2.5.7", default-features = false, features = ["rust"] }
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
-hd-keys-curves-wasm = { version = "1.0.0", default-features = false, features = ["k256", "p256"], git = "https://github.com/LIT-Protocol/hd-keys-curves-wasm.git" }
+hd-keys-curves-wasm = { version = "1.0.0", default-features = false, features = ["k256", "p256"] }
 serde = "1.0"
 serde_json = "1.0"
 serde_bare = "0.5"
