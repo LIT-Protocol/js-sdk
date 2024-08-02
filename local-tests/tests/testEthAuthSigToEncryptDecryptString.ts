@@ -13,8 +13,10 @@ import { log } from '@lit-protocol/misc';
 export const testEthAuthSigToEncryptDecryptString = async (
   devEnv: TinnyEnvironment
 ) => {
+  const alice = await devEnv.createRandomPerson();
+
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-    userAddress: devEnv.bareEthAuthSig.address.toLowerCase(),
+    userAddress: alice.authSig.address,
   });
 
   const encryptRes = await LitJsSdk.encryptString(
@@ -50,7 +52,7 @@ export const testEthAuthSigToEncryptDecryptString = async (
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,
       dataToEncryptHash: encryptRes.dataToEncryptHash,
-      authSig: devEnv.bareEthAuthSig,
+      authSig: alice.authSig,
       chain: 'ethereum',
     },
     devEnv.litNodeClient as unknown as ILitNodeClient

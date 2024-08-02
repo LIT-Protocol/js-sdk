@@ -62,7 +62,6 @@ import {
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { computeAddress } from 'ethers/lib/utils';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
-import { minStakingAbi } from '../abis/minAbi/minStakingAbi';
 import { TokenInfo, derivedAddresses } from './addresses';
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
@@ -591,11 +590,6 @@ export class LitContracts {
       provider = context.provider;
     } else {
       provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl);
-    }
-
-    if (network === 'datil-dev' || network === 'datil-test') {
-      // @ts-ignore
-      context!.Staking!.abi = minStakingAbi;
     }
 
     if (!context) {
