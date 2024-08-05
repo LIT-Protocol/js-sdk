@@ -1066,7 +1066,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1260,7 +1260,7 @@ export class LitNodeClientNodeJs
     // ========== Handle Response ==========
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1391,7 +1391,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     const signatureShares: NodeBlsSigningShare[] = (
@@ -1640,7 +1640,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     const signatureShares: NodeBlsSigningShare[] = (

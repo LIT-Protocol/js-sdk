@@ -1159,7 +1159,7 @@ export class LitCore {
    * @param { RejectedNodePromises } res
    * @param { string } requestId
    *
-   * @returns { void }
+   * @returns { never }
    *
    */
   _throwNodeError = (res: RejectedNodePromises, requestId: string): never => {
