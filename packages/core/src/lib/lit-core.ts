@@ -1180,7 +1180,7 @@ export class LitCore {
             errorCode: res.error.errorCode,
             message: res.error.message,
           },
-          // cause: res.error,
+          cause: res.error,
         },
         'There was an error getting the signing shares from the nodes. Response from the nodes: %s',
         JSON.stringify(res)

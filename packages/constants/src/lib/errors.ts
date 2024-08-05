@@ -209,6 +209,11 @@ function createErrorClass({
         };
       }
 
+      // If the cause is not an Error, wrap it in one
+      if (!(options.cause instanceof Error)) {
+        options.cause = new Error(options.cause);
+      }
+
       super(
         {
           name,
