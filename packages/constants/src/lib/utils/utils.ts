@@ -1,21 +1,21 @@
 import { EITHER_TYPE } from '../enums';
+import { LitError } from '../errors';
 import {
   IEitherSuccess,
   IEitherError,
-  ILitError,
 } from '../interfaces/i-errors';
 
 /**
  *
  * This method should be used when there's an expected error
  *
- * @param errorMsg is the error message
+ * @param error is the error encountered
  * @returns { IEither }
  */
-export function ELeft(errorMsg: ILitError): IEitherError {
+export function ELeft(error: LitError): IEitherError {
   return {
     type: EITHER_TYPE.ERROR,
-    result: errorMsg,
+    result: error,
   };
 }
 

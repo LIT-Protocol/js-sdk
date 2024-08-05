@@ -191,6 +191,14 @@ export const LIT_ERROR_CODE = {
   NODE_NOT_AUTHORIZED: 'NodeNotAuthorized',
 };
 
+export abstract class LitError extends VError {
+  protected constructor(options: Error | Options, message: string, ...params: any[]) {
+    super(options, message, ...params);
+  }
+}
+
+type LitErrorConstructor = new (options: Error | Options, message: string, ...params: any[]) => LitError;
+
 function createErrorClass({
   name,
   code,
@@ -199,8 +207,8 @@ function createErrorClass({
   name: string;
   code: string;
   kind: string;
-}) {
-  return class extends VError {
+}): LitErrorConstructor {
+  return class NamedLitError extends LitError {
     // VError has optional options parameter, but we make it required so thrower remembers to pass all the useful info
     constructor(options: Error | Options, message: string, ...params: any[]) {
       if (options instanceof Error) {
@@ -231,7 +239,7 @@ function createErrorClass({
   };
 }
 
-const errorClasses: Record<string, any> = {};
+const errorClasses: Record<string, LitErrorConstructor> = {};
 for (const key in LIT_ERROR) {
   if (key in LIT_ERROR) {
     const errorDef = LIT_ERROR[key];
