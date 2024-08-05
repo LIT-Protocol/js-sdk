@@ -208,7 +208,7 @@ function createErrorClass({
   code: string;
   kind: string;
 }): LitErrorConstructor {
-  return class NamedLitError extends LitError {
+  return class extends LitError {
     // VError has optional options parameter, but we make it required so thrower remembers to pass all the useful info
     constructor(options: Error | Options, message: string, ...params: any[]) {
       if (options instanceof Error) {
