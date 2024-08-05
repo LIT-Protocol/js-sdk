@@ -1,4 +1,5 @@
-import { Options, VError } from 'verror';
+// @ts-expect-error No types available for this package
+import { VError, Options } from '@openagenda/verror';
 
 export enum LitErrorKind {
   Unknown = 'Unknown',

@@ -45,6 +45,7 @@
     "@lit-protocol/contracts": "^0.0.39",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
+    "@openagenda/verror": "^3.1.4",
     "@simplewebauthn/browser": "^7.2.0",
     "@simplewebauthn/typescript-types": "^7.0.0",
     "@spruceid/siwe-parser": "2.0.0",
@@ -82,8 +83,7 @@
     "tslib": "^2.3.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "uint8arrays": "^4.0.3",
-    "verror": "^1.10.1"
+    "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
     "@nx/eslint-plugin": "17.3.0",
@@ -100,7 +100,6 @@
     "@types/jest": "27.4.1",
     "@types/node": "18.19.18",
     "@types/secp256k1": "^4.0.6",
-    "@types/verror": "^1.10.10",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
     "babel-jest": "27.5.1",
