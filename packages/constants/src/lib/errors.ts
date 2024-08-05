@@ -200,6 +200,7 @@ function createErrorClass({
   kind: string;
 }) {
   return class extends VError {
+    // VError has optional options parameter, but we make it required so thrower remembers to pass all the useful info
     constructor(options: Error | Options, message: string, ...params: any[]) {
       if (options instanceof Error) {
         options = {
