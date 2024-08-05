@@ -288,9 +288,7 @@ export abstract class BaseProvider {
     claimRequest: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
     if (!this.litNodeClient.ready) {
-      await this.litNodeClient.connect().catch((err) => {
-        throw err; // throw error up to caller
-      });
+      await this.litNodeClient.connect();
     }
 
     const res = await this.litNodeClient.claimKeyId(claimRequest);
