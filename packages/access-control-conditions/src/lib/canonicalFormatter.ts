@@ -142,12 +142,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 export const canonicalSolRpcConditionFormatter = (
   cond: ConditionItem,
   requireV2Conditions: boolean = false
-):
-  | any[]
-  | AccsOperatorParams
-  | ConditionItem
-  | AccsSOLV2Params
-  | any => {
+): any[] | AccsOperatorParams | ConditionItem | AccsSOLV2Params | any => {
   // -- if is array
   if (Array.isArray(cond)) {
     return cond.map((c: ConditionItem) =>

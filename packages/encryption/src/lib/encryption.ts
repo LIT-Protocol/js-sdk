@@ -72,7 +72,7 @@ export const encryptToJson = async (
         },
         cause: paramsIsSafe.result,
       },
-      'Invalid params',
+      'Invalid params'
     );
 
   if (string !== undefined) {
@@ -158,7 +158,7 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
         },
         cause: paramsIsSafe.result,
       },
-      'Invalid params',
+      'Invalid params'
     );
 
   // FIXME: The return type of this function is inferrable based on the value of `params.dataType`
@@ -278,7 +278,7 @@ export const decryptToString = async (
         },
         cause: paramsIsSafe.result,
       },
-      'Invalid params',
+      'Invalid params'
     );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
@@ -314,7 +314,7 @@ export const zipAndEncryptString = async (
         },
         cause: paramsIsSafe.result,
       },
-      'Invalid params',
+      'Invalid params'
     );
 
   let zip;
@@ -419,7 +419,7 @@ export const decryptToZip = async (
         },
         cause: paramsIsSafe.result,
       },
-      'Invalid params',
+      'Invalid params'
     );
 
   const { decryptedData } = await litNodeClient.decrypt(params);

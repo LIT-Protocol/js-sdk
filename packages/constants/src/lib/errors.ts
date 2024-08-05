@@ -192,12 +192,20 @@ export const LIT_ERROR_CODE = {
 };
 
 export abstract class LitError extends VError {
-  protected constructor(options: Error | Options, message: string, ...params: any[]) {
+  protected constructor(
+    options: Error | Options,
+    message: string,
+    ...params: any[]
+  ) {
     super(options, message, ...params);
   }
 }
 
-type LitErrorConstructor = new (options: Error | Options, message: string, ...params: any[]) => LitError;
+type LitErrorConstructor = new (
+  options: Error | Options,
+  message: string,
+  ...params: any[]
+) => LitError;
 
 function createErrorClass({
   name,

@@ -1,9 +1,6 @@
 import { EITHER_TYPE } from '../enums';
 import { LitError } from '../errors';
-import {
-  IEitherSuccess,
-  IEitherError,
-} from '../interfaces/i-errors';
+import { IEitherSuccess, IEitherError } from '../interfaces/i-errors';
 
 /**
  *
