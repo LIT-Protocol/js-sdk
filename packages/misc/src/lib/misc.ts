@@ -4,11 +4,9 @@ import Ajv, { JSONSchemaType } from 'ajv';
 
 import {
   ABI_ERC20,
-  ILitError,
   InvalidParamType,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
-  LIT_ERROR,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
   RELAYER_URL_BY_NETWORK,
@@ -19,19 +17,10 @@ import { LogLevel, LogManager } from '@lit-protocol/logger';
 import {
   Chain,
   AuthSig,
-  KV,
-  NodeClientErrorV0,
-  NodeClientErrorV1,
-  NodeErrorV1,
   NodeErrorV3,
-  ClaimRequest,
-  ClaimKeyResponse,
   ClaimResult,
-  ClaimProcessor,
   MintCallback,
   RelayClaimProcessor,
-  SuccessNodePromises,
-  RejectedNodePromises,
 } from '@lit-protocol/types';
 
 const logBuffer: any[][] = [];
@@ -98,149 +87,6 @@ export const findMostCommonResponse = (responses: object[]): object => {
   }
 
   return result;
-};
-
-/**
- * Throws a NodeClientErrorV0 or NodeClientErrorV1 error
- * @deprecated throw error classes
- * @param e
- */
-export const throwError = (e: NodeClientErrorV0 | NodeClientErrorV1): never => {
-  if (isNodeClientErrorV1(e)) {
-    return throwErrorV1(e);
-  } else if (isNodeClientErrorV0(e)) {
-    return throwErrorV0(e);
-  }
-  return throwGenericError(e as any);
-};
-
-/**
- * Standardized way to throw error in Lit Protocol projects
- *
- * @deprecated throw error classes
- * @param { ILitError }
- * @property { string } message
- * @property { string } name
- * @property { string } errorCode
- */
-export const throwErrorV0 = ({
-  message,
-  name,
-  errorCode,
-  error,
-}: ILitError): never => {
-  const errConstructorFunc = function (
-    this: any,
-    message: string,
-    name: string,
-    errorCode: string
-  ) {
-    this.message = message;
-    this.name = name;
-
-    // Map old error codes to new ones if possible.
-    this.errorCode = oldErrorToNewErrorMap[errorCode] ?? errorCode;
-  };
-
-  throw new (errConstructorFunc as any)(
-    message,
-    (name = error?.name ?? name),
-    (errorCode = error?.code ?? errorCode)
-  );
-};
-
-// Map for old error codes to new ones
-const oldErrorToNewErrorMap: Record<string, string> = {
-  not_authorized: 'NodeNotAuthorized',
-  storage_error: 'NodeStorageError',
-};
-
-/**
- * Standardized way to throw error in Lit Protocol projects
- *
- * @deprecated throw error classes
- */
-export const throwErrorV1 = ({
-  errorKind,
-  details,
-  status,
-  message,
-  errorCode,
-  requestId,
-}: NodeClientErrorV1): never => {
-  const errConstructorFunc = function (
-    this: any,
-    errorKind: string,
-    status: number,
-    details: string[],
-    message?: string,
-    errorCode?: string,
-    requestId?: string
-  ) {
-    this.message = message;
-    this.errorCode = errorCode;
-    this.errorKind = errorKind;
-    this.status = status;
-    this.details = details;
-    this.requestId = requestId;
-  };
-
-  throw new (errConstructorFunc as any)(
-    errorKind,
-    status,
-    details,
-    message,
-    errorCode,
-    requestId
-  );
-};
-
-/**
- * Throws a generic error
- * @deprecated throw error classes
- * @param e
- */
-export const throwGenericError = (e: any): never => {
-  const errConstructorFunc = function (
-    this: any,
-    message: string,
-    requestId: string
-  ) {
-    this.message = message;
-    this.errorKind = LIT_ERROR['UNKNOWN_ERROR'].name;
-    this.errorCode = LIT_ERROR['UNKNOWN_ERROR'].code;
-    this.requestId = requestId;
-  };
-
-  throw new (errConstructorFunc as any)(
-    e.message ?? 'Generic Error',
-    e.requestId ?? 'No request ID found'
-  );
-};
-
-/**
- * Checks if the given error is a NodeClientErrorV1
- * @deprecated throw error classes
- * @param nodeError
- */
-export const isNodeClientErrorV1 = (
-  nodeError: NodeClientErrorV0 | NodeClientErrorV1
-): nodeError is NodeClientErrorV1 => {
-  return (
-    nodeError.hasOwnProperty('errorCode') &&
-    nodeError.hasOwnProperty('errorKind')
-  );
-};
-
-/**
- * Checks if the given error is a NodeClientErrorV0
- * @deprecated throw error classes
- * @param nodeError
- */
-export const isNodeClientErrorV0 = (
-  nodeError: NodeClientErrorV0 | NodeClientErrorV1
-): nodeError is NodeClientErrorV0 => {
-  return nodeError.hasOwnProperty('errorCode');
 };
 
 declare global {

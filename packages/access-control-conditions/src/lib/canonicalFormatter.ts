@@ -1,7 +1,4 @@
-import {
-  ILitError,
-  InvalidAccessControlConditions,
-} from '@lit-protocol/constants';
+import { InvalidAccessControlConditions } from '@lit-protocol/constants';
 import {
   ABIParams,
   AccessControlConditions,
@@ -140,7 +137,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 * @param { object } cond
 * @param { boolean } requireV2Conditions
 *
-* @returns { any[] | AccsOperatorParams | AccsSOLV2Params | ILitError | any }
+* @returns { any[] | AccsOperatorParams | AccsSOLV2Params | any }
 */
 export const canonicalSolRpcConditionFormatter = (
   cond: ConditionItem,
@@ -150,7 +147,6 @@ export const canonicalSolRpcConditionFormatter = (
   | AccsOperatorParams
   | ConditionItem
   | AccsSOLV2Params
-  | ILitError
   | any => {
   // -- if is array
   if (Array.isArray(cond)) {

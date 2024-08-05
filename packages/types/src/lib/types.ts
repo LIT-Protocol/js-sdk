@@ -11,17 +11,12 @@ import { AuthMethodType } from './enums';
 import {
   AuthMethod,
   LitRelayConfig,
-  SignInWithOTPParams,
   Signature,
-  StytchOtpProviderOptions,
-  WebAuthnProviderOptions,
   AccsOperatorParams,
-  EthWalletProviderOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
-  OAuthProviderOptions,
   BaseAuthenticateOptions,
 } from './interfaces';
 
