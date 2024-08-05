@@ -306,7 +306,7 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
  * Check the attestation against AMD certs
  *
  * @param { NodeAttestation } attestation The actual attestation object, which includes the signature and report
- * @param { string } challenge The challenge we sent
+ * @param { string } challengeHex The challenge we sent
  * @param { string } url The URL we talked to
  *
  * @returns { Promise<undefined> } A promise that throws if the attestation is invalid
