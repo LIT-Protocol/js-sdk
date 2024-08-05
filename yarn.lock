@@ -3117,10 +3117,10 @@
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.0.39":
-  version "0.0.39"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.39.tgz#e2483f1ef3df63bd434bcc7c00414b8f2e8d9ec5"
-  integrity sha512-zz/TaKWUqFK2n7BqwKj9PeV0px89G7dnjkRJ9BM/eri356zodd/W5d5iGQUVdaFiCYKd/cibm4004BnuMlXLeg==
+"@lit-protocol/contracts@get-node-info-in-one-contract-call":
+  version "0.0.45"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.45.tgz#4d4d34a7c2dc4d2e3c5f3939a52b0495c472dc11"
+  integrity sha512-wGRxpso56hIoKqLLlI14oCSV8+XT9g9pIMyQAZIfD7Wq54zg5C5RZUod1cjxT+IsOccpMFrhXSRkd/HcXi8DnA==
 
 "@lit/reactive-element@^1.3.0", "@lit/reactive-element@^1.6.0":
   version "1.6.3"
