@@ -527,8 +527,7 @@ export const checkAndSignEVMAuthMessage = async ({
         },
         cause: currentChainIdOrError.result,
       },
-      currentChainIdOrError.result.message ??
-        'Unknown error when getting chain id'
+      'Unknown error when getting chain id'
     );
   }
 

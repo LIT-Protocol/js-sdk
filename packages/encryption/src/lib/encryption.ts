@@ -68,10 +68,11 @@ export const encryptToJson = async (
       {
         info: {
           params,
+          function: 'encryptToJson',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params',
     );
 
   if (string !== undefined) {
@@ -153,10 +154,11 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
       {
         info: {
           params,
+          function: 'decryptFromJson',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params',
     );
 
   // FIXME: The return type of this function is inferrable based on the value of `params.dataType`
@@ -235,10 +237,11 @@ export const encryptString = async (
       {
         info: {
           params,
+          function: 'encryptString',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params'
     );
 
   return litNodeClient.encrypt({
@@ -271,10 +274,11 @@ export const decryptToString = async (
       {
         info: {
           params,
+          function: 'decryptToString',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params',
     );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
@@ -306,10 +310,11 @@ export const zipAndEncryptString = async (
       {
         info: {
           params,
+          function: 'zipAndEncryptString',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params',
     );
 
   let zip;
@@ -410,10 +415,11 @@ export const decryptToZip = async (
       {
         info: {
           params,
+          function: 'decryptToZip',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params',
     );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
@@ -456,10 +462,11 @@ export const encryptZip = async (
       {
         info: {
           params,
+          function: 'encryptZip',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params'
     );
 
   const { zip } = params;
@@ -526,10 +533,11 @@ export const encryptFileAndZipWithMetadata = async (
       {
         info: {
           params,
+          function: 'encryptFileAndZipWithMetadata',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params'
     );
 
   // encrypt the file
@@ -613,10 +621,11 @@ export const decryptZipFileWithMetadata = async (
       {
         info: {
           params,
+          function: 'decryptZipFileWithMetadata',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params'
     );
 
   // -- execute
@@ -697,10 +706,11 @@ export const encryptFile = async (
       {
         info: {
           params,
+          function: 'encryptFile',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params'
     );
 
   // encrypt the file
@@ -736,10 +746,11 @@ export const decryptToFile = async (
       {
         info: {
           params,
+          function: 'decryptToFile',
         },
+        cause: paramsIsSafe.result,
       },
-      'Invalid params: %s',
-      paramsIsSafe.result.message
+      'Invalid params'
     );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
