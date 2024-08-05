@@ -862,6 +862,108 @@ export class LitContracts {
     return addresses;
   }
 
+  /**
+   * Retrieves the connection information for a given network.
+   *
+   * @param network - The key representing the network.
+   * @param context - Optional network context for the contract.
+   * @param rpcUrl - Optional RPC URL for the network.
+   * @param nodeProtocol - Optional protocol for the network node.
+   *
+   * @returns An object containing the minimum node count and an array of bootstrap URLs.
+   *
+   * @throws Error if the minimum validator count is not set or if the active validator set does not meet the threshold.
+   */
+  public static getConnectionInfo = async ({
+    litNetwork,
+    networkContext,
+    rpcUrl,
+    nodeProtocol,
+  }: {
+    litNetwork: LIT_NETWORKS_KEYS;
+    networkContext?: LitContractContext | LitContractResolverContext;
+    rpcUrl?: string;
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+  }) => {
+    const stakingContract = await LitContracts.getStakingContract(
+      litNetwork,
+      networkContext,
+      rpcUrl
+    );
+
+    const [
+      minNodeCount,
+      activeUnkickedValidators,
+      activeUnkickedValidatorStructs,
+    ] = await Promise.all([
+      stakingContract['currentValidatorCountForConsensus'](),
+      stakingContract['getActiveUnkickedValidators'](),
+      stakingContract['getActiveUnkickedValidatorStructs'](),
+    ]);
+
+    if (!minNodeCount) {
+      throw new Error('❌ Minimum validator count is not set');
+    }
+
+    if (activeUnkickedValidators.length <= minNodeCount) {
+      throw new Error('❌ Active validator set does not meet the threshold');
+    }
+
+    const activeValidatorStructs: ValidatorStruct[] =
+      activeUnkickedValidatorStructs.map((item: any) => {
+        return {
+          ip: item[0],
+          ipv6: item[1],
+          port: item[2],
+          nodeAddress: item[3],
+          reward: item[4],
+          seconderPubkey: item[5],
+          receiverPubkey: item[6],
+        };
+      });
+
+    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
+      const centralisation = CENTRALISATION_BY_NETWORK[litNetwork];
+
+      // Convert the integer IP to a string format
+      const ip = intToIP(item.ip);
+      let port = item.port;
+
+      // Determine the protocol to use based on various conditions
+      const protocol =
+        // If nodeProtocol is defined, use it
+        nodeProtocol ||
+        // If port is 443, use HTTPS, otherwise use network-specific HTTP
+        (port === 443 ? HTTPS : HTTP_BY_NETWORK[litNetwork]) ||
+        // Fallback to HTTP if no other conditions are met
+        HTTP;
+
+      // Check for specific conditions in centralised networks
+      if (centralisation === 'centralised') {
+        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
+        if (
+          litNetwork === LIT_NETWORK.Cayenne &&
+          !port.toString().startsWith('8')
+        ) {
+          throw new Error(
+            `Invalid port: ${port} for the ${centralisation} ${litNetwork} network. Expected range: 8470 - 8479`
+          );
+        }
+      }
+
+      const url = `${protocol}${ip}:${port}`;
+
+      LitContracts.logger.debug("Validator's URL:", url);
+
+      return url;
+    });
+
+    return {
+      minNodeCount,
+      bootstrapUrls: networks,
+    };
+  };
+
   public static getMinNodeCount = async (
     network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,

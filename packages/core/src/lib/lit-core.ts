@@ -220,20 +220,48 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
-  private async _getValidatorData() {
-    const [minNodeCount, bootstrapUrls] = await Promise.all([
-      LitContracts.getMinNodeCount(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl
-      ),
-      LitContracts.getValidators(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl,
-        this.config.nodeProtocol
-      ),
-    ]);
+  private async _getValidatorData(version?: 'v1' | 'v2') {
+    const _version = version || 'v2';
+
+    let minNodeCount: number = 0;
+    let bootstrapUrls: string[] = [];
+
+    if (_version === 'v1') {
+      const res = await Promise.all([
+        LitContracts.getMinNodeCount(
+          this.config.litNetwork,
+          this.config.contractContext,
+          this.config.rpcUrl
+        ),
+        LitContracts.getValidators(
+          this.config.litNetwork,
+          this.config.contractContext,
+          this.config.rpcUrl,
+          this.config.nodeProtocol
+        ),
+      ]);
+      minNodeCount = parseInt(res[0], 10);
+      bootstrapUrls = res[1];
+    }
+
+    if (_version === 'v2') {
+      const res = await LitContracts.getConnectionInfo({
+        litNetwork: this.config.litNetwork,
+        networkContext: this.config.contractContext,
+        rpcUrl: this.config.rpcUrl,
+        nodeProtocol: this.config.nodeProtocol,
+      });
+      minNodeCount = res.minNodeCount;
+      bootstrapUrls = res.bootstrapUrls;
+    }
+
+    if (_version !== 'v1' && _version !== 'v2') {
+      return throwError({
+        message: `Invalid version provided: ${_version}`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
 
     if (minNodeCount <= 0) {
       throwError({
@@ -254,7 +282,7 @@ export class LitCore {
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
 
     return {
-      minNodeCount: parseInt(minNodeCount, 10),
+      minNodeCount,
       bootstrapUrls,
     };
   }
