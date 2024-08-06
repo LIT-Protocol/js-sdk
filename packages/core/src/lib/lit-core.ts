@@ -220,50 +220,19 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
-  private async _getValidatorData(version?: 'v1' | 'v2') {
-    const _version = version || 'v2';
+  private async _getValidatorData() {
+    // let stakingContract: ethers.Contract | undefined = undefined;
+    // let epoch: number | undefined = undefined;
+    // let minNodeCount: number | undefined = undefined;
+    // let bootstrapUrls: string[] = [];
 
-    let epoch: number | undefined = undefined;
-    let minNodeCount: number | undefined = undefined;
-    let bootstrapUrls: string[] = [];
-
-    if (_version === 'v1') {
-      const res = await Promise.all([
-        LitContracts.getMinNodeCount(
-          this.config.litNetwork,
-          this.config.contractContext,
-          this.config.rpcUrl
-        ),
-        LitContracts.getValidators(
-          this.config.litNetwork,
-          this.config.contractContext,
-          this.config.rpcUrl,
-          this.config.nodeProtocol
-        ),
-      ]);
-      minNodeCount = parseInt(res[0], 10);
-      bootstrapUrls = res[1];
-    }
-
-    if (_version === 'v2') {
-      const res = await LitContracts.getConnectionInfo({
+    const { stakingContract, epoch, minNodeCount, bootstrapUrls } =
+      await LitContracts.getConnectionInfo({
         litNetwork: this.config.litNetwork,
         networkContext: this.config.contractContext,
         rpcUrl: this.config.rpcUrl,
         nodeProtocol: this.config.nodeProtocol,
       });
-      epoch = res.epoch;
-      minNodeCount = res.minNodeCount;
-      bootstrapUrls = res.bootstrapUrls;
-    }
-
-    if (_version !== 'v1' && _version !== 'v2') {
-      return throwError({
-        message: `Invalid version provided: ${_version}`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
 
     if (!minNodeCount) {
       throw new Error('minNodeCount is required');
@@ -285,16 +254,17 @@ export class LitCore {
       });
     }
 
-    log('[_getValidatorData] epoch: ', parseInt(epoch!.toString()));
-    log(
-      '[_getValidatorData] minNodeCount: ',
-      parseInt(minNodeCount!.toString())
-    );
+    const epochInInt = parseInt(epoch!.toString());
+    const minNodeCountInInt = parseInt(minNodeCount!.toString());
+
+    log('[_getValidatorData] epochInInt: ', epochInInt);
+    log('[_getValidatorData] minNodeCountInInt: ', minNodeCountInInt);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
 
     return {
-      epoch,
-      minNodeCount,
+      stakingContract,
+      epoch: epochInInt,
+      minNodeCount: minNodeCountInInt,
       bootstrapUrls,
     };
   }
@@ -323,8 +293,6 @@ export class LitCore {
           console.log('epoch', epoch);
           console.log('minNodeCount', minNodeCount);
           console.log('newNodeUrls', newNodeUrls);
-
-          process.exit();
 
           const delta: string[] = newNodeUrls.filter((item) =>
             existingNodeUrls.includes(item)
@@ -529,22 +497,37 @@ export class LitCore {
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
     // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
-    const getStakingContract =
-      this._stakingContract ||
-      LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext, // We've already primed the `contractContext`
-        this.config.rpcUrl
-      );
+    // const getStakingContract =
+    //   this._stakingContract ||
+    //   LitContracts.getStakingContract(
+    //     this.config.litNetwork,
+    //     this.config.contractContext, // We've already primed the `contractContext`
+    //     this.config.rpcUrl
+    //   );
+    const {
+      stakingContract,
+      epoch,
+      minNodeCount,
+      bootstrapUrls: newNodeUrls,
+    } = await this._getValidatorData();
 
-    const [{ minNodeCount, bootstrapUrls }, stakingContract] =
-      await Promise.all([this._getValidatorData(), getStakingContract]);
+    // const [{ epoch, minNodeCount, bootstrapUrls }, stakingContract] =
+    //   await Promise.all([this._getValidatorData(), getStakingContract]);
 
     this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
     this.config.minNodeCount = minNodeCount;
-    this.config.bootstrapUrls = bootstrapUrls;
+    this.config.bootstrapUrls = newNodeUrls;
 
-    this._epochState = await this._fetchCurrentEpochState();
+    this._epochState = {
+      currentNumber: epoch,
+      startTime: Date.now(),
+    };
+
+    // this._epochState = await this._fetchCurrentEpochState();
+    // non-async, but we don't need to wait for it to complete before continuing
+    this._fetchCurrentEpochState().then((epochState) => {
+      this._epochState = epochState;
+    });
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
@@ -911,6 +894,7 @@ export class LitCore {
 
     try {
       const epoch = await this._stakingContract['epoch']();
+      console.log('epoch:', epoch);
 
       // when we transition to the new epoch, we don't store the start time.  but we
       // set the endTime to the current timestamp + epochLength.
