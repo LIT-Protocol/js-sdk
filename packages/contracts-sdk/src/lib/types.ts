@@ -9,3 +9,8 @@ export type ValidatorStruct = {
   seconderPubkey: BigNumber;
   receiverPubkey: BigNumber;
 };
+
+export interface ValidatorStructAndCount extends ValidatorStruct {
+  epoch: number;
+  minNodeCount: number;
+}

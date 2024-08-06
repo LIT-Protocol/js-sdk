@@ -223,7 +223,8 @@ export class LitCore {
   private async _getValidatorData(version?: 'v1' | 'v2') {
     const _version = version || 'v2';
 
-    let minNodeCount: number = 0;
+    let epoch: number | undefined = undefined;
+    let minNodeCount: number | undefined = undefined;
     let bootstrapUrls: string[] = [];
 
     if (_version === 'v1') {
@@ -251,6 +252,7 @@ export class LitCore {
         rpcUrl: this.config.rpcUrl,
         nodeProtocol: this.config.nodeProtocol,
       });
+      epoch = res.epoch;
       minNodeCount = res.minNodeCount;
       bootstrapUrls = res.bootstrapUrls;
     }
@@ -261,6 +263,10 @@ export class LitCore {
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
+    }
+
+    if (!minNodeCount) {
+      throw new Error('minNodeCount is required');
     }
 
     if (minNodeCount <= 0) {
@@ -279,9 +285,17 @@ export class LitCore {
       });
     }
 
+    log('[_getValidatorData] epoch: ', parseInt(epoch!.toString()));
+    log(
+      '[_getValidatorData] minNodeCount: ',
+      parseInt(minNodeCount!.toString())
+    );
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
 
+    process.exit();
+
     return {
+      epoch,
       minNodeCount,
       bootstrapUrls,
     };
@@ -293,7 +307,7 @@ export class LitCore {
 
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
-      this._epochState = await this._fetchCurrentEpochState();
+      // this._epochState = await this._fetchCurrentEpochState();
 
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
@@ -302,7 +316,17 @@ export class LitCore {
             'State found to be new validator set locked, checking validator set'
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
-          const { bootstrapUrls: newNodeUrls } = await this._getValidatorData();
+          const {
+            epoch,
+            minNodeCount,
+            bootstrapUrls: newNodeUrls,
+          } = await this._getValidatorData();
+
+          console.log('epoch', epoch);
+          console.log('minNodeCount', minNodeCount);
+          console.log('newNodeUrls', newNodeUrls);
+
+          process.exit();
 
           const delta: string[] = newNodeUrls.filter((item) =>
             existingNodeUrls.includes(item)
@@ -875,9 +899,9 @@ export class LitCore {
     });
   };
 
-  private async _fetchCurrentEpochState(): Promise<
-    Pick<EpochCache, 'startTime' | 'currentNumber'>
-  > {
+  private async _fetchCurrentEpochState(
+    epoch: number
+  ): Promise<Pick<EpochCache, 'startTime' | 'currentNumber'>> {
     if (!this._stakingContract) {
       return throwError({
         message:
@@ -888,7 +912,7 @@ export class LitCore {
     }
 
     try {
-      const epoch = await this._stakingContract['epoch']();
+      // const epoch = await this._stakingContract['epoch']();
 
       // when we transition to the new epoch, we don't store the start time.  but we
       // set the endTime to the current timestamp + epochLength.

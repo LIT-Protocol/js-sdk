@@ -70,7 +70,7 @@ import {
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
 import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
-import { ValidatorStruct } from './types';
+import { ValidatorStruct, ValidatorStructAndCount } from './types';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -884,28 +884,25 @@ export class LitContracts {
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
-  }) => {
+  }): Promise<{
+    epoch: number;
+    minNodeCount: number;
+    bootstrapUrls: string[];
+  }> => {
     const stakingContract = await LitContracts.getStakingContract(
       litNetwork,
       networkContext,
       rpcUrl
     );
 
-    const [
-      minNodeCount,
-      activeUnkickedValidators,
-      activeUnkickedValidatorStructs,
-    ] = await Promise.all([
-      stakingContract['currentValidatorCountForConsensus'](),
-      stakingContract['getActiveUnkickedValidators'](),
-      stakingContract['getActiveUnkickedValidatorStructs'](),
-    ]);
+    const [epoch, minNodeCount, activeUnkickedValidatorStructs] =
+      await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
 
     if (!minNodeCount) {
       throw new Error('❌ Minimum validator count is not set');
     }
 
-    if (activeUnkickedValidators.length <= minNodeCount) {
+    if (activeUnkickedValidatorStructs.length <= minNodeCount) {
       throw new Error('❌ Active validator set does not meet the threshold');
     }
 
@@ -959,6 +956,7 @@ export class LitContracts {
     });
 
     return {
+      epoch,
       minNodeCount,
       bootstrapUrls: networks,
     };
