@@ -1,6 +1,10 @@
 import { ethers } from 'ethers';
 
-import { ALL_LIT_CHAINS, AuthMethodType , AuthMethodType_VALUES } from '@lit-protocol/constants';
+import {
+  ALL_LIT_CHAINS,
+  AuthMethodType,
+  AuthMethodType_VALUES,
+} from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {

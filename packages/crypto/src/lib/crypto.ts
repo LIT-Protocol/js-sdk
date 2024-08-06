@@ -18,7 +18,11 @@ import {
   sevSnpVerify,
 } from '@lit-protocol/wasm';
 
-import { LIT_ERROR, LIT_CURVE, LIT_CURVE_VALUES } from '@lit-protocol/constants';
+import {
+  LIT_ERROR,
+  LIT_CURVE,
+  LIT_CURVE_VALUES,
+} from '@lit-protocol/constants';
 import { nacl } from '@lit-protocol/nacl';
 import {
   CombinedECDSASignature,
@@ -173,7 +177,8 @@ export const combineEcdsaShares = async (
     });
   }
 
-  const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE_VALUES];
+  const variant =
+    ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE_VALUES];
   const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
   const signatureShares = validShares.map((share) =>
     Buffer.from(share.signatureShare, 'hex')
