@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 30
     env:
       DATIL_COMMIT_HASH: 0418b10c126fc19f1a64ae925a84ccc72ed0e173
-      DATIL_BRANCH_NAME: datil-cherrypick-shiva-changes 
+      DATIL_BRANCH_NAME: feature/get-node-info-in-one-contract-call 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
