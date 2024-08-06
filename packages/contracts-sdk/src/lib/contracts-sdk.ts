@@ -47,8 +47,8 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 // ----- autogen:imports:end  -----
 
 import {
-  AuthMethodScope,
-  AuthMethodType,
+  AuthMethodType_VALUES,
+  AuthMethodScope_VALUES,
   METAMASK_CHAIN_INFO_BY_NETWORK,
   NETWORK_CONTEXT_BY_NETWORK,
   LIT_NETWORK_VALUES,
@@ -1189,9 +1189,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     webAuthnPubkey,
   }: {
     pkpTokenId: string;
-    authMethodType: AuthMethodType | number;
+    authMethodType: AuthMethodType_VALUES | number;
     authMethodId: string | Uint8Array;
-    authMethodScopes: AuthMethodScope[];
+    authMethodScopes: AuthMethodScope_VALUES[];
     webAuthnPubkey?: string;
   }): Promise<ethers.ContractReceipt> => {
     const _authMethodId =
@@ -1237,7 +1237,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   }: {
     ipfsId: string;
     pkpTokenId: string;
-    authMethodScopes: AuthMethodScope[];
+    authMethodScopes: AuthMethodScope_VALUES[];
   }) => {
     const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
     const scopes = authMethodScopes ?? [];

@@ -18,7 +18,7 @@ import {
   sevSnpVerify,
 } from '@lit-protocol/wasm';
 
-import { LIT_ERROR, LIT_CURVE } from '@lit-protocol/constants';
+import { LIT_ERROR, LIT_CURVE, LIT_CURVE_VALUES } from '@lit-protocol/constants';
 import { nacl } from '@lit-protocol/nacl';
 import {
   CombinedECDSASignature,
@@ -143,7 +143,7 @@ export const verifySignature = async (
 //   sigName: string; // ignored
 // }
 
-const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE, EcdsaVariant>> = {
+const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
   [LIT_CURVE.EcdsaCaitSith]: 'K256',
   [LIT_CURVE.EcdsaK256]: 'K256',
   [LIT_CURVE.EcdsaCAITSITHP256]: 'P256',
@@ -173,7 +173,7 @@ export const combineEcdsaShares = async (
     });
   }
 
-  const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE];
+  const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE_VALUES];
   const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
   const signatureShares = validShares.map((share) =>
     Buffer.from(share.signatureShare, 'hex')
@@ -198,7 +198,7 @@ export const combineEcdsaShares = async (
 export const computeHDPubKey = async (
   pubkeys: string[],
   keyId: string,
-  sigType: LIT_CURVE
+  sigType: LIT_CURVE_VALUES
 ): Promise<string> => {
   const variant = ecdsaSigntureTypeMap[sigType];
 

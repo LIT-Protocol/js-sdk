@@ -1,4 +1,5 @@
-import { AuthSig, LIT_NETWORKS_KEYS } from '@lit-protocol/types';
+import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
+import { AuthSig } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8ArrayToBase64,
@@ -28,7 +29,7 @@ const supportedNetworks: SupportedNetworks[] = [
 ];
 
 function isSupportedLitNetwork(
-  litNetwork: LIT_NETWORKS_KEYS
+  litNetwork: LIT_NETWORK_VALUES
 ): asserts litNetwork is SupportedNetworks {
   // @ts-expect-error - This is an assert function; litNetwork by definition may be an invalid value
   if (!supportedNetworks.includes(litNetwork)) {

@@ -24,7 +24,7 @@ import {
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
-  LitNetwork,
+  LIT_NETWORK_VALUES,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -2349,7 +2349,7 @@ const resourceAbilityRequests = [
             signer: (params as ClaimRequest<'client'>).signer,
             ...relayParams,
           },
-          this.config.litNetwork as LitNetwork
+          this.config.litNetwork as LIT_NETWORK_VALUES
         );
       } else {
         mintTx = await defaultMintClaimCallback(
@@ -2360,7 +2360,7 @@ const resourceAbilityRequests = [
             pubkey,
             ...relayParams,
           },
-          this.config.litNetwork as LitNetwork
+          this.config.litNetwork as LIT_NETWORK_VALUES
         );
       }
 

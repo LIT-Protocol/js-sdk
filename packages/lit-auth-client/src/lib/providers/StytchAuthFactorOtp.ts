@@ -1,4 +1,4 @@
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AuthMethodType, AuthMethodType_VALUES } from '@lit-protocol/constants';
 import { BaseProvider } from './BaseProvider';
 import {
   BaseAuthenticateOptions,
@@ -136,7 +136,7 @@ export default class StytchAuthFactorOtpProvider<
 
   private static _resolveAuthFactor(factor: FactorParser): {
     parser: Function;
-    authMethodType: AuthMethodType;
+    authMethodType: AuthMethodType_VALUES;
   } {
     switch (factor) {
       case 'email':

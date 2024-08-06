@@ -1,4 +1,4 @@
-import { LitNetwork } from '@lit-protocol/constants';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 
 import { SupportedNetworks } from './types';
 
@@ -9,12 +9,12 @@ const SERVICE_URL_BY_NETWORKTYPE: Record<NETWORK_TYPES, string> = {
 };
 
 export const SERVICE_URL_BY_LIT_NETWORK: Record<SupportedNetworks, string> = {
-  [LitNetwork.DatilDev]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
-  [LitNetwork.DatilTest]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
-  [LitNetwork.Datil]: SERVICE_URL_BY_NETWORKTYPE.Production,
-  [LitNetwork.Cayenne]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
-  [LitNetwork.Manzano]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
-  [LitNetwork.Habanero]: SERVICE_URL_BY_NETWORKTYPE.Production,
+  [LIT_NETWORK.DatilDev]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
+  [LIT_NETWORK.DatilTest]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
+  [LIT_NETWORK.Datil]: SERVICE_URL_BY_NETWORKTYPE.Production,
+  [LIT_NETWORK.Cayenne]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
+  [LIT_NETWORK.Manzano]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
+  [LIT_NETWORK.Habanero]: SERVICE_URL_BY_NETWORKTYPE.Production,
 };
 
 export const LIT_SESSIONSIG_AUTHORIZATION_SCHEMA_PREFIX = 'LitSessionSig:';

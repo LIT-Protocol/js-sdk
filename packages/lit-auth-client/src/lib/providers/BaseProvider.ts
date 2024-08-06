@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import { ALL_LIT_CHAINS, AuthMethodType , AuthMethodType_VALUES } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
@@ -126,7 +126,7 @@ export abstract class BaseProvider {
     authMethodType,
     authMethodId,
   }: {
-    authMethodType: AuthMethodType;
+    authMethodType: AuthMethodType_VALUES;
     authMethodId: string;
   }): Promise<IRelayPKP[]> {
     if (!authMethodType || !authMethodId) {
@@ -178,7 +178,7 @@ export abstract class BaseProvider {
    */
   public async fetchPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
     const authMethodId = await this.getAuthMethodId(authMethod);
-    const authMethodType = authMethod.authMethodType;
+    const authMethodType = authMethod.authMethodType as AuthMethodType_VALUES;
 
     const pkps = await this.getPKPsForAuthMethod({
       authMethodType,

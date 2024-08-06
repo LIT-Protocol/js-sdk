@@ -1,10 +1,11 @@
-import { AuthSig, LIT_NETWORKS_KEYS } from '@lit-protocol/types';
+import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
+import { AuthSig } from '@lit-protocol/types';
 
 import { StoredKeyData } from '../types';
 
 interface BaseApiParams {
   sessionSig: AuthSig;
-  litNetwork: LIT_NETWORKS_KEYS;
+  litNetwork: LIT_NETWORK_VALUES;
 }
 
 export type FetchKeyParams = BaseApiParams & {
@@ -14,7 +15,7 @@ export type FetchKeyParams = BaseApiParams & {
 export type ListKeysParams = BaseApiParams;
 
 export type SupportedNetworks = Extract<
-  LIT_NETWORKS_KEYS,
+  LIT_NETWORK_VALUES,
   'cayenne' | 'manzano' | 'habanero' | 'datil-dev' | 'datil-test' | 'datil'
 >;
 
@@ -33,5 +34,5 @@ export interface StoreKeyParams extends BaseApiParams {
 export interface BaseRequestParams {
   sessionSig: AuthSig;
   method: 'GET' | 'POST';
-  litNetwork: LIT_NETWORKS_KEYS;
+  litNetwork: LIT_NETWORK_VALUES;
 }
