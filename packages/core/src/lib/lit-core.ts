@@ -292,8 +292,6 @@ export class LitCore {
     );
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
 
-    process.exit();
-
     return {
       epoch,
       minNodeCount,
@@ -307,7 +305,7 @@ export class LitCore {
 
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
-      // this._epochState = await this._fetchCurrentEpochState();
+      this._epochState = await this._fetchCurrentEpochState();
 
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
@@ -899,9 +897,9 @@ export class LitCore {
     });
   };
 
-  private async _fetchCurrentEpochState(
-    epoch: number
-  ): Promise<Pick<EpochCache, 'startTime' | 'currentNumber'>> {
+  private async _fetchCurrentEpochState(): Promise<
+    Pick<EpochCache, 'startTime' | 'currentNumber'>
+  > {
     if (!this._stakingContract) {
       return throwError({
         message:
@@ -912,7 +910,7 @@ export class LitCore {
     }
 
     try {
-      // const epoch = await this._stakingContract['epoch']();
+      const epoch = await this._stakingContract['epoch']();
 
       // when we transition to the new epoch, we don't store the start time.  but we
       // set the endTime to the current timestamp + epochLength.
