@@ -30,7 +30,7 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
  * @deprecated Will be removed in version 7.x.
  */
 export const GENERAL_WORKER_URL_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: string;
+  [key in Exclude<LIT_NETWORK_VALUES, 'datil'>]: string;
 } = {
   cayenne: 'https://apis.getlit.dev/cayenne/contracts',
   manzano: 'https://apis.getlit.dev/manzano/contracts',

@@ -1,4 +1,4 @@
-import { EITHER_TYPE } from '../enums';
+import { EITHER_TYPE_VALUES } from '../constants/constants';
 
 export interface ILitError {
   message?: string;
@@ -17,6 +17,6 @@ export interface ILitErrorTypeParams {
  * A standardized way to return either error or success
  */
 export interface IEither<T> {
-  type: EITHER_TYPE.SUCCESS | EITHER_TYPE.ERROR;
+  type: EITHER_TYPE_VALUES;
   result: T | ILitError;
 }

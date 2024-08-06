@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 import {
   AuthMethodType,
-  ProviderType,
+  ProviderType_VALUES,
   RELAYER_URL_BY_NETWORK,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
@@ -139,13 +139,13 @@ export class LitAuthClient {
   /**
    * Initialize a provider
    *
-   * @param {ProviderType} type - Type of provider to initialize
+   * @param {ProviderType_VALUES} type - Type of provider to initialize
    * @param {ProviderOptions} options - Options for the provider
    *
    * @returns {T} - Provider
    */
   public initProvider<T extends BaseProvider>(
-    type: ProviderType,
+    type: ProviderType_VALUES,
     options?: ProviderOptions
   ): T {
     const baseParams = {
@@ -240,7 +240,7 @@ export class LitAuthClient {
    *
    * @returns {BaseProvider | undefined} - Provider if found, undefined otherwise
    */
-  getProvider(type: ProviderType): BaseProvider | undefined {
+  getProvider(type: ProviderType_VALUES): BaseProvider | undefined {
     return this.providers.get(type);
   }
 

@@ -174,7 +174,7 @@ export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
  */
 export type MintCallback<T = ClaimProcessor> = (
   response: ClaimResult<T>,
-  network: string
+  network: LIT_NETWORKS_KEYS
 ) => Promise<string>;
 
 /**
