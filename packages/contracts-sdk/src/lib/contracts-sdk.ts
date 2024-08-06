@@ -885,6 +885,7 @@ export class LitContracts {
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   }): Promise<{
+    stakingContract: ethers.Contract;
     epoch: number;
     minNodeCount: number;
     bootstrapUrls: string[];
@@ -956,124 +957,11 @@ export class LitContracts {
     });
 
     return {
+      stakingContract,
       epoch,
       minNodeCount,
       bootstrapUrls: networks,
     };
-  };
-
-  public static getMinNodeCount = async (
-    network: LIT_NETWORKS_KEYS,
-    context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string
-  ) => {
-    const contract = await LitContracts.getStakingContract(
-      network,
-      context,
-      rpcUrl
-    );
-
-    const minNodeCount = await contract['currentValidatorCountForConsensus']();
-
-    if (!minNodeCount) {
-      throw new Error('❌ Minimum validator count is not set');
-    }
-    return minNodeCount;
-  };
-
-  public static getValidators = async (
-    network: LIT_NETWORKS_KEYS,
-    context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string,
-    nodeProtocol?: typeof HTTP | typeof HTTPS | null
-  ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(
-      network,
-      context,
-      rpcUrl
-    );
-
-    // Fetch contract data
-    const [activeValidators, currentValidatorsCount, kickedValidators] =
-      await Promise.all([
-        contract['getValidatorsInCurrentEpoch'](),
-        contract['currentValidatorCountForConsensus'](),
-        contract['getKickedValidators'](),
-      ]);
-
-    const validators = [];
-
-    // Check if active validator set meets the threshold
-    if (
-      activeValidators.length - kickedValidators.length >=
-      currentValidatorsCount
-    ) {
-      // Process each validator
-      for (const validator of activeValidators) {
-        validators.push(validator);
-      }
-    } else {
-      LitContracts.logger.error(
-        '❌ Active validator set does not meet the threshold'
-      );
-    }
-
-    // remove kicked validators in active validators
-    const cleanedActiveValidators = activeValidators.filter(
-      (av: any) => !kickedValidators.some((kv: any) => kv === av)
-    );
-
-    const activeValidatorStructs: ValidatorStruct[] = (
-      await contract['getValidatorsStructs'](cleanedActiveValidators)
-    ).map((item: any) => {
-      return {
-        ip: item[0],
-        ipv6: item[1],
-        port: item[2],
-        nodeAddress: item[3],
-        reward: item[4],
-        seconderPubkey: item[5],
-        receiverPubkey: item[6],
-      };
-    });
-
-    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
-      const centralisation = CENTRALISATION_BY_NETWORK[network];
-
-      // Convert the integer IP to a string format
-      const ip = intToIP(item.ip);
-      let port = item.port;
-
-      // Determine the protocol to use based on various conditions
-      const protocol =
-        // If nodeProtocol is defined, use it
-        nodeProtocol ||
-        // If port is 443, use HTTPS, otherwise use network-specific HTTP
-        (port === 443 ? HTTPS : HTTP_BY_NETWORK[network]) ||
-        // Fallback to HTTP if no other conditions are met
-        HTTP;
-
-      // Check for specific conditions in centralised networks
-      if (centralisation === 'centralised') {
-        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
-        if (
-          network === LIT_NETWORK.Cayenne &&
-          !port.toString().startsWith('8')
-        ) {
-          throw new Error(
-            `Invalid port: ${port} for the ${centralisation} ${network} network. Expected range: 8470 - 8479`
-          );
-        }
-      }
-
-      const url = `${protocol}${ip}:${port}`;
-
-      LitContracts.logger.debug("Validator's URL:", url);
-
-      return url;
-    });
-
-    return networks;
   };
 
   private static async _resolveContractContext(
