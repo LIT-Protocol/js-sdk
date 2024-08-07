@@ -281,7 +281,8 @@ export class LitCore {
       });
     }
 
-    const epochInInt = parseInt(epoch.toString());
+    const epochInInt = parseInt(epoch.toString(), 10);
+
     if (isNaN(epochInInt)) {
       throwError({
         message: `epoch is ${epoch}, which is invalid.`,
@@ -398,16 +399,16 @@ export class LitCore {
     unloadModules();
 
     this._stopListeningForNewEpoch();
-    this._stopNetworkPolling();
+    // this._stopNetworkPolling();
     if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
-  _stopNetworkPolling() {
-    if (this._networkSyncInterval) {
-      clearInterval(this._networkSyncInterval);
-      this._networkSyncInterval = null;
-    }
-  }
+  // _stopNetworkPolling() {
+  //   if (this._networkSyncInterval) {
+  //     clearInterval(this._networkSyncInterval);
+  //     this._networkSyncInterval = null;
+  //   }
+  // }
   _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
@@ -487,7 +488,7 @@ export class LitCore {
     // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
     this._stopListeningForNewEpoch();
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
-    this._stopNetworkPolling();
+    // this._stopNetworkPolling();
 
     // Initialize a contractContext if we were not given one; this allows interaction against the staking contract
     // to be handled locally from then on
@@ -545,7 +546,7 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this._scheduleNetworkSync();
+    // this._scheduleNetworkSync();
     this._listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
@@ -814,20 +815,20 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  private _scheduleNetworkSync() {
-    if (this._networkSyncInterval) {
-      clearInterval(this._networkSyncInterval);
-    }
+  // private _scheduleNetworkSync() {
+  //   if (this._networkSyncInterval) {
+  //     clearInterval(this._networkSyncInterval);
+  //   }
 
-    this._networkSyncInterval = setInterval(async () => {
-      if (
-        !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
-      ) {
-        await this._syncBlockhash();
-      }
-    }, BLOCKHASH_SYNC_INTERVAL);
-  }
+  //   this._networkSyncInterval = setInterval(async () => {
+  //     if (
+  //       !this.lastBlockHashRetrieved ||
+  //       Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
+  //     ) {
+  //       await this._syncBlockhash();
+  //     }
+  //   }, BLOCKHASH_SYNC_INTERVAL);
+  // }
 
   /**
    *
