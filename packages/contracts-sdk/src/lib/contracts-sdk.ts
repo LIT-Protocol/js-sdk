@@ -1024,7 +1024,9 @@ export class LitContracts {
     }
 
     if (activeUnkickedValidatorStructs.length <= minNodeCount) {
-      throw new Error('❌ Active validator set does not meet the threshold');
+      throw new Error(
+        `❌ Active validator set does not meet the threshold. Required: ${minNodeCount} but got: ${activeUnkickedValidatorStructs.length}`
+      );
     }
 
     const activeValidatorStructs: ValidatorStruct[] =
