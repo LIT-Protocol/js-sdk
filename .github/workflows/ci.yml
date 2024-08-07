@@ -49,7 +49,7 @@ jobs:
         with: 
           fetch-depth: 0
           repository: LIT-Protocol/lit-assets
-          ref: datil-cherrypick-shiva-changes
+          ref: datil
           token: ${{secrets.GH_PAT}}
           path: ${{ github.workspace }}/lit-assets/
           submodules: false
