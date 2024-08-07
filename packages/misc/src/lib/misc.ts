@@ -657,9 +657,9 @@ export const genRandomPath = (): string => {
 };
 
 /**
- * Checks if the given LitNetwork value is supported.
- * @param litNetwork - The LitNetwork value to check.
- * @throws {Error} - Throws an error if the LitNetwork value is not supported.
+ * Checks if the given LIT_NETWORK value is supported.
+ * @param litNetwork - The Lit Network value to check.
+ * @throws {Error} - Throws an error if the Lit Network value is not supported.
  */
 export function isSupportedLitNetwork(
   litNetwork: LIT_NETWORK_VALUES
@@ -668,7 +668,7 @@ export function isSupportedLitNetwork(
 
   if (!supportedNetworks.includes(litNetwork)) {
     throw new Error(
-      `Unsupported LitNetwork! (${supportedNetworks.join('|')}) are supported.`
+      `Unsupported LIT_NETWORK! (${supportedNetworks.join('|')}) are supported.`
     );
   }
 }

@@ -34,7 +34,7 @@ function isSupportedLitNetwork(
   // @ts-expect-error - This is an assert function; litNetwork by definition may be an invalid value
   if (!supportedNetworks.includes(litNetwork)) {
     throw new Error(
-      `Unsupported LitNetwork! (${supportedNetworks.join('|')}) are supported.`
+      `Unsupported LIT_NETWORK! (${supportedNetworks.join('|')}) are supported.`
     );
   }
 }

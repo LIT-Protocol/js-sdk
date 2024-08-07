@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
-import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
+import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 

@@ -700,6 +700,12 @@ export const LIT_NETWORK = {
 } as const;
 
 /**
+ * @deprecated Will be removed. - Use LIT_NETWORK instead
+ * Alias for LIT_NETWORK. Added for backwards compatibility.
+ */
+export const LitNetwork = LIT_NETWORK;
+
+/**
  * The type representing the keys of the LIT_NETWORK object.
  */
 export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;

@@ -12,7 +12,7 @@ import {
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
-import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
+import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 
