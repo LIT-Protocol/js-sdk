@@ -68,4 +68,3 @@ jobs:
         if: steps.session.outputs.exit_code == 0
         id: pkp
         run: yarn test:e2e -t 'PKP Ethers'
-
