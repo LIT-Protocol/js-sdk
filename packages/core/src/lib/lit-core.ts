@@ -220,22 +220,33 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
-  private async _getValidatorData() {
-    const [minNodeCount, bootstrapUrls] = await Promise.all([
-      LitContracts.getMinNodeCount(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl
-      ),
-      LitContracts.getValidators(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl,
-        this.config.nodeProtocol
-      ),
-    ]);
+  /**
+   * Retrieves the validator data including staking contract, epoch, minNodeCount, and bootstrapUrls.
+   * @returns An object containing the validator data.
+   * @throws Error if minNodeCount is not provided, is less than or equal to 0, or if bootstrapUrls are not available.
+   */
+  private async _getValidatorData(): Promise<{
+    stakingContract: ethers.Contract;
+    epoch: number;
+    minNodeCount: number;
+    bootstrapUrls: string[];
+  }> {
+    const { stakingContract, epoch, minNodeCount, bootstrapUrls } =
+      await LitContracts.getConnectionInfo({
+        litNetwork: this.config.litNetwork,
+        networkContext: this.config.contractContext,
+        rpcUrl: this.config.rpcUrl,
+        nodeProtocol: this.config.nodeProtocol,
+      });
 
-    if (minNodeCount <= 0) {
+    // Validate minNodeCount
+    if (minNodeCount === undefined || minNodeCount === null) {
+      throw new Error('minNodeCount is required');
+    }
+
+    const minNodeCountInInt = parseInt(minNodeCount.toString());
+
+    if (isNaN(minNodeCountInInt) || minNodeCountInInt <= 0) {
       throwError({
         message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
@@ -243,7 +254,8 @@ export class LitCore {
       });
     }
 
-    if (bootstrapUrls.length <= 0) {
+    // Validate bootstrapUrls
+    if (!Array.isArray(bootstrapUrls) || bootstrapUrls.length <= 0) {
       throwError({
         message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
         errorKind: LIT_ERROR.INIT_ERROR.kind,
@@ -251,10 +263,42 @@ export class LitCore {
       });
     }
 
+    // Validate stakingContract
+    if (!stakingContract) {
+      throwError({
+        message: 'stakingContract is required',
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    // Validate epoch
+    if (epoch === undefined || epoch === null) {
+      throwError({
+        message: 'epoch is required',
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    const epochInInt = parseInt(epoch.toString());
+    if (isNaN(epochInInt)) {
+      throwError({
+        message: `epoch is ${epoch}, which is invalid.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    log('[_getValidatorData] epochInInt: ', epochInInt);
+    log('[_getValidatorData] minNodeCountInInt: ', minNodeCountInInt);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
+    log('[_getValidatorData] stakingContract: ', stakingContract);
 
     return {
-      minNodeCount: parseInt(minNodeCount, 10),
+      stakingContract,
+      epoch: epochInInt,
+      minNodeCount: minNodeCountInInt,
       bootstrapUrls,
     };
   }
@@ -479,22 +523,21 @@ export class LitCore {
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
     // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
-    const getStakingContract =
-      this._stakingContract ||
-      LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext, // We've already primed the `contractContext`
-        this.config.rpcUrl
-      );
+    const validatorData = await this._getValidatorData();
 
-    const [{ minNodeCount, bootstrapUrls }, stakingContract] =
-      await Promise.all([this._getValidatorData(), getStakingContract]);
+    this._stakingContract = validatorData.stakingContract;
+    this.config.minNodeCount = validatorData.minNodeCount;
+    this.config.bootstrapUrls = validatorData.bootstrapUrls;
 
-    this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
-    this.config.minNodeCount = minNodeCount;
-    this.config.bootstrapUrls = bootstrapUrls;
+    this._epochState = {
+      currentNumber: validatorData.epoch,
+      startTime: null, // not set until we fetch it from the 'epoch' function
+    };
 
-    this._epochState = await this._fetchCurrentEpochState();
+    // non-async, but we don't need to wait for it to complete before continuing
+    this._fetchCurrentEpochState().then((epochState) => {
+      this._epochState = epochState;
+    });
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
