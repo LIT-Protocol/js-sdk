@@ -36,8 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      DATIL_COMMIT_HASH: b5cfe7489275dbed5e9098818d0bd441c8918903
-      DATIL_BRANCH_NAME: datil-cherrypick-shiva-changes 
+      DATIL_COMMIT_HASH: c46accc5761c0cb730fc2102f3fa6b5fa5bb7a94
+      DATIL_BRANCH_NAME: datil
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
