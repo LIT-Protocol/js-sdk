@@ -1,12 +1,7 @@
-import {
-  AuthMethodScope,
-  AuthMethodType,
-  LIT_ENDPOINT_VERSION,
-} from '@lit-protocol/constants';
+import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 
 /**
  * ## Scenario:

@@ -1,18 +1,7 @@
-import { version } from '@lit-protocol/constants';
+import { version, LogLevel, LogLevel_VALUES } from '@lit-protocol/constants';
 import { hashMessage } from 'ethers/lib/utils';
-import { encode } from 'punycode';
-import { toString as uint8arrayToString } from 'uint8arrays';
 
-export enum LogLevel {
-  INFO = 0,
-  DEBUG = 1,
-  WARN = 2,
-  ERROR = 3,
-  FATAL = 4,
-  TIMING_START = 5,
-  TIMING_END = 6,
-  OFF = -1,
-}
+export { LogLevel };
 
 const colours = {
   reset: '\x1b[0m',
@@ -49,7 +38,7 @@ const colours = {
   },
 };
 
-function _convertLoggingLevel(level: LogLevel): string {
+function _convertLoggingLevel(level: LogLevel_VALUES): string {
   switch (level) {
     case LogLevel.INFO:
       return `${colours.fg.green}[INFO]${colours.reset}`;
@@ -70,7 +59,7 @@ function _convertLoggingLevel(level: LogLevel): string {
   return '[UNKNOWN]';
 }
 
-function _resolveLoggingHandler(level: LogLevel): any {
+function _resolveLoggingHandler(level: LogLevel_VALUES): any {
   switch (level) {
     case LogLevel.DEBUG:
       return console.debug;
@@ -121,7 +110,7 @@ interface ILog {
   args: any[];
   id: string;
   category: string;
-  level: LogLevel;
+  level: LogLevel_VALUES;
   error?: any;
   toString(): string;
   toJSON(): Record<string, unknown>;
@@ -133,7 +122,7 @@ class Log implements ILog {
   args: any[];
   id: string;
   category: string;
-  level: LogLevel;
+  level: LogLevel_VALUES;
   error?: any;
 
   constructor(
@@ -142,7 +131,7 @@ class Log implements ILog {
     args: any[],
     id: string,
     category: string,
-    level: LogLevel
+    level: LogLevel_VALUES
   ) {
     this.timestamp = timestamp;
     this.message = message;
@@ -199,7 +188,7 @@ export type messageHandler = (log: Log) => void;
 
 export class Logger {
   private _category: string;
-  private _level: LogLevel;
+  private _level: LogLevel_VALUES;
   private _id: string;
   private _handler: messageHandler | undefined;
   private _consoleHandler: any;
@@ -211,7 +200,7 @@ export class Logger {
 
   public static createLogger(
     category: string,
-    level: LogLevel,
+    level: LogLevel_VALUES,
     id: string,
     isParent: boolean,
     config?: Record<string, any>
@@ -221,7 +210,7 @@ export class Logger {
 
   private constructor(
     category: string,
-    level: LogLevel,
+    level: LogLevel_VALUES,
     id: string,
     isParent: boolean,
     config?: Record<string, any>
@@ -259,7 +248,7 @@ export class Logger {
     return this._children;
   }
 
-  public setLevel(level: LogLevel): void {
+  public setLevel(level: LogLevel_VALUES): void {
     this._level = level;
   }
 
@@ -300,7 +289,11 @@ export class Logger {
       this._log(LogLevel.TIMING_END, message, ...args);
   }
 
-  private _log(level: LogLevel, message: string = '', ...args: any[]): void {
+  private _log(
+    level: LogLevel_VALUES,
+    message: string = '',
+    ...args: any[]
+  ): void {
     const log = new Log(
       new Date().toISOString(),
       message,
@@ -373,7 +366,7 @@ export class Logger {
 export class LogManager {
   private static _instance: LogManager;
   private _loggers: Map<string, Logger>;
-  private _level: LogLevel | undefined = LogLevel.DEBUG;
+  private _level: LogLevel_VALUES | undefined = LogLevel.DEBUG;
   private _config: Record<string, any> | undefined;
 
   static get Instance(): LogManager {
@@ -398,7 +391,7 @@ export class LogManager {
     }
   }
 
-  public setLevel(level: LogLevel) {
+  public setLevel(level: LogLevel_VALUES) {
     this._level = level;
     for (const logger of this._loggers) {
       logger[1].setLevel(level);

@@ -6,6 +6,8 @@ import {
   LIT_ERROR,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
+  LogLevel,
+  LogLevel_VALUES,
   RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 
@@ -28,7 +30,7 @@ import {
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
+import { LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
 
@@ -240,7 +242,7 @@ export const throwRemovedFunctionError = (functionName: string) => {
 
 export const bootstrapLogManager = (
   id: string,
-  level: LogLevel = LogLevel.DEBUG
+  level: LogLevel_VALUES = LogLevel.DEBUG
 ) => {
   if (!globalThis.logManager) {
     globalThis.logManager = LogManager.Instance;

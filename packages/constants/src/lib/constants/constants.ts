@@ -1178,3 +1178,41 @@ export const LitAbility = {
 export type LitAbility_TYPE = keyof typeof LitAbility;
 // This should replicate LitAbility in types package
 export type LitAbility_VALUES = (typeof LitAbility)[keyof typeof LitAbility];
+
+/**
+ * LIT specific abilities mapped into the Recap specific terminology
+ * of an 'ability'.
+ */
+export const LitRecapAbility = {
+  Decryption: 'Decryption',
+  Signing: 'Signing',
+  Auth: 'Auth',
+  Execution: 'Execution',
+} as const;
+export type LitRecapAbility_TYPE = keyof typeof LitRecapAbility;
+export type LitRecapAbility_VALUES =
+  (typeof LitRecapAbility)[keyof typeof LitRecapAbility];
+
+export const LitNamespace = {
+  Auth: 'Auth',
+  Threshold: 'Threshold',
+} as const;
+export type LitNamespace_TYPE = keyof typeof LitNamespace;
+export type LitNamespace_VALUES =
+  (typeof LitNamespace)[keyof typeof LitNamespace];
+
+/**
+ * SDK Logger levels
+ */
+export const LogLevel = {
+  INFO: 0,
+  DEBUG: 1,
+  WARN: 2,
+  ERROR: 3,
+  FATAL: 4,
+  TIMING_START: 5,
+  TIMING_END: 6,
+  OFF: -1,
+} as const;
+export type LogLevel_TYPE = keyof typeof LogLevel;
+export type LogLevel_VALUES = (typeof LogLevel)[keyof typeof LogLevel];

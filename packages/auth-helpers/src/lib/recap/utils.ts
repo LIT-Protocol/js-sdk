@@ -1,12 +1,19 @@
-import { LitAbility, LitAbility_VALUES } from '@lit-protocol/constants';
+import {
+  LitAbility,
+  LitAbility_VALUES,
+  LitRecapAbility,
+  LitRecapAbility_VALUES,
+  LitNamespace,
+  LitNamespace_VALUES,
+} from '@lit-protocol/constants';
 
 /**
  * Map from a LitAbility to the Recap namespace and ability.
  * @throws Error if the LitAbility is unknown
  */
 export function getRecapNamespaceAndAbility(litAbility: LitAbility_VALUES): {
-  recapNamespace: LitNamespace;
-  recapAbility: LitRecapAbility;
+  recapNamespace: LitNamespace_VALUES;
+  recapAbility: LitRecapAbility_VALUES;
 } {
   switch (litAbility) {
     case LitAbility.AccessControlConditionDecryption:
@@ -38,20 +45,4 @@ export function getRecapNamespaceAndAbility(litAbility: LitAbility_VALUES): {
     default:
       throw new Error(`Unknown LitAbility: ${litAbility}`);
   }
-}
-
-/**
- * LIT specific abilities mapped into the Recap specific terminology
- * of an 'ability'.
- */
-export enum LitRecapAbility {
-  Decryption = 'Decryption',
-  Signing = 'Signing',
-  Auth = 'Auth',
-  Execution = 'Execution',
-}
-
-export enum LitNamespace {
-  Auth = 'Auth',
-  Threshold = 'Threshold',
 }

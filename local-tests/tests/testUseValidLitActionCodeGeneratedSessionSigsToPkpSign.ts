@@ -1,5 +1,4 @@
 import { LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 import { LitAbility } from '@lit-protocol/constants';
 import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
