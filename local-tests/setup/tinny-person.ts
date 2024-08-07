@@ -7,6 +7,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthMethod,
   BaseSiweMessage,
+  LIT_NETWORKS_KEYS,
   LitContractContext,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
@@ -124,6 +125,7 @@ export class TinnyPerson {
     if (this.envConfig.network === LIT_TESTNET.LOCALCHAIN) {
       const networkContext = this.envConfig.contractContext;
       this.contractsClient = new LitContracts({
+        network: this.envConfig.network as LIT_NETWORKS_KEYS,
         signer: this.wallet,
         debug: this.envConfig.processEnvs.DEBUG,
         rpc: this.envConfig.processEnvs.LIT_RPC_URL, // anvil rpc
