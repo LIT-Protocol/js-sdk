@@ -1984,7 +1984,7 @@ export class LitNodeClientNodeJs
    *
    * ```ts
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
-import { LitAbility } from "@lit-protocol/types";
+import { LitAbility } from "@lit-protocol/constants";
 import { logWithRequestId } from '../../../misc/src/lib/misc';
 
 const resourceAbilityRequests = [

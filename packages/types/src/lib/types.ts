@@ -7,7 +7,6 @@ import {
   LPACC_EVM_BASIC,
 } from '@lit-protocol/accs-schemas';
 
-import { AuthMethodType } from './enums';
 import {
   AuthMethod,
   LitRelayConfig,
@@ -188,7 +187,7 @@ export type ClaimRequest<T = ClaimProcessor> = {
 export type ClaimResult<T = ClaimProcessor> = {
   signatures: Signature[];
   derivedKeyId: string;
-  authMethodType: AuthMethodType;
+  authMethodType: number;
   pubkey: string;
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
@@ -240,3 +239,16 @@ export interface LitContractResolverContext {
 }
 
 export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
+
+export type LitResourcePrefix =
+  | 'lit-accesscontrolcondition'
+  | 'lit-pkp'
+  | 'lit-ratelimitincrease'
+  | 'lit-litaction';
+
+export type LitAbility =
+  | 'access-control-condition-decryption'
+  | 'access-control-condition-signing'
+  | 'pkp-signing'
+  | 'rate-limit-increase-auth'
+  | 'lit-action-execution';

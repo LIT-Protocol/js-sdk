@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LitAbility } from '@lit-protocol/types';
+import { LitAbility } from '@lit-protocol/constants';
 import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';

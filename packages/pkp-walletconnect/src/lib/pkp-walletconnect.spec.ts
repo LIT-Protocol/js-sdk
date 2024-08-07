@@ -10,9 +10,9 @@ import { ethers } from 'ethers';
 import {
   createSiweMessageWithRecaps,
   generateAuthSig,
-  LitAbility,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
+import { LitAbility } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';

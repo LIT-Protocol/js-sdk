@@ -1,16 +1,16 @@
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
+import { LitAbility_VALUES } from '@lit-protocol/constants';
 import {
+  AuthSig,
   AttenuationsObject,
   CID as CIDString,
   ILitResource,
   ISessionCapabilityObject,
-  LitAbility,
   PlainJSON,
 } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe/siwe-helper';
-import { AuthSig } from '../models';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   private _inner: Recap;
@@ -81,7 +81,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   /** LIT specific methods */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility,
+    ability: LitAbility_VALUES,
     data: any = {}
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
@@ -112,7 +112,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
   verifyCapabilitiesForResource(
     litResource: ILitResource,
-    ability: LitAbility
+    ability: LitAbility_VALUES
   ): boolean {
     // Validate Lit ability is compatible with the Lit resource.
     // The only exception is if there's a wildcard resource key in the session capability object.

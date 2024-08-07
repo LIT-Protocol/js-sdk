@@ -1,14 +1,15 @@
-import {
-  AccessControlConditions,
-  ILitResource,
-  LitAbility,
-  LitResourcePrefix,
-} from '@lit-protocol/types';
+import { AccessControlConditions, ILitResource } from '@lit-protocol/types';
 import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
+import {
+  LitAbility,
+  LitAbility_VALUES,
+  LitResourcePrefix,
+  LitResourcePrefix_VALUES,
+} from '@lit-protocol/constants';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 abstract class LitResourceBase {
-  abstract resourcePrefix: LitResourcePrefix;
+  abstract resourcePrefix: LitResourcePrefix_VALUES;
   public readonly resource: string;
 
   constructor(resource: string) {
@@ -39,7 +40,7 @@ export class LitAccessControlConditionResource
     super(resource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
+  isValidLitAbility(litAbility: LitAbility_VALUES): boolean {
     return (
       litAbility === LitAbility.AccessControlConditionDecryption ||
       litAbility === LitAbility.AccessControlConditionSigning
@@ -87,7 +88,7 @@ export class LitPKPResource extends LitResourceBase implements ILitResource {
     super(resource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
+  isValidLitAbility(litAbility: LitAbility_VALUES): boolean {
     return litAbility === LitAbility.PKPSigning;
   }
 }
@@ -104,7 +105,7 @@ export class LitRLIResource extends LitResourceBase implements ILitResource {
     super(resource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
+  isValidLitAbility(litAbility: LitAbility_VALUES): boolean {
     return litAbility === LitAbility.RateLimitIncreaseAuth;
   }
 }
@@ -121,7 +122,7 @@ export class LitActionResource extends LitResourceBase implements ILitResource {
     super(resource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
+  isValidLitAbility(litAbility: LitAbility_VALUES): boolean {
     return litAbility === LitAbility.LitActionExecution;
   }
 }

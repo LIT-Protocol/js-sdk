@@ -1,6 +1,6 @@
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { ILitNodeClient, LitAbility, SolanaAuthSig } from '@lit-protocol/types';
+import { ILitNodeClient, SolanaAuthSig } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';

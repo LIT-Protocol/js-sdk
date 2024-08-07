@@ -1,10 +1,10 @@
-import { LitAbility, LitResourcePrefix } from '../models';
+import { LitAbility, LitAbility_VALUES } from '@lit-protocol/constants';
 
 /**
  * Map from a LitAbility to the Recap namespace and ability.
  * @throws Error if the LitAbility is unknown
  */
-export function getRecapNamespaceAndAbility(litAbility: LitAbility): {
+export function getRecapNamespaceAndAbility(litAbility: LitAbility_VALUES): {
   recapNamespace: LitNamespace;
   recapAbility: LitRecapAbility;
 } {

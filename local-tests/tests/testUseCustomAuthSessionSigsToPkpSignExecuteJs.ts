@@ -1,11 +1,8 @@
-import {
-  LitAbility,
-  LitActionResource,
-  LitPKPResource,
-} from '@lit-protocol/auth-helpers';
+import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import {
   AuthMethodScope,
   CENTRALISATION_BY_NETWORK,
+  LitAbility,
 } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { stringToIpfsHash } from 'local-tests/setup/tinny-utils';
