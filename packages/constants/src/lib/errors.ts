@@ -1,14 +1,14 @@
-export enum LitErrorKind {
-  Unknown = 'Unknown',
-  Unexpected = 'Unexpected',
-  Generic = 'Generic',
-  Config = 'Config',
-  Validation = 'Validation',
-  Conversion = 'Conversion',
-  Parser = 'Parser',
-  Serializer = 'Serializer',
-  Timeout = 'Timeout',
-}
+export const LitErrorKind = {
+  Unknown: 'Unknown',
+  Unexpected: 'Unexpected',
+  Generic: 'Generic',
+  Config: 'Config',
+  Validation: 'Validation',
+  Conversion: 'Conversion',
+  Parser: 'Parser',
+  Serializer: 'Serializer',
+  Timeout: 'Timeout',
+} as const;
 
 export const LIT_ERROR = {
   INVALID_PARAM_TYPE: {

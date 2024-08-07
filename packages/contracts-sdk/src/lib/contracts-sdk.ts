@@ -1174,7 +1174,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    *
    * @param {Object} params - The parameters for adding the permitted authentication method.
    * @param {string} params.pkpTokenId - The ID of the PKP token.
-   * @param {AuthMethodType | number} params.authMethodType - The type of the authentication method.
+   * @param {AuthMethodType_VALUES | number} params.authMethodType - The type of the authentication method.
    * @param {string | Uint8Array} params.authMethodId - The ID of the authentication method.
    * @param {AuthMethodScope[]} params.authMethodScopes - The scopes of the authentication method.
    * @param {string} [params.webAuthnPubkey] - The public key for WebAuthn.
