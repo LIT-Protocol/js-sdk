@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { log } from '@lit-protocol/misc';
-import { LitAbility } from '@lit-protocol/types';
+import { LitAbility } from '@lit-protocol/constants';
 import { getLitActionSessionSigsUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 

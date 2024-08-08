@@ -7,12 +7,11 @@ import {
 import {
   AuthCallbackParams,
   AuthSig,
-  LitAbility,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
-import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
+import { LitAbility, CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 
