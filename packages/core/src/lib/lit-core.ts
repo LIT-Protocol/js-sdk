@@ -220,22 +220,33 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
-  private async _getValidatorData() {
-    const [minNodeCount, bootstrapUrls] = await Promise.all([
-      LitContracts.getMinNodeCount(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl
-      ),
-      LitContracts.getValidators(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl,
-        this.config.nodeProtocol
-      ),
-    ]);
+  /**
+   * Retrieves the validator data including staking contract, epoch, minNodeCount, and bootstrapUrls.
+   * @returns An object containing the validator data.
+   * @throws Error if minNodeCount is not provided, is less than or equal to 0, or if bootstrapUrls are not available.
+   */
+  private async _getValidatorData(): Promise<{
+    stakingContract: ethers.Contract;
+    epoch: number;
+    minNodeCount: number;
+    bootstrapUrls: string[];
+  }> {
+    const { stakingContract, epoch, minNodeCount, bootstrapUrls } =
+      await LitContracts.getConnectionInfo({
+        litNetwork: this.config.litNetwork,
+        networkContext: this.config.contractContext,
+        rpcUrl: this.config.rpcUrl,
+        nodeProtocol: this.config.nodeProtocol,
+      });
 
-    if (minNodeCount <= 0) {
+    // Validate minNodeCount
+    if (minNodeCount === undefined || minNodeCount === null) {
+      throw new Error('minNodeCount is required');
+    }
+
+    const minNodeCountInInt = parseInt(minNodeCount.toString());
+
+    if (isNaN(minNodeCountInInt) || minNodeCountInInt <= 0) {
       throwError({
         message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
@@ -243,7 +254,8 @@ export class LitCore {
       });
     }
 
-    if (bootstrapUrls.length <= 0) {
+    // Validate bootstrapUrls
+    if (!Array.isArray(bootstrapUrls) || bootstrapUrls.length <= 0) {
       throwError({
         message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
         errorKind: LIT_ERROR.INIT_ERROR.kind,
@@ -251,10 +263,43 @@ export class LitCore {
       });
     }
 
+    // Validate stakingContract
+    if (!stakingContract) {
+      throwError({
+        message: 'stakingContract is required',
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    // Validate epoch
+    if (epoch === undefined || epoch === null) {
+      throwError({
+        message: 'epoch is required',
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    const epochInInt = parseInt(epoch.toString(), 10);
+
+    if (isNaN(epochInInt)) {
+      throwError({
+        message: `epoch is ${epoch}, which is invalid.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    log('[_getValidatorData] epochInInt: ', epochInInt);
+    log('[_getValidatorData] minNodeCountInInt: ', minNodeCountInInt);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
+    log('[_getValidatorData] stakingContract: ', stakingContract);
 
     return {
-      minNodeCount: parseInt(minNodeCount, 10),
+      stakingContract,
+      epoch: epochInInt,
+      minNodeCount: minNodeCountInInt,
       bootstrapUrls,
     };
   }
@@ -354,16 +399,16 @@ export class LitCore {
     unloadModules();
 
     this._stopListeningForNewEpoch();
-    this._stopNetworkPolling();
+    // this._stopNetworkPolling();
     if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
-  _stopNetworkPolling() {
-    if (this._networkSyncInterval) {
-      clearInterval(this._networkSyncInterval);
-      this._networkSyncInterval = null;
-    }
-  }
+  // _stopNetworkPolling() {
+  //   if (this._networkSyncInterval) {
+  //     clearInterval(this._networkSyncInterval);
+  //     this._networkSyncInterval = null;
+  //   }
+  // }
   _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
@@ -443,7 +488,7 @@ export class LitCore {
     // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
     this._stopListeningForNewEpoch();
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
-    this._stopNetworkPolling();
+    // this._stopNetworkPolling();
 
     // Initialize a contractContext if we were not given one; this allows interaction against the staking contract
     // to be handled locally from then on
@@ -479,22 +524,21 @@ export class LitCore {
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
     // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
-    const getStakingContract =
-      this._stakingContract ||
-      LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext, // We've already primed the `contractContext`
-        this.config.rpcUrl
-      );
+    const validatorData = await this._getValidatorData();
 
-    const [{ minNodeCount, bootstrapUrls }, stakingContract] =
-      await Promise.all([this._getValidatorData(), getStakingContract]);
+    this._stakingContract = validatorData.stakingContract;
+    this.config.minNodeCount = validatorData.minNodeCount;
+    this.config.bootstrapUrls = validatorData.bootstrapUrls;
 
-    this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
-    this.config.minNodeCount = minNodeCount;
-    this.config.bootstrapUrls = bootstrapUrls;
+    this._epochState = {
+      currentNumber: validatorData.epoch,
+      startTime: null, // not set until we fetch it from the 'epoch' function
+    };
 
-    this._epochState = await this._fetchCurrentEpochState();
+    // non-async, but we don't need to wait for it to complete before continuing
+    this._fetchCurrentEpochState().then((epochState) => {
+      this._epochState = epochState;
+    });
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
@@ -502,7 +546,7 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this._scheduleNetworkSync();
+    // this._scheduleNetworkSync();
     this._listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
@@ -771,20 +815,20 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  private _scheduleNetworkSync() {
-    if (this._networkSyncInterval) {
-      clearInterval(this._networkSyncInterval);
-    }
+  // private _scheduleNetworkSync() {
+  //   if (this._networkSyncInterval) {
+  //     clearInterval(this._networkSyncInterval);
+  //   }
 
-    this._networkSyncInterval = setInterval(async () => {
-      if (
-        !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
-      ) {
-        await this._syncBlockhash();
-      }
-    }, BLOCKHASH_SYNC_INTERVAL);
-  }
+  //   this._networkSyncInterval = setInterval(async () => {
+  //     if (
+  //       !this.lastBlockHashRetrieved ||
+  //       Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
+  //     ) {
+  //       await this._syncBlockhash();
+  //     }
+  //   }, BLOCKHASH_SYNC_INTERVAL);
+  // }
 
   /**
    *

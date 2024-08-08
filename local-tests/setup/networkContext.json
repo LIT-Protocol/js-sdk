@@ -7893,6 +7893,12 @@
             "internalType": "uint256",
             "name": "newMaxTripleConcurrency",
             "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "newRpcHealthcheckEnabled",
+            "type": "bool"
           }
         ],
         "name": "ConfigSet",
@@ -8377,6 +8383,11 @@
                 "internalType": "uint256",
                 "name": "maxTripleConcurrency",
                 "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "rpcHealthcheckEnabled",
+                "type": "bool"
               }
             ],
             "internalType": "struct LibStakingStorage.Config",
@@ -8901,6 +8912,11 @@
                 "internalType": "uint256",
                 "name": "maxTripleConcurrency",
                 "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "rpcHealthcheckEnabled",
+                "type": "bool"
               }
             ],
             "internalType": "struct LibStakingStorage.Config",
@@ -8998,6 +9014,129 @@
             "internalType": "struct LibStakingStorage.Epoch",
             "name": "",
             "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getActiveUnkickedValidatorStructs",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint32",
+                "name": "ip",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint128",
+                "name": "ipv6",
+                "type": "uint128"
+              },
+              {
+                "internalType": "uint32",
+                "name": "port",
+                "type": "uint32"
+              },
+              {
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "reward",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "senderPubKey",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "receiverPubKey",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct LibStakingStorage.Validator[]",
+            "name": "",
+            "type": "tuple[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getActiveUnkickedValidatorStructsAndCounts",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint32",
+                "name": "ip",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint128",
+                "name": "ipv6",
+                "type": "uint128"
+              },
+              {
+                "internalType": "uint32",
+                "name": "port",
+                "type": "uint32"
+              },
+              {
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "reward",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "senderPubKey",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "receiverPubKey",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct LibStakingStorage.Validator[]",
+            "name": "",
+            "type": "tuple[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getActiveUnkickedValidators",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "",
+            "type": "address[]"
           }
         ],
         "stateMutability": "view",
@@ -11011,6 +11150,19 @@
       {
         "inputs": [],
         "name": "PKP_HELPER_CONTRACT",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "PKP_HELPER_V2_CONTRACT",
         "outputs": [
           {
             "internalType": "bytes32",
