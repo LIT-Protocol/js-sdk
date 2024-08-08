@@ -2020,13 +2020,11 @@ const resourceAbilityRequests = [
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
-      throwError({
-        message: 'Eth Blockhash is undefined.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-      });
+      log('Eth Blockhash is undefined. Fetching again...');
+      this.latestBlockhash = await this.getLatestBlockhash();
     }
-    const nonce = this.latestBlockhash!;
+
+    const nonce = this.latestBlockhash;
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
