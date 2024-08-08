@@ -2021,7 +2021,7 @@ const resourceAbilityRequests = [
 
     if (!this.latestBlockhash) {
       log('Eth Blockhash is undefined. Fetching again...');
-      this.latestBlockhash = await this.getLatestBlockhash();
+      await this.getLatestBlockhash();
     }
 
     const nonce = this.latestBlockhash;
