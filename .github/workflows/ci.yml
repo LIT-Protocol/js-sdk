@@ -37,7 +37,6 @@ jobs:
     timeout-minutes: 30
     env:
       DATIL_COMMIT_HASH: b5cfe7489275dbed5e9098818d0bd441c8918903
-      DATIL_BRANCH_NAME: datil 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -49,7 +48,7 @@ jobs:
         with: 
           fetch-depth: 0
           repository: LIT-Protocol/lit-assets
-          ref: datil
+          ref: $DATIL_COMMIT_HASH
           token: ${{secrets.GH_PAT}}
           path: ${{ github.workspace }}/lit-assets/
           submodules: false
