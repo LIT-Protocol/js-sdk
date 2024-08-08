@@ -163,7 +163,7 @@ export default class EthWalletProvider extends BaseProvider {
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
-        nonce: litNodeClient.latestBlockhash!,
+        nonce: await litNodeClient.getLatestBlockhash(),
       });
     }
 
