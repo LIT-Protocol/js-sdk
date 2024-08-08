@@ -1,3 +1,12 @@
+import { ethers } from 'ethers';
+import { SiweMessage } from 'siwe';
+
+import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import {
+  LitNodeClient,
+  checkAndSignAuthMessage,
+} from '@lit-protocol/lit-node-client';
+import { log } from '@lit-protocol/misc';
 import {
   AuthMethod,
   AuthSig,
@@ -5,15 +14,8 @@ import {
   EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
-import { LIT_CHAINS, AuthMethodType, LIT_ERROR } from '@lit-protocol/constants';
-import { SiweMessage } from 'siwe';
-import { ethers } from 'ethers';
+
 import { BaseProvider } from './BaseProvider';
-import {
-  LitNodeClient,
-  checkAndSignAuthMessage,
-} from '@lit-protocol/lit-node-client';
-import { log, throwError } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -108,15 +110,6 @@ export default class EthWalletProvider extends BaseProvider {
     domain?: string;
     origin?: string;
   }): Promise<AuthMethod> {
-    if (!litNodeClient.latestBlockhash) {
-      throwError({
-        message:
-          'Eth Blockhash is undefined. Try connecting to the Lit network again.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-      });
-    }
-
     chain = chain || 'ethereum';
 
     let authSig: AuthSig;
@@ -152,7 +145,7 @@ export default class EthWalletProvider extends BaseProvider {
         version: '1',
         chainId,
         expirationTime: expiration,
-        nonce: litNodeClient.latestBlockhash!,
+        nonce: await litNodeClient.getLatestBlockhash(),
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);

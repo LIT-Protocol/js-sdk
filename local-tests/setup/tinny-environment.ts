@@ -403,7 +403,7 @@ export class TinnyEnvironment {
 
     const toSign = await createSiweMessage({
       walletAddress: wallet.address,
-      nonce: this.litNodeClient.latestBlockhash,
+      nonce: await this.litNodeClient.getLatestBlockhash(),
       expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
       litNodeClient: this.litNodeClient,
     });
