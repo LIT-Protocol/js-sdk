@@ -91,8 +91,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
               cond,
             },
           },
-          'You passed an invalid access control condition that is missing or has a wrong "conditionType": %s',
-          JSON.stringify(cond)
+          'You passed an invalid access control condition that is missing or has a wrong "conditionType"'
         );
     }
   }
@@ -103,8 +102,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
         cond,
       },
     },
-    'You passed an invalid access control condition: %s',
-    JSON.stringify(cond)
+    'You passed an invalid access control condition'
   );
 };
 
@@ -232,8 +230,7 @@ export const canonicalSolRpcConditionFormatter = (
         cond,
       },
     },
-    'You passed an invalid access control condition: %s',
-    JSON.stringify(cond)
+    'You passed an invalid access control condition'
   );
 };
 
@@ -294,8 +291,7 @@ export const canonicalAccessControlConditionFormatter = (
         cond,
       },
     },
-    'You passed an invalid access control condition: %s',
-    JSON.stringify(cond)
+    'You passed an invalid access control condition'
   );
 };
 
@@ -393,8 +389,7 @@ export const canonicalEVMContractConditionFormatter = (
         cond,
       },
     },
-    'You passed an invalid access control condition: %s',
-    JSON.stringify(cond)
+    'You passed an invalid access control condition'
   );
 };
 
@@ -458,8 +453,7 @@ export const canonicalCosmosConditionFormatter = (
         cond,
       },
     },
-    'You passed an invalid access control condition: %s',
-    JSON.stringify(cond)
+    'You passed an invalid access control condition'
   );
 };
 
