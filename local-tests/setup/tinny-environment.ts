@@ -9,7 +9,6 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthSig,
   CosmosAuthSig,
-  LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
   SolanaAuthSig,
