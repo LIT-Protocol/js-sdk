@@ -21,7 +21,6 @@ import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 import { toErrorWithMessage } from './tinny-utils';
 import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
-import { Network } from '../../packages/wrapped-keys/src/lib/types';
 
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
