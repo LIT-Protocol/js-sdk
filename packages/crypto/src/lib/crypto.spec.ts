@@ -1,4 +1,3 @@
-import { initWasmEcdsaSdk } from '@lit-protocol/ecdsa-sdk';
 import {
   decryptWithSignatureShares,
   encrypt,
@@ -6,12 +5,12 @@ import {
   combineSignatureShares,
   verifySignature,
   combineEcdsaShares,
-  loadModules,
 } from './crypto';
 import * as ethers from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
 
-import * as blsSdk from '@lit-protocol/bls-sdk';
+import { LIT_CURVE } from '@lit-protocol/constants';
+import { SigShare } from '@lit-protocol/types';
 
 const publicKey =
   '8e29447d7b0666fe41c357dbbdbdac0ac8ac973f88439a07f85fa31fa6fa3cea87c2eaa8b367e1c97764800fb5636892';
@@ -25,14 +24,9 @@ const identityParam = new Uint8Array([
 ]);
 
 describe('crypto', () => {
-  beforeAll(async () => {
-    await loadModules();
-    await blsSdk.initWasmBlsSdk();
-  });
-
   it('should encrypt', async () => {
     // execute
-    const ciphertext = encrypt(publicKey, secretMessage, identityParam);
+    const ciphertext = await encrypt(publicKey, secretMessage, identityParam);
 
     // assert
     expect(ciphertext.length).toBeGreaterThan(0);
@@ -49,7 +43,7 @@ describe('crypto', () => {
     ];
 
     // execute
-    const plaintext = decryptWithSignatureShares(
+    const plaintext = await decryptWithSignatureShares(
       ciphertext,
       signatureShares.map((s) => ({
         ProofOfPossession: s,
@@ -70,7 +64,7 @@ describe('crypto', () => {
     ];
 
     // execute
-    const plaintext = verifyAndDecryptWithSignatureShares(
+    const plaintext = await verifyAndDecryptWithSignatureShares(
       publicKey,
       identityParam,
       ciphertext,
@@ -93,7 +87,7 @@ describe('crypto', () => {
     }));
 
     // execute
-    const combinedSignature = combineSignatureShares(signatureShares);
+    const combinedSignature = await combineSignatureShares(signatureShares);
 
     // assert
     expect(combinedSignature.length).toEqual(192);
@@ -152,19 +146,15 @@ describe('crypto', () => {
     ]);
 
     // execute
-    verifySignature(publicKey, message, signature);
+    await verifySignature(publicKey, message, signature);
   });
 });
 
 describe('combine ECDSA Shares', () => {
-  beforeAll(async () => {
-    await initWasmEcdsaSdk();
-  });
-
   it('Should recombine ECDSA signature shares', async () => {
-    const sigShares = [
+    const sigShares: SigShare[] = [
       {
-        sigType: 'ECDSA_CAIT_SITH',
+        sigType: 'ECDSA_CAIT_SITH' as LIT_CURVE,
         signatureShare:
           'BC8108AD9CAE8358942BB4B27632B87FFA705CCB675F85A59847CC1B84845A38',
         shareIndex: 0,
@@ -176,7 +166,7 @@ describe('combine ECDSA Shares', () => {
         sigName: 'sig',
       },
       {
-        sigType: 'K256',
+        sigType: 'K256' as LIT_CURVE,
         signatureShare:
           'BA77EB500884A60583DEA49578D4BB64BB55EF497F37C88DF935D739CE8E0A9F',
         shareIndex: 0,
@@ -188,7 +178,7 @@ describe('combine ECDSA Shares', () => {
         sigName: 'sig',
       },
       {
-        sigType: 'ECDSA_CAIT_SITH',
+        sigType: 'ECDSA_CAIT_SITH' as LIT_CURVE,
         signatureShare:
           'EF850AE61B6D658976B2560B880BF03ABC1A070BACDEAE2311781F65A524F245',
         shareIndex: 0,
@@ -201,7 +191,7 @@ describe('combine ECDSA Shares', () => {
       },
     ];
 
-    let sig = combineEcdsaShares(sigShares);
+    let sig = await combineEcdsaShares(sigShares);
     expect(sig.r).toBeDefined();
     expect(sig.s).toBeDefined();
     expect(sig.recid).toBeDefined();

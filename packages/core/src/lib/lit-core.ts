@@ -29,12 +29,7 @@ import {
   version,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import {
-  checkSevSnpAttestation,
-  computeHDPubKey,
-  loadModules,
-  unloadModules,
-} from '@lit-protocol/crypto';
+import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   isBrowser,
@@ -57,6 +52,7 @@ import {
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
+  NodeAttestation,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
@@ -351,8 +347,6 @@ export class LitCore {
    *  Removes global objects created internally
    */
   async disconnect() {
-    unloadModules();
-
     this._stopListeningForNewEpoch();
     this._stopNetworkPolling();
     if (globalThis.litConfig) delete globalThis.litConfig;
@@ -422,11 +416,6 @@ export class LitCore {
    *
    */
   async connect(): Promise<void> {
-    // If we have never connected on this client instance first load WASM modules.
-    if (!this.ready) {
-      await loadModules();
-    }
-
     // Ensure that multiple closely timed calls to `connect()` don't result in concurrent connect() operations being run
     if (this._connectingPromise) {
       return this._connectingPromise;
@@ -596,7 +585,11 @@ export class LitCore {
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
-        await checkSevSnpAttestation(attestation, challenge, url);
+        await checkSevSnpAttestation(
+          attestation as NodeAttestation,
+          challenge,
+          url
+        );
         log(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
@@ -1278,10 +1271,10 @@ export class LitCore {
    * @param {LIT_CURVE} sigType
    * @returns {string} public key
    */
-  computeHDPubKey = (
+  computeHDPubKey = async (
     keyId: string,
     sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
-  ): string => {
+  ): Promise<string> => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');
       throwError({
@@ -1290,7 +1283,11 @@ export class LitCore {
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
       });
     }
-    return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
+    return await computeHDPubKey(
+      this.hdRootPubkeys as string[],
+      keyId,
+      sigType
+    );
   };
 
   /**

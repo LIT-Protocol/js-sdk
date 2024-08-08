@@ -1,7 +1,9 @@
+import { ethers } from 'ethers';
+
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
-  AuthCallback,
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
@@ -15,11 +17,10 @@ import {
   IRelayPKP,
   IRelayRequestData,
   MintRequestBody,
-  RelayClaimProcessor,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
-import { ethers } from 'ethers';
+
 import { validateMintRequestBody } from '../validators';
 
 export abstract class BaseProvider {
@@ -94,6 +95,7 @@ export abstract class BaseProvider {
   }
 
   /**
+   * @deprecated - Use {@link fetchPKPs} instead
    * Fetch PKPs associated with given auth method from relay server
    *
    * @param {AuthMethod} authMethod - Auth method object
@@ -110,6 +112,80 @@ export abstract class BaseProvider {
       throw new Error('Missing PKPs in fetch response from relay server');
     }
     return fetchRes.pkps;
+  }
+
+  /**
+   * Fetch PKPs associated with given auth method type and id from pkp contract
+   *
+   * @param {AuthMethodType} authMethodType - Auth method type
+   * @param {string} authMethodId - Auth method id
+   *
+   * @returns {Promise<IRelayPKP[]>} - Array of PKPs
+   */
+  async getPKPsForAuthMethod({
+    authMethodType,
+    authMethodId,
+  }: {
+    authMethodType: AuthMethodType;
+    authMethodId: string;
+  }): Promise<IRelayPKP[]> {
+    if (!authMethodType || !authMethodId) {
+      throw new Error(
+        'Auth method type and id are required to fetch PKPs by auth method'
+      );
+    }
+
+    const litContracts = new LitContracts({
+      randomPrivatekey: true,
+      network: this.litNodeClient.config.litNetwork,
+    });
+    try {
+      await litContracts.connect();
+    } catch (err) {
+      throw new Error('Unable to connect to LitContracts');
+    }
+
+    try {
+      const pkpPermissions = litContracts.pkpPermissionsContract;
+      const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
+        authMethodType,
+        authMethodId
+      );
+      const pkps: IRelayPKP[] = [];
+      for (const tokenId of tokenIds) {
+        const pubkey = await pkpPermissions.read.getPubkey(tokenId);
+        if (pubkey) {
+          const ethAddress = ethers.utils.computeAddress(pubkey);
+          pkps.push({
+            tokenId: tokenId.toString(),
+            publicKey: pubkey,
+            ethAddress: ethAddress,
+          });
+        }
+      }
+      return pkps;
+    } catch (err) {
+      throw new Error('Unable to get PKPs for auth method');
+    }
+  }
+
+  /**
+   * Fetch PKPs associated with given auth method from pkp contract
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<IRelayPKP[]>} - Array of PKPs
+   */
+  public async fetchPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
+    const authMethodId = await this.getAuthMethodId(authMethod);
+    const authMethodType = authMethod.authMethodType;
+
+    const pkps = await this.getPKPsForAuthMethod({
+      authMethodType,
+      authMethodId,
+    });
+
+    return pkps;
   }
 
   /**

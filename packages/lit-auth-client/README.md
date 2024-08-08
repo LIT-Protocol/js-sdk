@@ -1,6 +1,6 @@
 # lit-auth-client
 
-`lit-auth-client` makes it easy to manage PKP authentication with Lit Protocol. This library offers convenient methods for social logins, Ethereum wallet sign-ins, and minting and fetching of PKPs linked to auth methods.
+`lit-auth-client` makes it easy to manage PKP authentication with Lit Protocol. This library offers convenient classes for social logins, Ethereum wallet sign-ins, and minting and fetching of PKPs linked to auth methods.
 
 ## 📜 API Reference
 
