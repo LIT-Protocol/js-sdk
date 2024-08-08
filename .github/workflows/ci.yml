@@ -48,7 +48,7 @@ jobs:
         with: 
           fetch-depth: 0
           repository: LIT-Protocol/lit-assets
-          ref: $DATIL_COMMIT_HASH
+          ref: ${{vars.DATIL_COMMIT_HASH}}
           token: ${{secrets.GH_PAT}}
           path: ${{ github.workspace }}/lit-assets/
           submodules: false
