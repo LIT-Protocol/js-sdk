@@ -6,6 +6,8 @@ import {
   LIT_ERROR,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
+  LogLevel,
+  LogLevel_VALUES,
   RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 
@@ -28,7 +30,7 @@ import {
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
+import { LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
 
@@ -240,7 +242,7 @@ export const throwRemovedFunctionError = (functionName: string) => {
 
 export const bootstrapLogManager = (
   id: string,
-  level: LogLevel = LogLevel.DEBUG
+  level: LogLevel_VALUES = LogLevel.DEBUG
 ) => {
   if (!globalThis.logManager) {
     globalThis.logManager = LogManager.Instance;
@@ -657,9 +659,9 @@ export const genRandomPath = (): string => {
 };
 
 /**
- * Checks if the given LitNetwork value is supported.
- * @param litNetwork - The LitNetwork value to check.
- * @throws {Error} - Throws an error if the LitNetwork value is not supported.
+ * Checks if the given LIT_NETWORK value is supported.
+ * @param litNetwork - The Lit Network value to check.
+ * @throws {Error} - Throws an error if the Lit Network value is not supported.
  */
 export function isSupportedLitNetwork(
   litNetwork: LIT_NETWORK_VALUES
@@ -668,7 +670,7 @@ export function isSupportedLitNetwork(
 
   if (!supportedNetworks.includes(litNetwork)) {
     throw new Error(
-      `Unsupported LitNetwork! (${supportedNetworks.join('|')}) are supported.`
+      `Unsupported LIT_NETWORK! (${supportedNetworks.join('|')}) are supported.`
     );
   }
 }

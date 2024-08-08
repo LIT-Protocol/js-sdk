@@ -127,10 +127,10 @@ interface SignedMessage {
   address: string;
 }
 
-enum WALLET_ERROR {
-  REQUESTED_CHAIN_HAS_NOT_BEEN_ADDED = 4902,
-  NO_SUCH_METHOD = -32601,
-}
+const WALLET_ERROR = {
+  REQUESTED_CHAIN_HAS_NOT_BEEN_ADDED: 4902,
+  NO_SUCH_METHOD: -32601,
+} as const;
 
 /** ---------- Local Helpers ---------- */
 

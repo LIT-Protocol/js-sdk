@@ -1,4 +1,4 @@
-import { EITHER_TYPE } from '../enums';
+import { EITHER_TYPE } from '../constants/constants';
 import { IEither, ILitError } from '../interfaces/i-errors';
 
 /**

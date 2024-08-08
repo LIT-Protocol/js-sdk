@@ -1,4 +1,5 @@
-import { ILitResource, LitAbility } from '../models';
+import { LitAbility, LitAbility_VALUES } from '@lit-protocol/constants';
+import { ILitResource } from '../models';
 import {
   LitAccessControlConditionResource,
   LitActionResource,
@@ -8,7 +9,7 @@ import {
 
 /**
  * Lit resrouce ability request builder for creating resource ability requests.
- * 
+ *
  * @example
  * import { ResourceAbilityRequestBuilder } from '@lit-protocol/auth-helpers';
 
@@ -25,7 +26,10 @@ const requests = builder.build();
 
  */
 export class ResourceAbilityRequestBuilder {
-  private requests: Array<{ resource: ILitResource; ability: LitAbility }> = [];
+  private requests: Array<{
+    resource: ILitResource;
+    ability: LitAbility_VALUES;
+  }> = [];
 
   /**
    * Adds a PKP signing request to the builder.
@@ -96,7 +100,7 @@ export class ResourceAbilityRequestBuilder {
    * Builds the array of resource ability requests.
    * @returns The array of resource ability requests.
    */
-  build(): Array<{ resource: ILitResource; ability: LitAbility }> {
+  build(): Array<{ resource: ILitResource; ability: LitAbility_VALUES }> {
     return this.requests;
   }
 }

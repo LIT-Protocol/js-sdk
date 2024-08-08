@@ -6,7 +6,6 @@ import {
 } from '@lit-protocol/types';
 
 import { INTERNAL_DEV } from './autogen_internal';
-import { LitNetwork } from '../enums';
 
 /**
  * Lit Protocol Network Public Key
@@ -698,7 +697,13 @@ export const LIT_NETWORK = {
   Datil: 'datil',
   Custom: 'custom',
   Localhost: 'localhost',
-};
+} as const;
+
+/**
+ * @deprecated Will be removed. - Use LIT_NETWORK instead
+ * Alias for LIT_NETWORK. Added for backwards compatibility.
+ */
+export const LitNetwork = LIT_NETWORK;
 
 /**
  * The type representing the keys of the LIT_NETWORK object.
@@ -707,6 +712,7 @@ export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
 
 /**
  * The type representing the values of the LIT_NETWORK object.
+ * This should replicate LIT_NETWORKS_KEYS in types package
  */
 export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
 
@@ -766,7 +772,7 @@ export const HTTPS = 'https://';
  * Mapping of network values to corresponding http protocol.
  */
 export const HTTP_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
+  LIT_NETWORK_VALUES | 'internalDev',
   typeof HTTP | typeof HTTPS
 > = {
   cayenne: HTTPS,
@@ -774,6 +780,7 @@ export const HTTP_BY_NETWORK: Record<
   habanero: HTTPS,
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
+  datil: HTTPS,
   internalDev: HTTPS,
   custom: HTTP, // default, can be changed by config
   localhost: HTTP, // default, can be changed by config
@@ -944,17 +951,17 @@ export const CAYENNE_URL = 'https://cayenne.litgateway.com';
  * Note: Dynamic networks such as Habanero have no default node URLS; they are always
  * loaded from the chain during initialization
  */
-export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
+export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } & {
   localhost: string[];
   internalDev: string[];
 } = {
-  [LitNetwork.Cayenne]: [],
-  [LitNetwork.Manzano]: [],
-  [LitNetwork.DatilDev]: [],
-  [LitNetwork.DatilTest]: [],
-  [LitNetwork.Datil]: [],
-  [LitNetwork.Habanero]: [],
-  [LitNetwork.Custom]: [],
+  cayenne: [],
+  manzano: [],
+  'datil-dev': [],
+  'datil-test': [],
+  datil: [],
+  habanero: [],
+  custom: [],
   // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
   localhost: [
     'http://localhost:7470',
@@ -1018,3 +1025,194 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+
+// ========== Chains ==========
+export const VMTYPE = {
+  EVM: 'EVM',
+  SVM: 'SVM',
+  CVM: 'CVM',
+} as const;
+export type VMTYPE_TYPE = keyof typeof VMTYPE;
+export type VMTYPE_VALUES = (typeof VMTYPE)[keyof typeof VMTYPE];
+
+export const LIT_CURVE = {
+  BLS: 'BLS',
+  EcdsaK256: 'K256',
+  EcdsaCaitSith: 'ECDSA_CAIT_SITH', // Legacy alias of K256
+  EcdsaCAITSITHP256: 'EcdsaCaitSithP256',
+} as const;
+export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
+// This should replicate SigShare.sigType in types package
+export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
+
+// ========== Either Types ==========
+export const EITHER_TYPE = {
+  ERROR: 'ERROR',
+  SUCCESS: 'SUCCESS',
+} as const;
+export type EITHER_TYPE_TYPE = keyof typeof EITHER_TYPE;
+export type EITHER_TYPE_VALUES = (typeof EITHER_TYPE)[keyof typeof EITHER_TYPE];
+
+// ========== Supported PKP Auth Method Types ==========
+export const AuthMethodType = {
+  EthWallet: 1,
+  LitAction: 2,
+  WebAuthn: 3,
+  Discord: 4,
+  Google: 5,
+  GoogleJwt: 6,
+  AppleJwt: 8,
+  StytchOtp: 9,
+  StytchEmailFactorOtp: 10,
+  StytchSmsFactorOtp: 11,
+  StytchWhatsAppFactorOtp: 12,
+  StytchTotpFactorOtp: 13,
+} as const;
+export type AuthMethodType_TYPE = keyof typeof AuthMethodType;
+export type AuthMethodType_VALUES =
+  (typeof AuthMethodType)[keyof typeof AuthMethodType];
+
+// ========== Supported PKP Auth Method Scopes ==========
+export const AuthMethodScope = {
+  NoPermissions: 0,
+  SignAnything: 1,
+  PersonalSign: 2,
+} as const;
+export type AuthMethodScope_TYPE = keyof typeof AuthMethodScope;
+export type AuthMethodScope_VALUES =
+  (typeof AuthMethodScope)[keyof typeof AuthMethodScope];
+
+// ========== Supported Provider Types ==========
+export const ProviderType = {
+  Discord: 'discord',
+  Google: 'google',
+  EthWallet: 'ethwallet',
+  WebAuthn: 'webauthn',
+  Apple: 'apple',
+  StytchOtp: 'stytchOtp',
+  StytchEmailFactorOtp: 'stytchEmailFactorOtp',
+  StytchSmsFactorOtp: 'stytchSmsFactorOtp',
+  StytchWhatsAppFactorOtp: 'stytchWhatsAppFactorOtp',
+  StytchTotpFactor: 'stytchTotpFactor',
+} as const;
+export type ProviderType_TYPE = keyof typeof ProviderType;
+export type ProviderType_VALUES =
+  (typeof ProviderType)[keyof typeof ProviderType];
+
+// ========== Supported Staking States ==========
+export const StakingStates = {
+  Active: 0,
+  NextValidatorSetLocked: 1,
+  ReadyForNextEpoch: 2,
+  Unlocked: 3,
+  Paused: 4,
+  Restore: 5,
+} as const;
+export type StakingStates_TYPE = keyof typeof StakingStates;
+export type StakingStates_VALUES =
+  (typeof StakingStates)[keyof typeof StakingStates];
+
+// ========== Relay Auth Status ==========
+export const RelayAuthStatus = {
+  InProgress: 'InProgress',
+  Succeeded: 'Succeeded',
+  Failed: 'Failed',
+} as const;
+export type RelayAuthStatus_TYPE = keyof typeof RelayAuthStatus;
+export type RelayAuthStatus_VALUES =
+  (typeof RelayAuthStatus)[keyof typeof RelayAuthStatus];
+
+/**
+ * Prefixes used for identifying various LIT resources.
+ *
+ * @description These resource prefixes are also used as valid IRI schemes.
+ */
+export const LitResourcePrefix = {
+  AccessControlCondition: 'lit-accesscontrolcondition',
+  PKP: 'lit-pkp',
+  RLI: 'lit-ratelimitincrease',
+  LitAction: 'lit-litaction',
+} as const;
+export type LitResourcePrefix_TYPE = keyof typeof LitResourcePrefix;
+// This should mimic LitResourcePrefix in types package
+export type LitResourcePrefix_VALUES =
+  (typeof LitResourcePrefix)[keyof typeof LitResourcePrefix];
+
+/**
+ * User-facing abilities that can be granted to a session.
+ */
+export const LitAbility = {
+  /**
+   * This is the ability to process an encryption access control condition.
+   * The resource will specify the corresponding hashed key value of the
+   * access control condition.
+   */
+  AccessControlConditionDecryption: 'access-control-condition-decryption',
+
+  /**
+   * This is the ability to process a signing access control condition.
+   * The resource will specify the corresponding hashed key value of the
+   * access control condition.
+   */
+  AccessControlConditionSigning: 'access-control-condition-signing',
+
+  /**
+   * This is the ability to use a PKP for signing purposes. The resource will specify
+   * the corresponding PKP token ID.
+   */
+  PKPSigning: 'pkp-signing',
+
+  /**
+   * This is the ability to use a Rate Limit Increase (Capacity Credits NFT) token during
+   * authentication with the nodes. The resource will specify the corresponding
+   * Capacity Credits NFT token ID.
+   */
+  RateLimitIncreaseAuth: 'rate-limit-increase-auth',
+
+  /**
+   * This is the ability to execute a Lit Action. The resource will specify the
+   * corresponding Lit Action IPFS CID.
+   */
+  LitActionExecution: 'lit-action-execution',
+} as const;
+export type LitAbility_TYPE = keyof typeof LitAbility;
+// This should replicate LitAbility in types package
+export type LitAbility_VALUES = (typeof LitAbility)[keyof typeof LitAbility];
+
+/**
+ * LIT specific abilities mapped into the Recap specific terminology
+ * of an 'ability'.
+ */
+export const LitRecapAbility = {
+  Decryption: 'Decryption',
+  Signing: 'Signing',
+  Auth: 'Auth',
+  Execution: 'Execution',
+} as const;
+export type LitRecapAbility_TYPE = keyof typeof LitRecapAbility;
+export type LitRecapAbility_VALUES =
+  (typeof LitRecapAbility)[keyof typeof LitRecapAbility];
+
+export const LitNamespace = {
+  Auth: 'Auth',
+  Threshold: 'Threshold',
+} as const;
+export type LitNamespace_TYPE = keyof typeof LitNamespace;
+export type LitNamespace_VALUES =
+  (typeof LitNamespace)[keyof typeof LitNamespace];
+
+/**
+ * SDK Logger levels
+ */
+export const LogLevel = {
+  INFO: 0,
+  DEBUG: 1,
+  WARN: 2,
+  ERROR: 3,
+  FATAL: 4,
+  TIMING_START: 5,
+  TIMING_END: 6,
+  OFF: -1,
+} as const;
+export type LogLevel_TYPE = keyof typeof LogLevel;
+export type LogLevel_VALUES = (typeof LogLevel)[keyof typeof LogLevel];

@@ -1,20 +1,16 @@
+import { LIT_RPC } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContractResolverContext } from '@lit-protocol/types';
 
-export enum LIT_TESTNET {
-  LOCALCHAIN = 'localchain',
-  MANZANO = 'manzano',
-  CAYENNE = 'cayenne',
-  DATIL_DEV = 'datil-dev',
-  DATIL_TEST = 'datil-test',
-  DATIL_PROD = 'datil',
-}
-
-export enum LIT_RPC {
-  LOCAL_ANVIL = 'http://127.0.0.1:8545',
-  CHRONICLE = 'https://chain-rpc.litprotocol.com/http',
-  YELLOWSTONE = 'https://yellowstone-rpc.litprotocol.com',
-}
+export const LIT_TESTNET = {
+  LOCALCHAIN: 'localchain',
+  MANZANO: 'manzano',
+  CAYENNE: 'cayenne',
+  DATIL_DEV: 'datil-dev',
+  DATIL_TEST: 'datil-test',
+  DATIL_PROD: 'datil',
+} as const;
+export type LIT_TESTNET_VALUES = (typeof LIT_TESTNET)[keyof typeof LIT_TESTNET];
 
 /**
  * Mapping of testnet names to corresponding RPC endpoints.
@@ -23,9 +19,9 @@ export const RPC_MAP = {
   [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
   [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICLE,
   [LIT_TESTNET.CAYENNE]: LIT_RPC.CHRONICLE,
-  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.YELLOWSTONE,
-  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.YELLOWSTONE,
-  [LIT_TESTNET.DATIL_PROD]: LIT_RPC.YELLOWSTONE,
+  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.CHRONICLE_YELLOWSTONE,
+  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.CHRONICLE_YELLOWSTONE,
+  [LIT_TESTNET.DATIL_PROD]: LIT_RPC.CHRONICLE_YELLOWSTONE,
 };
 
 /**
@@ -49,7 +45,7 @@ export interface ProcessEnvs {
    * - `LIT_TESTNET.CAYENNE`
    * - `LIT_TESTNET.DATIL_DEV`
    */
-  NETWORK: LIT_TESTNET;
+  NETWORK: LIT_TESTNET_VALUES;
 
   /**
    * The number of milliseconds to wait between each request.
@@ -137,7 +133,7 @@ export type PKPInfo = {
 export interface TinnyEnvConfig {
   rpc: string;
   litNodeClient: LitNodeClient;
-  network: LIT_TESTNET;
+  network: LIT_TESTNET_VALUES;
   processEnvs: ProcessEnvs;
   contractContext?: LitContractResolverContext;
 }

@@ -1,5 +1,5 @@
 import { SiweMessage } from 'siwe';
-import { LitAbility, LitResourcePrefix } from '../models';
+import { LitAbility, LitResourcePrefix } from '@lit-protocol/constants';
 import { LitAccessControlConditionResource } from '../resources';
 import { RecapSessionCapabilityObject } from './recap-session-capability-object';
 import { LitNamespace, LitRecapAbility } from './utils';
@@ -12,9 +12,6 @@ const dummyCID =
   'bafysameboaza4mnsng7t3djdbilbrnliv6ikxh45zsph7kpettjfbp4ad2g2uu2znujlf2afphw25d4y35pq';
 
 describe('recapSessionCapabilityObject', () => {
-  // --global
-  let recapSessionCapabilityObject;
-
   // -- start
   it('imported { RecapSessionCapabilityObject } is a class', async () => {
     expect(isClass(RecapSessionCapabilityObject)).toBe(true);

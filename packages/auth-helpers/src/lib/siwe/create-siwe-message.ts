@@ -1,7 +1,8 @@
 import { SiweMessage } from 'siwe';
-import { BaseSiweMessage, CapacityDelegationFields } from '@lit-protocol/types';
+import { LitAbility } from '@lit-protocol/constants';
 import {
-  LitAbility,
+  BaseSiweMessage,
+  CapacityDelegationFields,
   WithCapacityDelegation,
   WithRecap,
 } from '@lit-protocol/types';

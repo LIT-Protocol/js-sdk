@@ -1,3 +1,7 @@
+import {
+  LitAbility_VALUES,
+  LitResourcePrefix_VALUES,
+} from '@lit-protocol/constants';
 import { SiweMessage } from 'siwe';
 
 // This is here to prevent circular dependency issue
@@ -17,56 +21,6 @@ export type AttenuationsObject = {
   [key: string]: { [key: string]: Array<PlainJSON> };
 };
 export type CID = string;
-
-/**
- * These are the user-facing abilities that can be granted to a session.
- */
-export enum LitAbility {
-  /**
-   * This is the ability to process an encryption access control condition.
-   * The resource will specify the corresponding hashed key value of the
-   * access control condition.
-   */
-  AccessControlConditionDecryption = 'access-control-condition-decryption',
-
-  /**
-   * This is the ability to process a signing access control condition.
-   * The resource will specify the corresponding hashed key value of the
-   * access control condition.
-   */
-  AccessControlConditionSigning = 'access-control-condition-signing',
-
-  /**
-   * This is the ability to use a PKP for signing purposes. The resource will specify
-   * the corresponding PKP token ID.
-   */
-  PKPSigning = 'pkp-signing',
-
-  /**
-   * This is the ability to use a Rate Limit Increase (Capacity Credits NFT) token during
-   * authentication with the nodes. The resource will specify the corresponding
-   * Capacity Credits NFT token ID.
-   */
-  RateLimitIncreaseAuth = 'rate-limit-increase-auth',
-
-  /**
-   * This is the ability to execute a Lit Action. The resource will specify the
-   * corresponding Lit Action IPFS CID.
-   */
-  LitActionExecution = 'lit-action-execution',
-}
-
-/**
- * Prefixes used for identifying various LIT resources.
- *
- * @description These resource prefixes are also used as valid IRI schemes.
- */
-export enum LitResourcePrefix {
-  AccessControlCondition = 'lit-accesscontrolcondition',
-  PKP = 'lit-pkp',
-  RLI = 'lit-ratelimitincrease',
-  LitAction = 'lit-litaction',
-}
 
 export interface ISessionCapabilityObject {
   get attenuations(): AttenuationsObject;
@@ -117,7 +71,7 @@ export interface ISessionCapabilityObject {
    */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility,
+    ability: LitAbility_VALUES,
     data?: any
   ): void;
 
@@ -127,7 +81,7 @@ export interface ISessionCapabilityObject {
    */
   verifyCapabilitiesForResource(
     litResource: ILitResource,
-    ability: LitAbility
+    ability: LitAbility_VALUES
   ): boolean;
 
   /**
@@ -153,11 +107,11 @@ export interface ILitResource {
    * Validates that the given LIT ability is valid for this resource.
    * @param litAbility The LIT ability to validate.
    */
-  isValidLitAbility(litAbility: LitAbility): boolean;
+  isValidLitAbility(litAbility: LitAbility_VALUES): boolean;
 
   toString(): string;
 
-  readonly resourcePrefix: LitResourcePrefix;
+  readonly resourcePrefix: LitResourcePrefix_VALUES;
   readonly resource: string;
 }
 
@@ -172,6 +126,6 @@ export interface ILitResource {
  */
 export type LitResourceAbilityRequest = {
   resource: ILitResource;
-  ability: LitAbility;
+  ability: LitAbility_VALUES;
   data?: any;
 };

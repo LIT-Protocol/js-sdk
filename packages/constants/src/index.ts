@@ -11,9 +11,6 @@ export * from './lib/constants/mappers';
 // ----------- Interfaces -----------
 export * from './lib/interfaces/i-errors';
 
-// ----------- ENUMS -----------
-export * from './lib/enums';
-
 // ----------- Errors -----------
 export * from './lib/errors';
 
