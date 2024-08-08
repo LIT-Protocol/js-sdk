@@ -2019,10 +2019,7 @@ const resourceAbilityRequests = [
         );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
-    if (!this.latestBlockhash) {
-      log('Eth Blockhash is undefined. Fetching again...');
-      await this.getLatestBlockhash();
-    }
+    await this.getLatestBlockhash();
 
     const nonce = this.latestBlockhash;
 
