@@ -2005,8 +2005,6 @@ const resourceAbilityRequests = [
     params: GetSessionSigsProps
   ): Promise<SessionSigsMap> => {
     // -- prepare
-    const nonce = await this.getLatestBlockhash();
-
     // Try to get it from local storage, if not generates one~
     const sessionKey = params.sessionKey ?? this.getSessionKey();
 
@@ -2029,7 +2027,7 @@ const resourceAbilityRequests = [
       expiration: expiration,
       sessionKey: sessionKey,
       sessionKeyUri: sessionKeyUri,
-      nonce,
+      nonce: await this.getLatestBlockhash(),
 
       // -- for recap
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -2063,7 +2061,7 @@ const resourceAbilityRequests = [
           expiration,
           sessionKey: sessionKey,
           uri: sessionKeyUri,
-          nonce,
+          nonce: await this.getLatestBlockhash(),
           resourceAbilityRequests: params.resourceAbilityRequests,
 
           // -- optional fields
