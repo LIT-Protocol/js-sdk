@@ -15,6 +15,7 @@ import {
   createSiweMessageWithRecaps,
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
+import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
   AuthMethodType,
   EITHER_TYPE,
@@ -58,6 +59,19 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+
+import { encodeCode } from './helpers/encode-code';
+import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getClaims } from './helpers/get-claims';
+import { getClaimsList } from './helpers/get-claims-list';
+import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { normalizeArray } from './helpers/normalize-array';
+import { normalizeJsParams } from './helpers/normalize-params';
+import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
+import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { removeDoubleQuotes } from './helpers/remove-double-quotes';
+import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 import type {
   AuthCallback,
@@ -114,20 +128,6 @@ import type {
   JsonPKPClaimKeyRequest,
 } from '@lit-protocol/types';
 
-import * as blsSdk from '@lit-protocol/bls-sdk';
-import { normalizeJsParams } from './helpers/normalize-params';
-import { encodeCode } from './helpers/encode-code';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
-import { removeDoubleQuotes } from './helpers/remove-double-quotes';
-import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { getClaimsList } from './helpers/get-claims-list';
-import { getClaims } from './helpers/get-claims';
-import { normalizeArray } from './helpers/normalize-array';
-import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-import { getBlsSignatures } from './helpers/get-bls-signatures';
-import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
-import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
-
 export class LitNodeClientNodeJs
   extends LitCore
   implements LitClientSessionManager, ILitNodeClient
@@ -180,12 +180,11 @@ export class LitNodeClientNodeJs
       await this.connect();
     }
 
-    const nonce = await this.getLatestBlockhash();
     const siweMessage = await createSiweMessageWithCapacityDelegation({
       uri: 'lit:capability:delegation',
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
-      nonce: nonce,
+      nonce: await this.getLatestBlockhash(),
       expiration: params.expiration,
       domain: params.domain,
       statement: params.statement,
@@ -1742,7 +1741,7 @@ export class LitNodeClientNodeJs
       version: '1',
       chainId: params.chainId ?? 1,
       expiration: _expiration,
-      nonce: this.latestBlockhash!,
+      nonce: await this.getLatestBlockhash(),
     };
 
     if (params.resourceAbilityRequests) {
@@ -2019,15 +2018,6 @@ const resourceAbilityRequests = [
         );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
-    if (!this.latestBlockhash) {
-      throwError({
-        message: 'Eth Blockhash is undefined.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-      });
-    }
-    const nonce = this.latestBlockhash!;
-
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
@@ -2037,7 +2027,7 @@ const resourceAbilityRequests = [
       expiration: expiration,
       sessionKey: sessionKey,
       sessionKeyUri: sessionKeyUri,
-      nonce,
+      nonce: await this.getLatestBlockhash(),
 
       // -- for recap
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -2071,7 +2061,7 @@ const resourceAbilityRequests = [
           expiration,
           sessionKey: sessionKey,
           uri: sessionKeyUri,
-          nonce,
+          nonce: await this.getLatestBlockhash(),
           resourceAbilityRequests: params.resourceAbilityRequests,
 
           // -- optional fields
