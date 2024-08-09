@@ -7,21 +7,14 @@ try {
   // ... continue execution
 }
 
-const NETWORKS: string[] = ['manzano', 'datil-dev', 'cayenne'];
+const NETWORKS: string[] = ['manzano', 'datil-dev', 'cayenne', 'datil-test'];
 
 describe('Connections', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  afterEach(() => {
-    // TODO: can be removed once v7 is merged with wasm refactors
-    delete globalThis.wasmExports;
-    //@ts-ignore defined in global
-    delete globalThis.wasmSevSnpUtils;
 
-    delete globalThis.wasmECDSA;
-  });
 
   it('Testing network: Manzano', async () => {
     const devEnv = new TinnyEnvironment(NETWORKS[0] as LIT_TESTNET);
@@ -35,7 +28,7 @@ describe('Connections', () => {
       devEnv.litNodeClient?.config?.minNodeCount!
     );
 
-    devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('Testing network: Datil Dev', async () => {
@@ -50,7 +43,22 @@ describe('Connections', () => {
       devEnv.litNodeClient?.config?.minNodeCount!
     );
 
-    devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
+  });
+  
+  it('Testing network: Datil Test', async () => {
+    const devEnv = new TinnyEnvironment(NETWORKS[3] as LIT_TESTNET);
+    await devEnv.init();
+    expect(devEnv.litNodeClient).toBeDefined();
+    expect(devEnv.litNodeClient?.ready).toBe(true);
+    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[2]);
+    expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
+    expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
+    expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
+      devEnv.litNodeClient?.config?.minNodeCount!
+    );
+
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('Testing network: Cayenne', async () => {
@@ -65,6 +73,6 @@ describe('Connections', () => {
       devEnv.litNodeClient?.config?.minNodeCount!
     );
 
-    devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 });
