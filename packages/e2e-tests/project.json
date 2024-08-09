@@ -41,5 +41,5 @@
       }
     }
   },
-  "tags": ["scope:e2e-tests"]
+  "tags": []
 }
