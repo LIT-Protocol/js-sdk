@@ -364,6 +364,7 @@ export class LitCore {
       this._networkSyncInterval = null;
     }
   }
+
   _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
@@ -634,17 +635,44 @@ export class LitCore {
     const connectedNodes = new Set<string>();
     const serverKeys: Record<string, JsonHandshakeResponse> = {};
 
-    let timeoutHandle: ReturnType<typeof setTimeout>;
-    await Promise.race([
-      new Promise((_resolve, reject) => {
-        timeoutHandle = setTimeout(() => {
+    // Handshake with each node
+    const handshakePromises = this.config.bootstrapUrls.map(async (url) => {
+      serverKeys[url] = await this._handshakeAndVerifyNodeAttestation({
+        url,
+        requestId,
+      });
+      connectedNodes.add(url);
+    });
+
+    // Succeed immediately when all nodes handshaked or at timeout when more than threshold handshaked
+    // Fail at threshold unreachable or below threshold at timeout
+    await new Promise<void>((resolve, reject) => {
+      let successes = 0;
+      let errors = 0;
+      const timeout = setTimeout(() => check(true), this.config.connectTimeout);
+
+      const check = (isTimeout: boolean) => {
+        // Force finish at timeout or when all nodes have handshaked/failed
+        const mustFinish =
+          isTimeout || successes + errors >= handshakePromises.length;
+        if (mustFinish && successes >= this.config.minNodeCount) {
+          // If we've got enough successful handshakes to continue, resolve
+          clearTimeout(timeout);
+          resolve();
+        } else if (
+          mustFinish ||
+          errors > handshakePromises.length - this.config.minNodeCount
+        ) {
+          // If we are out of time or have got enough errors to cannot reach threshold, reject
+          clearTimeout(timeout);
+
           const msg = `Error: Could not connect to enough nodes after timeout of ${
             this.config.connectTimeout
-          }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${
+          }ms. Could only connect to ${Object.keys(serverKeys).length} of ${
             this.config.minNodeCount
           } required nodes, from ${
             this.config.bootstrapUrls.length
-          } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          } possible nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             // TODO: Kludge, replace with standard error construction
@@ -656,20 +684,16 @@ export class LitCore {
           } catch (e) {
             reject(e);
           }
-        }, this.config.connectTimeout);
-      }),
-      Promise.all(
-        this.config.bootstrapUrls.map(async (url) => {
-          serverKeys[url] = await this._handshakeAndVerifyNodeAttestation({
-            url,
-            requestId,
-          });
-          connectedNodes.add(url);
-        })
-      ).finally(() => {
-        clearTimeout(timeoutHandle);
-      }),
-    ]);
+        }
+      };
+
+      handshakePromises.forEach((promise) =>
+        promise
+          .then(() => successes++)
+          .catch(() => errors++)
+          .finally(() => check(false))
+      );
+    });
 
     const coreNodeConfig = this._getCoreNodeConfigFromHandshakeResults({
       serverKeys,
