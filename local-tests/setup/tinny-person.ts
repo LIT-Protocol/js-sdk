@@ -95,7 +95,7 @@ export class TinnyPerson {
      * ====================================
      */
     this.siweMessage = await createSiweMessage<BaseSiweMessage>({
-      nonce: this.envConfig.litNodeClient.latestBlockhash,
+      nonce: await this.envConfig.litNodeClient.getLatestBlockhash(),
       walletAddress: this.wallet.address,
     });
 

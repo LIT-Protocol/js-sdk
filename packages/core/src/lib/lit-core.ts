@@ -351,6 +351,7 @@ export class LitCore {
    *  Removes global objects created internally
    */
   async disconnect() {
+    this.ready = false;
     unloadModules();
 
     this._stopListeningForNewEpoch();
