@@ -1,0 +1,78 @@
+import { expect, jest, test } from '@jest/globals';
+import { TinnyEnvironment, LIT_TESTNET } from '@lit-protocol/tinny';
+
+try {
+  jest.setTimeout(60000);
+} catch (e) {
+  // ... continue execution
+}
+
+const NETWORKS: string[] = ['manzano', 'datil-dev', 'cayenne', 'datil-test'];
+
+describe('Connections', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+
+
+  it('Testing network: Manzano', async () => {
+    const devEnv = new TinnyEnvironment(NETWORKS[0] as LIT_TESTNET);
+    await devEnv.init();
+    expect(devEnv.litNodeClient).toBeDefined();
+    expect(devEnv.litNodeClient?.ready).toBe(true);
+    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[0]);
+    expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
+    expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
+    expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
+      devEnv.litNodeClient?.config?.minNodeCount!
+    );
+
+    await devEnv.litNodeClient?.disconnect();
+  });
+
+  it('Testing network: Datil Dev', async () => {
+    const devEnv = new TinnyEnvironment(NETWORKS[1] as LIT_TESTNET);
+    await devEnv.init();
+    expect(devEnv.litNodeClient).toBeDefined();
+    expect(devEnv.litNodeClient?.ready).toBe(true);
+    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[1]);
+    expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
+    expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
+    expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
+      devEnv.litNodeClient?.config?.minNodeCount!
+    );
+
+    await devEnv.litNodeClient?.disconnect();
+  });
+  
+  it('Testing network: Datil Test', async () => {
+    const devEnv = new TinnyEnvironment(NETWORKS[3] as LIT_TESTNET);
+    await devEnv.init();
+    expect(devEnv.litNodeClient).toBeDefined();
+    expect(devEnv.litNodeClient?.ready).toBe(true);
+    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[2]);
+    expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
+    expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
+    expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
+      devEnv.litNodeClient?.config?.minNodeCount!
+    );
+
+    await devEnv.litNodeClient?.disconnect();
+  });
+
+  it('Testing network: Cayenne', async () => {
+    const devEnv = new TinnyEnvironment(NETWORKS[2] as LIT_TESTNET);
+    await devEnv.init();
+    expect(devEnv.litNodeClient).toBeDefined();
+    expect(devEnv.litNodeClient?.ready).toBe(true);
+    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[2]);
+    expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
+    expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
+    expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
+      devEnv.litNodeClient?.config?.minNodeCount!
+    );
+
+    await devEnv.litNodeClient?.disconnect();
+  });
+});
