@@ -234,10 +234,10 @@ function createErrorClass({
         {
           name,
           ...options,
-          info: {
+          meta: {
             code,
             kind,
-            ...options.info,
+            ...options.meta,
           },
         },
         message,
