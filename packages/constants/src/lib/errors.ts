@@ -1,5 +1,5 @@
 // @ts-expect-error No types available for this package
-import { VError, Options } from '@openagenda/verror';
+import { VError, Options, MultiError } from '@openagenda/verror';
 
 export enum LitErrorKind {
   Unknown = 'Unknown',
@@ -254,6 +254,9 @@ for (const key in LIT_ERROR) {
     errorClasses[errorDef.name] = createErrorClass(errorDef);
   }
 }
+
+// Re-export to allow MultiErrors but keep the centralized VError import here
+export { MultiError };
 
 export const {
   InitError,

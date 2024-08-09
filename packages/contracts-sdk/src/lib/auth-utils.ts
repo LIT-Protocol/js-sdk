@@ -1,3 +1,4 @@
+import { WrongParamFormat } from '@lit-protocol/constants';
 import { StytchToken } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
@@ -182,7 +183,14 @@ async function getGoogleJwtAuthId(authMethod: any): Promise<string> {
 function _parseJWT(jwt: string): StytchToken {
   const parts = jwt.split('.');
   if (parts.length !== 3) {
-    throw new Error('Invalid token length');
+    throw new WrongParamFormat(
+      {
+        info: {
+          jwt,
+        },
+      },
+      'Invalid token length'
+    );
   }
   const body = Buffer.from(parts[1], 'base64');
   const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));

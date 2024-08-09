@@ -22,8 +22,8 @@ import {
   IEither,
   EITHER_TYPE,
   LIT_CHAINS,
-  LIT_ERROR,
   LOCAL_STORAGE_KEYS,
+  InvalidSignatureError,
   WrongParamFormat,
   UnsupportedChainException,
   UnknownError,
@@ -873,12 +873,19 @@ export const signMessage = async ({
   log('recovered address: ', address);
 
   if (address.toLowerCase() !== account.toLowerCase()) {
-    const msg = `ruh roh, the user signed with a different address (${address}) then they're using with web3 (${account}).  this will lead to confusion.`;
-    log(msg);
+    const msg = `ruh roh, the user signed with a different address (${address}) then they're using with web3 (${account}). This will lead to confusion.`;
     alert(
-      'something seems to be wrong with your wallets message signing.  maybe restart your browser or your wallet.  your recovered sig address does not match your web3 account address'
+      'Something seems to be wrong with your wallets message signing.  maybe restart your browser or your wallet. Your recovered sig address does not match your web3 account address'
     );
-    throw new Error(msg);
+    throw new InvalidSignatureError(
+      {
+        info: {
+          address,
+          account,
+        },
+      },
+      msg
+    );
   }
   return { signature, address };
 };
