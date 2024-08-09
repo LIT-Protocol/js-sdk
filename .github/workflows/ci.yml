@@ -33,7 +33,7 @@ jobs:
       - name: Run Unit tests
         run: yarn tools --test --unit
   integration-tests:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-16x
     timeout-minutes: 30
     env:
       DATIL_COMMIT_HASH: b5cfe7489275dbed5e9098818d0bd441c8918903
