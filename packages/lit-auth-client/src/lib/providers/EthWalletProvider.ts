@@ -5,7 +5,13 @@ import {
   EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
-import { LIT_CHAINS, AuthMethodType, LIT_ERROR } from '@lit-protocol/constants';
+import {
+  LIT_CHAINS,
+  AuthMethodType,
+  InvalidArgumentException,
+  InvalidEthBlockhash,
+  WrongParamFormat,
+} from '@lit-protocol/constants';
 import { SiweMessage } from 'siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
@@ -13,7 +19,7 @@ import {
   LitNodeClient,
   checkAndSignAuthMessage,
 } from '@lit-protocol/lit-node-client';
-import { log, throwError } from '@lit-protocol/misc';
+import { log } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -55,17 +61,22 @@ export default class EthWalletProvider extends BaseProvider {
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
     if (!options) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            options,
+          },
+        },
         'Options are required to authenticate with EthWalletProvider.'
       );
     }
 
     return EthWalletProvider.authenticate({
       signer: options,
-      address: options?.address,
-      chain: options?.chain,
+      address: options.address,
+      chain: options.chain,
       litNodeClient: this.litNodeClient,
-      expiration: options?.expiration,
+      expiration: options.expiration,
       domain: this.domain,
       origin: this.origin,
     });
@@ -76,7 +87,6 @@ export default class EthWalletProvider extends BaseProvider {
    *
    * @param {EthWalletAuthenticateOptions} options
    * @param {string} [options.address] - Address to sign with
-   * @param {function} [options.signMessage] - Function to sign message with
    * @param {string} [options.chain] - Name of chain to use for signature
    * @param {number} [options.expiration] - When the auth signature expires
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
@@ -109,12 +119,10 @@ export default class EthWalletProvider extends BaseProvider {
     origin?: string;
   }): Promise<AuthMethod> {
     if (!litNodeClient.latestBlockhash) {
-      throwError({
-        message:
-          'Eth Blockhash is undefined. Try connecting to the Lit network again.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-      });
+      throw new InvalidEthBlockhash(
+        {},
+        'Eth Blockhash is undefined. Try connecting to the Lit network again.'
+      );
     }
 
     chain = chain || 'ethereum';
@@ -128,7 +136,13 @@ export default class EthWalletProvider extends BaseProvider {
       (signer as ethers.Wallet)?.address;
 
     if (!address) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            address,
+            signer,
+          },
+        },
         `Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`
       );
     }
@@ -199,8 +213,14 @@ export default class EthWalletProvider extends BaseProvider {
     try {
       address = JSON.parse(authMethod.accessToken).address;
     } catch (err) {
-      throw new Error(
-        `Error when parsing auth method to generate auth method ID for Eth wallet: ${err}`
+      throw new WrongParamFormat(
+        {
+          info: {
+            authMethod,
+          },
+          cause: err,
+        },
+        'Error when parsing auth method to generate auth method ID for Eth wallet'
       );
     }
 

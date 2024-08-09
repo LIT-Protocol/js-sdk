@@ -4,6 +4,11 @@ import { toBech32 } from '@cosmjs/encoding';
 import * as bitcoinjs from 'bitcoinjs-lib';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
+import {
+  InvalidArgumentException,
+  MultiError,
+  NoWalletException,
+} from '@lit-protocol/constants';
 
 import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
 export interface TokenInfo {
@@ -34,9 +39,15 @@ export const derivedAddresses = async ({
   };
 }): Promise<TokenInfo | any> => {
   if (!defaultRPCUrl) {
-    throw new Error('defaultRPCUrl must be provided');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          defaultRPCUrl,
+        },
+      },
+      'defaultRPCUrl must be provided'
+    );
   }
-  let pubkeyBuffer: Buffer;
 
   // one of the two must be provided
   if (!publicKey && !pkpTokenId) {
@@ -106,14 +117,13 @@ export const derivedAddresses = async ({
   // if publicKey is provided, validate it
   if (!publicKey) {
     console.warn('publicKey or pubkeyBuffer is undefined');
-    // throw new Error("publicKey or pubkeyBuffer is undefined");
     return;
   }
 
   if (publicKey.startsWith('0x')) {
     publicKey = publicKey.slice(2);
   }
-  pubkeyBuffer = Buffer.from(publicKey, 'hex');
+  const pubkeyBuffer = Buffer.from(publicKey, 'hex');
 
   // get the address from the public key
   const ethAddress = computeAddress(pubkeyBuffer);
@@ -132,14 +142,32 @@ export const derivedAddresses = async ({
     // }
 
     if (!btcAddress) {
-      errors.push('btcAddress is undefined');
+      errors.push(
+        new NoWalletException(
+          {
+            info: {
+              publicKey,
+            },
+          },
+          'btcAddress is undefined'
+        )
+      );
     }
 
     if (!ethAddress) {
-      errors.push('ethAddress is undefined');
+      errors.push(
+        new NoWalletException(
+          {
+            info: {
+              publicKey,
+            },
+          },
+          'ethAddress is undefined'
+        )
+      );
     }
 
-    throw new Error(errors.join(', '));
+    throw new MultiError(errors);
   }
 
   // https://docs.cosmos.network/main/spec/addresses/bech32

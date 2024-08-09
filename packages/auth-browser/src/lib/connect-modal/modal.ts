@@ -1,5 +1,7 @@
 // @ts-nocheck
 // node_modules/micromodal/dist/micromodal.es.js
+import { NoWalletException } from '@lit-protocol/constants';
+
 function e(e2, t2) {
   for (var o2 = 0; o2 < t2.length; o2++) {
     var n2 = t2[o2];
@@ -526,8 +528,9 @@ var LitConnectModal = class {
       filteredListOfWalletsArray.push(cloneWalletInfo);
     }
     if (filteredListOfWalletsArray.length === 0) {
-      alert('No wallets installed or provided.');
-      throw new Error('No wallets installed or provided.');
+      const message = 'No wallets installed or provided.';
+      alert(message);
+      throw new NoWalletException({}, message);
     }
     this.filteredListOfWalletsArray = filteredListOfWalletsArray;
   }

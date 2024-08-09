@@ -10,7 +10,10 @@ import {
   ELeft,
   ERight,
   IEither,
-  LIT_ERROR,
+  InvalidArgumentException,
+  InvalidBooleanException,
+  InvalidParamType,
+  ParamsMissingError,
 } from '@lit-protocol/constants';
 import {
   checkIfAuthSigRequiresChainParam,
@@ -151,7 +154,7 @@ interface ParamsValidator {
 
 class EncryptToJsonValidator implements ParamsValidator {
   private fnName: string;
-  private params: EncryptToJsonProps;
+  private readonly params: EncryptToJsonProps;
 
   constructor(fnName: string, params: EncryptToJsonProps) {
     this.fnName = fnName;
@@ -162,27 +165,40 @@ class EncryptToJsonValidator implements ParamsValidator {
     const { file, string } = this.params;
 
     if (string === undefined && file === undefined)
-      return ELeft({
-        message: `Either string or file must be provided`,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'string',
+              value: string,
+              functionName: this.fnName,
+            },
+          },
+          'Either string or file must be provided'
+        )
+      );
 
     if (string !== undefined && file !== undefined)
-      return ELeft({
-        message:
-          'Provide only a "string" or "file" to encrypt; you cannot provide both',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'string',
+              value: string,
+              functionName: this.fnName,
+            },
+          },
+          'Provide only a "string" or "file" to encrypt; you cannot provide both'
+        )
+      );
 
     return ERight(undefined);
   }
 }
 
 class DecryptFromJsonValidator implements ParamsValidator {
-  private fnName: string;
-  private params: EncryptToJsonPayload;
+  private readonly fnName: string;
+  private readonly params: EncryptToJsonPayload;
 
   constructor(fnName: string, params: EncryptToJsonPayload) {
     this.fnName = fnName;
@@ -202,21 +218,28 @@ class DecryptFromJsonValidator implements ParamsValidator {
     const { dataType } = this.params;
 
     if (dataType !== 'string' && dataType !== 'file')
-      return ELeft({
-        message: `dataType of ${dataType} is not valid. Must be 'string' or 'file'.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidArgumentException(
+          {
+            info: {
+              functionName: this.fnName,
+              dataType,
+            },
+          },
+          `dataType of %s is not valid. Must be 'string' or 'file'.`,
+          dataType
+        )
+      );
 
     return ERight(undefined);
   }
 }
 
 class StringValidator implements ParamsValidator {
-  private fnName: string;
-  private paramName: string;
-  private checkIsHex: boolean;
-  private str?: string;
+  private readonly fnName: string;
+  private readonly paramName: string;
+  private readonly checkIsHex: boolean;
+  private readonly str?: string;
 
   constructor(
     fnName: string,
@@ -232,11 +255,7 @@ class StringValidator implements ParamsValidator {
 
   validate(): IEither<void> {
     if (!this.str) {
-      return ELeft({
-        message: 'string is undefined',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(new InvalidParamType({}, 'str is undefined'));
     }
 
     if (
@@ -247,18 +266,34 @@ class StringValidator implements ParamsValidator {
         functionName: this.fnName,
       })
     )
-      return ELeft({
-        message: `${this.paramName} is not a string`,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: this.paramName,
+              value: this.str,
+              functionName: this.fnName,
+            },
+          },
+          '%s is not a string',
+          this.paramName
+        )
+      );
 
     if (this.checkIsHex && !isHexString(this.str)) {
-      return ELeft({
-        message: `${this.paramName} is not a valid hex string`,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: this.paramName,
+              value: this.str,
+              functionName: this.fnName,
+            },
+          },
+          '%s is not a valid hex string',
+          this.paramName
+        )
+      );
     }
 
     return ERight(undefined);
@@ -266,7 +301,7 @@ class StringValidator implements ParamsValidator {
 }
 
 class AuthMethodValidator implements ParamsValidator {
-  private fnName: string;
+  private readonly fnName: string;
   private authMethods?: AuthMethod[];
 
   constructor(fnName: string, authMethods?: AuthMethod[]) {
@@ -287,11 +322,18 @@ class AuthMethodValidator implements ParamsValidator {
         functionName: this.fnName,
       })
     )
-      return ELeft({
-        message: `authMethods is not an array`,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'authMethods',
+              value: authMethods,
+              functionName: this.fnName,
+            },
+          },
+          'authMethods is not an array'
+        )
+      );
 
     return ERight(undefined);
   }
@@ -304,7 +346,7 @@ interface ExecuteJsValidatorProps {
 
 class ExecuteJsValidator implements ParamsValidator {
   private fnName: string;
-  private params: ExecuteJsValidatorProps;
+  private readonly params: ExecuteJsValidatorProps;
 
   constructor(fnName: string, params: ExecuteJsValidatorProps) {
     this.fnName = fnName;
@@ -316,20 +358,32 @@ class ExecuteJsValidator implements ParamsValidator {
 
     // -- validate: either 'code' or 'ipfsId' must exists
     if (!code && !ipfsId) {
-      return ELeft({
-        message: 'You must pass either code or ipfsId',
-        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-      });
+      return ELeft(
+        new ParamsMissingError(
+          {
+            info: {
+              functionName: this.fnName,
+              params: this.params,
+            },
+          },
+          'You must pass either code or ipfsId'
+        )
+      );
     }
 
     // -- validate: 'code' and 'ipfsId' can't exists at the same time
     if (code && ipfsId) {
-      return ELeft({
-        message: "You cannot have both 'code' and 'ipfs' at the same time",
-        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-      });
+      return ELeft(
+        new ParamsMissingError(
+          {
+            info: {
+              functionName: this.fnName,
+              params: this.params,
+            },
+          },
+          "You cannot have both 'code' and 'ipfs' at the same time"
+        )
+      );
     }
 
     return ERight(undefined);
@@ -337,8 +391,8 @@ class ExecuteJsValidator implements ParamsValidator {
 }
 
 class FileValidator implements ParamsValidator {
-  private fnName: string;
-  private file?: AcceptedFileType;
+  private readonly fnName: string;
+  private readonly file?: AcceptedFileType;
 
   constructor(fnName: string, file?: AcceptedFileType) {
     this.fnName = fnName;
@@ -347,26 +401,40 @@ class FileValidator implements ParamsValidator {
 
   validate(): IEither<void> {
     if (!this.file) {
-      return ELeft({
-        message: 'You must pass file param',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidArgumentException(
+          {
+            info: {
+              functionName: this.fnName,
+              file: this.file,
+            },
+          },
+          'You must pass file param'
+        )
+      );
     }
 
+    const allowedTypes = ['Blob', 'File', 'Uint8Array'];
     if (
       !checkType({
         value: this.file,
-        allowedTypes: ['Blob', 'File', 'Uint8Array'],
+        allowedTypes,
         paramName: 'file',
         functionName: this.fnName,
       })
     )
-      return ELeft({
-        message: 'File param is not a valid Blob or File object',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidArgumentException(
+          {
+            info: {
+              functionName: this.fnName,
+              file: this.file,
+              allowedTypes,
+            },
+          },
+          'File param is not a valid Blob or File object'
+        )
+      );
 
     return ERight(undefined);
   }
@@ -377,9 +445,9 @@ export interface AuthMaterialValidatorProps extends SessionSigsOrAuthSig {
 }
 
 class AuthMaterialValidator implements ParamsValidator {
-  private fnName: string;
-  private authMaterial: AuthMaterialValidatorProps;
-  private checkIfAuthSigRequiresChainParam: boolean;
+  private readonly fnName: string;
+  private readonly authMaterial: AuthMaterialValidatorProps;
+  private readonly checkIfAuthSigRequiresChainParam: boolean;
 
   constructor(
     fnName: string,
@@ -395,19 +463,32 @@ class AuthMaterialValidator implements ParamsValidator {
     const { authSig, sessionSigs } = this.authMaterial;
 
     if (authSig && !is(authSig, 'Object', 'authSig', this.fnName))
-      return ELeft({
-        message: 'authSig is not an object',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'authSig',
+              value: authSig,
+              functionName: this.fnName,
+            },
+          },
+          'authSig is not an object'
+        )
+      );
 
     if (this.checkIfAuthSigRequiresChainParam) {
       if (!this.authMaterial.chain)
-        return ELeft({
-          message: 'You must pass chain param',
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
+        return ELeft(
+          new InvalidArgumentException(
+            {
+              info: {
+                functionName: this.fnName,
+                chain: this.authMaterial.chain,
+              },
+            },
+            'You must pass chain param'
+          )
+        );
 
       if (
         authSig &&
@@ -417,34 +498,62 @@ class AuthMaterialValidator implements ParamsValidator {
           this.fnName
         )
       )
-        return ELeft({
-          message: 'authSig is not valid',
-          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-        });
+        return ELeft(
+          new InvalidParamType(
+            {
+              info: {
+                param: 'authSig',
+                value: authSig,
+                functionName: this.fnName,
+              },
+            },
+            'authSig is not valid'
+          )
+        );
     }
 
     if (sessionSigs && !is(sessionSigs, 'Object', 'sessionSigs', this.fnName))
-      return ELeft({
-        message: 'sessionSigs is not an object',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'sessionSigs',
+              value: sessionSigs,
+              functionName: this.fnName,
+            },
+          },
+          'sessionSigs is not an object'
+        )
+      );
 
     if (!sessionSigs && !authSig)
-      return ELeft({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidArgumentException(
+          {
+            info: {
+              functionName: this.fnName,
+              sessionSigs,
+              authSig,
+            },
+          },
+          'You must pass either authSig or sessionSigs'
+        )
+      );
 
     // -- validate: if sessionSig and authSig exists
     if (sessionSigs && authSig)
-      return ELeft({
-        message: 'You cannot have both authSig and sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidArgumentException(
+          {
+            info: {
+              functionName: this.fnName,
+              sessionSigs,
+              authSig,
+            },
+          },
+          'You cannot have both authSig and sessionSigs'
+        )
+      );
 
     return ERight(undefined);
   }
@@ -458,8 +567,8 @@ export interface AccessControlConditionsValidatorProps {
 }
 
 class AccessControlConditionsValidator implements ParamsValidator {
-  private fnName: string;
-  private conditions: AccessControlConditionsValidatorProps;
+  private readonly fnName: string;
+  private readonly conditions: AccessControlConditionsValidatorProps;
 
   constructor(fnName: string, params: AccessControlConditionsValidatorProps) {
     this.fnName = fnName;
@@ -483,30 +592,54 @@ class AccessControlConditionsValidator implements ParamsValidator {
         this.fnName
       )
     )
-      return ELeft({
-        message: 'accessControlConditions is not an array',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'accessControlConditions',
+              value: accessControlConditions,
+              functionName: this.fnName,
+            },
+          },
+          '%s is not an array',
+          'accessControlConditions'
+        )
+      );
     if (
       evmContractConditions &&
       !is(evmContractConditions, 'Array', 'evmContractConditions', this.fnName)
     )
-      return ELeft({
-        message: 'evmContractConditions is not an array',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'evmContractConditions',
+              value: evmContractConditions,
+              functionName: this.fnName,
+            },
+          },
+          '%s is not an array',
+          'evmContractConditions'
+        )
+      );
 
     if (
       solRpcConditions &&
       !is(solRpcConditions, 'Array', 'solRpcConditions', this.fnName)
     )
-      return ELeft({
-        message: 'solRpcConditions is not an array',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'solRpcConditions',
+              value: solRpcConditions,
+              functionName: this.fnName,
+            },
+          },
+          '%s is not an array',
+          'solRpcConditions'
+        )
+      );
 
     if (
       unifiedAccessControlConditions &&
@@ -517,11 +650,19 @@ class AccessControlConditionsValidator implements ParamsValidator {
         this.fnName
       )
     )
-      return ELeft({
-        message: 'unifiedAccessControlConditions is not an array',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: 'unifiedAccessControlConditions',
+              value: unifiedAccessControlConditions,
+              functionName: this.fnName,
+            },
+          },
+          '%s is not an array',
+          'unifiedAccessControlConditions'
+        )
+      );
 
     if (
       !accessControlConditions &&
@@ -529,49 +670,78 @@ class AccessControlConditionsValidator implements ParamsValidator {
       !solRpcConditions &&
       !unifiedAccessControlConditions
     )
-      return ELeft({
-        message:
-          'You must pass either accessControlConditions, evmContractConditions, solRpcConditions or unifiedAccessControlConditions',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidArgumentException(
+          {
+            info: {
+              functionName: this.fnName,
+              conditions: this.conditions,
+            },
+          },
+          'You must pass either accessControlConditions, evmContractConditions, solRpcConditions or unifiedAccessControlConditions'
+        )
+      );
 
     if (
       accessControlConditions &&
       !isValidBooleanExpression(accessControlConditions)
     )
-      return ELeft({
-        message: 'Invalid boolean Access Control Conditions',
-        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidBooleanException(
+          {
+            info: {
+              functionName: this.fnName,
+              accessControlConditions,
+            },
+          },
+          'Invalid boolean Access Control Conditions'
+        )
+      );
 
     if (
       evmContractConditions &&
       !isValidBooleanExpression(evmContractConditions)
     )
-      return ELeft({
-        message: 'Invalid boolean EVM Access Control Conditions',
-        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidBooleanException(
+          {
+            info: {
+              functionName: this.fnName,
+              evmContractConditions,
+            },
+          },
+          'Invalid boolean EVM Access Control Conditions'
+        )
+      );
 
     if (solRpcConditions && !isValidBooleanExpression(solRpcConditions))
-      return ELeft({
-        message: 'Invalid boolean Solana Access Control Conditions',
-        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidBooleanException(
+          {
+            info: {
+              functionName: this.fnName,
+              solRpcConditions,
+            },
+          },
+          'Invalid boolean Solana Access Control Conditions'
+        )
+      );
 
     if (
       unifiedAccessControlConditions &&
       !isValidBooleanExpression(unifiedAccessControlConditions)
     )
-      return ELeft({
-        message: 'Invalid boolean Unified Access Control Conditions',
-        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-      });
+      return ELeft(
+        new InvalidBooleanException(
+          {
+            info: {
+              functionName: this.fnName,
+              unifiedAccessControlConditions,
+            },
+          },
+          'Invalid boolean Unified Access Control Conditions'
+        )
+      );
 
     return ERight(undefined);
   }

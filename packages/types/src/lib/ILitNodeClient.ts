@@ -127,11 +127,12 @@ export interface ILitNodeClient {
    * Throw node error
    *
    * @param { RejectedNodePromises } res
+   * @param { string } requestId
    *
    * @returns { void }
    *
    */
-  _throwNodeError(res: RejectedNodePromises, requestId: string): void;
+  _throwNodeError(res: RejectedNodePromises, requestId: string): never;
 
   // ========== Shares Resolvers ==========
 
@@ -140,6 +141,7 @@ export interface ILitNodeClient {
    * Get Signature
    *
    * @param { Array<any> } shareData from all node promises
+   * @param { string } requestId
    *
    * @returns { string } signature
    *

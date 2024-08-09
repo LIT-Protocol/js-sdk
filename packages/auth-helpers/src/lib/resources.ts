@@ -1,10 +1,11 @@
+import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
+import { InvalidArgumentException } from '@lit-protocol/constants';
 import {
   AccessControlConditions,
   ILitResource,
   LitAbility,
   LitResourcePrefix,
 } from '@lit-protocol/types';
-import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 abstract class LitResourceBase {
@@ -58,7 +59,13 @@ export class LitAccessControlConditionResource
     dataToEncryptHash: string
   ): Promise<string> {
     if (!accs || !dataToEncryptHash) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            accs,
+            dataToEncryptHash,
+          },
+        },
         'Invalid input: Access control conditions and data hash are required.'
       );
     }
@@ -146,5 +153,12 @@ export function parseLitResource(resourceKey: string): ILitResource {
       resourceKey.substring(`${LitResourcePrefix.LitAction}://`.length)
     );
   }
-  throw new Error(`Invalid resource prefix: ${resourceKey}`);
+  throw new InvalidArgumentException(
+    {
+      info: {
+        resourceKey,
+      },
+    },
+    `Invalid resource prefix`
+  );
 }
