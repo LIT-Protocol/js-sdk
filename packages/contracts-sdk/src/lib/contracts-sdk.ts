@@ -1685,20 +1685,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       claimAndMint: async (
         derivedKeyId: BytesLike,
         signatures: IPubkeyRouter.SignatureStruct[],
-        txOpts: ethers.PayableOverrides & { from?: string }
+        txOpts: ethers.CallOverrides = {}
       ) => {
         try {
-          const overrides = txOpts ?? {};
-
-          if (!overrides.value) {
-            const cost = await this.pkpNftContract.read.mintCost();
-            overrides.value = cost;
-          }
           const tx = await this._callWithAdjustedOverrides(
             this.pkpNftContract.write,
             'claimAndMint',
             [2, derivedKeyId, signatures],
-            overrides
+            {
+              ...txOpts,
+              value:
+                txOpts.value ?? (await this.pkpNftContract.read.mintCost()),
+            }
           );
 
           const txRec = await tx.wait();
@@ -2284,10 +2282,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         txOpts,
         timestamp,
       }: {
-        txOpts: {
-          value: BigNumberish | Promise<BigNumberish>;
-          gasLimit: BigNumberish | Promise<BigNumberish> | undefined;
-        };
+        txOpts: ethers.CallOverrides;
         timestamp: number;
       }) => {
         if (!this.connected) {
@@ -2456,7 +2451,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     contract: T,
     method: K,
     args: Parameters<T['functions'][K]>,
-    overrides: ethers.PayableOverrides & { from?: string } = {},
+    overrides: ethers.CallOverrides = {},
     gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
   ): Promise<ethers.BigNumber> => {
     const gasLimit = await contract.estimateGas[method as string](
@@ -2473,7 +2468,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     contract: T,
     method: K,
     args: Parameters<T['functions'][K]>,
-    overrides: ethers.PayableOverrides & { from?: string } = {},
+    overrides: ethers.CallOverrides = {},
     gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
   ): Promise<ReturnType<T['functions'][K]>> {
     // Check if the method exists on the contract
