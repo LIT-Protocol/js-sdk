@@ -4,7 +4,11 @@ import {
   BaseProviderOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
+import {
+  AuthMethodType,
+  UnauthorizedException,
+  UnknownError,
+} from '@lit-protocol/constants';
 import {
   prepareLoginUrl,
   parseLoginParams,
@@ -60,8 +64,14 @@ export default class GoogleProvider extends BaseProvider {
       : window.location.href.startsWith(this.redirectUri);
 
     if (!isUrlValid) {
-      throw new Error(
-        `Current url "${window.location.href}" does not match provided redirect uri "${this.redirectUri}"`
+      throw new UnauthorizedException(
+        {
+          info: {
+            url: window.location.href,
+            redirectUri: this.redirectUri,
+          },
+        },
+        `Current url does not match provided redirect uri`
       );
     }
 
@@ -72,20 +82,40 @@ export default class GoogleProvider extends BaseProvider {
 
     // Check if there's an error
     if (error) {
-      throw new Error(error);
+      throw new UnknownError(
+        {
+          info: {
+            error,
+          },
+          cause: new Error(error),
+        },
+        error ?? 'Received error from discord authentication'
+      );
     }
 
     // Check if provider is Google
     if (!provider || provider !== 'google') {
-      throw new Error(
-        `OAuth provider "${provider}" passed in redirect callback URL does not match "google"`
+      throw new UnauthorizedException(
+        {
+          info: {
+            provider,
+            redirectUri: this.redirectUri,
+          },
+        },
+        'OAuth provider does not match "google"'
       );
     }
 
     // Check if state param matches
     if (!state || decode(decodeURIComponent(state)) !== getStateParam()) {
-      throw new Error(
-        `Invalid state parameter "${state}" passed in redirect callback URL`
+      throw new UnauthorizedException(
+        {
+          info: {
+            state,
+            redirectUri: this.redirectUri,
+          },
+        },
+        'Invalid state parameter in callback URL'
       );
     }
 
@@ -98,8 +128,14 @@ export default class GoogleProvider extends BaseProvider {
 
     // Check if id token is present in url
     if (!idToken) {
-      throw new Error(
-        `Missing ID token in redirect callback URL for Google OAuth"`
+      throw new UnauthorizedException(
+        {
+          info: {
+            idToken,
+            redirectUri: this.redirectUri,
+          },
+        },
+        'Missing ID token in callback URL'
       );
     }
 
@@ -129,7 +165,7 @@ export default class GoogleProvider extends BaseProvider {
     );
 
     if (!popup) {
-      throw new Error('Failed to open popup window');
+      throw new UnknownError({}, 'Failed to open popup window');
     }
 
     return new Promise((resolve, reject) => {
