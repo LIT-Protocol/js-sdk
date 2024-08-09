@@ -2449,35 +2449,55 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     },
   };
 
-  private _getAdjustedGasLimit = async (
-    contract: ethers.Contract,
-    method: string,
-    args: unknown[],
+  private _getAdjustedGasLimit = async <
+    T extends ethers.Contract,
+    K extends keyof T['functions']
+  >(
+    contract: T,
+    method: K,
+    args: Parameters<T['functions'][K]>,
     overrides: ethers.PayableOverrides & { from?: string } = {},
     gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
-  ) => {
-    const gasLimit = await contract.estimateGas[method](...args, overrides);
+  ): Promise<ethers.BigNumber> => {
+    const gasLimit = await contract.estimateGas[method as string](
+      ...args,
+      overrides
+    );
     return gasLimit.mul(gasLimitAdjustment);
   };
 
-  private _callWithAdjustedOverrides = async (
-    contract: ethers.Contract,
-    method: string,
-    args: unknown[],
+  private async _callWithAdjustedOverrides<
+    T extends ethers.Contract,
+    K extends keyof T['functions']
+  >(
+    contract: T,
+    method: K,
+    args: Parameters<T['functions'][K]>,
     overrides: ethers.PayableOverrides & { from?: string } = {},
     gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
-  ) => {
-    return contract[method](...args, {
+  ): Promise<ReturnType<T['functions'][K]>> {
+    // Check if the method exists on the contract
+    if (!(method in contract.functions)) {
+      throw new Error(
+        `Method ${String(method)} does not exist on the contract`
+      );
+    }
+
+    // Adjust the gas limit
+    const gasLimit =
+      overrides.gasLimit ??
+      (await this._getAdjustedGasLimit(
+        contract,
+        method,
+        args,
+        overrides,
+        gasLimitAdjustment
+      ));
+
+    // Call the contract method with adjusted overrides
+    return contract.functions[method as string](...args, {
       ...overrides,
-      gasLimit:
-        overrides.gasLimit ??
-        (await this._getAdjustedGasLimit(
-          contract,
-          method,
-          args,
-          overrides,
-          gasLimitAdjustment
-        )),
-    });
-  };
+      gasLimit,
+    }) as ReturnType<T['functions'][K]>;
+  }
 }
