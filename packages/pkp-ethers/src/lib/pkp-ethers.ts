@@ -38,6 +38,7 @@ import { ethers, version, Wallet } from 'ethers';
 import {
   InitError,
   RPC_URL_BY_NETWORK,
+  InvalidParamType,
   UnknownError,
   UnsupportedMethodError,
 } from '@lit-protocol/constants';
@@ -178,7 +179,14 @@ export class PKPEthersWallet
   }
 
   connect(): never {
-    throw new Error('Use setRPC to set a new JSON RPC provider');
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          method: 'connect',
+        },
+      },
+      'Use setRPC to set a new JSON RPC provider'
+    );
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
@@ -358,7 +366,14 @@ export class PKPEthersWallet
     }
 
     if (progressCallback && typeof progressCallback !== 'function') {
-      throw new Error('invalid callback');
+      throw new InvalidParamType(
+        {
+          info: {
+            progressCallback,
+          },
+        },
+        'invalid callback'
+      );
     }
 
     if (!options) {

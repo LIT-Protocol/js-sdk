@@ -2,6 +2,7 @@ import {
   ELeft,
   ERight,
   IEither,
+  InvalidArgumentException,
   LocalStorageItemNotFoundException,
   LocalStorageItemNotRemovedException,
   LocalStorageItemNotSetException,
@@ -208,15 +209,25 @@ export const injectViewerIFrame = ({
 }): void => {
   if (fileUrl.includes('data:')) {
     // data urls are not safe, refuse to do this
-    throw new Error(
-      'You can not inject an iFrame with a data url.  Try a regular https URL.'
+    throw new InvalidArgumentException(
+      {
+        info: {
+          fileUrl,
+        },
+      },
+      'You can not inject an iFrame with a data url. Try a regular https URL.'
     );
   }
 
   const url = new URL(fileUrl);
   if (url.host.toLowerCase() === window.location.host.toLowerCase()) {
-    throw new Error(
-      'You cannot host a LIT on the same domain as the parent webpage.  This is because iFrames with the same origin have access to localstorage and cookies in the parent webpage which is unsafe'
+    throw new InvalidArgumentException(
+      {
+        info: {
+          fileUrl,
+        },
+      },
+      'You cannot host a LIT on the same domain as the parent webpage. This is because iFrames with the same origin have access to localstorage and cookies in the parent webpage which is unsafe'
     );
   }
 

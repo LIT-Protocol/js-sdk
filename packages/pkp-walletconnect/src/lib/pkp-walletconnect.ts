@@ -22,7 +22,12 @@ import {
   Web3WalletTypes,
 } from '@walletconnect/web3wallet';
 
-import { InitError, LIT_CHAINS } from '@lit-protocol/constants';
+ import {
+  InitError,
+  LIT_CHAINS,
+  ParamsMissingError,
+  UnsupportedMethodError,
+} from '@lit-protocol/constants';
 import {
   PKPEthersWallet,
   SupportedETHSigningMethods,
@@ -66,7 +71,14 @@ export class PKPWalletConnect {
     params: InitWalletConnectParams
   ): Promise<void> {
     if (!params.projectId) {
-      throw new Error('WalletConnect project ID is required');
+      throw new ParamsMissingError(
+        {
+          info: {
+            params,
+          },
+        },
+        'WalletConnect project ID is required'
+      );
     }
 
     const coreOpts: CoreTypes.Options = {
@@ -326,7 +338,14 @@ export class PKPWalletConnect {
         });
         response = formatJsonRpcResult(id, result);
       } else {
-        throw new Error(`Unsupported method: ${request.method}`);
+        throw new UnsupportedMethodError(
+          {
+            info: {
+              request,
+            },
+          },
+          `Unsupported method: ${request.method}`
+        );
       }
     } catch (err: unknown) {
       let message: string;

@@ -453,8 +453,15 @@ export class LitCore {
       !this.config.contractContext.Staking &&
       !this.config.contractContext.resolverAddress
     ) {
-      throw new Error(
-        'The provided contractContext was missing the "Staking" contract`'
+      throw new InitError(
+        {
+          info: {
+            contractContext: this.config.contractContext,
+            litNetwork: this.config.litNetwork,
+            rpcUrl: this.config.rpcUrl,
+          },
+        },
+        'The provided contractContext was missing the "Staking" contract'
       );
     }
 
@@ -591,11 +598,7 @@ export class LitCore {
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
-        await checkSevSnpAttestation(
-          attestation as NodeAttestation,
-          challenge,
-          url
-        );
+        await checkSevSnpAttestation(attestation, challenge, url);
         log(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {

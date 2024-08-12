@@ -8,6 +8,7 @@ import {
   InvalidArgumentException,
   MultiError,
   NoWalletException,
+  ParamsMissingError,
 } from '@lit-protocol/constants';
 
 import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
@@ -51,7 +52,15 @@ export const derivedAddresses = async ({
 
   // one of the two must be provided
   if (!publicKey && !pkpTokenId) {
-    throw new Error('publicKey or pkpTokenId must be provided');
+    throw new ParamsMissingError(
+      {
+        info: {
+          publicKey,
+          pkpTokenId,
+        },
+      },
+      'publicKey or pkpTokenId must be provided'
+    );
   }
 
   // if pkp contract address is not provided, use the default one 0xF5cB699652cED3781Dd75575EDBe075d6212DF98

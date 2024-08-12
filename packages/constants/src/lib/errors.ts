@@ -185,6 +185,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'init_error',
     kind: LitErrorKind.Unexpected,
   },
+  NETWORK_ERROR: {
+    name: 'NetworkError',
+    code: 'network_error',
+    kind: LitErrorKind.Unexpected,
+  },
 };
 
 export const LIT_ERROR_CODE = {
@@ -274,6 +279,7 @@ export const {
   LocalStorageItemNotRemovedException,
   LocalStorageItemNotSetException,
   MintingNotSupported,
+  NetworkError,
   NoValidShares,
   NoWalletException,
   NodeError,

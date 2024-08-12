@@ -1,6 +1,12 @@
 import { splitSignature } from 'ethers/lib/utils';
 
-import { LIT_CURVE, NoValidShares } from '@lit-protocol/constants';
+import {
+  InvalidParamType,
+  LIT_CURVE,
+  NetworkError,
+  NoValidShares,
+  UnknownError,
+} from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
 import {
@@ -218,7 +224,14 @@ export const computeHDPubKey = async (
       );
       return Buffer.from(preComputedPubkey).toString('hex');
     default:
-      throw new Error('Non supported signature type');
+      throw new InvalidParamType(
+        {
+          info: {
+            sigType,
+          },
+        },
+        `Non supported signature type`
+      );
   }
 };
 
@@ -278,7 +291,14 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   async function fetchAsUint8Array(targetUrl: string) {
     const res = await fetch(targetUrl);
     if (!res.ok) {
-      throw new Error(`[getAmdCert] HTTP error! status: ${res.status}`);
+      throw new NetworkError(
+        {
+          info: {
+            targetUrl,
+          },
+        },
+        `[getAmdCert] HTTP error! status: ${res.status}`
+      );
     }
     const arrayBuffer = await res.arrayBuffer();
     return new Uint8Array(arrayBuffer);
@@ -330,7 +350,15 @@ export const checkSevSnpAttestation = async (
   const report = Buffer.from(attestation.report, 'base64');
 
   if (!noonce.equals(challenge)) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          challengeHex,
+          noonce,
+          challenge,
+        },
+      },
       `Attestation noonce ${noonce} does not match challenge ${challenge}`
     );
   }
@@ -345,7 +373,14 @@ export const checkSevSnpAttestation = async (
     } else if (url.startsWith('http://')) {
       portWeTalkedTo = '80';
     } else {
-      throw new Error(`Unknown port in URL ${url}`);
+      throw new NetworkError(
+        {
+          info: {
+            url,
+          },
+        },
+        `Unknown port in URL ${url}`
+      );
     }
   }
 
@@ -354,12 +389,26 @@ export const checkSevSnpAttestation = async (
   const portFromReport = ipAndAddrFromReport.split(':')[1];
 
   if (ipWeTalkedTo !== ipFromReport) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          ipWeTalkedTo,
+          ipFromReport,
+        },
+      },
       `Attestation external address ${ipFromReport} does not match IP we talked to ${ipWeTalkedTo}`
     );
   }
   if (portWeTalkedTo !== portFromReport) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          portWeTalkedTo,
+          portFromReport,
+        },
+      },
       `Attestation external port ${portFromReport} does not match port we talked to ${portWeTalkedTo}`
     );
   }
@@ -386,7 +435,16 @@ export const checkSevSnpAttestation = async (
   }
 
   if (!vcekCert || vcekCert.length === 0 || vcekCert.length < 256) {
-    throw new Error('Unable to retrieve VCEK certificate from AMD');
+    throw new UnknownError(
+      {
+        info: {
+          attestation,
+          report,
+          vcekUrl,
+        },
+      },
+      'Unable to retrieve VCEK certificate from AMD'
+    );
   }
 
   // pass base64 encoded report to wasm wrapper

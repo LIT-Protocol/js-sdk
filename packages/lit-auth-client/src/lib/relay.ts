@@ -5,6 +5,9 @@ import {
   LIT_NETWORK_VALUES,
   LIT_NETWORK,
   RELAYER_URL_BY_NETWORK,
+  WrongNetworkException,
+  InvalidParamType,
+  NetworkError,
 } from '@lit-protocol/constants';
 import {
   AuthMethod,
@@ -27,7 +30,14 @@ export class LitRelay implements IRelay {
   static getRelayUrl(litNetwork: LIT_NETWORK_VALUES): string {
     const relayerUrl = RELAYER_URL_BY_NETWORK[litNetwork];
     if (!relayerUrl) {
-      throw new Error(`Relay URL not found for network ${litNetwork}`);
+      throw new WrongNetworkException(
+        {
+          info: {
+            litNetwork,
+          },
+        },
+        `Relay URL not found for network ${litNetwork}`
+      );
     }
 
     return relayerUrl;
@@ -118,7 +128,15 @@ export class LitRelay implements IRelay {
     pkpPublicKey?: string;
   }> {
     if (authMethods.length < 1) {
-      throw new Error('Must provide at least one auth method');
+      throw new InvalidParamType(
+        {
+          info: {
+            authMethods,
+            options,
+          },
+        },
+        'Must provide at least one auth method'
+      );
     }
 
     if (
@@ -166,7 +184,12 @@ export class LitRelay implements IRelay {
 
     const mintRes = await this.mintPKP(JSON.stringify(reqBody));
     if (!mintRes || !mintRes.requestId) {
-      throw new Error(
+      throw new NetworkError(
+        {
+          info: {
+            mintRes,
+          },
+        },
         `Missing mint response or request ID from mint response ${mintRes.error}`
       );
     }
