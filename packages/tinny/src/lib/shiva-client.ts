@@ -1,5 +1,7 @@
-import { LitContractResolverContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+
+import { LitContractResolverContext } from '@lit-protocol/types';
+
 import {
   TestNetCreateRequest,
   TestNetInfo,
@@ -8,8 +10,18 @@ import {
 } from './shiva-client.d';
 
 class ShivaError extends Error {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(shivaResponse: TestNetResponse<any>) {
     let message = `An error occurred on request to testnet with id: ${shivaResponse.testnetId}`;
+    
+    if (!shivaResponse.errors) {
+      super(message);
+      this.name  = 'ShivaError';
+      this.message = message;
+    
+      return;
+    }
+
     for (const error of shivaResponse.errors) {
       message += ' ' + error;
     }
@@ -61,10 +73,10 @@ export interface ShivaEnvs {
  * on the network from the implementation within this class. Each testnet is a unique network
  */
 export class TestnetClient {
-  private _id: string;
-  private _info: TestNetInfo;
-  private _processEnvs: ShivaEnvs;
-  private _currentState: TestNetState;
+  private _id: string | undefined;
+  private _info: TestNetInfo | undefined;
+  private _processEnvs: ShivaEnvs | undefined;
+  private _currentState: TestNetState | undefined;
 
   constructor(id: string, envs: ShivaEnvs) {
     this._processEnvs = envs;
@@ -108,7 +120,7 @@ export class TestnetClient {
     let state = 'Busy';
     while (state != 'Active' && state != `UNKNOWN`) {
       const res = await fetch(
-        this._processEnvs.TESTNET_MANAGER_URL + '/test/poll/testnet/' + this._id
+        this._processEnvs?.TESTNET_MANAGER_URL + '/test/poll/testnet/' + this._id
       );
       const stateRes: TestNetResponse<TestNetState> =
         await _processTestnetResponse<TestNetState>(res);
@@ -130,7 +142,7 @@ export class TestnetClient {
    */
   public async getTestnetConfig() {
     const res = await fetch(
-      this._processEnvs.TESTNET_MANAGER_URL +
+      this._processEnvs?.TESTNET_MANAGER_URL +
         '/test/get/info/testnet/' +
         this._id
     );
@@ -147,7 +159,7 @@ export class TestnetClient {
    */
   public async transitionEpochAndWait() {
     const res = await fetch(
-      this._processEnvs.TESTNET_MANAGER_URL +
+      this._processEnvs?.TESTNET_MANAGER_URL +
         '/test/action/transition/epoch/wait/' +
         this._id
     );
@@ -163,7 +175,7 @@ export class TestnetClient {
    */
   public async stopRandomNetworkPeerAndWaitForNextEpoch() {
     const res = await fetch(
-      this._processEnvs.TESTNET_MANAGER_URL +
+      this._processEnvs?.TESTNET_MANAGER_URL +
         '/test/action/stop/random/wait/' +
         this._id
     );
@@ -177,7 +189,7 @@ export class TestnetClient {
   public async stopTestnet() {
     console.log('stopping testnet with id:', this._id);
     const res = await fetch(
-      this._processEnvs.TESTNET_MANAGER_URL + '/test/delete/testnet/' + this._id
+      this._processEnvs?.TESTNET_MANAGER_URL + '/test/delete/testnet/' + this._id
     );
 
     return _processTestnetResponse<boolean>(res);
