@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
 import { LitNetwork } from '@lit-protocol/constants';
-import { TinnyPerson } from '../tinny-person';
+import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
+
 import { TinnyEnvironment } from '../tinny-environment';
+import { TinnyPerson } from '../tinny-person';
 
 const VALID_SESSION_SIG_LIT_ACTION_CODE = `
 // Works with an AuthSig AuthMethod
@@ -56,6 +58,7 @@ export const getLitActionSessionSigs = async (
 
   const litActionSessionSigs =
     await devEnv.litNodeClient?.getLitActionSessionSigs({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       pkpPublicKey: alice.authMethodOwnedPkp?.publicKey!,
       authMethods: [alice.authMethod!],
       resourceAbilityRequests: _resourceAbilityRequests,
@@ -100,6 +103,7 @@ export const getLitActionSessionSigsUsingIpfsId = async (
   ];
 
   const litActionSessionSigs = await devEnv.litNodeClient?.getPkpSessionSigs({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     pkpPublicKey: alice.authMethodOwnedPkp?.publicKey!,
     authMethods: [alice.authMethod!],
     resourceAbilityRequests: _resourceAbilityRequests,
@@ -123,6 +127,7 @@ export const getInvalidLitActionSessionSigs = async (
   alice: TinnyPerson
 ) => {
   const litActionSessionSigs = await devEnv.litNodeClient?.getPkpSessionSigs({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     pkpPublicKey: alice.authMethodOwnedPkp?.publicKey!,
     authMethods: [alice.authMethod!],
     resourceAbilityRequests: [
@@ -148,6 +153,7 @@ export const getInvalidLitActionIpfsSessionSigs = async (
   alice: TinnyPerson
 ) => {
   const litActionSessionSigs = await devEnv.litNodeClient?.getPkpSessionSigs({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     pkpPublicKey: alice.authMethodOwnedPkp?.publicKey!,
     authMethods: [alice.authMethod!],
     resourceAbilityRequests: [
