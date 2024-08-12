@@ -378,7 +378,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Sepolia Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://eth-sepolia.g.alchemy.com/v2/demo'],
+    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
     blockExplorerUrls: ['https://sepolia.etherscan.io/'],
     type: null,
     vmType: 'EVM',
