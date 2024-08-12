@@ -14,9 +14,17 @@ describe('Connections', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  it('Testing network: Manzano', async () => {
-    const devEnv = new TinnyEnvironment();
+  let devEnv: TinnyEnvironment;
+  beforeAll( async () => {
+    devEnv = new TinnyEnvironment();
     await devEnv.init();
+  });
+
+  afterAll(async () => {
+    await devEnv.litNodeClient?.disconnect(); 
+  });
+
+  it('Testing Network Handshake', async () => {
     expect(devEnv.litNodeClient).toBeDefined();
     expect(devEnv.litNodeClient?.ready).toBe(true);
     expect(devEnv.litNodeClient?.config.litNetwork).toBe(devEnv.processEnvs.NETWORK);
