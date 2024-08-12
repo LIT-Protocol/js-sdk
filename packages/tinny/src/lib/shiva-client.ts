@@ -1,7 +1,4 @@
-import {
-  LitContractContext,
-  LitContractResolverContext,
-} from '@lit-protocol/types';
+import { LitContractResolverContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import {
   TestNetCreateRequest,
@@ -13,8 +10,7 @@ import {
 class ShivaError extends Error {
   constructor(shivaResponse: TestNetResponse<any>) {
     let message = `An error occurred on request to testnet with id: ${shivaResponse.testnetId}`;
-
-    for (const error of shivaResponse.errors || []) {
+    for (const error of shivaResponse.errors) {
       message += ' ' + error;
     }
 
@@ -66,9 +62,9 @@ export interface ShivaEnvs {
  */
 export class TestnetClient {
   private _id: string;
-  private _info: TestNetInfo | undefined;
+  private _info: TestNetInfo;
   private _processEnvs: ShivaEnvs;
-  private _currentState: TestNetState | undefined;
+  private _currentState: TestNetState;
 
   constructor(id: string, envs: ShivaEnvs) {
     this._processEnvs = envs;
@@ -93,7 +89,6 @@ export class TestnetClient {
     const contractResolverAbi: string = testNetConfig.contractResolverAbi;
     const contractResolverAddress =
       testNetConfig.contractAddresses[`contractResolver`];
-
     const networkContext = {
       abi: JSON.parse(contractResolverAbi),
       resolverAddress: contractResolverAddress,
@@ -102,7 +97,6 @@ export class TestnetClient {
       ),
       environment: 0, // test deployment uses env value 0 in test common
     };
-
     return networkContext;
   }
 
@@ -118,10 +112,10 @@ export class TestnetClient {
       );
       const stateRes: TestNetResponse<TestNetState> =
         await _processTestnetResponse<TestNetState>(res);
-      state = stateRes.body!;
+      state = stateRes.body as TestNetState;
       console.log('found state to be', state);
 
-      await new Promise<void>((res, _) => {
+      await new Promise<void>((res) => {
         setTimeout(() => {
           res();
         }, 500);
@@ -141,10 +135,10 @@ export class TestnetClient {
         this._id
     );
 
-    const resp: TestNetResponse<TestNetInfo> =
-      await _processTestnetResponse<TestNetInfo>(res);
-    this._info = resp.body!;
-    return resp;
+    const testnetInfoRes = await _processTestnetResponse<TestNetInfo>(res);
+    this._info = testnetInfoRes.body as TestNetInfo;
+
+    return testnetInfoRes;
   }
 
   /**
@@ -227,7 +221,7 @@ export class ShivaClient {
         existingTestnets[0],
         new TestnetClient(existingTestnets[0], this.processEnvs)
       );
-      return this._clients.get(existingTestnets[0])!;
+      return this._clients.get(existingTestnets[0]) as TestnetClient;
     } else {
       console.log(
         'lit node binary path: ',
@@ -240,7 +234,7 @@ export class ShivaClient {
       const body: Partial<TestNetCreateRequest> = createReq ?? {
         nodeCount: 3,
         pollingInterval: '2000',
-        epochLength: 100,
+        epochLength: 90_000,
       };
 
       if (this.processEnvs.USE_LIT_BINARIES) {
@@ -269,7 +263,7 @@ export class ShivaClient {
         new TestnetClient(createTestnet.testnetId, this.processEnvs)
       );
 
-      return this._clients.get(createTestnet.testnetId)!;
+      return this._clients.get(createTestnet.testnetId) as TestnetClient;
     }
   }
 }
