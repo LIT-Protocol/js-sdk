@@ -7,49 +7,17 @@ try {
   // ... continue execution
 }
 
-const NETWORKS: string[] = ['manzano', 'datil-dev', 'cayenne'];
-
 describe('Connections', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   it('Testing network: Manzano', async () => {
-    const devEnv = new TinnyEnvironment(NETWORKS[0] as LIT_TESTNET);
+    const devEnv = new TinnyEnvironment();
     await devEnv.init();
     expect(devEnv.litNodeClient).toBeDefined();
     expect(devEnv.litNodeClient?.ready).toBe(true);
-    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[0]);
-    expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
-    expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
-    expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
-      devEnv.litNodeClient?.config?.minNodeCount!
-    );
-
-    await devEnv.litNodeClient?.disconnect();
-  });
-
-  it('Testing network: Datil Dev', async () => {
-    const devEnv = new TinnyEnvironment(NETWORKS[1] as LIT_TESTNET);
-    await devEnv.init();
-    expect(devEnv.litNodeClient).toBeDefined();
-    expect(devEnv.litNodeClient?.ready).toBe(true);
-    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[1]);
-    expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
-    expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
-    expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
-      devEnv.litNodeClient?.config?.minNodeCount!
-    );
-
-    await devEnv.litNodeClient?.disconnect();
-  });
-
-  it('Testing network: Cayenne', async () => {
-    const devEnv = new TinnyEnvironment(NETWORKS[2] as LIT_TESTNET);
-    await devEnv.init();
-    expect(devEnv.litNodeClient).toBeDefined();
-    expect(devEnv.litNodeClient?.ready).toBe(true);
-    expect(devEnv.litNodeClient?.config.litNetwork).toBe(NETWORKS[2]);
+    expect(devEnv.litNodeClient?.config.litNetwork).toBe(devEnv.processEnvs.NETWORK);
     expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
     expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
     expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
