@@ -131,7 +131,7 @@ export interface PKPInfo {
   tokenId: string;
   publicKey: string;
   ethAddress: string;
-};
+}
 
 export interface TinnyEnvConfig {
   rpc: string;
