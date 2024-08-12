@@ -2,7 +2,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContractResolverContext } from '@lit-protocol/types';
 
 export enum LIT_TESTNET {
-  LOCALCHAIN = 'localchain',
+  LOCALCHAIN = 'custom',
   MANZANO = 'manzano',
   CAYENNE = 'cayenne',
   DATIL_DEV = 'datil-dev',
@@ -127,7 +127,7 @@ export interface ProcessEnvs {
 /**
  * Represents the PKP information.
  */
-export type PKPInfo = {
+export interface PKPInfo {
   tokenId: string;
   publicKey: string;
   ethAddress: string;
