@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 
-import * as ipfs from 'ipfs-unixfs-importer';
+import * as ipfs from 'ipfs-unixfs-importer/dist/src/index';
 
 
 /**
