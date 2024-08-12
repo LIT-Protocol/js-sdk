@@ -1,26 +1,28 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { expect, jest } from '@jest/globals';
-import { TinnyEnvironment } from '../../setup/tinny-environment';
+
 import {
   LitAbility,
   LitActionResource,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
-import { getEoaSessionSigsWithCapacityDelegations } from '../../setup/session-sigs/get-eoa-session-sigs';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import { TinnyEnvironment, getEoaSessionSigsWithCapacityDelegations } from '@lit-protocol/tinny';
 
 describe('Delegation', () => {
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error is defined
     devEnv = global.devEnv;
   });
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error is defined
     await global.devEnv.litNodeClient?.disconnect();
   });
 
@@ -35,6 +37,7 @@ describe('Delegation', () => {
 
     const scopes =
       await bob.contractsClient?.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
         bob.authMethodOwnedPkp?.tokenId!,
         AuthMethodType.EthWallet,
         bobsAuthMethodAuthId,
@@ -47,10 +50,12 @@ describe('Delegation', () => {
 
     // As a dApp owner, create a capacity delegation authSig for Bob's PKP wallet
     const capacityDelegationAuthSig =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       await alice.createCapacityDelegationAuthSig([bob.pkp?.ethAddress!]);
 
     // As a dApp owner, delegate the capacity credits NFT to Bob
     const bobPkpSessionSigs = await devEnv.litNodeClient?.getPkpSessionSigs({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       pkpPublicKey: bob.authMethodOwnedPkp?.publicKey!,
       authMethods: [bob.authMethod!],
       resourceAbilityRequests: [
@@ -127,7 +132,9 @@ describe('Delegation', () => {
     );
 
     // -- printing out the recaps from the session sigs
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const bobsSingleSessionSig =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       bobsSessionSigs![devEnv.litNodeClient?.config?.bootstrapUrls[0]!];
 
     // 5. Bob can now execute JS code using the capacity credits NFT
@@ -198,6 +205,7 @@ describe('Delegation', () => {
     const res = await devEnv.litNodeClient?.pkpSign({
       sessionSigs: bobsSessionSigs!,
       toSign: alice.loveLetter,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       pubKey: bob.pkp?.publicKey!,
     });
 

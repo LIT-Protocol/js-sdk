@@ -1,5 +1,7 @@
-import { importer } from 'ipfs-unixfs-importer';
 import { Buffer } from 'buffer';
+
+import * as ipfs from 'ipfs-unixfs-importer';
+
 
 /**
  * Converts a string to an IPFS hash.
@@ -9,6 +11,7 @@ import { Buffer } from 'buffer';
  */
 export async function stringToIpfsHash(input: string): Promise<string> {
   const blockput = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     put: async (block: any) => {
       return block.cid;
     },
@@ -18,11 +21,13 @@ export async function stringToIpfsHash(input: string): Promise<string> {
   const content = Buffer.from(input);
 
   // Import the content to create an IPFS file
-  const files = importer([{ content }], blockput as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const files = ipfs.importer([{ content }], blockput as any);
 
   // Get the first (and only) file result
   const result = (await files.next()).value;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ipfsHash = (result as any).cid.toString();
 
   if (!ipfsHash.startsWith('Qm')) {

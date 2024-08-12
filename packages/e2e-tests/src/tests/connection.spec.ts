@@ -1,5 +1,6 @@
-import { expect, jest, test } from '@jest/globals';
-import { TinnyEnvironment, LIT_TESTNET } from '@lit-protocol/tinny';
+import { expect, jest } from '@jest/globals';
+
+import { TinnyEnvironment } from '@lit-protocol/tinny';
 
 try {
   jest.setTimeout(60000);
@@ -9,6 +10,7 @@ try {
 
 describe('Connections', () => {
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
@@ -21,6 +23,7 @@ describe('Connections', () => {
     expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
     expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
     expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       devEnv.litNodeClient?.config?.minNodeCount!
     );
 
