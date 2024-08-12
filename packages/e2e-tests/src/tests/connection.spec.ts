@@ -14,15 +14,6 @@ describe('Connections', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  afterEach(() => {
-    // TODO: can be removed once v7 is merged with wasm refactors
-    delete globalThis.wasmExports;
-    //@ts-ignore defined in global
-    delete globalThis.wasmSevSnpUtils;
-
-    delete globalThis.wasmECDSA;
-  });
-
   it('Testing network: Manzano', async () => {
     const devEnv = new TinnyEnvironment(NETWORKS[0] as LIT_TESTNET);
     await devEnv.init();
@@ -35,7 +26,7 @@ describe('Connections', () => {
       devEnv.litNodeClient?.config?.minNodeCount!
     );
 
-    devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('Testing network: Datil Dev', async () => {
@@ -50,7 +41,7 @@ describe('Connections', () => {
       devEnv.litNodeClient?.config?.minNodeCount!
     );
 
-    devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('Testing network: Cayenne', async () => {
@@ -65,6 +56,6 @@ describe('Connections', () => {
       devEnv.litNodeClient?.config?.minNodeCount!
     );
 
-    devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 });
