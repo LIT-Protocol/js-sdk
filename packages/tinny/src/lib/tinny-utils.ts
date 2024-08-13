@@ -1,4 +1,3 @@
-
 export function randomSolanaPrivateKey() {
   const BASE58_ALPHABET =
     '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -30,7 +29,6 @@ export function withTimeout<T>(
   );
   return Promise.race([promise, timeout]);
 }
-
 
 function isErrorWithMessage(error: unknown): error is Error {
   return (

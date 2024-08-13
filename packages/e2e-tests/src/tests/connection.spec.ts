@@ -15,26 +15,26 @@ describe('Connections', () => {
   });
 
   let devEnv: TinnyEnvironment;
-  beforeAll( async () => {
+  beforeAll(async () => {
     //@ts-expect-error defined in global
     devEnv = global.devEnv;
   });
 
   afterAll(async () => {
-    await devEnv.litNodeClient?.disconnect(); 
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('Testing Network Handshake', async () => {
     expect(devEnv.litNodeClient).toBeDefined();
     expect(devEnv.litNodeClient?.ready).toBe(true);
-    expect(devEnv.litNodeClient?.config.litNetwork).toBe(devEnv.processEnvs.NETWORK);
+    expect(devEnv.litNodeClient?.config.litNetwork).toBe(
+      devEnv.processEnvs.NETWORK
+    );
     expect(devEnv.litNodeClient?.networkPubKey).toBeDefined();
     expect(devEnv.litNodeClient?.hdRootPubkeys).toBeDefined();
     expect(devEnv.litNodeClient?.connectedNodes?.size).toBeGreaterThanOrEqual(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       devEnv.litNodeClient?.config?.minNodeCount!
     );
-
-    await devEnv.litNodeClient?.disconnect();
   });
 });

@@ -7,7 +7,10 @@ import {
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
-import { TinnyEnvironment, getEoaSessionSigsWithCapacityDelegations } from '@lit-protocol/tinny';
+import {
+  TinnyEnvironment,
+  getEoaSessionSigsWithCapacityDelegations,
+} from '@lit-protocol/tinny';
 
 describe('Delegation', () => {
   let devEnv: TinnyEnvironment;

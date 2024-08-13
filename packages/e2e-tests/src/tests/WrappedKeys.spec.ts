@@ -1,15 +1,5 @@
 import { expect, jest } from '@jest/globals';
 import {
-  TinnyEnvironment,
-  getPkpSessionSigs,
-  getEoaSessionSigs,
-} from '@lit-protocol/tinny';
-import {
-  EthereumLitTransaction,
-  SerializedTransaction,
-  api,
-} from '@lit-protocol/wrapped-keys';
-import {
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
@@ -18,23 +8,32 @@ import {
   Transaction,
   clusterApiUrl,
 } from '@solana/web3.js';
-
-import nacl from 'tweetnacl';
 import bs58 from 'bs58';
 import { ethers } from 'ethers';
+import nacl from 'tweetnacl';
+
+import { LIT_CHAINS } from '@lit-protocol/constants';
+import { encryptString } from '@lit-protocol/encryption';
+import {
+  TinnyEnvironment,
+  getPkpSessionSigs,
+  getEoaSessionSigs,
+} from '@lit-protocol/tinny';
 import {
   AuthSig,
+  ILitNodeClient,
   LIT_NETWORKS_KEYS,
   SessionSigsMap,
 } from '@lit-protocol/types';
-import { encryptString } from '@lit-protocol/encryption';
-
-import { LIT_CHAINS } from '@lit-protocol/constants';
-
+import {
+  EthereumLitTransaction,
+  SerializedTransaction,
+  api,
+} from '@lit-protocol/wrapped-keys';
 // Using absolute pathing as these members are not exported from the module
-import { LIT_ACTION_CID_REPOSITORY } from '../../../wrapped-keys/src/lib/lit-actions-client/constants';
-import { getPkpAccessControlCondition } from '../../../wrapped-keys/src/lib/utils';
-import { LIT_PREFIX } from '../../../wrapped-keys/src/lib/constants';
+import { LIT_PREFIX } from '@lit-protocol/wrapped-keys/src/lib/constants';
+import { LIT_ACTION_CID_REPOSITORY } from '@lit-protocol/wrapped-keys/src/lib/lit-actions-client/constants';
+import { getPkpAccessControlCondition } from '@lit-protocol/wrapped-keys/src/lib/utils';
 
 const {
   importPrivateKey,
@@ -72,16 +71,17 @@ try {
 describe('Wrapped Keys', () => {
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error global defined
     devEnv = global.devEnv;
   });
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error global defined
     await global.devEnv.litNodeClient?.disconnect();
   });
 
@@ -101,7 +101,7 @@ describe('Wrapped Keys', () => {
     const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
       memo: 'Test key',
@@ -151,7 +151,7 @@ describe('Wrapped Keys', () => {
       network: 'solana',
       unsignedTransaction,
       broadcast: false,
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       id,
     });
 
@@ -177,7 +177,7 @@ describe('Wrapped Keys', () => {
     const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
       memo: 'Test key',
@@ -203,7 +203,7 @@ describe('Wrapped Keys', () => {
       pkpSessionSigs: pkpSessionSigsSigning!,
       network: 'solana',
       messageToSign,
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       id,
     });
 
@@ -234,10 +234,10 @@ describe('Wrapped Keys', () => {
     const privateKey = randomSolanaPrivateKey();
     // '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
 
-    const { pkpAddress, id } = await importPrivateKey({
+    const { pkpAddress } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey,
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       publicKey: '0xdeadbeef',
       keyType: 'K256',
       memo: 'Test key',
@@ -262,7 +262,7 @@ describe('Wrapped Keys', () => {
     const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       network: 'solana',
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       memo: 'Test Key',
     });
 
@@ -280,7 +280,7 @@ describe('Wrapped Keys', () => {
 
     const signature = await signMessageWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning!,
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       network: 'solana',
       messageToSign,
       id,
@@ -306,7 +306,7 @@ describe('Wrapped Keys', () => {
 
     const { decryptedPrivateKey } = await exportPrivateKey({
       pkpSessionSigs: pkpSessionSigsExport!,
-      litNodeClient: devEnv?.litNodeClient!,
+      litNodeClient: devEnv?.litNodeClient as ILitNodeClient,
       network: 'solana',
       id,
     });
@@ -376,26 +376,22 @@ describe('Wrapped Keys', () => {
     const privateKey =
       '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB'; // Already exists in the DB
 
-    try {
-      await importPrivateKey({
+    expect(
+      importPrivateKey({
         pkpSessionSigs: pkpSessionSigs!,
         privateKey,
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
         memo: 'Test Key',
-      });
-    } catch (e: any) {
-      if (
-        e.message.includes(
-          'Failed to make request for wrapped key: There is already a wrapped key stored with the same dataToEncryptHash. A wrapped key may only be associated with a single pkpAddress'
-        )
-      ) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrowError(
+      new Error(
+        'Failed to make request for wrapped key: There is already a wrapped key stored with the same dataToEncryptHash. A wrapped key may only be associated with a single pkpAddress.'
+      )
+    );
+
+    devEnv.releasePrivateKeyFromUser(alice);
   });
 
   it('Fail Import Wrapped Key Same PKP', async () => {
@@ -412,7 +408,7 @@ describe('Wrapped Keys', () => {
 
     const privateKey1 = randomSolanaPrivateKey();
 
-    const { pkpAddress, id } = await importPrivateKey({
+    const { pkpAddress } = await importPrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
       privateKey: privateKey1,
       litNodeClient: devEnv.litNodeClient!,
@@ -423,28 +419,19 @@ describe('Wrapped Keys', () => {
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
     expect(pkpAddress).toEqual(alicePkpAddress);
-    try {
-      const privateKey2 = randomSolanaPrivateKey();
 
-      await importPrivateKey({
+    const privateKey2 = randomSolanaPrivateKey();
+
+    expect(
+      importPrivateKey({
         pkpSessionSigs: pkpSessionSigs!,
         privateKey: privateKey2,
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
         memo: 'Test Key',
-      });
-    } catch (e: any) {
-      if (
-        e.message.includes(
-          'There is already a wrapped key stored, either for the provided pkpAddress, or with the same dataToEncryptHash; a pkpAddress may only have 1 wrapped key, and a wrapped key may only be associated with a single pkpAddress.'
-        )
-      ) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrowError(new Error());
   });
 
   it('Fail Max Expiration Session Sig', async () => {
@@ -454,23 +441,22 @@ describe('Wrapped Keys', () => {
 
     console.log(pkpSessionSigs);
 
-    try {
-      const privateKey = randomSolanaPrivateKey();
+    const privateKey = randomSolanaPrivateKey();
 
-      await importPrivateKey({
+    expect(
+      importPrivateKey({
         pkpSessionSigs: pkpSessionSigs!,
         privateKey,
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
         memo: 'Test Key',
-      });
-    } catch (e: any) {
-      if (e.message.includes('Expires too far in the future')) {
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrow(
+      new Error(
+        'Failed to make request for wrapped key: Not Authorized: Invalid sessionSig: Expires too far in the future; must be within 15 of now.'
+      )
+    );
   });
 
   it('Fail Import Invalid Session Sig', async () => {
@@ -480,7 +466,7 @@ describe('Wrapped Keys', () => {
       const tamperedPkpSessionSigs: SessionSigsMap = {};
 
       for (const key in pkpSessionSig) {
-        if (pkpSessionSig.hasOwnProperty(key)) {
+        if (pkpSessionSig[key]) {
           const authSig = pkpSessionSig[key];
           const updatedAuthSig: AuthSig = {
             ...authSig,
@@ -496,25 +482,18 @@ describe('Wrapped Keys', () => {
     const alice = await devEnv.createRandomPerson();
 
     const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
+    const privateKey = randomSolanaPrivateKey();
 
-    try {
-      const privateKey = randomSolanaPrivateKey();
-
-      await importPrivateKey({
+    expect(
+      importPrivateKey({
         pkpSessionSigs: tamperPkpSessionSigs(pkpSessionSigs!),
         privateKey,
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
         memo: 'Test Key',
-      });
-    } catch (e: any) {
-      if (e.message.includes('bad public key size')) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrowError('bad public key size');
   });
 
   it('Fail Import Expired Session Sig', async () => {
@@ -545,24 +524,22 @@ describe('Wrapped Keys', () => {
       },
     };
 
-    try {
-      const privateKey = randomSolanaPrivateKey();
+    const privateKey = randomSolanaPrivateKey();
 
-      await importPrivateKey({
+    expect(
+      importPrivateKey({
         pkpSessionSigs,
         privateKey,
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
         memo: 'Test Key',
-      });
-    } catch (e: any) {
-      if (e.message.includes('Invalid sessionSig: Expired')) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrowError(
+      new Error(
+        'Failed to make request for wrapped key: Not Authorized: Invalid sessionSig: Expired'
+      )
+    );
   });
 
   it('Fail EOA Session Sig', async () => {
@@ -574,22 +551,18 @@ describe('Wrapped Keys', () => {
 
     const privateKey = randomSolanaPrivateKey();
 
-    try {
-      await importPrivateKey({
+    expect(
+      importPrivateKey({
         pkpSessionSigs: eoaSessionSigs!,
         privateKey,
         litNodeClient: devEnv.litNodeClient!,
         publicKey: '0xdeadbeef',
         keyType: 'K256',
         memo: 'Test Key',
-      });
-    } catch (e: any) {
-      if (e.message.includes('SessionSig is not from a PKP')) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrowError(
+      new Error('SessionSig is not from a PKP; no LIT_BLS capabilities found')
+    );
   });
 
   it('Fail Eth Sign Tx Missing Params', async () => {
@@ -623,29 +596,26 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    try {
-      await signTransactionWithEncryptedKey({
+    expect(
+      signTransactionWithEncryptedKey({
         pkpSessionSigs: pkpSessionSigsSigning!,
         network: 'evm',
         unsignedTransaction: {
-          ...getChainForNetwork(devEnv.litNodeClient?.config?.litNetwork!),
+          ...getChainForNetwork(
+            devEnv.litNodeClient?.config?.litNetwork as LIT_NETWORKS_KEYS
+          ),
           // @ts-expect-error This test is intentionally using the type incorrectly.
           serializedTransaction: 'random-value',
         },
         broadcast: false,
+        id,
         litNodeClient: devEnv.litNodeClient!,
-      });
-    } catch (e: any) {
-      if (
-        e.message.includes(
-          'Error executing the Signing Lit Action: Error: Missing required field: toAddress'
-        )
-      ) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrowError(
+      new Error(
+        'Error executing the Signing Lit Action: Error: Missing required field: toAddress'
+      )
+    );
   });
 
   it('Fail Eth Sign Invalid Param', async () => {
@@ -689,26 +659,20 @@ describe('Wrapped Keys', () => {
       dataHex: 'Test transaction from Alice to bob',
     };
 
-    try {
-      await signTransactionWithEncryptedKey({
+    expect(
+      signTransactionWithEncryptedKey({
         pkpSessionSigs: pkpSessionSigsSigning!,
         network: 'evm',
         unsignedTransaction,
         broadcast: false,
         litNodeClient: devEnv.litNodeClient!,
         id,
-      });
-    } catch (e: any) {
-      if (
-        e.message.includes(
-          'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
-        )
-      ) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
+      })
+    ).rejects.toThrowError(
+      new Error(
+        'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value (argument="value", value="Test transaction from Alice to bob", code=INVALID_ARGUMENT, version=bytes/5.7.0)'
+      )
+    );
   });
 
   it('Fail Eth TX Invalid Decryption', async () => {
@@ -734,12 +698,12 @@ describe('Wrapped Keys', () => {
     ); // 10 mins expiry
 
     const unsignedTransaction = getBaseTransactionForNetwork({
-      network: devEnv.litNodeClient?.config.litNetwork!,
+      network: devEnv.litNodeClient?.config.litNetwork as LIT_NETWORKS_KEYS,
       toAddress: alice.wallet.address,
     });
 
-    try {
-      await devEnv.litNodeClient?.executeJs({
+    devEnv.litNodeClient
+      ?.executeJs({
         sessionSigs: pkpSessionSigsSigning,
         ipfsId: LIT_ACTION_CID_REPOSITORY.signTransaction.evm,
         jsParams: {
@@ -748,18 +712,12 @@ describe('Wrapped Keys', () => {
           unsignedTransaction,
           accessControlConditions: [decryptionAccessControlCondition],
         },
+      })
+      .then((res) => {
+        expect(res.response).toEqual(
+          'Error: When decrypting to a single node- Access control conditions check failed.  Check that you are allowed to decrypt this item.'
+        );
       });
-    } catch (e: any) {
-      if (
-        e.message.includes(
-          'There was an error getting the signing shares from the nodes'
-        )
-      ) {
-        console.log('✅ THIS IS EXPECTED: ', e);
-      } else {
-        throw e;
-      }
-    }
   });
 
   it('Export', async () => {
@@ -836,7 +794,7 @@ describe('Wrapped Keys', () => {
     ); // 10 mins expiry
 
     const unsignedTransaction = getBaseTransactionForNetwork({
-      network: devEnv.litNodeClient?.config.litNetwork!,
+      network: devEnv.litNodeClient?.config.litNetwork as LIT_NETWORKS_KEYS,
       toAddress: alice.wallet.address,
     });
 
@@ -1021,7 +979,9 @@ describe('Wrapped Keys', () => {
       dataHex: ethers.utils.hexlify(
         ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
       ),
-      ...getChainForNetwork(devEnv.litNodeClient?.config.litNetwork!),
+      ...getChainForNetwork(
+        devEnv.litNodeClient?.config.litNetwork as LIT_NETWORKS_KEYS
+      ),
     };
 
     const signedTx = await signTransactionWithEncryptedKey({
@@ -1074,7 +1034,7 @@ describe('Wrapped Keys', () => {
     ); // 10 mins expiry
 
     const unsignedTransaction = getBaseTransactionForNetwork({
-      network: devEnv.litNodeClient?.config.litNetwork!,
+      network: devEnv.litNodeClient?.config.litNetwork as LIT_NETWORKS_KEYS,
       toAddress: alice.wallet.address,
     });
 
@@ -1124,7 +1084,7 @@ describe('Wrapped Keys', () => {
     ); // 10 mins expiry
 
     const unsignedTransaction = getBaseTransactionForNetwork({
-      network: devEnv.litNodeClient?.config.litNetwork!,
+      network: devEnv.litNodeClient?.config.litNetwork as LIT_NETWORKS_KEYS,
       toAddress: alice.wallet.address,
     });
 

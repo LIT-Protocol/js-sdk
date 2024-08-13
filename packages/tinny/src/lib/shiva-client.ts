@@ -13,12 +13,12 @@ class ShivaError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(shivaResponse: TestNetResponse<any>) {
     let message = `An error occurred on request to testnet with id: ${shivaResponse.testnetId}`;
-    
+
     if (!shivaResponse.errors) {
       super(message);
-      this.name  = 'ShivaError';
+      this.name = 'ShivaError';
       this.message = message;
-    
+
       return;
     }
 
@@ -120,7 +120,9 @@ export class TestnetClient {
     let state = 'Busy';
     while (state != 'Active' && state != `UNKNOWN`) {
       const res = await fetch(
-        this._processEnvs?.TESTNET_MANAGER_URL + '/test/poll/testnet/' + this._id
+        this._processEnvs?.TESTNET_MANAGER_URL +
+          '/test/poll/testnet/' +
+          this._id
       );
       const stateRes: TestNetResponse<TestNetState> =
         await _processTestnetResponse<TestNetState>(res);
@@ -189,7 +191,9 @@ export class TestnetClient {
   public async stopTestnet() {
     console.log('stopping testnet with id:', this._id);
     const res = await fetch(
-      this._processEnvs?.TESTNET_MANAGER_URL + '/test/delete/testnet/' + this._id
+      this._processEnvs?.TESTNET_MANAGER_URL +
+        '/test/delete/testnet/' +
+        this._id
     );
 
     return _processTestnetResponse<boolean>(res);

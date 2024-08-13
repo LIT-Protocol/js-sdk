@@ -23,7 +23,6 @@ import {
 import { toErrorWithMessage } from './tinny-utils';
 import { TinnyPerson } from '../index';
 
-
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -51,7 +50,8 @@ export class TinnyEnvironment {
     ],
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']!) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
-    RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']!) || 5000,
+    RUN_IN_BAND_INTERVAL:
+      parseInt(process.env['RUN_IN_BAND_INTERVAL']!) || 5000,
 
     // Available Accounts
     // ==================
@@ -105,7 +105,10 @@ export class TinnyEnvironment {
   public testnet: TestnetClient | undefined;
   //=========== PRIVATE MEMBERS ===========
   private _shivaClient: ShivaClient = new ShivaClient();
-  private _contractContext: LitContractContext | LitContractResolverContext | undefined;
+  private _contractContext:
+    | LitContractContext
+    | LitContractResolverContext
+    | undefined;
 
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
@@ -275,7 +278,7 @@ export class TinnyEnvironment {
       );
     }
 
-    // @ts-expect-error property is defined on globalThis 
+    // @ts-expect-error property is defined on globalThis
     if (globalThis['wasmSevSnpUtils']) {
       console.warn(
         'WASM modules already loaded. wil overide. when connect is called'
@@ -408,7 +411,7 @@ export class TinnyEnvironment {
 
     const toSign = await createSiweMessage({
       walletAddress: wallet.address,
-      nonce: await this.litNodeClient?.getLatestBlockhash() as string,
+      nonce: (await this.litNodeClient?.getLatestBlockhash()) as string,
       expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
       litNodeClient: this.litNodeClient,
     });
@@ -526,8 +529,8 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId = (
-      //@ts-expect-error client is defined
+    const capacityTokenId = //@ts-expect-error client is defined
+    (
       await this.contractsClient.mintCapacityCreditsNFT({
         requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
         daysUntilUTCMidnightExpiration: 2,
@@ -535,8 +538,8 @@ export class TinnyEnvironment {
     ).capacityTokenIdStr;
 
     try {
-      this.superCapacityDelegationAuthSig = (
-        //@ts-expect-error cliet is defined
+      this.superCapacityDelegationAuthSig = //@ts-expect-error cliet is defined
+      (
         await this.litNodeClient.createCapacityDelegationAuthSig({
           dAppOwnerWallet: wallet,
           capacityTokenId: capacityTokenId,
@@ -545,7 +548,11 @@ export class TinnyEnvironment {
         })
       ).capacityDelegationAuthSig;
     } catch (e: unknown) {
-      if ((e as Error).message.includes(`Can't allocate capacity beyond the global max`)) {
+      if (
+        (e as Error).message.includes(
+          `Can't allocate capacity beyond the global max`
+        )
+      ) {
         console.log('❗️Skipping capacity delegation auth sig setup.', e);
       } else {
         console.log(
@@ -556,11 +563,13 @@ export class TinnyEnvironment {
     }
   }
 
-  async _switchWallet(wallet: ethers.Wallet, provider: ethers.providers.Provider) {
+  async _switchWallet(
+    wallet: ethers.Wallet,
+    provider: ethers.providers.Provider
+  ) {
     // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
     // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
-    const capacityCreditWallet =
-      ethers.Wallet.createRandom().connect(provider);
+    const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
 
     // get wallet balance
     const balance = await wallet.getBalance();

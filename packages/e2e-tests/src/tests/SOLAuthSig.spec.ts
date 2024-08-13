@@ -1,6 +1,5 @@
-import { TinnyEnvironment } from '@lit-protocol/tinny';
-import { AccessControlConditions } from '../../setup/accs/accs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
+import { TinnyEnvironment, AccessControlConditions } from '@lit-protocol/tinny';
 import { ILitNodeClient } from '@lit-protocol/types';
 
 try {
@@ -12,16 +11,17 @@ try {
 describe('Sol AuthSig', () => {
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error global defined
     devEnv = global.devEnv;
   });
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error global defined
     await global.devEnv.litNodeClient?.disconnect();
   });
 
@@ -37,8 +37,6 @@ describe('Sol AuthSig', () => {
       },
       devEnv.litNodeClient as unknown as ILitNodeClient
     );
-
-    console.log('encryptRes:', encryptRes);
 
     // -- Expected output:´
     // {
