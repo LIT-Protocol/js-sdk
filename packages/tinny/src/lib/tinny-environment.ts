@@ -529,8 +529,9 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId = //@ts-expect-error client is defined
+    const capacityTokenId =
     (
+      //@ts-expect-error client is defined
       await this.contractsClient.mintCapacityCreditsNFT({
         requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
         daysUntilUTCMidnightExpiration: 2,
@@ -538,8 +539,9 @@ export class TinnyEnvironment {
     ).capacityTokenIdStr;
 
     try {
-      this.superCapacityDelegationAuthSig = //@ts-expect-error cliet is defined
+      this.superCapacityDelegationAuthSig =
       (
+        //@ts-expect-error client is defined
         await this.litNodeClient.createCapacityDelegationAuthSig({
           dAppOwnerWallet: wallet,
           capacityTokenId: capacityTokenId,
@@ -568,7 +570,8 @@ export class TinnyEnvironment {
     provider: ethers.providers.Provider
   ) {
     // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
-    // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
+    // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization.
+    // Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
     const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
 
     // get wallet balance
