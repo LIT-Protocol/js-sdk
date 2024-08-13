@@ -146,7 +146,7 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
         expiration: expiration,
         resources: resourceAbilityRequests,
         walletAddress: fromWallet.address,
-        nonce: devEnv.litNodeClient.latestBlockhash,
+        nonce: await devEnv.litNodeClient.getLatestBlockhash(),
         litNodeClient: devEnv.litNodeClient,
       });
 
