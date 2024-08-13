@@ -1,20 +1,22 @@
+import { ethers } from 'ethers';
+
 import {
   LitActionResource,
   LitPKPResource,
   generateAuthSig,
   createSiweMessageWithRecaps,
 } from '@lit-protocol/auth-helpers';
+import { LitNetwork } from '@lit-protocol/constants';
+import { log } from '@lit-protocol/misc';
 import {
   AuthCallbackParams,
   AuthSig,
   LitAbility,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
-import { log } from '@lit-protocol/misc';
-import { ethers } from 'ethers';
-import { LitNetwork } from '@lit-protocol/constants';
-import { TinnyPerson } from '../tinny-person';
+
 import { TinnyEnvironment } from '../tinny-environment';
+import { TinnyPerson } from '../tinny-person';
 
 /**
  * Retrieves the session signatures for an EOA in a given Tinny environment.

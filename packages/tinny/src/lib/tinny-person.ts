@@ -1,19 +1,22 @@
+import { ethers } from 'ethers';
+
 import {
   AuthSig,
   generateAuthSig,
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
+import { AuthMethodScope } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import {
   AuthMethod,
   BaseSiweMessage,
   LIT_NETWORKS_KEYS,
   LitContractContext,
 } from '@lit-protocol/types';
-import { ethers } from 'ethers';
+
 import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
-import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
-import { AuthMethodScope } from '@lit-protocol/constants';
+
 
 export class TinnyPerson {
   public privateKey: string;
