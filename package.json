@@ -16,7 +16,7 @@
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
     "test:ci": "nx affected --target=test --all --code-coverage",
-    "test:e2e": "dotenvx run --env-file=.env -- nx run e2e-tests:test",
+    "test:e2e": "nx run e2e-tests:test",
     "test:local": "node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/test.mjs",
     "test:unit": "nx run-many --target=test",
     "test:unit:watch": "nx run-many --target=test --watch",

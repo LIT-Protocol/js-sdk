@@ -6,6 +6,7 @@
  */
 
 const NodeEnvironment = require('jest-environment-node').TestEnvironment;
+
 const TinnyEnvironment = require('@lit-protocol/tinny').TinnyEnvironment;
 
 require('dotenv').config();
