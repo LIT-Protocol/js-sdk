@@ -190,6 +190,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'network_error',
     kind: LitErrorKind.Unexpected,
   },
+  TRANSACTION_ERROR: {
+    name: 'TransactionError',
+    code: 'transaction_error',
+    kind: LitErrorKind.Unexpected,
+  },
 };
 
 export const LIT_ERROR_CODE = {
@@ -287,6 +292,7 @@ export const {
   ParamNullError,
   ParamsMissingError,
   RemovedFunctionError,
+  TransactionError,
   UnauthorizedException,
   UnknownDecryptionAlgorithmTypeError,
   UnknownError,
