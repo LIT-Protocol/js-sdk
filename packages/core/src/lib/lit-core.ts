@@ -888,7 +888,9 @@ export class LitCore {
     // if the epoch started less than 15s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
     // this gives the nodes time to sync with the chain and see the new epoch before we try to use it
     console.log(
-      `In get currentEpochNumber..  Current time is ${Date.now()} and EPOCH_PROPAGATION_DELAY is ${EPOCH_PROPAGATION_DELAY} and _epochCache is ${JSON.stringify(
+      `In get currentEpochNumber..  Current time is ${Math.floor(
+        Date.now() / 1000
+      )} and EPOCH_PROPAGATION_DELAY is ${EPOCH_PROPAGATION_DELAY} and _epochCache is ${JSON.stringify(
         this._epochCache,
         null,
         2
@@ -897,7 +899,8 @@ export class LitCore {
     if (
       this._epochCache.currentNumber &&
       this._epochCache.startTime &&
-      Date.now() < this._epochCache.startTime + EPOCH_PROPAGATION_DELAY
+      Math.floor(Date.now() / 1000) <
+        this._epochCache.startTime + EPOCH_PROPAGATION_DELAY
     ) {
       console.log(
         `In get currentEpochNumber..  Returning previous epoch number: ${
