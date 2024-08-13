@@ -33,7 +33,10 @@ import {
 } from '@cosmjs/stargate';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
-import { InvalidArgumentException } from '@lit-protocol/constants';
+import {
+  InvalidArgumentException,
+  RemovedFunctionError,
+} from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
@@ -87,7 +90,14 @@ export class PKPCosmosWallet
   };
 
   handleRequest = async (): Promise<void> => {
-    throw new Error('Method not implemented.');
+    throw new RemovedFunctionError(
+      {
+        info: {
+          functionName: 'handleRequest',
+        },
+      },
+      'Method not implemented.'
+    );
   };
 
   /**

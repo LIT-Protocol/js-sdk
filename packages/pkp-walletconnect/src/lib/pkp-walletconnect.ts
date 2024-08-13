@@ -22,7 +22,7 @@ import {
   Web3WalletTypes,
 } from '@walletconnect/web3wallet';
 
- import {
+import {
   InitError,
   LIT_CHAINS,
   ParamsMissingError,

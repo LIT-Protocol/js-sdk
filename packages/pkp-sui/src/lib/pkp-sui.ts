@@ -32,7 +32,10 @@ import { sha256 } from '@noble/hashes/sha256';
 
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
-import { InvalidArgumentException } from '@lit-protocol/constants';
+import {
+  InvalidArgumentException,
+  UnknownError,
+} from '@lit-protocol/constants';
 
 import { getDigestFromBytes } from './TransactionBlockData';
 
@@ -293,7 +296,14 @@ export class PKPSuiWallet implements PKPWallet, Signer {
     const txEffects = await this.dryRunTransactionBlock(...args);
     const gasEstimation = getTotalGasUsedUpperBound(txEffects.effects);
     if (typeof gasEstimation === 'undefined') {
-      throw new Error('Failed to estimate the gas cost from transaction');
+      throw new UnknownError(
+        {
+          info: {
+            txEffects,
+          },
+        },
+        'Failed to estimate the gas cost from transaction'
+      );
     }
     return gasEstimation;
   }

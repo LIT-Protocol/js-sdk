@@ -4,14 +4,17 @@ import Ajv, { JSONSchemaType } from 'ajv';
 
 import {
   ABI_ERC20,
+  InvalidArgumentException,
   InvalidParamType,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
+  NetworkError,
   RELAYER_URL_BY_NETWORK,
   RemovedFunctionError,
   UnknownError,
+  WrongNetworkException,
 } from '@lit-protocol/constants';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
 import {
@@ -554,7 +557,13 @@ export function isSupportedLitNetwork(
   const supportedNetworks = Object.values(LIT_NETWORK);
 
   if (!supportedNetworks.includes(litNetwork)) {
-    throw new Error(
+    throw new WrongNetworkException(
+      {
+        info: {
+          litNetwork,
+          supportedNetworks,
+        },
+      },
       `Unsupported LitNetwork! (${supportedNetworks.join('|')}) are supported.`
     );
   }
@@ -568,45 +577,54 @@ export const defaultMintClaimCallback: MintCallback<
 ): Promise<string> => {
   isSupportedLitNetwork(network);
 
-  try {
-    const AUTH_CLAIM_PATH = '/auth/claim';
+  const AUTH_CLAIM_PATH = '/auth/claim';
 
-    const relayUrl: string = params.relayUrl || RELAYER_URL_BY_NETWORK[network];
+  const relayUrl: string = params.relayUrl || RELAYER_URL_BY_NETWORK[network];
 
-    if (!relayUrl) {
-      throw new Error(
-        'No relayUrl provided and no default relayUrl found for network'
-      );
-    }
-
-    const relayUrlWithPath = relayUrl + AUTH_CLAIM_PATH;
-
-    const response = await fetch(relayUrlWithPath, {
-      method: 'POST',
-      body: JSON.stringify(params),
-      headers: {
-        'api-key': params.relayApiKey
-          ? params.relayApiKey
-          : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-        'Content-Type': 'application/json',
+  if (!relayUrl) {
+    throw new InvalidArgumentException(
+      {
+        info: {
+          network,
+          relayUrl,
+        },
       },
-    });
-
-    if (response.status < 200 || response.status >= 400) {
-      const errResp = (await response.json()) ?? '';
-      const errStmt = `An error occurred requesting "/auth/claim" endpoint ${JSON.stringify(
-        errResp
-      )}`;
-      console.warn(errStmt);
-      throw new Error(errStmt);
-    }
-
-    const body = await response.json();
-    return body.requestId;
-  } catch (e) {
-    console.error((e as Error).message);
-    throw e;
+      'No relayUrl provided and no default relayUrl found for network'
+    );
   }
+
+  const relayUrlWithPath = relayUrl + AUTH_CLAIM_PATH;
+
+  const response = await fetch(relayUrlWithPath, {
+    method: 'POST',
+    body: JSON.stringify(params),
+    headers: {
+      'api-key': params.relayApiKey
+        ? params.relayApiKey
+        : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (response.status < 200 || response.status >= 400) {
+    const errResp = (await response.json()) ?? '';
+    const errStmt = `An error occurred requesting "/auth/claim" endpoint ${JSON.stringify(
+      errResp
+    )}`;
+    console.warn(errStmt);
+    throw new NetworkError(
+      {
+        info: {
+          response,
+          errResp,
+        },
+      },
+      `An error occurred requesting "/auth/claim" endpoint`
+    );
+  }
+
+  const body = await response.json();
+  return body.requestId;
 };
 
 /**

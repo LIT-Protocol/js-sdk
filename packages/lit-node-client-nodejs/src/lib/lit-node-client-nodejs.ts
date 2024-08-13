@@ -36,6 +36,7 @@ import {
   WalletSignatureNotFoundError,
   UnknownError,
   InvalidSignatureError,
+  UnsupportedMethodError,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -165,7 +166,14 @@ export class LitNodeClientNodeJs
   ): Promise<CapacityCreditsRes> => {
     // -- validate
     if (!params.dAppOwnerWallet) {
-      throw new Error('dAppOwnerWallet must exist');
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'dAppOwnerWallet must exist'
+      );
     }
 
     // Useful log for debugging
@@ -301,7 +309,15 @@ export class LitNodeClientNodeJs
     }
 
     if (rateLimitAuthSig) {
-      throw new Error('Not implemented yet.');
+      throw new UnsupportedMethodError(
+        {
+          info: {
+            method: 'generateSessionCapabilityObjectWithWildcards',
+            rateLimitAuthSig,
+          },
+        },
+        'Not implemented yet.'
+      );
       // await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
@@ -1746,7 +1762,12 @@ export class LitNodeClientNodeJs
     );
 
     if (!sessionKeyUri) {
-      throw new Error(
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
         '[signSessionKey] sessionKeyUri is not defined. Please provide a sessionKeyUri or a sessionKey.'
       );
     }
@@ -1834,7 +1855,15 @@ export class LitNodeClientNodeJs
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
-      throw new Error(`Error when handling node promises: ${e}`);
+      throw new UnknownError(
+        {
+          info: {
+            requestId,
+          },
+          cause: e,
+        },
+        'Error when handling node promises'
+      );
     }
 
     logWithRequestId(requestId, 'handleNodePromises res:', res);
@@ -1868,7 +1897,16 @@ export class LitNodeClientNodeJs
     if (signedDataList.length <= 0) {
       const err = `[signSessionKey] signedDataList is empty.`;
       log(err);
-      throw new Error(err);
+      throw new InvalidSignatureError(
+        {
+          info: {
+            requestId,
+            responseData,
+            signedDataList,
+          },
+        },
+        err
+      );
     }
 
     logWithRequestId(
@@ -1906,7 +1944,16 @@ export class LitNodeClientNodeJs
         if (!data.signatureShare.ProofOfPossession) {
           const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`;
           log(err);
-          throw new Error(err);
+          throw new InvalidSignatureError(
+            {
+              info: {
+                requestId,
+                responseData,
+                data,
+              },
+            },
+            err
+          );
         }
 
         return data;
@@ -1929,7 +1976,15 @@ export class LitNodeClientNodeJs
       this.config.minNodeCount
     );
     if (validatedSignedDataList.length < this.config.minNodeCount) {
-      throw new Error(
+      throw new InvalidSignatureError(
+        {
+          info: {
+            requestId,
+            responseData,
+            validatedSignedDataList,
+            minNodeCount: this.config.minNodeCount,
+          },
+        },
         `[signSessionKey] not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`
       );
     }
@@ -2200,24 +2255,46 @@ const resourceAbilityRequests = [
       authNeededCallback: async (props: AuthCallbackParams) => {
         // -- validate
         if (!props.expiration) {
-          throw new Error(
+          throw new ParamsMissingError(
+            {
+              info: {
+                props,
+              },
+            },
             '[getPkpSessionSigs/callback] expiration is required'
           );
         }
 
         if (!props.resources) {
-          throw new Error('[getPkpSessionSigs/callback]resources is required');
+          throw new ParamsMissingError(
+            {
+              info: {
+                props,
+              },
+            },
+            '[getPkpSessionSigs/callback]resources is required'
+          );
         }
 
         if (!props.resourceAbilityRequests) {
-          throw new Error(
+          throw new ParamsMissingError(
+            {
+              info: {
+                props,
+              },
+            },
             '[getPkpSessionSigs/callback]resourceAbilityRequests is required'
           );
         }
 
         // lit action code and ipfs id cannot exist at the same time
         if (props.litActionCode && props.litActionIpfsId) {
-          throw new Error(
+          throw new UnsupportedMethodError(
+            {
+              info: {
+                props,
+              },
+            },
             '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
         }
@@ -2265,14 +2342,26 @@ const resourceAbilityRequests = [
   getLitActionSessionSigs = async (params: GetLitActionSessionSigs) => {
     // Check if either litActionCode or litActionIpfsId is provided
     if (!params.litActionCode && !params.litActionIpfsId) {
-      throw new Error(
-        "Either 'litActionCode' or 'litActionIpfsId' must be provided."
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'Either "litActionCode" or "litActionIpfsId" must be provided.'
       );
     }
 
     // Check if jsParams is provided
     if (!params.jsParams) {
-      throw new Error("'jsParams' is required.");
+      throw new ParamsMissingError(
+        {
+          info: {
+            params,
+          },
+        },
+        "'jsParams' is required."
+      );
     }
 
     return this.getPkpSessionSigs(params);
@@ -2316,7 +2405,14 @@ const resourceAbilityRequests = [
 
     const nodePromises = this.getNodePromises((url: string) => {
       if (!params.authMethod) {
-        throw new Error('authMethod is required');
+        throw new ParamsMissingError(
+          {
+            info: {
+              params,
+            },
+          },
+          'authMethod is required'
+        );
       }
 
       const reqBody: JsonPKPClaimKeyRequest = {
