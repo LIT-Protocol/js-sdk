@@ -347,6 +347,8 @@ export class LitCore {
    *  Removes global objects created internally
    */
   async disconnect() {
+    this.ready = false;
+
     this._stopListeningForNewEpoch();
     this._stopNetworkPolling();
     if (globalThis.litConfig) delete globalThis.litConfig;
