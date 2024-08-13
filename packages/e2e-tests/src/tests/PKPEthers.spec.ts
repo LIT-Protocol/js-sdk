@@ -49,8 +49,7 @@ describe('PKP Ethers', () => {
   });
 
   afterAll(async () => {
-    //@ts-expect-error defined in global
-    await global.devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   describe('Sign Message', () => {

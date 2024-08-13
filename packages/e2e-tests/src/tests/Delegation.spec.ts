@@ -25,8 +25,7 @@ describe('Delegation', () => {
   });
 
   afterAll(async () => {
-    //@ts-expect-error is defined
-    await global.devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('PKP to PKP delegation executeJS', async () => {
@@ -154,10 +153,10 @@ describe('Delegation', () => {
         dataToSign: alice.loveLetter,
         publicKey: bob.pkp?.publicKey,
       },
+    }).finally(() => {
+      devEnv.releasePrivateKeyFromUser(alice);
+      devEnv.releasePrivateKeyFromUser(bob);
     });
-
-    devEnv.releasePrivateKeyFromUser(alice);
-    devEnv.releasePrivateKeyFromUser(bob);
 
     // Expected output:
     // {
@@ -210,10 +209,10 @@ describe('Delegation', () => {
       toSign: alice.loveLetter,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       pubKey: bob.pkp?.publicKey!,
+    }).finally(() => {
+      devEnv.releasePrivateKeyFromUser(alice);
+      devEnv.releasePrivateKeyFromUser(bob);
     });
-
-    devEnv.releasePrivateKeyFromUser(alice);
-    devEnv.releasePrivateKeyFromUser(bob);
 
     // Expected output:
     // {

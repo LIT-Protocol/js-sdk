@@ -289,7 +289,7 @@ export class TinnyEnvironment {
 
     if (!this.litNodeClient.ready) {
       console.error('❌ litNodeClient not ready');
-      process.exit();
+      process.exit(1);
     }
   }
 

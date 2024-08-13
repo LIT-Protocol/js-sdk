@@ -81,8 +81,7 @@ describe('Wrapped Keys', () => {
   });
 
   afterAll(async () => {
-    //@ts-expect-error global defined
-    await global.devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('Sign Tx Sol Encrypted Key', async () => {

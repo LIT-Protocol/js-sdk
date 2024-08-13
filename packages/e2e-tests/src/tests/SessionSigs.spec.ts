@@ -43,8 +43,7 @@ describe('SessionSigs', () => {
   });
 
   afterAll(async () => {
-    //@ts-expect-error global defined
-    await global.devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   describe('DecryptString', () => {

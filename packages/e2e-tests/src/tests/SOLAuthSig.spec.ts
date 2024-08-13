@@ -21,8 +21,7 @@ describe('Sol AuthSig', () => {
   });
 
   afterAll(async () => {
-    //@ts-expect-error global defined
-    await global.devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('DecryptString', async () => {
