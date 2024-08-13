@@ -17,7 +17,6 @@ import {
 
 import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
 
-
 export class TinnyPerson {
   public privateKey: string;
   public wallet: ethers.Wallet;
