@@ -7,6 +7,7 @@ import {
   LitResourcePrefix,
 } from '@lit-protocol/types';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
+import { formatPKPResource } from './utils';
 
 abstract class LitResourceBase {
   abstract resourcePrefix: LitResourcePrefix;
@@ -91,7 +92,8 @@ export class LitPKPResource extends LitResourceBase implements ILitResource {
    * PKP token ID.
    */
   constructor(resource: string) {
-    super(resource);
+    const fixedResource = formatPKPResource(resource);
+    super(fixedResource);
   }
 
   isValidLitAbility(litAbility: LitAbility): boolean {

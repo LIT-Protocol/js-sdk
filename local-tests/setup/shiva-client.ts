@@ -135,7 +135,10 @@ export class TestnetClient {
         this._id
     );
 
-    return _processTestnetResponse<boolean>(res);
+    const testnetInfoRes = await _processTestnetResponse<TestNetInfo>(res);
+    this._info = testnetInfoRes.body;
+
+    return testnetInfoRes;
   }
 
   /**
@@ -231,7 +234,7 @@ export class ShivaClient {
       let body: Partial<TestNetCreateRequest> = createReq ?? {
         nodeCount: 3,
         pollingInterval: '2000',
-        epochLength: 100,
+        epochLength: 90_000,
       };
 
       if (this.processEnvs.USE_LIT_BINARIES) {
