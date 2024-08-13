@@ -99,7 +99,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   >
 > &
   Partial<
-    Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
+    Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl' | 'retryNodeHandshake'>
   > & {
     bootstrapUrls: string[];
   } & {
@@ -123,6 +123,7 @@ export class LitCore {
     alertWhenUnauthorized: false,
     debug: true,
     connectTimeout: 20000,
+    retryNodeHandshake: true,
     checkNodeAttestation: false,
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
@@ -636,9 +637,36 @@ export class LitCore {
     const serverKeys: Record<string, JsonHandshakeResponse> = {};
 
     let timeoutHandle: ReturnType<typeof setTimeout>;
+    let canRetry = this.config.retryNodeHandshake ?? true;
+
+    const handshakeWithNode = async (url: string): Promise<void> => {
+      serverKeys[url] = await this._handshakeAndVerifyNodeAttestation({
+        url,
+        requestId,
+      });
+      connectedNodes.add(url);
+    };
+
+    const handshakeWithNodeWithRetry = async (url: string): Promise<void> => {
+      try {
+        return await handshakeWithNode(url);
+      } catch (e) {
+        if (canRetry) {
+          logErrorWithRequestId(
+            requestId,
+            `Error while attempting handshake with node ${url}. Retrying...`
+          );
+          return await handshakeWithNodeWithRetry(url);
+        } else {
+          throw e;
+        }
+      }
+    };
+
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
+          canRetry = false;
           const msg = `Error: Could not connect to all required nodes after timeout of ${
             this.config.connectTimeout
           }ms. Could only connect to ${Object.keys(serverKeys).length} of ${
@@ -658,14 +686,9 @@ export class LitCore {
         }, this.config.connectTimeout);
       }),
       Promise.all(
-        this.config.bootstrapUrls.map(async (url) => {
-          serverKeys[url] = await this._handshakeAndVerifyNodeAttestation({
-            url,
-            requestId,
-          });
-          connectedNodes.add(url);
-        })
+        this.config.bootstrapUrls.map(handshakeWithNodeWithRetry)
       ).finally(() => {
+        canRetry = false;
         clearTimeout(timeoutHandle);
       }),
     ]);

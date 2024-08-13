@@ -194,6 +194,7 @@ export interface LitNodeClientConfig {
   minNodeCount?: number;
   debug?: boolean;
   connectTimeout?: number;
+  retryNodeHandshake?: boolean;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
