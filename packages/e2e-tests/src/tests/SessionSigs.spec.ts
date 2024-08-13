@@ -715,13 +715,9 @@ const decryptAndCombine = async (
   // }
 
   // -- assertions
-  if (!encryptRes.ciphertext) {
-    throw new Error(`Expected "ciphertext" in encryptRes`);
-  }
+  expect(encryptRes.ciphertext).toBeDefined();
 
-  if (!encryptRes.dataToEncryptHash) {
-    throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
-  }
+  expect(!encryptRes.dataToEncryptHash).toBeDefined();
 
   const res = await devEnv.litNodeClient?.executeJs({
     sessionSigs: litActionSessionSigs,
