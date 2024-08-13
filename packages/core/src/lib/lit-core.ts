@@ -107,7 +107,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
-const EPOCH_PROPAGATION_DELAY = 30_000;
+const EPOCH_PROPAGATION_DELAY = 45_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
