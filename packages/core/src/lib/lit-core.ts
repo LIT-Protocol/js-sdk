@@ -116,6 +116,7 @@ const NETWORKS_REQUIRING_SEV: string[] = [
   LitNetwork.Habanero,
   LitNetwork.Manzano,
   LitNetwork.DatilTest,
+  LitNetwork.Datil,
 ];
 
 export class LitCore {
