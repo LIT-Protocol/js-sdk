@@ -1,5 +1,5 @@
 // @ts-expect-error No types available for this package
-import { VError, Options, MultiError } from '@openagenda/verror';
+import { VError, Options } from '@openagenda/verror';
 
 export enum LitErrorKind {
   Unknown = 'Unknown',
@@ -130,7 +130,7 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'unknown_signature_error',
     kind: LitErrorKind.Validation,
   },
-  SIGNATURE_VALIDATION_ERROR: {
+  INVALID_SIGNATURE_ERROR: {
     name: 'InvalidSignatureError',
     code: 'invalid_signature_error',
     kind: LitErrorKind.Validation,
@@ -266,6 +266,7 @@ for (const key in LIT_ERROR) {
 }
 
 // Re-export to allow MultiErrors but keep the centralized VError import here
+const MultiError = VError.MultiError;
 export { MultiError };
 
 export const {
