@@ -32,7 +32,6 @@ import {
   LitNodeClientNotReadyError,
   InvalidParamType,
   InvalidArgumentException,
-  InvalidEthBlockhash,
   WalletSignatureNotFoundError,
   UnknownError,
   InvalidSignatureError,
