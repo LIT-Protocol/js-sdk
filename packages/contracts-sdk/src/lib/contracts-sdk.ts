@@ -2452,7 +2452,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       ...args,
       overrides
     );
-    return gasLimit.mul(gasLimitAdjustment);
+    // BigNumber uses integer math, so for example, to get a 10% increase,
+    // we multiply it by 110 to get 10% more gas and then divide
+    // by 100 to get the final gas limit
+    return gasLimit.mul(gasLimitAdjustment).div(100);
   };
 
   private async _callWithAdjustedOverrides<
