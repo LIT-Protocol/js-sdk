@@ -885,22 +885,20 @@ export class LitCore {
   }
 
   get currentEpochNumber(): number | null {
-    // if the epoch started less than 15s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
+    // if the epoch started less than 45s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
     // this gives the nodes time to sync with the chain and see the new epoch before we try to use it
     console.log(
       `In get currentEpochNumber..  Current time is ${Math.floor(
         Date.now() / 1000
-      )} and EPOCH_PROPAGATION_DELAY is ${EPOCH_PROPAGATION_DELAY} and _epochCache is ${JSON.stringify(
-        this._epochCache,
-        null,
-        2
-      )}`
+      )} and EPOCH_PROPAGATION_DELAY is ${Math.floor(
+        EPOCH_PROPAGATION_DELAY / 1000
+      )} and _epochCache is ${JSON.stringify(this._epochCache, null, 2)}`
     );
     if (
       this._epochCache.currentNumber &&
       this._epochCache.startTime &&
       Math.floor(Date.now() / 1000) <
-        this._epochCache.startTime + EPOCH_PROPAGATION_DELAY
+        this._epochCache.startTime + Math.floor(EPOCH_PROPAGATION_DELAY / 1000)
     ) {
       console.log(
         `In get currentEpochNumber..  Returning previous epoch number: ${
