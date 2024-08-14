@@ -312,12 +312,26 @@ export class TinnyEnvironment {
     if (!name) {
       throw new Error('Name is required');
     }
-    const key = await this.getAvailablePrivateKey();
-    const privateKey = key.privateKey;
+    // make a new wallet for the person
+    const personWallet = ethers.Wallet.createRandom();
+
+    // send eth to the new wallet from the fundingKey
+    const fundingKey = await this.getAvailablePrivateKey();
+    const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+    const fundingWallet = new ethers.Wallet(fundingKey.privateKey, provider);
+    // send 1 eth
+    const tx = await fundingWallet.sendTransaction({
+      to: personWallet.address,
+      value: ethers.utils.parseEther('1'),
+    });
+    await tx.wait();
+    // we can now free up the key, since we are done with it.
+    this.releasePrivateKey(fundingKey.index);
+
     const envConfig = this.getEnvConfig();
 
     const person = new TinnyPerson({
-      privateKey,
+      privateKey: personWallet.privateKey,
       envConfig,
     });
 
