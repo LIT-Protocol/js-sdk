@@ -1679,20 +1679,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       claimAndMint: async (
         derivedKeyId: BytesLike,
         signatures: IPubkeyRouter.SignatureStruct[],
-        txOpts: ethers.PayableOverrides & { from?: string }
+        txOpts: ethers.CallOverrides = {}
       ) => {
         try {
-          const overrides = txOpts ?? {};
-
-          if (!overrides.value) {
-            const cost = await this.pkpNftContract.read.mintCost();
-            overrides.value = cost;
-          }
           const tx = await this._callWithAdjustedOverrides(
             this.pkpNftContract.write,
             'claimAndMint',
             [2, derivedKeyId, signatures],
-            overrides
+            {
+              ...txOpts,
+              value:
+                txOpts.value ?? (await this.pkpNftContract.read.mintCost()),
+            }
           );
 
           const txRec = await tx.wait();
@@ -2278,10 +2276,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         txOpts,
         timestamp,
       }: {
-        txOpts: {
-          value: BigNumberish | Promise<BigNumberish>;
-          gasLimit: BigNumberish | Promise<BigNumberish> | undefined;
-        };
+        txOpts: ethers.CallOverrides;
         timestamp: number;
       }) => {
         if (!this.connected) {
@@ -2443,35 +2438,58 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     },
   };
 
-  private _getAdjustedGasLimit = async (
-    contract: ethers.Contract,
-    method: string,
-    args: unknown[],
-    overrides: ethers.PayableOverrides & { from?: string } = {},
+  private _getAdjustedGasLimit = async <
+    T extends ethers.Contract,
+    K extends keyof T['functions']
+  >(
+    contract: T,
+    method: K,
+    args: Parameters<T['functions'][K]>,
+    overrides: ethers.CallOverrides = {},
     gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
-  ) => {
-    const gasLimit = await contract.estimateGas[method](...args, overrides);
-    return gasLimit.mul(gasLimitAdjustment);
+  ): Promise<ethers.BigNumber> => {
+    const gasLimit = await contract.estimateGas[method as string](
+      ...args,
+      overrides
+    );
+    // BigNumber uses integer math, so for example, to get a 10% increase,
+    // we multiply it by 110 to get 10% more gas and then divide
+    // by 100 to get the final gas limit
+    return gasLimit.mul(gasLimitAdjustment).div(100);
   };
 
-  private _callWithAdjustedOverrides = async (
-    contract: ethers.Contract,
-    method: string,
-    args: unknown[],
-    overrides: ethers.PayableOverrides & { from?: string } = {},
+  private async _callWithAdjustedOverrides<
+    T extends ethers.Contract,
+    K extends keyof T['functions']
+  >(
+    contract: T,
+    method: K,
+    args: Parameters<T['functions'][K]>,
+    overrides: ethers.CallOverrides = {},
     gasLimitAdjustment: ethers.BigNumber = GAS_LIMIT_ADJUSTMENT
-  ) => {
-    return contract[method](...args, {
+  ): Promise<ReturnType<T['functions'][K]>> {
+    // Check if the method exists on the contract
+    if (!(method in contract.functions)) {
+      throw new Error(
+        `Method ${String(method)} does not exist on the contract`
+      );
+    }
+
+    // Adjust the gas limit
+    const gasLimit =
+      overrides.gasLimit ??
+      (await this._getAdjustedGasLimit(
+        contract,
+        method,
+        args,
+        overrides,
+        gasLimitAdjustment
+      ));
+
+    // Call the contract method with adjusted overrides
+    return contract.functions[method as string](...args, {
       ...overrides,
-      gasLimit:
-        overrides.gasLimit ??
-        (await this._getAdjustedGasLimit(
-          contract,
-          method,
-          args,
-          overrides,
-          gasLimitAdjustment
-        )),
-    });
-  };
+      gasLimit,
+    }) as ReturnType<T['functions'][K]>;
+  }
 }
