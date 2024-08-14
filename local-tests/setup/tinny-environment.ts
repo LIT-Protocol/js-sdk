@@ -1,5 +1,6 @@
 import {
   LIT_TESTNET,
+  LIT_TESTNET_VALUES,
   ProcessEnvs,
   RPC_MAP,
   TinnyEnvConfig,
@@ -23,7 +24,7 @@ import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
 
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
-  public network: LIT_TESTNET;
+  public network: LIT_TESTNET_VALUES;
 
   /**
    * Environment variables used in the process.
@@ -31,11 +32,12 @@ export class TinnyEnvironment {
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT']) || 45000,
-    NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
+    NETWORK:
+      (process.env['NETWORK'] as LIT_TESTNET_VALUES) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-      (process.env['NETWORK'] as LIT_TESTNET) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_TESTNET_VALUES) === 'datil-dev'
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -104,7 +106,7 @@ export class TinnyEnvironment {
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
 
-  constructor(network?: LIT_TESTNET) {
+  constructor(network?: LIT_TESTNET_VALUES) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
 
@@ -345,7 +347,7 @@ export class TinnyEnvironment {
     return await this.createNewPerson('Alice');
   }
 
-  setUnavailable = (network: LIT_TESTNET) => {
+  setUnavailable = (network: LIT_TESTNET_VALUES) => {
     if (this.processEnvs.NETWORK === network) {
       throw new Error('LIT_IGNORE_TEST');
     }
