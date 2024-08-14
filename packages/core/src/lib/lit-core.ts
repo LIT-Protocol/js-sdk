@@ -99,7 +99,14 @@ export type LitNodeClientConfigWithDefaults = Required<
   >
 > &
   Partial<
-    Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl' | 'retryNodeHandshake'>
+    Pick<
+      LitNodeClientConfig,
+      | 'storageProvider'
+      | 'contractContext'
+      | 'rpcUrl'
+      | 'nodeRequestTimeout'
+      | 'retryNodeHandshake'
+    >
   > & {
     bootstrapUrls: string[];
   } & {
@@ -122,7 +129,8 @@ export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
-    connectTimeout: 20000,
+    connectTimeout: 20_000,
+    nodeRequestTimeout: 7_500,
     retryNodeHandshake: true,
     checkNodeAttestation: false,
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
@@ -845,7 +853,7 @@ export class LitCore {
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
     // -- get properties from params
-    const { url } = params;
+    const { url, challenge } = params;
 
     // -- create url with path
     const urlWithPath = composeLitUrl({
@@ -857,15 +865,13 @@ export class LitCore {
 
     const data = {
       clientPublicKey: 'test',
-      challenge: params.challenge,
+      challenge,
     };
 
     return await this.sendCommandToNode({
       url: urlWithPath,
       data,
       requestId,
-    }).catch((err: NodeErrorV3) => {
-      return err;
     });
   };
 
@@ -962,7 +968,22 @@ export class LitCore {
       body: JSON.stringify(data),
     };
 
-    return sendRequest(url, req, requestId);
+    let abortTimeout: ReturnType<typeof setTimeout>;
+    if (this.config.nodeRequestTimeout) {
+      // TODO: Use AbortSignal.timeout once we update to TS >=4.9.5. It considers request active time instead of elapsed time
+      // AbortSignal.timeout(this.config.nodeRequestTimeout)
+      const abortController = new AbortController();
+      req.signal = abortController.signal;
+      abortTimeout = setTimeout(() => abortController.abort("Request to node timed out"), this.config.nodeRequestTimeout);
+    }
+
+    const sendRequestPromise = sendRequest(url, req, requestId);
+
+    // If request is resolved but not yet read, aborting will cause reading to throw abortion error
+    // Therefore we need to clear the timeout always, even if request is already resolved
+    sendRequestPromise.finally(() => clearTimeout(abortTimeout));
+
+    return sendRequestPromise;
   };
 
   /**

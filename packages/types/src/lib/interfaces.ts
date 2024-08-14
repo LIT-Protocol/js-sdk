@@ -193,7 +193,11 @@ export interface LitNodeClientConfig {
   alertWhenUnauthorized?: boolean;
   minNodeCount?: number;
   debug?: boolean;
+  // Timeout for connecting/handshaking with all nodes
   connectTimeout?: number;
+  // Timeout for each request made to a node
+  nodeRequestTimeout?: number;
+  // Whether to retry handshaking a particular node if it failed, will retry until connectTimeout is reached
   retryNodeHandshake?: boolean;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
