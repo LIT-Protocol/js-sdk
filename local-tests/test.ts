@@ -104,6 +104,7 @@ import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-
 import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
+import { testPkpSignXTimes } from './tests/testPkpSignXTimes';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -280,6 +281,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
 
   const testConfig = {
     tests: {
+      testPkpSignXTimes,
       // testExample,
       // testBundleSpeed,
       ...eoaSessionSigsTests,
