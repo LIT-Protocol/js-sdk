@@ -893,7 +893,7 @@ export class LitCore {
       Math.floor(Date.now() / 1000) <
         this._epochCache.startTime +
           Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
-      this._epochCache.currentNumber > 2
+      this._epochCache.currentNumber >= 3
     ) {
       return this._epochCache.currentNumber - 1;
     }
