@@ -60,7 +60,6 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
@@ -978,7 +977,10 @@ export class LitCore {
       // AbortSignal.timeout(this.config.nodeRequestTimeout)
       const abortController = new AbortController();
       req.signal = abortController.signal;
-      abortTimeout = setTimeout(() => abortController.abort("Request to node timed out"), this.config.nodeRequestTimeout);
+      abortTimeout = setTimeout(
+        () => abortController.abort('Request to node timed out'),
+        this.config.nodeRequestTimeout
+      );
     }
 
     const sendRequestPromise = sendRequest(url, req, requestId);
