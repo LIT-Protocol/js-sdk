@@ -15,7 +15,7 @@ export const testPkpSignXTimes = async (devEnv: TinnyEnvironment) => {
   const network = process.env.NETWORK || 'unknown';
   const logFilePath = path.join(
     process.cwd(),
-    `${network}-pkp-sign-test-log-${timestamp}.log`
+    `./logs/${network}-pkp-sign-test-log-${timestamp}.log`
   );
 
   // Initialize the log file
