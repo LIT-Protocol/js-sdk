@@ -22,6 +22,7 @@ import {
   LIT_ENDPOINT,
   LIT_ERROR,
   LIT_ERROR_CODE,
+  LIT_NETWORK,
   LIT_NETWORKS,
   LitNetwork,
   RPC_URL_BY_NETWORK,
@@ -153,9 +154,10 @@ export class LitCore {
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     if (!(config.litNetwork in LIT_NETWORKS)) {
+      const supportedNetwork = Object.values(LIT_NETWORK).join(', ');
+
       return throwError({
-        message:
-          'Unsupported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
+        message: `Unsupported network has been provided please use a "litNetwork" option which is supported (${supportedNetwork})`,
         errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
       });
