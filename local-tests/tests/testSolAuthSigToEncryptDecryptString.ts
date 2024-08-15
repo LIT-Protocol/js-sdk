@@ -10,7 +10,7 @@ import { log } from '@lit-protocol/misc';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testSolAuthSigToEncryptDecryptString
  * ✅ NETWORK=manzano yarn test:local --filter=testSolAuthSigToEncryptDecryptString
- * ✅ NETWORK=localchain yarn test:local --filter=testSolAuthSigToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testSolAuthSigToEncryptDecryptString
  */
 export const testSolAuthSigToEncryptDecryptString = async (
   devEnv: TinnyEnvironment

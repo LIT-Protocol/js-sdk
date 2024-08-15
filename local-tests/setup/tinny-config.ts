@@ -1,28 +1,6 @@
-import { LIT_RPC } from '@lit-protocol/constants';
+import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContractResolverContext } from '@lit-protocol/types';
-
-export const LIT_TESTNET = {
-  LOCALCHAIN: 'localchain',
-  MANZANO: 'manzano',
-  CAYENNE: 'cayenne',
-  DATIL_DEV: 'datil-dev',
-  DATIL_TEST: 'datil-test',
-  DATIL_PROD: 'datil',
-} as const;
-export type LIT_TESTNET_VALUES = (typeof LIT_TESTNET)[keyof typeof LIT_TESTNET];
-
-/**
- * Mapping of testnet names to corresponding RPC endpoints.
- */
-export const RPC_MAP = {
-  [LIT_TESTNET.LOCALCHAIN]: LIT_RPC.LOCAL_ANVIL,
-  [LIT_TESTNET.MANZANO]: LIT_RPC.CHRONICLE,
-  [LIT_TESTNET.CAYENNE]: LIT_RPC.CHRONICLE,
-  [LIT_TESTNET.DATIL_DEV]: LIT_RPC.CHRONICLE_YELLOWSTONE,
-  [LIT_TESTNET.DATIL_TEST]: LIT_RPC.CHRONICLE_YELLOWSTONE,
-  [LIT_TESTNET.DATIL_PROD]: LIT_RPC.CHRONICLE_YELLOWSTONE,
-};
 
 /**
  * Represents the configuration options for the process environment.
@@ -40,12 +18,12 @@ export interface ProcessEnvs {
 
   /**
    * The network to use for testing. This can be one of the following:
-   * - `LIT_TESTNET.LOCALCHAIN`
-   * - `LIT_TESTNET.MANZANO`
-   * - `LIT_TESTNET.CAYENNE`
-   * - `LIT_TESTNET.DATIL_DEV`
+   * - `LIT_NETWORK.CUSTOM`
+   * - `LIT_NETWORK.MANZANO`
+   * - `LIT_NETWORK.CAYENNE`
+   * - `LIT_NETWORK.DATIL_DEV`
    */
-  NETWORK: LIT_TESTNET_VALUES;
+  NETWORK: LIT_NETWORK_VALUES;
 
   /**
    * The number of milliseconds to wait between each request.
@@ -133,7 +111,7 @@ export type PKPInfo = {
 export interface TinnyEnvConfig {
   rpc: string;
   litNodeClient: LitNodeClient;
-  network: LIT_TESTNET_VALUES;
+  network: LIT_NETWORK_VALUES;
   processEnvs: ProcessEnvs;
   contractContext?: LitContractResolverContext;
 }

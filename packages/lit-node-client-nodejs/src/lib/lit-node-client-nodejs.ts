@@ -24,7 +24,6 @@ import {
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
-  LIT_NETWORK_VALUES,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -234,7 +233,7 @@ export class LitNodeClientNodeJs
       storedSessionKeyOrError.result === ''
     ) {
       console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
 
       // Generate new one
@@ -245,7 +244,7 @@ export class LitNodeClientNodeJs
         localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
       } catch (e) {
         log(
-          `[getSessionKey] Localstorage not available.Not a problem. Contiune...`
+          `[getSessionKey] Localstorage not available.Not a problem. Continue...`
         );
       }
 
@@ -644,7 +643,7 @@ export class LitNodeClientNodeJs
     ciphertext: string,
     signatureShares: NodeBlsSigningShare[]
   ): Promise<Uint8Array> => {
-    const sigShares = signatureShares.map((s: any) => s.signatureShare);
+    const sigShares = signatureShares.map((s) => s.signatureShare);
 
     return verifyAndDecryptWithSignatureShares(
       networkPubKey,

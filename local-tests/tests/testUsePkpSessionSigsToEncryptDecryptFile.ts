@@ -11,7 +11,7 @@ import { log } from '@lit-protocol/misc';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
- * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
  */
 export const testUsePkpSessionSigsToEncryptDecryptFile = async (
   devEnv: TinnyEnvironment

@@ -13,7 +13,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
- * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
+ * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  */
 export const testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (
   devEnv: TinnyEnvironment

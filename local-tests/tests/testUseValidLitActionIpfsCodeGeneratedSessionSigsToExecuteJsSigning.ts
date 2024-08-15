@@ -8,7 +8,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
  * ❌ NOT AVAILABLE IN HABANERO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
  */
 export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: TinnyEnvironment) => {

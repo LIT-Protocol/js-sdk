@@ -7,7 +7,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToSendTx
  * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToSendTx
- * ✅ NETWORK=localchain yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToSendTx
+ * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToSendTx
  */
 export const testPkpEthersWithLitActionSessionSigsToSendTx = async (
   devEnv: TinnyEnvironment

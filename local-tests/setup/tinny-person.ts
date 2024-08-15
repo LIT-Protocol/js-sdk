@@ -7,13 +7,12 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthMethod,
   BaseSiweMessage,
-  LIT_NETWORKS_KEYS,
   LitContractContext,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
+import { PKPInfo, TinnyEnvConfig } from './tinny-config';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
-import { AuthMethodScope } from '@lit-protocol/constants';
+import { AuthMethodScope, LIT_NETWORK } from '@lit-protocol/constants';
 
 export class TinnyPerson {
   public privateKey: string;
@@ -68,7 +67,7 @@ export class TinnyPerson {
     // Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
     const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
 
-    if (this.envConfig.network != LIT_TESTNET.LOCALCHAIN) {
+    if (this.envConfig.network != LIT_NETWORK.Custom) {
       // check balance this.wallet
       const balance = await this.wallet.getBalance();
       console.log(
@@ -126,15 +125,14 @@ export class TinnyPerson {
      * Setup contracts-sdk client
      * ====================================
      */
-    if (this.envConfig.network === LIT_TESTNET.LOCALCHAIN) {
+    if (this.envConfig.network === LIT_NETWORK.Custom) {
       const networkContext = this.envConfig.contractContext;
       this.contractsClient = new LitContracts({
-        network: this.envConfig.network as LIT_NETWORKS_KEYS,
+        network: this.envConfig.network,
         signer: this.wallet,
         debug: this.envConfig.processEnvs.DEBUG,
         rpc: this.envConfig.processEnvs.LIT_RPC_URL, // anvil rpc
         customContext: networkContext as unknown as LitContractContext,
-        network: 'custom',
       });
     } else {
       this.contractsClient = new LitContracts({

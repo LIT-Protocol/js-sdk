@@ -1,4 +1,4 @@
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { LitAbility } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
@@ -12,13 +12,13 @@ import { log } from '@lit-protocol/misc';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ❌ NOT AVAILABLE IN MANZANO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+    devEnv.setUnavailable(LIT_NETWORK.Manzano);
 
     const alice = await devEnv.createRandomPerson();
     // set access control conditions for encrypting and decrypting

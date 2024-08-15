@@ -8,7 +8,7 @@ import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testRelayer
  * ✅ NETWORK=manzano yarn test:local --filter=testRelayer
- * ✅ NETWORK=localchain yarn test:local --filter=testRelayer
+ * ✅ NETWORK=custom yarn test:local --filter=testRelayer
  * ✅ NETWORK=datil-dev yarn test:local --filter=testRelayer
  */
 export const testRelayer = async (devEnv: TinnyEnvironment) => {

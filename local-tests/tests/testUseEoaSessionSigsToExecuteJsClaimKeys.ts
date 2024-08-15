@@ -23,7 +23,7 @@ import { log } from '@lit-protocol/misc';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
  * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
- * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
+ * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
  */
 export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
   devEnv: TinnyEnvironment

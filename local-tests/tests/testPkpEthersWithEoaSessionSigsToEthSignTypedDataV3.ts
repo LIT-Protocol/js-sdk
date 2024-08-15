@@ -11,7 +11,7 @@ import {
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3
  * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3
- * ✅ NETWORK=localchain yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3
+ * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3
  */
 export const testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3 = async (
   devEnv: TinnyEnvironment

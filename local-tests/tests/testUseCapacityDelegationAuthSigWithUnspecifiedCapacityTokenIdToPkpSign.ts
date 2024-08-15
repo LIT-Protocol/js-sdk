@@ -13,7 +13,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ## Test Commands:
  * - ❌ Not supported in Cayenne, but session sigs would still work
  * - ✅ NETWORK=manzano yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign
- * - ✅ NETWORK=localchain yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign
+ * - ✅ NETWORK=custom yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign
  */
 export const testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign =
   async (devEnv: TinnyEnvironment) => {

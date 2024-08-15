@@ -10,7 +10,7 @@ const { importPrivateKey, signTransactionWithEncryptedKey } = api;
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
  * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
+ * ✅ NETWORK=custom yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithMissingParam
  */
 export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
   devEnv: TinnyEnvironment

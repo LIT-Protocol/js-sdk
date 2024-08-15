@@ -11,7 +11,7 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4
  * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4
- * ✅ NETWORK=localchain yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4
+ * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4
  */
 export const testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4 = async (
   devEnv: TinnyEnvironment

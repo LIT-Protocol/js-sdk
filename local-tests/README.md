@@ -5,7 +5,7 @@ Tinny is a mini test framework, serving as a temporary solution for running e2e 
 # Prerequisite
 
 - Node v20 or above
-- The generated file `networkContext.ts` after running `npm run deploy -- --network localchain` in the `lit-assets` repo
+- The generated file `networkContext.ts` after running `npm run deploy -- --network custom` in the `lit-assets` repo
 
 # How to run
 
@@ -16,8 +16,8 @@ The `testName` specified in the filter **must be the same as the function name**
 ## to run all tests
 
 ```
-// run all tests on localchain
-DEBUG=true NETWORK=localchain yarn test:local
+// run all tests on local chain
+DEBUG=true NETWORK=custom yarn test:local
 
 // run filtered tests on manzano
 DEBUG=true NETWORK=manzano yarn test:local --filter=testExample
@@ -41,7 +41,7 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `MAX_ATTEMPTS`           | Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.                                                                                               |
 | `TEST_TIMEOUT`           | The maximum number of milliseconds to wait for a test to complete.                                                                                                                                              |
-| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_TESTNET.LOCALCHAIN`, `LIT_TESTNET.MANZANO`, or `LIT_TESTNET.CAYENNE`.                                                                   |
+| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_NETWORK.Custom`, `LIT_NETWORK.Manzano`, or `LIT_NETWORK.Cayenne`.                                                                       |
 | `DEBUG`                  | Specifies whether to enable debug mode.                                                                                                                                                                         |
 | `REQUEST_PER_KILOSECOND` | To execute a transaction with Lit, you must reserve capacity on the network using Capacity Credits. These allow a set number of requests over a period (default 2 days).                                        |
 | `WAIT_FOR_KEY_INTERVAL`  | Wait time in milliseconds if no private keys are available.                                                                                                                                                     |
@@ -50,7 +50,7 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | `RUN_IN_BAND_INTERVAL`   | The interval in milliseconds to run the tests in a single thread.                                                                                                                                               |
 | `LIT_RPC_URL`            | The URL of the Lit RPC server: <br> - For local Anvil: `http://127.0.0.1:8545` <br> - For Chronicle: `https://chain-rpc.litprotocol.com/http` <br> - For Yellowstone: `https://yellowstone-rpc.litprotocol.com` |
 | `STOP_TESTNET`           | Flag to stop a single running testnet after the test run concludes.                                                                                                                                             |
-| `USE_SHIVA`              | A flag to determine if `Shiva` should be used for the `localchain` network.                                                                                                                                     |
+| `USE_SHIVA`              | A flag to determine if `Shiva` should be used for the local `custom` network.                                                                                                                                   |
 | `PRIVATE_KEYS`           | A set of private keys to use which will be used to perform chain operations.                                                                                                                                    |
 | `CHUNK_SIZE`             | Determines the number of tests run concurrently during parallel execution                                                                                                                                       |
 
@@ -77,7 +77,7 @@ export const testExample = async (devEnv: TinnyEnvironment) => {
 
   // ========== Enviorment ==========
   // This test will be skipped if we are testing on the Cayenne network
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+  devEnv.setUnavailable(LIT_NETWORK.Cayenne);
 
   // Using litNodeClient
   const res = await devEnv.litNodeClient.executeJs({...});

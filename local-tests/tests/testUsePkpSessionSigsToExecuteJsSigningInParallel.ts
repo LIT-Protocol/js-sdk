@@ -6,7 +6,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigningInParallel
  * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigningInParallel
- * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigningInParallel
+ * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigningInParallel
  */
 export const testUsePkpSessionSigsToExecuteJsSigningInParallel = async (
   devEnv: TinnyEnvironment

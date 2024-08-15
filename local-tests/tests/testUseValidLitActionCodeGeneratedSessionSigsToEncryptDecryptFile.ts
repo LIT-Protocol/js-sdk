@@ -1,4 +1,4 @@
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { LitAbility } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
@@ -13,12 +13,12 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=manzano yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+    devEnv.setUnavailable(LIT_NETWORK.Manzano);
     const alice = await devEnv.createRandomPerson();
 
     const message = 'Hello world';
