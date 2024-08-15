@@ -7,7 +7,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 export const testExample = async (devEnv: TinnyEnvironment) => {
   // Note: This test will be skipped if we are testing on the Cayenne network
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+  devEnv.setUnavailable(LIT_NETWORK.Cayenne);
 
   const alice = await devEnv.createRandomPerson();
 

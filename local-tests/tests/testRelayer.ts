@@ -2,7 +2,6 @@ import { log } from '@lit-protocol/misc';
 import { ClaimRequest, ClientClaimProcessor } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { EthWalletProvider, LitRelay } from '@lit-protocol/lit-auth-client';
-import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
 
 /**
  * Test Commands:
@@ -16,10 +15,7 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
 
   // -- test fetch pkps
   const litRelay = new LitRelay({
-    // devEnv.network is LIT_TESTNET, which is an enum similar to LIT_NETWORK but with less networks
-    relayUrl: LitRelay.getRelayUrl(
-      devEnv.network as unknown as LIT_NETWORK_VALUES
-    ),
+    relayUrl: LitRelay.getRelayUrl(devEnv.network),
     relayApiKey: 'test-api-key',
   });
   const ethWalletProvider = new EthWalletProvider({
