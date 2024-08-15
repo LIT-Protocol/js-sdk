@@ -3,15 +3,13 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import fs from 'fs';
 import path from 'path';
 
-/**
- * Test Commands:
- * ✅ NETWORK=datil-dev yarn test:local --filter=testPkpSignXTimes
- * ✅ NETWORK=datil-test yarn test:local --filter=testPkpSignXTimes
- * ✅ NETWORK=datil yarn test:local --filter=testPkpSignXTimes
- */
 export const testPkpSignXTimes = async (devEnv: TinnyEnvironment) => {
-  const PARALLEL_RUNS = 5;
-  const TOTAL_RUNS = 1000;
+  const PARALLEL_RUNS = 20;
+  const TOTAL_RUNS = 10000;
+  const DELAY_BETWEEN_TESTS = 1500; // 1.5 seconds in milliseconds
+
+  const alice = await devEnv.createRandomPerson();
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
   const timestamp = new Date().toISOString().replace(/:/g, '-');
   const network = process.env.NETWORK || 'unknown';
@@ -33,12 +31,13 @@ export const testPkpSignXTimes = async (devEnv: TinnyEnvironment) => {
   };
 
   log({
-    message: `Starting testPkpSignXTimes on network ${network} with ${TOTAL_RUNS} total runs, ${PARALLEL_RUNS} in parallel`,
+    message: `Starting testPkpSignXTimes on network ${network} with ${TOTAL_RUNS} total runs, ${PARALLEL_RUNS} in parallel, ${DELAY_BETWEEN_TESTS}ms delay between tests`,
   });
   log({ message: `Logging to file: ${logFilePath}` });
 
   const runTest = async (index: number, alice: any, eoaSessionSigs: any) => {
     const startTime = Date.now();
+
     try {
       const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
         toSign: alice.loveLetter,
@@ -99,20 +98,22 @@ export const testPkpSignXTimes = async (devEnv: TinnyEnvironment) => {
   const results: any[] = [];
 
   for (let i = 0; i < TOTAL_RUNS; i += PARALLEL_RUNS) {
-    // Recreate alice and eoaSessionSigs for each batch
-    const alice = await devEnv.createRandomPerson();
-    const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
     log({
       type: 'batch_start',
       batch: Math.floor(i / PARALLEL_RUNS) + 1,
       totalBatches: Math.ceil(TOTAL_RUNS / PARALLEL_RUNS),
-      message: 'Created new random person and session sigs for this batch',
+      message: 'new batch started',
     });
 
     const batch = Array(Math.min(PARALLEL_RUNS, TOTAL_RUNS - i))
       .fill(null)
-      .map((_, index) => runTest(i + index, alice, eoaSessionSigs));
+      .map((_, index) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(runTest(i + index, alice, eoaSessionSigs));
+          }, index * DELAY_BETWEEN_TESTS);
+        });
+      });
 
     const batchResults = await Promise.all(batch);
     results.push(...batchResults);
