@@ -21,9 +21,8 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
   'datil-test': datilTest,
   datil: datil,
 
-  // just use datil dev abis for custom and localhost
+  // just use datil dev abis for custom
   custom: datilDev,
-  localhost: datilDev,
 };
 
 /**
@@ -38,7 +37,6 @@ export const GENERAL_WORKER_URL_BY_NETWORK: {
   'datil-dev': 'https://apis.getlit.dev/datil-dev/contracts',
   'datil-test': 'https://apis.getlit.dev/datil-test/contracts',
 
-  // just use cayenne abis for custom and localhost
+  // just use cayenne abis for custom
   custom: 'https://apis.getlit.dev/cayenne/contracts',
-  localhost: 'https://apis.getlit.dev/cayenne/contracts',
 };

@@ -31,7 +31,7 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
     Date.now() + 1000 * 60 * 60 * 24 * 7
   ).toISOString();
 
-  let siweParams = {
+  const siweParams = {
     domain: params?.domain ?? 'localhost',
     address: params.walletAddress,
     statement:

@@ -174,7 +174,7 @@ export class LitCore {
         };
         break;
       default:
-        // `custom` or `localhost`; no opinion about checkNodeAttestation
+        // `custom`; no opinion about checkNodeAttestation
         this.config = {
           ...this.config,
           ...config,
@@ -378,7 +378,7 @@ export class LitCore {
    */
   setCustomBootstrapUrls = (): void => {
     // -- validate
-    if (this.config.litNetwork === 'custom') return;
+    if (this.config.litNetwork === LIT_NETWORK.Custom) return;
 
     // -- execute
     const hasNetwork: boolean = this.config.litNetwork in LIT_NETWORKS;
@@ -603,7 +603,7 @@ export class LitCore {
           errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
         });
       }
-    } else if (this.config.litNetwork === 'custom') {
+    } else if (this.config.litNetwork === LIT_NETWORK.Custom) {
       log(
         `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
       );

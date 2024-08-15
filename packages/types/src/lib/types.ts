@@ -122,7 +122,6 @@ export type LIT_NETWORKS_KEYS =
   | 'datil-dev'
   | 'datil-test'
   | 'datil'
-  | 'localhost'
   | 'custom'
   | 'habanero'
   | 'manzano';

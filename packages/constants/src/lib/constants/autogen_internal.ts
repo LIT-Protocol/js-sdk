@@ -16,6 +16,6 @@ export const INTERNAL_DEFAULT_CONFIG = {
     'https://167.114.17.203:443',
     'https://158.69.34.227:443',
   ],
-  litNetwork: 'internalDev',
+  litNetwork: 'custom',
   connectTimeout: 20000,
 };

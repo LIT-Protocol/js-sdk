@@ -5,8 +5,6 @@ import {
   LITSVMChain,
 } from '@lit-protocol/types';
 
-import { INTERNAL_DEV } from './autogen_internal';
-
 /**
  * Lit Protocol Network Public Key
  */
@@ -696,7 +694,6 @@ export const LIT_NETWORK = {
   DatilTest: 'datil-test',
   Datil: 'datil',
   Custom: 'custom',
-  Localhost: 'localhost',
 } as const;
 
 /**
@@ -729,7 +726,6 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
-  localhost: LIT_RPC.LOCAL_ANVIL,
 };
 
 /**
@@ -745,7 +741,6 @@ export const RELAYER_URL_BY_NETWORK: {
   'datil-test': 'https://datil-test-relayer.getlit.dev',
   datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
-  localhost: 'http://localhost:3000',
 };
 
 /**
@@ -762,7 +757,6 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   'datil-test': metamaskChainInfo.yellowstone,
   datil: metamaskChainInfo.yellowstone,
   custom: metamaskChainInfo.yellowstone,
-  localhost: metamaskChainInfo.yellowstone,
 };
 
 export const HTTP = 'http://';
@@ -772,7 +766,7 @@ export const HTTPS = 'https://';
  * Mapping of network values to corresponding http protocol.
  */
 export const HTTP_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES | 'internalDev',
+  LIT_NETWORK_VALUES,
   typeof HTTP | typeof HTTPS
 > = {
   cayenne: HTTPS,
@@ -781,9 +775,7 @@ export const HTTP_BY_NETWORK: Record<
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
   datil: HTTPS,
-  internalDev: HTTPS,
   custom: HTTP, // default, can be changed by config
-  localhost: HTTP, // default, can be changed by config
 };
 
 /**
@@ -800,7 +792,6 @@ export const CENTRALISATION_BY_NETWORK: Record<
   'datil-test': 'decentralised',
   datil: 'decentralised',
   custom: 'unknown',
-  localhost: 'unknown',
 } as const;
 
 /**
@@ -951,10 +942,7 @@ export const CAYENNE_URL = 'https://cayenne.litgateway.com';
  * Note: Dynamic networks such as Habanero have no default node URLS; they are always
  * loaded from the chain during initialization
  */
-export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } & {
-  localhost: string[];
-  internalDev: string[];
-} = {
+export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
   cayenne: [],
   manzano: [],
   'datil-dev': [],
@@ -962,20 +950,6 @@ export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } & {
   datil: [],
   habanero: [],
   custom: [],
-  // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
-  localhost: [
-    'http://localhost:7470',
-    'http://localhost:7471',
-    'http://localhost:7472',
-    'http://localhost:7473',
-    'http://localhost:7474',
-    'http://localhost:7475',
-    'http://localhost:7476',
-    'http://localhost:7477',
-    'http://localhost:7478',
-    'http://localhost:7479',
-  ],
-  internalDev: INTERNAL_DEV,
 };
 
 // ========== Lit Sessions ==========

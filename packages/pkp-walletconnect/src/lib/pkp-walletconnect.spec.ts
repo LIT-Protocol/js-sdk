@@ -31,7 +31,7 @@ describe('PKPWalletConnect', () => {
   let pkpWalletConnect: PKPWalletConnect;
 
   beforeAll(() => {
-    const litNodeClient = new LitNodeClient({ litNetwork: 'localhost' });
+    const litNodeClient = new LitNodeClient({ litNetwork: 'custom' });
 
     pkpEthersWallet = new PKPEthersWallet({
       litNodeClient,

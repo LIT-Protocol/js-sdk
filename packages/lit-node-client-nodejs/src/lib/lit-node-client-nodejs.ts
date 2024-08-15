@@ -2339,7 +2339,7 @@ const resourceAbilityRequests = [
             signer: (params as ClaimRequest<'client'>).signer,
             ...relayParams,
           },
-          this.config.litNetwork as LIT_NETWORK_VALUES
+          this.config.litNetwork
         );
       } else {
         mintTx = await defaultMintClaimCallback(
@@ -2350,7 +2350,7 @@ const resourceAbilityRequests = [
             pubkey,
             ...relayParams,
           },
-          this.config.litNetwork as LIT_NETWORK_VALUES
+          this.config.litNetwork
         );
       }
 
