@@ -82,7 +82,7 @@ function parseLogContent(content: string): NetworkStats {
 // Get list of log files with pagination
 app.get('/logs', (req, res) => {
   const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 3; // Changed to 3 for 2 pages with 7 items
+  const limit = parseInt(req.query.limit as string) || 7;
   const network = (req.query.network as string) || 'all';
 
   fs.readdir(logDirectory, (err, files) => {
@@ -294,187 +294,192 @@ app.get('/', (req, res) => {
     </div>
 
     <script>
-        let allNetworkStats = {};
-        let currentPage = 1;
-        let totalPages = 1;
-        let currentNetwork = 'all';
+let allNetworkStats = {};
+let currentPage = 1;
+let totalPages = 1;
+let currentNetwork = 'all';
 
-        function categorizeNetwork(filename) {
-            if (filename.startsWith('datil-dev')) return 'datil-dev';
-            if (filename.startsWith('datil-test')) return 'datil-test';
-            return 'datil';
-        }
+function categorizeNetwork(filename) {
+    if (filename.startsWith('datil-dev')) return 'datil-dev';
+    if (filename.startsWith('datil-test')) return 'datil-test';
+    return 'datil';
+}
 
-        async function fetchLogs(page = 1, network = 'all') {
-            const response = await fetch(\`/logs?page=\${page}&limit=10&network=\${network}\`);
-            const data = await response.json();
-            console.log('Fetched log data:', data);
-            displayLogs(data.data);
-            updatePagination(data.page, data.totalPages);
-            currentPage = data.page;
-            totalPages = data.totalPages;
-        }
+async function fetchLogs(page = 1, network = 'all') {
+    const response = await fetch(\`/logs?page=\${page}&limit=6&network=\${network}\`);
+    const data = await response.json();
+    console.log('Fetched log data:', data);
+    displayLogs(data.data);
+    updatePagination(data.page, data.totalPages);
+    currentPage = data.page;
+    totalPages = data.totalPages;
+}
 
-        async function fetchNetworkStats() {
-            const response = await fetch('/network-stats');
-            allNetworkStats = await response.json();
-            displayNetworkStats();
-            createChart();
-            populateNetworkSelect();
-        }
+async function fetchNetworkStats() {
+    const response = await fetch('/network-stats');
+    allNetworkStats = await response.json();
+    displayNetworkStats();
+    createChart();
+    populateNetworkSelect();
+}
 
-        function populateNetworkSelect() {
-            const networkSelect = document.getElementById('networkSelect');
-            networkSelect.innerHTML = '<option value="all">All Networks</option>';
-            Object.keys(allNetworkStats).forEach(network => {
-                const option = document.createElement('option');
-                option.value = network;
-                option.textContent = network;
-                networkSelect.appendChild(option);
-            });
-        }
+function populateNetworkSelect() {
+    const networkSelect = document.getElementById('networkSelect');
+    networkSelect.innerHTML = '<option value="all">All Networks</option>';
+    Object.keys(allNetworkStats).forEach(network => {
+        const option = document.createElement('option');
+        option.value = network;
+        option.textContent = network;
+        networkSelect.appendChild(option);
+    });
+}
 
-        async function displayLogs(logs) {
-            const tableBody = document.getElementById('log-table-body');
-            tableBody.innerHTML = '';
+async function displayLogs(logs) {
+    const tableBody = document.getElementById('log-table-body');
+    tableBody.innerHTML = '';
 
-            for (const log of logs) {
-                const detailsResponse = await fetch('/logs/details/' + log.name);
-                const details = await detailsResponse.json();
+    for (const log of logs) {
+        const detailsResponse = await fetch('/logs/details/' + log.name);
+        const details = await detailsResponse.json();
 
-                const row = document.createElement('tr');
-                row.innerHTML = \`
-                    <td>\${log.name}</td>
-                    <td>\${log.network}</td>
-                    <td>\${new Date(log.timestamp).toLocaleString()}</td>
-                    <td><a href="/logs/\${log.name}" download>Download</a></td>
-                    <td>\${details.success}</td>
-                    <td>\${details.failure}</td>
-                    <td>\${details.totalDuration}</td>
-                    <td>\${details.successRate.toFixed(2)}</td>
-                    <td>\${details.failureRate.toFixed(2)}</td>
-                \`;
-                tableBody.appendChild(row);
-            }
-        }
+        const row = document.createElement('tr');
+        row.innerHTML = \`
+            <td>\${log.name}</td>
+            <td>\${log.network}</td>
+            <td>\${new Date(log.timestamp).toLocaleString()}</td>
+            <td><a href="/logs/\${log.name}" download>Download</a></td>
+            <td>\${details.success}</td>
+            <td>\${details.failure}</td>
+            <td>\${details.totalDuration}</td>
+            <td>\${details.successRate.toFixed(2)}</td>
+            <td>\${details.failureRate.toFixed(2)}</td>
+        \`;
+        tableBody.appendChild(row);
+    }
+}
 
-        function updatePagination(currentPage, totalPages) {
-            console.log('Updating pagination:', { currentPage, totalPages }); // Add this line for debugging
-            const paginationControls = document.getElementById('paginationControls');
-            paginationControls.innerHTML = '';
+function updatePagination(currentPage, totalPages) {
+    console.log('Updating pagination:', { currentPage, totalPages });
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
 
-            const prevButton = createPaginationButton('Previous', () => fetchLogs(Math.max(1, currentPage - 1), currentNetwork));
-            prevButton.disabled = currentPage === 1;
-            paginationControls.appendChild(prevButton);
+    const prevButton = createPaginationButton('Previous', () => fetchLogs(currentPage - 1, currentNetwork));
+    prevButton.disabled = currentPage === 1;
+    paginationControls.appendChild(prevButton);
 
-            const pageInfo = document.createElement('span');
-            pageInfo.textContent = \` Page \${currentPage} of \${totalPages} \`;
-            paginationControls.appendChild(pageInfo);
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, startPage + 4);
 
-            const nextButton = createPaginationButton('Next', () => fetchLogs(Math.min(totalPages, currentPage + 1), currentNetwork));
-            nextButton.disabled = currentPage === totalPages;
-            paginationControls.appendChild(nextButton);
-        }
+    for (let i = startPage; i <= endPage; i++) {
+        const pageButton = createPaginationButton(i.toString(), () => fetchLogs(i, currentNetwork));
+        pageButton.classList.toggle('active', i === currentPage);
+        paginationControls.appendChild(pageButton);
+    }
 
-        function createPaginationButton(text, onClick) {
-            const button = document.createElement('button');
-            button.textContent = text;
-            button.className = 'pagination-button';
-            button.onclick = onClick;
-            button.style.display = 'inline-block'; // Ensure the button is visible
-            button.style.margin = '0 5px';
-            button.style.padding = '5px 10px';
-            return button;
-        }
+    const nextButton = createPaginationButton('Next', () => fetchLogs(currentPage + 1, currentNetwork));
+    nextButton.disabled = currentPage === totalPages;
+    paginationControls.appendChild(nextButton);
+}
 
-        function displayNetworkStats() {
-            const tableBody = document.getElementById('network-stats-body');
-            tableBody.innerHTML = '';
+function createPaginationButton(text, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = 'pagination-button';
+    button.onclick = onClick;
+    button.style.display = 'inline-block';
+    button.style.margin = '0 5px';
+    button.style.padding = '5px 10px';
+    return button;
+}
 
-            Object.entries(allNetworkStats).forEach(([network, stats]) => {
-                const row = document.createElement('tr');
-                row.innerHTML = \`
-                    <td>\${network}</td>
-                    <td>\${stats.latestTimestamp}</td>
-                    <td>\${stats.success}</td>
-                    <td>\${stats.failure}</td>
-                    <td>\${stats.totalDuration}</td>
-                    <td>\${stats.successRate.toFixed(2)}</td>
-                    <td>\${stats.failureRate.toFixed(2)}</td>
-                \`;
-                tableBody.appendChild(row);
-            });
-        }
+function displayNetworkStats() {
+    const tableBody = document.getElementById('network-stats-body');
+    tableBody.innerHTML = '';
 
-        function createChart() {
-            const networks = Object.keys(allNetworkStats);
-            const successRates = networks.map(network => allNetworkStats[network].successRate);
-            const failureRates = networks.map(network => allNetworkStats[network].failureRate);
+    Object.entries(allNetworkStats).forEach(([network, stats]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = \`
+            <td>\${network}</td>
+            <td>\${stats.latestTimestamp}</td>
+            <td>\${stats.success}</td>
+            <td>\${stats.failure}</td>
+            <td>\${stats.totalDuration}</td>
+            <td>\${stats.successRate.toFixed(2)}</td>
+            <td>\${stats.failureRate.toFixed(2)}</td>
+        \`;
+        tableBody.appendChild(row);
+    });
+}
 
-            const ctx = document.getElementById('networkRatesChart').getContext('2d');
-            if (window.myChart instanceof Chart) {
-                window.myChart.destroy();
-            }
-            window.myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: networks,
-                    datasets: [
-                        {
-                            label: 'Success Rate (%)',
-                            data: successRates,
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Failure Rate (%)',
-                            data: failureRates,
-                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        }
-                    ]
+function createChart() {
+    const networks = Object.keys(allNetworkStats);
+    const successRates = networks.map(network => allNetworkStats[network].successRate);
+    const failureRates = networks.map(network => allNetworkStats[network].failureRate);
+
+    const ctx = document.getElementById('networkRatesChart').getContext('2d');
+    if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
+    window.myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: networks,
+            datasets: [
+                {
+                    label: 'Success Rate (%)',
+                    data: successRates,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
                 },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Rate (%)'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Network'
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Success and Failure Rates by Network'
-                        },
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        }
+                {
+                    label: 'Failure Rate (%)',
+                    data: failureRates,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Rate (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Network'
                     }
                 }
-            });
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Success and Failure Rates by Network'
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
         }
+    });
+}
 
-        document.getElementById('networkSelect').addEventListener('change', function() {
-            currentNetwork = this.value;
-            currentPage = 1;
-            fetchLogs(currentPage, currentNetwork);
-        });
+document.getElementById('networkSelect').addEventListener('change', function() {
+    currentNetwork = this.value;
+    currentPage = 1;
+    fetchLogs(currentPage, currentNetwork);
+});
 
-        fetchLogs(1, 'all');
-        fetchNetworkStats();
+fetchLogs(1, 'all');
+fetchNetworkStats();
     </script>
 </body>
 </html>
