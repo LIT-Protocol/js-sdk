@@ -6,8 +6,8 @@ import {
   LIT_ERROR,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
-  LogLevel,
-  LogLevel_VALUES,
+  LOG_LEVEL,
+  LOG_LEVEL_VALUES,
   RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 
@@ -242,7 +242,7 @@ export const throwRemovedFunctionError = (functionName: string) => {
 
 export const bootstrapLogManager = (
   id: string,
-  level: LogLevel_VALUES = LogLevel.DEBUG
+  level: LOG_LEVEL_VALUES = LOG_LEVEL.DEBUG
 ) => {
   if (!globalThis.logManager) {
     globalThis.logManager = LogManager.Instance;

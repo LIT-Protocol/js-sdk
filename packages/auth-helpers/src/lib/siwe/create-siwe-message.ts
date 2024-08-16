@@ -1,5 +1,5 @@
 import { SiweMessage } from 'siwe';
-import { LitAbility } from '@lit-protocol/constants';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
   CapacityDelegationFields,
@@ -60,7 +60,7 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
     params.resources = [
       {
         resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
-        ability: LitAbility.RateLimitIncreaseAuth,
+        ability: LIT_ABILITY.RateLimitIncreaseAuth,
         data: capabilities,
       },
     ];

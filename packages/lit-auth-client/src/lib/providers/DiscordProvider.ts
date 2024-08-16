@@ -3,7 +3,7 @@ import {
   BaseProviderOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { BaseProvider } from './BaseProvider';
 import {
   prepareLoginUrl,
@@ -94,7 +94,7 @@ export default class DiscordProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.Discord,
+      authMethodType: AUTH_METHOD_TYPE.Discord,
       accessToken: accessToken,
     };
     return authMethod;
@@ -147,7 +147,7 @@ export default class DiscordProvider extends BaseProvider {
           clearInterval(interval);
           popup.close();
           resolve({
-            authMethodType: AuthMethodType.Discord,
+            authMethodType: AUTH_METHOD_TYPE.Discord,
             accessToken: token,
           });
         }

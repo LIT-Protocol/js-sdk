@@ -1,6 +1,6 @@
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { LitAbility } from '@lit-protocol/constants';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
@@ -62,7 +62,7 @@ export const testUseEoaSessionSigsToEncryptDecryptFile = async (
   const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, alice, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
-      ability: LitAbility.AccessControlConditionDecryption,
+      ability: LIT_ABILITY.AccessControlConditionDecryption,
     },
   ]);
 

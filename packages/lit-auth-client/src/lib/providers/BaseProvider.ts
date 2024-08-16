@@ -2,8 +2,8 @@ import { ethers } from 'ethers';
 
 import {
   ALL_LIT_CHAINS,
-  AuthMethodType,
-  AuthMethodType_VALUES,
+  AUTH_METHOD_TYPE,
+  AUTH_METHOD_TYPE_VALUES,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -121,7 +121,7 @@ export abstract class BaseProvider {
   /**
    * Fetch PKPs associated with given auth method type and id from pkp contract
    *
-   * @param {AuthMethodType} authMethodType - Auth method type
+   * @param {AUTH_METHOD_TYPE} authMethodType - Auth method type
    * @param {string} authMethodId - Auth method id
    *
    * @returns {Promise<IRelayPKP[]>} - Array of PKPs
@@ -130,7 +130,7 @@ export abstract class BaseProvider {
     authMethodType,
     authMethodId,
   }: {
-    authMethodType: AuthMethodType_VALUES;
+    authMethodType: AUTH_METHOD_TYPE_VALUES;
     authMethodId: string;
   }): Promise<IRelayPKP[]> {
     if (!authMethodType || !authMethodId) {
@@ -182,7 +182,7 @@ export abstract class BaseProvider {
    */
   public async fetchPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
     const authMethodId = await this.getAuthMethodId(authMethod);
-    const authMethodType = authMethod.authMethodType as AuthMethodType_VALUES;
+    const authMethodType = authMethod.authMethodType as AUTH_METHOD_TYPE_VALUES;
 
     const pkps = await this.getPKPsForAuthMethod({
       authMethodType,
@@ -253,7 +253,7 @@ export abstract class BaseProvider {
           }),
         };
 
-        if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
+        if (params.authMethod.authMethodType === AUTH_METHOD_TYPE.EthWallet) {
           const authSig = JSON.parse(params.authMethod.accessToken);
 
           response = await nodeClient.signSessionKey({

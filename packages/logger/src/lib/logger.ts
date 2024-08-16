@@ -1,7 +1,7 @@
-import { version, LogLevel, LogLevel_VALUES } from '@lit-protocol/constants';
+import { version, LOG_LEVEL, LOG_LEVEL_VALUES } from '@lit-protocol/constants';
 import { hashMessage } from 'ethers/lib/utils';
 
-export { LogLevel };
+export { LOG_LEVEL };
 
 const colours = {
   reset: '\x1b[0m',
@@ -38,42 +38,42 @@ const colours = {
   },
 };
 
-function _convertLoggingLevel(level: LogLevel_VALUES): string {
+function _convertLoggingLevel(level: LOG_LEVEL_VALUES): string {
   switch (level) {
-    case LogLevel.INFO:
+    case LOG_LEVEL.INFO:
       return `${colours.fg.green}[INFO]${colours.reset}`;
-    case LogLevel.DEBUG:
+    case LOG_LEVEL.DEBUG:
       return `${colours.fg.cyan}[DEBUG]${colours.reset}`;
-    case LogLevel.WARN:
+    case LOG_LEVEL.WARN:
       return `${colours.fg.yellow}[WARN]${colours.reset}`;
-    case LogLevel.ERROR:
+    case LOG_LEVEL.ERROR:
       return `${colours.fg.red}[ERROR]${colours.reset}`;
-    case LogLevel.FATAL:
+    case LOG_LEVEL.FATAL:
       return `${colours.fg.red}[FATAL]${colours.reset}`;
-    case LogLevel.TIMING_START:
+    case LOG_LEVEL.TIMING_START:
       return `${colours.fg.green}[TIME_START]${colours.reset}`;
-    case LogLevel.TIMING_END:
+    case LOG_LEVEL.TIMING_END:
       return `${colours.fg.green}[TIME_END]${colours.reset}`;
   }
 
   return '[UNKNOWN]';
 }
 
-function _resolveLoggingHandler(level: LogLevel_VALUES): any {
+function _resolveLoggingHandler(level: LOG_LEVEL_VALUES): any {
   switch (level) {
-    case LogLevel.DEBUG:
+    case LOG_LEVEL.DEBUG:
       return console.debug;
-    case LogLevel.INFO:
+    case LOG_LEVEL.INFO:
       return console.info;
-    case LogLevel.ERROR:
+    case LOG_LEVEL.ERROR:
       return console.error;
-    case LogLevel.WARN:
+    case LOG_LEVEL.WARN:
       return console.warn;
-    case LogLevel.FATAL:
+    case LOG_LEVEL.FATAL:
       return console.error;
-    case LogLevel.TIMING_END:
+    case LOG_LEVEL.TIMING_END:
       return console.timeLog;
-    case LogLevel.TIMING_START:
+    case LOG_LEVEL.TIMING_START:
       return console.time;
   }
 }
@@ -110,7 +110,7 @@ interface ILog {
   args: any[];
   id: string;
   category: string;
-  level: LogLevel_VALUES;
+  level: LOG_LEVEL_VALUES;
   error?: any;
   toString(): string;
   toJSON(): Record<string, unknown>;
@@ -122,7 +122,7 @@ class Log implements ILog {
   args: any[];
   id: string;
   category: string;
-  level: LogLevel_VALUES;
+  level: LOG_LEVEL_VALUES;
   error?: any;
 
   constructor(
@@ -131,7 +131,7 @@ class Log implements ILog {
     args: any[],
     id: string,
     category: string,
-    level: LogLevel_VALUES
+    level: LOG_LEVEL_VALUES
   ) {
     this.timestamp = timestamp;
     this.message = message;
@@ -188,7 +188,7 @@ export type messageHandler = (log: Log) => void;
 
 export class Logger {
   private _category: string;
-  private _level: LogLevel_VALUES;
+  private _level: LOG_LEVEL_VALUES;
   private _id: string;
   private _handler: messageHandler | undefined;
   private _consoleHandler: any;
@@ -200,7 +200,7 @@ export class Logger {
 
   public static createLogger(
     category: string,
-    level: LogLevel_VALUES,
+    level: LOG_LEVEL_VALUES,
     id: string,
     isParent: boolean,
     config?: Record<string, any>
@@ -210,7 +210,7 @@ export class Logger {
 
   private constructor(
     category: string,
-    level: LogLevel_VALUES,
+    level: LOG_LEVEL_VALUES,
     id: string,
     isParent: boolean,
     config?: Record<string, any>
@@ -248,7 +248,7 @@ export class Logger {
     return this._children;
   }
 
-  public setLevel(level: LogLevel_VALUES): void {
+  public setLevel(level: LOG_LEVEL_VALUES): void {
     this._level = level;
   }
 
@@ -257,40 +257,40 @@ export class Logger {
   }
 
   public info(message: string = '', ...args: any[]): void {
-    this._log(LogLevel.INFO, message, ...args);
+    this._log(LOG_LEVEL.INFO, message, ...args);
   }
 
   public debug(message: string = '', ...args: any[]): void {
-    this._log(LogLevel.DEBUG, message, ...args);
+    this._log(LOG_LEVEL.DEBUG, message, ...args);
   }
 
   public warn(message: string = '', ...args: any[]): void {
-    this._log(LogLevel.WARN, message, args);
+    this._log(LOG_LEVEL.WARN, message, args);
   }
 
   public error(message: string = '', ...args: any[]): void {
-    this._log(LogLevel.ERROR, message, ...args);
+    this._log(LOG_LEVEL.ERROR, message, ...args);
   }
 
   public fatal(message: string = '', ...args: any[]): void {
-    this._log(LogLevel.FATAL, message, ...args);
+    this._log(LOG_LEVEL.FATAL, message, ...args);
   }
 
   public trace(message: string = '', ...args: any[]): void {
-    this._log(LogLevel.FATAL, message, ...args);
+    this._log(LOG_LEVEL.FATAL, message, ...args);
   }
 
   public timeStart(message: string = '', ...args: any[]): void {
-    this._log(LogLevel.TIMING_START, message, ...args);
+    this._log(LOG_LEVEL.TIMING_START, message, ...args);
   }
 
   public timeEnd(message: string = '', ...args: any[]): void {
-    this._level < LogLevel.OFF &&
-      this._log(LogLevel.TIMING_END, message, ...args);
+    this._level < LOG_LEVEL.OFF &&
+      this._log(LOG_LEVEL.TIMING_END, message, ...args);
   }
 
   private _log(
-    level: LogLevel_VALUES,
+    level: LOG_LEVEL_VALUES,
     message: string = '',
     ...args: any[]
   ): void {
@@ -305,19 +305,19 @@ export class Logger {
 
     const arrayLog = log.toArray();
     if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LOG_LEVEL.ERROR) &&
         this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LOG_LEVEL.ERROR) &&
         this._handler &&
         this._handler(log);
-      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
+      (this._level >= level || level === LOG_LEVEL.ERROR) && this._addLog(log);
     } else if (!this._config?.['condenseLogs']) {
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LOG_LEVEL.ERROR) &&
         this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LOG_LEVEL.ERROR) &&
         this._handler &&
         this._handler(log);
-      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
+      (this._level >= level || level === LOG_LEVEL.ERROR) && this._addLog(log);
     }
   }
 
@@ -366,7 +366,7 @@ export class Logger {
 export class LogManager {
   private static _instance: LogManager;
   private _loggers: Map<string, Logger>;
-  private _level: LogLevel_VALUES | undefined = LogLevel.DEBUG;
+  private _level: LOG_LEVEL_VALUES | undefined = LOG_LEVEL.DEBUG;
   private _config: Record<string, any> | undefined;
 
   static get Instance(): LogManager {
@@ -391,7 +391,7 @@ export class LogManager {
     }
   }
 
-  public setLevel(level: LogLevel_VALUES) {
+  public setLevel(level: LOG_LEVEL_VALUES) {
     this._level = level;
     for (const logger of this._loggers) {
       logger[1].setLevel(level);
@@ -410,7 +410,7 @@ export class LogManager {
     if (!instance && !id) {
       this._loggers.set(
         category,
-        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+        Logger.createLogger(category, this._level ?? LOG_LEVEL.INFO, '', true)
       );
 
       instance = this._loggers.get(category) as Logger;
@@ -422,7 +422,7 @@ export class LogManager {
       if (!instance) {
         this._loggers.set(
           category,
-          Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+          Logger.createLogger(category, this._level ?? LOG_LEVEL.INFO, '', true)
         );
 
         instance = this._loggers.get(category) as Logger;
@@ -437,7 +437,7 @@ export class LogManager {
         id,
         Logger.createLogger(
           category,
-          this._level ?? LogLevel.INFO,
+          this._level ?? LOG_LEVEL.INFO,
           id ?? '',
           true
         )
@@ -451,7 +451,7 @@ export class LogManager {
     } else if (!instance) {
       this._loggers.set(
         category,
-        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+        Logger.createLogger(category, this._level ?? LOG_LEVEL.INFO, '', true)
       );
 
       instance = this._loggers.get(category) as Logger;

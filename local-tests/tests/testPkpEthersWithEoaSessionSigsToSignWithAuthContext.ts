@@ -4,7 +4,7 @@ import {
   createSiweMessageWithRecaps,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
-import { LitAbility } from '@lit-protocol/constants';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
@@ -48,11 +48,11 @@ export const testPkpEthersWithEoaSessionSigsToSignWithAuthContext = async (
         resourceAbilityRequests: [
           {
             resource: new LitPKPResource('*'),
-            ability: LitAbility.PKPSigning,
+            ability: LIT_ABILITY.PKPSigning,
           },
           {
             resource: new LitActionResource('*'),
-            ability: LitAbility.LitActionExecution,
+            ability: LIT_ABILITY.LitActionExecution,
           },
         ],
       },

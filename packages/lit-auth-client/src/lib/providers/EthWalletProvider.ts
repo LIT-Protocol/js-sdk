@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 
-import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import { LIT_CHAINS, AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import {
   LitNodeClient,
   checkAndSignAuthMessage,
@@ -168,7 +168,7 @@ export default class EthWalletProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.EthWallet,
+      authMethodType: AUTH_METHOD_TYPE.EthWallet,
       accessToken: JSON.stringify(authSig),
     };
     return authMethod;

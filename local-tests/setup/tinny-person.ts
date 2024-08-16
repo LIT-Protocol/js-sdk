@@ -12,7 +12,7 @@ import {
 import { ethers } from 'ethers';
 import { PKPInfo, TinnyEnvConfig } from './tinny-config';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
-import { AuthMethodScope, LIT_NETWORK } from '@lit-protocol/constants';
+import { AUTH_METHOD_SCOPE, LIT_NETWORK } from '@lit-protocol/constants';
 
 export class TinnyPerson {
   public privateKey: string;
@@ -165,7 +165,7 @@ export class TinnyPerson {
     this.authMethodOwnedPkp = (
       await this.contractsClient.mintWithAuth({
         authMethod: this.authMethod,
-        scopes: [AuthMethodScope.SignAnything],
+        scopes: [AUTH_METHOD_SCOPE.SignAnything],
       })
     ).pkp;
 

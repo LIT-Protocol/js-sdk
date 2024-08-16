@@ -26,8 +26,8 @@ import {
   LIT_NETWORK,
   LIT_NETWORKS,
   RPC_URL_BY_NETWORK,
-  StakingStates,
-  StakingStates_VALUES,
+  STAKING_STATES,
+  STAKING_STATES_VALUES,
   version,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -258,10 +258,12 @@ export class LitCore {
   }
 
   // ========== Scoped Class Helpers ==========
-  private async _handleStakingContractStateChange(state: StakingStates_VALUES) {
+  private async _handleStakingContractStateChange(
+    state: STAKING_STATES_VALUES
+  ) {
     log(`New state detected: "${state}"`);
 
-    if (state === StakingStates.Active) {
+    if (state === STAKING_STATES.Active) {
       // We always want to track the most recent epoch number on _all_ networks
       this._epochState = await this._fetchCurrentEpochState();
 
@@ -336,7 +338,7 @@ export class LitCore {
       );
 
       // Stash a function instance, because its identity must be consistent for '.off()' usage to work later
-      this._stakingContractListener = (state: StakingStates_VALUES) => {
+      this._stakingContractListener = (state: STAKING_STATES_VALUES) => {
         // Intentionally not return or await; Listeners are _not async_
         this._handleStakingContractStateChange(state);
       };

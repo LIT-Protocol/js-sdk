@@ -4,7 +4,7 @@ import {
   BaseProviderOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import {
   prepareLoginUrl,
   parseLoginParams,
@@ -104,7 +104,7 @@ export default class GoogleProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.GoogleJwt,
+      authMethodType: AUTH_METHOD_TYPE.GoogleJwt,
       accessToken: idToken,
     };
     return authMethod;
@@ -157,7 +157,7 @@ export default class GoogleProvider extends BaseProvider {
           clearInterval(interval);
           popup.close();
           resolve({
-            authMethodType: AuthMethodType.GoogleJwt,
+            authMethodType: AUTH_METHOD_TYPE.GoogleJwt,
             accessToken: token,
           });
         }

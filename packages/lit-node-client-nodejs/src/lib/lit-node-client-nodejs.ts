@@ -16,7 +16,7 @@ import {
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
@@ -2265,7 +2265,7 @@ const resourceAbilityRequests = [
       });
     }
 
-    if (params.authMethod.authMethodType == AuthMethodType.WebAuthn) {
+    if (params.authMethod.authMethodType == AUTH_METHOD_TYPE.WebAuthn) {
       throwError({
         message:
           'Unsupported auth method type. Webauthn, and Lit Actions are not supported for claiming',

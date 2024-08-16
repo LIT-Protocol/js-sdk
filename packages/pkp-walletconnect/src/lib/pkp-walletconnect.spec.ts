@@ -12,7 +12,7 @@ import {
   generateAuthSig,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
-import { LitAbility } from '@lit-protocol/constants';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
@@ -58,7 +58,7 @@ describe('PKPWalletConnect', () => {
           resourceAbilityRequests: [
             {
               resource: new LitPKPResource('*'),
-              ability: LitAbility.PKPSigning,
+              ability: LIT_ABILITY.PKPSigning,
             },
           ],
         },

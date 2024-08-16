@@ -1,6 +1,6 @@
-import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import { AUTH_METHOD_SCOPE, AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LitAbility } from '@lit-protocol/constants';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -29,12 +29,12 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
   const scopes =
     await bob.contractsClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
       bob.authMethodOwnedPkp.tokenId,
-      AuthMethodType.EthWallet,
+      AUTH_METHOD_TYPE.EthWallet,
       bobsAuthMethodAuthId,
       3
     );
 
-  if (!scopes[AuthMethodScope.SignAnything]) {
+  if (!scopes[AUTH_METHOD_SCOPE.SignAnything]) {
     throw new Error('Bob does not have the "SignAnything" scope on his PKP');
   }
 
@@ -50,11 +50,11 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
     resourceAbilityRequests: [
       {
         resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+        ability: LIT_ABILITY.PKPSigning,
       },
       {
         resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
+        ability: LIT_ABILITY.LitActionExecution,
       },
     ],
     capabilityAuthSigs: [capacityDelegationAuthSig],

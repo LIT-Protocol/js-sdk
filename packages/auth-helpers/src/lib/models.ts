@@ -1,6 +1,6 @@
 import {
-  LitAbility_VALUES,
-  LitResourcePrefix_VALUES,
+  LIT_ABILITY_VALUES,
+  LIT_RESOURCE_PREFIX_VALUES,
 } from '@lit-protocol/constants';
 import { SiweMessage } from 'siwe';
 
@@ -71,7 +71,7 @@ export interface ISessionCapabilityObject {
    */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility_VALUES,
+    ability: LIT_ABILITY_VALUES,
     data?: any
   ): void;
 
@@ -81,7 +81,7 @@ export interface ISessionCapabilityObject {
    */
   verifyCapabilitiesForResource(
     litResource: ILitResource,
-    ability: LitAbility_VALUES
+    ability: LIT_ABILITY_VALUES
   ): boolean;
 
   /**
@@ -107,11 +107,11 @@ export interface ILitResource {
    * Validates that the given LIT ability is valid for this resource.
    * @param litAbility The LIT ability to validate.
    */
-  isValidLitAbility(litAbility: LitAbility_VALUES): boolean;
+  isValidLitAbility(litAbility: LIT_ABILITY_VALUES): boolean;
 
   toString(): string;
 
-  readonly resourcePrefix: LitResourcePrefix_VALUES;
+  readonly resourcePrefix: LIT_RESOURCE_PREFIX_VALUES;
   readonly resource: string;
 }
 
@@ -126,6 +126,6 @@ export interface ILitResource {
  */
 export type LitResourceAbilityRequest = {
   resource: ILitResource;
-  ability: LitAbility_VALUES;
+  ability: LIT_ABILITY_VALUES;
   data?: any;
 };

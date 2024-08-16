@@ -1,6 +1,6 @@
 import { LIT_NETWORK } from '@lit-protocol/constants';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { LitAbility } from '@lit-protocol/constants';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
@@ -66,7 +66,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
     const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, alice, [
       {
         resource: new LitAccessControlConditionResource(accsResourceString),
-        ability: LitAbility.AccessControlConditionDecryption,
+        ability: LIT_ABILITY.AccessControlConditionDecryption,
       },
     ]);
 

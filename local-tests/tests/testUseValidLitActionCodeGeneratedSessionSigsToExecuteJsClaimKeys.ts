@@ -1,5 +1,5 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LIT_NETWORK, LitAbility } from '@lit-protocol/constants';
+import { LIT_NETWORK, LIT_ABILITY } from '@lit-protocol/constants';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -26,11 +26,11 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys =
     const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [
       {
         resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+        ability: LIT_ABILITY.PKPSigning,
       },
       {
         resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
+        ability: LIT_ABILITY.LitActionExecution,
       },
     ]);
 

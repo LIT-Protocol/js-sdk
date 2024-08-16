@@ -1,7 +1,10 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitResourceAbilityRequest } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
-import { LitAbility, CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
+import {
+  LIT_ABILITY,
+  CENTRALISATION_BY_NETWORK,
+} from '@lit-protocol/constants';
 import { TinnyEnvironment } from '../tinny-environment';
 import { TinnyPerson } from '../tinny-person';
 
@@ -24,11 +27,11 @@ export const getPkpSessionSigs = async (
   const _resourceAbilityRequests = resourceAbilityRequests || [
     {
       resource: new LitPKPResource('*'),
-      ability: LitAbility.PKPSigning,
+      ability: LIT_ABILITY.PKPSigning,
     },
     {
       resource: new LitActionResource('*'),
-      ability: LitAbility.LitActionExecution,
+      ability: LIT_ABILITY.LitActionExecution,
     },
   ];
 

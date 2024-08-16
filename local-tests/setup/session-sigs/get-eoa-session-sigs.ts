@@ -11,7 +11,10 @@ import {
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
-import { LitAbility, CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
+import {
+  LIT_ABILITY,
+  CENTRALISATION_BY_NETWORK,
+} from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 
@@ -41,11 +44,11 @@ export const getEoaSessionSigs = async (
   const _resourceAbilityRequests = resourceAbilityRequests || [
     {
       resource: new LitPKPResource('*'),
-      ability: LitAbility.PKPSigning,
+      ability: LIT_ABILITY.PKPSigning,
     },
     {
       resource: new LitActionResource('*'),
-      ability: LitAbility.LitActionExecution,
+      ability: LIT_ABILITY.LitActionExecution,
     },
   ];
 
@@ -117,11 +120,11 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
     resourceAbilityRequests: [
       {
         resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+        ability: LIT_ABILITY.PKPSigning,
       },
       {
         resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
+        ability: LIT_ABILITY.LitActionExecution,
       },
     ],
     authNeededCallback: async ({

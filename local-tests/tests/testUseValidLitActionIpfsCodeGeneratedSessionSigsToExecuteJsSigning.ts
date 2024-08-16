@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { log } from '@lit-protocol/misc';
-import { LitAbility } from '@lit-protocol/constants';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { getLitActionSessionSigsUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -19,11 +19,11 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
       [
         {
           resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
+          ability: LIT_ABILITY.PKPSigning,
         },
         {
           resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
+          ability: LIT_ABILITY.LitActionExecution,
         },
       ]
     );

@@ -3,7 +3,7 @@ import {
   BaseProviderOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import {
   prepareLoginUrl,
   parseLoginParams,
@@ -89,7 +89,7 @@ export default class AppleProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.AppleJwt,
+      authMethodType: AUTH_METHOD_TYPE.AppleJwt,
       accessToken: idToken,
     };
     return authMethod;

@@ -1,45 +1,45 @@
 import {
-  LitAbility,
-  LitAbility_VALUES,
-  LitRecapAbility,
-  LitRecapAbility_VALUES,
-  LitNamespace,
-  LitNamespace_VALUES,
+  LIT_ABILITY,
+  LIT_ABILITY_VALUES,
+  LIT_RECAP_ABILITY,
+  LIT_RECAP_ABILITY_VALUES,
+  LIT_NAMESPACE,
+  LIT_NAMESPACE_VALUES,
 } from '@lit-protocol/constants';
 
 /**
  * Map from a LitAbility to the Recap namespace and ability.
  * @throws Error if the LitAbility is unknown
  */
-export function getRecapNamespaceAndAbility(litAbility: LitAbility_VALUES): {
-  recapNamespace: LitNamespace_VALUES;
-  recapAbility: LitRecapAbility_VALUES;
+export function getRecapNamespaceAndAbility(litAbility: LIT_ABILITY_VALUES): {
+  recapNamespace: LIT_NAMESPACE_VALUES;
+  recapAbility: LIT_RECAP_ABILITY_VALUES;
 } {
   switch (litAbility) {
-    case LitAbility.AccessControlConditionDecryption:
+    case LIT_ABILITY.AccessControlConditionDecryption:
       return {
-        recapNamespace: LitNamespace.Threshold,
-        recapAbility: LitRecapAbility.Decryption,
+        recapNamespace: LIT_NAMESPACE.Threshold,
+        recapAbility: LIT_RECAP_ABILITY.Decryption,
       };
-    case LitAbility.AccessControlConditionSigning:
+    case LIT_ABILITY.AccessControlConditionSigning:
       return {
-        recapNamespace: LitNamespace.Threshold,
-        recapAbility: LitRecapAbility.Signing,
+        recapNamespace: LIT_NAMESPACE.Threshold,
+        recapAbility: LIT_RECAP_ABILITY.Signing,
       };
-    case LitAbility.PKPSigning:
+    case LIT_ABILITY.PKPSigning:
       return {
-        recapNamespace: LitNamespace.Threshold,
-        recapAbility: LitRecapAbility.Signing,
+        recapNamespace: LIT_NAMESPACE.Threshold,
+        recapAbility: LIT_RECAP_ABILITY.Signing,
       };
-    case LitAbility.RateLimitIncreaseAuth:
+    case LIT_ABILITY.RateLimitIncreaseAuth:
       return {
-        recapNamespace: LitNamespace.Auth,
-        recapAbility: LitRecapAbility.Auth,
+        recapNamespace: LIT_NAMESPACE.Auth,
+        recapAbility: LIT_RECAP_ABILITY.Auth,
       };
-    case LitAbility.LitActionExecution:
+    case LIT_ABILITY.LitActionExecution:
       return {
-        recapNamespace: LitNamespace.Threshold,
-        recapAbility: LitRecapAbility.Execution,
+        recapNamespace: LIT_NAMESPACE.Threshold,
+        recapAbility: LIT_RECAP_ABILITY.Execution,
       };
 
     default:
