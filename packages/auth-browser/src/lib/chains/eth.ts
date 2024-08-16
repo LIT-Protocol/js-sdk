@@ -131,6 +131,9 @@ const WALLET_ERROR = {
   REQUESTED_CHAIN_HAS_NOT_BEEN_ADDED: 4902,
   NO_SUCH_METHOD: -32601,
 } as const;
+export type WALLET_ERROR_TYPE = keyof typeof WALLET_ERROR;
+export type WALLET_ERROR_VALUES =
+  (typeof WALLET_ERROR)[keyof typeof WALLET_ERROR];
 
 /** ---------- Local Helpers ---------- */
 
@@ -275,7 +278,7 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
 };
 
 /**
- * 
+ *
  * Get RPC Urls in the correct format
  * need to make it look like this:
    ---
@@ -286,7 +289,7 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
         // ...
     },
    ---
- * 
+ *
  * @returns
  */
 export const getRPCUrls = (): RPCUrls => {
