@@ -768,7 +768,9 @@ const signWithAuthContext = async (devEnv: TinnyEnvironment): Promise<void> => {
 
   expect(
     pkpEthersWallet.signMessage(alice.loveLetter)
-  ).resolves.not.toThrowError();
+  ).resolves.not.toThrowError().finally(() => {
+    devEnv.releasePrivateKeyFromUser(alice);
+  });
 };
 
 const ethPersonalSign = async (
