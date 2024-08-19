@@ -299,16 +299,19 @@ import { LitNodeClientBadConfigError } from '@lit-protocol/constants';
 
 try {
   const someNativeError = new Error('some native error');
-  
-  throw new LitNodeClientBadConfigError({
-    cause: someNativeError,
-    info: {
-      foo: 'bar',
+
+  throw new LitNodeClientBadConfigError(
+    {
+      cause: someNativeError,
+      info: {
+        foo: 'bar',
+      },
+      meta: {
+        baz: 'qux',
+      },
     },
-    meta: {
-      baz: 'qux',
-    },
-  }, 'some useful message');
+    'some useful message'
+  );
 } catch (e) {
   console.log(e.name); // LitNodeClientBadConfigError
   console.log(e.message); // some useful message: some native error
