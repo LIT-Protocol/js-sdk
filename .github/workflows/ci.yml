@@ -28,11 +28,6 @@ jobs:
           node-version: 20
           cache: yarn
           cache-dependency-path: ${{ github.workspace }}/yarn.lock
-      - name: Install project dependencies
-        run: yarn --frozen-lockfile
-      - uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'master'
       - name: Build
         run: yarn build:dev
       - name: Run Unit tests
