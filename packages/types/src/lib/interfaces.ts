@@ -34,7 +34,7 @@ export interface AccsOperatorParams {
 /** ---------- Auth Sig ---------- */
 
 /**
- * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
+ * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE ReCap](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
  */
 export interface AuthSig {
   /**
@@ -1082,7 +1082,7 @@ export interface GetSignSessionKeySharesProp {
 }
 export interface CommonGetSessionSigsProps {
   /**
-   *
+   * Session signature properties shared across all functions that generate session signatures.
    */
   pkpPublicKey?: string;
 
@@ -1098,19 +1098,17 @@ export interface CommonGetSessionSigsProps {
 
   /**
    * An array of resource abilities that you want to request for this session. These will be signed with the session key.
-   * If you want to request the ability to decrypt an access control condition, then you would pass something similar to the example:
+   * For example, an ability is added to grant a session permission to decrypt content associated with a particular Access Control Conditions (ACC) hash. When trying to decrypt, this ability is checked in the `resourceAbilityRequests` to verify if the session has the required decryption capability.
    * @example
-   * [{ resource: new LitAccessControlConditionResource('someResource`), ability: LitAbility.AccessControlConditionDecryption }]
+   * [{ resource: new LitAccessControlConditionResource('someAccHash`), ability: LitAbility.AccessControlConditionDecryption }]
    */
   resourceAbilityRequests: LitResourceAbilityRequest[];
 
   /**
    * The session capability object that you want to request for this session.
+   * It is likely you will not need this, as the object will be automatically derived from the `resourceAbilityRequests`.
    * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
-   *
-   * If you passed nothing, and you're requesting to perform a decryption operation for an access
-   * control condition, then the session capability object will be a wildcard for the access control condition,
-   * which grants this session signature the ability to decrypt this access control condition.
+   * The wildcard means that the session will be granted the ability to to perform operations with any access control condition.
    */
   sessionCapabilityObject?: ISessionCapabilityObject;
 
@@ -1126,9 +1124,9 @@ export interface CommonGetSessionSigsProps {
 
   /**
    * @deprecated - use capabilityAuthSigs instead
-   *  Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * on both Datil-test and Datil networks capacity credit proof is required.
-   * see more [here](https://developer.litprotocol.com/sdk/capacity-credits).
+   * Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
+   * Capacity credits are required on the paid Lit networks (mainnets and certain testnets), and are not required on the unpaid Lit networks (certain testnets).
+   * See more [here](https://developer.litprotocol.com/sdk/capacity-credits).
    */
   capacityDelegationAuthSig?: AuthSig;
 
@@ -1168,7 +1166,7 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  *
  * -  `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
  *
- * -  `address`: The session key pair public key.
+ * -  `address`: When the session key signs the SIWE ReCap message, this will be the session key pair public key. If an EOA wallet signs the message, then this will be the EOA Ethereum address.
  *
  * -  `algo`: The signing algorithm used to generate the session signature.
  */
