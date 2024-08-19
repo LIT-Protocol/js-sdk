@@ -86,7 +86,7 @@ jobs:
       - name: End Tests Connection
         id: connection
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e -t 'Connections'
+        run: yarn test:e2e --runInBand -t 'Connections'
       - name: End Tests Session Compaitiblity
         id: session
         if: steps.connection.outputs.exit_code == 0
