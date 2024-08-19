@@ -195,6 +195,8 @@ export interface LitNodeClientConfig {
   debug?: boolean;
   // Timeout for connecting/handshaking with all nodes
   connectTimeout?: number;
+  // Timeout for connection request made to each node. If not provided, the default value is 7500ms
+  nodeConnectionTimeout?: number;
   // Timeout for each request made to a node
   nodeRequestTimeout?: number;
   // Whether to retry handshaking a particular node if it failed, will retry until connectTimeout is reached
@@ -646,6 +648,8 @@ export interface SendNodeCommand {
   url: string;
   data: any;
   requestId: string;
+  // Timeout for this request. Overrides the config's nodeRequestTimeout
+  timeout?: number;
 }
 export interface SigShare {
   sigType:

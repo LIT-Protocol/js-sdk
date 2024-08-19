@@ -103,6 +103,7 @@ export type LitNodeClientConfigWithDefaults = Required<
       | 'storageProvider'
       | 'contractContext'
       | 'rpcUrl'
+      | 'nodeConnectionTimeout'
       | 'nodeRequestTimeout'
       | 'retryNodeHandshake'
     >
@@ -130,7 +131,8 @@ export class LitCore {
     alertWhenUnauthorized: false,
     debug: true,
     connectTimeout: 20_000,
-    nodeRequestTimeout: 7_500,
+    nodeConnectionTimeout: 7_500,
+    nodeRequestTimeout: 35_000, // LitActions have a 30s timeout + some buffer for network latency
     retryNodeHandshake: true,
     checkNodeAttestation: false,
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
@@ -659,16 +661,17 @@ export class LitCore {
       try {
         return await handshakeWithNode(url);
       } catch (e) {
-        if (canRetry) {
-          logErrorWithRequestId(
-            requestId,
-            `Error while attempting handshake with node ${url}. Retrying...`
-          );
-          return await handshakeWithNodeWithRetry(url);
-        } else {
+        if (!canRetry) {
           throw e;
         }
       }
+
+      // If we get here, we've failed to handshake with the node. We should retry.
+      logErrorWithRequestId(
+        requestId,
+        `Error while attempting handshake with node ${url}. Retrying...`
+      );
+      return await handshakeWithNodeWithRetry(url);
     };
 
     await Promise.race([
@@ -872,6 +875,7 @@ export class LitCore {
       url: urlWithPath,
       data,
       requestId,
+      timeout: this.config.nodeConnectionTimeout,
     });
   };
 
@@ -948,6 +952,7 @@ export class LitCore {
     url,
     data,
     requestId,
+    timeout,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
@@ -972,14 +977,14 @@ export class LitCore {
     };
 
     let abortTimeout: ReturnType<typeof setTimeout>;
-    if (this.config.nodeRequestTimeout) {
+    if (timeout || this.config.nodeRequestTimeout) {
       // TODO: Use AbortSignal.timeout once we update to TS >=4.9.5. It considers request active time instead of elapsed time
-      // AbortSignal.timeout(this.config.nodeRequestTimeout)
+      // AbortSignal.timeout(timout || this.config.nodeRequestTimeout)
       const abortController = new AbortController();
       req.signal = abortController.signal;
       abortTimeout = setTimeout(
         () => abortController.abort('Request to node timed out'),
-        this.config.nodeRequestTimeout
+        timeout || this.config.nodeRequestTimeout
       );
     }
 
