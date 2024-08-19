@@ -295,7 +295,9 @@ const ethTransaction = async (
       expect(signature.length).toEqual(132);
       expect(recoveredAddr).toEqual(alice.pkp?.ethAddress);
     })
-  ).resolves.not.toThrowError();
+  ).resolves.not.toThrowError().finally(() => {
+    devEnv.releasePrivateKeyFromUser(alice);
+  });
 };
 
 const signTransaction = async (
@@ -533,10 +535,9 @@ const signTypedDataV1 = async (
           alice.pkp?.ethAddress.toLowerCase()
         );
       })
-      .finally(() => {
-        devEnv.releasePrivateKeyFromUser(alice);
-      })
-  ).resolves.not.toThrowError();
+  ).resolves.not.toThrowError().finally(() => {
+    devEnv.releasePrivateKeyFromUser(alice);
+  });
 };
 
 const signTypedDatav3 = async (
@@ -717,10 +718,9 @@ const signTypedDatav4 = async (
           alice.pkp?.ethAddress.toLowerCase()
         );
       })
-      .finally(() => {
-        devEnv.releasePrivateKeyFromUser(alice);
-      })
-  ).resolves.not.toThrow();
+  ).resolves.not.toThrow().finally(() => {
+    devEnv.releasePrivateKeyFromUser(alice);
+  });
 };
 
 const signWithAuthContext = async (devEnv: TinnyEnvironment): Promise<void> => {
@@ -824,8 +824,7 @@ const ethPersonalSign = async (
           );
         }
       })
-      .finally(() => {
-        devEnv.releasePrivateKeyFromUser(alice);
-      })
-  ).not.toThrowError();
+  ).resolves.not.toThrowError().finally(() => {
+    devEnv.releasePrivateKeyFromUser(alice);
+  })
 };
