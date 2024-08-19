@@ -107,7 +107,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
-const EPOCH_PROPAGATION_DELAY = 15_000;
+const EPOCH_PROPAGATION_DELAY = 45_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
@@ -116,6 +116,7 @@ const NETWORKS_REQUIRING_SEV: string[] = [
   LitNetwork.Habanero,
   LitNetwork.Manzano,
   LitNetwork.DatilTest,
+  LitNetwork.Datil,
 ];
 
 export class LitCore {
@@ -351,6 +352,7 @@ export class LitCore {
    *  Removes global objects created internally
    */
   async disconnect() {
+    this.ready = false;
     unloadModules();
 
     this._stopListeningForNewEpoch();
@@ -888,7 +890,10 @@ export class LitCore {
     if (
       this._epochCache.currentNumber &&
       this._epochCache.startTime &&
-      Date.now() < this._epochCache.startTime + EPOCH_PROPAGATION_DELAY
+      Math.floor(Date.now() / 1000) <
+        this._epochCache.startTime +
+          Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
+      this._epochCache.currentNumber >= 3
     ) {
       return this._epochCache.currentNumber - 1;
     }

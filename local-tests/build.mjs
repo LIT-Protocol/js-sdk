@@ -18,6 +18,7 @@ export const build = async () => {
         allowList: [
           'ethers',
           '@lit-protocol/accs-schemas',
+          '@lit-protocol/contracts',
           'crypto',
           'secp256k1',
         ],
