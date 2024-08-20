@@ -1,4 +1,5 @@
 import {
+  InvalidArgumentException,
   LIT_ABILITY,
   LIT_ABILITY_VALUES,
   LIT_RECAP_ABILITY,
@@ -43,6 +44,13 @@ export function getRecapNamespaceAndAbility(litAbility: LIT_ABILITY_VALUES): {
       };
 
     default:
-      throw new Error(`Unknown LitAbility: ${litAbility}`);
+      throw new InvalidArgumentException(
+        {
+          info: {
+            litAbility,
+          },
+        },
+        `Unknown LitAbility`
+      );
   }
 }

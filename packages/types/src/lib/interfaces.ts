@@ -698,12 +698,12 @@ export interface BlsSignatureShare {
 }
 
 export interface SuccessNodePromises<T> {
-  success: boolean;
+  success: true;
   values: T[];
 }
 
 export interface RejectedNodePromises {
-  success: boolean;
+  success: false;
   error: NodeErrorV1;
 }
 

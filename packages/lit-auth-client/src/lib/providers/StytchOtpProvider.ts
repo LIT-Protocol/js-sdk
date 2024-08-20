@@ -1,4 +1,4 @@
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE, WrongParamFormat } from '@lit-protocol/constants';
 import {
   AuthMethod,
   BaseAuthenticateOptions,
@@ -114,7 +114,14 @@ export class StytchOtpProvider extends BaseProvider {
   public static _parseJWT(jwt: string): StytchToken {
     const parts = jwt.split('.');
     if (parts.length !== 3) {
-      throw new Error('Invalid token length');
+      throw new WrongParamFormat(
+        {
+          info: {
+            jwt,
+          },
+        },
+        'Invalid token length'
+      );
     }
     const body = Buffer.from(parts[1], 'base64');
     const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));

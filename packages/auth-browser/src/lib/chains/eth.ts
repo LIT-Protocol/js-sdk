@@ -1,46 +1,41 @@
+import { Buffer as BufferPolyfill } from 'buffer';
+
+import { hexlify } from '@ethersproject/bytes';
+import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
+import { toUtf8Bytes } from '@ethersproject/strings';
+
+// import WalletConnectProvider from '@walletconnect/ethereum-provider';
+import { verifyMessage } from '@ethersproject/wallet';
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import { ethers } from 'ethers';
+import { getAddress } from 'ethers/lib/utils';
+import { SiweMessage } from 'siwe';
+
+// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
+import * as nacl from 'tweetnacl';
+import * as naclUtil from 'tweetnacl-util';
+
+// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import {
   ELeft,
   ERight,
   IEither,
   EITHER_TYPE,
   LIT_CHAINS,
-  LIT_ERROR,
   LOCAL_STORAGE_KEYS,
+  InvalidSignatureError,
+  WrongParamFormat,
+  UnsupportedChainException,
+  UnknownError,
+  RemovedFunctionError,
+  WrongNetworkException,
+  LocalStorageItemNotFoundException,
 } from '@lit-protocol/constants';
-
+import { isBrowser, isNode, log, numberToHex } from '@lit-protocol/misc';
+import { getStorageItem } from '@lit-protocol/misc-browser';
 import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
 
-import { ethers } from 'ethers';
-// import WalletConnectProvider from '@walletconnect/ethereum-provider';
-import { toUtf8Bytes } from '@ethersproject/strings';
-import { hexlify } from '@ethersproject/bytes';
-import { verifyMessage } from '@ethersproject/wallet';
-
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
-
 import LitConnectModal from '../connect-modal/modal';
-
-import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
-
-import { SiweMessage } from 'siwe';
-import { getAddress } from 'ethers/lib/utils';
-
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
-import * as naclUtil from 'tweetnacl-util';
-
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
-import * as nacl from 'tweetnacl';
-
-import { Buffer as BufferPolyfill } from 'buffer';
-
-import {
-  isBrowser,
-  isNode,
-  log,
-  numberToHex,
-  throwError,
-} from '@lit-protocol/misc';
-import { getStorageItem } from '@lit-protocol/misc-browser';
 
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
@@ -67,20 +62,7 @@ interface ConnectWeb3Result {
   account: string | any;
 }
 
-interface RPCUrls {
-  [chainId: string]: string;
-}
-
-interface Web3ProviderOptions {
-  walletconnect: {
-    package: any;
-    options: {
-      infuraId?: string;
-      rpc: RPCUrls;
-      chainId: number;
-    };
-  };
-}
+type RPCUrls = Record<string, string>;
 
 interface signAndSaveAuthParams {
   web3: Web3Provider;
@@ -95,23 +77,23 @@ interface signAndSaveAuthParams {
 interface IABI {
   inputs: any[];
   name: string;
-  outputs: Array<{
+  outputs: {
     internalType: string;
     name: string;
     type: string;
-  }>;
+  }[];
   stateMutability: string;
   type: string;
 }
 
 interface IABIEncode {
-  abi: Array<IABI>;
+  abi: IABI[];
   functionName: string;
   functionParams: [];
 }
 
 interface IABIDecode {
-  abi: Array<IABI>;
+  abi: IABI[];
   functionName: string;
   data: any;
 }
@@ -146,34 +128,42 @@ export type WALLET_ERROR_VALUES =
  */
 export const chainHexIdToChainName = (chainHexId: string): void | string => {
   // -- setup
-  const keys = Object.keys(LIT_CHAINS);
   const entries = Object.entries(LIT_CHAINS);
   const hexIds = Object.values(LIT_CHAINS).map(
-    (chain: any) => '0x' + chain.chainId.toString(16)
+    (chain) => '0x' + chain.chainId.toString(16)
   );
 
   // -- validate:: must begin with 0x
   if (!chainHexId.startsWith('0x')) {
-    throwError({
-      message: `${chainHexId} should begin with "0x"`,
-      errorKind: LIT_ERROR.WRONG_PARAM_FORMAT.kind,
-      errorCode: LIT_ERROR.WRONG_PARAM_FORMAT.name,
-    });
+    throw new WrongParamFormat(
+      {
+        info: {
+          param: 'chainHexId',
+          value: chainHexId,
+        },
+      },
+      '%s should begin with "0x"',
+      chainHexId
+    );
   }
 
   // -- validate:: hex id must be listed in constants
   if (!hexIds.includes(chainHexId)) {
-    throwError({
-      message: `${chainHexId} cannot be found in LIT_CHAINS`,
-      errorKind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
-      errorCode: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
-    });
+    throw new UnsupportedChainException(
+      {
+        info: {
+          chainHexId,
+        },
+      },
+      `Unsupported chain selected. Please select one of: %s`,
+      Object.keys(LIT_CHAINS)
+    );
   }
 
   // -- search
   const chainName =
     entries.find(
-      (data: any) => '0x' + data[1].chainId.toString(16) === chainHexId
+      (data) => '0x' + data[1].chainId.toString(16) === chainHexId
     ) || null;
 
   // -- success case
@@ -182,11 +172,15 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
   }
 
   // -- fail case
-  throwError({
-    message: `Failed to convert ${chainHexId}`,
-    errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-    errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-  });
+  throw new UnknownError(
+    {
+      info: {
+        chainHexId,
+      },
+    },
+    'Failed to convert %s',
+    chainHexId
+  );
 };
 
 /**
@@ -208,11 +202,17 @@ export const getChainId = async (
     // couldn't get chainId.  throw the incorrect network error
     log('getNetwork threw an exception', e);
 
-    resultOrError = ELeft({
-      message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-      errorKind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
-      errorCode: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
-    });
+    resultOrError = ELeft(
+      new WrongNetworkException(
+        {
+          info: {
+            chain,
+          },
+        },
+        `Incorrect network selected. Please switch to the %s network in your wallet and try again.`,
+        chain
+      )
+    );
   }
 
   return resultOrError;
@@ -295,10 +295,9 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
 export const getRPCUrls = (): RPCUrls => {
   const rpcUrls: RPCUrls = {};
 
-  const keys: Array<string> = Object.keys(LIT_CHAINS);
+  const keys: string[] = Object.keys(LIT_CHAINS);
 
-  for (let i = 0; i < keys.length; i++) {
-    const chainName = keys[i];
+  for (const chainName of keys) {
     const chainId = LIT_CHAINS[chainName].chainId;
     const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
     rpcUrls[chainId.toString()] = rpcUrl;
@@ -320,13 +319,12 @@ export const encodeCallData = ({
   functionName,
   functionParams,
 }: IABIEncode): string => {
-  throw new Error('encodeCallData has been removed.');
+  throw new RemovedFunctionError({}, 'encodeCallData has been removed.');
 };
 
 /**
  * @deprecated
  * (ABI) Decode call data
- * TODO: fix "any"
  *
  * @param { IABIDecode }
  * @returns { string }
@@ -335,7 +333,7 @@ export const decodeCallResult = ({
   abi,
   functionName,
   data,
-}: IABIDecode): { answer: string } | any => {
+}: IABIDecode): ethers.utils.Result => {
   const _interface = new ethers.utils.Interface(abi);
 
   const decoded = _interface.decodeFunctionResult(functionName, data);
@@ -488,11 +486,14 @@ export const checkAndSignEVMAuthMessage = async ({
   // --- scoped methods ---
   const _throwIncorrectNetworkError = (error: any) => {
     if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {
-      throwError({
-        message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-        errorKind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
-        errorCode: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
-      });
+      throw new WrongNetworkException(
+        {
+          info: {
+            chain,
+          },
+        },
+        `Incorrect network selected. Please switch to the ${chain} network in your wallet and try again.`
+      );
     } else {
       throw error;
     }
@@ -513,7 +514,7 @@ export const checkAndSignEVMAuthMessage = async ({
   const currentChainIdOrError = await getChainId(chain, web3);
   const selectedChainId: number = selectedChain.chainId;
   const selectedChainIdHex: string = numberToHex(selectedChainId);
-  const authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+  let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
   log('currentChainIdOrError:', currentChainIdOrError);
   log('selectedChainId:', selectedChainId);
@@ -522,7 +523,15 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 3. check all variables before executing business logic
   if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
-    return throwError(currentChainIdOrError.result as any);
+    throw new UnknownError(
+      {
+        info: {
+          chainId: chain,
+        },
+        cause: currentChainIdOrError.result,
+      },
+      'Unknown error when getting chain id'
+    );
   }
 
   log('chainId from web3', currentChainIdOrError);
@@ -598,8 +607,7 @@ export const checkAndSignEVMAuthMessage = async ({
     log('signing auth message because sig is not in local storage');
 
     try {
-      // @ts-ignore
-      authSigOrError.result = await _signAndGetAuth({
+      const authSig = await _signAndGetAuth({
         web3,
         account,
         chainId: selectedChain.chainId,
@@ -608,24 +616,36 @@ export const checkAndSignEVMAuthMessage = async ({
         uri,
         nonce,
       });
+
+      authSigOrError = {
+        type: EITHER_TYPE.SUCCESS,
+        result: JSON.stringify(authSig),
+      };
     } catch (e: any) {
-      log(e);
-      return throwError({
-        message: e.message,
-        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-      });
+      throw new UnknownError(
+        {
+          info: {
+            account,
+            chainId: selectedChain.chainId,
+            resources,
+            expiration: expirationString,
+            uri,
+            nonce,
+          },
+          cause: e,
+        },
+        'Could not get authenticated message'
+      );
     }
-    authSigOrError.type = EITHER_TYPE.SUCCESS;
+
+    // Log new authSig
     log('5. authSigOrError:', authSigOrError);
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
-  // @ts-ignore
-  let authSig: AuthSig = authSigOrError.result;
-  if (typeof authSig === 'string') {
-    authSig = JSON.parse(authSig);
-  }
+  const authSigString: string = authSigOrError.result;
+  let authSig = JSON.parse(authSigString);
+
   log('6. authSig:', authSig);
 
   // -- 7. case: when we are NOT on the right wallet address
@@ -646,7 +666,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
   } else {
-    let mustResign: boolean = getMustResign(authSig, resources);
+    const mustResign: boolean = getMustResign(authSig, resources);
 
     if (mustResign) {
       authSig = await _signAndGetAuth({
@@ -704,17 +724,20 @@ const _signAndGetAuth = async ({
     nonce,
   });
 
-  let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+  const authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
   if (authSigOrError.type === 'ERROR') {
-    throwError({
-      message: 'Failed to get authSig from local storage',
-      errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
-      errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
-    });
+    throw new LocalStorageItemNotFoundException(
+      {
+        info: {
+          storageKey: LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
+        },
+      },
+      'Failed to get authSig from local storage'
+    );
   }
 
-  let authSig: AuthSig =
+  const authSig: AuthSig =
     typeof authSigOrError.result === 'string'
       ? JSON.parse(authSigOrError.result)
       : authSigOrError.result;
@@ -774,14 +797,14 @@ export const signAndSaveAuthMessage = async ({
   const body: string = message.prepareMessage();
   const formattedAccount = getAddress(account);
   // -- 2. sign the message
-  let signedResult: SignedMessage = await signMessage({
+  const signedResult: SignedMessage = await signMessage({
     body,
     web3,
     account: formattedAccount,
   });
 
   // -- 3. prepare auth message
-  let authSig: AuthSig = {
+  const authSig: AuthSig = {
     sig: signedResult.signature,
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: body,
@@ -836,13 +859,13 @@ export const signMessage = async ({
   // -- validate
   if (!web3 || !account) {
     log(`web3: ${web3} OR ${account} not found. Connecting web3..`);
-    let res = await connectWeb3({ chainId: 1 });
+    const res = await connectWeb3({ chainId: 1 });
     web3 = res.web3;
     account = res.account;
   }
 
   log('pausing...');
-  await new Promise((resolve: any) => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
   log('signing with ', account);
 
   const signature = await signMessageAsync(web3.getSigner(), account, body);
@@ -853,12 +876,19 @@ export const signMessage = async ({
   log('recovered address: ', address);
 
   if (address.toLowerCase() !== account.toLowerCase()) {
-    const msg = `ruh roh, the user signed with a different address (${address}) then they\'re using with web3 (${account}).  this will lead to confusion.`;
-    log(msg);
+    const msg = `ruh roh, the user signed with a different address (${address}) then they're using with web3 (${account}). This will lead to confusion.`;
     alert(
-      'something seems to be wrong with your wallets message signing.  maybe restart your browser or your wallet.  your recovered sig address does not match your web3 account address'
+      'Something seems to be wrong with your wallets message signing.  maybe restart your browser or your wallet. Your recovered sig address does not match your web3 account address'
     );
-    throw new Error(msg);
+    throw new InvalidSignatureError(
+      {
+        info: {
+          address,
+          account,
+        },
+      },
+      msg
+    );
   }
   return { signature, address };
 };

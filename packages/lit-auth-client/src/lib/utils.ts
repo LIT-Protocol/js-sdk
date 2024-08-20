@@ -1,6 +1,10 @@
 import * as cbor from 'cbor-web';
 
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import {
+  AUTH_METHOD_TYPE,
+  InvalidArgumentException,
+  UnknownError,
+} from '@lit-protocol/constants';
 import { getLoggerbyId } from '@lit-protocol/misc';
 import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 
@@ -61,7 +65,12 @@ function getLoginRoute(provider: string): string {
     case 'discord':
       return '/auth/discord';
     default:
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            provider,
+          },
+        },
         `No login route available for the given provider "${provider}".`
       );
   }
@@ -279,7 +288,15 @@ export function parseAuthenticatorData(
 
     return authenticatorData;
   } catch (e) {
-    throw new Error('Authenticator Data could not be parsed');
+    throw new UnknownError(
+      {
+        info: {
+          authDataBuffer,
+        },
+        cause: e,
+      },
+      'Authenticator Data could not be parsed'
+    );
   }
 }
 
@@ -358,7 +375,12 @@ export async function getAuthIdByAuthMethod(
       break;
     default:
       log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            authMethod,
+          },
+        },
         `Unsupported auth method type: ${authMethod.authMethodType}`
       );
   }

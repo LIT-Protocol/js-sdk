@@ -1,3 +1,7 @@
+import {
+  InvalidArgumentException,
+  RemovedFunctionError,
+} from '@lit-protocol/constants';
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
 import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
@@ -26,7 +30,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
    * @deprecated - to be removed, as it's not used.
    */
   async addRateLimitAuthSig(authSig: AuthSig) {
-    throw new Error('Not implemented yet. ');
+    throw new RemovedFunctionError({}, 'addRateLimitAuthSig is deprecated.');
   }
 
   static decode(encoded: string): RecapSessionCapabilityObject {
@@ -86,7 +90,13 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            litResource,
+            ability,
+          },
+        },
         `The specified Lit resource does not support the specified ability.`
       );
     }

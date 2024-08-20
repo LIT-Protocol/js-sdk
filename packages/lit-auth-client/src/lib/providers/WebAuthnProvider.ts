@@ -4,7 +4,12 @@ import {
   MintRequestBody,
   WebAuthnProviderOptions,
 } from '@lit-protocol/types';
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import {
+  AUTH_METHOD_TYPE,
+  RemovedFunctionError,
+  UnknownError,
+  WrongParamFormat,
+} from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import {
   PublicKeyCredentialCreationOptionsJSON,
@@ -86,7 +91,14 @@ export default class WebAuthnProvider extends BaseProvider {
     // Mint PKP
     const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
-      throw new Error('Missing mint response or request ID from relay server');
+      throw new UnknownError(
+        {
+          info: {
+            mintRes,
+          },
+        },
+        'Missing mint response or request ID from relay server'
+      );
     }
 
     return mintRes.requestId;
@@ -100,7 +112,12 @@ export default class WebAuthnProvider extends BaseProvider {
    * @throws {Error} - Throws an error when called for WebAuthnProvider.
    */
   public override async mintPKPThroughRelayer(): Promise<string> {
-    throw new Error(
+    throw new RemovedFunctionError(
+      {
+        info: {
+          method: 'mintPKPThroughRelayer',
+        },
+      },
       'Use verifyAndMintPKPThroughRelayer for WebAuthnProvider instead.'
     );
   }
@@ -173,8 +190,14 @@ export default class WebAuthnProvider extends BaseProvider {
     try {
       credentialId = JSON.parse(authMethod.accessToken).rawId;
     } catch (err) {
-      throw new Error(
-        `Error when parsing auth method to generate auth method ID for WebAuthn: ${err}`
+      throw new WrongParamFormat(
+        {
+          info: {
+            authMethod,
+          },
+          cause: err,
+        },
+        'Error when parsing auth method to generate auth method ID for Eth wallet'
       );
     }
 
@@ -217,8 +240,11 @@ export default class WebAuthnProvider extends BaseProvider {
         ethers.utils.arrayify(publicKeyCoseBuffer)
       );
     } catch (e) {
-      throw new Error(
-        `Error while decoding WebAuthn registration response for public key retrieval. Attestation response not encoded as expected: ${e}`
+      throw new UnknownError(
+        {
+          cause: e,
+        },
+        'Error while decoding WebAuthn registration response for public key retrieval. Attestation response not encoded as expected'
       );
     }
 

@@ -21,7 +21,6 @@ import {
   LIT_CURVE,
   LIT_CURVE_VALUES,
   LIT_ENDPOINT,
-  LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
@@ -29,6 +28,15 @@ import {
   STAKING_STATES,
   STAKING_STATES_VALUES,
   version,
+  InitError,
+  InvalidParamType,
+  NodeError,
+  UnknownError,
+  InvalidArgumentException,
+  LitNodeClientBadConfigError,
+  InvalidEthBlockhash,
+  LitNodeClientNotReadyError,
+  InvalidNodeAttestation,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -42,7 +50,6 @@ import {
   logWithRequestId,
   mostCommonString,
   sendRequest,
-  throwError,
 } from '@lit-protocol/misc';
 import {
   AuthSig,
@@ -54,7 +61,6 @@ import {
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
-  NodeAttestation,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
@@ -150,12 +156,12 @@ export class LitCore {
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     if (!(config.litNetwork in LIT_NETWORKS)) {
-      return throwError({
-        message:
-          'Unsupported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
-      });
+      const validNetworks = Object.keys(LIT_NETWORKS);
+      throw new InvalidParamType(
+        {},
+        'Unsupported network has been provided please use a "litNetwork" option which is supported (%s)',
+        validNetworks
+      );
     }
 
     // Initialize default config based on litNetwork
@@ -234,19 +240,19 @@ export class LitCore {
     ]);
 
     if (minNodeCount <= 0) {
-      throwError({
-        message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {},
+        `minNodeCount is %s, which is invalid. Please check your network connection and try again.`,
+        minNodeCount
+      );
     }
 
     if (bootstrapUrls.length <= 0) {
-      throwError({
-        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
+      throw new InitError(
+        {},
+        `Failed to get bootstrapUrls for network %s`,
+        this.config.litNetwork
+      );
     }
 
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
@@ -387,13 +393,10 @@ export class LitCore {
 
     if (!hasNetwork) {
       // network not found, report error
-      throwError({
-        message:
-          'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.name,
-      });
-      return;
+      throw new LitNodeClientBadConfigError(
+        {},
+        'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS'
+      );
     }
 
     this.config.bootstrapUrls = LIT_NETWORKS[this.config.litNetwork];
@@ -406,8 +409,10 @@ export class LitCore {
   getLatestBlockhash = async (): Promise<string> => {
     await this._syncBlockhash();
     if (!this.latestBlockhash) {
-      throw new Error(
-        `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
+      throw new InvalidEthBlockhash(
+        {},
+        `latestBlockhash is not available. Received: "%s"`,
+        this.latestBlockhash
       );
     }
 
@@ -453,8 +458,15 @@ export class LitCore {
       !this.config.contractContext.Staking &&
       !this.config.contractContext.resolverAddress
     ) {
-      throw new Error(
-        'The provided contractContext was missing the "Staking" contract`'
+      throw new InitError(
+        {
+          info: {
+            contractContext: this.config.contractContext,
+            litNetwork: this.config.litNetwork,
+            rpcUrl: this.config.rpcUrl,
+          },
+        },
+        'The provided contractContext was missing the "Staking" contract'
       );
     }
 
@@ -579,11 +591,11 @@ export class LitCore {
       const attestation = handshakeResult.attestation;
 
       if (!attestation) {
-        throwError({
-          message: `Missing attestation in handshake response from ${url}`,
-          errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-          errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-        });
+        throw new InvalidNodeAttestation(
+          {},
+          `Missing attestation in handshake response from %s`,
+          url
+        );
       }
 
       // actually verify the attestation by checking the signature against AMD certs
@@ -591,19 +603,18 @@ export class LitCore {
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
-        await checkSevSnpAttestation(
-          attestation as NodeAttestation,
-          challenge,
-          url
-        );
+        await checkSevSnpAttestation(attestation, challenge, url);
         log(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        throwError({
-          message: `Lit Node Attestation failed verification for ${url} - ${e.message}`,
-          errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-          errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-        });
+        throw new InvalidNodeAttestation(
+          {
+            cause: e,
+          },
+          `Lit Node Attestation failed verification for %s - %s`,
+          url,
+          e.message
+        );
       }
     } else if (this.config.litNetwork === LIT_NETWORK.Custom) {
       log(
@@ -645,16 +656,7 @@ export class LitCore {
             this.config.bootstrapUrls.length
           } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
-          try {
-            // TODO: Kludge, replace with standard error construction
-            throwError({
-              message: msg,
-              errorKind: LIT_ERROR.INIT_ERROR.kind,
-              errorCode: LIT_ERROR.INIT_ERROR.name,
-            });
-          } catch (e) {
-            reject(e);
-          }
+          reject(new InitError({}, msg));
         }, this.config.connectTimeout);
       }),
       Promise.all(
@@ -697,11 +699,15 @@ export class LitCore {
         'Error getting latest blockhash from the nodes.'
       );
 
-      throwError({
-        message: 'Error getting latest blockhash from the nodes.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-      });
+      throw new InvalidEthBlockhash(
+        {
+          info: {
+            requestId,
+          },
+        },
+        `latestBlockhash is not available. Received: "%s"`,
+        latestBlockhash
+      );
     }
 
     // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
@@ -710,22 +716,22 @@ export class LitCore {
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.subnetPubKey
         )
-      ),
+      )!,
       networkPubKey: mostCommonString(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKey
         )
-      ),
+      )!,
       networkPubKeySet: mostCommonString(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKeySet
         )
-      ),
+      )!,
       hdRootPubkeys: mostCommonString(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.hdRootPubkeys
         )
-      ),
+      )!,
       latestBlockhash,
       lastBlockHashRetrieved: Date.now(),
     };
@@ -850,12 +856,10 @@ export class LitCore {
     Pick<EpochCache, 'startTime' | 'currentNumber'>
   > {
     if (!this._stakingContract) {
-      return throwError({
-        message:
-          'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
+      throw new InitError(
+        {},
+        'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?'
+      );
     }
 
     try {
@@ -873,11 +877,11 @@ export class LitCore {
         startTime,
       };
     } catch (error) {
-      return throwError({
-        message: `[_fetchCurrentEpochState] Error getting current epoch number: ${error}`,
-        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-      });
+      throw new UnknownError(
+        {},
+        '[_fetchCurrentEpochNumber] Error getting current epoch number: %s',
+        error
+      );
     }
   }
 
@@ -984,21 +988,21 @@ export class LitCore {
     url: string;
   }): AuthSig => {
     if (!sessionSigs) {
-      return throwError({
-        message: `You must pass in sessionSigs`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {},
+        'You must pass in sessionSigs. Received: %s',
+        sessionSigs
+      );
     }
 
     const sigToPassToNode = sessionSigs[url];
 
     if (!sessionSigs[url]) {
-      throwError({
-        message: `You passed sessionSigs but we could not find session sig for node ${url}`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {},
+        'You passed sessionSigs but we could not find session sig for node %s',
+        url
+      );
     }
 
     return sigToPassToNode;
@@ -1139,10 +1143,11 @@ export class LitCore {
       };
     }
 
+    // TODO Likely a good use case for MultiError
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
     const mostCommonError = JSON.parse(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mostCommonString(errors.map((r: any) => JSON.stringify(r)))
+      mostCommonString(errors.map((r: any) => JSON.stringify(r)))!
     );
 
     logErrorWithRequestId(
@@ -1157,15 +1162,15 @@ export class LitCore {
   };
 
   /**
-   *
    * Throw node error
    *
    * @param { RejectedNodePromises } res
+   * @param { string } requestId
    *
-   * @returns { void }
+   * @returns { never }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
+  _throwNodeError = (res: RejectedNodePromises, requestId: string): never => {
     if (res.error) {
       if (
         ((res.error.errorCode &&
@@ -1176,22 +1181,28 @@ export class LitCore {
         log('You are not authorized to access this content');
       }
 
-      throwError({
-        ...res.error,
-        message:
-          res.error.message ||
-          'There was an error getting the signing shares from the nodes',
-        errorCode: res.error.errorCode || LIT_ERROR.UNKNOWN_ERROR.code,
-        requestId,
-      } as NodeClientErrorV0 | NodeClientErrorV1);
+      throw new NodeError(
+        {
+          info: {
+            requestId,
+            errorCode: res.error.errorCode,
+            message: res.error.message,
+          },
+          cause: res.error,
+        },
+        'There was an error getting the signing shares from the nodes. Response from the nodes: %s',
+        JSON.stringify(res)
+      );
     } else {
-      throwError({
-        message: `There was an error getting the signing shares from the nodes.  Response from the nodes: ${JSON.stringify(
-          res
-        )}`,
-        error: LIT_ERROR.UNKNOWN_ERROR,
-        requestId,
-      });
+      throw new UnknownError(
+        {
+          info: {
+            requestId,
+          },
+        },
+        `There was an error getting the signing shares from the nodes. Response from the nodes: %s`,
+        JSON.stringify(res)
+      );
     }
   };
 
@@ -1283,11 +1294,10 @@ export class LitCore {
   ): Promise<string> => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');
-      throwError({
-        message: `root public keys not found, have you connected to the nodes?`,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-      });
+      throw new LitNodeClientNotReadyError(
+        {},
+        'root public keys not found, have you connected to the nodes?'
+      );
     }
     return await computeHDPubKey(
       this.hdRootPubkeys as string[],

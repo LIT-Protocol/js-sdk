@@ -44,30 +44,6 @@ describe('utils', () => {
     expect(mostOccured).toBe(0);
   });
 
-  it('should throwError in the Lit standardized way', () => {
-    let err: Error;
-
-    try {
-      err = utilsModule.throwError({
-        message: 'Message!',
-        errorKind: 'hello',
-        errorCode: 'world',
-      });
-    } catch (e) {
-      err = e as Error;
-    }
-
-    const keys = Object.keys(err);
-    const values = Object.values(err);
-
-    expect(keys).toContain('message');
-    expect(keys).toContain('errorKind');
-    expect(keys).toContain('errorCode');
-    expect(values).toContain('Message!');
-    expect(values).toContain('hello');
-    expect(values).toContain('world');
-  });
-
   // it('should able to use the error type from constants', () => {
   //   let err: Error;
 

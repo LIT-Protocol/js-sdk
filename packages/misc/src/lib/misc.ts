@@ -1,40 +1,34 @@
+import { Contract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
+import Ajv, { JSONSchemaType } from 'ajv';
+
 import {
   ABI_ERC20,
-  ILitError,
+  InvalidArgumentException,
+  InvalidParamType,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
-  LIT_ERROR,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
   LOG_LEVEL,
   LOG_LEVEL_VALUES,
+  NetworkError,
   RELAYER_URL_BY_NETWORK,
+  RemovedFunctionError,
+  UnknownError,
+  WrongNetworkException,
 } from '@lit-protocol/constants';
-
+import { LogManager } from '@lit-protocol/logger';
 import {
   Chain,
   AuthSig,
-  KV,
-  NodeClientErrorV0,
-  NodeClientErrorV1,
-  NodeErrorV1,
   NodeErrorV3,
-  ClaimRequest,
-  ClaimKeyResponse,
   ClaimResult,
-  ClaimProcessor,
   MintCallback,
   RelayClaimProcessor,
-  SuccessNodePromises,
-  RejectedNodePromises,
 } from '@lit-protocol/types';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import { LogManager } from '@lit-protocol/logger';
-import { version } from '@lit-protocol/constants';
-import Ajv, { JSONSchemaType } from 'ajv';
 
-const logBuffer: Array<Array<any>> = [];
+const logBuffer: any[][] = [];
 const ajv = new Ajv();
 
 /**
@@ -57,25 +51,25 @@ export const printError = (e: Error): void => {
  * @param { Array<any> } arr
  * @returns { any } the element that appeared the most
  */
-export const mostCommonString = (arr: Array<any>): any => {
+export const mostCommonString = <T>(arr: T[]): T | undefined => {
   return arr
     .sort(
-      (a: any, b: any) =>
-        arr.filter((v: any) => v === a).length -
-        arr.filter((v: any) => v === b).length
+      (a: T, b: T) =>
+        arr.filter((v: T) => v === a).length -
+        arr.filter((v: T) => v === b).length
     )
     .pop();
 };
 
-export const findMostCommonResponse = (responses: Array<object>): object => {
-  const result: { [key: string]: any } = {};
+export const findMostCommonResponse = (responses: object[]): object => {
+  const result: Record<string, any> = {};
 
   // Aggregate all values for each key across all responses
   const keys = new Set(responses.flatMap(Object.keys));
 
   for (const key of keys) {
     const values = responses.map(
-      (response: { [key: string]: any }) => response[key]
+      (response: Record<string, any>) => response[key]
     );
 
     // Filter out undefined values before processing
@@ -100,130 +94,6 @@ export const findMostCommonResponse = (responses: Array<object>): object => {
   return result;
 };
 
-export const throwError = (e: NodeClientErrorV0 | NodeClientErrorV1): never => {
-  if (isNodeClientErrorV1(e)) {
-    return throwErrorV1(e);
-  } else if (isNodeClientErrorV0(e)) {
-    return throwErrorV0(e);
-  }
-  return throwGenericError(e as any);
-};
-
-/**
- *
- * Standardized way to throw error in Lit Protocol projects
- *
- * @deprecated use throwErrorV1
- * @param { ILitError }
- * @property { string } message
- * @property { string } name
- * @property { string } errorCode
- */
-export const throwErrorV0 = ({
-  message,
-  name,
-  errorCode,
-  error,
-}: ILitError): never => {
-  const errConstructorFunc = function (
-    this: any,
-    message: string,
-    name: string,
-    errorCode: string
-  ) {
-    this.message = message;
-    this.name = name;
-
-    // Map old error codes to new ones if possible.
-    this.errorCode = oldErrorToNewErrorMap[errorCode] ?? errorCode;
-  };
-
-  throw new (errConstructorFunc as any)(
-    message,
-    (name = error?.name ?? name),
-    (errorCode = error?.code ?? errorCode)
-  );
-};
-
-// Map for old error codes to new ones
-const oldErrorToNewErrorMap: { [key: string]: string } = {
-  not_authorized: 'NodeNotAuthorized',
-  storage_error: 'NodeStorageError',
-};
-
-/**
- *
- * Standardized way to throw error in Lit Protocol projects
- *
- */
-export const throwErrorV1 = ({
-  errorKind,
-  details,
-  status,
-  message,
-  errorCode,
-  requestId,
-}: NodeClientErrorV1): never => {
-  const errConstructorFunc = function (
-    this: any,
-    errorKind: string,
-    status: number,
-    details: string[],
-    message?: string,
-    errorCode?: string,
-    requestId?: string
-  ) {
-    this.message = message;
-    this.errorCode = errorCode;
-    this.errorKind = errorKind;
-    this.status = status;
-    this.details = details;
-    this.requestId = requestId;
-  };
-
-  throw new (errConstructorFunc as any)(
-    errorKind,
-    status,
-    details,
-    message,
-    errorCode,
-    requestId
-  );
-};
-
-export const throwGenericError = (e: any): never => {
-  const errConstructorFunc = function (
-    this: any,
-    message: string,
-    requestId: string
-  ) {
-    this.message = message;
-    this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
-    this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
-    this.requestId = requestId;
-  };
-
-  throw new (errConstructorFunc as any)(
-    e.message ?? 'Generic Error',
-    e.requestId ?? 'No request ID found'
-  );
-};
-
-export const isNodeClientErrorV1 = (
-  nodeError: NodeClientErrorV0 | NodeClientErrorV1
-): nodeError is NodeClientErrorV1 => {
-  return (
-    nodeError.hasOwnProperty('errorCode') &&
-    nodeError.hasOwnProperty('errorKind')
-  );
-};
-
-export const isNodeClientErrorV0 = (
-  nodeError: NodeClientErrorV0 | NodeClientErrorV1
-): nodeError is NodeClientErrorV0 => {
-  return nodeError.hasOwnProperty('errorCode');
-};
-
 declare global {
   var litConfig: any;
   var wasmExport: any;
@@ -233,11 +103,14 @@ declare global {
 }
 
 export const throwRemovedFunctionError = (functionName: string) => {
-  throwError({
-    message: `This function "${functionName}" has been removed. Please use the old SDK.`,
-    errorKind: LIT_ERROR.REMOVED_FUNCTION_ERROR.kind,
-    errorCode: LIT_ERROR.REMOVED_FUNCTION_ERROR.name,
-  });
+  throw new RemovedFunctionError(
+    {
+      info: {
+        functionName,
+      },
+    },
+    `This function "${functionName}" has been removed. Please use the old SDK.`
+  );
 };
 
 export const bootstrapLogManager = (
@@ -420,7 +293,7 @@ export const checkType = ({
   throwOnError = true,
 }: {
   value: any;
-  allowedTypes: Array<string> | any;
+  allowedTypes: string[] | any;
   paramName: string;
   functionName: string;
   throwOnError?: boolean;
@@ -436,11 +309,17 @@ export const checkType = ({
     }`;
 
     if (throwOnError) {
-      throwError({
-        message,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            allowedTypes,
+            value,
+            paramName,
+            functionName,
+          },
+        },
+        message
+      );
     }
     return false;
   }
@@ -481,11 +360,16 @@ export const checkSchema = (
 
   if (!validates) {
     if (throwOnError) {
-      throwError({
-        message,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            value,
+            paramName,
+            functionName,
+          },
+        },
+        message
+      );
     }
     return false;
   }
@@ -546,7 +430,7 @@ export const sortedObject = (obj: any): any => {
   const result: any = {};
 
   // NOTE: Use forEach instead of reduce for performance with large objects eg Wasm code
-  sortedKeys.forEach((key: any) => {
+  sortedKeys.forEach((key) => {
     result[key] = sortedObject(obj[key]);
   });
 
@@ -572,6 +456,7 @@ export const numberToHex = (v: number): string => {
  * @param { string } type
  * @param { string } paramName
  * @param { string } functionName
+ * @param { boolean } throwOnError
  * @returns { Boolean } true/false
  */
 export const is = (
@@ -579,21 +464,26 @@ export const is = (
   type: string,
   paramName: string,
   functionName: string,
-  throwOnError = true
-) => {
+  throwOnError: boolean = true
+): boolean => {
   if (getVarType(value) !== type) {
-    let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
+    const message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
     )}" type instead. value: ${
       value instanceof Object ? JSON.stringify(value) : value
     }`;
 
     if (throwOnError) {
-      throwError({
-        message,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            value,
+            paramName,
+            functionName,
+          },
+        },
+        message
+      );
     }
     return false;
   }
@@ -602,7 +492,7 @@ export const is = (
 };
 
 export const isNode = () => {
-  var isNode = false;
+  let isNode = false;
   // @ts-ignore
   if (typeof process === 'object') {
     // @ts-ignore
@@ -669,8 +559,14 @@ export function isSupportedLitNetwork(
   const supportedNetworks = Object.values(LIT_NETWORK);
 
   if (!supportedNetworks.includes(litNetwork)) {
-    throw new Error(
-      `Unsupported LIT_NETWORK! (${supportedNetworks.join('|')}) are supported.`
+    throw new WrongNetworkException(
+      {
+        info: {
+          litNetwork,
+          supportedNetworks,
+        },
+      },
+      `Unsupported LitNetwork! (${supportedNetworks.join('|')}) are supported.`
     );
   }
 }
@@ -683,45 +579,54 @@ export const defaultMintClaimCallback: MintCallback<
 ): Promise<string> => {
   isSupportedLitNetwork(network);
 
-  try {
-    const AUTH_CLAIM_PATH = '/auth/claim';
+  const AUTH_CLAIM_PATH = '/auth/claim';
 
-    const relayUrl: string = params.relayUrl || RELAYER_URL_BY_NETWORK[network];
+  const relayUrl: string = params.relayUrl || RELAYER_URL_BY_NETWORK[network];
 
-    if (!relayUrl) {
-      throw new Error(
-        'No relayUrl provided and no default relayUrl found for network'
-      );
-    }
-
-    const relayUrlWithPath = relayUrl + AUTH_CLAIM_PATH;
-
-    const response = await fetch(relayUrlWithPath, {
-      method: 'POST',
-      body: JSON.stringify(params),
-      headers: {
-        'api-key': params.relayApiKey
-          ? params.relayApiKey
-          : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-        'Content-Type': 'application/json',
+  if (!relayUrl) {
+    throw new InvalidArgumentException(
+      {
+        info: {
+          network,
+          relayUrl,
+        },
       },
-    });
-
-    if (response.status < 200 || response.status >= 400) {
-      let errResp = (await response.json()) ?? '';
-      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
-        errResp
-      )}`;
-      console.warn(errStmt);
-      throw new Error(errStmt);
-    }
-
-    let body: any = await response.json();
-    return body.requestId;
-  } catch (e) {
-    console.error((e as Error).message);
-    throw e;
+      'No relayUrl provided and no default relayUrl found for network'
+    );
   }
+
+  const relayUrlWithPath = relayUrl + AUTH_CLAIM_PATH;
+
+  const response = await fetch(relayUrlWithPath, {
+    method: 'POST',
+    body: JSON.stringify(params),
+    headers: {
+      'api-key': params.relayApiKey
+        ? params.relayApiKey
+        : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (response.status < 200 || response.status >= 400) {
+    const errResp = (await response.json()) ?? '';
+    const errStmt = `An error occurred requesting "/auth/claim" endpoint ${JSON.stringify(
+      errResp
+    )}`;
+    console.warn(errStmt);
+    throw new NetworkError(
+      {
+        info: {
+          response,
+          errResp,
+        },
+      },
+      `An error occurred requesting "/auth/claim" endpoint`
+    );
+  }
+
+  const body = await response.json();
+  return body.requestId;
 };
 
 /**
@@ -879,9 +784,26 @@ export async function getIpAddress(domain: string): Promise<string> {
     if (data.Answer && data.Answer.length > 0) {
       return data.Answer[0].data;
     } else {
-      throw new Error('No IP Address found or bad domain name');
+      throw new UnknownError(
+        {
+          info: {
+            domain,
+            apiURL,
+          },
+        },
+        'No IP Address found or bad domain name'
+      );
     }
   } catch (error: any) {
-    throw new Error(error);
+    throw new UnknownError(
+      {
+        info: {
+          domain,
+          apiURL,
+        },
+        cause: error,
+      },
+      'message' in error ? error.message : String(error)
+    );
   }
 }

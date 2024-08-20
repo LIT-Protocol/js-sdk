@@ -4,6 +4,10 @@ import {
   ALL_LIT_CHAINS,
   AUTH_METHOD_TYPE,
   AUTH_METHOD_TYPE_VALUES,
+  InvalidArgumentException,
+  LitNodeClientNotReadyError,
+  ParamsMissingError,
+  UnknownError,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -84,7 +88,14 @@ export abstract class BaseProvider {
     const data = await this.prepareRelayRequestData(authMethod);
 
     if (customArgs && !validateMintRequestBody(customArgs)) {
-      throw new Error('Invalid mint request body');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            customArgs,
+          },
+        },
+        'Invalid mint request body'
+      );
     }
 
     const body = this.prepareMintBody(
@@ -93,7 +104,14 @@ export abstract class BaseProvider {
     );
     const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
-      throw new Error('Missing mint response or request ID from relay server');
+      throw new UnknownError(
+        {
+          info: {
+            mintRes,
+          },
+        },
+        'Missing mint response or request ID from relay server'
+      );
     }
     return mintRes.requestId;
   }
@@ -113,7 +131,14 @@ export abstract class BaseProvider {
     const body = this.prepareFetchBody(data);
     const fetchRes = await this.relay.fetchPKPs(body);
     if (!fetchRes || !fetchRes.pkps) {
-      throw new Error('Missing PKPs in fetch response from relay server');
+      throw new ParamsMissingError(
+        {
+          info: {
+            fetchRes,
+          },
+        },
+        'Missing PKPs in fetch response from relay server'
+      );
     }
     return fetchRes.pkps;
   }
@@ -134,7 +159,13 @@ export abstract class BaseProvider {
     authMethodId: string;
   }): Promise<IRelayPKP[]> {
     if (!authMethodType || !authMethodId) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            authMethodType,
+            authMethodId,
+          },
+        },
         'Auth method type and id are required to fetch PKPs by auth method'
       );
     }
@@ -146,7 +177,12 @@ export abstract class BaseProvider {
     try {
       await litContracts.connect();
     } catch (err) {
-      throw new Error('Unable to connect to LitContracts');
+      throw new UnknownError(
+        {
+          cause: err,
+        },
+        'Unable to connect to LitContracts'
+      );
     }
 
     try {
@@ -169,7 +205,12 @@ export abstract class BaseProvider {
       }
       return pkps;
     } catch (err) {
-      throw new Error('Unable to get PKPs for auth method');
+      throw new UnknownError(
+        {
+          cause: err,
+        },
+        'Unable to get PKPs for auth method'
+      );
     }
   }
 
@@ -292,9 +333,7 @@ export abstract class BaseProvider {
     claimRequest: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
     if (!this.litNodeClient.ready) {
-      await this.litNodeClient.connect().catch((err) => {
-        throw err; // throw error up to caller
-      });
+      await this.litNodeClient.connect();
     }
 
     const res = await this.litNodeClient.claimKeyId(claimRequest);
@@ -320,7 +359,15 @@ export abstract class BaseProvider {
     let authMethodId = await this.getAuthMethodId(authMethod);
     authMethodId = authMethodId.slice(2);
     if (!this.litNodeClient) {
-      throw new Error('Lit Node Client is configured');
+      throw new LitNodeClientNotReadyError(
+        {
+          info: {
+            authMethod,
+            method: 'computePublicKeyFromAuthMethod',
+          },
+        },
+        'Lit Node Client is not configured'
+      );
     }
     return this.litNodeClient.computeHDPubKey(authMethodId);
   };

@@ -3,7 +3,11 @@ import {
   BaseProviderOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import {
+  AUTH_METHOD_TYPE,
+  UnauthorizedException,
+  UnknownError,
+} from '@lit-protocol/constants';
 import { BaseProvider } from './BaseProvider';
 import {
   prepareLoginUrl,
@@ -50,8 +54,14 @@ export default class DiscordProvider extends BaseProvider {
   public async authenticate(): Promise<AuthMethod> {
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
-      throw new Error(
-        `Current url "${window.location.href}" does not match provided redirect uri "${this.redirectUri}"`
+      throw new UnauthorizedException(
+        {
+          info: {
+            url: window.location.href,
+            redirectUri: this.redirectUri,
+          },
+        },
+        `Current url does not match provided redirect uri`
       );
     }
 
@@ -62,20 +72,40 @@ export default class DiscordProvider extends BaseProvider {
 
     // Check if there's an error
     if (error) {
-      throw new Error(error);
+      throw new UnknownError(
+        {
+          info: {
+            error,
+          },
+          cause: new Error(error),
+        },
+        error ?? 'Received error from discord authentication'
+      );
     }
 
     // Check if provider is Discord
     if (!provider || provider !== 'discord') {
-      throw new Error(
-        `OAuth provider "${provider}" passed in redirect callback URL does not match "discord"`
+      throw new UnauthorizedException(
+        {
+          info: {
+            provider,
+            redirectUri: this.redirectUri,
+          },
+        },
+        'OAuth provider does not match "discord"'
       );
     }
 
     // Check if state param matches
     if (!state || decode(decodeURIComponent(state)) !== getStateParam()) {
-      throw new Error(
-        `Invalid state parameter "${state}" passed in redirect callback URL`
+      throw new UnauthorizedException(
+        {
+          info: {
+            state,
+            redirectUri: this.redirectUri,
+          },
+        },
+        'Invalid state parameter in callback URL'
       );
     }
 
@@ -88,8 +118,14 @@ export default class DiscordProvider extends BaseProvider {
 
     // Check if access token is present in url
     if (!accessToken) {
-      throw new Error(
-        `Missing access token in redirect callback URL for Discord OAuth"`
+      throw new UnauthorizedException(
+        {
+          info: {
+            accessToken,
+            redirectUri: this.redirectUri,
+          },
+        },
+        `Missing access token in callback URL`
       );
     }
 
@@ -119,7 +155,7 @@ export default class DiscordProvider extends BaseProvider {
     );
 
     if (!popup) {
-      throw new Error('Failed to open popup window');
+      throw new UnknownError({}, 'Failed to open popup window');
     }
 
     return new Promise((resolve, reject) => {
@@ -189,7 +225,7 @@ export default class DiscordProvider extends BaseProvider {
       const user = await meResponse.json();
       userId = user.id;
     } else {
-      throw new Error('Unable to verify Discord account');
+      throw new UnknownError({}, 'Unable to verify Discord account');
     }
 
     // -- get auth method id
@@ -218,7 +254,7 @@ export default class DiscordProvider extends BaseProvider {
       const user = await meResponse.json();
       return user.id;
     } else {
-      throw new Error('Unable to verify Discord account');
+      throw new UnknownError({}, 'Unable to verify Discord account');
     }
   }
 }

@@ -285,6 +285,56 @@ To run manual tests:
 - LIT_JS_SDK_LOCAL_NODE_DEV - set to true to use a local node
 - LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY - set to a funded wallet on Chronicle Testnet
 
+# Error Handling
+
+This SDK uses custom error classes derived from [@openagenda/verror](https://github.com/OpenAgenda/verror) to handle errors between packages and to the SDK consumers.
+Normal error handling is also supported as VError extends the native Error class, but using VError allows for better error composition and information propagation.
+You can check their documentation for the extra fields that are added to the error object and methods on how to handle them in a safe way.
+
+## Example
+
+```ts
+import { VError } from '@openagenda/verror';
+import { LitNodeClientBadConfigError } from '@lit-protocol/constants';
+
+try {
+  const someNativeError = new Error('some native error');
+
+  throw new LitNodeClientBadConfigError(
+    {
+      cause: someNativeError,
+      info: {
+        foo: 'bar',
+      },
+      meta: {
+        baz: 'qux',
+      },
+    },
+    'some useful message'
+  );
+} catch (e) {
+  console.log(e.name); // LitNodeClientBadConfigError
+  console.log(e.message); // some useful message: some native error
+  console.log(e.info); // { foo: 'bar' }
+  console.log(e.baz); // qux
+  // VError.cause(e) is someNativeError
+  // VError.info(e) is { foo: 'bar' }
+  // VError.meta(e) is { baz: 'qux', code: 'lit_node_client_bad_config_error', kind: 'Config' }
+  // Verror.fullStack(e) is the full stack trace composed of the error chain including the causes
+}
+```
+
+## Creating a new error
+
+In file `packages/constants/src/lib/errors.ts` you can find the list of errors that are currently supported and add new ones if needed.
+
+To create and use a new error, you need to:
+
+1. Add the error information to the `LIT_ERROR` object in `packages/constants/src/lib/errors.ts`
+2. Export the error from the `errors.ts` file at the end of the file
+3. Import the error where you need it
+4. Throw the error in your code adding all the information a user might need to know about the error such as the cause, the info, etc.
+
 # Dockerfile
 
 ...coming soon

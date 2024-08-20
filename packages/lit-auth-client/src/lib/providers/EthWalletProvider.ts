@@ -1,7 +1,12 @@
 import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 
-import { LIT_CHAINS, AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import {
+  LIT_CHAINS,
+  AUTH_METHOD_TYPE,
+  InvalidArgumentException,
+  WrongParamFormat,
+} from '@lit-protocol/constants';
 import {
   LitNodeClient,
   checkAndSignAuthMessage,
@@ -57,17 +62,22 @@ export default class EthWalletProvider extends BaseProvider {
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
     if (!options) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            options,
+          },
+        },
         'Options are required to authenticate with EthWalletProvider.'
       );
     }
 
     return EthWalletProvider.authenticate({
       signer: options,
-      address: options?.address,
-      chain: options?.chain,
+      address: options.address,
+      chain: options.chain,
       litNodeClient: this.litNodeClient,
-      expiration: options?.expiration,
+      expiration: options.expiration,
       domain: this.domain,
       origin: this.origin,
     });
@@ -78,7 +88,6 @@ export default class EthWalletProvider extends BaseProvider {
    *
    * @param {EthWalletAuthenticateOptions} options
    * @param {string} [options.address] - Address to sign with
-   * @param {function} [options.signMessage] - Function to sign message with
    * @param {string} [options.chain] - Name of chain to use for signature
    * @param {number} [options.expiration] - When the auth signature expires
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
@@ -121,7 +130,13 @@ export default class EthWalletProvider extends BaseProvider {
       (signer as ethers.Wallet)?.address;
 
     if (!address) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            address,
+            signer,
+          },
+        },
         `Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`
       );
     }
@@ -192,8 +207,14 @@ export default class EthWalletProvider extends BaseProvider {
     try {
       address = JSON.parse(authMethod.accessToken).address;
     } catch (err) {
-      throw new Error(
-        `Error when parsing auth method to generate auth method ID for Eth wallet: ${err}`
+      throw new WrongParamFormat(
+        {
+          info: {
+            authMethod,
+          },
+          cause: err,
+        },
+        'Error when parsing auth method to generate auth method ID for Eth wallet'
       );
     }
 

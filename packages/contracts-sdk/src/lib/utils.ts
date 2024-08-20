@@ -1,3 +1,5 @@
+import { InvalidArgumentException } from '@lit-protocol/constants';
+
 // Converts the number of requests per day to requests per second.
 export function convertRequestsPerDayToPerSecond(
   requestsPerDay: number
@@ -41,7 +43,15 @@ export function requestsToKilosecond({
     case 'second':
       return Math.round(requests * 1000);
     default:
-      throw new Error('Invalid period');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            period,
+            requests,
+          },
+        },
+        'Invalid period'
+      );
   }
 }
 
@@ -60,7 +70,15 @@ export function requestsToDay({
     case 'kilosecond':
       return Math.round(requests * 86);
     default:
-      throw new Error('Invalid period');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            period,
+            requests,
+          },
+        },
+        'Invalid period'
+      );
   }
 }
 
@@ -79,6 +97,14 @@ export function requestsToSecond({
     case 'kilosecond':
       return Math.round(requests * 1000);
     default:
-      throw new Error('Invalid period');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            period,
+            requests,
+          },
+        },
+        'Invalid period'
+      );
   }
 }

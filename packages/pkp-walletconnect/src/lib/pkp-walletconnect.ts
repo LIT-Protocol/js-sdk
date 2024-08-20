@@ -22,7 +22,12 @@ import {
   Web3WalletTypes,
 } from '@walletconnect/web3wallet';
 
-import { LIT_CHAINS } from '@lit-protocol/constants';
+import {
+  InitError,
+  LIT_CHAINS,
+  ParamsMissingError,
+  UnsupportedMethodError,
+} from '@lit-protocol/constants';
 import {
   PKPEthersWallet,
   SupportedETHSigningMethods,
@@ -50,7 +55,6 @@ export class PKPWalletConnect {
   private readonly PREFIX = '[PKPWalletConnect]';
   private readonly orange = '\x1b[33m';
   private readonly reset = '\x1b[0m';
-  private readonly red = '\x1b[31m';
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
@@ -67,7 +71,14 @@ export class PKPWalletConnect {
     params: InitWalletConnectParams
   ): Promise<void> {
     if (!params.projectId) {
-      throw new Error('WalletConnect project ID is required');
+      throw new ParamsMissingError(
+        {
+          info: {
+            params,
+          },
+        },
+        'WalletConnect project ID is required'
+      );
     }
 
     const coreOpts: CoreTypes.Options = {
@@ -327,7 +338,14 @@ export class PKPWalletConnect {
         });
         response = formatJsonRpcResult(id, result);
       } else {
-        throw new Error(`Unsupported method: ${request.method}`);
+        throw new UnsupportedMethodError(
+          {
+            info: {
+              request,
+            },
+          },
+          `Unsupported method: ${request.method}`
+        );
       }
     } catch (err: unknown) {
       let message: string;
@@ -671,7 +689,8 @@ export class PKPWalletConnect {
   ): IWeb3Wallet {
     if (!client) {
       this._log('WalletConnect client has not yet been initialized.');
-      return this._throwError(
+      throw new InitError(
+        {},
         'WalletConnect client has not yet been initialized. Please call initWalletConnect().'
       );
     }
@@ -689,19 +708,4 @@ export class PKPWalletConnect {
       console.log(this.orange + this.PREFIX + this.reset, ...args);
     }
   }
-
-  /**
-   * Logs an error message to the console and throws an Error with the same message.
-   *
-   * @param {string} message - The error message to be logged and thrown.
-   *
-   * @returns {never} - This function does not return a value since it always throws an Error.
-   */
-  private _throwError = (message: string): never => {
-    console.error(
-      this.orange + this.PREFIX + this.reset,
-      this.red + message + this.reset
-    );
-    throw new Error(message);
-  };
 }
