@@ -295,9 +295,11 @@ const ethTransaction = async (
       expect(signature.length).toEqual(132);
       expect(recoveredAddr).toEqual(alice.pkp?.ethAddress);
     })
-  ).resolves.not.toThrowError().finally(() => {
-    devEnv.releasePrivateKeyFromUser(alice);
-  });
+  )
+    .resolves.not.toThrowError()
+    .finally(() => {
+      devEnv.releasePrivateKeyFromUser(alice);
+    });
 };
 
 const signTransaction = async (
@@ -518,26 +520,27 @@ const signTypedDataV1 = async (
         method: 'eth_signTypedData_v1',
         params: [msgParams, alice.pkp?.ethAddress],
       },
+    }).then((signature: string) => {
+      const recoveredAddr = recoverTypedSignature({
+        data: msgParams,
+        signature: signature,
+        version: SignTypedDataVersion.V1,
+      });
+
+      // ==================== Post-Validation ====================
+      if (signature.length !== 132) {
+        throw new Error('❌ signature should be 132 characters long');
+      }
+
+      expect(recoveredAddr.toLowerCase()).toEqual(
+        alice.pkp?.ethAddress.toLowerCase()
+      );
     })
-      .then((signature: string) => {
-        const recoveredAddr = recoverTypedSignature({
-          data: msgParams,
-          signature: signature,
-          version: SignTypedDataVersion.V1,
-        });
-
-        // ==================== Post-Validation ====================
-        if (signature.length !== 132) {
-          throw new Error('❌ signature should be 132 characters long');
-        }
-
-        expect(recoveredAddr.toLowerCase()).toEqual(
-          alice.pkp?.ethAddress.toLowerCase()
-        );
-      })
-  ).resolves.not.toThrowError().finally(() => {
-    devEnv.releasePrivateKeyFromUser(alice);
-  });
+  )
+    .resolves.not.toThrowError()
+    .finally(() => {
+      devEnv.releasePrivateKeyFromUser(alice);
+    });
 };
 
 const signTypedDatav3 = async (
@@ -704,23 +707,24 @@ const signTypedDatav4 = async (
         method: 'eth_signTypedData_v4',
         params: [alice.pkp?.ethAddress, JSON.stringify(msgParams)],
       },
+    }).then((signature: string) => {
+      const recoveredAddr = recoverTypedSignature({
+        data: msgParams as TypedMessage<MessageTypes>,
+        signature: signature,
+        version: SignTypedDataVersion.V4,
+      });
+
+      expect(signature.length).toEqual(132);
+
+      expect(recoveredAddr.toLowerCase()).toEqual(
+        alice.pkp?.ethAddress.toLowerCase()
+      );
     })
-      .then((signature: string) => {
-        const recoveredAddr = recoverTypedSignature({
-          data: msgParams as TypedMessage<MessageTypes>,
-          signature: signature,
-          version: SignTypedDataVersion.V4,
-        });
-
-        expect(signature.length).toEqual(132);
-
-        expect(recoveredAddr.toLowerCase()).toEqual(
-          alice.pkp?.ethAddress.toLowerCase()
-        );
-      })
-  ).resolves.not.toThrow().finally(() => {
-    devEnv.releasePrivateKeyFromUser(alice);
-  });
+  )
+    .resolves.not.toThrow()
+    .finally(() => {
+      devEnv.releasePrivateKeyFromUser(alice);
+    });
 };
 
 const signWithAuthContext = async (devEnv: TinnyEnvironment): Promise<void> => {
@@ -766,11 +770,11 @@ const signWithAuthContext = async (devEnv: TinnyEnvironment): Promise<void> => {
 
   await pkpEthersWallet.init();
 
-  expect(
-    pkpEthersWallet.signMessage(alice.loveLetter)
-  ).resolves.not.toThrowError().finally(() => {
-    devEnv.releasePrivateKeyFromUser(alice);
-  });
+  expect(pkpEthersWallet.signMessage(alice.loveLetter))
+    .resolves.not.toThrowError()
+    .finally(() => {
+      devEnv.releasePrivateKeyFromUser(alice);
+    });
 };
 
 const ethPersonalSign = async (
@@ -809,22 +813,23 @@ const ethPersonalSign = async (
         method: 'personal_sign',
         params: [hexMsg, alice.pkp?.ethAddress],
       },
+    }).then((signature: string) => {
+      const recoveredAddr = ethers.utils.verifyMessage(message, signature);
+
+      // ==================== Post-Validation ====================
+      if (signature.length !== 132) {
+        throw new Error('❌ signature should be 132 characters long');
+      }
+
+      if (recoveredAddr !== alice.pkp?.ethAddress) {
+        throw new Error(
+          `❌ recoveredAddr should be ${alice.pkp?.ethAddress} but got ${recoveredAddr}`
+        );
+      }
     })
-      .then((signature: string) => {
-        const recoveredAddr = ethers.utils.verifyMessage(message, signature);
-
-        // ==================== Post-Validation ====================
-        if (signature.length !== 132) {
-          throw new Error('❌ signature should be 132 characters long');
-        }
-
-        if (recoveredAddr !== alice.pkp?.ethAddress) {
-          throw new Error(
-            `❌ recoveredAddr should be ${alice.pkp?.ethAddress} but got ${recoveredAddr}`
-          );
-        }
-      })
-  ).resolves.not.toThrowError().finally(() => {
-    devEnv.releasePrivateKeyFromUser(alice);
-  })
+  )
+    .resolves.not.toThrowError()
+    .finally(() => {
+      devEnv.releasePrivateKeyFromUser(alice);
+    });
 };

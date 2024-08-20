@@ -19,7 +19,6 @@ class CustomEnvironment extends NodeEnvironment {
   }
 
   async setup() {
-
     await super.setup();
     if (!this._hasLoadedTinny) {
       this.global.devEnv = new TinnyEnvironment();
