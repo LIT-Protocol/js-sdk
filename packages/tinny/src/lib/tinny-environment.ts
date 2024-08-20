@@ -529,8 +529,9 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId = //@ts-expect-error client is defined
+    const capacityTokenId =
     (
+      //@ts-expect-error client is defined
       await this.contractsClient.mintCapacityCreditsNFT({
         requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
         daysUntilUTCMidnightExpiration: 2,
@@ -538,8 +539,9 @@ export class TinnyEnvironment {
     ).capacityTokenIdStr;
 
     try {
-      this.superCapacityDelegationAuthSig = //@ts-expect-error client is defined
+      this.superCapacityDelegationAuthSig =
       (
+        //@ts-expect-error client is defined
         await this.litNodeClient.createCapacityDelegationAuthSig({
           dAppOwnerWallet: wallet,
           capacityTokenId: capacityTokenId,
