@@ -13,7 +13,7 @@ module.exports = {
       { tsconfig: '<rootDir>/tsconfig.spec.json' },
     ],
   },
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
   maxWorkers: 10,
   /**
    * manually set the exports names to load in common js, to mimic the behaviors of jest 27

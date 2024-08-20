@@ -1,7 +1,7 @@
-import { tinny } from './tinny';
+import { TinnyEnvironment } from './tinny-environment';
 
 describe('tinny', () => {
-  it('should work', () => {
-    expect(tinny()).toEqual('tinny');
+  it('Tinny eviorment should be defined', () => {
+    expect(TinnyEnvironment).toBeDefined();
   });
 });

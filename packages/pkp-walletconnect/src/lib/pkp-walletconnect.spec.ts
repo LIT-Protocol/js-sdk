@@ -1,12 +1,13 @@
 // @ts-expect-error - set global variable for testing
 global.jestTesting = true;
 
-import * as LITCONFIG from 'lit.config.json';
-import { PKPClient } from '@lit-protocol/pkp-client';
 import { Core } from '@walletconnect/core';
 import { SignClientTypes } from '@walletconnect/types';
 import { getSdkError } from '@walletconnect/utils';
 import { Web3Wallet } from '@walletconnect/web3wallet';
+
+import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
+import { PKPClient } from '@lit-protocol/pkp-client';
 
 import { PKPWalletConnect } from './pkp-walletconnect';
 
@@ -40,6 +41,7 @@ describe('PKPWalletConnect', () => {
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: PKP_PUBKEY,
       cosmosAddressPrefix: 'cosmos',
+      litNodeClient: new LitNodeClientNodeJs({ litNetwork: 'cayenne' }),
     });
 
     pkpWalletConnect = new PKPWalletConnect(true);
