@@ -3,7 +3,7 @@ import { SiweMessage } from 'siwe';
 
 import {
   LIT_CHAINS,
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   InvalidArgumentException,
   WrongParamFormat,
 } from '@lit-protocol/constants';
@@ -183,7 +183,7 @@ export default class EthWalletProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.EthWallet,
+      authMethodType: AUTH_METHOD_TYPE.EthWallet,
       accessToken: JSON.stringify(authSig),
     };
     return authMethod;

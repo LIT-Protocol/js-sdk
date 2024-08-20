@@ -8,7 +8,7 @@ import { log } from '@lit-protocol/misc';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testEthAuthSigToEncryptDecryptString
  * ✅ NETWORK=manzano yarn test:local --filter=testEthAuthSigToEncryptDecryptString
- * ✅ NETWORK=localchain yarn test:local --filter=testEthAuthSigToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testEthAuthSigToEncryptDecryptString
  */
 export const testEthAuthSigToEncryptDecryptString = async (
   devEnv: TinnyEnvironment

@@ -4,7 +4,7 @@ import {
   OAuthProviderOptions,
 } from '@lit-protocol/types';
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   UnauthorizedException,
   UnknownError,
 } from '@lit-protocol/constants';
@@ -125,7 +125,7 @@ export default class AppleProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.AppleJwt,
+      authMethodType: AUTH_METHOD_TYPE.AppleJwt,
       accessToken: idToken,
     };
     return authMethod;

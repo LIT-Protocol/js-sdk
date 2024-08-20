@@ -47,8 +47,8 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 // ----- autogen:imports:end  -----
 
 import {
-  AuthMethodScope,
-  AuthMethodType,
+  AUTH_METHOD_TYPE_VALUES,
+  AUTH_METHOD_SCOPE_VALUES,
   METAMASK_CHAIN_INFO_BY_NETWORK,
   NETWORK_CONTEXT_BY_NETWORK,
   LIT_NETWORK_VALUES,
@@ -1290,7 +1290,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    *
    * @param {Object} params - The parameters for adding the permitted authentication method.
    * @param {string} params.pkpTokenId - The ID of the PKP token.
-   * @param {AuthMethodType | number} params.authMethodType - The type of the authentication method.
+   * @param {AUTH_METHOD_TYPE_VALUES | number} params.authMethodType - The type of the authentication method.
    * @param {string | Uint8Array} params.authMethodId - The ID of the authentication method.
    * @param {AuthMethodScope[]} params.authMethodScopes - The scopes of the authentication method.
    * @param {string} [params.webAuthnPubkey] - The public key for WebAuthn.
@@ -1305,9 +1305,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     webAuthnPubkey,
   }: {
     pkpTokenId: string;
-    authMethodType: AuthMethodType | number;
+    authMethodType: AUTH_METHOD_TYPE_VALUES | number;
     authMethodId: string | Uint8Array;
-    authMethodScopes: AuthMethodScope[];
+    authMethodScopes: AUTH_METHOD_SCOPE_VALUES[];
     webAuthnPubkey?: string;
   }): Promise<ethers.ContractReceipt> => {
     const _authMethodId =
@@ -1365,7 +1365,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   }: {
     ipfsId: string;
     pkpTokenId: string;
-    authMethodScopes: AuthMethodScope[];
+    authMethodScopes: AUTH_METHOD_SCOPE_VALUES[];
   }) => {
     const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
     const scopes = authMethodScopes ?? [];

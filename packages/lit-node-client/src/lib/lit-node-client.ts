@@ -11,10 +11,10 @@ import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
  * @example
  *
  * ```
- * import { LitNetwork } from '@lit-protocol/constants';
- * 
+ * import { LIT_NETWORK } from '@lit-protocol/constants';
+ *
  * const litNodeClient = new LitNodeClient({
-    litNetwork: LitNetwork.Habanero,
+    litNetwork: LIT_NETWORK.Habanero,
    });
  * ```
  */

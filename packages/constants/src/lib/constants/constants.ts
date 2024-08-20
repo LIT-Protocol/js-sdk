@@ -5,9 +5,6 @@ import {
   LITSVMChain,
 } from '@lit-protocol/types';
 
-import { INTERNAL_DEV } from './autogen_internal';
-import { LitNetwork } from '../enums';
-
 /**
  * Lit Protocol Network Public Key
  */
@@ -629,7 +626,7 @@ export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
 /**
  * Object containing information to submit to Metamask
  */
-export const metamaskChainInfo = {
+export const METAMASK_CHAIN_INFO = {
   /**
    * Information about the "chronicle" chain.
    */
@@ -662,6 +659,12 @@ export const metamaskChainInfo = {
     iconUrls: ['future'],
   },
 };
+/**
+ * @deprecated Will be removed - Use METAMASK_CHAIN_INFO instead
+ * Alias for {@link METAMASK_CHAIN_INFO}. Added for backwards compatibility.
+ * See {@link METAMASK_CHAIN_INFO}
+ */
+export const metamaskChainInfo = METAMASK_CHAIN_INFO;
 
 /**
  * Constants representing the available LIT RPC endpoints.
@@ -697,16 +700,20 @@ export const LIT_NETWORK = {
   DatilTest: 'datil-test',
   Datil: 'datil',
   Custom: 'custom',
-  Localhost: 'localhost',
-};
-
+} as const;
+/**
+ * @deprecated Will be removed. - Use LIT_NETWORK instead
+ * Alias for LIT_NETWORK. Added for backwards compatibility.
+ * See {@link LIT_NETWORK}
+ */
+export const LitNetwork = LIT_NETWORK;
 /**
  * The type representing the keys of the LIT_NETWORK object.
  */
 export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
-
 /**
  * The type representing the values of the LIT_NETWORK object.
+ * This should replicate LIT_NETWORKS_KEYS in types package
  */
 export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
 
@@ -723,7 +730,6 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
-  localhost: LIT_RPC.LOCAL_ANVIL,
 };
 
 /**
@@ -739,7 +745,6 @@ export const RELAYER_URL_BY_NETWORK: {
   'datil-test': 'https://datil-test-relayer.getlit.dev',
   datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
-  localhost: 'http://localhost:3000',
 };
 
 /**
@@ -756,7 +761,6 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   'datil-test': metamaskChainInfo.yellowstone,
   datil: metamaskChainInfo.yellowstone,
   custom: metamaskChainInfo.yellowstone,
-  localhost: metamaskChainInfo.yellowstone,
 };
 
 export const HTTP = 'http://';
@@ -774,9 +778,8 @@ export const HTTP_BY_NETWORK: Record<
   habanero: HTTPS,
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
-  internalDev: HTTPS,
+  datil: HTTPS,
   custom: HTTP, // default, can be changed by config
-  localhost: HTTP, // default, can be changed by config
 };
 
 /**
@@ -793,7 +796,6 @@ export const CENTRALISATION_BY_NETWORK: Record<
   'datil-test': 'decentralised',
   datil: 'decentralised',
   custom: 'unknown',
-  localhost: 'unknown',
 } as const;
 
 /**
@@ -944,31 +946,14 @@ export const CAYENNE_URL = 'https://cayenne.litgateway.com';
  * Note: Dynamic networks such as Habanero have no default node URLS; they are always
  * loaded from the chain during initialization
  */
-export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
-  localhost: string[];
-  internalDev: string[];
-} = {
-  [LitNetwork.Cayenne]: [],
-  [LitNetwork.Manzano]: [],
-  [LitNetwork.DatilDev]: [],
-  [LitNetwork.DatilTest]: [],
-  [LitNetwork.Datil]: [],
-  [LitNetwork.Habanero]: [],
-  [LitNetwork.Custom]: [],
-  // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
-  localhost: [
-    'http://localhost:7470',
-    'http://localhost:7471',
-    'http://localhost:7472',
-    'http://localhost:7473',
-    'http://localhost:7474',
-    'http://localhost:7475',
-    'http://localhost:7476',
-    'http://localhost:7477',
-    'http://localhost:7478',
-    'http://localhost:7479',
-  ],
-  internalDev: INTERNAL_DEV,
+export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
+  cayenne: [],
+  manzano: [],
+  'datil-dev': [],
+  'datil-test': [],
+  datil: [],
+  habanero: [],
+  custom: [],
 };
 
 // ========== Lit Sessions ==========
@@ -1018,3 +1003,255 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+
+// ========== Chains ==========
+export const VMTYPE = {
+  EVM: 'EVM',
+  SVM: 'SVM',
+  CVM: 'CVM',
+} as const;
+export type VMTYPE_TYPE = keyof typeof VMTYPE;
+export type VMTYPE_VALUES = (typeof VMTYPE)[keyof typeof VMTYPE];
+
+export const LIT_CURVE = {
+  BLS: 'BLS',
+  EcdsaK256: 'K256',
+  EcdsaCaitSith: 'ECDSA_CAIT_SITH', // Legacy alias of K256
+  EcdsaCAITSITHP256: 'EcdsaCaitSithP256',
+} as const;
+export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
+// This should replicate SigShare.sigType in types package
+export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
+
+// ========== Either Types ==========
+export const EITHER_TYPE = {
+  ERROR: 'ERROR',
+  SUCCESS: 'SUCCESS',
+} as const;
+export type EITHER_TYPE_TYPE = keyof typeof EITHER_TYPE;
+export type EITHER_TYPE_VALUES = (typeof EITHER_TYPE)[keyof typeof EITHER_TYPE];
+
+// ========== Supported PKP Auth Method Types ==========
+export const AUTH_METHOD_TYPE = {
+  EthWallet: 1,
+  LitAction: 2,
+  WebAuthn: 3,
+  Discord: 4,
+  Google: 5,
+  GoogleJwt: 6,
+  AppleJwt: 8,
+  StytchOtp: 9,
+  StytchEmailFactorOtp: 10,
+  StytchSmsFactorOtp: 11,
+  StytchWhatsAppFactorOtp: 12,
+  StytchTotpFactorOtp: 13,
+} as const;
+export type AUTH_METHOD_TYPE_TYPE = keyof typeof AUTH_METHOD_TYPE;
+export type AUTH_METHOD_TYPE_VALUES =
+  (typeof AUTH_METHOD_TYPE)[keyof typeof AUTH_METHOD_TYPE];
+/**
+ * @deprecated Will be removed - Use AUTH_METHOD_TYPE instead
+ * Alias for AUTH_METHOD_TYPE. Added for backwards compatibility.
+ * See {@link AUTH_METHOD_TYPE}
+ */
+export const AuthMethodType = AUTH_METHOD_TYPE;
+
+// ========== Supported PKP Auth Method Scopes ==========
+export const AUTH_METHOD_SCOPE = {
+  NoPermissions: 0,
+  SignAnything: 1,
+  PersonalSign: 2,
+} as const;
+export type AUTH_METHOD_SCOPE_TYPE = keyof typeof AUTH_METHOD_SCOPE;
+export type AUTH_METHOD_SCOPE_VALUES =
+  (typeof AUTH_METHOD_SCOPE)[keyof typeof AUTH_METHOD_SCOPE];
+
+/**
+ * @deprecated Will be removed - Use AUTH_METHOD_SCOPE instead
+ * Alias for AUTH_METHOD_SCOPE. Added for backwards compatibility.
+ * See {@link AUTH_METHOD_SCOPE}
+ */
+export const AuthMethodScope = AUTH_METHOD_SCOPE;
+
+// ========== Supported Provider Types ==========
+export const PROVIDER_TYPE = {
+  Discord: 'discord',
+  Google: 'google',
+  EthWallet: 'ethwallet',
+  WebAuthn: 'webauthn',
+  Apple: 'apple',
+  StytchOtp: 'stytchOtp',
+  StytchEmailFactorOtp: 'stytchEmailFactorOtp',
+  StytchSmsFactorOtp: 'stytchSmsFactorOtp',
+  StytchWhatsAppFactorOtp: 'stytchWhatsAppFactorOtp',
+  StytchTotpFactor: 'stytchTotpFactor',
+} as const;
+export type PROVIDER_TYPE_TYPE = keyof typeof PROVIDER_TYPE;
+export type PROVIDER_TYPE_VALUES =
+  (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
+/**
+ * @deprecated Will be removed - Use PROVIDER_TYPE instead
+ * Alias for PROVIDER_TYPE. Added for backwards compatibility.
+ * See {@link PROVIDER_TYPE}
+ */
+export const ProviderType = PROVIDER_TYPE;
+
+// ========== Supported Staking States ==========
+export const STAKING_STATES = {
+  Active: 0,
+  NextValidatorSetLocked: 1,
+  ReadyForNextEpoch: 2,
+  Unlocked: 3,
+  Paused: 4,
+  Restore: 5,
+} as const;
+export type STAKING_STATES_TYPE = keyof typeof STAKING_STATES;
+export type STAKING_STATES_VALUES =
+  (typeof STAKING_STATES)[keyof typeof STAKING_STATES];
+/**
+ * @deprecated Will be removed - Use STAKING_STATES instead
+ * Alias for STAKING_STATES. Added for backwards compatibility.
+ * See {@link STAKING_STATES}
+ */
+export const StakingStates = STAKING_STATES;
+
+// ========== Relay Auth Status ==========
+export const RELAY_AUTH_STATUS = {
+  InProgress: 'InProgress',
+  Succeeded: 'Succeeded',
+  Failed: 'Failed',
+} as const;
+export type RELAY_AUTH_STATUS_TYPE = keyof typeof RELAY_AUTH_STATUS;
+export type RELAY_AUTH_STATUS_VALUES =
+  (typeof RELAY_AUTH_STATUS)[keyof typeof RELAY_AUTH_STATUS];
+/**
+ * @deprecated Will be removed - Use RELAY_AUTH_STATUS instead
+ * Alias for RELAY_AUTH_STATUS. Added for backwards compatibility.
+ * See {@link RELAY_AUTH_STATUS}
+ */
+export const RelayAuthStatus = RELAY_AUTH_STATUS;
+
+/**
+ * Prefixes used for identifying various LIT resources.
+ *
+ * @description These resource prefixes are also used as valid IRI schemes.
+ */
+export const LIT_RESOURCE_PREFIX = {
+  AccessControlCondition: 'lit-accesscontrolcondition',
+  PKP: 'lit-pkp',
+  RLI: 'lit-ratelimitincrease',
+  LitAction: 'lit-litaction',
+} as const;
+export type LIT_RESOURCE_PREFIX_TYPE = keyof typeof LIT_RESOURCE_PREFIX;
+// This should mimic LitResourcePrefix in types package
+export type LIT_RESOURCE_PREFIX_VALUES =
+  (typeof LIT_RESOURCE_PREFIX)[keyof typeof LIT_RESOURCE_PREFIX];
+/**
+ * @deprecated Will be removed - Use LIT_RESOURCE_PREFIX instead
+ * Alias for LIT_RESOURCE_PREFIX. Added for backwards compatibility.
+ * See {@link LIT_RESOURCE_PREFIX}
+ */
+export const LitResourcePrefix = LIT_RESOURCE_PREFIX;
+
+/**
+ * User-facing abilities that can be granted to a session.
+ */
+export const LIT_ABILITY = {
+  /**
+   * This is the ability to process an encryption access control condition.
+   * The resource will specify the corresponding hashed key value of the
+   * access control condition.
+   */
+  AccessControlConditionDecryption: 'access-control-condition-decryption',
+
+  /**
+   * This is the ability to process a signing access control condition.
+   * The resource will specify the corresponding hashed key value of the
+   * access control condition.
+   */
+  AccessControlConditionSigning: 'access-control-condition-signing',
+
+  /**
+   * This is the ability to use a PKP for signing purposes. The resource will specify
+   * the corresponding PKP token ID.
+   */
+  PKPSigning: 'pkp-signing',
+
+  /**
+   * This is the ability to use a Rate Limit Increase (Capacity Credits NFT) token during
+   * authentication with the nodes. The resource will specify the corresponding
+   * Capacity Credits NFT token ID.
+   */
+  RateLimitIncreaseAuth: 'rate-limit-increase-auth',
+
+  /**
+   * This is the ability to execute a Lit Action. The resource will specify the
+   * corresponding Lit Action IPFS CID.
+   */
+  LitActionExecution: 'lit-action-execution',
+} as const;
+export type LIT_ABILITY_TYPE = keyof typeof LIT_ABILITY;
+// This should replicate LitAbility in types package
+export type LIT_ABILITY_VALUES = (typeof LIT_ABILITY)[keyof typeof LIT_ABILITY];
+/**
+ * @deprecated Will be removed - Use LIT_ABILITY instead
+ * Alias for LIT_ABILITY. Added for backwards compatibility.
+ * See {@link LIT_ABILITY}
+ */
+export const LitAbility = LIT_ABILITY;
+
+/**
+ * LIT specific abilities mapped into the Recap specific terminology
+ * of an 'ability'.
+ */
+export const LIT_RECAP_ABILITY = {
+  Decryption: 'Decryption',
+  Signing: 'Signing',
+  Auth: 'Auth',
+  Execution: 'Execution',
+} as const;
+export type LIT_RECAP_ABILITY_TYPE = keyof typeof LIT_RECAP_ABILITY;
+export type LIT_RECAP_ABILITY_VALUES =
+  (typeof LIT_RECAP_ABILITY)[keyof typeof LIT_RECAP_ABILITY];
+/**
+ * @deprecated Will be removed - Use LIT_RECAP_ABILITY instead
+ * Alias for LIT_RECAP_ABILITY. Added for backwards compatibility.
+ * See {@link LIT_RECAP_ABILITY}
+ */
+export const LitRecapAbility = LIT_RECAP_ABILITY;
+
+export const LIT_NAMESPACE = {
+  Auth: 'Auth',
+  Threshold: 'Threshold',
+} as const;
+export type LIT_NAMESPACE_TYPE = keyof typeof LIT_NAMESPACE;
+export type LIT_NAMESPACE_VALUES =
+  (typeof LIT_NAMESPACE)[keyof typeof LIT_NAMESPACE];
+/**
+ * @deprecated Will be removed - Use LIT_NAMESPACE instead
+ * Alias for LIT_NAMESPACE. Added for backwards compatibility.
+ * See {@link LIT_NAMESPACE}
+ */
+export const LitNamespace = LIT_NAMESPACE;
+
+/**
+ * SDK Logger levels
+ */
+export const LOG_LEVEL = {
+  INFO: 0,
+  DEBUG: 1,
+  WARN: 2,
+  ERROR: 3,
+  FATAL: 4,
+  TIMING_START: 5,
+  TIMING_END: 6,
+  OFF: -1,
+} as const;
+export type LOG_LEVEL_TYPE = keyof typeof LOG_LEVEL;
+export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
+/**
+ * @deprecated Will be removed - Use LOG_LEVEL instead
+ * Alias for LOG_LEVEL. Added for backwards compatibility.
+ * See {@link LOG_LEVEL}
+ */
+export const LogLevel = LOG_LEVEL;

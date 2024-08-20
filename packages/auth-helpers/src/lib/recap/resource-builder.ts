@@ -1,4 +1,5 @@
-import { ILitResource, LitAbility } from '../models';
+import { LIT_ABILITY, LIT_ABILITY_VALUES } from '@lit-protocol/constants';
+import { ILitResource } from '../models';
 import {
   LitAccessControlConditionResource,
   LitActionResource,
@@ -8,7 +9,7 @@ import {
 
 /**
  * Lit resrouce ability request builder for creating resource ability requests.
- * 
+ *
  * @example
  * import { ResourceAbilityRequestBuilder } from '@lit-protocol/auth-helpers';
 
@@ -25,7 +26,10 @@ const requests = builder.build();
 
  */
 export class ResourceAbilityRequestBuilder {
-  private requests: Array<{ resource: ILitResource; ability: LitAbility }> = [];
+  private requests: Array<{
+    resource: ILitResource;
+    ability: LIT_ABILITY_VALUES;
+  }> = [];
 
   /**
    * Adds a PKP signing request to the builder.
@@ -35,7 +39,7 @@ export class ResourceAbilityRequestBuilder {
   addPKPSigningRequest(resourceId: string): this {
     this.requests.push({
       resource: new LitPKPResource(resourceId),
-      ability: LitAbility.PKPSigning,
+      ability: LIT_ABILITY.PKPSigning,
     });
     return this;
   }
@@ -48,7 +52,7 @@ export class ResourceAbilityRequestBuilder {
   addLitActionExecutionRequest(resourceId: string): this {
     this.requests.push({
       resource: new LitActionResource(resourceId),
-      ability: LitAbility.LitActionExecution,
+      ability: LIT_ABILITY.LitActionExecution,
     });
     return this;
   }
@@ -61,7 +65,7 @@ export class ResourceAbilityRequestBuilder {
   addAccessControlConditionSigningRequest(resourceId: string): this {
     this.requests.push({
       resource: new LitAccessControlConditionResource(resourceId),
-      ability: LitAbility.AccessControlConditionSigning,
+      ability: LIT_ABILITY.AccessControlConditionSigning,
     });
     return this;
   }
@@ -74,7 +78,7 @@ export class ResourceAbilityRequestBuilder {
   addAccessControlConditionDecryptionRequest(resourceId: string): this {
     this.requests.push({
       resource: new LitAccessControlConditionResource(resourceId),
-      ability: LitAbility.AccessControlConditionDecryption,
+      ability: LIT_ABILITY.AccessControlConditionDecryption,
     });
     return this;
   }
@@ -87,7 +91,7 @@ export class ResourceAbilityRequestBuilder {
   addRateLimitIncreaseAuthRequest(resourceId: string): this {
     this.requests.push({
       resource: new LitRLIResource(resourceId),
-      ability: LitAbility.RateLimitIncreaseAuth,
+      ability: LIT_ABILITY.RateLimitIncreaseAuth,
     });
     return this;
   }
@@ -96,7 +100,7 @@ export class ResourceAbilityRequestBuilder {
    * Builds the array of resource ability requests.
    * @returns The array of resource ability requests.
    */
-  build(): Array<{ resource: ILitResource; ability: LitAbility }> {
+  build(): Array<{ resource: ILitResource; ability: LIT_ABILITY_VALUES }> {
     return this.requests;
   }
 }

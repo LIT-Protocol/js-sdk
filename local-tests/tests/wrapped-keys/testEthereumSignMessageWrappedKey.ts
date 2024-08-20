@@ -10,7 +10,7 @@ const { importPrivateKey, signMessageWithEncryptedKey } = api;
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignMessageWrappedKey
  * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignMessageWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignMessageWrappedKey
+ * ✅ NETWORK=custom yarn test:local --filter=testEthereumSignMessageWrappedKey
  */
 export const testEthereumSignMessageWrappedKey = async (
   devEnv: TinnyEnvironment

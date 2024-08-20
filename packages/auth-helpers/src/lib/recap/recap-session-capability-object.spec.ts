@@ -1,8 +1,12 @@
 import { SiweMessage } from 'siwe';
-import { LitAbility, LitResourcePrefix } from '../models';
+import {
+  LIT_ABILITY,
+  LIT_RESOURCE_PREFIX,
+  LIT_NAMESPACE,
+  LIT_RECAP_ABILITY,
+} from '@lit-protocol/constants';
 import { LitAccessControlConditionResource } from '../resources';
 import { RecapSessionCapabilityObject } from './recap-session-capability-object';
-import { LitNamespace, LitRecapAbility } from './utils';
 
 const isClass = (v: any) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -12,9 +16,6 @@ const dummyCID =
   'bafysameboaza4mnsng7t3djdbilbrnliv6ikxh45zsph7kpettjfbp4ad2g2uu2znujlf2afphw25d4y35pq';
 
 describe('recapSessionCapabilityObject', () => {
-  // --global
-  let recapSessionCapabilityObject;
-
   // -- start
   it('imported { RecapSessionCapabilityObject } is a class', async () => {
     expect(isClass(RecapSessionCapabilityObject)).toBe(true);
@@ -51,7 +52,7 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
     const decodedRecapSessionCapabilityObject =
       RecapSessionCapabilityObject.decode(
@@ -67,7 +68,7 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
     const siweMessage = new SiweMessage({
       domain: 'example.com',
@@ -203,7 +204,7 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
     const siweMessage = new SiweMessage({
       domain: 'example.com',
@@ -220,9 +221,9 @@ describe('recapSessionCapabilityObject', () => {
       recapSessionCapabilityObject.addToSiweMessage(siweMessage);
     expect(newSiweMessage.statement).toEqual(
       `This is some existing statement. I further authorize the stated URI to perform the following actions on my behalf: (1) '${
-        LitNamespace.Threshold
+        LIT_NAMESPACE.Threshold
       }': '${
-        LitRecapAbility.Decryption
+        LIT_RECAP_ABILITY.Decryption
       }' for '${litResource.getResourceKey()}'.`
     );
     expect(newSiweMessage.resources).toEqual([
@@ -235,7 +236,7 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
 
     const siweResource = recapSessionCapabilityObject.encodeAsSiweResource();
@@ -249,12 +250,12 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
-      [`${LitResourcePrefix.AccessControlCondition}://someResource`]: {
-        [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
+      [`${LIT_RESOURCE_PREFIX.AccessControlCondition}://someResource`]: {
+        [`${LIT_NAMESPACE.Threshold}/${LIT_RECAP_ABILITY.Decryption}`]: [{}],
       },
     });
   });
@@ -264,17 +265,17 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionSigning
+      LIT_ABILITY.AccessControlConditionSigning
     );
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
-      [`${LitResourcePrefix.AccessControlCondition}://someResource`]: {
-        [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
-        [`${LitNamespace.Threshold}/${LitRecapAbility.Signing}`]: [{}],
+      [`${LIT_RESOURCE_PREFIX.AccessControlCondition}://someResource`]: {
+        [`${LIT_NAMESPACE.Threshold}/${LIT_RECAP_ABILITY.Decryption}`]: [{}],
+        [`${LIT_NAMESPACE.Threshold}/${LIT_RECAP_ABILITY.Signing}`]: [{}],
       },
     });
   });
@@ -284,12 +285,12 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionDecryption
+        LIT_ABILITY.AccessControlConditionDecryption
       )
     ).toBe(true);
   });
@@ -299,23 +300,23 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionSigning
+      LIT_ABILITY.AccessControlConditionSigning
     );
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionSigning
+        LIT_ABILITY.AccessControlConditionSigning
       )
     ).toBe(true);
 
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionDecryption
+        LIT_ABILITY.AccessControlConditionDecryption
       )
     ).toBe(true);
   });
@@ -325,12 +326,12 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionSigning
+        LIT_ABILITY.AccessControlConditionSigning
       )
     ).toBe(false);
   });
@@ -341,7 +342,7 @@ describe('recapSessionCapabilityObject', () => {
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionSigning
+        LIT_ABILITY.AccessControlConditionSigning
       )
     ).toBe(false);
   });
@@ -352,26 +353,26 @@ describe('recapSessionCapabilityObject', () => {
     recapSessionCapabilityObject.addAllCapabilitiesForResource(litResource);
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
-      [`${LitResourcePrefix.AccessControlCondition}://someResource`]: {
+      [`${LIT_RESOURCE_PREFIX.AccessControlCondition}://someResource`]: {
         [`*/*`]: [{}],
       },
     });
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionSigning
+        LIT_ABILITY.AccessControlConditionSigning
       )
     ).toBe(true);
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionDecryption
+        LIT_ABILITY.AccessControlConditionDecryption
       )
     ).toBe(true);
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.PKPSigning
+        LIT_ABILITY.PKPSigning
       )
     ).toBe(false);
   });
@@ -381,30 +382,30 @@ describe('recapSessionCapabilityObject', () => {
     const litResource = new LitAccessControlConditionResource('*');
     recapSessionCapabilityObject.addCapabilityForResource(
       litResource,
-      LitAbility.AccessControlConditionDecryption
+      LIT_ABILITY.AccessControlConditionDecryption
     );
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
-      [`${LitResourcePrefix.AccessControlCondition}://*`]: {
-        [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
+      [`${LIT_RESOURCE_PREFIX.AccessControlCondition}://*`]: {
+        [`${LIT_NAMESPACE.Threshold}/${LIT_RECAP_ABILITY.Decryption}`]: [{}],
       },
     });
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionSigning
+        LIT_ABILITY.AccessControlConditionSigning
       )
     ).toBe(false);
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionDecryption
+        LIT_ABILITY.AccessControlConditionDecryption
       )
     ).toBe(true);
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         new LitAccessControlConditionResource('someResource'),
-        LitAbility.AccessControlConditionDecryption
+        LIT_ABILITY.AccessControlConditionDecryption
       )
     ).toBe(true);
   });
@@ -415,32 +416,32 @@ describe('recapSessionCapabilityObject', () => {
     recapSessionCapabilityObject.addAllCapabilitiesForResource(litResource);
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
-      [`${LitResourcePrefix.AccessControlCondition}://*`]: {
+      [`${LIT_RESOURCE_PREFIX.AccessControlCondition}://*`]: {
         [`*/*`]: [{}],
       },
     });
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionSigning
+        LIT_ABILITY.AccessControlConditionSigning
       )
     ).toBe(true);
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         litResource,
-        LitAbility.AccessControlConditionDecryption
+        LIT_ABILITY.AccessControlConditionDecryption
       )
     ).toBe(true);
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         new LitAccessControlConditionResource('someResource'),
-        LitAbility.AccessControlConditionDecryption
+        LIT_ABILITY.AccessControlConditionDecryption
       )
     ).toBe(true);
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
         new LitAccessControlConditionResource('someResource'),
-        LitAbility.PKPSigning
+        LIT_ABILITY.PKPSigning
       )
     ).toBe(false);
   });

@@ -1,7 +1,7 @@
 import * as cbor from 'cbor-web';
 
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   InvalidArgumentException,
   UnknownError,
 } from '@lit-protocol/constants';
@@ -352,25 +352,25 @@ export async function getAuthIdByAuthMethod(
   let authId;
 
   switch (authMethod.authMethodType) {
-    case AuthMethodType.EthWallet:
+    case AUTH_METHOD_TYPE.EthWallet:
       authId = await EthWalletProvider.authMethodId(authMethod);
       break;
-    case AuthMethodType.Discord:
+    case AUTH_METHOD_TYPE.Discord:
       authId = await DiscordProvider.authMethodId(authMethod);
       break;
-    case AuthMethodType.WebAuthn:
+    case AUTH_METHOD_TYPE.WebAuthn:
       authId = await WebAuthnProvider.authMethodId(authMethod);
       break;
-    case AuthMethodType.GoogleJwt:
+    case AUTH_METHOD_TYPE.GoogleJwt:
       authId = await GoogleProvider.authMethodId(authMethod);
       break;
-    case AuthMethodType.StytchOtp:
+    case AUTH_METHOD_TYPE.StytchOtp:
       authId = await StytchOtpProvider.authMethodId(authMethod);
       break;
-    case AuthMethodType.StytchEmailFactorOtp:
-    case AuthMethodType.StytchSmsFactorOtp:
-    case AuthMethodType.StytchTotpFactorOtp:
-    case AuthMethodType.StytchWhatsAppFactorOtp:
+    case AUTH_METHOD_TYPE.StytchEmailFactorOtp:
+    case AUTH_METHOD_TYPE.StytchSmsFactorOtp:
+    case AUTH_METHOD_TYPE.StytchTotpFactorOtp:
+    case AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp:
       authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
       break;
     default:

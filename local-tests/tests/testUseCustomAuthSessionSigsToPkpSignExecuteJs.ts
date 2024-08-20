@@ -1,11 +1,8 @@
+import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import {
-  LitAbility,
-  LitActionResource,
-  LitPKPResource,
-} from '@lit-protocol/auth-helpers';
-import {
-  AuthMethodScope,
+  AUTH_METHOD_SCOPE,
   CENTRALISATION_BY_NETWORK,
+  LIT_ABILITY,
 } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { stringToIpfsHash } from 'local-tests/setup/tinny-utils';
@@ -14,7 +11,7 @@ import { stringToIpfsHash } from 'local-tests/setup/tinny-utils';
  * Test Commands:
  * NETWORK=cayenne yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
  * NOT AVAILABLE IN HABANERO
- * NETWORK=localchain yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
+ * NETWORK=custom yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
  */
 export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   devEnv: TinnyEnvironment
@@ -39,7 +36,7 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
       pkpTokenId: alice.pkp.tokenId,
       authMethodType: customAuthMethod.authMethodType,
       authMethodId: customAuthMethod.authMethodId,
-      authMethodScopes: [AuthMethodScope.SignAnything],
+      authMethodScopes: [AUTH_METHOD_SCOPE.SignAnything],
     });
 
   console.log(
@@ -75,7 +72,7 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
     await alice.contractsClient.addPermittedAction({
       ipfsId: IPFSID,
       pkpTokenId: alice.pkp.tokenId,
-      authMethodScopes: [AuthMethodScope.SignAnything],
+      authMethodScopes: [AUTH_METHOD_SCOPE.SignAnything],
     });
 
   console.log('✅ addPermittedActionReceipt:', addPermittedActionReceipt);
@@ -89,11 +86,11 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
       resourceAbilityRequests: [
         {
           resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
+          ability: LIT_ABILITY.PKPSigning,
         },
         {
           resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
+          ability: LIT_ABILITY.LitActionExecution,
         },
       ],
       // litActionIpfsId: IPFSID,

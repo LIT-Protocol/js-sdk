@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { log } from '@lit-protocol/misc';
-import { LitAbility } from '@lit-protocol/types';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { getLitActionSessionSigsUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -8,7 +8,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
  * ❌ NOT AVAILABLE IN HABANERO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
  */
 export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: TinnyEnvironment) => {
@@ -19,11 +19,11 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
       [
         {
           resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
+          ability: LIT_ABILITY.PKPSigning,
         },
         {
           resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
+          ability: LIT_ABILITY.LitActionExecution,
         },
       ]
     );

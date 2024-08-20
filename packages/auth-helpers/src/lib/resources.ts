@@ -1,16 +1,17 @@
 import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
-import { InvalidArgumentException } from '@lit-protocol/constants';
 import {
-  AccessControlConditions,
-  ILitResource,
-  LitAbility,
-  LitResourcePrefix,
-} from '@lit-protocol/types';
+  InvalidArgumentException,
+  LIT_ABILITY,
+  LIT_ABILITY_VALUES,
+  LIT_RESOURCE_PREFIX,
+  LIT_RESOURCE_PREFIX_VALUES,
+} from '@lit-protocol/constants';
+import { AccessControlConditions, ILitResource } from '@lit-protocol/types';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 import { formatPKPResource } from './utils';
 
 abstract class LitResourceBase {
-  abstract resourcePrefix: LitResourcePrefix;
+  abstract resourcePrefix: LIT_RESOURCE_PREFIX_VALUES;
   public readonly resource: string;
 
   constructor(resource: string) {
@@ -30,7 +31,7 @@ export class LitAccessControlConditionResource
   extends LitResourceBase
   implements ILitResource
 {
-  public readonly resourcePrefix = LitResourcePrefix.AccessControlCondition;
+  public readonly resourcePrefix = LIT_RESOURCE_PREFIX.AccessControlCondition;
 
   /**
    * Creates a new LitAccessControlConditionResource.
@@ -41,10 +42,10 @@ export class LitAccessControlConditionResource
     super(resource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
+  isValidLitAbility(litAbility: LIT_ABILITY_VALUES): boolean {
     return (
-      litAbility === LitAbility.AccessControlConditionDecryption ||
-      litAbility === LitAbility.AccessControlConditionSigning
+      litAbility === LIT_ABILITY.AccessControlConditionDecryption ||
+      litAbility === LIT_ABILITY.AccessControlConditionSigning
     );
   }
 
@@ -84,7 +85,7 @@ export class LitAccessControlConditionResource
 }
 
 export class LitPKPResource extends LitResourceBase implements ILitResource {
-  public readonly resourcePrefix = LitResourcePrefix.PKP;
+  public readonly resourcePrefix = LIT_RESOURCE_PREFIX.PKP;
 
   /**
    * Creates a new LitPKPResource.
@@ -96,13 +97,13 @@ export class LitPKPResource extends LitResourceBase implements ILitResource {
     super(fixedResource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
-    return litAbility === LitAbility.PKPSigning;
+  isValidLitAbility(litAbility: LIT_ABILITY_VALUES): boolean {
+    return litAbility === LIT_ABILITY.PKPSigning;
   }
 }
 
 export class LitRLIResource extends LitResourceBase implements ILitResource {
-  public readonly resourcePrefix = LitResourcePrefix.RLI;
+  public readonly resourcePrefix = LIT_RESOURCE_PREFIX.RLI;
 
   /**
    * Creates a new LitRLIResource.
@@ -113,13 +114,13 @@ export class LitRLIResource extends LitResourceBase implements ILitResource {
     super(resource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
-    return litAbility === LitAbility.RateLimitIncreaseAuth;
+  isValidLitAbility(litAbility: LIT_ABILITY_VALUES): boolean {
+    return litAbility === LIT_ABILITY.RateLimitIncreaseAuth;
   }
 }
 
 export class LitActionResource extends LitResourceBase implements ILitResource {
-  public readonly resourcePrefix = LitResourcePrefix.LitAction;
+  public readonly resourcePrefix = LIT_RESOURCE_PREFIX.LitAction;
 
   /**
    * Creates a new LitActionResource.
@@ -130,29 +131,29 @@ export class LitActionResource extends LitResourceBase implements ILitResource {
     super(resource);
   }
 
-  isValidLitAbility(litAbility: LitAbility): boolean {
-    return litAbility === LitAbility.LitActionExecution;
+  isValidLitAbility(litAbility: LIT_ABILITY_VALUES): boolean {
+    return litAbility === LIT_ABILITY.LitActionExecution;
   }
 }
 
 export function parseLitResource(resourceKey: string): ILitResource {
-  if (resourceKey.startsWith(LitResourcePrefix.AccessControlCondition)) {
+  if (resourceKey.startsWith(LIT_RESOURCE_PREFIX.AccessControlCondition)) {
     return new LitAccessControlConditionResource(
       resourceKey.substring(
-        `${LitResourcePrefix.AccessControlCondition}://`.length
+        `${LIT_RESOURCE_PREFIX.AccessControlCondition}://`.length
       )
     );
-  } else if (resourceKey.startsWith(LitResourcePrefix.PKP)) {
+  } else if (resourceKey.startsWith(LIT_RESOURCE_PREFIX.PKP)) {
     return new LitPKPResource(
-      resourceKey.substring(`${LitResourcePrefix.PKP}://`.length)
+      resourceKey.substring(`${LIT_RESOURCE_PREFIX.PKP}://`.length)
     );
-  } else if (resourceKey.startsWith(LitResourcePrefix.RLI)) {
+  } else if (resourceKey.startsWith(LIT_RESOURCE_PREFIX.RLI)) {
     return new LitRLIResource(
-      resourceKey.substring(`${LitResourcePrefix.RLI}://`.length)
+      resourceKey.substring(`${LIT_RESOURCE_PREFIX.RLI}://`.length)
     );
-  } else if (resourceKey.startsWith(LitResourcePrefix.LitAction)) {
+  } else if (resourceKey.startsWith(LIT_RESOURCE_PREFIX.LitAction)) {
     return new LitActionResource(
-      resourceKey.substring(`${LitResourcePrefix.LitAction}://`.length)
+      resourceKey.substring(`${LIT_RESOURCE_PREFIX.LitAction}://`.length)
     );
   }
   throw new InvalidArgumentException(

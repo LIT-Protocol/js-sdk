@@ -2,14 +2,12 @@ import { log } from '@lit-protocol/misc';
 import { ClaimRequest, ClientClaimProcessor } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { EthWalletProvider, LitRelay } from '@lit-protocol/lit-auth-client';
-import { LitNetwork } from '@lit-protocol/constants';
-import { withTimeout } from 'local-tests/setup/tinny-utils';
 
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testRelayer
  * ✅ NETWORK=manzano yarn test:local --filter=testRelayer
- * ✅ NETWORK=localchain yarn test:local --filter=testRelayer
+ * ✅ NETWORK=custom yarn test:local --filter=testRelayer
  * ✅ NETWORK=datil-dev yarn test:local --filter=testRelayer
  */
 export const testRelayer = async (devEnv: TinnyEnvironment) => {
@@ -17,8 +15,7 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
 
   // -- test fetch pkps
   const litRelay = new LitRelay({
-    // devEnv.network is LIT_TESTNET, which is an enum similar to LitNetwork but with less networks
-    relayUrl: LitRelay.getRelayUrl(devEnv.network as unknown as LitNetwork),
+    relayUrl: LitRelay.getRelayUrl(devEnv.network),
     relayApiKey: 'test-api-key',
   });
   const ethWalletProvider = new EthWalletProvider({

@@ -16,14 +16,13 @@ import {
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
-  LitNetwork,
   ParamsMissingError,
   ParamNullError,
   NoValidShares,
@@ -247,7 +246,7 @@ export class LitNodeClientNodeJs
       storedSessionKeyOrError.result === ''
     ) {
       console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
 
       // Generate new one
@@ -258,7 +257,7 @@ export class LitNodeClientNodeJs
         localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
       } catch (e) {
         log(
-          `[getSessionKey] Localstorage not available.Not a problem. Contiune...`
+          `[getSessionKey] Localstorage not available.Not a problem. Continue...`
         );
       }
 
@@ -669,7 +668,7 @@ export class LitNodeClientNodeJs
     ciphertext: string,
     signatureShares: NodeBlsSigningShare[]
   ): Promise<Uint8Array> => {
-    const sigShares = signatureShares.map((s: any) => s.signatureShare);
+    const sigShares = signatureShares.map((s) => s.signatureShare);
 
     return verifyAndDecryptWithSignatureShares(
       networkPubKey,
@@ -2073,7 +2072,7 @@ export class LitNodeClientNodeJs
    *
    * ```ts
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
-import { LitAbility } from "@lit-protocol/types";
+import { LitAbility } from "@lit-protocol/constants";
 import { logWithRequestId } from '../../../misc/src/lib/misc';
 
 const resourceAbilityRequests = [
@@ -2387,7 +2386,7 @@ const resourceAbilityRequests = [
       throw new LitNodeClientNotReadyError({}, message);
     }
 
-    if (params.authMethod.authMethodType == AuthMethodType.WebAuthn) {
+    if (params.authMethod.authMethodType == AUTH_METHOD_TYPE.WebAuthn) {
       throw new LitNodeClientNotReadyError(
         {},
         'Unsupported auth method type. Webauthn, and Lit Actions are not supported for claiming'
@@ -2462,7 +2461,7 @@ const resourceAbilityRequests = [
             signer: (params as ClaimRequest<'client'>).signer,
             ...relayParams,
           },
-          this.config.litNetwork as LitNetwork
+          this.config.litNetwork
         );
       } else {
         mintTx = await defaultMintClaimCallback(
@@ -2473,7 +2472,7 @@ const resourceAbilityRequests = [
             pubkey,
             ...relayParams,
           },
-          this.config.litNetwork as LitNetwork
+          this.config.litNetwork
         );
       }
 

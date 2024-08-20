@@ -1,14 +1,14 @@
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
  * ❌ NETWORK=cayenne yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  * ❌ NETWORK=manzano yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
- * ❌ NETWORK=localchain yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
+ * ❌ NETWORK=custom yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  * ❌ NETWORK=datil-dev yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  */
 export const testCosmosAuthSigToEncryptDecryptString = async (
@@ -16,10 +16,10 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
 ) => {
   console.log('❌❌ THIS IS A KNOWN FAILING TEST, PLEASE IGNORE FOR NOW. ❌❌');
 
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
-  devEnv.setUnavailable(LIT_TESTNET.LOCALCHAIN);
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-  devEnv.setUnavailable(LIT_TESTNET.DATIL_DEV);
+  devEnv.setUnavailable(LIT_NETWORK.Cayenne);
+  devEnv.setUnavailable(LIT_NETWORK.Custom);
+  devEnv.setUnavailable(LIT_NETWORK.Manzano);
+  devEnv.setUnavailable(LIT_NETWORK.DatilDev);
 
   const accs = AccessControlConditions.getCosmosBasicAccessControlConditions({
     userAddress: devEnv.bareCosmosAuthSig.address,

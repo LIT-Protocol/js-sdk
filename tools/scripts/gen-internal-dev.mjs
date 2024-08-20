@@ -109,7 +109,7 @@ export const INTERNAL_DEFAULT_CONFIG = {
   minNodeCount: ${minNodeCount},
   debug: true,
   bootstrapUrls: ${content},
-  litNetwork: 'internalDev',
+  litNetwork: 'custom',
   connectTimeout: 20000,
 };`
   );

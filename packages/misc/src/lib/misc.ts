@@ -10,13 +10,15 @@ import {
   LIT_CHAINS,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
+  LOG_LEVEL,
+  LOG_LEVEL_VALUES,
   NetworkError,
   RELAYER_URL_BY_NETWORK,
   RemovedFunctionError,
   UnknownError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
+import { LogManager } from '@lit-protocol/logger';
 import {
   Chain,
   AuthSig,
@@ -113,7 +115,7 @@ export const throwRemovedFunctionError = (functionName: string) => {
 
 export const bootstrapLogManager = (
   id: string,
-  level: LogLevel = LogLevel.DEBUG
+  level: LOG_LEVEL_VALUES = LOG_LEVEL.DEBUG
 ) => {
   if (!globalThis.logManager) {
     globalThis.logManager = LogManager.Instance;
@@ -547,9 +549,9 @@ export const genRandomPath = (): string => {
 };
 
 /**
- * Checks if the given LitNetwork value is supported.
- * @param litNetwork - The LitNetwork value to check.
- * @throws {Error} - Throws an error if the LitNetwork value is not supported.
+ * Checks if the given LIT_NETWORK value is supported.
+ * @param litNetwork - The Lit Network value to check.
+ * @throws {Error} - Throws an error if the Lit Network value is not supported.
  */
 export function isSupportedLitNetwork(
   litNetwork: LIT_NETWORK_VALUES

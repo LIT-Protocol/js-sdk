@@ -10,9 +10,9 @@ import { ethers } from 'ethers';
 import {
   createSiweMessageWithRecaps,
   generateAuthSig,
-  LitAbility,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
@@ -31,7 +31,7 @@ describe('PKPWalletConnect', () => {
   let pkpWalletConnect: PKPWalletConnect;
 
   beforeAll(() => {
-    const litNodeClient = new LitNodeClient({ litNetwork: 'localhost' });
+    const litNodeClient = new LitNodeClient({ litNetwork: 'custom' });
 
     pkpEthersWallet = new PKPEthersWallet({
       litNodeClient,
@@ -58,7 +58,7 @@ describe('PKPWalletConnect', () => {
           resourceAbilityRequests: [
             {
               resource: new LitPKPResource('*'),
-              ability: LitAbility.PKPSigning,
+              ability: LIT_ABILITY.PKPSigning,
             },
           ],
         },

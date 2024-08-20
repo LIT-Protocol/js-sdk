@@ -1,4 +1,4 @@
-import { EITHER_TYPE } from '../enums';
+import { EITHER_TYPE } from '../constants/constants';
 import { LitError } from '../errors';
 
 /**
@@ -7,11 +7,11 @@ import { LitError } from '../errors';
 export type IEither<T> = IEitherError | IEitherSuccess<T>;
 
 export interface IEitherError {
-  type: EITHER_TYPE.ERROR;
+  type: typeof EITHER_TYPE.ERROR;
   result: LitError;
 }
 
 export interface IEitherSuccess<T> {
-  type: EITHER_TYPE.SUCCESS;
+  type: typeof EITHER_TYPE.SUCCESS;
   result: T;
 }

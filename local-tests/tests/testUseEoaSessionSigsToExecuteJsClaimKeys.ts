@@ -5,8 +5,6 @@
 //   ClaimResult,
 //   ClientClaimProcessor,
 // } from '@lit-protocol/types';
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
@@ -25,7 +23,7 @@ import { log } from '@lit-protocol/misc';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
  * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
- * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
+ * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys
  */
 export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
   devEnv: TinnyEnvironment

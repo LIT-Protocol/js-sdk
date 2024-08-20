@@ -4,7 +4,7 @@ import {
   OAuthProviderOptions,
 } from '@lit-protocol/types';
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   UnauthorizedException,
   UnknownError,
 } from '@lit-protocol/constants';
@@ -130,7 +130,7 @@ export default class DiscordProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.Discord,
+      authMethodType: AUTH_METHOD_TYPE.Discord,
       accessToken: accessToken,
     };
     return authMethod;
@@ -183,7 +183,7 @@ export default class DiscordProvider extends BaseProvider {
           clearInterval(interval);
           popup.close();
           resolve({
-            authMethodType: AuthMethodType.Discord,
+            authMethodType: AUTH_METHOD_TYPE.Discord,
             accessToken: token,
           });
         }

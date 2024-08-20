@@ -1,4 +1,4 @@
-import { AuthMethodType, WrongParamFormat } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE, WrongParamFormat } from '@lit-protocol/constants';
 import {
   AuthMethod,
   BaseAuthenticateOptions,
@@ -78,7 +78,7 @@ export class StytchOtpProvider extends BaseProvider {
       }
 
       resolve({
-        authMethodType: AuthMethodType.StytchOtp,
+        authMethodType: AUTH_METHOD_TYPE.StytchOtp,
         accessToken: accessToken,
       });
     });

@@ -11,7 +11,7 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1
  * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1
- * ✅ NETWORK=localchain yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1
+ * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1
  */
 export const testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1 = async (
   devEnv: TinnyEnvironment

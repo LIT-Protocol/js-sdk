@@ -11,7 +11,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil
  * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil
- * ✅ NETWORK=localchain yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil
+ * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil
  */
 export const testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil = async (
   devEnv: TinnyEnvironment

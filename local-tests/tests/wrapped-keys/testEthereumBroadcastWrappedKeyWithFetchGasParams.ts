@@ -11,7 +11,7 @@ const { importPrivateKey, signTransactionWithEncryptedKey } = api;
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
  * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
+ * ✅ NETWORK=custom yarn test:local --filter=testEthereumBroadcastWrappedKeyWithFetchGasParams
  */
 export const testEthereumBroadcastWrappedKeyWithFetchGasParams = async (
   devEnv: TinnyEnvironment

@@ -1,12 +1,7 @@
-import {
-  AuthMethodScope,
-  AuthMethodType,
-  LIT_ENDPOINT_VERSION,
-} from '@lit-protocol/constants';
+import { AUTH_METHOD_SCOPE, AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LitAbility } from '@lit-protocol/types';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 
 /**
  * ## Scenario:
@@ -20,7 +15,7 @@ import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
  * ## Test Commands:
  * - ❌ Not supported in Cayenne
  * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
- * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
+ * - ✅ NETWORK=custom yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
  */
 export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
   devEnv: TinnyEnvironment
@@ -34,12 +29,12 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
   const scopes =
     await bob.contractsClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
       bob.authMethodOwnedPkp.tokenId,
-      AuthMethodType.EthWallet,
+      AUTH_METHOD_TYPE.EthWallet,
       bobsAuthMethodAuthId,
       3
     );
 
-  if (!scopes[AuthMethodScope.SignAnything]) {
+  if (!scopes[AUTH_METHOD_SCOPE.SignAnything]) {
     throw new Error('Bob does not have the "SignAnything" scope on his PKP');
   }
 
@@ -55,11 +50,11 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
     resourceAbilityRequests: [
       {
         resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+        ability: LIT_ABILITY.PKPSigning,
       },
       {
         resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
+        ability: LIT_ABILITY.LitActionExecution,
       },
     ],
     capabilityAuthSigs: [capacityDelegationAuthSig],

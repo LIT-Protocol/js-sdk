@@ -1,6 +1,9 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
-import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
+import { LitResourceAbilityRequest } from '@lit-protocol/types';
+import {
+  LIT_ABILITY,
+  CENTRALISATION_BY_NETWORK,
+} from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 
@@ -49,11 +52,11 @@ export const getLitActionSessionSigs = async (
   const _resourceAbilityRequests = resourceAbilityRequests || [
     {
       resource: new LitPKPResource('*'),
-      ability: LitAbility.PKPSigning,
+      ability: LIT_ABILITY.PKPSigning,
     },
     {
       resource: new LitActionResource('*'),
-      ability: LitAbility.LitActionExecution,
+      ability: LIT_ABILITY.LitActionExecution,
     },
   ];
 
@@ -96,11 +99,11 @@ export const getLitActionSessionSigsUsingIpfsId = async (
   const _resourceAbilityRequests = resourceAbilityRequests || [
     {
       resource: new LitPKPResource('*'),
-      ability: LitAbility.PKPSigning,
+      ability: LIT_ABILITY.PKPSigning,
     },
     {
       resource: new LitActionResource('*'),
-      ability: LitAbility.LitActionExecution,
+      ability: LIT_ABILITY.LitActionExecution,
     },
   ];
 
@@ -132,7 +135,7 @@ export const getInvalidLitActionSessionSigs = async (
     resourceAbilityRequests: [
       {
         resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+        ability: LIT_ABILITY.PKPSigning,
       },
     ],
     litActionCode: Buffer.from(INVALID_SESSION_SIG_LIT_ACTION_CODE).toString(
@@ -157,7 +160,7 @@ export const getInvalidLitActionIpfsSessionSigs = async (
     resourceAbilityRequests: [
       {
         resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+        ability: LIT_ABILITY.PKPSigning,
       },
     ],
     litActionIpfsId: INVALID_IPFS_ID,

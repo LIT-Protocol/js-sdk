@@ -1,5 +1,6 @@
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
+  AUTH_METHOD_TYPE_VALUES,
   InvalidArgumentException,
   WrongParamFormat,
 } from '@lit-protocol/constants';
@@ -114,16 +115,16 @@ export default class StytchAuthFactorOtpProvider<
         StytchAuthFactorOtpProvider._parseJWT(accessToken);
       let factor: FactorParser = 'email';
       switch (authMethod.authMethodType) {
-        case AuthMethodType.StytchEmailFactorOtp:
+        case AUTH_METHOD_TYPE.StytchEmailFactorOtp:
           factor = 'email';
           break;
-        case AuthMethodType.StytchSmsFactorOtp:
+        case AUTH_METHOD_TYPE.StytchSmsFactorOtp:
           factor = 'sms';
           break;
-        case AuthMethodType.StytchWhatsAppFactorOtp:
+        case AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp:
           factor = 'whatsApp';
           break;
-        case AuthMethodType.StytchTotpFactorOtp:
+        case AUTH_METHOD_TYPE.StytchTotpFactorOtp:
           factor = 'totp';
           break;
         default:
@@ -147,28 +148,28 @@ export default class StytchAuthFactorOtpProvider<
 
   private static _resolveAuthFactor(factor: FactorParser): {
     parser: Function;
-    authMethodType: AuthMethodType;
+    authMethodType: AUTH_METHOD_TYPE_VALUES;
   } {
     switch (factor) {
       case 'email':
         return {
           parser: emailOtpAuthFactorParser,
-          authMethodType: AuthMethodType.StytchEmailFactorOtp,
+          authMethodType: AUTH_METHOD_TYPE.StytchEmailFactorOtp,
         };
       case 'sms':
         return {
           parser: smsOtpAuthFactorParser,
-          authMethodType: AuthMethodType.StytchSmsFactorOtp,
+          authMethodType: AUTH_METHOD_TYPE.StytchSmsFactorOtp,
         };
       case 'whatsApp':
         return {
           parser: whatsAppOtpAuthFactorParser,
-          authMethodType: AuthMethodType.StytchWhatsAppFactorOtp,
+          authMethodType: AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp,
         };
       case 'totp':
         return {
           parser: totpAuthFactorParser,
-          authMethodType: AuthMethodType.StytchTotpFactorOtp,
+          authMethodType: AUTH_METHOD_TYPE.StytchTotpFactorOtp,
         };
     }
   }

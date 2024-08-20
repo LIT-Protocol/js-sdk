@@ -13,7 +13,7 @@ const { generatePrivateKey, signMessageWithEncryptedKey, exportPrivateKey } =
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testGenerateSolanaWrappedKey
  * ✅ NETWORK=manzano yarn test:local --filter=testGenerateSolanaWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testGenerateSolanaWrappedKey
+ * ✅ NETWORK=custom yarn test:local --filter=testGenerateSolanaWrappedKey
  */
 export const testGenerateSolanaWrappedKey = async (
   devEnv: TinnyEnvironment

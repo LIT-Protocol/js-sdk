@@ -18,7 +18,7 @@ const { importPrivateKey, signTransactionWithEncryptedKey } = api;
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
  * ✅ NETWORK=manzano yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
+ * ✅ NETWORK=custom yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
  */
 export const testSignTransactionWithSolanaEncryptedKey = async (
   devEnv: TinnyEnvironment

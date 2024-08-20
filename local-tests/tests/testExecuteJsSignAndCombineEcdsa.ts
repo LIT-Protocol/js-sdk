@@ -1,5 +1,3 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -15,7 +13,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ## Test Commands:
  * - ❌ Not supported in Cayenne, but session sigs would still work
  * - ✅ NETWORK=manzano yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs
- * - ✅ NETWORK=localchain yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs
+ * - ✅ NETWORK=custom yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs
  */
 export const testExecuteJsSignAndCombineEcdsa = async (
   devEnv: TinnyEnvironment

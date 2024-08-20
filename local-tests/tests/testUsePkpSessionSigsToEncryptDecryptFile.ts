@@ -1,5 +1,6 @@
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
+import { LIT_ABILITY } from '@lit-protocol/constants';
+import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
@@ -10,7 +11,7 @@ import { log } from '@lit-protocol/misc';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
- * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
  */
 export const testUsePkpSessionSigsToEncryptDecryptFile = async (
   devEnv: TinnyEnvironment
@@ -62,7 +63,7 @@ export const testUsePkpSessionSigsToEncryptDecryptFile = async (
   const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, alice, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
-      ability: LitAbility.AccessControlConditionDecryption,
+      ability: LIT_ABILITY.AccessControlConditionDecryption,
     },
   ]);
 

@@ -22,13 +22,13 @@ class ShivaError extends Error {
 
 export interface ShivaEnvs {
   /**
-   * If runnnig no localchain this flag will stop the running testnet when the test
+   * If running on local chain this flag will stop the running testnet when the test
    * run has finished. Which is when all pending task promises have settled.
    */
   STOP_TESTNET: boolean;
 
   /**
-   * URL for Testnet manager intigration
+   * URL for Testnet manager integration
    */
   TESTNET_MANAGER_URL: string;
 
@@ -57,7 +57,7 @@ export interface ShivaEnvs {
 
 /**
  * Client implementation for a single testnet instance managed by the Shiva tool
- * Is essentially a localchain setup but allows for programmatic operations to be performed
+ * Is essentially a local chain setup but allows for programmatic operations to be performed
  * on the network from the implementation within this class. Each testnet is a unique network
  */
 export class TestnetClient {

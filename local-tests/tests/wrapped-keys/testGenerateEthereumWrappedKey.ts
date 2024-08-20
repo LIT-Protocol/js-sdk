@@ -11,7 +11,7 @@ const { generatePrivateKey } = api;
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testGenerateEthereumWrappedKey
  * ✅ NETWORK=manzano yarn test:local --filter=testGenerateEthereumWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testGenerateEthereumWrappedKey
+ * ✅ NETWORK=custom yarn test:local --filter=testGenerateEthereumWrappedKey
  */
 export const testGenerateEthereumWrappedKey = async (
   devEnv: TinnyEnvironment

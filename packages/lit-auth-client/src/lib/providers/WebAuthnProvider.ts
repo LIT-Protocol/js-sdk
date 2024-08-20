@@ -5,7 +5,7 @@ import {
   WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   RemovedFunctionError,
   UnknownError,
   WrongParamFormat,
@@ -62,7 +62,7 @@ export default class WebAuthnProvider extends BaseProvider {
 
     // Get auth method id
     const authMethodId = await this.getAuthMethodId({
-      authMethodType: AuthMethodType.WebAuthn,
+      authMethodType: AUTH_METHOD_TYPE.WebAuthn,
       accessToken: JSON.stringify(attResp),
     });
 
@@ -73,7 +73,7 @@ export default class WebAuthnProvider extends BaseProvider {
     // Format args for relay server
     const defaultArgs = {
       keyType: 2,
-      permittedAuthMethodTypes: [AuthMethodType.WebAuthn],
+      permittedAuthMethodTypes: [AUTH_METHOD_TYPE.WebAuthn],
       permittedAuthMethodIds: [authMethodId],
       permittedAuthMethodPubkeys: [authMethodPubkey],
       permittedAuthMethodScopes: [[ethers.BigNumber.from('1')]],
@@ -160,7 +160,7 @@ export default class WebAuthnProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.WebAuthn,
+      authMethodType: AUTH_METHOD_TYPE.WebAuthn,
       accessToken: JSON.stringify(actualAuthenticationResponse),
     };
 

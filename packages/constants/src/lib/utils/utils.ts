@@ -1,4 +1,4 @@
-import { EITHER_TYPE } from '../enums';
+import { EITHER_TYPE } from '../constants/constants';
 import { LitError } from '../errors';
 import { IEitherSuccess, IEitherError } from '../interfaces/i-errors';
 

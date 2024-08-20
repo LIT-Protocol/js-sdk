@@ -1,28 +1,23 @@
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
+import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
-import {
-  LitAccessControlConditionResource,
-  LitActionResource,
-} from '@lit-protocol/auth-helpers';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
-import * as accessControlConditions from '@lit-protocol/access-control-conditions';
 
 /**
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ❌ NOT AVAILABLE IN MANZANO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
 export const testExecutJsDecryptAndCombine = async (
   devEnv: TinnyEnvironment
 ) => {
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+  devEnv.setUnavailable(LIT_NETWORK.Manzano);
 
   const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting

@@ -19,12 +19,14 @@ import {
   HTTP,
   HTTPS,
   LIT_CURVE,
+  LIT_CURVE_VALUES,
   LIT_ENDPOINT,
   LIT_ERROR_CODE,
+  LIT_NETWORK,
   LIT_NETWORKS,
-  LitNetwork,
   RPC_URL_BY_NETWORK,
-  StakingStates,
+  STAKING_STATES,
+  STAKING_STATES_VALUES,
   version,
   InitError,
   InvalidParamType,
@@ -59,7 +61,6 @@ import {
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
-  NodeAttestation,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
@@ -116,9 +117,9 @@ const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
 // Intentionally not including datil-dev here per discussion with Howard
 const NETWORKS_REQUIRING_SEV: string[] = [
-  LitNetwork.Habanero,
-  LitNetwork.Manzano,
-  LitNetwork.DatilTest,
+  LIT_NETWORK.Habanero,
+  LIT_NETWORK.Manzano,
+  LIT_NETWORK.DatilTest,
 ];
 
 export class LitCore {
@@ -166,10 +167,10 @@ export class LitCore {
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
       // Official networks; default value for `checkNodeAttestation` according to network provided.
-      case LitNetwork.Cayenne:
-      case LitNetwork.DatilDev:
-      case LitNetwork.Manzano:
-      case LitNetwork.Habanero:
+      case LIT_NETWORK.Cayenne:
+      case LIT_NETWORK.DatilDev:
+      case LIT_NETWORK.Manzano:
+      case LIT_NETWORK.Habanero:
         this.config = {
           ...this.config,
           checkNodeAttestation: NETWORKS_REQUIRING_SEV.includes(
@@ -179,7 +180,7 @@ export class LitCore {
         };
         break;
       default:
-        // `custom` or `localhost`; no opinion about checkNodeAttestation
+        // `custom`; no opinion about checkNodeAttestation
         this.config = {
           ...this.config,
           ...config,
@@ -263,10 +264,12 @@ export class LitCore {
   }
 
   // ========== Scoped Class Helpers ==========
-  private async _handleStakingContractStateChange(state: StakingStates) {
+  private async _handleStakingContractStateChange(
+    state: STAKING_STATES_VALUES
+  ) {
     log(`New state detected: "${state}"`);
 
-    if (state === StakingStates.Active) {
+    if (state === STAKING_STATES.Active) {
       // We always want to track the most recent epoch number on _all_ networks
       this._epochState = await this._fetchCurrentEpochState();
 
@@ -341,7 +344,7 @@ export class LitCore {
       );
 
       // Stash a function instance, because its identity must be consistent for '.off()' usage to work later
-      this._stakingContractListener = (state: StakingStates) => {
+      this._stakingContractListener = (state: STAKING_STATES_VALUES) => {
         // Intentionally not return or await; Listeners are _not async_
         this._handleStakingContractStateChange(state);
       };
@@ -383,7 +386,7 @@ export class LitCore {
    */
   setCustomBootstrapUrls = (): void => {
     // -- validate
-    if (this.config.litNetwork === LitNetwork.Custom) return;
+    if (this.config.litNetwork === LIT_NETWORK.Custom) return;
 
     // -- execute
     const hasNetwork: boolean = this.config.litNetwork in LIT_NETWORKS;
@@ -476,7 +479,7 @@ export class LitCore {
         },
         {}
       );
-      if (this.config.litNetwork === LitNetwork.Custom) {
+      if (this.config.litNetwork === LIT_NETWORK.Custom) {
         log('using custom contracts: ', logAddresses);
       }
     }
@@ -613,7 +616,7 @@ export class LitCore {
           e.message
         );
       }
-    } else if (this.config.litNetwork === 'custom') {
+    } else if (this.config.litNetwork === LIT_NETWORK.Custom) {
       log(
         `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
       );
@@ -1282,12 +1285,12 @@ export class LitCore {
    * Calculates an HD public key from a given keyId
    * The curve type or signature type is assumed to be k256 unless provided
    * @param keyId
-   * @param {LIT_CURVE} sigType
+   * @param {LIT_CURVE_VALUES} sigType
    * @returns {string} public key
    */
   computeHDPubKey = async (
     keyId: string,
-    sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
+    sigType: LIT_CURVE_VALUES = LIT_CURVE.EcdsaCaitSith
   ): Promise<string> => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');

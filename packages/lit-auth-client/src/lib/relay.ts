@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   LIT_NETWORK_VALUES,
   LIT_NETWORK,
   RELAYER_URL_BY_NETWORK,
@@ -167,7 +167,7 @@ export class LitRelay implements IRelay {
     for (const authMethod of authMethods) {
       const id = await getAuthIdByAuthMethod(authMethod);
       permittedAuthMethodIds.push(id);
-      if (authMethod.authMethodType === AuthMethodType.WebAuthn) {
+      if (authMethod.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
         permittedAuthMethodPubkeys.push(
           WebAuthnProvider.getPublicKeyFromRegistration(
             JSON.parse(authMethod.accessToken)

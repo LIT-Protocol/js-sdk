@@ -18,13 +18,6 @@ describe('LitNodeClientNodeJs', () => {
     expect(isClass(LitNodeClientNodeJs)).toBe(true);
   });
 
-  it('should be able to instantiate a new LitNodeClientNodeJs to localhost', async () => {
-    const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'localhost',
-    });
-    expect(litNodeClient).toBeDefined();
-  });
-
   it('should be able to instantiate a new LitNodeClientNodeJs to custom', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
       litNetwork: 'custom',

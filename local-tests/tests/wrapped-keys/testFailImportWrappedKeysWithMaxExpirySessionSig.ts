@@ -9,7 +9,7 @@ const { importPrivateKey } = api;
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
  * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
- * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
+ * ✅ NETWORK=custom yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
  */
 export const testFailImportWrappedKeysWithMaxExpirySessionSig = async (
   devEnv: TinnyEnvironment

@@ -13,7 +13,7 @@ import { getBaseTransactionForNetwork } from './util';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
  * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
+ * ✅ NETWORK=custom yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
  */
 export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
   async (devEnv: TinnyEnvironment) => {

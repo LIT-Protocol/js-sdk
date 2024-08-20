@@ -1,5 +1,3 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -15,7 +13,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * Test Commands:
  * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
- * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
+ * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  */
 export const testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (
   devEnv: TinnyEnvironment
