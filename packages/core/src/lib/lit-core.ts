@@ -751,8 +751,29 @@ export class LitCore {
         this.latestBlockhash = blockHashBody.blockhash;
         this.lastBlockHashRetrieved = Date.now();
         log('Done syncing state new blockhash: ', this.latestBlockhash);
+
+        // -- check undefined
+        if (!this.latestBlockhash) {
+          logError(
+            `Error getting latest blockhash from the nodes. Received: "${this.latestBlockhash}". Not a problem.. we will fetching it manually`
+          );
+          try {
+            const provider = new ethers.providers.JsonRpcProvider(
+              'https://ethereum-rpc.publicnode.com'
+            );
+            const latestBlock = await provider.getBlock('latest');
+            this.latestBlockhash = latestBlock.hash;
+            this.lastBlockHashRetrieved = Date.now();
+            log(
+              'Successfully retrieved blockhash manually: ',
+              this.latestBlockhash
+            );
+          } catch (ethersError) {
+            logError('Failed to manually retrieve blockhash using ethers:');
+          }
+        }
       })
-      .catch((err: BlockHashErrorResponse) => {
+      .catch(async (err: BlockHashErrorResponse) => {
         // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
         logError(
           'Error while attempting fetch new latestBlockhash:',
