@@ -1018,3 +1018,13 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+
+/**
+ * Lowest latency, highest score & privacy enabled listed on https://chainlist.org/
+ */
+export const FALLBACK_RPC_URLS = [
+  'https://ethereum-rpc.publicnode.com',
+  'https://eth.llamarpc.com',
+  'https://eth.drpc.org',
+  'https://eth.llamarpc.com',
+];

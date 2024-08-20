@@ -16,6 +16,7 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import {
   CENTRALISATION_BY_NETWORK,
+  FALLBACK_RPC_URLS,
   HTTP,
   HTTPS,
   LIT_CURVE,
@@ -734,6 +735,20 @@ export class LitCore {
     };
   }
 
+  private _getProviderWithFallback =
+    async (): Promise<ethers.providers.JsonRpcProvider | null> => {
+      for (const url of FALLBACK_RPC_URLS) {
+        try {
+          const provider = new ethers.providers.JsonRpcProvider(url);
+          await provider.getBlockNumber(); // Simple check to see if the provider is working
+          return provider;
+        } catch (error) {
+          logError(`RPC URL failed: ${url}`);
+        }
+      }
+      return null;
+    };
+
   /**
    * Fetches the latest block hash and log any errors that are returned
    * @returns void
@@ -752,15 +767,20 @@ export class LitCore {
         this.lastBlockHashRetrieved = Date.now();
         log('Done syncing state new blockhash: ', this.latestBlockhash);
 
-        // -- check undefined
         if (!this.latestBlockhash) {
           logError(
-            `Error getting latest blockhash from the nodes. Received: "${this.latestBlockhash}". Not a problem.. we will fetching it manually`
+            `Error getting latest blockhash from the nodes. Received: "${this.latestBlockhash}". Attempting to fetch blockhash manually using ethers with fallback RPC URLs...`
           );
-          try {
-            const provider = new ethers.providers.JsonRpcProvider(
-              'https://ethereum-rpc.publicnode.com'
+          const provider = await this._getProviderWithFallback();
+
+          if (!provider) {
+            logError(
+              'All fallback RPC URLs failed. Unable to retrieve blockhash.'
             );
+            return;
+          }
+
+          try {
             const latestBlock = await provider.getBlock('latest');
             this.latestBlockhash = latestBlock.hash;
             this.lastBlockHashRetrieved = Date.now();
@@ -769,18 +789,42 @@ export class LitCore {
               this.latestBlockhash
             );
           } catch (ethersError) {
-            logError('Failed to manually retrieve blockhash using ethers:');
+            logError('Failed to manually retrieve blockhash using ethers');
           }
         }
       })
       .catch(async (err: BlockHashErrorResponse) => {
-        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+        // Prevent errors from bubbling up and causing unhandled promise rejections
         logError(
-          'Error while attempting fetch new latestBlockhash:',
+          'Error while attempting to fetch new latestBlockhash:',
           err.messages,
-          'reason: ',
+          'Reason: ',
           err.reason
         );
+
+        log(
+          'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
+        );
+        const provider = await this._getProviderWithFallback();
+
+        if (!provider) {
+          logError(
+            'All fallback RPC URLs failed. Unable to retrieve blockhash.'
+          );
+          return;
+        }
+
+        try {
+          const latestBlock = await provider.getBlock('latest');
+          this.latestBlockhash = latestBlock.hash;
+          this.lastBlockHashRetrieved = Date.now();
+          log(
+            'Successfully retrieved blockhash manually: ',
+            this.latestBlockhash
+          );
+        } catch (ethersError) {
+          logError('Failed to manually retrieve blockhash using ethers');
+        }
       });
   }
 
