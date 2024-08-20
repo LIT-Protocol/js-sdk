@@ -529,26 +529,23 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId =
-    (
-      //@ts-expect-error client is defined
-      await this.contractsClient.mintCapacityCreditsNFT({
-        requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
-      })
-    ).capacityTokenIdStr;
+    //@ts-expect-error client is defined
+    const capacityNft = await this.contractsClient.mintCapacityCreditsNFT({
+      requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
+      daysUntilUTCMidnightExpiration: 2,
+    });
+    const capacityTokenId = capacityNft.capacityTokenIdStr;
 
     try {
-      this.superCapacityDelegationAuthSig =
-      (
-        //@ts-expect-error client is defined
-        await this.litNodeClient.createCapacityDelegationAuthSig({
-          dAppOwnerWallet: wallet,
-          capacityTokenId: capacityTokenId,
-          // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
-          uses: '200',
-        })
-      ).capacityDelegationAuthSig;
+      //@ts-expect-error client is defined
+      const resp = await this.litNodeClient.createCapacityDelegationAuthSig({
+        dAppOwnerWallet: wallet,
+        capacityTokenId: capacityTokenId,
+        // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+        uses: '200',
+      });
+
+      this.superCapacityDelegationAuthSig = resp.capacityDelegationAuthSig;
     } catch (e: unknown) {
       if (
         (e as Error).message.includes(
