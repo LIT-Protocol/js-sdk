@@ -794,7 +794,7 @@ export class LitCore {
         }
       })
       .catch(async (err: BlockHashErrorResponse) => {
-        // Prevent errors from bubbling up and causing unhandled promise rejections
+        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
         logError(
           'Error while attempting to fetch new latestBlockhash:',
           err.messages,
