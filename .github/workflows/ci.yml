@@ -28,6 +28,8 @@ jobs:
           node-version: 20
           cache: yarn
           cache-dependency-path: ${{ github.workspace }}/yarn.lock
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile 
       - name: Build
         run: yarn build:dev
       - name: Run Unit tests
