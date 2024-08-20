@@ -1,5 +1,4 @@
-import { ILitError, LIT_ERROR } from '@lit-protocol/constants';
-
+import { InvalidAccessControlConditions } from '@lit-protocol/constants';
 import {
   ABIParams,
   AccessControlConditions,
@@ -14,8 +13,6 @@ import {
   JsonSigningResourceId,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-
-import { throwError } from '@lit-protocol/misc';
 
 /** ---------- Local Functions ---------- */
 /**
@@ -40,7 +37,7 @@ const getOperatorParam = (cond: ConditionItem): AccsOperatorParams => {
  * @param { Array<ABIParams> } params
  * @returns { Array<ABIParams> }
  */
-const canonicalAbiParamss = (params: Array<ABIParams>): Array<ABIParams> => {
+const canonicalAbiParamss = (params: ABIParams[]): ABIParams[] => {
   return params.map((param) => ({
     name: param.name,
     type: param.type,
@@ -88,21 +85,25 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
         return canonicalCosmosConditionFormatter(cond as AccsCOSMOSParams);
 
       default:
-        throwError({
-          message: `You passed an invalid access control condition that is missing or has a wrong "conditionType": ${JSON.stringify(
-            cond
-          )}`,
-          errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-          errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-        });
+        throw new InvalidAccessControlConditions(
+          {
+            info: {
+              cond,
+            },
+          },
+          'You passed an invalid access control condition that is missing or has a wrong "conditionType"'
+        );
     }
   }
 
-  throwError({
-    message: `You passed an invalid access control condition: ${cond}`,
-    errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-    errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-  });
+  throw new InvalidAccessControlConditions(
+    {
+      info: {
+        cond,
+      },
+    },
+    'You passed an invalid access control condition'
+  );
 };
 
 /**
@@ -134,18 +135,12 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 * @param { object } cond
 * @param { boolean } requireV2Conditions
 *
-* @returns { any[] | AccsOperatorParams | AccsSOLV2Params | ILitError | any }
+* @returns { any[] | AccsOperatorParams | AccsSOLV2Params | any }
 */
 export const canonicalSolRpcConditionFormatter = (
   cond: ConditionItem,
   requireV2Conditions: boolean = false
-):
-  | any[]
-  | AccsOperatorParams
-  | ConditionItem
-  | AccsSOLV2Params
-  | ILitError
-  | any => {
+): any[] | AccsOperatorParams | ConditionItem | AccsSOLV2Params | any => {
   // -- if is array
   if (Array.isArray(cond)) {
     return cond.map((c: ConditionItem) =>
@@ -181,11 +176,14 @@ export const canonicalSolRpcConditionFormatter = (
         !('offset' in _assumedV2Cond.pdaInterface) ||
         !('fields' in _assumedV2Cond.pdaInterface)
       ) {
-        throwError({
-          message: `Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions`,
-          errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-          errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-        });
+        throw new InvalidAccessControlConditions(
+          {
+            info: {
+              cond,
+            },
+          },
+          'Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions'
+        );
       }
 
       // -- else
@@ -226,11 +224,14 @@ export const canonicalSolRpcConditionFormatter = (
   }
 
   // -- else
-  throwError({
-    message: `You passed an invalid access control condition: ${cond}`,
-    errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-    errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-  });
+  throw new InvalidAccessControlConditions(
+    {
+      info: {
+        cond,
+      },
+    },
+    'You passed an invalid access control condition'
+  );
 };
 
 /**
@@ -284,11 +285,14 @@ export const canonicalAccessControlConditionFormatter = (
     return _return;
   }
 
-  throwError({
-    message: `You passed an invalid access control condition: ${cond}`,
-    errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-    errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-  });
+  throw new InvalidAccessControlConditions(
+    {
+      info: {
+        cond,
+      },
+    },
+    'You passed an invalid access control condition'
+  );
 };
 
 /**
@@ -379,11 +383,14 @@ export const canonicalEVMContractConditionFormatter = (
     return _return;
   }
 
-  throwError({
-    message: `You passed an invalid access control condition: ${cond}`,
-    errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-    errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-  });
+  throw new InvalidAccessControlConditions(
+    {
+      info: {
+        cond,
+      },
+    },
+    'You passed an invalid access control condition'
+  );
 };
 
 /**
@@ -440,11 +447,14 @@ export const canonicalCosmosConditionFormatter = (
     };
   }
 
-  throwError({
-    message: `You passed an invalid access control condition: ${cond}`,
-    errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-    errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-  });
+  throw new InvalidAccessControlConditions(
+    {
+      info: {
+        cond,
+      },
+    },
+    'You passed an invalid access control condition'
+  );
 };
 
 /**

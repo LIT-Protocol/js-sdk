@@ -1,4 +1,8 @@
-import { AuthMethodType } from '@lit-protocol/constants';
+import {
+  AuthMethodType,
+  InvalidArgumentException,
+  WrongParamFormat,
+} from '@lit-protocol/constants';
 import { BaseProvider } from './BaseProvider';
 import {
   BaseAuthenticateOptions,
@@ -123,7 +127,14 @@ export default class StytchAuthFactorOtpProvider<
           factor = 'totp';
           break;
         default:
-          throw new Error('Unsupport stytch auth type');
+          throw new InvalidArgumentException(
+            {
+              info: {
+                authMethodType: authMethod.authMethodType,
+              },
+            },
+            'Unsupport stytch auth type'
+          );
       }
       const factorParser = this._resolveAuthFactor(factor).parser;
       try {
@@ -170,7 +181,14 @@ export default class StytchAuthFactorOtpProvider<
   private static _parseJWT(jwt: string): StytchToken {
     const parts = jwt.split('.');
     if (parts.length !== 3) {
-      throw new Error('Invalid token length');
+      throw new WrongParamFormat(
+        {
+          info: {
+            jwt,
+          },
+        },
+        'Invalid token length'
+      );
     }
     const body = Buffer.from(parts[1], 'base64');
     const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));

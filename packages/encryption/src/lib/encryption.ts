@@ -1,9 +1,13 @@
 // @ts-expect-error jszip types don't resolve. :sad_panda:
 import * as JSZip from 'jszip/dist/jszip.js';
 
-import { EITHER_TYPE, ILitError, LIT_ERROR } from '@lit-protocol/constants';
+import {
+  EITHER_TYPE,
+  InvalidParamType,
+  UnknownError,
+} from '@lit-protocol/constants';
 import { verifySignature } from '@lit-protocol/crypto';
-import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
+import { checkType, isBrowser, log } from '@lit-protocol/misc';
 import {
   DecryptRequest,
   DecryptZipFileWithMetadata,
@@ -60,11 +64,16 @@ export const encryptToJson = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptToJson',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   if (string !== undefined) {
     const { ciphertext, dataToEncryptHash } = await encryptString(
@@ -102,7 +111,14 @@ export const encryptToJson = async (
       dataType: 'file',
     } as EncryptToJsonPayload);
   } else {
-    throw new Error(`You must provide either 'file' or 'string'.`);
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+        },
+      },
+      'You must provide either "file" or "string"'
+    );
   }
 };
 
@@ -134,11 +150,16 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptFromJson',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   // FIXME: The return type of this function is inferrable based on the value of `params.dataType`
   if (parsedJsonData.dataType === 'string') {
@@ -172,8 +193,15 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
       litNodeClient
     );
   } else {
-    throw new Error(
-      `dataType of ${parsedJsonData.dataType} is not valid. Must be 'string' or 'file'.`
+    throw new InvalidParamType(
+      {
+        info: {
+          dataType: parsedJsonData.dataType,
+          params,
+        },
+      },
+      'dataType of %s is not valid. Must be "string" or "file".',
+      parsedJsonData.dataType
     );
   }
 }
@@ -205,11 +233,16 @@ export const encryptString = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptString',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   return litNodeClient.encrypt({
     ...params,
@@ -237,11 +270,16 @@ export const decryptToString = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptToString',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
 
@@ -268,11 +306,16 @@ export const zipAndEncryptString = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'zipAndEncryptString',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   let zip;
 
@@ -323,21 +366,23 @@ export const zipAndEncryptFiles = async (
         functionName: 'zipAndEncryptFiles',
       })
     )
-      throwError({
-        message: 'Invalid file type',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            files,
+          },
+        },
+        'Invalid file type'
+      );
 
     const folder: JSZip | null = zip.folder('encryptedAssets');
 
     if (!folder) {
       log("Failed to get 'encryptedAssets' from zip.folder() ");
-      return throwError({
-        message: "Failed to get 'encryptedAssets' from zip.folder() ",
-        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-      });
+      throw new UnknownError(
+        {},
+        "Failed to get 'encryptedAssets' from zip.folder() "
+      );
     }
 
     folder.file(files[i].name, files[i]);
@@ -366,11 +411,16 @@ export const decryptToZip = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptToZip',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
 
@@ -408,11 +458,16 @@ export const encryptZip = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptZip',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   const { zip } = params;
   let zipBlob;
@@ -474,11 +529,16 @@ export const encryptFileAndZipWithMetadata = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptFileAndZipWithMetadata',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   // encrypt the file
   const { ciphertext, dataToEncryptHash } = await encryptFile(
@@ -515,11 +575,10 @@ export const encryptFileAndZipWithMetadata = async (
 
   if (!folder) {
     log("Failed to get 'encryptedAssets' from zip.folder() ");
-    return throwError({
-      message: `Failed to get 'encryptedAssets' from zip.folder()`,
-      errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-      errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-    });
+    throw new UnknownError(
+      {},
+      `Failed to get 'encryptedAssets' from zip.folder()`
+    );
   }
 
   folder.file(file.name, uint8arrayFromString(ciphertext, 'base64'));
@@ -558,11 +617,16 @@ export const decryptZipFileWithMetadata = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptZipFileWithMetadata',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   // -- execute
   const zip = await JSZip.loadAsync(file);
@@ -638,11 +702,16 @@ export const encryptFile = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptFile',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   // encrypt the file
   const fileAsArrayBuffer = await params.file.arrayBuffer();
@@ -673,11 +742,16 @@ export const decryptToFile = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptToFile',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
 
@@ -704,10 +778,10 @@ declare global {
  *
  * @returns { IJWT<T> } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
  */
-export const verifyJwt = ({
+export const verifyJwt = async ({
   publicKey,
   jwt,
-}: VerifyJWTProps): IJWT<SigningAccessControlConditionJWTPayload> => {
+}: VerifyJWTProps): Promise<IJWT<SigningAccessControlConditionJWTPayload>> => {
   // -- validate
   if (
     !checkType({
@@ -717,11 +791,14 @@ export const verifyJwt = ({
       functionName: 'verifyJwt',
     })
   )
-    return throwError({
-      message: 'jwt must be a string',
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          jwt,
+        },
+      },
+      'jwt must be a string'
+    );
 
   log('verifyJwt', jwt);
 
@@ -737,7 +814,7 @@ export const verifyJwt = ({
 
   const message = uint8arrayFromString(unsignedJwt);
 
-  verifySignature(publicKey, message, signature);
+  await verifySignature(publicKey, message, signature);
 
   const _jwt: IJWT<SigningAccessControlConditionJWTPayload> = {
     verified: true,

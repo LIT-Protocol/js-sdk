@@ -1,10 +1,24 @@
-import { isBrowser, log, logError, throwError } from '@lit-protocol/misc';
+import { splitSignature } from 'ethers/lib/utils';
 
+import {
+  InvalidParamType,
+  LIT_CURVE,
+  NetworkError,
+  NoValidShares,
+  UnknownError,
+} from '@lit-protocol/constants';
+import { log } from '@lit-protocol/misc';
+import { nacl } from '@lit-protocol/nacl';
+import {
+  CombinedECDSASignature,
+  NodeAttestation,
+  SessionKeyPair,
+  SigShare,
+} from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-
 import {
   EcdsaVariant,
   blsCombine,
@@ -17,16 +31,6 @@ import {
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
-
-import { LIT_ERROR, LIT_CURVE } from '@lit-protocol/constants';
-import { nacl } from '@lit-protocol/nacl';
-import {
-  CombinedECDSASignature,
-  NodeAttestation,
-  SessionKeyPair,
-  SigShare,
-} from '@lit-protocol/types';
-import { splitSignature } from 'ethers/lib/utils';
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
@@ -159,18 +163,21 @@ const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE, EcdsaVariant>> = {
  *
  */
 export const combineEcdsaShares = async (
-  sigShares: Array<SigShare>
+  sigShares: SigShare[]
 ): Promise<CombinedECDSASignature> => {
   const validShares = sigShares.filter((share) => share.signatureShare);
 
   const anyValidShare = validShares[0];
 
   if (!anyValidShare) {
-    return throwError({
-      message: 'No valid shares to combine',
-      errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
-      errorCode: LIT_ERROR.NO_VALID_SHARES.name,
-    });
+    throw new NoValidShares(
+      {
+        info: {
+          shares: sigShares,
+        },
+      },
+      'No valid shares to combine'
+    );
   }
 
   const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE];
@@ -184,7 +191,7 @@ export const combineEcdsaShares = async (
   const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
   const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
 
-  ecdsaVerify(variant!, messageHash, publicKey, [r, s, v]);
+  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, v]);
 
   const signature = splitSignature(Buffer.concat([r, s, Buffer.from([v])]));
 
@@ -217,7 +224,14 @@ export const computeHDPubKey = async (
       );
       return Buffer.from(preComputedPubkey).toString('hex');
     default:
-      throw new Error('Non supported signature type');
+      throw new InvalidParamType(
+        {
+          info: {
+            sigType,
+          },
+        },
+        `Non supported signature type`
+      );
   }
 };
 
@@ -277,7 +291,14 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   async function fetchAsUint8Array(targetUrl: string) {
     const res = await fetch(targetUrl);
     if (!res.ok) {
-      throw new Error(`[getAmdCert] HTTP error! status: ${res.status}`);
+      throw new NetworkError(
+        {
+          info: {
+            targetUrl,
+          },
+        },
+        `[getAmdCert] HTTP error! status: ${res.status}`
+      );
     }
     const arrayBuffer = await res.arrayBuffer();
     return new Uint8Array(arrayBuffer);
@@ -305,7 +326,7 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
  * Check the attestation against AMD certs
  *
  * @param { NodeAttestation } attestation The actual attestation object, which includes the signature and report
- * @param { string } challenge The challenge we sent
+ * @param { string } challengeHex The challenge we sent
  * @param { string } url The URL we talked to
  *
  * @returns { Promise<undefined> } A promise that throws if the attestation is invalid
@@ -329,7 +350,15 @@ export const checkSevSnpAttestation = async (
   const report = Buffer.from(attestation.report, 'base64');
 
   if (!noonce.equals(challenge)) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          challengeHex,
+          noonce,
+          challenge,
+        },
+      },
       `Attestation noonce ${noonce} does not match challenge ${challenge}`
     );
   }
@@ -344,7 +373,14 @@ export const checkSevSnpAttestation = async (
     } else if (url.startsWith('http://')) {
       portWeTalkedTo = '80';
     } else {
-      throw new Error(`Unknown port in URL ${url}`);
+      throw new NetworkError(
+        {
+          info: {
+            url,
+          },
+        },
+        `Unknown port in URL ${url}`
+      );
     }
   }
 
@@ -353,12 +389,26 @@ export const checkSevSnpAttestation = async (
   const portFromReport = ipAndAddrFromReport.split(':')[1];
 
   if (ipWeTalkedTo !== ipFromReport) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          ipWeTalkedTo,
+          ipFromReport,
+        },
+      },
       `Attestation external address ${ipFromReport} does not match IP we talked to ${ipWeTalkedTo}`
     );
   }
   if (portWeTalkedTo !== portFromReport) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          portWeTalkedTo,
+          portFromReport,
+        },
+      },
       `Attestation external port ${portFromReport} does not match port we talked to ${portWeTalkedTo}`
     );
   }
@@ -385,7 +435,16 @@ export const checkSevSnpAttestation = async (
   }
 
   if (!vcekCert || vcekCert.length === 0 || vcekCert.length < 256) {
-    throw new Error('Unable to retrieve VCEK certificate from AMD');
+    throw new UnknownError(
+      {
+        info: {
+          attestation,
+          report,
+          vcekUrl,
+        },
+      },
+      'Unable to retrieve VCEK certificate from AMD'
+    );
   }
 
   // pass base64 encoded report to wasm wrapper

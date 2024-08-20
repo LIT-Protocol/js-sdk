@@ -1,5 +1,7 @@
-import { LIT_ERROR } from '@lit-protocol/constants';
+import { formatEther, formatUnits } from 'ethers/lib/utils';
 
+import { InvalidUnifiedConditionType } from '@lit-protocol/constants';
+import { decimalPlaces, log } from '@lit-protocol/misc';
 import {
   AccessControlConditions,
   AccsCOSMOSParams,
@@ -8,9 +10,6 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-
-import { decimalPlaces, log, throwError } from '@lit-protocol/misc';
-import { formatEther, formatUnits } from 'ethers/lib/utils';
 
 /**
  *
@@ -47,7 +46,7 @@ export const formatAtom = (amount: number): string => {
  * @returns { string } humanized version of the comparator
  */
 export const humanizeComparator = (comparator: string): string | undefined => {
-  const list: { [key: string]: string } = {
+  const list: Record<string, string> = {
     '>': 'more than',
     '>=': 'at least',
     '=': 'exactly',
@@ -82,7 +81,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   myWalletAddress,
 }: {
   accessControlConditions: AccessControlConditions;
-  tokenList?: Array<any | string>;
+  tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing evm basic access control conditions');
@@ -217,7 +216,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
         let tokenFromList;
         if (tokenList) {
           tokenFromList = tokenList.find(
-            (t: any) => t.address === acc.contractAddress
+            (t) => t.address === acc.contractAddress
           );
         }
         let decimals, name;
@@ -282,7 +281,7 @@ export const humanizeEvmContractConditions = async ({
   myWalletAddress,
 }: {
   evmContractConditions: EvmContractConditions;
-  tokenList?: Array<any | string>;
+  tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing evm contract conditions');
@@ -343,7 +342,7 @@ export const humanizeSolRpcConditions = async ({
   myWalletAddress,
 }: {
   solRpcConditions: SolRpcConditions;
-  tokenList?: Array<any | string>;
+  tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing sol rpc conditions');
@@ -416,8 +415,8 @@ export const humanizeCosmosConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  cosmosConditions: Array<AccsCOSMOSParams | any>;
-  tokenList?: Array<any | string>;
+  cosmosConditions: (AccsCOSMOSParams | any)[];
+  tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing cosmos conditions');
@@ -495,7 +494,7 @@ export const humanizeUnifiedAccessControlConditions = async ({
   myWalletAddress,
 }: {
   unifiedAccessControlConditions: UnifiedAccessControlConditions;
-  tokenList?: Array<any | string>;
+  tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
   const promises = await Promise.all(
@@ -543,11 +542,15 @@ export const humanizeUnifiedAccessControlConditions = async ({
           myWalletAddress,
         });
       } else {
-        throwError({
-          message: `Unrecognized condition type: ${acc.conditionType}`,
-          errorKind: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.kind,
-          errorCode: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.name,
-        });
+        throw new InvalidUnifiedConditionType(
+          {
+            info: {
+              acc,
+            },
+          },
+          'Unrecognized condition type: %s',
+          acc.conditionType
+        );
       }
     })
   );

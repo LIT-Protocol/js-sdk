@@ -1,3 +1,6 @@
+// @ts-expect-error No types available for this package
+import { VError, Options } from '@openagenda/verror';
+
 export enum LitErrorKind {
   Unknown = 'Unknown',
   Unexpected = 'Unexpected',
@@ -10,7 +13,13 @@ export enum LitErrorKind {
   Timeout = 'Timeout',
 }
 
-export const LIT_ERROR = {
+interface ErrorConfig {
+  name: string;
+  code: string;
+  kind: LitErrorKind;
+}
+
+export const LIT_ERROR: Record<string, ErrorConfig> = {
   INVALID_PARAM_TYPE: {
     name: 'InvalidParamType',
     code: 'invalid_param_type',
@@ -46,9 +55,9 @@ export const LIT_ERROR = {
     code: 'lit_node_client_not_ready_error',
     kind: LitErrorKind.Unexpected,
   },
-  UNAUTHROZIED_EXCEPTION: {
-    name: 'UnauthroziedException',
-    code: 'unauthrozied_exception',
+  UNAUTHORIZED_EXCEPTION: {
+    name: 'UnauthorizedException',
+    code: 'unauthorized_exception',
     kind: LitErrorKind.Validation,
   },
   INVALID_ARGUMENT_EXCEPTION: {
@@ -96,6 +105,11 @@ export const LIT_ERROR = {
     code: 'removed_function_error',
     kind: LitErrorKind.Validation,
   },
+  UNSUPPORTED_METHOD_ERROR: {
+    name: 'UnsupportedMethodError',
+    code: 'unsupported_method_error',
+    kind: LitErrorKind.Validation,
+  },
   LIT_NODE_CLIENT_BAD_CONFIG_ERROR: {
     name: 'LitNodeClientBadConfigError',
     code: 'lit_node_client_bad_config_error',
@@ -116,7 +130,7 @@ export const LIT_ERROR = {
     code: 'unknown_signature_error',
     kind: LitErrorKind.Validation,
   },
-  SIGNATURE_VALIDATION_ERROR: {
+  INVALID_SIGNATURE_ERROR: {
     name: 'InvalidSignatureError',
     code: 'invalid_signature_error',
     kind: LitErrorKind.Validation,
@@ -140,6 +154,11 @@ export const LIT_ERROR = {
     name: 'NodejsException',
     code: 'nodejs_exception',
     kind: LitErrorKind.Unexpected,
+  },
+  NODE_ERROR: {
+    name: 'NodeError',
+    code: 'node_error',
+    kind: LitErrorKind.Unknown,
   },
   WALLET_SIGNATURE_NOT_FOUND_ERROR: {
     name: 'WalletSignatureNotFoundError',
@@ -166,8 +185,124 @@ export const LIT_ERROR = {
     code: 'init_error',
     kind: LitErrorKind.Unexpected,
   },
+  NETWORK_ERROR: {
+    name: 'NetworkError',
+    code: 'network_error',
+    kind: LitErrorKind.Unexpected,
+  },
+  TRANSACTION_ERROR: {
+    name: 'TransactionError',
+    code: 'transaction_error',
+    kind: LitErrorKind.Unexpected,
+  },
 };
 
 export const LIT_ERROR_CODE = {
   NODE_NOT_AUTHORIZED: 'NodeNotAuthorized',
 };
+
+export abstract class LitError extends VError {
+  protected constructor(
+    options: Error | Options,
+    message: string,
+    ...params: any[]
+  ) {
+    super(options, message, ...params);
+  }
+}
+
+type LitErrorConstructor = new (
+  options: Error | Options,
+  message: string,
+  ...params: any[]
+) => LitError;
+
+function createErrorClass({
+  name,
+  code,
+  kind,
+}: {
+  name: string;
+  code: string;
+  kind: string;
+}): LitErrorConstructor {
+  return class extends LitError {
+    // VError has optional options parameter, but we make it required so thrower remembers to pass all the useful info
+    constructor(options: Error | Options, message: string, ...params: any[]) {
+      if (options instanceof Error) {
+        options = {
+          cause: options,
+        };
+      }
+
+      // If the cause is not an Error, wrap it in one
+      if (!(options.cause instanceof Error)) {
+        options.cause = new Error(options.cause);
+      }
+
+      super(
+        {
+          name,
+          ...options,
+          meta: {
+            code,
+            kind,
+            ...options.meta,
+          },
+        },
+        message,
+        ...params
+      );
+    }
+  };
+}
+
+const errorClasses: Record<string, LitErrorConstructor> = {};
+for (const key in LIT_ERROR) {
+  if (key in LIT_ERROR) {
+    const errorDef = LIT_ERROR[key];
+    errorClasses[errorDef.name] = createErrorClass(errorDef);
+  }
+}
+
+// Re-export to allow MultiErrors but keep the centralized VError import here
+const MultiError = VError.MultiError;
+export { MultiError };
+
+export const {
+  InitError,
+  InvalidAccessControlConditions,
+  InvalidArgumentException,
+  InvalidBooleanException,
+  InvalidEthBlockhash,
+  InvalidNodeAttestation,
+  InvalidParamType,
+  InvalidSignatureError,
+  InvalidUnifiedConditionType,
+  LitNodeClientBadConfigError,
+  LitNodeClientNotReadyError,
+  LocalStorageItemNotFoundException,
+  LocalStorageItemNotRemovedException,
+  LocalStorageItemNotSetException,
+  MintingNotSupported,
+  NetworkError,
+  NoValidShares,
+  NoWalletException,
+  NodeError,
+  NodejsException,
+  ParamNullError,
+  ParamsMissingError,
+  RemovedFunctionError,
+  TransactionError,
+  UnauthorizedException,
+  UnknownDecryptionAlgorithmTypeError,
+  UnknownError,
+  UnknownSignatureError,
+  UnknownSignatureType,
+  UnsupportedChainException,
+  UnsupportedMethodError,
+  WalletSignatureNotFoundError,
+  WasmInitError,
+  WrongNetworkException,
+  WrongParamFormat,
+} = errorClasses;

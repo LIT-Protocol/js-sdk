@@ -1,3 +1,4 @@
+import { InvalidArgumentException } from '@lit-protocol/constants';
 import { LitAbility, LitResourcePrefix } from '../models';
 
 /**
@@ -36,7 +37,14 @@ export function getRecapNamespaceAndAbility(litAbility: LitAbility): {
       };
 
     default:
-      throw new Error(`Unknown LitAbility: ${litAbility}`);
+      throw new InvalidArgumentException(
+        {
+          info: {
+            litAbility,
+          },
+        },
+        `Unknown LitAbility`
+      );
   }
 }
 
