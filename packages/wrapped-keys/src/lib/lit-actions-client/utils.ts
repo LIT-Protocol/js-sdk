@@ -1,6 +1,9 @@
 import { ExecuteJsResponse, JsonExecutionSdkParams } from '@lit-protocol/types';
 
-import { LIT_ACTION_CID_REPOSITORY } from './constants';
+import {
+  IPFS_HASH_BY_ACTION_PLATFORM,
+  LIT_ACTION_CID_REPOSITORY,
+} from './constants';
 import { LitActionType } from './types';
 import { Network } from '../types';
 import { WRAPPED_KEY_FALLBACK_SERVICE } from '@lit-protocol/constants';
@@ -68,8 +71,19 @@ export async function fetchAndUpdateCodeIfMatch(
       if (cid === params.ipfsId) {
         try {
           const res = await fetch(
-            `${WRAPPED_KEY_FALLBACK_SERVICE}/${action}/${platform}`
+            IPFS_HASH_BY_ACTION_PLATFORM[
+              `/${action}/${platform}` as keyof typeof IPFS_HASH_BY_ACTION_PLATFORM
+            ]
           );
+
+          console.log(
+            IPFS_HASH_BY_ACTION_PLATFORM[
+              `/${action}/${platform}` as keyof typeof IPFS_HASH_BY_ACTION_PLATFORM
+            ]
+          );
+
+          // console.log('res:', res);
+          // process.exit();
           if (!res.ok) {
             throw new Error(
               `Failed to fetch the code for ${action} on ${platform}`
