@@ -4,7 +4,7 @@ import {
   SessionSigsMap,
 } from '@lit-protocol/types';
 
-import { fetchAndUpdateCodeIfMatch, postLitActionValidation } from './utils';
+import { postLitActionValidation } from './utils';
 import {
   EthereumLitTransaction,
   SerializedTransaction,
@@ -30,20 +30,21 @@ export async function signTransactionWithLitAction({
   storedKeyMetadata: { ciphertext, dataToEncryptHash, pkpAddress },
   unsignedTransaction,
 }: SignTransactionWithLitActionParams): Promise<string> {
-  const result = await litNodeClient.executeJs(
-    await fetchAndUpdateCodeIfMatch({
-      sessionSigs: pkpSessionSigs,
-      ipfsId: litActionIpfsCid,
-      jsParams: {
-        pkpAddress,
-        ciphertext,
-        dataToEncryptHash,
-        unsignedTransaction,
-        broadcast,
-        accessControlConditions,
-      },
-    })
-  );
+  const result = await litNodeClient.executeJs({
+    sessionSigs: pkpSessionSigs,
+    ipfsId: litActionIpfsCid,
+    jsParams: {
+      pkpAddress,
+      ciphertext,
+      dataToEncryptHash,
+      unsignedTransaction,
+      broadcast,
+      accessControlConditions,
+    },
+    ipfsOptions: {
+      overwriteCode: true,
+    },
+  });
 
   return postLitActionValidation(result);
 }

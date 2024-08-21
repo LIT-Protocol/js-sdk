@@ -19,17 +19,4 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   }),
 });
 
-const FALLBACK_IPFS_GATEWAY = 'https://litprotocol.mypinata.cloud/ipfs/';
-
-const IPFS_HASH_BY_ACTION_PLATFORM = {
-  '/signTransaction/evm': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.signTransaction.evm}`,
-  '/signTransaction/solana': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.signTransaction.solana}`,
-  '/signMessage/evm': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.signMessage.evm}`,
-  '/signMessage/solana': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.signMessage.solana}`,
-  '/generateEncryptedKey/evm': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.generateEncryptedKey.evm}`,
-  '/generateEncryptedKey/solana': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.generateEncryptedKey.solana}`,
-  '/exportPrivateKey/evm': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.exportPrivateKey.evm}`,
-  '/exportPrivateKey/solana': `${FALLBACK_IPFS_GATEWAY}${LIT_ACTION_CID_REPOSITORY.exportPrivateKey.solana}`,
-} as const;
-
-export { LIT_ACTION_CID_REPOSITORY, IPFS_HASH_BY_ACTION_PLATFORM };
+export { LIT_ACTION_CID_REPOSITORY };

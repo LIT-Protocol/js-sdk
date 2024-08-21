@@ -1,6 +1,5 @@
 import { AccessControlConditions } from '@lit-protocol/types';
-
-import { fetchAndUpdateCodeIfMatch, postLitActionValidation } from './utils';
+import { postLitActionValidation } from './utils';
 import { GeneratePrivateKeyParams } from '../types';
 
 interface GeneratePrivateKeyLitActionParams extends GeneratePrivateKeyParams {
@@ -22,16 +21,17 @@ export async function generateKeyWithLitAction({
   accessControlConditions,
   pkpAddress,
 }: GeneratePrivateKeyLitActionParams): Promise<GeneratePrivateKeyLitActionResult> {
-  const result = await litNodeClient.executeJs(
-    await fetchAndUpdateCodeIfMatch({
-      sessionSigs: pkpSessionSigs,
-      ipfsId: litActionIpfsCid,
-      jsParams: {
-        pkpAddress,
-        accessControlConditions,
-      },
-    })
-  );
+  const result = await litNodeClient.executeJs({
+    sessionSigs: pkpSessionSigs,
+    ipfsId: litActionIpfsCid,
+    jsParams: {
+      pkpAddress,
+      accessControlConditions,
+    },
+    ipfsOptions: {
+      overwriteCode: true,
+    },
+  });
 
   const response = postLitActionValidation(result);
   return JSON.parse(response);

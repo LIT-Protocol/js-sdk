@@ -8,7 +8,6 @@ import { encryptString } from '@lit-protocol/encryption';
 import { LIT_PREFIX } from 'packages/wrapped-keys/src/lib/constants';
 import { LIT_ACTION_CID_REPOSITORY } from '../../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
 import { getBaseTransactionForNetwork } from './util';
-import { fetchAndUpdateCodeIfMatch } from 'dist/packages/wrapped-keys/src/lib/lit-actions-client/utils';
 
 /**
  * Test Commands:
@@ -48,18 +47,19 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
       });
 
       try {
-        const _res = await devEnv.litNodeClient.executeJs(
-          await fetchAndUpdateCodeIfMatch({
-            sessionSigs: pkpSessionSigsSigning,
-            ipfsId: LIT_ACTION_CID_REPOSITORY.signTransaction.evm,
-            jsParams: {
-              ciphertext,
-              dataToEncryptHash,
-              unsignedTransaction,
-              accessControlConditions: [decryptionAccessControlCondition],
-            },
-          })
-        );
+        const _res = await devEnv.litNodeClient.executeJs({
+          sessionSigs: pkpSessionSigsSigning,
+          ipfsId: LIT_ACTION_CID_REPOSITORY.signTransaction.evm,
+          jsParams: {
+            ciphertext,
+            dataToEncryptHash,
+            unsignedTransaction,
+            accessControlConditions: [decryptionAccessControlCondition],
+          },
+          ipfsOptions: {
+            overwriteCode: true,
+          },
+        });
       } catch (e: any) {
         if (
           e.message.includes(

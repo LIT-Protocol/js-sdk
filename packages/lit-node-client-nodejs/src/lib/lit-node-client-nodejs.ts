@@ -19,6 +19,7 @@ import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
   AuthMethodType,
   EITHER_TYPE,
+  FALLBACK_IPFS_GATEWAY,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
@@ -26,7 +27,6 @@ import {
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
   LitNetwork,
-  WRAPPED_KEY_FALLBACK_SERVICE,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -1001,11 +1001,32 @@ export class LitNodeClientNodeJs
     }
 
     // Format the params
-    const formattedParams: JsonExecutionSdkParams = {
+    let formattedParams: JsonExecutionSdkParams = {
       ...params,
       ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
       ...(params.code && { code: encodeCode(params.code) }),
     };
+
+    // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
+    // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
+    // and update the params with the fetched code, removing the ipfsId afterward.
+    if (params.ipfsOptions?.overwriteCode && params.ipfsId) {
+      const gatewayUrl = params.ipfsOptions.gatewayUrl || FALLBACK_IPFS_GATEWAY;
+      const response = await fetch(`${gatewayUrl}${params.ipfsId}`);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch code from IPFS: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const code = await response.text();
+
+      formattedParams = {
+        ...params,
+        code: Buffer.from(code).toString('base64'),
+        ipfsId: undefined,
+      };
+    }
 
     const requestId = this.getRequestId();
     // ========== Get Node Promises ==========

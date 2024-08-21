@@ -1,12 +1,8 @@
 import { ExecuteJsResponse, JsonExecutionSdkParams } from '@lit-protocol/types';
 
-import {
-  IPFS_HASH_BY_ACTION_PLATFORM,
-  LIT_ACTION_CID_REPOSITORY,
-} from './constants';
+import { LIT_ACTION_CID_REPOSITORY } from './constants';
 import { LitActionType } from './types';
 import { Network } from '../types';
-import { WRAPPED_KEY_FALLBACK_SERVICE } from '@lit-protocol/constants';
 
 /**
  *
@@ -51,54 +47,4 @@ export function postLitActionValidation(
 
 export function getLitActionCid(network: Network, actionType: LitActionType) {
   return LIT_ACTION_CID_REPOSITORY[actionType][network];
-}
-
-/**
- * Fetches and updates the params.code if it matches the given IPFS ID, and
- * set the IPFS ID to undefined.
- *
- * @param params - The JSON execution SDK parameters.
- * @returns A promise that resolves to the updated JSON execution SDK parameters.
- * @throws If there is an error fetching the code or if the response is not successful.
- */
-export async function fetchAndUpdateCodeIfMatch(
-  params: JsonExecutionSdkParams
-): Promise<JsonExecutionSdkParams> {
-  for (const [action, platforms] of Object.entries(LIT_ACTION_CID_REPOSITORY)) {
-    for (const [platform, cid] of Object.entries(
-      platforms as Record<string, string>
-    )) {
-      if (cid === params.ipfsId) {
-        try {
-          const url =
-            IPFS_HASH_BY_ACTION_PLATFORM[
-              `/${action}/${platform}` as keyof typeof IPFS_HASH_BY_ACTION_PLATFORM
-            ];
-
-          const res = await fetch(url);
-
-          if (!res.ok) {
-            throw new Error(
-              `Failed to fetch the code for ${action} on ${platform}`
-            );
-          }
-          const code = await res.text();
-
-          const newParams = params;
-
-          newParams.code = code;
-          newParams.ipfsId = undefined;
-
-          return newParams;
-        } catch (error) {
-          throw new Error(
-            `Error fetching code for ${action} on ${platform}: ${JSON.stringify(
-              error
-            )}`
-          );
-        }
-      }
-    }
-  }
-  return params;
 }
