@@ -38,9 +38,18 @@ try {
 
 describe('PKP Ethers', () => {
   let devEnv: TinnyEnvironment;
+  let alice: TinnyPerson;
   beforeAll(async () => {
     //@ts-expect-error defined in global
     devEnv = global.devEnv;
+  });
+
+  beforeEach(async () => {
+    alice = await devEnv.createRandomPerson();
+  });
+
+  afterEach(() => {
+    alice && devEnv.releasePrivateKeyFromUser(alice);
   });
 
   beforeEach(() => {
@@ -54,194 +63,194 @@ describe('PKP Ethers', () => {
 
   describe('Sign Message', () => {
     it('LitAction Session', async () => {
-      await signMessage(devEnv, getLitActionSessionSigs);
+      await signMessage(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signMessage(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await signMessage(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await signMessage(devEnv, getEoaSessionSigs);
+      await signMessage(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await signMessage(devEnv, getEoaSessionSigs);
+      await signMessage(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('ETH Signing', () => {
     it('LitAction Session', async () => {
-      await ethTransaction(devEnv, getLitActionSessionSigs);
+      await ethTransaction(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await ethTransaction(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await ethTransaction(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await ethTransaction(devEnv, getEoaSessionSigs);
+      await ethTransaction(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await ethTransaction(devEnv, getEoaSessionSigs);
+      await ethTransaction(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('ETH Personal Signing', () => {
     it('LitAction Session', async () => {
-      await ethPersonalSign(devEnv, getLitActionSessionSigs);
+      await ethPersonalSign(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await ethPersonalSign(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await ethPersonalSign(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await ethPersonalSign(devEnv, getEoaSessionSigs);
+      await ethPersonalSign(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await ethPersonalSign(devEnv, getEoaSessionSigs);
+      await ethPersonalSign(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('Sign Transaction', () => {
     it('LitAction Session', async () => {
-      await signTransaction(devEnv, getLitActionSessionSigs);
+      await signTransaction(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signTransaction(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await signTransaction(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await signTransaction(devEnv, getEoaSessionSigs);
+      await signTransaction(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await signTransaction(devEnv, getEoaSessionSigs);
+      await signTransaction(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('Eth Sign Typed Data', () => {
     it('LitAction Session', async () => {
-      await signTransaction(devEnv, getLitActionSessionSigs);
+      await signTypedDataV1(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signTypedDataV1(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await signTypedDataV1(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await signTypedDataV1(devEnv, getEoaSessionSigs);
+      await signTypedDataV1(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await signTypedDataV1(devEnv, getEoaSessionSigs);
+      await signTypedDataV1(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('Sign Typed Data Util', () => {
     it('LitAction Session', async () => {
-      await ethTypedDataUtil(devEnv, getLitActionSessionSigs);
+      await ethTypedDataUtil(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await ethTypedDataUtil(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await ethTypedDataUtil(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await ethTypedDataUtil(devEnv, getEoaSessionSigs);
+      await ethTypedDataUtil(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await ethTypedDataUtil(devEnv, getEoaSessionSigs);
+      await ethTypedDataUtil(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('SignedTypedDataV1', () => {
     it('LitAction Session', async () => {
-      await signTypedDataV1(devEnv, getLitActionSessionSigs);
+      await signTypedDataV1(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signTypedDataV1(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await signTypedDataV1(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await signTypedDataV1(devEnv, getEoaSessionSigs);
+      await signTypedDataV1(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await signTypedDataV1(devEnv, getEoaSessionSigs);
+      await signTypedDataV1(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('SignedTypedDatav3', () => {
     it('LitAction Session', async () => {
-      await signTypedDatav3(devEnv, getLitActionSessionSigs);
+      await signTypedDatav3(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signTypedDatav3(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await signTypedDatav3(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await signTypedDatav3(devEnv, getEoaSessionSigs);
+      await signTypedDatav3(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await signTypedDatav3(devEnv, getEoaSessionSigs);
+      await signTypedDatav3(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('Signed Typed Data v4', () => {
     it('LitAction Session', async () => {
-      await signTypedDatav4(devEnv, getLitActionSessionSigs);
+      await signTypedDatav4(devEnv, alice, getLitActionSessionSigs);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signTypedDatav4(devEnv, getLitActionSessionSigsUsingIpfsId);
+      await signTypedDatav4(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
     });
 
     it('EOA Wallet', async () => {
-      await signTypedDatav4(devEnv, getEoaSessionSigs);
+      await signTypedDatav4(devEnv, alice, getEoaSessionSigs);
     });
 
     it('PKP Session', async () => {
-      await signTypedDatav4(devEnv, getEoaSessionSigs);
+      await signTypedDatav4(devEnv, alice, getEoaSessionSigs);
     });
   });
 
   describe('Sign With AuthContext', () => {
     it('LitAction Session', async () => {
-      await signWithAuthContext(devEnv);
+      await signWithAuthContext(devEnv, alice);
     });
 
     it('LitAction IPFS Session', async () => {
-      await signWithAuthContext(devEnv);
+      await signWithAuthContext(devEnv, alice);
     });
 
     it('EOA Wallet', async () => {
-      await signWithAuthContext(devEnv);
+      await signWithAuthContext(devEnv, alice);
     });
 
     it('PKP Session', async () => {
-      await signWithAuthContext(devEnv);
+      await signWithAuthContext(devEnv, alice);
     });
   });
 });
 
 const signMessage = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const eoaSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -259,13 +268,13 @@ const signMessage = async (
 
 const ethTransaction = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const eoaSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -295,22 +304,18 @@ const ethTransaction = async (
       expect(signature.length).toEqual(132);
       expect(recoveredAddr).toEqual(alice.pkp?.ethAddress);
     })
-  )
-    .resolves.not.toThrowError()
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
-    });
+  ).resolves.not.toThrowError();
 };
 
 const signTransaction = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const eoaSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -349,61 +354,57 @@ const signTransaction = async (
       method: 'eth_signTransaction',
       params: [tx],
     },
-  })
-    .then((rawSignedTx: string) => {
-      const parsedTransaction = ethers.utils.parseTransaction(rawSignedTx);
+  }).then((rawSignedTx: string) => {
+    const parsedTransaction = ethers.utils.parseTransaction(rawSignedTx);
 
-      const signature = ethers.utils.joinSignature({
-        r: parsedTransaction.r!,
-        s: parsedTransaction.s!,
-        v: parsedTransaction.v!,
-      });
-
-      const rawTx = {
-        nonce: parsedTransaction.nonce,
-        gasPrice: parsedTransaction.gasPrice,
-        gasLimit: parsedTransaction.gasLimit,
-        to: parsedTransaction.to,
-        value: parsedTransaction.value,
-        data: parsedTransaction.data,
-        chainId: parsedTransaction.chainId, // Include chainId if the transaction is EIP-155
-      };
-
-      const txHash = ethers.utils.keccak256(
-        ethers.utils.serializeTransaction(rawTx)
-      );
-
-      const { v, r, s } = parsedTransaction;
-
-      const recoveredAddress = ethers.utils.recoverAddress(txHash, {
-        r: r!,
-        s: s!,
-        v: v!,
-      });
-
-      // ==================== Post-Validation ====================
-      expect(parsedTransaction).toBeDefined();
-
-      expect(signature.length).toEqual(132);
-
-      expect(recoveredAddress.toLowerCase()).toEqual(
-        alice.pkp?.ethAddress.toLowerCase()
-      );
-    })
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
+    const signature = ethers.utils.joinSignature({
+      r: parsedTransaction.r!,
+      s: parsedTransaction.s!,
+      v: parsedTransaction.v!,
     });
+
+    const rawTx = {
+      nonce: parsedTransaction.nonce,
+      gasPrice: parsedTransaction.gasPrice,
+      gasLimit: parsedTransaction.gasLimit,
+      to: parsedTransaction.to,
+      value: parsedTransaction.value,
+      data: parsedTransaction.data,
+      chainId: parsedTransaction.chainId, // Include chainId if the transaction is EIP-155
+    };
+
+    const txHash = ethers.utils.keccak256(
+      ethers.utils.serializeTransaction(rawTx)
+    );
+
+    const { v, r, s } = parsedTransaction;
+
+    const recoveredAddress = ethers.utils.recoverAddress(txHash, {
+      r: r!,
+      s: s!,
+      v: v!,
+    });
+
+    // ==================== Post-Validation ====================
+    expect(parsedTransaction).toBeDefined();
+
+    expect(signature.length).toEqual(132);
+
+    expect(recoveredAddress.toLowerCase()).toEqual(
+      alice.pkp?.ethAddress.toLowerCase()
+    );
+  });
 };
 
 const ethTypedDataUtil = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const eoaSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -459,36 +460,32 @@ const ethTypedDataUtil = async (
       method: 'eth_signTypedData',
       params: [alice?.pkp?.ethAddress, JSON.stringify(msgParams)],
     },
-  })
-    .then((signature: string) => {
-      // https://docs.ethers.io/v5/api/utils/signing-key/#utils-verifyTypedData
-      const recoveredAddr = ethers.utils.verifyTypedData(
-        msgParams.domain,
-        { Person: msgParams.types.Person, Mail: msgParams.types.Mail },
-        msgParams.message,
-        signature
-      );
+  }).then((signature: string) => {
+    // https://docs.ethers.io/v5/api/utils/signing-key/#utils-verifyTypedData
+    const recoveredAddr = ethers.utils.verifyTypedData(
+      msgParams.domain,
+      { Person: msgParams.types.Person, Mail: msgParams.types.Mail },
+      msgParams.message,
+      signature
+    );
 
-      expect(signature.length).toEqual(132);
+    expect(signature.length).toEqual(132);
 
-      expect(recoveredAddr.toLowerCase()).toEqual(
-        alice.pkp?.ethAddress.toLowerCase()
-      );
-    })
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
-    });
+    expect(recoveredAddr.toLowerCase()).toEqual(
+      alice.pkp?.ethAddress.toLowerCase()
+    );
+  });
 };
 
 const signTypedDataV1 = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const eoaSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -536,22 +533,18 @@ const signTypedDataV1 = async (
         alice.pkp?.ethAddress.toLowerCase()
       );
     })
-  )
-    .resolves.not.toThrowError()
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
-    });
+  ).resolves.not.toThrowError();
 };
 
 const signTypedDatav3 = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const eoaSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -608,39 +601,35 @@ const signTypedDatav3 = async (
       method: 'eth_signTypedData_v3',
       params: [alice.pkp?.ethAddress, JSON.stringify(msgParams)],
     },
-  })
-    .then((signature: string) => {
-      const recoveredAddr = recoverTypedSignature({
-        data: {
-          types: msgParams.types,
-          domain: msgParams.domain,
-          primaryType: msgParams.primaryType as 'Mail',
-          message: msgParams.message,
-        },
-        signature: signature,
-        version: SignTypedDataVersion.V3,
-      });
-
-      expect(signature.length).toEqual(132);
-
-      expect(recoveredAddr.toLowerCase()).toEqual(
-        alice.pkp?.ethAddress.toLowerCase()
-      );
-    })
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
+  }).then((signature: string) => {
+    const recoveredAddr = recoverTypedSignature({
+      data: {
+        types: msgParams.types,
+        domain: msgParams.domain,
+        primaryType: msgParams.primaryType as 'Mail',
+        message: msgParams.message,
+      },
+      signature: signature,
+      version: SignTypedDataVersion.V3,
     });
+
+    expect(signature.length).toEqual(132);
+
+    expect(recoveredAddr.toLowerCase()).toEqual(
+      alice.pkp?.ethAddress.toLowerCase()
+    );
+  });
 };
 
 const signTypedDatav4 = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const eoaSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -720,16 +709,13 @@ const signTypedDatav4 = async (
         alice.pkp?.ethAddress.toLowerCase()
       );
     })
-  )
-    .resolves.not.toThrow()
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
-    });
+  ).resolves.not.toThrow();
 };
 
-const signWithAuthContext = async (devEnv: TinnyEnvironment): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
-
+const signWithAuthContext = async (
+  devEnv: TinnyEnvironment,
+  alice: TinnyPerson
+): Promise<void> => {
   const pkpEthersWallet = new PKPEthersWallet({
     pkpPubKey: alice.pkp?.publicKey as string,
     litNodeClient: devEnv.litNodeClient as LitNodeClient,
@@ -770,22 +756,20 @@ const signWithAuthContext = async (devEnv: TinnyEnvironment): Promise<void> => {
 
   await pkpEthersWallet.init();
 
-  expect(pkpEthersWallet.signMessage(alice.loveLetter))
-    .resolves.not.toThrowError()
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
-    });
+  expect(
+    pkpEthersWallet.signMessage(alice.loveLetter)
+  ).resolves.not.toThrowError();
 };
 
 const ethPersonalSign = async (
   devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
   generator: (
     devEnv: TinnyEnvironment,
     person: TinnyPerson,
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  const alice = await devEnv.createRandomPerson();
   const pkpSessionSigs = await generator(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
@@ -827,9 +811,5 @@ const ethPersonalSign = async (
         );
       }
     })
-  )
-    .resolves.not.toThrowError()
-    .finally(() => {
-      devEnv.releasePrivateKeyFromUser(alice);
-    });
+  ).resolves.not.toThrowError();
 };

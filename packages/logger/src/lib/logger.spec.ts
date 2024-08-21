@@ -19,7 +19,7 @@ describe('logger', () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     jest.spyOn(console, 'time').mockImplementation(() => {});
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'log').mockImplementation(() => {});    
+    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   it('Log Manager singleton should be defined', () => {

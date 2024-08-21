@@ -9,14 +9,25 @@ import {
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import {
   TinnyEnvironment,
+  TinnyPerson,
   getEoaSessionSigsWithCapacityDelegations,
 } from '@lit-protocol/tinny';
 
 describe('Delegation', () => {
   let devEnv: TinnyEnvironment;
+  let alice: TinnyPerson;
+  let bob: TinnyPerson;
+
   beforeAll(async () => {
     //@ts-expect-error is defined
     devEnv = global.devEnv;
+    alice = await devEnv.createRandomPerson();
+    bob = await devEnv.createRandomPerson();
+  });
+
+  afterEach(() => {
+    devEnv.releasePrivateKeyFromUser(alice);
+    devEnv.releasePrivateKeyFromUser(bob);
   });
 
   beforeEach(() => {
@@ -29,9 +40,6 @@ describe('Delegation', () => {
   });
 
   it('PKP to PKP delegation executeJS', async () => {
-    const alice = await devEnv.createRandomPerson();
-    const bob = await devEnv.createRandomPerson();
-
     // Checking the scopes of the PKP owned by Bob
     const bobsAuthMethodAuthId = await LitAuthClient.getAuthIdByAuthMethod(
       bob.authMethod
@@ -120,9 +128,6 @@ describe('Delegation', () => {
   });
 
   it('PKP to EOA ExecuteJs', async () => {
-    const alice = await devEnv.createRandomPerson();
-    const bob = await devEnv.createRandomPerson();
-
     const appOwnersCapacityDelegationAuthSig =
       await alice.createCapacityDelegationAuthSig([bob.wallet.address]);
 
@@ -132,12 +137,6 @@ describe('Delegation', () => {
       bob.wallet,
       appOwnersCapacityDelegationAuthSig
     );
-
-    // -- printing out the recaps from the session sigs
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const bobsSingleSessionSig =
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      bobsSessionSigs![devEnv.litNodeClient?.config?.bootstrapUrls[0]!];
 
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient
@@ -192,9 +191,6 @@ describe('Delegation', () => {
   });
 
   it('PKP to EOA PKP Sign', async () => {
-    const alice = await devEnv.createRandomPerson();
-    const bob = await devEnv.createRandomPerson();
-
     const appOwnersCapacityDelegationAuthSig =
       await alice.createCapacityDelegationAuthSig([bob.wallet.address]);
 
