@@ -117,25 +117,27 @@ describe('SessionSigs', () => {
   });
 
   describe('ExecuteJS JSON Response', () => {
-    it('LitAction Session', async () => {
-      await executeJsJSONResponse(devEnv, alice, getLitActionSessionSigs);
-    });
+    if (!devEnv.setUnavailable(LIT_TESTNET.MANZANO)) {
+      it('LitAction Session', async () => {
+        await executeJsJSONResponse(devEnv, alice, getLitActionSessionSigs);
+      });
 
-    it('LitAction IPFS Session', async () => {
-      await executeJsJSONResponse(
-        devEnv,
-        alice,
-        getLitActionSessionSigsUsingIpfsId
-      );
-    });
+      it('LitAction IPFS Session', async () => {
+        await executeJsJSONResponse(
+          devEnv,
+          alice,
+          getLitActionSessionSigsUsingIpfsId
+        );
+      });
 
-    it('EOA Wallet', async () => {
-      await executeJsJSONResponse(devEnv, alice, getEoaSessionSigs);
-    });
+      it('EOA Wallet', async () => {
+        await executeJsJSONResponse(devEnv, alice, getEoaSessionSigs);
+      });
 
-    it('PKP Session', async () => {
-      await executeJsJSONResponse(devEnv, alice, getPkpSessionSigs);
-    });
+      it('PKP Session', async () => {
+        await executeJsJSONResponse(devEnv, alice, getPkpSessionSigs);
+      });
+    }
   });
 
   describe('PKP Sign', () => {
@@ -463,8 +465,6 @@ const executeJsJSONResponse = async (
     resources?: LitResourceAbilityRequest[]
   ) => Promise<SessionSigsMap | undefined>
 ): Promise<void> => {
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
   const litActionSessionSigs = await generator(devEnv, alice);
 
   const res = await devEnv.litNodeClient?.executeJs({

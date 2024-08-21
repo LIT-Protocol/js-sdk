@@ -355,8 +355,10 @@ export class TinnyEnvironment {
 
   setUnavailable = (network: LIT_TESTNET) => {
     if (this.processEnvs.NETWORK === network) {
-      throw new Error('LIT_IGNORE_TEST');
+      return true;
     }
+
+    return false;
   };
 
   /**
