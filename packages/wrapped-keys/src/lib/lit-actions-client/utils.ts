@@ -70,20 +70,13 @@ export async function fetchAndUpdateCodeIfMatch(
     )) {
       if (cid === params.ipfsId) {
         try {
-          const res = await fetch(
+          const url =
             IPFS_HASH_BY_ACTION_PLATFORM[
               `/${action}/${platform}` as keyof typeof IPFS_HASH_BY_ACTION_PLATFORM
-            ]
-          );
+            ];
 
-          console.log(
-            IPFS_HASH_BY_ACTION_PLATFORM[
-              `/${action}/${platform}` as keyof typeof IPFS_HASH_BY_ACTION_PLATFORM
-            ]
-          );
+          const res = await fetch(url);
 
-          // console.log('res:', res);
-          // process.exit();
           if (!res.ok) {
             throw new Error(
               `Failed to fetch the code for ${action} on ${platform}`
