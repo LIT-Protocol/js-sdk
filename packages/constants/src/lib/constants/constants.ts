@@ -1018,3 +1018,25 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+
+export const LIT_ACTION_CID_REPOSITORY = {
+  signTransaction: {
+    evm: 'QmSsgmy1N1zFZ5yNPCY7QWQZwrYRLuYUJF1VDygJc7L26o',
+    solana: 'QmdkcMmrtqWSQ8VrPr8KwzuzZnAxGJoVDeZP3NKTWCMZCg',
+  },
+  signMessage: {
+    evm: 'QmWVW51FBH5j3wwaMVy8MR1QyzJgEjuaPh1yqwSGXRCENx',
+    solana: 'QmSPcfFhLofjhNDd5ZdVbhw53zmbR8oV4C2585Bm7C8izH',
+  },
+  generateEncryptedKey: {
+    evm: 'QmaoPMSqcze3NW3KSA75ecWSkcmWT1J7kVr8LyJPCKRvHd',
+    solana: 'QmdRBXYLYvcNHrChmsZ2jFDY8dA99CcSdqHo3p1ES3UThL',
+  },
+  exportPrivateKey: {
+    evm: 'Qmb5ZAm1EZRL7dYTtyYxkPxx4kBmoCjjzcgdrJH9cKMXxR',
+    solana: 'Qmb5ZAm1EZRL7dYTtyYxkPxx4kBmoCjjzcgdrJH9cKMXxR',
+  },
+} as const;
+
+export const WRAPPED_KEY_FALLBACK_SERVICE =
+  'https://fallback-wrappey-key.getlit.dev';
