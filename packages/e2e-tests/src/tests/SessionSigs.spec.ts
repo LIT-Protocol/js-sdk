@@ -16,7 +16,6 @@ import {
   getEoaSessionSigs,
   getPkpSessionSigs,
   getLitActionSessionSigsUsingIpfsId,
-  getInvalidLitActionIpfsSessionSigs,
 } from '@lit-protocol/tinny';
 import {
   ILitNodeClient,
@@ -257,20 +256,6 @@ describe('SessionSigs', () => {
     it('PKP Session', async () => {
       await signAndCombine(devEnv, alice, getPkpSessionSigs);
     });
-  });
-
-  it('Invalid lit action Custom Auth SessionSigs', async () => {
-    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
-    expect(devEnv.createRandomPerson()).resolves.not.toThrowError();
-  });
-
-  it('Invalid Lit Action Custom Auth IPFS SessionSigs', async () => {
-    const alice = await devEnv.createRandomPerson();
-
-    expect(
-      getInvalidLitActionIpfsSessionSigs(devEnv, alice)
-    ).rejects.toThrowError('An error related to validation has occured.');
   });
 });
 

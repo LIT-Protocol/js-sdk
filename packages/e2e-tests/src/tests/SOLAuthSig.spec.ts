@@ -1,5 +1,9 @@
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { TinnyEnvironment, AccessControlConditions } from '@lit-protocol/tinny';
+import {
+  TinnyEnvironment,
+  AccessControlConditions,
+  TinnyPerson,
+} from '@lit-protocol/tinny';
 import { ILitNodeClient } from '@lit-protocol/types';
 
 try {
@@ -10,9 +14,18 @@ try {
 
 describe('Sol AuthSig', () => {
   let devEnv: TinnyEnvironment;
+  let alice: TinnyPerson;
   beforeAll(async () => {
-    //@ts-expect-error global defined
+    //@ts-expect-error defined in global
     devEnv = global.devEnv;
+  });
+
+  beforeEach(async () => {
+    alice = await devEnv.createRandomPerson();
+  });
+
+  afterEach(() => {
+    alice && devEnv.releasePrivateKeyFromUser(alice);
   });
 
   beforeEach(() => {

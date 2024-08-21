@@ -18,6 +18,7 @@ import {
   TinnyEnvironment,
   getPkpSessionSigs,
   getEoaSessionSigs,
+  TinnyPerson,
 } from '@lit-protocol/tinny';
 import {
   AuthSig,
@@ -70,9 +71,18 @@ try {
 
 describe('Wrapped Keys', () => {
   let devEnv: TinnyEnvironment;
+  let alice: TinnyPerson;
   beforeAll(async () => {
-    //@ts-expect-error global defined
+    //@ts-expect-error defined in global
     devEnv = global.devEnv;
+  });
+
+  beforeEach(async () => {
+    alice = await devEnv.createRandomPerson();
+  });
+
+  afterEach(() => {
+    alice && devEnv.releasePrivateKeyFromUser(alice);
   });
 
   beforeEach(() => {
@@ -85,8 +95,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Sign Tx Sol Encrypted Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -161,8 +169,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Sign Message Sol Encryption Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -219,16 +225,12 @@ describe('Wrapped Keys', () => {
   });
 
   it('Import Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const privateKey = randomSolanaPrivateKey();
     // '4rXcTBAZVypFRGGER4TwSuGGxMvmRwvYA3jwuZfDY4YKX4VEbuUaPCWrZGSxujKknQCdN8UD9wMW8XYmT1BiLxmB';
@@ -247,16 +249,12 @@ describe('Wrapped Keys', () => {
   });
 
   it('Generate Solana Wrapped Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs: pkpSessionSigs!,
@@ -319,8 +317,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Generate ETH Wrapped Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -363,8 +359,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Fail Import Wrapped Key Same Private Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -403,8 +397,6 @@ describe('Wrapped Keys', () => {
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    console.log(pkpSessionSigs);
-
     const privateKey1 = randomSolanaPrivateKey();
 
     const { pkpAddress } = await importPrivateKey({
@@ -434,11 +426,7 @@ describe('Wrapped Keys', () => {
   });
 
   it('Fail Max Expiration Session Sig', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
-
-    console.log(pkpSessionSigs);
 
     const privateKey = randomSolanaPrivateKey();
 
@@ -477,8 +465,6 @@ describe('Wrapped Keys', () => {
 
       return tamperedPkpSessionSigs;
     };
-
-    const alice = await devEnv.createRandomPerson();
 
     const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
     const privateKey = randomSolanaPrivateKey();
@@ -546,8 +532,6 @@ describe('Wrapped Keys', () => {
 
     const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
-    console.log(eoaSessionSigs);
-
     const privateKey = randomSolanaPrivateKey();
 
     expect(
@@ -565,8 +549,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Fail Eth Sign Tx Missing Params', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -618,16 +600,12 @@ describe('Wrapped Keys', () => {
   });
 
   it('Fail Eth Sign Invalid Param', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
       undefined,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
-
-    console.log(pkpSessionSigs);
 
     const privateKey = ethers.Wallet.createRandom().privateKey;
 
@@ -675,7 +653,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Fail Eth TX Invalid Decryption', async () => {
-    const alice = await devEnv.createRandomPerson();
     const privateKey = ethers.Wallet.createRandom().privateKey;
     const alicePkpAddress = alice.authMethodOwnedPkp!.ethAddress;
     const decryptionAccessControlCondition =
@@ -720,8 +697,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Export', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigsImport = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -761,8 +736,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Eth Sign Tx', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -810,8 +783,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Eth Sign Message', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -850,9 +821,6 @@ describe('Wrapped Keys', () => {
       id,
     });
 
-    console.log('signature');
-    console.log(signature);
-
     expect(ethers.utils.isHexString(signature)).toBeTruthy();
 
     const unsignedBinaryMessage = ethers.utils.arrayify(
@@ -873,8 +841,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Eth Sign Message Generate Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -933,8 +899,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Eth Broadcast With Fetch Gas Params', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -997,8 +961,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Eth Broadcast Tx', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -1051,8 +1013,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Eth Broadcast Tx Generated Key', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
