@@ -86,7 +86,7 @@ export async function fetchAndUpdateCodeIfMatch(
 
           const newParams = params;
 
-          newParams.code = code;
+          newParams.code = Buffer.from(code).toString('base64');
           newParams.ipfsId = undefined;
 
           return newParams;
