@@ -77,10 +77,12 @@ export async function fetchAndUpdateCodeIfMatch(
           }
           const code = await res.text();
 
-          params.code = code;
-          params.ipfsId = undefined;
+          const newParams = params;
 
-          return params;
+          newParams.code = code;
+          newParams.ipfsId = undefined;
+
+          return newParams;
         } catch (error) {
           throw new Error(
             `Error fetching code for ${action} on ${platform}: ${JSON.stringify(
