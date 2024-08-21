@@ -1019,5 +1019,8 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
 
+/**
+ * FIXME: THIS IS A PLACEHOLDER URL. WE NEED TO UPDATE THIS URL TO THE ACTUAL URL
+ */
 export const WRAPPED_KEY_FALLBACK_SERVICE =
   'https://fallback-wrappey-key.getlit.dev';
