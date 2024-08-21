@@ -1,6 +1,6 @@
 import { AccessControlConditions } from '@lit-protocol/types';
 
-import { postLitActionValidation } from './utils';
+import { fetchAndUpdateCodeIfMatch, postLitActionValidation } from './utils';
 import { ExportPrivateKeyParams, StoredKeyData } from '../types';
 
 interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
@@ -26,16 +26,18 @@ export async function exportPrivateKeyWithLitAction(
     dataToEncryptHash,
     ...storeKeyMetadataMinusEncryptedAndPkp
   } = storedKeyMetadata;
-  const result = await litNodeClient.executeJs({
-    sessionSigs: pkpSessionSigs,
-    ipfsId: litActionIpfsCid,
-    jsParams: {
-      pkpAddress,
-      ciphertext,
-      dataToEncryptHash,
-      accessControlConditions,
-    },
-  });
+  const result = await litNodeClient.executeJs(
+    await fetchAndUpdateCodeIfMatch({
+      sessionSigs: pkpSessionSigs,
+      ipfsId: litActionIpfsCid,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        accessControlConditions,
+      },
+    })
+  );
 
   const decryptedPrivateKey = postLitActionValidation(result);
 

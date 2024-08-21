@@ -1,6 +1,6 @@
 import { AccessControlConditions } from '@lit-protocol/types';
 
-import { postLitActionValidation } from './utils';
+import { fetchAndUpdateCodeIfMatch, postLitActionValidation } from './utils';
 import { SignMessageWithEncryptedKeyParams, StoredKeyData } from '../types';
 
 interface SignMessageWithLitActionParams
@@ -23,16 +23,18 @@ export async function signMessageWithLitAction(
   } = args;
 
   const { pkpAddress, ciphertext, dataToEncryptHash } = storedKeyMetadata;
-  const result = await litNodeClient.executeJs({
-    sessionSigs: pkpSessionSigs,
-    ipfsId: litActionIpfsCid,
-    jsParams: {
-      pkpAddress,
-      ciphertext,
-      dataToEncryptHash,
-      messageToSign,
-      accessControlConditions,
-    },
-  });
+  const result = await litNodeClient.executeJs(
+    await fetchAndUpdateCodeIfMatch({
+      sessionSigs: pkpSessionSigs,
+      ipfsId: litActionIpfsCid,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        messageToSign,
+        accessControlConditions,
+      },
+    })
+  );
   return postLitActionValidation(result);
 }
