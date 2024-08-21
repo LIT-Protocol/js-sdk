@@ -19,6 +19,7 @@ import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
   AuthMethodType,
   EITHER_TYPE,
+  LIT_ACTION_CID_REPOSITORY,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
@@ -26,6 +27,7 @@ import {
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
   LitNetwork,
+  WRAPPED_KEY_FALLBACK_SERVICE,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -962,6 +964,44 @@ export class LitNodeClientNodeJs
   //   res = await this.runOnTargetedNodes(formattedParams);
   // }
 
+  private async _fetchAndUpdateCodeIfMatch(
+    params: JsonExecutionSdkParams
+  ): Promise<JsonExecutionSdkParams> {
+    for (const [action, platforms] of Object.entries(
+      LIT_ACTION_CID_REPOSITORY
+    )) {
+      for (const [platform, cid] of Object.entries(
+        platforms as Record<string, string>
+      )) {
+        if (cid === params.ipfsId) {
+          try {
+            const res = await fetch(
+              `${WRAPPED_KEY_FALLBACK_SERVICE}/${action}/${platform}`
+            );
+            if (!res.ok) {
+              throw new Error(
+                `Failed to fetch the code for ${action} on ${platform}`
+              );
+            }
+            const code = await res.text();
+
+            params.code = code;
+            params.ipfsId = undefined;
+
+            return params;
+          } catch (error) {
+            throw new Error(
+              `Error fetching code for ${action} on ${platform}: ${JSON.stringify(
+                error
+              )}`
+            );
+          }
+        }
+      }
+    }
+    return params;
+  }
+
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
@@ -998,6 +1038,8 @@ export class LitNodeClientNodeJs
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
+
+    params = await this._fetchAndUpdateCodeIfMatch(params);
 
     // Format the params
     const formattedParams: JsonExecutionSdkParams = {
