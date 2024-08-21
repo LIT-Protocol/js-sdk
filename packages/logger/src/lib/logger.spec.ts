@@ -1,10 +1,25 @@
-import { Logger, LogLevel, LogManager } from './logger';
+import { LogLevel, LogManager } from './logger';
 
 describe('logger', () => {
   let lm: LogManager;
   beforeEach(() => {
     LogManager.clearInstance();
     lm = LogManager.Instance;
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'info').mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'debug').mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'timeLog').mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'time').mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'log').mockImplementation(() => {});    
   });
 
   it('Log Manager singleton should be defined', () => {
