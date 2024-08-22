@@ -1,5 +1,4 @@
 import { AccessControlConditions } from '@lit-protocol/types';
-
 import { postLitActionValidation } from './utils';
 import { GeneratePrivateKeyParams } from '../types';
 
@@ -28,6 +27,9 @@ export async function generateKeyWithLitAction({
     jsParams: {
       pkpAddress,
       accessControlConditions,
+    },
+    ipfsOptions: {
+      overwriteCode: true,
     },
   });
 

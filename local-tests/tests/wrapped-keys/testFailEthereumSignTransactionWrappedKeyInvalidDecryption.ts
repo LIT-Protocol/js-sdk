@@ -56,6 +56,9 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
             unsignedTransaction,
             accessControlConditions: [decryptionAccessControlCondition],
           },
+          ipfsOptions: {
+            overwriteCode: true,
+          },
         });
       } catch (e: any) {
         if (

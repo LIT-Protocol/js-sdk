@@ -35,6 +35,9 @@ export async function exportPrivateKeyWithLitAction(
       dataToEncryptHash,
       accessControlConditions,
     },
+    ipfsOptions: {
+      overwriteCode: true,
+    },
   });
 
   const decryptedPrivateKey = postLitActionValidation(result);
