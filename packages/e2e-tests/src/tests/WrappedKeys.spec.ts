@@ -689,8 +689,9 @@ describe('Wrapped Keys', () => {
         expect(res.response).toEqual(
           'Error: When decrypting to a single node- Access control conditions check failed.  Check that you are allowed to decrypt this item.'
         );
-      }).finally(() => {
-        devEnv.releasePrivateKeyFromUser(bob);   
+      })
+      .finally(() => {
+        devEnv.releasePrivateKeyFromUser(bob);
       });
   });
 
@@ -921,7 +922,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    expect(pkpAddress).toEqual(alicePkpAddress); 
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,

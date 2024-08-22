@@ -171,7 +171,11 @@ describe('SessionSigs', () => {
       });
 
       it('LitAction IPFS Session', async () => {
-        await executeJsSigning(devEnv, alice, getLitActionSessionSigsUsingIpfsId);
+        await executeJsSigning(
+          devEnv,
+          alice,
+          getLitActionSessionSigsUsingIpfsId
+        );
       });
 
       it('EOA Wallet', async () => {
