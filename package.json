@@ -15,7 +15,7 @@
     "bundles": "yarn node ./esbuilder/lit-connect-modal/esbuild.js",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
-    "test:ci": "nx affected --target=test --exclude=e2e-tests --code-coverage",
+    "test:ci": "nx affected --target=test --exclude=e2e-tests",
     "test:e2e": "nx run e2e-tests:test",
     "test:local": "node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/test.mjs",
     "test:unit": "nx run-many --target=test --exclude=e2e-tests",
