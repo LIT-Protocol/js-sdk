@@ -17,21 +17,23 @@ if (!globalThis.LitNodeClientNodeJs) {
 // ==================== Exports ====================
 export * from './lib/lit-node-client-nodejs';
 
-export {
-  decryptToFile,
-  decryptFromJson,
-  decryptToString,
-  decryptToZip,
-  decryptZipFileWithMetadata,
-  encryptFile,
-  encryptFileAndZipWithMetadata,
-  encryptToJson,
-  encryptString,
-  encryptZip,
-  verifyJwt,
-  zipAndEncryptFiles,
-  zipAndEncryptString,
-} from '@lit-protocol/encryption';
+// export {
+//   decryptToFile,
+//   decryptFromJson,
+//   decryptToString,
+//   decryptToUint8Array,
+//   decryptToZip,
+//   decryptZipFileWithMetadata,
+//   encryptFile,
+//   encryptFileAndZipWithMetadata,
+//   encryptToJson,
+//   encryptString,
+//   encryptUint8Array,
+//   encryptZip,
+//   verifyJwt,
+//   zipAndEncryptFiles,
+//   zipAndEncryptString,
+// } from '@lit-protocol/encryption';
 
 export {
   hashResourceIdForSigning,

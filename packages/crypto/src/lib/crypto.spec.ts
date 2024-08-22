@@ -1,3 +1,8 @@
+import * as ethers from 'ethers';
+import { joinSignature } from 'ethers/lib/utils';
+
+import { SigShare } from '@lit-protocol/types';
+
 import {
   decryptWithSignatureShares,
   encrypt,
@@ -6,11 +11,6 @@ import {
   verifySignature,
   combineEcdsaShares,
 } from './crypto';
-import * as ethers from 'ethers';
-import { joinSignature } from 'ethers/lib/utils';
-
-import { LIT_CURVE } from '@lit-protocol/constants';
-import { SigShare } from '@lit-protocol/types';
 
 const publicKey =
   '8e29447d7b0666fe41c357dbbdbdac0ac8ac973f88439a07f85fa31fa6fa3cea87c2eaa8b367e1c97764800fb5636892';
@@ -154,7 +154,7 @@ describe('combine ECDSA Shares', () => {
   it('Should recombine ECDSA signature shares', async () => {
     const sigShares: SigShare[] = [
       {
-        sigType: 'ECDSA_CAIT_SITH' as LIT_CURVE,
+        sigType: 'ECDSA_CAIT_SITH' as const,
         signatureShare:
           'BC8108AD9CAE8358942BB4B27632B87FFA705CCB675F85A59847CC1B84845A38',
         shareIndex: 0,
@@ -166,7 +166,7 @@ describe('combine ECDSA Shares', () => {
         sigName: 'sig',
       },
       {
-        sigType: 'K256' as LIT_CURVE,
+        sigType: 'K256' as const,
         signatureShare:
           'BA77EB500884A60583DEA49578D4BB64BB55EF497F37C88DF935D739CE8E0A9F',
         shareIndex: 0,
@@ -178,7 +178,7 @@ describe('combine ECDSA Shares', () => {
         sigName: 'sig',
       },
       {
-        sigType: 'ECDSA_CAIT_SITH' as LIT_CURVE,
+        sigType: 'ECDSA_CAIT_SITH' as const,
         signatureShare:
           'EF850AE61B6D658976B2560B880BF03ABC1A070BACDEAE2311781F65A524F245',
         shareIndex: 0,

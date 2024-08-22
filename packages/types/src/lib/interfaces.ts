@@ -562,6 +562,14 @@ export interface EncryptResponse {
   dataToEncryptHash: string;
 }
 
+export interface EncryptUint8ArrayRequest
+  extends MultipleAccessControlConditions {
+  /**
+   * The uint8array that you wish to encrypt
+   */
+  dataToEncrypt: Uint8Array;
+}
+
 export interface EncryptStringRequest extends MultipleAccessControlConditions {
   /**
    * String that you wish to encrypt

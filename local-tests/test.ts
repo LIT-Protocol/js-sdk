@@ -22,6 +22,7 @@ import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testU
 import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
 import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
 import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaSessionSigsToEncryptDecryptString';
+import { testUseEoaSessionSigsToEncryptDecryptUint8Array } from './tests/testUseEoaSessionSigsToEncryptDecryptUint8Array';
 import { testUsePkpSessionSigsToEncryptDecryptString } from './tests/testUsePkpSessionSigsToEncryptDecryptString';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
 import { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionCodeToGenerateSessionSigs';
@@ -161,6 +162,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
     testUseEoaSessionSigsToExecuteJsJsonResponse,
     testUseEoaSessionSigsToExecuteJsConsoleLog,
     testUseEoaSessionSigsToEncryptDecryptString,
+    testUseEoaSessionSigsToEncryptDecryptUint8Array,
     testUseEoaSessionSigsToEncryptDecryptFile,
     testUseEoaSessionSigsToEncryptDecryptZip,
   };

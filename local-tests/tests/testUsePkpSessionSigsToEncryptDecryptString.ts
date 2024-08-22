@@ -1,4 +1,3 @@
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
@@ -6,6 +5,7 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
@@ -22,7 +22,7 @@ export const testUsePkpSessionSigsToEncryptDecryptString = async (
     userAddress: alice.authMethodOwnedPkp.ethAddress,
   });
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       accessControlConditions: accs,
       dataToEncrypt: 'Hello world',
@@ -61,7 +61,7 @@ export const testUsePkpSessionSigsToEncryptDecryptString = async (
   ]);
 
   // -- Decrypt the encrypted string
-  const decryptRes = await LitJsSdk.decryptToString(
+  const decryptRes = await decryptToString(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,
