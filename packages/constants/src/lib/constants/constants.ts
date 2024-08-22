@@ -1019,4 +1019,7 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
 
-export const FALLBACK_IPFS_GATEWAY = 'https://flk-ipfs.io/ipfs/';
+export const FALLBACK_IPFS_GATEWAYS = [
+  'https://flk-ipfs.io/ipfs/',
+  'https://litprotocol.mypinata.cloud/ipfs/',
+];

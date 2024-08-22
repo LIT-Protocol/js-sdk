@@ -19,7 +19,7 @@ import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
   AuthMethodType,
   EITHER_TYPE,
-  FALLBACK_IPFS_GATEWAY,
+  FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
@@ -966,25 +966,36 @@ export class LitNodeClientNodeJs
    * @throws An error if the code retrieval fails.
    */
 
-  async _getFallbackIpfsCode(gatewayUrl: string, ipfsId: string) {
-    log(`Using fallback IPFS gateway to fetch code for IPFS ID: ${ipfsId}`);
-    try {
-      const response = await fetch(`${gatewayUrl}${ipfsId}`);
+  async _getFallbackIpfsCode(gatewayUrl: string | undefined, ipfsId: string) {
+    const allGateways = gatewayUrl
+      ? [gatewayUrl, ...FALLBACK_IPFS_GATEWAYS]
+      : FALLBACK_IPFS_GATEWAYS;
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch code from IPFS: ${response.status} ${response.statusText}`
-        );
+    log(
+      `Attempting to fetch code for IPFS ID: ${ipfsId} using fallback IPFS gateways`
+    );
+
+    for (const url of allGateways) {
+      try {
+        const response = await fetch(`${url}${ipfsId}`);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch code from IPFS gateway ${url}: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const code = await response.text();
+        const codeBase64 = Buffer.from(code).toString('base64');
+
+        return codeBase64;
+      } catch (error) {
+        console.error(`Error fetching code from IPFS gateway ${url}`);
+        // Continue to the next gateway in the array
       }
-
-      const code = await response.text();
-      const codeBase64 = Buffer.from(code).toString('base64');
-
-      return codeBase64;
-    } catch (error) {
-      console.error(`Error fetching code from IPFS`);
-      throw error;
     }
+
+    throw new Error('All IPFS gateways failed to fetch the code.');
   }
 
   /**
@@ -1040,7 +1051,7 @@ export class LitNodeClientNodeJs
 
     if (overwriteCode && params.ipfsId) {
       const code = await this._getFallbackIpfsCode(
-        params.ipfsOptions?.gatewayUrl || FALLBACK_IPFS_GATEWAY,
+        params.ipfsOptions?.gatewayUrl,
         params.ipfsId
       );
 
@@ -2222,7 +2233,7 @@ export class LitNodeClientNodeJs
 
         if (overwriteCode && props.litActionIpfsId) {
           const code = await this._getFallbackIpfsCode(
-            params.ipfsOptions?.gatewayUrl || FALLBACK_IPFS_GATEWAY,
+            params.ipfsOptions?.gatewayUrl,
             props.litActionIpfsId
           );
 
