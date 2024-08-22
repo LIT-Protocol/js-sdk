@@ -95,7 +95,7 @@ export class TinnyPerson {
      * ====================================
      */
     this.siweMessage = await createSiweMessage<BaseSiweMessage>({
-      nonce: this.envConfig?.litNodeClient?.latestBlockhash!,
+      nonce: await this.envConfig.litNodeClient.getLatestBlockhash(),
       walletAddress: this.wallet.address,
     });
 
@@ -211,7 +211,7 @@ export class TinnyPerson {
       })
     )?.capacityTokenIdStr;
 
-    this.contractsClient!.signer! = this.wallet;
+    this.contractsClient!.signer = this.wallet;
     await this.contractsClient?.connect();
     return (
       await this.envConfig.litNodeClient.createCapacityDelegationAuthSig({

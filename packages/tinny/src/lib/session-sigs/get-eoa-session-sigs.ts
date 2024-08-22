@@ -76,6 +76,7 @@ export const getEoaSessionSigs = async (
         expiration: expiration,
         resources: resourceAbilityRequests,
         walletAddress: person.wallet.address,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
         nonce: await devEnv.litNodeClient?.getLatestBlockhash()!,
         litNodeClient: devEnv.litNodeClient,
       });
@@ -138,7 +139,8 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
         expiration: expiration,
         resources: resourceAbilityRequests,
         walletAddress: fromWallet.address,
-        nonce: devEnv.litNodeClient?.latestBlockhash!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+        nonce: await devEnv.litNodeClient?.getLatestBlockhash()!,
         litNodeClient: devEnv.litNodeClient,
       });
 
