@@ -70,7 +70,7 @@ import {
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
 import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
-import { ValidatorStruct } from './types';
+import { EpochInfo, ValidatorStruct } from './types';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -1010,7 +1010,7 @@ export class LitContracts {
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   }): Promise<{
     stakingContract: ethers.Contract;
-    epoch: number;
+    epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
   }> => {
@@ -1020,16 +1020,26 @@ export class LitContracts {
       rpcUrl
     );
 
-    const [epoch, minNodeCount, activeUnkickedValidatorStructs] =
+    const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
 
-    if (!minNodeCount) {
+    const typedEpochInfo: EpochInfo = {
+      epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
+      number: ethers.BigNumber.from(epochInfo[1]).toNumber(),
+      endTime: ethers.BigNumber.from(epochInfo[2]).toNumber(),
+      retries: ethers.BigNumber.from(epochInfo[3]).toNumber(),
+      timeout: ethers.BigNumber.from(epochInfo[4]).toNumber(),
+    };
+
+    const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
+
+    if (!minNodeCountInt) {
       throw new Error('❌ Minimum validator count is not set');
     }
 
-    if (activeUnkickedValidatorStructs.length <= minNodeCount) {
+    if (activeUnkickedValidatorStructs.length <= minNodeCountInt) {
       throw new Error(
-        `❌ Active validator set does not meet the threshold. Required: ${minNodeCount} but got: ${activeUnkickedValidatorStructs.length}`
+        `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
       );
     }
 
@@ -1084,8 +1094,8 @@ export class LitContracts {
 
     return {
       stakingContract,
-      epoch,
-      minNodeCount,
+      epochInfo: typedEpochInfo,
+      minNodeCount: minNodeCountInt,
       bootstrapUrls: networks,
     };
   };

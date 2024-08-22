@@ -70,6 +70,7 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
+import { EpochInfo } from 'packages/contracts-sdk/src/lib/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -230,11 +231,11 @@ export class LitCore {
    */
   private async _getValidatorData(): Promise<{
     stakingContract: ethers.Contract;
-    epoch: number;
+    epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
   }> {
-    const { stakingContract, epoch, minNodeCount, bootstrapUrls } =
+    const { stakingContract, epochInfo, minNodeCount, bootstrapUrls } =
       await LitContracts.getConnectionInfo({
         litNetwork: this.config.litNetwork,
         networkContext: this.config.contractContext,
@@ -245,16 +246,6 @@ export class LitCore {
     // Validate minNodeCount
     if (minNodeCount === undefined || minNodeCount === null) {
       throw new Error('minNodeCount is required');
-    }
-
-    const minNodeCountInInt = parseInt(minNodeCount.toString());
-
-    if (isNaN(minNodeCountInInt) || minNodeCountInInt <= 0) {
-      throwError({
-        message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
     }
 
     // Validate bootstrapUrls
@@ -276,7 +267,7 @@ export class LitCore {
     }
 
     // Validate epoch
-    if (epoch === undefined || epoch === null) {
+    if (epochInfo.number === undefined || epochInfo.number === null) {
       throwError({
         message: 'epoch is required',
         errorKind: LIT_ERROR.INIT_ERROR.kind,
@@ -284,25 +275,15 @@ export class LitCore {
       });
     }
 
-    const epochInInt = parseInt(epoch.toString(), 10);
-
-    if (isNaN(epochInInt)) {
-      throwError({
-        message: `epoch is ${epoch}, which is invalid.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    log('[_getValidatorData] epochInInt: ', epochInInt);
-    log('[_getValidatorData] minNodeCountInInt: ', minNodeCountInInt);
+    log('[_getValidatorData] epochInfo: ', epochInfo);
+    log('[_getValidatorData] minNodeCount: ', minNodeCount);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
     log('[_getValidatorData] stakingContract: ', stakingContract);
 
     return {
       stakingContract,
-      epoch: epochInInt,
-      minNodeCount: minNodeCountInInt,
+      epochInfo,
+      minNodeCount,
       bootstrapUrls,
     };
   }
@@ -311,9 +292,14 @@ export class LitCore {
   private async _handleStakingContractStateChange(state: StakingStates) {
     log(`New state detected: "${state}"`);
 
+    const validatorData = await this._getValidatorData();
+
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
-      this._epochState = await this._fetchCurrentEpochState();
+
+      this._epochState = await this._fetchCurrentEpochState(
+        validatorData.epochInfo
+      );
 
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
@@ -322,9 +308,8 @@ export class LitCore {
             'State found to be new validator set locked, checking validator set'
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
-          const { bootstrapUrls: newNodeUrls } = await this._getValidatorData();
 
-          const delta: string[] = newNodeUrls.filter((item) =>
+          const delta: string[] = validatorData.bootstrapUrls.filter((item) =>
             existingNodeUrls.includes(item)
           );
           // if the sets differ we reconnect.
@@ -534,15 +519,9 @@ export class LitCore {
     this.config.minNodeCount = validatorData.minNodeCount;
     this.config.bootstrapUrls = validatorData.bootstrapUrls;
 
-    this._epochState = {
-      currentNumber: validatorData.epoch,
-      startTime: null, // not set until we fetch it from the 'epoch' function
-    };
-
-    // non-async, but we don't need to wait for it to complete before continuing
-    this._fetchCurrentEpochState().then((epochState) => {
-      this._epochState = epochState;
-    });
+    this._epochState = await this._fetchCurrentEpochState(
+      validatorData.epochInfo
+    );
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
@@ -895,39 +874,26 @@ export class LitCore {
     });
   };
 
-  private async _fetchCurrentEpochState(): Promise<
-    Pick<EpochCache, 'startTime' | 'currentNumber'>
-  > {
-    if (!this._stakingContract) {
-      return throwError({
-        message:
-          'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
+  private async _fetchCurrentEpochState(
+    epochInfo?: EpochInfo
+  ): Promise<Pick<EpochCache, 'startTime' | 'currentNumber'>> {
+    if (!epochInfo) {
+      log(
+        'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
+      );
+      const validatorData = await this._getValidatorData();
+      epochInfo = validatorData.epochInfo;
     }
 
-    try {
-      const epoch = await this._stakingContract['epoch']();
+    // when we transition to the new epoch, we don't store the start time.  but we
+    // set the endTime to the current timestamp + epochLength.
+    // by reversing this and subtracting epochLength from the endTime, we get the start time
+    const startTime = epochInfo.endTime - epochInfo.epochLength;
 
-      // when we transition to the new epoch, we don't store the start time.  but we
-      // set the endTime to the current timestamp + epochLength.
-      // by reversing this and subtracting epochLength from the endTime, we get the start time
-      const startTime =
-        (epoch.endTime.toNumber() as number) -
-        (epoch.epochLength.toNumber() as number);
-
-      return {
-        currentNumber: epoch.number.toNumber() as number,
-        startTime,
-      };
-    } catch (error) {
-      return throwError({
-        message: `[_fetchCurrentEpochState] Error getting current epoch number: ${error}`,
-        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-      });
-    }
+    return {
+      currentNumber: epochInfo.number,
+      startTime,
+    };
   }
 
   get currentEpochNumber(): number | null {
