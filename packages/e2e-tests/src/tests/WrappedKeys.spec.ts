@@ -388,8 +388,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Fail Import Wrapped Key Same PKP', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const pkpSessionSigs = await getPkpSessionSigs(
       devEnv,
       alice,
@@ -528,8 +526,6 @@ describe('Wrapped Keys', () => {
   });
 
   it('Fail EOA Session Sig', async () => {
-    const alice = await devEnv.createRandomPerson();
-
     const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
     const privateKey = randomSolanaPrivateKey();
@@ -693,6 +689,8 @@ describe('Wrapped Keys', () => {
         expect(res.response).toEqual(
           'Error: When decrypting to a single node- Access control conditions check failed.  Check that you are allowed to decrypt this item.'
         );
+      }).finally(() => {
+        devEnv.releasePrivateKeyFromUser(bob);   
       });
   });
 
@@ -923,11 +921,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress); 
 
     const pkpSessionSigsSigning = await getPkpSessionSigs(
       devEnv,
