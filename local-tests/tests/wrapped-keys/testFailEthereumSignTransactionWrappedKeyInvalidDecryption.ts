@@ -8,6 +8,7 @@ import { encryptString } from '@lit-protocol/encryption';
 import { LIT_PREFIX } from 'packages/wrapped-keys/src/lib/constants';
 import { LIT_ACTION_CID_REPOSITORY } from '../../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
 import { getBaseTransactionForNetwork } from './util';
+import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 
 /**
  * Test Commands:
@@ -57,7 +58,10 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
             accessControlConditions: [decryptionAccessControlCondition],
           },
           ipfsOptions: {
-            overwriteCode: true,
+            overwriteCode:
+              GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[
+                devEnv.litNodeClient.config.litNetwork
+              ],
           },
         });
       } catch (e: any) {

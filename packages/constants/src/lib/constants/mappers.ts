@@ -42,3 +42,16 @@ export const GENERAL_WORKER_URL_BY_NETWORK: {
   custom: 'https://apis.getlit.dev/cayenne/contracts',
   localhost: 'https://apis.getlit.dev/cayenne/contracts',
 };
+
+export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: boolean;
+} = {
+  cayenne: false,
+  manzano: false,
+  habanero: false,
+  'datil-dev': false,
+  'datil-test': false,
+  datil: true,
+  custom: false,
+  localhost: false,
+};

@@ -20,6 +20,7 @@ import {
   AuthMethodType,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAY,
+  GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
@@ -127,6 +128,7 @@ import type {
   EncryptionSignRequest,
   SigningAccessControlConditionRequest,
   JsonPKPClaimKeyRequest,
+  IpfsOptions,
 } from '@lit-protocol/types';
 
 export class LitNodeClientNodeJs
@@ -955,13 +957,35 @@ export class LitNodeClientNodeJs
 
   // ========== Scoped Business Logics ==========
 
-  // Normalize the data to a basic array
+  /**
+   * Retrieves the fallback IPFS code for a given IPFS ID.
+   *
+   * @param gatewayUrl - the gateway url.
+   * @param ipfsId - The IPFS ID.
+   * @returns The base64-encoded fallback IPFS code.
+   * @throws An error if the code retrieval fails.
+   */
 
-  // TODO: executeJsWithTargettedNodes
-  // if (formattedParams.targetNodeRange) {
-  //   // FIXME: we should make this a separate function
-  //   res = await this.runOnTargetedNodes(formattedParams);
-  // }
+  async _getFallbackIpfsCode(gatewayUrl: string, ipfsId: string) {
+    log(`Using fallback IPFS gateway to fetch code for IPFS ID: ${ipfsId}`);
+    try {
+      const response = await fetch(`${gatewayUrl}${ipfsId}`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch code from IPFS: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const code = await response.text();
+      const codeBase64 = Buffer.from(code).toString('base64');
+
+      return codeBase64;
+    } catch (error) {
+      console.error(`Error fetching code from IPFS`);
+      throw error;
+    }
+  }
 
   /**
    *
@@ -1010,20 +1034,19 @@ export class LitNodeClientNodeJs
     // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
     // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
     // and update the params with the fetched code, removing the ipfsId afterward.
-    if (params.ipfsOptions?.overwriteCode && params.ipfsId) {
-      const gatewayUrl = params.ipfsOptions.gatewayUrl || FALLBACK_IPFS_GATEWAY;
-      const response = await fetch(`${gatewayUrl}${params.ipfsId}`);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch code from IPFS: ${response.status} ${response.statusText}`
-        );
-      }
+    const overwriteCode =
+      params.ipfsOptions?.overwriteCode ||
+      GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
 
-      const code = await response.text();
+    if (overwriteCode && params.ipfsId) {
+      const code = await this._getFallbackIpfsCode(
+        params.ipfsOptions?.gatewayUrl || FALLBACK_IPFS_GATEWAY,
+        params.ipfsId
+      );
 
       formattedParams = {
         ...params,
-        code: Buffer.from(code).toString('base64'),
+        code: code,
         ipfsId: undefined,
       };
     }
@@ -2188,6 +2211,27 @@ export class LitNodeClientNodeJs
           throw new Error(
             '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
+        }
+
+        // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
+        // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
+        // and update the params with the fetched code, removing the ipfsId afterward.
+
+        const overwriteCode =
+          params.ipfsOptions?.overwriteCode ||
+          GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
+
+        if (overwriteCode && props.litActionIpfsId) {
+          const code = await this._getFallbackIpfsCode(
+            params.ipfsOptions?.gatewayUrl || FALLBACK_IPFS_GATEWAY,
+            props.litActionIpfsId
+          );
+
+          props = {
+            ...props,
+            litActionCode: code,
+            litActionIpfsId: undefined,
+          };
         }
 
         /**
