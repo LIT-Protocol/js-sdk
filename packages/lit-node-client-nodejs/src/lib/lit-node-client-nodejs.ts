@@ -965,8 +965,10 @@ export class LitNodeClientNodeJs
    * @returns The base64-encoded fallback IPFS code.
    * @throws An error if the code retrieval fails.
    */
-
-  async _getFallbackIpfsCode(gatewayUrl: string | undefined, ipfsId: string) {
+  private async _getFallbackIpfsCode(
+    gatewayUrl: string | undefined,
+    ipfsId: string
+  ) {
     const allGateways = gatewayUrl
       ? [gatewayUrl, ...FALLBACK_IPFS_GATEWAYS]
       : FALLBACK_IPFS_GATEWAYS;
