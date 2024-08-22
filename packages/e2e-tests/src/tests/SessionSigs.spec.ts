@@ -95,29 +95,31 @@ describe('SessionSigs', () => {
   });
 
   describe('Claim Key Multiple', () => {
-    it('LitAction Session', async () => {
-      await executeJsClaimKeys(devEnv, alice, getLitActionSessionSigs);
-    });
+    if (devEnv && !devEnv.setUnavailable(LIT_TESTNET.MANZANO)) {
+      it('LitAction Session', async () => {
+        await executeJsClaimKeys(devEnv, alice, getLitActionSessionSigs);
+      });
 
-    it('LitAction IPFS Session', async () => {
-      await executeJsClaimKeys(
-        devEnv,
-        alice,
-        getLitActionSessionSigsUsingIpfsId
-      );
-    });
+      it('LitAction IPFS Session', async () => {
+        await executeJsClaimKeys(
+          devEnv,
+          alice,
+          getLitActionSessionSigsUsingIpfsId
+        );
+      });
 
-    it('EOA Wallet', async () => {
-      await executeJsClaimKeys(devEnv, alice, getEoaSessionSigs);
-    });
+      it('EOA Wallet', async () => {
+        await executeJsClaimKeys(devEnv, alice, getEoaSessionSigs);
+      });
 
-    it('PKP Session', async () => {
-      await executeJsClaimKeys(devEnv, alice, getPkpSessionSigs);
-    });
+      it('PKP Session', async () => {
+        await executeJsClaimKeys(devEnv, alice, getPkpSessionSigs);
+      });
+    }
   });
 
   describe('ExecuteJS JSON Response', () => {
-    if (!devEnv.setUnavailable(LIT_TESTNET.MANZANO)) {
+    if (devEnv && !devEnv.setUnavailable(LIT_TESTNET.MANZANO)) {
       it('LitAction Session', async () => {
         await executeJsJSONResponse(devEnv, alice, getLitActionSessionSigs);
       });
