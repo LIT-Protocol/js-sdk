@@ -454,27 +454,29 @@ const ethTypedDataUtil = async (
     },
   };
 
-  ethRequestHandler({
-    signer: pkpEthersWallet,
-    payload: {
-      method: 'eth_signTypedData',
-      params: [alice?.pkp?.ethAddress, JSON.stringify(msgParams)],
-    },
-  }).then((signature: string) => {
-    // https://docs.ethers.io/v5/api/utils/signing-key/#utils-verifyTypedData
-    const recoveredAddr = ethers.utils.verifyTypedData(
-      msgParams.domain,
-      { Person: msgParams.types.Person, Mail: msgParams.types.Mail },
-      msgParams.message,
-      signature
-    );
+  expect(
+    ethRequestHandler({
+      signer: pkpEthersWallet,
+      payload: {
+        method: 'eth_signTypedData',
+        params: [alice?.pkp?.ethAddress, JSON.stringify(msgParams)],
+      },
+    }).then((signature: string) => {
+      // https://docs.ethers.io/v5/api/utils/signing-key/#utils-verifyTypedData
+      const recoveredAddr = ethers.utils.verifyTypedData(
+        msgParams.domain,
+        { Person: msgParams.types.Person, Mail: msgParams.types.Mail },
+        msgParams.message,
+        signature
+      );
 
-    expect(signature.length).toEqual(132);
+      expect(signature.length).toEqual(132);
 
-    expect(recoveredAddr.toLowerCase()).toEqual(
-      alice.pkp?.ethAddress.toLowerCase()
-    );
-  });
+      expect(recoveredAddr.toLowerCase()).toEqual(
+        alice.pkp?.ethAddress.toLowerCase()
+      );
+    })
+  ).resolves;
 };
 
 const signTypedDataV1 = async (
@@ -595,30 +597,32 @@ const signTypedDatav3 = async (
     },
   };
 
-  ethRequestHandler({
-    signer: pkpEthersWallet,
-    payload: {
-      method: 'eth_signTypedData_v3',
-      params: [alice.pkp?.ethAddress, JSON.stringify(msgParams)],
-    },
-  }).then((signature: string) => {
-    const recoveredAddr = recoverTypedSignature({
-      data: {
-        types: msgParams.types,
-        domain: msgParams.domain,
-        primaryType: msgParams.primaryType as 'Mail',
-        message: msgParams.message,
+  expect(
+    ethRequestHandler({
+      signer: pkpEthersWallet,
+      payload: {
+        method: 'eth_signTypedData_v3',
+        params: [alice.pkp?.ethAddress, JSON.stringify(msgParams)],
       },
-      signature: signature,
-      version: SignTypedDataVersion.V3,
-    });
+    }).then((signature: string) => {
+      const recoveredAddr = recoverTypedSignature({
+        data: {
+          types: msgParams.types,
+          domain: msgParams.domain,
+          primaryType: msgParams.primaryType as 'Mail',
+          message: msgParams.message,
+        },
+        signature: signature,
+        version: SignTypedDataVersion.V3,
+      });
 
-    expect(signature.length).toEqual(132);
+      expect(signature.length).toEqual(132);
 
-    expect(recoveredAddr.toLowerCase()).toEqual(
-      alice.pkp?.ethAddress.toLowerCase()
-    );
-  });
+      expect(recoveredAddr.toLowerCase()).toEqual(
+        alice.pkp?.ethAddress.toLowerCase()
+      );
+    })
+  ).resolves;
 };
 
 const signTypedDatav4 = async (
@@ -757,7 +761,10 @@ const signWithAuthContext = async (
   await pkpEthersWallet.init();
 
   expect(
-    pkpEthersWallet.signMessage(alice.loveLetter)
+    pkpEthersWallet.signMessage(alice.loveLetter).then((signature) => {
+      expect(signature).toBeDefined();
+      expect(signature.length).toEqual(132);
+    })
   ).resolves.not.toThrowError();
 };
 
@@ -800,16 +807,8 @@ const ethPersonalSign = async (
     }).then((signature: string) => {
       const recoveredAddr = ethers.utils.verifyMessage(message, signature);
 
-      // ==================== Post-Validation ====================
-      if (signature.length !== 132) {
-        throw new Error('❌ signature should be 132 characters long');
-      }
-
-      if (recoveredAddr !== alice.pkp?.ethAddress) {
-        throw new Error(
-          `❌ recoveredAddr should be ${alice.pkp?.ethAddress} but got ${recoveredAddr}`
-        );
-      }
+      expect(signature.length).toEqual(132);
+      expect(recoveredAddr).toEqual(alice.pkp?.ethAddress);
     })
   ).resolves.not.toThrowError();
 };
