@@ -2216,7 +2216,6 @@ export class LitNodeClientNodeJs
         // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
         // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
         // and update the params with the fetched code, removing the ipfsId afterward.
-
         const overwriteCode =
           params.ipfsOptions?.overwriteCode ||
           GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
