@@ -41,6 +41,9 @@ export async function signTransactionWithLitAction({
       broadcast,
       accessControlConditions,
     },
+    ipfsOptions: {
+      overwriteCode: true,
+    },
   });
 
   return postLitActionValidation(result);

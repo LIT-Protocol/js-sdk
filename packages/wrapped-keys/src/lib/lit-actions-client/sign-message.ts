@@ -33,6 +33,9 @@ export async function signMessageWithLitAction(
       messageToSign,
       accessControlConditions,
     },
+    ipfsOptions: {
+      overwriteCode: true,
+    },
   });
   return postLitActionValidation(result);
 }

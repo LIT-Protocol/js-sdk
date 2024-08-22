@@ -123,7 +123,6 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }
-  process.exit();
   // -- execute js
   try {
     const res = await devEnv.litNodeClient.executeJs({

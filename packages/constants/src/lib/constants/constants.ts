@@ -378,7 +378,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Sepolia Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://eth-sepolia.g.alchemy.com/v2/demo'],
+    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
     blockExplorerUrls: ['https://sepolia.etherscan.io/'],
     type: null,
     vmType: 'EVM',
@@ -1018,3 +1018,5 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+
+export const FALLBACK_IPFS_GATEWAY = 'https://litprotocol.mypinata.cloud/ipfs/';
