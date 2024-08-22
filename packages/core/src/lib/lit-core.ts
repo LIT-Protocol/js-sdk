@@ -52,6 +52,7 @@ import {
   AuthSig,
   BlockHashErrorResponse,
   CustomNetwork,
+  EpochInfo,
   EthBlockhashInfo,
   FormattedMultipleAccs,
   HandshakeWithNode,
@@ -70,7 +71,6 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { EpochInfo } from 'packages/contracts-sdk/src/lib/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;

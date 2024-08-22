@@ -2,6 +2,7 @@
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
   CreateCustomAuthMethodRequest,
+  EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
   LitContractContext,
@@ -70,7 +71,7 @@ import {
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
 import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
-import { EpochInfo, ValidatorStruct } from './types';
+import { ValidatorStruct } from './types';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
