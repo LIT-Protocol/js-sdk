@@ -1,6 +1,7 @@
 {
   "name": "@lit-protocol/tinny",
   "version": "6.4.1",
+  "private": true,
   "dependencies": {
     "tslib": "^2.3.0"
   },
