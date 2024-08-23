@@ -930,7 +930,7 @@ export class LitCore {
     data = { ...data, epoch: this.currentEpochNumber };
 
     // If there is a `sessionSigs' object in the params remove before sending the request;
-    // this line has been added as a catch all to prevent sending with the request 
+    // this line has been added as a catch all to prevent sending with the request
     if (data.sessionSigs) {
       delete data.sessionSigs;
     }
