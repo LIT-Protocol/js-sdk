@@ -244,7 +244,7 @@ export class LitCore {
       });
 
     // Validate minNodeCount
-if (!minNodeCount) {
+    if (!minNodeCount) {
       throw new Error('minNodeCount is required');
     }
 
@@ -267,7 +267,7 @@ if (!minNodeCount) {
     }
 
     // Validate epoch
-    if (epochInfo.number === undefined || epochInfo.number === null) {
+    if (!epochInfo.number) {
       throwError({
         message: 'epoch is required',
         errorKind: LIT_ERROR.INIT_ERROR.kind,
