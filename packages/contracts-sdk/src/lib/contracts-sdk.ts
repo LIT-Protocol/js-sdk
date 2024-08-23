@@ -641,6 +641,8 @@ export class LitContracts {
             '❌ Could not get Staking Contract from contract resolver instance'
           );
         }
+
+        //@ts-ignore
         const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find((data: any) => {
           return data.name === 'Staking'
         });
