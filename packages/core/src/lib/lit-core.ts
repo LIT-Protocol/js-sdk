@@ -986,7 +986,11 @@ export class LitCore {
       const abortController = new AbortController();
       req.signal = abortController.signal;
       abortTimeout = setTimeout(() => {
-        abortController.abort(new Error(`Request to node timed out based on config. Timeout: ${requestTimeout}`));
+        abortController.abort(
+          new Error(
+            `Request to node timed out based on config. Timeout: ${requestTimeout}`
+          )
+        );
       }, requestTimeout);
     }
 
