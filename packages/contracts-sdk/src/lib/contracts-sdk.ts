@@ -641,11 +641,13 @@ export class LitContracts {
             '❌ Could not get Staking Contract from contract resolver instance'
           );
         }
-
-        //@ts-ignore
-        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find((data: any) => {
-          return data.name === 'Staking'
-        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore data is callable as an array type
+        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
+          (data) => {
+            return data.name === 'Staking';
+          }
+        );
         return new ethers.Contract(
           contractContext.Staking.address,
           contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
@@ -1021,7 +1023,6 @@ export class LitContracts {
     minNodeCount: number;
     bootstrapUrls: string[];
   }> => {
-
     const stakingContract = await LitContracts.getStakingContract(
       litNetwork,
       networkContext,
