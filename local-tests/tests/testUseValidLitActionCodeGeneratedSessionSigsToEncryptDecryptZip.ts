@@ -1,5 +1,4 @@
 import { LIT_NETWORK } from '@lit-protocol/constants';
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
@@ -7,6 +6,7 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { zipAndEncryptString, decryptToZip } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
@@ -27,7 +27,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip =
       userAddress: alice.authMethodOwnedPkp.ethAddress,
     });
 
-    const encryptRes = await LitJsSdk.zipAndEncryptString(
+    const encryptRes = await zipAndEncryptString(
       {
         accessControlConditions: accs,
         dataToEncrypt: message,
@@ -68,7 +68,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip =
     ]);
 
     // -- Decrypt the encrypted string
-    const decryptedZip = await LitJsSdk.decryptToZip(
+    const decryptedZip = await decryptToZip(
       {
         accessControlConditions: accs,
         ciphertext: encryptRes.ciphertext,

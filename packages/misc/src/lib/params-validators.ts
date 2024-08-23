@@ -16,12 +16,6 @@ import {
   ParamsMissingError,
 } from '@lit-protocol/constants';
 import {
-  checkIfAuthSigRequiresChainParam,
-  checkType,
-  is,
-  log,
-} from '@lit-protocol/misc';
-import {
   AcceptedFileType,
   AccessControlConditions,
   AuthMethod,
@@ -29,6 +23,7 @@ import {
   DecryptRequest,
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
+  EncryptUint8ArrayRequest,
   EncryptFileRequest,
   EncryptRequest,
   EncryptStringRequest,
@@ -43,6 +38,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
+import { checkIfAuthSigRequiresChainParam, checkType, is, log } from './misc';
 import { isValidBooleanExpression } from './utils';
 
 export const safeParams = ({
@@ -76,6 +72,11 @@ export const paramsValidators: Record<
   // ========== NO AUTH MATERIAL NEEDED FOR CLIENT SIDE ENCRYPTION ==========
   encrypt: (params: EncryptRequest) => [
     new AccessControlConditionsValidator('encrypt', params),
+  ],
+
+  encryptUint8Array: (params: EncryptUint8ArrayRequest) => [
+    new AccessControlConditionsValidator('encryptUint8Array', params),
+    new Uint8ArrayValidator('encryptUint8Array', params.dataToEncrypt),
   ],
 
   encryptFile: (params: EncryptFileRequest) => [
@@ -228,6 +229,52 @@ class DecryptFromJsonValidator implements ParamsValidator {
           },
           `dataType of %s is not valid. Must be 'string' or 'file'.`,
           dataType
+        )
+      );
+
+    return ERight(undefined);
+  }
+}
+
+class Uint8ArrayValidator implements ParamsValidator {
+  private readonly fnName: string;
+  private readonly paramName: string;
+  private readonly uint8array?: Uint8Array;
+
+  constructor(
+    fnName: string,
+    uint8array?: Uint8Array,
+    paramName: string = 'uint8array'
+  ) {
+    this.fnName = fnName;
+    this.paramName = paramName;
+    this.uint8array = uint8array;
+  }
+
+  validate(): IEither<void> {
+    if (!this.uint8array) {
+      return ELeft(new InvalidParamType({}, 'uint8array is undefined'));
+    }
+
+    if (
+      !checkType({
+        value: this.uint8array,
+        allowedTypes: ['Uint8Array'],
+        paramName: this.paramName,
+        functionName: this.fnName,
+      })
+    )
+      return ELeft(
+        new InvalidParamType(
+          {
+            info: {
+              param: this.paramName,
+              value: this.uint8array,
+              functionName: this.fnName,
+            },
+          },
+          '%s is not a Uint8Array',
+          this.paramName
         )
       );
 

@@ -6,8 +6,7 @@ import {
   InvalidParamType,
   UnknownError,
 } from '@lit-protocol/constants';
-import { verifySignature } from '@lit-protocol/crypto';
-import { checkType, isBrowser, log } from '@lit-protocol/misc';
+import { checkType, isBrowser, log, safeParams } from '@lit-protocol/misc';
 import {
   DecryptRequest,
   DecryptZipFileWithMetadata,
@@ -15,13 +14,11 @@ import {
   EncryptFileAndZipWithMetadataProps,
   EncryptFileRequest,
   EncryptResponse,
+  EncryptUint8ArrayRequest,
   EncryptStringRequest,
   EncryptZipRequest,
-  IJWT,
   ILitNodeClient,
   MetadataForFile,
-  SigningAccessControlConditionJWTPayload,
-  VerifyJWTProps,
   EncryptToJsonPayload,
   EncryptToJsonProps,
   DecryptFromJsonProps,
@@ -31,7 +28,6 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import { safeParams } from './params-validators';
 /**
  * Encrypt a string or file using the LIT network public key and serialise all the metadata required to decrypt
  * i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to JSON
@@ -208,6 +204,77 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
 
 // ---------- Local Helpers ----------
 
+/** Encrypt a uint8array. This is used to encrypt any uint8array that is to be locked via the Lit Protocol.
+ * @param { EncryptUint8ArrayRequest } params - The params required to encrypt a uint8array
+ * @param params.dataToEncrypt - (optional) The uint8array to encrypt
+ * @param params.accessControlConditions - (optional) The access control conditions
+ * @param params.evmContractConditions - (optional) The EVM contract conditions
+ * @param params.solRpcConditions - (optional) The Solana RPC conditions
+ * @param params.unifiedAccessControlConditions - The unified access control conditions
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+ *
+ * @returns { Promise<EncryptResponse> } - The encrypted uint8array and the hash of the data that was encrypted
+ */
+export const encryptUint8Array = async (
+  params: EncryptUint8ArrayRequest,
+  litNodeClient: ILitNodeClient
+): Promise<EncryptResponse> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptUint8Array',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+        },
+      },
+      'Invalid params'
+    );
+
+  return litNodeClient.encrypt({
+    ...params,
+  });
+};
+
+/**
+ * Decrypt a cyphertext into a Uint8Array that was encrypted with the encryptUint8Array function.
+ *
+ * @param { DecryptRequest } params - The params required to decrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+ *
+ * @returns { Promise<Uint8Array> } - The decrypted `Uint8Array`
+ */
+export const decryptToUint8Array = async (
+  params: DecryptRequest,
+  litNodeClient: ILitNodeClient
+): Promise<Uint8Array> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decrypt',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptToUint8Array',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
+
+  const { decryptedData } = await litNodeClient.decrypt(params);
+
+  return decryptedData;
+};
+
 /**
  *
  * Encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
@@ -335,7 +402,7 @@ export const zipAndEncryptString = async (
  * Zip and encrypt multiple files.
  *
  * @param { Array<File> } files - The files to encrypt
- * @param { DecryptRequestBase } paramsBase - The params required to encrypt a file
+ * @param { DecryptRequestBase } params - The params required to encrypt a file
  * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
@@ -756,76 +823,4 @@ export const decryptToFile = async (
   const { decryptedData } = await litNodeClient.decrypt(params);
 
   return decryptedData;
-};
-
-declare global {
-  // `var` is required for global hackery
-  // FIXME: `any` types for wasm are no bueno
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var wasmExports: any;
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var wasmECDSA: any;
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var LitNodeClient: any;
-}
-
-/**
- * // TODO check for expiration
- *
- * Verify a JWT from the LIT network.  Use this for auth on your server.  For some background, users can specify access control condiitons for various URLs, and then other users can then request a signed JWT proving that their ETH account meets those on-chain conditions using the getSignedToken function.  Then, servers can verify that JWT using this function.  A successful verification proves that the user meets the access control conditions defined earlier.  For example, the on-chain condition could be posession of a specific NFT.
- *
- * @param { VerifyJWTProps } jwt
- *
- * @returns { IJWT<T> } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
- */
-export const verifyJwt = async ({
-  publicKey,
-  jwt,
-}: VerifyJWTProps): Promise<IJWT<SigningAccessControlConditionJWTPayload>> => {
-  // -- validate
-  if (
-    !checkType({
-      value: jwt,
-      allowedTypes: ['String'],
-      paramName: 'jwt',
-      functionName: 'verifyJwt',
-    })
-  )
-    throw new InvalidParamType(
-      {
-        info: {
-          jwt,
-        },
-      },
-      'jwt must be a string'
-    );
-
-  log('verifyJwt', jwt);
-
-  // verify that the wasm was loaded
-  if (!globalThis.wasmExports) {
-    log('wasmExports is not loaded.');
-  }
-
-  const jwtParts = jwt.split('.');
-  const signature = uint8arrayFromString(jwtParts[2], 'base64url');
-
-  const unsignedJwt = `${jwtParts[0]}.${jwtParts[1]}`;
-
-  const message = uint8arrayFromString(unsignedJwt);
-
-  await verifySignature(publicKey, message, signature);
-
-  const _jwt: IJWT<SigningAccessControlConditionJWTPayload> = {
-    verified: true,
-    header: JSON.parse(
-      uint8arrayToString(uint8arrayFromString(jwtParts[0], 'base64url'))
-    ),
-    payload: JSON.parse(
-      uint8arrayToString(uint8arrayFromString(jwtParts[1], 'base64url'))
-    ),
-    signature,
-  };
-
-  return _jwt;
 };

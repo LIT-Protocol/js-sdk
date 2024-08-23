@@ -45,7 +45,6 @@ import {
   verifyAndDecryptWithSignatureShares,
   verifySignature,
 } from '@lit-protocol/crypto';
-import { safeParams } from '@lit-protocol/encryption';
 import {
   defaultMintClaimCallback,
   findMostCommonResponse,
@@ -56,6 +55,7 @@ import {
   logWithRequestId,
   mostCommonString,
   normalizeAndStringify,
+  safeParams,
   removeHexPrefix,
 } from '@lit-protocol/misc';
 import {

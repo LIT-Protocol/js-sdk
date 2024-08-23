@@ -3,17 +3,24 @@ import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
+import {
+  encryptUint8Array,
+  decryptToUint8Array,
+} from '@lit-protocol/encryption';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@lit-protocol/uint8arrays';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
-import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
- * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
- * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
+ * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
+ * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
  */
-export const testUseEoaSessionSigsToEncryptDecryptString = async (
+export const testUseEoaSessionSigsToEncryptDecryptUint8Array = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -22,10 +29,13 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
     userAddress: alice.wallet.address,
   });
 
-  const encryptRes = await encryptString(
+  const message = 'Hello world';
+  const messageToEncrypt = uint8arrayFromString(message, 'utf8');
+
+  const encryptRes = await encryptUint8Array(
     {
       accessControlConditions: accs,
-      dataToEncrypt: 'Hello world',
+      dataToEncrypt: messageToEncrypt,
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
@@ -63,7 +73,7 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
   ]);
 
   // -- Decrypt the encrypted string
-  const decryptRes = await decryptToString(
+  const decryptRes = await decryptToUint8Array(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,
@@ -73,10 +83,11 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
+  const decryptResString = uint8arrayToString(decryptRes, 'utf8');
 
   devEnv.releasePrivateKeyFromUser(alice);
 
-  if (decryptRes !== 'Hello world') {
+  if (decryptResString !== message) {
     throw new Error(
       `Expected decryptRes to be 'Hello world' but got ${decryptRes}`
     );

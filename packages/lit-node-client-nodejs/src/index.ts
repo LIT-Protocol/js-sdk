@@ -18,22 +18,6 @@ if (!globalThis.LitNodeClientNodeJs) {
 export * from './lib/lit-node-client-nodejs';
 
 export {
-  decryptToFile,
-  decryptFromJson,
-  decryptToString,
-  decryptToZip,
-  decryptZipFileWithMetadata,
-  encryptFile,
-  encryptFileAndZipWithMetadata,
-  encryptToJson,
-  encryptString,
-  encryptZip,
-  verifyJwt,
-  zipAndEncryptFiles,
-  zipAndEncryptString,
-} from '@lit-protocol/encryption';
-
-export {
   hashResourceIdForSigning,
   humanizeAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';

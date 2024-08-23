@@ -1,8 +1,8 @@
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LIT_NETWORK } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
@@ -25,7 +25,7 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
     userAddress: devEnv.bareCosmosAuthSig.address,
   });
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       unifiedAccessControlConditions: accs,
       dataToEncrypt: 'Hello world',
@@ -52,7 +52,7 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
 
   // -- Decrypt the encrypted string
   try {
-    const decryptRes = await LitJsSdk.decryptToString(
+    const decryptRes = await decryptToString(
       {
         unifiedAccessControlConditions: accs,
         ciphertext: encryptRes.ciphertext,

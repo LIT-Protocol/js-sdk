@@ -1,10 +1,10 @@
 import { LIT_NETWORK } from '@lit-protocol/constants';
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { encryptString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
@@ -27,7 +27,7 @@ export const testExecutJsDecryptAndCombine = async (
 
   const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       accessControlConditions: accs,
       dataToEncrypt: 'Hello world',
