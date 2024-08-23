@@ -979,7 +979,9 @@ export class LitCore {
     let abortTimeout: ReturnType<typeof setTimeout>;
     if (timeout || this.config.nodeRequestTimeout) {
       // TODO: Use AbortSignal.timeout once we update to TS >=4.9.5. It considers request active time instead of elapsed time
-      // AbortSignal.timeout(timout || this.config.nodeRequestTimeout)
+      // Example:
+      // const abortSignal = AbortSignal.timeout(timeout || this.config.nodeRequestTimeout);
+      // req.signal = abortSignal;
       const abortController = new AbortController();
       req.signal = abortController.signal;
       abortTimeout = setTimeout(
