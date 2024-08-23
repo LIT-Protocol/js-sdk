@@ -1062,7 +1062,7 @@ export class LitContracts {
 
       // Convert the integer IP to a string format
       const ip = intToIP(item.ip);
-      let port = item.port;
+const port = item.port;
 
       // Determine the protocol to use based on various conditions
       const protocol =
