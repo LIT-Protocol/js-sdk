@@ -644,7 +644,7 @@ export class LitContracts {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore data is callable as an array type
         const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
-          (data) => {
+          (data: any) => {
             return data.name === 'Staking';
           }
         );
