@@ -977,17 +977,17 @@ export class LitCore {
     };
 
     let abortTimeout: ReturnType<typeof setTimeout>;
-    if (timeout || this.config.nodeRequestTimeout) {
+    const requestTimeout = timeout || this.config.nodeRequestTimeout;
+    if (requestTimeout) {
       // TODO: Use AbortSignal.timeout once we update to TS >=4.9.5. It considers request active time instead of elapsed time
       // Example:
-      // const abortSignal = AbortSignal.timeout(timeout || this.config.nodeRequestTimeout);
+      // const abortSignal = AbortSignal.timeout(requestTimeout);
       // req.signal = abortSignal;
       const abortController = new AbortController();
       req.signal = abortController.signal;
-      abortTimeout = setTimeout(
-        () => abortController.abort('Request to node timed out'),
-        timeout || this.config.nodeRequestTimeout
-      );
+      abortTimeout = setTimeout(() => {
+        abortController.abort(new Error(`Request to node timed out based on config. Timeout: ${requestTimeout}`));
+      }, requestTimeout);
     }
 
     const sendRequestPromise = sendRequest(url, req, requestId);
