@@ -187,19 +187,32 @@ export interface HumanizedAccsProps {
 /** ---------- Key Value Type ---------- */
 export type KV = Record<string, any>;
 
-/** ---------- Lit Node Client ---------- */
+/**
+ * Configuration object for the LitNodeClient.
+ *
+ * @typedef {Object} LitNodeClientConfig
+ * @property {LIT_NETWORKS_KEYS} litNetwork - The key of the Lit network to connect to.
+ * @property {boolean} [alertWhenUnauthorized] - Whether to alert when unauthorized access is detected.
+ * @property {number} [minNodeCount] - Minimum number of nodes to connect to.
+ * @property {boolean} [debug] - Enable or disable debug mode.
+ * @property {number} [connectTimeout] - Timeout for connecting/handshaking with all nodes in milliseconds.
+ * @property {number} [nodeConnectionTimeout] - Timeout for connection requests made to each node in milliseconds (default is 7500ms).
+ * @property {number} [nodeRequestTimeout] - Timeout for each request made to a node in milliseconds.
+ * @property {boolean} [retryNodeHandshake] - Whether to retry handshaking with a particular node if it failed, retrying until connectTimeout is reached.
+ * @property {boolean} [checkNodeAttestation] - Whether to check for node attestation.
+ * @property {LitContractContext | LitContractResolverContext} [contractContext] - Contract context for interaction.
+ * @property {StorageProvider} [storageProvider] - Storage provider for session or local storage.
+ * @property {(authSigParams: AuthCallbackParams) => Promise<AuthSig>} [defaultAuthCallback] - Default callback for handling authentication signatures.
+ * @property {string} [rpcUrl] - URL for the RPC endpoint.
+ */
 export interface LitNodeClientConfig {
   litNetwork: LIT_NETWORKS_KEYS;
   alertWhenUnauthorized?: boolean;
   minNodeCount?: number;
   debug?: boolean;
-  // Timeout for connecting/handshaking with all nodes
   connectTimeout?: number;
-  // Timeout for connection request made to each node. If not provided, the default value is 7500ms
   nodeConnectionTimeout?: number;
-  // Timeout for each request made to a node
   nodeRequestTimeout?: number;
-  // Whether to retry handshaking a particular node if it failed, will retry until connectTimeout is reached
   retryNodeHandshake?: boolean;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
@@ -644,11 +657,19 @@ export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
 
 export interface LitNodePromise {}
 
+/**
+ * Represents a command to be sent to a node.
+ *
+ * @typedef {Object} SendNodeCommand
+ * @property {string} url - The URL to which the command is sent.
+ * @property {any} data - The data to be sent with the command.
+ * @property {string} requestId - The unique identifier for the request.
+ * @property {number} [timeout] - Timeout for this request, in milliseconds. Overrides the config's nodeRequestTimeout.
+ */
 export interface SendNodeCommand {
   url: string;
   data: any;
   requestId: string;
-  // Timeout for this request. Overrides the config's nodeRequestTimeout
   timeout?: number;
 }
 export interface SigShare {
