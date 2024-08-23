@@ -244,7 +244,7 @@ export class LitCore {
       });
 
     // Validate minNodeCount
-    if (minNodeCount === undefined || minNodeCount === null) {
+if (!minNodeCount) {
       throw new Error('minNodeCount is required');
     }
 
