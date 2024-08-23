@@ -990,10 +990,11 @@ export class LitContracts {
   /**
    * Retrieves the connection information for a given network.
    *
-   * @param network - The key representing the network.
-   * @param context - Optional network context for the contract.
-   * @param rpcUrl - Optional RPC URL for the network.
-   * @param nodeProtocol - Optional protocol for the network node.
+   * @param params
+   * @param params.litNetwork - The key representing the network.
+   * @param [params.networkContext] - Optional network context for the contract.
+   * @param [params.rpcUrl] - Optional RPC URL for the network.
+   * @param [params.nodeProtocol] - Optional protocol for the network node.
    *
    * @returns An object containing the staking contract, epoch number, minimum node count and an array of bootstrap URLs.
    *
