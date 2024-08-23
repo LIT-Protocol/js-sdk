@@ -1078,7 +1078,7 @@ export class LitContracts {
         // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
         if (
           litNetwork === LIT_NETWORK.Cayenne &&
-          !port.toString().startsWith('8')
+!(port >= 8470 && port <= 8479)
         ) {
           throw new Error(
             `Invalid port: ${port} for the ${centralisation} ${litNetwork} network. Expected range: 8470 - 8479`
