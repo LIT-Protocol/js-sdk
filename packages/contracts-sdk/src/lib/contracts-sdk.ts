@@ -600,13 +600,13 @@ export class LitContracts {
     if (!context) {
       const contractData = await LitContracts._resolveContractContext(
         network
-        // context
+        //context
       );
 
       const stakingContract = contractData.find(
         (item: { name: string }) => item.name === 'Staking'
       );
-      const { address, abi } = stakingContract;
+      const { address, abi } = stakingContract!;
 
       // Validate the required data
       if (!address || !abi) {
@@ -641,9 +641,12 @@ export class LitContracts {
             '❌ Could not get Staking Contract from contract resolver instance'
           );
         }
+        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find((data) => {
+          return data.name === 'Staking'
+        });
         return new ethers.Contract(
           contractContext.Staking.address,
-          contractContext.Staking.abi ?? StakingData.abi,
+          contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
           provider
         );
       }
@@ -1016,6 +1019,7 @@ export class LitContracts {
     minNodeCount: number;
     bootstrapUrls: string[];
   }> => {
+
     const stakingContract = await LitContracts.getStakingContract(
       litNetwork,
       networkContext,
