@@ -48,7 +48,7 @@ export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
 } = {
   cayenne: false,
   manzano: false,
-  habanero: false,
+  habanero: true,
   'datil-dev': false,
   'datil-test': false,
   datil: true, // <-- this is the only one that is true. To be re-evaluated in the future.
