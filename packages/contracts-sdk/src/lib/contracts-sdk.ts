@@ -2,6 +2,7 @@
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
   CreateCustomAuthMethodRequest,
+  EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
   LitContractContext,
@@ -599,13 +600,13 @@ export class LitContracts {
     if (!context) {
       const contractData = await LitContracts._resolveContractContext(
         network
-        // context
+        //context
       );
 
       const stakingContract = contractData.find(
         (item: { name: string }) => item.name === 'Staking'
       );
-      const { address, abi } = stakingContract;
+      const { address, abi } = stakingContract!;
 
       // Validate the required data
       if (!address || !abi) {
@@ -640,9 +641,16 @@ export class LitContracts {
             '❌ Could not get Staking Contract from contract resolver instance'
           );
         }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore data is callable as an array type
+        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
+          (data: any) => {
+            return data.name === 'Staking';
+          }
+        );
         return new ethers.Contract(
           contractContext.Staking.address,
-          contractContext.Staking.abi ?? StakingData.abi,
+          contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
           provider
         );
       }
@@ -866,6 +874,9 @@ export class LitContracts {
     return addresses;
   }
 
+  /**
+   * @deprecated - Use {@link getConnectionInfo } instead, which provides more information.
+   */
   public static getMinNodeCount = async (
     network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
@@ -885,6 +896,9 @@ export class LitContracts {
     return minNodeCount;
   };
 
+  /**
+   * @deprecated - Use {@link getConnectionInfo } instead, which provides more information.
+   */
   public static getValidators = async (
     network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
@@ -978,6 +992,121 @@ export class LitContracts {
     });
 
     return networks;
+  };
+
+  /**
+   * Retrieves the connection information for a given network.
+   *
+   * @param params
+   * @param params.litNetwork - The key representing the network.
+   * @param [params.networkContext] - Optional network context for the contract.
+   * @param [params.rpcUrl] - Optional RPC URL for the network.
+   * @param [params.nodeProtocol] - Optional protocol for the network node.
+   *
+   * @returns An object containing the staking contract, epoch number, minimum node count and an array of bootstrap URLs.
+   *
+   * @throws Error if the minimum validator count is not set or if the active validator set does not meet the threshold.
+   */
+  public static getConnectionInfo = async ({
+    litNetwork,
+    networkContext,
+    rpcUrl,
+    nodeProtocol,
+  }: {
+    litNetwork: LIT_NETWORKS_KEYS;
+    networkContext?: LitContractContext | LitContractResolverContext;
+    rpcUrl?: string;
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+  }): Promise<{
+    stakingContract: ethers.Contract;
+    epochInfo: EpochInfo;
+    minNodeCount: number;
+    bootstrapUrls: string[];
+  }> => {
+    const stakingContract = await LitContracts.getStakingContract(
+      litNetwork,
+      networkContext,
+      rpcUrl
+    );
+
+    const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
+      await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
+
+    const typedEpochInfo: EpochInfo = {
+      epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
+      number: ethers.BigNumber.from(epochInfo[1]).toNumber(),
+      endTime: ethers.BigNumber.from(epochInfo[2]).toNumber(),
+      retries: ethers.BigNumber.from(epochInfo[3]).toNumber(),
+      timeout: ethers.BigNumber.from(epochInfo[4]).toNumber(),
+    };
+
+    const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
+
+    if (!minNodeCountInt) {
+      throw new Error('❌ Minimum validator count is not set');
+    }
+
+    if (activeUnkickedValidatorStructs.length <= minNodeCountInt) {
+      throw new Error(
+        `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
+      );
+    }
+
+    const activeValidatorStructs: ValidatorStruct[] =
+      activeUnkickedValidatorStructs.map((item: any) => {
+        return {
+          ip: item[0],
+          ipv6: item[1],
+          port: item[2],
+          nodeAddress: item[3],
+          reward: item[4],
+          seconderPubkey: item[5],
+          receiverPubkey: item[6],
+        };
+      });
+
+    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
+      const centralisation = CENTRALISATION_BY_NETWORK[litNetwork];
+
+      // Convert the integer IP to a string format
+      const ip = intToIP(item.ip);
+      const port = item.port;
+
+      // Determine the protocol to use based on various conditions
+      const protocol =
+        // If nodeProtocol is defined, use it
+        nodeProtocol ||
+        // If port is 443, use HTTPS, otherwise use network-specific HTTP
+        (port === 443 ? HTTPS : HTTP_BY_NETWORK[litNetwork]) ||
+        // Fallback to HTTP if no other conditions are met
+        HTTP;
+
+      // Check for specific conditions in centralised networks
+      if (centralisation === 'centralised') {
+        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
+        if (
+          litNetwork === LIT_NETWORK.Cayenne &&
+          !(port >= 8470 && port <= 8479)
+        ) {
+          throw new Error(
+            `Invalid port: ${port} for the ${centralisation} ${litNetwork} network. Expected range: 8470 - 8479`
+          );
+        }
+      }
+
+      const url = `${protocol}${ip}:${port}`;
+
+      LitContracts.logger.debug("Validator's URL:", url);
+
+      return url;
+    });
+
+    return {
+      stakingContract,
+      epochInfo: typedEpochInfo,
+      minNodeCount: minNodeCountInt,
+      bootstrapUrls: networks,
+    };
   };
 
   private static async _resolveContractContext(
