@@ -3,7 +3,7 @@ import { LitCidRepository } from './types';
 const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   signTransaction: Object.freeze({
     evm: 'QmRWGips9G3pHXNa3viGFpAyh1LwzrR35R4xMiG61NuHpS',
-    solana: 'QmTG6CTLxuUnQrKGNtKHyWPUjkftw9KXQMGv4hSwY4UEeA',
+    solana: 'QmPZR6FnTPMYpzKxNNHt4xRckDsAoQz76cxkLhJArSoe4w',
   }),
   signMessage: Object.freeze({
     evm: 'QmNy5bHvgaN2rqo4kMU71jtgSSxDES6HSDgadBV29pfcRu',
