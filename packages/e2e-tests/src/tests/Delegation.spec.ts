@@ -184,7 +184,7 @@ describe('Delegation', () => {
     expect(res?.signatures?.sig.publicKey).toBeDefined();
 
     // -- signatures.sig.signature must start with 0x
-    expect(res?.signatures.sig.signature.startsWith('0x')).toBeDefined();
+    expect(res?.signatures.sig.signature.startsWith('0x')).toBe(true);
 
     // -- signatures.sig.recid must be parseable as a number
     expect(isNaN(res?.signatures.sig.recid)).toBeTruthy();
