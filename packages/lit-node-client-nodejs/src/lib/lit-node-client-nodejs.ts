@@ -980,15 +980,7 @@ export class LitNodeClientNodeJs
    *
    */
   getSignature = async (shareData: any[], requestId: string): Promise<any> => {
-    // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
-    const R_x = shareData[0].local_x;
-    const R_y = shareData[0].local_y;
-
-    const valid_shares = shareData.map((s) => s.signature_share);
-    const shares = JSON.stringify(valid_shares);
-
-    await wasmECDSA.initWasmEcdsaSdk(); // init WASM
-    const signature = wasmECDSA.combine_signature(R_x, R_y, shares);
+    const signature = await combineEcdsaShares(shareData);
     logWithRequestId(requestId, 'raw ecdsa sig', signature);
 
     return signature;
@@ -2074,6 +2066,7 @@ export class LitNodeClientNodeJs
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
 import { LitAbility } from "@lit-protocol/constants";
 import { logWithRequestId } from '../../../misc/src/lib/misc';
+import { CombinedECDSASignature } from '../../../types/src/lib/interfaces';
 
 const resourceAbilityRequests = [
     {
