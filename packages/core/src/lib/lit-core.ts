@@ -52,6 +52,7 @@ import {
   AuthSig,
   BlockHashErrorResponse,
   CustomNetwork,
+  EpochInfo,
   EthBlockhashInfo,
   FormattedMultipleAccs,
   HandshakeWithNode,
@@ -224,30 +225,32 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
-  private async _getValidatorData() {
-    const [minNodeCount, bootstrapUrls] = await Promise.all([
-      LitContracts.getMinNodeCount(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl
-      ),
-      LitContracts.getValidators(
-        this.config.litNetwork,
-        this.config.contractContext,
-        this.config.rpcUrl,
-        this.config.nodeProtocol
-      ),
-    ]);
-
-    if (minNodeCount <= 0) {
-      throwError({
-        message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+  /**
+   * Retrieves the validator data including staking contract, epoch, minNodeCount, and bootstrapUrls.
+   * @returns An object containing the validator data.
+   * @throws Error if minNodeCount is not provided, is less than or equal to 0, or if bootstrapUrls are not available.
+   */
+  private async _getValidatorData(): Promise<{
+    stakingContract: ethers.Contract;
+    epochInfo: EpochInfo;
+    minNodeCount: number;
+    bootstrapUrls: string[];
+  }> {
+    const { stakingContract, epochInfo, minNodeCount, bootstrapUrls } =
+      await LitContracts.getConnectionInfo({
+        litNetwork: this.config.litNetwork,
+        networkContext: this.config.contractContext,
+        rpcUrl: this.config.rpcUrl,
+        nodeProtocol: this.config.nodeProtocol,
       });
+
+    // Validate minNodeCount
+    if (!minNodeCount) {
+      throw new Error('minNodeCount is required');
     }
 
-    if (bootstrapUrls.length <= 0) {
+    // Validate bootstrapUrls
+    if (!Array.isArray(bootstrapUrls) || bootstrapUrls.length <= 0) {
       throwError({
         message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
         errorKind: LIT_ERROR.INIT_ERROR.kind,
@@ -255,10 +258,33 @@ export class LitCore {
       });
     }
 
+    // Validate stakingContract
+    if (!stakingContract) {
+      throwError({
+        message: 'stakingContract is required',
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    // Validate epoch
+    if (!epochInfo.number) {
+      throwError({
+        message: 'epoch is required',
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    log('[_getValidatorData] epochInfo: ', epochInfo);
+    log('[_getValidatorData] minNodeCount: ', minNodeCount);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
+    log('[_getValidatorData] stakingContract: ', stakingContract);
 
     return {
-      minNodeCount: parseInt(minNodeCount, 10),
+      stakingContract,
+      epochInfo,
+      minNodeCount,
       bootstrapUrls,
     };
   }
@@ -267,9 +293,14 @@ export class LitCore {
   private async _handleStakingContractStateChange(state: StakingStates) {
     log(`New state detected: "${state}"`);
 
+    const validatorData = await this._getValidatorData();
+
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
-      this._epochState = await this._fetchCurrentEpochState();
+
+      this._epochState = await this._fetchCurrentEpochState(
+        validatorData.epochInfo
+      );
 
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
@@ -278,9 +309,8 @@ export class LitCore {
             'State found to be new validator set locked, checking validator set'
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
-          const { bootstrapUrls: newNodeUrls } = await this._getValidatorData();
 
-          const delta: string[] = newNodeUrls.filter((item) =>
+          const delta: string[] = validatorData.bootstrapUrls.filter((item) =>
             existingNodeUrls.includes(item)
           );
           // if the sets differ we reconnect.
@@ -359,16 +389,16 @@ export class LitCore {
     unloadModules();
 
     this._stopListeningForNewEpoch();
-    this._stopNetworkPolling();
+    // this._stopNetworkPolling();
     if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
-  _stopNetworkPolling() {
-    if (this._networkSyncInterval) {
-      clearInterval(this._networkSyncInterval);
-      this._networkSyncInterval = null;
-    }
-  }
+  // _stopNetworkPolling() {
+  //   if (this._networkSyncInterval) {
+  //     clearInterval(this._networkSyncInterval);
+  //     this._networkSyncInterval = null;
+  //   }
+  // }
   _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
@@ -448,7 +478,7 @@ export class LitCore {
     // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
     this._stopListeningForNewEpoch();
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
-    this._stopNetworkPolling();
+    // this._stopNetworkPolling();
 
     // Initialize a contractContext if we were not given one; this allows interaction against the staking contract
     // to be handled locally from then on
@@ -484,22 +514,15 @@ export class LitCore {
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
     // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
-    const getStakingContract =
-      this._stakingContract ||
-      LitContracts.getStakingContract(
-        this.config.litNetwork,
-        this.config.contractContext, // We've already primed the `contractContext`
-        this.config.rpcUrl
-      );
+    const validatorData = await this._getValidatorData();
 
-    const [{ minNodeCount, bootstrapUrls }, stakingContract] =
-      await Promise.all([this._getValidatorData(), getStakingContract]);
+    this._stakingContract = validatorData.stakingContract;
+    this.config.minNodeCount = validatorData.minNodeCount;
+    this.config.bootstrapUrls = validatorData.bootstrapUrls;
 
-    this._stakingContract = stakingContract; // Note: This may be a no-op if it was already set from prior connect run
-    this.config.minNodeCount = minNodeCount;
-    this.config.bootstrapUrls = bootstrapUrls;
-
-    this._epochState = await this._fetchCurrentEpochState();
+    this._epochState = await this._fetchCurrentEpochState(
+      validatorData.epochInfo
+    );
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
@@ -507,7 +530,7 @@ export class LitCore {
       await this._runHandshakeWithBootstrapUrls();
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
-    this._scheduleNetworkSync();
+    // this._scheduleNetworkSync();
     this._listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
@@ -776,20 +799,20 @@ export class LitCore {
    * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
    * @private
    */
-  private _scheduleNetworkSync() {
-    if (this._networkSyncInterval) {
-      clearInterval(this._networkSyncInterval);
-    }
+  // private _scheduleNetworkSync() {
+  //   if (this._networkSyncInterval) {
+  //     clearInterval(this._networkSyncInterval);
+  //   }
 
-    this._networkSyncInterval = setInterval(async () => {
-      if (
-        !this.lastBlockHashRetrieved ||
-        Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
-      ) {
-        await this._syncBlockhash();
-      }
-    }, BLOCKHASH_SYNC_INTERVAL);
-  }
+  //   this._networkSyncInterval = setInterval(async () => {
+  //     if (
+  //       !this.lastBlockHashRetrieved ||
+  //       Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
+  //     ) {
+  //       await this._syncBlockhash();
+  //     }
+  //   }, BLOCKHASH_SYNC_INTERVAL);
+  // }
 
   /**
    *
@@ -852,39 +875,26 @@ export class LitCore {
     });
   };
 
-  private async _fetchCurrentEpochState(): Promise<
-    Pick<EpochCache, 'startTime' | 'currentNumber'>
-  > {
-    if (!this._stakingContract) {
-      return throwError({
-        message:
-          'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
+  private async _fetchCurrentEpochState(
+    epochInfo?: EpochInfo
+  ): Promise<Pick<EpochCache, 'startTime' | 'currentNumber'>> {
+    if (!epochInfo) {
+      log(
+        'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
+      );
+      const validatorData = await this._getValidatorData();
+      epochInfo = validatorData.epochInfo;
     }
 
-    try {
-      const epoch = await this._stakingContract['epoch']();
+    // when we transition to the new epoch, we don't store the start time.  but we
+    // set the endTime to the current timestamp + epochLength.
+    // by reversing this and subtracting epochLength from the endTime, we get the start time
+    const startTime = epochInfo.endTime - epochInfo.epochLength;
 
-      // when we transition to the new epoch, we don't store the start time.  but we
-      // set the endTime to the current timestamp + epochLength.
-      // by reversing this and subtracting epochLength from the endTime, we get the start time
-      const startTime =
-        (epoch.endTime.toNumber() as number) -
-        (epoch.epochLength.toNumber() as number);
-
-      return {
-        currentNumber: epoch.number.toNumber() as number,
-        startTime,
-      };
-    } catch (error) {
-      return throwError({
-        message: `[_fetchCurrentEpochState] Error getting current epoch number: ${error}`,
-        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-      });
-    }
+    return {
+      currentNumber: epochInfo.number,
+      startTime,
+    };
   }
 
   get currentEpochNumber(): number | null {
@@ -929,6 +939,12 @@ export class LitCore {
   SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epoch: this.currentEpochNumber };
+
+    // If there is a `sessionSigs' object in the params remove before sending the request;
+    // this line has been added as a catch all to prevent sending with the request
+    if (data.sessionSigs) {
+      delete data.sessionSigs;
+    }
 
     logWithRequestId(
       requestId,

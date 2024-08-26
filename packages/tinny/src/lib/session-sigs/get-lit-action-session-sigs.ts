@@ -3,8 +3,12 @@ import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitNetwork } from '@lit-protocol/constants';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
 
-import { TinnyEnvironment } from '../tinny-environment';
+import {
+  CENTRALISATION_BY_NETWORK,
+  GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
+} from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
+import { TinnyEnvironment } from '../tinny-environment';
 
 const VALID_SESSION_SIG_LIT_ACTION_CODE = `
 // Works with an AuthSig AuthMethod
@@ -143,6 +147,12 @@ export const getInvalidLitActionSessionSigs = async (
       publicKey: alice.authMethodOwnedPkp?.publicKey,
       sigName: 'unified-auth-sig',
     },
+    ipfsOptions: {
+      overwriteCode:
+        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[
+          devEnv.litNodeClient.config.litNetwork
+        ],
+    },
   });
 
   return litActionSessionSigs;
@@ -166,6 +176,12 @@ export const getInvalidLitActionIpfsSessionSigs = async (
     jsParams: {
       publicKey: alice.authMethodOwnedPkp?.publicKey,
       sigName: 'unified-auth-sig',
+    },
+    ipfsOptions: {
+      overwriteCode:
+        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[
+          devEnv.litNodeClient.config.litNetwork
+        ],
     },
   });
 
