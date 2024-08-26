@@ -1909,6 +1909,8 @@ export interface GetPkpSessionSigs
    * sending it to the node
    */
   authMethods?: AuthMethod[];
+
+  ipfsOptions?: IpfsOptions;
 }
 
 /**
@@ -1926,7 +1928,9 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
     | (Pick<Required<LitActionSdkParams>, 'litActionIpfsId'> & {
         litActionCode?: never;
       })
-  );
+  ) & {
+    ipfsOptions?: IpfsOptions;
+  };
 
 export interface SessionKeyCache {
   value: SessionKeyPair;
