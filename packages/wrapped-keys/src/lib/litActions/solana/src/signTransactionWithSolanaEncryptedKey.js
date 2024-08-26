@@ -87,7 +87,9 @@ const { removeSaltFromDecryptedKey } = require('../../utils');
         clusterApiUrl(unsignedTransaction.chain),
         'confirmed'
       );
-      const transactionSignature = await solanaConnection.sendRawTransaction(transaction.serialize());
+      const transactionSignature = await solanaConnection.sendRawTransaction(
+        transaction.serialize()
+      );
 
       Lit.Actions.setResponse({ response: transactionSignature });
     } else {
