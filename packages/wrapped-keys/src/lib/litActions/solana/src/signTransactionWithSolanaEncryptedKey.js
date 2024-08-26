@@ -65,7 +65,6 @@ const { removeSaltFromDecryptedKey } = require('../../utils');
   let privateKey;
   try {
     privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-    Lit.Actions.setResponse({ response: privateKey });
   } catch (err) {
     Lit.Actions.setResponse({ response: err.message });
     return;
@@ -82,14 +81,19 @@ const { removeSaltFromDecryptedKey } = require('../../utils');
 
     transaction.sign(solanaKeyPair);
     const signature = transaction.signature.toString('base64');
-    Lit.Actions.setResponse({ response: signature });
 
     if (broadcast) {
       const solanaConnection = new Connection(
         clusterApiUrl(unsignedTransaction.chain),
         'confirmed'
       );
-      await solanaConnection.sendRawTransaction(transaction.serialize()); // FIXME: Shouldn't this return the tx hash for consistency with the evm action?
+      const transactionSignature = await solanaConnection.sendRawTransaction(
+        transaction.serialize()
+      );
+
+      Lit.Actions.setResponse({ response: transactionSignature });
+    } else {
+      Lit.Actions.setResponse({ response: signature });
     }
   } catch (error) {
     Lit.Actions.setResponse({
