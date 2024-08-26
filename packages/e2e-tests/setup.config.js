@@ -13,7 +13,7 @@ require('dotenv').config();
 console.log('loaded configuration from .env', __dirname);
 
 class CustomEnvironment extends NodeEnvironment {
-  _hasLoadedTinny = false;
+  private _hasLoadedTinny = false;
   constructor(config) {
     super(config);
   }
