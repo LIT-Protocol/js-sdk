@@ -1,7 +1,4 @@
-import {
-  EITHER_TYPE,
-  InvalidParamType,
-} from '@lit-protocol/constants';
+import { EITHER_TYPE, InvalidParamType } from '@lit-protocol/constants';
 import { safeParams } from '@lit-protocol/misc';
 import {
   DecryptRequest,
