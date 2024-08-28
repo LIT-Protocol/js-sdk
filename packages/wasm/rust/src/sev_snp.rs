@@ -139,15 +139,14 @@ fn get_expected_report_data(
         hasher.update(value);
     }
 
-    // FIXME: can we really have `signatures.len() == 0`?
-    if signatures.is_empty() {
-        hasher.update("signatures");
 
-        // FIXME: why is the slice needed?
-        for s in &signatures[..signatures.len() - 1] {
-            hasher.update(s);
-        }
+    hasher.update("signatures");
+
+    // FIXME: why is the slice needed?
+    for s in &signatures[..signatures.len() - 1] {
+        hasher.update(s);
     }
+
 
     let result = hasher.finalize();
     let mut array = [0u8; 64];
