@@ -129,7 +129,6 @@ fn get_expected_report_data(
     challenge: &[u8],
 ) -> [u8; 64] {
     let mut hasher = Sha512::new();
-
     hasher.update("noonce");
     hasher.update(challenge);
 
@@ -139,14 +138,13 @@ fn get_expected_report_data(
         hasher.update(value);
     }
 
-
     hasher.update("signatures");
-
-    // FIXME: why is the slice needed?
-    for s in &signatures[..signatures.len() - 1] {
-        hasher.update(s);
+    if signatures.len() > 1 {
+        // FIXME: why is the slice needed?
+        for s in &signatures[..signatures.len() - 1] {
+            hasher.update(s);
+        }
     }
-
 
     let result = hasher.finalize();
     let mut array = [0u8; 64];
