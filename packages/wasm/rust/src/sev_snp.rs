@@ -141,7 +141,7 @@ fn get_expected_report_data(
     if signatures.len() > 0 {
         hasher.update("signatures");
         // FIXME: why is the slice needed?
-        for s in &signatures[..signatures.len() - 1] {
+        for s in &signatures[..signatures.len()] {
             hasher.update(s);
         }
     }
