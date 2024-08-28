@@ -57,7 +57,7 @@
     "bitcoinjs-lib": "^6.1.0",
     "bs58": "^5.0.0",
     "cbor-web": "^9.0.1",
-    "cross-fetch": "3.1.4",
+    "cross-fetch": "3.1.8",
     "date-and-time": "^2.4.1",
     "ethers": "^5.7.1",
     "jose": "^4.14.4",
