@@ -140,7 +140,7 @@ fn get_expected_report_data(
 
     if signatures.len() > 0 {
         hasher.update("signatures");
-        // FIXME: why is the slice needed?
+
         for idx in 0..((signatures.len() - 1) as usize) {
             let sig = signatures.get(idx);
             match sig {
