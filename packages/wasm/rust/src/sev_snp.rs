@@ -111,7 +111,7 @@ fn verify_challenge(
     signatures: Vec<Vec<u8>>,
     attestation_report: AttestationReport,
 ) -> JsResult<()> {
-    let expected_report_data = get_expected_report_data(data, signatures, challenge);
+    let expected_report_data = get_expected_report_data(data, signatures, challenge)?;
 
     if attestation_report.report_data != expected_report_data {
         return Err(
@@ -127,7 +127,7 @@ fn get_expected_report_data(
     data: BTreeMap<String, Vec<u8>>,
     signatures: Vec<Vec<u8>>,
     challenge: &[u8],
-) -> [u8; 64] {
+) -> JsResult<[u8; 64]> {
     let mut hasher = Sha512::new();
     hasher.update("noonce");
     hasher.update(challenge);
@@ -141,13 +141,26 @@ fn get_expected_report_data(
     if signatures.len() > 0 {
         hasher.update("signatures");
         // FIXME: why is the slice needed?
-        for s in &signatures[..signatures.len()] {
-            hasher.update(s);
+        for idx in 0..((signatures.len() - 1) as usize) {
+            let sig = signatures.get(idx);
+            match sig {
+                Some(s) => {
+                    hasher.update(s.clone());
+                }
+                None => {
+                    return Err(
+                        JsError::new(
+                            "Error while processing signatures for checking against Report.  This generally means that the signature indexing failed"
+                        )
+                    );
+                }
+            }
         }
     }
 
     let result = hasher.finalize();
     let mut array = [0u8; 64];
     array.copy_from_slice(&result[..]);
-    array
+
+    Ok(array)
 }
