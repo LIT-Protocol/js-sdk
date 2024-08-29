@@ -66,7 +66,6 @@ const { removeSaltFromDecryptedKey } = require('../../utils');
   let privateKey;
   try {
     privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-    Lit.Actions.setResponse({ response: privateKey });
   } catch (err) {
     Lit.Actions.setResponse({ response: err.message });
     return;
