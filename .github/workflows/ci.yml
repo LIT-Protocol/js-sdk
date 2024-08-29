@@ -87,6 +87,10 @@ jobs:
         run: yarn build:dev
       - name: Copy ENV File
         run: cp .env.ci .env
+      - name: End to End Tests - Epoch Transition
+        id: epochs
+        if: steps.build.outputs.exit_code == 0
+        run: yarn test:e2e --runInBand -t 'Epoch Transition'
       - name: End to End Tests - Connection 
         id: connection
         if: steps.build.outputs.exit_code == 0
