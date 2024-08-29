@@ -3,7 +3,7 @@ import { expect, jest } from '@jest/globals';
 import { TinnyEnvironment } from '@lit-protocol/tinny';
 
 try {
-  jest.setTimeout(60000000);
+  jest.setTimeout(60_000 * 1_000);
 } catch (e) {
   // ... continue execution
 }
