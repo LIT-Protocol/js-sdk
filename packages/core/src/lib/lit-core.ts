@@ -1,3 +1,5 @@
+// @ts-expect-error No types available for this package
+import { VError } from '@openagenda/verror';
 import { ethers } from 'ethers';
 
 import {
@@ -18,25 +20,26 @@ import {
   CENTRALISATION_BY_NETWORK,
   HTTP,
   HTTPS,
+  InitError,
+  InvalidArgumentException,
+  InvalidEthBlockhash,
+  InvalidNodeAttestation,
+  InvalidParamType,
   LIT_CURVE,
   LIT_CURVE_VALUES,
   LIT_ENDPOINT,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
+  LitNodeClientBadConfigError,
+  LitNodeClientNotReadyError,
+  NetworkError,
+  NodeError,
   RPC_URL_BY_NETWORK,
   STAKING_STATES,
   STAKING_STATES_VALUES,
-  version,
-  InitError,
-  InvalidParamType,
-  NodeError,
   UnknownError,
-  InvalidArgumentException,
-  LitNodeClientBadConfigError,
-  InvalidEthBlockhash,
-  LitNodeClientNotReadyError,
-  InvalidNodeAttestation,
+  version,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -64,7 +67,6 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
@@ -103,7 +105,15 @@ export type LitNodeClientConfigWithDefaults = Required<
   >
 > &
   Partial<
-    Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
+    Pick<
+      LitNodeClientConfig,
+      | 'storageProvider'
+      | 'contractContext'
+      | 'rpcUrl'
+      | 'nodeConnectTimeout'
+      | 'nodeRequestTimeout'
+      | 'retryNodeHandshake'
+    >
   > & {
     bootstrapUrls: string[];
   } & {
@@ -126,7 +136,10 @@ export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
-    connectTimeout: 20000,
+    connectTimeout: 20_000, // Default for full handshake
+    nodeConnectTimeout: 7_500, // Default for handshake per node
+    nodeRequestTimeout: 35_000, // LitActions have a 30s timeout + some buffer for network latency
+    retryNodeHandshake: true,
     checkNodeAttestation: false,
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
@@ -645,31 +658,78 @@ export class LitCore {
     const serverKeys: Record<string, JsonHandshakeResponse> = {};
 
     let timeoutHandle: ReturnType<typeof setTimeout>;
+    let canRetry = this.config.retryNodeHandshake ?? true;
+
+    const handshakeWithNode = async (url: string): Promise<void> => {
+      serverKeys[url] = await this._handshakeAndVerifyNodeAttestation({
+        url,
+        requestId,
+      });
+      connectedNodes.add(url);
+    };
+
+    const handshakeWithNodeWithRetry = async (url: string): Promise<void> => {
+      try {
+        return await handshakeWithNode(url);
+      } catch (e) {
+        const errorInfo = VError.info(e);
+        // Only retry requests if there was a 5xx error or a timeout error (not client side errors)
+        const isRetryableRequest =
+          errorInfo.statusCode >= 500 ||
+          VError.hasCauseWithName(e, 'TimeoutError');
+        if (!canRetry || !isRetryableRequest) {
+          throw e;
+        }
+      }
+
+      // If we get here, we've failed to handshake with the node. We should retry.
+      logErrorWithRequestId(
+        requestId,
+        `Error while attempting handshake with node ${url}. Retrying...`
+      );
+      return await handshakeWithNodeWithRetry(url);
+    };
+
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not connect to enough nodes after timeout of ${
-            this.config.connectTimeout
-          }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${
-            this.config.minNodeCount
-          } required nodes, from ${
-            this.config.bootstrapUrls.length
-          } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          canRetry = false;
+          const serverKeysObtained = Object.keys(serverKeys).length;
+          const msg = `Error: Could not connect to all required nodes after timeout of ${this.config.connectTimeout}ms. Could only connect to ${serverKeysObtained} of ${this.config.bootstrapUrls.length} required nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
-          reject(new InitError({}, msg));
+          reject(
+            new InitError(
+              {
+                info: {
+                  requestId,
+                  connectedNodesNumber: serverKeysObtained,
+                  requiredNodesNumber: this.config.bootstrapUrls.length,
+                },
+                cause: new NetworkError({}, msg),
+              },
+              msg
+            )
+          );
         }, this.config.connectTimeout);
       }),
-      Promise.all(
-        this.config.bootstrapUrls.map(async (url) => {
-          serverKeys[url] = await this._handshakeAndVerifyNodeAttestation({
-            url,
-            requestId,
-          });
-          connectedNodes.add(url);
+      Promise.all(this.config.bootstrapUrls.map(handshakeWithNodeWithRetry))
+        .catch((e) => {
+          throw new InitError(
+            {
+              info: {
+                requestId,
+                connectedNodesNumber: Object.keys(serverKeys).length,
+                requiredNodesNumber: this.config.bootstrapUrls.length,
+              },
+              cause: e,
+            },
+            e.message
+          );
         })
-      ).finally(() => {
-        clearTimeout(timeoutHandle);
-      }),
+        .finally(() => {
+          canRetry = false;
+          clearTimeout(timeoutHandle);
+        }),
     ]);
 
     const coreNodeConfig = this._getCoreNodeConfigFromHandshakeResults({
@@ -828,7 +888,7 @@ export class LitCore {
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
     // -- get properties from params
-    const { url } = params;
+    const { url, challenge } = params;
 
     // -- create url with path
     const urlWithPath = composeLitUrl({
@@ -840,15 +900,14 @@ export class LitCore {
 
     const data = {
       clientPublicKey: 'test',
-      challenge: params.challenge,
+      challenge,
     };
 
     return await this.sendCommandToNode({
       url: urlWithPath,
       data,
       requestId,
-    }).catch((err: NodeErrorV3) => {
-      return err;
+      timeout: this.config.nodeConnectTimeout,
     });
   };
 
@@ -920,6 +979,7 @@ export class LitCore {
     url,
     data,
     requestId,
+    timeout,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
@@ -942,6 +1002,11 @@ export class LitCore {
       },
       body: JSON.stringify(data),
     };
+
+    const requestTimeout = timeout || this.config.nodeRequestTimeout;
+    if (requestTimeout) {
+      req.signal = AbortSignal.timeout(requestTimeout);
+    }
 
     return sendRequest(url, req, requestId);
   };

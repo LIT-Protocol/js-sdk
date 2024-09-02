@@ -13,6 +13,7 @@ import {
   LOG_LEVEL,
   LOG_LEVEL_VALUES,
   NetworkError,
+  NodeError,
   RELAYER_URL_BY_NETWORK,
   RemovedFunctionError,
   UnknownError,
@@ -696,38 +697,51 @@ export function getEnv({
   return defaultValue;
 }
 
-export function sendRequest(
+export async function sendRequest(
   url: string,
   req: RequestInit,
   requestId: string
 ): Promise<Response> {
-  return fetch(url, req)
-    .then(async (response) => {
-      const isJson = response.headers
-        .get('content-type')
-        ?.includes('application/json');
+  try {
+    const response = await fetch(url, req);
+    const isJson = response.headers
+      .get('content-type')
+      ?.includes('application/json');
 
-      const data = isJson ? await response.json() : null;
+    const data = isJson ? await response.json() : null;
 
-      if (!response.ok) {
-        // get error message from body or default to response status
-        const error = data || response.status;
-        return Promise.reject(error);
-      }
-
-      return data;
-    })
-    .catch((error: NodeErrorV3) => {
-      logErrorWithRequestId(
-        requestId,
-        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-          error?.message || error?.details
-            ? `Error is ${error.message} - ${error.details}`
-            : ''
-        }`
+    if (!response.ok) {
+      throw new NodeError(
+        {
+          info: {
+            requestId,
+            data,
+            statusCode: response.status,
+          },
+        },
+        'Node responded with an error, check the error info for more details'
       );
-      return Promise.reject(error);
-    });
+    }
+
+    return data;
+  } catch (error: any) {
+    const errorMessage = `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+      error.message || error.details
+        ? `Error is ${error.message} - ${error.details}`
+        : ''
+    }`;
+    logErrorWithRequestId(requestId, errorMessage);
+
+    throw new NetworkError(
+      {
+        info: {
+          requestId,
+        },
+        cause: error,
+      },
+      errorMessage
+    );
+  }
 }
 
 /**
