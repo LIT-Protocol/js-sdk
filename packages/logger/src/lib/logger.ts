@@ -329,7 +329,7 @@ export class Logger {
   }
 
   private _checkHash(log: Log): boolean {
-    const strippedMessage = this._cleanString(log.message); 
+    const strippedMessage = this._cleanString(log.message);
     const digest = hashMessage(strippedMessage);
     const hash = digest.toString();
     const item = this._logHashes.get(hash);
@@ -371,19 +371,19 @@ export class Logger {
   }
 
   /**
-   * 
+   *
    * @param input string which will be cleaned of non utf-8 characters
    * @returns {string} input cleaned of non utf-8 characters
    */
   private _cleanString(input: string): string {
-    let output = "";
-    for (let i=0; i<input.length; i++) {
-        if (input.charCodeAt(i) <= 127) {
-            output += input.charAt(i);
-        }
+    let output = '';
+    for (let i = 0; i < input.length; i++) {
+      if (input.charCodeAt(i) <= 127) {
+        output += input.charAt(i);
+      }
     }
     return output;
-}
+  }
 }
 
 export class LogManager {
