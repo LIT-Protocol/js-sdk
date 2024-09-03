@@ -1,6 +1,6 @@
 import { TinnyEnvironment } from '@lit-protocol/tinny';
 
-import {testTransitionEpochShouldTriggerStakingEvent} from './tests/EpochTransition.spec.ts';
+import {testTransitionEpochShouldTriggerStakingEvent} from './tests/EpochTransition.ts';
 
 
 (async () => {
