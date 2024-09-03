@@ -56,6 +56,7 @@
     "@walletconnect/web3wallet": "1.8.8",
     "ajv": "^8.12.0",
     "base64url": "^3.0.1",
+    "bech32": "^2.0.0",
     "bitcoinjs-lib": "^6.1.0",
     "bs58": "^5.0.0",
     "cbor-web": "^9.0.2",

@@ -30,7 +30,10 @@ export interface TokenInfo {
  * @param prefix - Cosmos address prefix (e.g., "cosmos")
  * @returns Cosmos address as a Bech32 string
  */
-function deriveCosmosAddress(ethPubKey: string, prefix: string = 'cosmos'): string {
+function deriveCosmosAddress(
+  ethPubKey: string,
+  prefix: string = 'cosmos'
+): string {
   let pubKeyBuffer = Buffer.from(ethPubKey, 'hex');
 
   // If the Ethereum public key is uncompressed (130 characters), compress it

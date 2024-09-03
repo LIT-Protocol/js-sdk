@@ -6,7 +6,8 @@ import {
 import { derivedAddresses } from './addresses';
 
 const RPC_URL = 'https://chain-rpc.litprotocol.com/http';
-const COMPRESSED_PUBLIC_KEY = '02e5896d70c1bc4b4844458748fe0f936c7919d7968341e391fb6d82c258192e64';
+const COMPRESSED_PUBLIC_KEY =
+  '02e5896d70c1bc4b4844458748fe0f936c7919d7968341e391fb6d82c258192e64';
 
 describe('adddresses', () => {
   it('should throw if defaultRPCUrl is not provided', async () => {
