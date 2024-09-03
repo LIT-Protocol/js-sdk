@@ -250,7 +250,7 @@ export class ShivaClient {
       const body: Partial<TestNetCreateRequest> = createReq ?? {
         nodeCount: 3,
         pollingInterval: '2000',
-        epochLength: 1_000,
+        epochLength: 200,
       };
 
       if (this.processEnvs.USE_LIT_BINARIES) {
