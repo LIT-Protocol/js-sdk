@@ -153,10 +153,10 @@ class Log implements ILog {
   }
 
   toString(): string {
-    var fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(
+    let fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(
       this.level
     )} [${this.category}] [id: ${this.id}] ${this.message}`;
-    for (var i = 0; i < this.args.length; i++) {
+    for (let i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
         fmtStr = `${fmtStr} ${_safeStringify(this.args[i])}`;
       } else {
@@ -167,7 +167,7 @@ class Log implements ILog {
   }
 
   toArray(): string[] {
-    let args = [];
+    const args = [];
     args.push(`[Lit-JS-SDK v${version}]`);
     args.push(`[${this.timestamp}]`);
     args.push(_convertLoggingLevel(this.level));
@@ -176,7 +176,7 @@ class Log implements ILog {
     this.id && args.push(`${colours.fg.cyan}[id: ${this.id}]${colours.reset}`);
     this.message && args.push(this.message);
 
-    for (var i = 0; i < this.args.length; i++) {
+    for (let i = 0; i < this.args.length; i++) {
       args.push(this.args[i]);
     }
 
@@ -204,7 +204,7 @@ export class Logger {
   private _handler: messageHandler | undefined;
   private _consoleHandler: any;
   private _logs: Log[] = [];
-  private _logHashes: Map<string, boolean> = new Map();
+  private _logHashes: Map<string, boolean> = new Map<string, boolean>();
   private _config: Record<string, any> | undefined;
   private _isParent: boolean;
   private _children: Map<string, Logger>;
@@ -329,9 +329,10 @@ export class Logger {
   }
 
   private _checkHash(log: Log): boolean {
-    const digest = hashMessage(log.message);
+    const strippedMessage = this._cleanString(log.message); 
+    const digest = hashMessage(strippedMessage);
     const hash = digest.toString();
-    let item = this._logHashes.get(hash);
+    const item = this._logHashes.get(hash);
     if (item) {
       return true;
     } else {
@@ -368,6 +369,21 @@ export class Logger {
       }
     }
   }
+
+  /**
+   * 
+   * @param input string which will be cleaned of non utf-8 characters
+   * @returns {string} input cleaned of non utf-8 characters
+   */
+  private _cleanString(input: string): string {
+    let output = "";
+    for (let i=0; i<input.length; i++) {
+        if (input.charCodeAt(i) <= 127) {
+            output += input.charAt(i);
+        }
+    }
+    return output;
+}
 }
 
 export class LogManager {
