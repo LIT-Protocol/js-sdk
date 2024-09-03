@@ -1,17 +1,18 @@
-import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import { Secp256k1 } from '@cosmjs/crypto';
-import { toBech32 } from '@cosmjs/encoding';
-import * as bitcoinjs from 'bitcoinjs-lib';
-import { Contract, ethers } from 'ethers';
-import { computeAddress } from 'ethers/lib/utils';
 import {
   InvalidArgumentException,
   MultiError,
   NoWalletException,
   ParamsMissingError,
 } from '@lit-protocol/constants';
+import { bech32 } from 'bech32';
+import * as bitcoinjs from 'bitcoinjs-lib';
+import { createHash } from 'crypto';
+import { Contract, ethers } from 'ethers';
+import { computeAddress } from 'ethers/lib/utils';
+import { publicKeyConvert } from 'secp256k1';
 
 import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
+
 export interface TokenInfo {
   tokenId: string;
   publicKey: string;
@@ -22,6 +23,56 @@ export interface TokenInfo {
   isNewPKP: boolean;
 }
 
+/**
+ * Derives a Cosmos address from an Ethereum public key.
+ *
+ * @param ethPubKey - Ethereum public key as a hex string (uncompressed, 130 characters long, or compressed, 66 characters long)
+ * @param prefix - Cosmos address prefix (e.g., "cosmos")
+ * @returns Cosmos address as a Bech32 string
+ */
+function deriveCosmosAddress(ethPubKey: string, prefix: string = 'cosmos'): string {
+  let pubKeyBuffer = Buffer.from(ethPubKey, 'hex');
+
+  // If the Ethereum public key is uncompressed (130 characters), compress it
+  if (pubKeyBuffer.length === 65 && pubKeyBuffer[0] === 0x04) {
+    pubKeyBuffer = Buffer.from(publicKeyConvert(pubKeyBuffer, true));
+  }
+
+  // Hash the compressed public key with SHA-256
+  const sha256Hash = createHash('sha256').update(pubKeyBuffer).digest();
+
+  // Hash the SHA-256 hash with RIPEMD-160
+  const ripemd160Hash = createHash('ripemd160').update(sha256Hash).digest();
+
+  // Encode the RIPEMD-160 hash with Bech32 and return it
+  return bech32.encode(prefix, bech32.toWords(ripemd160Hash));
+}
+
+/**
+ * Derives multiple blockchain addresses (Ethereum, Bitcoin, and Cosmos) from a given uncompressed eth public key
+ * or PKP token ID. If a PKP token ID is provided, it retrieves the public key from the PKP contract.
+ *
+ * @param params - The parameters for deriving addresses.
+ * @param params.publicKey - The Ethereum public key as a hex string (optional). If not provided, pkpTokenId must be provided.
+ * @param params.pkpTokenId - The PKP token ID (optional). If not provided, publicKey must be provided.
+ * @param params.pkpContractAddress - The PKP contract address (optional). If not provided, a default address is used.
+ * @param params.defaultRPCUrl - The default RPC URL for connecting to the Ethereum network.
+ * @param params.options - Additional options (optional).
+ * @param params.options.cacheContractCall - Whether to cache the contract call result in local storage (default: false).
+ *
+ * @returns A Promise that resolves to an object containing token information:
+ *   @property {string} tokenId - The PKP token ID.
+ *   @property {string} publicKey - The Ethereum public key as a hex string.
+ *   @property {Buffer} publicKeyBuffer - The buffer representation of the public key.
+ *   @property {string} ethAddress - The derived Ethereum address.
+ *   @property {string} btcAddress - The derived Bitcoin address.
+ *   @property {string} cosmosAddress - The derived Cosmos address.
+ *   @property {boolean} isNewPKP - Whether a new PKP was created.
+ *
+ * @throws {InvalidArgumentException} If the defaultRPCUrl is not provided.
+ * @throws {ParamsMissingError} If neither publicKey nor pkpTokenId is provided.
+ * @throws {MultiError} If any of the derived addresses (btcAddress, ethAddress, cosmosAddress) are undefined.
+ */
 export const derivedAddresses = async ({
   publicKey,
   pkpTokenId,
@@ -34,7 +85,7 @@ export const derivedAddresses = async ({
   publicKey?: string;
   pkpTokenId?: string;
   pkpContractAddress?: string;
-  defaultRPCUrl?: string;
+  defaultRPCUrl: string;
   options?: {
     cacheContractCall?: boolean;
   };
@@ -142,7 +193,10 @@ export const derivedAddresses = async ({
     pubkey: pubkeyBuffer,
   }).address;
 
-  if (!btcAddress || !ethAddress) {
+  // get cosmos address from the public key
+  const cosmosAddress = deriveCosmosAddress(publicKey);
+
+  if (!btcAddress || !ethAddress || !cosmosAddress) {
     // push to error reporting service
     const errors = [];
 
@@ -176,23 +230,21 @@ export const derivedAddresses = async ({
       );
     }
 
+    if (!cosmosAddress) {
+      errors.push(
+        new NoWalletException(
+          {
+            info: {
+              publicKey,
+            },
+          },
+          'cosmosAddress is undefined'
+        )
+      );
+    }
+
     throw new MultiError(errors);
   }
-
-  // https://docs.cosmos.network/main/spec/addresses/bech32
-  // To covert between other binary representation of addresses and keys,
-  // it is important to first apply the Amino encoding process before Bech32 encoding.
-  // PubKeySecp256k1	tendermint/PubKeySecp256k1	0xEB5AE987	0x21
-  // https://github.com/tendermint/tendermint/blob/d419fffe18531317c28c29a292ad7d253f6cafdf/docs/spec/blockchain/encoding.md#public-key-cryptography
-  function getCosmosAddress(pubkeyBuffer: Buffer) {
-    return toBech32(
-      'cosmos',
-      rawSecp256k1PubkeyToRawAddress(Secp256k1.compressPubkey(pubkeyBuffer))
-    );
-  }
-
-  // get cosmos address from the public key
-  const cosmosAddress = getCosmosAddress(pubkeyBuffer);
 
   return {
     tokenId: pkpTokenId,
