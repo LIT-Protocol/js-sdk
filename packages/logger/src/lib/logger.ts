@@ -1,7 +1,6 @@
-import { version } from '@lit-protocol/constants';
 import { hashMessage } from 'ethers/lib/utils';
-import { encode } from 'punycode';
-import { toString as uint8arrayToString } from 'uint8arrays';
+
+import { version } from '@lit-protocol/constants';
 
 export enum LogLevel {
   INFO = 0,
@@ -353,17 +352,17 @@ export class Logger {
 
   private _addToLocalStorage(log: Log) {
     if (globalThis.localStorage) {
-      let bucket: { [index: string]: string[] } | string | null =
+      let bucket: Record<string, string[]> | string | null =
         globalThis.localStorage.getItem(log.category);
       if (bucket) {
-        bucket = JSON.parse(bucket) as { [index: string]: string[] };
+        bucket = JSON.parse(bucket) as Record<string, string[]>;
         if (!bucket[log.id]) {
           bucket[log.id] = [];
         }
         bucket[log.id].push(log.toString());
         globalThis.localStorage.setItem(log.category, _safeStringify(bucket));
       } else {
-        const bucket: { [index: string]: string[] } = {};
+        const bucket: Record<string, string[]> = {};
         bucket[log.id] = [log.toString()];
         globalThis.localStorage.setItem(log.category, _safeStringify(bucket));
       }
@@ -451,7 +450,7 @@ export class LogManager {
         instance = this._loggers.get(category) as Logger;
         instance.Config = this._config;
       }
-      let children = instance?.Children;
+      const children = instance?.Children;
       let child = children?.get(id);
       if (child) {
         return child;
@@ -487,9 +486,9 @@ export class LogManager {
   getById(id: string): string[] {
     let logStrs: string[] = [];
     for (const category of this._loggers.entries()) {
-      let logger = category[1].Children.get(id);
+      const logger = category[1].Children.get(id);
       if (logger) {
-        let logStr = [];
+        const logStr = [];
         for (const log of logger.Logs) {
           logStr.push(log.toString());
         }
@@ -504,9 +503,9 @@ export class LogManager {
     let logsForRequest: string[] = this.getById(id);
     if (logsForRequest.length < 1 && globalThis.localStorage) {
       for (const category of this._loggers.keys()) {
-        let bucketStr: string | null =
+        const bucketStr: string | null =
           globalThis.localStorage.getItem(category);
-        let bucket: { [key: string]: string[] } = JSON.parse(
+        const bucket: Record<string, string[]> = JSON.parse(
           bucketStr as string
         );
         if (bucket && bucket[id]) {
