@@ -7,14 +7,12 @@
  * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
-
-import { publicKeyConvert } from 'secp256k1';
-
 import {
   InitError,
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
+import { publicKeyConvert } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { logError } from '@lit-protocol/misc';
 import {
@@ -41,7 +39,7 @@ const compressPubKey = (pubKey: string): string => {
   }
 
   // const hex = Buffer.from(pubKey, 'hex');
-  const uint8array = new Uint8Array(Buffer.from(pubKey, 'hex'));
+  const uint8array = Buffer.from(pubKey, 'hex');
   const compressedKey = publicKeyConvert(uint8array, true);
   const hex = Buffer.from(compressedKey).toString('hex');
 
