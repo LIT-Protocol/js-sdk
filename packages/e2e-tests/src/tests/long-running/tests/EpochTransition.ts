@@ -16,11 +16,17 @@ export async function testTransitionEpochShouldTriggerStakingEvent(devEnv: Tinny
     throw new Error("Nodes not connected after epoch transition");
   }
 
-  if (devEnv.litNodeClient?.config.bootstrapUrls !== connectedNodes) {
-    console.log(connectedNodes);
-    console.log(devEnv.litNodeClient.config.bootstrapUrls);
-    throw new Error("Connected nodes does not match original node set pre epoch transiton");
+  if (connectedNodes?.length !== devEnv.litNodeClient.config.bootstrapUrls.length) {
+    throw new Error('Validator collection lengths do not match after epoch transition with same node set');
   }
+
+  for (const url of connectedNodes!) {
+    if (devEnv.litNodeClient.config.bootstrapUrls.indexOf(url) < 0) {
+      console.log(connectedNodes);
+      console.log(devEnv.litNodeClient.config.bootstrapUrls);
+      throw new Error("Connected nodes does not match original node set pre epoch transiton");
+    }
+  } 
 
 
   if (currentEpoch as number + 1 != devEnv.litNodeClient.currentEpochNumber) {
