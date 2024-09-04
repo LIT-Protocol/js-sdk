@@ -299,7 +299,7 @@ export class LitCore {
       // We always want to track the most recent epoch number on _all_ networks
 
       this._epochState = await this._fetchCurrentEpochState();
-      log("Epoch state: ", this._epochState);
+      log("Epoch state: ", this._epochState.currentNumber);
 
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
