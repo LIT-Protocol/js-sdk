@@ -249,7 +249,7 @@ export class ShivaClient {
       );
       const body: Partial<TestNetCreateRequest> = createReq ?? {
         nodeCount: 3,
-        pollingInterval: '2000',
+        pollingInterval: '20',
         epochLength: 200,
       };
 
