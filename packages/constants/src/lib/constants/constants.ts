@@ -1,9 +1,13 @@
+import depd from 'depd';
+
 import {
   LITChain,
   LITCosmosChain,
   LITEVMChain,
   LITSVMChain,
 } from '@lit-protocol/types';
+
+const deprecated = depd('lit-js-sdk:constants:constants');
 
 /**
  * Lit Protocol Network Public Key
@@ -621,7 +625,18 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
 /**
  * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['yellowstone']` for the new Chronicle Yellowstone Testnet (Jul 2024). (Updated to use `yellowstone` chain instead 22 July 2024)
  */
-export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
+const LIT_CHAIN_RPC_URL_TARGET = {
+  url: LIT_CHAINS['chronicleTestnet'].rpcUrls[0],
+};
+
+export const LIT_CHAIN_RPC_URL = new Proxy(LIT_CHAIN_RPC_URL_TARGET, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LIT_CHAIN_RPC_URL is deprecated and will be removed in a future version. Use LIT_CHAINS["chronicleTestnet"].rpcUrls[0] instead or use LIT_CHAINS["yellowstone"].rpcUrls[0] for the new Chronicle Yellowstone Testnet.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+}).url;
 
 /**
  * Object containing information to submit to Metamask
@@ -664,7 +679,14 @@ export const METAMASK_CHAIN_INFO = {
  * Alias for {@link METAMASK_CHAIN_INFO}. Added for backwards compatibility.
  * See {@link METAMASK_CHAIN_INFO}
  */
-export const metamaskChainInfo = METAMASK_CHAIN_INFO;
+export const metamaskChainInfo = new Proxy(METAMASK_CHAIN_INFO, {
+  get(target, prop, receiver) {
+    deprecated(
+      'metamaskChainInfo is deprecated and will be removed in a future version. Use METAMASK_CHAIN_INFO instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 /**
  * Constants representing the available LIT RPC endpoints.
@@ -706,7 +728,14 @@ export const LIT_NETWORK = {
  * Alias for LIT_NETWORK. Added for backwards compatibility.
  * See {@link LIT_NETWORK}
  */
-export const LitNetwork = LIT_NETWORK;
+export const LitNetwork = new Proxy(LIT_NETWORK, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LitNetwork is deprecated and will be removed in a future version. Use LIT_NETWORK instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 /**
  * The type representing the keys of the LIT_NETWORK object.
  */
@@ -752,15 +781,15 @@ export const RELAYER_URL_BY_NETWORK: {
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
-  typeof metamaskChainInfo.chronicle | typeof metamaskChainInfo.yellowstone
+  typeof METAMASK_CHAIN_INFO.chronicle | typeof METAMASK_CHAIN_INFO.yellowstone
 > = {
-  cayenne: metamaskChainInfo.chronicle,
-  manzano: metamaskChainInfo.chronicle,
-  habanero: metamaskChainInfo.chronicle,
-  'datil-dev': metamaskChainInfo.yellowstone,
-  'datil-test': metamaskChainInfo.yellowstone,
-  datil: metamaskChainInfo.yellowstone,
-  custom: metamaskChainInfo.yellowstone,
+  cayenne: METAMASK_CHAIN_INFO.chronicle,
+  manzano: METAMASK_CHAIN_INFO.chronicle,
+  habanero: METAMASK_CHAIN_INFO.chronicle,
+  'datil-dev': METAMASK_CHAIN_INFO.yellowstone,
+  'datil-test': METAMASK_CHAIN_INFO.yellowstone,
+  datil: METAMASK_CHAIN_INFO.yellowstone,
+  custom: METAMASK_CHAIN_INFO.yellowstone,
 };
 
 export const HTTP = 'http://';
@@ -974,31 +1003,78 @@ export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
 
+const RELAY_URL_CAYENNE_TARGET = {
+  url: 'https://relayer-server-staging-cayenne.getlit.dev',
+};
 /**
  * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Cayenne instead
  */
-export const RELAY_URL_CAYENNE =
-  'https://relayer-server-staging-cayenne.getlit.dev';
+export const RELAY_URL_CAYENNE = new Proxy(RELAY_URL_CAYENNE_TARGET, {
+  get(target, prop, receiver) {
+    deprecated(
+      'RELAY_URL_CAYENNE is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.Cayenne instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+}).url;
 
+const RELAY_URL_HABANERO_TARGET = {
+  url: 'https://habanero-relayer.getlit.dev',
+};
 /**
  * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Habanero instead
  */
-export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
+export const RELAY_URL_HABANERO = new Proxy(RELAY_URL_HABANERO_TARGET, {
+  get(target, prop, receiver) {
+    deprecated(
+      'RELAY_URL_HABANERO is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.Habanero instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+}).url;
 
+const RELAY_URL_MANZANO_TARGET = { url: 'https://manzano-relayer.getlit.dev' };
 /**
  * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Manzano instead
  */
-export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
+export const RELAY_URL_MANZANO = new Proxy(RELAY_URL_MANZANO_TARGET, {
+  get(target, prop, receiver) {
+    deprecated(
+      'RELAY_URL_MANZANO is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.Manzano instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+}).url;
 
+const RELAY_URL_DATIL_DEV_TARGET = {
+  url: 'https://datil-dev-relayer.getlit.dev',
+};
 /**
  * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilDev instead
  */
-export const RELAY_URL_DATIL_DEV = 'https://datil-dev-relayer.getlit.dev';
+export const RELAY_URL_DATIL_DEV = new Proxy(RELAY_URL_DATIL_DEV_TARGET, {
+  get(target, prop, receiver) {
+    deprecated(
+      'RELAY_URL_DATIL_DEV is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.DatilDev instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+}).url;
 
+const RELAY_URL_DATIL_TEST_TARGET = {
+  url: 'https://datil-test-relayer.getlit.dev',
+};
 /**
  * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilTest instead
  */
-export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
+export const RELAY_URL_DATIL_TEST = new Proxy(RELAY_URL_DATIL_TEST_TARGET, {
+  get(target, prop, receiver) {
+    deprecated(
+      'RELAY_URL_DATIL_TEST is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.DatilTest instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+}).url;
 
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
@@ -1054,7 +1130,14 @@ export type AUTH_METHOD_TYPE_VALUES =
  * Alias for AUTH_METHOD_TYPE. Added for backwards compatibility.
  * See {@link AUTH_METHOD_TYPE}
  */
-export const AuthMethodType = AUTH_METHOD_TYPE;
+export const AuthMethodType = new Proxy(AUTH_METHOD_TYPE, {
+  get(target, prop, receiver) {
+    deprecated(
+      'AuthMethodType is deprecated and will be removed in a future version. Use AUTH_METHOD_TYPE instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 // ========== Supported PKP Auth Method Scopes ==========
 export const AUTH_METHOD_SCOPE = {
@@ -1071,7 +1154,14 @@ export type AUTH_METHOD_SCOPE_VALUES =
  * Alias for AUTH_METHOD_SCOPE. Added for backwards compatibility.
  * See {@link AUTH_METHOD_SCOPE}
  */
-export const AuthMethodScope = AUTH_METHOD_SCOPE;
+export const AuthMethodScope = new Proxy(AUTH_METHOD_SCOPE, {
+  get(target, prop, receiver) {
+    deprecated(
+      'AuthMethodScope is deprecated and will be removed in a future version. Use AUTH_METHOD_SCOPE instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 // ========== Supported Provider Types ==========
 export const PROVIDER_TYPE = {
@@ -1094,7 +1184,14 @@ export type PROVIDER_TYPE_VALUES =
  * Alias for PROVIDER_TYPE. Added for backwards compatibility.
  * See {@link PROVIDER_TYPE}
  */
-export const ProviderType = PROVIDER_TYPE;
+export const ProviderType = new Proxy(PROVIDER_TYPE, {
+  get(target, prop, receiver) {
+    deprecated(
+      'ProviderType is deprecated and will be removed in a future version. Use PROVIDER_TYPE instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 // ========== Supported Staking States ==========
 export const STAKING_STATES = {
@@ -1113,7 +1210,14 @@ export type STAKING_STATES_VALUES =
  * Alias for STAKING_STATES. Added for backwards compatibility.
  * See {@link STAKING_STATES}
  */
-export const StakingStates = STAKING_STATES;
+export const StakingStates = new Proxy(STAKING_STATES, {
+  get(target, prop, receiver) {
+    deprecated(
+      'StakingStates is deprecated and will be removed in a future version. Use STAKING_STATES instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 // ========== Relay Auth Status ==========
 export const RELAY_AUTH_STATUS = {
@@ -1129,7 +1233,14 @@ export type RELAY_AUTH_STATUS_VALUES =
  * Alias for RELAY_AUTH_STATUS. Added for backwards compatibility.
  * See {@link RELAY_AUTH_STATUS}
  */
-export const RelayAuthStatus = RELAY_AUTH_STATUS;
+export const RelayAuthStatus = new Proxy(RELAY_AUTH_STATUS, {
+  get(target, prop, receiver) {
+    deprecated(
+      'RelayAuthStatus is deprecated and will be removed in a future version. Use RELAY_AUTH_STATUS instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 /**
  * Prefixes used for identifying various LIT resources.
@@ -1151,7 +1262,14 @@ export type LIT_RESOURCE_PREFIX_VALUES =
  * Alias for LIT_RESOURCE_PREFIX. Added for backwards compatibility.
  * See {@link LIT_RESOURCE_PREFIX}
  */
-export const LitResourcePrefix = LIT_RESOURCE_PREFIX;
+export const LitResourcePrefix = new Proxy(LIT_RESOURCE_PREFIX, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LitResourcePrefix is deprecated and will be removed in a future version. Use LIT_RESOURCE_PREFIX instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 /**
  * User-facing abilities that can be granted to a session.
@@ -1198,7 +1316,14 @@ export type LIT_ABILITY_VALUES = (typeof LIT_ABILITY)[keyof typeof LIT_ABILITY];
  * Alias for LIT_ABILITY. Added for backwards compatibility.
  * See {@link LIT_ABILITY}
  */
-export const LitAbility = LIT_ABILITY;
+export const LitAbility = new Proxy(LIT_ABILITY, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LitAbility is deprecated and will be removed in a future version. Use LIT_ABILITY instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 /**
  * LIT specific abilities mapped into the Recap specific terminology
@@ -1218,7 +1343,14 @@ export type LIT_RECAP_ABILITY_VALUES =
  * Alias for LIT_RECAP_ABILITY. Added for backwards compatibility.
  * See {@link LIT_RECAP_ABILITY}
  */
-export const LitRecapAbility = LIT_RECAP_ABILITY;
+export const LitRecapAbility = new Proxy(LIT_RECAP_ABILITY, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LitRecapAbility is deprecated and will be removed in a future version. Use LIT_RECAP_ABILITY instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 export const LIT_NAMESPACE = {
   Auth: 'Auth',
@@ -1232,7 +1364,14 @@ export type LIT_NAMESPACE_VALUES =
  * Alias for LIT_NAMESPACE. Added for backwards compatibility.
  * See {@link LIT_NAMESPACE}
  */
-export const LitNamespace = LIT_NAMESPACE;
+export const LitNamespace = new Proxy(LIT_NAMESPACE, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LitNamespace is deprecated and will be removed in a future version. Use LIT_NAMESPACE instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 /**
  * SDK Logger levels
@@ -1254,4 +1393,11 @@ export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
  * Alias for LOG_LEVEL. Added for backwards compatibility.
  * See {@link LOG_LEVEL}
  */
-export const LogLevel = LOG_LEVEL;
+export const LogLevel = new Proxy(LOG_LEVEL, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LogLevel is deprecated and will be removed in a future version. Use LOG_LEVEL instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});

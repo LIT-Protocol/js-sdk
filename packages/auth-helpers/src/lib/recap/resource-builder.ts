@@ -1,5 +1,5 @@
 import { LIT_ABILITY, LIT_ABILITY_VALUES } from '@lit-protocol/constants';
-import { ILitResource } from '../models';
+import { ILitResource } from '@lit-protocol/types';
 import {
   LitAccessControlConditionResource,
   LitActionResource,

@@ -2,19 +2,21 @@ import {
   InvalidArgumentException,
   RemovedFunctionError,
 } from '@lit-protocol/constants';
+import depd from 'depd';
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
 import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 import {
   AuthSig,
   AttenuationsObject,
   CID as CIDString,
-  ILitResource,
-  ISessionCapabilityObject,
   PlainJSON,
 } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe/siwe-helper';
+
+const deprecated = depd('lit-js-sdk:auth-recap:session-capability-object');
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   private _inner: Recap;
@@ -27,9 +29,10 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   /**
-   * @deprecated - to be removed, as it's not used.
+   * @deprecated - function removed.
    */
   async addRateLimitAuthSig(authSig: AuthSig) {
+    deprecated('addRateLimitAuthSig is deprecated.');
     throw new RemovedFunctionError({}, 'addRateLimitAuthSig is deprecated.');
   }
 

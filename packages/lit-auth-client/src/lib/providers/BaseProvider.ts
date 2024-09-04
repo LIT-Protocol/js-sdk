@@ -1,3 +1,4 @@
+import depd from 'depd';
 import { ethers } from 'ethers';
 
 import {
@@ -30,6 +31,8 @@ import {
 } from '@lit-protocol/types';
 
 import { validateMintRequestBody } from '../validators';
+
+const deprecated = depd('lit-js-sdk:auth-browser:base-provider');
 
 export abstract class BaseProvider {
   /**
@@ -127,6 +130,7 @@ export abstract class BaseProvider {
   public async fetchPKPsThroughRelayer(
     authMethod: AuthMethod
   ): Promise<IRelayPKP[]> {
+    deprecated('fetchPKPsThroughRelayer is deprecated. Use fetchPKPs instead.');
     const data = await this.prepareRelayRequestData(authMethod);
     const body = this.prepareFetchBody(data);
     const fetchRes = await this.relay.fetchPKPs(body);

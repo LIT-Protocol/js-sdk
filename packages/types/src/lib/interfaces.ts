@@ -1,4 +1,5 @@
 import { Provider } from '@ethersproject/abstract-provider';
+import depd from 'depd';
 // @ts-expect-error JSZip types are not properly resolved by TSC :(
 import * as JSZip from 'jszip/dist/jszip.js';
 
@@ -20,6 +21,9 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
+
+const deprecated = depd('lit-js-sdk:types:interfaces');
+
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -750,16 +754,34 @@ export interface NodeErrorV3 {
 }
 
 /**
- *
  * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- *
  */
-export interface NodeClientErrorV0 {
+export const NodeClientErrorV0 = new Proxy(
+  {
+    errorCode: '',
+    message: '',
+    error: '',
+    name: '',
+  },
+  {
+    get(target, prop, receiver) {
+      deprecated(
+        'NodeClientErrorV0 is deprecated and will be removed in a future version. Use NodeClientErrorV1 instead.'
+      );
+      return Reflect.get(target, prop, receiver);
+    },
+  }
+);
+
+/**
+ * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
+ */
+export type NodeClientErrorV0 = typeof NodeClientErrorV0 & {
   errorCode?: string;
   message: string;
   error: any;
   name?: string;
-}
+};
 
 export interface NodeClientErrorV1 {
   message: string;
@@ -1095,7 +1117,7 @@ export interface CommonGetSessionSigsProps {
   switchChain?: boolean;
   /**
    * The serialized session key pair to sign.
-   * If not provided, a session key pair will be fetched from localStorge or generated.
+   * If not provided, a session key pair will be fetched from localStorage or generated.
    */
   sessionKey?: SessionKeyPair;
 
@@ -1227,7 +1249,6 @@ export interface PKPBaseProp {
   litActionJsParams?: any;
   controllerSessionSigs?: SessionSigs;
 
-  // -- soon to be deprecated
   /**
    * @deprecated - use authContext
    */

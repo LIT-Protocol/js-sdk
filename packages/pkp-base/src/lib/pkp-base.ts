@@ -7,6 +7,7 @@
  * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
+import depd from 'depd';
 import {
   InitError,
   LitNodeClientNotReadyError,
@@ -26,6 +27,8 @@ import {
   AuthMethod,
   SessionSigsMap,
 } from '@lit-protocol/types';
+
+const deprecated = depd('lit-js-sdk:pkp-base:pkp-base');
 
 /**
  * Compresses a given public key.
@@ -52,8 +55,7 @@ const compressPubKey = (pubKey: string): string => {
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
 
-  // @deprecated
-  controllerAuthSig?: AuthSig;
+  private _controllerAuthSig?: AuthSig;
   controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigsMap;
   authContext?: AuthenticationProps;
@@ -80,12 +82,23 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
-   * Constructor for the PKPBase class.
-   * Initializes the instance with the provided properties.
-   * Marked as private to make class final. When creating an instance use PKPBase.createInstance
-   *
-   * @param { PKPBaseProp } pkpBaseProp - The properties for the PKPBase instance.
+   * @deprecated - Use a different authentication method instead.
    */
+  get controllerAuthSig(): AuthSig | undefined {
+    deprecated('controllerAuthSig is deprecated.');
+    return this._controllerAuthSig;
+  }
+
+  /**
+   * @deprecated - Use a different authentication method instead.
+   */
+  set controllerAuthSig(value: AuthSig | undefined) {
+    deprecated('controllerAuthSig is deprecated.');
+    this._controllerAuthSig = value;
+  }
+
+  // Rest of the PKPBase class...
+
   private constructor(pkpBaseProp: PKPBaseProp) {
     const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
 

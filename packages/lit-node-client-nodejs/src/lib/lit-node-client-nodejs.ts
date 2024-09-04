@@ -4,8 +4,6 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
 import {
-  ILitResource,
-  ISessionCapabilityObject,
   LitAccessControlConditionResource,
   LitResourceAbilityRequest,
   decode,
@@ -68,6 +66,7 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
@@ -315,7 +314,6 @@ export class LitNodeClientNodeJs
         },
         'Not implemented yet.'
       );
-      // await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
     return sessionCapabilityObject;

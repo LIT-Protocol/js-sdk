@@ -1,4 +1,5 @@
-import { LIT_NETWORK_VALUES } from './constants';
+import depd from 'depd';
+
 import {
   cayenne,
   manzano,
@@ -7,6 +8,10 @@ import {
   datilTest,
   datil,
 } from '@lit-protocol/contracts';
+
+import { LIT_NETWORK_VALUES } from './constants';
+
+const deprecated = depd('lit-js-sdk:constants:mappers');
 
 /**
  * Mapping of network context by network value.
@@ -28,7 +33,7 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
 /**
  * @deprecated Will be removed in version 7.x.
  */
-export const GENERAL_WORKER_URL_BY_NETWORK: {
+const GeneralWorkerUrlByNetwork: {
   [key in Exclude<LIT_NETWORK_VALUES, 'datil'>]: string;
 } = {
   cayenne: 'https://apis.getlit.dev/cayenne/contracts',
@@ -40,3 +45,18 @@ export const GENERAL_WORKER_URL_BY_NETWORK: {
   // just use cayenne abis for custom
   custom: 'https://apis.getlit.dev/cayenne/contracts',
 };
+
+/**
+ * @deprecated Will be removed in version 7.x.
+ */
+export const GENERAL_WORKER_URL_BY_NETWORK = new Proxy(
+  GeneralWorkerUrlByNetwork,
+  {
+    get(target, prop, receiver) {
+      deprecated(
+        'GeneralWorkerUrlByNetwork is deprecated and will be removed in a future version. Use NETWORK_CONTEXT_BY_NETWORK instead.'
+      );
+      return Reflect.get(target, prop, receiver);
+    },
+  }
+);
