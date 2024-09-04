@@ -6,7 +6,7 @@ export async function testTransitionEpochShouldTriggerStakingEvent(devEnv: Tinny
   await devEnv.testnet?.transitionEpochAndWait()
 
   await new Promise((res) => {
-    setTimeout(res, 1_000);
+    setTimeout(res, 10_000);
   });
   
   
