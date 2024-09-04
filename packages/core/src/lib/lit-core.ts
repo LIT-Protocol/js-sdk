@@ -312,7 +312,7 @@ export class LitCore {
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
 
           const delta: string[] = validatorData.bootstrapUrls.filter((item) =>
-            existingNodeUrls.includes(item)
+            existingNodeUrls.indexOf(item) > 0
           );
           // if the sets differ we reconnect.
           if (delta.length > 1) {
