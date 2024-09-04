@@ -6,7 +6,7 @@ export async function testTransitionEpochShouldTriggerStakingEvent(devEnv: Tinny
   await devEnv.testnet?.transitionEpochAndWait()
 
   await new Promise((res) => {
-    setTimeout(res, 20_000);
+    setTimeout(res, 45_000);
   });
   
   
@@ -31,7 +31,7 @@ export async function testTransitionEpochShouldTriggerStakingEvent(devEnv: Tinny
   /**
    * Currently not passing as after the chain event is emitted the current epoch state appears to alwayys be the previous epoch
    */
-  if (currentEpoch as number + 1 != devEnv.litNodeClient.currentEpochNumber) {
+  if (currentEpoch as number + 1 != devEnv.litNodeClient?.currentEpochNumber as number) {
     console.log(currentEpoch);
     console.log(devEnv.litNodeClient?.currentEpochNumber);
     throw new Error('Epoch value is not what was expected');

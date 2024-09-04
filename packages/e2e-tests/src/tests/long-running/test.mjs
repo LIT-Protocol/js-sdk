@@ -1,7 +1,7 @@
 import { TinnyEnvironment } from '@lit-protocol/tinny';
 
 import {testTransitionEpochShouldTriggerStakingEvent} from './tests/EpochTransition.ts';
-import { epochTransitionSignSessioShouldValidate } from './tests/EpochTransitionSignSession.ts';
+import { epochTransitionSignSessioShouldValidateAfterTransition, epochTransitionSignSessioShouldValidateDuringTransition } from './tests/EpochTransitionSignSession.ts';
 
 (async () => {
     console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -11,7 +11,8 @@ import { epochTransitionSignSessioShouldValidate } from './tests/EpochTransition
     
     const longRunningTests = {
         testTransitionEpochShouldTriggerStakingEvent,
-        epochTransitionSignSessioShouldValidate
+        epochTransitionSignSessioShouldValidateAfterTransition,
+        epochTransitionSignSessioShouldValidateDuringTransition
     };
 
     const testConfig = {
