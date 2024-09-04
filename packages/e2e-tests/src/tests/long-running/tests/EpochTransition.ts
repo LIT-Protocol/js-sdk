@@ -3,15 +3,13 @@ import { TinnyEnvironment } from '@lit-protocol/tinny';
 export async function testTransitionEpochShouldTriggerStakingEvent(devEnv: TinnyEnvironment) {
 
   const connectedNodes: string[] | undefined = devEnv.litNodeClient?.config.bootstrapUrls;
+  const currentEpoch = devEnv.litNodeClient?.currentEpochNumber;
   await devEnv.testnet?.transitionEpochAndWait()
 
   await new Promise((res) => {
     setTimeout(res, 45_000);
   });
   
-  
-  const currentEpoch = devEnv.litNodeClient?.currentEpochNumber;
-
   if (!devEnv.litNodeClient?.ready) {
     throw new Error("Nodes not connected after epoch transition");
   }
