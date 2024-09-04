@@ -294,13 +294,14 @@ export class LitCore {
     log(`New state detected: "${state}"`);
 
     const validatorData = await this._getValidatorData();
-
+    log("validator info ", validatorData);
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
 
       this._epochState = await this._fetchCurrentEpochState(
         validatorData.epochInfo
       );
+      log("Epoch state: ", this._epochState);
 
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
