@@ -17,6 +17,8 @@ export async function testTransitionEpochShouldTriggerStakingEvent(devEnv: Tinny
   }
 
   if (devEnv.litNodeClient?.config.bootstrapUrls !== connectedNodes) {
+    console.log(connectedNodes);
+    console.log(devEnv.litNodeClient.config.bootstrapUrls);
     throw new Error("Connected nodes does not match original node set pre epoch transiton");
   }
 
