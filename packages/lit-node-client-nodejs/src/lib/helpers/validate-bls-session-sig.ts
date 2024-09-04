@@ -1,3 +1,4 @@
+import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 import { ethers } from 'ethers';
@@ -61,7 +62,7 @@ export const blsSessionSigVerify = (
       `${checkTime.toISOString()} < ${issuedAt.toISOString()}`
     );
   }
-
+  log('verifiying signature against public bls key');
   verifier(
     networkPubKey,
     shaHashed,
