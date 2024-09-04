@@ -5,7 +5,7 @@ import {
   ParamsMissingError,
 } from '@lit-protocol/constants';
 import { bech32 } from 'bech32';
-import * as bitcoinjs from 'bitcoinjs-lib';
+import bs58 from 'bs58';
 import { createHash } from 'crypto';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
@@ -21,6 +21,42 @@ export interface TokenInfo {
   btcAddress: string;
   cosmosAddress: string;
   isNewPKP: boolean;
+}
+
+/**
+ * Derives a Bitcoin address (P2PKH) from a public key.
+ *
+ * @param ethPubKey - Public key as a hex string (uncompressed or compressed)
+ * @returns Bitcoin address as a Base58Check string
+ */
+function deriveBitcoinAddress(ethPubKey: string): string {
+  // Remove the "0x" prefix if it exists and convert to a Buffer
+  if (ethPubKey.startsWith('0x')) {
+    ethPubKey = ethPubKey.slice(2);
+  }
+
+  const pubkeyBuffer = Buffer.from(ethPubKey, 'hex');
+
+  // Perform SHA-256 hashing on the public key
+  const sha256Hash = createHash('sha256').update(pubkeyBuffer).digest();
+
+  // Perform RIPEMD-160 hashing on the result of SHA-256
+  const ripemd160Hash = createHash('ripemd160').update(sha256Hash).digest();
+
+  // Add version byte in front of RIPEMD-160 hash (0x00 for mainnet)
+  const versionedPayload = Buffer.concat([Buffer.from([0x00]), ripemd160Hash]);
+
+  // Create a checksum by hashing the versioned payload twice with SHA-256
+  const checksum = createHash('sha256')
+    .update(createHash('sha256').update(versionedPayload).digest())
+    .digest()
+    .slice(0, 4);
+
+  // Concatenate the versioned payload and the checksum
+  const binaryBitcoinAddress = Buffer.concat([versionedPayload, checksum]);
+
+  // Encode the result with Base58 to get the final Bitcoin address and return it
+  return bs58.encode(binaryBitcoinAddress);
 }
 
 /**
@@ -192,9 +228,7 @@ export const derivedAddresses = async ({
   const ethAddress = computeAddress(pubkeyBuffer);
 
   // get the btc address from the public key
-  const btcAddress = bitcoinjs.payments.p2pkh({
-    pubkey: pubkeyBuffer,
-  }).address;
+  const btcAddress = deriveBitcoinAddress(publicKey);
 
   // get cosmos address from the public key
   const cosmosAddress = deriveCosmosAddress(publicKey);
