@@ -298,9 +298,7 @@ export class LitCore {
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
 
-      this._epochState = await this._fetchCurrentEpochState(
-        validatorData.epochInfo
-      );
+      this._epochState = await this._fetchCurrentEpochState();
       log("Epoch state: ", this._epochState);
 
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
@@ -330,11 +328,12 @@ export class LitCore {
               delta,
               'starting node connection'
             );
+
+            await this.connect();
           } else {
             log("validator sets found to match previous epoch, skipping reconnect");
           }
 
-          await this.connect();
         } catch (err: unknown) {
           // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
           // But for now, our every-30-second network sync will fix things in at most 30s from now.
