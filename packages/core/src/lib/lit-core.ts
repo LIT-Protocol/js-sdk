@@ -910,6 +910,7 @@ export class LitCore {
           Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
       this._epochCache.currentNumber >= 3
     ) {
+      log('found not to be time for epoch propigation');
       return this._epochCache.currentNumber - 1;
     }
     return this._epochCache.currentNumber;

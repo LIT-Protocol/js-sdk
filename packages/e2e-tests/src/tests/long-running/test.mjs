@@ -1,7 +1,7 @@
 import { TinnyEnvironment } from '@lit-protocol/tinny';
 
 import {testTransitionEpochShouldTriggerStakingEvent} from './tests/EpochTransition.ts';
-
+import { epochTransitionSignSessioShouldValidate } from './tests/EpochTransitionSignSession.ts';
 
 (async () => {
     console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -10,7 +10,8 @@ import {testTransitionEpochShouldTriggerStakingEvent} from './tests/EpochTransit
     await devEnv.init();
     
     const longRunningTests = {
-        testTransitionEpochShouldTriggerStakingEvent
+        testTransitionEpochShouldTriggerStakingEvent,
+        epochTransitionSignSessioShouldValidate
     };
 
     const testConfig = {
