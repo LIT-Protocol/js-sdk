@@ -1,4 +1,4 @@
-import * as depd from 'depd';
+const depd = require('depd');
 
 import {
   LITChain,

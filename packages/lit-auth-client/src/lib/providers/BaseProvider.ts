@@ -1,4 +1,4 @@
-import * as depd from 'depd';
+const depd = require('depd');
 import { ethers } from 'ethers';
 
 import {

@@ -1,5 +1,5 @@
 import { Provider } from '@ethersproject/abstract-provider';
-import * as depd from 'depd';
+const depd = require('depd');
 // @ts-expect-error JSZip types are not properly resolved by TSC :(
 import * as JSZip from 'jszip/dist/jszip.js';
 

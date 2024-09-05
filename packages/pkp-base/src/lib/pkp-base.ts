@@ -7,7 +7,7 @@
  * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
-import * as depd from 'depd';
+const depd = require('depd');
 import {
   InitError,
   LitNodeClientNotReadyError,

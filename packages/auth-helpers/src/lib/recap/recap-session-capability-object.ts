@@ -2,7 +2,7 @@ import {
   InvalidArgumentException,
   RemovedFunctionError,
 } from '@lit-protocol/constants';
-import * as depd from 'depd';
+const depd = require('depd');
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
 import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';

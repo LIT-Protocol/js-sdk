@@ -1,6 +1,6 @@
 // @ts-expect-error No types available for this package
 import { VError, Options } from '@openagenda/verror';
-import * as depd from 'depd';
+const depd = require('depd');
 
 const deprecated = depd('lit-js-sdk:constants:errors');
 

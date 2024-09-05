@@ -1,5 +1,5 @@
 import { Buffer as BufferPolyfill } from 'buffer';
-import * as depd from 'depd';
+const depd = require('depd');
 
 import { hexlify } from '@ethersproject/bytes';
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
