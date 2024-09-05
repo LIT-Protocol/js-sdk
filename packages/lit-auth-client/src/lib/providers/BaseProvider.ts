@@ -1,4 +1,4 @@
-import depd from 'depd';
+import * as depd from 'depd';
 import { ethers } from 'ethers';
 
 import {
