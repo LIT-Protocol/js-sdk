@@ -294,7 +294,7 @@ export class LitCore {
     log(`New state detected: "${state}"`);
 
     const validatorData = await this._getValidatorData();
-    log("validator info ", validatorData.epochInfo);
+    log('validator info ', validatorData.epochInfo);
     if (state === StakingStates.Active) {
       // We always want to track the most recent epoch number on _all_ networks
 
@@ -309,8 +309,8 @@ export class LitCore {
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
 
-          const delta: string[] = validatorData.bootstrapUrls.filter((item) =>
-            existingNodeUrls.indexOf(item) < 0
+          const delta: string[] = validatorData.bootstrapUrls.filter(
+            (item) => existingNodeUrls.indexOf(item) < 0
           );
           // if the sets differ we reconnect.
           if (delta.length > 1) {
@@ -331,9 +331,10 @@ export class LitCore {
 
             await this.connect();
           } else {
-            log("validator sets found to match previous epoch, skipping reconnect");
+            log(
+              'validator sets found to match previous epoch, skipping reconnect'
+            );
           }
-
         } catch (err: unknown) {
           // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
           // But for now, our every-30-second network sync will fix things in at most 30s from now.

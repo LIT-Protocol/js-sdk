@@ -29,7 +29,7 @@ export const build = async () => {
     platform: 'node',
     target: 'esnext',
     format: 'esm',
-    inject: [ `${TEST_DIR}/shim.mjs`],
+    inject: [`${TEST_DIR}/shim.mjs`],
     mainFields: ['module', 'main'],
   });
 };
@@ -41,7 +41,10 @@ export const build = async () => {
  */
 export const postBuildPolyfill = () => {
   try {
-    const file = fs.readFileSync(`./src/tests/long-running/build/test.mjs`, 'utf8');
+    const file = fs.readFileSync(
+      `./src/tests/long-running/build/test.mjs`,
+      'utf8'
+    );
     const content = `import fetch from 'node-fetch';
 try {
   if (!globalThis.fetch) {
