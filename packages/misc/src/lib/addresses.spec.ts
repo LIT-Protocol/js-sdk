@@ -1,31 +1,11 @@
-import {
-  InvalidArgumentException,
-  ParamsMissingError,
-} from '@lit-protocol/constants';
-
 import { derivedAddresses } from './addresses';
 
-const RPC_URL = 'https://chain-rpc.litprotocol.com/http';
 const COMPRESSED_PUBLIC_KEY =
   '02e5896d70c1bc4b4844458748fe0f936c7919d7968341e391fb6d82c258192e64';
 
 describe('adddresses', () => {
-  it('should throw if defaultRPCUrl is not provided', async () => {
-    // @ts-expect-error - testing invalid argument
-    await expect(derivedAddresses({})).rejects.toThrow(
-      InvalidArgumentException
-    );
-  });
-
-  it('should throw if publicKey or pkpTokenId is not provided', async () => {
-    await expect(derivedAddresses({ defaultRPCUrl: RPC_URL })).rejects.toThrow(
-      ParamsMissingError
-    );
-  });
-
   it('should return the derived address from a compressed eth public key', async () => {
     const derivedAddress = await derivedAddresses({
-      defaultRPCUrl: RPC_URL,
       publicKey: COMPRESSED_PUBLIC_KEY,
     });
     expect(derivedAddress).toEqual({

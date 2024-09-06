@@ -66,9 +66,10 @@ import {
   TransactionError,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
+import { TokenInfo } from '@lit-protocol/types';
 import { computeAddress } from 'ethers/lib/utils';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
-import { TokenInfo, derivedAddresses } from './addresses';
+import { derivedAddresses } from '@lit-protocol/misc';
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
@@ -1769,9 +1770,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tokenId = tokenIds[i];
           const pubKey = await this.pkpNftContract.read.getPubkey(tokenId);
           const addrs = await derivedAddresses({
-            pkpTokenId: tokenId,
             publicKey: pubKey,
-            defaultRPCUrl: this.rpc,
           });
 
           arr.push(addrs);

@@ -246,3 +246,13 @@ export type LitAbility =
   | 'pkp-signing'
   | 'rate-limit-increase-auth'
   | 'lit-action-execution';
+
+export interface TokenInfo {
+  tokenId: string;
+  publicKey: string;
+  publicKeyBuffer: Buffer;
+  ethAddress: string;
+  btcAddress: string;
+  cosmosAddress: string;
+  isNewPKP: boolean;
+}

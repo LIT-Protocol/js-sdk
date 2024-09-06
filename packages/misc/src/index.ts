@@ -1,3 +1,4 @@
+export * from './lib/addresses';
 export * from './lib/misc';
 export * from './lib/params-validators';
 export * from './lib/utils';

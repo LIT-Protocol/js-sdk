@@ -13,9 +13,8 @@ import {
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
-import { publicKeyConvert } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { logError } from '@lit-protocol/misc';
+import { logError, publicKeyConvert } from '@lit-protocol/misc';
 import {
   AuthenticationProps,
   JsonExecutionSdkParams,

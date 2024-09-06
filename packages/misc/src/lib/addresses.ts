@@ -1,26 +1,14 @@
 import {
-  InvalidArgumentException,
   MultiError,
   NoWalletException,
   ParamsMissingError,
 } from '@lit-protocol/constants';
+import { TokenInfo } from '@lit-protocol/types';
 import { bech32 } from 'bech32';
-import bs58 from 'bs58';
+import { encode } from 'bs58';
 import { createHash } from 'crypto';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-
-import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
-
-export interface TokenInfo {
-  tokenId: string;
-  publicKey: string;
-  publicKeyBuffer: Buffer;
-  ethAddress: string;
-  btcAddress: string;
-  cosmosAddress: string;
-  isNewPKP: boolean;
-}
 
 /**
  * Converts a public key between compressed and uncompressed formats.
@@ -124,7 +112,7 @@ function deriveBitcoinAddress(ethPubKey: string): string {
   const binaryBitcoinAddress = Buffer.concat([versionedPayload, checksum]);
 
   // Encode the result with Base58 to get the final Bitcoin address and return it
-  return bs58.encode(binaryBitcoinAddress);
+  return encode(binaryBitcoinAddress);
 }
 
 /**
@@ -154,6 +142,24 @@ function deriveCosmosAddress(
   // Encode the RIPEMD-160 hash with Bech32 and return it
   return bech32.encode(prefix, bech32.toWords(ripemd160Hash));
 }
+
+type DerivedAddressesParams =
+  | {
+      publicKey: string;
+      pkpTokenId?: never;
+      pkpContractAddress?: never;
+      defaultRPCUrl?: never;
+      options?: never;
+    }
+  | {
+      publicKey?: never;
+      pkpTokenId: string;
+      pkpContractAddress: string;
+      defaultRPCUrl: string;
+      options?: {
+        cacheContractCall?: boolean;
+      };
+    };
 
 /**
  * Derives multiple blockchain addresses (Ethereum, Bitcoin, and Cosmos) from a given uncompressed eth public key
@@ -188,26 +194,7 @@ export const derivedAddresses = async ({
   options = {
     cacheContractCall: false,
   },
-}: {
-  publicKey?: string;
-  pkpTokenId?: string;
-  pkpContractAddress?: string;
-  defaultRPCUrl: string;
-  options?: {
-    cacheContractCall?: boolean;
-  };
-}): Promise<TokenInfo | any> => {
-  if (!defaultRPCUrl) {
-    throw new InvalidArgumentException(
-      {
-        info: {
-          defaultRPCUrl,
-        },
-      },
-      'defaultRPCUrl must be provided'
-    );
-  }
-
+}: DerivedAddressesParams): Promise<TokenInfo | any> => {
   // one of the two must be provided
   if (!publicKey && !pkpTokenId) {
     throw new ParamsMissingError(
@@ -221,45 +208,54 @@ export const derivedAddresses = async ({
     );
   }
 
-  // if pkp contract address is not provided, use the default one 0xF5cB699652cED3781Dd75575EDBe075d6212DF98
-  if (!pkpContractAddress) {
-    pkpContractAddress = PKPNFTData.address;
-  }
-
-  // if pkpTokenId is provided, get the public key from it
-
+  // if pkpTokenId is provided, we must get the public key from it (in cache or from the contract)
   let isNewPKP = false;
-
   if (pkpTokenId) {
     // try to get the public key from 'lit-cached-pkps' local storage
     const CACHE_KEY = 'lit-cached-pkps';
+    let cachedPkpJSON;
     try {
       const cachedPkp = localStorage.getItem(CACHE_KEY);
       if (cachedPkp) {
-        const cachedPkpJSON = JSON.parse(cachedPkp);
-        if (cachedPkpJSON[pkpTokenId]) {
-          publicKey = cachedPkpJSON[pkpTokenId];
-        } else {
-          const provider = new ethers.providers.StaticJsonRpcProvider(
-            defaultRPCUrl
-          );
-
-          const contract = new Contract(
-            pkpContractAddress,
-            ['function getPubkey(uint256 tokenId) view returns (bytes memory)'],
-            provider
-          );
-
-          publicKey = await contract['getPubkey'](pkpTokenId);
-          isNewPKP = true;
-        }
+        cachedPkpJSON = JSON.parse(cachedPkp);
+        publicKey = cachedPkpJSON[pkpTokenId];
       }
     } catch (e) {
       console.error(e);
     }
 
-    // trying to store key value pair in local storage
+    if (!publicKey) {
+      // Could not get the public key from the cache, so we need to get it from the contract
+      if (!defaultRPCUrl || !pkpContractAddress) {
+        throw new NoWalletException(
+          {
+            info: {
+              publicKey,
+              pkpTokenId,
+              pkpContractAddress,
+              defaultRPCUrl,
+            },
+          },
+          'defaultRPCUrl or pkpContractAddress was not provided'
+        );
+      }
+
+      const provider = new ethers.providers.StaticJsonRpcProvider(
+        defaultRPCUrl
+      );
+
+      const contract = new Contract(
+        pkpContractAddress,
+        ['function getPubkey(uint256 tokenId) view returns (bytes memory)'],
+        provider
+      );
+
+      publicKey = await contract['getPubkey'](pkpTokenId);
+      isNewPKP = true;
+    }
+
     if (options.cacheContractCall) {
+      // trying to store key value pair in local storage
       try {
         const cachedPkp = localStorage.getItem(CACHE_KEY);
         if (cachedPkp) {
@@ -277,14 +273,18 @@ export const derivedAddresses = async ({
     }
   }
 
-  if (publicKey === undefined) {
-    console.warn('publicKey is undefined');
-  }
-
-  // if publicKey is provided, validate it
   if (!publicKey) {
-    console.warn('publicKey or pubkeyBuffer is undefined');
-    return;
+    throw new NoWalletException(
+      {
+        info: {
+          publicKey,
+          pkpTokenId,
+          pkpContractAddress,
+          defaultRPCUrl,
+        },
+      },
+      'publicKey was not provided or could not be obtained from the pkpTokenId'
+    );
   }
 
   if (publicKey.startsWith('0x')) {
@@ -304,10 +304,6 @@ export const derivedAddresses = async ({
   if (!btcAddress || !ethAddress || !cosmosAddress) {
     // push to error reporting service
     const errors = [];
-
-    // if (!pkpTokenId) {
-    //   errors.push("pkpTokenId is undefined");
-    // }
 
     if (!btcAddress) {
       errors.push(
