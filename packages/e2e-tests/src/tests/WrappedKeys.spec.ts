@@ -86,8 +86,7 @@ describe('Wrapped Keys', () => {
   });
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
   });
 
   afterAll(async () => {
@@ -289,10 +288,7 @@ describe('Wrapped Keys', () => {
       bs58.decode(generatedPublicKey)
     );
 
-    if (!signatureIsValidForPublicKey)
-      throw new Error(
-        `signature: ${signature} doesn't validate for the Solana public key: ${generatedPublicKey}`
-      );
+    expect(signatureIsValidForPublicKey).toBeDefined();
 
     const pkpSessionSigsExport = await getPkpSessionSigs(
       devEnv,
@@ -332,11 +328,7 @@ describe('Wrapped Keys', () => {
     });
 
     const alicePkpAddress = alice.authMethodOwnedPkp?.ethAddress;
-    if (pkpAddress !== alicePkpAddress) {
-      throw new Error(
-        `Received address: ${pkpAddress} doesn't match Alice's PKP address: ${alicePkpAddress}`
-      );
-    }
+    expect(pkpAddress).toEqual(alicePkpAddress);
 
     const pkpSessionSigsExport = await getPkpSessionSigs(
       devEnv,
@@ -1080,6 +1072,11 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
         chain: 'yellowstone',
         chainId: LIT_CHAINS['yellowstone'].chainId,
       };
+    case 'datil':
+      return {
+        chain: 'yellowstone',
+        chainId: LIT_CHAINS['yellowstone'].chainId,
+      };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
   }
@@ -1100,6 +1097,8 @@ export function getGasParamsForNetwork(network: LIT_NETWORKS_KEYS): {
     case 'datil-dev':
       return { gasLimit: 5000000 };
     case 'datil-test':
+      return { gasLimit: 5000000 };
+    case 'datil':
       return { gasLimit: 5000000 };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);
