@@ -10,8 +10,7 @@ const config = {
   setupFilesAfterEnv: ['../../jest.setup.js'],
   testEnvironment: './setup.config.js',
   globalSetup: './setup.jest.js',
-  globalTeardown: './teardown.jest.js'
+  globalTeardown: './teardown.jest.js',
 };
-
 
 module.exports = config;
