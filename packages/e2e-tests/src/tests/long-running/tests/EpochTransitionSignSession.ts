@@ -58,8 +58,9 @@ export async function testEpochTransitionHandshakeShouldReturnUniformEpoch(
   devEnv.testnet?.transitionEpochAndWait();
   // give some time for the transition to start
   await new Promise<void>((res) => {
-    setTimeout(res, 5_000);
+    setTimeout(res, 15_000);
   });
-
+  await devEnv.litNodeClient?.disconnect();
   await devEnv.litNodeClient?.connect();
+  console.log(devEnv.litNodeClient?.connectedNodes);
 }
