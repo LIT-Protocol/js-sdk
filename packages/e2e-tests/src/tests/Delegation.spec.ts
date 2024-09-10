@@ -19,8 +19,9 @@ describe('Delegation', () => {
   let bob: TinnyPerson;
 
   beforeAll(async () => {
-    //@ts-expect-error is defined
-    devEnv = global.devEnv;
+    devEnv = new TinnyEnvironment();
+    await devEnv.init(); 
+
     alice = await devEnv.createRandomPerson();
     bob = await devEnv.createRandomPerson();
   });

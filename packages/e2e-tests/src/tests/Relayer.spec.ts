@@ -14,8 +14,8 @@ try {
 describe('Relayer', () => {
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    //@ts-expect-error global defined
-    devEnv = global.devEnv;
+    devEnv = new TinnyEnvironment();
+    await devEnv.init();
   });
 
   beforeEach(() => {

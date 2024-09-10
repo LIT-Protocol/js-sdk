@@ -15,9 +15,9 @@ describe('Connections', () => {
   });
 
   let devEnv: TinnyEnvironment;
-  beforeAll(() => {
-    //@ts-expect-error defined in global
-    devEnv = global.devEnv;
+  beforeAll(async () => {
+    devEnv = new TinnyEnvironment();
+    await devEnv.init(); 
   });
 
   afterAll(async () => {

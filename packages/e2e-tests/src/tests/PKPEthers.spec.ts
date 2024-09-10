@@ -39,9 +39,10 @@ try {
 describe('PKP Ethers', () => {
   let devEnv: TinnyEnvironment;
   let alice: TinnyPerson;
+
   beforeAll(async () => {
-    //@ts-expect-error defined in global
-    devEnv = global.devEnv;
+    devEnv = new TinnyEnvironment();
+    await devEnv.init();
   });
 
   beforeEach(async () => {
