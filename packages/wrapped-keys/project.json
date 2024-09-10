@@ -11,7 +11,14 @@
         "outputPath": "dist/packages/wrapped-keys",
         "main": "packages/wrapped-keys/src/index.ts",
         "tsConfig": "packages/wrapped-keys/tsconfig.lib.json",
-        "assets": ["packages/wrapped-keys/*.md"],
+        "assets": [
+          "packages/wrapped-keys/*.md",
+          {
+            "glob": "**/*",
+            "input": "packages/wrapped-keys/src/lib/generated/litActions",
+            "output": "src/lib/generated/litActions"
+          }
+        ],
         "updateBuildableProjectDepsInPackageJson": true
       }
     },

@@ -1,6 +1,9 @@
-import { ExecuteJsResponse, JsonExecutionSdkParams } from '@lit-protocol/types';
+import { ExecuteJsResponse } from '@lit-protocol/types';
 
-import { LIT_ACTION_CID_REPOSITORY } from './constants';
+import {
+  LIT_ACTION_BUNDLED_CODE_PATH,
+  LIT_ACTION_CID_REPOSITORY,
+} from './constants';
 import { LitActionType } from './types';
 import { Network } from '../types';
 
@@ -47,4 +50,13 @@ export function postLitActionValidation(
 
 export function getLitActionCid(network: Network, actionType: LitActionType) {
   return LIT_ACTION_CID_REPOSITORY[actionType][network];
+}
+
+export function getLitActionCode(
+  network: Network,
+  actionType: LitActionType
+): string | undefined {
+  const litActionCode = LIT_ACTION_BUNDLED_CODE_PATH[actionType][network];
+
+  return litActionCode;
 }

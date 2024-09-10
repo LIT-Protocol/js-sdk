@@ -1,6 +1,6 @@
 import { NETWORK_EVM, NETWORK_SOLANA } from '../constants';
 import { generateKeyWithLitAction } from '../lit-actions-client';
-import { getLitActionCid } from '../lit-actions-client/utils';
+import { getLitActionCid, getLitActionCode } from '../lit-actions-client/utils';
 import { storePrivateKey } from '../service-client';
 import {
   GeneratePrivateKeyParams,
@@ -48,11 +48,19 @@ export async function generatePrivateKey(
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
+  const litActionCode = getLitActionCode(network, 'generateEncryptedKey');
+  if (!litActionCode) {
+    console.warn('Could not load bundled code. Using IPFS CID instead.');
+  }
+
   const { ciphertext, dataToEncryptHash, publicKey } =
     await generateKeyWithLitAction({
       ...params,
       pkpAddress,
-      litActionIpfsCid: getLitActionCid(network, 'generateEncryptedKey'),
+      litActionIpfsCid: litActionCode
+        ? undefined
+        : getLitActionCid(network, 'generateEncryptedKey'),
+      litActionCode: litActionCode ? litActionCode : undefined,
       accessControlConditions: [allowPkpAddressToDecrypt],
     });
 
