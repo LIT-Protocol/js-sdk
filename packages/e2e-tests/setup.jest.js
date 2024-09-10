@@ -10,7 +10,7 @@ module.exports = async function (globalConfig, projectConfig) {
 
   global.__SHIVA__ = new tinny.ShivaClient();
   global.__TESTNET__ = await global.__SHIVA__.startTestnetManager();
-  const state = global.__TESTNET__.pollTestnetForActive();
+  const state = await global.__TESTNET__.pollTestnetForActive();
   console.log('test net state is ', state);
   if (state === `UNKNOWN`) {
     console.log(
@@ -18,6 +18,6 @@ module.exports = async function (globalConfig, projectConfig) {
     );
     throw new Error(`Error while creating testnet, aborting test run`);
   }
-  const config = global.__TESTNET__.getTestnetConfig();
+  const config = await global.__TESTNET__.getTestnetConfig();
   console.log(config);
 };

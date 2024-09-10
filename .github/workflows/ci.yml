@@ -90,7 +90,7 @@ jobs:
       - name: End to End Tests 
         id: e2e-tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e --runInBand --testPathIgnorePatterns 'Relayer' 'Wrapped Keys'
+        run: yarn test:e2e --runInBand --testPathIgnorePatterns './src/tests/Relayer.spec.ts' './src/tests/WrappedKeys.spec.ts'
       - name: Get Container Logs
         if: always()
         run: docker logs shiva
