@@ -39,7 +39,7 @@ describe('Epoch Transition', () => {
         }
         
         expect(currentEpoch! + 1).toEqual(devEnv.litNodeClient?.currentEpochNumber);
-    });
+    }, 60 * 60 * 1_000);
 
 
     it('Validate BLS signature valid after epoch transition', async () => {
@@ -59,7 +59,7 @@ describe('Epoch Transition', () => {
         expect(session).toBeDefined();
 
         devEnv.releasePrivateKeyFromUser(alice);
-    });
+    }, 60 * 60 * 1_000);
 
 
     it('Validate BLS signature during epoch transition', async () => {
@@ -81,7 +81,7 @@ describe('Epoch Transition', () => {
         ]);
       
         expect(session).toBeDefined();
-    });
+    }, 60 * 60 * 1_000);
 
 
     it('should return same epoch id in handshake when connecting during epoch transition', async () => {
@@ -92,5 +92,5 @@ describe('Epoch Transition', () => {
         });
         await devEnv.litNodeClient?.disconnect();
         await devEnv.litNodeClient?.connect();
-    });
+    }, 60 * 60 * 1_000);
 });

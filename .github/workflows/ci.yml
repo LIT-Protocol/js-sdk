@@ -90,7 +90,7 @@ jobs:
       - name: End to End Tests 
         id: e2e-tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e --runInBand -t 'Connections' -t 'SessionSigs' -t 'PKP Ethers' -t 'Epoch Transition'
+        run: yarn test:e2e --runInBand --testPathIgnorePatterns 'Relayer' 'Wrapped Keys'
       - name: Get Container Logs
         if: always()
         run: docker logs shiva
