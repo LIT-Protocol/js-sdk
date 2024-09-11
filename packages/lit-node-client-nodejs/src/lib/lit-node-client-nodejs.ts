@@ -969,23 +969,6 @@ export class LitNodeClientNodeJs
     return signatures;
   };
 
-  /**
-   *
-   * Get a single signature
-   *
-   * @param { Array<any> } shareData from all node promises
-   * @param { string } requestId
-   *
-   * @returns { string } signature
-   *
-   */
-  getSignature = async (shareData: any[], requestId: string): Promise<any> => {
-    const signature = await combineEcdsaShares(shareData);
-    logWithRequestId(requestId, 'raw ecdsa sig', signature);
-
-    return signature;
-  };
-
   // ========== Scoped Business Logics ==========
 
   // Normalize the data to a basic array
