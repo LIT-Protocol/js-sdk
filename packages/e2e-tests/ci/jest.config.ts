@@ -13,6 +13,7 @@ const config = {
   testEnvironment: './../setup.config.js',
   globalSetup: './../setup.jest.js',
   globalTeardown: './../teardown.jest.js',
+  testMatch: "./../src/tests/*.spec.ts",
   testPathIgnorePatterns: [
     './../src/tests/Epoch',
     './../src/tests/WrappedKeys',
