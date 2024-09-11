@@ -793,6 +793,18 @@ export class LitCore {
    * @returns void
    */
   private async _syncBlockhash() {
+    const currentTime = Date.now();
+    const blockHashValidityDuration = BLOCKHASH_SYNC_INTERVAL;
+
+    if (
+      this.latestBlockhash &&
+      this.lastBlockHashRetrieved &&
+      currentTime - this.lastBlockHashRetrieved < blockHashValidityDuration
+    ) {
+      log('Blockhash is still valid. No need to sync.');
+      return;
+    }
+
     log(
       'Syncing state for new blockhash ',
       'current blockhash: ',
