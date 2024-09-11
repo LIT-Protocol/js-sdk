@@ -399,7 +399,7 @@ export class TinnyEnvironment {
         `[𐬺🧪 Tinny Environment𐬺] Failed to init() tinny ${err.message}`
       );
       console.log(err.stack);
-      process.exit(1);
+      throw err;
     }
   }
 
