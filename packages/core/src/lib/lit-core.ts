@@ -773,7 +773,12 @@ export class LitCore {
     async (): Promise<ethers.providers.JsonRpcProvider | null> => {
       for (const url of FALLBACK_RPC_URLS) {
         try {
-          const provider = new ethers.providers.JsonRpcProvider(url);
+          const provider = new ethers.providers.JsonRpcProvider({
+            url: url,
+
+            // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
+            timeout: 60000,
+          });
           await provider.getBlockNumber(); // Simple check to see if the provider is working
           return provider;
         } catch (error) {
