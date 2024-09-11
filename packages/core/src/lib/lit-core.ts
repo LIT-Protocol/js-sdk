@@ -792,39 +792,19 @@ export class LitCore {
         this.lastBlockHashRetrieved = Date.now();
         log('Done syncing state new blockhash: ', this.latestBlockhash);
 
+        // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
         if (!this.latestBlockhash) {
-          logError(
-            `Error getting latest blockhash from the nodes. Received: "${this.latestBlockhash}". Attempting to fetch blockhash manually using ethers with fallback RPC URLs...`
+          throw new Error(
+            `Error getting latest blockhash. Received: "${this.latestBlockhash}"`
           );
-          const provider = await this._getProviderWithFallback();
-
-          if (!provider) {
-            logError(
-              'All fallback RPC URLs failed. Unable to retrieve blockhash.'
-            );
-            return;
-          }
-
-          try {
-            const latestBlock = await provider.getBlock('latest');
-            this.latestBlockhash = latestBlock.hash;
-            this.lastBlockHashRetrieved = Date.now();
-            log(
-              'Successfully retrieved blockhash manually: ',
-              this.latestBlockhash
-            );
-          } catch (ethersError) {
-            logError('Failed to manually retrieve blockhash using ethers');
-          }
         }
       })
-      .catch(async (err: BlockHashErrorResponse) => {
-        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+      .catch(async (err: BlockHashErrorResponse | Error) => {
         logError(
           'Error while attempting to fetch new latestBlockhash:',
-          err.messages,
+          err instanceof Error ? err.message : err.messages,
           'Reason: ',
-          err.reason
+          err instanceof Error ? err : err.reason
         );
 
         log(
