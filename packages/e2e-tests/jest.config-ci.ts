@@ -21,5 +21,5 @@ const config = {
   ],
 };
 
-//@ts-expect-error module type exists
+
 module.exports = config;

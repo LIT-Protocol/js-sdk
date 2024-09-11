@@ -35,7 +35,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/e2e-tests"],
       "options": {
-        "jestConfig": "packages/e2e-tests/jest.config.ci.ts"
+        "jestConfig": "packages/e2e-tests/jest.config-ci.ts"
       }
     },
     "test-long-run": {
