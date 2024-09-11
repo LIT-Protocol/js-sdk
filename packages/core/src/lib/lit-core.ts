@@ -279,7 +279,10 @@ export class LitCore {
     log('[_getValidatorData] epochInfo: ', epochInfo);
     log('[_getValidatorData] minNodeCount: ', minNodeCount);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
-    log('[_getValidatorData] Staking contract address: ', stakingContract.address);
+    log(
+      '[_getValidatorData] Staking contract address: ',
+      stakingContract.address
+    );
     return {
       stakingContract,
       epochInfo,

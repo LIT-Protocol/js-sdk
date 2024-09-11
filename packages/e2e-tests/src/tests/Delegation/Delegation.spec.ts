@@ -20,7 +20,7 @@ describe('Delegation', () => {
 
   beforeAll(async () => {
     devEnv = new TinnyEnvironment();
-    await devEnv.init(); 
+    await devEnv.init();
 
     alice = await devEnv.createRandomPerson();
     bob = await devEnv.createRandomPerson();

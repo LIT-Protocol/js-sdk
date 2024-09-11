@@ -17,7 +17,7 @@ describe('Connections', () => {
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
     devEnv = new TinnyEnvironment();
-    await devEnv.init(); 
+    await devEnv.init();
   });
 
   afterAll(async () => {

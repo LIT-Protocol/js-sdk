@@ -31,6 +31,13 @@
         "runInBand": false
       }
     },
+    "test-ci": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/e2e-tests"],
+      "options": {
+        "jestConfig": "packages/e2e-tests/jest.config.ci.ts"
+      }
+    },
     "test-long-run": {
       "executor": "nx:run-script",
       "options": {
