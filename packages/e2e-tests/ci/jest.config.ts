@@ -21,5 +21,5 @@ const config = {
   ],
 };
 
-
+//@ts-ignore
 module.exports = config;
