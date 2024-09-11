@@ -16,7 +16,6 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import {
   CENTRALISATION_BY_NETWORK,
-  FALLBACK_RPC_URLS,
   HTTP,
   HTTPS,
   LIT_CURVE,
@@ -120,6 +119,16 @@ const NETWORKS_REQUIRING_SEV: string[] = [
   LitNetwork.Manzano,
   LitNetwork.DatilTest,
   LitNetwork.Datil,
+];
+
+/**
+ * Lowest latency, highest score & privacy enabled listed on https://chainlist.org/
+ */
+const FALLBACK_RPC_URLS = [
+  'https://ethereum-rpc.publicnode.com',
+  'https://eth.llamarpc.com',
+  'https://eth.drpc.org',
+  'https://eth.llamarpc.com',
 ];
 
 export class LitCore {
