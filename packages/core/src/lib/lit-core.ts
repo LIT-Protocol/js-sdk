@@ -224,6 +224,10 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
+  getRequestIds = (): Set<string> => {
+    return globalThis.logManager.LoggerIds;
+  };
+
   /**
    * Retrieves the validator data including staking contract, epoch, minNodeCount, and bootstrapUrls.
    * @returns An object containing the validator data.
