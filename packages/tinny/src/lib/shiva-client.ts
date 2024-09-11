@@ -17,7 +17,6 @@ class ShivaError extends Error {
     if (!shivaResponse.errors) {
       super(message);
       this.name = 'ShivaError';
-      this.message = message;
 
       return;
     }

@@ -6,20 +6,13 @@ describe('logger', () => {
     LogManager.clearInstance();
     lm = LogManager.Instance;
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'info').mockImplementation(() => {});
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'debug').mockImplementation(() => {});
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'timeLog').mockImplementation(() => {});
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'time').mockImplementation(() => {});
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+    jest.spyOn(console, 'info').mockImplementation(jest.fn());
+    jest.spyOn(console, 'debug').mockImplementation(jest.fn());
+    jest.spyOn(console, 'error').mockImplementation(jest.fn());
+    jest.spyOn(console, 'timeLog').mockImplementation(jest.fn());
+    jest.spyOn(console, 'time').mockImplementation(jest.fn());
+    jest.spyOn(console, 'log').mockImplementation(jest.fn());
   });
 
   it('Log Manager singleton should be defined', () => {

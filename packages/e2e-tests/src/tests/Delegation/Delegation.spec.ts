@@ -32,8 +32,7 @@ describe('Delegation', () => {
   });
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
   });
 
   afterAll(async () => {
@@ -97,9 +96,6 @@ describe('Delegation', () => {
       },
     });
 
-    devEnv.releasePrivateKeyFromUser(alice);
-    devEnv.releasePrivateKeyFromUser(bob);
-
     // -- Expected output:
     // {
     //   claims: {},
@@ -125,7 +121,7 @@ describe('Delegation', () => {
     expect(res?.signatures?.sig.publicKey).toBeDefined();
 
     // -- signatures.sig.signature must start with 0x
-    expect(res?.signatures.sig.signature.startsWith('0x')).toBeDefined();
+    expect(res?.signatures.sig.signature.startsWith('0x')).toBe(true);
   });
 
   it('PKP to EOA ExecuteJs', async () => {
@@ -140,25 +136,20 @@ describe('Delegation', () => {
     );
 
     // 5. Bob can now execute JS code using the capacity credits NFT
-    const res = await devEnv.litNodeClient
-      ?.executeJs({
-        sessionSigs: bobsSessionSigs,
-        code: `(async () => {
+    const res = await devEnv.litNodeClient?.executeJs({
+      sessionSigs: bobsSessionSigs,
+      code: `(async () => {
             const sigShare = await LitActions.signEcdsa({
               toSign: dataToSign,
               publicKey,
               sigName: "sig",
             });
           })();`,
-        jsParams: {
-          dataToSign: alice.loveLetter,
-          publicKey: bob.pkp?.publicKey,
-        },
-      })
-      .finally(() => {
-        devEnv.releasePrivateKeyFromUser(alice);
-        devEnv.releasePrivateKeyFromUser(bob);
-      });
+      jsParams: {
+        dataToSign: alice.loveLetter,
+        publicKey: bob.pkp?.publicKey,
+      },
+    });
 
     // Expected output:
     // {
@@ -203,17 +194,12 @@ describe('Delegation', () => {
     );
 
     // 5. Bob can now execute JS code using the capacity credits NFT
-    const res = await devEnv.litNodeClient
-      ?.pkpSign({
-        sessionSigs: bobsSessionSigs!,
-        toSign: alice.loveLetter,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
-        pubKey: bob.pkp?.publicKey!,
-      })
-      .finally(() => {
-        devEnv.releasePrivateKeyFromUser(alice);
-        devEnv.releasePrivateKeyFromUser(bob);
-      });
+    const res = await devEnv.litNodeClient?.pkpSign({
+      sessionSigs: bobsSessionSigs!,
+      toSign: alice.loveLetter,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+      pubKey: bob.pkp?.publicKey!,
+    });
 
     // Expected output:
     // {
