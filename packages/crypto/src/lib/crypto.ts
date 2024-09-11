@@ -457,12 +457,6 @@ export const checkSevSnpAttestation = async (
 };
 
 declare global {
-  // `var` is required for global hackery
-  // FIXME: `any` types for wasm are no bueno
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var wasmExports: any;
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var wasmECDSA: any;
   // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var LitNodeClient: any;
 }
@@ -499,11 +493,6 @@ export const verifyJwt = async ({
     );
 
   log('verifyJwt', jwt);
-
-  // verify that the wasm was loaded
-  if (!globalThis.wasmExports) {
-    log('wasmExports is not loaded.');
-  }
 
   const jwtParts = jwt.split('.');
   const signature = uint8arrayFromString(jwtParts[2], 'base64url');

@@ -9,6 +9,7 @@ on:
       - staging/**
       - feat/**
       - feature/**
+      - staging/**
 jobs:
   unit-tests:
     runs-on: warp-ubuntu-latest-x64-16x

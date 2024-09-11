@@ -134,20 +134,6 @@ export interface ILitNodeClient {
    */
   _throwNodeError(res: RejectedNodePromises, requestId: string): never;
 
-  // ========== Shares Resolvers ==========
-
-  /**
-   *
-   * Get Signature
-   *
-   * @param { Array<any> } shareData from all node promises
-   * @param { string } requestId
-   *
-   * @returns { string } signature
-   *
-   */
-  getSignature(shareData: any[], requestId: string): Promise<any>;
-
   // ========== API Calls to Nodes ==========
   sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;
 
