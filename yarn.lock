@@ -3110,17 +3110,17 @@
   resolved "https://registry.yarnpkg.com/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.2.0.tgz#353ce4a76c83fadec272ea5674ede767650762fd"
   integrity sha512-yWJKmpGE6lUURKAaIltoPIE/wrbY3TEkqQt+X0m+7fQNnAv0keydnYvbiJFP1PnMhizmIWRWOG5KLhYyc/xl+g==
 
-"@lit-protocol/accs-schemas@0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.9.tgz#28b420df66e4402abb80f84bba7125575c291ef9"
-  integrity sha512-4Y7YNvtMWAEGIjkzqy7Fdt06WLACugyP4lbURWDzdn8DODQfmdJ/RzFybJR2/ChlHgEqY+joWPMeEQHqn7QSfw==
+"@lit-protocol/accs-schemas@^0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.11.tgz#ef170f8d60c110da40770b12320565932b4b6fe7"
+  integrity sha512-TYoUaR98Xy4RQPxmrMkvssUJFcdWYrtgcRBgUreeDPCj21MVhk+/hqoUf6GGt3Fyn+Orqq/xneZV4edjHhxuqQ==
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.0.39":
-  version "0.0.39"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.39.tgz#e2483f1ef3df63bd434bcc7c00414b8f2e8d9ec5"
-  integrity sha512-zz/TaKWUqFK2n7BqwKj9PeV0px89G7dnjkRJ9BM/eri356zodd/W5d5iGQUVdaFiCYKd/cibm4004BnuMlXLeg==
+"@lit-protocol/contracts@^0.0.63":
+  version "0.0.63"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.63.tgz#8700c37df9d2422e9c97aa27871fb64de6186f6c"
+  integrity sha512-CAorNt72ybIY/g//dDeR837izNGuYQR99XwPSK2X2AJ6c+aZX1kdXCrOnxsbY40BzFrOk/dIFo+ymJ9E3qh48w==
 
 "@lit/reactive-element@^1.3.0", "@lit/reactive-element@^1.6.0":
   version "1.6.3"

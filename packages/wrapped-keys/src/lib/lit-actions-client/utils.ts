@@ -1,4 +1,4 @@
-import { ExecuteJsResponse } from '@lit-protocol/types';
+import { ExecuteJsResponse, JsonExecutionSdkParams } from '@lit-protocol/types';
 
 import { LIT_ACTION_CID_REPOSITORY } from './constants';
 import { LitActionType } from './types';

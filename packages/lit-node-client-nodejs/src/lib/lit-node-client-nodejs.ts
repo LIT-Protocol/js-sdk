@@ -19,6 +19,8 @@ import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
   AuthMethodType,
   EITHER_TYPE,
+  FALLBACK_IPFS_GATEWAYS,
+  GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
@@ -126,6 +128,7 @@ import type {
   EncryptionSignRequest,
   SigningAccessControlConditionRequest,
   JsonPKPClaimKeyRequest,
+  IpfsOptions,
 } from '@lit-protocol/types';
 
 export class LitNodeClientNodeJs
@@ -954,13 +957,48 @@ export class LitNodeClientNodeJs
 
   // ========== Scoped Business Logics ==========
 
-  // Normalize the data to a basic array
+  /**
+   * Retrieves the fallback IPFS code for a given IPFS ID.
+   *
+   * @param gatewayUrl - the gateway url.
+   * @param ipfsId - The IPFS ID.
+   * @returns The base64-encoded fallback IPFS code.
+   * @throws An error if the code retrieval fails.
+   */
+  private async _getFallbackIpfsCode(
+    gatewayUrl: string | undefined,
+    ipfsId: string
+  ) {
+    const allGateways = gatewayUrl
+      ? [gatewayUrl, ...FALLBACK_IPFS_GATEWAYS]
+      : FALLBACK_IPFS_GATEWAYS;
 
-  // TODO: executeJsWithTargettedNodes
-  // if (formattedParams.targetNodeRange) {
-  //   // FIXME: we should make this a separate function
-  //   res = await this.runOnTargetedNodes(formattedParams);
-  // }
+    log(
+      `Attempting to fetch code for IPFS ID: ${ipfsId} using fallback IPFS gateways`
+    );
+
+    for (const url of allGateways) {
+      try {
+        const response = await fetch(`${url}${ipfsId}`);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch code from IPFS gateway ${url}: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const code = await response.text();
+        const codeBase64 = Buffer.from(code).toString('base64');
+
+        return codeBase64;
+      } catch (error) {
+        console.error(`Error fetching code from IPFS gateway ${url}`);
+        // Continue to the next gateway in the array
+      }
+    }
+
+    throw new Error('All IPFS gateways failed to fetch the code.');
+  }
 
   /**
    *
@@ -1000,11 +1038,31 @@ export class LitNodeClientNodeJs
     }
 
     // Format the params
-    const formattedParams: JsonExecutionSdkParams = {
+    let formattedParams: JsonExecutionSdkParams = {
       ...params,
       ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
       ...(params.code && { code: encodeCode(params.code) }),
     };
+
+    // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
+    // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
+    // and update the params with the fetched code, removing the ipfsId afterward.
+    const overwriteCode =
+      params.ipfsOptions?.overwriteCode ||
+      GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
+
+    if (overwriteCode && params.ipfsId) {
+      const code = await this._getFallbackIpfsCode(
+        params.ipfsOptions?.gatewayUrl,
+        params.ipfsId
+      );
+
+      formattedParams = {
+        ...params,
+        code: code,
+        ipfsId: undefined,
+      };
+    }
 
     const requestId = this.getRequestId();
     // ========== Get Node Promises ==========
@@ -2166,6 +2224,26 @@ export class LitNodeClientNodeJs
           throw new Error(
             '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
+        }
+
+        // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
+        // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
+        // and update the params with the fetched code, removing the ipfsId afterward.
+        const overwriteCode =
+          params.ipfsOptions?.overwriteCode ||
+          GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
+
+        if (overwriteCode && props.litActionIpfsId) {
+          const code = await this._getFallbackIpfsCode(
+            params.ipfsOptions?.gatewayUrl,
+            props.litActionIpfsId
+          );
+
+          props = {
+            ...props,
+            litActionCode: code,
+            litActionIpfsId: undefined,
+          };
         }
 
         /**

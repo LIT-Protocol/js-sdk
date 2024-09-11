@@ -1,7 +1,7 @@
 import { AccessControlConditions } from '@lit-protocol/types';
-
 import { postLitActionValidation } from './utils';
 import { GeneratePrivateKeyParams } from '../types';
+import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 
 interface GeneratePrivateKeyLitActionParams extends GeneratePrivateKeyParams {
   pkpAddress: string;
@@ -28,6 +28,10 @@ export async function generateKeyWithLitAction({
     jsParams: {
       pkpAddress,
       accessControlConditions,
+    },
+    ipfsOptions: {
+      overwriteCode:
+        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
     },
   });
 

@@ -490,6 +490,12 @@ export interface LitActionResponseStrategy {
     responses: Record<string, string>[]
   ) => Record<string, string>;
 }
+
+export interface IpfsOptions {
+  overwriteCode?: boolean;
+  gatewayUrl?: `https://${string}/ipfs/`;
+}
+
 export interface JsonExecutionSdkParamsTargetNode
   extends JsonExecutionSdkParams {
   targetNodeRange: number;
@@ -522,6 +528,8 @@ export interface JsonExecutionSdkParams
    * Lit Action execution context
    */
   responseStrategy?: LitActionResponseStrategy;
+
+  ipfsOptions?: IpfsOptions;
 }
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
@@ -1901,6 +1909,8 @@ export interface GetPkpSessionSigs
    * sending it to the node
    */
   authMethods?: AuthMethod[];
+
+  ipfsOptions?: IpfsOptions;
 }
 
 /**
@@ -1918,7 +1928,9 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
     | (Pick<Required<LitActionSdkParams>, 'litActionIpfsId'> & {
         litActionCode?: never;
       })
-  );
+  ) & {
+    ipfsOptions?: IpfsOptions;
+  };
 
 export interface SessionKeyCache {
   value: SessionKeyPair;
