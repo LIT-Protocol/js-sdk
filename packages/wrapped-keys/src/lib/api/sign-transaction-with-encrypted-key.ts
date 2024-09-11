@@ -1,5 +1,5 @@
 import { signTransactionWithLitAction } from '../lit-actions-client';
-import { getLitActionCid, getLitActionCode } from '../lit-actions-client/utils';
+import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { fetchPrivateKey } from '../service-client';
 import { SignTransactionWithEncryptedKeyParams } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
@@ -30,16 +30,14 @@ export async function signTransactionWithEncryptedKey(
     storedKeyMetadata.pkpAddress
   );
 
-  const litActionCode = getLitActionCode(network, 'signTransaction');
-  if (!litActionCode) {
-    console.warn('Could not load bundled code. Using IPFS CID instead.');
-  }
+  const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
+    network,
+    'signTransaction'
+  );
 
   return signTransactionWithLitAction({
     ...params,
-    litActionIpfsCid: litActionCode
-      ? undefined
-      : getLitActionCid(network, 'signTransaction'),
+    litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
     litActionCode: litActionCode ? litActionCode : undefined,
     storedKeyMetadata,
     accessControlConditions: [allowPkpAddressToDecrypt],

@@ -1,5 +1,5 @@
 import { exportPrivateKeyWithLitAction } from '../lit-actions-client';
-import { getLitActionCid, getLitActionCode } from '../lit-actions-client/utils';
+import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { fetchPrivateKey } from '../service-client';
 import { ExportPrivateKeyParams, ExportPrivateKeyResult } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
@@ -29,16 +29,14 @@ export async function exportPrivateKey(
     storedKeyMetadata.pkpAddress
   );
 
-  const litActionCode = getLitActionCode(network, 'exportPrivateKey');
-  if (!litActionCode) {
-    console.warn('Could not load bundled code. Using IPFS CID instead.');
-  }
+  const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
+    network,
+    'exportPrivateKey'
+  );
 
   return exportPrivateKeyWithLitAction({
     ...params,
-    litActionIpfsCid: litActionCode
-      ? undefined
-      : getLitActionCid(network, 'exportPrivateKey'),
+    litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
     litActionCode: litActionCode ? litActionCode : undefined,
     accessControlConditions: [allowPkpAddressToDecrypt],
     pkpSessionSigs,

@@ -1,5 +1,5 @@
 import { signMessageWithLitAction } from '../lit-actions-client';
-import { getLitActionCid, getLitActionCode } from '../lit-actions-client/utils';
+import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { fetchPrivateKey } from '../service-client';
 import { SignMessageWithEncryptedKeyParams } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
@@ -31,16 +31,14 @@ export async function signMessageWithEncryptedKey(
     storedKeyMetadata.pkpAddress
   );
 
-  const litActionCode = getLitActionCode(network, 'signMessage');
-  if (!litActionCode) {
-    console.warn('Could not load bundled code. Using IPFS CID instead.');
-  }
+  const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
+    network,
+    'signMessage'
+  );
 
   return signMessageWithLitAction({
     ...params,
-    litActionIpfsCid: litActionCode
-      ? undefined
-      : getLitActionCid(network, 'signMessage'),
+    litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
     litActionCode: litActionCode ? litActionCode : undefined,
     accessControlConditions: [allowPkpAddressToDecrypt],
     pkpSessionSigs,
