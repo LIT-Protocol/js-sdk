@@ -54,7 +54,7 @@ describe('PKP Ethers', () => {
   });
 
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn(() => { return void 0;}));
   });
 
   afterAll(async () => {
@@ -759,13 +759,10 @@ const signWithAuthContext = async (
   });
 
   await pkpEthersWallet.init();
-
-  expect(
-    pkpEthersWallet.signMessage(alice.loveLetter).then((signature) => {
-      expect(signature).toBeDefined();
-      expect(signature.length).toEqual(132);
-    })
-  ).resolves.not.toThrowError();
+  const signature: string = await pkpEthersWallet.signMessage(alice.loveLetter);
+  
+  expect(signature).toBeDefined();
+  expect(signature.length).toEqual(132);
 };
 
 const ethPersonalSign = async (
