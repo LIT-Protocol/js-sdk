@@ -1,4 +1,4 @@
-import { LitCidRepository } from './types';
+import { LitActionRepository, LitCidRepository } from './types';
 import * as exportPrivateKey from '../generated/litActions/common/exportPrivateKey';
 import * as generateEncryptedEthereumPrivateKey from '../generated/litActions/ethereum/generateEncryptedEthereumPrivateKey';
 import * as signMessageWithEthereumEncryptedKey from '../generated/litActions/ethereum/signMessageWithEthereumEncryptedKey';
@@ -26,7 +26,7 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   }),
 });
 
-const LIT_ACTION_BUNDLED_CODE_PATH: LitCidRepository = Object.freeze({
+const LIT_ACTION_CODE_REPOSITORY: LitActionRepository = Object.freeze({
   signTransaction: Object.freeze({
     evm: signTransactionWithEthereumEncryptedKey.code,
     solana: signTransactionWithSolanaEncryptedKey.code,
@@ -45,4 +45,4 @@ const LIT_ACTION_BUNDLED_CODE_PATH: LitCidRepository = Object.freeze({
   }),
 });
 
-export { LIT_ACTION_BUNDLED_CODE_PATH, LIT_ACTION_CID_REPOSITORY };
+export { LIT_ACTION_CODE_REPOSITORY, LIT_ACTION_CID_REPOSITORY };

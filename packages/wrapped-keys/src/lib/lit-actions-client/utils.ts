@@ -1,7 +1,7 @@
 import { ExecuteJsResponse } from '@lit-protocol/types';
 
 import {
-  LIT_ACTION_BUNDLED_CODE_PATH,
+  LIT_ACTION_CODE_REPOSITORY,
   LIT_ACTION_CID_REPOSITORY,
 } from './constants';
 import { LitActionType } from './types';
@@ -56,7 +56,7 @@ export function getLitActionCode(
   network: Network,
   actionType: LitActionType
 ): string {
-  const litActionCode = LIT_ACTION_BUNDLED_CODE_PATH[actionType][network];
+  const litActionCode = LIT_ACTION_CODE_REPOSITORY[actionType][network];
 
   if (!litActionCode) {
     throw new Error(
