@@ -1,5 +1,5 @@
 import { exportPrivateKeyWithLitAction } from '../lit-actions-client';
-import { getLitActionCid } from '../lit-actions-client/utils';
+import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { fetchPrivateKey } from '../service-client';
 import { ExportPrivateKeyParams, ExportPrivateKeyResult } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
@@ -29,9 +29,15 @@ export async function exportPrivateKey(
     storedKeyMetadata.pkpAddress
   );
 
+  const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
+    network,
+    'exportPrivateKey'
+  );
+
   return exportPrivateKeyWithLitAction({
     ...params,
-    litActionIpfsCid: getLitActionCid(network, 'exportPrivateKey'),
+    litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
+    litActionCode: litActionCode ? litActionCode : undefined,
     accessControlConditions: [allowPkpAddressToDecrypt],
     pkpSessionSigs,
     storedKeyMetadata,

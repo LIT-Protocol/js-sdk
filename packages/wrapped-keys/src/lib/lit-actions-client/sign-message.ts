@@ -8,7 +8,8 @@ interface SignMessageWithLitActionParams
   extends SignMessageWithEncryptedKeyParams {
   accessControlConditions: AccessControlConditions;
   storedKeyMetadata: StoredKeyData;
-  litActionIpfsCid: string;
+  litActionIpfsCid?: string;
+  litActionCode?: string;
 }
 
 export async function signMessageWithLitAction(
@@ -20,6 +21,7 @@ export async function signMessageWithLitAction(
     messageToSign,
     pkpSessionSigs,
     litActionIpfsCid,
+    litActionCode,
     storedKeyMetadata,
   } = args;
 
@@ -27,6 +29,7 @@ export async function signMessageWithLitAction(
   const result = await litNodeClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
+    code: litActionCode,
     jsParams: {
       pkpAddress,
       ciphertext,
