@@ -15,6 +15,9 @@ const ensureDirectoryExistence = (filePath) => {
 const wrapIIFEInStringPlugin = {
   name: 'wrap-iife-in-string',
   setup(build) {
+    // Ensure write is set to false so our plugin will always receive outputFiles
+    build.initialOptions.write = false;
+
     build.onEnd((result) => {
       if (result.errors.length > 0) {
         console.error('Build failed with errors:', result.errors);
@@ -57,7 +60,6 @@ module.exports = {
     outdir: './src/lib/generated/litActions/solana',
     inject: ['./buffer.shim.js'],
     plugins: [wrapIIFEInStringPlugin],
-    write: false,
   });
   await esbuild.build({
     entryPoints: [
@@ -71,7 +73,6 @@ module.exports = {
     outdir: './src/lib/generated/litActions/ethereum',
     inject: ['./buffer.shim.js'],
     plugins: [wrapIIFEInStringPlugin],
-    write: false,
   });
   await esbuild.build({
     entryPoints: ['./src/lib/litActions/common/src/exportPrivateKey.js'],
@@ -81,6 +82,5 @@ module.exports = {
     outdir: './src/lib/generated/litActions/common',
     inject: ['./buffer.shim.js'],
     plugins: [wrapIIFEInStringPlugin],
-    write: false,
   });
 })();
