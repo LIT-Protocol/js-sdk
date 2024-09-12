@@ -83,13 +83,16 @@ export function getLitActionCodeOrCid(
   try {
     litActionCode = getLitActionCode(network, actionType);
   } catch (e) {
-    console.warn('Could not load bundled code. Using IPFS CID instead.', e);
+    console.warn(
+      `Missing bundled code or could not get it for action type: ${actionType} and network: ${network}. Using IPFS CID instead.`,
+      e
+    );
     litActionIpfsCid = getLitActionCid(network, actionType);
   }
 
   if (!litActionCode && !litActionIpfsCid) {
     throw new Error(
-      `Could not find Lit Action code nor IPFS CID for action type: ${actionType} and network: ${network}`
+      `Could not get Lit Action code nor IPFS CID for action type: ${actionType} and network: ${network}`
     );
   }
 
