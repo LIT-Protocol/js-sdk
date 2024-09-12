@@ -31,4 +31,3 @@ else
   # Unknown OS
   echo "Unknown operating system: $OSTYPE. sed -i might not be supported."
 fi
-´
