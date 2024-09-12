@@ -1,11 +1,11 @@
 import { LitCidRepository } from './types';
-import exportPrivateKey from '../generated/litActions/common/exportPrivateKey';
-import generateEncryptedEthereumPrivateKey from '../generated/litActions/ethereum/generateEncryptedEthereumPrivateKey';
-import signMessageWithEthereumEncryptedKey from '../generated/litActions/ethereum/signMessageWithEthereumEncryptedKey';
-import signTransactionWithEthereumEncryptedKey from '../generated/litActions/ethereum/signTransactionWithEthereumEncryptedKey';
-import generateEncryptedSolanaPrivateKey from '../generated/litActions/solana/generateEncryptedSolanaPrivateKey';
-import signMessageWithSolanaEncryptedKey from '../generated/litActions/solana/signMessageWithSolanaEncryptedKey';
-import signTransactionWithSolanaEncryptedKey from '../generated/litActions/solana/signTransactionWithSolanaEncryptedKey';
+import * as exportPrivateKey from '../generated/litActions/common/exportPrivateKey';
+import * as generateEncryptedEthereumPrivateKey from '../generated/litActions/ethereum/generateEncryptedEthereumPrivateKey';
+import * as signMessageWithEthereumEncryptedKey from '../generated/litActions/ethereum/signMessageWithEthereumEncryptedKey';
+import * as signTransactionWithEthereumEncryptedKey from '../generated/litActions/ethereum/signTransactionWithEthereumEncryptedKey';
+import * as generateEncryptedSolanaPrivateKey from '../generated/litActions/solana/generateEncryptedSolanaPrivateKey';
+import * as signMessageWithSolanaEncryptedKey from '../generated/litActions/solana/signMessageWithSolanaEncryptedKey';
+import * as signTransactionWithSolanaEncryptedKey from '../generated/litActions/solana/signTransactionWithSolanaEncryptedKey';
 
 const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   signTransaction: Object.freeze({
@@ -28,20 +28,20 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
 
 const LIT_ACTION_BUNDLED_CODE_PATH: LitCidRepository = Object.freeze({
   signTransaction: Object.freeze({
-    evm: signTransactionWithEthereumEncryptedKey,
-    solana: signTransactionWithSolanaEncryptedKey,
+    evm: signTransactionWithEthereumEncryptedKey.code,
+    solana: signTransactionWithSolanaEncryptedKey.code,
   }),
   signMessage: Object.freeze({
-    evm: signMessageWithEthereumEncryptedKey,
-    solana: signMessageWithSolanaEncryptedKey,
+    evm: signMessageWithEthereumEncryptedKey.code,
+    solana: signMessageWithSolanaEncryptedKey.code,
   }),
   generateEncryptedKey: Object.freeze({
-    evm: generateEncryptedEthereumPrivateKey,
-    solana: generateEncryptedSolanaPrivateKey,
+    evm: generateEncryptedEthereumPrivateKey.code,
+    solana: generateEncryptedSolanaPrivateKey.code,
   }),
   exportPrivateKey: Object.freeze({
-    evm: exportPrivateKey,
-    solana: exportPrivateKey,
+    evm: exportPrivateKey.code,
+    solana: exportPrivateKey.code,
   }),
 });
 
