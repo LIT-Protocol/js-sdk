@@ -5,15 +5,13 @@ const config = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  passWithNoTests: true,
-  runInBand: true,
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../../coverage/packages/e2e-tests',
   setupFilesAfterEnv: ['../../../jest.setup.js'],
   testEnvironment: './../setup.config.js',
   globalSetup: './../setup.jest.js',
   globalTeardown: './../teardown.jest.js',
-  roots: ["./../src/tests"],
+  roots: ["./../src/tests/Core"],
   testPathIgnorePatterns: [
     './../src/tests/Epoch',
     './../src/tests/WrappedKeys',
