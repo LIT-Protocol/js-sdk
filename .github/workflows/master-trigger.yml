@@ -17,4 +17,17 @@ jobs:
   unit_tests:
     uses: ./.github/workflows/ci.yml
     secrets: inherit
-    if: ${{needs.lint.outputs.result == 'success'}} 
+    needs: [lint]
+    if: ${{needs.lint.outputs.result == 'success'}}
+  all_jobs:
+    if: ${{always()}}
+    needs: [
+      lint,
+      unit_tests,
+    ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check status
+      run: |
+        echo "linter ${{needs.lint.result}}"
+        echo "tests" ${{needs.unit_tests.result}}
