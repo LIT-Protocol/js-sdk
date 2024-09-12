@@ -1,5 +1,11 @@
 name: lint
 on:
+  workflow_call:
+    outputs:
+      lint_result:
+        description: 'lint result'
+        value: ${{jobs.linter.result}}
+
   workflow_dispatch: {}
 jobs:
   linter:

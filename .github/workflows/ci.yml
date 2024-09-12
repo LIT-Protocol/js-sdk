@@ -1,5 +1,13 @@
 name: Testing
 on:
+  workflow_call:
+    outputs:
+      unit-tests:
+        description: 'unit test results'
+        value: ${{jobs.unit-tests.result}}
+      intigration-tests:
+        description: 'unit test results'
+        value: ${{jobs.integration-tests.result}}
   workflow_dispatch: {}
 
 jobs:
