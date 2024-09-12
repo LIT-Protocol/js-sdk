@@ -22,6 +22,14 @@
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
+    "build-bc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["yarn --cwd ./packages/wrapped-keys build-bc"],
+        "cwd": "."
+      },
+      "dependsOn": ["build"]
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
