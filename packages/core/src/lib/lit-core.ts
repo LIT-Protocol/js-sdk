@@ -263,24 +263,6 @@ export class LitCore {
       );
     }
 
-    // Validate stakingContract
-    if (!stakingContract) {
-      throwError({
-        message: 'stakingContract is required',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
-
-    // Validate epoch
-    if (!epochInfo.number) {
-      throwError({
-        message: 'epoch is required',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
-
     log('[_getValidatorData] epochInfo: ', epochInfo);
     log('[_getValidatorData] minNodeCount: ', minNodeCount);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);

@@ -1,4 +1,3 @@
-import { LIT_NETWORK_VALUES } from './constants';
 import {
   cayenne,
   manzano,
@@ -7,6 +6,8 @@ import {
   datilTest,
   datil,
 } from '@lit-protocol/contracts';
+
+import { LIT_NETWORK_VALUES } from './constants';
 
 /**
  * Mapping of network context by network value.
@@ -57,5 +58,4 @@ export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
   'datil-test': false,
   datil: true, // <-- this is the only one that is true. To be re-evaluated in the future.
   custom: false,
-  localhost: false,
 };
