@@ -12,6 +12,7 @@ jobs:
     uses: ./.github/workflows/list-changed-files.yml
     secrets: inherit
   lint:
+    needs: [list_changed_files_and_trigger_workflows]
     uses: ./.github/workflows/lint.yml
     secrets: inherit
   tests:
