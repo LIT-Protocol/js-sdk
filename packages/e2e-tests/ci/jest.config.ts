@@ -11,7 +11,7 @@ const config = {
   testEnvironment: './../setup.config.js',
   globalSetup: './../setup.jest.js',
   globalTeardown: './../teardown.jest.js',
-  roots: ["./../src/tests/Core"],
+  roots: ['./../src/tests/Core'],
   testPathIgnorePatterns: [
     './../src/tests/Epoch',
     './../src/tests/WrappedKeys',
