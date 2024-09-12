@@ -1,0 +1,19 @@
+name: master-trigger
+on:
+  pull_request:
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  list_changed_files_and_trigger_workflows:
+    uses: ./.github/workflows/list-changed-files.yml
+    secrets: inherit
+  lint:
+    uses: ./.github/workflows/lint.yml
+    secrets: inherit
+  unit_tests:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit

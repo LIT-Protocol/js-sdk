@@ -1,14 +1,7 @@
 name: Testing
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-      - staging/**
-      - feat/**
-      - feature/**
+  workflow_dispatch: {}
+
 jobs:
   unit-tests:
     runs-on: warp-ubuntu-latest-x64-16x
