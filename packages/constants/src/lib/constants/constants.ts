@@ -616,6 +616,74 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  fuse: {
+    contractAddress: null,
+    chainId: 122,
+    name: 'Fuse',
+    symbol: 'FUSE',
+    decimals: 18,
+    rpcUrls: ['https://rpc.fuse.io/'],
+    blockExplorerUrls: ['https://explorer.fuse.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  campNetwork: {
+    contractAddress: null,
+    chainId: 325000,
+    name: 'Camp Network',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'],
+    blockExplorerUrls: [
+      'https://explorer.camp-network-testnet.gelato.digital/',
+    ],
+    type: null,
+    vmType: 'EVM',
+  },
+  vanar: {
+    contractAddress: null,
+    chainId: 78600,
+    name: 'Vanar Vanguard',
+    symbol: 'VANRY',
+    decimals: 18,
+    rpcUrls: ['https://rpc-vanguard.vanarchain.com'],
+    blockExplorerUrls: ['https://explorer-vanguard.vanarchain.com'],
+    type: null,
+    vmType: 'EVM',
+  },
+  lisk: {
+    contractAddress: null,
+    chainId: 1135,
+    name: 'Lisk',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://lisk.drpc.org'],
+    blockExplorerUrls: ['https://blockscout.lisk.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  chilizMainnet: {
+    contractAddress: null,
+    chainId: 88888,
+    name: 'Chiliz Mainnet',
+    symbol: 'CHZ',
+    decimals: 18,
+    rpcUrls: ['https://rpc.ankr.com/chiliz'],
+    blockExplorerUrls: ['https://chiliscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  chilizTestnet: {
+    contractAddress: null,
+    chainId: 88882,
+    name: 'Chiliz Spicy Testnet',
+    symbol: 'CHZ',
+    decimals: 18,
+    rpcUrls: ['https://spicy-rpc.chiliz.com/'],
+    blockExplorerUrls: ['https://testnet.chiliscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**
@@ -1255,3 +1323,8 @@ export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
  * See {@link LOG_LEVEL}
  */
 export const LogLevel = LOG_LEVEL;
+
+export const FALLBACK_IPFS_GATEWAYS = [
+  'https://flk-ipfs.io/ipfs/',
+  'https://litprotocol.mypinata.cloud/ipfs/',
+];

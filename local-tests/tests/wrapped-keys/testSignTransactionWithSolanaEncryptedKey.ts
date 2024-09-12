@@ -23,6 +23,13 @@ const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 export const testSignTransactionWithSolanaEncryptedKey = async (
   devEnv: TinnyEnvironment
 ) => {
+  /**
+   * The commented code tests the following. We're commenting it as Solana heavily rate limits its Air Dropping
+   * 1. Importing with the actual Solana publicKey
+   * 2. Requesting a Solana Airdrop on devnet
+   * 3. Setting broadcast as true so that the Lit Action returns the transaction signature which can be used to confirm the tx
+   * 4. Checking the status of the tx as well as confirming it
+   */
   const alice = await devEnv.createRandomPerson();
 
   try {
@@ -35,15 +42,29 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
 
     const solanaKeypair = Keypair.generate();
     const privateKey = Buffer.from(solanaKeypair.secretKey).toString('hex');
+    // const publicKey = solanaKeypair.publicKey;
+    // console.log("publicKey");
+    // console.log(publicKey); // https://explorer.solana.com/address/jnu7wE8XMWXDmghQuVUZUUtQ1HFRkn8mwoquVif3e8q?cluster=devnet
 
     const { pkpAddress, id } = await importPrivateKey({
       pkpSessionSigs,
       privateKey,
       litNodeClient: devEnv.litNodeClient,
       publicKey: '0xdeadbeef',
+      // publicKey: publicKey.toBase58(),
       keyType: 'K256',
       memo: 'Test key',
     });
+
+    const solanaConnection = new Connection(
+      clusterApiUrl('devnet'),
+      'confirmed'
+    );
+
+    // Request Solana Airdrop
+    // const balance = await solanaConnection.getBalance(solanaKeypair.publicKey);
+    // console.log("balance- ", balance); // Should be 0, in fact if we get the balance right after the Air Drop it will also be 0 unless we wait. We're skipping the balance confirmation
+    // await solanaConnection.requestAirdrop(solanaKeypair.publicKey, 1000000000);
 
     const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
     if (pkpAddress !== alicePkpAddress) {
@@ -69,10 +90,6 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
     );
     solanaTransaction.feePayer = solanaKeypair.publicKey;
 
-    const solanaConnection = new Connection(
-      clusterApiUrl('devnet'),
-      'confirmed'
-    );
     const { blockhash } = await solanaConnection.getLatestBlockhash();
     solanaTransaction.recentBlockhash = blockhash;
 
@@ -93,9 +110,20 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
       network: 'solana',
       unsignedTransaction,
       broadcast: false,
+      // broadcast: true,
       litNodeClient: devEnv.litNodeClient,
       id,
     });
+
+    // The following Explorer link show that the imported Solana wallet was sent an Air Drop and then broadcasted a tx from within the Lit Action
+    // https://explorer.solana.com/address/jnu7wE8XMWXDmghQuVUZUUtQ1HFRkn8mwoquVif3e8q?cluster=devnet
+
+    // Transaction Signature upon broadcast from `sendRawTransaction()`. We use this below to check the status of the tx and check whether it's confirmed.
+    // console.log(signedTx); // 5YEthLprbhk5Zwn47YU7qZW6qZEFFhJTEK37B53vLLzGNXis436SLk5vYD7QQK7LuERtKunuSuxdwTYkS48Bb1Vf
+    // const status = await solanaConnection.getSignatureStatus(signedTx);
+    // console.log(status); // { context: { apiVersion: '2.0.5', slot: 321490377 }, value: { confirmationStatus: 'confirmed', confirmations: 0, err: null, slot: 321490377, status: { Ok: null } } }
+    // const confirmation = await solanaConnection.confirmTransaction(signedTx);
+    // console.log(confirmation); // { context: { slot: 321490379 }, value: { err: null } }
 
     const signatureBuffer = Buffer.from(signedTx, 'base64');
     solanaTransaction.addSignature(solanaKeypair.publicKey, signatureBuffer);

@@ -10,6 +10,7 @@ import {
   SerializedTransaction,
   StoredKeyData,
 } from '../types';
+import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 
 interface SignTransactionWithLitActionParams {
   litNodeClient: ILitNodeClient;
@@ -40,6 +41,10 @@ export async function signTransactionWithLitAction({
       unsignedTransaction,
       broadcast,
       accessControlConditions,
+    },
+    ipfsOptions: {
+      overwriteCode:
+        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
     },
   });
 
