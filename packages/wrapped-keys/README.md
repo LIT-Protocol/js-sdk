@@ -6,6 +6,7 @@ This submodule is used for Wrapped Keys which allows you to import any existing 
 
 ```
 yarn add @lit-protocol/wrapped-keys
+yarn add @lit-protocol/wrapped-keys-bc # version with lit actions code in the bundle
 ```
 
 ### Vanilla JS (UMD)
@@ -16,3 +17,6 @@ yarn add @lit-protocol/wrapped-keys
   console.log(LitJsSdk_wrappedKeys);
 </script>
 ```
+
+### Lit Actions Code
+This package outputs two bundles. The light-one one that uses IPFS CIDs to indicate the Lit Actions involved and another one that includes their code and sends that to the nodes instead of the CID.
