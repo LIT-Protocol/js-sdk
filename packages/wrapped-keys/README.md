@@ -19,4 +19,5 @@ yarn add @lit-protocol/wrapped-keys-bc # version with lit actions code in the bu
 ```
 
 ### Lit Actions Code
+
 This package outputs two bundles. The light-one one that uses IPFS CIDs to indicate the Lit Actions involved and another one that includes their code and sends that to the nodes instead of the CID.
