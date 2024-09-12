@@ -687,11 +687,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
 };
 
 /**
- * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['yellowstone']` for the new Chronicle Yellowstone Testnet (Jul 2024). (Updated to use `yellowstone` chain instead 22 July 2024)
- */
-export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
-
-/**
  * Object containing information to submit to Metamask
  */
 export const METAMASK_CHAIN_INFO = {
@@ -727,12 +722,6 @@ export const METAMASK_CHAIN_INFO = {
     iconUrls: ['future'],
   },
 };
-/**
- * @deprecated Will be removed - Use METAMASK_CHAIN_INFO instead
- * Alias for {@link METAMASK_CHAIN_INFO}. Added for backwards compatibility.
- * See {@link METAMASK_CHAIN_INFO}
- */
-export const metamaskChainInfo = METAMASK_CHAIN_INFO;
 
 /**
  * Constants representing the available LIT RPC endpoints.
@@ -769,16 +758,12 @@ export const LIT_NETWORK = {
   Datil: 'datil',
   Custom: 'custom',
 } as const;
-/**
- * @deprecated Will be removed. - Use LIT_NETWORK instead
- * Alias for LIT_NETWORK. Added for backwards compatibility.
- * See {@link LIT_NETWORK}
- */
-export const LitNetwork = LIT_NETWORK;
+
 /**
  * The type representing the keys of the LIT_NETWORK object.
  */
 export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
+
 /**
  * The type representing the values of the LIT_NETWORK object.
  * This should replicate LIT_NETWORKS_KEYS in types package
@@ -820,15 +805,15 @@ export const RELAYER_URL_BY_NETWORK: {
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
-  typeof metamaskChainInfo.chronicle | typeof metamaskChainInfo.yellowstone
+  typeof METAMASK_CHAIN_INFO.chronicle | typeof METAMASK_CHAIN_INFO.yellowstone
 > = {
-  cayenne: metamaskChainInfo.chronicle,
-  manzano: metamaskChainInfo.chronicle,
-  habanero: metamaskChainInfo.chronicle,
-  'datil-dev': metamaskChainInfo.yellowstone,
-  'datil-test': metamaskChainInfo.yellowstone,
-  datil: metamaskChainInfo.yellowstone,
-  custom: metamaskChainInfo.yellowstone,
+  cayenne: METAMASK_CHAIN_INFO.chronicle,
+  manzano: METAMASK_CHAIN_INFO.chronicle,
+  habanero: METAMASK_CHAIN_INFO.chronicle,
+  'datil-dev': METAMASK_CHAIN_INFO.yellowstone,
+  'datil-test': METAMASK_CHAIN_INFO.yellowstone,
+  datil: METAMASK_CHAIN_INFO.yellowstone,
+  custom: METAMASK_CHAIN_INFO.yellowstone,
 };
 
 export const HTTP = 'http://';
@@ -1042,32 +1027,6 @@ export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
 
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Cayenne instead
- */
-export const RELAY_URL_CAYENNE =
-  'https://relayer-server-staging-cayenne.getlit.dev';
-
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Habanero instead
- */
-export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
-
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Manzano instead
- */
-export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
-
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilDev instead
- */
-export const RELAY_URL_DATIL_DEV = 'https://datil-dev-relayer.getlit.dev';
-
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilTest instead
- */
-export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
-
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
@@ -1087,6 +1046,7 @@ export const LIT_CURVE = {
   EcdsaCaitSith: 'ECDSA_CAIT_SITH', // Legacy alias of K256
   EcdsaCAITSITHP256: 'EcdsaCaitSithP256',
 } as const;
+
 export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
 // This should replicate SigShare.sigType in types package
 export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
@@ -1114,15 +1074,10 @@ export const AUTH_METHOD_TYPE = {
   StytchWhatsAppFactorOtp: 12,
   StytchTotpFactorOtp: 13,
 } as const;
+
 export type AUTH_METHOD_TYPE_TYPE = keyof typeof AUTH_METHOD_TYPE;
 export type AUTH_METHOD_TYPE_VALUES =
   (typeof AUTH_METHOD_TYPE)[keyof typeof AUTH_METHOD_TYPE];
-/**
- * @deprecated Will be removed - Use AUTH_METHOD_TYPE instead
- * Alias for AUTH_METHOD_TYPE. Added for backwards compatibility.
- * See {@link AUTH_METHOD_TYPE}
- */
-export const AuthMethodType = AUTH_METHOD_TYPE;
 
 // ========== Supported PKP Auth Method Scopes ==========
 export const AUTH_METHOD_SCOPE = {
@@ -1130,16 +1085,10 @@ export const AUTH_METHOD_SCOPE = {
   SignAnything: 1,
   PersonalSign: 2,
 } as const;
+
 export type AUTH_METHOD_SCOPE_TYPE = keyof typeof AUTH_METHOD_SCOPE;
 export type AUTH_METHOD_SCOPE_VALUES =
   (typeof AUTH_METHOD_SCOPE)[keyof typeof AUTH_METHOD_SCOPE];
-
-/**
- * @deprecated Will be removed - Use AUTH_METHOD_SCOPE instead
- * Alias for AUTH_METHOD_SCOPE. Added for backwards compatibility.
- * See {@link AUTH_METHOD_SCOPE}
- */
-export const AuthMethodScope = AUTH_METHOD_SCOPE;
 
 // ========== Supported Provider Types ==========
 export const PROVIDER_TYPE = {
@@ -1154,15 +1103,10 @@ export const PROVIDER_TYPE = {
   StytchWhatsAppFactorOtp: 'stytchWhatsAppFactorOtp',
   StytchTotpFactor: 'stytchTotpFactor',
 } as const;
+
 export type PROVIDER_TYPE_TYPE = keyof typeof PROVIDER_TYPE;
 export type PROVIDER_TYPE_VALUES =
   (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
-/**
- * @deprecated Will be removed - Use PROVIDER_TYPE instead
- * Alias for PROVIDER_TYPE. Added for backwards compatibility.
- * See {@link PROVIDER_TYPE}
- */
-export const ProviderType = PROVIDER_TYPE;
 
 // ========== Supported Staking States ==========
 export const STAKING_STATES = {
@@ -1173,15 +1117,10 @@ export const STAKING_STATES = {
   Paused: 4,
   Restore: 5,
 } as const;
+
 export type STAKING_STATES_TYPE = keyof typeof STAKING_STATES;
 export type STAKING_STATES_VALUES =
   (typeof STAKING_STATES)[keyof typeof STAKING_STATES];
-/**
- * @deprecated Will be removed - Use STAKING_STATES instead
- * Alias for STAKING_STATES. Added for backwards compatibility.
- * See {@link STAKING_STATES}
- */
-export const StakingStates = STAKING_STATES;
 
 // ========== Relay Auth Status ==========
 export const RELAY_AUTH_STATUS = {
@@ -1189,15 +1128,10 @@ export const RELAY_AUTH_STATUS = {
   Succeeded: 'Succeeded',
   Failed: 'Failed',
 } as const;
+
 export type RELAY_AUTH_STATUS_TYPE = keyof typeof RELAY_AUTH_STATUS;
 export type RELAY_AUTH_STATUS_VALUES =
   (typeof RELAY_AUTH_STATUS)[keyof typeof RELAY_AUTH_STATUS];
-/**
- * @deprecated Will be removed - Use RELAY_AUTH_STATUS instead
- * Alias for RELAY_AUTH_STATUS. Added for backwards compatibility.
- * See {@link RELAY_AUTH_STATUS}
- */
-export const RelayAuthStatus = RELAY_AUTH_STATUS;
 
 /**
  * Prefixes used for identifying various LIT resources.
@@ -1214,12 +1148,6 @@ export type LIT_RESOURCE_PREFIX_TYPE = keyof typeof LIT_RESOURCE_PREFIX;
 // This should mimic LitResourcePrefix in types package
 export type LIT_RESOURCE_PREFIX_VALUES =
   (typeof LIT_RESOURCE_PREFIX)[keyof typeof LIT_RESOURCE_PREFIX];
-/**
- * @deprecated Will be removed - Use LIT_RESOURCE_PREFIX instead
- * Alias for LIT_RESOURCE_PREFIX. Added for backwards compatibility.
- * See {@link LIT_RESOURCE_PREFIX}
- */
-export const LitResourcePrefix = LIT_RESOURCE_PREFIX;
 
 /**
  * User-facing abilities that can be granted to a session.
@@ -1258,15 +1186,10 @@ export const LIT_ABILITY = {
    */
   LitActionExecution: 'lit-action-execution',
 } as const;
+
 export type LIT_ABILITY_TYPE = keyof typeof LIT_ABILITY;
 // This should replicate LitAbility in types package
 export type LIT_ABILITY_VALUES = (typeof LIT_ABILITY)[keyof typeof LIT_ABILITY];
-/**
- * @deprecated Will be removed - Use LIT_ABILITY instead
- * Alias for LIT_ABILITY. Added for backwards compatibility.
- * See {@link LIT_ABILITY}
- */
-export const LitAbility = LIT_ABILITY;
 
 /**
  * LIT specific abilities mapped into the Recap specific terminology
@@ -1278,29 +1201,19 @@ export const LIT_RECAP_ABILITY = {
   Auth: 'Auth',
   Execution: 'Execution',
 } as const;
+
 export type LIT_RECAP_ABILITY_TYPE = keyof typeof LIT_RECAP_ABILITY;
 export type LIT_RECAP_ABILITY_VALUES =
   (typeof LIT_RECAP_ABILITY)[keyof typeof LIT_RECAP_ABILITY];
-/**
- * @deprecated Will be removed - Use LIT_RECAP_ABILITY instead
- * Alias for LIT_RECAP_ABILITY. Added for backwards compatibility.
- * See {@link LIT_RECAP_ABILITY}
- */
-export const LitRecapAbility = LIT_RECAP_ABILITY;
 
 export const LIT_NAMESPACE = {
   Auth: 'Auth',
   Threshold: 'Threshold',
 } as const;
+
 export type LIT_NAMESPACE_TYPE = keyof typeof LIT_NAMESPACE;
 export type LIT_NAMESPACE_VALUES =
   (typeof LIT_NAMESPACE)[keyof typeof LIT_NAMESPACE];
-/**
- * @deprecated Will be removed - Use LIT_NAMESPACE instead
- * Alias for LIT_NAMESPACE. Added for backwards compatibility.
- * See {@link LIT_NAMESPACE}
- */
-export const LitNamespace = LIT_NAMESPACE;
 
 /**
  * SDK Logger levels
@@ -1315,14 +1228,9 @@ export const LOG_LEVEL = {
   TIMING_END: 6,
   OFF: -1,
 } as const;
+
 export type LOG_LEVEL_TYPE = keyof typeof LOG_LEVEL;
 export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
-/**
- * @deprecated Will be removed - Use LOG_LEVEL instead
- * Alias for LOG_LEVEL. Added for backwards compatibility.
- * See {@link LOG_LEVEL}
- */
-export const LogLevel = LOG_LEVEL;
 
 export const FALLBACK_IPFS_GATEWAYS = [
   'https://flk-ipfs.io/ipfs/',
