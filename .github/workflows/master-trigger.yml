@@ -14,7 +14,7 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yml
     secrets: inherit
-  unit_tests:
+  tests:
     uses: ./.github/workflows/ci.yml
     secrets: inherit
     needs: [lint]
@@ -22,7 +22,7 @@ jobs:
     if: ${{ always() }}
     needs: [
       lint,
-      unit_tests,
+      tests,
     ]
     runs-on: ubuntu-latest
     steps:
