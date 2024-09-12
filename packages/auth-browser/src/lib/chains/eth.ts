@@ -542,14 +542,6 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 4. case: (current chain id is NOT equal to selected chain) AND is set to switch chain
   if (currentChainIdOrError.result !== selectedChainId && switchChain) {
-    // -- validate the provider type
-    // if (web3.provider instanceof walletProvider) {
-    //   return throwError({
-    //     message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-    //     error: LIT_ERROR.WRONG_NETWORK_EXCEPTION,
-    //   });
-    // }
-
     const provider = web3.provider as any;
 
     // -- (case) if able to switch chain id

@@ -41,6 +41,8 @@ import {
   InvalidParamType,
   UnknownError,
   UnsupportedMethodError,
+  UnsupportedChainException,
+  LIT_CHAINS,
 } from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
@@ -318,13 +320,16 @@ export class PKPEthersWallet
       // @ts-ignore
       (name: string) => {
         if (this.provider == null) {
-          logger.throwError(
-            'cannot resolve ENS names without a provider',
-            Logger.errors.UNSUPPORTED_OPERATION,
+          throw new UnsupportedChainException(
             {
-              operation: 'resolveName',
-              value: name,
-            }
+              info: {
+                operation: 'resolveName',
+                value: name,
+                domain,
+              },
+            },
+            `cannot resolve ENS names without a provider`,
+            Object.keys(LIT_CHAINS)
           );
         }
         return this.provider.resolveName(name);
