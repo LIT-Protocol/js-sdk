@@ -6,7 +6,7 @@ on:
         description: 'unit test results'
         value: ${{jobs.unit-tests.result}}
       intigration-tests:
-        description: 'unit test results'
+        description: 'intigration test results'
         value: ${{jobs.integration-tests.result}}
   workflow_dispatch: {}
 
@@ -40,6 +40,10 @@ jobs:
     timeout-minutes: 30
     needs: [unit-tests]
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Install Shiva
         uses: ./.github/workflows/use-shiva.yml
         with:
