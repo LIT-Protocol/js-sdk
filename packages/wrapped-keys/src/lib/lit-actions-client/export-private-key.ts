@@ -2,6 +2,7 @@ import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
 import { ExportPrivateKeyParams, StoredKeyData } from '../types';
+import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 
 interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
   accessControlConditions: AccessControlConditions;
@@ -34,6 +35,10 @@ export async function exportPrivateKeyWithLitAction(
       ciphertext,
       dataToEncryptHash,
       accessControlConditions,
+    },
+    ipfsOptions: {
+      overwriteCode:
+        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
     },
   });
 

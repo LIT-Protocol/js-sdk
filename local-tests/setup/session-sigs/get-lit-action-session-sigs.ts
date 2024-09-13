@@ -1,8 +1,9 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitResourceAbilityRequest } from '@lit-protocol/types';
 import {
-  LIT_ABILITY,
   CENTRALISATION_BY_NETWORK,
+  GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
+  LIT_ABILITY,
 } from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
@@ -145,6 +146,12 @@ export const getInvalidLitActionSessionSigs = async (
       publicKey: alice.authMethodOwnedPkp.publicKey,
       sigName: 'unified-auth-sig',
     },
+    ipfsOptions: {
+      overwriteCode:
+        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[
+          devEnv.litNodeClient.config.litNetwork
+        ],
+    },
   });
 
   return litActionSessionSigs;
@@ -167,6 +174,12 @@ export const getInvalidLitActionIpfsSessionSigs = async (
     jsParams: {
       publicKey: alice.authMethodOwnedPkp.publicKey,
       sigName: 'unified-auth-sig',
+    },
+    ipfsOptions: {
+      overwriteCode:
+        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[
+          devEnv.litNodeClient.config.litNetwork
+        ],
     },
   });
 

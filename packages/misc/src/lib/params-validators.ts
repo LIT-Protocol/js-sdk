@@ -21,15 +21,12 @@ import {
   AuthMethod,
   DecryptFromJsonProps,
   DecryptRequest,
-  DecryptZipFileWithMetadataProps,
-  EncryptFileAndZipWithMetadataProps,
   EncryptUint8ArrayRequest,
   EncryptFileRequest,
   EncryptRequest,
   EncryptStringRequest,
   EncryptToJsonPayload,
   EncryptToJsonProps,
-  EncryptZipRequest,
   EvmContractConditions,
   GetSignedTokenRequest,
   JsonExecutionSdkParams,
@@ -89,32 +86,9 @@ export const paramsValidators: Record<
     new StringValidator('encryptString', params.dataToEncrypt, 'dataToEncrypt'),
   ],
 
-  encryptZip: (params: EncryptZipRequest) => [
-    new AccessControlConditionsValidator('encryptZip', params),
-  ],
-
-  zipAndEncryptString: (params: EncryptStringRequest) => [
-    new StringValidator('zipAndEncryptString', params.dataToEncrypt),
-  ],
-
   encryptToJson: (params: EncryptToJsonProps) => [
     new AccessControlConditionsValidator('encryptToJson', params),
     new EncryptToJsonValidator('encryptToJson', params),
-  ],
-
-  encryptFileAndZipWithMetadata: (
-    params: EncryptFileAndZipWithMetadataProps
-  ) => [
-    new AccessControlConditionsValidator(
-      'encryptFileAndZipWithMetadata',
-      params
-    ),
-    new FileValidator('encryptFileAndZipWithMetadata', params.file),
-    new StringValidator(
-      'encryptFileAndZipWithMetadata',
-      params.readme,
-      'readme'
-    ),
   ],
 
   // ========== REQUIRED AUTH MATERIAL VALIDATORS ==========
@@ -127,11 +101,6 @@ export const paramsValidators: Record<
     new AccessControlConditionsValidator('decrypt', params),
     new AuthMaterialValidator('decrypt', params, true),
     new StringValidator('decrypt', params.ciphertext, 'ciphertext'),
-  ],
-
-  decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => [
-    new AuthMaterialValidator('decryptZipFileWithMetadata', params),
-    new FileValidator('decryptZipFileWithMetadata', params.file),
   ],
 
   decryptFromJson: (params: DecryptFromJsonProps) => [

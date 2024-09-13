@@ -17,7 +17,13 @@ const deprecated = depd('lit-js-sdk:constants:mappers');
  * Mapping of network context by network value.
  */
 export const NETWORK_CONTEXT_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: any;
+  [key in LIT_NETWORK_VALUES]:
+    | typeof cayenne
+    | typeof manzano
+    | typeof habanero
+    | typeof datilDev
+    | typeof datilTest
+    | typeof datil;
 } = {
   cayenne: cayenne,
   manzano: manzano,
@@ -28,35 +34,16 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
 
   // just use datil dev abis for custom
   custom: datilDev,
-};
+} as const;
 
-/**
- * @deprecated Will be removed in version 7.x.
- */
-const GeneralWorkerUrlByNetwork: {
-  [key in Exclude<LIT_NETWORK_VALUES, 'datil'>]: string;
+export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
+  [key in LIT_NETWORK_VALUES]: boolean;
 } = {
-  cayenne: 'https://apis.getlit.dev/cayenne/contracts',
-  manzano: 'https://apis.getlit.dev/manzano/contracts',
-  habanero: 'https://apis.getlit.dev/habanero/contracts',
-  'datil-dev': 'https://apis.getlit.dev/datil-dev/contracts',
-  'datil-test': 'https://apis.getlit.dev/datil-test/contracts',
-
-  // just use cayenne abis for custom
-  custom: 'https://apis.getlit.dev/cayenne/contracts',
+  cayenne: false,
+  manzano: false,
+  habanero: true,
+  'datil-dev': false,
+  'datil-test': false,
+  datil: true, // <-- this is the only one that is true. To be re-evaluated in the future.
+  custom: false,
 };
-
-/**
- * @deprecated Will be removed in version 7.x.
- */
-export const GENERAL_WORKER_URL_BY_NETWORK = new Proxy(
-  GeneralWorkerUrlByNetwork,
-  {
-    get(target, prop, receiver) {
-      deprecated(
-        'GeneralWorkerUrlByNetwork is deprecated and will be removed in a future version. Use NETWORK_CONTEXT_BY_NETWORK instead.'
-      );
-      return Reflect.get(target, prop, receiver);
-    },
-  }
-);

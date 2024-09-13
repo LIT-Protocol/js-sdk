@@ -27,7 +27,6 @@ import { testUsePkpSessionSigsToEncryptDecryptString } from './tests/testUsePkpS
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
 import { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionCodeToGenerateSessionSigs';
 import { testUseEoaSessionSigsToEncryptDecryptFile } from './tests/testUseEoaSessionSigsToEncryptDecryptFile';
-import { testUseEoaSessionSigsToEncryptDecryptZip } from './tests/testUseEoaSessionSigsToEncryptDecryptZip';
 import { testUsePkpSessionSigsToExecuteJsSigningInParallel } from './tests/testUsePkpSessionSigsToExecuteJsSigningInParallel';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel';
 import { testUsePkpSessionSigsToExecuteJsClaimKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimKeys';
@@ -35,13 +34,11 @@ import { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testU
 import { testUsePkpSessionSigsToExecuteJsJsonResponse } from './tests/testUsePkpSessionSigsToExecuteJsJsonResponse';
 import { testUsePkpSessionSigsToExecuteJsConsoleLog } from './tests/testUsePkpSessionSigsToExecuteJsConsoleLog';
 import { testUsePkpSessionSigsToEncryptDecryptFile } from './tests/testUsePkpSessionSigsToEncryptDecryptFile';
-import { testUsePkpSessionSigsToEncryptDecryptZip } from './tests/testUsePkpSessionSigsToEncryptDecryptZip';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
-import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
 import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
@@ -164,7 +161,6 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
     testUseEoaSessionSigsToEncryptDecryptString,
     testUseEoaSessionSigsToEncryptDecryptUint8Array,
     testUseEoaSessionSigsToEncryptDecryptFile,
-    testUseEoaSessionSigsToEncryptDecryptZip,
   };
 
   const pkpSessionSigsTests = {
@@ -177,7 +173,6 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
     testUsePkpSessionSigsToExecuteJsConsoleLog,
     testUsePkpSessionSigsToEncryptDecryptString,
     testUsePkpSessionSigsToEncryptDecryptFile,
-    testUsePkpSessionSigsToEncryptDecryptZip,
   };
 
   const litActionSessionSigsTests = {
@@ -190,7 +185,6 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile,
-    testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip,
 
     // -- invalid cases
     testUseInvalidLitActionIpfsCodeToGenerateSessionSigs,

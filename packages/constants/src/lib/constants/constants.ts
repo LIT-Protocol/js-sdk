@@ -620,23 +620,75 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-};
-
-/**
- * @deprecated Will be removed in version 7.x. - This is using the OLD chornicle testnet. `LIT_CHAINS['chronicleTestnet']` instead, or use `LIT_CHAINS['yellowstone']` for the new Chronicle Yellowstone Testnet (Jul 2024). (Updated to use `yellowstone` chain instead 22 July 2024)
- */
-const LIT_CHAIN_RPC_URL_TARGET = {
-  url: LIT_CHAINS['chronicleTestnet'].rpcUrls[0],
-};
-
-export const LIT_CHAIN_RPC_URL = new Proxy(LIT_CHAIN_RPC_URL_TARGET, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LIT_CHAIN_RPC_URL is deprecated and will be removed in a future version. Use LIT_CHAINS["chronicleTestnet"].rpcUrls[0] instead or use LIT_CHAINS["yellowstone"].rpcUrls[0] for the new Chronicle Yellowstone Testnet.'
-    );
-    return Reflect.get(target, prop, receiver);
+  fuse: {
+    contractAddress: null,
+    chainId: 122,
+    name: 'Fuse',
+    symbol: 'FUSE',
+    decimals: 18,
+    rpcUrls: ['https://rpc.fuse.io/'],
+    blockExplorerUrls: ['https://explorer.fuse.io/'],
+    type: null,
+    vmType: 'EVM',
   },
-}).url;
+  campNetwork: {
+    contractAddress: null,
+    chainId: 325000,
+    name: 'Camp Network',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'],
+    blockExplorerUrls: [
+      'https://explorer.camp-network-testnet.gelato.digital/',
+    ],
+    type: null,
+    vmType: 'EVM',
+  },
+  vanar: {
+    contractAddress: null,
+    chainId: 78600,
+    name: 'Vanar Vanguard',
+    symbol: 'VANRY',
+    decimals: 18,
+    rpcUrls: ['https://rpc-vanguard.vanarchain.com'],
+    blockExplorerUrls: ['https://explorer-vanguard.vanarchain.com'],
+    type: null,
+    vmType: 'EVM',
+  },
+  lisk: {
+    contractAddress: null,
+    chainId: 1135,
+    name: 'Lisk',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://lisk.drpc.org'],
+    blockExplorerUrls: ['https://blockscout.lisk.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  chilizMainnet: {
+    contractAddress: null,
+    chainId: 88888,
+    name: 'Chiliz Mainnet',
+    symbol: 'CHZ',
+    decimals: 18,
+    rpcUrls: ['https://rpc.ankr.com/chiliz'],
+    blockExplorerUrls: ['https://chiliscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  chilizTestnet: {
+    contractAddress: null,
+    chainId: 88882,
+    name: 'Chiliz Spicy Testnet',
+    symbol: 'CHZ',
+    decimals: 18,
+    rpcUrls: ['https://spicy-rpc.chiliz.com/'],
+    blockExplorerUrls: ['https://testnet.chiliscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+};
 
 /**
  * Object containing information to submit to Metamask
@@ -740,6 +792,7 @@ export const LitNetwork = new Proxy(LIT_NETWORK, {
  * The type representing the keys of the LIT_NETWORK object.
  */
 export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
+
 /**
  * The type representing the values of the LIT_NETWORK object.
  * This should replicate LIT_NETWORKS_KEYS in types package
@@ -1003,79 +1056,6 @@ export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
 
-const RELAY_URL_CAYENNE_TARGET = {
-  url: 'https://relayer-server-staging-cayenne.getlit.dev',
-};
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Cayenne instead
- */
-export const RELAY_URL_CAYENNE = new Proxy(RELAY_URL_CAYENNE_TARGET, {
-  get(target, prop, receiver) {
-    deprecated(
-      'RELAY_URL_CAYENNE is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.Cayenne instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-}).url;
-
-const RELAY_URL_HABANERO_TARGET = {
-  url: 'https://habanero-relayer.getlit.dev',
-};
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Habanero instead
- */
-export const RELAY_URL_HABANERO = new Proxy(RELAY_URL_HABANERO_TARGET, {
-  get(target, prop, receiver) {
-    deprecated(
-      'RELAY_URL_HABANERO is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.Habanero instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-}).url;
-
-const RELAY_URL_MANZANO_TARGET = { url: 'https://manzano-relayer.getlit.dev' };
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.Manzano instead
- */
-export const RELAY_URL_MANZANO = new Proxy(RELAY_URL_MANZANO_TARGET, {
-  get(target, prop, receiver) {
-    deprecated(
-      'RELAY_URL_MANZANO is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.Manzano instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-}).url;
-
-const RELAY_URL_DATIL_DEV_TARGET = {
-  url: 'https://datil-dev-relayer.getlit.dev',
-};
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilDev instead
- */
-export const RELAY_URL_DATIL_DEV = new Proxy(RELAY_URL_DATIL_DEV_TARGET, {
-  get(target, prop, receiver) {
-    deprecated(
-      'RELAY_URL_DATIL_DEV is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.DatilDev instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-}).url;
-
-const RELAY_URL_DATIL_TEST_TARGET = {
-  url: 'https://datil-test-relayer.getlit.dev',
-};
-/**
- * @deprecated Will be removed in version 7.x. - Use RELAYER_URL_BY_NETWORK.DatilTest instead
- */
-export const RELAY_URL_DATIL_TEST = new Proxy(RELAY_URL_DATIL_TEST_TARGET, {
-  get(target, prop, receiver) {
-    deprecated(
-      'RELAY_URL_DATIL_TEST is deprecated and will be removed in a future version. Use RELAYER_URL_BY_NETWORK.DatilTest instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-}).url;
-
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
@@ -1095,6 +1075,7 @@ export const LIT_CURVE = {
   EcdsaCaitSith: 'ECDSA_CAIT_SITH', // Legacy alias of K256
   EcdsaCAITSITHP256: 'EcdsaCaitSithP256',
 } as const;
+
 export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
 // This should replicate SigShare.sigType in types package
 export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
@@ -1122,6 +1103,7 @@ export const AUTH_METHOD_TYPE = {
   StytchWhatsAppFactorOtp: 12,
   StytchTotpFactorOtp: 13,
 } as const;
+
 export type AUTH_METHOD_TYPE_TYPE = keyof typeof AUTH_METHOD_TYPE;
 export type AUTH_METHOD_TYPE_VALUES =
   (typeof AUTH_METHOD_TYPE)[keyof typeof AUTH_METHOD_TYPE];
@@ -1145,6 +1127,7 @@ export const AUTH_METHOD_SCOPE = {
   SignAnything: 1,
   PersonalSign: 2,
 } as const;
+
 export type AUTH_METHOD_SCOPE_TYPE = keyof typeof AUTH_METHOD_SCOPE;
 export type AUTH_METHOD_SCOPE_VALUES =
   (typeof AUTH_METHOD_SCOPE)[keyof typeof AUTH_METHOD_SCOPE];
@@ -1176,6 +1159,7 @@ export const PROVIDER_TYPE = {
   StytchWhatsAppFactorOtp: 'stytchWhatsAppFactorOtp',
   StytchTotpFactor: 'stytchTotpFactor',
 } as const;
+
 export type PROVIDER_TYPE_TYPE = keyof typeof PROVIDER_TYPE;
 export type PROVIDER_TYPE_VALUES =
   (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
@@ -1202,6 +1186,7 @@ export const STAKING_STATES = {
   Paused: 4,
   Restore: 5,
 } as const;
+
 export type STAKING_STATES_TYPE = keyof typeof STAKING_STATES;
 export type STAKING_STATES_VALUES =
   (typeof STAKING_STATES)[keyof typeof STAKING_STATES];
@@ -1225,6 +1210,7 @@ export const RELAY_AUTH_STATUS = {
   Succeeded: 'Succeeded',
   Failed: 'Failed',
 } as const;
+
 export type RELAY_AUTH_STATUS_TYPE = keyof typeof RELAY_AUTH_STATUS;
 export type RELAY_AUTH_STATUS_VALUES =
   (typeof RELAY_AUTH_STATUS)[keyof typeof RELAY_AUTH_STATUS];
@@ -1308,6 +1294,7 @@ export const LIT_ABILITY = {
    */
   LitActionExecution: 'lit-action-execution',
 } as const;
+
 export type LIT_ABILITY_TYPE = keyof typeof LIT_ABILITY;
 // This should replicate LitAbility in types package
 export type LIT_ABILITY_VALUES = (typeof LIT_ABILITY)[keyof typeof LIT_ABILITY];
@@ -1335,6 +1322,7 @@ export const LIT_RECAP_ABILITY = {
   Auth: 'Auth',
   Execution: 'Execution',
 } as const;
+
 export type LIT_RECAP_ABILITY_TYPE = keyof typeof LIT_RECAP_ABILITY;
 export type LIT_RECAP_ABILITY_VALUES =
   (typeof LIT_RECAP_ABILITY)[keyof typeof LIT_RECAP_ABILITY];
@@ -1356,6 +1344,7 @@ export const LIT_NAMESPACE = {
   Auth: 'Auth',
   Threshold: 'Threshold',
 } as const;
+
 export type LIT_NAMESPACE_TYPE = keyof typeof LIT_NAMESPACE;
 export type LIT_NAMESPACE_VALUES =
   (typeof LIT_NAMESPACE)[keyof typeof LIT_NAMESPACE];
@@ -1386,6 +1375,7 @@ export const LOG_LEVEL = {
   TIMING_END: 6,
   OFF: -1,
 } as const;
+
 export type LOG_LEVEL_TYPE = keyof typeof LOG_LEVEL;
 export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
 /**
@@ -1401,3 +1391,8 @@ export const LogLevel = new Proxy(LOG_LEVEL, {
     return Reflect.get(target, prop, receiver);
   },
 });
+
+export const FALLBACK_IPFS_GATEWAYS = [
+  'https://flk-ipfs.io/ipfs/',
+  'https://litprotocol.mypinata.cloud/ipfs/',
+];

@@ -2898,17 +2898,22 @@
     npmlog "^6.0.2"
     write-file-atomic "^4.0.1"
 
-"@lit-protocol/accs-schemas@0.0.11":
+"@lit-labs/ssr-dom-shim@^1.0.0", "@lit-labs/ssr-dom-shim@^1.1.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.2.0.tgz#353ce4a76c83fadec272ea5674ede767650762fd"
+  integrity sha512-yWJKmpGE6lUURKAaIltoPIE/wrbY3TEkqQt+X0m+7fQNnAv0keydnYvbiJFP1PnMhizmIWRWOG5KLhYyc/xl+g==
+
+"@lit-protocol/accs-schemas@^0.0.11":
   version "0.0.11"
   resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.11.tgz#ef170f8d60c110da40770b12320565932b4b6fe7"
   integrity sha512-TYoUaR98Xy4RQPxmrMkvssUJFcdWYrtgcRBgUreeDPCj21MVhk+/hqoUf6GGt3Fyn+Orqq/xneZV4edjHhxuqQ==
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.0.39":
-  version "0.0.39"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.39.tgz#e2483f1ef3df63bd434bcc7c00414b8f2e8d9ec5"
-  integrity sha512-zz/TaKWUqFK2n7BqwKj9PeV0px89G7dnjkRJ9BM/eri356zodd/W5d5iGQUVdaFiCYKd/cibm4004BnuMlXLeg==
+"@lit-protocol/contracts@^0.0.63":
+  version "0.0.63"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.63.tgz#8700c37df9d2422e9c97aa27871fb64de6186f6c"
+  integrity sha512-CAorNt72ybIY/g//dDeR837izNGuYQR99XwPSK2X2AJ6c+aZX1kdXCrOnxsbY40BzFrOk/dIFo+ymJ9E3qh48w==
 
 "@metamask/eth-sig-util@5.0.2":
   version "5.0.2"
@@ -11009,15 +11014,10 @@ jsprim@^2.0.2:
     object.assign "^4.1.4"
     object.values "^1.1.6"
 
-jszip@^3.10.1:
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.10.1.tgz#34aee70eb18ea1faec2f589208a157d1feb091c2"
-  integrity sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==
-  dependencies:
-    lie "~3.3.0"
-    pako "~1.0.2"
-    readable-stream "~2.3.6"
-    setimmediate "^1.0.5"
+just-diff-apply@^3.0.0:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/just-diff-apply/-/just-diff-apply-3.1.2.tgz#710d8cda00c65dc4e692df50dbe9bac5581c2193"
+  integrity sha512-TCa7ZdxCeq6q3Rgms2JCRHTCfWAETPZ8SzYUbkYF6KR3I03sN29DaOIC+xyWboIcMvjAsD5iG2u/RWzHD8XpgQ==
 
 just-diff-apply@^5.2.0:
   version "5.5.0"
@@ -11156,13 +11156,6 @@ libsodium@^0.7.15:
   version "0.7.15"
   resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.15.tgz#ac284e3dcb1c29ae9526c5581cdada6a072f6d20"
   integrity sha512-sZwRknt/tUpE2AwzHq3jEyUU5uvIZHtSssktXq7owd++3CSgn8RGrv6UZJJBpP7+iBghBqe7Z06/2M31rI2NKw==
-
-lie@~3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/lie/-/lie-3.3.0.tgz#dcf82dee545f46074daf200c7c1c5a08e0f40f6a"
-  integrity sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==
-  dependencies:
-    immediate "~3.0.5"
 
 lines-and-columns@^1.1.6:
   version "1.2.4"
@@ -12682,7 +12675,7 @@ pako@^2.1.0:
   resolved "https://registry.yarnpkg.com/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
   integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
 
-pako@~1.0.2:
+pako@~1.0.5:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==

@@ -1,7 +1,5 @@
 import { Provider } from '@ethersproject/abstract-provider';
 import depd from 'depd';
-// @ts-expect-error JSZip types are not properly resolved by TSC :(
-import * as JSZip from 'jszip/dist/jszip.js';
 
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
@@ -37,11 +35,36 @@ export interface AccsOperatorParams {
 
 /** ---------- Auth Sig ---------- */
 
+/**
+ * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE ReCap](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
+ */
 export interface AuthSig {
+  /**
+   * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
+   */
   sig: any;
+
+  /**
+   * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
+   */
   derivedVia: string;
+
+  /**
+   * An [ERC-5573](https://eips.ethereum.org/EIPS/eip-5573) SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
+   * -  [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
+   * -  [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
+   * -  [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
+   */
   signedMessage: string;
+
+  /**
+   * The Ethereum address that was used to sign `signedMessage` and create the `sig`.
+   */
   address: string;
+
+  /**
+   * An optional property only seen when generating session signatures, this is the signing algorithm used to generate session signatures.
+   */
   algo?: string;
 }
 
@@ -113,27 +136,6 @@ export interface IProvider {
 }
 
 /** ---------- Crypto ---------- */
-export interface EncryptedZip {
-  symmetricKey: SymmetricKey;
-  encryptedZip: Blob;
-}
-
-export interface DecryptZipFileWithMetadata {
-  decryptedFile: Uint8Array;
-  metadata: MetadataForFile;
-}
-
-export interface MetadataForFile {
-  name: string | any;
-  type: string | any;
-  size: string | number | any;
-  accessControlConditions: any[] | any;
-  evmContractConditions: any[] | any;
-  solRpcConditions: any[] | any;
-  unifiedAccessControlConditions: any[] | any;
-  chain: string;
-  dataToEncryptHash: string;
-}
 
 export interface EncryptedFile {
   encryptedFile: Blob;
@@ -469,6 +471,12 @@ export interface LitActionResponseStrategy {
     responses: Record<string, string>[]
   ) => Record<string, string>;
 }
+
+export interface IpfsOptions {
+  overwriteCode?: boolean;
+  gatewayUrl?: `https://${string}/ipfs/`;
+}
+
 export interface JsonExecutionSdkParamsTargetNode
   extends JsonExecutionSdkParams {
   targetNodeRange: number;
@@ -501,6 +509,8 @@ export interface JsonExecutionSdkParams
    * Lit Action execution context
    */
   responseStrategy?: LitActionResponseStrategy;
+
+  ipfsOptions?: IpfsOptions;
 }
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
@@ -579,13 +589,6 @@ export interface EncryptStringRequest extends MultipleAccessControlConditions {
    * String that you wish to encrypt
    */
   dataToEncrypt: string;
-}
-
-export interface EncryptZipRequest extends MultipleAccessControlConditions {
-  /**
-   * The zip that you wish to encrypt
-   */
-  zip: JSZip;
 }
 
 export interface EncryptFileRequest extends DecryptRequestBase {
@@ -933,36 +936,6 @@ export interface DecryptFromJsonProps {
   parsedJsonData: EncryptToJsonPayload;
 }
 
-export interface EncryptFileAndZipWithMetadataProps
-  extends MultipleAccessControlConditions {
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: string;
-
-  // The file you wish to encrypt
-  file: File;
-
-  // An instance of LitNodeClient that is already connected
-  litNodeClient: ILitNodeClient;
-
-  // An optional readme text that will be inserted into readme.txt in the final zip file.  This is useful in case someone comes across this zip file and wants to know how to decrypt it.  This file could contain instructions and a URL to use to decrypt the file.
-  readme: string;
-}
-
-export interface DecryptZipFileWithMetadataProps extends SessionSigsOrAuthSig {
-  /**
-   * The zip file blob with metadata inside it and the encrypted asset
-   */
-  file: File | Blob;
-
-  /**
-   * An instance of LitNodeClient that is already connected
-   */
-  litNodeClient: ILitNodeClient;
-}
-
 /**
  * Struct in rust
  * -----
@@ -1058,7 +1031,8 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
   authSig?: AuthSig;
 
   /**
-   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now. */
+   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
+   */
   expiration?: string;
 
   resources: any;
@@ -1085,34 +1059,39 @@ export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
 export interface CommonGetSessionSigsProps {
+  /**
+   * Session signature properties shared across all functions that generate session signatures.
+   */
   pkpPublicKey?: string;
 
-  // When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
+  /**
+   * When this session signature will expire. After this time is up you will need to reauthenticate, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
+   */
   expiration?: any;
 
-  //   The chain to use for the session signature.  This is the chain that will be used to sign the session key.  If you're using EVM then this probably doesn't matter at all.
+  /**
+   * The chain to use for the session signature and sign the session key. This value is almost always `ethereum`. If you're using EVM, this parameter isn't very important.
+   */
   chain?: Chain;
 
   /**
    * An array of resource abilities that you want to request for this session. These will be signed with the session key.
-   *
-   * @example If you want to request the ability to decrypt an access control condition, then you would pass
-   * [{ resource: new LitAccessControlConditionResource('someResource), ability: LitAbility.AccessControlConditionDecryption }]
+   * For example, an ability is added to grant a session permission to decrypt content associated with a particular Access Control Conditions (ACC) hash. When trying to decrypt, this ability is checked in the `resourceAbilityRequests` to verify if the session has the required decryption capability.
+   * @example
+   * [{ resource: new LitAccessControlConditionResource('someAccHash`), ability: LitAbility.AccessControlConditionDecryption }]
    */
   resourceAbilityRequests: LitResourceAbilityRequest[];
 
   /**
    * The session capability object that you want to request for this session.
+   * It is likely you will not need this, as the object will be automatically derived from the `resourceAbilityRequests`.
    * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
-   *
-   * @example If you passed nothing, and you're requesting to perform a decryption operation for an access
-   * control condition, then the session capability object will be a wildcard for the access control condition,
-   * which grants this session signature the ability to decrypt this access control condition.
+   * The wildcard means that the session will be granted the ability to to perform operations with any access control condition.
    */
   sessionCapabilityObject?: ISessionCapabilityObject;
 
   /**
-   * If you want to ask Metamask to try and switch the user's chain, you may pass true here.  This will only work if the user is using Metamask.  If the user is not using Metamask, then this will be ignored.
+   * If you want to ask MetaMask to try and switch the user's chain, you may pass true here. This will only work if the user is using MetaMask, otherwise this will be ignored.
    */
   switchChain?: boolean;
   /**
@@ -1123,14 +1102,14 @@ export interface CommonGetSessionSigsProps {
 
   /**
    * @deprecated - use capabilityAuthSigs instead
-   *  Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * on both manzano and habanero networks capacity credit proof is required.
-   * see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
+   * Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
+   * Capacity credits are required on the paid Lit networks (mainnets and certain testnets), and are not required on the unpaid Lit networks (certain testnets).
+   * See more [here](https://developer.litprotocol.com/sdk/capacity-credits).
    */
   capacityDelegationAuthSig?: AuthSig;
 
   /**
-   * Not limited to capacityDelegationAuthSig, we want to be able to pass in any other authSigs for other purposes.
+   * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
    */
   capabilityAuthSigs?: AuthSig[];
 }
@@ -1139,7 +1118,7 @@ export interface BaseProviderGetSessionSigsProps
   extends CommonGetSessionSigsProps,
     LitActionSdkParams {
   /**
-   * This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
+   * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
    */
   authNeededCallback?: AuthCallback;
 }
@@ -1148,7 +1127,7 @@ export interface GetSessionSigsProps
   extends CommonGetSessionSigsProps,
     LitActionSdkParams {
   /**
-   * This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
+   * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
    */
   authNeededCallback: AuthCallback;
 }
@@ -1157,6 +1136,17 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 /**
  * A map of node addresses to the session signature payload
  * for that node specifically.
+ *
+ * Each individual session signature for each node includes the following properties:
+ * -  `sig`: The signature produced by the ECDSA key pair signing the `signedMessage` payload.
+ *
+ * -  `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
+ *
+ * -  `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
+ *
+ * -  `address`: When the session key signs the SIWE ReCap message, this will be the session key pair public key. If an EOA wallet signs the message, then this will be the EOA Ethereum address.
+ *
+ * -  `algo`: The signing algorithm used to generate the session signature.
  */
 export type SessionSigsMap = Record<string, AuthSig>;
 
@@ -1860,6 +1850,8 @@ export interface GetPkpSessionSigs
    * sending it to the node
    */
   authMethods?: AuthMethod[];
+
+  ipfsOptions?: IpfsOptions;
 }
 
 /**
@@ -1877,7 +1869,9 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
     | (Pick<Required<LitActionSdkParams>, 'litActionIpfsId'> & {
         litActionCode?: never;
       })
-  );
+  ) & {
+    ipfsOptions?: IpfsOptions;
+  };
 
 export interface SessionKeyCache {
   value: SessionKeyPair;
