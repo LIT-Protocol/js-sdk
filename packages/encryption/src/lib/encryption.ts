@@ -116,14 +116,10 @@ export const encryptToJson = async (
  * @returns { Promise<string | Uint8Array> } - The decrypted `string` or file (as a `Uint8Array`) depending on `dataType` property in the parsed JSON provided
  *
  */
-export async function decryptFromJson<T extends DecryptFromJsonProps>(
-  params: T
+export async function decryptFromJson(
+  params: DecryptFromJsonProps
 ): Promise<
-  T extends { parsedJsonData: { dataType: 'file' } }
-    ? ReturnType<typeof decryptToFile>
-    : T extends { parsedJsonData: { dataType: 'string' } }
-    ? ReturnType<typeof decryptToString>
-    : never
+  ReturnType<typeof decryptToFile> | ReturnType<typeof decryptToString>
 > {
   const { sessionSigs, parsedJsonData, litNodeClient } = params;
 
@@ -145,7 +141,6 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
       'Invalid params'
     );
 
-  // FIXME: The return type of this function is inferrable based on the value of `params.dataType`
   if (parsedJsonData.dataType === 'string') {
     return decryptToString(
       {

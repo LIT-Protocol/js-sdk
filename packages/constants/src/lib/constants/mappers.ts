@@ -1,3 +1,5 @@
+import depd from 'depd';
+
 import {
   cayenne,
   manzano,
@@ -8,6 +10,8 @@ import {
 } from '@lit-protocol/contracts';
 
 import { LIT_NETWORK_VALUES } from './constants';
+
+const deprecated = depd('lit-js-sdk:constants:mappers');
 
 /**
  * Mapping of network context by network value.

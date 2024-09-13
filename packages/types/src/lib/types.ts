@@ -247,6 +247,16 @@ export type LitAbility =
   | 'rate-limit-increase-auth'
   | 'lit-action-execution';
 
+export interface TokenInfo {
+  tokenId: string;
+  publicKey: string;
+  publicKeyBuffer: Buffer;
+  ethAddress: string;
+  btcAddress: string;
+  cosmosAddress: string;
+  isNewPKP: boolean;
+}
+
 /**
  * from the `getActiveUnkickedValidatorStructsAndCounts` Staking contract function
    epochLength: _BigNumber { _hex: '0x05dc', _isBigNumber: true },

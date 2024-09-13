@@ -1,5 +1,8 @@
 // @ts-expect-error No types available for this package
 import { VError, Options } from '@openagenda/verror';
+import depd from 'depd';
+
+const deprecated = depd('lit-js-sdk:constants:errors');
 
 export const LIT_ERROR_KIND = {
   Unknown: 'Unknown',
@@ -12,12 +15,20 @@ export const LIT_ERROR_KIND = {
   Serializer: 'Serializer',
   Timeout: 'Timeout',
 } as const;
+
 /**
  * @deprecated Will be removed - Use LIT_ERROR_KIND instead
  * Alias for LIT_ERROR_KIND. Added for backwards compatibility.
  * See {@link LIT_ERROR_KIND}
  */
-export const LitErrorKind = LIT_ERROR_KIND;
+export const LitErrorKind = new Proxy(LIT_ERROR_KIND, {
+  get(target, prop, receiver) {
+    deprecated(
+      'LitErrorKind is deprecated and will be removed in a future version. Use LIT_ERROR_KIND instead.'
+    );
+    return Reflect.get(target, prop, receiver);
+  },
+});
 
 interface ErrorConfig {
   name: string;

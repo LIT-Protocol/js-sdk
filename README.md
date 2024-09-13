@@ -370,34 +370,6 @@ eg.
 </details>
 
 <details>
-<summary>Web bundling using esbuild</summary>
-
-It’s currently using a custom plugin [@websaam/nx-esbuild](https://www.npmjs.com/package/@websaam/nx-esbuild) which is a fork from [@wanews/nx-esbuild](https://www.npmjs.com/package/@wanews/nx-esbuild)
-
-```json
-"_buildWeb": {
-    "executor": "@websaam/nx-esbuild:package",
-    "options": {
-      "banner": {
-        "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
-      },
-      "globalName": "LitJsSdk_CoreBrowser",
-      "outfile":"dist/packages/core-browser-vanilla/core-browser.js",
-      "entryPoints": ["./packages/core-browser/src/index.ts"],
-      "define": { "global": "window" },
-      "plugins":[
-        {
-          "package": "esbuild-node-builtins",
-          "function": "nodeBuiltIns"
-        }
-      ]
-    }
-  }
-```
-
-</details>
-
-<details>
 <summary>Reference Error: crypto is not defined</summary>
 
 ```js

@@ -1,4 +1,5 @@
 import { Buffer as BufferPolyfill } from 'buffer';
+import depd from 'depd';
 
 import { hexlify } from '@ethersproject/bytes';
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
@@ -36,6 +37,8 @@ import { getStorageItem } from '@lit-protocol/misc-browser';
 import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
 
 import LitConnectModal from '../connect-modal/modal';
+
+const deprecated = depd('lit-js-sdk:auth-browser:index');
 
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
@@ -309,18 +312,17 @@ export const getRPCUrls = (): RPCUrls => {
 /** ---------- Exports ---------- */
 /**
  * @deprecated
- * (ABI) Encode call data
+ * encodeCallData has been removed.
  *
  * @param { IABIEncode }
  * @returns { string }
  */
-export const encodeCallData = ({
-  abi,
-  functionName,
-  functionParams,
-}: IABIEncode): string => {
-  throw new RemovedFunctionError({}, 'encodeCallData has been removed.');
-};
+export const encodeCallData = deprecated.function(
+  ({ abi, functionName, functionParams }: IABIEncode): string => {
+    throw new RemovedFunctionError({}, 'encodeCallData has been removed.');
+  },
+  'encodeCallData has been removed.'
+);
 
 /**
  * @deprecated
@@ -329,17 +331,16 @@ export const encodeCallData = ({
  * @param { IABIDecode }
  * @returns { string }
  */
-export const decodeCallResult = ({
-  abi,
-  functionName,
-  data,
-}: IABIDecode): ethers.utils.Result => {
-  const _interface = new ethers.utils.Interface(abi);
+export const decodeCallResult = deprecated.function(
+  ({ abi, functionName, data }: IABIDecode): ethers.utils.Result => {
+    const _interface = new ethers.utils.Interface(abi);
 
-  const decoded = _interface.decodeFunctionResult(functionName, data);
+    const decoded = _interface.decodeFunctionResult(functionName, data);
 
-  return decoded;
-};
+    return decoded;
+  },
+  'decodeCallResult will be removed.'
+);
 
 /**
  * @browserOnly
@@ -397,7 +398,7 @@ export const connectWeb3 = async ({
 
   // trigger metamask popup
   try {
-    log(
+    deprecated(
       '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
     );
     // @ts-ignore
