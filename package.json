@@ -41,8 +41,8 @@
     "@cosmjs/proto-signing": "0.30.1",
     "@cosmjs/stargate": "0.30.1",
     "@dotenvx/dotenvx": "^1.6.4",
-    "@lit-protocol/contracts": "^0.0.63",
     "@lit-protocol/accs-schemas": "^0.0.12",
+    "@lit-protocol/contracts": "^0.0.63",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
     "@simplewebauthn/browser": "^7.2.0",
@@ -84,6 +84,7 @@
     "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
+    "@nx/esbuild": "^19.7.3",
     "@nx/eslint-plugin": "17.3.0",
     "@nx/jest": "17.3.0",
     "@nx/js": "17.3.0",
