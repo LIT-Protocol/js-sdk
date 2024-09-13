@@ -1,9 +1,7 @@
 import { ExecuteJsResponse } from '@lit-protocol/types';
 
-import {
-  LIT_ACTION_CODE_REPOSITORY,
-  LIT_ACTION_CID_REPOSITORY,
-} from './constants';
+import { litActionCodeRepository } from './code-repository';
+import { LIT_ACTION_CID_REPOSITORY } from './constants';
 import { LitActionType } from './types';
 import { Network } from '../types';
 
@@ -49,6 +47,9 @@ export function postLitActionValidation(
 }
 
 export function getLitActionCid(network: Network, actionType: LitActionType) {
+  // We already have guarantees that `actionType` is valid; it is not user provided and type-safe
+  assertNetworkIsValid(network);
+
   return LIT_ACTION_CID_REPOSITORY[actionType][network];
 }
 
@@ -56,14 +57,22 @@ export function getLitActionCode(
   network: Network,
   actionType: LitActionType
 ): string {
-  const litActionCode = LIT_ACTION_CODE_REPOSITORY[actionType][network];
+  // We already have guarantees that `actionType` is valid; it is not user provided and type-safe
+  assertNetworkIsValid(network);
 
-  if (!litActionCode) {
+  // No fuzzy validation needed here, because `setLitActionsCode()` validates its input
+  return litActionCodeRepository[actionType][network];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function assertNetworkIsValid(network: any): asserts network is Network {
+  const validNetworks: Network[] = ['evm', 'solana'];
+
+  if (!validNetworks.includes(network)) {
     throw new Error(
-      `Could not find Lit Action code for action type: ${actionType}`
+      `Invalid network: ${network}. Must be one of ${validNetworks.join(', ')}.`
     );
   }
-  return litActionCode;
 }
 
 /**
@@ -77,24 +86,11 @@ export function getLitActionCodeOrCid(
   network: Network,
   actionType: LitActionType
 ): { litActionCode?: string; litActionIpfsCid?: string } {
-  let litActionCode: string | undefined;
-  let litActionIpfsCid: string | undefined;
+  // Default state is that litActionCode will be falsy, unless someone has injected to it using `setLitActionsCode();
+  const litActionCode = getLitActionCode(network, actionType);
 
-  try {
-    litActionCode = getLitActionCode(network, actionType);
-  } catch (e) {
-    console.warn(
-      `Missing bundled code or could not get it for action type: ${actionType} and network: ${network}. Using IPFS CID instead.`,
-      e
-    );
-    litActionIpfsCid = getLitActionCid(network, actionType);
+  if (litActionCode) {
+    return { litActionCode };
   }
-
-  if (!litActionCode && !litActionIpfsCid) {
-    throw new Error(
-      `Could not get Lit Action code nor IPFS CID for action type: ${actionType} and network: ${network}`
-    );
-  }
-
-  return { litActionCode, litActionIpfsCid };
+  return { litActionIpfsCid: getLitActionCid(network, actionType) };
 }

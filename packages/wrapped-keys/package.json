@@ -24,10 +24,6 @@
     "genReact": false
   },
   "version": "6.5.0",
-  "scripts": {
-    "bundle": "yarn node ./esbuild.config.js",
-    "build-bc": "sh ./build-bc.sh"
-  },
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
