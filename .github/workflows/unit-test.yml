@@ -1,13 +1,11 @@
-name: Testing
+name: Unit Testing
 on:
   workflow_call:
     outputs:
       unit-tests:
         description: 'unit test results'
         value: ${{jobs.unit-tests.result}}
-      intigration-tests:
-        description: 'intigration test results'
-        value: ${{jobs.integration-tests.result}}
+
   workflow_dispatch: {}
 
 jobs:
@@ -35,24 +33,3 @@ jobs:
         run: yarn build:dev
       - name: Run Unit tests
         run: yarn test:ci
-  integration-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: [unit-tests]
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Install Shiva
-        uses: ./.github/workflows/use-shiva.yml
-        with:
-          secrets: inherit
-          commit-hash: ae3c20e07eb933b61073689b95f56867c03de252
-          main: |
-            ehco "test"
-          post: |
-            docker logs shiva
-            docker stop shiva
-            docker rm shiva
-            docker rmi ghcr.io/lit-protocol/shiva

@@ -6,7 +6,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
+env:
+  DATIL_COMMIT_HASH: ae3c20e07eb933b61073689b95f56867c03de252
 jobs:
   list_changed_files_and_trigger_workflows:
     uses: ./.github/workflows/list-changed-files.yml
@@ -15,15 +16,22 @@ jobs:
     needs: [list_changed_files_and_trigger_workflows]
     uses: ./.github/workflows/lint.yml
     secrets: inherit
-  tests:
-    uses: ./.github/workflows/ci.yml
+  unit_tests:
+    uses: ./.github/workflows/unit-test.yml
     secrets: inherit
     needs: [lint]
+  intigration_tests:
+      uses: ./.github/workflows/intigration-test.yml
+      secrets: inherit
+      needs: [lint]
+      with:
+        commit: ${{github.env.DATIL_COMMIT_HASH}} 
   all_jobs:
     if: ${{ always() }}
     needs: [
       lint,
-      tests,
+      unit_tests,
+      intigration_tests
     ]
     runs-on: ubuntu-latest
     steps:
