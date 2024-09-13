@@ -1,6 +1,4 @@
 import { Provider } from '@ethersproject/abstract-provider';
-// @ts-expect-error JSZip types are not properly resolved by TSC :(
-import * as JSZip from 'jszip/dist/jszip.js';
 
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
@@ -134,27 +132,6 @@ export interface IProvider {
 }
 
 /** ---------- Crypto ---------- */
-export interface EncryptedZip {
-  symmetricKey: SymmetricKey;
-  encryptedZip: Blob;
-}
-
-export interface DecryptZipFileWithMetadata {
-  decryptedFile: Uint8Array;
-  metadata: MetadataForFile;
-}
-
-export interface MetadataForFile {
-  name: string | any;
-  type: string | any;
-  size: string | number | any;
-  accessControlConditions: any[] | any;
-  evmContractConditions: any[] | any;
-  solRpcConditions: any[] | any;
-  unifiedAccessControlConditions: any[] | any;
-  chain: string;
-  dataToEncryptHash: string;
-}
 
 export interface EncryptedFile {
   encryptedFile: Blob;
@@ -610,13 +587,6 @@ export interface EncryptStringRequest extends MultipleAccessControlConditions {
   dataToEncrypt: string;
 }
 
-export interface EncryptZipRequest extends MultipleAccessControlConditions {
-  /**
-   * The zip that you wish to encrypt
-   */
-  zip: JSZip;
-}
-
 export interface EncryptFileRequest extends DecryptRequestBase {
   file: AcceptedFileType;
 }
@@ -942,36 +912,6 @@ export interface DecryptFromJsonProps {
   litNodeClient: ILitNodeClient;
 
   parsedJsonData: EncryptToJsonPayload;
-}
-
-export interface EncryptFileAndZipWithMetadataProps
-  extends MultipleAccessControlConditions {
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: string;
-
-  // The file you wish to encrypt
-  file: File;
-
-  // An instance of LitNodeClient that is already connected
-  litNodeClient: ILitNodeClient;
-
-  // An optional readme text that will be inserted into readme.txt in the final zip file.  This is useful in case someone comes across this zip file and wants to know how to decrypt it.  This file could contain instructions and a URL to use to decrypt the file.
-  readme: string;
-}
-
-export interface DecryptZipFileWithMetadataProps extends SessionSigsOrAuthSig {
-  /**
-   * The zip file blob with metadata inside it and the encrypted asset
-   */
-  file: File | Blob;
-
-  /**
-   * An instance of LitNodeClient that is already connected
-   */
-  litNodeClient: ILitNodeClient;
 }
 
 /**
