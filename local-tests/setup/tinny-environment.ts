@@ -180,7 +180,10 @@ export class TinnyEnvironment {
 
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
-        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
+        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...', {
+          privateKeys: this.processEnvs.PRIVATE_KEYS,
+          keysInUse: this.processEnvs.KEY_IN_USE,
+        }); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
         await new Promise((resolve) =>
           setTimeout(resolve, this.processEnvs.WAIT_FOR_KEY_INTERVAL)
@@ -194,6 +197,7 @@ export class TinnyEnvironment {
    * @param {number} index - The index of the key to mark as available.
    */
   releasePrivateKeyFromUser(user: TinnyPerson) {
+    console.log('releasing', user);
     const index = this.processEnvs.PRIVATE_KEYS.indexOf(user.privateKey);
     this.processEnvs.KEY_IN_USE[index] = false;
     // console.log(
@@ -398,20 +402,27 @@ export class TinnyEnvironment {
    */
   async setupBareEthAuthSig() {
     const privateKey = await this.getAvailablePrivateKey();
-    const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
-    const wallet = new ethers.Wallet(privateKey.privateKey, provider);
+    try {
+      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+      const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
-    const toSign = await createSiweMessage({
-      walletAddress: wallet.address,
-      nonce: await this.litNodeClient.getLatestBlockhash(),
-      expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
-      litNodeClient: this.litNodeClient,
-    });
+      const toSign = await createSiweMessage({
+        walletAddress: wallet.address,
+        nonce: await this.litNodeClient.getLatestBlockhash(),
+        expiration: new Date(
+          Date.now() + 29 * 24 * 60 * 60 * 1000
+        ).toISOString(),
+        litNodeClient: this.litNodeClient,
+      });
 
-    this.bareEthAuthSig = await generateAuthSig({
-      signer: wallet,
-      toSign,
-    });
+      this.bareEthAuthSig = await generateAuthSig({
+        signer: wallet,
+        toSign,
+      });
+    } finally {
+      // @ts-expect-error
+      this.releasePrivateKeyFromUser(privateKey);
+    }
   }
 
   //============= SHIVA ENDPOINTS =============
