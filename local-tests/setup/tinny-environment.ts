@@ -197,7 +197,6 @@ export class TinnyEnvironment {
    * @param {number} index - The index of the key to mark as available.
    */
   releasePrivateKeyFromUser(user: TinnyPerson) {
-    console.log('releasing', user);
     const index = this.processEnvs.PRIVATE_KEYS.indexOf(user.privateKey);
     this.processEnvs.KEY_IN_USE[index] = false;
     // console.log(
