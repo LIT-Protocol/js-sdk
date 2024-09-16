@@ -17,11 +17,11 @@ describe('Epoch Transition', () => {
   beforeAll(async () => {
     devEnv = new TinnyEnvironment();
     await devEnv.init();
-  });
+  }, 60 * 60 * 1_000);
 
   afterAll(async () => {
     await devEnv.litNodeClient?.disconnect();
-  });
+  }, 60 * 60 * 1_000);
 
   it(
     'Transition should trigger staking event',
