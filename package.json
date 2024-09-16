@@ -18,7 +18,7 @@
     "test:ci": "nx affected --target=test --exclude=e2e-tests",
     "test:e2e": "nx run e2e-tests:test",
     "test:e2e:ci": "nx run e2e-tests:test-ci",
-    "test:e2e:ci:epoch": "nx run e2e-tests:test-ci ./packages/e2e-tests/src/tests/Epoch/EpochTransition.spec.ts",
+    "test:e2e:ci:epoch": "nx run e2e-tests:test ./packages/e2e-tests/src/tests/Epoch/EpochTransition.spec.ts",
     "test:unit": "nx run-many --target=test --exclude=e2e-tests",
     "test:unit:watch": "nx run-many --target=test --watch",
     "test:unit:bun": "bun ./tools/scripts/unit-test-with-bun.mjs",
