@@ -17,17 +17,6 @@ jobs:
     needs: [list_changed_files_and_trigger_workflows]
     uses: ./.github/workflows/lint.yml
     secrets: inherit
-  set_network_commit_hashes:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Set commit hashes
-      id: commit-hashes
-      run: |
-        export DATIL_COMMIT_HASH="ae3c20e07eb933b61073689b95f56867c03de252"
-        echo "datil_commit_hash=${DATIL_COMMIT_HASH}" >> DATIL_COMMIT_HASH
-    outputs:
-      datil_commit_hash: ${{steps.commit-hashes.outputs.DATIL_COMMIT_HASH}} 
-
   unit_tests:
     uses: ./.github/workflows/unit-test.yml
     secrets: inherit
@@ -36,13 +25,13 @@ jobs:
       uses: ./.github/workflows/intigration-test.yml
       secrets: inherit
       if: ${{needs.list_changed_files_and_trigger_workflows.outputs.lit_core_changed == 'true'}} 
-      needs: [lint, get_shas, list_changed_files_and_trigger_workflows, set_network_commit_hashes]
+      needs: [lint, get_shas, list_changed_files_and_trigger_workflows, unit_tests]
       with:
         commit: ${{vars.DATIL_COMMIT_HASH}}
   intigration_tests_longrun_epoch:
     uses: ./.github/workflows/intigration-test-long-running.yml
     secrets: inherit
-    needs: [lint, get_shas, set_network_commit_hashes]
+    needs: [lint, get_shas, list_changed_files_and_trigger_workflows, unit_tests]
     with:
       commit: ${{vars.DATIL_COMMIT_HASH}} 
   all_jobs:
