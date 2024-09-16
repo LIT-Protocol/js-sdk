@@ -101,4 +101,16 @@ describe('logger', () => {
 
     expect(lm.getLogsForId('foo6').length).toEqual(count);
   });
+
+  it('should retain logger keys and return from LogManager', () => {
+    const count = 10;
+    for (let i = 0; i < count; i++) {
+      const logger = lm.get('' + i, 'foo7');
+      logger.setLevel(LogLevel.DEBUG);
+      logger.debug(i + '');
+    }
+
+    expect(lm.getLogsForId('foo7').length).toEqual(count);
+    expect(lm.LoggerIds.size).toEqual(1);
+  });
 });

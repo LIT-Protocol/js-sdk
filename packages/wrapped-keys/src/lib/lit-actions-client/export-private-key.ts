@@ -7,7 +7,8 @@ import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
   accessControlConditions: AccessControlConditions;
   storedKeyMetadata: StoredKeyData;
-  litActionIpfsCid: string;
+  litActionIpfsCid?: string;
+  litActionCode?: string;
 }
 
 export async function exportPrivateKeyWithLitAction(
@@ -17,6 +18,7 @@ export async function exportPrivateKeyWithLitAction(
     accessControlConditions,
     litNodeClient,
     pkpSessionSigs,
+    litActionCode,
     litActionIpfsCid,
     storedKeyMetadata,
   } = args;
@@ -29,6 +31,7 @@ export async function exportPrivateKeyWithLitAction(
   } = storedKeyMetadata;
   const result = await litNodeClient.executeJs({
     sessionSigs: pkpSessionSigs,
+    code: litActionCode,
     ipfsId: litActionIpfsCid,
     jsParams: {
       pkpAddress,

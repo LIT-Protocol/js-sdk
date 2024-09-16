@@ -1,6 +1,9 @@
-import { ExecuteJsResponse, JsonExecutionSdkParams } from '@lit-protocol/types';
+import { ExecuteJsResponse } from '@lit-protocol/types';
 
-import { LIT_ACTION_CID_REPOSITORY } from './constants';
+import {
+  LIT_ACTION_CODE_REPOSITORY,
+  LIT_ACTION_CID_REPOSITORY,
+} from './constants';
 import { LitActionType } from './types';
 import { Network } from '../types';
 
@@ -47,4 +50,51 @@ export function postLitActionValidation(
 
 export function getLitActionCid(network: Network, actionType: LitActionType) {
   return LIT_ACTION_CID_REPOSITORY[actionType][network];
+}
+
+export function getLitActionCode(
+  network: Network,
+  actionType: LitActionType
+): string {
+  const litActionCode = LIT_ACTION_CODE_REPOSITORY[actionType][network];
+
+  if (!litActionCode) {
+    throw new Error(
+      `Could not find Lit Action code for action type: ${actionType}`
+    );
+  }
+  return litActionCode;
+}
+
+/**
+ * Fetch the Lit action code or its IPFS CID for a given network and action type.
+ *
+ * @param {Network} network The network to get the code or CID for.
+ * @param {LitActionType} actionType The type of action to get the code or CID for.
+ * @returns {{ litActionCode?: string, litActionIpfsCid?: string }} The Lit action code or its IPFS CID.
+ */
+export function getLitActionCodeOrCid(
+  network: Network,
+  actionType: LitActionType
+): { litActionCode?: string; litActionIpfsCid?: string } {
+  let litActionCode: string | undefined;
+  let litActionIpfsCid: string | undefined;
+
+  try {
+    litActionCode = getLitActionCode(network, actionType);
+  } catch (e) {
+    console.warn(
+      `Missing bundled code or could not get it for action type: ${actionType} and network: ${network}. Using IPFS CID instead.`,
+      e
+    );
+    litActionIpfsCid = getLitActionCid(network, actionType);
+  }
+
+  if (!litActionCode && !litActionIpfsCid) {
+    throw new Error(
+      `Could not get Lit Action code nor IPFS CID for action type: ${actionType} and network: ${network}`
+    );
+  }
+
+  return { litActionCode, litActionIpfsCid };
 }

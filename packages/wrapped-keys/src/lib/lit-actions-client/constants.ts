@@ -1,4 +1,11 @@
-import { LitCidRepository } from './types';
+import { LitActionRepository, LitCidRepository } from './types';
+import * as exportPrivateKey from '../generated/litActions/common/exportPrivateKey';
+import * as generateEncryptedEthereumPrivateKey from '../generated/litActions/ethereum/generateEncryptedEthereumPrivateKey';
+import * as signMessageWithEthereumEncryptedKey from '../generated/litActions/ethereum/signMessageWithEthereumEncryptedKey';
+import * as signTransactionWithEthereumEncryptedKey from '../generated/litActions/ethereum/signTransactionWithEthereumEncryptedKey';
+import * as generateEncryptedSolanaPrivateKey from '../generated/litActions/solana/generateEncryptedSolanaPrivateKey';
+import * as signMessageWithSolanaEncryptedKey from '../generated/litActions/solana/signMessageWithSolanaEncryptedKey';
+import * as signTransactionWithSolanaEncryptedKey from '../generated/litActions/solana/signTransactionWithSolanaEncryptedKey';
 
 const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   signTransaction: Object.freeze({
@@ -19,4 +26,23 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   }),
 });
 
-export { LIT_ACTION_CID_REPOSITORY };
+const LIT_ACTION_CODE_REPOSITORY: LitActionRepository = Object.freeze({
+  signTransaction: Object.freeze({
+    evm: signTransactionWithEthereumEncryptedKey.code,
+    solana: signTransactionWithSolanaEncryptedKey.code,
+  }),
+  signMessage: Object.freeze({
+    evm: signMessageWithEthereumEncryptedKey.code,
+    solana: signMessageWithSolanaEncryptedKey.code,
+  }),
+  generateEncryptedKey: Object.freeze({
+    evm: generateEncryptedEthereumPrivateKey.code,
+    solana: generateEncryptedSolanaPrivateKey.code,
+  }),
+  exportPrivateKey: Object.freeze({
+    evm: exportPrivateKey.code,
+    solana: exportPrivateKey.code,
+  }),
+});
+
+export { LIT_ACTION_CODE_REPOSITORY, LIT_ACTION_CID_REPOSITORY };

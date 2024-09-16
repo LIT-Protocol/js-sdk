@@ -15,7 +15,8 @@ import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 interface SignTransactionWithLitActionParams {
   litNodeClient: ILitNodeClient;
   pkpSessionSigs: SessionSigsMap;
-  litActionIpfsCid: string;
+  litActionIpfsCid?: string;
+  litActionCode?: string;
   unsignedTransaction: EthereumLitTransaction | SerializedTransaction;
   storedKeyMetadata: StoredKeyData;
   accessControlConditions: AccessControlConditions;
@@ -26,6 +27,7 @@ export async function signTransactionWithLitAction({
   accessControlConditions,
   broadcast,
   litActionIpfsCid,
+  litActionCode,
   litNodeClient,
   pkpSessionSigs,
   storedKeyMetadata: { ciphertext, dataToEncryptHash, pkpAddress },
@@ -34,6 +36,7 @@ export async function signTransactionWithLitAction({
   const result = await litNodeClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
+    code: litActionCode,
     jsParams: {
       pkpAddress,
       ciphertext,
