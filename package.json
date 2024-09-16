@@ -55,7 +55,6 @@
     "@walletconnect/types": "2.9.2",
     "@walletconnect/utils": "2.9.2",
     "@walletconnect/web3wallet": "1.8.8",
-    "@websaam/nx-esbuild": "^0.0.1",
     "ajv": "^8.12.0",
     "axios": "^0.27.2",
     "base64url": "^3.0.1",
@@ -84,7 +83,7 @@
     "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
-    "@nx/esbuild": "^19.7.3",
+    "@nx/esbuild": "^17.3.0",
     "@nx/eslint-plugin": "17.3.0",
     "@nx/jest": "17.3.0",
     "@nx/js": "17.3.0",
@@ -108,7 +107,7 @@
     "cypress": "11.0.1",
     "cypress-metamask": "^1.0.5-development",
     "cypress-metamask-v2": "^1.7.2",
-    "esbuild": "0.19.12",
+    "esbuild": "^0.17.3",
     "esbuild-node-builtins": "^0.1.0",
     "esbuild-node-externals": "^1.13.0",
     "esbuild-plugin-tsc": "^0.4.0",
