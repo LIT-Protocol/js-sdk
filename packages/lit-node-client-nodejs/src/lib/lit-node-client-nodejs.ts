@@ -780,7 +780,7 @@ export class LitNodeClientNodeJs
 
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     const nodePromises = [];
 
     for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
@@ -1078,7 +1078,7 @@ export class LitNodeClientNodeJs
       };
     }
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
     const nodePromises = this.getNodePromises(async (url: string) => {
@@ -1262,7 +1262,7 @@ export class LitNodeClientNodeJs
       );
     }
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
 
@@ -1402,7 +1402,7 @@ export class LitNodeClientNodeJs
     }
 
     // ========== Get Node Promises ==========
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
       const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
@@ -1640,7 +1640,7 @@ export class LitNodeClientNodeJs
     log('identityParam', identityParam);
 
     // ========== Get Network Signature ==========
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
       const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
@@ -1860,7 +1860,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] body:`, body);
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     logWithRequestId(requestId, 'signSessionKey body', body);
     const nodePromises = this.getNodePromises((url: string) => {
       const reqBody: JsonSignSessionKeyRequestV1 = body;
@@ -2430,7 +2430,7 @@ export class LitNodeClientNodeJs
       );
     }
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
 
     const nodePromises = this.getNodePromises((url: string) => {
       if (!params.authMethod) {
