@@ -783,7 +783,7 @@ export class LitContracts {
     await Promise.all(
       contractNames.map(async (contractName) => {
         const contracts = context?.contractContext;
-        console.log("contracts in context", contracts);
+        console.log("contracts in context", contracts?.[contractName]);
         contractContext[contractName] = {
           address: await getContract(contractName, context.environment),
           abi: contracts?.[contractName]?.abi ?? undefined,
