@@ -28,7 +28,7 @@ jobs:
         export DATIL_COMMIT_HASH="ae3c20e07eb933b61073689b95f56867c03de252"
         echo "datil_commit_hash=${DATIL_COMMIT_HASH}" >> DATIL_COMMIT
     outputs:
-      datil_commit_hash: ${{steps.commit-hashes.outputs.datil_commit_hash}} 
+      datil_commit_hash: ${{steps.commit-hashes.outputs.DATIL_COMMIT_HASH}} 
 
   unit_tests:
     uses: ./.github/workflows/unit-test.yml
