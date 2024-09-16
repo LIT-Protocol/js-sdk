@@ -39,7 +39,7 @@
         "runInBand": true,
         "passWithNoTests": true
       }
-    },
+    }, 
     "test-long-run": {
       "executor": "nx:run-script",
       "options": {
