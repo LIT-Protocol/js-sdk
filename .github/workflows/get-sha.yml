@@ -1,0 +1,25 @@
+name: Set SHAs
+on:
+    workflow_call: {}
+
+jobs:
+   get-sha:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Check SHA
+       uses: nrwl/nx-set-shas@v3
+       id: sha
+       with:
+        main-branch-name: 'master'
+     
+   check_status:
+      needs: [get-sha]
+      runs-on: ubuntu-latest 
+      steps:
+        - name: output SHAs
+          run: |
+           if [${{needs.get-sha.result}} == 'success']; then
+                echo "get sha failed"
+                exit 1
+            fi
+            echo "All steps passed" 

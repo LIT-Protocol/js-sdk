@@ -12,6 +12,9 @@ jobs:
   list_changed_files_and_trigger_workflows:
     uses: ./.github/workflows/list-changed-files.yml
     secrets: inherit
+  get_shas:
+    uses: ./.github/workflows/get-sha.yml
+    secrets: inherit
   lint:
     needs: [list_changed_files_and_trigger_workflows]
     uses: ./.github/workflows/lint.yml
@@ -19,13 +22,13 @@ jobs:
   unit_tests:
     uses: ./.github/workflows/unit-test.yml
     secrets: inherit
-    needs: [lint]
+    needs: [lint, get_shas]
   intigration_tests:
       uses: ./.github/workflows/intigration-test.yml
       secrets: inherit
-      needs: [lint]
+      needs: [lint, get_shas]
       with:
-        commit: ${{github.env.DATIL_COMMIT_HASH}} 
+        commit: ${{env.DATIL_COMMIT_HASH}} 
   all_jobs:
     if: ${{ always() }}
     needs: [
