@@ -1,4 +1,4 @@
-const { removeSaltFromDecryptedKey } = require('../../utils');
+const { removeSaltFromDecryptedKey } = require('../utils');
 
 /**
  *

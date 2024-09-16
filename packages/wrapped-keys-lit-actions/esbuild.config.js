@@ -64,6 +64,7 @@ module.exports = {
     outdir: './src/lib/generated/',
     inject: ['./buffer.shim.js'],
     plugins: [wrapIIFEInStringPlugin],
+    platform: 'browser',
   });
   // await esbuild.build({
   //   entryPoints: [

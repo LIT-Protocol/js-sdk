@@ -1,0 +1,60 @@
+{
+  "name": "wrapped-keys-lit-actions",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/wrapped-keys-lit-actions/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "packages/wrapped-keys-lit-actions/src/index.ts",
+        "outputPath": "dist/packages/wrapped-keys-lit-actions",
+        "tsConfig": "packages/wrapped-keys-lit-actions/tsconfig.json",
+        "assets": ["packages/wrapped-keys-lit-actions/*.md"],
+        "platform": "browser",
+        "thirdParty": true,
+        "additionalEntryPoints": [
+          "packages/wrapped-keys-lit-actions/src/lib/ethereum/signTransactionWithEthereumEncryptedKey.js",
+          "packages/wrapped-keys-lit-actions/src/lib/ethereum/signMessageWithEthereumEncryptedKey.js",
+          "packages/wrapped-keys-lit-actions/src/lib/ethereum/generateEncryptedEthereumPrivateKey.js",
+          "packages/wrapped-keys-lit-actions/src/lib/common/exportPrivateKey.js",
+          "packages/wrapped-keys-lit-actions/src/lib/solana/signTransactionWithSolanaEncryptedKey.js",
+          "packages/wrapped-keys-lit-actions/src/lib/solana/signMessageWithSolanaEncryptedKey.js",
+          "packages/wrapped-keys-lit-actions/src/lib/solana/generateEncryptedSolanaPrivateKey.js"
+        ],
+        "esbuildOptions": {
+          "inject": ["packages/wrapped-keys-lit-actions/buffer.shim.js"],
+          "bundle": true,
+          "minify": true,
+          "sourcemap": false
+        }
+      },
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/wrapped-keys-lit-actions/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/wrapped-keys-lit-actions"],
+      "options": {
+        "jestConfig": "packages/wrapped-keys-lit-actions/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

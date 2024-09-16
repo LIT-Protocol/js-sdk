@@ -8,7 +8,7 @@
  * @returns { Promise<string> } - Returns a stringified JSON object with ciphertext & dataToEncryptHash which are the result of the encryption. Also returns the publicKey of the newly generated Ethers Wrapped Key.
  */
 
-(async () => {
+export default async () => {
   const LIT_PREFIX = 'lit_';
 
   const resp = await Lit.Actions.runOnce(
@@ -34,4 +34,4 @@
   Lit.Actions.setResponse({
     response: resp,
   });
-})();
+};
