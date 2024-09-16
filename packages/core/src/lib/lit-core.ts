@@ -662,7 +662,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.getRequestId();
+    const requestId: string = this._getNewRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -878,12 +878,12 @@ export class LitCore {
 
   /**
    *
-   * Get a random request ID
+   * Get a new random request ID
    *
    * @returns { string }
    *
    */
-  getRequestId() {
+  protected _getNewRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
