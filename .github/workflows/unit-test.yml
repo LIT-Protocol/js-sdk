@@ -26,7 +26,6 @@ jobs:
           cache-dependency-path: ${{ github.workspace }}/yarn.lock
       - name: Check SHA
         uses: nrwl/nx-set-shas@v3
-        id: sha
         with:
           main-branch-name: 'master'
       - name: Install Dependencies
@@ -34,4 +33,4 @@ jobs:
       - name: Build
         run: yarn build:dev
       - name: Run Unit tests
-        run: yarn test:ci
+        run: yarn test:unit
