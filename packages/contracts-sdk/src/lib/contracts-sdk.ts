@@ -127,6 +127,19 @@ export class LitContracts {
   debug: boolean = false;
   network: LIT_NETWORKS_KEYS;
   customContext?: LitContractContext | LitContractResolverContext;
+  static contractNames: string[] = [
+    'Allowlist',
+    'Staking',
+    'RateLimitNFT',
+    'PubkeyRouter',
+    'PKPHelper',
+    'PKPPermissions',
+    'PKPNFTMetadata',
+    'PKPNFT',
+    'Multisender',
+    'LITToken',
+    'StakingBalances',
+  ];
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
@@ -762,28 +775,13 @@ export class LitContracts {
       return address;
     };
 
-    if (!contractNames) {
-      contractNames = [
-        'Allowlist',
-        'Staking',
-        'RateLimitNFT',
-        'PubkeyRouter',
-        'PKPHelper',
-        'PKPPermissions',
-        'PKPNFTMetadata',
-        'PKPNFT',
-        'Multisender',
-        'LITToken',
-        'StakingBalances',
-      ];
-    }
+    const names = contractNames ?? LitContracts.contractNames;
 
     const contractContext: LitContractContext = {} as LitContractContext;
     // Ah, Bluebird.props(), we miss you 🫗
     await Promise.all(
-      contractNames.map(async (contractName) => {
+      names.map(async (contractName) => {
         const contracts = context?.contractContext;
-        console.log("contracts in context", contracts?.[contractName]);
         contractContext[contractName] = {
           address: await getContract(contractName, context.environment),
           abi: contracts?.[contractName]?.abi ?? undefined,
