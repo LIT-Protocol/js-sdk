@@ -1,4 +1,4 @@
-name: Intigration Testing Datil
+name: Intigration Testing Datil Long Running
 on:
   workflow_call:
     outputs:
@@ -66,7 +66,7 @@ jobs:
       - name: End to End Tests 
         id: e2e-tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e:ci
+        run: yarn test:e2e:ci:epoch
       - name: Get Container Logs
         if: always()
         run: docker logs shiva

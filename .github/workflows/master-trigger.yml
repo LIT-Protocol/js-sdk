@@ -35,9 +35,16 @@ jobs:
   intigration_tests:
       uses: ./.github/workflows/intigration-test.yml
       secrets: inherit
-      needs: [lint, get_shas, set_network_commit_hashes]
+      if: ${{needs.list_changed_files_and_trigger_workflows.outputs.lit_core_changed == 'true'}} 
+      needs: [lint, get_shas, list_changed_files_and_trigger_workflows, set_network_commit_hashes]
       with:
-        commit: ${{vars.DATIL_COMMIT_HASH}} 
+        commit: ${{vars.DATIL_COMMIT_HASH}}
+  intigration_tests_longrun_epoch:
+    uses: ./.github/workflows/intigration-test-long-running.yml
+    secrets: inherit
+    needs: [lint, get_shas, set_network_commit_hashes]
+    with:
+      commit: ${{vars.DATIL_COMMIT_HASH}} 
   all_jobs:
     if: ${{ always() }}
     needs: [
