@@ -10,7 +10,7 @@ on:
 
 jobs:
   unit-tests:
-    runs-on: warp-ubuntu-latest-x64-16x
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout repo
@@ -24,6 +24,11 @@ jobs:
           node-version: 20
           cache: yarn
           cache-dependency-path: ${{ github.workspace }}/yarn.lock
+      - name: Check SHA
+        uses: nrwl/nx-set-shas@v3
+        id: sha
+        with:
+          main-branch-name: 'master'
       - name: Install Dependencies
         run: yarn 
       - name: Build
