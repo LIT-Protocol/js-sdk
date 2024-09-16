@@ -437,17 +437,19 @@ export class LitContracts {
     this.log('resolved contract addresses for: ', this.network, logAddresses);
 
     if (addresses.Allowlist.abi) {
-     this.allowlistContract = {
+      this.allowlistContract = {
         read: new ethers.Contract(
           addresses.Allowlist.address,
           addresses.Allowlist.abi as any,
           this.provider
-        ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
+        ) as unknown as allowlistContract.Allowlist &
+          allowlistContract.Allowlist,
         write: new ethers.Contract(
           addresses.Allowlist.address,
           addresses.Allowlist.abi as any,
           this.signer
-        ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
+        ) as unknown as allowlistContract.Allowlist &
+          allowlistContract.Allowlist,
       };
     }
 
@@ -488,12 +490,14 @@ export class LitContracts {
           addresses.PKPHelper.address,
           addresses.PKPHelper.abi as any,
           this.provider
-        ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper,
+        ) as unknown as pkpHelperContract.PKPHelper &
+          pkpHelperContract.PKPHelper,
         write: new ethers.Contract(
           addresses.PKPHelper.address,
           addresses.PKPHelper.abi as any,
           this.signer
-        ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper,
+        ) as unknown as pkpHelperContract.PKPHelper &
+          pkpHelperContract.PKPHelper,
       };
     }
 
@@ -510,7 +514,7 @@ export class LitContracts {
           this.signer
         ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
       };
-    }    
+    }
     if (addresses.PKPNFTMetadata.abi) {
       this.pkpNftMetadataContract = {
         read: new ethers.Contract(

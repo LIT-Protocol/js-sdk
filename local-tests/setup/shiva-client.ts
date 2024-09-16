@@ -101,28 +101,27 @@ export class TestnetClient {
         Allowlist: {},
         Multisender: {},
         Staking: {
-          abi: JSON.parse(testNetConfig.contractAbis.staking)
+          abi: JSON.parse(testNetConfig.contractAbis.staking),
         },
         StakingBalances: {
-          abi: JSON.parse(testNetConfig.contractAbis.stakingBalances)
+          abi: JSON.parse(testNetConfig.contractAbis.stakingBalances),
         },
         PKPNFT: {
-          abi: JSON.parse(testNetConfig.contractAbis.pkpnft)
+          abi: JSON.parse(testNetConfig.contractAbis.pkpnft),
         },
         PKPPermissions: {
-          abi: JSON.parse(testNetConfig.contractAbis.pkpPermissions)
+          abi: JSON.parse(testNetConfig.contractAbis.pkpPermissions),
         },
         PKPHelper: {
-          abi: JSON.parse(testNetConfig.contractAbis.pkpHelper)
+          abi: JSON.parse(testNetConfig.contractAbis.pkpHelper),
         },
         LITToken: {
-          abi: JSON.parse(testNetConfig.contractAbis.litToken)
+          abi: JSON.parse(testNetConfig.contractAbis.litToken),
         },
         PKPNFTMetadata: {},
         RateLimitNFT: {},
         PubkeyRouter: {},
-
-      }
+      },
     };
     return networkContext;
   }
