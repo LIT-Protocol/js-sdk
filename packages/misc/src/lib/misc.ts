@@ -780,12 +780,27 @@ export function getEnv({
   return defaultValue;
 }
 
-/** This method will give us the JSON parsed response if possible, otherwise the text of the response as a string
- * Responses from the backend API should always be in JSON format
- * However, some mis-behaving infrastructure could return a 200 OK response code, but with a text string in the body
+async function tryTextResponse(response: Response, requestId: string) {
+  try {
+    return await response.text();
+  } catch (e) {
+    // Unable to parse the response at all; probably a broken streeam
+    throw new Error(
+      constructErrorMessage(
+        `HTTP ${response.status} - ${getErrorMessageStr(e)}`,
+        requestId
+      )
+    );
+  }
+}
+/**
+ * Attempts to parse the response from an HTTP request as JSON.
+ * If parsing fails and the response status is 200, an error is thrown
+ * with the response body text and the provided request ID.
  *
- * @param {Response} response The response we received from fetch()
- * @returns {<T>|string} The error message from the response
+ * @param {Response} response - The response object to be parsed.
+ * @param {string} requestId - The identifier for the request, used for error messaging.
+ * @return {Promise<unknown>} - A promise that resolves to the parsed JSON or response text.
  */
 async function tryParseResponse(
   response: Response,
@@ -793,17 +808,20 @@ async function tryParseResponse(
 ): Promise<unknown> {
   try {
     return await response.json(); // NOTE: `await` here is necessary for errors to be caught by try{}
-  } catch (e) {
-    try {
-      return await response.text();
-    } catch (err) {
+  } catch (err) {
+    const responseBody = await tryTextResponse(response, requestId);
+
+    if (response.status === 200) {
+      // For 200 responses that we couldn't parse as JSON... throw an error because our API is always JSON
       throw new Error(
         constructErrorMessage(
-          `HTTP ${response.status} - ${getErrorMessageStr(err)}`,
+          `HTTP ${response.status} - ${getErrorMessageStr(responseBody)}`,
           requestId
         )
       );
     }
+
+    return responseBody;
   }
 }
 
