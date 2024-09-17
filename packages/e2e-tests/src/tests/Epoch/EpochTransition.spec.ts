@@ -9,12 +9,16 @@ import { getPkpSessionSigs, TinnyEnvironment } from '@lit-protocol/tinny';
 
 describe('Epoch Transition', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(jest.fn(() => { void 0; }));
+    jest.spyOn(console, 'warn').mockImplementation(
+      jest.fn(() => {
+        void 0;
+      })
+    );
   });
 
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    devEnv = new TinnyEnvironment(undefined, {useRLI: false});
+    devEnv = new TinnyEnvironment(undefined, { useRLI: false });
     await devEnv.init();
   }, 60 * 60 * 1_000);
 

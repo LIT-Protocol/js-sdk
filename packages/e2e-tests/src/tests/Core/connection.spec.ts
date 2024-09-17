@@ -10,12 +10,16 @@ try {
 
 describe('Connections', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(jest.fn(() => {void 0;}));
+    jest.spyOn(console, 'warn').mockImplementation(
+      jest.fn(() => {
+        void 0;
+      })
+    );
   });
 
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    devEnv = new TinnyEnvironment(undefined, {useRLI: false});
+    devEnv = new TinnyEnvironment(undefined, { useRLI: false });
     await devEnv.init();
   });
 
@@ -56,5 +60,4 @@ describe('Connections', () => {
       );
     });
   });
-
 });
