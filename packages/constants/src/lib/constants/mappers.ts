@@ -57,7 +57,7 @@ export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
   habanero: true,
   'datil-dev': false,
   'datil-test': false,
-  datil: true, // <-- this is the only one that is true. To be re-evaluated in the future.
+  datil: false,
   custom: false,
   localhost: false,
 };
