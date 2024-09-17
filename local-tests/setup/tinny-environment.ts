@@ -398,20 +398,26 @@ export class TinnyEnvironment {
    */
   async setupBareEthAuthSig() {
     const privateKey = await this.getAvailablePrivateKey();
-    const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
-    const wallet = new ethers.Wallet(privateKey.privateKey, provider);
+    try {
+      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+      const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
-    const toSign = await createSiweMessage({
-      walletAddress: wallet.address,
-      nonce: await this.litNodeClient.getLatestBlockhash(),
-      expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
-      litNodeClient: this.litNodeClient,
-    });
+      const toSign = await createSiweMessage({
+        walletAddress: wallet.address,
+        nonce: await this.litNodeClient.getLatestBlockhash(),
+        expiration: new Date(
+          Date.now() + 29 * 24 * 60 * 60 * 1000
+        ).toISOString(),
+        litNodeClient: this.litNodeClient,
+      });
 
-    this.bareEthAuthSig = await generateAuthSig({
-      signer: wallet,
-      toSign,
-    });
+      this.bareEthAuthSig = await generateAuthSig({
+        signer: wallet,
+        toSign,
+      });
+    } finally {
+      this.releasePrivateKeyFromUser(privateKey as unknown as TinnyPerson);
+    }
   }
 
   //============= SHIVA ENDPOINTS =============
