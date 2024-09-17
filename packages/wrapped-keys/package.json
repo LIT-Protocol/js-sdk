@@ -23,9 +23,10 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "6.4.10",
+  "version": "6.5.1",
   "scripts": {
-    "bundle": "yarn node ./esbuild.config.js"
+    "bundle": "yarn node ./esbuild.config.js",
+    "build-bc": "sh ./build-bc.sh"
   },
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"

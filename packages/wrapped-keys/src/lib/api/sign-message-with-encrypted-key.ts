@@ -1,5 +1,5 @@
 import { signMessageWithLitAction } from '../lit-actions-client';
-import { getLitActionCid } from '../lit-actions-client/utils';
+import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { fetchPrivateKey } from '../service-client';
 import { SignMessageWithEncryptedKeyParams } from '../types';
 import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
@@ -31,9 +31,15 @@ export async function signMessageWithEncryptedKey(
     storedKeyMetadata.pkpAddress
   );
 
+  const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
+    network,
+    'signMessage'
+  );
+
   return signMessageWithLitAction({
     ...params,
-    litActionIpfsCid: getLitActionCid(network, 'signMessage'),
+    litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
+    litActionCode: litActionCode ? litActionCode : undefined,
     accessControlConditions: [allowPkpAddressToDecrypt],
     pkpSessionSigs,
     storedKeyMetadata,
