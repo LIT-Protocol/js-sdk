@@ -942,8 +942,6 @@ export class LitCore {
       url: urlWithPath,
       data,
       requestId,
-    }).catch((err: NodeErrorV3) => {
-      return err;
     });
   };
 
