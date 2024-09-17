@@ -111,7 +111,7 @@ describe('Epoch Transition', () => {
       devEnv.testnet?.transitionEpochAndWait();
       // give some time for the transition to start
       await new Promise<void>((res) => {
-        setTimeout(res, 15_000);
+        setTimeout(res, 20_000);
       });
       await devEnv.litNodeClient?.disconnect();
       await devEnv.litNodeClient?.connect();
