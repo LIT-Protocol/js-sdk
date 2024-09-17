@@ -1,4 +1,4 @@
-name: master-trigger
+name: root-trigger 
 on:
   pull_request:
   workflow_dispatch: {}
