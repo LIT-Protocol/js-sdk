@@ -1,3 +1,7 @@
+import { Contract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
+import Ajv, { JSONSchemaType } from 'ajv';
+
 import {
   ABI_ERC20,
   ILitError,
@@ -8,31 +12,18 @@ import {
   LIT_NETWORK_VALUES,
   RELAYER_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
-
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 import {
   Chain,
   AuthSig,
-  KV,
   NodeClientErrorV0,
   NodeClientErrorV1,
-  NodeErrorV1,
-  NodeErrorV3,
-  ClaimRequest,
-  ClaimKeyResponse,
   ClaimResult,
-  ClaimProcessor,
   MintCallback,
   RelayClaimProcessor,
-  SuccessNodePromises,
-  RejectedNodePromises,
 } from '@lit-protocol/types';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
-import { version } from '@lit-protocol/constants';
-import Ajv, { JSONSchemaType } from 'ajv';
 
-const logBuffer: Array<Array<any>> = [];
+const logBuffer: any[][] = [];
 const ajv = new Ajv();
 
 /**
@@ -55,7 +46,7 @@ export const printError = (e: Error): void => {
  * @param { Array<any> } arr
  * @returns { any } the element that appeared the most
  */
-export const mostCommonString = (arr: Array<any>): any => {
+export const mostCommonString = (arr: any[]): any => {
   return arr
     .sort(
       (a: any, b: any) =>
@@ -65,15 +56,15 @@ export const mostCommonString = (arr: Array<any>): any => {
     .pop();
 };
 
-export const findMostCommonResponse = (responses: Array<object>): object => {
-  const result: { [key: string]: any } = {};
+export const findMostCommonResponse = (responses: object[]): object => {
+  const result: Record<string, any> = {};
 
   // Aggregate all values for each key across all responses
   const keys = new Set(responses.flatMap(Object.keys));
 
   for (const key of keys) {
     const values = responses.map(
-      (response: { [key: string]: any }) => response[key]
+      (response: Record<string, any>) => response[key]
     );
 
     // Filter out undefined values before processing
@@ -144,7 +135,7 @@ export const throwErrorV0 = ({
 };
 
 // Map for old error codes to new ones
-const oldErrorToNewErrorMap: { [key: string]: string } = {
+const oldErrorToNewErrorMap: Record<string, string> = {
   not_authorized: 'NodeNotAuthorized',
   storage_error: 'NodeStorageError',
 };
@@ -418,7 +409,7 @@ export const checkType = ({
   throwOnError = true,
 }: {
   value: any;
-  allowedTypes: Array<string> | any;
+  allowedTypes: string[] | any;
   paramName: string;
   functionName: string;
   throwOnError?: boolean;
@@ -580,7 +571,7 @@ export const is = (
   throwOnError = true
 ) => {
   if (getVarType(value) !== type) {
-    let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
+    const message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
     )}" type instead. value: ${
       value instanceof Object ? JSON.stringify(value) : value
@@ -600,7 +591,7 @@ export const is = (
 };
 
 export const isNode = () => {
-  var isNode = false;
+  let isNode = false;
   // @ts-ignore
   if (typeof process === 'object') {
     // @ts-ignore
@@ -706,15 +697,15 @@ export const defaultMintClaimCallback: MintCallback<
     });
 
     if (response.status < 200 || response.status >= 400) {
-      let errResp = (await response.json()) ?? '';
-      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
+      const errResp = (await response.json()) ?? '';
+      const errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
         errResp
       )}`;
       console.warn(errStmt);
       throw new Error(errStmt);
     }
 
-    let body: any = await response.json();
+    const body: any = await response.json();
     return body.requestId;
   } catch (e) {
     console.error((e as Error).message);
@@ -789,38 +780,96 @@ export function getEnv({
   return defaultValue;
 }
 
-export function sendRequest(
-  url: string,
-  req: RequestInit,
+/** This method will give us the JSON parsed response if possible, otherwise the text of the response as a string
+ * Responses from the backend API should always be in JSON format
+ * However, some mis-behaving infrastructure could return a 200 OK response code, but with a text string in the body
+ *
+ * @param {Response} response The response we received from fetch()
+ * @returns {<T>|string} The error message from the response
+ */
+async function tryParseResponse(
+  response: Response,
   requestId: string
-): Promise<Response> {
-  return fetch(url, req)
-    .then(async (response) => {
-      const isJson = response.headers
-        .get('content-type')
-        ?.includes('application/json');
-
-      const data = isJson ? await response.json() : null;
-
-      if (!response.ok) {
-        // get error message from body or default to response status
-        const error = data || response.status;
-        return Promise.reject(error);
-      }
-
-      return data;
-    })
-    .catch((error: NodeErrorV3) => {
-      logErrorWithRequestId(
-        requestId,
-        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-          error?.message || error?.details
-            ? `Error is ${error.message} - ${error.details}`
-            : ''
-        }`
+): Promise<unknown> {
+  try {
+    return await response.json(); // NOTE: `await` here is necessary for errors to be caught by try{}
+  } catch (e) {
+    try {
+      return await response.text();
+    } catch (err) {
+      throw new Error(
+        constructErrorMessage(
+          `HTTP ${response.status} - ${getErrorMessageStr(err)}`,
+          requestId
+        )
       );
-      return Promise.reject(error);
-    });
+    }
+  }
+}
+
+function getErrorMessageStr(responseBody: unknown) {
+  if (!responseBody) {
+    return 'There was no response body.';
+  } else if (typeof responseBody === 'string') {
+    // Got a string back? This is probably a proxy or some other internal thing.
+    return responseBody;
+  } else {
+    // We got some kind of structured JSON back from the node, but it was still a failed request.
+    if (typeof responseBody === 'object' && 'message' in responseBody) {
+      const responseObject = responseBody as { message: string };
+      return responseObject.message;
+    } else {
+      // If we got here, we're not entirely sure WTF the response is. Stringify it so we can log it in its entirety later.
+      return JSON.stringify(responseBody);
+    }
+  }
+}
+
+function constructErrorMessage(
+  errorMessage: string,
+  requestId: string,
+  errorDetails?: unknown
+): string {
+  const message = `Error is: ${errorMessage}`;
+  const details = errorDetails ? ` - ${errorDetails}` : '';
+  return `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${message}${
+    details ? JSON.stringify(details) : ''
+  }`;
+}
+
+/* If fetch throws an error, we encountered a network error _and there is no response at all_ */
+async function tryFetch(url: string, init: RequestInit, requestId: string) {
+  try {
+    return await fetch(url, init);
+  } catch (e: unknown) {
+    // TODO: Use VError cause to keep original error in scope for consumers in v7
+    const err = e as Error; // Fetch always throws Error instances
+    throw new Error(constructErrorMessage(err.message, requestId));
+  }
+}
+
+export async function sendRequest(
+  url: string,
+  init: RequestInit,
+  requestId: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  const response = await tryFetch(url, init, requestId);
+  const responseContent = await tryParseResponse(response, requestId);
+
+  if (!response.ok || response.status !== 200) {
+    // Request 'succeeded', but with a non-200 `status`.
+    throw new Error(
+      constructErrorMessage(
+        `HTTP ${response.status} - ${getErrorMessageStr(responseContent)}`,
+        requestId,
+        // @ts-expect-error - We don't really know the type of responseContent
+        responseContent?.details // Structured errors from the nodes include `details`
+      )
+    );
+  }
+
+  return responseContent;
 }
 
 /**
