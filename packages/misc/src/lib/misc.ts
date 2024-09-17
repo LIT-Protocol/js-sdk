@@ -854,22 +854,27 @@ export async function sendRequest(
   requestId: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
-  const response = await tryFetch(url, init, requestId);
-  const responseContent = await tryParseResponse(response, requestId);
+  try {
+    const response = await tryFetch(url, init, requestId);
+    const responseContent = await tryParseResponse(response, requestId);
 
-  if (!response.ok || response.status !== 200) {
-    // Request 'succeeded', but with a non-200 `status`.
-    throw new Error(
-      constructErrorMessage(
-        `HTTP ${response.status} - ${getErrorMessageStr(responseContent)}`,
-        requestId,
-        // @ts-expect-error - We don't really know the type of responseContent
-        responseContent?.details // Structured errors from the nodes include `details`
-      )
-    );
+    if (!response.ok || response.status !== 200) {
+      // Request 'succeeded', but with a non-200 `status`.
+      throw new Error(
+        constructErrorMessage(
+          `HTTP ${response.status} - ${getErrorMessageStr(responseContent)}`,
+          requestId,
+          // @ts-expect-error - We don't really know the type of responseContent
+          responseContent?.details // Structured errors from the nodes include `details`
+        )
+      );
+    }
+    return responseContent;
+  } catch (error) {
+    const err = error as Error;
+    logErrorWithRequestId(requestId, err.message || JSON.stringify(error));
+    throw error;
   }
-
-  return responseContent;
 }
 
 /**
