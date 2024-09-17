@@ -1,10 +1,10 @@
+
 require('dotenv').config();
 console.log('loaded configuration from .env', __dirname);
 
 module.exports = async function (globalConfig, projectConfig) {
   console.log('starting global setup, initalizing testnet');
-  console.log(globalConfig);
-  console.log(projectConfig);
+
   if (process.env['USE_SHIVA'] === true) {
     const tinny = require('@lit-protocol/tinny');
     global.__SHIVA__ = new tinny.ShivaClient();

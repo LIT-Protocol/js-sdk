@@ -28,7 +28,8 @@
       "options": {
         "jestConfig": "packages/e2e-tests/jest.config.ts",
         "passWithNoTests": true,
-        "runInBand": false
+        "runInBand": false,
+        "json": true
       }
     },
     "test-ci": {
@@ -37,7 +38,8 @@
       "options": {
         "jestConfig": "packages/e2e-tests/ci/jest.config.ts",
         "runInBand": true,
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "json": true
       }
     },
     "test-long-run": {
