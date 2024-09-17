@@ -110,10 +110,11 @@ export class TinnyEnvironment {
     | LitContractResolverContext
     | undefined;
 
-  constructor(network?: LIT_TESTNET) {
+  private _config: { useRLI: boolean };
+  constructor(network?: LIT_TESTNET, config?: { useRLI: boolean }) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
-
+    this._config = config ?? { useRLI: true };
     if (Object.values(LIT_TESTNET).indexOf(this.network) === -1) {
       throw new Error(
         `Invalid network environment. Please use one of ${Object.values(
@@ -391,7 +392,10 @@ export class TinnyEnvironment {
       }
 
       await this.setupLitNodeClient();
-      await this.setupSuperCapacityDelegationAuthSig();
+      if (this._config.useRLI) {
+        await this.setupSuperCapacityDelegationAuthSig();
+      }
+
       await this.setupBareEthAuthSig();
     } catch (e) {
       const err = toErrorWithMessage(e);
