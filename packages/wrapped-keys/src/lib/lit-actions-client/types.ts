@@ -28,7 +28,6 @@ export type LitActionCodeRepositoryEntry = Record<Network, string>;
  * @property {LitActionCodeRepositoryEntry} generateEncryptedKey - Ethereum and Solana encrypted key generation actions.
  * @property {LitActionCodeRepositoryEntry} exportPrivateKey - Ethereum and Solana private key export actions.
  */
-export type LitActionCodeRepository = Record<
-  LitActionType,
-  LitActionCodeRepositoryEntry
+export type LitActionCodeRepository = Readonly<
+  Record<LitActionType, LitActionCodeRepositoryEntry>
 >;

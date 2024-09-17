@@ -14,9 +14,11 @@ By default, this package uses IPFS CIDs to indicate the Lit Actions involved, wh
 
 This behaviour can be modified by calling `config.setLitActionsCode({ litActionRepository })` and providing your own source code for LIT actions, which allows you to either embed your LIT action source code into your app bundle or even fetch it dynamically during app load.
 
-When setting an explicit LIT action source code repository, LIT action source code will be sent to the LIT nodes in each request from your users, instead of relying on the nodes fetching the code from IPFS. This can provide performance improvements in some circumstances due to the variable nature of IPFS performance, but with an added overhead in bandwidth used for each request your users make.
+When setting an explicit Lit Action source code repository, Lit Action source code will be sent to the LIT nodes in each request from your users, instead of relying on the nodes fetching the code from IPFS.
 
-To use LIT-provided LIT actions and bundle their source code into your app, use `@lit-protocol/wrapped-keys-lit-actions` or define your own LIT action source code dictionary,
+This can provide performance improvements in some circumstances due to the variable nature of IPFS performance, but with an added overhead in bandwidth used for each request your users make, bundle size and/or app load time depending on your use case.
+
+To use LIT-provided Lit Actions and bundle their source code into your app, use `@lit-protocol/wrapped-keys-lit-actions` or define your own LIT action source code dictionary,
 
 Example using LIT-provided action source code:
 

@@ -4,41 +4,35 @@
   "sourceRoot": "packages/wrapped-keys-lit-actions/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/esbuild:esbuild",
-      "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
+    "build-la": {
+      "cache": false,
+      "executor": "nx:run-commands",
       "options": {
-        "main": "packages/wrapped-keys-lit-actions/src/index.ts",
-        "outputPath": "dist/packages/wrapped-keys-lit-actions",
-        "tsConfig": "packages/wrapped-keys-lit-actions/tsconfig.json",
-        "assets": ["packages/wrapped-keys-lit-actions/*.md"],
-        "platform": "browser",
-        "thirdParty": true,
-        "additionalEntryPoints": [
-          "packages/wrapped-keys-lit-actions/src/lib/ethereum/signTransactionWithEthereumEncryptedKey.js",
-          "packages/wrapped-keys-lit-actions/src/lib/ethereum/signMessageWithEthereumEncryptedKey.js",
-          "packages/wrapped-keys-lit-actions/src/lib/ethereum/generateEncryptedEthereumPrivateKey.js",
-          "packages/wrapped-keys-lit-actions/src/lib/common/exportPrivateKey.js",
-          "packages/wrapped-keys-lit-actions/src/lib/solana/signTransactionWithSolanaEncryptedKey.js",
-          "packages/wrapped-keys-lit-actions/src/lib/solana/signMessageWithSolanaEncryptedKey.js",
-          "packages/wrapped-keys-lit-actions/src/lib/solana/generateEncryptedSolanaPrivateKey.js"
+        "commands": [
+          "yarn --cwd ./packages/wrapped-keys-lit-actions generate-lit-actions"
         ],
-        "esbuildOptions": {
-          "inject": ["packages/wrapped-keys-lit-actions/buffer.shim.js"],
-          "bundle": true,
-          "minify": true,
-          "sourcemap": false
-        }
-      },
-      "configurations": {
-        "development": {
-          "minify": false
-        },
-        "production": {
-          "minify": true
-        }
+        "cwd": "."
       }
+    },
+    "build": {
+      "cache": false,
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/wrapped-keys-lit-actions",
+        "main": "packages/wrapped-keys-lit-actions/src/index.ts",
+        "tsConfig": "packages/wrapped-keys-lit-actions/tsconfig.lib.json",
+        "assets": [
+          "packages/wrapped-keys-lit-actions/*.md",
+          {
+            "glob": "**/*",
+            "input": "packages/wrapped-keys-lit-actions/src/generated",
+            "output": "src/generated"
+          }
+        ],
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": ["build-la"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",

@@ -23,7 +23,10 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "6.5.0",
-  "main": "./dist/undefined",
+  "scripts": {
+    "generate-lit-actions": "yarn node ./esbuild.config.js"
+  },
+  "version": "6.5.1",
+  "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

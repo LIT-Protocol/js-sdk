@@ -1,4 +1,4 @@
-import { LitActionCodeRepository, LitActionCodeRepositoryEntry } from './types';
+import { LitActionCodeRepository } from './types';
 
 /**
  * A repository for managing Lit Actions related to blockchain operations.
@@ -6,79 +6,39 @@ import { LitActionCodeRepository, LitActionCodeRepositoryEntry } from './types';
  * encrypted keys, and private keys across multiple blockchain platforms.
  * @type {LitActionCodeRepository}
  */
-const litActionCodeRepository: LitActionCodeRepository = {
-  signTransaction: {
+const litActionCodeRepository: LitActionCodeRepository = Object.freeze({
+  signTransaction: Object.seal({
     evm: '',
     solana: '',
-  },
-  signMessage: {
+  }),
+  signMessage: Object.seal({
     evm: '',
     solana: '',
-  },
-  generateEncryptedKey: {
+  }),
+  generateEncryptedKey: Object.seal({
     evm: '',
     solana: '',
-  },
-  exportPrivateKey: {
+  }),
+  exportPrivateKey: Object.seal({
     evm: '',
     solana: '',
-  },
-};
-
-function assertIsLitActionKey(
-  key: string
-): asserts key is keyof LitActionCodeRepository {
-  if (!(key in litActionCodeRepository)) {
-    throw new Error(
-      `Invalid key: ${key}; must be one of ${Object.keys(
-        litActionCodeRepository
-      ).join(',')}`
-    );
-  }
-}
-
-/**
- * Type Guard for LitActionCodeRepositoryEntry
- */
-function assertIsLitActionRepositoryEntry(
-  entry: unknown
-): asserts entry is LitActionCodeRepositoryEntry {
-  if (
-    typeof entry !== 'object' ||
-    entry === null ||
-    !('evm' in entry) ||
-    !('solana' in entry) ||
-    // @ts-expect-error This is an assertion function
-    typeof (entry as object).evm !== 'string' ||
-    // @ts-expect-error This is an assertion function
-    typeof (entry as object).solana !== 'string'
-  ) {
-    throw new Error(
-      `Invalid LitActionRepository entry: ${JSON.stringify(entry)}`
-    );
-  }
-}
+  }),
+});
 
 /**
  * @param repository - user provided repository to set
  */
 function setLitActionsCode(repository: LitActionCodeRepository) {
-  const userProvidedRepositoryCount = Object.keys(repository).length;
-  const litActionCodeRepositoryCount = Object.keys(
-    litActionCodeRepository
-  ).length;
+  const actions = Object.keys(repository) as (keyof typeof repository)[];
 
-  if (userProvidedRepositoryCount !== litActionCodeRepositoryCount) {
-    throw new Error(
-      `Invalid repository shape; expected ${litActionCodeRepositoryCount}`
-    );
-  }
+  for (const action of actions) {
+    const networks = Object.keys(
+      repository[action]
+    ) as (keyof (typeof repository)[typeof action])[];
 
-  for (const key in repository) {
-    assertIsLitActionKey(key);
-    assertIsLitActionRepositoryEntry(repository[key]);
-
-    litActionCodeRepository[key] = repository[key];
+    for (const network of networks) {
+      litActionCodeRepository[action][network] = repository[action][network];
+    }
   }
 }
 

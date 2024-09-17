@@ -12,7 +12,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
  * @returns { Promise<string> } - Returns a decrypted private key.
  */
 
-export default async () => {
+(async () => {
   let decryptedPrivateKey;
   try {
     decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
@@ -40,4 +40,4 @@ export default async () => {
   } catch (err) {
     Lit.Actions.setResponse({ response: err.message });
   }
-};
+})();
