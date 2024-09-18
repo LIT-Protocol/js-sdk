@@ -1,4 +1,9 @@
-import { LitActionCodeRepository } from './types';
+import {
+  LitActionCodeRepository,
+  LitActionCodeRepositoryInput,
+  LitActionType,
+} from './types';
+import { Network } from '../types';
 
 /**
  * A repository for managing Lit Actions related to blockchain operations.
@@ -26,18 +31,14 @@ const litActionCodeRepository: LitActionCodeRepository = Object.freeze({
 });
 
 /**
- * @param repository - user provided repository to set
+ * Updates the litActionCodeRepository with the provided entries.
+ * @param { LitActionCodeRepositoryInput } repository - user provided repository to set
  */
-function setLitActionsCode(repository: LitActionCodeRepository) {
-  const actions = Object.keys(repository) as (keyof typeof repository)[];
-
-  for (const action of actions) {
-    const networks = Object.keys(
-      repository[action]
-    ) as (keyof (typeof repository)[typeof action])[];
-
-    for (const network of networks) {
-      litActionCodeRepository[action][network] = repository[action][network];
+function setLitActionsCode(repository: LitActionCodeRepositoryInput) {
+  for (const [actionType, actionCode] of Object.entries(repository)) {
+    for (const [network, code] of Object.entries(actionCode)) {
+      litActionCodeRepository[actionType as LitActionType][network as Network] =
+        code;
     }
   }
 }

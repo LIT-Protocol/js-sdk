@@ -20,6 +20,8 @@ export type LitCidRepository = Readonly<
  * @typedef {Record<Network, string>} LitActionCodeRepositoryEntry
  */
 export type LitActionCodeRepositoryEntry = Record<Network, string>;
+export type LitActionCodeRepositoryEntryInput =
+  Partial<LitActionCodeRepositoryEntry>;
 
 /**
  * @typedef {Record<LitActionType, LitActionCodeRepositoryEntry>} LitActionCodeRepository
@@ -30,4 +32,7 @@ export type LitActionCodeRepositoryEntry = Record<Network, string>;
  */
 export type LitActionCodeRepository = Readonly<
   Record<LitActionType, LitActionCodeRepositoryEntry>
+>;
+export type LitActionCodeRepositoryInput = Partial<
+  Record<LitActionType, LitActionCodeRepositoryEntryInput>
 >;
