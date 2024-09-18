@@ -128,6 +128,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     blockExplorerUrls: ['https://arbiscan.io/'],
     vmType: 'EVM',
   },
+  arbitrumSepolia: {
+    contractAddress: null,
+    chainId: 421614,
+    name: 'Arbitrum Sepolia',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://arbitrum-sepolia.blockpi.network/v1/rpc/public'],
+    blockExplorerUrls: ['https://sepolia.arbiscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
   avalanche: {
     contractAddress: '0xBB118507E802D17ECDD4343797066dDc13Cde7C6',
     chainId: 43114,
@@ -378,7 +389,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Sepolia Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://eth-sepolia.g.alchemy.com/v2/demo'],
+    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
     blockExplorerUrls: ['https://sepolia.etherscan.io/'],
     type: null,
     vmType: 'EVM',
@@ -619,6 +630,144 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  fuse: {
+    contractAddress: null,
+    chainId: 122,
+    name: 'Fuse',
+    symbol: 'FUSE',
+    decimals: 18,
+    rpcUrls: ['https://rpc.fuse.io/'],
+    blockExplorerUrls: ['https://explorer.fuse.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  campNetwork: {
+    contractAddress: null,
+    chainId: 325000,
+    name: 'Camp Network',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'],
+    blockExplorerUrls: [
+      'https://explorer.camp-network-testnet.gelato.digital/',
+    ],
+    type: null,
+    vmType: 'EVM',
+  },
+  vanar: {
+    contractAddress: null,
+    chainId: 78600,
+    name: 'Vanar Vanguard',
+    symbol: 'VANRY',
+    decimals: 18,
+    rpcUrls: ['https://rpc-vanguard.vanarchain.com'],
+    blockExplorerUrls: ['https://explorer-vanguard.vanarchain.com'],
+    type: null,
+    vmType: 'EVM',
+  },
+  lisk: {
+    contractAddress: null,
+    chainId: 1135,
+    name: 'Lisk',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://lisk.drpc.org'],
+    blockExplorerUrls: ['https://blockscout.lisk.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  chilizMainnet: {
+    contractAddress: null,
+    chainId: 88888,
+    name: 'Chiliz Mainnet',
+    symbol: 'CHZ',
+    decimals: 18,
+    rpcUrls: ['https://rpc.ankr.com/chiliz'],
+    blockExplorerUrls: ['https://chiliscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  chilizTestnet: {
+    contractAddress: null,
+    chainId: 88882,
+    name: 'Chiliz Spicy Testnet',
+    symbol: 'CHZ',
+    decimals: 18,
+    rpcUrls: ['https://spicy-rpc.chiliz.com/'],
+    blockExplorerUrls: ['https://testnet.chiliscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  skaleTestnet: {
+    contractAddress: null,
+    chainId: 37084624,
+    name: 'SKALE Nebula Hub Testnet',
+    symbol: 'sFUEL',
+    decimals: 18,
+    rpcUrls: ['https://testnet.skalenodes.com/v1/lanky-ill-funny-testnet'],
+    blockExplorerUrls: [
+      'https://lanky-ill-funny-testnet.explorer.testnet.skalenodes.com',
+    ],
+    type: null,
+    vmType: 'EVM',
+  },
+  skale: {
+    contractAddress: null,
+    chainId: 1482601649,
+    name: 'SKALE Nebula Hub Mainnet',
+    symbol: 'sFUEL',
+    decimals: 18,
+    rpcUrls: ['https://mainnet.skalenodes.com/v1/green-giddy-denebola'],
+    blockExplorerUrls: [
+      'https://green-giddy-denebola.explorer.mainnet.skalenodes.com',
+    ],
+    type: null,
+    vmType: 'EVM',
+  },
+  fhenixHelium: {
+    contractAddress: null,
+    chainId: 8008135,
+    name: 'Fhenix Helium',
+    symbol: 'tFHE',
+    decimals: 18,
+    rpcUrls: ['https://api.helium.fhenix.zone'],
+    blockExplorerUrls: ['https://explorer.helium.fhenix.zone'],
+    type: null,
+    vmType: 'EVM',
+  },
+  hederaTestnet: {
+    contractAddress: null,
+    chainId: 296,
+    name: 'Hedera Testnet',
+    symbol: 'HBAR',
+    decimals: 8,
+    rpcUrls: ['https://testnet.hashio.io/api'],
+    blockExplorerUrls: ['https://hashscan.io/testnet/dashboard'],
+    type: null,
+    vmType: 'EVM',
+  },
+  bitTorrentTestnet: {
+    contractAddress: null,
+    chainId: 1028,
+    name: 'BitTorrent Testnet',
+    symbol: 'BTT',
+    decimals: 18,
+    rpcUrls: ['https://test-rpc.bittorrentchain.io'],
+    blockExplorerUrls: ['https://testnet.bttcscan.com'],
+    type: null,
+    vmType: 'EVM',
+  },
+  kintoTestnet: {
+    contractAddress: null,
+    chainId: 88882,
+    name: 'Kinto Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['http://35.215.120.180:8545'],
+    blockExplorerUrls: ['https://kintoscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**
@@ -695,6 +844,7 @@ export const LIT_NETWORK = {
   Habanero: 'habanero',
   DatilDev: 'datil-dev',
   DatilTest: 'datil-test',
+  Datil: 'datil',
   Custom: 'custom',
   Localhost: 'localhost',
 };
@@ -720,6 +870,7 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   habanero: LIT_RPC.CHRONICLE,
   'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
+  datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
   localhost: LIT_RPC.LOCAL_ANVIL,
 };
@@ -735,6 +886,7 @@ export const RELAYER_URL_BY_NETWORK: {
   habanero: 'https://habanero-relayer.getlit.dev',
   'datil-dev': 'https://datil-dev-relayer.getlit.dev',
   'datil-test': 'https://datil-test-relayer.getlit.dev',
+  datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
   localhost: 'http://localhost:3000',
 };
@@ -751,6 +903,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   habanero: metamaskChainInfo.chronicle,
   'datil-dev': metamaskChainInfo.yellowstone,
   'datil-test': metamaskChainInfo.yellowstone,
+  datil: metamaskChainInfo.yellowstone,
   custom: metamaskChainInfo.yellowstone,
   localhost: metamaskChainInfo.yellowstone,
 };
@@ -787,6 +940,7 @@ export const CENTRALISATION_BY_NETWORK: Record<
   habanero: 'decentralised',
   'datil-dev': 'centralised',
   'datil-test': 'decentralised',
+  datil: 'decentralised',
   custom: 'unknown',
   localhost: 'unknown',
 } as const;
@@ -947,6 +1101,7 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   [LitNetwork.Manzano]: [],
   [LitNetwork.DatilDev]: [],
   [LitNetwork.DatilTest]: [],
+  [LitNetwork.Datil]: [],
   [LitNetwork.Habanero]: [],
   [LitNetwork.Custom]: [],
   // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
@@ -979,7 +1134,6 @@ export const AUTH_METHOD_TYPE_IDS = {
 
 // ========== PKP Client ==========
 export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
-export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
 
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
@@ -1013,3 +1167,8 @@ export const RELAY_URL_DATIL_TEST = 'https://datil-test-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+
+export const FALLBACK_IPFS_GATEWAYS = [
+  'https://flk-ipfs.io/ipfs/',
+  'https://litprotocol.mypinata.cloud/ipfs/',
+];

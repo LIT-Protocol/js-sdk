@@ -12,7 +12,7 @@ import {
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
-import { LitNetwork } from '@lit-protocol/constants';
+import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 
@@ -29,9 +29,12 @@ export const getEoaSessionSigs = async (
   person: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
-  if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
+  const centralisation =
+    CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
+
+  if (centralisation === 'decentralised') {
     console.warn(
-      'Manzano network detected. Adding capacityDelegationAuthSig to eoaSessionSigs'
+      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
     );
   }
 
@@ -86,10 +89,9 @@ export const getEoaSessionSigs = async (
       return authSig;
     },
 
-    // -- only add this for manzano network because of rate limiting
-    ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-      ? { capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig] }
-      : {}),
+    ...(centralisation === 'decentralised' && {
+      capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
+    }),
   });
 
   log('[getEoaSessionSigs]: ', getEoaSessionSigs);
@@ -102,6 +104,15 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
   fromWallet: ethers.Wallet,
   capacityDelegationAuthSig: AuthSig
 ) => {
+  const centralisation =
+    CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
+
+  if (centralisation === 'decentralised') {
+    console.warn(
+      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
+    );
+  }
+
   const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
     chain: 'ethereum',
     resourceAbilityRequests: [
@@ -136,7 +147,7 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
         expiration: expiration,
         resources: resourceAbilityRequests,
         walletAddress: fromWallet.address,
-        nonce: devEnv.litNodeClient.latestBlockhash,
+        nonce: await devEnv.litNodeClient.getLatestBlockhash(),
         litNodeClient: devEnv.litNodeClient,
       });
 
@@ -147,7 +158,11 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
 
       return authSig;
     },
-    capacityDelegationAuthSig: capacityDelegationAuthSig,
+    ...(centralisation === 'decentralised' && {
+      capabilityAuthSigs: [
+        capacityDelegationAuthSig ?? devEnv.superCapacityDelegationAuthSig,
+      ],
+    }),
   });
 
   log('[getEoaSessionSigs]: ', getEoaSessionSigs);

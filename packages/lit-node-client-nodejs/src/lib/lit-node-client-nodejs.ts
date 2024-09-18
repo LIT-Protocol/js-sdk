@@ -15,9 +15,12 @@ import {
   createSiweMessageWithRecaps,
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
+import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
   AuthMethodType,
   EITHER_TYPE,
+  FALLBACK_IPFS_GATEWAYS,
+  GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
@@ -58,6 +61,19 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+
+import { encodeCode } from './helpers/encode-code';
+import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getClaims } from './helpers/get-claims';
+import { getClaimsList } from './helpers/get-claims-list';
+import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { normalizeArray } from './helpers/normalize-array';
+import { normalizeJsParams } from './helpers/normalize-params';
+import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
+import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { removeDoubleQuotes } from './helpers/remove-double-quotes';
+import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 import type {
   AuthCallback,
@@ -112,21 +128,8 @@ import type {
   EncryptionSignRequest,
   SigningAccessControlConditionRequest,
   JsonPKPClaimKeyRequest,
+  IpfsOptions,
 } from '@lit-protocol/types';
-
-import * as blsSdk from '@lit-protocol/bls-sdk';
-import { normalizeJsParams } from './helpers/normalize-params';
-import { encodeCode } from './helpers/encode-code';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
-import { removeDoubleQuotes } from './helpers/remove-double-quotes';
-import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { getClaimsList } from './helpers/get-claims-list';
-import { getClaims } from './helpers/get-claims';
-import { normalizeArray } from './helpers/normalize-array';
-import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-import { getBlsSignatures } from './helpers/get-bls-signatures';
-import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
-import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -180,12 +183,11 @@ export class LitNodeClientNodeJs
       await this.connect();
     }
 
-    const nonce = await this.getLatestBlockhash();
     const siweMessage = await createSiweMessageWithCapacityDelegation({
       uri: 'lit:capability:delegation',
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
-      nonce: nonce,
+      nonce: await this.getLatestBlockhash(),
       expiration: params.expiration,
       domain: params.domain,
       statement: params.statement,
@@ -955,13 +957,48 @@ export class LitNodeClientNodeJs
 
   // ========== Scoped Business Logics ==========
 
-  // Normalize the data to a basic array
+  /**
+   * Retrieves the fallback IPFS code for a given IPFS ID.
+   *
+   * @param gatewayUrl - the gateway url.
+   * @param ipfsId - The IPFS ID.
+   * @returns The base64-encoded fallback IPFS code.
+   * @throws An error if the code retrieval fails.
+   */
+  private async _getFallbackIpfsCode(
+    gatewayUrl: string | undefined,
+    ipfsId: string
+  ) {
+    const allGateways = gatewayUrl
+      ? [gatewayUrl, ...FALLBACK_IPFS_GATEWAYS]
+      : FALLBACK_IPFS_GATEWAYS;
 
-  // TODO: executeJsWithTargettedNodes
-  // if (formattedParams.targetNodeRange) {
-  //   // FIXME: we should make this a separate function
-  //   res = await this.runOnTargetedNodes(formattedParams);
-  // }
+    log(
+      `Attempting to fetch code for IPFS ID: ${ipfsId} using fallback IPFS gateways`
+    );
+
+    for (const url of allGateways) {
+      try {
+        const response = await fetch(`${url}${ipfsId}`);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch code from IPFS gateway ${url}: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const code = await response.text();
+        const codeBase64 = Buffer.from(code).toString('base64');
+
+        return codeBase64;
+      } catch (error) {
+        console.error(`Error fetching code from IPFS gateway ${url}`);
+        // Continue to the next gateway in the array
+      }
+    }
+
+    throw new Error('All IPFS gateways failed to fetch the code.');
+  }
 
   /**
    *
@@ -1001,11 +1038,31 @@ export class LitNodeClientNodeJs
     }
 
     // Format the params
-    const formattedParams: JsonExecutionSdkParams = {
+    let formattedParams: JsonExecutionSdkParams = {
       ...params,
       ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
       ...(params.code && { code: encodeCode(params.code) }),
     };
+
+    // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
+    // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
+    // and update the params with the fetched code, removing the ipfsId afterward.
+    const overwriteCode =
+      params.ipfsOptions?.overwriteCode ||
+      GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
+
+    if (overwriteCode && params.ipfsId) {
+      const code = await this._getFallbackIpfsCode(
+        params.ipfsOptions?.gatewayUrl,
+        params.ipfsId
+      );
+
+      formattedParams = {
+        ...params,
+        code: code,
+        ipfsId: undefined,
+      };
+    }
 
     const requestId = this.getRequestId();
     // ========== Get Node Promises ==========
@@ -1742,7 +1799,7 @@ export class LitNodeClientNodeJs
       version: '1',
       chainId: params.chainId ?? 1,
       expiration: _expiration,
-      nonce: this.latestBlockhash!,
+      nonce: await this.getLatestBlockhash(),
     };
 
     if (params.resourceAbilityRequests) {
@@ -1971,36 +2028,22 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Get session signatures for a set of resources
+   * Get session signatures for a set of [Lit resources](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.ILitResource.html#resource).
    *
-   * High level, how this works:
-   * 1. Generate or retrieve session key
-   * 2. Generate or retrieve the wallet signature of the session key
+   * How this function works on a high level:
+   * 1. Generate or retrieve [session keys](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.SessionKeyPair.html) (a public and private key pair)
+   * 2. Generate or retrieve the [`AuthSig`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.AuthSig.html) that specifies the session [abilities](https://v6-api-doc-lit-js-sdk.vercel.app/enums/auth_helpers_src.LitAbility.html)
    * 3. Sign the specific resources with the session key
+   *
    *
    * Note: When generating session signatures for different PKPs or auth methods,
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
    *
+   *
    * @param { GetSessionSigsProps } params
    *
-   * @example
+   * An example of how this function is used can be found in the Lit developer-guides-code repository [here](https://github.com/LIT-Protocol/developer-guides-code/tree/master/session-signatures/getSessionSigs).
    *
-   * ```ts
-   * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
-import { LitAbility } from "@lit-protocol/types";
-import { logWithRequestId } from '../../../misc/src/lib/misc';
-
-const resourceAbilityRequests = [
-    {
-      resource: new LitPKPResource("*"),
-      ability: LitAbility.PKPSigning,
-    },
-    {
-      resource: new LitActionResource("*"),
-      ability: LitAbility.LitActionExecution,
-    },
-  ];
-   * ```
    */
   getSessionSigs = async (
     params: GetSessionSigsProps
@@ -2019,15 +2062,6 @@ const resourceAbilityRequests = [
         );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
-    if (!this.latestBlockhash) {
-      throwError({
-        message: 'Eth Blockhash is undefined.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-      });
-    }
-    const nonce = this.latestBlockhash!;
-
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
@@ -2037,7 +2071,7 @@ const resourceAbilityRequests = [
       expiration: expiration,
       sessionKey: sessionKey,
       sessionKeyUri: sessionKeyUri,
-      nonce,
+      nonce: await this.getLatestBlockhash(),
 
       // -- for recap
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -2071,7 +2105,7 @@ const resourceAbilityRequests = [
           expiration,
           sessionKey: sessionKey,
           uri: sessionKeyUri,
-          nonce,
+          nonce: await this.getLatestBlockhash(),
           resourceAbilityRequests: params.resourceAbilityRequests,
 
           // -- optional fields
@@ -2190,6 +2224,26 @@ const resourceAbilityRequests = [
           throw new Error(
             '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
+        }
+
+        // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
+        // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
+        // and update the params with the fetched code, removing the ipfsId afterward.
+        const overwriteCode =
+          params.ipfsOptions?.overwriteCode ||
+          GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
+
+        if (overwriteCode && props.litActionIpfsId) {
+          const code = await this._getFallbackIpfsCode(
+            params.ipfsOptions?.gatewayUrl,
+            props.litActionIpfsId
+          );
+
+          props = {
+            ...props,
+            litActionCode: code,
+            litActionIpfsId: undefined,
+          };
         }
 
         /**

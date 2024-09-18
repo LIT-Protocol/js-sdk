@@ -1,6 +1,6 @@
 import { NETWORK_EVM, NETWORK_SOLANA } from '../constants';
 import { generateKeyWithLitAction } from '../lit-actions-client';
-import { getLitActionCid } from '../lit-actions-client/utils';
+import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { storePrivateKey } from '../service-client';
 import {
   GeneratePrivateKeyParams,
@@ -48,11 +48,17 @@ export async function generatePrivateKey(
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
+  const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
+    network,
+    'generateEncryptedKey'
+  );
+
   const { ciphertext, dataToEncryptHash, publicKey } =
     await generateKeyWithLitAction({
       ...params,
       pkpAddress,
-      litActionIpfsCid: getLitActionCid(network, 'generateEncryptedKey'),
+      litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
+      litActionCode: litActionCode ? litActionCode : undefined,
       accessControlConditions: [allowPkpAddressToDecrypt],
     });
 

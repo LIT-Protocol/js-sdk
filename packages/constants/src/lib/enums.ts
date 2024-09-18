@@ -60,6 +60,7 @@ export enum LitNetwork {
   Custom = 'custom',
   DatilDev = 'datil-dev',
   DatilTest = 'datil-test',
+  Datil = 'datil',
 }
 
 /**
