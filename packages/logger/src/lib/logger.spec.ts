@@ -119,6 +119,6 @@ describe('logger', () => {
     }
 
     expect(lm.getLogsForId('foo7').length).toEqual(count);
-    expect(lm.LoggerIds.size).toEqual(1);
+    expect(lm.LoggerIds.length).toEqual(1);
   });
 });
