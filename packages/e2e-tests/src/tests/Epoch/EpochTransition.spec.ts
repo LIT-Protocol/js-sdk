@@ -5,6 +5,7 @@ import {
   LitActionResource,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { getPkpSessionSigs, TinnyEnvironment } from '@lit-protocol/tinny';
 
 describe('Epoch Transition', () => {
@@ -115,6 +116,14 @@ describe('Epoch Transition', () => {
       });
       await devEnv.litNodeClient?.disconnect();
       await devEnv.litNodeClient?.connect();
+
+      const connnectionInfo = await LitContracts.getConnectionInfo({
+        litNetwork: 'custom',
+        networkContext: devEnv.litNodeClient?.config.contractContext,
+        rpcUrl: devEnv.rpc,
+        nodeProtocol: devEnv.litNodeClient?.config.nodeProtocol,
+      });
+      console.log(connnectionInfo);
     },
     60 * 60 * 1_000
   );
