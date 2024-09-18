@@ -1,5 +1,6 @@
 import {
   LitActionCodeRepository,
+  LitActionCodeRepositoryEntry,
   LitActionCodeRepositoryInput,
   LitActionType,
 } from './types';
@@ -30,12 +31,48 @@ const litActionCodeRepository: LitActionCodeRepository = Object.freeze({
   }),
 });
 
+function assertIsLitActionKey(
+  key: string
+): asserts key is keyof LitActionCodeRepository {
+  if (!(key in litActionCodeRepository)) {
+    throw new Error(
+      `Invalid key: ${key}; must be one of ${Object.keys(
+        litActionCodeRepository
+      ).join(',')}`
+    );
+  }
+}
+
+/**
+ * Type Guard for LitActionCodeRepositoryEntry
+ */
+function assertIsLitActionRepositoryEntry(
+  entry: unknown
+): asserts entry is LitActionCodeRepositoryEntry {
+  if (
+    typeof entry !== 'object' ||
+    !entry ||
+    ('evm' in entry &&
+      typeof (entry as LitActionCodeRepositoryEntry).evm !== 'string') ||
+    ('solana' in entry &&
+      typeof (entry as LitActionCodeRepositoryEntry).solana !== 'string') ||
+    Object.keys(entry).some((key) => !['evm', 'solana'].includes(key))
+  ) {
+    throw new Error(
+      `Invalid LitActionRepository entry: ${JSON.stringify(entry)}`
+    );
+  }
+}
+
 /**
  * Updates the litActionCodeRepository with the provided entries.
  * @param { LitActionCodeRepositoryInput } repository - user provided repository to set
  */
 function setLitActionsCode(repository: LitActionCodeRepositoryInput) {
   for (const [actionType, actionCode] of Object.entries(repository)) {
+    assertIsLitActionKey(actionType as LitActionType);
+    assertIsLitActionRepositoryEntry(actionCode);
+
     for (const [network, code] of Object.entries(actionCode)) {
       litActionCodeRepository[actionType as LitActionType][network as Network] =
         code;
