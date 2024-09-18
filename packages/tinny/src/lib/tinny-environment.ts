@@ -1,26 +1,29 @@
+import { ethers, Signer } from 'ethers';
+
+import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
+import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import {
+  AuthSig,
+  CosmosAuthSig,
+  LitContractContext,
+  LitContractResolverContext,
+  SolanaAuthSig,
+} from '@lit-protocol/types';
+
+import { ShivaClient, TestnetClient } from './shiva-client';
 import {
   LIT_TESTNET,
   ProcessEnvs,
   RPC_MAP,
   TinnyEnvConfig,
 } from './tinny-config';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitContracts } from '@lit-protocol/contracts-sdk';
-import {
-  AuthSig,
-  CosmosAuthSig,
-  LIT_NETWORKS_KEYS,
-  LitContractContext,
-  LitContractResolverContext,
-  SolanaAuthSig,
-} from '@lit-protocol/types';
-import { TinnyPerson } from './tinny-person';
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import { toErrorWithMessage } from './tinny-utils';
+import { TinnyPerson } from '../index';
 
-import { ethers } from 'ethers';
-import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
-import { ShivaClient, TestnetClient } from './shiva-client';
-
-declare var globalThis: any;
+console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
 
@@ -28,25 +31,27 @@ export class TinnyEnvironment {
    * Environment variables used in the process.
    */
   public processEnvs: ProcessEnvs = {
-    MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS'] as string) || 1,
-    TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT'] as string) || 45000,
+    MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']!) || 1,
+    TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT']!) || 45000,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
-      parseInt(process.env['REQUEST_PER_KILOSECOND'] ?? '') || 200,
-    LIT_RPC_URL: process.env['LIT_RPC_URL'] ?? '', // localhost rpc if not provided
+      parseInt(process.env['REQUEST_PER_KILOSECOND']!) ||
+      (process.env['NETWORK'] as LIT_TESTNET) === 'datil-dev'
+        ? 1
+        : 200,
+    LIT_RPC_URL: process.env['LIT_RPC_URL']!,
     WAIT_FOR_KEY_INTERVAL:
-      parseInt(process.env['WAIT_FOR_KEY_INTERVAL'] ?? '') || 3000,
+      parseInt(process.env['WAIT_FOR_KEY_INTERVAL']!) || 3000,
     BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
       'http://127.0.0.1:7470',
       'http://127.0.0.1:7471',
       'http://127.0.0.1:7472',
     ],
-    TIME_TO_RELEASE_KEY:
-      parseInt(process.env['TIME_TO_RELEASE_KEY'] ?? '') || 10000,
+    TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']!) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL:
-      parseInt(process.env['RUN_IN_BAND_INTERVAL'] ?? '') || 5000,
+      parseInt(process.env['RUN_IN_BAND_INTERVAL']!) || 5000,
 
     // Available Accounts
     // ==================
@@ -60,6 +65,7 @@ export class TinnyEnvironment {
     // (8) "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f" (10000.000000000000000000 ETH)
     // (9) "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720" (10000.000000000000000000 ETH)
     PRIVATE_KEYS: process.env['PRIVATE_KEYS']?.split(',') || [
+      '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
       '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
       '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
       '0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a',
@@ -69,7 +75,7 @@ export class TinnyEnvironment {
       '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
       '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
     ],
-    KEY_IN_USE: new Array(),
+    KEY_IN_USE: [],
     NO_SETUP: process.env['NO_SETUP'] === 'true',
     USE_SHIVA: process.env['USE_SHIVA'] === 'true',
     NETWORK_CONFIG: process.env['NETWORK_CONFIG'] ?? './networkContext.json',
@@ -146,7 +152,7 @@ export class TinnyEnvironment {
     );
   }
 
-  world: Map<string, TinnyPerson> = new Map();
+  world: Map<string, TinnyPerson> = new Map<string, TinnyPerson>();
 
   /**
    * Retrieves an available private key from a list, marking it as in use and scheduling
@@ -170,6 +176,7 @@ export class TinnyEnvironment {
     privateKey: string;
     index: number;
   }> {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const index = this.processEnvs.KEY_IN_USE.findIndex((used) => !used); // Find the first unused key
 
@@ -180,7 +187,7 @@ export class TinnyEnvironment {
 
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
-        // console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
+        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
         await new Promise((resolve) =>
           setTimeout(resolve, this.processEnvs.WAIT_FOR_KEY_INTERVAL)
@@ -227,7 +234,13 @@ export class TinnyEnvironment {
   async setupLitNodeClient() {
     console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
 
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    console.log('this.network:', this.network);
+    const centralisation = CENTRALISATION_BY_NETWORK[this.network];
+
+    if (
+      this.network === LIT_TESTNET.LOCALCHAIN ||
+      centralisation === 'unknown'
+    ) {
       const networkContext =
         this?.testnet?.ContractContext ?? this._contractContext;
       this.litNodeClient = new LitNodeClient({
@@ -237,18 +250,20 @@ export class TinnyEnvironment {
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
       });
-    } else if (this.network === LIT_TESTNET.MANZANO) {
+    } else if (centralisation === 'decentralised') {
       this.litNodeClient = new LitNodeClient({
-        litNetwork: this.network, // 'habanero' or 'manzano'
+        litNetwork: this.network,
         checkNodeAttestation: true,
         debug: this.processEnvs.DEBUG,
       });
-    } else {
+    } else if (centralisation === 'centralised') {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: false,
         debug: this.processEnvs.DEBUG,
       });
+    } else {
+      throw new Error(`Network not supported: "${this.network}"`);
     }
 
     if (globalThis.wasmExports) {
@@ -263,7 +278,8 @@ export class TinnyEnvironment {
       );
     }
 
-    if (globalThis.wasmSevSnpUtils) {
+    // @ts-expect-error property is defined on globalThis
+    if (globalThis['wasmSevSnpUtils']) {
       console.warn(
         'WASM modules already loaded. wil overide. when connect is called'
       );
@@ -273,7 +289,7 @@ export class TinnyEnvironment {
 
     if (!this.litNodeClient.ready) {
       console.error('❌ litNodeClient not ready');
-      process.exit();
+      process.exit(1);
     }
   }
 
@@ -339,38 +355,52 @@ export class TinnyEnvironment {
 
   setUnavailable = (network: LIT_TESTNET) => {
     if (this.processEnvs.NETWORK === network) {
-      throw new Error('LIT_IGNORE_TEST');
+      return true;
     }
+
+    return false;
   };
 
   /**
    * Init
    */
   async init() {
-    if (this.processEnvs.NO_SETUP) {
-      console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
-      return;
-    }
-    if (this.network === LIT_TESTNET.LOCALCHAIN && this.processEnvs.USE_SHIVA) {
-      this.testnet = await this._shivaClient.startTestnetManager();
-      // wait for the testnet to be active before we start the tests.
-      let state = await this.testnet.pollTestnetForActive();
-      if (state === `UNKNOWN`) {
-        console.log(
-          'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
-        );
-        throw new Error(`Error while creating testnet, aborting test run`);
+    try {
+      if (this.processEnvs.NO_SETUP) {
+        console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
+        return;
+      }
+      if (
+        this.network === LIT_TESTNET.LOCALCHAIN &&
+        this.processEnvs.USE_SHIVA
+      ) {
+        this.testnet = await this._shivaClient.startTestnetManager();
+        // wait for the testnet to be active before we start the tests.
+        const state = await this.testnet.pollTestnetForActive();
+        if (state === `UNKNOWN`) {
+          console.log(
+            'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
+          );
+          throw new Error(`Error while creating testnet, aborting test run`);
+        }
+
+        await this.testnet.getTestnetConfig();
+      } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
+        const context = await import('./networkContext.json');
+        this._contractContext = context;
       }
 
-      await this.testnet.getTestnetConfig();
-    } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
-      const context = await import('./networkContext.json');
-      this._contractContext = context;
+      await this.setupLitNodeClient();
+      await this.setupSuperCapacityDelegationAuthSig();
+      await this.setupBareEthAuthSig();
+    } catch (e) {
+      const err = toErrorWithMessage(e);
+      console.log(
+        `[𐬺🧪 Tinny Environment𐬺] Failed to init() tinny ${err.message}`
+      );
+      console.log(err.stack);
+      process.exit(1);
     }
-
-    await this.setupLitNodeClient();
-    await this.setupSuperCapacityDelegationAuthSig();
-    await this.setupBareEthAuthSig();
   }
 
   /**
@@ -383,7 +413,7 @@ export class TinnyEnvironment {
 
     const toSign = await createSiweMessage({
       walletAddress: wallet.address,
-      nonce: this.litNodeClient?.latestBlockhash!,
+      nonce: (await this.litNodeClient?.getLatestBlockhash()) as string,
       expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
       litNodeClient: this.litNodeClient,
     });
@@ -451,34 +481,25 @@ export class TinnyEnvironment {
       const networkContext =
         this?.testnet?.ContractContext ?? this._contractContext;
       this.contractsClient = new LitContracts({
-        network: this.processEnvs.NETWORK as LIT_NETWORKS_KEYS,
         signer: wallet,
         debug: this.processEnvs.DEBUG,
         rpc: this.rpc,
         customContext: networkContext,
+        network: 'custom',
       });
-    } else {
-      // scoping `this` for function scope
-      const me = this;
-      async function _switchWallet() {
-        // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
-        // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
-        const capacityCreditWallet =
-          ethers.Wallet.createRandom().connect(provider);
+    } else if (
+      CENTRALISATION_BY_NETWORK[this.network] === 'decentralised' ||
+      CENTRALISATION_BY_NETWORK[this.network] === 'centralised'
+    ) {
+      this.contractsClient = new LitContracts({
+        signer: wallet,
+        debug: this.processEnvs.DEBUG,
+        network: this.network,
+      });
+    }
 
-        // get wallet balance
-        const balance = await wallet.getBalance();
-        console.log('this.rpc:', me.rpc);
-        console.log('this.wallet.address', wallet.address);
-        console.log('Balance:', balance.toString());
-
-        const transferTx = await wallet.sendTransaction({
-          to: capacityCreditWallet.address,
-          value: ethers.utils.parseEther('0.001'),
-        });
-        await transferTx.wait();
-      }
-
+    // THE FOLLOWING WILL TECHNICALLY NEVER BE CALLED, BUT IT'S HERE FOR FUTURE REFERENCE FOR SWITCHING WALLETS
+    else {
       // await _switchWallet();
 
       this.contractsClient = new LitContracts({
@@ -489,6 +510,11 @@ export class TinnyEnvironment {
       });
     }
 
+    if (!this.contractsClient) {
+      console.log('❗️Contracts client not initialized');
+      process.exit();
+    }
+
     await this.contractsClient.connect();
 
     /**
@@ -496,40 +522,68 @@ export class TinnyEnvironment {
      * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
      * ====================================
      */
-    const me = this;
-    // Disabled for now
-    const _mintSuperCapacityDelegationAuthSig = async () => {
-      console.log(
-        '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
-      );
-      try {
-        const capacityTokenId = (
-          await me.contractsClient?.mintCapacityCreditsNFT({
-            requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-            daysUntilUTCMidnightExpiration: 2,
-          })
-        )?.capacityTokenIdStr;
-
-        this.superCapacityDelegationAuthSig = (
-          await this.litNodeClient?.createCapacityDelegationAuthSig({
-            dAppOwnerWallet: wallet,
-            capacityTokenId: capacityTokenId,
-            // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
-            uses: '200',
-          })
-        )?.capacityDelegationAuthSig;
-      } catch (e: any) {
-        if (
-          e.message.includes(`Can't allocate capacity beyond the global max`)
-        ) {
-          console.log('❗️Skipping capacity delegation auth sig setup.', e);
-        } else {
-          console.log(
-            '❗️Error while setting up capacity delegation auth sig',
-            e
-          );
-        }
-      }
-    };
+    if (CENTRALISATION_BY_NETWORK[this.network] === 'decentralised') {
+      await this.mintSuperCapacityDelegationAuthSig(wallet);
+    }
   };
+
+  async mintSuperCapacityDelegationAuthSig(wallet: Signer) {
+    console.log(
+      '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
+    );
+
+    //@ts-expect-error client is defined
+    const capacityNft = await this.contractsClient.mintCapacityCreditsNFT({
+      requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
+      daysUntilUTCMidnightExpiration: 2,
+    });
+    const capacityTokenId = capacityNft.capacityTokenIdStr;
+
+    try {
+      //@ts-expect-error client is defined
+      const resp = await this.litNodeClient.createCapacityDelegationAuthSig({
+        dAppOwnerWallet: wallet,
+        capacityTokenId: capacityTokenId,
+        // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+        uses: '200',
+      });
+
+      this.superCapacityDelegationAuthSig = resp.capacityDelegationAuthSig;
+    } catch (e: unknown) {
+      if (
+        (e as Error).message.includes(
+          `Can't allocate capacity beyond the global max`
+        )
+      ) {
+        console.log('❗️Skipping capacity delegation auth sig setup.', e);
+      } else {
+        console.log(
+          '❗️Error while setting up capacity delegation auth sig',
+          e
+        );
+      }
+    }
+  }
+
+  async _switchWallet(
+    wallet: ethers.Wallet,
+    provider: ethers.providers.Provider
+  ) {
+    // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
+    // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization.
+    // Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
+    const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
+
+    // get wallet balance
+    const balance = await wallet.getBalance();
+    console.log('this.rpc:', this.rpc);
+    console.log('this.wallet.address', wallet.address);
+    console.log('Balance:', balance.toString());
+
+    const transferTx = await wallet.sendTransaction({
+      to: capacityCreditWallet.address,
+      value: ethers.utils.parseEther('0.001'),
+    });
+    await transferTx.wait();
+  }
 }

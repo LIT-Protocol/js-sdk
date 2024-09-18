@@ -217,6 +217,7 @@ export class LitCore {
       // if the user wants to override the storage option explicitly we override.
       Object.defineProperty(globalThis, 'localStorage', {
         value: this.config.storageProvider?.provider,
+        configurable: true,
       });
     } else if (
       isNode() &&

@@ -6,6 +6,7 @@
 global.jestTesting = true;
 
 import { LitNodeClientNodeJs } from './lit-node-client-nodejs';
+import { LocalStorage } from 'node-localstorage';
 
 const isClass = (v) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -41,16 +42,23 @@ describe('LitNodeClientNodeJs', () => {
 
   it('should be able to defined a storage provider', async () => {
     const tmp = globalThis.localStorage;
-    Object.defineProperty(globalThis, 'localStorage', { value: undefined });
-    const ls = require('node-localstorage').LocalStorage;
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: undefined,
+      configurable: true,
+    });
+
     const litNodeClient = new LitNodeClientNodeJs({
       litNetwork: 'custom',
       storageProvider: {
-        provider: new ls('./storage.test.db'),
+        provider: new LocalStorage('./storage.test.db'),
       },
     });
     expect(litNodeClient).toBeDefined();
-    expect(litNodeClient.config.storageProvider?.provider).toBeInstanceOf(ls);
+    expect(litNodeClient.config.storageProvider?.provider).toBeInstanceOf(
+      LocalStorage
+    );
+
+    //@ts-expect-error redefine ls
     Object.defineProperty(globalThis, 'localStorage', { value: tmp });
   });
 

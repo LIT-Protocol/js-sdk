@@ -1,19 +1,21 @@
+import { ethers } from 'ethers';
+
 import {
   AuthSig,
   generateAuthSig,
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
+import { AuthMethodScope } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import {
   AuthMethod,
   BaseSiweMessage,
   LIT_NETWORKS_KEYS,
   LitContractContext,
 } from '@lit-protocol/types';
-import { ethers } from 'ethers';
+
 import { LIT_TESTNET, PKPInfo, TinnyEnvConfig } from './tinny-config';
-import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
-import { AuthMethodScope } from '@lit-protocol/constants';
 
 export class TinnyPerson {
   public privateKey: string;
@@ -93,7 +95,7 @@ export class TinnyPerson {
      * ====================================
      */
     this.siweMessage = await createSiweMessage<BaseSiweMessage>({
-      nonce: this.envConfig?.litNodeClient?.latestBlockhash!,
+      nonce: await this.envConfig.litNodeClient.getLatestBlockhash(),
       walletAddress: this.wallet.address,
     });
 
@@ -178,13 +180,27 @@ export class TinnyPerson {
    */
   async mintCapacityCreditsNFT() {
     console.log('[𐬺🧪 Tinny Person𐬺] Mint a Capacity Credits NFT ');
-    const capacityTokenId = (
-      await this.contractsClient?.mintCapacityCreditsNFT({
+    const capacityToken = await this.contractsClient
+      ?.mintCapacityCreditsNFT({
         requestsPerKilosecond:
           this.envConfig.processEnvs.REQUEST_PER_KILOSECOND,
         daysUntilUTCMidnightExpiration: 2,
       })
-    )?.capacityTokenIdStr;
+      .catch((err) => {
+        throw new Error(
+          `Error while minting capacity credit nft, error message: ${
+            err.message ?? 'unknown'
+          }`
+        );
+      });
+
+    if (!capacityToken) {
+      throw new Error(
+        'Errpr while mitning capacity credit nft: receive undefined value'
+      );
+    }
+
+    const capacityTokenId = capacityToken.capacityTokenIdStr;
 
     return capacityTokenId;
   }
@@ -201,15 +217,9 @@ export class TinnyPerson {
       '[𐬺🧪 Tinny Person𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId = (
-      await this.contractsClient?.mintCapacityCreditsNFT({
-        requestsPerKilosecond:
-          this.envConfig.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
-      })
-    )?.capacityTokenIdStr;
+    const capacityTokenId = await this.mintCapacityCreditsNFT();
 
-    this.contractsClient!.signer! = this.wallet;
+    this.contractsClient!.signer = this.wallet;
     await this.contractsClient?.connect();
     return (
       await this.envConfig.litNodeClient.createCapacityDelegationAuthSig({

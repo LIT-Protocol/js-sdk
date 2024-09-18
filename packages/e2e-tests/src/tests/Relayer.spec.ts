@@ -1,9 +1,9 @@
-import { TinnyEnvironment } from '@lit-protocol/tinny';
+import { ProviderType } from '@lit-protocol/constants';
 import {
   EthWalletProvider,
   LitAuthClient,
 } from '@lit-protocol/lit-auth-client';
-import { ProviderType } from '@lit-protocol/constants';
+import { TinnyEnvironment } from '@lit-protocol/tinny';
 
 try {
   jest.setTimeout(100_000);
@@ -14,17 +14,16 @@ try {
 describe('Relayer', () => {
   let devEnv: TinnyEnvironment;
   beforeAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error global defined
     devEnv = global.devEnv;
   });
 
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
   });
 
   afterAll(async () => {
-    //@ts-ignore
-    await global.devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('Fetch PKPS', async () => {

@@ -18,20 +18,22 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'yarn'
-      - name: Install project dependencies
-        run: yarn --frozen-lockfile
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: buildjet/setup-node@v3
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: ${{ github.workspace }}/yarn.lock
+      - name: Install Dependencies
+        run: yarn 
       - name: Build
         run: yarn build:dev
       - name: Run Unit tests
-        run: yarn tools --test --unit
+        run: yarn test:ci
   integration-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -57,7 +59,13 @@ jobs:
            rust/lit-node
       - name: Check LA dir
         run: ls -la ${{github.workspace}}/lit-assets
-      - name: Install LA Blockchain Dependencies
+      - name: Setup Lit Bockchain Dependencies
+        uses: buildjet/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm 
+          cache-dependency-path: ${{ github.workspace }}/lit-assets/blockchain/contracts/package-lock.json
+      - name: Install Blockchain Deps
         run: npm i
         working-directory: ${{github.workspace}}/lit-assets/blockchain/contracts
       - name: Docker login
@@ -69,12 +77,8 @@ jobs:
       - name: Run Shiva Container
         id: shiva-runner
         run: docker run -d -m 32g -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH=$DATIL_COMMIT_HASH -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:latest
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
       - name: Install project dependencies
-        run: yarn --frozen-lockfile
+        run: yarn 
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
@@ -83,7 +87,7 @@ jobs:
         run: yarn build:dev
       - name: Copy ENV File
         run: cp .env.ci .env
-      - name: End Tests Connection
+      - name: End to End Tests - Connection 
         id: connection
         if: steps.build.outputs.exit_code == 0
         run: yarn test:e2e -t 'Connections'
@@ -91,7 +95,7 @@ jobs:
         id: session
         if: steps.connection.outputs.exit_code == 0
         run: yarn test:e2e -t 'SessionSigs'
-      - name: End Tests PKP Ethers
+      - name: End to End Tests - PKP Ethers
         if: steps.session.outputs.exit_code == 0
         id: pkp
         run: yarn test:e2e -t 'PKP Ethers'

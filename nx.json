@@ -59,5 +59,8 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "sharedGlobals": [],
     "production": ["default", "!{projectRoot}/src/test-setup.[jt]s"]
+  },
+  "release": {
+    "projects": ["!@lit-protocol/tinny", "!@lit-protocol/e2e-tests"]
   }
 }

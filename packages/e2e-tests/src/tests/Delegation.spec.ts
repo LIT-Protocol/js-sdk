@@ -1,33 +1,44 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { expect, jest } from '@jest/globals';
-import { TinnyEnvironment } from '../../setup/tinny-environment';
+
 import {
   LitAbility,
   LitActionResource,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
-import { getEoaSessionSigsWithCapacityDelegations } from '../../setup/session-sigs/get-eoa-session-sigs';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import {
+  TinnyEnvironment,
+  TinnyPerson,
+  getEoaSessionSigsWithCapacityDelegations,
+} from '@lit-protocol/tinny';
 
 describe('Delegation', () => {
   let devEnv: TinnyEnvironment;
+  let alice: TinnyPerson;
+  let bob: TinnyPerson;
+
   beforeAll(async () => {
-    //@ts-ignore
+    //@ts-expect-error is defined
     devEnv = global.devEnv;
+    alice = await devEnv.createRandomPerson();
+    bob = await devEnv.createRandomPerson();
+  });
+
+  afterEach(() => {
+    devEnv.releasePrivateKeyFromUser(alice);
+    devEnv.releasePrivateKeyFromUser(bob);
   });
 
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
   });
 
   afterAll(async () => {
-    //@ts-ignore
-    await global.devEnv.litNodeClient?.disconnect();
+    await devEnv.litNodeClient?.disconnect();
   });
 
   it('PKP to PKP delegation executeJS', async () => {
-    const alice = await devEnv.createRandomPerson();
-    const bob = await devEnv.createRandomPerson();
-
     // Checking the scopes of the PKP owned by Bob
     const bobsAuthMethodAuthId = await LitAuthClient.getAuthIdByAuthMethod(
       bob.authMethod
@@ -35,6 +46,7 @@ describe('Delegation', () => {
 
     const scopes =
       await bob.contractsClient?.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
         bob.authMethodOwnedPkp?.tokenId!,
         AuthMethodType.EthWallet,
         bobsAuthMethodAuthId,
@@ -47,10 +59,12 @@ describe('Delegation', () => {
 
     // As a dApp owner, create a capacity delegation authSig for Bob's PKP wallet
     const capacityDelegationAuthSig =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       await alice.createCapacityDelegationAuthSig([bob.pkp?.ethAddress!]);
 
     // As a dApp owner, delegate the capacity credits NFT to Bob
     const bobPkpSessionSigs = await devEnv.litNodeClient?.getPkpSessionSigs({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       pkpPublicKey: bob.authMethodOwnedPkp?.publicKey!,
       authMethods: [bob.authMethod!],
       resourceAbilityRequests: [
@@ -81,9 +95,6 @@ describe('Delegation', () => {
       },
     });
 
-    devEnv.releasePrivateKeyFromUser(alice);
-    devEnv.releasePrivateKeyFromUser(bob);
-
     // -- Expected output:
     // {
     //   claims: {},
@@ -109,13 +120,10 @@ describe('Delegation', () => {
     expect(res?.signatures?.sig.publicKey).toBeDefined();
 
     // -- signatures.sig.signature must start with 0x
-    expect(res?.signatures.sig.signature.startsWith('0x')).toBeDefined();
+    expect(res?.signatures.sig.signature.startsWith('0x')).toBe(true);
   });
 
   it('PKP to EOA ExecuteJs', async () => {
-    const alice = await devEnv.createRandomPerson();
-    const bob = await devEnv.createRandomPerson();
-
     const appOwnersCapacityDelegationAuthSig =
       await alice.createCapacityDelegationAuthSig([bob.wallet.address]);
 
@@ -125,10 +133,6 @@ describe('Delegation', () => {
       bob.wallet,
       appOwnersCapacityDelegationAuthSig
     );
-
-    // -- printing out the recaps from the session sigs
-    const bobsSingleSessionSig =
-      bobsSessionSigs![devEnv.litNodeClient?.config?.bootstrapUrls[0]!];
 
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient?.executeJs({
@@ -145,9 +149,6 @@ describe('Delegation', () => {
         publicKey: bob.pkp?.publicKey,
       },
     });
-
-    devEnv.releasePrivateKeyFromUser(alice);
-    devEnv.releasePrivateKeyFromUser(bob);
 
     // Expected output:
     // {
@@ -174,16 +175,13 @@ describe('Delegation', () => {
     expect(res?.signatures?.sig.publicKey).toBeDefined();
 
     // -- signatures.sig.signature must start with 0x
-    expect(res?.signatures.sig.signature.startsWith('0x')).toBeDefined();
+    expect(res?.signatures.sig.signature.startsWith('0x')).toBe(true);
 
     // -- signatures.sig.recid must be parseable as a number
     expect(isNaN(res?.signatures.sig.recid)).toBeTruthy();
   });
 
   it('PKP to EOA PKP Sign', async () => {
-    const alice = await devEnv.createRandomPerson();
-    const bob = await devEnv.createRandomPerson();
-
     const appOwnersCapacityDelegationAuthSig =
       await alice.createCapacityDelegationAuthSig([bob.wallet.address]);
 
@@ -198,11 +196,9 @@ describe('Delegation', () => {
     const res = await devEnv.litNodeClient?.pkpSign({
       sessionSigs: bobsSessionSigs!,
       toSign: alice.loveLetter,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       pubKey: bob.pkp?.publicKey!,
     });
-
-    devEnv.releasePrivateKeyFromUser(alice);
-    devEnv.releasePrivateKeyFromUser(bob);
 
     // Expected output:
     // {

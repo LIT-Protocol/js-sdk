@@ -1,10 +1,18 @@
-import { Logger, LogLevel, LogManager } from './logger';
+import { LogLevel, LogManager } from './logger';
 
 describe('logger', () => {
   let lm: LogManager;
   beforeEach(() => {
     LogManager.clearInstance();
     lm = LogManager.Instance;
+
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+    jest.spyOn(console, 'info').mockImplementation(jest.fn());
+    jest.spyOn(console, 'debug').mockImplementation(jest.fn());
+    jest.spyOn(console, 'error').mockImplementation(jest.fn());
+    jest.spyOn(console, 'timeLog').mockImplementation(jest.fn());
+    jest.spyOn(console, 'time').mockImplementation(jest.fn());
+    jest.spyOn(console, 'log').mockImplementation(jest.fn());
   });
 
   it('Log Manager singleton should be defined', () => {
