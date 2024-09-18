@@ -1,5 +1,3 @@
-import { LitActionCodeRepository } from '@lit-protocol/wrapped-keys';
-
 import * as exportPrivateKey from './generated/common/exportPrivateKey';
 import * as generateEncryptedEthereumPrivateKey from './generated/ethereum/generateEncryptedEthereumPrivateKey';
 import * as signMessageWithEthereumEncryptedKey from './generated/ethereum/signMessageWithEthereumEncryptedKey';
@@ -7,6 +5,8 @@ import * as signTransactionWithEthereumEncryptedKey from './generated/ethereum/s
 import * as generateEncryptedSolanaPrivateKey from './generated/solana/generateEncryptedSolanaPrivateKey';
 import * as signMessageWithSolanaEncryptedKey from './generated/solana/signMessageWithSolanaEncryptedKey';
 import * as signTransactionWithSolanaEncryptedKey from './generated/solana/signTransactionWithSolanaEncryptedKey';
+
+import type { LitActionCodeRepository } from '@lit-protocol/wrapped-keys';
 
 const litActionRepository: LitActionCodeRepository = {
   signTransaction: {
