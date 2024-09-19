@@ -39,6 +39,7 @@ import {
   log,
   numberToHex,
   throwError,
+  validateSessionSig,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 
@@ -661,7 +662,13 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 9. finally, if the authSig is expired, re-sign
   // if it's not expired, then we don't need to resign
-  if (isSignedMessageExpired(authSig.signedMessage)) {
+  const checkAuthSig = validateSessionSig(authSig);
+
+  if (isSignedMessageExpired(authSig.signedMessage) || !checkAuthSig.isValid) {
+    if (!checkAuthSig.isValid) {
+      log(`Invalid AuthSig: ${checkAuthSig.errors.join(', ')}`);
+    }
+
     log('9. authSig expired!, resigning..');
 
     authSig = await _signAndGetAuth({

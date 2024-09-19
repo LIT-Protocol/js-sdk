@@ -50,6 +50,7 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
+  validateSessionSigs,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -130,7 +131,6 @@ import type {
   JsonPKPClaimKeyRequest,
   IpfsOptions,
 } from '@lit-protocol/types';
-import { validateSessionSigs } from './helpers/session-sigs-validator';
 
 export class LitNodeClientNodeJs
   extends LitCore

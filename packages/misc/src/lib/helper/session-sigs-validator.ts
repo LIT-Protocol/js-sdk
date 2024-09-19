@@ -132,9 +132,7 @@ function parseCapabilities(capabilities: Capability[]): ValidationResult {
  * @param sessionSig - The session signature to validate.
  * @returns The validation result, indicating whether the session signature is valid and any errors encountered during validation.
  */
-export function validateSessionSignature(
-  sessionSig: AuthSig
-): ValidationResult {
+export function validateSessionSig(sessionSig: AuthSig): ValidationResult {
   const errors: string[] = [];
 
   // Parse the main signedMessage
@@ -194,7 +192,7 @@ export function validateSessionSigs(
   const errors: string[] = [];
 
   Object.entries(sessionSigs).forEach(([key, sessionSig]) => {
-    const validationResult = validateSessionSignature(sessionSig);
+    const validationResult = validateSessionSig(sessionSig);
 
     if (!validationResult.isValid) {
       errors.push(
