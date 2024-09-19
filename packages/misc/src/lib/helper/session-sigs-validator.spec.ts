@@ -134,7 +134,7 @@ Expiration Time: invalid-date-format`; // Invalid expiration date in capability
 
     expect(validationResult.isValid).toBe(false);
     expect(validationResult.errors).toContain(
-      "Session Sig 'session1': Expiration Time not found in main signedMessage."
+      "Session Sig 'session1': Expiration Time not found in outer signedMessage."
     );
   });
 

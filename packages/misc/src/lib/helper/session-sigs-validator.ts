@@ -159,19 +159,19 @@ export function validateSessionSig(sessionSig: AuthSig): ValidationResult {
     }
   }
 
-  // Validate main expiration
-  const mainExpirationTimeStr = parsedSignedMessage['expiration'];
+  // Validate outer expiration
+  const outerExpirationTimeStr = parsedSignedMessage['expiration'];
 
-  if (mainExpirationTimeStr) {
+  if (outerExpirationTimeStr) {
     const validationResult = validateExpiration(
-      mainExpirationTimeStr,
+      outerExpirationTimeStr,
       'main signedMessage'
     );
     if (!validationResult.isValid) {
       errors.push(...validationResult.errors);
     }
   } else {
-    errors.push('Expiration Time not found in main signedMessage.');
+    errors.push('Expiration Time not found in outer signedMessage.');
   }
 
   return {
