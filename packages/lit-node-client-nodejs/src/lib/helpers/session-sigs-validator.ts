@@ -5,13 +5,13 @@ import {
   ParsedSignedMessage,
 } from '@lit-protocol/types';
 
-export interface ValidationResult {
+interface ValidationResult {
   isValid: boolean;
   errors: string[];
 }
 
 // Function to parse a signedMessage string into an object
-export function parseSignedMessage(signedMessage: string): ParsedSignedMessage {
+function parseSignedMessage(signedMessage: string): ParsedSignedMessage {
   const lines = signedMessage.split('\n');
   const parsedData: ParsedSignedMessage = {};
   let currentKey: string | null = null as string | null;
@@ -50,11 +50,23 @@ export function parseSignedMessage(signedMessage: string): ParsedSignedMessage {
     parsedData[currentKey.trim()] = currentValue.trim();
   }
 
+  // parsedData: {
+  //   'localhost wants you to sign in with your Ethereum account': '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
+  //   'This is a test statement.  You can put anything you want here. I further authorize the stated URI to perform the following actions on my behalf': "(1) 'Auth': 'Auth' for 'lit-ratelimitincrease://24529'.",
+  //   URI: 'lit:capability:delegation',
+  //   Version: '1',
+  //   'Chain ID': '1',
+  //   Nonce: '0x921dd92f497527857ee8dda62f1805e56c34c99a6b37691b4e56e6fb171a5a70',
+  //   'Issued At': '2024-09-19T13:07:33.606Z',
+  //   'Expiration Time': '2024-09-26T13:07:33.602Z',
+  //   Resources: '',
+  //   '- urn': 'recap:eyJhdHQiOnsibGl0LXJhdGVsaW1pdGluY3JlYXNlOi8vMjQ1MjkiOnsiQXV0aC9BdXRoIjpbeyJuZnRfaWQiOlsiMjQ1MjkiXSwidXNlcyI6IjIwMCJ9XX19LCJwcmYiOltdfQ'
+  // }
   return parsedData;
 }
 
 // Function to validate expiration date
-export function validateExpiration(
+function validateExpiration(
   expirationTimeStr: string,
   context: string
 ): ValidationResult {
@@ -79,9 +91,7 @@ export function validateExpiration(
 }
 
 // Function to parse and validate capabilities
-export function parseCapabilities(
-  capabilities: Capability[]
-): ValidationResult {
+function parseCapabilities(capabilities: Capability[]): ValidationResult {
   const errors: string[] = [];
 
   capabilities.forEach((capability, index) => {
@@ -115,6 +125,12 @@ export function parseCapabilities(
   };
 }
 
+/**
+ * Validates the session signature.
+ *
+ * @param sessionSig - The session signature to validate.
+ * @returns The validation result, indicating whether the session signature is valid and any errors encountered during validation.
+ */
 export function validateSessionSignature(
   sessionSig: AuthSig
 ): ValidationResult {
@@ -131,10 +147,17 @@ export function validateSessionSignature(
 
   // Validate capabilities
   const capabilities: Capability[] = parsedSignedMessage.capabilities;
-  const capabilitiesValidationResult = parseCapabilities(capabilities);
 
-  if (!capabilitiesValidationResult.isValid) {
-    errors.push(...capabilitiesValidationResult.errors);
+  if (!capabilities) {
+    errors.push('Capabilities not found in main signedMessage.');
+  } else if (capabilities.length === 0) {
+    errors.push('No capabilities found in main signedMessage.');
+  } else {
+    const capabilitiesValidationResult = parseCapabilities(capabilities);
+
+    if (!capabilitiesValidationResult.isValid) {
+      errors.push(...capabilitiesValidationResult.errors);
+    }
   }
 
   // Validate main expiration
