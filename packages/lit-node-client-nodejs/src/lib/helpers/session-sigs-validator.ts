@@ -3,6 +3,7 @@ import {
   Capability,
   ParsedSessionMessage,
   ParsedSignedMessage,
+  SessionSigsMap,
 } from '@lit-protocol/types';
 
 interface ValidationResult {
@@ -174,6 +175,33 @@ export function validateSessionSignature(
   } else {
     errors.push('Expiration Time not found in main signedMessage.');
   }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Validates the session signatures.
+ *
+ * @param sessionSigs - The session signatures to validate.
+ * @returns The validation result, indicating whether the session signatures are valid and any errors encountered during validation.
+ */
+export function validateSessionSigs(
+  sessionSigs: SessionSigsMap
+): ValidationResult {
+  const errors: string[] = [];
+
+  Object.entries(sessionSigs).forEach(([key, sessionSig]) => {
+    const validationResult = validateSessionSignature(sessionSig);
+
+    if (!validationResult.isValid) {
+      errors.push(
+        `Session Sig '${key}': ${validationResult.errors.join(', ')}`
+      );
+    }
+  });
 
   return {
     isValid: errors.length === 0,
