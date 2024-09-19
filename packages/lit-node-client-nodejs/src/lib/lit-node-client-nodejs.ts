@@ -130,6 +130,7 @@ import type {
   JsonPKPClaimKeyRequest,
   IpfsOptions,
 } from '@lit-protocol/types';
+import { validateSessionSigs } from './helpers/session-sigs-validator';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -1037,6 +1038,17 @@ export class LitNodeClientNodeJs
       });
     }
 
+    // validate session sigs
+    const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
+
+    if (checkedSessionSigs.isValid === false) {
+      return throwError({
+        message: `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+    }
+
     // Format the params
     let formattedParams: JsonExecutionSdkParams = {
       ...params,
@@ -1237,6 +1249,17 @@ export class LitNodeClientNodeJs
         message: `Either sessionSigs or authMethods (length > 0) must be present.`,
         errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
         errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
+      });
+    }
+
+    // validate session sigs
+    const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
+
+    if (checkedSessionSigs.isValid === false) {
+      return throwError({
+        message: `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
 
