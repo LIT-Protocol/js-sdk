@@ -16,6 +16,11 @@ import {
   KEYTYPE_K256,
   KEYTYPE_ED25519,
 } from './lib/constants';
+import { setLitActionsCode } from './lib/lit-actions-client/code-repository';
+import {
+  LitActionCodeRepository,
+  LitActionCodeRepositoryEntry,
+} from './lib/lit-actions-client/types';
 
 import type { SupportedNetworks } from './lib/service-client/types';
 import type {
@@ -62,6 +67,10 @@ export const api = {
   storeEncryptedKey,
 };
 
+export const config = {
+  setLitActionsCode,
+};
+
 export {
   ApiParamsSupportedNetworks,
   BaseApiParams,
@@ -74,6 +83,8 @@ export {
   ImportPrivateKeyParams,
   ImportPrivateKeyResult,
   ListEncryptedKeyMetadataParams,
+  LitActionCodeRepository,
+  LitActionCodeRepositoryEntry,
   SerializedTransaction,
   SignTransactionParams,
   SignTransactionParamsSupportedEvm,

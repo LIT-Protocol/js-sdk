@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/wrapped-keys",
+  "name": "@lit-protocol/wrapped-keys-lit-actions",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -15,7 +15,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/wrapped-keys"
+    "directory": "../../dist/packages/wrapped-keys-lit-actions"
   },
   "tags": [
     "universal"
@@ -23,7 +23,10 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "6.5.3",
+  "scripts": {
+    "generate-lit-actions": "yarn node ./esbuild.config.js"
+  },
+  "version": "6.5.1",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
