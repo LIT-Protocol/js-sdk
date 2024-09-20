@@ -282,8 +282,7 @@ export class LitNodeClientNodeJs
    */
   static async generateSessionCapabilityObjectWithWildcards(
     litResources: ILitResource[],
-    addAllCapabilities?: boolean,
-    rateLimitAuthSig?: AuthSig
+    addAllCapabilities?: boolean
   ): Promise<ISessionCapabilityObject> {
     const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
 
@@ -294,11 +293,6 @@ export class LitNodeClientNodeJs
       for (const litResource of litResources) {
         sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
       }
-    }
-
-    if (rateLimitAuthSig) {
-      throw new Error('Not implemented yet.');
-      // await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
     return sessionCapabilityObject;
