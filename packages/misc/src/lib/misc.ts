@@ -635,7 +635,10 @@ export const decimalPlaces = async ({
 }): Promise<number> => {
   const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
 
-  const web3 = new JsonRpcProvider(rpcUrl);
+  const web3 = new JsonRpcProvider({
+    url: rpcUrl,
+    skipFetchSetup: true,
+  });
 
   const contract = new Contract(contractAddress, (ABI_ERC20 as any).abi, web3);
 
