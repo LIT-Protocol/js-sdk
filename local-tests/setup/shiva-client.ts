@@ -92,7 +92,7 @@ export class TestnetClient {
     const networkContext = {
       abi: JSON.parse(contractResolverAbi),
       resolverAddress: contractResolverAddress,
-       provider: new ethers.providers.StaticJsonRpcProvider({
+      provider: new ethers.providers.StaticJsonRpcProvider({
         url: `http://${testNetConfig.rpcUrl}`,
         skipFetchSetup: true,
       }),
