@@ -2,7 +2,7 @@ const { Keypair } = require('@solana/web3.js');
 const bs58 = require('bs58');
 const nacl = require('tweetnacl');
 
-const { removeSaltFromDecryptedKey } = require('../../utils');
+const { removeSaltFromDecryptedKey } = require('../utils');
 
 /**
  *

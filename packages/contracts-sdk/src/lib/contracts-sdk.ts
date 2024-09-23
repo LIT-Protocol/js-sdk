@@ -398,12 +398,12 @@ export class LitContracts {
     }
 
     this.log('Your Signer:', this.signer);
-    this.log('Your Provider:', this.provider);
+    this.log('Your Provider:', this.provider.connection);
 
     if (!this.provider) {
-      this.log('No provide found. Will try to use the one from the signer.');
+      this.log('No provider found. Will try to use the one from the signer.');
       this.provider = this.signer.provider;
-      this.log('Your Provider(from signer):', this.provider);
+      this.log('Your Provider(from signer):', this.provider.connection);
     }
 
     const addresses: any = await LitContracts.getContractAddresses(
@@ -1046,7 +1046,7 @@ export class LitContracts {
       throw new Error('❌ Minimum validator count is not set');
     }
 
-    if (activeUnkickedValidatorStructs.length <= minNodeCountInt) {
+    if (activeUnkickedValidatorStructs.length < minNodeCountInt) {
       throw new Error(
         `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
       );

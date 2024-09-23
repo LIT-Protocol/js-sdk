@@ -11,24 +11,9 @@
         "outputPath": "dist/packages/wrapped-keys",
         "main": "packages/wrapped-keys/src/index.ts",
         "tsConfig": "packages/wrapped-keys/tsconfig.lib.json",
-        "assets": [
-          "packages/wrapped-keys/*.md",
-          {
-            "glob": "**/*",
-            "input": "packages/wrapped-keys/src/lib/generated/litActions",
-            "output": "src/lib/generated/litActions"
-          }
-        ],
+        "assets": ["packages/wrapped-keys/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
       }
-    },
-    "build-bc": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": ["yarn --cwd ./packages/wrapped-keys build-bc"],
-        "cwd": "."
-      },
-      "dependsOn": ["build"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
