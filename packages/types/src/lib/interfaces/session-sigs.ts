@@ -7,11 +7,20 @@ export interface ParsedSignedMessage {
   'Chain ID'?: string;
   Nonce?: string;
   'Issued At'?: string;
+
+  /**
+   * Inner expiration
+   */
   'Expiration Time'?: string;
   Resources?: string[]; // Should be an array of strings
-  // Dynamic keys
 
-  [key: string]: any;
+  /**
+   * Outer expiration
+   */
+  expiration?: string;
+
+  // Dynamic keys
+  [key: string]: unknown;
 }
 
 export interface ParsedSessionMessage extends ParsedSignedMessage {
