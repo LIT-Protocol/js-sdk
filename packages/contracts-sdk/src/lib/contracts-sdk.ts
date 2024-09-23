@@ -1046,7 +1046,7 @@ export class LitContracts {
       throw new Error('❌ Minimum validator count is not set');
     }
 
-    if (activeUnkickedValidatorStructs.length <= minNodeCountInt) {
+    if (activeUnkickedValidatorStructs.length < minNodeCountInt) {
       throw new Error(
         `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
       );
