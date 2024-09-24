@@ -210,9 +210,7 @@ export interface LitContract {
  * network context and interfacing with contracts on Chroncile blockchain
  *
  */
-export interface LitContractContext {
-  [index: string]: string | any;
-
+export interface ExclusiveLitContractContext {
   Allowlist: LitContract;
   LITToken: LitContract;
   Multisender: LitContract;
@@ -225,21 +223,11 @@ export interface LitContractContext {
   Staking: LitContract;
   StakingBalances: LitContract;
 }
+export interface LitContractContext extends ExclusiveLitContractContext {
+  [index: string]: string | any;
+}
 
-// Only includes the defined contract names, omitting the index signature
-type DefinedContractNamesOnly = Pick<LitContractContext, 'Allowlist'> &
-  Pick<LitContractContext, 'LITToken'> &
-  Pick<LitContractContext, 'Multisender'> &
-  Pick<LitContractContext, 'PKPHelper'> &
-  Pick<LitContractContext, 'PKPNFT'> &
-  Pick<LitContractContext, 'PKPNFTMetadata'> &
-  Pick<LitContractContext, 'PKPPermissions'> &
-  Pick<LitContractContext, 'PubkeyRouter'> &
-  Pick<LitContractContext, 'RateLimitNFT'> &
-  Pick<LitContractContext, 'Staking'> &
-  Pick<LitContractContext, 'StakingBalances'>;
-
-export type ContractName = keyof DefinedContractNamesOnly;
+export type ContractName = keyof ExclusiveLitContractContext;
 
 /**
  * Type for a contract resolver instance which will be used
