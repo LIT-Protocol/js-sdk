@@ -197,6 +197,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'invalid_eth_blockhash',
     kind: LIT_ERROR_KIND.Unexpected,
   },
+  INVALID_SESSION_SIGS: {
+    name: 'InvalidSessionSigs',
+    code: 'invalid_session_sigs',
+    kind: LIT_ERROR_KIND.Validation,
+  },
   INIT_ERROR: {
     name: 'InitError',
     code: 'init_error',
@@ -292,6 +297,7 @@ export const {
   InvalidArgumentException,
   InvalidBooleanException,
   InvalidEthBlockhash,
+  InvalidSessionSigs,
   InvalidNodeAttestation,
   InvalidParamType,
   InvalidSignatureError,

@@ -32,7 +32,13 @@ import {
   WrongNetworkException,
   LocalStorageItemNotFoundException,
 } from '@lit-protocol/constants';
-import { isBrowser, isNode, log, numberToHex } from '@lit-protocol/misc';
+import {
+  isBrowser,
+  isNode,
+  log,
+  numberToHex,
+  validateSessionSig,
+} from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
 
