@@ -121,6 +121,16 @@ const NETWORKS_REQUIRING_SEV: string[] = [
   LitNetwork.Datil,
 ];
 
+/**
+ * Lowest latency, highest score & privacy enabled listed on https://chainlist.org/
+ */
+const FALLBACK_RPC_URLS = [
+  'https://ethereum-rpc.publicnode.com',
+  'https://eth.llamarpc.com',
+  'https://eth.drpc.org',
+  'https://eth.llamarpc.com',
+];
+
 export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
@@ -225,6 +235,10 @@ export class LitCore {
     return globalThis.logManager.getLogsForId(id);
   };
 
+  getRequestIds = (): Set<string> => {
+    return globalThis.logManager.LoggerIds;
+  };
+
   /**
    * Retrieves the validator data including staking contract, epoch, minNodeCount, and bootstrapUrls.
    * @returns An object containing the validator data.
@@ -279,10 +293,8 @@ export class LitCore {
     log('[_getValidatorData] epochInfo: ', epochInfo);
     log('[_getValidatorData] minNodeCount: ', minNodeCount);
     log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
-    log(
-      '[_getValidatorData] Staking contract address: ',
-      stakingContract.address
-    );
+    log('[_getValidatorData] stakingContract: ', stakingContract.address);
+
     return {
       stakingContract,
       epochInfo,
@@ -671,13 +683,11 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not connect to enough nodes after timeout of ${
+          const msg = `Error: Could not handshake with nodes after timeout of ${
             this.config.connectTimeout
-          }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${
-            this.config.minNodeCount
-          } required nodes, from ${
+          }ms. Could only connect to ${Object.keys(serverKeys).length} of ${
             this.config.bootstrapUrls.length
-          } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             // TODO: Kludge, replace with standard error construction
@@ -765,11 +775,42 @@ export class LitCore {
     };
   }
 
+  private _getProviderWithFallback =
+    async (): Promise<ethers.providers.JsonRpcProvider | null> => {
+      for (const url of FALLBACK_RPC_URLS) {
+        try {
+          const provider = new ethers.providers.JsonRpcProvider({
+            url: url,
+
+            // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
+            timeout: 60000,
+          });
+          await provider.getBlockNumber(); // Simple check to see if the provider is working
+          return provider;
+        } catch (error) {
+          logError(`RPC URL failed: ${url}`);
+        }
+      }
+      return null;
+    };
+
   /**
    * Fetches the latest block hash and log any errors that are returned
    * @returns void
    */
   private async _syncBlockhash() {
+    const currentTime = Date.now();
+    const blockHashValidityDuration = BLOCKHASH_SYNC_INTERVAL;
+
+    if (
+      this.latestBlockhash &&
+      this.lastBlockHashRetrieved &&
+      currentTime - this.lastBlockHashRetrieved < blockHashValidityDuration
+    ) {
+      log('Blockhash is still valid. No need to sync.');
+      return;
+    }
+
     log(
       'Syncing state for new blockhash ',
       'current blockhash: ',
@@ -782,15 +823,45 @@ export class LitCore {
         this.latestBlockhash = blockHashBody.blockhash;
         this.lastBlockHashRetrieved = Date.now();
         log('Done syncing state new blockhash: ', this.latestBlockhash);
+
+        // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
+        if (!this.latestBlockhash) {
+          throw new Error(
+            `Error getting latest blockhash. Received: "${this.latestBlockhash}"`
+          );
+        }
       })
-      .catch((err: BlockHashErrorResponse) => {
-        // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+      .catch(async (err: BlockHashErrorResponse | Error) => {
         logError(
-          'Error while attempting fetch new latestBlockhash:',
-          err.messages,
-          'reason: ',
-          err.reason
+          'Error while attempting to fetch new latestBlockhash:',
+          err instanceof Error ? err.message : err.messages,
+          'Reason: ',
+          err instanceof Error ? err : err.reason
         );
+
+        log(
+          'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
+        );
+        const provider = await this._getProviderWithFallback();
+
+        if (!provider) {
+          logError(
+            'All fallback RPC URLs failed. Unable to retrieve blockhash.'
+          );
+          return;
+        }
+
+        try {
+          const latestBlock = await provider.getBlock('latest');
+          this.latestBlockhash = latestBlock.hash;
+          this.lastBlockHashRetrieved = Date.now();
+          log(
+            'Successfully retrieved blockhash manually: ',
+            this.latestBlockhash
+          );
+        } catch (ethersError) {
+          logError('Failed to manually retrieve blockhash using ethers');
+        }
       });
   }
 
@@ -875,8 +946,6 @@ export class LitCore {
       url: urlWithPath,
       data,
       requestId,
-    }).catch((err: NodeErrorV3) => {
-      return err;
     });
   };
 

@@ -516,7 +516,7 @@ export interface JsonExecutionSdkParams
   /**
    * the session signatures to use to authorize the user with the nodes
    */
-  sessionSigs: any;
+  sessionSigs: SessionSigsMap;
 
   /**
    * auth methods to resolve

@@ -1,5 +1,6 @@
-import { ExecuteJsResponse, JsonExecutionSdkParams } from '@lit-protocol/types';
+import { ExecuteJsResponse } from '@lit-protocol/types';
 
+import { litActionCodeRepository } from './code-repository';
 import { LIT_ACTION_CID_REPOSITORY } from './constants';
 import { LitActionType } from './types';
 import { Network } from '../types';
@@ -46,5 +47,50 @@ export function postLitActionValidation(
 }
 
 export function getLitActionCid(network: Network, actionType: LitActionType) {
+  // We already have guarantees that `actionType` is valid; it is not user provided and type-safe
+  assertNetworkIsValid(network);
+
   return LIT_ACTION_CID_REPOSITORY[actionType][network];
+}
+
+export function getLitActionCode(
+  network: Network,
+  actionType: LitActionType
+): string {
+  // We already have guarantees that `actionType` is valid; it is not user provided and type-safe
+  assertNetworkIsValid(network);
+
+  // No fuzzy validation needed here, because `setLitActionsCode()` validates its input
+  return litActionCodeRepository[actionType][network];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function assertNetworkIsValid(network: any): asserts network is Network {
+  const validNetworks: Network[] = ['evm', 'solana'];
+
+  if (!validNetworks.includes(network)) {
+    throw new Error(
+      `Invalid network: ${network}. Must be one of ${validNetworks.join(', ')}.`
+    );
+  }
+}
+
+/**
+ * Fetch the Lit action code or its IPFS CID for a given network and action type.
+ *
+ * @param {Network} network The network to get the code or CID for.
+ * @param {LitActionType} actionType The type of action to get the code or CID for.
+ * @returns {{ litActionCode?: string, litActionIpfsCid?: string }} The Lit action code or its IPFS CID.
+ */
+export function getLitActionCodeOrCid(
+  network: Network,
+  actionType: LitActionType
+): { litActionCode?: string; litActionIpfsCid?: string } {
+  // Default state is that litActionCode will be falsy, unless someone has injected to it using `setLitActionsCode();
+  const litActionCode = getLitActionCode(network, actionType);
+
+  if (litActionCode) {
+    return { litActionCode };
+  }
+  return { litActionIpfsCid: getLitActionCid(network, actionType) };
 }

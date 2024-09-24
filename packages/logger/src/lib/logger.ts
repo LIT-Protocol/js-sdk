@@ -411,6 +411,17 @@ export class LogManager {
     }
   }
 
+  get LoggerIds(): string[] {
+    const keys: string[] = [];
+    for (const category of this._loggers.entries()) {
+      for (const child of category[1].Children) {
+        keys.push(child[0]);
+      }
+    }
+
+    return keys;
+  }
+
   // if a logger is given an id it will persist logs under its logger instance
   public get(category: string, id?: string): Logger {
     let instance = this._loggers.get(category);

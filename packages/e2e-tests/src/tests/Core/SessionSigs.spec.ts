@@ -301,7 +301,7 @@ const executeJsClaimKeys = async (
   ]);
 
   const res = await devEnv.litNodeClient?.executeJs({
-    sessionSigs: litActionSessionSigs,
+    sessionSigs: litActionSessionSigs!,
     code: `(async () => {
     Lit.Actions.claimKey({keyId: "foo"});
     Lit.Actions.claimKey({keyId: "bar"});
@@ -390,7 +390,7 @@ const executeJsClaimKey = async (
   const litActionSessionSigs = await generator(devEnv, alice);
 
   const res = await devEnv.litNodeClient?.executeJs({
-    sessionSigs: litActionSessionSigs,
+    sessionSigs: litActionSessionSigs!,
     code: `(async () => {
     Lit.Actions.claimKey({keyId: "foo"});
   })();`,
@@ -481,7 +481,7 @@ const executeJsJSONResponse = async (
   const litActionSessionSigs = await generator(devEnv, alice);
 
   const res = await devEnv.litNodeClient?.executeJs({
-    sessionSigs: litActionSessionSigs,
+    sessionSigs: litActionSessionSigs!,
     code: `(async () => {
     console.log('hello world')
 
@@ -519,7 +519,7 @@ const executeJsSigning = async (
   ]);
 
   const res = await devEnv.litNodeClient?.executeJs({
-    sessionSigs: litActionSessionSigs,
+    sessionSigs: litActionSessionSigs!,
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,
@@ -552,7 +552,7 @@ const executeJsSigningParallel = async (
 
   const fn = async () => {
     return await devEnv.litNodeClient?.executeJs({
-      sessionSigs: litActionSessionSigs,
+      sessionSigs: litActionSessionSigs!,
       code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,
@@ -653,7 +653,7 @@ const broadcastAndCollect = async (
   const litActionSessionSigs = await generator(devEnv, alice);
 
   const res = await devEnv.litNodeClient?.executeJs({
-    sessionSigs: litActionSessionSigs,
+    sessionSigs: litActionSessionSigs!,
     code: `(async () => {
               let rand = Math.floor(Math.random() * 100);
               const resp = await Lit.Actions.broadcastAndCollect({
@@ -710,7 +710,7 @@ const decryptAndCombine = async (
   expect(!encryptRes.dataToEncryptHash).toBeDefined();
 
   const res = await devEnv.litNodeClient?.executeJs({
-    sessionSigs: litActionSessionSigs,
+    sessionSigs: litActionSessionSigs!,
     code: `(async () => {
             const resp = await Lit.Actions.decryptAndCombine({
               accessControlConditions,
@@ -745,7 +745,7 @@ const signAndCombine = async (
   const litActionSessionSigs = await generator(devEnv, alice);
 
   const res = await devEnv.litNodeClient?.executeJs({
-    sessionSigs: litActionSessionSigs,
+    sessionSigs: litActionSessionSigs!,
     code: `(async () => {
             const sigShare = await LitActions.signAndCombineEcdsa({
               toSign: dataToSign,

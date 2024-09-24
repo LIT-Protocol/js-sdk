@@ -22,13 +22,6 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     this._inner = new Recap(att, prf);
   }
 
-  /**
-   * @deprecated - to be removed, as it's not used.
-   */
-  async addRateLimitAuthSig(authSig: AuthSig) {
-    throw new Error('Not implemented yet. ');
-  }
-
   static decode(encoded: string): RecapSessionCapabilityObject {
     const recap = Recap.decode_urn(encoded);
     return new this(
