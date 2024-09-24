@@ -104,12 +104,18 @@ async function getResponseJson<T>(response: Response): Promise<T | string> {
   }
 }
 
+export function generateRequestId(): string {
+  return Math.random().toString(16).slice(2);
+}
+
 export async function makeRequest<T>({
   url,
   init,
+  requestId,
 }: {
   url: string;
   init: RequestInit;
+  requestId: string;
 }) {
   try {
     const response = await fetch(url, { ...init });
@@ -127,16 +133,11 @@ export async function makeRequest<T>({
 
     return result;
   } catch (e: unknown) {
-    let cause = '';
-    // @ts-expect-error - Yes, it's unknown, but we know the property is there.
-    if ('cause' in e) {
-      // @ts-expect-error - Yes, it's unknown, but we know the property is there; fetch throws TypeError with `cause`
-      cause = e.cause;
-    }
     throw new Error(
-      `Failed to make request for wrapped key: ${(e as Error).message}${
-        cause ? ' - ' + cause : ''
-      }`
+      `Request(${requestId}) for wrapped key failed. Error: ${
+        (e as Error).message
+        // @ts-expect-error Unknown, but `cause` is on `TypeError: fetch failed` errors
+      }${e.cause ? ' - ' + e.cause : ''}`
     );
   }
 }

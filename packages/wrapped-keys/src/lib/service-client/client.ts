@@ -1,5 +1,5 @@
 import { FetchKeyParams, ListKeysParams, StoreKeyParams } from './types';
-import { getBaseRequestParams, makeRequest } from './utils';
+import { generateRequestId, getBaseRequestParams, makeRequest } from './utils';
 import {
   StoredKeyData,
   StoredKeyMetadata,
@@ -27,9 +27,14 @@ export async function listPrivateKeyMetadata(
 
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
+  const requestId = generateRequestId();
+  const url = new URL(`${baseUrl}/${pkpAddress}`);
+  url.searchParams.set('requestId', requestId);
+
   return makeRequest<StoredKeyMetadata[]>({
-    url: `${baseUrl}/${pkpAddress}`,
+    url: url.toString(),
     init: initParams,
+    requestId,
   });
 }
 
@@ -51,9 +56,14 @@ export async function fetchPrivateKey(
   });
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
+  const requestId = generateRequestId();
+
+  const url = new URL(`${baseUrl}/${pkpAddress}/${id}`);
+  url.searchParams.set('requestId', requestId);
   return makeRequest<StoredKeyData>({
-    url: `${baseUrl}/${pkpAddress}/${id}`,
+    url: url.toString(),
     init: initParams,
+    requestId,
   });
 }
 
@@ -72,13 +82,15 @@ export async function storePrivateKey(
     sessionSig,
     method: 'POST',
   });
+  const requestId = generateRequestId();
 
   const { pkpAddress, id } = await makeRequest<StoreEncryptedKeyResult>({
     url: baseUrl,
     init: {
       ...initParams,
-      body: JSON.stringify(storedKeyMetadata),
+      body: JSON.stringify({ ...storedKeyMetadata, requestId }),
     },
+    requestId,
   });
 
   return { pkpAddress, id };
