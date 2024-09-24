@@ -111,18 +111,32 @@ export async function makeRequest<T>({
   url: string;
   init: RequestInit;
 }) {
-  const response = await fetch(url, { ...init });
+  try {
+    const response = await fetch(url, { ...init });
 
-  if (!response.ok) {
-    const errorMessage = await getResponseErrorMessage(response);
-    throw new Error(`Failed to make request for wrapped key: ${errorMessage}`);
-  }
+    if (!response.ok) {
+      const errorMessage = await getResponseErrorMessage(response);
+      throw new Error(`HTTP(${response.status}): ${errorMessage}`);
+    }
 
     const result = await getResponseJson<T>(response);
 
-  if (typeof result === 'string') {
-    throw new Error(`Unexpected response from wrapped key service: ${result}`);
-  }
+    if (typeof result === 'string') {
+      throw new Error(`HTTP(${response.status}): ${result}`);
+    }
 
-  return result;
+    return result;
+  } catch (e: unknown) {
+    let cause = '';
+    // @ts-expect-error - Yes, it's unknown, but we know the property is there.
+    if ('cause' in e) {
+      // @ts-expect-error - Yes, it's unknown, but we know the property is there; fetch throws TypeError with `cause`
+      cause = e.cause;
+    }
+    throw new Error(
+      `Failed to make request for wrapped key: ${(e as Error).message}${
+        cause ? ' - ' + cause : ''
+      }`
+    );
+  }
 }
