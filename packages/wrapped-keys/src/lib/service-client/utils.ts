@@ -111,7 +111,6 @@ export async function makeRequest<T>({
   url: string;
   init: RequestInit;
 }) {
-  console.log('Fetching from URL', url);
   const response = await fetch(url, { ...init });
 
   if (!response.ok) {
@@ -119,10 +118,7 @@ export async function makeRequest<T>({
     throw new Error(`Failed to make request for wrapped key: ${errorMessage}`);
   }
 
-  /**
-   *
-   */
-  const result = await getResponseJson<T>(response);
+    const result = await getResponseJson<T>(response);
 
   if (typeof result === 'string') {
     throw new Error(`Unexpected response from wrapped key service: ${result}`);
