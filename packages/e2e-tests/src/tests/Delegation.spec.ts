@@ -81,7 +81,7 @@ describe('Delegation', () => {
     });
 
     const res = await devEnv.litNodeClient?.executeJs({
-      sessionSigs: bobPkpSessionSigs,
+      sessionSigs: bobPkpSessionSigs!,
       code: `(async () => {
                 const sigShare = await LitActions.signEcdsa({
                 toSign: dataToSign,
@@ -136,7 +136,7 @@ describe('Delegation', () => {
 
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient?.executeJs({
-      sessionSigs: bobsSessionSigs,
+      sessionSigs: bobsSessionSigs!,
       code: `(async () => {
             const sigShare = await LitActions.signEcdsa({
               toSign: dataToSign,

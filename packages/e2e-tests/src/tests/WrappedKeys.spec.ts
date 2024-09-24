@@ -668,7 +668,7 @@ describe('Wrapped Keys', () => {
 
     devEnv.litNodeClient
       ?.executeJs({
-        sessionSigs: pkpSessionSigsSigning,
+        sessionSigs: pkpSessionSigsSigning!,
         ipfsId: LIT_ACTION_CID_REPOSITORY.signTransaction.evm,
         jsParams: {
           ciphertext,
