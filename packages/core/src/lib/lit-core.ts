@@ -498,9 +498,10 @@ export class LitCore {
     if (!this.config.contractContext) {
       this.config.contractContext = await LitContracts.getContractAddresses(
         this.config.litNetwork,
-        new ethers.providers.StaticJsonRpcProvider(
-          this.config.rpcUrl || RPC_URL_BY_NETWORK[this.config.litNetwork]
-        )
+        new ethers.providers.StaticJsonRpcProvider({
+          url: this.config.rpcUrl || RPC_URL_BY_NETWORK[this.config.litNetwork],
+          skipFetchSetup: true,
+        })
       );
     } else if (
       !this.config.contractContext.Staking &&

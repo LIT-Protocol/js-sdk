@@ -311,7 +311,10 @@ export class LitContracts {
     // ----------------------------------------------
     else if (isNode()) {
       this.log("----- We're in node! -----");
-      this.provider = new ethers.providers.StaticJsonRpcProvider(this.rpc);
+      this.provider = new ethers.providers.StaticJsonRpcProvider({
+        url: this.rpc,
+        skipFetchSetup: true,
+      });
     }
 
     // ======================================
@@ -594,7 +597,10 @@ export class LitContracts {
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
-      provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl);
+      provider = new ethers.providers.StaticJsonRpcProvider({
+        url: rpcUrl,
+        skipFetchSetup: true,
+      });
     }
 
     if (!context) {
@@ -1517,7 +1523,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   //   if (isBrowser()) {
   //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
   //   } else {
-  //     provider = new ethers.providers.StaticJsonRpcProvider(this.rpc);
+  //     provider = new ethers.providers.StaticJsonRpcProvider({
+  //       url: this.rpc,
+  //       skipFetchSetup: true,
+  //     });
   //   }
   //   const signer = new ethers.Wallet(privateKey, provider);
 
@@ -1530,7 +1539,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   //   if (isBrowser()) {
   //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
   //   } else {
-  //     provider = new ethers.providers.StaticJsonRpcProvider(this.rpc);
+  //     provider = new ethers.providers.StaticJsonRpcProvider({
+  //       url: this.rpc,
+  //       skipFetchSetup: true,
+  //     });
   //   }
   //   const signer = new ethers.Wallet(privateKey, provider);
 
