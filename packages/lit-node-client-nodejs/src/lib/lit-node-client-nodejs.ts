@@ -35,6 +35,8 @@ import {
   UnknownError,
   InvalidSignatureError,
   UnsupportedMethodError,
+  LIT_ERROR,
+  InvalidSessionSigs,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -57,6 +59,7 @@ import {
   normalizeAndStringify,
   safeParams,
   removeHexPrefix,
+  validateSessionSigs,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -293,8 +296,7 @@ export class LitNodeClientNodeJs
    */
   static async generateSessionCapabilityObjectWithWildcards(
     litResources: ILitResource[],
-    addAllCapabilities?: boolean,
-    rateLimitAuthSig?: AuthSig
+    addAllCapabilities?: boolean
   ): Promise<ISessionCapabilityObject> {
     const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
 
@@ -305,18 +307,6 @@ export class LitNodeClientNodeJs
       for (const litResource of litResources) {
         sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
       }
-    }
-
-    if (rateLimitAuthSig) {
-      throw new UnsupportedMethodError(
-        {
-          info: {
-            method: 'generateSessionCapabilityObjectWithWildcards',
-            rateLimitAuthSig,
-          },
-        },
-        'Not implemented yet.'
-      );
     }
 
     return sessionCapabilityObject;
@@ -1051,6 +1041,16 @@ export class LitNodeClientNodeJs
       );
     }
 
+    // validate session sigs
+    const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
+
+    if (checkedSessionSigs.isValid === false) {
+      throw new InvalidSessionSigs(
+        {},
+        `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
+      );
+    }
+
     // Format the params
     let formattedParams: JsonExecutionSdkParams = {
       ...params,
@@ -1263,6 +1263,17 @@ export class LitNodeClientNodeJs
     }
 
     const requestId = this._getNewRequestId();
+
+    // validate session sigs
+    const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
+
+    if (checkedSessionSigs.isValid === false) {
+      throw new InvalidSessionSigs(
+        {},
+        `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
+      );
+    }
+
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
 

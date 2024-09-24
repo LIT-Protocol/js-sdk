@@ -128,7 +128,6 @@ export class TinnyPerson {
     if (this.envConfig.network === LIT_NETWORK.Custom) {
       const networkContext = this.envConfig.contractContext;
       this.contractsClient = new LitContracts({
-        network: this.envConfig.network,
         signer: this.wallet,
         debug: this.envConfig.processEnvs.DEBUG,
         rpc: this.envConfig.processEnvs.LIT_RPC_URL, // anvil rpc

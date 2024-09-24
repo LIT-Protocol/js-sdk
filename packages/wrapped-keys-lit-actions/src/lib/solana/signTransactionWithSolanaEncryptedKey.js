@@ -5,7 +5,7 @@ const {
   Transaction,
 } = require('@solana/web3.js');
 
-const { removeSaltFromDecryptedKey } = require('../../utils');
+const { removeSaltFromDecryptedKey } = require('../utils');
 
 /**
  *

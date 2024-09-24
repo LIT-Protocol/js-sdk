@@ -1,4 +1,4 @@
-import { LIT_PREFIX } from '../constants';
+const LIT_PREFIX = 'lit_';
 
 export function removeSaltFromDecryptedKey(decryptedPrivateKey) {
   if (!decryptedPrivateKey.startsWith(LIT_PREFIX)) {

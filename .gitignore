@@ -72,3 +72,5 @@ storage.test.db
 local-tests/build
 # local-tests/setup/networkContext.json
 .env
+
+packages/wrapped-keys-lit-actions/src/generated
