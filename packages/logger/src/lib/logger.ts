@@ -1,7 +1,6 @@
-import { version } from '@lit-protocol/constants';
 import { hashMessage } from 'ethers/lib/utils';
-import { encode } from 'punycode';
-import { toString as uint8arrayToString } from 'uint8arrays';
+
+import { version } from '@lit-protocol/constants';
 
 export enum LogLevel {
   INFO = 0,
@@ -153,10 +152,10 @@ class Log implements ILog {
   }
 
   toString(): string {
-    var fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(
+    let fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(
       this.level
     )} [${this.category}] [id: ${this.id}] ${this.message}`;
-    for (var i = 0; i < this.args.length; i++) {
+    for (let i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
         fmtStr = `${fmtStr} ${_safeStringify(this.args[i])}`;
       } else {
@@ -167,7 +166,7 @@ class Log implements ILog {
   }
 
   toArray(): string[] {
-    let args = [];
+    const args = [];
     args.push(`[Lit-JS-SDK v${version}]`);
     args.push(`[${this.timestamp}]`);
     args.push(_convertLoggingLevel(this.level));
@@ -176,7 +175,7 @@ class Log implements ILog {
     this.id && args.push(`${colours.fg.cyan}[id: ${this.id}]${colours.reset}`);
     this.message && args.push(this.message);
 
-    for (var i = 0; i < this.args.length; i++) {
+    for (let i = 0; i < this.args.length; i++) {
       args.push(this.args[i]);
     }
 
@@ -204,7 +203,7 @@ export class Logger {
   private _handler: messageHandler | undefined;
   private _consoleHandler: any;
   private _logs: Log[] = [];
-  private _logHashes: Map<string, boolean> = new Map();
+  private _logHashes: Map<string, boolean> = new Map<string, boolean>();
   private _config: Record<string, any> | undefined;
   private _isParent: boolean;
   private _children: Map<string, Logger>;
@@ -329,9 +328,10 @@ export class Logger {
   }
 
   private _checkHash(log: Log): boolean {
-    const digest = hashMessage(log.message);
+    const strippedMessage = this._cleanString(log.message);
+    const digest = hashMessage(strippedMessage);
     const hash = digest.toString();
-    let item = this._logHashes.get(hash);
+    const item = this._logHashes.get(hash);
     if (item) {
       return true;
     } else {
@@ -352,21 +352,36 @@ export class Logger {
 
   private _addToLocalStorage(log: Log) {
     if (globalThis.localStorage) {
-      let bucket: { [index: string]: string[] } | string | null =
+      let bucket: Record<string, string[]> | string | null =
         globalThis.localStorage.getItem(log.category);
       if (bucket) {
-        bucket = JSON.parse(bucket) as { [index: string]: string[] };
+        bucket = JSON.parse(bucket) as Record<string, string[]>;
         if (!bucket[log.id]) {
           bucket[log.id] = [];
         }
         bucket[log.id].push(log.toString());
         globalThis.localStorage.setItem(log.category, _safeStringify(bucket));
       } else {
-        const bucket: { [index: string]: string[] } = {};
+        const bucket: Record<string, string[]> = {};
         bucket[log.id] = [log.toString()];
         globalThis.localStorage.setItem(log.category, _safeStringify(bucket));
       }
     }
+  }
+
+  /**
+   *
+   * @param input string which will be cleaned of non utf-8 characters
+   * @returns {string} input cleaned of non utf-8 characters
+   */
+  private _cleanString(input: string): string {
+    let output = '';
+    for (let i = 0; i < input.length; i++) {
+      if (input.charCodeAt(i) <= 127) {
+        output += input.charAt(i);
+      }
+    }
+    return output;
   }
 }
 
@@ -446,7 +461,7 @@ export class LogManager {
         instance = this._loggers.get(category) as Logger;
         instance.Config = this._config;
       }
-      let children = instance?.Children;
+      const children = instance?.Children;
       let child = children?.get(id);
       if (child) {
         return child;
@@ -482,9 +497,9 @@ export class LogManager {
   getById(id: string): string[] {
     let logStrs: string[] = [];
     for (const category of this._loggers.entries()) {
-      let logger = category[1].Children.get(id);
+      const logger = category[1].Children.get(id);
       if (logger) {
-        let logStr = [];
+        const logStr = [];
         for (const log of logger.Logs) {
           logStr.push(log.toString());
         }
@@ -499,9 +514,9 @@ export class LogManager {
     let logsForRequest: string[] = this.getById(id);
     if (logsForRequest.length < 1 && globalThis.localStorage) {
       for (const category of this._loggers.keys()) {
-        let bucketStr: string | null =
+        const bucketStr: string | null =
           globalThis.localStorage.getItem(category);
-        let bucket: { [key: string]: string[] } = JSON.parse(
+        const bucket: Record<string, string[]> = JSON.parse(
           bucketStr as string
         );
         if (bucket && bucket[id]) {
