@@ -226,6 +226,21 @@ export interface LitContractContext {
   StakingBalances: LitContract;
 }
 
+// Only includes the defined contract names, omitting the index signature
+type DefinedContractNamesOnly = Pick<LitContractContext, 'Allowlist'> &
+  Pick<LitContractContext, 'LITToken'> &
+  Pick<LitContractContext, 'Multisender'> &
+  Pick<LitContractContext, 'PKPHelper'> &
+  Pick<LitContractContext, 'PKPNFT'> &
+  Pick<LitContractContext, 'PKPNFTMetadata'> &
+  Pick<LitContractContext, 'PKPPermissions'> &
+  Pick<LitContractContext, 'PubkeyRouter'> &
+  Pick<LitContractContext, 'RateLimitNFT'> &
+  Pick<LitContractContext, 'Staking'> &
+  Pick<LitContractContext, 'StakingBalances'>;
+
+export type ContractName = keyof DefinedContractNamesOnly;
+
 /**
  * Type for a contract resolver instance which will be used
  * In place of LitContractContext for loading addresses of lit contracts
