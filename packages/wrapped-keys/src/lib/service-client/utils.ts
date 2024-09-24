@@ -57,6 +57,7 @@ export function getBaseRequestParams(requestParams: BaseRequestParams): {
     initParams: {
       method,
       headers: {
+        'x-correlation-id': requestParams.requestId,
         'Content-Type': 'application/json',
         'Lit-Network': litNetwork,
         Authorization: composeAuthHeader(sessionSig), // As Base64 string to avoid escaping issues

@@ -19,20 +19,18 @@ export async function listPrivateKeyMetadata(
 ): Promise<StoredKeyMetadata[]> {
   const { litNetwork, sessionSig } = params;
 
+  const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
     litNetwork,
     sessionSig,
     method: 'GET',
+    requestId,
   });
 
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
-  const requestId = generateRequestId();
-  const url = new URL(`${baseUrl}/${pkpAddress}`);
-  url.searchParams.set('requestId', requestId);
-
   return makeRequest<StoredKeyMetadata[]>({
-    url: url.toString(),
+    url: `${baseUrl}/${pkpAddress}`,
     init: initParams,
     requestId,
   });
@@ -49,19 +47,17 @@ export async function fetchPrivateKey(
 ): Promise<StoredKeyData> {
   const { litNetwork, sessionSig, id } = params;
 
+  const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
     litNetwork,
     sessionSig,
     method: 'GET',
+    requestId,
   });
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
-  const requestId = generateRequestId();
-
-  const url = new URL(`${baseUrl}/${pkpAddress}/${id}`);
-  url.searchParams.set('requestId', requestId);
   return makeRequest<StoredKeyData>({
-    url: url.toString(),
+    url: `${baseUrl}/${pkpAddress}/${id}`,
     init: initParams,
     requestId,
   });
@@ -77,18 +73,19 @@ export async function storePrivateKey(
 ): Promise<StoreEncryptedKeyResult> {
   const { litNetwork, sessionSig, storedKeyMetadata } = params;
 
+  const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
     litNetwork,
     sessionSig,
     method: 'POST',
+    requestId,
   });
-  const requestId = generateRequestId();
 
   const { pkpAddress, id } = await makeRequest<StoreEncryptedKeyResult>({
     url: baseUrl,
     init: {
       ...initParams,
-      body: JSON.stringify({ ...storedKeyMetadata, requestId }),
+      body: JSON.stringify(storedKeyMetadata),
     },
     requestId,
   });
