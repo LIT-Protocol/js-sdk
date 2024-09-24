@@ -1,6 +1,7 @@
 /* eslint-disable import/order */
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
+  ContractName,
   CreateCustomAuthMethodRequest,
   EpochInfo,
   GasLimitParam,
@@ -127,7 +128,7 @@ export class LitContracts {
   debug: boolean = false;
   network: LIT_NETWORKS_KEYS;
   customContext?: LitContractContext | LitContractResolverContext;
-  static contractNames: string[] = [
+  static contractNames: ContractName[] = [
     'Allowlist',
     'Staking',
     'RateLimitNFT',
@@ -694,7 +695,7 @@ export class LitContracts {
   private static async _getContractsFromResolver(
     context: LitContractResolverContext,
     provider: ethers.providers.StaticJsonRpcProvider,
-    contractNames?: (keyof LitContractContext)[]
+    contractNames?: ContractName[]
   ): Promise<LitContractContext> {
     const resolverContract = new ethers.Contract(
       context.resolverAddress,
