@@ -132,6 +132,7 @@ export class TinnyPerson {
         debug: this.envConfig.processEnvs.DEBUG,
         rpc: this.envConfig.processEnvs.LIT_RPC_URL, // anvil rpc
         customContext: networkContext as unknown as LitContractContext,
+        network: 'custom',
       });
     } else {
       this.contractsClient = new LitContracts({
