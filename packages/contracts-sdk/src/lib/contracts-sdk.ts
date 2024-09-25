@@ -458,7 +458,7 @@ export class LitContracts {
           addresses.LITToken.address,
           addresses.LITToken.abi as ethers.ContractInterface,
           this.provider
-        ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
+        ) as litTokenContract.LITToken,
         write: new ethers.Contract(
           addresses.LITToken.address,
           addresses.LITToken.abi as ethers.ContractInterface,
