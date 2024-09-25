@@ -2225,6 +2225,9 @@ export class LitNodeClientNodeJs
       capabilities,
       issuedAt: new Date().toISOString(),
       expiration: sessionExpiration,
+
+      // FIX ME: This is a dummy value for now
+      maxPrice: '0x1234567890abcdef1234567890abcdef12345678',
     };
 
     const signatures: SessionSigsMap = {};

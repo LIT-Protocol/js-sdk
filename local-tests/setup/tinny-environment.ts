@@ -480,7 +480,7 @@ export class TinnyEnvironment {
         debug: this.processEnvs.DEBUG,
         rpc: this.rpc,
         customContext: networkContext,
-        network: 'custom',
+        network: LIT_NETWORK.Custom,
       });
     } else if (
       CENTRALISATION_BY_NETWORK[this.network] === 'decentralised' ||
