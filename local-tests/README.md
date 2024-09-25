@@ -126,7 +126,6 @@ The `TinnyPerson` class encapsulates various functionalities to manage wallet op
 # esbuild benchmark
 
 ```ts
-
 // test-bundle-speed.ts
 export const testBundleSpeed = async (devEnv: TinnyEnvironment) => {
   const a = await import('@lit-protocol/lit-node-client');
