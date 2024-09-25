@@ -448,8 +448,7 @@ export class LitContracts {
           addresses.Allowlist.address,
           addresses.Allowlist.abi as any,
           this.signer
-        ) as unknown as allowlistContract.Allowlist &
-          allowlistContract.Allowlist,
+        ) as allowlistContract.Allowlist,
       };
     }
 
