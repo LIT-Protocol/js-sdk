@@ -6,6 +6,7 @@ const {
 } = require('@solana/web3.js');
 
 const { removeSaltFromDecryptedKey } = require('../utils');
+const { bs58 } = require('bs58');
 
 /**
  *
@@ -80,7 +81,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
     );
 
     transaction.sign(solanaKeyPair);
-    const signature = transaction.signature.toString('base64');
+    const signature = bs58.encode(transaction.signature);
 
     if (broadcast) {
       const solanaConnection = new Connection(
