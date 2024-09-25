@@ -1,5 +1,5 @@
 import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
-import { AuthSig } from '@lit-protocol/types';
+import { AuthSig, LIT_NETWORKS_KEYS } from '@lit-protocol/types';
 
 import { StoredKeyData } from '../types';
 
@@ -34,5 +34,6 @@ export interface StoreKeyParams extends BaseApiParams {
 export interface BaseRequestParams {
   sessionSig: AuthSig;
   method: 'GET' | 'POST';
-  litNetwork: LIT_NETWORK_VALUES;
+  litNetwork: LIT_NETWORKS_KEYS;
+  requestId: string;
 }

@@ -58,6 +58,7 @@ export function getBaseRequestParams(requestParams: BaseRequestParams): {
     initParams: {
       method,
       headers: {
+        'x-correlation-id': requestParams.requestId,
         'Content-Type': 'application/json',
         'Lit-Network': litNetwork,
         Authorization: composeAuthHeader(sessionSig), // As Base64 string to avoid escaping issues
@@ -105,29 +106,40 @@ async function getResponseJson<T>(response: Response): Promise<T | string> {
   }
 }
 
+export function generateRequestId(): string {
+  return Math.random().toString(16).slice(2);
+}
+
 export async function makeRequest<T>({
   url,
   init,
+  requestId,
 }: {
   url: string;
   init: RequestInit;
+  requestId: string;
 }) {
-  console.log('Fetching from URL', url);
-  const response = await fetch(url, { ...init });
+  try {
+    const response = await fetch(url, { ...init });
 
-  if (!response.ok) {
-    const errorMessage = await getResponseErrorMessage(response);
-    throw new Error(`Failed to make request for wrapped key: ${errorMessage}`);
+    if (!response.ok) {
+      const errorMessage = await getResponseErrorMessage(response);
+      throw new Error(`HTTP(${response.status}): ${errorMessage}`);
+    }
+
+    const result = await getResponseJson<T>(response);
+
+    if (typeof result === 'string') {
+      throw new Error(`HTTP(${response.status}): ${result}`);
+    }
+
+    return result;
+  } catch (e: unknown) {
+    throw new Error(
+      `Request(${requestId}) for wrapped key failed. Error: ${
+        (e as Error).message
+        // @ts-expect-error Unknown, but `cause` is on `TypeError: fetch failed` errors
+      }${e.cause ? ' - ' + e.cause : ''}`
+    );
   }
-
-  /**
-   *
-   */
-  const result = await getResponseJson<T>(response);
-
-  if (typeof result === 'string') {
-    throw new Error(`Unexpected response from wrapped key service: ${result}`);
-  }
-
-  return result;
 }
