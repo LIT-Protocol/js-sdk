@@ -463,7 +463,7 @@ export class LitContracts {
           addresses.LITToken.address,
           addresses.LITToken.abi as ethers.ContractInterface,
           this.signer
-        ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
+        ) as litTokenContract.LITToken,
       };
     }
 
