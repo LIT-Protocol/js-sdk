@@ -473,30 +473,26 @@ export class LitContracts {
           addresses.Multisender.address,
           addresses.Multisender.abi as ethers.ContractInterface,
           this.provider
-        ) as unknown as multisenderContract.Multisender &
-          multisenderContract.Multisender,
+        ) as multisenderContract.Multisender,
         write: new ethers.Contract(
           addresses.Multisender.address,
           addresses.Multisender.abi as ethers.ContractInterface,
           this.signer
-        ) as unknown as multisenderContract.Multisender &
-          multisenderContract.Multisender,
+        ) as multisenderContract.Multisender,
       };
     }
     if (addresses.PKPHelper.abi) {
       this.pkpHelperContract = {
         read: new ethers.Contract(
           addresses.PKPHelper.address,
-          addresses.PKPHelper.abi as any,
+          addresses.PKPHelper.abi as ethers.ContractInterface,
           this.provider
-        ) as unknown as pkpHelperContract.PKPHelper &
-          pkpHelperContract.PKPHelper,
+        ) as pkpHelperContract.PKPHelper,
         write: new ethers.Contract(
           addresses.PKPHelper.address,
           addresses.PKPHelper.abi as any,
           this.signer
-        ) as unknown as pkpHelperContract.PKPHelper &
-          pkpHelperContract.PKPHelper,
+        ) as pkpHelperContract.PKPHelper,
       };
     }
 
@@ -506,12 +502,12 @@ export class LitContracts {
           addresses.PKPNFT.address,
           addresses.PKPNFT.abi as any,
           this.provider
-        ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
+        ) as pkpNftContract.PKPNFT,
         write: new ethers.Contract(
           addresses.PKPNFT.address,
           addresses.PKPNFT.abi as any,
           this.signer
-        ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
+        ) as pkpNftContract.PKPNFT,
       };
     }
     if (addresses.PKPNFTMetadata.abi) {
@@ -520,14 +516,12 @@ export class LitContracts {
           addresses.PKPNFTMetadata.address,
           addresses.PKPNFTMetadata.abi as any,
           this.provider
-        ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
-          pkpNftMetadataContract.PKPNFTMetadata,
+        ) as pkpNftMetadataContract.PKPNFTMetadata,
         write: new ethers.Contract(
           addresses.PKPNFTMetadata.address,
           addresses.PKPNFTMetadata.abi as any,
           this.signer
-        ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
-          pkpNftMetadataContract.PKPNFTMetadata,
+        ) as pkpNftMetadataContract.PKPNFTMetadata,
       };
     }
 
@@ -537,14 +531,12 @@ export class LitContracts {
           addresses.PKPPermissions.address,
           addresses.PKPPermissions.abi as any,
           this.provider
-        ) as unknown as pkpPermissionsContract.PKPPermissions &
-          pkpPermissionsContract.PKPPermissions,
+        ) as pkpPermissionsContract.PKPPermissions,
         write: new ethers.Contract(
           addresses.PKPPermissions.address,
           addresses.PKPPermissions.abi as any,
           this.signer
-        ) as unknown as pkpPermissionsContract.PKPPermissions &
-          pkpPermissionsContract.PKPPermissions,
+        ) as pkpPermissionsContract.PKPPermissions,
       };
     }
 
@@ -554,14 +546,12 @@ export class LitContracts {
           addresses.PubkeyRouter.address,
           addresses.PubkeyRouter.abi as any,
           this.provider
-        ) as unknown as pubkeyRouterContract.PubkeyRouter &
-          pubkeyRouterContract.PubkeyRouter,
+        ) as pubkeyRouterContract.PubkeyRouter,
         write: new ethers.Contract(
           addresses.PubkeyRouter.address,
           addresses.PubkeyRouter.abi as any,
           this.signer
-        ) as unknown as pubkeyRouterContract.PubkeyRouter &
-          pubkeyRouterContract.PubkeyRouter,
+        ) as pubkeyRouterContract.PubkeyRouter,
       };
     }
 
@@ -571,14 +561,12 @@ export class LitContracts {
           addresses.RateLimitNFT.address,
           addresses.RateLimitNFT.abi as any,
           this.provider
-        ) as unknown as rateLimitNftContract.RateLimitNFT &
-          rateLimitNftContract.RateLimitNFT,
+        ) as rateLimitNftContract.RateLimitNFT,
         write: new ethers.Contract(
           addresses.RateLimitNFT.address,
           addresses.RateLimitNFT.abi as any,
           this.signer
-        ) as unknown as rateLimitNftContract.RateLimitNFT &
-          rateLimitNftContract.RateLimitNFT,
+        ) as rateLimitNftContract.RateLimitNFT,
       };
     }
 
@@ -588,12 +576,12 @@ export class LitContracts {
           addresses.Staking.address,
           addresses.Staking.abi as any,
           this.provider
-        ) as unknown as stakingContract.Staking & stakingContract.Staking,
+        ) as stakingContract.Staking,
         write: new ethers.Contract(
           addresses.Staking.address,
           addresses.Staking.abi as any,
           this.signer
-        ) as unknown as stakingContract.Staking & stakingContract.Staking,
+        ) as stakingContract.Staking,
       };
     }
 
@@ -603,14 +591,12 @@ export class LitContracts {
           addresses.StakingBalances.address,
           addresses.StakingBalances.abi as any,
           this.provider
-        ) as unknown as stakingBalancesContract.StakingBalances &
-          stakingBalancesContract.StakingBalances,
+        ) as stakingBalancesContract.StakingBalances,
         write: new ethers.Contract(
           addresses.StakingBalances.address,
           addresses.StakingBalances.abi as any,
           this.signer
-        ) as unknown as stakingBalancesContract.StakingBalances &
-          stakingBalancesContract.StakingBalances,
+        ) as stakingBalancesContract.StakingBalances,
       };
     }
 
