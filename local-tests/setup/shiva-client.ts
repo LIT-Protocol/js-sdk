@@ -1,5 +1,6 @@
 import { LitContractResolverContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import { PKPPermissions } from '../../dist/packages/contracts-sdk/src/abis/PKPPermissions.sol/PKPPermissions';
 import {
   TestNetCreateRequest,
   TestNetInfo,
@@ -97,6 +98,31 @@ export class TestnetClient {
         skipFetchSetup: true,
       }),
       environment: 0, // test deployment uses env value 0 in test common
+      contractContext: {
+        Allowlist: {},
+        Multisender: {},
+        Staking: {
+          abi: JSON.parse(testNetConfig.contractAbis.staking),
+        },
+        StakingBalances: {
+          abi: JSON.parse(testNetConfig.contractAbis.stakingBalances),
+        },
+        PKPNFT: {
+          abi: JSON.parse(testNetConfig.contractAbis.pkpnft),
+        },
+        PKPPermissions: {
+          abi: JSON.parse(testNetConfig.contractAbis.pkpPermissions),
+        },
+        PKPHelper: {
+          abi: JSON.parse(testNetConfig.contractAbis.pkpHelper),
+        },
+        LITToken: {
+          abi: JSON.parse(testNetConfig.contractAbis.litToken),
+        },
+        PKPNFTMetadata: {},
+        RateLimitNFT: {},
+        PubkeyRouter: {},
+      },
     };
     return networkContext;
   }
