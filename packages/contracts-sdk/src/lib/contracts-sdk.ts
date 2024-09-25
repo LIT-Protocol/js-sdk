@@ -443,8 +443,7 @@ export class LitContracts {
           addresses.Allowlist.address,
           addresses.Allowlist.abi as any,
           this.provider
-        ) as unknown as allowlistContract.Allowlist &
-          allowlistContract.Allowlist,
+        ) as allowlistContract.Allowlist,
         write: new ethers.Contract(
           addresses.Allowlist.address,
           addresses.Allowlist.abi as any,
