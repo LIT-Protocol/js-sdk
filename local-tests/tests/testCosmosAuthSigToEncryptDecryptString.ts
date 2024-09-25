@@ -6,8 +6,8 @@ import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ❌ NETWORK=cayenne yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
- * ❌ NETWORK=manzano yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
+ * ❌ NETWORK=datil-dev yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
+ * ❌ NETWORK=datil-test yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  * ❌ NETWORK=custom yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  * ❌ NETWORK=datil-dev yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  */
@@ -16,9 +16,7 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
 ) => {
   console.log('❌❌ THIS IS A KNOWN FAILING TEST, PLEASE IGNORE FOR NOW. ❌❌');
 
-  devEnv.setUnavailable(LIT_NETWORK.Cayenne);
   devEnv.setUnavailable(LIT_NETWORK.Custom);
-  devEnv.setUnavailable(LIT_NETWORK.Manzano);
   devEnv.setUnavailable(LIT_NETWORK.DatilDev);
 
   const accs = AccessControlConditions.getCosmosBasicAccessControlConditions({

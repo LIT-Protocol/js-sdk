@@ -12,8 +12,8 @@ import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
+ * ✅ NETWORK=datil-test yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
  * ✅ NETWORK=custom yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyInvalidDecryption
  */
 export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =

@@ -9,8 +9,8 @@ import { encryptString, decryptToFile } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile
- * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile
  */
 export const testUseEoaSessionSigsToEncryptDecryptFile = async (

@@ -6,8 +6,8 @@ import { LIT_NETWORK } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 export const testExample = async (devEnv: TinnyEnvironment) => {
-  // Note: This test will be skipped if we are testing on the Cayenne network
-  devEnv.setUnavailable(LIT_NETWORK.Cayenne);
+  // Note: This test will be skipped if we are testing on the DatilDev network
+  devEnv.setUnavailable(LIT_NETWORK.DatilDev);
 
   const alice = await devEnv.createRandomPerson();
 

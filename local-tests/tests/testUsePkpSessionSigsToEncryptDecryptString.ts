@@ -9,8 +9,8 @@ import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
- * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
  * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
  */
 export const testUsePkpSessionSigsToEncryptDecryptString = async (

@@ -223,7 +223,7 @@ export class TinnyEnvironment {
    *
    * The LitNodeClient is configured differently based on the network:
    * - Custom: Uses custom settings for local testing, with node attestation disabled.
-   * - Manzano (or other specified testnets): Configures for specific network environments with node attestation enabled.
+   * - DatilTest (or other specified testnets): Configures for specific network environments with node attestation enabled.
    *
    * Logs the process and exits if the client is not ready after attempting to connect.
    */

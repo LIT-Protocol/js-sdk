@@ -4,8 +4,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign
- * ❌ NOT AVAILABLE IN HABANERO
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign
  * ❌ NETWORK=custom yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign
  *
  **/

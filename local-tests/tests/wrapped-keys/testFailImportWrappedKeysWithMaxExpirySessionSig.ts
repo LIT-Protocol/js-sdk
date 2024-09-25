@@ -7,8 +7,8 @@ const { importPrivateKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
- * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
+ * ✅ NETWORK=datil-test yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
  * ✅ NETWORK=custom yarn test:local --filter=testFailImportWrappedKeysWithMaxExpirySessionSig
  */
 export const testFailImportWrappedKeysWithMaxExpirySessionSig = async (

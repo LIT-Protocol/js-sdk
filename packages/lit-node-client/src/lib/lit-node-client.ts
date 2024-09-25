@@ -14,7 +14,7 @@ import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
  * import { LIT_NETWORK } from '@lit-protocol/constants';
  *
  * const litNodeClient = new LitNodeClient({
-    litNetwork: LIT_NETWORK.Habanero,
+    litNetwork: LIT_NETWORK.DatilTest,
    });
  * ```
  */

@@ -148,7 +148,7 @@ yarn test:local
 
 ## Create a new react demo app using the Lit JS SDK
 
-```js
+```sh
 yarn tools --create --react contracts-sdk --demo
 ```
 
@@ -164,13 +164,13 @@ yarn delete:package <package-name>
 
 ## Building
 
-```jsx
+```sh
 yarn build
 ```
 
 ### Building target package
 
-```jsx
+```sh
 yarn nx run <project-name>:build
 ```
 
@@ -226,18 +226,9 @@ You must have at least nodejs v18 to do this.
 
 5. Update the docs with `yarn gen:docs --push`
 
-6. Finally, publish with the `@cayenne` tag: `yarn publish:cayenne`
+6. Finally, publish with `yarn publish:packages`
 
 7. Commit these changes "Published version X.X.X"
-
-### Publishing to Serrano / Jalapno
-
-```sh
-git checkout serrano
-yarn bump
-yarn build
-yarn node ./tools/scripts/pub.mjs --tag serrano-jalapeno
-```
 
 ## Testing
 
@@ -251,7 +242,7 @@ yarn test:local
 
 ### Unit Tests
 
-```jsx
+```sh
 yarn test:unit
 ```
 

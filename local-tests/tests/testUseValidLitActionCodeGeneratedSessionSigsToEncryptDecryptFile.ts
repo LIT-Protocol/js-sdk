@@ -10,14 +10,13 @@ import { encryptString, decryptToFile } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
- * ✅ NETWORK=manzano yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_NETWORK.Manzano);
     const alice = await devEnv.createRandomPerson();
 
     const message = 'Hello world';

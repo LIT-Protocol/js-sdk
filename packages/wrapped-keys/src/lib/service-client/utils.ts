@@ -20,9 +20,6 @@ function composeAuthHeader(sessionSig: AuthSig) {
 }
 
 const supportedNetworks: SupportedNetworks[] = [
-  'cayenne',
-  'manzano',
-  'habanero',
   'datil-dev',
   'datil-test',
   'datil',

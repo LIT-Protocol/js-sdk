@@ -19,12 +19,12 @@ The `testName` specified in the filter **must be the same as the function name**
 // run all tests on local chain
 DEBUG=true NETWORK=custom yarn test:local
 
-// run filtered tests on manzano
-DEBUG=true NETWORK=manzano yarn test:local --filter=testExample
-DEBUG=true NETWORK=manzano yarn test:local --filter=testExample,testBundleSpeed
+// run filtered tests on datil-test
+DEBUG=true NETWORK=datil-test yarn test:local --filter=testExample
+DEBUG=true NETWORK=datil-test yarn test:local --filter=testExample,testBundleSpeed
 
 // run filtered tests by keyword
-DEBUG=true NETWORK=manzano yarn test:local --filter=Encrypt
+DEBUG=true NETWORK=datil-test yarn test:local --filter=Encrypt
 
 // eg.
 yarn test:local --filter=testExample,testBundleSpeed
@@ -41,7 +41,7 @@ Below is the API documentation for the `ProcessEnvs` interface, detailing the co
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `MAX_ATTEMPTS`           | Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.                                                                                               |
 | `TEST_TIMEOUT`           | The maximum number of milliseconds to wait for a test to complete.                                                                                                                                              |
-| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_NETWORK.Custom`, `LIT_NETWORK.Manzano`, or `LIT_NETWORK.Cayenne`.                                                                       |
+| `NETWORK`                | The network to use for testing, which can be one of the following: `LIT_NETWORK.Custom`, `LIT_NETWORK.DatilDev`, or `LIT_NETWORK.Datil`.                                                                        |
 | `DEBUG`                  | Specifies whether to enable debug mode.                                                                                                                                                                         |
 | `REQUEST_PER_KILOSECOND` | To execute a transaction with Lit, you must reserve capacity on the network using Capacity Credits. These allow a set number of requests over a period (default 2 days).                                        |
 | `WAIT_FOR_KEY_INTERVAL`  | Wait time in milliseconds if no private keys are available.                                                                                                                                                     |
@@ -76,8 +76,8 @@ In the test function, a `devEnv` variable will automatically be added as the fir
 export const testExample = async (devEnv: TinnyEnvironment) => {
 
   // ========== Enviorment ==========
-  // This test will be skipped if we are testing on the Cayenne network
-  devEnv.setUnavailable(LIT_NETWORK.Cayenne);
+  // This test will be skipped if we are testing on the DatilDev network
+  devEnv.setUnavailable(LIT_NETWORK.DatilDev);
 
   // Using litNodeClient
   const res = await devEnv.litNodeClient.executeJs({...});
@@ -137,6 +137,7 @@ export const testBundleSpeed = async (devEnv: TinnyEnvironment) => {
 
   console.log(a, b, c, d, e);
 };
-----------------
-Build time: 77ms
+// ----------------
+// Build time: 77ms
+// ----------------
 ```

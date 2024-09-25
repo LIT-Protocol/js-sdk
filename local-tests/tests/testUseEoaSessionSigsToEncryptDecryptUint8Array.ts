@@ -16,8 +16,8 @@ import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
- * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
  * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptUint8Array
  */
 export const testUseEoaSessionSigsToEncryptDecryptUint8Array = async (

@@ -35,7 +35,6 @@ import {
   UnknownError,
   InvalidSignatureError,
   UnsupportedMethodError,
-  LIT_ERROR,
   InvalidSessionSigs,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';

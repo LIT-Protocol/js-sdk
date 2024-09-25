@@ -8,8 +8,8 @@ const { importPrivateKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailImportWrappedKeysWithInvalidSessionSig
- * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithInvalidSessionSig
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testFailImportWrappedKeysWithInvalidSessionSig
+ * ✅ NETWORK=datil-test yarn test:local --filter=testFailImportWrappedKeysWithInvalidSessionSig
  * ✅ NETWORK=custom yarn test:local --filter=testFailImportWrappedKeysWithInvalidSessionSig
  */
 export const testFailImportWrappedKeysWithInvalidSessionSig = async (

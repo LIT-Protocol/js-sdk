@@ -13,8 +13,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * - Note: The key claiming process involves multiple nodes within the Lit network verifying the sessionSigs and collaboratively signing the claim, which results in the generation of a new key pair if successful.
  *
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
- * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
  * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
  */
 export const testUsePkpSessionSigsToExecuteJsClaimKeys = async (

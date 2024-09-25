@@ -7,8 +7,8 @@ import { randomSolanaPrivateKey } from '../../setup/tinny-utils';
 const { exportPrivateKey, importPrivateKey } = api;
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testExportWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testExportWrappedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testExportWrappedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testExportWrappedKey
  * ✅ NETWORK=custom yarn test:local --filter=testExportWrappedKey
  */
 export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {

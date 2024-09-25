@@ -5,8 +5,8 @@ import { EthWalletProvider, LitRelay } from '@lit-protocol/lit-auth-client';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testRelayer
- * ✅ NETWORK=manzano yarn test:local --filter=testRelayer
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testRelayer
+ * ✅ NETWORK=datil-test yarn test:local --filter=testRelayer
  * ✅ NETWORK=custom yarn test:local --filter=testRelayer
  * ✅ NETWORK=datil-dev yarn test:local --filter=testRelayer
  */

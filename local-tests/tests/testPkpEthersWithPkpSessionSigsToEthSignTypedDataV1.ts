@@ -9,8 +9,8 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1
- * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1
+ * ✅ NETWORK=datil-test yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1
  * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1
  */
 export const testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1 = async (

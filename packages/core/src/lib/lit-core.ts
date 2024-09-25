@@ -118,8 +118,6 @@ const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
 // Intentionally not including datil-dev here per discussion with Howard
 const NETWORKS_REQUIRING_SEV: string[] = [
-  LIT_NETWORK.Habanero,
-  LIT_NETWORK.Manzano,
   LIT_NETWORK.DatilTest,
   LIT_NETWORK.Datil,
 ];
@@ -140,7 +138,7 @@ export class LitCore {
     debug: true,
     connectTimeout: 20000,
     checkNodeAttestation: false,
-    litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
+    litNetwork: LIT_NETWORK.Custom,
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
@@ -179,10 +177,7 @@ export class LitCore {
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
       // Official networks; default value for `checkNodeAttestation` according to network provided.
-      case LIT_NETWORK.Cayenne:
       case LIT_NETWORK.DatilDev:
-      case LIT_NETWORK.Manzano:
-      case LIT_NETWORK.Habanero:
         this.config = {
           ...this.config,
           checkNodeAttestation: NETWORKS_REQUIRING_SEV.includes(

@@ -27,21 +27,6 @@ export const LIT_AUTH_SIG_CHAIN_KEYS: string[] = [
 export const AUTH_SIGNATURE_BODY =
   'I am creating an account to use Lit Protocol at {{timestamp}}';
 
-const oldChronicleChain = {
-  contractAddress: null,
-  chainId: 175177,
-  name: 'Chronicle - Lit Protocol Testnet',
-  symbol: 'tstLIT',
-  decimals: 18,
-  rpcUrls: [
-    'https://lit-protocol.calderachain.xyz/replica-http',
-    'https://chain-rpc.litprotocol.com/http',
-  ],
-  blockExplorerUrls: ['https://chain.litprotocol.com/'],
-  type: null,
-  vmType: 'EVM',
-};
-
 const yellowstoneChain = {
   contractAddress: null,
   chainId: 175188,
@@ -507,19 +492,11 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
 
   /**
-   * Chainlist entry for the Chronicle Testnet.
-   * https://chainlist.org/chain/175177
-   */
-  chronicleTestnet: oldChronicleChain,
-
-  /**
-   * Use this for `>= DatilTest` network.
+   * Use this for `>= Datil` network.
    * Chainlist entry for the Chronicle Yellowstone Testnet.
    * https://chainlist.org/chain/175188
    */
   yellowstone: yellowstoneChain,
-
-  lit: oldChronicleChain,
 
   chiado: {
     contractAddress: null,
@@ -776,22 +753,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
  */
 export const METAMASK_CHAIN_INFO = {
   /**
-   * Information about the "chronicle" chain.
-   */
-  chronicle: {
-    chainId: LIT_CHAINS['chronicleTestnet'].chainId,
-    chainName: LIT_CHAINS['chronicleTestnet'].name,
-    nativeCurrency: {
-      name: LIT_CHAINS['chronicleTestnet'].symbol,
-      symbol: LIT_CHAINS['chronicleTestnet'].symbol,
-      decimals: LIT_CHAINS['chronicleTestnet'].decimals,
-    },
-    rpcUrls: LIT_CHAINS['chronicleTestnet'].rpcUrls,
-    blockExplorerUrls: LIT_CHAINS['chronicleTestnet'].blockExplorerUrls,
-    iconUrls: ['future'],
-  },
-
-  /**
    * Information about the "chronicleYellowstone" chain.
    */
   yellowstone: {
@@ -831,11 +792,6 @@ export const LIT_RPC = {
   LOCAL_ANVIL: 'http://127.0.0.1:8545',
 
   /**
-   * Chronicle RPC endpoint - Used for Cayenne, Manzano, Habanero
-   */
-  CHRONICLE: 'https://chain-rpc.litprotocol.com/http',
-
-  /**
    * Chronicle Yellowstone RPC endpoint - used for >= Datil-test
    * More info: https://app.conduit.xyz/published/view/chronicle-yellowstone-testnet-9qgmzfcohk
    */
@@ -848,9 +804,6 @@ export const LIT_EVM_CHAINS = LIT_CHAINS;
  * Represents the Lit Network constants.
  */
 export const LIT_NETWORK = {
-  Cayenne: 'cayenne',
-  Manzano: 'manzano',
-  Habanero: 'habanero',
   DatilDev: 'datil-dev',
   DatilTest: 'datil-test',
   Datil: 'datil',
@@ -886,9 +839,6 @@ export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
  * A mapping of network names to their corresponding RPC URLs.
  */
 export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
-  cayenne: LIT_RPC.CHRONICLE,
-  manzano: LIT_RPC.CHRONICLE,
-  habanero: LIT_RPC.CHRONICLE,
   'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
@@ -901,9 +851,6 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
 export const RELAYER_URL_BY_NETWORK: {
   [key in LIT_NETWORK_VALUES]: string;
 } = {
-  cayenne: 'https://relayer-server-staging-cayenne.getlit.dev',
-  manzano: 'https://manzano-relayer.getlit.dev',
-  habanero: 'https://habanero-relayer.getlit.dev',
   'datil-dev': 'https://datil-dev-relayer.getlit.dev',
   'datil-test': 'https://datil-test-relayer.getlit.dev',
   datil: 'https://datil-relayer.getlit.dev',
@@ -915,11 +862,8 @@ export const RELAYER_URL_BY_NETWORK: {
  */
 export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
-  typeof METAMASK_CHAIN_INFO.chronicle | typeof METAMASK_CHAIN_INFO.yellowstone
+  typeof METAMASK_CHAIN_INFO.yellowstone
 > = {
-  cayenne: METAMASK_CHAIN_INFO.chronicle,
-  manzano: METAMASK_CHAIN_INFO.chronicle,
-  habanero: METAMASK_CHAIN_INFO.chronicle,
   'datil-dev': METAMASK_CHAIN_INFO.yellowstone,
   'datil-test': METAMASK_CHAIN_INFO.yellowstone,
   datil: METAMASK_CHAIN_INFO.yellowstone,
@@ -936,9 +880,6 @@ export const HTTP_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   typeof HTTP | typeof HTTPS
 > = {
-  cayenne: HTTPS,
-  manzano: HTTPS,
-  habanero: HTTPS,
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
   datil: HTTPS,
@@ -952,9 +893,6 @@ export const CENTRALISATION_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   'centralised' | 'decentralised' | 'unknown'
 > = {
-  cayenne: 'centralised',
-  manzano: 'decentralised',
-  habanero: 'decentralised',
   'datil-dev': 'centralised',
   'datil-test': 'decentralised',
   datil: 'decentralised',
@@ -1100,22 +1038,14 @@ export const SYMM_KEY_ALGO_PARAMS = {
 };
 
 /**
- * Default node URL for Cayenne network
- */
-export const CAYENNE_URL = 'https://cayenne.litgateway.com';
-
-/**
  * Default node URLs for each LIT network
- * Note: Dynamic networks such as Habanero have no default node URLS; they are always
+ * Note: Dynamic networks have no default node URLS; they are always
  * loaded from the chain during initialization
  */
 export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
-  cayenne: [],
-  manzano: [],
   'datil-dev': [],
   'datil-test': [],
   datil: [],
-  habanero: [],
   custom: [],
 };
 
