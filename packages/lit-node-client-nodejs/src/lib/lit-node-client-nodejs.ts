@@ -1781,7 +1781,7 @@ export class LitNodeClientNodeJs
 
     if (curveType === 'ECDSA') {
       throw new Error(
-        'ECDSA curve type is not supported for this version. Please use 6.x.x instead.'
+        'The ECDSA curve type is not supported in this version. Please use version 6.x.x instead.'
       );
     }
 
