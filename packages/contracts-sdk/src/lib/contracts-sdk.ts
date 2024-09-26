@@ -606,18 +606,33 @@ export class LitContracts {
     this.connected = true;
   };
 
+  /**
+   * Retrieves the Staking contract instance based on the provided network, context, and RPC URL.
+   * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
+   * If a resolver address is present in the context, it retrieves the Staking contract from the contract resolver instance.
+   * Otherwise, it retrieves the Staking contract using the contract address and ABI from the contract context.
+   * Throws an error if required contract data is missing or if the Staking contract cannot be obtained.
+   *
+   * @param network - The network key.
+   * @param context - The contract context or contract resolver context.
+   * @param rpcUrl - The RPC URL.
+   * @returns The Staking contract instance.
+   * @throws Error if required contract data is missing or if the Staking contract cannot be obtained.
+   */
   public static async getStakingContract(
     network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
     let provider: ethers.providers.StaticJsonRpcProvider;
-    rpcUrl = RPC_URL_BY_NETWORK[network];
+
+    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
+
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
       provider = new ethers.providers.StaticJsonRpcProvider({
-        url: rpcUrl,
+        url: _rpcUrl,
         skipFetchSetup: true,
       });
     }
