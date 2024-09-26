@@ -625,12 +625,14 @@ export class LitContracts {
     rpcUrl?: string
   ) {
     let provider: ethers.providers.StaticJsonRpcProvider;
-    rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
+
+    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
+
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
       provider = new ethers.providers.StaticJsonRpcProvider({
-        url: rpcUrl,
+        url: _rpcUrl,
         skipFetchSetup: true,
       });
     }
