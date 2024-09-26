@@ -39,7 +39,6 @@ import {
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
-  combineEcdsaShares,
   combineSignatureShares,
   encrypt,
   generateSessionKeyPair,
@@ -530,7 +529,7 @@ export class LitNodeClientNodeJs
           { suppressExceptions: false }
         );
       } catch (e) {
-        log(`Error while verifying ECDSA signature: `, e);
+        log(`Error while verifying BLS signature: `, e);
         return true;
       }
     } else if (authSig.algo === `LIT_BLS`) {
@@ -814,149 +813,6 @@ export class LitNodeClientNodeJs
       requestId,
       params.targetNodeRange
     )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
-  };
-
-  /**
-   *
-   * Get signatures from signed data
-   *
-   * @param { Array<any> } signedData
-   *
-   * @returns { any }
-   *
-   */
-  getSessionSignatures = async (signedData: any[]): Promise<any> => {
-    // -- prepare
-    const signatures: any = {};
-
-    // TOOD: get keys of signedData
-    const keys = Object.keys(signedData[0]);
-
-    // removeExtraBackslashesAndQuotes
-    const sanitise = (str: string) => {
-      // Check if str is a string and remove extra backslashes
-      if (typeof str === 'string') {
-        // Remove backslashes
-        let newStr = str.replace(/\\+/g, '');
-        // Remove leading and trailing double quotes
-        newStr = newStr.replace(/^"|"$/g, '');
-        return newStr;
-      }
-      return str;
-    };
-
-    // -- execute
-    for await (const key of keys) {
-      log('key:', key);
-
-      const shares = signedData.map((r) => r[key]);
-
-      log('shares:', shares);
-
-      shares.sort((a, b) => a.shareIndex - b.shareIndex);
-
-      const sigShares: SigShare[] = shares.map((s, index: number) => {
-        log('Original Share Struct:', s);
-
-        const share = getFlattenShare(s);
-
-        log('share:', share);
-
-        if (!share) {
-          throw new NoValidShares(
-            {
-              info: {
-                share: s,
-              },
-            },
-            'share is null or undefined'
-          );
-        }
-
-        if (!share.bigr) {
-          throw new NoValidShares(
-            {
-              info: {
-                share: s,
-              },
-            },
-            'bigR is missing in share %s. share %s',
-            index,
-            JSON.stringify(share)
-          );
-        }
-
-        const sanitisedBigR = sanitise(share.bigr);
-        const sanitisedSigShare = sanitise(share.publicKey);
-
-        log('sanitisedBigR:', sanitisedBigR);
-        log('sanitisedSigShare:', sanitisedSigShare);
-
-        return {
-          sigType: share.sigType,
-          signatureShare: sanitise(share.signatureShare),
-          shareIndex: share.shareIndex,
-          bigR: sanitise(share.bigr),
-          publicKey: share.publicKey,
-          dataSigned: share.dataSigned,
-          siweMessage: share.siweMessage,
-        };
-      });
-
-      log('getSessionSignatures - sigShares', sigShares);
-
-      const sigType = mostCommonString(sigShares.map((s) => s.sigType));
-
-      // -- validate if this.networkPubKeySet is null
-      if (this.networkPubKeySet === null) {
-        throw new ParamNullError({}, 'networkPubKeySet cannot be null');
-      }
-
-      // -- validate if signature type is ECDSA
-      if (
-        sigType !== LIT_CURVE.EcdsaCaitSith &&
-        sigType !== LIT_CURVE.EcdsaK256 &&
-        sigType !== LIT_CURVE.EcdsaCAITSITHP256
-      ) {
-        throw new UnknownSignatureType(
-          {
-            info: {
-              signatureType: sigType,
-            },
-          },
-          'signature type is %s which is invalid',
-          sigType
-        );
-      }
-
-      const signature = await combineEcdsaShares(sigShares);
-      if (!signature.r) {
-        throw new UnknownSignatureError(
-          {
-            info: {
-              signature,
-            },
-          },
-          'signature could not be combined'
-        );
-      }
-
-      const encodedSig = joinSignature({
-        r: '0x' + signature.r,
-        s: '0x' + signature.s,
-        v: signature.recid,
-      });
-
-      signatures[key] = {
-        ...signature,
-        signature: encodedSig,
-        publicKey: mostCommonString(sigShares.map((s) => s.publicKey)),
-        dataSigned: mostCommonString(sigShares.map((s) => s.dataSigned)),
-        siweMessage: mostCommonString(sigShares.map((s) => s.siweMessage)),
-      };
-    }
-
-    return signatures;
   };
 
   // ========== Scoped Business Logics ==========
@@ -1308,7 +1164,7 @@ export class LitNodeClientNodeJs
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
+      this.connectedNodes.size
     );
 
     // ========== Handle Response ==========
@@ -1923,9 +1779,10 @@ export class LitNodeClientNodeJs
     // -- 1. combine signed data as a list, and get the signatures from it
     let curveType = responseData[0]?.curveType;
 
-    if (!curveType) {
-      log(`[signSessionKey] curveType not found. Defaulting to ECDSA.`);
-      curveType = 'ECDSA';
+    if (curveType === 'ECDSA') {
+      throw new Error(
+        'The ECDSA curve type is not supported in this version. Please use version 6.x.x instead.'
+      );
     }
 
     log(`[signSessionKey] curveType is "${curveType}"`);
