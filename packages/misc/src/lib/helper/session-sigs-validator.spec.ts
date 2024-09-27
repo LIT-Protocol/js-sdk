@@ -10,6 +10,7 @@ describe('validateSessionSigs', () => {
       capabilities: [
         {
           sig: 'valid-capability-sig',
+          derivedVia: 'some-method',
           signedMessage: `Capability Signed Message
 Expiration Time: 2099-12-31T23:59:59Z`,
           address: '0xValidAddress',
@@ -43,7 +44,7 @@ Expiration Time: 2099-12-31T23:59:59Z`,
 
     expect(validationResult.isValid).toBe(false);
     expect(validationResult.errors).toContain(
-      "Session Sig 'session1': Main signedMessage is not valid JSON."
+      "Session Sig 'session1': Main signedMessage is not valid."
     );
   });
 
@@ -65,7 +66,7 @@ Expiration Time: 2099-12-31T23:59:59Z`,
 
     expect(validationResult.isValid).toBe(false);
     expect(validationResult.errors).toContain(
-      "Session Sig 'session1': Capabilities not found in main signedMessage."
+      `Session Sig 'session1': Validation error: Required at "capabilities"`
     );
   });
 
@@ -87,7 +88,9 @@ Expiration Time: 2099-12-31T23:59:59Z`,
 
     expect(validationResult.isValid).toBe(false);
     expect(validationResult.errors).toContainEqual(
-      expect.stringContaining('No capabilities found in main signedMessage.')
+      expect.stringContaining(
+        `Session Sig 'session1': Validation error: Array must contain at least 1 element(s) at "capabilities"`
+      )
     );
   });
 
@@ -199,6 +202,7 @@ Expiration Time: invalid-date-format`; // Invalid expiration date in capability
         capabilities: [
           {
             sig: 'valid-capability-sig',
+            derivedVia: 'some-method',
             signedMessage: `Capability Signed Message
 Expiration Time: invalid-date-format`, // Invalid date format
             address: '0xValidAddress',
@@ -218,7 +222,7 @@ Expiration Time: invalid-date-format`, // Invalid date format
 
     expect(validationResult.isValid).toBe(false);
     expect(validationResult.errors).toContain(
-      "Session Sig 'session2': Main signedMessage is not valid JSON."
+      "Session Sig 'session2': Main signedMessage is not valid."
     );
     expect(validationResult.errors).toContainEqual(
       expect.stringContaining(

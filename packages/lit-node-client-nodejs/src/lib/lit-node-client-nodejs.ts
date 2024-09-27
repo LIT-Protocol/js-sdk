@@ -154,7 +154,7 @@ export class LitNodeClientNodeJs
 
     super(args);
 
-    if (args !== undefined && args !== null && 'defaultAuthCallback' in args) {
+    if ('defaultAuthCallback' in args) {
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
   }

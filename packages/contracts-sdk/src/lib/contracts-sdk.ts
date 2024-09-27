@@ -6,8 +6,11 @@ import {
   EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
+  LitNetworkKeysSchema,
   LitContractContext,
+  LitContractContextSchema,
   LitContractResolverContext,
+  LitContractResolverContextSchema,
   MintCapacityCreditsContext,
   MintCapacityCreditsRes,
   MintNextAndAddAuthMethods,
@@ -638,9 +641,11 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
+    const _network = LitNetworkKeysSchema.parse(network);
+
     let provider: ethers.providers.StaticJsonRpcProvider;
 
-    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
+    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[_network];
 
     if (context && 'provider' in context!) {
       provider = context.provider;
@@ -653,7 +658,7 @@ export class LitContracts {
 
     if (!context) {
       const contractData = await LitContracts._resolveContractContext(
-        network
+        _network
         //context
       );
 
@@ -669,7 +674,7 @@ export class LitContracts {
             info: {
               address,
               abi,
-              network,
+              _network,
             },
           },
           '❌ Required contract data is missing'
@@ -718,7 +723,7 @@ export class LitContracts {
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore data is callable as an array type
-        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
+        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[_network].data.find(
           (data: any) => {
             return data.name === 'Staking';
           }
@@ -737,9 +742,10 @@ export class LitContracts {
     provider: ethers.providers.StaticJsonRpcProvider,
     contractNames?: ContractName[]
   ): Promise<LitContractContext> {
+    const _context = LitContractResolverContextSchema.parse(context);
     const resolverContract = new ethers.Contract(
-      context.resolverAddress,
-      context.abi,
+      _context.resolverAddress,
+      _context.abi,
       provider
     );
 
@@ -847,10 +853,13 @@ export class LitContracts {
       // if there is a resolver address we use the resolver contract to query the rest of the contracts
       // here we override context to be what is returned from the resolver which is of type LitContractContext
       if (context?.resolverAddress) {
+        const _context = LitContractResolverContextSchema.parse(context);
         context = await LitContracts._getContractsFromResolver(
-          context as LitContractResolverContext,
+          _context,
           provider
         );
+      } else {
+        context = LitContractContextSchema.parse(context);
       }
 
       const flatten = [];

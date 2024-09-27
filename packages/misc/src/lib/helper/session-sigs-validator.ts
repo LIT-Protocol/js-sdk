@@ -1,8 +1,10 @@
+import { fromError, isZodErrorLike } from 'zod-validation-error';
 import {
   AuthSig,
   Capability,
   ParsedSessionMessage,
   ParsedSignedMessage,
+  ParsedSessionMessageSchema,
   SessionSigsMap,
 } from '@lit-protocol/types';
 
@@ -135,32 +137,41 @@ function parseCapabilities(capabilities: Capability[]): ValidationResult {
 export function validateSessionSig(sessionSig: AuthSig): ValidationResult {
   const errors: string[] = [];
 
-  // Parse the main signedMessage
-  let parsedSignedMessage: ParsedSessionMessage;
+  // JSON Parse the main signedMessage
+  let signedMessage: any;
   try {
-    parsedSignedMessage = JSON.parse(sessionSig.signedMessage);
+    signedMessage = JSON.parse(sessionSig.signedMessage);
   } catch (error) {
-    errors.push('Main signedMessage is not valid JSON.');
+    errors.push('Main signedMessage is not valid.');
+    if (isZodErrorLike(error)) {
+      const validationError = fromError(error);
+      errors.push(validationError.toString());
+    }
+    return { isValid: false, errors };
+  }
+
+  // Validate signedMessage schema
+  let parsedSessionMessage: ParsedSessionMessage;
+  try {
+    parsedSessionMessage = ParsedSessionMessageSchema.parse(signedMessage);
+  } catch (error) {
+    if (isZodErrorLike(error)) {
+      const validationError = fromError(error);
+      errors.push(validationError.toString());
+    }
     return { isValid: false, errors };
   }
 
   // Validate capabilities
-  const capabilities: Capability[] = parsedSignedMessage.capabilities;
+  const capabilities: Capability[] = parsedSessionMessage.capabilities;
+  const capabilitiesValidationResult = parseCapabilities(capabilities);
 
-  if (!capabilities) {
-    errors.push('Capabilities not found in main signedMessage.');
-  } else if (capabilities.length === 0) {
-    errors.push('No capabilities found in main signedMessage.');
-  } else {
-    const capabilitiesValidationResult = parseCapabilities(capabilities);
-
-    if (!capabilitiesValidationResult.isValid) {
-      errors.push(...capabilitiesValidationResult.errors);
-    }
+  if (!capabilitiesValidationResult.isValid) {
+    errors.push(...capabilitiesValidationResult.errors);
   }
 
   // Validate outer expiration
-  const outerExpirationTimeStr = parsedSignedMessage['expiration'];
+  const outerExpirationTimeStr = parsedSessionMessage['expiration'];
 
   if (outerExpirationTimeStr) {
     const validationResult = validateExpiration(
