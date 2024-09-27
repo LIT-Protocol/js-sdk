@@ -196,9 +196,7 @@ export interface LitContract {
  * network context and interfacing with contracts on Chroncile blockchain
  *
  */
-export interface LitContractContext {
-  [index: string]: string | any;
-
+export interface ExclusiveLitContractContext {
   Allowlist: LitContract;
   LITToken: LitContract;
   Multisender: LitContract;
@@ -211,6 +209,11 @@ export interface LitContractContext {
   Staking: LitContract;
   StakingBalances: LitContract;
 }
+export interface LitContractContext extends ExclusiveLitContractContext {
+  [index: string]: string | any;
+}
+
+export type ContractName = keyof ExclusiveLitContractContext;
 
 /**
  * Type for a contract resolver instance which will be used
