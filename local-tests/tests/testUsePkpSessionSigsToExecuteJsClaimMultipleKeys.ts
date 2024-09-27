@@ -11,8 +11,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * - Then: The claim operation should successfully return signatures, derived key IDs, and validate the existence and structure of claimed results.
  * *
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
- * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  */
 export const testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (

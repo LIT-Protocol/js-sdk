@@ -5,8 +5,8 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 const { importPrivateKey } = api;
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
- * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
  * ✅ NETWORK=custom yarn test:local --filter=testFailImportWrappedKeysWithSamePrivateKey
  */
 export const testFailImportWrappedKeysWithSamePrivateKey = async (

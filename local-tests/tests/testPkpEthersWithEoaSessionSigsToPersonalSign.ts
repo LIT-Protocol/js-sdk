@@ -5,8 +5,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithEoaSessionSigsToPersonalSign
- * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithEoaSessionSigsToPersonalSign
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testPkpEthersWithEoaSessionSigsToPersonalSign
+ * ✅ NETWORK=datil-test yarn test:local --filter=testPkpEthersWithEoaSessionSigsToPersonalSign
  * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithEoaSessionSigsToPersonalSign
  */
 export const testPkpEthersWithEoaSessionSigsToPersonalSign = async (

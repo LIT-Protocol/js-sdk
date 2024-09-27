@@ -16,7 +16,7 @@ export type ListKeysParams = BaseApiParams;
 
 export type SupportedNetworks = Extract<
   LIT_NETWORK_VALUES,
-  'cayenne' | 'manzano' | 'habanero' | 'datil-dev' | 'datil-test' | 'datil'
+  'datil-dev' | 'datil-test' | 'datil'
 >;
 
 export interface StoreKeyParams extends BaseApiParams {

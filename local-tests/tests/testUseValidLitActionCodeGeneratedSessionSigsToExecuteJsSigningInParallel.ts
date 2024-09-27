@@ -5,15 +5,11 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
- * ❌ Not available in Habanero
- * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_NETWORK.Manzano);
-
     const alice = await devEnv.createRandomPerson();
 
     const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);

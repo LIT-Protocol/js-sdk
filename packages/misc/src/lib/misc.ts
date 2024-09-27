@@ -578,7 +578,7 @@ export const defaultMintClaimCallback: MintCallback<
   RelayClaimProcessor
 > = async (
   params: ClaimResult<RelayClaimProcessor>,
-  network: LIT_NETWORK_VALUES = 'cayenne'
+  network: LIT_NETWORK_VALUES = LIT_NETWORK.DatilDev
 ): Promise<string> => {
   isSupportedLitNetwork(network);
 

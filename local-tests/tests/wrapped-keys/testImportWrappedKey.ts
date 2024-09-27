@@ -10,8 +10,8 @@ const { importPrivateKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testImportWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testImportWrappedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testImportWrappedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testImportWrappedKey
  * ✅ NETWORK=custom yarn test:local --filter=testImportWrappedKey
  */
 export const testImportWrappedKey = async (devEnv: TinnyEnvironment) => {

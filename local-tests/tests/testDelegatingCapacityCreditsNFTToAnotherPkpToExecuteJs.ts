@@ -13,8 +13,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  *
  *
  * ## Test Commands:
- * - ❌ Not supported in Cayenne
- * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
+ * - ✅ NETWORK=datil-test yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
  * - ✅ NETWORK=custom yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
  */
 export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (

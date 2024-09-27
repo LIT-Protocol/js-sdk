@@ -112,14 +112,7 @@ export type LITCosmosChain = LITChainRequiredProps & {
  */
 export type LITChain<T> = Record<string, T>;
 
-export type LIT_NETWORKS_KEYS =
-  | 'cayenne'
-  | 'datil-dev'
-  | 'datil-test'
-  | 'datil'
-  | 'custom'
-  | 'habanero'
-  | 'manzano';
+export type LIT_NETWORKS_KEYS = 'datil-dev' | 'datil-test' | 'datil' | 'custom';
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;

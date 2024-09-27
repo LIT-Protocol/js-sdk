@@ -8,8 +8,8 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3
- * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3
+ * ✅ NETWORK=datil-test yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3
  * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3
  */
 export const testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3 = async (

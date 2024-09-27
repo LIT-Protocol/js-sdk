@@ -8,17 +8,13 @@ import { encryptString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
- * ❌ NOT AVAILABLE IN MANZANO
- * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
 export const testExecutJsDecryptAndCombine = async (
   devEnv: TinnyEnvironment
 ) => {
-  devEnv.setUnavailable(LIT_NETWORK.Manzano);
-
   const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({

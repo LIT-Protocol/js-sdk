@@ -5,17 +5,13 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
- * ❌ NOT AVAILABLE IN HABANERO
- * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  *
  **/
 export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment
 ) => {
-  devEnv.setUnavailable(LIT_NETWORK.Manzano);
-
   const alice = await devEnv.createRandomPerson();
   const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 

@@ -5,6 +5,8 @@
 // [Lit-JS-SDK v2.2.39] ✅ [ECDSA SDK NodeJS] wasmECDSA loaded.
 global.jestTesting = true;
 
+import { LIT_NETWORK } from '@lit-protocol/constants';
+
 import { LitNodeClientNodeJs } from './lit-node-client-nodejs';
 
 const isClass = (v) => {
@@ -20,14 +22,14 @@ describe('LitNodeClientNodeJs', () => {
 
   it('should be able to instantiate a new LitNodeClientNodeJs to custom', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'custom',
+      litNetwork: LIT_NETWORK.Custom,
     });
     expect(litNodeClient).toBeDefined();
   });
 
-  it('should be able to instantiate a new LitNodeClientNodeJs to cayenne', async () => {
+  it('should be able to instantiate a new LitNodeClientNodeJs to datil dev', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'cayenne',
+      litNetwork: LIT_NETWORK.DatilDev,
     });
     expect(litNodeClient).toBeDefined();
   });
@@ -37,7 +39,7 @@ describe('LitNodeClientNodeJs', () => {
     Object.defineProperty(globalThis, 'localStorage', { value: undefined });
     const ls = require('node-localstorage').LocalStorage;
     const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'custom',
+      litNetwork: LIT_NETWORK.Custom,
       storageProvider: {
         provider: new ls('./storage.test.db'),
       },

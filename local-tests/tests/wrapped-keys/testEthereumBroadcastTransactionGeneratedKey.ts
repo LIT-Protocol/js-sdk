@@ -9,8 +9,8 @@ const { signTransactionWithEncryptedKey, generatePrivateKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
  * ✅ NETWORK=custom yarn test:local --filter=testEthereumBroadcastTransactionGeneratedKey
  */
 export const testEthereumBroadcastTransactionGeneratedKey = async (

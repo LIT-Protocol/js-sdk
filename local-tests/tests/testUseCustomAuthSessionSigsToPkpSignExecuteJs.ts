@@ -9,8 +9,7 @@ import { stringToIpfsHash } from 'local-tests/setup/tinny-utils';
 
 /**
  * Test Commands:
- * NETWORK=cayenne yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
- * NOT AVAILABLE IN HABANERO
+ * NETWORK=datil-dev yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
  * NETWORK=custom yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
  */
 export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (

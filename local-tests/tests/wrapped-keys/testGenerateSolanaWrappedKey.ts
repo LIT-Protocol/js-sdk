@@ -11,8 +11,8 @@ const { generatePrivateKey, signMessageWithEncryptedKey, exportPrivateKey } =
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testGenerateSolanaWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testGenerateSolanaWrappedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testGenerateSolanaWrappedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testGenerateSolanaWrappedKey
  * ✅ NETWORK=custom yarn test:local --filter=testGenerateSolanaWrappedKey
  */
 export const testGenerateSolanaWrappedKey = async (
