@@ -3,6 +3,7 @@ import { hashMessage } from 'ethers/lib/utils';
 import { version } from '@lit-protocol/constants';
 
 export enum LogLevel {
+  OFF = -1,
   ERROR = 0,
   INFO = 1,
   DEBUG = 2,
@@ -10,7 +11,6 @@ export enum LogLevel {
   FATAL = 4,
   TIMING_START = 5,
   TIMING_END = 6,
-  OFF = -1,
 }
 
 const colours = {
