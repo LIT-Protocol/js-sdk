@@ -71,6 +71,7 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
+import { LogLevel } from '@lit-protocol/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -202,7 +203,7 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
-    bootstrapLogManager('core');
+    bootstrapLogManager('core', this.config.debug ? LogLevel.DEBUG : LogLevel.OFF);
 
     // -- configure local storage if not present
     // LitNodeClientNodejs is a base for LitNodeClient
@@ -694,6 +695,7 @@ export class LitCore {
               errorCode: LIT_ERROR.INIT_ERROR.name,
             });
           } catch (e) {
+            logErrorWithRequestId(requestId, e);
             reject(e);
           }
         }, this.config.connectTimeout);

@@ -3,10 +3,10 @@ import { hashMessage } from 'ethers/lib/utils';
 import { version } from '@lit-protocol/constants';
 
 export enum LogLevel {
-  INFO = 0,
-  DEBUG = 1,
-  WARN = 2,
-  ERROR = 3,
+  ERROR = 0,
+  INFO = 1,
+  DEBUG = 2,
+  WARN = 3,
   FATAL = 4,
   TIMING_START = 5,
   TIMING_END = 6,
@@ -207,6 +207,7 @@ export class Logger {
   private _config: Record<string, any> | undefined;
   private _isParent: boolean;
   private _children: Map<string, Logger>;
+  private _timestamp: number;
 
   public static createLogger(
     category: string,
@@ -232,6 +233,7 @@ export class Logger {
     this._config = config;
     this._children = new Map();
     this._isParent = isParent;
+    this._timestamp = Date.now();
   }
 
   get id(): string {
@@ -240,6 +242,10 @@ export class Logger {
 
   get category(): string {
     return this._category;
+  }
+
+  get timestamp(): number {
+    return this._timestamp;
   }
 
   get Logs(): Log[] {
@@ -312,14 +318,15 @@ export class Logger {
     const arrayLog = log.toArray();
     if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
       (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler(...arrayLog);
+        this._consoleHandler && this._consoleHandler(...arrayLog);
       (this._level >= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
+
       (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     } else if (!this._config?.['condenseLogs']) {
       (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler(...arrayLog);
+        this._consoleHandler && this._consoleHandler(...arrayLog);
       (this._level >= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
@@ -342,7 +349,6 @@ export class Logger {
 
   private _addLog(log: Log) {
     this._logs.push(log);
-
     // TODO: currently we are not deleting old request id's which over time will fill local storage as the maximum storage size is 10mb
     // we should be deleting keys from the front of the collection of `Object.keys(category)` such that the first keys entered are deleted when we reach a pre defined key threshold
     // this implementation assumes that serialization / deserialization from `localStorage` keeps the same key ordering in each `category` object as we will asssume the array produced from `Object.keys` will always be the same ordering.
@@ -427,14 +433,18 @@ export class LogManager {
   }
 
   get LoggerIds(): string[] {
-    const keys: string[] = [];
+    const keys: [string, number][] = [];
     for (const category of this._loggers.entries()) {
       for (const child of category[1].Children) {
-        keys.push(child[0]);
+        keys.push([child[0], child[1].timestamp]);
       }
     }
 
-    return keys;
+    return keys.sort((a: [string, number], b: [string, number]) => {
+      return a[1] > b[1] ? a[1] : b[1];
+    }).map((value: [string, number]) => {
+      return value[0]; 
+    });
   }
 
   // if a logger is given an id it will persist logs under its logger instance

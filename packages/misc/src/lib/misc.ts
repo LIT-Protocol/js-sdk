@@ -278,12 +278,7 @@ export const log = (...args: any): void => {
     logBuffer.push(args);
     return;
   }
-
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
-  // config is loaded, and debug is true
-
+  
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
@@ -307,9 +302,6 @@ export const logWithRequestId = (id: string, ...args: any) => {
     return;
   }
 
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
   // config is loaded, and debug is true
 
   // if there are there are logs in buffer, print them first and empty the buffer.
@@ -337,9 +329,7 @@ export const logErrorWithRequestId = (id: string, ...args: any) => {
     return;
   }
 
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
+
   // config is loaded, and debug is true
 
   // if there are there are logs in buffer, print them first and empty the buffer.
