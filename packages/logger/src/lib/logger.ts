@@ -318,7 +318,8 @@ export class Logger {
     const arrayLog = log.toArray();
     if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
       (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler && this._consoleHandler(...arrayLog);
+        this._consoleHandler &&
+        this._consoleHandler(...arrayLog);
       (this._level >= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
@@ -326,7 +327,8 @@ export class Logger {
       (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     } else if (!this._config?.['condenseLogs']) {
       (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler && this._consoleHandler(...arrayLog);
+        this._consoleHandler &&
+        this._consoleHandler(...arrayLog);
       (this._level >= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
@@ -440,11 +442,13 @@ export class LogManager {
       }
     }
 
-    return keys.sort((a: [string, number], b: [string, number]) => {
-      return a[1] > b[1] ? a[1] : b[1];
-    }).map((value: [string, number]) => {
-      return value[0]; 
-    });
+    return keys
+      .sort((a: [string, number], b: [string, number]) => {
+        return a[1] > b[1] ? a[1] : b[1];
+      })
+      .map((value: [string, number]) => {
+        return value[0];
+      });
   }
 
   // if a logger is given an id it will persist logs under its logger instance

@@ -203,7 +203,10 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
-    bootstrapLogManager('core', this.config.debug ? LogLevel.DEBUG : LogLevel.OFF);
+    bootstrapLogManager(
+      'core',
+      this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
+    );
 
     // -- configure local storage if not present
     // LitNodeClientNodejs is a base for LitNodeClient
