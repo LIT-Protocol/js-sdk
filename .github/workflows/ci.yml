@@ -44,6 +44,7 @@ jobs:
     timeout-minutes: 30
     env:
       DATIL_COMMIT_HASH: ae3c20e07eb933b61073689b95f56867c03de252
+      NAGA_COMMIT_HASH: 16547aa747fbf1a20faf1aa1a0da1c6f54737ff3
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
