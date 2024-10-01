@@ -47,28 +47,13 @@ async function sendTransaction({ chain, transaction }) {
 }
 
 export async function signTransactionWithEncryptedSolanaKey({
-  accessControlConditions,
-  ciphertext,
-  dataToEncryptHash,
-  unsignedTransaction,
   broadcast,
+  privateKey,
+  unsignedTransaction,
 }) {
   validateUnsignedTransaction(unsignedTransaction);
 
-  const decryptedPrivateKey = await getDecryptedKey({
-    accessControlConditions,
-    ciphertext,
-    dataToEncryptHash,
-  });
-
-  if (!decryptedPrivateKey) {
-    // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-    return;
-  }
-
-  const solanaKeyPair = Keypair.fromSecretKey(
-    Buffer.from(removeSaltFromDecryptedKey(decryptedPrivateKey), 'hex')
-  );
+  const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
   const transaction = Transaction.from(
     Buffer.from(unsignedTransaction.serializedTransaction, 'base64')
@@ -78,10 +63,10 @@ export async function signTransactionWithEncryptedSolanaKey({
 
   if (!broadcast) {
     return signature;
-  } else {
-    return await sendTransaction({
-      chain: unsignedTransaction.chain,
-      transaction,
-    });
   }
+
+  return await sendTransaction({
+    chain: unsignedTransaction.chain,
+    transaction,
+  });
 }

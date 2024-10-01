@@ -100,26 +100,12 @@ async function broadcastTransaction({ provider, signedTx }) {
 }
 
 export async function signTransactionWithEncryptedKey({
-  accessControlConditions,
-  ciphertext,
-  dataToEncryptHash,
-  unsignedTransaction,
   broadcast,
+  privateKey,
+  unsignedTransaction,
 }) {
   const tx = getValidatedUnsignedTx(unsignedTransaction);
 
-  const decryptedPrivateKey = await getDecryptedKey({
-    accessControlConditions,
-    ciphertext,
-    dataToEncryptHash,
-  });
-
-  if (!decryptedPrivateKey) {
-    // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-    return;
-  }
-
-  const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
   const wallet = new ethers.Wallet(privateKey);
 
   tx.from = wallet.address;

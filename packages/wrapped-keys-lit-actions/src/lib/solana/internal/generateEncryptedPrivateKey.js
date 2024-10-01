@@ -11,7 +11,9 @@ import { LIT_PREFIX } from '../../constants';
  * @private
  * @returns { Promise<{ciphertext: string, dataToEncryptHash: string, publicKey: string}> } - The ciphertext & dataToEncryptHash which are the result of the encryption, and the publicKey of the newly generated Ethers Wrapped Key.
  */
-export async function generateSolanaPrivateKey({ accessControlConditions }) {
+export async function generateEncryptedSolanaPrivateKey({
+  accessControlConditions,
+}) {
   const solanaKeypair = Keypair.generate();
   const privateKey =
     LIT_PREFIX + Buffer.from(solanaKeypair.secretKey).toString('hex');
