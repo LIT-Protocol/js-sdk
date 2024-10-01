@@ -14,7 +14,7 @@ async function signMessage({ messageToSign, solanaKeyPair }) {
 
     return { signature };
   } catch (err) {
-    throw new Error('When signing message - ' + err.message);
+    throw new Error(`When signing message - ${err.message}`);
   }
 }
 
@@ -64,5 +64,5 @@ export async function signMessageWithEncryptedKey({
     throw new Error('Signature did not verify to expected Solana public key');
   }
 
-  return { signature: bs58.encode(signature) };
+  return bs58.encode(signature);
 }

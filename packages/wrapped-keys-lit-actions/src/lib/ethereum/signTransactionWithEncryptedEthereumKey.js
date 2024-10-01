@@ -27,7 +27,9 @@ const {
       broadcast,
     });
 
-    Lit.Actions.setResponse({ response: txResult });
+    if (txResult) {
+      Lit.Actions.setResponse({ response: txResult });
+    }
   } catch (err) {
     Lit.Actions.setResponse({
       response: `Error: ${err.message}`,

@@ -17,6 +17,6 @@ export async function getDecryptedKey({
 
     return privateKey;
   } catch (err) {
-    throw new Error('When decrypting key to a single node - ' + err.message);
+    throw new Error(`When decrypting key to a single node - ${err.message}`);
   }
 }
