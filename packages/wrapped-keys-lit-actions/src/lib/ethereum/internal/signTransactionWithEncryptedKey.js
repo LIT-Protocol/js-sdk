@@ -30,7 +30,7 @@ function getValidatedUnsignedTx(unsignedTransaction) {
       data: unsignedTransaction.dataHex,
     };
   } catch (err) {
-    throw new Error('Invalid unsignedTransaction - ' + err.message);
+    throw new Error(`Invalid unsignedTransaction - ${err.message}`);
   }
 }
 
@@ -43,7 +43,7 @@ async function getLatestNonce({ walletAddress, chain }) {
 
     return nonce;
   } catch (err) {
-    throw new Error('Unable to get latest nonce - ' + err.message);
+    throw new Error(`Unable to get latest nonce - ${err.message}`);
   }
 }
 
@@ -55,10 +55,7 @@ async function getEthersRPCProvider({ chain }) {
 
     return new ethers.providers.JsonRpcProvider(rpcUrl);
   } catch (err) {
-    throw new Error(
-      'Getting the rpc for the chain: ${unsignedTransaction.chain} - ' +
-        err.message
-    );
+    throw new Error(`Getting the rpc for the chain: ${chain} - ${err.message}`);
   }
 }
 
@@ -70,7 +67,7 @@ async function getGasPrice({ userProvidedGasPrice, provider }) {
       return await provider.getGasPrice();
     }
   } catch (err) {
-    throw new Error('When getting gas price - ' + err.message);
+    throw new Error(`When getting gas price - ${err.message}`);
   }
 }
 
@@ -81,7 +78,7 @@ async function getGasLimit({ provider, userProvidedGasLimit, tx }) {
     try {
       return await provider.estimateGas(tx);
     } catch (err) {
-      throw new Error('When estimating gas - ' + err.message);
+      throw new Error(`When estimating gas - ${err.message}`);
     }
   }
 }
@@ -90,7 +87,7 @@ async function signTransaction({ tx, wallet }) {
   try {
     return await wallet.signTransaction(tx);
   } catch (err) {
-    throw new Error('When signing transaction - ' + err.message);
+    throw new Error(`When signing transaction - ${err.message}`);
   }
 }
 
@@ -98,7 +95,7 @@ async function broadcastTransaction({ provider, signedTx }) {
   try {
     return await provider.sendTransaction(signedTx);
   } catch (err) {
-    throw new Error('When sending transaction - ' + err.message);
+    throw new Error(`When sending transaction - ${err.message}`);
   }
 }
 

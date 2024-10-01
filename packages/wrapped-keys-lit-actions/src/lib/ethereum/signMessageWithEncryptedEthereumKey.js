@@ -18,15 +18,17 @@ const {
 
 (async () => {
   try {
-    const { signature } = await signMessageWithEncryptedKey({
+    const signature = await signMessageWithEncryptedKey({
       accessControlConditions,
       ciphertext,
       dataToEncryptHash,
       messageToSign,
     });
 
-    Lit.Actions.setResponse({ response: signature });
+    if (signature) {
+      Lit.Actions.setResponse({ response: signature });
+    }
   } catch (err) {
-    Lit.Actions.setResponse({ response: 'Error: ' + err.message });
+    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
   }
 })();

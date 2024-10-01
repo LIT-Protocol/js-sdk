@@ -10,7 +10,7 @@ async function signMessage({ privateKey, messageToSign }) {
 
     return { signature, walletAddress: wallet.address };
   } catch (err) {
-    throw new Error('When signing message - ' + err.message);
+    throw new Error(`When signing message - ${err.message}`);
   }
 }
 
@@ -58,5 +58,5 @@ export async function signMessageWithEncryptedKey({
     );
   }
 
-  return { signature, walletAddress };
+  return signature;
 }
