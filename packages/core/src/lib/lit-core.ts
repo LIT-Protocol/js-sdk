@@ -71,7 +71,7 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { LogLevel } from '@lit-protocol/logger';
+import { Logger, LogLevel, LogManager } from '@lit-protocol/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -162,6 +162,7 @@ export class LitCore {
   };
   private _blockHashUrl =
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
+  protected _logger!: Logger; 
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
@@ -203,7 +204,7 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
-    bootstrapLogManager(
+    this._logger = bootstrapLogManager(
       'core',
       this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
     );
@@ -215,6 +216,7 @@ export class LitCore {
     // If the user sets a new file path, we respect it over the default path.
     if (this.config.storageProvider?.provider) {
       log(
+        this._logger,
         'localstorage api not found, injecting persistence instance found in config'
       );
       // using Object defineProperty in order to set a property previously defined as readonly.
@@ -228,6 +230,7 @@ export class LitCore {
       !this.config.storageProvider?.provider
     ) {
       log(
+        this._logger,
         'Looks like you are running in NodeJS and did not provide a storage provider, your sessions will not be cached'
       );
     }
@@ -235,11 +238,11 @@ export class LitCore {
 
   // ========== Logger utilities ==========
   getLogsForRequestId = (id: string): string[] => {
-    return globalThis.logManager.getLogsForId(id);
+    return LogManager.Instance.getLogsForId(id);
   };
 
-  getRequestIds = (): Set<string> => {
-    return globalThis.logManager.LoggerIds;
+  getRequestIds = (): string[] => {
+    return LogManager.Instance.LoggerIds;
   };
 
   /**
@@ -323,6 +326,7 @@ export class LitCore {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
         try {
           log(
+            this._logger,
             'State found to be new validator set locked, checking validator set'
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
@@ -342,6 +346,7 @@ export class LitCore {
                 network request to the previous epoch's node set before changing over.
               */
             log(
+              this._logger,
               'Active validator sets changed, new validators ',
               delta,
               'starting node connection'
@@ -384,6 +389,7 @@ export class LitCore {
 
     if (this._stakingContract) {
       log(
+        this._logger,
         'listening for state change on staking contract: ',
         this._stakingContract.address
       );
@@ -526,7 +532,7 @@ export class LitCore {
         {}
       );
       if (this.config.litNetwork === LitNetwork.Custom) {
-        log('using custom contracts: ', logAddresses);
+        log(this._logger, 'using custom contracts: ', logAddresses);
       }
     }
 
@@ -556,8 +562,8 @@ export class LitCore {
     globalThis.litNodeClient = this;
     this.ready = true;
 
-    log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
-    log('current network config', {
+    log(this._logger, `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
+    log(this._logger, 'current network config', {
       networkPubkey: this.networkPubKey,
       networkPubKeySet: this.networkPubKeySet,
       hdRootPubkeys: this.hdRootPubkeys,
@@ -607,6 +613,7 @@ export class LitCore {
       keys.networkPubKeySet === 'ERR'
     ) {
       logErrorWithRequestId(
+        this._logger,
         requestId,
         'Error connecting to node. Detected "ERR" in keys',
         url,
@@ -614,9 +621,10 @@ export class LitCore {
       );
     }
 
-    log(`Handshake with ${url} returned keys: `, keys);
+    log(this._logger, `Handshake with ${url} returned keys: `, keys);
     if (!keys.latestBlockhash) {
       logErrorWithRequestId(
+        this._logger,
         requestId,
         `Error getting latest blockhash from the node ${url}.`
       );
@@ -638,12 +646,12 @@ export class LitCore {
       }
 
       // actually verify the attestation by checking the signature against AMD certs
-      log('Checking attestation against amd certs...');
+      log(this._logger, 'Checking attestation against amd certs...');
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
         await checkSevSnpAttestation(attestation, challenge, url);
-        log(`Lit Node Attestation verified for ${url}`);
+        log(this._logger, `Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         throwError({
@@ -654,6 +662,7 @@ export class LitCore {
       }
     } else if (this.config.litNetwork === 'custom') {
       log(
+        this._logger,
         `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
       );
     }
@@ -698,7 +707,7 @@ export class LitCore {
               errorCode: LIT_ERROR.INIT_ERROR.name,
             });
           } catch (e) {
-            logErrorWithRequestId(requestId, e);
+            logErrorWithRequestId(this._logger, requestId, e);
             reject(e);
           }
         }, this.config.connectTimeout);
@@ -739,6 +748,7 @@ export class LitCore {
 
     if (!latestBlockhash) {
       logErrorWithRequestId(
+        this._logger,
         requestId,
         'Error getting latest blockhash from the nodes.'
       );
@@ -809,11 +819,12 @@ export class LitCore {
       this.lastBlockHashRetrieved &&
       currentTime - this.lastBlockHashRetrieved < blockHashValidityDuration
     ) {
-      log('Blockhash is still valid. No need to sync.');
+      log(this._logger, 'Blockhash is still valid. No need to sync.');
       return;
     }
 
     log(
+      this._logger,
       'Syncing state for new blockhash ',
       'current blockhash: ',
       this.latestBlockhash
@@ -824,7 +835,7 @@ export class LitCore {
         const blockHashBody: EthBlockhashInfo = await resp.json();
         this.latestBlockhash = blockHashBody.blockhash;
         this.lastBlockHashRetrieved = Date.now();
-        log('Done syncing state new blockhash: ', this.latestBlockhash);
+        log(this._logger, 'Done syncing state new blockhash: ', this.latestBlockhash);
 
         // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
         if (!this.latestBlockhash) {
@@ -835,6 +846,7 @@ export class LitCore {
       })
       .catch(async (err: BlockHashErrorResponse | Error) => {
         logError(
+          this._logger,
           'Error while attempting to fetch new latestBlockhash:',
           err instanceof Error ? err.message : err.messages,
           'Reason: ',
@@ -842,12 +854,14 @@ export class LitCore {
         );
 
         log(
+          this._logger,
           'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
         );
         const provider = await this._getProviderWithFallback();
 
         if (!provider) {
           logError(
+            this._logger,
             'All fallback RPC URLs failed. Unable to retrieve blockhash.'
           );
           return;
@@ -858,11 +872,12 @@ export class LitCore {
           this.latestBlockhash = latestBlock.hash;
           this.lastBlockHashRetrieved = Date.now();
           log(
+            this._logger,
             'Successfully retrieved blockhash manually: ',
             this.latestBlockhash
           );
         } catch (ethersError) {
-          logError('Failed to manually retrieve blockhash using ethers');
+          logError(this._logger, 'Failed to manually retrieve blockhash using ethers');
         }
       });
   }
@@ -937,7 +952,7 @@ export class LitCore {
       endpoint: LIT_ENDPOINT.HANDSHAKE,
     });
 
-    log(`handshakeWithNode ${urlWithPath}`);
+    log(this._logger, `handshakeWithNode ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
@@ -956,6 +971,7 @@ export class LitCore {
   ): Promise<Pick<EpochCache, 'startTime' | 'currentNumber'>> {
     if (!epochInfo) {
       log(
+        this._logger,
         'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
       );
       const validatorData = await this._getValidatorData();
@@ -1023,6 +1039,7 @@ export class LitCore {
     }
 
     logWithRequestId(
+      this._logger,
       requestId,
       `sendCommandToNode with url ${url} and data`,
       data
@@ -1247,6 +1264,7 @@ export class LitCore {
     );
 
     logErrorWithRequestId(
+      this._logger,
       requestId || '',
       `most common error: ${JSON.stringify(mostCommonError)}`
     );
@@ -1274,7 +1292,7 @@ export class LitCore {
           res.error.errorCode === 'not_authorized') &&
         this.config.alertWhenUnauthorized
       ) {
-        log('You are not authorized to access this content');
+        log(this._logger, 'You are not authorized to access this content');
       }
 
       throwError({
@@ -1328,6 +1346,7 @@ export class LitCore {
         canonicalAccessControlConditionFormatter(c)
       );
       log(
+        this._logger,
         'formattedAccessControlConditions',
         JSON.stringify(formattedAccessControlConditions)
       );
@@ -1336,6 +1355,7 @@ export class LitCore {
         canonicalEVMContractConditionFormatter(c)
       );
       log(
+        this._logger,
         'formattedEVMContractConditions',
         JSON.stringify(formattedEVMContractConditions)
       );
@@ -1346,6 +1366,7 @@ export class LitCore {
         canonicalSolRpcConditionFormatter(c)
       );
       log(
+        this._logger,
         'formattedSolRpcConditions',
         JSON.stringify(formattedSolRpcConditions)
       );
@@ -1355,6 +1376,7 @@ export class LitCore {
           canonicalUnifiedAccessControlConditionFormatter(c)
         );
       log(
+        this._logger,
         'formattedUnifiedAccessControlConditions',
         JSON.stringify(formattedUnifiedAccessControlConditions)
       );
@@ -1383,7 +1405,7 @@ export class LitCore {
     sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
   ): string => {
     if (!this.hdRootPubkeys) {
-      logError('root public keys not found, have you connected to the nodes?');
+      logError(this._logger, 'root public keys not found, have you connected to the nodes?');
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,

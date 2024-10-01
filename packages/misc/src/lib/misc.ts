@@ -28,7 +28,7 @@ import {
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
+import { Logger, LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
 
@@ -226,8 +226,6 @@ declare global {
   var litConfig: any;
   var wasmExport: any;
   var wasmECDSA: any;
-  var logger: any;
-  var logManager: any;
 }
 
 export const throwRemovedFunctionError = (functionName: string) => {
@@ -238,22 +236,21 @@ export const throwRemovedFunctionError = (functionName: string) => {
   });
 };
 
+export const getLoggerbyId = (id: string) => {
+  return LogManager.Instance.get(id);
+};
+
 export const bootstrapLogManager = (
   id: string,
   level: LogLevel = LogLevel.DEBUG
-) => {
-  if (!globalThis.logManager) {
-    globalThis.logManager = LogManager.Instance;
-    globalThis.logManager.withConfig({
-      condenseLogs: true,
-    });
-    globalThis.logManager.setLevel(level);
-  }
+): Logger => {
 
-  globalThis.logger = globalThis.logManager.get(id);
-};
+  globalThis.logManager = LogManager.Instance;
+  globalThis.logManager.withConfig({
+    condenseLogs: true,
+  });
+  globalThis.logManager.setLevel(level);
 
-export const getLoggerbyId = (id: string) => {
   return globalThis.logManager.get(id);
 };
 
@@ -265,7 +262,7 @@ export const getLoggerbyId = (id: string) => {
  *
  * @returns { void }
  */
-export const log = (...args: any): void => {
+export const log = (logger: Logger, ...args: any): void => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -282,13 +279,13 @@ export const log = (...args: any): void => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis?.logger && globalThis?.logger.debug(...log);
+    logger.debug(...log);
   }
 
-  globalThis?.logger && globalThis?.logger.debug(...args);
+  globalThis?.logger && logger.debug(...args);
 };
 
-export const logWithRequestId = (id: string, ...args: any) => {
+export const logWithRequestId = (logger: Logger, id: string, ...args: any) => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -315,7 +312,7 @@ export const logWithRequestId = (id: string, ...args: any) => {
     globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
 };
 
-export const logErrorWithRequestId = (id: string, ...args: any) => {
+export const logErrorWithRequestId = (logger: Logger, id: string, ...args: any) => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -342,7 +339,7 @@ export const logErrorWithRequestId = (id: string, ...args: any) => {
     globalThis.logManager.get(globalThis.logger.category, id).error(...args);
 };
 
-export const logError = (...args: any) => {
+export const logError = (logger: Logger, ...args: any) => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
