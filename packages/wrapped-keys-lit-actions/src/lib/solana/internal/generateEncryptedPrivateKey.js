@@ -1,5 +1,4 @@
-import { Keypair } from '@solana/web3.js';
-
+import { generateSolanaPrivateKey } from './generatePrivateKey';
 import { LIT_PREFIX } from '../../constants';
 
 /* global Lit */
@@ -14,20 +13,16 @@ import { LIT_PREFIX } from '../../constants';
 export async function generateEncryptedSolanaPrivateKey({
   accessControlConditions,
 }) {
-  const solanaKeypair = Keypair.generate();
-  const privateKey =
-    LIT_PREFIX + Buffer.from(solanaKeypair.secretKey).toString('hex');
-  let utf8Encode = new TextEncoder();
-  const to_encrypt = utf8Encode.encode(privateKey);
+  const { privateKey, publicKey } = generateSolanaPrivateKey();
 
   const { ciphertext, dataToEncryptHash } = await Lit.Actions.encrypt({
     accessControlConditions,
-    to_encrypt,
+    to_encrypt: new TextEncoder().encode(LIT_PREFIX + privateKey),
   });
 
   return {
     ciphertext,
     dataToEncryptHash,
-    publicKey: solanaKeypair.publicKey.toString(),
+    publicKey,
   };
 }
