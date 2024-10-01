@@ -6,7 +6,6 @@ const {
 } = require('@solana/web3.js');
 
 const { removeSaltFromDecryptedKey } = require('../utils');
-const { bs58 } = require('bs58');
 
 /**
  *
