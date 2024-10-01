@@ -254,10 +254,13 @@ export type KV = Record<string, any>;
  */
 export const StorageProviderSchema = z.object({
   provider: z.object({
-    getItem: z.function().args(z.string()).returns(z.union([z.string(), z.null()])),
+    getItem: z
+      .function()
+      .args(z.string())
+      .returns(z.union([z.string(), z.null()])),
     setItem: z.function().args(z.string(), z.string()).returns(z.void()),
     removeItem: z.function().args(z.string()).returns(z.void()),
-    clear: z.function().returns(z.void())
+    clear: z.function().returns(z.void()),
   }),
 });
 export type StorageProvider = z.infer<typeof StorageProviderSchema>;

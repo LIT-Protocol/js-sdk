@@ -77,8 +77,8 @@ export interface LITChainRequiredProps {
   name: string;
   symbol: string;
   decimals: number;
-  rpcUrls: string[];
-  blockExplorerUrls: string[];
+  rpcUrls: readonly string[];
+  blockExplorerUrls: readonly string[];
   vmType: string;
 }
 

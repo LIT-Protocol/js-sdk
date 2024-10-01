@@ -1,4 +1,5 @@
 import depd from 'depd';
+import { z } from 'zod';
 
 import {
   LITChain,
@@ -12,32 +13,61 @@ const deprecated = depd('lit-js-sdk:constants:constants');
 /**
  * Lit Protocol Network Public Key
  */
-export const NETWORK_PUB_KEY: string =
+export const NETWORK_PUB_KEY =
   '9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62';
+export const NetworkPubKeySchema = z.literal(NETWORK_PUB_KEY).readonly();
+export type NETWORK_PUB_KEY_TYPE = z.infer<typeof NetworkPubKeySchema>;
 
 // you can either pass a "chain" param to lit functions, which it uses to tell which network your sig came from.
 // or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
-export const LIT_AUTH_SIG_CHAIN_KEYS: string[] = [
+export const LIT_AUTH_SIG_CHAIN_KEYS = [
   'ethereum',
   'solana',
   'cosmos',
   'kyve',
-];
+] as const;
+export const LitAuthSigChainKeysSchema = z
+  .enum(LIT_AUTH_SIG_CHAIN_KEYS)
+  .readonly();
+export type LIT_AUTH_SIG_CHAIN_KEYS_TYPE = z.infer<
+  typeof LitAuthSigChainKeysSchema
+>;
 
 export const AUTH_SIGNATURE_BODY =
   'I am creating an account to use Lit Protocol at {{timestamp}}';
+export const AuthSignatureBodySchema = z
+  .literal(AUTH_SIGNATURE_BODY)
+  .readonly();
+export type AUTH_SIGNATURE_BODY_TYPE = z.infer<typeof AuthSignatureBodySchema>;
 
 const yellowstoneChain = {
   contractAddress: null,
   chainId: 175188,
+  extra: true,
   name: 'Chronicle Yellowstone - Lit Protocol Testnet',
   symbol: 'tstLPX',
   decimals: 18,
-  rpcUrls: ['https://yellowstone-rpc.litprotocol.com/'],
-  blockExplorerUrls: ['https://yellowstone-explorer.litprotocol.com/'],
+  rpcUrls: ['https://yellowstone-rpc.litprotocol.com/'] as const,
+  blockExplorerUrls: ['https://yellowstone-explorer.litprotocol.com/'] as const,
   type: null,
   vmType: 'EVM',
 };
+export const EVMChainSchema = z
+  .object({
+    name: z.string(),
+    symbol: z.string(),
+    decimals: z.number(),
+    rpcUrls: z.array(z.string()).nonempty().readonly(),
+    blockExplorerUrls: z.array(z.string()).nonempty().readonly(),
+    vmType: z.literal(yellowstoneChain.vmType),
+    // Properties for EVM
+    chainId: z.number(),
+    contractAddress: z.union([z.string().optional(), z.null()]),
+    type: z.union([z.string().optional(), z.null()]),
+    extra: z.boolean().optional(), // What is this? Only yellowstone has it and is not used anywhere
+  })
+  .readonly();
+export type YELLOWSTONE_CHAIN_TYPE = z.infer<typeof EVMChainSchema>;
 
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
@@ -55,8 +85,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: 'ERC1155',
     rpcUrls: [
       'https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE',
-    ],
-    blockExplorerUrls: ['https://etherscan.io'],
+    ] as const,
+    blockExplorerUrls: ['https://etherscan.io'] as const,
     vmType: 'EVM',
   },
   polygon: {
@@ -65,8 +95,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Polygon',
     symbol: 'MATIC',
     decimals: 18,
-    rpcUrls: ['https://polygon-rpc.com'],
-    blockExplorerUrls: ['https://explorer.matic.network'],
+    rpcUrls: ['https://polygon-rpc.com'] as const,
+    blockExplorerUrls: ['https://explorer.matic.network'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -76,8 +106,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Fantom',
     symbol: 'FTM',
     decimals: 18,
-    rpcUrls: ['https://rpcapi.fantom.network'],
-    blockExplorerUrls: ['https://ftmscan.com'],
+    rpcUrls: ['https://rpcapi.fantom.network'] as const,
+    blockExplorerUrls: ['https://ftmscan.com'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -87,8 +117,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'xDai',
     symbol: 'xDai',
     decimals: 18,
-    rpcUrls: ['https://rpc.gnosischain.com'],
-    blockExplorerUrls: [' https://blockscout.com/xdai/mainnet'],
+    rpcUrls: ['https://rpc.gnosischain.com'] as const,
+    blockExplorerUrls: [' https://blockscout.com/xdai/mainnet'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -98,8 +128,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Binance Smart Chain',
     symbol: 'BNB',
     decimals: 18,
-    rpcUrls: ['https://bsc-dataseed.binance.org/'],
-    blockExplorerUrls: [' https://bscscan.com/'],
+    rpcUrls: ['https://bsc-dataseed.binance.org/'] as const,
+    blockExplorerUrls: [' https://bscscan.com/'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -110,8 +140,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     symbol: 'AETH',
     decimals: 18,
     type: 'ERC1155',
-    rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-    blockExplorerUrls: ['https://arbiscan.io/'],
+    rpcUrls: ['https://arb1.arbitrum.io/rpc'] as const,
+    blockExplorerUrls: ['https://arbiscan.io/'] as const,
     vmType: 'EVM',
   },
   arbitrumSepolia: {
@@ -120,8 +150,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Arbitrum Sepolia',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://arbitrum-sepolia.blockpi.network/v1/rpc/public'],
-    blockExplorerUrls: ['https://sepolia.arbiscan.io/'],
+    rpcUrls: [
+      'https://arbitrum-sepolia.blockpi.network/v1/rpc/public',
+    ] as const,
+    blockExplorerUrls: ['https://sepolia.arbiscan.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -132,8 +164,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     symbol: 'AVAX',
     decimals: 18,
     type: 'ERC1155',
-    rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
-    blockExplorerUrls: ['https://snowtrace.io/'],
+    rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'] as const,
+    blockExplorerUrls: ['https://snowtrace.io/'] as const,
     vmType: 'EVM',
   },
   fuji: {
@@ -143,8 +175,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     symbol: 'AVAX',
     decimals: 18,
     type: 'ERC1155',
-    rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
-    blockExplorerUrls: ['https://testnet.snowtrace.io/'],
+    rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'] as const,
+    blockExplorerUrls: ['https://testnet.snowtrace.io/'] as const,
     vmType: 'EVM',
   },
   harmony: {
@@ -154,8 +186,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     symbol: 'ONE',
     decimals: 18,
     type: 'ERC1155',
-    rpcUrls: ['https://api.harmony.one'],
-    blockExplorerUrls: ['https://explorer.harmony.one/'],
+    rpcUrls: ['https://api.harmony.one'] as const,
+    blockExplorerUrls: ['https://explorer.harmony.one/'] as const,
     vmType: 'EVM',
   },
   mumbai: {
@@ -166,8 +198,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     decimals: 18,
     rpcUrls: [
       'https://rpc-mumbai.maticvigil.com/v1/96bf5fa6e03d272fbd09de48d03927b95633726c',
-    ],
-    blockExplorerUrls: ['https://mumbai.polygonscan.com'],
+    ] as const,
+    blockExplorerUrls: ['https://mumbai.polygonscan.com'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -177,8 +209,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Goerli',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://goerli.infura.io/v3/96dffb3d8c084dec952c61bd6230af34'],
-    blockExplorerUrls: ['https://goerli.etherscan.io'],
+    rpcUrls: [
+      'https://goerli.infura.io/v3/96dffb3d8c084dec952c61bd6230af34',
+    ] as const,
+    blockExplorerUrls: ['https://goerli.etherscan.io'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -188,8 +222,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Cronos',
     symbol: 'CRO',
     decimals: 18,
-    rpcUrls: ['https://evm-cronos.org'],
-    blockExplorerUrls: ['https://cronos.org/explorer/'],
+    rpcUrls: ['https://evm-cronos.org'] as const,
+    blockExplorerUrls: ['https://cronos.org/explorer/'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -199,8 +233,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Optimism',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://mainnet.optimism.io'],
-    blockExplorerUrls: ['https://optimistic.etherscan.io'],
+    rpcUrls: ['https://mainnet.optimism.io'] as const,
+    blockExplorerUrls: ['https://optimistic.etherscan.io'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -210,8 +244,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Celo',
     symbol: 'CELO',
     decimals: 18,
-    rpcUrls: ['https://forno.celo.org'],
-    blockExplorerUrls: ['https://explorer.celo.org'],
+    rpcUrls: ['https://forno.celo.org'] as const,
+    blockExplorerUrls: ['https://explorer.celo.org'] as const,
     type: 'ERC1155',
     vmType: 'EVM',
   },
@@ -221,8 +255,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Aurora',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://mainnet.aurora.dev'],
-    blockExplorerUrls: ['https://aurorascan.dev'],
+    rpcUrls: ['https://mainnet.aurora.dev'] as const,
+    blockExplorerUrls: ['https://aurorascan.dev'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -232,8 +266,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Eluvio',
     symbol: 'ELV',
     decimals: 18,
-    rpcUrls: ['https://host-76-74-28-226.contentfabric.io/eth'],
-    blockExplorerUrls: ['https://explorer.eluv.io'],
+    rpcUrls: ['https://host-76-74-28-226.contentfabric.io/eth'] as const,
+    blockExplorerUrls: ['https://explorer.eluv.io'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -243,8 +277,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Alfajores',
     symbol: 'CELO',
     decimals: 18,
-    rpcUrls: ['https://alfajores-forno.celo-testnet.org'],
-    blockExplorerUrls: ['https://alfajores-blockscout.celo-testnet.org'],
+    rpcUrls: ['https://alfajores-forno.celo-testnet.org'] as const,
+    blockExplorerUrls: [
+      'https://alfajores-blockscout.celo-testnet.org',
+    ] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -254,8 +290,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'XDC Blockchain',
     symbol: 'XDC',
     decimals: 18,
-    rpcUrls: ['https://rpc.xinfin.network'],
-    blockExplorerUrls: ['https://explorer.xinfin.network'],
+    rpcUrls: ['https://rpc.xinfin.network'] as const,
+    blockExplorerUrls: ['https://explorer.xinfin.network'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -265,8 +301,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'EVMOS',
     symbol: 'EVMOS',
     decimals: 18,
-    rpcUrls: ['https://eth.bd.evmos.org:8545'],
-    blockExplorerUrls: ['https://evm.evmos.org'],
+    rpcUrls: ['https://eth.bd.evmos.org:8545'] as const,
+    blockExplorerUrls: ['https://evm.evmos.org'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -276,8 +312,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'EVMOS Testnet',
     symbol: 'EVMOS',
     decimals: 18,
-    rpcUrls: ['https://eth.bd.evmos.dev:8545'],
-    blockExplorerUrls: ['https://evm.evmos.dev'],
+    rpcUrls: ['https://eth.bd.evmos.dev:8545'] as const,
+    blockExplorerUrls: ['https://evm.evmos.dev'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -287,8 +323,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'BSC Testnet',
     symbol: 'BNB',
     decimals: 18,
-    rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
-    blockExplorerUrls: ['https://testnet.bscscan.com/'],
+    rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'] as const,
+    blockExplorerUrls: ['https://testnet.bscscan.com/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -298,8 +334,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Base Goerli',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://goerli.base.org'],
-    blockExplorerUrls: ['https://goerli.basescan.org'],
+    rpcUrls: ['https://goerli.base.org'] as const,
+    blockExplorerUrls: ['https://goerli.basescan.org'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -309,8 +345,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Base Sepolia',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://sepolia.base.org'],
-    blockExplorerUrls: ['https://sepolia.basescan.org'],
+    rpcUrls: ['https://sepolia.base.org'] as const,
+    blockExplorerUrls: ['https://sepolia.basescan.org'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -320,8 +356,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Moonbeam',
     symbol: 'GLMR',
     decimals: 18,
-    rpcUrls: ['https://rpc.api.moonbeam.network'],
-    blockExplorerUrls: ['https://moonscan.io'],
+    rpcUrls: ['https://rpc.api.moonbeam.network'] as const,
+    blockExplorerUrls: ['https://moonscan.io'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -331,8 +367,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Moonriver',
     symbol: 'MOVR',
     decimals: 18,
-    rpcUrls: ['https://rpc.api.moonriver.moonbeam.network'],
-    blockExplorerUrls: ['https://moonriver.moonscan.io'],
+    rpcUrls: ['https://rpc.api.moonriver.moonbeam.network'] as const,
+    blockExplorerUrls: ['https://moonriver.moonscan.io'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -342,8 +378,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Moonbase Alpha',
     symbol: 'DEV',
     decimals: 18,
-    rpcUrls: ['https://rpc.api.moonbase.moonbeam.network'],
-    blockExplorerUrls: ['https://moonbase.moonscan.io/'],
+    rpcUrls: ['https://rpc.api.moonbase.moonbeam.network'] as const,
+    blockExplorerUrls: ['https://moonbase.moonscan.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -353,8 +389,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Filecoin',
     symbol: 'FIL',
     decimals: 18,
-    rpcUrls: ['https://api.node.glif.io/rpc/v1'],
-    blockExplorerUrls: ['https://filfox.info/'],
+    rpcUrls: ['https://api.node.glif.io/rpc/v1'] as const,
+    blockExplorerUrls: ['https://filfox.info/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -364,8 +400,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Filecoin Hyperspace testnet',
     symbol: 'tFIL',
     decimals: 18,
-    rpcUrls: ['https://api.hyperspace.node.glif.io/rpc/v1'],
-    blockExplorerUrls: ['https://hyperspace.filscan.io/'],
+    rpcUrls: ['https://api.hyperspace.node.glif.io/rpc/v1'] as const,
+    blockExplorerUrls: ['https://hyperspace.filscan.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -375,8 +411,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Sepolia Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
-    blockExplorerUrls: ['https://sepolia.etherscan.io/'],
+    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'] as const,
+    blockExplorerUrls: ['https://sepolia.etherscan.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -386,8 +422,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Scroll Alpha Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://alpha-rpc.scroll.io/l2'],
-    blockExplorerUrls: ['https://blockscout.scroll.io/'],
+    rpcUrls: ['https://alpha-rpc.scroll.io/l2'] as const,
+    blockExplorerUrls: ['https://blockscout.scroll.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -397,8 +433,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Scroll',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://rpc.scroll.io'],
-    blockExplorerUrls: ['https://scrollscan.com/'],
+    rpcUrls: ['https://rpc.scroll.io'] as const,
+    blockExplorerUrls: ['https://scrollscan.com/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -408,8 +444,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'zkSync Era Mainnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://mainnet.era.zksync.io'],
-    blockExplorerUrls: ['https://explorer.zksync.io/'],
+    rpcUrls: ['https://mainnet.era.zksync.io'] as const,
+    blockExplorerUrls: ['https://explorer.zksync.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -419,8 +455,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Base Mainnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://mainnet.base.org'],
-    blockExplorerUrls: ['https://basescan.org'],
+    rpcUrls: ['https://mainnet.base.org'] as const,
+    blockExplorerUrls: ['https://basescan.org'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -430,8 +466,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Lukso',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://rpc.lukso.gateway.fm'],
-    blockExplorerUrls: ['https://explorer.execution.mainnet.lukso.network/'],
+    rpcUrls: ['https://rpc.lukso.gateway.fm'] as const,
+    blockExplorerUrls: [
+      'https://explorer.execution.mainnet.lukso.network/',
+    ] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -441,8 +479,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Lukso Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://rpc.testnet.lukso.network'],
-    blockExplorerUrls: ['https://explorer.execution.testnet.lukso.network'],
+    rpcUrls: ['https://rpc.testnet.lukso.network'] as const,
+    blockExplorerUrls: [
+      'https://explorer.execution.testnet.lukso.network',
+    ] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -452,8 +492,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: '	Zora',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://rpc.zora.energy/'],
-    blockExplorerUrls: ['https://explorer.zora.energy'],
+    rpcUrls: ['https://rpc.zora.energy/'] as const,
+    blockExplorerUrls: ['https://explorer.zora.energy'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -463,8 +503,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Zora Goerli',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://testnet.rpc.zora.energy'],
-    blockExplorerUrls: ['https://testnet.explorer.zora.energy'],
+    rpcUrls: ['https://testnet.rpc.zora.energy'] as const,
+    blockExplorerUrls: ['https://testnet.explorer.zora.energy'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -474,8 +514,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'zkSync Era Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://testnet.era.zksync.dev'],
-    blockExplorerUrls: ['https://goerli.explorer.zksync.io/'],
+    rpcUrls: ['https://testnet.era.zksync.dev'] as const,
+    blockExplorerUrls: ['https://goerli.explorer.zksync.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -485,8 +525,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Linea Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://rpc.goerli.linea.build'],
-    blockExplorerUrls: ['https://explorer.goerli.linea.build'],
+    rpcUrls: ['https://rpc.goerli.linea.build'] as const,
+    blockExplorerUrls: ['https://explorer.goerli.linea.build'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -504,8 +544,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Chiado',
     symbol: 'XDAI',
     decimals: 18,
-    rpcUrls: ['https://rpc.chiadochain.net'],
-    blockExplorerUrls: ['https://blockscout.chiadochain.net'],
+    rpcUrls: ['https://rpc.chiadochain.net'] as const,
+    blockExplorerUrls: ['https://blockscout.chiadochain.net'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -515,8 +555,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'zkEvm',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://zkevm-rpc.com'],
-    blockExplorerUrls: ['https://zkevm.polygonscan.com/'],
+    rpcUrls: ['https://zkevm-rpc.com'] as const,
+    blockExplorerUrls: ['https://zkevm.polygonscan.com/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -526,8 +566,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Mantle Testnet',
     symbol: 'MNT',
     decimals: 18,
-    rpcUrls: ['https://rpc.testnet.mantle.xyz'],
-    blockExplorerUrls: ['https://explorer.testnet.mantle.xyz/'],
+    rpcUrls: ['https://rpc.testnet.mantle.xyz'] as const,
+    blockExplorerUrls: ['https://explorer.testnet.mantle.xyz/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -537,8 +577,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Mantle',
     symbol: 'MNT',
     decimals: 18,
-    rpcUrls: ['https://rpc.mantle.xyz'],
-    blockExplorerUrls: ['http://explorer.mantle.xyz/'],
+    rpcUrls: ['https://rpc.mantle.xyz'] as const,
+    blockExplorerUrls: ['http://explorer.mantle.xyz/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -548,8 +588,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Klaytn',
     symbol: 'KLAY',
     decimals: 18,
-    rpcUrls: ['https://klaytn.blockpi.network/v1/rpc/public'],
-    blockExplorerUrls: ['https://www.klaytnfinder.io/'],
+    rpcUrls: ['https://klaytn.blockpi.network/v1/rpc/public'] as const,
+    blockExplorerUrls: ['https://www.klaytnfinder.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -559,8 +599,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Public Goods Network',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://rpc.publicgoods.network'],
-    blockExplorerUrls: ['https://explorer.publicgoods.network/'],
+    rpcUrls: ['https://rpc.publicgoods.network'] as const,
+    blockExplorerUrls: ['https://explorer.publicgoods.network/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -570,8 +610,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Optimism Goerli',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://optimism-goerli.publicnode.com'],
-    blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'],
+    rpcUrls: ['https://optimism-goerli.publicnode.com'] as const,
+    blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -581,8 +621,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Waev Eclipse Testnet',
     symbol: 'ecWAEV',
     decimals: 18,
-    rpcUrls: ['https://api.evm.waev.eclipsenetwork.xyz'],
-    blockExplorerUrls: ['http://waev.explorer.modular.cloud/'],
+    rpcUrls: ['https://api.evm.waev.eclipsenetwork.xyz'] as const,
+    blockExplorerUrls: ['http://waev.explorer.modular.cloud/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -592,8 +632,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Waev Eclipse Devnet',
     symbol: 'ecWAEV',
     decimals: 18,
-    rpcUrls: ['https://api.evm.waev.dev.eclipsenetwork.xyz'],
-    blockExplorerUrls: ['http://waev.explorer.modular.cloud/'],
+    rpcUrls: ['https://api.evm.waev.dev.eclipsenetwork.xyz'] as const,
+    blockExplorerUrls: ['http://waev.explorer.modular.cloud/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -603,8 +643,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Verify Testnet',
     symbol: 'MATIC',
     decimals: 18,
-    rpcUrls: ['https://rpc.verify-testnet.gelato.digital'],
-    blockExplorerUrls: ['https://verify-testnet.blockscout.com/'],
+    rpcUrls: ['https://rpc.verify-testnet.gelato.digital'] as const,
+    blockExplorerUrls: ['https://verify-testnet.blockscout.com/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -614,8 +654,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Fuse',
     symbol: 'FUSE',
     decimals: 18,
-    rpcUrls: ['https://rpc.fuse.io/'],
-    blockExplorerUrls: ['https://explorer.fuse.io/'],
+    rpcUrls: ['https://rpc.fuse.io/'] as const,
+    blockExplorerUrls: ['https://explorer.fuse.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -625,10 +665,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Camp Network',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'],
+    rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'] as const,
     blockExplorerUrls: [
       'https://explorer.camp-network-testnet.gelato.digital/',
-    ],
+    ] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -638,8 +678,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Vanar Vanguard',
     symbol: 'VANRY',
     decimals: 18,
-    rpcUrls: ['https://rpc-vanguard.vanarchain.com'],
-    blockExplorerUrls: ['https://explorer-vanguard.vanarchain.com'],
+    rpcUrls: ['https://rpc-vanguard.vanarchain.com'] as const,
+    blockExplorerUrls: ['https://explorer-vanguard.vanarchain.com'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -649,8 +689,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Lisk',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://lisk.drpc.org'],
-    blockExplorerUrls: ['https://blockscout.lisk.com/'],
+    rpcUrls: ['https://lisk.drpc.org'] as const,
+    blockExplorerUrls: ['https://blockscout.lisk.com/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -660,8 +700,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Chiliz Mainnet',
     symbol: 'CHZ',
     decimals: 18,
-    rpcUrls: ['https://rpc.ankr.com/chiliz'],
-    blockExplorerUrls: ['https://chiliscan.com/'],
+    rpcUrls: ['https://rpc.ankr.com/chiliz'] as const,
+    blockExplorerUrls: ['https://chiliscan.com/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -671,8 +711,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Chiliz Spicy Testnet',
     symbol: 'CHZ',
     decimals: 18,
-    rpcUrls: ['https://spicy-rpc.chiliz.com/'],
-    blockExplorerUrls: ['https://testnet.chiliscan.com/'],
+    rpcUrls: ['https://spicy-rpc.chiliz.com/'] as const,
+    blockExplorerUrls: ['https://testnet.chiliscan.com/'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -682,10 +722,12 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'SKALE Nebula Hub Testnet',
     symbol: 'sFUEL',
     decimals: 18,
-    rpcUrls: ['https://testnet.skalenodes.com/v1/lanky-ill-funny-testnet'],
+    rpcUrls: [
+      'https://testnet.skalenodes.com/v1/lanky-ill-funny-testnet',
+    ] as const,
     blockExplorerUrls: [
       'https://lanky-ill-funny-testnet.explorer.testnet.skalenodes.com',
-    ],
+    ] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -695,10 +737,12 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'SKALE Nebula Hub Mainnet',
     symbol: 'sFUEL',
     decimals: 18,
-    rpcUrls: ['https://mainnet.skalenodes.com/v1/green-giddy-denebola'],
+    rpcUrls: [
+      'https://mainnet.skalenodes.com/v1/green-giddy-denebola',
+    ] as const,
     blockExplorerUrls: [
       'https://green-giddy-denebola.explorer.mainnet.skalenodes.com',
-    ],
+    ] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -708,8 +752,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Fhenix Helium',
     symbol: 'tFHE',
     decimals: 18,
-    rpcUrls: ['https://api.helium.fhenix.zone'],
-    blockExplorerUrls: ['https://explorer.helium.fhenix.zone'],
+    rpcUrls: ['https://api.helium.fhenix.zone'] as const,
+    blockExplorerUrls: ['https://explorer.helium.fhenix.zone'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -719,8 +763,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Hedera Testnet',
     symbol: 'HBAR',
     decimals: 8,
-    rpcUrls: ['https://testnet.hashio.io/api'],
-    blockExplorerUrls: ['https://hashscan.io/testnet/dashboard'],
+    rpcUrls: ['https://testnet.hashio.io/api'] as const,
+    blockExplorerUrls: ['https://hashscan.io/testnet/dashboard'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -730,8 +774,8 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'BitTorrent Testnet',
     symbol: 'BTT',
     decimals: 18,
-    rpcUrls: ['https://test-rpc.bittorrentchain.io'],
-    blockExplorerUrls: ['https://testnet.bttcscan.com'],
+    rpcUrls: ['https://test-rpc.bittorrentchain.io'] as const,
+    blockExplorerUrls: ['https://testnet.bttcscan.com'] as const,
     type: null,
     vmType: 'EVM',
   },
@@ -741,12 +785,16 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Kinto Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['http://35.215.120.180:8545'],
-    blockExplorerUrls: ['https://kintoscan.io/'],
+    rpcUrls: ['http://35.215.120.180:8545'] as const,
+    blockExplorerUrls: ['https://kintoscan.io/'] as const,
     type: null,
     vmType: 'EVM',
   },
 };
+export const LitEvmChainsSchema = z.record(z.string(), EVMChainSchema);
+export type LitEVMChains = z.infer<typeof LitEvmChainsSchema>;
+
+export const LIT_EVM_CHAINS = LIT_CHAINS;
 
 /**
  * Object containing information to submit to Metamask
@@ -765,9 +813,27 @@ export const METAMASK_CHAIN_INFO = {
     },
     rpcUrls: LIT_CHAINS['yellowstone'].rpcUrls,
     blockExplorerUrls: LIT_CHAINS['yellowstone'].blockExplorerUrls,
-    iconUrls: ['future'],
+    iconUrls: ['future'] as const,
   },
 };
+const MetamaskChainInfoSchema = z.object({
+  yellowstone: z
+    .object({
+      chainId: z.number(),
+      chainName: z.string(),
+      nativeCurrency: z.object({
+        name: z.string(),
+        symbol: z.string(),
+        decimals: z.number(),
+      }),
+      rpcUrls: z.array(z.string()),
+      blockExplorerUrls: z.array(z.string()),
+      iconUrls: z.enum(METAMASK_CHAIN_INFO.yellowstone.iconUrls),
+    })
+    .readonly(),
+});
+export type MetamaskChainInfo = z.infer<typeof MetamaskChainInfoSchema>;
+
 /**
  * @deprecated Will be removed - Use METAMASK_CHAIN_INFO instead
  * Alias for {@link METAMASK_CHAIN_INFO}. Added for backwards compatibility.
@@ -797,8 +863,11 @@ export const LIT_RPC = {
    */
   CHRONICLE_YELLOWSTONE: 'https://yellowstone-rpc.litprotocol.com',
 } as const;
-
-export const LIT_EVM_CHAINS = LIT_CHAINS;
+const LitRpcSchema = z.object({
+  LOCAL_ANVIL: z.literal(LIT_RPC.LOCAL_ANVIL),
+  CHRONICLE_YELLOWSTONE: z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
+});
+export type LitRpc = z.infer<typeof LitRpcSchema>;
 
 /**
  * Represents the Lit Network constants.
@@ -809,6 +878,13 @@ export const LIT_NETWORK = {
   Datil: 'datil',
   Custom: 'custom',
 } as const;
+const LitNetworkSchema = z.object({
+  DatilDev: z.literal(LIT_NETWORK.DatilDev),
+  DatilTest: z.literal(LIT_NETWORK.DatilTest),
+  Datil: z.literal(LIT_NETWORK.Datil),
+  Custom: z.literal(LIT_NETWORK.Custom),
+});
+export type LitNetwork = z.infer<typeof LitNetworkSchema>;
 /**
  * @deprecated Will be removed. - Use LIT_NETWORK instead
  * Alias for LIT_NETWORK. Added for backwards compatibility.
@@ -844,6 +920,13 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
 };
+export const RpcUlrByNetworkSchema = z.object({
+  'datil-dev': z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
+  'datil-test': z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
+  datil: z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
+  custom: z.literal(LIT_RPC.LOCAL_ANVIL),
+});
+export type RpcUlrByNetwork = z.infer<typeof RpcUlrByNetworkSchema>;
 
 /**
  * Mapping of network names to their corresponding relayer URLs.
@@ -856,6 +939,13 @@ export const RELAYER_URL_BY_NETWORK: {
   datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
 };
+export const RelayerUrlByNetworkSchema = z.object({
+  'datil-dev': z.literal('https://datil-dev-relayer.getlit.dev'),
+  'datil-test': z.literal('https://datil-test-relayer.getlit.dev'),
+  datil: z.literal('https://datil-relayer.getlit.dev'),
+  custom: z.literal('http://localhost:3000'),
+});
+export type RelayerUrlByNetwork = z.infer<typeof RelayerUrlByNetworkSchema>;
 
 /**
  * Mapping of network values to corresponding Metamask chain info.
@@ -869,6 +959,15 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   datil: METAMASK_CHAIN_INFO.yellowstone,
   custom: METAMASK_CHAIN_INFO.yellowstone,
 };
+export const MetamaskChainInfoByNetworkSchema = z.object({
+  'datil-dev': MetamaskChainInfoSchema.shape.yellowstone,
+  'datil-test': MetamaskChainInfoSchema.shape.yellowstone,
+  datil: MetamaskChainInfoSchema.shape.yellowstone,
+  custom: MetamaskChainInfoSchema.shape.yellowstone,
+});
+export type MetamaskChainInfoByNetwork = z.infer<
+  typeof MetamaskChainInfoByNetworkSchema
+>;
 
 export const HTTP = 'http://';
 export const HTTPS = 'https://';
