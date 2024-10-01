@@ -99,7 +99,7 @@ async function broadcastTransaction({ provider, signedTx }) {
   }
 }
 
-export async function signTransactionWithEncryptedKey({
+export async function signTransactionEthereumKey({
   broadcast,
   privateKey,
   unsignedTransaction,

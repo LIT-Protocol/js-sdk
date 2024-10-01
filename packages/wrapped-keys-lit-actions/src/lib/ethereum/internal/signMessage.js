@@ -19,10 +19,7 @@ function verifyMessageSignature(messageToSign, signature) {
   }
 }
 
-export async function signMessageWithEncryptedEthereumKey({
-  privateKey,
-  messageToSign,
-}) {
+export async function signMessageEthereumKey({ privateKey, messageToSign }) {
   const { signature, walletAddress } = await signMessage({
     privateKey,
     messageToSign,

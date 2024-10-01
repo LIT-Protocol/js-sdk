@@ -1,6 +1,4 @@
-const {
-  signTransactionWithEncryptedSolanaKey,
-} = require('./internal/signTransactionWithEncryptedKey');
+const { signTransactionSolanaKey } = require('./internal/signTransaction');
 const { getDecryptedKey } = require('../common/internal/getDecryptedKey');
 const { removeSaltFromDecryptedKey } = require('../utils');
 
@@ -35,7 +33,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
 
     const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
 
-    const txResult = await signTransactionWithEncryptedSolanaKey({
+    const txResult = await signTransactionSolanaKey({
       broadcast,
       privateKey,
       unsignedTransaction,
