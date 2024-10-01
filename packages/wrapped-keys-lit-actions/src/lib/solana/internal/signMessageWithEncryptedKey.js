@@ -32,26 +32,11 @@ function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }) {
   }
 }
 
-export async function signMessageWithEncryptedKey({
-  accessControlConditions,
-  ciphertext,
-  dataToEncryptHash,
+export async function signMessageWithEncryptedSolanaKey({
   messageToSign,
+  privateKey,
 }) {
-  const decryptedPrivateKey = await getDecryptedKey({
-    accessControlConditions,
-    ciphertext,
-    dataToEncryptHash,
-  });
-
-  if (!decryptedPrivateKey) {
-    // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-    return;
-  }
-
-  const solanaKeyPair = Keypair.fromSecretKey(
-    Buffer.from(removeSaltFromDecryptedKey(decryptedPrivateKey), 'hex')
-  );
+  const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
   const { signature } = await signMessage({
     messageToSign,

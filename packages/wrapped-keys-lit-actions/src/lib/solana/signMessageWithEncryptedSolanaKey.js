@@ -1,8 +1,10 @@
-/* global accessControlConditions, ciphertext, dataToEncryptHash, messageToSign, Lit */
-
 const {
-  signMessageWithEncryptedKey,
+  signMessageWithEncryptedSolanaKey,
 } = require('./internal/signMessageWithEncryptedKey');
+const { getDecryptedKey } = require('../common/internal/getDecryptedKey');
+const { removeSaltFromDecryptedKey } = require('../utils');
+
+/* global accessControlConditions, ciphertext, dataToEncryptHash, messageToSign, Lit */
 
 /**
  *
@@ -19,16 +21,25 @@ const {
 
 (async () => {
   try {
-    const signature = await signMessageWithEncryptedKey({
+    const decryptedPrivateKey = await getDecryptedKey({
       accessControlConditions,
       ciphertext,
       dataToEncryptHash,
-      messageToSign,
     });
 
-    if (signature) {
-      Lit.Actions.setResponse({ response: signature });
+    if (!decryptedPrivateKey) {
+      // Silently exit on nodes which didn't run the `decryptToSingleNode` code
+      return;
     }
+
+    const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
+
+    const signature = await signMessageWithEncryptedSolanaKey({
+      messageToSign,
+      privateKey,
+    });
+
+    Lit.Actions.setResponse({ response: signature });
   } catch (err) {
     Lit.Actions.setResponse({ response: `Error: ${err.message}` });
   }

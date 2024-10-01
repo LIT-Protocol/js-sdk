@@ -1,8 +1,10 @@
-/* global accessControlConditions, ciphertext, dataToEncryptHash, messageToSign, Lit */
-
 const {
-  signMessageWithEncryptedKey,
+  signMessageWithEncryptedEthereumKey,
 } = require('./internal/signMessageWithEncryptedKey');
+const { getDecryptedKey } = require('../common/internal/getDecryptedKey');
+const { removeSaltFromDecryptedKey } = require('../utils');
+
+/* global accessControlConditions, ciphertext, dataToEncryptHash, messageToSign, Lit */
 
 /**
  * Signs a message with the Ethers wallet which is also decrypted inside the Lit Action.
@@ -18,16 +20,25 @@ const {
 
 (async () => {
   try {
-    const signature = await signMessageWithEncryptedKey({
+    const decryptedPrivateKey = await getDecryptedKey({
       accessControlConditions,
       ciphertext,
       dataToEncryptHash,
+    });
+
+    if (!decryptedPrivateKey) {
+      // Silently exit on nodes which didn't run the `decryptToSingleNode` code
+      return;
+    }
+
+    const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
+
+    const signature = await signMessageWithEncryptedEthereumKey({
+      privateKey,
       messageToSign,
     });
 
-    if (signature) {
-      Lit.Actions.setResponse({ response: signature });
-    }
+    Lit.Actions.setResponse({ response: signature });
   } catch (err) {
     Lit.Actions.setResponse({ response: `Error: ${err.message}` });
   }

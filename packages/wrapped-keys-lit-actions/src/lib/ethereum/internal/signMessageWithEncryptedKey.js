@@ -1,8 +1,5 @@
 /* global ethers */
 
-import { getDecryptedKey } from '../../common/internal/getDecryptedKey';
-import { removeSaltFromDecryptedKey } from '../../utils';
-
 async function signMessage({ privateKey, messageToSign }) {
   try {
     const wallet = new ethers.Wallet(privateKey);
@@ -22,25 +19,10 @@ function verifyMessageSignature(messageToSign, signature) {
   }
 }
 
-export async function signMessageWithEncryptedKey({
-  accessControlConditions,
-  ciphertext,
-  dataToEncryptHash,
+export async function signMessageWithEncryptedEthereumKey({
+  privateKey,
   messageToSign,
 }) {
-  const decryptedPrivateKey = await getDecryptedKey({
-    accessControlConditions,
-    ciphertext,
-    dataToEncryptHash,
-  });
-
-  if (!decryptedPrivateKey) {
-    // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-    return;
-  }
-
-  const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-
   const { signature, walletAddress } = await signMessage({
     privateKey,
     messageToSign,

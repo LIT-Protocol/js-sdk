@@ -1,5 +1,5 @@
 const {
-  generateSolanaPrivateKey,
+  generateEncryptedSolanaPrivateKey,
 } = require('./internal/generateEncryptedPrivateKey');
 
 /* global accessControlConditions, Lit */
@@ -16,7 +16,10 @@ const {
 (async () => {
   const generatedKeyResultStr = await Lit.Actions.runOnce(
     { waitForResponse: true, name: 'generateSolanaPrivateKey' },
-    () => JSON.stringify(generateSolanaPrivateKey({ accessControlConditions }))
+    () =>
+      JSON.stringify(
+        generateEncryptedSolanaPrivateKey({ accessControlConditions })
+      )
   );
 
   Lit.Actions.setResponse({

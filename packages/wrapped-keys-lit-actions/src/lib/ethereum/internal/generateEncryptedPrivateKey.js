@@ -9,7 +9,9 @@
  */
 import { LIT_PREFIX } from '../../constants';
 
-export async function generateEthereumPrivateKey({ accessControlConditions }) {
+export async function generateEncryptedEthereumPrivateKey({
+  accessControlConditions,
+}) {
   const wallet = ethers.Wallet.createRandom();
   const privateKey = LIT_PREFIX + wallet.privateKey.toString();
 
