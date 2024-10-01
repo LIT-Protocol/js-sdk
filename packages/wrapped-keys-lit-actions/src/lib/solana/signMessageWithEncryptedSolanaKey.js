@@ -1,6 +1,4 @@
-const {
-  signMessageWithEncryptedSolanaKey,
-} = require('./internal/signMessageWithEncryptedKey');
+const { signMessageSolanaKey } = require('./internal/signMessage');
 const { getDecryptedKey } = require('../common/internal/getDecryptedKey');
 const { removeSaltFromDecryptedKey } = require('../utils');
 
@@ -34,7 +32,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
 
     const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
 
-    const signature = await signMessageWithEncryptedSolanaKey({
+    const signature = await signMessageSolanaKey({
       messageToSign,
       privateKey,
     });

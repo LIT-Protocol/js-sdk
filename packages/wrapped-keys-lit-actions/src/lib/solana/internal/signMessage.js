@@ -2,9 +2,6 @@ import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 
-import { getDecryptedKey } from '../../common/internal/getDecryptedKey';
-import { removeSaltFromDecryptedKey } from '../../utils';
-
 async function signMessage({ messageToSign, solanaKeyPair }) {
   try {
     const signature = nacl.sign.detached(
@@ -32,10 +29,7 @@ function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }) {
   }
 }
 
-export async function signMessageWithEncryptedSolanaKey({
-  messageToSign,
-  privateKey,
-}) {
+export async function signMessageSolanaKey({ messageToSign, privateKey }) {
   const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
   const { signature } = await signMessage({

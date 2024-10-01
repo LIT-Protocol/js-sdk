@@ -1,11 +1,9 @@
-const {
-  generateEncryptedSolanaPrivateKey,
-} = require('./internal/generateEncryptedPrivateKey');
+const { generateSolanaPrivateKey } = require('./internal/generatePrivateKey');
+const { encryptPrivateKey } = require('../common/internal/encryptKey');
 
 /* global accessControlConditions, Lit */
 
 /**
- *
  * Bundles solana/web3.js package as it's required to generate a random Solana key and only allows the provided PKP to decrypt it
  *
  * @jsParam pkpAddress - The Eth address of the PKP which is associated with the Wrapped Key
@@ -14,15 +12,21 @@ const {
  * @returns { Promise<string> } - Returns a stringified JSON object with ciphertext & dataToEncryptHash which are the result of the encryption. Also returns the publicKey of the newly generated Solana Wrapped Key.
  */
 (async () => {
-  const generatedKeyResultStr = await Lit.Actions.runOnce(
-    { waitForResponse: true, name: 'generateSolanaPrivateKey' },
+  const { privateKey, publicKey } = generateSolanaPrivateKey();
+
+  const encryptedKeyResultStr = await Lit.Actions.runOnce(
+    { waitForResponse: true, name: 'encryptSolanaPrivateKey' },
     () =>
       JSON.stringify(
-        generateEncryptedSolanaPrivateKey({ accessControlConditions })
+        encryptPrivateKey({
+          accessControlConditions,
+          publicKey,
+          privateKey,
+        })
       )
   );
 
   Lit.Actions.setResponse({
-    response: generatedKeyResultStr,
+    response: encryptedKeyResultStr,
   });
 })();

@@ -46,7 +46,7 @@ async function sendTransaction({ chain, transaction }) {
   }
 }
 
-export async function signTransactionWithEncryptedSolanaKey({
+export async function signTransactionSolanaKey({
   broadcast,
   privateKey,
   unsignedTransaction,

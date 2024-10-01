@@ -1,6 +1,4 @@
-const {
-  signMessageWithEncryptedEthereumKey,
-} = require('./internal/signMessageWithEncryptedKey');
+const { signMessageEthereumKey } = require('./internal/signMessage');
 const { getDecryptedKey } = require('../common/internal/getDecryptedKey');
 const { removeSaltFromDecryptedKey } = require('../utils');
 
@@ -33,7 +31,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
 
     const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
 
-    const signature = await signMessageWithEncryptedEthereumKey({
+    const signature = await signMessageEthereumKey({
       privateKey,
       messageToSign,
     });

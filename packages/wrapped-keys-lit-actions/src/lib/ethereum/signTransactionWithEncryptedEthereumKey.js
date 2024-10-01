@@ -1,6 +1,4 @@
-const {
-  signTransactionWithEncryptedKey,
-} = require('./internal/signTransactionWithEncryptedKey');
+const { signTransactionEthereumKey } = require('./internal/signTransaction');
 const { getDecryptedKey } = require('../common/internal/getDecryptedKey');
 const { removeSaltFromDecryptedKey } = require('../utils');
 
@@ -34,7 +32,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
 
     const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
 
-    const txResult = await signTransactionWithEncryptedKey({
+    const txResult = await signTransactionEthereumKey({
       broadcast,
       privateKey,
       unsignedTransaction,
