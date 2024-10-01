@@ -50,6 +50,7 @@ import {
   logWithRequestId,
   mostCommonString,
   sendRequest,
+  setMiscLitConfig,
 } from '@lit-protocol/misc';
 import {
   AuthSig,
@@ -197,8 +198,8 @@ export class LitCore {
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
-    // -- set global variables
-    globalThis.litConfig = this.config;
+    // -- set misc global variables
+    setMiscLitConfig(this.config);
     bootstrapLogManager('core');
 
     // -- configure local storage if not present
@@ -387,7 +388,7 @@ export class LitCore {
 
     this._stopListeningForNewEpoch();
     // this._stopNetworkPolling();
-    if (globalThis.litConfig) delete globalThis.litConfig;
+    setMiscLitConfig(undefined);
   }
 
   // _stopNetworkPolling() {
@@ -532,9 +533,6 @@ export class LitCore {
     // this._scheduleNetworkSync();
     this._listenForNewEpoch();
 
-    // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
-    // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
-    globalThis.litNodeClient = this;
     this.ready = true;
 
     log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
