@@ -50,8 +50,8 @@ module.exports = {
 (async () => {
   await esbuild.build({
     entryPoints: [
-      './src/lib/solana/signTransactionWithSolanaEncryptedKey.js',
-      './src/lib/solana/signMessageWithSolanaEncryptedKey.js',
+      './src/lib/solana/signTransactionWithEncryptedSolanaKey.js',
+      './src/lib/solana/signMessageWithEncryptedSolanaKey.js',
       './src/lib/solana/generateEncryptedSolanaPrivateKey.js',
       './src/lib/ethereum/signTransactionWithEncryptedEthereumKey.js',
       './src/lib/ethereum/signMessageWithEncryptedEthereumKey.js',
