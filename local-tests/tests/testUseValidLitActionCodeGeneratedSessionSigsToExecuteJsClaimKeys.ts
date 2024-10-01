@@ -13,15 +13,11 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * - Then: The claim operation should successfully return signatures, derived key IDs, and validate the existence and structure of claimed results.
  * *
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys
- * ❌ Not supported in Manzano
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys
  * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys
- * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_NETWORK.Manzano);
-
     const alice = await devEnv.createRandomPerson();
     const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [
       {

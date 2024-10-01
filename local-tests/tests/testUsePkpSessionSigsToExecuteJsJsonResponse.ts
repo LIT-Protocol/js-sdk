@@ -3,8 +3,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsJsonResponse
- * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsJsonResponse
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUsePkpSessionSigsToExecuteJsJsonResponse
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUsePkpSessionSigsToExecuteJsJsonResponse
  * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToExecuteJsJsonResponse
  */
 export const testUsePkpSessionSigsToExecuteJsJsonResponse = async (

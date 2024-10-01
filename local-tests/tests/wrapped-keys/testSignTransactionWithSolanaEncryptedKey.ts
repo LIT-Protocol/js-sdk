@@ -16,8 +16,8 @@ const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
  * ✅ NETWORK=custom yarn test:local --filter=testSignTransactionWithSolanaEncryptedKey
  */
 export const testSignTransactionWithSolanaEncryptedKey = async (

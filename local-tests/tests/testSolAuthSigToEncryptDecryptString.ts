@@ -5,8 +5,8 @@ import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testSolAuthSigToEncryptDecryptString
- * ✅ NETWORK=manzano yarn test:local --filter=testSolAuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testSolAuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-test yarn test:local --filter=testSolAuthSigToEncryptDecryptString
  * ✅ NETWORK=custom yarn test:local --filter=testSolAuthSigToEncryptDecryptString
  */
 export const testSolAuthSigToEncryptDecryptString = async (

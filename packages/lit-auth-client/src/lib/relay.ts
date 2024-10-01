@@ -65,11 +65,11 @@ export class LitRelay implements IRelay {
    *
    * @param {LitRelayConfig} config
    * @param {string} [config.relayApiKey] - API key for Lit's relay server
-   * @param {string} [config.relayUrl] - URL for Lit's relay server. If not provided, will default to the Cayenne relay server.
+   * @param {string} [config.relayUrl] - URL for Lit's relay server. If not provided, will default to the last dev relay server.
    */
   constructor(config: LitRelayConfig) {
     this.relayUrl =
-      config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.Cayenne);
+      config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.DatilDev);
     this.relayApiKey = config.relayApiKey || '';
     log("Lit's relay server URL:", this.relayUrl);
   }

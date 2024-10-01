@@ -5,15 +5,11 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog
- * ❌ Not supported on manzano
- * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_NETWORK.Manzano);
-
     const alice = await devEnv.createRandomPerson();
 
     const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [

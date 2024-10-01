@@ -8,8 +8,8 @@ const { importPrivateKey, signMessageWithEncryptedKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignMessageWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignMessageWrappedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testEthereumSignMessageWrappedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testEthereumSignMessageWrappedKey
  * ✅ NETWORK=custom yarn test:local --filter=testEthereumSignMessageWrappedKey
  */
 export const testEthereumSignMessageWrappedKey = async (

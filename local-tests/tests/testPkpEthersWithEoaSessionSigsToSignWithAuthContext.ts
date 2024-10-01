@@ -11,8 +11,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
- * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
+ * ✅ NETWORK=datil-test yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
  * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
  */
 export const testPkpEthersWithEoaSessionSigsToSignWithAuthContext = async (

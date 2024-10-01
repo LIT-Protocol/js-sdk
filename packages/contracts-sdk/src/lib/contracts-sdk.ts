@@ -234,7 +234,7 @@ export class LitContracts {
     this.randomPrivateKey = args?.randomPrivatekey ?? false;
     this.options = args?.options;
     this.debug = args?.debug ?? false;
-    this.network = args?.network || 'cayenne';
+    this.network = args?.network || LIT_NETWORK.DatilDev;
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = RPC_URL_BY_NETWORK[this.network];
@@ -1048,26 +1048,6 @@ export class LitContracts {
         // Fallback to HTTP if no other conditions are met
         HTTP;
 
-      // Check for specific conditions in centralised networks
-      if (centralisation === 'centralised') {
-        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
-        if (
-          network === LIT_NETWORK.Cayenne &&
-          !port.toString().startsWith('8')
-        ) {
-          throw new NetworkError(
-            {
-              info: {
-                ip,
-                port,
-                network,
-              },
-            },
-            `Invalid port: ${port} for the ${centralisation} ${network} network. Expected range: 8470 - 8479`
-          );
-        }
-      }
-
       const url = `${protocol}${ip}:${port}`;
 
       LitContracts.logger.debug("Validator's URL:", url);
@@ -1164,19 +1144,6 @@ export class LitContracts {
         (port === 443 ? HTTPS : HTTP_BY_NETWORK[litNetwork]) ||
         // Fallback to HTTP if no other conditions are met
         HTTP;
-
-      // Check for specific conditions in centralised networks
-      if (centralisation === 'centralised') {
-        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
-        if (
-          litNetwork === LIT_NETWORK.Cayenne &&
-          !(port >= 8470 && port <= 8479)
-        ) {
-          throw new Error(
-            `Invalid port: ${port} for the ${centralisation} ${litNetwork} network. Expected range: 8470 - 8479`
-          );
-        }
-      }
 
       const url = `${protocol}${ip}:${port}`;
 

@@ -19,8 +19,6 @@ export interface ProcessEnvs {
   /**
    * The network to use for testing. This can be one of the following:
    * - `LIT_NETWORK.Custom`
-   * - `LIT_NETWORK.Manzano`
-   * - `LIT_NETWORK.Cayenne`
    * - `LIT_NETWORK.DatilDev`
    */
   NETWORK: LIT_NETWORK_VALUES;

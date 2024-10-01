@@ -3,8 +3,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseInvalidLitActionIpfsCodeToGenerateSessionSigs
- * ❌ NOT AVAILABLE IN MANZANO
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseInvalidLitActionIpfsCodeToGenerateSessionSigs
  * ✅ NETWORK=custom yarn test:local --filter=testUseInvalidLitActionIpfsCodeToGenerateSessionSigs
  */
 export const testUseInvalidLitActionIpfsCodeToGenerateSessionSigs = async (

@@ -11,8 +11,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  *
  *
  * ## Test Commands:
- * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
+ * - ✅ NETWORK=datil-test yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
  * - ✅ NETWORK=custom yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (

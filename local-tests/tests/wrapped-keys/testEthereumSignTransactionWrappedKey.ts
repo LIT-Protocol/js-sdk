@@ -11,8 +11,8 @@ const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignTransactionWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testEthereumSignTransactionWrappedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testEthereumSignTransactionWrappedKey
  * ✅ NETWORK=custom yarn test:local --filter=testEthereumSignTransactionWrappedKey
  */
 export const testEthereumSignTransactionWrappedKey = async (
