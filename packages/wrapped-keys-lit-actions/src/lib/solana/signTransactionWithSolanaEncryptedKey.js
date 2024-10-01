@@ -80,7 +80,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
     );
 
     transaction.sign(solanaKeyPair);
-    const signature = bs58.encode(transaction.signature);
+    const signature = ethers.utils.base58.encode(transaction.signature);
 
     if (broadcast) {
       const solanaConnection = new Connection(
