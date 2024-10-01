@@ -2,9 +2,9 @@ import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import nacl from 'tweetnacl';
-import bs58 from 'bs58';
 import { Keypair } from '@solana/web3.js';
+import { ethers } from 'ethers';
+import nacl from 'tweetnacl';
 
 const { generatePrivateKey, signMessageWithEncryptedKey, exportPrivateKey } =
   api;
@@ -68,8 +68,8 @@ export const testGenerateSolanaWrappedKey = async (
 
     const signatureIsValidForPublicKey = nacl.sign.detached.verify(
       Buffer.from(messageToSign),
-      bs58.decode(signature),
-      bs58.decode(generatedPublicKey)
+      ethers.utils.base58.decode(signature),
+      ethers.utils.base58.decode(generatedPublicKey)
     );
 
     if (!signatureIsValidForPublicKey)
