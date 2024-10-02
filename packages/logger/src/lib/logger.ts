@@ -444,7 +444,7 @@ export class LogManager {
 
     return keys
       .sort((a: [string, number], b: [string, number]) => {
-        return a[1] > b[1] ? a[1] : b[1];
+        return a[1] - b[1];       
       })
       .map((value: [string, number]) => {
         return value[0];
