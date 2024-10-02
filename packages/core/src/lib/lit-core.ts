@@ -36,6 +36,7 @@ import {
   loadModules,
   unloadModules,
 } from '@lit-protocol/crypto';
+import { Logger, LogLevel, LogManager } from '@lit-protocol/logger';
 import {
   bootstrapLogManager,
   isBrowser,
@@ -71,7 +72,6 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { Logger, LogLevel, LogManager } from '@lit-protocol/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
