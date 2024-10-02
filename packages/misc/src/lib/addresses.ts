@@ -5,7 +5,6 @@ import {
 } from '@lit-protocol/constants';
 import { TokenInfo } from '@lit-protocol/types';
 import { bech32 } from 'bech32';
-import bs58 from 'bs58';
 import { createHash } from 'crypto';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
@@ -112,7 +111,7 @@ function deriveBitcoinAddress(ethPubKey: string): string {
   const binaryBitcoinAddress = Buffer.concat([versionedPayload, checksum]);
 
   // Encode the result with Base58 to get the final Bitcoin address and return it
-  return bs58.encode(binaryBitcoinAddress);
+  return ethers.utils.base58.encode(binaryBitcoinAddress);
 }
 
 /**

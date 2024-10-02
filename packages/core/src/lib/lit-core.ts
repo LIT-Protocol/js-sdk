@@ -21,6 +21,7 @@ import {
   LIT_CURVE,
   LIT_CURVE_VALUES,
   LIT_ENDPOINT,
+  LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
@@ -75,6 +76,7 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
+import { LogLevel } from '@lit-protocol/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -198,9 +200,12 @@ export class LitCore {
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
-    // -- set misc global variables
-    setMiscLitConfig(this.config);
-    bootstrapLogManager('core');
+    // -- set global variables
+    globalThis.litConfig = this.config;
+    bootstrapLogManager(
+      'core',
+      this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
+    );
 
     // -- configure local storage if not present
     // LitNodeClientNodejs is a base for LitNodeClient
@@ -672,7 +677,12 @@ export class LitCore {
             this.config.bootstrapUrls.length
           } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
-          reject(new InitError({}, msg));
+          try {
+            throw new InitError({}, msg);
+          } catch (e) {
+            logErrorWithRequestId(requestId, e);
+            reject(e);
+          }
         }, this.config.connectTimeout);
       }),
       Promise.all(
