@@ -48,7 +48,7 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
 
   // As a dApp owner, create a capacity delegation authSig for Bob's PKP wallet
   const capacityDelegationAuthSig = await alice.createCapacityDelegationAuthSig(
-    [bob.pkp.ethAddress]
+    [bob.authMethodOwnedPkp.ethAddress]
   );
 
   // As a dApp owner, delegate the capacity credits NFT to Bob
