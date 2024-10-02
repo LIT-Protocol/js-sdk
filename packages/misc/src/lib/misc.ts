@@ -244,7 +244,6 @@ export const bootstrapLogManager = (
   id: string,
   level: LogLevel = LogLevel.DEBUG
 ): Logger => {
-
   globalThis.logManager = LogManager.Instance;
   globalThis.logManager.withConfig({
     condenseLogs: true,
@@ -312,7 +311,11 @@ export const logWithRequestId = (logger: Logger, id: string, ...args: any) => {
     globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
 };
 
-export const logErrorWithRequestId = (logger: Logger, id: string, ...args: any) => {
+export const logErrorWithRequestId = (
+  logger: Logger,
+  id: string,
+  ...args: any
+) => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);

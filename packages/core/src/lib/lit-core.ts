@@ -162,7 +162,7 @@ export class LitCore {
   };
   private _blockHashUrl =
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
-  protected _logger!: Logger; 
+  protected _logger!: Logger;
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
@@ -299,7 +299,11 @@ export class LitCore {
     log(this._logger, '[_getValidatorData] epochInfo: ', epochInfo);
     log(this._logger, '[_getValidatorData] minNodeCount: ', minNodeCount);
     log(this._logger, '[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
-    log(this._logger, '[_getValidatorData] stakingContract: ', stakingContract.address);
+    log(
+      this._logger,
+      '[_getValidatorData] stakingContract: ',
+      stakingContract.address
+    );
 
     return {
       stakingContract,
@@ -563,7 +567,10 @@ export class LitCore {
     globalThis.litNodeClient = this;
     this.ready = true;
 
-    log(this._logger, `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
+    log(
+      this._logger,
+      `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
+    );
     log(this._logger, 'current network config', {
       networkPubkey: this.networkPubKey,
       networkPubKeySet: this.networkPubKeySet,
@@ -836,7 +843,11 @@ export class LitCore {
         const blockHashBody: EthBlockhashInfo = await resp.json();
         this.latestBlockhash = blockHashBody.blockhash;
         this.lastBlockHashRetrieved = Date.now();
-        log(this._logger, 'Done syncing state new blockhash: ', this.latestBlockhash);
+        log(
+          this._logger,
+          'Done syncing state new blockhash: ',
+          this.latestBlockhash
+        );
 
         // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
         if (!this.latestBlockhash) {
@@ -878,7 +889,10 @@ export class LitCore {
             this.latestBlockhash
           );
         } catch (ethersError) {
-          logError(this._logger, 'Failed to manually retrieve blockhash using ethers');
+          logError(
+            this._logger,
+            'Failed to manually retrieve blockhash using ethers'
+          );
         }
       });
   }
@@ -1406,7 +1420,10 @@ export class LitCore {
     sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
   ): string => {
     if (!this.hdRootPubkeys) {
-      logError(this._logger, 'root public keys not found, have you connected to the nodes?');
+      logError(
+        this._logger,
+        'root public keys not found, have you connected to the nodes?'
+      );
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
