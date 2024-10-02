@@ -680,12 +680,7 @@ export class LitCore {
           } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
-            // TODO: Kludge, replace with standard error construction
-            throwError({
-              message: msg,
-              errorKind: LIT_ERROR.INIT_ERROR.kind,
-              errorCode: LIT_ERROR.INIT_ERROR.name,
-            });
+            throw new InitError({}, msg);
           } catch (e) {
             logErrorWithRequestId(requestId, e);
             reject(e);
