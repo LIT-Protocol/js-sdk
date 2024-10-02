@@ -296,10 +296,10 @@ export class LitCore {
       });
     }
 
-    log('[_getValidatorData] epochInfo: ', epochInfo);
-    log('[_getValidatorData] minNodeCount: ', minNodeCount);
-    log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
-    log('[_getValidatorData] stakingContract: ', stakingContract.address);
+    log(this._logger, '[_getValidatorData] epochInfo: ', epochInfo);
+    log(this._logger, '[_getValidatorData] minNodeCount: ', minNodeCount);
+    log(this._logger, '[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
+    log(this._logger, '[_getValidatorData] stakingContract: ', stakingContract.address);
 
     return {
       stakingContract,
@@ -311,7 +311,7 @@ export class LitCore {
 
   // ========== Scoped Class Helpers ==========
   private async _handleStakingContractStateChange(state: StakingStates) {
-    log(`New state detected: "${state}"`);
+    log(this._logger, `New state detected: "${state}"`);
 
     const validatorData = await this._getValidatorData();
 
@@ -363,6 +363,7 @@ export class LitCore {
             | NodeClientErrorV0
             | NodeClientErrorV1;
           logError(
+            this._logger,
             'Error while attempting to reconnect to nodes after epoch transition:',
             message
           );
@@ -800,7 +801,7 @@ export class LitCore {
           await provider.getBlockNumber(); // Simple check to see if the provider is working
           return provider;
         } catch (error) {
-          logError(`RPC URL failed: ${url}`);
+          logError(this._logger, `RPC URL failed: ${url}`);
         }
       }
       return null;
