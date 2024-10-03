@@ -17,7 +17,6 @@ import {
   MintWithAuthParams,
   MintWithAuthResponse,
 } from '@lit-protocol/types';
-import bs58 from 'bs58';
 import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
 import { decToHex, hexToDec, intToIP } from './hex2dec';
 
@@ -1717,7 +1716,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * @returns {string}
      */
     getBytesFromMultihash: (multihash: string) => {
-      const decoded = bs58.decode(multihash);
+      const decoded = ethers.utils.base58.decode(multihash);
 
       return `0x${Buffer.from(decoded).toString('hex')}`;
     },
@@ -1735,7 +1734,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       const digestSize = parseInt(text.slice(2, 4), 16);
       const digest = text.slice(4, 4 + digestSize * 2);
 
-      const multihash = bs58.encode(Buffer.from(`1220${digest}`, 'hex'));
+      const multihash = ethers.utils.base58.encode(
+        Buffer.from(`1220${digest}`, 'hex')
+      );
 
       return multihash;
     },
