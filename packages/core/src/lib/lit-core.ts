@@ -201,7 +201,7 @@ export class LitCore {
     this.setCustomBootstrapUrls();
 
     // -- set global variables
-    globalThis.litConfig = this.config;
+    setMiscLitConfig(this.config);
     bootstrapLogManager(
       'core',
       this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
