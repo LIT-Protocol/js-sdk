@@ -2,7 +2,7 @@ import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 
-async function signMessage({ messageToSign, solanaKeyPair }) {
+function signMessage({ messageToSign, solanaKeyPair }) {
   try {
     const signature = nacl.sign.detached(
       new TextEncoder().encode(messageToSign),
@@ -25,19 +25,25 @@ function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }) {
 
     return isValid;
   } catch (err) {
-    throw new Error(`When validating signed message is valid: ${err.message}`);
+    throw new Error(
+      `When validating signed Solana message is valid: ${err.message}`
+    );
   }
 }
 
 export async function signMessageSolanaKey({ messageToSign, privateKey }) {
   const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
-  const { signature } = await signMessage({
+  const { signature } = signMessage({
     messageToSign,
     solanaKeyPair,
   });
 
-  const isValid = verifyMessageSignature({ signature, solanaKeyPair });
+  const isValid = verifyMessageSignature({
+    signature,
+    solanaKeyPair,
+    messageToSign,
+  });
 
   if (!isValid) {
     throw new Error('Signature did not verify to expected Solana public key');

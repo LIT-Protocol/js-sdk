@@ -11,11 +11,13 @@ async function signMessage({ privateKey, messageToSign }) {
   }
 }
 
-function verifyMessageSignature(messageToSign, signature) {
+function verifyMessageSignature({ messageToSign, signature }) {
   try {
     return ethers.utils.verifyMessage(messageToSign, signature);
   } catch (err) {
-    throw new Error(`When validating signed message is valid: ${err.message}`);
+    throw new Error(
+      `When validating signed Ethereum message is valid: ${err.message}`
+    );
   }
 }
 
@@ -25,11 +27,7 @@ export async function signMessageEthereumKey({ privateKey, messageToSign }) {
     messageToSign,
   });
 
-  const recoveredAddress = verifyMessageSignature(
-    messageToSign,
-    signature,
-    walletAddress
-  );
+  const recoveredAddress = verifyMessageSignature({ messageToSign, signature });
 
   if (recoveredAddress !== walletAddress) {
     throw new Error(
