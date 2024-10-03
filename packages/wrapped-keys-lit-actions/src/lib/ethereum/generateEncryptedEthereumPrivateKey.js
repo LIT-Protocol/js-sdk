@@ -19,7 +19,7 @@ import { encryptPrivateKey } from '../common/internal/encryptKey';
     { waitForResponse: true, name: 'encryptEthereumPrivateKey' },
     async () =>
       JSON.stringify(
-        encryptPrivateKey({
+        await encryptPrivateKey({
           accessControlConditions,
           privateKey,
           publicKey,

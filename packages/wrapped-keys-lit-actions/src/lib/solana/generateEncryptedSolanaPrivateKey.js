@@ -16,9 +16,9 @@ const { encryptPrivateKey } = require('../common/internal/encryptKey');
 
   const encryptedKeyResultStr = await Lit.Actions.runOnce(
     { waitForResponse: true, name: 'encryptSolanaPrivateKey' },
-    () =>
+    async () =>
       JSON.stringify(
-        encryptPrivateKey({
+        await encryptPrivateKey({
           accessControlConditions,
           publicKey,
           privateKey,
