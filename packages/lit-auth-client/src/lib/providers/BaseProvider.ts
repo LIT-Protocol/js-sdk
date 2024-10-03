@@ -274,14 +274,7 @@ export abstract class BaseProvider {
       authNeededCallback = async (
         authCallbackParams: AuthCallbackParams
       ): Promise<AuthSig> => {
-        let chainId = 1;
-        try {
-          const chainInfo = ALL_LIT_CHAINS[authCallbackParams.chain];
-          // @ts-expect-error - chainId is not defined on the type
-          chainId = chainInfo.chainId;
-        } catch {
-          // Do nothing
-        }
+        const chainId = ALL_LIT_CHAINS[authCallbackParams.chain]?.chainId || 1;
 
         let response: SignSessionKeyResponse;
 
@@ -292,7 +285,7 @@ export abstract class BaseProvider {
           pkpPublicKey: params.pkpPublicKey,
           expiration: authCallbackParams.expiration,
           resources: authCallbackParams.resources,
-          chainId: chainId,
+          chainId,
           ...(params.resourceAbilityRequests && {
             resourceAbilityRequests: params.resourceAbilityRequests,
           }),

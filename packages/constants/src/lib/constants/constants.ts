@@ -1,12 +1,4 @@
 import depd from 'depd';
-import { z } from 'zod';
-
-import {
-  LITChain,
-  LITCosmosChain,
-  LITEVMChain,
-  LITSVMChain,
-} from '@lit-protocol/types';
 
 const deprecated = depd('lit-js-sdk:constants:constants');
 
@@ -15,8 +7,6 @@ const deprecated = depd('lit-js-sdk:constants:constants');
  */
 export const NETWORK_PUB_KEY =
   '9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62';
-export const NetworkPubKeySchema = z.literal(NETWORK_PUB_KEY).readonly();
-export type NETWORK_PUB_KEY_TYPE = z.infer<typeof NetworkPubKeySchema>;
 
 // you can either pass a "chain" param to lit functions, which it uses to tell which network your sig came from.
 // or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
@@ -26,19 +16,9 @@ export const LIT_AUTH_SIG_CHAIN_KEYS = [
   'cosmos',
   'kyve',
 ] as const;
-export const LitAuthSigChainKeysSchema = z
-  .enum(LIT_AUTH_SIG_CHAIN_KEYS)
-  .readonly();
-export type LIT_AUTH_SIG_CHAIN_KEYS_TYPE = z.infer<
-  typeof LitAuthSigChainKeysSchema
->;
 
 export const AUTH_SIGNATURE_BODY =
   'I am creating an account to use Lit Protocol at {{timestamp}}';
-export const AuthSignatureBodySchema = z
-  .literal(AUTH_SIGNATURE_BODY)
-  .readonly();
-export type AUTH_SIGNATURE_BODY_TYPE = z.infer<typeof AuthSignatureBodySchema>;
 
 const yellowstoneChain = {
   contractAddress: null,
@@ -51,23 +31,7 @@ const yellowstoneChain = {
   blockExplorerUrls: ['https://yellowstone-explorer.litprotocol.com/'] as const,
   type: null,
   vmType: 'EVM',
-};
-export const EVMChainSchema = z
-  .object({
-    name: z.string(),
-    symbol: z.string(),
-    decimals: z.number(),
-    rpcUrls: z.array(z.string()).nonempty().readonly(),
-    blockExplorerUrls: z.array(z.string()).nonempty().readonly(),
-    vmType: z.literal(yellowstoneChain.vmType),
-    // Properties for EVM
-    chainId: z.number(),
-    contractAddress: z.union([z.string().optional(), z.null()]),
-    type: z.union([z.string().optional(), z.null()]),
-    extra: z.boolean().optional(), // What is this? Only yellowstone has it and is not used anywhere
-  })
-  .readonly();
-export type YELLOWSTONE_CHAIN_TYPE = z.infer<typeof EVMChainSchema>;
+} as const;
 
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
@@ -75,7 +39,7 @@ export type YELLOWSTONE_CHAIN_TYPE = z.infer<typeof EVMChainSchema>;
  * @type { LITEVMChain }
  * @default
  */
-export const LIT_CHAINS: LITChain<LITEVMChain> = {
+export const LIT_CHAINS: { [key: string]: any } = {
   ethereum: {
     contractAddress: '0xA54F7579fFb3F98bd8649fF02813F575f9b3d353',
     chainId: 1,
@@ -790,10 +754,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-};
-export const LitEvmChainsSchema = z.record(z.string(), EVMChainSchema);
-export type LitEVMChains = z.infer<typeof LitEvmChainsSchema>;
-
+} as const;
 export const LIT_EVM_CHAINS = LIT_CHAINS;
 
 /**
@@ -815,24 +776,7 @@ export const METAMASK_CHAIN_INFO = {
     blockExplorerUrls: LIT_CHAINS['yellowstone'].blockExplorerUrls,
     iconUrls: ['future'] as const,
   },
-};
-const MetamaskChainInfoSchema = z.object({
-  yellowstone: z
-    .object({
-      chainId: z.number(),
-      chainName: z.string(),
-      nativeCurrency: z.object({
-        name: z.string(),
-        symbol: z.string(),
-        decimals: z.number(),
-      }),
-      rpcUrls: z.array(z.string()),
-      blockExplorerUrls: z.array(z.string()),
-      iconUrls: z.enum(METAMASK_CHAIN_INFO.yellowstone.iconUrls),
-    })
-    .readonly(),
-});
-export type MetamaskChainInfo = z.infer<typeof MetamaskChainInfoSchema>;
+} as const;
 
 /**
  * @deprecated Will be removed - Use METAMASK_CHAIN_INFO instead
@@ -863,11 +807,6 @@ export const LIT_RPC = {
    */
   CHRONICLE_YELLOWSTONE: 'https://yellowstone-rpc.litprotocol.com',
 } as const;
-const LitRpcSchema = z.object({
-  LOCAL_ANVIL: z.literal(LIT_RPC.LOCAL_ANVIL),
-  CHRONICLE_YELLOWSTONE: z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
-});
-export type LitRpc = z.infer<typeof LitRpcSchema>;
 
 /**
  * Represents the Lit Network constants.
@@ -878,13 +817,6 @@ export const LIT_NETWORK = {
   Datil: 'datil',
   Custom: 'custom',
 } as const;
-const LitNetworkSchema = z.object({
-  DatilDev: z.literal(LIT_NETWORK.DatilDev),
-  DatilTest: z.literal(LIT_NETWORK.DatilTest),
-  Datil: z.literal(LIT_NETWORK.Datil),
-  Custom: z.literal(LIT_NETWORK.Custom),
-});
-export type LitNetwork = z.infer<typeof LitNetworkSchema>;
 /**
  * @deprecated Will be removed. - Use LIT_NETWORK instead
  * Alias for LIT_NETWORK. Added for backwards compatibility.
@@ -919,14 +851,7 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
-};
-export const RpcUlrByNetworkSchema = z.object({
-  'datil-dev': z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
-  'datil-test': z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
-  datil: z.literal(LIT_RPC.CHRONICLE_YELLOWSTONE),
-  custom: z.literal(LIT_RPC.LOCAL_ANVIL),
-});
-export type RpcUlrByNetwork = z.infer<typeof RpcUlrByNetworkSchema>;
+} as const;
 
 /**
  * Mapping of network names to their corresponding relayer URLs.
@@ -938,14 +863,7 @@ export const RELAYER_URL_BY_NETWORK: {
   'datil-test': 'https://datil-test-relayer.getlit.dev',
   datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
-};
-export const RelayerUrlByNetworkSchema = z.object({
-  'datil-dev': z.literal('https://datil-dev-relayer.getlit.dev'),
-  'datil-test': z.literal('https://datil-test-relayer.getlit.dev'),
-  datil: z.literal('https://datil-relayer.getlit.dev'),
-  custom: z.literal('http://localhost:3000'),
-});
-export type RelayerUrlByNetwork = z.infer<typeof RelayerUrlByNetworkSchema>;
+} as const;
 
 /**
  * Mapping of network values to corresponding Metamask chain info.
@@ -958,16 +876,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   'datil-test': METAMASK_CHAIN_INFO.yellowstone,
   datil: METAMASK_CHAIN_INFO.yellowstone,
   custom: METAMASK_CHAIN_INFO.yellowstone,
-};
-export const MetamaskChainInfoByNetworkSchema = z.object({
-  'datil-dev': MetamaskChainInfoSchema.shape.yellowstone,
-  'datil-test': MetamaskChainInfoSchema.shape.yellowstone,
-  datil: MetamaskChainInfoSchema.shape.yellowstone,
-  custom: MetamaskChainInfoSchema.shape.yellowstone,
-});
-export type MetamaskChainInfoByNetwork = z.infer<
-  typeof MetamaskChainInfoByNetworkSchema
->;
+} as const;
 
 export const HTTP = 'http://';
 export const HTTPS = 'https://';
@@ -983,7 +892,7 @@ export const HTTP_BY_NETWORK: Record<
   'datil-test': HTTPS,
   datil: HTTPS,
   custom: HTTP, // default, can be changed by config
-};
+} as const;
 
 /**
  * Mapping of network values to their corresponding centralisation status.
@@ -1004,32 +913,32 @@ export const CENTRALISATION_BY_NETWORK: Record<
  * @type { LITSVMChain }
  * @default
  */
-export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
+export const LIT_SVM_CHAINS: { [key: string]: any } = {
   solana: {
     name: 'Solana',
     symbol: 'SOL',
     decimals: 9,
-    rpcUrls: ['https://api.mainnet-beta.solana.com'],
-    blockExplorerUrls: ['https://explorer.solana.com/'],
+    rpcUrls: ['https://api.mainnet-beta.solana.com'] as const,
+    blockExplorerUrls: ['https://explorer.solana.com/'] as const,
     vmType: 'SVM',
   },
   solanaDevnet: {
     name: 'Solana Devnet',
     symbol: 'SOL',
     decimals: 9,
-    rpcUrls: ['https://api.devnet.solana.com'],
-    blockExplorerUrls: ['https://explorer.solana.com/'],
+    rpcUrls: ['https://api.devnet.solana.com'] as const,
+    blockExplorerUrls: ['https://explorer.solana.com/'] as const,
     vmType: 'SVM',
   },
   solanaTestnet: {
     name: 'Solana Testnet',
     symbol: 'SOL',
     decimals: 9,
-    rpcUrls: ['https://api.testnet.solana.com'],
-    blockExplorerUrls: ['https://explorer.solana.com/'],
+    rpcUrls: ['https://api.testnet.solana.com'] as const,
+    blockExplorerUrls: ['https://explorer.solana.com/'] as const,
     vmType: 'SVM',
   },
-};
+} as const;
 
 /**
  * Cosmos Chains supported by the LIT protocol.  Use the chain name as a key in this object.
@@ -1037,14 +946,14 @@ export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
  * @type { LITCosmosChain }
  * @default
  */
-export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
+export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
   cosmos: {
     name: 'Cosmos',
     symbol: 'ATOM',
     decimals: 6,
     chainId: 'cosmoshub-4',
-    rpcUrls: ['https://lcd-cosmoshub.keplr.app'],
-    blockExplorerUrls: ['https://atomscan.com/'],
+    rpcUrls: ['https://lcd-cosmoshub.keplr.app'] as const,
+    blockExplorerUrls: ['https://atomscan.com/'] as const,
     vmType: 'CVM',
   },
   kyve: {
@@ -1052,8 +961,8 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     symbol: 'KYVE',
     decimals: 6,
     chainId: 'korellia',
-    rpcUrls: ['https://api.korellia.kyve.network'],
-    blockExplorerUrls: ['https://explorer.kyve.network/'],
+    rpcUrls: ['https://api.korellia.kyve.network'] as const,
+    blockExplorerUrls: ['https://explorer.kyve.network/'] as const,
     vmType: 'CVM',
   },
   evmosCosmos: {
@@ -1061,8 +970,8 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     symbol: 'EVMOS',
     decimals: 18,
     chainId: 'evmos_9001-2',
-    rpcUrls: ['https://rest.bd.evmos.org:1317'],
-    blockExplorerUrls: ['https://evmos.bigdipper.live'],
+    rpcUrls: ['https://rest.bd.evmos.org:1317'] as const,
+    blockExplorerUrls: ['https://evmos.bigdipper.live'] as const,
     vmType: 'CVM',
   },
   evmosCosmosTestnet: {
@@ -1070,8 +979,8 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     symbol: 'EVMOS',
     decimals: 18,
     chainId: 'evmos_9000-4',
-    rpcUrls: ['https://rest.bd.evmos.dev:1317'],
-    blockExplorerUrls: ['https://testnet.bigdipper.live'],
+    rpcUrls: ['https://rest.bd.evmos.dev:1317'] as const,
+    blockExplorerUrls: ['https://testnet.bigdipper.live'] as const,
     vmType: 'CVM',
   },
   cheqdMainnet: {
@@ -1079,8 +988,8 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     symbol: 'CHEQ',
     decimals: 9,
     chainId: 'cheqd-mainnet-1',
-    rpcUrls: ['https://api.cheqd.net'],
-    blockExplorerUrls: ['https://explorer.cheqd.io'],
+    rpcUrls: ['https://api.cheqd.net'] as const,
+    blockExplorerUrls: ['https://explorer.cheqd.io'] as const,
     vmType: 'CVM',
   },
   cheqdTestnet: {
@@ -1088,8 +997,8 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     symbol: 'CHEQ',
     decimals: 9,
     chainId: 'cheqd-testnet-6',
-    rpcUrls: ['https://api.cheqd.network'],
-    blockExplorerUrls: ['https://testnet-explorer.cheqd.io'],
+    rpcUrls: ['https://api.cheqd.network'] as const,
+    blockExplorerUrls: ['https://testnet-explorer.cheqd.io'] as const,
     vmType: 'CVM',
   },
   juno: {
@@ -1097,23 +1006,21 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     symbol: 'JUNO',
     decimals: 6,
     chainId: 'juno-1',
-    rpcUrls: ['https://rest.cosmos.directory/juno'],
-    blockExplorerUrls: ['https://www.mintscan.io/juno'],
+    rpcUrls: ['https://rest.cosmos.directory/juno'] as const,
+    blockExplorerUrls: ['https://www.mintscan.io/juno'] as const,
     vmType: 'CVM',
   },
-};
+} as const;
 
 /**
  * All Chains supported by the LIT protocol.  Use the chain name as a key in this object.
  * @type { LITChain<LITEVMChain | LITSVMChain | LITCosmosChain> }
  */
-export const ALL_LIT_CHAINS: LITChain<
-  LITEVMChain | LITSVMChain | LITCosmosChain
-> = {
+export const ALL_LIT_CHAINS: { [key: string]: any } = {
   ...LIT_CHAINS,
   ...LIT_SVM_CHAINS,
   ...LIT_COSMOS_CHAINS,
-};
+} as const;
 
 /**
  * Local storage key constants
@@ -1126,7 +1033,7 @@ export const LOCAL_STORAGE_KEYS = {
   KEY_PAIR: 'lit-comms-keypair',
   SESSION_KEY: 'lit-session-key',
   WALLET_SIGNATURE: 'lit-wallet-sig',
-};
+} as const;
 
 /**
  * Symmetric key algorithm parameters
@@ -1134,7 +1041,7 @@ export const LOCAL_STORAGE_KEYS = {
 export const SYMM_KEY_ALGO_PARAMS = {
   name: 'AES-CBC',
   length: 256,
-};
+} as const;
 
 /**
  * Default node URLs for each LIT network
@@ -1146,10 +1053,10 @@ export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
   'datil-test': [],
   datil: [],
   custom: [],
-};
+} as const;
 
 // ========== Lit Sessions ==========
-export const LIT_SESSION_KEY_URI = 'lit:session:';
+export const LIT_SESSION_KEY_URI = 'lit:session:' as const;
 
 // ========== Lit Auth Methods ==========
 
@@ -1158,17 +1065,17 @@ export const AUTH_METHOD_TYPE_IDS = {
   DISCORD: 4,
   GOOGLE: 5,
   GOOGLE_JWT: 6,
-};
+} as const;
 
 // ========== PKP Client ==========
-export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
+export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'] as const;
 
 // ========== RLI Delegation ==========
-export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
+export const SIWE_DELEGATION_URI = 'lit:capability:delegation' as const;
 
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
-  'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+  'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3' as const;
 
 // ========== Chains ==========
 export const VMTYPE = {

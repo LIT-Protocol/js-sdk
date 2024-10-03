@@ -7,6 +7,15 @@ import {
   LPACC_SOL,
   LPACC_EVM_BASIC,
 } from '@lit-protocol/accs-schemas';
+import {
+  LitEVMChainSchema,
+  LitEVMChainsSchema,
+  LitSVMChainSchema,
+  LitSVMChainsSchema,
+  LitCosmosChainSchema,
+  LitCosmosChainsSchema,
+  LitBaseChainSchema,
+} from '@lit-protocol/schemas';
 
 import {
   AuthMethod,
@@ -73,14 +82,7 @@ export type Chain = z.infer<typeof ChainSchema>;
  *
  * @typedef { Object } LITChainRequiredProps
  */
-export interface LITChainRequiredProps {
-  name: string;
-  symbol: string;
-  decimals: number;
-  rpcUrls: readonly string[];
-  blockExplorerUrls: readonly string[];
-  vmType: string;
-}
+export type LITChainRequiredProps = z.infer<typeof LitBaseChainSchema>;
 
 /**
  * @typedef { Object } LITEVMChain
@@ -88,24 +90,18 @@ export interface LITChainRequiredProps {
  * @property { string } chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
  * @property { string } name - The human readable name of the chain
  */
-export type LITEVMChain = LITChainRequiredProps & {
-  contractAddress: string | null;
-  chainId: number;
-  type: string | null;
-};
+export type LITEVMChain = z.infer<typeof LitEVMChainSchema>;
 
 /**
  * @typedef { Object } LITSVMChain
  */
-export type LITSVMChain = LITChainRequiredProps;
+export type LITSVMChain = z.infer<typeof LitSVMChainSchema>;
 
 /**
  * @typedef { Object } LITCosmosChain
  * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
  */
-export type LITCosmosChain = LITChainRequiredProps & {
-  chainId: string;
-};
+export type LITCosmosChain = z.infer<typeof LitCosmosChainSchema>;
 
 /**
  * @typedef {Object} LITChain
