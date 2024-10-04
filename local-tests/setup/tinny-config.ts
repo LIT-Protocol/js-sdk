@@ -123,6 +123,10 @@ export interface ProcessEnvs {
    * this value will be ignored
    */
   NETWORK_CONFIG: string;
+
+  STORAGE_CACHE: string;
+
+  USE_STORAGE: boolean;
 }
 
 /**

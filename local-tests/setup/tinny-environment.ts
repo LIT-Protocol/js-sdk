@@ -20,6 +20,7 @@ import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 import { toErrorWithMessage } from './tinny-utils';
 import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
+import { LocalStorage } from 'node-localstorage';
 
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
@@ -76,6 +77,9 @@ export class TinnyEnvironment {
     NO_SETUP: process.env['NO_SETUP'] === 'true',
     USE_SHIVA: process.env['USE_SHIVA'] === 'true',
     NETWORK_CONFIG: process.env['NETWORK_CONFIG'] ?? './networkContext.json',
+
+    STORAGE_CACHE: process.env['STORAGE_CACHE'] ?? './storage',
+    USE_STORAGE: process.env['USE_STORAGE'] === 'true'
   };
 
   public litNodeClient: LitNodeClient;
@@ -241,6 +245,9 @@ export class TinnyEnvironment {
         this?.testnet?.ContractContext ?? this._contractContext;
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
+        storageProvider: {
+          provider: this.processEnvs.USE_STORAGE ? new LocalStorage(this.processEnvs.STORAGE_CACHE) : undefined
+        },
         rpcUrl: this.rpc,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
@@ -250,12 +257,18 @@ export class TinnyEnvironment {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: true,
+        storageProvider: {
+          provider: this.processEnvs.USE_STORAGE ? new LocalStorage(this.processEnvs.STORAGE_CACHE) : undefined
+        },
         debug: this.processEnvs.DEBUG,
       });
     } else if (centralisation === 'centralised') {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: false,
+        storageProvider: {
+          provider: this.processEnvs.USE_STORAGE ? new LocalStorage(this.processEnvs.STORAGE_CACHE) : undefined
+        },
         debug: this.processEnvs.DEBUG,
       });
     } else {

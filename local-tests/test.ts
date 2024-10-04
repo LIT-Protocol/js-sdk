@@ -105,6 +105,8 @@ import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey'
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 
+import {testPkpSessionSigsIsValidAfterEllapsedTime} from './tests/testPkpSessionSigsIsValidAfterEllapsedTime';
+
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
@@ -176,6 +178,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
     testUsePkpSessionSigsToEncryptDecryptString,
     testUsePkpSessionSigsToEncryptDecryptFile,
     testUsePkpSessionSigsToEncryptDecryptZip,
+    testPkpSessionSigsIsValidAfterEllapsedTime
   };
 
   const litActionSessionSigsTests = {
