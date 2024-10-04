@@ -41,6 +41,7 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   defaultMintClaimCallback,
   findMostCommonResponse,
+  formatSessionSigs,
   hexPrefixed,
   log,
   logError,
@@ -134,8 +135,7 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1276,8 +1276,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -2075,8 +2075,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2159,10 +2159,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
@@ -2201,6 +2201,13 @@ export class LitNodeClientNodeJs
     });
 
     log('signatures:', signatures);
+
+    try {
+      const formattedSessionSigs = formatSessionSigs(JSON.stringify(signatures));
+      log(formattedSessionSigs);
+    } catch (e) {
+      // swallow error
+    }
 
     return signatures;
   };
