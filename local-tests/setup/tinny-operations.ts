@@ -85,7 +85,9 @@ export const runInBand = async ({
           console.error(
             `${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)`
           );
-          console.error(`Error: ${error.message}\nStack Trace: ${error.stackTrace}`);
+          console.error(
+            `Error: ${error.message}\nStack Trace: ${error.stackTrace}`
+          );
           failedTests.push(
             `${testName} (Failed in ${timeTaken} ms) - Error: ${error.message}`
           );

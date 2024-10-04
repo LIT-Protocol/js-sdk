@@ -79,7 +79,7 @@ export class TinnyEnvironment {
     NETWORK_CONFIG: process.env['NETWORK_CONFIG'] ?? './networkContext.json',
 
     STORAGE_CACHE: process.env['STORAGE_CACHE'] ?? './storage',
-    USE_STORAGE: process.env['USE_STORAGE'] === 'true'
+    USE_STORAGE: process.env['USE_STORAGE'] === 'true',
   };
 
   public litNodeClient: LitNodeClient;
@@ -246,7 +246,9 @@ export class TinnyEnvironment {
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'custom',
         storageProvider: {
-          provider: this.processEnvs.USE_STORAGE ? new LocalStorage(this.processEnvs.STORAGE_CACHE) : undefined
+          provider: this.processEnvs.USE_STORAGE
+            ? new LocalStorage(this.processEnvs.STORAGE_CACHE)
+            : undefined,
         },
         rpcUrl: this.rpc,
         debug: this.processEnvs.DEBUG,
@@ -258,7 +260,9 @@ export class TinnyEnvironment {
         litNetwork: this.network,
         checkNodeAttestation: true,
         storageProvider: {
-          provider: this.processEnvs.USE_STORAGE ? new LocalStorage(this.processEnvs.STORAGE_CACHE) : undefined
+          provider: this.processEnvs.USE_STORAGE
+            ? new LocalStorage(this.processEnvs.STORAGE_CACHE)
+            : undefined,
         },
         debug: this.processEnvs.DEBUG,
       });
@@ -267,7 +271,9 @@ export class TinnyEnvironment {
         litNetwork: this.network,
         checkNodeAttestation: false,
         storageProvider: {
-          provider: this.processEnvs.USE_STORAGE ? new LocalStorage(this.processEnvs.STORAGE_CACHE) : undefined
+          provider: this.processEnvs.USE_STORAGE
+            ? new LocalStorage(this.processEnvs.STORAGE_CACHE)
+            : undefined,
         },
         debug: this.processEnvs.DEBUG,
       });

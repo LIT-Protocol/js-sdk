@@ -105,7 +105,7 @@ import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey'
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 
-import {testPkpSessionSigsIsValidAfterEllapsedTime} from './tests/testPkpSessionSigsIsValidAfterEllapsedTime';
+import { testPkpSessionSigsIsValidAfterEllapsedTime } from './tests/testPkpSessionSigsIsValidAfterEllapsedTime';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -178,7 +178,7 @@ import {testPkpSessionSigsIsValidAfterEllapsedTime} from './tests/testPkpSession
     testUsePkpSessionSigsToEncryptDecryptString,
     testUsePkpSessionSigsToEncryptDecryptFile,
     testUsePkpSessionSigsToEncryptDecryptZip,
-    testPkpSessionSigsIsValidAfterEllapsedTime
+    testPkpSessionSigsIsValidAfterEllapsedTime,
   };
 
   const litActionSessionSigsTests = {
