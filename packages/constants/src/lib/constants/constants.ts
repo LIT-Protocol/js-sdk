@@ -504,6 +504,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  lineaSepolia: {
+    contractAddress: null,
+    chainId: 59141,
+    name: 'Linea Sepolia Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.sepolia.linea.build'],
+    blockExplorerUrls: ['https://explorer.sepolia.linea.build'],
+    type: null,
+    vmType: 'EVM',
+  },
 
   /**
    * Chainlist entry for the Chronicle Testnet.
@@ -754,17 +765,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     decimals: 18,
     rpcUrls: ['https://test-rpc.bittorrentchain.io'],
     blockExplorerUrls: ['https://testnet.bttcscan.com'],
-    type: null,
-    vmType: 'EVM',
-  },
-  kintoTestnet: {
-    contractAddress: null,
-    chainId: 88882,
-    name: 'Kinto Testnet',
-    symbol: 'ETH',
-    decimals: 18,
-    rpcUrls: ['http://35.215.120.180:8545'],
-    blockExplorerUrls: ['https://kintoscan.io/'],
     type: null,
     vmType: 'EVM',
   },
