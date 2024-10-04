@@ -50,6 +50,7 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
+  validateSessionSig,
   validateSessionSigs,
 } from '@lit-protocol/misc';
 import {
@@ -130,12 +131,12 @@ import type {
   SigningAccessControlConditionRequest,
   JsonPKPClaimKeyRequest,
   IpfsOptions,
+  StoredWalletSigOrError,
 } from '@lit-protocol/types';
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -323,9 +324,12 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   *
-   * Get the signature from local storage, if not, generates one
-   *
+   * Retrieves (from lit-wallet-sig) or generates a wallet signature (LIT_BLS AuthSig).
+   * It first attempts to retrieve a stored wallet signature, and if not found or invalid,
+   * generates a new one.
+   * 
+   * @param {GetWalletSigProps} props - The properties required for getting or generating a wallet signature.
+   * @returns {Promise<AuthSig>} A promise that resolves to the AuthSig object.
    */
   getWalletSig = async ({
     authNeededCallback,
@@ -341,108 +345,180 @@ export class LitNodeClientNodeJs
     jsParams,
     sessionKey,
   }: GetWalletSigProps): Promise<AuthSig> => {
-    let walletSig: AuthSig;
-
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
     const storedWalletSigOrError = getStorageItem(storageKey);
 
-    // browser: 2 > 2.1 > 3
-    // nodejs: 1. > 1.1
-
-    // -- (TRY) to get it in the local storage
-    // -- IF NOT: Generates one
     log(`getWalletSig - flow starts
-        storageKey: ${storageKey}
-        storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
-    `);
+      storageKey: ${storageKey}
+      storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
+  `);
 
-    if (
+    // Checks if the stored wallet signature is valid.
+    if (!(
       storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
       !storedWalletSigOrError.result ||
       storedWalletSigOrError.result == ''
-    ) {
-      log('getWalletSig - flow 1');
-      console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
-      );
-      if (authNeededCallback) {
-        log('getWalletSig - flow 1.1');
+    )) {
+      return this._handleStoredWalletSig(storedWalletSigOrError, {
+        authNeededCallback,
+        chain,
+        sessionCapabilityObject,
+        switchChain,
+        expiration,
+        sessionKeyUri,
+        nonce,
+        resourceAbilityRequests,
+        litActionCode,
+        litActionIpfsId,
+        jsParams,
+        sessionKey,
+      });
+    } else {
+      return this._generateNewWalletSig({
+        authNeededCallback,
+        chain,
+        sessionCapabilityObject,
+        switchChain,
+        expiration,
+        sessionKeyUri,
+        nonce,
+        resourceAbilityRequests,
+        litActionCode,
+        litActionIpfsId,
+        jsParams,
+        sessionKey,
+      });
+    }
+  };
 
-        const body = {
-          chain,
-          statement: sessionCapabilityObject?.statement,
-          resources: sessionCapabilityObject
-            ? [sessionCapabilityObject.encodeAsSiweResource()]
-            : undefined,
-          ...(switchChain && { switchChain }),
-          expiration,
-          uri: sessionKeyUri,
-          sessionKey: sessionKey,
-          nonce,
+  /**
+   * Handles the stored walletSig by validating it and either returning it or generating a new one.
+   * 
+   * @param {StoredWalletSigOrError} storedWalletSigOrError - The stored wallet signature or error.
+   * @param {GetWalletSigProps} props - The properties required for getting or generating a wallet signature.
+   * @returns {Promise<AuthSig>} A promise that resolves to the AuthSig object.
+   */
+  private _handleStoredWalletSig = async (
+    storedWalletSigOrError: StoredWalletSigOrError,
+    props: GetWalletSigProps
+  ): Promise<AuthSig> => {
+    log('getWalletSig - flow 2');
+    try {
+      const walletSig = JSON.parse(storedWalletSigOrError.result as string);
+      log('getWalletSig - flow 2.1');
 
-          // for recap
-          ...(resourceAbilityRequests && { resourceAbilityRequests }),
+      const checkWalletSig = validateSessionSig(walletSig);
 
-          // for lit action custom auth
-          ...(litActionCode && { litActionCode }),
-          ...(litActionIpfsId && { litActionIpfsId }),
-          ...(jsParams && { jsParams }),
-        };
+      if (!checkWalletSig.isValid) {
+        log('getWalletSig - flow 2.1.1');
+        log('WalletSig is not valid', checkWalletSig.errors);
 
-        log('callback body:', body);
+        const removeWalletSigOrError = removeStorageItem(LOCAL_STORAGE_KEYS.WALLET_SIGNATURE);
 
-        walletSig = await authNeededCallback(body);
-      } else {
-        log('getWalletSig - flow 1.2');
-        if (!this.defaultAuthCallback) {
-          log('getWalletSig - flow 1.2.1');
-          return throwError({
-            message: 'No default auth callback provided',
-            errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-            errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-          });
+        if (removeWalletSigOrError.type === EITHER_TYPE.ERROR) {
+          console.warn(
+            `Unable to remove walletSig in local storage. Not a problem. Continuing...`
+          );
+        } else {
+          return this._generateNewWalletSig(props);
         }
+      }
 
-        log('getWalletSig - flow 1.2.2');
-        walletSig = await this.defaultAuthCallback({
-          chain,
-          statement: sessionCapabilityObject.statement,
-          resources: sessionCapabilityObject
-            ? [sessionCapabilityObject.encodeAsSiweResource()]
-            : undefined,
-          switchChain,
-          expiration,
-          uri: sessionKeyUri,
-          nonce,
+      return walletSig;
+    } catch (e) {
+      console.warn('Error parsing walletSig', e);
+      log('getWalletSig - flow 2.2');
+      return this._generateNewWalletSig(props);
+    }
+  };
+
+  /**
+   * Generates a new wallet signature using the provided properties.
+   * 
+   * @param {GetWalletSigProps} props - The properties required for generating a new wallet signature.
+   * @returns {Promise<AuthSig>} A promise that resolves to the new AuthSig object.
+   */
+  private _generateNewWalletSig = async (props: GetWalletSigProps): Promise<AuthSig> => {
+    log('getWalletSig - flow 1');
+    console.warn(
+      `Storage key "${LOCAL_STORAGE_KEYS.WALLET_SIGNATURE}" is missing. Not a problem. Continue...`
+    );
+
+    const walletSig = await this._getAuthSigFromCallback(props);
+
+    const storeNewWalletSigOrError = setStorageItem(
+      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE,
+      JSON.stringify(walletSig)
+    );
+    if (storeNewWalletSigOrError.type === 'ERROR') {
+      log('getWalletSig - flow 1.4');
+      console.warn(
+        `Unable to store walletSig in local storage. Not a problem. Continue...`
+      );
+    }
+
+    return walletSig;
+  };
+
+  /**
+   * Retrieves an AuthSig by calling either the provided authNeededCallback or the default auth callback.
+   * 
+   * @param {GetWalletSigProps} props - The properties required for getting an AuthSig.
+   * @returns {Promise<AuthSig>} A promise that resolves to the AuthSig object.
+   * @throws {Error} If no default auth callback is provided when needed.
+   */
+  private _getAuthSigFromCallback = async (props: GetWalletSigProps): Promise<AuthSig> => {
+    const {
+      authNeededCallback,
+      chain,
+      sessionCapabilityObject,
+      switchChain,
+      expiration,
+      sessionKeyUri,
+      sessionKey,
+      nonce,
+      resourceAbilityRequests,
+      litActionCode,
+      litActionIpfsId,
+      jsParams,
+    } = props;
+
+    const body = {
+      chain,
+      statement: sessionCapabilityObject?.statement,
+      resources: sessionCapabilityObject
+        ? [sessionCapabilityObject.encodeAsSiweResource()]
+        : undefined,
+      ...(switchChain && { switchChain }),
+      expiration,
+      uri: sessionKeyUri,
+      sessionKey: sessionKey,
+      nonce,
+      ...(resourceAbilityRequests && { resourceAbilityRequests }),
+      ...(litActionCode && { litActionCode }),
+      ...(litActionIpfsId && { litActionIpfsId }),
+      ...(jsParams && { jsParams }),
+    };
+
+    log('callback body:', body);
+
+    if (authNeededCallback) {
+      log('getWalletSig - flow 1.1');
+      return await authNeededCallback(body);
+    } else {
+      log('getWalletSig - flow 1.2');
+      if (!this.defaultAuthCallback) {
+        log('getWalletSig - flow 1.2.1');
+        return throwError({
+          message: 'No default auth callback provided',
+          errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+          errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
         });
       }
 
-      log('getWalletSig - flow 1.3');
-
-      // (TRY) to set walletSig to local storage
-      const storeNewWalletSigOrError = setStorageItem(
-        storageKey,
-        JSON.stringify(walletSig)
-      );
-      if (storeNewWalletSigOrError.type === 'ERROR') {
-        log('getWalletSig - flow 1.4');
-        console.warn(
-          `Unable to store walletSig in local storage. Not a problem. Continue...`
-        );
-      }
-    } else {
-      log('getWalletSig - flow 2');
-      try {
-        walletSig = JSON.parse(storedWalletSigOrError.result as string);
-        log('getWalletSig - flow 2.1');
-      } catch (e) {
-        console.warn('Error parsing walletSig', e);
-        log('getWalletSig - flow 2.2');
-      }
+      log('getWalletSig - flow 1.2.2');
+      return await this.defaultAuthCallback(body);
     }
-
-    log('getWalletSig - flow 3');
-    return walletSig!;
   };
 
   private _authCallbackAndUpdateStorageItem = async ({
@@ -1276,8 +1352,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -2075,8 +2151,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2159,10 +2235,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
