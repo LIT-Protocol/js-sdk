@@ -361,7 +361,7 @@ export class LitContracts {
       (!this.privateKey && this.randomPrivateKey) ||
       this.options?.storeOrUseStorageKey
     ) {
-      console.warn('THIS.SIGNER:', this.signer);
+      this.log('THIS.SIGNER:', this.signer);
 
       const STORAGE_KEY = 'lit-contracts-sdk-private-key';
 
@@ -397,7 +397,7 @@ export class LitContracts {
 
       // -- (OPTION) store private key in local storage
       if (this.options?.storeOrUseStorageKey) {
-        console.warn(
+        this.log(
           "You've set the option to store your private key in local storage."
         );
         localStorage.setItem(STORAGE_KEY, storagePrivateKey);
@@ -428,12 +428,12 @@ export class LitContracts {
     }
 
     this.log('Your Signer:', this.signer);
-    this.log('Your Provider:', this.provider.connection);
+    this.log('Your Provider:', this.provider?.connection!);
 
     if (!this.provider) {
       this.log('No provider found. Will try to use the one from the signer.');
       this.provider = this.signer.provider;
-      this.log('Your Provider(from signer):', this.provider.connection);
+      this.log('Your Provider(from signer):', this.provider?.connection!);
     }
 
     const addresses: any = await LitContracts.getContractAddresses(
@@ -1344,13 +1344,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     }
 
     const tokenId = events[0].topics[1];
-    console.warn('tokenId:', tokenId);
+    this.log('tokenId:', tokenId);
     let tries = 0;
     const maxAttempts = 10;
     let publicKey = '';
     while (tries < maxAttempts) {
       publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
-      console.log('pkp pub key: ', publicKey);
+      this.log('pkp pub key: ', publicKey);
       if (publicKey !== '0x') {
         break;
       }
@@ -1975,7 +1975,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const events = 'events' in res ? res.events : res.logs;
 
         const tokenIdFromEvent = events[0].topics[1];
-        console.warn('tokenIdFromEvent:', tokenIdFromEvent);
+        this.log('tokenIdFromEvent:', tokenIdFromEvent);
         let tries = 0;
         const maxAttempts = 10;
         let publicKey = '';
@@ -1983,7 +1983,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           publicKey = await this.pkpNftContract.read.getPubkey(
             tokenIdFromEvent
           );
-          console.log('pkp pub key: ', publicKey);
+          this.log('pkp pub key: ', publicKey);
           if (publicKey !== '0x') {
             break;
           }
@@ -1993,7 +1993,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           });
         }
 
-        console.warn('public key from token id', publicKey);
+        this.log('public key from token id', publicKey);
         if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
         }
