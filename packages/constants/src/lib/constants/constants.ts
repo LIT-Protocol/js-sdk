@@ -735,6 +735,19 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  skaleCalypso: {
+    contractAddress: null,
+    chainId: 1564830818,
+    name: 'SKALE Calypso Hub Mainnet',
+    symbol: 'sFUEL',
+    decimals: 18,
+    rpcUrls: ['https://mainnet.skalenodes.com/v1/honorable-steel-rasalhague'],
+    blockExplorerUrls: [
+      'https://giant-half-dual-testnet.explorer.testnet.skalenodes.com/',
+    ],
+    type: null,
+    vmType: 'EVM',
+  },
   fhenixHelium: {
     contractAddress: null,
     chainId: 8008135,
