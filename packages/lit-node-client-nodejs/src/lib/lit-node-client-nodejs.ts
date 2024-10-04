@@ -136,7 +136,8 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient {
+  implements LitClientSessionManager, ILitNodeClient
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -327,7 +328,7 @@ export class LitNodeClientNodeJs
    * Retrieves (from lit-wallet-sig) or generates a wallet signature (LIT_BLS AuthSig) based on the provided parameters.
    * It first attempts to retrieve a stored wallet signature, and if not found or invalid,
    * generates a new one.
-   * 
+   *
    * @param {GetWalletSigProps} props - The properties required for getting or generating a wallet signature.
    * @returns {Promise<AuthSig>} A promise that resolves to the AuthSig object.
    */
@@ -346,7 +347,9 @@ export class LitNodeClientNodeJs
     sessionKey,
   }: GetWalletSigProps): Promise<AuthSig> => {
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
-    const storedWalletSigOrError = getStorageItem(storageKey) as StoredWalletSigOrError;
+    const storedWalletSigOrError = getStorageItem(
+      storageKey
+    ) as StoredWalletSigOrError;
 
     log(`getWalletSig - flow starts
       storageKey: ${storageKey}
@@ -388,11 +391,13 @@ export class LitNodeClientNodeJs
 
   /**
    * Checks if the stored wallet signature is valid.
-   * 
+   *
    * @param { StoredWalletSigOrError }The stored wallet signature or error.
    * @returns {boolean} True if the stored wallet signature is valid, false otherwise.
    */
-  private _isStoredWalletSigValid = (storedWalletSigOrError: StoredWalletSigOrError): boolean => {
+  private _isStoredWalletSigValid = (
+    storedWalletSigOrError: StoredWalletSigOrError
+  ): boolean => {
     return !(
       storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
       !storedWalletSigOrError.result ||
@@ -402,7 +407,7 @@ export class LitNodeClientNodeJs
 
   /**
    * Handles the stored wallet signature by validating it and either returning it or generating a new one.
-   * 
+   *
    * @param {any} storedWalletSigOrError - The stored wallet signature or error.
    * @param {GetWalletSigProps} props - The properties required for getting or generating a wallet signature.
    * @returns {Promise<AuthSig>} A promise that resolves to the AuthSig object.
@@ -422,7 +427,9 @@ export class LitNodeClientNodeJs
         log('getWalletSig - flow 2.1.1');
         log('WalletSig is not valid', checkWalletSig.errors);
 
-        const removeWalletSigOrError = removeStorageItem(LOCAL_STORAGE_KEYS.WALLET_SIGNATURE);
+        const removeWalletSigOrError = removeStorageItem(
+          LOCAL_STORAGE_KEYS.WALLET_SIGNATURE
+        );
 
         if (removeWalletSigOrError.type === EITHER_TYPE.ERROR) {
           console.warn(
@@ -443,11 +450,13 @@ export class LitNodeClientNodeJs
 
   /**
    * Generates a new wallet signature using the provided properties.
-   * 
+   *
    * @param {GetWalletSigProps} props - The properties required for generating a new wallet signature.
    * @returns {Promise<AuthSig>} A promise that resolves to the new AuthSig object.
    */
-  private _generateNewWalletSig = async (props: GetWalletSigProps): Promise<AuthSig> => {
+  private _generateNewWalletSig = async (
+    props: GetWalletSigProps
+  ): Promise<AuthSig> => {
     log('getWalletSig - flow 1');
     console.warn(
       `Storage key "${LOCAL_STORAGE_KEYS.WALLET_SIGNATURE}" is missing. Not a problem. Continue...`
@@ -471,12 +480,14 @@ export class LitNodeClientNodeJs
 
   /**
    * Retrieves an AuthSig by calling either the provided authNeededCallback or the default auth callback.
-   * 
+   *
    * @param {GetWalletSigProps} props - The properties required for getting an AuthSig.
    * @returns {Promise<AuthSig>} A promise that resolves to the AuthSig object.
    * @throws {Error} If no default auth callback is provided when needed.
    */
-  private _getAuthSigFromCallback = async (props: GetWalletSigProps): Promise<AuthSig> => {
+  private _getAuthSigFromCallback = async (
+    props: GetWalletSigProps
+  ): Promise<AuthSig> => {
     const {
       authNeededCallback,
       chain,
@@ -1361,8 +1372,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-          authMethods: params.authMethods,
-        }),
+            authMethods: params.authMethods,
+          }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -2160,8 +2171,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2244,10 +2255,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-        ...(params.capabilityAuthSigs ?? []),
-        params.capacityDelegationAuthSig,
-        authSig,
-      ]
+          ...(params.capabilityAuthSigs ?? []),
+          params.capacityDelegationAuthSig,
+          authSig,
+        ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
