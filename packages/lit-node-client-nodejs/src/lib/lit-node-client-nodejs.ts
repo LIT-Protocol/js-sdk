@@ -324,7 +324,7 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Retrieves (from lit-wallet-sig) or generates a wallet signature (LIT_BLS AuthSig).
+   * Retrieves (from lit-wallet-sig) or generates a wallet signature (LIT_BLS AuthSig) based on the provided parameters.
    * It first attempts to retrieve a stored wallet signature, and if not found or invalid,
    * generates a new one.
    * 
@@ -346,19 +346,14 @@ export class LitNodeClientNodeJs
     sessionKey,
   }: GetWalletSigProps): Promise<AuthSig> => {
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
-    const storedWalletSigOrError = getStorageItem(storageKey);
+    const storedWalletSigOrError = getStorageItem(storageKey) as StoredWalletSigOrError;
 
     log(`getWalletSig - flow starts
       storageKey: ${storageKey}
       storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
   `);
 
-    // Checks if the stored wallet signature is valid.
-    if (!(
-      storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
-      !storedWalletSigOrError.result ||
-      storedWalletSigOrError.result == ''
-    )) {
+    if (this._isStoredWalletSigValid(storedWalletSigOrError)) {
       return this._handleStoredWalletSig(storedWalletSigOrError, {
         authNeededCallback,
         chain,
@@ -392,14 +387,28 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Handles the stored walletSig by validating it and either returning it or generating a new one.
+   * Checks if the stored wallet signature is valid.
    * 
-   * @param {StoredWalletSigOrError} storedWalletSigOrError - The stored wallet signature or error.
+   * @param { StoredWalletSigOrError }The stored wallet signature or error.
+   * @returns {boolean} True if the stored wallet signature is valid, false otherwise.
+   */
+  private _isStoredWalletSigValid = (storedWalletSigOrError: StoredWalletSigOrError): boolean => {
+    return !(
+      storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
+      !storedWalletSigOrError.result ||
+      storedWalletSigOrError.result == ''
+    );
+  };
+
+  /**
+   * Handles the stored wallet signature by validating it and either returning it or generating a new one.
+   * 
+   * @param {any} storedWalletSigOrError - The stored wallet signature or error.
    * @param {GetWalletSigProps} props - The properties required for getting or generating a wallet signature.
    * @returns {Promise<AuthSig>} A promise that resolves to the AuthSig object.
    */
   private _handleStoredWalletSig = async (
-    storedWalletSigOrError: StoredWalletSigOrError,
+    storedWalletSigOrError: any,
     props: GetWalletSigProps
   ): Promise<AuthSig> => {
     log('getWalletSig - flow 2');
