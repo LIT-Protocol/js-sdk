@@ -8,7 +8,9 @@ import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
 
 import * as sevSnpUtilsSdk from '@lit-protocol/sev-snp-utils-sdk';
 
-import { isBrowser, log, logError, throwError } from '@lit-protocol/misc';
+import { isBrowser, log, logError, throwError, bootstrapLogger } from '@lit-protocol/misc';
+
+import { LogManager, Logger, LogLevel } from '@lit-protocol/logger';
 
 import {
   uint8arrayFromString,
@@ -21,6 +23,10 @@ import { LIT_CURVE } from '@lit-protocol/constants';
 import { CombinedECDSASignature } from '@lit-protocol/types';
 
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
+
+const LOG_CATEGORY: string = "crypto";
+export const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
+
 
 export interface BlsSignatureShare {
   ProofOfPossession: string;
@@ -43,6 +49,7 @@ export const loadModules = (): Promise<void> => {
 
       if (!globalThis.jestTesting) {
         log(
+          logger,
           `✅ [BLS SDK] wasmExports loaded. ${
             Object.keys(exports).length
           } functions available. Run 'wasmExports' in the console to see them.`
@@ -66,6 +73,7 @@ export const loadModules = (): Promise<void> => {
 
       if (!globalThis.jestTesting) {
         log(
+          logger,
           `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
             Object.keys(wasmECDSA).length
           } functions available. Run 'wasmECDSA' in the console to see them.`
@@ -80,6 +88,7 @@ export const loadModules = (): Promise<void> => {
 
       if (!globalThis.jestTesting) {
         log(
+          logger,
           `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
             Object.keys(exports).length
           } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
@@ -94,7 +103,7 @@ export const loadModules = (): Promise<void> => {
   if found to be defined. Can be called multiple times safely.
 */
 export const unloadModules = () => {
-  log('running cleanup for global modules');
+  log(logger, 'running cleanup for global modules');
   if (globalThis.wasmExports) delete globalThis.wasmExports;
 
   if (globalThis.wasmECDSA) delete globalThis.wasmECDSA;
@@ -248,7 +257,7 @@ export const combineEcdsaShares = (
     return acc;
   }, []);
 
-  log('Valid Shares:', validShares);
+  log(logger, 'Valid Shares:', validShares);
 
   // if there are no valid shares, throw an error
   if (validShares.length === 0) {
@@ -399,6 +408,7 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
 
   log(
+    logger,
     `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} to manage CORS restrictions and to avoid being rate limited by AMD.`
   );
 
@@ -418,12 +428,12 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   }
 
   // Try direct fetch only if proxy fails
-  log('[getAmdCert] Attempting to fetch directly without proxy.');
+  log(logger, '[getAmdCert] Attempting to fetch directly without proxy.');
 
   try {
     return await fetchAsUint8Array(url);
   } catch (e) {
-    log('[getAmdCert] Direct fetch also failed:', e);
+    log(logger, '[getAmdCert] Direct fetch also failed:', e);
     throw e; // Re-throw to signal that both methods failed
   }
 }

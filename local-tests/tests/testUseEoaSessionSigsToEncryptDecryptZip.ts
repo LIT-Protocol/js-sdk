@@ -31,7 +31,7 @@ export const testUseEoaSessionSigsToEncryptDecryptZip = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  devEnv.logger.debug('encryptRes:', encryptRes);
 
   // -- Expected output:
   // {

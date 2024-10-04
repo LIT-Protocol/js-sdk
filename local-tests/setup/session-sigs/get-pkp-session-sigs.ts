@@ -1,9 +1,13 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
-import { log } from '@lit-protocol/misc';
+import { bootstrapLogger, log } from '@lit-protocol/misc';
 import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
 import { TinnyEnvironment } from '../tinny-environment';
 import { TinnyPerson } from '../tinny-person';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+const LOG_CATEGORY: string = "get-pkp-session-sigs";
+export const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 export const getPkpSessionSigs = async (
   devEnv: TinnyEnvironment,
@@ -43,7 +47,7 @@ export const getPkpSessionSigs = async (
     }),
   });
 
-  log('[getPkpSessionSigs]: ', pkpSessionSigs);
+  log(logger, '[getPkpSessionSigs]: ', pkpSessionSigs);
 
   return pkpSessionSigs;
 };

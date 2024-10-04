@@ -12,10 +12,6 @@ export const parseAsJsonOrString = (
   try {
     return JSON.parse(responseString);
   } catch (e) {
-    log(
-      '[parseResponses] Error parsing response as json.  Swallowing and returning as string.',
-      responseString
-    );
     return responseString;
   }
 };

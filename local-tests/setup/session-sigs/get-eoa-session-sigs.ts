@@ -10,11 +10,15 @@ import {
   LitAbility,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
-import { log } from '@lit-protocol/misc';
+import { bootstrapLogger, log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+const LOG_CATEGORY: string = "get-eoa-session-sigs";
+export const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 /**
  * Retrieves the session signatures for an EOA in a given Tinny environment.
@@ -94,7 +98,7 @@ export const getEoaSessionSigs = async (
     }),
   });
 
-  log('[getEoaSessionSigs]: ', getEoaSessionSigs);
+  log(logger, '[getEoaSessionSigs]: ', getEoaSessionSigs);
 
   return sessionSigs;
 };
@@ -165,7 +169,7 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
     }),
   });
 
-  log('[getEoaSessionSigs]: ', getEoaSessionSigs);
+  log(logger, '[getEoaSessionSigs]: ', getEoaSessionSigs);
 
   return sessionSigs;
 };

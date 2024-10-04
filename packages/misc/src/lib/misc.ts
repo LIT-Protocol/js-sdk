@@ -35,6 +35,8 @@ import Ajv, { JSONSchemaType } from 'ajv';
 const logBuffer: Array<Array<any>> = [];
 const ajv = new Ajv();
 
+const logger = 
+
 /**
  *
  * Print error message based on Error interface
@@ -240,17 +242,17 @@ export const getLoggerbyId = (id: string) => {
   return LogManager.Instance.get(id);
 };
 
-export const bootstrapLogManager = (
+export const bootstrapLogger = (
   id: string,
   level: LogLevel = LogLevel.DEBUG
 ): Logger => {
-  globalThis.logManager = LogManager.Instance;
-  globalThis.logManager.withConfig({
+
+  LogManager.Instance.withConfig({
     condenseLogs: true,
   });
-  globalThis.logManager.setLevel(level);
+  LogManager.Instance.setLevel(level);
 
-  return globalThis.logManager.get(id);
+  return LogManager.Instance.get(id);
 };
 
 /**
@@ -261,7 +263,7 @@ export const bootstrapLogManager = (
  *
  * @returns { void }
  */
-export const log = (logger: Logger, ...args: any): void => {
+export const log = (logger?: Logger, ...args: any): void => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -281,7 +283,7 @@ export const log = (logger: Logger, ...args: any): void => {
     logger.debug(...log);
   }
 
-  globalThis?.logger && logger.debug(...args);
+  logger.debug(...args);
 };
 
 export const logWithRequestId = (logger: Logger, id: string, ...args: any) => {
@@ -303,12 +305,10 @@ export const logWithRequestId = (logger: Logger, id: string, ...args: any) => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).debug(...log);
+      LogManager.Instance.get(logger.category, id).debug(...log);
   }
 
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
+  LogManager.Instance.get(logger.category, id).debug(...args);
 };
 
 export const logErrorWithRequestId = (
@@ -329,17 +329,13 @@ export const logErrorWithRequestId = (
     return;
   }
 
-  // config is loaded, and debug is true
-
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).error(...log);
+      LogManager.Instance.get(logger.category, id).debug(...log);
   }
 
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).error(...args);
+  LogManager.Instance.get(logger.category, id).debug(...args);
 };
 
 export const logError = (logger: Logger, ...args: any) => {
@@ -364,12 +360,11 @@ export const logError = (logger: Logger, ...args: any) => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category).error(...log);
+      logger.error(...log);
   }
 
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category).error(...args);
+
+  logger.error(...args);
 };
 
 /**
@@ -493,7 +488,6 @@ export const checkIfAuthSigRequiresChainParam = (
   chain: string,
   functionName: string
 ): boolean => {
-  log('checkIfAuthSigRequiresChainParam');
   for (const key of LIT_AUTH_SIG_CHAIN_KEYS) {
     if (key in authSig) {
       return true;
@@ -803,14 +797,6 @@ export function sendRequest(
       return data;
     })
     .catch((error: NodeErrorV3) => {
-      logErrorWithRequestId(
-        requestId,
-        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-          error?.message || error?.details
-            ? `Error is ${error.message} - ${error.details}`
-            : ''
-        }`
-      );
       return Promise.reject(error);
     });
 }

@@ -9,7 +9,7 @@ import {
 } from '@lit-protocol/constants';
 
 import { IProvider, AuthSig } from '@lit-protocol/types';
-import { log, throwError } from '@lit-protocol/misc';
+import { bootstrapLogger, log, throwError } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 // import { toString as uint8arrayToString } from 'uint8arrays';
 
@@ -17,6 +17,12 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+
+/** ---------- Module Variable Initialization ---------- */
+const LOG_CATEGORY: string = "auth-browser";
+const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 /**
  *
@@ -84,7 +90,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
   const res = await connectSolProvider();
 
   if (!res) {
-    log('Failed to connect sol provider');
+    log(logger, 'Failed to connect sol provider');
   }
 
   const provider = res?.provider;
@@ -98,7 +104,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
 
   // -- case: if unable to get auth from local storage
   if (authSigOrError.type === EITHER_TYPE.ERROR) {
-    log('signing auth message because sig is not in local storage');
+    log(logger, 'signing auth message because sig is not in local storage');
 
     await signAndSaveAuthMessage({ provider });
 
@@ -123,6 +129,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
   // -- if the wallet address isn't the same as the address from local storage
   if (account !== authSig.address) {
     log(
+      logger,
       'signing auth message because account is not the same as the address in the auth sig'
     );
 
@@ -135,7 +142,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
     authSig = JSON.parse(authSigOrError.result);
   }
 
-  log('authSig', authSig);
+  log(logger, 'authSig', authSig);
 
   return authSig;
 };

@@ -16,6 +16,7 @@ import {
 } from '@lit-protocol/types';
 
 import { BaseProvider } from './BaseProvider';
+import { logger } from '@lit-protocol/lit-auth-client';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -35,6 +36,7 @@ export default class EthWalletProvider extends BaseProvider {
       this.origin = options.origin || window.location.origin;
     } catch (e) {
       log(
+        logger,
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       this.domain = options.domain || 'localhost';

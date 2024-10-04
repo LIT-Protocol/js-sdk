@@ -44,7 +44,7 @@ export class LitNodeClient extends LitNodeClientNodeJs {
 
     // -- validate
     if (storageConfigOrError.type === EITHER_TYPE.ERROR) {
-      log(`Storage key "${storageKey}" is missing. `);
+      log(this._logger, `Storage key "${storageKey}" is missing. `);
       return;
     }
 

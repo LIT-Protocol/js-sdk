@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-import { log } from '@lit-protocol/misc';
+import { bootstrapLogger, log } from '@lit-protocol/misc';
 import {
   AccsDefaultParams,
   AuthSig,
@@ -9,6 +9,12 @@ import {
 } from '@lit-protocol/types';
 
 import { CHAIN_ETHEREUM } from './constants';
+
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+
+const LOG_CATEGORY: string = "wrapped-keys";
+const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 /**
  *
@@ -28,7 +34,7 @@ export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   }
 
   const [[, sessionSig]] = sessionSigsEntries;
-  log(`Session Sig being used: ${JSON.stringify(sessionSig)}`);
+  log(logger, `Session Sig being used: ${JSON.stringify(sessionSig)}`);
 
   return sessionSig;
 }
@@ -63,7 +69,7 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   }
 
   const pkpAddress = delegationAuthSig.address;
-  log(`pkpAddress to permit decryption: ${pkpAddress}`);
+  log(logger, `pkpAddress to permit decryption: ${pkpAddress}`);
 
   return pkpAddress;
 }

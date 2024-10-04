@@ -6,6 +6,7 @@ import {
   LitRelayConfig,
 } from '@lit-protocol/types';
 import { log } from './utils';
+import { logger } from '..';
 
 /**
  * Class that communicates with Lit relay server
@@ -104,18 +105,18 @@ export class LitRelay implements IRelay {
       }
 
       const resBody = await response.json();
-      log('Response OK', { body: resBody });
+      log(logger, 'Response OK', { body: resBody });
 
       if (resBody.error) {
         // exit loop since error
-        log('Something wrong with the API call', {
+        log(logger, 'Something wrong with the API call', {
           error: resBody.error,
         });
         const err = new Error(resBody.error);
         throw err;
       } else if (resBody.status === 'Succeeded') {
         // exit loop since success
-        log('Successfully authed', { ...resBody });
+        log(logger, 'Successfully authed', { ...resBody });
         return resBody;
       }
 

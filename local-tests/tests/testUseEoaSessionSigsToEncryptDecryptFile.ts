@@ -33,7 +33,7 @@ export const testUseEoaSessionSigsToEncryptDecryptFile = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  devEnv.logger.debug('encryptRes:', encryptRes);
 
   // await 5 seconds for the encryption to be mined
 

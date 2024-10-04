@@ -20,6 +20,8 @@ import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 import { toErrorWithMessage } from './tinny-utils';
 import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
+import { bootstrapLogger } from '@lit-protocol/misc';
+import { Logger, LogLevel } from '@lit-protocol/logger';
 
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
@@ -100,6 +102,9 @@ export class TinnyEnvironment {
   };
 
   public testnet: TestnetClient | undefined;
+
+
+  public logger: Logger;
   //=========== PRIVATE MEMBERS ===========
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
@@ -107,7 +112,7 @@ export class TinnyEnvironment {
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
     this.network = network || this.processEnvs.NETWORK;
-
+    this.logger = bootstrapLogger('tinny', this.processEnvs.DEBUG ? LogLevel.DEBUG : LogLevel.OFF);
     if (Object.values(LIT_TESTNET).indexOf(this.network) === -1) {
       throw new Error(
         `Invalid network environment. Please use one of ${Object.values(

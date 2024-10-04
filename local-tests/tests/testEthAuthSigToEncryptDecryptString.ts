@@ -2,7 +2,8 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
+import { bootstrapLogger, log } from '@lit-protocol/misc';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 
 /**
  * Test Commands:
@@ -27,7 +28,7 @@ export const testEthAuthSigToEncryptDecryptString = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  devEnv.logger.debug('encryptRes:', encryptRes);
 
   // await 5 seconds for the encryption to be mined
 

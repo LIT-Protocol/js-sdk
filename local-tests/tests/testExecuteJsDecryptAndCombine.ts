@@ -8,8 +8,13 @@ import {
 } from '@lit-protocol/auth-helpers';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
+import { bootstrapLogger, log } from '@lit-protocol/misc';
 import * as accessControlConditions from '@lit-protocol/access-control-conditions';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+
+const LOG_CATEGORY: string = "testEthAuthSigToEncryptDecryptString";
+export const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 /**
  * Test Commands:
@@ -40,7 +45,7 @@ export const testExecutJsDecryptAndCombine = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  log(logger, 'encryptRes:', encryptRes);
 
   // -- Expected output:
   // {

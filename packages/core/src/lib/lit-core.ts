@@ -38,7 +38,7 @@ import {
 } from '@lit-protocol/crypto';
 import { Logger, LogLevel, LogManager } from '@lit-protocol/logger';
 import {
-  bootstrapLogManager,
+  bootstrapLogger,
   isBrowser,
   isNode,
   log,
@@ -204,7 +204,7 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
-    this._logger = bootstrapLogManager(
+    this._logger = bootstrapLogger(
       'core',
       this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
     );

@@ -768,7 +768,7 @@ export class LitNodeClientNodeJs
       // because the staking nodes can change, and the rust code will use the same list
       const url = this.config.bootstrapUrls[nodeIndex];
 
-      log(`running on node ${nodeIndex} at ${url}`);
+      log(this._logger, `running on node ${nodeIndex} at ${url}`);
 
       // -- choose the right signature
       const sessionSig = this.getSessionSigByUrl({
@@ -1174,6 +1174,14 @@ export class LitNodeClientNodeJs
     // -- 2. combine responses as a string, and parse it as JSON if possible
     const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
 
+    if (typeof parsedResponse === `string`) {
+      log(
+        this._logger,
+        'Error parsing response as json.  Swallowing and returning as string.',
+        parsedResponse
+      );
+    }
+  
     // -- 3. combine logs
     const mostCommonLogs: string = mostCommonString(
       responseData.map((r: NodeLog) => r.logs)

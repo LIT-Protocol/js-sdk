@@ -64,5 +64,6 @@ export const testUseEoaSessionSigsToExecuteJsSigning = async (
     throw new Error(`Expected "publicKey" in res.signatures.sig`);
   }
 
-  log('✅ testUseEoaSessionSigsToExecuteJsSigning');
+  devEnv.logger.debug('✅ testUseEoaSessionSigsToExecuteJsSigning');
 };
+

@@ -1,5 +1,6 @@
 import { PKP_CLIENT_SUPPORTED_CHAINS } from '@lit-protocol/constants';
-import { log } from '@lit-protocol/misc';
+import { Logger, LogLevel } from '@lit-protocol/logger';
+import { bootstrapLogger, log } from '@lit-protocol/misc';
 import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import {
@@ -14,6 +15,7 @@ export class PKPClient {
 
   public readonly pkpPubKey: string;
 
+  private logger: Logger;
   /**
    * Constructs a new PKPClient instance with the provided properties.
    * Automatically registers supported wallets.
@@ -22,7 +24,7 @@ export class PKPClient {
    */
   constructor(prop: PKPClientProp) {
     this.pkpPubKey = prop.pkpPubKey;
-
+    this.logger = bootstrapLogger('pkp-client', prop.debug ? LogLevel.DEBUG : LogLevel.OFF);
     this.ethWallet = new PKPEthersWallet({ ...prop } as PKPEthersWalletProp);
     this.cosmosWallet = new PKPCosmosWallet({ ...prop } as PKPCosmosWalletProp);
   }
@@ -128,6 +130,7 @@ export class PKPClient {
 
     if (successfulInits !== walletEntries.length) {
       log(
+        this.logger,
         `Not all wallets initialized successfully. Details: ${JSON.stringify(
           walletStatus,
           null,

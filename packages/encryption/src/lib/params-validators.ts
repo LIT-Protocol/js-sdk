@@ -13,6 +13,7 @@ import {
   LIT_ERROR,
 } from '@lit-protocol/constants';
 import {
+  bootstrapLogger,
   checkIfAuthSigRequiresChainParam,
   checkType,
   is,
@@ -41,6 +42,11 @@ import {
 } from '@lit-protocol/types';
 
 import { isValidBooleanExpression } from './utils';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+
+const LOG_CATEGORY: string = "encryption";
+const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 export const safeParams = ({
   functionName,
@@ -50,7 +56,7 @@ export const safeParams = ({
   params: any[] | any;
 }): IEither<void> => {
   if (!paramsValidators[functionName]) {
-    log(`This function ${functionName} is skipping params safe guarding.`);
+    log(logger, `This function ${functionName} is skipping params safe guarding.`);
     return ERight(undefined);
   }
 

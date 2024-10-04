@@ -428,6 +428,10 @@ export class LogManager {
     }
   }
 
+  get level(): LogLevel | undefined{
+    return this._level;
+  }
+
   public setHandler(handler: messageHandler) {
     for (const logger of this._loggers) {
       logger[1].setHandler(handler);

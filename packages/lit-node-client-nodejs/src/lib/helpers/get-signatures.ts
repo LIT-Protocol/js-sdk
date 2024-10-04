@@ -3,12 +3,17 @@ import { joinSignature } from 'ethers/lib/utils';
 import { LIT_CURVE, LIT_ERROR } from '@lit-protocol/constants';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
 import {
+  bootstrapLogger,
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';
 import { SigResponse, SigShare } from '@lit-protocol/types';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+const LOG_CATEGORY: string = "lit-node-client";
+const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 export const getFlattenShare = (share: any): SigShare => {
   // flatten the signature object so that the properties of the signature are top level
@@ -110,6 +115,7 @@ export const getSignatures = <T>(params: {
       for (const field of requiredFields) {
         if (!signatureResponse[sigName][field]) {
           logWithRequestId(
+            logger,
             requestId,
             `invalid field ${field} in signature share: ${sigName}, continuing with share processing`
           );
@@ -167,21 +173,25 @@ export const getSignatures = <T>(params: {
 
     const sigName = shares[0].sigName;
     logWithRequestId(
+      logger,
       requestId,
       `starting signature combine for sig name: ${sigName}`,
       shares
     );
     logWithRequestId(
+      logger,
       requestId,
       `number of shares for ${sigName}:`,
       signedData.length
     );
     logWithRequestId(
+      logger,
       requestId,
       `validated length for signature: ${sigName}`,
       shares.length
     );
     logWithRequestId(
+      logger,
       requestId,
       'minimum required shares for threshold:',
       minNodeCount
@@ -189,6 +199,7 @@ export const getSignatures = <T>(params: {
 
     if (shares.length < minNodeCount) {
       logErrorWithRequestId(
+        logger,
         requestId,
         `not enough nodes to get the signatures.  Expected ${minNodeCount}, got ${shares.length}`
       );

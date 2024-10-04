@@ -9,7 +9,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-import { log, throwError } from '@lit-protocol/misc';
+import { bootstrapLogger, log, throwError } from '@lit-protocol/misc';
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -18,6 +18,10 @@ import {
   canonicalUnifiedAccessControlConditionFormatter,
 } from './canonicalFormatter';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
+
+const LOG_CATEGORY: string = "access-control-conditions";
+const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 // Same as:
 // const unifiedAccs = [
@@ -89,12 +93,12 @@ import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 export const hashUnifiedAccessControlConditions = (
   unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
-  log('unifiedAccessControlConditions:', unifiedAccessControlConditions);
+  log(logger, 'unifiedAccessControlConditions:', unifiedAccessControlConditions);
 
   const conditions = unifiedAccessControlConditions.map((condition) => {
     return canonicalUnifiedAccessControlConditionFormatter(condition);
   });
-  log('conditions:', conditions);
+  log(logger, 'conditions:', conditions);
 
   // check if there's any undefined in the conditions
   const hasUndefined = conditions.some((c) => c === undefined);
@@ -115,7 +119,7 @@ export const hashUnifiedAccessControlConditions = (
   }
   const toHash = JSON.stringify(conditions);
 
-  log('Hashing unified access control conditions: ', toHash);
+  log(logger, 'Hashing unified access control conditions: ', toHash);
 
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
@@ -174,7 +178,7 @@ export const hashAccessControlConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing access control conditions: ', toHash);
+  log(logger, 'Hashing access control conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -198,7 +202,7 @@ export const hashEVMContractConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing evm contract conditions: ', toHash);
+  log(logger, 'Hashing evm contract conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
   return crypto.subtle.digest('SHA-256', data);
@@ -221,7 +225,7 @@ export const hashSolRpcConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing sol rpc conditions: ', toHash);
+  log(logger, 'Hashing sol rpc conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 

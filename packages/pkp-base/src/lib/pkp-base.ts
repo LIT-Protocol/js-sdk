@@ -11,7 +11,7 @@
 import { publicKeyConvert } from 'secp256k1';
 
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { logError } from '@lit-protocol/misc';
+import { bootstrapLogger, log, logError } from '@lit-protocol/misc';
 import {
   AuthenticationProps,
   JsonExecutionSdkParams,
@@ -23,6 +23,7 @@ import {
   AuthMethod,
   SessionSigsMap,
 } from '@lit-protocol/types';
+import { Logger, LogLevel } from '@lit-protocol/logger';
 
 /**
  * Compresses a given public key.
@@ -73,6 +74,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   private reset = '\x1b[0m';
   private red = '\x1b[31m';
 
+  private logger: Logger;
   get litNodeClientReady(): boolean {
     return this.litNodeClient.ready;
   }
@@ -88,6 +90,8 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
 
     this.debug = prop.debug || false;
+
+    this.logger = bootstrapLogger('pkp-base', this.debug ? LogLevel.DEBUG : LogLevel.OFF);
 
     if (prop.pkpPubKey.startsWith('0x')) {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
@@ -169,7 +173,8 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     if (!pkpBaseProp.litActionCode && !pkpBaseProp.litActionIPFS) {
-      this.log(
+      log(
+        this.logger,
         'No lit action code or IPFS hash provided. Using default action.'
       );
       this.useAction = false;
@@ -196,7 +201,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async init(): Promise<void> {
     try {
       await this.litNodeClient.connect();
-      this.log('Connected to Lit Node');
+      log(this.logger, 'Connected to Lit Node');
     } catch (e) {
       return this.throwError('Failed to connect to Lit Node');
     }
@@ -212,15 +217,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     if (providedAuthentications !== 1) {
       // log which authentications has the user provided
       if (this.controllerAuthSig) {
-        logError('controllerAuthSig is provided');
+        logError(this.logger, 'controllerAuthSig is provided');
       }
 
       if (this.controllerSessionSigs) {
-        logError('controllerSessionSigs is provided');
+        logError(this.logger, 'controllerSessionSigs is provided');
       }
 
       if (this.authContext) {
-        logError('authContext is provided');
+        logError(this.logger, 'authContext is provided');
       }
 
       this.throwError('Must specify one, and only one, authentication method ');
@@ -296,14 +301,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       return this.throwError('executeJsArgs must have either code or ipfsId');
     }
 
-    this.log('executeJsArgs:', executeJsArgs);
+    log(this.logger, 'executeJsArgs:', executeJsArgs);
 
     const res = await this.litNodeClient.executeJs(executeJsArgs);
 
     const sig = res.signatures[sigName];
 
-    this.log('res:', res);
-    this.log('res.signatures[sigName]:', sig);
+    log(this.logger, 'res:', res);
+    log(this.logger, 'res.signatures[sigName]:', sig);
 
     if (sig.r && sig.s) {
       // pad sigs with 0 if length is odd
@@ -358,6 +363,17 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
+   * Logs the provided arguments to the console, but only if debugging is enabled.
+   *
+   * @param {...any[]} args - The values to be logged to the console.
+   *
+   * @returns {void} - This function does not return a value.
+   */
+ log(...args: unknown[]): void {
+    log(this.logger, ...args);    
+  }
+
+  /**
    * Ensures that the LitNode client is ready for use by waiting for initialization if necessary.
    * If the client is already ready, this function does nothing.
    *
@@ -366,19 +382,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async ensureLitNodeClientReady(): Promise<void> {
     if (!this.litNodeClientReady) {
       await this.init();
-    }
-  }
-
-  /**
-   * Logs the provided arguments to the console, but only if debugging is enabled.
-   *
-   * @param {...any[]} args - The values to be logged to the console.
-   *
-   * @returns {void} - This function does not return a value.
-   */
-  log(...args: any[]): void {
-    if (this.debug) {
-      console.log(this.orange + this.PREFIX + this.reset, ...args);
     }
   }
 

@@ -8,7 +8,7 @@ import {
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
-  bootstrapLogManager,
+  bootstrapLogger,
   isSupportedLitNetwork,
   log,
 } from '@lit-protocol/misc';
@@ -33,6 +33,7 @@ import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { LitRelay } from './relay';
+import { logger } from '..';
 
 /**
  * Class that handles authentication through Lit login
@@ -71,7 +72,7 @@ export class LitAuthClient {
    */
   constructor(options?: LitAuthClientOptions) {
     this.providers = new Map();
-    bootstrapLogManager('auth-client');
+ 
     this.debug = options?.debug ?? false;
 
     // Check if custom relay object is provided
@@ -131,9 +132,9 @@ export class LitAuthClient {
       throw new Error('No RPC URL provided');
     }
 
-    log('rpc url: ', this.rpcUrl);
-    log('relay config: ', options.litRelayConfig);
-    log('relay instance: ', this.relay);
+    log(logger, 'rpc url: ', this.rpcUrl);
+    log(logger, 'relay config: ', options.litRelayConfig);
+    log(logger, 'relay instance: ', this.relay);
   }
 
   /**
@@ -155,7 +156,7 @@ export class LitAuthClient {
     };
 
     let provider: T;
-    log('resolving provider of type: ', type);
+    log(logger, 'resolving provider of type: ', type);
     switch (type) {
       case 'google':
         provider = new GoogleProvider({
@@ -278,7 +279,7 @@ export class LitAuthClient {
         authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
         break;
       default:
-        log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
+        log(logger, `unsupported AuthMethodType: ${authMethod.authMethodType}`);
         throw new Error(
           `Unsupported auth method type: ${authMethod.authMethodType}`
         );

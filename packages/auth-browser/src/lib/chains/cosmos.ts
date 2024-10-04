@@ -11,7 +11,8 @@ import {
 } from '@lit-protocol/constants';
 
 import { AuthSig, CosmosWalletType } from '@lit-protocol/types';
-import { log, sortedObject, throwError } from '@lit-protocol/misc';
+import { bootstrapLogger, log, sortedObject, throwError } from '@lit-protocol/misc';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 
 /** ---------- Declaration ---------- */
 declare global {
@@ -46,6 +47,10 @@ interface CosmosSignDoc {
   }>;
   memo: string;
 }
+
+/** ---------- Module Variable Initialization ---------- */
+const LOG_CATEGORY: string = "auth-browser";
+const logger = bootstrapLogger(LOG_CATEGORY, LogManager.Instance.level ?? LogLevel.OFF);
 
 /** ---------- Local Helpers ---------- */
 /**
@@ -142,7 +147,7 @@ export const checkAndSignCosmosAuthMessage = async ({
 
   // -- if not found in local storage
   if (!authSig) {
-    log('signing auth message because sig is not in local storage');
+    log(logger, 'signing auth message because sig is not in local storage');
 
     await signAndSaveAuthMessage(connectedCosmosProvider);
 
@@ -155,6 +160,7 @@ export const checkAndSignCosmosAuthMessage = async ({
   // -- validate
   if (connectedCosmosProvider.account != authSig.address) {
     log(
+      logger,
       'signing auth message because account is not the same as the address in the auth sig'
     );
     await signAndSaveAuthMessage(connectedCosmosProvider);
@@ -162,7 +168,7 @@ export const checkAndSignCosmosAuthMessage = async ({
     authSig = JSON.parse(authSig);
   }
 
-  log('authSig', authSig);
+  log(logger, 'authSig', authSig);
 
   return authSig;
 };
