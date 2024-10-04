@@ -1,4 +1,4 @@
-import { parseSignedMessage } from "./session-sigs-validator";
+import { parseSignedMessage } from './session-sigs-validator';
 
 function formatDuration(start: Date, end: Date): string {
   const diff = end.getTime() - start.getTime();
@@ -8,7 +8,8 @@ function formatDuration(start: Date, end: Date): string {
   const seconds = ((diff % (1000 * 60)) / 1000).toFixed(3);
 
   if (days > 0) return `${days} days`;
-  if (hours > 0) return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+  if (hours > 0)
+    return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
   return `${minutes} minutes, ${seconds} seconds`;
 }
 
@@ -22,7 +23,10 @@ function formatStatus(expirationDate: Date, currentDate: Date): string {
   }
 }
 
-export function formatSessionSigs(sessionSigs: string, currentTime: Date = new Date()): string {
+export function formatSessionSigs(
+  sessionSigs: string,
+  currentTime: Date = new Date()
+): string {
   const parsedSigs = JSON.parse(sessionSigs);
   const firstNodeKey = Object.keys(parsedSigs)[0];
   const firstNode = parsedSigs[firstNodeKey];
@@ -54,7 +58,10 @@ export function formatSessionSigs(sessionSigs: string, currentTime: Date = new D
     result += `    * Capability ${index + 1} (${capType}):\n`;
     result += `        * Issued at: ${capIssuedAt.toISOString()}\n`;
     result += `        * Expiration: ${capExpiration.toISOString()}\n`;
-    result += `        * Duration: ${formatDuration(capIssuedAt, capExpiration)}\n`;
+    result += `        * Duration: ${formatDuration(
+      capIssuedAt,
+      capExpiration
+    )}\n`;
     result += `        * Status: ${formatStatus(capExpiration, currentDate)}\n`;
   });
 
