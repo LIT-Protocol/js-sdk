@@ -8,7 +8,6 @@ import {
   LitActionResource,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
-import { isValid } from 'date-and-time';
 
 /**
  * Test Commands:
@@ -42,7 +41,7 @@ export const testPkpSessionSigsIsValidAfterEllapsedTime = async (
 
   let res = validateSessionSigs(pkpSessionSigs);
 
-  if (isValid) {
+  if (res.isValid) {
     throw new Error(
       'Session signature validation should fail with expiration ellapsed'
     );
