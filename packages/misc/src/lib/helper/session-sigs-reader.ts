@@ -7,10 +7,18 @@ function formatDuration(start: Date, end: Date): string {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = ((diff % (1000 * 60)) / 1000).toFixed(3);
 
-  if (days > 0) return `${days} days`;
-  if (hours > 0)
-    return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-  return `${minutes} minutes, ${seconds} seconds`;
+
+  let elapsedTime: string;
+
+  if (days > 0) {
+    elapsedTime = `${days} days`;
+  } else if (hours > 0) {
+    elapsedTime = `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+  } else {
+    elapsedTime = `${minutes} minutes, ${seconds} seconds`;
+  }
+
+  return elapsedTime;
 }
 
 function formatStatus(expirationDate: Date, currentDate: Date): string {
