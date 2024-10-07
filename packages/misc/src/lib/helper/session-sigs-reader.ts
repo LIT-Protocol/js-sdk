@@ -7,7 +7,6 @@ function formatDuration(start: Date, end: Date): string {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = ((diff % (1000 * 60)) / 1000).toFixed(3);
 
-
   let elapsedTime: string;
 
   if (days > 0) {
@@ -43,7 +42,8 @@ export function formatSessionSigs(
   try {
     signedMessage = JSON.parse(firstNode.signedMessage);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     throw new Error(`Invalid JSON format for signedMessage: ${errorMessage}`);
   }
 
@@ -57,7 +57,8 @@ export function formatSessionSigs(
     issuedAt = new Date(signedMessage.issuedAt);
     expiration = new Date(signedMessage.expiration);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     throw new Error(`Error parsing issuedAt or expiration: ${errorMessage}`);
   }
 
