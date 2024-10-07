@@ -1,16 +1,17 @@
-/* eslint-disable import/order */
 import { isBrowser, isNode } from '@lit-protocol/misc';
+import {
+  LitNetworkKeysSchema,
+  LitContractContextSchema,
+  LitContractResolverContextSchema,
+} from '@lit-protocol/schemas';
 import {
   ContractName,
   CreateCustomAuthMethodRequest,
   EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
-  LitNetworkKeysSchema,
   LitContractContext,
-  LitContractContextSchema,
   LitContractResolverContext,
-  LitContractResolverContextSchema,
   MintCapacityCreditsContext,
   MintCapacityCreditsRes,
   MintNextAndAddAuthMethods,

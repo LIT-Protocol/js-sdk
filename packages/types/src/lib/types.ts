@@ -8,13 +8,22 @@ import {
   LPACC_EVM_BASIC,
 } from '@lit-protocol/accs-schemas';
 import {
+  AllLitChainsSchema,
+  ChainSchema,
+  ExclusiveLitContractContextSchema,
+  LitAbilitySchema,
+  LitBaseChainSchema,
+  LitContractContextSchema,
+  LitContractResolverContextSchema,
+  LitResourcePrefixSchema,
+  LitContractSchema,
   LitEVMChainSchema,
   LitEVMChainsSchema,
   LitSVMChainSchema,
   LitSVMChainsSchema,
   LitCosmosChainSchema,
   LitCosmosChainsSchema,
-  LitBaseChainSchema,
+  LitNetworkKeysSchema,
 } from '@lit-protocol/schemas';
 
 import {
@@ -73,7 +82,6 @@ export type SupportedJsonRequests =
   | JsonSigningRetrieveRequest
   | JsonEncryptionRetrieveRequest;
 
-export const ChainSchema = z.string();
 export type Chain = z.infer<typeof ChainSchema>;
 
 /**
@@ -91,31 +99,28 @@ export type LITChainRequiredProps = z.infer<typeof LitBaseChainSchema>;
  * @property { string } name - The human readable name of the chain
  */
 export type LITEVMChain = z.infer<typeof LitEVMChainSchema>;
+export type LITEVMChains = z.infer<typeof LitEVMChainsSchema>;
 
 /**
  * @typedef { Object } LITSVMChain
  */
 export type LITSVMChain = z.infer<typeof LitSVMChainSchema>;
+export type LITSVMChains = z.infer<typeof LitSVMChainsSchema>;
 
 /**
  * @typedef { Object } LITCosmosChain
  * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
  */
 export type LITCosmosChain = z.infer<typeof LitCosmosChainSchema>;
+export type LITCosmosChains = z.infer<typeof LitCosmosChainsSchema>;
 
 /**
  * @typedef {Object} LITChain
  * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
  * @property {string} name - The human readable name of the chain
  */
-export type LITChain<T> = Record<string, T>;
+export type LITChain = z.infer<typeof AllLitChainsSchema>;
 
-export const LitNetworkKeysSchema = z.enum([
-  'datil-dev',
-  'datil-test',
-  'datil',
-  'custom',
-] as const);
 export type LIT_NETWORKS_KEYS = z.infer<typeof LitNetworkKeysSchema>;
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
@@ -182,11 +187,6 @@ export type ClaimResult<T = ClaimProcessor> = {
   pubkey: string;
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
-export const LitContractSchema = z.object({
-  address: z.string().optional(),
-  abi: z.any().optional(), // TODO: Define ABI type
-  name: z.string().optional(),
-});
 export type LitContract = z.infer<typeof LitContractSchema>;
 
 /**
@@ -194,24 +194,9 @@ export type LitContract = z.infer<typeof LitContractSchema>;
  * network context and interfacing with contracts on Chroncile blockchain
  *
  */
-export const ExclusiveLitContractContextSchema = z.object({
-  Allowlist: LitContractSchema,
-  LITToken: LitContractSchema,
-  Multisender: LitContractSchema,
-  PKPHelper: LitContractSchema,
-  PKPNFT: LitContractSchema,
-  PKPNFTMetadata: LitContractSchema,
-  PKPPermissions: LitContractSchema,
-  PubkeyRouter: LitContractSchema,
-  RateLimitNFT: LitContractSchema,
-  Staking: LitContractSchema,
-  StakingBalances: LitContractSchema,
-});
 export type ExclusiveLitContractContext = z.infer<
   typeof ExclusiveLitContractContextSchema
 >;
-export const LitContractContextSchema =
-  ExclusiveLitContractContextSchema.catchall(z.union([z.string(), z.any()]));
 export type LitContractContext = z.infer<typeof LitContractContextSchema>;
 
 export type ContractName = keyof ExclusiveLitContractContext;
@@ -222,44 +207,14 @@ export type ContractName = keyof ExclusiveLitContractContext;
  * an instance of LitContractContext can still be provided. which will be used for abi data.
  *
  */
-export const LitContractResolverContextSchema = z
-  .object({
-    resolverAddress: z.string(),
-    abi: z.any(), // TODO: Define ABI type
-    environment: z.number(),
-    contractContext: LitContractContextSchema.optional(),
-    provider: z.instanceof(ethers.providers.JsonRpcProvider).optional(),
-  })
-  .catchall(
-    z.union([
-      z.string(),
-      LitContractContextSchema,
-      z.instanceof(ethers.providers.JsonRpcProvider),
-      z.undefined(),
-      z.number(),
-    ])
-  );
 export type LitContractResolverContext = z.infer<
   typeof LitContractResolverContextSchema
 >;
 
 export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
 
-export const LitResourcePrefixSchema = z.enum([
-  'lit-accesscontrolcondition',
-  'lit-pkp',
-  'lit-ratelimitincrease',
-  'lit-litaction',
-] as const);
 export type LitResourcePrefix = z.infer<typeof LitResourcePrefixSchema>;
 
-export const LitAbilitySchema = z.enum([
-  'access-control-condition-decryption',
-  'access-control-condition-signing',
-  'pkp-signing',
-  'rate-limit-increase-auth',
-  'lit-action-execution',
-] as const);
 export type LitAbility = z.infer<typeof LitAbilitySchema>;
 
 export interface TokenInfo {

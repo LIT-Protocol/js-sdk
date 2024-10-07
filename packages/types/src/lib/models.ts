@@ -1,6 +1,12 @@
 import { SiweMessage } from 'siwe';
 import { z } from 'zod';
-import { LitAbility, LitAbilitySchema, LitResourcePrefixSchema } from './types';
+
+import {
+  ILitResourceSchema,
+  LitResourceAbilityRequestSchema,
+} from '@lit-protocol/schemas';
+
+import { LitAbility } from './types';
 
 export type PlainJSON =
   | boolean
@@ -82,21 +88,6 @@ export interface ISessionCapabilityObject {
   addAllCapabilitiesForResource(litResource: ILitResource): void;
 }
 
-export const ILitResourceSchema = z.object({
-  /**
-   * Gets the fully qualified resource key.
-   * @returns The fully qualified resource key.
-   */
-  getResourceKey: z.function().args(z.void()).returns(z.string()),
-  /**
-   * Validates that the given LIT ability is valid for this resource.
-   * @param litAbility The LIT ability to validate.
-   */
-  isValidLitAbility: z.function().args(LitAbilitySchema).returns(z.boolean()),
-  toString: z.function().args(z.void()).returns(z.string()),
-  resourcePrefix: LitResourcePrefixSchema,
-  resource: z.string(),
-});
 export type ILitResource = z.infer<typeof ILitResourceSchema>;
 
 /**
@@ -108,11 +99,6 @@ export type ILitResource = z.infer<typeof ILitResourceSchema>;
  * specified LIT resource and the specified LIT ability, and will be validated by
  * the LIT-internal systems.
  */
-export const LitResourceAbilityRequestSchema = z.object({
-  resource: ILitResourceSchema,
-  ability: LitAbilitySchema,
-  data: z.any().optional(),
-});
 export type LitResourceAbilityRequest = z.infer<
   typeof LitResourceAbilityRequestSchema
 >;

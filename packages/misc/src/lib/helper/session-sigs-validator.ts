@@ -1,10 +1,10 @@
 import { fromError, isZodErrorLike } from 'zod-validation-error';
+import { ParsedSessionMessageSchema } from '@lit-protocol/schemas';
 import {
   AuthSig,
   Capability,
   ParsedSessionMessage,
   ParsedSignedMessage,
-  ParsedSessionMessageSchema,
   SessionSigsMap,
 } from '@lit-protocol/types';
 

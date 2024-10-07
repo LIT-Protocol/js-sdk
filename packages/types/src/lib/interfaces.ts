@@ -2,24 +2,27 @@ import { Provider } from '@ethersproject/abstract-provider';
 import depd from 'depd';
 import { z } from 'zod';
 
-import { ILitNodeClient } from './ILitNodeClient';
 import {
-  ISessionCapabilityObject,
-  LitResourceAbilityRequest,
-  LitResourceAbilityRequestSchema,
-} from './models';
+  AuthSigSchema,
+  CosmosWalletTypeSchema,
+  SessionKeyPairSchema,
+  LitActionSdkParamsSchema,
+  AuthCallbackParamsSchema,
+  StorageProviderSchema,
+  LitNodeClientConfigSchema,
+  CustomNetworkSchema,
+} from '@lit-protocol/schemas';
+
+import { ILitNodeClient } from './ILitNodeClient';
+import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
-  ChainSchema,
   EvmContractConditions,
   IRelayAuthStatus,
   JsonRequest,
-  LitNetworkKeysSchema,
-  LitContractContextSchema,
-  LitContractResolverContextSchema,
   ResponseStrategy,
   SolRpcConditions,
   SymmetricKey,
@@ -44,31 +47,6 @@ export interface AccsOperatorParams {
 /**
  * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE ReCap](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
  */
-export const AuthSigSchema = z.object({
-  /**
-   * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
-   */
-  sig: z.string(), // TODO it was any?
-  /**
-   * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
-   */
-  derivedVia: z.string(),
-  /**
-   * An [ERC-5573](https://eips.ethereum.org/EIPS/eip-5573) SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
-   * -  [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
-   * -  [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
-   * -  [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
-   */
-  signedMessage: z.string(),
-  /**
-   * The Ethereum address that was used to sign `signedMessage` and create the `sig`.
-   */
-  address: z.string(),
-  /**
-   * An optional property only seen when generating session signatures, this is the signing algorithm used to generate session signatures.
-   */
-  algo: z.string().optional(),
-});
 export type AuthSig = z.infer<typeof AuthSigSchema>;
 
 export interface SolanaAuthSig extends AuthSig {
@@ -79,108 +57,12 @@ export interface CosmosAuthSig extends AuthSig {
   derivedVia: 'cosmos.signArbitrary';
 }
 
-export const CosmosWalletTypeSchema = z.enum(['keplr', 'leap'] as const);
 export type CosmosWalletType = z.infer<typeof CosmosWalletTypeSchema>;
 
-export const SessionKeyPairSchema = z.object({
-  publicKey: z.string(),
-  secretKey: z.string(),
-});
 export type SessionKeyPair = z.infer<typeof SessionKeyPairSchema>;
 
-export const LitActionSdkParamsSchema = z.object({
-  /**
-   * The litActionCode is the JavaScript code that will run on the nodes.
-   * You will need to convert the string content to base64.
-   *
-   * @example
-   * Buffer.from(litActionCodeString).toString('base64');
-   */
-  litActionCode: z.string().optional(),
-  /**
-   * You can obtain the Lit Action IPFS CID by converting your JavaScript code using this tool:
-   * https://explorer.litprotocol.com/create-action
-   *
-   * Note: You do not need to pin your code to IPFS necessarily.
-   * You can convert a code string to an IPFS hash using the "ipfs-hash-only" or 'ipfs-unixfs-importer' library.
-   *
-   * @example
-   * async function stringToIpfsHash(input: string): Promise<string> {
-   *   // Convert the input string to a Buffer
-   *   const content = Buffer.from(input);
-   *
-   *   // Import the content to create an IPFS file
-   *   const files = importer([{ content }], {} as any, { onlyHash: true });
-   *
-   *   // Get the first (and only) file result
-   *   const result = (await files.next()).value;
-   *
-   *   const ipfsHash = (result as any).cid.toString();
-   *   if (!ipfsHash.startsWith('Qm')) {
-   *     throw new Error('Generated hash does not start with Qm');
-   *   }
-   *
-   *   return ipfsHash;
-   * }
-   */
-  litActionIpfsId: z.string().optional(),
-  /**
-   * An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-   */
-  jsParams: z
-    .union([
-      z.any(),
-      z
-        .object({
-          publicKey: z.string().optional(),
-          sigName: z.string().optional(),
-        })
-        .catchall(z.any()),
-    ])
-    .optional(),
-});
 export type LitActionSdkParams = z.infer<typeof LitActionSdkParamsSchema>;
 
-export const AuthCallbackParamsSchema = LitActionSdkParamsSchema.extend({
-  /**
-   * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
-   */
-  sessionKey: SessionKeyPairSchema.optional(),
-  /**
-   * The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
-   */
-  chain: ChainSchema,
-  /**
-   *   The statement that describes what the user is signing. If the auth callback is for signing a SIWE message, you MUST add this statement to the end of the SIWE statement.
-   */
-  statement: z.string().optional(),
-  /**
-   * The blockhash that the nodes return during the handshake
-   */
-  nonce: z.string(),
-  /**
-   * Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
-   */
-  resources: z.array(z.string()).optional(),
-  /**
-   * Optional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
-   */
-  switchChain: z.boolean().optional(),
-  // --- Following for Session Auth ---
-  expiration: z.string().optional(),
-  uri: z.string().optional(),
-  /**
-   * Cosmos wallet type, to support mutliple popular cosmos wallets
-   * Keplr & Cypher -> window.keplr
-   * Leap -> window.leap
-   */
-  cosmosWalletType: CosmosWalletTypeSchema.optional(),
-  /**
-   * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
-   */
-  walletConnectProjectId: z.string().optional(),
-  resourceAbilityRequests: LitResourceAbilityRequestSchema.optional(),
-});
 export type AuthCallbackParams = z.infer<typeof AuthCallbackParamsSchema>;
 
 /** ---------- Web3 ---------- */
@@ -252,48 +134,11 @@ export type KV = Record<string, any>;
  * if running in NodeJs and this is implicitly
  * binded globally
  */
-export const StorageProviderSchema = z.object({
-  provider: z.object({
-    getItem: z
-      .function()
-      .args(z.string())
-      .returns(z.union([z.string(), z.null()])),
-    setItem: z.function().args(z.string(), z.string()).returns(z.void()),
-    removeItem: z.function().args(z.string()).returns(z.void()),
-    clear: z.function().returns(z.void()),
-  }),
-});
 export type StorageProvider = z.infer<typeof StorageProviderSchema>;
 
 /** ---------- Lit Node Client ---------- */
-export const LitNodeClientConfigSchema = z.object({
-  litNetwork: LitNetworkKeysSchema,
-  alertWhenUnauthorized: z.boolean().optional(),
-  minNodeCount: z.number().optional(),
-  debug: z.boolean().optional(),
-  connectTimeout: z.number().optional(),
-  checkNodeAttestation: z.boolean().optional(),
-  contractContext: z
-    .union([LitContractContextSchema, LitContractResolverContextSchema])
-    .optional(),
-  storageProvider: StorageProviderSchema.optional(),
-  defaultAuthCallback: z
-    .function()
-    .args(AuthCallbackParamsSchema)
-    .returns(z.promise(AuthSigSchema))
-    .optional(),
-  rpcUrl: z.string().optional(),
-});
 export type LitNodeClientConfig = z.infer<typeof LitNodeClientConfigSchema>;
 
-export const CustomNetworkSchema = z.intersection(
-  LitNodeClientConfigSchema.pick({
-    litNetwork: true,
-    contractContext: true,
-    checkNodeAttestation: true,
-  }),
-  LitNodeClientConfigSchema.pick({ minNodeCount: true }).partial()
-);
 export type CustomNetwork = z.infer<typeof CustomNetworkSchema>;
 
 export interface Signature {
