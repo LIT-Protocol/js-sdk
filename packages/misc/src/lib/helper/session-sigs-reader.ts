@@ -38,7 +38,14 @@ export function formatSessionSigs(
   const parsedSigs = JSON.parse(sessionSigs);
   const firstNodeKey = Object.keys(parsedSigs)[0];
   const firstNode = parsedSigs[firstNodeKey];
-  const signedMessage = JSON.parse(firstNode.signedMessage);
+  let signedMessage;
+
+  try {
+    signedMessage = JSON.parse(firstNode.signedMessage);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Invalid JSON format for signedMessage: ${errorMessage}`);
+  }
 
   const currentDate = new Date(currentTime);
 
