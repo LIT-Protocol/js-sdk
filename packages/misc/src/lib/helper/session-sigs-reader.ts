@@ -52,8 +52,14 @@ export function formatSessionSigs(
   let result = `The request time is at: ${currentDate.toISOString()}\n`;
 
   // Outer expiration
-  const issuedAt = new Date(signedMessage.issuedAt);
-  const expiration = new Date(signedMessage.expiration);
+  let issuedAt, expiration;
+  try {
+    issuedAt = new Date(signedMessage.issuedAt);
+    expiration = new Date(signedMessage.expiration);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Error parsing issuedAt or expiration: ${errorMessage}`);
+  }
 
   result += '* Outer expiration:\n';
   result += `    * Issued at: ${issuedAt.toISOString()}\n`;
