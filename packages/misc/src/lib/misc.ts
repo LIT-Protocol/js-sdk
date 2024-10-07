@@ -1,3 +1,4 @@
+import { LitNodeClientConfig } from '@lit-protocol/types';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import Ajv, { JSONSchemaType } from 'ajv';
@@ -30,6 +31,13 @@ import {
 
 const logBuffer: any[][] = [];
 const ajv = new Ajv();
+
+// Module scoped variable to store the LitNodeClientConfig passed to LitCore
+let litConfig: LitNodeClientConfig | undefined;
+
+export const setMiscLitConfig = (config: LitNodeClientConfig | undefined) => {
+  litConfig = config;
+};
 
 /**
  *
@@ -95,7 +103,6 @@ export const findMostCommonResponse = (responses: object[]): object => {
 };
 
 declare global {
-  var litConfig: any;
   var wasmExport: any;
   var wasmECDSA: any;
   var logger: any;
@@ -148,7 +155,7 @@ export const log = (...args: any): void => {
   }
 
   // check if config is loaded yet
-  if (!globalThis?.litConfig) {
+  if (!litConfig) {
     // config isn't loaded yet, push into buffer
     logBuffer.push(args);
     return;
@@ -171,7 +178,7 @@ export const logWithRequestId = (id: string, ...args: any) => {
   }
 
   // check if config is loaded yet
-  if (!globalThis?.litConfig) {
+  if (!litConfig) {
     // config isn't loaded yet, push into buffer
     logBuffer.push(args);
     return;
@@ -196,7 +203,7 @@ export const logErrorWithRequestId = (id: string, ...args: any) => {
   }
 
   // check if config is loaded yet
-  if (!globalThis?.litConfig) {
+  if (!litConfig) {
     // config isn't loaded yet, push into buffer
     logBuffer.push(args);
     return;
@@ -221,7 +228,7 @@ export const logError = (...args: any) => {
   }
 
   // check if config is loaded yet
-  if (!globalThis?.litConfig) {
+  if (!litConfig) {
     // config isn't loaded yet, push into buffer
     logBuffer.push(args);
     return;
