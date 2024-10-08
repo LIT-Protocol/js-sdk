@@ -11,6 +11,7 @@ import {
   clusterApiUrl,
 } from '@solana/web3.js';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { ethers } from 'ethers';
 
 const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
@@ -125,7 +126,7 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
     // const confirmation = await solanaConnection.confirmTransaction(signedTx);
     // console.log(confirmation); // { context: { slot: 321490379 }, value: { err: null } }
 
-    const signatureBuffer = Buffer.from(signedTx, 'base64');
+    const signatureBuffer = Buffer.from(ethers.utils.base58.decode(signedTx));
     solanaTransaction.addSignature(solanaKeypair.publicKey, signatureBuffer);
 
     if (!solanaTransaction.verifySignatures()) {
