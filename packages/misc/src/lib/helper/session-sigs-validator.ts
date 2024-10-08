@@ -12,7 +12,7 @@ interface ValidationResult {
 }
 
 // Function to parse a signedMessage string into an object
-function parseSignedMessage(signedMessage: string): ParsedSignedMessage {
+export function parseSignedMessage(signedMessage: string): ParsedSignedMessage {
   const lines = signedMessage.split('\n');
   const parsedData: ParsedSignedMessage = {};
   let currentKey: string | null = null as string | null;

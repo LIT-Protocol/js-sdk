@@ -48,6 +48,7 @@ import {
 import {
   defaultMintClaimCallback,
   findMostCommonResponse,
+  formatSessionSigs,
   hexPrefixed,
   log,
   logError,
@@ -2114,6 +2115,16 @@ export class LitNodeClientNodeJs
     });
 
     log('signatures:', signatures);
+
+    try {
+      const formattedSessionSigs = formatSessionSigs(
+        JSON.stringify(signatures)
+      );
+      log(formattedSessionSigs);
+    } catch (e) {
+      // swallow error
+      log('Error formatting session signatures: ', e);
+    }
 
     return signatures;
   };
