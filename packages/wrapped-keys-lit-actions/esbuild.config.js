@@ -57,6 +57,7 @@ module.exports = {
       './src/lib/ethereum/signMessageWithEncryptedEthereumKey.js',
       './src/lib/ethereum/generateEncryptedEthereumPrivateKey.js',
       './src/lib/common/exportPrivateKey.js',
+      './src/lib/common/batchGenerateEncryptedKeys.js',
     ],
     bundle: true,
     minify: true,

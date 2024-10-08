@@ -1,3 +1,4 @@
+import * as batchGenerateEncryptedKeys from './generated/common/batchGenerateEncryptedKeys';
 import * as exportPrivateKey from './generated/common/exportPrivateKey';
 import * as generateEncryptedEthereumPrivateKey from './generated/ethereum/generateEncryptedEthereumPrivateKey';
 import * as signMessageWithEthereumEncryptedKey from './generated/ethereum/signMessageWithEncryptedEthereumKey';
@@ -6,7 +7,10 @@ import * as generateEncryptedSolanaPrivateKey from './generated/solana/generateE
 import * as signMessageWithSolanaEncryptedKey from './generated/solana/signMessageWithEncryptedSolanaKey';
 import * as signTransactionWithSolanaEncryptedKey from './generated/solana/signTransactionWithEncryptedSolanaKey';
 
-import type { LitActionCodeRepository } from '@lit-protocol/wrapped-keys';
+import type {
+  LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
+} from '@lit-protocol/wrapped-keys';
 
 const litActionRepository: LitActionCodeRepository = {
   signTransaction: {
@@ -27,8 +31,13 @@ const litActionRepository: LitActionCodeRepository = {
   },
 };
 
+const litActionRepositoryCommon: LitActionCodeRepositoryCommon = {
+  batchGenerateEncryptedKeys: batchGenerateEncryptedKeys.code,
+};
+
 export {
   // Individual exports to allow tree-shaking and only importing the lit actions you need
+  batchGenerateEncryptedKeys,
   exportPrivateKey,
   generateEncryptedEthereumPrivateKey,
   signMessageWithEthereumEncryptedKey,
@@ -39,4 +48,5 @@ export {
 
   // Full export to bundle all lit actions
   litActionRepository,
+  litActionRepositoryCommon,
 };
