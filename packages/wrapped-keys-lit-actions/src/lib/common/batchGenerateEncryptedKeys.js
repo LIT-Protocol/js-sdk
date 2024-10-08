@@ -154,6 +154,6 @@ function validateParams(actions) {
     // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
     // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
   } catch (err) {
-    Lit.Actions.setResponse({ response: `Error: ${err.message + err.stack}` });
+    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
   }
 })();
