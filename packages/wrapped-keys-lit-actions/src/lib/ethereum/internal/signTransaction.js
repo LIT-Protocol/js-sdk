@@ -1,6 +1,3 @@
-import { getDecryptedKey } from '../../common/internal/getDecryptedKey';
-import { removeSaltFromDecryptedKey } from '../../utils';
-
 /* global ethers, Lit */
 
 function getValidatedUnsignedTx(unsignedTransaction) {
