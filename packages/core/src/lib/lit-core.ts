@@ -36,6 +36,7 @@ import {
   loadModules,
   unloadModules,
 } from '@lit-protocol/crypto';
+import { LogLevel } from '@lit-protocol/logger';
 import {
   bootstrapLogManager,
   isBrowser,
@@ -71,7 +72,6 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { LogLevel } from '@lit-protocol/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -1022,10 +1022,11 @@ export class LitCore {
       delete data.sessionSigs;
     }
 
-    logWithRequestId(requestId, `sendCommandToNode with url ${url} and data`, {
-      jsParams: JSON.stringify(data.jsParams),
-      codeLength: data.code?.length,
-    });
+    logWithRequestId(
+      requestId,
+      `sendCommandToNode with url ${url} and data`,
+      data
+    );
 
     const req: RequestInit = {
       method: 'POST',
