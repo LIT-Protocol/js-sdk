@@ -1,5 +1,7 @@
 import {
   LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
+  LitActionCodeRepositoryCommonInput,
   LitActionCodeRepositoryEntry,
   LitActionCodeRepositoryInput,
   LitActionType,
@@ -52,10 +54,10 @@ function assertIsLitActionRepositoryEntry(
   if (
     typeof entry !== 'object' ||
     !entry ||
-    ('evm' in entry &&
-      typeof (entry as LitActionCodeRepositoryEntry).evm !== 'string') ||
-    ('solana' in entry &&
-      typeof (entry as LitActionCodeRepositoryEntry).solana !== 'string') ||
+    // @ts-expect-error assert function
+    ('evm' in entry && typeof entry.evm !== 'string') ||
+    // @ts-expect-error assert function
+    ('solana' in entry && typeof entry.solana !== 'string') ||
     Object.keys(entry).some((key) => !['evm', 'solana'].includes(key))
   ) {
     throw new Error(
@@ -80,4 +82,58 @@ function setLitActionsCode(repository: LitActionCodeRepositoryInput) {
   }
 }
 
-export { litActionCodeRepository, setLitActionsCode };
+/**
+ * A repository for managing Lit Actions related to blockchain operations.
+ * Contains actions that are designed to be used for multiple networks
+ * @type {LitActionCodeRepositoryCommon}
+ */
+const litActionCodeRepositoryCommon: LitActionCodeRepositoryCommon = {
+  batchGenerateEncryptedKeys: '',
+};
+
+function assertIsLitActionKeyCommon(
+  key: string
+): asserts key is keyof LitActionCodeRepositoryCommon {
+  if (!(key in litActionCodeRepositoryCommon)) {
+    throw new Error(
+      `Invalid key: ${key}; must be one of ${Object.keys(
+        litActionCodeRepositoryCommon
+      ).join(',')}`
+    );
+  }
+}
+
+/**
+ * Type Guard for LitActionCodeRepositoryEntry
+ */
+function assertIsLitActionRepositoryEntryCommon(
+  entry: unknown
+): asserts entry is LitActionCodeRepositoryEntry {
+  if (typeof entry !== 'string') {
+    throw new Error(
+      `Invalid LitActionRepositoryCommon entry: ${JSON.stringify(entry)}`
+    );
+  }
+}
+
+/**
+ * Updates the litActionCodeRepository with the provided entries.
+ * @param { LitActionCodeRepositoryCommonInput } repository - user provided repository to set
+ */
+function setLitActionsCodeCommon(
+  repository: LitActionCodeRepositoryCommonInput
+) {
+  for (const [actionType, actionCode] of Object.entries(repository)) {
+    assertIsLitActionKeyCommon(actionType);
+    assertIsLitActionRepositoryEntryCommon(actionCode);
+
+    litActionCodeRepositoryCommon[actionType] = actionCode;
+  }
+}
+
+export {
+  litActionCodeRepository,
+  setLitActionsCode,
+  litActionCodeRepositoryCommon,
+  setLitActionsCodeCommon,
+};

@@ -1,4 +1,4 @@
-import { LitCidRepository } from './types';
+import { LitCidRepository, LitCidRepositoryCommon } from './types';
 
 const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   signTransaction: Object.freeze({
@@ -19,4 +19,8 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   }),
 });
 
-export { LIT_ACTION_CID_REPOSITORY };
+const LIT_ACTION_CID_REPOSITORY_COMMON: LitCidRepositoryCommon = Object.freeze({
+  batchGenerateEncryptedKeys: '',
+});
+
+export { LIT_ACTION_CID_REPOSITORY, LIT_ACTION_CID_REPOSITORY_COMMON };
