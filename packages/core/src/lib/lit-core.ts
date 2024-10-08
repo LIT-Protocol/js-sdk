@@ -1022,11 +1022,10 @@ export class LitCore {
       delete data.sessionSigs;
     }
 
-    logWithRequestId(
-      requestId,
-      `sendCommandToNode with url ${url} and data`,
-      data
-    );
+    logWithRequestId(requestId, `sendCommandToNode with url ${url} and data`, {
+      jsParams: JSON.stringify(data.jsParams),
+      codeLength: data.code?.length,
+    });
 
     const req: RequestInit = {
       method: 'POST',
