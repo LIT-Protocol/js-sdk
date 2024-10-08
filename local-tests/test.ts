@@ -104,7 +104,7 @@ import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-
 import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
-import { testBatchGenerateEncryptedKeys } from './tests/wrapped-keys/testBatchGenerateEncryptedKeys';
+import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
 
@@ -124,7 +124,7 @@ setLitActionsCodeToLocal();
   // --filter=WrappedKey
   const wrappedKeysTests = {
     // -- valid cases
-    testBatchGenerateEncryptedKeys,
+    testBatchGeneratePrivateKeys,
     testEthereumSignMessageGeneratedKey,
     testEthereumBroadcastTransactionGeneratedKey,
     testEthereumSignMessageWrappedKey,

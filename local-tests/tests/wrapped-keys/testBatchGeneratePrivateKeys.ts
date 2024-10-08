@@ -3,7 +3,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
-const { batchGenerateEncryptedKeys } = api;
+const { batchGeneratePrivateKeys } = api;
 
 /**
  * Test Commands:
@@ -11,7 +11,7 @@ const { batchGenerateEncryptedKeys } = api;
  * ✅ NETWORK=manzano yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
  * ✅ NETWORK=localchain yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
  */
-export const testBatchGenerateEncryptedKeys = async (
+export const testBatchGeneratePrivateKeys = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -24,7 +24,7 @@ export const testBatchGenerateEncryptedKeys = async (
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    const results = await batchGenerateEncryptedKeys({
+    const results = await batchGeneratePrivateKeys({
       pkpSessionSigs: pkpSessionSigsSigning,
       actions: [
         {
