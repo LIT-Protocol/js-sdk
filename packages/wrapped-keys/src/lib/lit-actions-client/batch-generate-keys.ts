@@ -20,8 +20,8 @@ interface GeneratePrivateKeyLitActionResult {
 
 interface BatchGeneratePrivateKeysWithLitActionResult {
   network: Network;
-  signedMessage?: { signature: string };
-  generatedPrivateKey: GeneratePrivateKeyLitActionResult;
+  signMessage?: { signature: string };
+  generateEncryptedPrivateKey: GeneratePrivateKeyLitActionResult;
 }
 
 export async function batchGenerateKeysWithLitAction(

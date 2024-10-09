@@ -44,14 +44,14 @@ export async function batchGeneratePrivateKeys(
   const results = await Promise.all(
     actionResults.map(
       async (result): Promise<BatchGeneratePrivateKeysActionResult> => {
-        const { generatedPrivateKey, network } = result;
+        const { generateEncryptedPrivateKey, network } = result;
 
-        const signature = result.signedMessage?.signature;
+        const signature = result.signMessage?.signature;
 
         const { id } = await storePrivateKey({
           sessionSig,
           storedKeyMetadata: {
-            ...generatedPrivateKey,
+            ...generateEncryptedPrivateKey,
             keyType: getKeyTypeFromNetwork(network),
             pkpAddress,
           },
@@ -59,11 +59,11 @@ export async function batchGeneratePrivateKeys(
         });
 
         return {
-          ...(signature ? { signedMessage: { signature } } : {}),
-          generatedPrivateKey: {
-            memo: generatedPrivateKey.memo,
+          ...(signature ? { signMessage: { signature } } : {}),
+          generateEncryptedPrivateKey: {
+            memo: generateEncryptedPrivateKey.memo,
             id,
-            generatedPublicKey: generatedPrivateKey.publicKey,
+            generatedPublicKey: generateEncryptedPrivateKey.publicKey,
             pkpAddress,
           },
         };

@@ -14,8 +14,8 @@ async function verifySolanaSignature(
   solanaMessageToSign
 ) {
   const {
-    signedMessage: { signature },
-    generatedPrivateKey: { generatedPublicKey },
+    signMessage: { signature },
+    generateEncryptedPrivateKey: { generatedPublicKey },
   } = solanaResult;
   const signatureIsValidForPublicKey = nacl.sign.detached.verify(
     Buffer.from(solanaMessageToSign),
@@ -40,7 +40,7 @@ async function verifyEvmSignature(
     try {
       return ethers.utils.verifyMessage(
         messageToSign,
-        evmResult.signedMessage.signature
+        evmResult.signMessage.signature
       );
     } catch (err) {
       throw new Error(
@@ -52,7 +52,7 @@ async function verifyEvmSignature(
   const { decryptedPrivateKey } = await exportPrivateKey({
     litNodeClient,
     network: 'evm',
-    id: evmResult.generatedPrivateKey.id,
+    id: evmResult.generateEncryptedPrivateKey.id,
     pkpSessionSigs,
   });
 
@@ -63,7 +63,7 @@ async function verifyEvmSignature(
   console.log({
     recoveredAddress,
     walletAddress: wallet.address,
-    signature: evmResult.signedMessage.signature,
+    signature: evmResult.signMessage.signature,
   });
   if (recoveredAddress !== wallet.address) {
     throw new Error(
@@ -74,8 +74,8 @@ async function verifyEvmSignature(
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
  * ✅ NETWORK=localchain yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
  */
 export const testBatchGeneratePrivateKeys = async (
@@ -117,8 +117,8 @@ export const testBatchGeneratePrivateKeys = async (
     }
 
     if (
-      results[0].generatedPrivateKey.memo !== 'Test evm key' ||
-      results[1].generatedPrivateKey.memo !== 'Test solana key'
+      results[0].generateEncryptedPrivateKey.memo !== 'Test evm key' ||
+      results[1].generateEncryptedPrivateKey.memo !== 'Test solana key'
     ) {
       throw new Error(
         'Results not in order sent; expected evm as first result, solana as second'
@@ -126,8 +126,8 @@ export const testBatchGeneratePrivateKeys = async (
     }
 
     if (
-      !results[0].signedMessage.signature ||
-      !results[1].signedMessage.signature
+      !results[0].signMessage.signature ||
+      !results[1].signMessage.signature
     ) {
       throw new Error('Missing message signature in response');
     }

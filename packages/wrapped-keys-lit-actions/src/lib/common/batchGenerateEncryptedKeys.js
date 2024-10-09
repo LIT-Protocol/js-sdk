@@ -10,7 +10,7 @@ const { signMessageSolanaKey } = require('../solana/internal/signMessage');
 
 /* global accessControlConditions, actions, Lit*/
 
-async function processEthereumAction(action, ndx) {
+async function processEthereumAction(action) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
 
@@ -32,17 +32,17 @@ async function processEthereumAction(action, ndx) {
 
   return {
     network,
-    generatedPrivateKey: {
+    generateEncryptedPrivateKey: {
       ...generatedPrivateKey,
       memo: generateKeyParams.memo,
     },
     ...(messageSignature
-      ? { signedMessage: { signature: messageSignature } }
+      ? { signMessage: { signature: messageSignature } }
       : {}),
   };
 }
 
-async function processSolanaAction(action, ndx) {
+async function processSolanaAction(action) {
   const { network, generateKeyParams } = action;
 
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -65,12 +65,12 @@ async function processSolanaAction(action, ndx) {
 
   return {
     network,
-    generatedPrivateKey: {
+    generateEncryptedPrivateKey: {
       ...generatedPrivateKey,
       memo: generateKeyParams.memo,
     },
     ...(messageSignature
-      ? { signedMessage: { signature: messageSignature } }
+      ? { signMessage: { signature: messageSignature } }
       : {}),
   };
 }

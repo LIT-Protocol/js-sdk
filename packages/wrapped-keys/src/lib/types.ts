@@ -153,8 +153,8 @@ export type BatchGeneratePrivateKeysParams = BaseApiParams & {
  * @extends ApiParamsSupportedNetworks
  */
 export interface BatchGeneratePrivateKeysActionResult {
-  generatedPrivateKey: GeneratePrivateKeyResult & { memo: string };
-  signedMessage?: { signature: string };
+  generateEncryptedPrivateKey: GeneratePrivateKeyResult & { memo: string };
+  signMessage?: { signature: string };
 }
 
 export interface BatchGeneratePrivateKeysResult {
