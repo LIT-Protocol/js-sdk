@@ -144,10 +144,13 @@ function validateParams(actions) {
   try {
     validateParams(actions);
 
-    const batchGeneratePrivateKeysActionResult = await processActions(actions);
+    const batchGeneratePrivateKeysActionResult = await Lit.Actions.runOnce(
+      { waitForResponse: true, name: `processActions` },
+      async () => JSON.stringify(await processActions(actions))
+    );
 
     Lit.Actions.setResponse({
-      response: JSON.stringify(batchGeneratePrivateKeysActionResult),
+      response: batchGeneratePrivateKeysActionResult,
     });
 
     // 1. Generate both EVM and solana private keys
