@@ -1,5 +1,7 @@
 const { signMessageEthereumKey } = require('./internal/signMessage');
-const { getDecryptedKey } = require('../common/internal/getDecryptedKey');
+const {
+  getDecryptedKeyToSingleNode,
+} = require('../common/internal/getDecryptedKeyToSingleNode');
 const { removeSaltFromDecryptedKey } = require('../utils');
 
 /* global accessControlConditions, ciphertext, dataToEncryptHash, messageToSign, Lit */
@@ -18,7 +20,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
 
 (async () => {
   try {
-    const decryptedPrivateKey = await getDecryptedKey({
+    const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
       accessControlConditions,
       ciphertext,
       dataToEncryptHash,

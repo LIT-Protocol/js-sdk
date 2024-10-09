@@ -1,6 +1,6 @@
 /* global Lit */
 
-export async function getDecryptedKey({
+export async function getDecryptedKeyToSingleNode({
   accessControlConditions,
   ciphertext,
   dataToEncryptHash,

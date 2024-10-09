@@ -1,4 +1,6 @@
-const { getDecryptedKey } = require('./internal/getDecryptedKey');
+const {
+  getDecryptedKeyToSingleNode,
+} = require('./internal/getDecryptedKeyToSingleNode');
 const { removeSaltFromDecryptedKey } = require('../utils');
 
 /* global accessControlConditions, ciphertext, dataToEncryptHash, Lit */
@@ -17,7 +19,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
 
 (async () => {
   try {
-    const decryptedPrivateKey = await getDecryptedKey({
+    const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
       accessControlConditions,
       ciphertext,
       dataToEncryptHash,
