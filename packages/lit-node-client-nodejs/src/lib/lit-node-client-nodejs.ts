@@ -1869,7 +1869,7 @@ export class LitNodeClientNodeJs
       res = await this.handleNodePromises(
         nodePromises,
         requestId,
-        this.connectedNodes.size
+        this.config.minNodeCount
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
