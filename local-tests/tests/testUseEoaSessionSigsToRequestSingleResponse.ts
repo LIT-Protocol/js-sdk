@@ -20,37 +20,38 @@ export const testUseEoaSessionSigsToRequestSingleResponse = async (
       code: `(async () => {
           console.log('hello world')
         })();`,
-      numResponsesRequired: 1,
+      useSingleNode: true,
     });
+
+    console.log('res:', res);
+
+    // Expected output:
+    // {
+    //   success: true,
+    //   signedData: {},
+    //   decryptedData: {},
+    //   claimData: {},
+    //   response: "",
+    //   logs: "hello world\n",
+    // }
+
+    // -- assertions
+    if (res.response) {
+      throw new Error(`Expected "response" to be falsy`);
+    }
+
+    if (!res.logs) {
+      throw new Error(`Expected "logs" in res`);
+    }
+
+    if (!res.logs.includes('hello world')) {
+      throw new Error(`Expected "logs" to include 'hello world'`);
+    }
+
+    if (!res.success) {
+      throw new Error(`Expected "success" in res`);
+    }
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
-  }
-  console.log('res:', res);
-
-  // Expected output:
-  // {
-  //   success: true,
-  //   signedData: {},
-  //   decryptedData: {},
-  //   claimData: {},
-  //   response: "",
-  //   logs: "hello world\n",
-  // }
-
-  // -- assertions
-  if (res.response) {
-    throw new Error(`Expected "response" to be falsy`);
-  }
-
-  if (!res.logs) {
-    throw new Error(`Expected "logs" in res`);
-  }
-
-  if (!res.logs.includes('hello world')) {
-    throw new Error(`Expected "logs" to include 'hello world'`);
-  }
-
-  if (!res.success) {
-    throw new Error(`Expected "success" in res`);
   }
 };

@@ -538,14 +538,9 @@ export interface ExecuteJsAdvancedOptions {
   ipfsOptions?: IpfsOptions;
 
   /**
-   * number of responses required to consider the execution successful
+   * Only run the action on a single node; this will only work if all code in your action is non-interactive
    */
-  numResponsesRequired?: number;
-
-  /**
-   * idea: the number of nodes to pay for running executions
-   */
-  // numNodesToRunOn?: number;
+  useSingleNode?: boolean;
 }
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
