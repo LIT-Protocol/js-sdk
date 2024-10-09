@@ -12,18 +12,19 @@ export const testUseEoaSessionSigsToRequestSingleResponse = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
-  const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: eoaSessionSigs,
-    code: `(async () => {
-      console.log('hello world')
-    })();`,
-    numResponsesRequired: 1,
-  });
-
-  devEnv.releasePrivateKeyFromUser(alice);
-
+  try {
+      const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
+    
+      const res = await devEnv.litNodeClient.executeJs({
+        sessionSigs: eoaSessionSigs,
+        code: `(async () => {
+          console.log('hello world')
+        })();`,
+        numResponsesRequired: 1,
+      });
+    } finally {
+      devEnv.releasePrivateKeyFromUser(alice);
+    }
   console.log('res:', res);
 
   // Expected output:
