@@ -1917,7 +1917,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             publicKey: pubKey,
           });
 
-          arr.push(addrs);
+          arr.push({
+            tokenId,
+            ...addrs,
+          });
         }
 
         return arr;

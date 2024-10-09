@@ -1190,7 +1190,7 @@ export class LitCore {
     nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number
-  ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
+  ): Promise<SuccessNodePromises | RejectedNodePromises> => {
     async function waitForNSuccessesWithErrors<T>(
       promises: Promise<T>[],
       n: number

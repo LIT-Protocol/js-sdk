@@ -24,6 +24,10 @@ import {
   LitCosmosChainSchema,
   LitCosmosChainsSchema,
   LitNetworkKeysSchema,
+  EpochInfoSchema,
+  TokenInfoSchema,
+  DerivedAddressesSchema,
+  ResponseStrategySchema,
 } from '@lit-protocol/schemas';
 
 import {
@@ -189,11 +193,6 @@ export type ClaimResult<T = ClaimProcessor> = {
 
 export type LitContract = z.infer<typeof LitContractSchema>;
 
-/**
- * Defines a set of contract metadata for bootstrapping
- * network context and interfacing with contracts on Chroncile blockchain
- *
- */
 export type ExclusiveLitContractContext = z.infer<
   typeof ExclusiveLitContractContextSchema
 >;
@@ -201,44 +200,18 @@ export type LitContractContext = z.infer<typeof LitContractContextSchema>;
 
 export type ContractName = keyof ExclusiveLitContractContext;
 
-/**
- * Type for a contract resolver instance which will be used
- * In place of LitContractContext for loading addresses of lit contracts
- * an instance of LitContractContext can still be provided. which will be used for abi data.
- *
- */
 export type LitContractResolverContext = z.infer<
   typeof LitContractResolverContextSchema
 >;
 
-export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
+export type ResponseStrategy = z.infer<typeof ResponseStrategySchema>;
 
 export type LitResourcePrefix = z.infer<typeof LitResourcePrefixSchema>;
 
 export type LitAbility = z.infer<typeof LitAbilitySchema>;
 
-export interface TokenInfo {
-  tokenId: string;
-  publicKey: string;
-  publicKeyBuffer: Buffer;
-  ethAddress: string;
-  btcAddress: string;
-  cosmosAddress: string;
-  isNewPKP: boolean;
-}
+export type DerivedAddresses = z.infer<typeof DerivedAddressesSchema>;
 
-/**
- * from the `getActiveUnkickedValidatorStructsAndCounts` Staking contract function
-   epochLength: _BigNumber { _hex: '0x05dc', _isBigNumber: true },
-  number: _BigNumber { _hex: '0x04c5', _isBigNumber: true },
-  endTime: _BigNumber { _hex: '0x66c75b12', _isBigNumber: true },
-  retries: _BigNumber { _hex: '0x03', _isBigNumber: true },
-  timeout: _BigNumber { _hex: '0x3c', _isBigNumber: true }
- */
-export type EpochInfo = {
-  epochLength: number;
-  number: number;
-  endTime: number;
-  retries: number;
-  timeout: number;
-};
+export type TokenInfo = z.infer<typeof TokenInfoSchema>;
+
+export type EpochInfo = z.infer<typeof EpochInfoSchema>;

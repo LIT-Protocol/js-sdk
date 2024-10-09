@@ -954,7 +954,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'cosmoshub-4',
     rpcUrls: ['https://lcd-cosmoshub.keplr.app'] as const,
     blockExplorerUrls: ['https://atomscan.com/'] as const,
-    vmType: 'CVM',
+    vmType: 'CVM', // TODO replace all these with the constant
   },
   kyve: {
     name: 'Kyve',
