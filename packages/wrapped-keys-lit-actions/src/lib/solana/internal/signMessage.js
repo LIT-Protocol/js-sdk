@@ -1,6 +1,7 @@
 import { Keypair } from '@solana/web3.js';
-import bs58 from 'bs58';
 import nacl from 'tweetnacl';
+
+/* global ethers */
 
 function signMessage({ messageToSign, solanaKeyPair }) {
   try {
@@ -49,5 +50,5 @@ export async function signMessageSolanaKey({ messageToSign, privateKey }) {
     throw new Error('Signature did not verify to expected Solana public key');
   }
 
-  return bs58.encode(signature);
+  return ethers.utils.base58.encode(signature);
 }
