@@ -7,7 +7,7 @@ const {
 
 /* global ethers */
 
-function validateUnsignedTransaction(unsignedTransaction) {
+export function validateUnsignedTransaction(unsignedTransaction) {
   const VALID_NETWORKS = ['devnet', 'testnet', 'mainnet-beta'];
 
   if (!VALID_NETWORKS.includes(unsignedTransaction.chain)) {
@@ -48,7 +48,7 @@ export async function signTransactionSolanaKey({
   privateKey,
   unsignedTransaction,
 }) {
-  validateUnsignedTransaction(unsignedTransaction);
+  // Be sure you call validateUnsignedTransaction(unsignedTransaction); before calling this method!
 
   const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 

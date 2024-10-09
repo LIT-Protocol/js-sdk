@@ -1,4 +1,7 @@
-const { signTransactionSolanaKey } = require('./internal/signTransaction');
+const {
+  signTransactionSolanaKey,
+  validateUnsignedTransaction,
+} = require('./internal/signTransaction');
 const {
   getDecryptedKeyToSingleNode,
 } = require('../common/internal/getDecryptedKeyToSingleNode');
@@ -22,6 +25,8 @@ const { removeSaltFromDecryptedKey } = require('../utils');
 
 (async () => {
   try {
+    validateUnsignedTransaction(unsignedTransaction);
+
     const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
       accessControlConditions,
       ciphertext,
