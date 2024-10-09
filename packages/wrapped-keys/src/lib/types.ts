@@ -157,8 +157,10 @@ export interface BatchGeneratePrivateKeysActionResult {
   signedMessage?: { signature: string };
 }
 
-export type BatchGeneratePrivateKeysResult =
-  BatchGeneratePrivateKeysActionResult[];
+export interface BatchGeneratePrivateKeysResult {
+  pkpAddress: string;
+  results: BatchGeneratePrivateKeysActionResult[];
+}
 
 /** @typedef GeneratePrivateKeyParams
  * @extends BaseApiParams

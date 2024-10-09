@@ -41,7 +41,7 @@ export async function batchGeneratePrivateKeys(
     pkpSessionSigs,
   });
 
-  return Promise.all(
+  const results = await Promise.all(
     actionResults.map(
       async (result): Promise<BatchGeneratePrivateKeysActionResult> => {
         const { generatedPrivateKey, network } = result;
@@ -70,4 +70,6 @@ export async function batchGeneratePrivateKeys(
       }
     )
   );
+
+  return { pkpAddress, results };
 }
