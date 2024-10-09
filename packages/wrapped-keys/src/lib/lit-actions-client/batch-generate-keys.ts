@@ -37,6 +37,7 @@ export async function batchGenerateKeysWithLitAction(
   } = args;
 
   const result = await litNodeClient.executeJs({
+    numResponsesRequired: 1,
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
