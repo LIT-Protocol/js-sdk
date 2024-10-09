@@ -62,7 +62,7 @@ export async function batchGeneratePrivateKeys(
           ...(signature ? { signedMessage: { signature } } : {}),
           generatedPrivateKey: {
             memo: generatedPrivateKey.memo,
-            id: id,
+            id,
             generatedPublicKey: generatedPrivateKey.publicKey,
             pkpAddress,
           },
