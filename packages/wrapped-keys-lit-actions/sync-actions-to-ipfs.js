@@ -6,6 +6,14 @@ const {
   litActionRepositoryCommon,
 } = require('./dist/src/index');
 
+/** Usage:
+ * 1. Ensure you have a valid Pinata IPFS JWT in `LIT_IPFS_JWT` env var
+ * 2. Make sure you run `yarn build` to ensure that all LIT actions code has been built into the generated directory from the current commit
+ * 3. `node sync-actions-to-ipfs` -> this will print out JSON of the `LIT_ACTION_CID_REPOSITORY` and LIT_ACTION_CID_REPOSITORY_COMMON
+ * 4. Copy/paste the CIDs into those objects in `packages/wrapped-keys/src/lib/lit-actions-client/constants.ts`
+ * 5. Commit the changes and push them to your branch
+ */
+
 const JWT = process.env.LIT_IPFS_JWT || '';
 if (!JWT) {
   throw new Error('Missing Pinata IPFS JWT in LIT_IPFS_JWT env variable');
