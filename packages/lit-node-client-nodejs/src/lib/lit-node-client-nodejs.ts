@@ -1934,7 +1934,11 @@ export class LitNodeClientNodeJs
         for (const field of requiredFields) {
           const key: keyof BlsResponseData = field as keyof BlsResponseData;
 
-          if (!data[key] || data[key] === '') {
+          if (
+            data[key] === undefined ||
+            data[key] === null ||
+            data[key] === ''
+          ) {
             log(
               `[signSessionKey] Invalid signed data. "${field}" is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
             );
