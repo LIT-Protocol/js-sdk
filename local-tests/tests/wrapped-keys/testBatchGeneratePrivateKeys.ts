@@ -93,7 +93,6 @@ export const testBatchGeneratePrivateKeys = async (
 
     const solanaMessageToSign = 'This is a test solana message';
     const evmMessageToSign = 'This is a test evm message';
-    const results = await batchGeneratePrivateKeys({
     const { results } = await batchGeneratePrivateKeys({
       pkpSessionSigs: pkpSessionSigsSigning,
       actions: [
