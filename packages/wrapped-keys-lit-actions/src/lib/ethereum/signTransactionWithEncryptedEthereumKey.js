@@ -1,4 +1,7 @@
-const { signTransactionEthereumKey } = require('./internal/signTransaction');
+const {
+  signTransactionEthereumKey,
+  getValidatedUnsignedTx,
+} = require('./internal/signTransaction');
 const {
   getDecryptedKeyToSingleNode,
 } = require('../common/internal/getDecryptedKeyToSingleNode');
@@ -21,6 +24,8 @@ const { removeSaltFromDecryptedKey } = require('../utils');
  */
 (async () => {
   try {
+    const validatedTx = getValidatedUnsignedTx(unsignedTransaction);
+
     const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
       accessControlConditions,
       ciphertext,
@@ -38,6 +43,7 @@ const { removeSaltFromDecryptedKey } = require('../utils');
       broadcast,
       privateKey,
       unsignedTransaction,
+      validatedTx,
     });
 
     Lit.Actions.setResponse({ response: txResult });

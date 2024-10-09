@@ -1,6 +1,6 @@
 /* global ethers, Lit */
 
-function getValidatedUnsignedTx(unsignedTransaction) {
+export function getValidatedUnsignedTx(unsignedTransaction) {
   try {
     if (!unsignedTransaction.toAddress) {
       throw new Error('Missing required field: toAddress');
@@ -68,21 +68,21 @@ async function getGasPrice({ userProvidedGasPrice, provider }) {
   }
 }
 
-async function getGasLimit({ provider, userProvidedGasLimit, tx }) {
+async function getGasLimit({ provider, userProvidedGasLimit, validatedTx }) {
   if (userProvidedGasLimit) {
     return userProvidedGasLimit;
   } else {
     try {
-      return await provider.estimateGas(tx);
+      return await provider.estimateGas(validatedTx);
     } catch (err) {
       throw new Error(`When estimating gas - ${err.message}`);
     }
   }
 }
 
-async function signTransaction({ tx, wallet }) {
+async function signTransaction({ validatedTx, wallet }) {
   try {
-    return await wallet.signTransaction(tx);
+    return await wallet.signTransaction(validatedTx);
   } catch (err) {
     throw new Error(`When signing transaction - ${err.message}`);
   }
@@ -99,13 +99,12 @@ async function broadcastTransaction({ provider, signedTx }) {
 export async function signTransactionEthereumKey({
   broadcast,
   privateKey,
+  validatedTx,
   unsignedTransaction,
 }) {
-  const tx = getValidatedUnsignedTx(unsignedTransaction);
-
   const wallet = new ethers.Wallet(privateKey);
 
-  tx.from = wallet.address;
+  validatedTx.from = wallet.address;
 
   const [nonce, provider] = await Promise.all([
     getLatestNonce({
@@ -117,20 +116,20 @@ export async function signTransactionEthereumKey({
     }),
   ]);
 
-  tx.nonce = nonce;
+  validatedTx.nonce = nonce;
 
-  tx.gasPrice = await getGasPrice({
+  validatedTx.gasPrice = await getGasPrice({
     provider,
     userProvidedGasPrice: unsignedTransaction.gasPrice,
   });
 
-  tx.gasLimit = await getGasLimit({
+  validatedTx.gasLimit = await getGasLimit({
     provider,
-    tx,
+    validatedTx,
     userProvidedGasLimit: unsignedTransaction.gasLimit,
   });
 
-  const signedTx = await signTransaction({ tx, wallet });
+  const signedTx = await signTransaction({ validatedTx, wallet });
 
   if (!broadcast) {
     return signedTx;
