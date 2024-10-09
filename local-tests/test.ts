@@ -107,6 +107,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
 import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
+import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 
 // Use the current LIT action code to test against
 setLitActionsCodeToLocal();
@@ -170,6 +171,7 @@ setLitActionsCodeToLocal();
     testUseEoaSessionSigsToEncryptDecryptString,
     testUseEoaSessionSigsToEncryptDecryptFile,
     testUseEoaSessionSigsToEncryptDecryptZip,
+    testUseEoaSessionSigsToRequestSingleResponse,
   };
 
   const pkpSessionSigsTests = {
