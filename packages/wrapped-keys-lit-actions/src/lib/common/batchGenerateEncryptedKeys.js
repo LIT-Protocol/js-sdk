@@ -17,17 +17,11 @@ async function processEthereumAction(action, ndx) {
   const ethereumKey = generateEthereumPrivateKey();
 
   const [generatedPrivateKey, messageSignature] = await Promise.all([
-    Lit.Actions.runOnce(
-      { waitForResponse: true, name: `encryptEthereumPrivateKey_${ndx}` },
-      async () =>
-        JSON.stringify(
-          await encryptPrivateKey({
-            accessControlConditions,
-            publicKey: ethereumKey.publicKey,
-            privateKey: ethereumKey.privateKey,
-          })
-        )
-    ),
+    encryptPrivateKey({
+      accessControlConditions,
+      publicKey: ethereumKey.publicKey,
+      privateKey: ethereumKey.privateKey,
+    }),
     messageToSign
       ? signMessageEthereumKey({
           messageToSign: messageToSign,
@@ -39,7 +33,7 @@ async function processEthereumAction(action, ndx) {
   return {
     network,
     generatedPrivateKey: {
-      ...JSON.parse(generatedPrivateKey),
+      ...generatedPrivateKey,
       memo: generateKeyParams.memo,
     },
     ...(messageSignature
@@ -56,17 +50,11 @@ async function processSolanaAction(action, ndx) {
   const solanaKey = generateSolanaPrivateKey();
 
   const [generatedPrivateKey, messageSignature] = await Promise.all([
-    Lit.Actions.runOnce(
-      { waitForResponse: true, name: `encryptSolanaPrivateKey_${ndx}` },
-      async () =>
-        JSON.stringify(
-          await encryptPrivateKey({
-            accessControlConditions,
-            publicKey: solanaKey.publicKey,
-            privateKey: solanaKey.privateKey,
-          })
-        )
-    ),
+    encryptPrivateKey({
+      accessControlConditions,
+      publicKey: solanaKey.publicKey,
+      privateKey: solanaKey.privateKey,
+    }),
     messageToSign
       ? signMessageSolanaKey({
           messageToSign: messageToSign,
@@ -78,7 +66,7 @@ async function processSolanaAction(action, ndx) {
   return {
     network,
     generatedPrivateKey: {
-      ...JSON.parse(generatedPrivateKey),
+      ...generatedPrivateKey,
       memo: generateKeyParams.memo,
     },
     ...(messageSignature
@@ -144,13 +132,10 @@ function validateParams(actions) {
   try {
     validateParams(actions);
 
-    const batchGeneratePrivateKeysActionResult = await Lit.Actions.runOnce(
-      { waitForResponse: true, name: `processActions` },
-      async () => JSON.stringify(await processActions(actions))
-    );
+    const batchGeneratePrivateKeysActionResult = await processActions(actions);
 
     Lit.Actions.setResponse({
-      response: batchGeneratePrivateKeysActionResult,
+      response: JSON.stringify(batchGeneratePrivateKeysActionResult),
     });
 
     // 1. Generate both EVM and solana private keys
