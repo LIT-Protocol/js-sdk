@@ -26,6 +26,7 @@ export async function generateKeyWithLitAction({
   pkpAddress,
 }: GeneratePrivateKeyLitActionParams): Promise<GeneratePrivateKeyLitActionResult> {
   const result = await litNodeClient.executeJs({
+    useSingleNode: true,
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,

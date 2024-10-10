@@ -2,8 +2,8 @@ import { LitCidRepository, LitCidRepositoryCommon } from './types';
 
 const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
   signTransaction: Object.freeze({
-    evm: 'QmSr9TLHUFcGMrQQrNXRsYxcgaBFtcCqWi4sgbevbhmrhv',
-    solana: 'QmS223QiJkPfncUhY2HGQmme7LRgg93NBy8tU1fgGFUUzu',
+    evm: 'QmRpAgGKEmgeBRhqdC2EH17QUt6puwsbm8Z2nNneVN4uJG',
+    solana: 'QmR1nPG2tnmC72zuCEMZUZrrMEkbDiMPNHW45Dsm2n7xnk',
   }),
   signMessage: Object.freeze({
     evm: 'QmXi9iqJvXrHoUGSo5WREonrruDhzQ7cFr7Cry3wX2hmue',
@@ -14,13 +14,13 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
     solana: 'QmYrmzhh7ZoK8LoZ854DmfdRacmZgpVz9c3kW6u5htcdc5',
   }),
   exportPrivateKey: Object.freeze({
-    solana: 'QmUJ74pTUqeeHzDGdfwCph1vJVNJ1rRzJdvMiTjS1BMwYj',
     evm: 'QmUJ74pTUqeeHzDGdfwCph1vJVNJ1rRzJdvMiTjS1BMwYj',
+    solana: 'QmUJ74pTUqeeHzDGdfwCph1vJVNJ1rRzJdvMiTjS1BMwYj',
   }),
 });
 
 const LIT_ACTION_CID_REPOSITORY_COMMON: LitCidRepositoryCommon = Object.freeze({
-  batchGenerateEncryptedKeys: 'QmTMCnEd5M45EVSBvayc8gAvFsNYRnPjf5sfbtR44bWt68',
+  batchGenerateEncryptedKeys: 'QmR8Zs7ctSEctxBrSnAYhMXFXCC1ub8K1xvMn5Js3NCSAA',
 });
 
 export { LIT_ACTION_CID_REPOSITORY, LIT_ACTION_CID_REPOSITORY_COMMON };

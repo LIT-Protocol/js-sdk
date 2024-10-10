@@ -12,21 +12,14 @@ const { encryptPrivateKey } = require('../common/internal/encryptKey');
  * @returns { Promise<string> } - Returns a stringified JSON object with ciphertext & dataToEncryptHash which are the result of the encryption. Also returns the publicKey of the newly generated Solana Wrapped Key.
  */
 (async () => {
-  const encryptedKeyResultStr = await Lit.Actions.runOnce(
-    { waitForResponse: true, name: 'encryptSolanaPrivateKey' },
-    async () => {
-      const { privateKey, publicKey } = generateSolanaPrivateKey();
-      return JSON.stringify(
-        await encryptPrivateKey({
-          accessControlConditions,
-          publicKey,
-          privateKey,
-        })
-      );
-    }
-  );
+  const { privateKey, publicKey } = generateSolanaPrivateKey();
+  const encryptedKeyResult = await encryptPrivateKey({
+    accessControlConditions,
+    publicKey,
+    privateKey,
+  });
 
   Lit.Actions.setResponse({
-    response: encryptedKeyResultStr,
+    response: JSON.stringify(encryptedKeyResult),
   });
 })();

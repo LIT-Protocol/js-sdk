@@ -13,21 +13,14 @@ import { generateEthereumPrivateKey } from './internal/generatePrivateKey';
 import { encryptPrivateKey } from '../common/internal/encryptKey';
 
 (async () => {
-  const encryptedKeyResultStr = await Lit.Actions.runOnce(
-    { waitForResponse: true, name: 'encryptEthereumPrivateKey' },
-    async () => {
-      const { privateKey, publicKey } = generateEthereumPrivateKey();
-      return JSON.stringify(
-        await encryptPrivateKey({
-          accessControlConditions,
-          privateKey,
-          publicKey,
-        })
-      );
-    }
-  );
+  const { privateKey, publicKey } = generateEthereumPrivateKey();
+  const encryptedKeyResult = await encryptPrivateKey({
+    accessControlConditions,
+    privateKey,
+    publicKey,
+  });
 
   Lit.Actions.setResponse({
-    response: encryptedKeyResultStr,
+    response: JSON.stringify(encryptedKeyResult),
   });
 })();
