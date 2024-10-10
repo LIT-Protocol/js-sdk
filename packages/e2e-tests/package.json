@@ -17,7 +17,10 @@
   "tags": [
     "universal"
   ],
-  "version": "6.4.1",
+  "scripts": {
+    "test:long-run": "node src/tests/long-running/build.mjs && dotenvx run --env-file=../../.env -- node src/tests/long-running/build/test.mjs"
+  },
+  "version": "6.4.10",
   "private": true,
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
