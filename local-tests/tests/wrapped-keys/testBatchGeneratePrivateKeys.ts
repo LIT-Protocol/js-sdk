@@ -49,23 +49,18 @@ async function verifyEvmSignature(
     }
   }
 
-  const { decryptedPrivateKey } = await exportPrivateKey({
-    litNodeClient,
-    network: 'evm',
-    id: evmResult.generateEncryptedPrivateKey.id,
-    pkpSessionSigs,
-  });
+  const walletAddress = ethers.utils.computeAddress(
+    evmResult.generateEncryptedPrivateKey.generatedPublicKey
+  );
 
   const recoveredAddress = verifyMessageSignature();
 
-  const wallet = new ethers.Wallet(decryptedPrivateKey);
-
   console.log({
     recoveredAddress,
-    walletAddress: wallet.address,
+    walletAddress,
     signature: evmResult.signMessage.signature,
   });
-  if (recoveredAddress !== wallet.address) {
+  if (recoveredAddress !== walletAddress) {
     throw new Error(
       "Recovered address from verifyMessage doesn't match the wallet address"
     );
