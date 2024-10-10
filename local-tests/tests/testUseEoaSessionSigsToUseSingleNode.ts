@@ -3,24 +3,29 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToRequestSingleResponse
- * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToRequestSingleResponse
- * ✅ NETWORK=datil yarn test:local --filter=testUseEoaSessionSigsToRequestSingleResponse
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToUseSingleNode
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToUseSingleNode
+ * ✅ NETWORK=datil yarn test:local --filter=testUseEoaSessionSigsToUseSingleNode
  */
-export const testUseEoaSessionSigsToRequestSingleResponse = async (
+export const testUseEoaSessionSigsToUseSingleNode = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
 
+  let res: any;
+
   try {
     const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
-    const res = await devEnv.litNodeClient.executeJs({
+    res = await devEnv.litNodeClient.executeJs({
       sessionSigs: eoaSessionSigs,
       code: `(async () => {
           console.log('hello world')
         })();`,
-      numResponsesRequired: 1,
+
+      // note: re-enable this when we want to require a certain number of responses
+      // numResponsesRequired: 1,
+      useSingleNode: true,
     });
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);

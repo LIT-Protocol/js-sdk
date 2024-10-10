@@ -135,8 +135,7 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1072,13 +1071,19 @@ export class LitNodeClientNodeJs
     }
 
     const requestId = this.getRequestId();
+
+    let nodePromises: Promise<NodeCommandResponse>[];
+    let singleNodeResponse: NodeCommandResponse | null = null;
+
     // ========== Get Node Promises ==========
-    // Handle promises for commands sent to Lit nodes
-    const nodePromises = this.getNodePromises(async (url: string) => {
-      // -- choose the right signature
+    if (params.useSingleNode) {
+      // Select a single random node
+      const nodeUrls = Array.from(this.connectedNodes);
+      const randomNodeUrl = nodeUrls[Math.floor(Math.random() * nodeUrls.length)];
+
       const sessionSig = this.getSessionSigByUrl({
         sessionSigs: formattedParams.sessionSigs,
-        url,
+        url: randomNodeUrl,
       });
 
       const reqBody: JsonExecutionRequest = {
@@ -1087,41 +1092,99 @@ export class LitNodeClientNodeJs
       };
 
       const urlWithPath = composeLitUrl({
-        url,
+        url: randomNodeUrl,
         endpoint: LIT_ENDPOINT.EXECUTE_JS,
       });
 
-      return this.generatePromise(urlWithPath, reqBody, requestId);
-    });
+      try {
+        singleNodeResponse = await this.generatePromise(urlWithPath, reqBody, requestId);
+      } catch (error) {
+        return throwError({
+          message: `Error executing JS on single node: ${error}`,
+          errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+          errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
+        });
+      }
+    } else {
+      // Use all nodes as before
+      nodePromises = this.getNodePromises(async (url: string) => {
+        const sessionSig = this.getSessionSigByUrl({
+          sessionSigs: formattedParams.sessionSigs,
+          url,
+        });
 
-    // -- resolve promises
-    const res = await this.handleNodePromises(
-      nodePromises,
-      requestId,
-      params.numResponsesRequired || this.connectedNodes.size
-    );
+        const reqBody: JsonExecutionRequest = {
+          ...formattedParams,
+          authSig: sessionSig,
+        };
 
-    // -- case: promises rejected
-    if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.EXECUTE_JS,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, requestId);
+      });
     }
 
-    // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<NodeShare>).values;
+    // -- resolve promises
+    let responseData: NodeCommandResponse[];
+
+    if (params.useSingleNode) {
+      if (!singleNodeResponse) {
+        return throwError({
+          message: "No response received from single node",
+          errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+          errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
+        });
+      }
+      responseData = [singleNodeResponse];
+    } else {
+      const res = await this.handleNodePromises(
+        nodePromises!,
+        requestId,
+        this.connectedNodes.size
+      );
+
+      if (!res.success) {
+        this._throwNodeError(res as RejectedNodePromises, requestId);
+      }
+
+      // Type guard to ensure we're dealing with SuccessNodePromises<NodeCommandResponse>
+      if (!this._isSuccessNodePromises<NodeCommandResponse>(res)) {
+        return throwError({
+          message: "Unexpected response type from nodes",
+          errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+          errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
+        });
+      }
+
+      responseData = res.values;
+    }
 
     logWithRequestId(
       requestId,
       'executeJs responseData from node : ',
       JSON.stringify(responseData, null, 2)
     );
+    // Convert NodeCommandResponse to NodeShare
+    const nodeShares: NodeShare[] = responseData.map((response) => {
+
+      const _nodeShare = response as unknown as NodeShare;
+
+      // Ensure all required properties for NodeShare are included
+      return {
+        ..._nodeShare,
+      };
+    });
 
     // -- find the responseData that has the most common response
-    const mostCommonResponse = findMostCommonResponse(
-      responseData
-    ) as NodeShare;
+    const mostCommonResponse = params.useSingleNode
+      ? nodeShares[0]
+      : findMostCommonResponse(responseData) as NodeShare;
 
     const responseFromStrategy = processLitActionResponseStrategy(
-      responseData,
+      nodeShares,
       params.responseStrategy ?? { strategy: 'leastCommon' }
     );
     mostCommonResponse.response = responseFromStrategy;
@@ -1150,7 +1213,7 @@ export class LitNodeClientNodeJs
 
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = responseData.map((r) => {
-      return removeDoubleQuotes(r.signedData);
+      return removeDoubleQuotes((r as unknown as NodeShare).signedData);
     });
 
     logWithRequestId(
@@ -1162,7 +1225,10 @@ export class LitNodeClientNodeJs
     const signatures = getSignatures({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
-      minNodeCount: params.numResponsesRequired || this.config.minNodeCount,
+
+      // note: re-enable this when we want to require a certain number of responses
+      // minNodeCount: params.numResponsesRequired || this.config.minNodeCount,
+      minNodeCount: this.config.minNodeCount,
       signedData: signedDataList,
     });
 
@@ -1171,11 +1237,13 @@ export class LitNodeClientNodeJs
 
     // -- 3. combine logs
     const mostCommonLogs: string = mostCommonString(
-      responseData.map((r: NodeLog) => r.logs)
+      responseData.map((r) => {
+        r as unknown as NodeLog;
+      })
     );
 
     // -- 4. combine claims
-    const claimsList = getClaimsList(responseData);
+    const claimsList = getClaimsList(responseData as unknown as NodeShare[]);
     const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
 
     // ========== Result ==========
@@ -1277,8 +1345,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -2080,8 +2148,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2164,10 +2232,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
