@@ -182,7 +182,6 @@ export class TinnyEnvironment {
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
         console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...', {
-          privateKeys: this.processEnvs.PRIVATE_KEYS,
           keysInUse: this.processEnvs.KEY_IN_USE,
         }); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
@@ -442,8 +441,9 @@ export class TinnyEnvironment {
    * @throws If there is an error sending the funds.
    */
   getFunds = async (walletAddress: string, amount = '0.001') => {
+    const privateKey = await this.getAvailablePrivateKey();
+
     try {
-      const privateKey = await this.getAvailablePrivateKey();
       const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
       const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
@@ -455,6 +455,9 @@ export class TinnyEnvironment {
       await tx.wait();
     } catch (e) {
       throw new Error(`Failed to send funds to ${walletAddress}: ${e}`);
+    } finally {
+      // @ts-expect-error We don't have a user, but this works
+      this.releasePrivateKeyFromUser({ privateKey });
     }
   };
 

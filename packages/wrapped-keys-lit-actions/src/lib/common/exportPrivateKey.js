@@ -1,4 +1,9 @@
+const {
+  getDecryptedKeyToSingleNode,
+} = require('./internal/getDecryptedKeyToSingleNode');
 const { removeSaltFromDecryptedKey } = require('../utils');
+
+/* global accessControlConditions, ciphertext, dataToEncryptHash, Lit */
 
 /**
  *
@@ -13,31 +18,21 @@ const { removeSaltFromDecryptedKey } = require('../utils');
  */
 
 (async () => {
-  let decryptedPrivateKey;
   try {
-    decryptedPrivateKey = await Lit.Actions.decryptToSingleNode({
+    const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
       accessControlConditions,
       ciphertext,
       dataToEncryptHash,
-      chain: 'ethereum',
-      authSig: null,
     });
-  } catch (err) {
-    const errorMessage =
-      'Error: When decrypting to a single node- ' + err.message;
-    Lit.Actions.setResponse({ response: errorMessage });
-    return;
-  }
 
-  if (!decryptedPrivateKey) {
-    // Exit the nodes which don't have the decryptedData
-    return;
-  }
+    if (!decryptedPrivateKey) {
+      // Silently exit on nodes which didn't run the `decryptToSingleNode` code
+      return;
+    }
 
-  try {
     const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
     Lit.Actions.setResponse({ response: privateKey });
   } catch (err) {
-    Lit.Actions.setResponse({ response: err.message });
+    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
   }
 })();

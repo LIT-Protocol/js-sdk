@@ -66,11 +66,7 @@ export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
         id,
       });
     } catch (e: any) {
-      if (
-        e.message.includes(
-          'Error executing the Signing Lit Action: Error: Missing required field: toAddress'
-        )
-      ) {
+      if (e.message.includes('Missing required field: toAddress')) {
         console.log('✅ THIS IS EXPECTED: ', e);
         console.log(e.message);
         console.log(

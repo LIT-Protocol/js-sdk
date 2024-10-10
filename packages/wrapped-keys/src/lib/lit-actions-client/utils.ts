@@ -1,8 +1,14 @@
 import { ExecuteJsResponse } from '@lit-protocol/types';
 
-import { litActionCodeRepository } from './code-repository';
-import { LIT_ACTION_CID_REPOSITORY } from './constants';
-import { LitActionType } from './types';
+import {
+  litActionCodeRepository,
+  litActionCodeRepositoryCommon,
+} from './code-repository';
+import {
+  LIT_ACTION_CID_REPOSITORY,
+  LIT_ACTION_CID_REPOSITORY_COMMON,
+} from './constants';
+import { LitActionType, LitActionTypeCommon } from './types';
 import { Network } from '../types';
 
 /**
@@ -77,6 +83,7 @@ function assertNetworkIsValid(network: any): asserts network is Network {
 
 /**
  * Fetch the Lit action code or its IPFS CID for a given network and action type.
+ * @private
  *
  * @param {Network} network The network to get the code or CID for.
  * @param {LitActionType} actionType The type of action to get the code or CID for.
@@ -93,4 +100,34 @@ export function getLitActionCodeOrCid(
     return { litActionCode };
   }
   return { litActionIpfsCid: getLitActionCid(network, actionType) };
+}
+
+/**
+ * Fetch the Lit action code or its IPFS CID for a given network and action type.
+ * @private
+ * @param {LitActionTypeCommon} actionType The type of action to get the code or CID for.
+ * @returns {{ litActionCode?: string, litActionIpfsCid?: string }} The Lit action code or its IPFS CID.
+ */
+export function getLitActionCodeOrCidCommon(actionType: LitActionTypeCommon): {
+  litActionCode?: string;
+  litActionIpfsCid?: string;
+} {
+  // Default state is that litActionCode will be falsy, unless someone has injected to it using `setLitActionsCode();
+  const litActionCode = getLitActionCodeCommon(actionType);
+
+  if (litActionCode) {
+    return { litActionCode };
+  }
+  return { litActionIpfsCid: getLitActionCidCommon(actionType) };
+}
+
+export function getLitActionCidCommon(actionType: LitActionTypeCommon) {
+  return LIT_ACTION_CID_REPOSITORY_COMMON[actionType];
+}
+
+export function getLitActionCodeCommon(
+  actionType: LitActionTypeCommon
+): string {
+  // No fuzzy validation needed here, because `setLitActionsCodeCommon()` validates its input
+  return litActionCodeRepositoryCommon[actionType];
 }
