@@ -65,7 +65,7 @@ export const encrypt = async (
    * to use the G2 curve for signature purposes, hence the switch on public key length.
    *
    * The G2 curve, `Bls12381G2`, is typically associated with signature generation/verification,
-   * while G1 is associated with encryption. Here, the length of the public key determines how 
+   * while G1 is associated with encryption. Here, the length of the public key determines how
    * we handle the encryption and the format of the returned encrypted message.
    */
   if (publicKeyHex.replace('0x', '').length !== 96) {
@@ -75,13 +75,14 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length} instead.`
+      `Invalid public key length. Expecting 96 characters, got ${
+        publicKeyHex.replace('0x', '').length
+      } instead.`
     );
   }
   return Buffer.from(
     await blsEncrypt('Bls12381G2', publicKey, message, identity)
   ).toString('base64');
-
 };
 
 /**
