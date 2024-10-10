@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { hashTypedData } from './hash';
-import bs58 from 'bs58';
+import { ethers } from 'ethers';
 
 /**
  * Generate transaction digest.
@@ -12,5 +12,5 @@ import bs58 from 'bs58';
  */
 export function getDigestFromBytes(bytes: Uint8Array) {
   const hash = hashTypedData('TransactionData', bytes);
-  return bs58.encode(hash);
+  return ethers.utils.base58.encode(hash);
 }

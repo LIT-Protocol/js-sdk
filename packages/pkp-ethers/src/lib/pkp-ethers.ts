@@ -35,7 +35,15 @@ import {
 import { Wordlist } from '@ethersproject/wordlists';
 import { ethers, version, Wallet } from 'ethers';
 
-import { RPC_URL_BY_NETWORK } from '@lit-protocol/constants';
+import {
+  InitError,
+  RPC_URL_BY_NETWORK,
+  InvalidParamType,
+  UnknownError,
+  UnsupportedMethodError,
+  UnsupportedChainException,
+  LIT_CHAINS,
+} from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
@@ -87,8 +95,14 @@ export class PKPEthersWallet
       prop.rpc || RPC_URL_BY_NETWORK[prop.litNodeClient.config.litNetwork];
 
     if (!rpcUrl) {
-      throw new Error(
-        `No RPC URL provided, and none could be found for ${prop.litNodeClient.config.litNetwork}`
+      throw new InitError(
+        {
+          info: {
+            rpcUrl,
+            network: prop.litNodeClient.config.litNetwork,
+          },
+        },
+        'No RPC URL provided, and none could be found for the provided LitNodeClient'
       );
     }
 
@@ -173,7 +187,14 @@ export class PKPEthersWallet
   }
 
   connect(): never {
-    throw new Error('Use setRPC to set a new JSON RPC provider');
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          method: 'connect',
+        },
+      },
+      'Use setRPC to set a new JSON RPC provider'
+    );
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
@@ -305,13 +326,16 @@ export class PKPEthersWallet
       // @ts-ignore
       (name: string) => {
         if (this.provider == null) {
-          logger.throwError(
-            'cannot resolve ENS names without a provider',
-            Logger.errors.UNSUPPORTED_OPERATION,
+          throw new UnsupportedChainException(
             {
-              operation: 'resolveName',
-              value: name,
-            }
+              info: {
+                operation: 'resolveName',
+                value: name,
+                domain,
+              },
+            },
+            `cannot resolve ENS names without a provider`,
+            Object.keys(LIT_CHAINS)
           );
         }
         return this.provider.resolveName(name);
@@ -353,7 +377,14 @@ export class PKPEthersWallet
     }
 
     if (progressCallback && typeof progressCallback !== 'function') {
-      throw new Error('invalid callback');
+      throw new InvalidParamType(
+        {
+          info: {
+            progressCallback,
+          },
+        },
+        'invalid callback'
+      );
     }
 
     if (!options) {
@@ -385,8 +416,15 @@ export class PKPEthersWallet
 
       res = await this.rpcProvider.sendTransaction(signedTxn);
     } catch (e) {
-      this.pkpBase.log('sendTransaction => error:', e);
-      throw e;
+      throw new UnknownError(
+        {
+          info: {
+            transaction,
+          },
+          cause: e,
+        },
+        'could not send transaction'
+      );
     }
 
     return res;
@@ -467,23 +505,11 @@ export class PKPEthersWallet
 
   async call(
     transaction: ethers.utils.Deferrable<TransactionRequest>,
-    blockTag?: ethers.providers.BlockTag | undefined
+    blockTag:
+      | ethers.providers.BlockTag
+      | Promise<ethers.providers.BlockTag> = 'latest'
   ): Promise<string> {
-    if (!blockTag) {
-      return this.pkpBase.throwError(`blockTag is required`);
-    }
-
-    const resolved = await resolveProperties({
-      transaction: this.rpcProvider._getTransactionRequest(transaction),
-      blockTag: this.rpcProvider._getBlockTag(blockTag),
-      ccipReadEnabled: Promise.resolve(transaction.ccipReadEnabled),
-    });
-
-    return this.rpcProvider._call(
-      resolved.transaction as TransactionRequest,
-      resolved.blockTag,
-      resolved.ccipReadEnabled as any
-    );
+    return this.rpcProvider.call(transaction as TransactionRequest, blockTag);
   }
 
   async getChainId() {
@@ -497,16 +523,37 @@ export class PKPEthersWallet
     return this.rpcProvider.getFeeData();
   }
 
-  resolveName(): Promise<string> {
-    return this.pkpBase.throwError(`Not available in PKPEthersWallet`);
+  resolveName(): never {
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          method: 'resolveName',
+        },
+      },
+      'resolveName is not available in PKPEthersWallet'
+    );
   }
 
-  checkTransaction(): ethers.utils.Deferrable<TransactionRequest> {
-    return this.pkpBase.throwError(`Not available in PKPEthersWallet`);
+  checkTransaction(): never {
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          method: 'checkTransaction',
+        },
+      },
+      'checkTransaction is not available in PKPEthersWallet'
+    );
   }
 
-  populateTransaction(): Promise<TransactionRequest> {
-    return this.pkpBase.throwError(`Not available in PKPEthersWallet`);
+  populateTransaction(): never {
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          method: 'populateTransaction',
+        },
+      },
+      'populateTransaction is not available in PKPEthersWallet'
+    );
   }
 
   _checkProvider(): void {
@@ -515,13 +562,25 @@ export class PKPEthersWallet
     );
   }
 
-  get mnemonic() {
-    return this.pkpBase.throwError(`There's no mnemonic for a PKPWallet`);
+  get mnemonic(): never {
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          method: 'mnemonic',
+        },
+      },
+      "There's no mnemonic for a PKPWallet"
+    );
   }
 
-  get privateKey(): string {
-    return this.pkpBase.throwError(
-      `This PKP contains no private key (can you imagine!?)`
+  get privateKey(): never {
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          method: 'privateKey',
+        },
+      },
+      'This PKP contains no private key (can you imagine!?)'
     );
   }
 

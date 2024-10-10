@@ -63,7 +63,9 @@ export interface ILitNodeClient {
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT(signatureShares: NodeBlsSigningShare[]): string;
+  combineSharesAndGetJWT(
+    signatureShares: NodeBlsSigningShare[]
+  ): Promise<string>;
 
   /**
    *
@@ -125,24 +127,12 @@ export interface ILitNodeClient {
    * Throw node error
    *
    * @param { RejectedNodePromises } res
+   * @param { string } requestId
    *
    * @returns { void }
    *
    */
-  _throwNodeError(res: RejectedNodePromises, requestId: string): void;
-
-  // ========== Shares Resolvers ==========
-
-  /**
-   *
-   * Get Signature
-   *
-   * @param { Array<any> } shareData from all node promises
-   *
-   * @returns { string } signature
-   *
-   */
-  getSignature(shareData: any[], requestId: string): Promise<any>;
+  _throwNodeError(res: RejectedNodePromises, requestId: string): never;
 
   // ========== API Calls to Nodes ==========
   sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;

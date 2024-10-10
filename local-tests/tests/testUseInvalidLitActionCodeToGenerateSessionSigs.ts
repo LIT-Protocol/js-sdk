@@ -1,19 +1,15 @@
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import { getInvalidLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
- * ❌ NOT AVAILABLE IN MANZANO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
+ * ✅ NETWORK=custom yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
  */
 export const testUseInvalidLitActionCodeToGenerateSessionSigs = async (
   devEnv: TinnyEnvironment
 ) => {
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
   const alice = await devEnv.createRandomPerson();
 
   try {

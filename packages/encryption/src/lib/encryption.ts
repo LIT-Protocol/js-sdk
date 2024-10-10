@@ -1,23 +1,12 @@
-// @ts-expect-error jszip types don't resolve. :sad_panda:
-import * as JSZip from 'jszip/dist/jszip.js';
-
-import { EITHER_TYPE, ILitError, LIT_ERROR } from '@lit-protocol/constants';
-import { verifySignature } from '@lit-protocol/crypto';
-import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
+import { EITHER_TYPE, InvalidParamType } from '@lit-protocol/constants';
+import { safeParams } from '@lit-protocol/misc';
 import {
   DecryptRequest,
-  DecryptZipFileWithMetadata,
-  DecryptZipFileWithMetadataProps,
-  EncryptFileAndZipWithMetadataProps,
   EncryptFileRequest,
   EncryptResponse,
+  EncryptUint8ArrayRequest,
   EncryptStringRequest,
-  EncryptZipRequest,
-  IJWT,
   ILitNodeClient,
-  MetadataForFile,
-  SigningAccessControlConditionJWTPayload,
-  VerifyJWTProps,
   EncryptToJsonPayload,
   EncryptToJsonProps,
   DecryptFromJsonProps,
@@ -27,12 +16,11 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import { safeParams } from './params-validators';
 /**
  * Encrypt a string or file using the LIT network public key and serialise all the metadata required to decrypt
  * i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to JSON
  *
- * Useful for encrypting/decrypting data in IPFS or other storage without compressing it in a ZIP file.
+ * Useful for encrypting/decrypting data in IPFS or other storage without compressing it in a file.
  *
  * @param params { EncryptToJsonProps } - The params required to encrypt either a file or string and serialise it to JSON
  *
@@ -60,11 +48,16 @@ export const encryptToJson = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptToJson',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   if (string !== undefined) {
     const { ciphertext, dataToEncryptHash } = await encryptString(
@@ -102,7 +95,14 @@ export const encryptToJson = async (
       dataType: 'file',
     } as EncryptToJsonPayload);
   } else {
-    throw new Error(`You must provide either 'file' or 'string'.`);
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+        },
+      },
+      'You must provide either "file" or "string"'
+    );
   }
 };
 
@@ -116,14 +116,10 @@ export const encryptToJson = async (
  * @returns { Promise<string | Uint8Array> } - The decrypted `string` or file (as a `Uint8Array`) depending on `dataType` property in the parsed JSON provided
  *
  */
-export async function decryptFromJson<T extends DecryptFromJsonProps>(
-  params: T
+export async function decryptFromJson(
+  params: DecryptFromJsonProps
 ): Promise<
-  T extends { parsedJsonData: { dataType: 'file' } }
-    ? ReturnType<typeof decryptToFile>
-    : T extends { parsedJsonData: { dataType: 'string' } }
-    ? ReturnType<typeof decryptToString>
-    : never
+  ReturnType<typeof decryptToFile> | ReturnType<typeof decryptToString>
 > {
   const { sessionSigs, parsedJsonData, litNodeClient } = params;
 
@@ -134,13 +130,17 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptFromJson',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
-  // FIXME: The return type of this function is inferrable based on the value of `params.dataType`
   if (parsedJsonData.dataType === 'string') {
     return decryptToString(
       {
@@ -172,13 +172,91 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
       litNodeClient
     );
   } else {
-    throw new Error(
-      `dataType of ${parsedJsonData.dataType} is not valid. Must be 'string' or 'file'.`
+    throw new InvalidParamType(
+      {
+        info: {
+          dataType: parsedJsonData.dataType,
+          params,
+        },
+      },
+      'dataType of %s is not valid. Must be "string" or "file".',
+      parsedJsonData.dataType
     );
   }
 }
 
 // ---------- Local Helpers ----------
+
+/** Encrypt a uint8array. This is used to encrypt any uint8array that is to be locked via the Lit Protocol.
+ * @param { EncryptUint8ArrayRequest } params - The params required to encrypt a uint8array
+ * @param params.dataToEncrypt - (optional) The uint8array to encrypt
+ * @param params.accessControlConditions - (optional) The access control conditions
+ * @param params.evmContractConditions - (optional) The EVM contract conditions
+ * @param params.solRpcConditions - (optional) The Solana RPC conditions
+ * @param params.unifiedAccessControlConditions - The unified access control conditions
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+ *
+ * @returns { Promise<EncryptResponse> } - The encrypted uint8array and the hash of the data that was encrypted
+ */
+export const encryptUint8Array = async (
+  params: EncryptUint8ArrayRequest,
+  litNodeClient: ILitNodeClient
+): Promise<EncryptResponse> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptUint8Array',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+        },
+      },
+      'Invalid params'
+    );
+
+  return litNodeClient.encrypt({
+    ...params,
+  });
+};
+
+/**
+ * Decrypt a cyphertext into a Uint8Array that was encrypted with the encryptUint8Array function.
+ *
+ * @param { DecryptRequest } params - The params required to decrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+ *
+ * @returns { Promise<Uint8Array> } - The decrypted `Uint8Array`
+ */
+export const decryptToUint8Array = async (
+  params: DecryptRequest,
+  litNodeClient: ILitNodeClient
+): Promise<Uint8Array> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decrypt',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptToUint8Array',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
+
+  const { decryptedData } = await litNodeClient.decrypt(params);
+
+  return decryptedData;
+};
 
 /**
  *
@@ -205,11 +283,16 @@ export const encryptString = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptString',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   return litNodeClient.encrypt({
     ...params,
@@ -237,11 +320,16 @@ export const decryptToString = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptToString',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
 
@@ -250,377 +338,7 @@ export const decryptToString = async (
 
 /**
  *
- * Zip and encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
- *
- * @param { EncryptStringRequest } params - The params required to encrypt a string
- * @param { ILitNodeClient } litNodeClient - The Lit Node Client
- *
- * @returns { Promise<EncryptResponse> } - The encrypted string and the hash of the string
- */
-export const zipAndEncryptString = async (
-  params: EncryptStringRequest,
-  litNodeClient: ILitNodeClient
-): Promise<EncryptResponse> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'zipAndEncryptString',
-    params,
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-
-  let zip;
-
-  try {
-    zip = new JSZip.default();
-  } catch (e) {
-    zip = new JSZip();
-  }
-
-  zip.file('string.txt', params.dataToEncrypt);
-
-  return encryptZip({ zip, ...params }, litNodeClient);
-};
-
-/**
- *
- * Zip and encrypt multiple files.
- *
- * @param { Array<File> } files - The files to encrypt
- * @param { DecryptRequestBase } paramsBase - The params required to encrypt a file
- * @param { ILitNodeClient } litNodeClient - The Lit Node Client
- *
- * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
-
-*/
-export const zipAndEncryptFiles = async (
-  files: File[],
-  params: DecryptRequest,
-  litNodeClient: ILitNodeClient
-): Promise<EncryptResponse> => {
-  // let's zip em
-  let zip;
-
-  try {
-    zip = new JSZip.default();
-  } catch (e) {
-    zip = new JSZip();
-  }
-
-  // -- zip each file
-  for (let i = 0; i < files.length; i++) {
-    // -- validate
-    if (
-      !checkType({
-        value: files[i],
-        allowedTypes: ['File'],
-        paramName: `files[${i}]`,
-        functionName: 'zipAndEncryptFiles',
-      })
-    )
-      throwError({
-        message: 'Invalid file type',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
-
-    const folder: JSZip | null = zip.folder('encryptedAssets');
-
-    if (!folder) {
-      log("Failed to get 'encryptedAssets' from zip.folder() ");
-      return throwError({
-        message: "Failed to get 'encryptedAssets' from zip.folder() ",
-        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-      });
-    }
-
-    folder.file(files[i].name, files[i]);
-  }
-
-  return encryptZip({ zip, ...params }, litNodeClient);
-};
-
-/**
- *
- * Decrypt and unzip a zip that was created using encryptZip, zipAndEncryptString, or zipAndEncryptFiles.
- *
- * @param { DecryptRequest } params - The params required to decrypt a string
- * @param { ILitNodeClient } litNodeClient - The Lit Node Client
- *
- * @returns { Promise<{ [key: string]: JSZip.JSZipObject }>} - The decrypted zip file
- */
-export const decryptToZip = async (
-  params: DecryptRequest,
-  litNodeClient: ILitNodeClient
-): Promise<Record<string, JSZip.JSZipObject>> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'decrypt',
-    params,
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-
-  const { decryptedData } = await litNodeClient.decrypt(params);
-
-  // unpack the zip
-  let zip;
-
-  try {
-    zip = new JSZip.default();
-  } catch (e) {
-    zip = new JSZip();
-  }
-  const unzipped = await zip.loadAsync(decryptedData);
-
-  return unzipped.files;
-};
-
-/**
- *
- * Encrypt a zip file created with JSZip.
- *
- * @param { EncryptZipRequest } params - The params required to encrypt a zip
- * @param param.zip - The zip file to encrypt
- * @param { ILitNodeClient } litNodeClient - The Lit Node Client
- *
- * @returns { Promise<EncryptResponse> } - The encrypted zip file and the hash of the zip file
- */
-export const encryptZip = async (
-  params: EncryptZipRequest,
-  litNodeClient: ILitNodeClient
-): Promise<EncryptResponse> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'encryptZip',
-    params,
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-
-  const { zip } = params;
-  let zipBlob;
-  let zipBlobArrayBuffer: ArrayBuffer;
-
-  if (isBrowser()) {
-    zipBlob = await zip.generateAsync({ type: 'blob' });
-    zipBlobArrayBuffer = await zipBlob.arrayBuffer();
-  } else {
-    zipBlobArrayBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-  }
-
-  // to download the encrypted zip file for testing, uncomment this
-  // saveAs(encryptedZipBlob, 'encrypted.bin')
-  return litNodeClient.encrypt({
-    ...params,
-    dataToEncrypt: new Uint8Array(zipBlobArrayBuffer),
-  });
-};
-
-/**
- *
- * Encrypt a single file and then zip it up with the metadata.
- *
- * @param { EncryptFileAndZipWithMetadataProps } params - The params required to encrypt a file and zip it up with the metadata
- *
- * @returns { Promise<any> } - The encrypted zip file and the hash of the zip file
- *
- */
-export const encryptFileAndZipWithMetadata = async (
-  params: EncryptFileAndZipWithMetadataProps
-): Promise<any> => {
-  const {
-    sessionSigs,
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    chain,
-    file,
-    litNodeClient,
-    readme,
-  } = params;
-
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'encryptFileAndZipWithMetadata',
-    params: {
-      sessionSigs,
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-      chain,
-      file,
-      litNodeClient,
-      readme,
-    },
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-
-  // encrypt the file
-  const { ciphertext, dataToEncryptHash } = await encryptFile(
-    { ...params },
-    litNodeClient
-  );
-
-  // Zip up with metadata
-  let zip;
-
-  try {
-    zip = new JSZip.default();
-  } catch (e) {
-    zip = new JSZip();
-  }
-  const metadata: MetadataForFile = {
-    name: file.name,
-    type: file.type,
-    size: file.size,
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    chain,
-    dataToEncryptHash,
-  };
-
-  zip.file('lit_protocol_metadata.json', JSON.stringify(metadata));
-  if (readme) {
-    zip.file('readme.txt', readme);
-  }
-
-  const folder: JSZip | null = zip.folder('encryptedAssets');
-
-  if (!folder) {
-    log("Failed to get 'encryptedAssets' from zip.folder() ");
-    return throwError({
-      message: `Failed to get 'encryptedAssets' from zip.folder()`,
-      errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-      errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
-    });
-  }
-
-  folder.file(file.name, uint8arrayFromString(ciphertext, 'base64'));
-
-  let zipBlob;
-  if (isBrowser()) {
-    zipBlob = await zip.generateAsync({ type: 'blob' });
-  } else {
-    zipBlob = await zip.generateAsync({ type: 'nodebuffer' });
-  }
-
-  return zipBlob;
-};
-
-/**
- *
- * Given a zip file with metadata inside it, unzip, load the metadata, and return the decrypted file and the metadata.  This zip file would have been created with the encryptFileAndZipWithMetadata function.
- *
- * @param { DecryptZipFileWithMetadataProps } params - The params required to decrypt a zip file with metadata
- *
- * @returns { Promise<DecryptZipFileWithMetadata> } A promise containing an object that contains decryptedFile and metadata properties.  The decryptedFile is an ArrayBuffer that is ready to use, and metadata is an object that contains all the properties of the file like it's name and size and type.
- */
-export const decryptZipFileWithMetadata = async (
-  params: DecryptZipFileWithMetadataProps
-): Promise<DecryptZipFileWithMetadata | undefined> => {
-  const { sessionSigs, file, litNodeClient } = params;
-
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'decryptZipFileWithMetadata',
-    params: {
-      sessionSigs,
-      file,
-      litNodeClient,
-    },
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-
-  // -- execute
-  const zip = await JSZip.loadAsync(file);
-
-  const jsonFile: JSZip.JSZipObject | null = zip.file(
-    'lit_protocol_metadata.json'
-  );
-
-  if (!jsonFile) {
-    log(`Failed to read lit_protocol_metadata.json while zip.file()`);
-    return;
-  }
-
-  const metadata: MetadataForFile = JSON.parse(await jsonFile.async('string'));
-
-  log('zip metadata', metadata);
-
-  const folder: JSZip | null = zip.folder('encryptedAssets');
-
-  if (!folder) {
-    log("Failed to get 'encryptedAssets' from zip.folder() ");
-    return;
-  }
-
-  const _file: JSZip.JSZipObject | null = folder.file(metadata.name);
-
-  if (!_file) {
-    log("Failed to get 'metadata.name' while zip.folder().file()");
-    return;
-  }
-
-  const encryptedFile = await _file.async('blob');
-
-  const decryptedFile = await decryptToFile(
-    {
-      ...params,
-      accessControlConditions: metadata.accessControlConditions,
-      evmContractConditions: metadata.evmContractConditions,
-      solRpcConditions: metadata.solRpcConditions,
-      unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
-      chain: metadata.chain,
-      ciphertext: uint8arrayToString(
-        new Uint8Array(await encryptedFile.arrayBuffer()),
-        'base64'
-      ),
-      dataToEncryptHash: metadata.dataToEncryptHash,
-    },
-    litNodeClient
-  );
-
-  const data: DecryptZipFileWithMetadata = { decryptedFile, metadata };
-
-  return data;
-};
-
-/**
- *
- * Encrypt a file without doing any zipping or packing.  This is useful for large files.  A 1gb file can be encrypted in only 2 seconds, for example.
+ * Encrypt a file without doing any compression or packing.  This is useful for large files.  A 1gb file can be encrypted in only 2 seconds, for example.
  *
  * @param { EncryptFileRequest } params - The params required to encrypt a file
  * @param { ILitNodeClient } litNodeClient - The lit node client to use to encrypt the file
@@ -638,11 +356,16 @@ export const encryptFile = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'encryptFile',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   // encrypt the file
   const fileAsArrayBuffer = await params.file.arrayBuffer();
@@ -655,7 +378,7 @@ export const encryptFile = async (
 
 /**
  *
- * Decrypt a file that was encrypted with the encryptFile function, without doing any unzipping or unpacking.  This is useful for large files.  A 1gb file can be decrypted in only 1 second, for example.
+ * Decrypt a file that was encrypted with the encryptFile function, without doing any uncompressing or unpacking.  This is useful for large files.  A 1gb file can be decrypted in only 1 second, for example.
  *
  * @param { DecryptRequest } params - The params required to decrypt a file
  * @param { ILitNodeClient } litNodeClient - The lit node client to use to decrypt the file
@@ -673,82 +396,18 @@ export const decryptToFile = async (
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    return throwError({
-      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+    throw new InvalidParamType(
+      {
+        info: {
+          params,
+          function: 'decryptToFile',
+        },
+        cause: paramsIsSafe.result,
+      },
+      'Invalid params'
+    );
 
   const { decryptedData } = await litNodeClient.decrypt(params);
 
   return decryptedData;
-};
-
-declare global {
-  // `var` is required for global hackery
-  // FIXME: `any` types for wasm are no bueno
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var wasmExports: any;
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var wasmECDSA: any;
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var LitNodeClient: any;
-}
-
-/**
- * // TODO check for expiration
- *
- * Verify a JWT from the LIT network.  Use this for auth on your server.  For some background, users can specify access control condiitons for various URLs, and then other users can then request a signed JWT proving that their ETH account meets those on-chain conditions using the getSignedToken function.  Then, servers can verify that JWT using this function.  A successful verification proves that the user meets the access control conditions defined earlier.  For example, the on-chain condition could be posession of a specific NFT.
- *
- * @param { VerifyJWTProps } jwt
- *
- * @returns { IJWT<T> } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
- */
-export const verifyJwt = ({
-  publicKey,
-  jwt,
-}: VerifyJWTProps): IJWT<SigningAccessControlConditionJWTPayload> => {
-  // -- validate
-  if (
-    !checkType({
-      value: jwt,
-      allowedTypes: ['String'],
-      paramName: 'jwt',
-      functionName: 'verifyJwt',
-    })
-  )
-    return throwError({
-      message: 'jwt must be a string',
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-
-  log('verifyJwt', jwt);
-
-  // verify that the wasm was loaded
-  if (!globalThis.wasmExports) {
-    log('wasmExports is not loaded.');
-  }
-
-  const jwtParts = jwt.split('.');
-  const signature = uint8arrayFromString(jwtParts[2], 'base64url');
-
-  const unsignedJwt = `${jwtParts[0]}.${jwtParts[1]}`;
-
-  const message = uint8arrayFromString(unsignedJwt);
-
-  verifySignature(publicKey, message, signature);
-
-  const _jwt: IJWT<SigningAccessControlConditionJWTPayload> = {
-    verified: true,
-    header: JSON.parse(
-      uint8arrayToString(uint8arrayFromString(jwtParts[0], 'base64url'))
-    ),
-    payload: JSON.parse(
-      uint8arrayToString(uint8arrayFromString(jwtParts[1], 'base64url'))
-    ),
-    signature,
-  };
-
-  return _jwt;
 };
