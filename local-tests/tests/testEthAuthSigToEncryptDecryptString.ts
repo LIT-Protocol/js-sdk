@@ -3,6 +3,7 @@ import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
 
 /**
  * Test Commands:
@@ -15,6 +16,12 @@ export const testEthAuthSigToEncryptDecryptString = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
+  if (CENTRALISATION_BY_NETWORK[devEnv.network] === 'decentralised') {
+    // The capacity credits NFT owner automatically uses the capacity credits
+    // to pay for the encryption
+    await alice.mintCapacityCreditsNFT();
+  }
+
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
     userAddress: alice.authSig.address,
   });
@@ -26,6 +33,7 @@ export const testEthAuthSigToEncryptDecryptString = async (
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
+
 
   log('encryptRes:', encryptRes);
 
