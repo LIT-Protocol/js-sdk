@@ -10,8 +10,8 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
     solana: 'QmcEJGVqRYtVukjm2prCPT7Fs66GpaqZwmZoxEHMHor6Jz',
   }),
   generateEncryptedKey: Object.freeze({
-    evm: 'QmPzycC9bN4QfhVWy7ggL4u9Gr1vQz3Gx4MYh4vvpvqBzc',
-    solana: 'QmYrmzhh7ZoK8LoZ854DmfdRacmZgpVz9c3kW6u5htcdc5',
+    evm: 'QmeD6NYCWhUCLgxgpkgSguaKjwnpCnJ6Yf8SdsyPpK4eKK',
+    solana: 'QmPkVD3hEjMi1T5zQuvdrFCXaGTEMHNdAhAL4WHkqxijrQ',
   }),
   exportPrivateKey: Object.freeze({
     evm: 'QmUJ74pTUqeeHzDGdfwCph1vJVNJ1rRzJdvMiTjS1BMwYj',
