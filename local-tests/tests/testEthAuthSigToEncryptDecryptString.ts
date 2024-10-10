@@ -34,7 +34,6 @@ export const testEthAuthSigToEncryptDecryptString = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-
   log('encryptRes:', encryptRes);
 
   // await 5 seconds for the encryption to be mined
