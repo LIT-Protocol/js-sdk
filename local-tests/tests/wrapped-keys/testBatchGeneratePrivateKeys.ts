@@ -30,12 +30,7 @@ async function verifySolanaSignature(
     );
   }
 }
-async function verifyEvmSignature(
-  litNodeClient,
-  evmResult,
-  messageToSign,
-  pkpSessionSigs
-) {
+async function verifyEvmSignature(evmResult, messageToSign) {
   function verifyMessageSignature() {
     try {
       return ethers.utils.verifyMessage(
@@ -131,12 +126,7 @@ export const testBatchGeneratePrivateKeys = async (
     await verifySolanaSignature(results[1], solanaMessageToSign);
 
     console.log('evm verify sig');
-    await verifyEvmSignature(
-      devEnv.litNodeClient,
-      results[0],
-      evmMessageToSign,
-      pkpSessionSigsSigning
-    );
+    await verifyEvmSignature(results[0], evmMessageToSign);
     console.log('results', results);
 
     log('✅ testBatchGenerateEncryptedKeys');
