@@ -70,11 +70,7 @@ export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
         id,
       });
     } catch (e: any) {
-      if (
-        e.message.includes(
-          'Error executing the Signing Lit Action: Error: When signing transaction- invalid hexlify value'
-        )
-      ) {
+      if (e.message.includes('invalid hexlify value')) {
         console.log('✅ THIS IS EXPECTED: ', e);
         console.log(e.message);
         console.log(

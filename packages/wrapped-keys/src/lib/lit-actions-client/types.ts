@@ -6,10 +6,16 @@ export type LitActionType =
   | 'generateEncryptedKey'
   | 'exportPrivateKey';
 
+export type LitActionTypeCommon = 'batchGenerateEncryptedKeys';
+
 export type LitCidRepositoryEntry = Readonly<Record<Network, string>>;
 
 export type LitCidRepository = Readonly<
   Record<LitActionType, LitCidRepositoryEntry>
+>;
+
+export type LitCidRepositoryCommon = Readonly<
+  Record<LitActionTypeCommon, string>
 >;
 
 /**
@@ -35,4 +41,9 @@ export type LitActionCodeRepository = Readonly<
 >;
 export type LitActionCodeRepositoryInput = Partial<
   Record<LitActionType, LitActionCodeRepositoryEntryInput>
+>;
+
+export type LitActionCodeRepositoryCommon = Record<LitActionTypeCommon, string>;
+export type LitActionCodeRepositoryCommonInput = Partial<
+  Record<LitActionTypeCommon, string>
 >;

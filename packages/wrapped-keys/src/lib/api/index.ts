@@ -1,3 +1,4 @@
+import { batchGeneratePrivateKeys } from './batch-generate-private-keys';
 import { exportPrivateKey } from './export-private-key';
 import { generatePrivateKey } from './generate-private-key';
 import { getEncryptedKey } from './get-encrypted-key';
@@ -16,4 +17,5 @@ export {
   signMessageWithEncryptedKey,
   storeEncryptedKey,
   getEncryptedKey,
+  batchGeneratePrivateKeys,
 };

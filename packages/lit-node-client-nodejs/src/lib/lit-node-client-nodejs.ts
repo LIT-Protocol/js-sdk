@@ -996,6 +996,29 @@ export class LitNodeClientNodeJs
     throw new Error('All IPFS gateways failed to fetch the code.');
   }
 
+  private async executeJsNodeRequest(
+    url: string,
+    formattedParams: JsonExecutionSdkParams,
+    requestId: string
+  ) {
+    // -- choose the right signature
+    const sessionSig = this.getSessionSigByUrl({
+      sessionSigs: formattedParams.sessionSigs,
+      url,
+    });
+
+    const reqBody: JsonExecutionRequest = {
+      ...formattedParams,
+      authSig: sessionSig,
+    };
+
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.EXECUTE_JS,
+    });
+
+    return this.generatePromise(urlWithPath, reqBody, requestId);
+  }
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
@@ -1074,31 +1097,24 @@ export class LitNodeClientNodeJs
     const requestId = this.getRequestId();
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const nodePromises = this.getNodePromises(async (url: string) => {
-      // -- choose the right signature
-      const sessionSig = this.getSessionSigByUrl({
-        sessionSigs: formattedParams.sessionSigs,
-        url,
-      });
+    const getNodePromises = async () => {
+      if (params.useSingleNode) {
+        return this.getRandomNodePromise((url: string) =>
+          this.executeJsNodeRequest(url, formattedParams, requestId)
+        );
+      }
+      return this.getNodePromises((url: string) =>
+        this.executeJsNodeRequest(url, formattedParams, requestId)
+      );
+    };
 
-      const reqBody: JsonExecutionRequest = {
-        ...formattedParams,
-        authSig: sessionSig,
-      };
-
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.EXECUTE_JS,
-      });
-
-      return this.generatePromise(urlWithPath, reqBody, requestId);
-    });
+    const nodePromises = await getNodePromises();
 
     // -- resolve promises
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this.connectedNodes.size
+      params.useSingleNode ? 1 : this.connectedNodes.size
     );
 
     // -- case: promises rejected
@@ -1162,7 +1178,7 @@ export class LitNodeClientNodeJs
     const signatures = getSignatures({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
-      minNodeCount: this.config.minNodeCount,
+      minNodeCount: params.useSingleNode ? 1 : this.config.minNodeCount,
       signedData: signedDataList,
     });
 
