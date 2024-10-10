@@ -43,8 +43,7 @@ export const loadModules = (): Promise<void> => {
 
       if (!globalThis.jestTesting) {
         log(
-          `✅ [BLS SDK] wasmExports loaded. ${
-            Object.keys(exports).length
+          `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
           } functions available. Run 'wasmExports' in the console to see them.`
         );
       }
@@ -66,8 +65,7 @@ export const loadModules = (): Promise<void> => {
 
       if (!globalThis.jestTesting) {
         log(
-          `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-            Object.keys(wasmECDSA).length
+          `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
           } functions available. Run 'wasmECDSA' in the console to see them.`
         );
       }
@@ -80,8 +78,7 @@ export const loadModules = (): Promise<void> => {
 
       if (!globalThis.jestTesting) {
         log(
-          `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-            Object.keys(exports).length
+          `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${Object.keys(exports).length
           } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
         );
       }
@@ -120,15 +117,14 @@ export const encrypt = (
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
   /**
- * Our system uses BLS12-381 on the G1 curve for encryption.
- * However, on the SDK side (this function), we expect the public key
- * to use the G2 curve for signature purposes, hence the switch on public key length.
- *
- * The G2 curve, `Bls12381G2`, is typically associated with signature generation/verification,
- * while G1 is associated with encryption. Here, the length of the public key determines how 
- * we handle the encryption and the format of the returned encrypted message.
- */
-
+   * Our system uses BLS12-381 on the G1 curve for encryption.
+   * However, on the SDK side (this function), we expect the public key
+   * to use the G2 curve for signature purposes, hence the switch on public key length.
+   *
+   * The G2 curve, `Bls12381G2`, is typically associated with signature generation/verification,
+   * while G1 is associated with encryption. Here, the length of the public key determines how 
+   * we handle the encryption and the format of the returned encrypted message.
+   */
   if (publicKeyHex.replace('0x', '').length !== 96) {
     throw new InvalidParamType(
       {
