@@ -1,3 +1,11 @@
+/**
+ * Direct link to nx presets
+ * https://github.com/nrwl/nx/blob/master/packages/jest/preset/jest-preset.ts
+ */
 const nxPreset = require('@nx/jest/preset').default;
 
-module.exports = { ...nxPreset };
+const presets = {
+  ...nxPreset,
+};
+
+presets.testEnviorment = 'node';
