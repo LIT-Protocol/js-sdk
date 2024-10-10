@@ -128,22 +128,21 @@ export const encrypt = (
  * while G1 is associated with encryption. Here, the length of the public key determines how 
  * we handle the encryption and the format of the returned encrypted message.
  */
-  switch (publicKeyHex.replace('0x', '').length) {
 
-    /**
-     * @deprecated - not sure if this is still used/needed
-     */
-    case 218:
-      return Buffer.from(
-        await blsEncrypt('Bls12381G2', publicKey, message, identity)
-      ).toString('hex');
-    case 96:
-      return Buffer.from(
-        await blsEncrypt('Bls12381G2', publicKey, message, identity)
-      ).toString('base64');
-    default:
-      return '';
+  if (publicKeyHex.replace('0x', '').length !== 96) {
+    throw new InvalidParamType(
+      {
+        info: {
+          publicKeyHex,
+        },
+      },
+      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length} instead.`
+    );
   }
+  return Buffer.from(
+    await blsEncrypt('Bls12381G2', publicKey, message, identity)
+  ).toString('base64');
+
 };
 
 /**
