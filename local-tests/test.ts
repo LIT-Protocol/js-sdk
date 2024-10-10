@@ -102,6 +102,13 @@ import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-
 import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
+import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
+
+import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
+import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
+
+// Use the current LIT action code to test against
+setLitActionsCodeToLocal();
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -116,6 +123,7 @@ import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/
   // --filter=WrappedKey
   const wrappedKeysTests = {
     // -- valid cases
+    testBatchGeneratePrivateKeys,
     testEthereumSignMessageGeneratedKey,
     testEthereumBroadcastTransactionGeneratedKey,
     testEthereumSignMessageWrappedKey,

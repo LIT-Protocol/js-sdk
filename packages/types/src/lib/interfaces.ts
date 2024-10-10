@@ -483,7 +483,8 @@ export interface JsonExecutionSdkParamsTargetNode
 }
 
 export interface JsonExecutionSdkParams
-  extends Pick<LitActionSdkParams, 'jsParams'> {
+  extends Pick<LitActionSdkParams, 'jsParams'>,
+    ExecuteJsAdvancedOptions {
   /**
    *  JS code to run on the nodes
    */
@@ -503,14 +504,24 @@ export interface JsonExecutionSdkParams
    * auth methods to resolve
    */
   authMethods?: AuthMethod[];
+}
 
+export interface ExecuteJsAdvancedOptions {
   /**
    * a strategy for proccessing `reponse` objects returned from the
    * Lit Action execution context
    */
   responseStrategy?: LitActionResponseStrategy;
 
+  /**
+   * Allow overriding the default `code` property in the `JsonExecutionSdkParams`
+   */
   ipfsOptions?: IpfsOptions;
+
+  /**
+   * Only run the action on a single node; this will only work if all code in your action is non-interactive
+   */
+  useSingleNode?: boolean;
 }
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
@@ -669,7 +680,7 @@ export interface SigShare {
   bigr?: string; // backward compatibility
   bigR?: string;
   publicKey: string;
-  dataSigned?: string;
+  dataSigned?: string | 'fail';
   siweMessage?: string;
   sigName?: string;
 }
@@ -686,6 +697,8 @@ export interface PkpSignedData {
 export interface NodeShare {
   claimData: any;
   shareIndex: any;
+
+  // I think this is deprecated
   unsignedJwt: any;
   signedData: SigShare;
   decryptedData: any;
