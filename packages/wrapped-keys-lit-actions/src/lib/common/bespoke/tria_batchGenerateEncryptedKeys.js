@@ -10,7 +10,20 @@ const {
 } = require('../../solana/internal/generatePrivateKey');
 const { signMessageSolanaKey } = require('../../solana/internal/signMessage');
 
-/* "TRIA" global accessControlConditions, actions, Lit*/
+// =========== Global Variables (JsParams) ===========
+// Lit Action:: Prepare jsParams
+const jsParams = {
+  authMethod: {
+    accessToken: authMethod.accessToken,
+    authMethodType: authMethod.authMethodType,
+  },
+  publicKey: publicKey,
+  actions: actions,
+  accessControlConditions: accessControlConditions,
+};
+
+validateJsParams(jsParams);
+
 async function processEthereumAction(action) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -156,26 +169,7 @@ function validateJsParams(jsParams) {
   });
 }
 
-// (async () => {
-//   try {
-//     validateParams(actions);
-
-//     const batchGeneratePrivateKeysActionResult = await processActions(actions);
-
-//     Lit.Actions.setResponse({
-//       response: JSON.stringify(batchGeneratePrivateKeysActionResult),
-//     });
-
-//     // 1. Generate both EVM and solana private keys
-//     // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
-//     // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
-//   } catch (err) {
-//     Lit.Actions.setResponse({ response: `Error: ${err.message}` });
-//   }
-// })();
-
 const go = async () => {
-  // ========== Tria's Logic ==========
   // Lit Action:: Prepare jsParams
   const jsParams = {
     authMethod: {
@@ -252,29 +246,21 @@ const go = async () => {
   //   return;
   // }
 
-  // LitActions.setResponse({
-  //   response: `(true, ${JSON.stringify({
-  //     returnedData: data,
-  //     logs: {
-  //       authMethodId,
-  //       tokenId,
-  //       permittedAuthMethods,
-  //       permittedAuthMethod,
-  //       actions: jsParams.actions,
-  //       batchGeneratePrivateKeysActionResult,
-  //     },
-  //   })})`,
-  // });
-
+  // -- Perform runOnce wrapped-keys actions
   try {
-    const batchGeneratePrivateKeysActionResult = await processActions(
-      jsParams.actions
+    let res = await Lit.Actions.runOnce(
+      { waitForResponse: true, name: 'tria-auth-and-wrapped-keys' },
+      async () => {
+        const batchGeneratePrivateKeysActionResult = await processActions(
+          jsParams.actions
+        );
+
+        return JSON.stringify(batchGeneratePrivateKeysActionResult);
+      }
     );
 
     Lit.Actions.setResponse({
-      response: JSON.stringify(
-        `(true, ${JSON.stringify(batchGeneratePrivateKeysActionResult)})`
-      ),
+      response: JSON.stringify(`(true, ${res})`),
     });
 
     // 1. Generate both EVM and solana private keys
