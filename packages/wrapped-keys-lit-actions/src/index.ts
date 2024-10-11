@@ -12,6 +12,9 @@ import type {
   LitActionCodeRepositoryCommon,
 } from '@lit-protocol/wrapped-keys';
 
+// bespoke
+import * as tria_batchGenerateEncryptedKeys from './generated/common/bespoke/tria_batchGenerateEncryptedKeys';
+
 const litActionRepository: LitActionCodeRepository = {
   signTransaction: {
     evm: signTransactionWithEthereumEncryptedKey.code,
@@ -33,6 +36,9 @@ const litActionRepository: LitActionCodeRepository = {
 
 const litActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: batchGenerateEncryptedKeys.code,
+
+  // bespoke
+  tria_batchGenerateEncryptedKeys: tria_batchGenerateEncryptedKeys.code,
 };
 
 export {

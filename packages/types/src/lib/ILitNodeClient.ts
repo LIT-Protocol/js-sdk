@@ -239,6 +239,5 @@ export interface ILitNodeClient {
    */
   getLitActionSessionSigs(
     params: GetLitActionSessionSigs
-  ): Promise<SessionSigsMap>
-
+  ): Promise<SessionSigsMap>;
 }

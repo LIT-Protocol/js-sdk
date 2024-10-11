@@ -8,6 +8,9 @@ import {
   storeEncryptedKey,
   listEncryptedKeyMetadata,
   batchGeneratePrivateKeys,
+
+  // bespoke
+  triaBatchGeneratePrivateKeys,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,

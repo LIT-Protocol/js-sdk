@@ -175,7 +175,7 @@ setLitActionsCodeToLocal();
 
     // single node execution
     testUseEoaSessionSigsToRequestSingleResponse,
-    testUseTriaAuthAndWrappedKeysSessionSigsGen
+    testUseTriaAuthAndWrappedKeysSessionSigsGen,
   };
 
   const pkpSessionSigsTests = {
