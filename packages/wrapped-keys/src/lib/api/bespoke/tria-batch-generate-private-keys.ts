@@ -110,6 +110,18 @@ export async function triaBatchGeneratePrivateKeys(
 
   console.log("sessionSigsResources:", sessionSigsResources);
 
+  // select a random resource from the array
+  const firstResource = sessionSigsResources[0];
+
+  if (!firstResource.customAuthSource) {
+    throw new Error(`Error: customAuthSource is required`);
+  }
+
+  // remove "(true, from the beginning of the string and )" at the end of the string
+  const customAuthSource = firstResource.customAuthSource.slice(8, -2);
+  console.log("customAuthSource:", customAuthSource);
+
+
   process.exit();
 
   // // This is the original code
