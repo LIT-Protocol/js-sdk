@@ -1,7 +1,50 @@
 import { LIT_NETWORKS_KEYS } from '@lit-protocol/types';
 import { LIT_CHAINS } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
-import { EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
+import { config } from '@lit-protocol/wrapped-keys';
+import {
+  litActionRepositoryCommon,
+  litActionRepository,
+} from '@lit-protocol/wrapped-keys-lit-actions';
+
+import type {
+  LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
+  EthereumLitTransaction,
+} from '@lit-protocol/wrapped-keys';
+
+const emptyLitActionRepositoryCommon: LitActionCodeRepositoryCommon = {
+  batchGenerateEncryptedKeys: '',
+};
+
+const emptyLitActionRepository: LitActionCodeRepository = {
+  signTransaction: {
+    evm: '',
+    solana: '',
+  },
+  signMessage: {
+    evm: '',
+    solana: '',
+  },
+  generateEncryptedKey: {
+    evm: '',
+    solana: '',
+  },
+  exportPrivateKey: {
+    evm: '',
+    solana: '',
+  },
+};
+
+export function resetLitActionsCode() {
+  config.setLitActionsCodeCommon(emptyLitActionRepositoryCommon);
+  config.setLitActionsCode(emptyLitActionRepository);
+}
+
+export function setLitActionsCodeToLocal() {
+  config.setLitActionsCodeCommon(litActionRepositoryCommon);
+  config.setLitActionsCode(litActionRepository);
+}
 
 export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
   chain: string;

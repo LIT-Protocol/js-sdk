@@ -781,6 +781,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  storyProtocolTestnet: {
+    contractAddress: null,
+    chainId: 1513,
+    name: 'Story Protocol Testnet',
+    symbol: 'IP',
+    decimals: 18,
+    rpcUrls: ['https://testnet.storyrpc.io'],
+    blockExplorerUrls: ['https://testnet.storyscan.xyz'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**

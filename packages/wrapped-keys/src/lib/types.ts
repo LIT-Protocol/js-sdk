@@ -134,6 +134,34 @@ export interface ExportPrivateKeyResult {
   id: string;
 }
 
+/** @typedef GeneratePrivateKeyAction
+ * @extends ApiParamsSupportedNetworks
+ */
+export type GeneratePrivateKeyAction = ApiParamsSupportedNetworks & {
+  generateKeyParams: { memo: string };
+  signMessageParams?: { messageToSign: string | Uint8Array };
+};
+
+/** @typedef BatchGeneratePrivateKeysParams
+ * @extends BaseApiParams
+ */
+export type BatchGeneratePrivateKeysParams = BaseApiParams & {
+  actions: GeneratePrivateKeyAction[];
+};
+
+/** @typedef GeneratePrivateKeyAction
+ * @extends ApiParamsSupportedNetworks
+ */
+export interface BatchGeneratePrivateKeysActionResult {
+  generateEncryptedPrivateKey: GeneratePrivateKeyResult & { memo: string };
+  signMessage?: { signature: string };
+}
+
+export interface BatchGeneratePrivateKeysResult {
+  pkpAddress: string;
+  results: BatchGeneratePrivateKeysActionResult[];
+}
+
 /** @typedef GeneratePrivateKeyParams
  * @extends BaseApiParams
  * @property {Network} network The network for which the private key needs to be generated; keys are generated differently for different networks

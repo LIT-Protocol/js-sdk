@@ -146,7 +146,7 @@ export const getSignatures = <T>(params: {
 
   if (allKeys.length !== initialKeys.length) {
     throwError({
-      message: 'total number of valid signatures does not match requested',
+      message: `Total number of valid signatures does not match requested. Valid signatures: ${allKeys.length}, Requested signatures: ${initialKeys.length}`,
       errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
       errorCode: LIT_ERROR.NO_VALID_SHARES.code,
     });

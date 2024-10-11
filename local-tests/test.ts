@@ -104,6 +104,13 @@ import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-
 import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
+import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
+
+import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
+import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
+
+// Use the current LIT action code to test against
+setLitActionsCodeToLocal();
 
 import { testPkpSessionSigsIsValidAfterEllapsedTime } from './tests/testPkpSessionSigsIsValidAfterEllapsedTime';
 
@@ -120,6 +127,7 @@ import { testPkpSessionSigsIsValidAfterEllapsedTime } from './tests/testPkpSessi
   // --filter=WrappedKey
   const wrappedKeysTests = {
     // -- valid cases
+    testBatchGeneratePrivateKeys,
     testEthereumSignMessageGeneratedKey,
     testEthereumBroadcastTransactionGeneratedKey,
     testEthereumSignMessageWrappedKey,
@@ -165,6 +173,7 @@ import { testPkpSessionSigsIsValidAfterEllapsedTime } from './tests/testPkpSessi
     testUseEoaSessionSigsToEncryptDecryptString,
     testUseEoaSessionSigsToEncryptDecryptFile,
     testUseEoaSessionSigsToEncryptDecryptZip,
+    testUseEoaSessionSigsToRequestSingleResponse,
   };
 
   const pkpSessionSigsTests = {

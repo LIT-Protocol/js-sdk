@@ -1,28 +1,14 @@
-import { NETWORK_EVM, NETWORK_SOLANA } from '../constants';
+import { getKeyTypeFromNetwork } from './utils';
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { storePrivateKey } from '../service-client';
-import {
-  GeneratePrivateKeyParams,
-  GeneratePrivateKeyResult,
-  KeyType,
-  Network,
-} from '../types';
+import { GeneratePrivateKeyParams, GeneratePrivateKeyResult } from '../types';
 import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
 } from '../utils';
 
-function getKeyTypeFromNetwork(network: Network): KeyType {
-  if (network === NETWORK_EVM) {
-    return 'K256';
-  } else if (network === NETWORK_SOLANA) {
-    return 'ed25519';
-  } else {
-    throw new Error('Network not implemented in generate-private-key');
-  }
-}
 /**
  * Generates a random private key inside a Lit Action, and persists the key and its metadata to the wrapped keys service.
  * Returns the public key of the random private key, and the PKP address that it was associated with.
