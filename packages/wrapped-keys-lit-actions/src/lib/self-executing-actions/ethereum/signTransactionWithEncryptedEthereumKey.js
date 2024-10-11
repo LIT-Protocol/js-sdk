@@ -1,11 +1,11 @@
 const {
+  getDecryptedKeyToSingleNode,
+} = require('../../internal/common/getDecryptedKeyToSingleNode');
+const {
   signTransactionEthereumKey,
   getValidatedUnsignedTx,
-} = require('./internal/signTransaction');
-const {
-  getDecryptedKeyToSingleNode,
-} = require('../common/internal/getDecryptedKeyToSingleNode');
-const { removeSaltFromDecryptedKey } = require('../utils');
+} = require('../../internal/ethereum/signTransaction');
+const { removeSaltFromDecryptedKey } = require('../../utils');
 
 /* global accessControlConditions, ciphertext, dataToEncryptHash, unsignedTransaction, broadcast, Lit */
 

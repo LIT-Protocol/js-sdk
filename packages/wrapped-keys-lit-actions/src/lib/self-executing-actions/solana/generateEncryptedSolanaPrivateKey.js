@@ -1,5 +1,7 @@
-const { generateSolanaPrivateKey } = require('./internal/generatePrivateKey');
-const { encryptPrivateKey } = require('../common/internal/encryptKey');
+const { encryptPrivateKey } = require('../../internal/common/encryptKey');
+const {
+  generateSolanaPrivateKey,
+} = require('../../internal/solana/generatePrivateKey');
 
 /* global accessControlConditions, Lit */
 

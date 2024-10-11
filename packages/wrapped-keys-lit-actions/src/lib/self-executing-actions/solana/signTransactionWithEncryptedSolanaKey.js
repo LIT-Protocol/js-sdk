@@ -1,11 +1,11 @@
 const {
+  getDecryptedKeyToSingleNode,
+} = require('../../internal/common/getDecryptedKeyToSingleNode');
+const {
   signTransactionSolanaKey,
   validateUnsignedTransaction,
-} = require('./internal/signTransaction');
-const {
-  getDecryptedKeyToSingleNode,
-} = require('../common/internal/getDecryptedKeyToSingleNode');
-const { removeSaltFromDecryptedKey } = require('../utils');
+} = require('../../internal/solana/signTransaction');
+const { removeSaltFromDecryptedKey } = require('../../utils');
 
 /* global accessControlConditions, ciphertext, dataToEncryptHash, unsignedTransaction, Lit, broadcast */
 

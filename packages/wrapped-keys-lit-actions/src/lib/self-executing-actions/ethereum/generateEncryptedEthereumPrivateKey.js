@@ -9,8 +9,8 @@
  *
  * @returns { Promise<string> } - Returns a stringified JSON object with ciphertext & dataToEncryptHash which are the result of the encryption. Also returns the publicKey of the newly generated Ethers Wrapped Key.
  */
-import { generateEthereumPrivateKey } from './internal/generatePrivateKey';
-import { encryptPrivateKey } from '../common/internal/encryptKey';
+import { encryptPrivateKey } from '../../internal/common/encryptKey';
+import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
 
 (async () => {
   const { privateKey, publicKey } = generateEthereumPrivateKey();

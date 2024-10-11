@@ -1,12 +1,14 @@
-const { encryptPrivateKey } = require('./internal/encryptKey');
+const { encryptPrivateKey } = require('../../internal/common/encryptKey');
 const {
   generateEthereumPrivateKey,
-} = require('../ethereum/internal/generatePrivateKey');
-const { signMessageEthereumKey } = require('../ethereum/internal/signMessage');
+} = require('../../internal/ethereum/generatePrivateKey');
+const {
+  signMessageEthereumKey,
+} = require('../../internal/ethereum/signMessage');
 const {
   generateSolanaPrivateKey,
-} = require('../solana/internal/generatePrivateKey');
-const { signMessageSolanaKey } = require('../solana/internal/signMessage');
+} = require('../../internal/solana/generatePrivateKey');
+const { signMessageSolanaKey } = require('../../internal/solana/signMessage');
 
 /* global accessControlConditions, actions, Lit*/
 
