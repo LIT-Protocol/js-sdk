@@ -710,33 +710,44 @@ export const IpfsOptionsSchema = z.object({
   gatewayUrl: z.string().startsWith('https://').endsWith('/ipfs/').optional(),
 });
 
-export const JsonExecutionSdkParamsSchema = LitActionSdkParamsSchema.pick({
-  jsParams: true,
-}).extend({
-  /**
-   *  JS code to run on the nodes
-   */
-  code: z.string().optional(), // TODO one or the other
-  /**
-   * The IPFS ID of some JS code to run on the nodes
-   */
-  ipfsId: z.string().optional(), // TODO one or the other
-  /**
-   * the session signatures to use to authorize the user with the nodes
-   */
-  sessionSigs: SessionSigsSchema,
-  /**
-   * auth methods to resolve
-   */
-  authMethods: z.array(AuthMethodSchema).optional(),
+export const ExecuteJsAdvancedOptionsSchema = z.object({
   /**
    * a strategy for processing `response` objects returned from the
    * Lit Action execution context
    */
   responseStrategy: LitActionResponseStrategySchema.optional(),
-
+  /**
+   * Allow overriding the default `code` property in the `JsonExecutionSdkParams`
+   */
   ipfsOptions: IpfsOptionsSchema.optional(),
+  /**
+   * Only run the action on a single node; this will only work if all code in your action is non-interactive
+   */
+  useSingleNode: z.boolean().optional(),
 });
+
+export const JsonExecutionSdkParamsSchema = LitActionSdkParamsSchema.pick({
+  jsParams: true,
+})
+  .merge(ExecuteJsAdvancedOptionsSchema)
+  .extend({
+    /**
+     *  JS code to run on the nodes
+     */
+    code: z.string().optional(), // TODO one or the other
+    /**
+     * The IPFS ID of some JS code to run on the nodes
+     */
+    ipfsId: z.string().optional(), // TODO one or the other
+    /**
+     * the session signatures to use to authorize the user with the nodes
+     */
+    sessionSigs: SessionSigsSchema,
+    /**
+     * auth methods to resolve
+     */
+    authMethods: z.array(AuthMethodSchema).optional(),
+  });
 
 export const SigResponseSchema = z.object({
   r: z.string(),

@@ -41,6 +41,7 @@ import {
   NodeErrorV1Schema,
   RejectedNodePromisesSchema,
   NodeAttestationSchema,
+  ExecuteJsAdvancedOptionsSchema,
 } from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
@@ -355,47 +356,13 @@ export interface JsonExecutionSdkParamsTargetNode
   targetNodeRange: number;
 }
 
-export interface JsonExecutionSdkParams
-  extends Pick<LitActionSdkParams, 'jsParams'>,
-    ExecuteJsAdvancedOptions {
-  /**
-   *  JS code to run on the nodes
-   */
-  code?: string;
+export type JsonExecutionSdkParams = z.infer<
+  typeof JsonExecutionSdkParamsSchema
+>;
 
-  /**
-   * The IPFS ID of some JS code to run on the nodes
-   */
-  ipfsId?: string;
-
-  /**
-   * the session signatures to use to authorize the user with the nodes
-   */
-  sessionSigs: SessionSigsMap;
-
-  /**
-   * auth methods to resolve
-   */
-  authMethods?: AuthMethod[];
-}
-
-export interface ExecuteJsAdvancedOptions {
-  /**
-   * a strategy for proccessing `reponse` objects returned from the
-   * Lit Action execution context
-   */
-  responseStrategy?: LitActionResponseStrategy;
-
-  /**
-   * Allow overriding the default `code` property in the `JsonExecutionSdkParams`
-   */
-  ipfsOptions?: IpfsOptions;
-
-  /**
-   * Only run the action on a single node; this will only work if all code in your action is non-interactive
-   */
-  useSingleNode?: boolean;
-}
+export type ExecuteJsAdvancedOptions = z.infer<
+  typeof ExecuteJsAdvancedOptionsSchema
+>;
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
   targetNodeRange: number;
