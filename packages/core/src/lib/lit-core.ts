@@ -38,6 +38,7 @@ import {
   InvalidEthBlockhash,
   LitNodeClientNotReadyError,
   InvalidNodeAttestation,
+  LogLevel,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -51,6 +52,7 @@ import {
   logWithRequestId,
   mostCommonString,
   sendRequest,
+  setMiscLitConfig,
 } from '@lit-protocol/misc';
 import {
   AuthSig,
@@ -74,7 +76,6 @@ import {
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
-import { LogLevel } from '@lit-protocol/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -199,7 +200,7 @@ export class LitCore {
     this.setCustomBootstrapUrls();
 
     // -- set global variables
-    globalThis.litConfig = this.config;
+    setMiscLitConfig(this.config);
     bootstrapLogManager(
       'core',
       this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
@@ -391,7 +392,7 @@ export class LitCore {
 
     this._stopListeningForNewEpoch();
     // this._stopNetworkPolling();
-    if (globalThis.litConfig) delete globalThis.litConfig;
+    setMiscLitConfig(undefined);
   }
 
   // _stopNetworkPolling() {
@@ -536,9 +537,6 @@ export class LitCore {
     // this._scheduleNetworkSync();
     this._listenForNewEpoch();
 
-    // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
-    // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
-    globalThis.litNodeClient = this;
     this.ready = true;
 
     log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
@@ -1070,6 +1068,18 @@ export class LitCore {
     return nodePromises;
   };
 
+  getRandomNodePromise(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    callback: (url: string) => Promise<any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any>[] {
+    const randomNodeIndex = Math.floor(
+      Math.random() * this.connectedNodes.size
+    );
+
+    const nodeUrlsArr = Array.from(this.connectedNodes);
+    return [callback(nodeUrlsArr[randomNodeIndex])];
+  }
   /**
    * Retrieves the session signature for a given URL from the sessionSigs map.
    * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.

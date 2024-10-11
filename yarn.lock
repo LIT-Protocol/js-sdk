@@ -1954,7 +1954,7 @@
   dependencies:
     "@ethersproject/logger" "^5.7.0"
 
-"@ethersproject/providers@5.7.2", "@ethersproject/providers@^5.0.0", "@ethersproject/providers@^5.7.2":
+"@ethersproject/providers@5.7.2", "@ethersproject/providers@^5.0.0":
   version "5.7.2"
   resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.7.2.tgz#f8b1a4f275d7ce58cf0a2eec222269a08beb18cb"
   integrity sha512-g34EWZ1WWAVgr4aptGlVBF8mhl3VWjv+8hoAnzStu8Ah22VHBsuGzP17eb6xDVRzw895G4W7vvx60lFFur/1Rg==
@@ -3302,10 +3302,10 @@
     npmlog "^6.0.2"
     write-file-atomic "^4.0.1"
 
-"@lit-protocol/accs-schemas@^0.0.12":
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.12.tgz#36446b325fa9fb0d228fa9caecf425e5550e4d6e"
-  integrity sha512-tkAddbEexpjbIY01TFB8YWffe6PFWkxdiSZsriPINfVAL5VmTiL6YH9D3faDP+rNaGMUXu0/AMQ0Dft/iGuLLA==
+"@lit-protocol/accs-schemas@^0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.14.tgz#9955e8b9181a9612f85d418bd390cfb53fffc71e"
+  integrity sha512-pGYGBqxjiq5JKr+FXV2N2iTeDo1hlLQchqEgtkgTFSFHVvCLT8mADii7/jFTl/M0zCTOdmNTq1VXccwo5l8FFg==
   dependencies:
     ajv "^8.12.0"
 

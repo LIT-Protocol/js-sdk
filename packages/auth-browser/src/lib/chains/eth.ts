@@ -7,7 +7,10 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 
 // import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { verifyMessage } from '@ethersproject/wallet';
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import {
+  EthereumProvider,
+  default as WalletConnectProvider,
+} from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
@@ -127,6 +130,8 @@ export type WALLET_ERROR_VALUES =
   (typeof WALLET_ERROR)[keyof typeof WALLET_ERROR];
 
 /** ---------- Local Helpers ---------- */
+
+let litWCProvider: WalletConnectProvider | undefined;
 
 /**
  *
@@ -386,8 +391,7 @@ export const connectWeb3 = async ({
     };
 
     if (isBrowser()) {
-      // @ts-ignore
-      globalThis.litWCProvider = wcProvider;
+      litWCProvider = wcProvider;
     }
   }
 
@@ -440,10 +444,9 @@ export const disconnectWeb3 = (): void => {
   }
 
   // @ts-ignore
-  if (isBrowser() && globalThis.litWCProvider) {
+  if (isBrowser() && litWCProvider) {
     try {
-      // @ts-ignore
-      globalThis.litWCProvider.disconnect();
+      litWCProvider.disconnect();
     } catch (err) {
       log(
         'Attempted to disconnect global WalletConnectProvider for lit-connect-modal',
