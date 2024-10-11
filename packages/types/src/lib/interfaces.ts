@@ -40,11 +40,11 @@ import {
   SuccessNodePromisesSchema,
   NodeErrorV1Schema,
   RejectedNodePromisesSchema,
+  NodeAttestationSchema,
 } from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -463,14 +463,13 @@ export interface PkpSignedData {
   sigType: string;
   dataSigned: string;
 }
-export interface NodeShare {
+export interface NodeShare extends NodeLog {
   claimData: any;
   shareIndex: any;
   unsignedJwt: any;
   signedData: SigShare;
   decryptedData: any;
   response: any;
-  logs: any;
   success?: boolean | '';
 }
 
@@ -609,17 +608,7 @@ export interface CombinedECDSASignature {
 
 export type HandshakeWithNode = z.infer<typeof HandshakeWithNodeSchema>;
 
-export interface NodeAttestation {
-  type: string;
-  noonce: string;
-  data: {
-    INSTANCE_ID: string;
-    RELEASE_ID: string;
-    UNIX_TIME: string;
-  };
-  signatures: string[];
-  report: string;
-}
+export type NodeAttestation = z.infer<typeof NodeAttestationSchema>;
 
 export type JsonHandshakeResponse = z.infer<typeof JsonHandshakeResponseSchema>;
 

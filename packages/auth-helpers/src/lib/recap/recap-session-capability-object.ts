@@ -7,12 +7,7 @@ import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
 import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
 import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
-import {
-  AuthSig,
-  AttenuationsObject,
-  CID as CIDString,
-  PlainJSON,
-} from '../models';
+import { AttenuationsObject, CID as CIDString } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe/siwe-helper';
 
@@ -62,9 +57,9 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
   addAttenuation(
     resource: string,
-    namespace: string = '*',
-    name: string = '*',
-    restriction: { [key: string]: PlainJSON } = {}
+    namespace = '*',
+    name = '*',
+    restriction = {}
   ) {
     return this._inner.addAttenuation(resource, namespace, name, restriction);
   }

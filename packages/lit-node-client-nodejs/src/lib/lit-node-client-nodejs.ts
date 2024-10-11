@@ -1,6 +1,6 @@
 import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
-import { joinSignature, sha256 } from 'ethers/lib/utils';
+import { sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
 import {
@@ -25,9 +25,6 @@ import {
   LOCAL_STORAGE_KEYS,
   ParamsMissingError,
   ParamNullError,
-  NoValidShares,
-  UnknownSignatureType,
-  UnknownSignatureError,
   LitNodeClientNotReadyError,
   InvalidParamType,
   InvalidArgumentException,
@@ -75,7 +72,7 @@ import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
 import { getClaimsList } from './helpers/get-claims-list';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { getSignatures } from './helpers/get-signatures';
 import { normalizeArray } from './helpers/normalize-array';
 import { normalizeJsParams } from './helpers/normalize-params';
 import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
@@ -107,9 +104,7 @@ import type {
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
-  NodeLog,
   NodeShare,
-  PKPSignShare,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -137,7 +132,6 @@ import type {
   EncryptionSignRequest,
   SigningAccessControlConditionRequest,
   JsonPKPClaimKeyRequest,
-  IpfsOptions,
 } from '@lit-protocol/types';
 
 export class LitNodeClientNodeJs
@@ -606,6 +600,7 @@ export class LitNodeClientNodeJs
    * Combine Shares from network public key set and signature shares
    *
    * @param { NodeBlsSigningShare } signatureShares
+   * @param { string } requestId
    *
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
@@ -717,9 +712,7 @@ export class LitNodeClientNodeJs
    */
   runOnTargetedNodes = async (
     params: JsonExecutionSdkParamsTargetNode
-  ): Promise<
-    SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises
-  > => {
+  ): Promise<SuccessNodePromises | RejectedNodePromises> => {
     log('running runOnTargetedNodes:', params.targetNodeRange);
 
     if (!params.targetNodeRange) {
@@ -812,7 +805,7 @@ export class LitNodeClientNodeJs
       nodePromises,
       requestId,
       params.targetNodeRange
-    )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
+    )) as SuccessNodePromises | RejectedNodePromises;
   };
 
   // ========== Scoped Business Logics ==========
@@ -969,7 +962,7 @@ export class LitNodeClientNodeJs
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<NodeShare>).values;
+    const responseData = (res as SuccessNodePromises).values as NodeShare[];
 
     logWithRequestId(
       requestId,
@@ -1032,9 +1025,7 @@ export class LitNodeClientNodeJs
     const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
 
     // -- 3. combine logs
-    const mostCommonLogs: string = mostCommonString(
-      responseData.map((r: NodeLog) => r.logs)
-    );
+    const mostCommonLogs = mostCommonString(responseData.map((r) => r.logs));
 
     // -- 4. combine claims
     const claimsList = getClaimsList(responseData);
@@ -1174,7 +1165,7 @@ export class LitNodeClientNodeJs
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
+    const responseData = (res as SuccessNodePromises).values;
 
     logWithRequestId(
       requestId,
@@ -1304,9 +1295,8 @@ export class LitNodeClientNodeJs
       this._throwNodeError(res, requestId);
     }
 
-    const signatureShares: NodeBlsSigningShare[] = (
-      res as SuccessNodePromises<NodeBlsSigningShare>
-    ).values;
+    const signatureShares: NodeBlsSigningShare[] = (res as SuccessNodePromises)
+      .values;
 
     log('signatureShares', signatureShares);
 
@@ -1553,9 +1543,8 @@ export class LitNodeClientNodeJs
       this._throwNodeError(res, requestId);
     }
 
-    const signatureShares: NodeBlsSigningShare[] = (
-      res as SuccessNodePromises<NodeBlsSigningShare>
-    ).values;
+    const signatureShares: NodeBlsSigningShare[] = (res as SuccessNodePromises)
+      .values;
 
     logWithRequestId(requestId, 'signatureShares', signatureShares);
 
@@ -1930,9 +1919,9 @@ export class LitNodeClientNodeJs
     return signSessionKeyRes;
   };
 
-  private _isSuccessNodePromises = <T>(
-    res: SuccessNodePromises<T> | RejectedNodePromises
-  ): res is SuccessNodePromises<T> => {
+  private _isSuccessNodePromises = (
+    res: SuccessNodePromises | RejectedNodePromises
+  ): res is SuccessNodePromises => {
     return res.success;
   };
 

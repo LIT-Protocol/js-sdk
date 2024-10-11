@@ -497,7 +497,7 @@ export const JsonSigningResourceIdSchema = z.object({
 export const JsonAccsRequestSchema =
   MultipleAccessControlConditionsSchema.extend({
     // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
-    chain: ChainSchema,
+    chain: ChainSchema.optional(),
 
     // The resourceId representing something on the web via a URL
     resourceId: JsonSigningResourceIdSchema.optional(),
@@ -668,13 +668,25 @@ export const HandshakeWithNodeSchema = z.object({
   challenge: z.string(),
 });
 
+export const NodeAttestationSchema = z.object({
+  type: z.string(),
+  noonce: z.string(),
+  data: z.object({
+    INSTANCE_ID: z.string(),
+    RELEASE_ID: z.string(),
+    UNIX_TIME: z.string(),
+  }),
+  signatures: z.array(z.string()),
+  report: z.string(),
+});
+
 export const NodeCommandServerKeysResponseSchema = z.object({
   serverPublicKey: z.string(),
   subnetPublicKey: z.string(),
   networkPublicKey: z.string(),
   networkPublicKeySet: z.string(),
   hdRootPubkeys: z.array(z.string()),
-  attestation: z.string().optional(),
+  attestation: NodeAttestationSchema,
   latestBlockhash: z.string().optional(),
 });
 
@@ -863,7 +875,7 @@ export const ILitNodeClientSchema = z.object({
 
   // ========== Constructor ==========
   // ** IMPORTANT !! You have to create your constructor when implementing this class **
-  constructor: z.function(),
+  // constructor: z.function().args(z.union([LitNodeClientConfigSchema, CustomNetworkSchema])),
 
   // ========== Scoped Class Helpers ==========
 
@@ -894,7 +906,7 @@ export const ILitNodeClientSchema = z.object({
    */
   combineSharesAndGetJWT: z
     .function()
-    .args(z.array(NodeBlsSigningShareSchema))
+    .args(z.array(NodeBlsSigningShareSchema), z.string().optional())
     .returns(z.promise(z.string())),
   /**
    *
@@ -936,7 +948,7 @@ export const ILitNodeClientSchema = z.object({
    */
   getNodePromises: z
     .function()
-    .args(z.function()) // TODO improve
+    .args(z.function().args(z.string()).returns(z.promise(z.any()))) // TODO improve
     .returns(z.array(z.promise(z.any()))), // TODO
   /**
    * Handle node promises

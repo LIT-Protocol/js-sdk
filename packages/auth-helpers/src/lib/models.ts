@@ -1,13 +1,6 @@
 import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
 import { ILitResource } from '@lit-protocol/types';
 
-// This is here to prevent circular dependency issue
-export interface AuthSig {
-  sig: any;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-}
 export type PlainJSON =
   | boolean
   | number
