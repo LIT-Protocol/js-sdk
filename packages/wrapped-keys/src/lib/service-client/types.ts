@@ -31,14 +31,10 @@ export interface StoreKeyParams extends BaseApiParams {
 }
 
 export interface StoreKeyBatchParams extends BaseApiParams {
+  pkpAddress: string;
   storedKeyMetadataBatch: Pick<
     StoredKeyData,
-    | 'pkpAddress'
-    | 'publicKey'
-    | 'keyType'
-    | 'dataToEncryptHash'
-    | 'ciphertext'
-    | 'memo'
+    'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext' | 'memo'
   >[];
 }
 

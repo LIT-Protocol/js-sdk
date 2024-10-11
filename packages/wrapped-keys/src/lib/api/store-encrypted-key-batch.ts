@@ -46,6 +46,7 @@ export async function storeEncryptedKeyBatch(
     );
 
   return storePrivateKeyBatch({
+    pkpAddress,
     storedKeyMetadataBatch,
     sessionSig: getFirstSessionSig(pkpSessionSigs),
     litNetwork: litNodeClient.config.litNetwork,
