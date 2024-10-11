@@ -118,7 +118,7 @@ export async function storePrivateKeyBatch(
   });
 
   const { pkpAddress, ids } = await makeRequest<StoreEncryptedKeyBatchResult>({
-    url: baseUrl,
+    url: `${baseUrl}_batch`,
     init: {
       ...initParams,
       body: JSON.stringify({ keyParamsBatch: storedKeyMetadataBatch }),
