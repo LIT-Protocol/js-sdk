@@ -24,6 +24,11 @@ export const testUseTriaAuthAndWrappedKeysSessionSigsGen = async (
   const alice = await devEnv.createRandomPerson();
 
   // -- Start
+  const triaAuthMethod = {
+    // authMethodId: '', <-- Tria's managing this by permitting auth method to the user id
+    authMethodType: process.env.TRIA_AUTHMETHOD_TYPE,
+    accessToken: process.env.TRIA_ACCESS_TOKEN,
+  };
 
   // -- mint a pkp
   console.log(`🔄 Minting new PKP...`);
@@ -85,8 +90,8 @@ export const testUseTriaAuthAndWrappedKeysSessionSigsGen = async (
   const evmMessageToSign = 'This is a test evm message';
 
   const { results } = await triaBatchGeneratePrivateKeys({
-    ipfsId: hashOfLitActionCode,
     pkpPublicKey: pkp.publicKey,
+    ipfsId: hashOfLitActionCode,
     actions: [
       {
         network: 'evm',
@@ -100,8 +105,10 @@ export const testUseTriaAuthAndWrappedKeysSessionSigsGen = async (
       },
     ],
     litNodeClient: devEnv.litNodeClient,
+    authMethod: triaAuthMethod,
   });
 
+  console.log("results:", results);
 
   process.exit();
 

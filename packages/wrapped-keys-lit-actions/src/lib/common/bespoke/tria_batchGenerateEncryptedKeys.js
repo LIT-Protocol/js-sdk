@@ -11,7 +11,6 @@ const {
 const { signMessageSolanaKey } = require('../../solana/internal/signMessage');
 
 /* "TRIA" global accessControlConditions, actions, Lit*/
-
 async function processEthereumAction(action) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -94,16 +93,43 @@ async function processActions(actions) {
   );
 }
 
-function validateParams(actions) {
-  if (!actions) {
+/**
+ * - jsParams: Expected data type: Object (e.g., "{ authMethod: { accessToken: '...', authMethodType: '...' }, publicKey: '...', actions: [...] }")
+ *
+ * This parameter is an object containing the following properties:
+ * - authMethod
+ * - publicKey
+ * - actions: Array of action objects, each containing network and key generation params.
+ *
+ */
+function validateJsParams(jsParams) {
+  if (!jsParams.authMethod) {
+    throw new Error('Missing required field: authMethod');
+  }
+  if (!jsParams.publicKey) {
+    throw new Error('Missing required field: publicKey');
+  }
+  if (!jsParams.accessControlConditions) {
+    throw new Error('Missing required field: accessControlConditions');
+  }
+  const { accessToken, authMethodType } = jsParams.authMethod;
+
+  if (!accessToken) {
+    throw new Error('Missing required field: authMethod.accessToken');
+  }
+  if (!authMethodType) {
+    throw new Error('Missing required field: authMethod.authMethodType');
+  }
+
+  if (!jsParams.actions) {
     throw new Error('Missing required field: actions');
   }
 
-  if (!actions.length) {
+  if (!jsParams.actions.length) {
     throw new Error('No actions provided (empty array?)');
   }
 
-  actions.forEach((action, ndx) => {
+  jsParams.actions.forEach((action, ndx) => {
     if (!['evm', 'solana'].includes(action.network)) {
       throw new Error(
         `Invalid field: actions[${ndx}].network: ${action.network}`
@@ -149,9 +175,114 @@ function validateParams(actions) {
 // })();
 
 const go = async () => {
-  LitActions.setResponse({
-    response: "(true, 'Something else is here!')",
+  // ========== Tria's Logic ==========
+  // Lit Action:: Prepare jsParams
+  const jsParams = {
+    authMethod: {
+      accessToken: authMethod.accessToken,
+      authMethodType: authMethod.authMethodType,
+    },
+    publicKey: publicKey,
+    actions: actions,
+    accessControlConditions: accessControlConditions,
+  };
+
+  validateJsParams(jsParams);
+
+  // ========== Tria's Logic ==========
+
+  // Authentication
+  const url = 'https://api.development.tria.so/api/v1/user/info';
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${jsParams.authMethod.accessToken}`,
+    },
   });
+  const data = await response.json();
+  console.log('data', data);
+
+  if (!data.success) {
+    Lit.Actions.setResponse({
+      response: JSON.stringify({
+        success: false,
+        message: 'Authentication Failed',
+      }),
+    });
+    return;
+  }
+
+  // Authorization:: Prepare params
+  // -- 1. get the authMethodId from unique identify from the response
+  const authMethodId = `${ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes(data.userInfo.uuid)
+  )}`;
+  console.log('Computed AuthMethodId', authMethodId);
+
+  // -- 2. get the PKP token id
+  const tokenId = Lit.Actions.pubkeyToTokenId({
+    publicKey: jsParams.publicKey,
+  });
+  console.log('tokenId', tokenId);
+
+  // -- 3. get the permitted auth methods of the PKP token id
+  const permittedAuthMethods = await Lit.Actions.getPermittedAuthMethods({
+    tokenId,
+  });
+  console.log('permittedAuthMethods', permittedAuthMethods);
+
+  // -- 4. only get where authMethod that's equal to the authMethod Id
+  const permittedAuthMethod = permittedAuthMethods.find(
+    (method) => method.id === authMethodId
+  );
+  console.log('permittedAuthMethod', permittedAuthMethod);
+
+  // TODO: Uncomment this block to enable Authorization
+  // Authorization:: Failed Authentication and Authorization
+  // if (
+  //   !permittedAuthMethod ||
+  //   permittedAuthMethod.auth_method_type !== jsParams.authMethod.authMethodType
+  // ) {
+  //   Lit.Actions.setResponse({
+  //     response: JSON.stringify({
+  //       success: false,
+  //       message: 'Authorization Failed',
+  //     }),
+  //   });
+  //   return;
+  // }
+
+  // LitActions.setResponse({
+  //   response: `(true, ${JSON.stringify({
+  //     returnedData: data,
+  //     logs: {
+  //       authMethodId,
+  //       tokenId,
+  //       permittedAuthMethods,
+  //       permittedAuthMethod,
+  //       actions: jsParams.actions,
+  //       batchGeneratePrivateKeysActionResult,
+  //     },
+  //   })})`,
+  // });
+
+  try {
+    const batchGeneratePrivateKeysActionResult = await processActions(
+      jsParams.actions
+    );
+
+    Lit.Actions.setResponse({
+      response: JSON.stringify(
+        `(true, ${JSON.stringify(batchGeneratePrivateKeysActionResult)})`
+      ),
+    });
+
+    // 1. Generate both EVM and solana private keys
+    // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
+    // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
+  } catch (err) {
+    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
+  }
 };
 
 go();

@@ -15,16 +15,7 @@ import {
 import { LitAbility, LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { SessionSigsMap } from '@lit-protocol/types';
 import { formatSessionSigsJSON, getResourcesFromSessionSigs } from '@lit-protocol/misc';
-
-// resolvedAuthContext: {
-//   auth_context: {
-//     actionIpfsIds: [ 'Qmd5ibCRo9DhEnjcmfBsMU6qRBCvMCZw5kB7oSvCa7iXDR' ],
-//     authMethodContexts: [],
-//     authSigAddress: null,
-//     customAuthResource: "(true, 'Anything your want to use in executeJs')",
-//     resources: []
-//   }
-// }
+import { computeAddress } from 'ethers/lib/utils';
 
 
 /**
@@ -37,6 +28,10 @@ export async function triaBatchGeneratePrivateKeys(
   params: Omit<BatchGeneratePrivateKeysParams, 'pkpSessionSigs'> & {
     pkpPublicKey: string | `0x${string}`;
     ipfsId: string | `Qm${string}`;
+    authMethod: {
+      authMethodType: string | `0x${string}`;
+      accessToken: string | `eyJ${string}`;
+    }
   }
 ): Promise<BatchGeneratePrivateKeysResult> {
 
@@ -60,9 +55,34 @@ export async function triaBatchGeneratePrivateKeys(
   //   'tria_batchGenerateEncryptedKeys'
   // );
 
+  let pkpPubKey = params.pkpPublicKey;
+
+  if (pkpPubKey.startsWith('0x')) {
+    pkpPubKey = pkpPubKey.slice(2);
+  }
+  const pkpPubkeyBuffer = Buffer.from(pkpPubKey, 'hex');
+
+  const pkpEthAddress = computeAddress(pkpPubkeyBuffer);
+
+  console.log("pkpEthAddress:", pkpEthAddress);
+
+  const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpEthAddress);
+
   // Here we should use getLitActionSessionSigs rather than executeJs
   console.log(`🔄 Getting Lit Action Session Sigs`);
   let litActionSessionSigs: SessionSigsMap;
+
+  const _jsParams = {
+    authMethod: {
+      accessToken: params.authMethod.accessToken,
+      authMethodType: params.authMethod.authMethodType,
+    },
+    actions: params.actions,
+    publicKey: params.pkpPublicKey,
+    accessControlConditions: [allowPkpAddressToDecrypt],
+  };
+
+  console.log("_jsParams:", _jsParams);
 
   try {
     litActionSessionSigs = await params.litNodeClient.getLitActionSessionSigs({
@@ -78,7 +98,7 @@ export async function triaBatchGeneratePrivateKeys(
         },
       ],
       litActionIpfsId: params.ipfsId,
-      jsParams: {},
+      jsParams: _jsParams,
     });
   } catch (e) {
     throw new Error(`Error getting Lit Action Session Sigs: ${e}`);
