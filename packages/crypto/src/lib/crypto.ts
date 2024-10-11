@@ -45,6 +45,7 @@ export interface BlsSignatureShare {
 
 /**
  * Encrypt data with a BLS public key.
+ * We are using G1 for encryption and G2 for signatures
  *
  * @param publicKeyHex hex-encoded string of the BLS public key to encrypt with
  * @param message Uint8Array of the data to encrypt
@@ -58,18 +59,30 @@ export const encrypt = async (
 ): Promise<string> => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
-  switch (publicKeyHex.replace('0x', '').length) {
-    case 218:
-      return Buffer.from(
-        await blsEncrypt('Bls12381G2', publicKey, message, identity)
-      ).toString('hex');
-    case 96:
-      return Buffer.from(
-        await blsEncrypt('Bls12381G2', publicKey, message, identity)
-      ).toString('base64');
-    default:
-      return '';
+  /**
+   * Our system uses BLS12-381 on the G1 curve for encryption.
+   * However, on the SDK side (this function), we expect the public key
+   * to use the G2 curve for signature purposes, hence the switch on public key length.
+   *
+   * The G2 curve, `Bls12381G2`, is typically associated with signature generation/verification,
+   * while G1 is associated with encryption. Here, the length of the public key determines how
+   * we handle the encryption and the format of the returned encrypted message.
+   */
+  if (publicKeyHex.replace('0x', '').length !== 96) {
+    throw new InvalidParamType(
+      {
+        info: {
+          publicKeyHex,
+        },
+      },
+      `Invalid public key length. Expecting 96 characters, got ${
+        publicKeyHex.replace('0x', '').length
+      } instead.`
+    );
   }
+  return Buffer.from(
+    await blsEncrypt('Bls12381G2', publicKey, message, identity)
+  ).toString('base64');
 };
 
 /**
