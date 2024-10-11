@@ -8,6 +8,9 @@ import { signMessageWithEncryptedKey } from './sign-message-with-encrypted-key';
 import { signTransactionWithEncryptedKey } from './sign-transaction-with-encrypted-key';
 import { storeEncryptedKey } from './store-encrypted-key';
 
+// bespoke
+import { triaBatchGeneratePrivateKeys } from './bespoke/tria-batch-generate-private-keys';
+
 export {
   listEncryptedKeyMetadata,
   generatePrivateKey,
@@ -18,4 +21,7 @@ export {
   storeEncryptedKey,
   getEncryptedKey,
   batchGeneratePrivateKeys,
+
+  // bespoke
+  triaBatchGeneratePrivateKeys,
 };

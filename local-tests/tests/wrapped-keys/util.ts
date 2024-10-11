@@ -15,6 +15,9 @@ import type {
 
 const emptyLitActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: '',
+
+  // bespoke
+  tria_batchGenerateEncryptedKeys: '',
 };
 
 const emptyLitActionRepository: LitActionCodeRepository = {

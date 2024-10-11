@@ -1,4 +1,5 @@
 import * as batchGenerateEncryptedKeys from './generated/common/batchGenerateEncryptedKeys';
+import * as tria_batchGenerateEncryptedKeys from './generated/common/bespoke/tria_batchGenerateEncryptedKeys';
 import * as exportPrivateKey from './generated/common/exportPrivateKey';
 import * as generateEncryptedEthereumPrivateKey from './generated/ethereum/generateEncryptedEthereumPrivateKey';
 import * as signMessageWithEthereumEncryptedKey from './generated/ethereum/signMessageWithEncryptedEthereumKey';
@@ -33,6 +34,9 @@ const litActionRepository: LitActionCodeRepository = {
 
 const litActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: batchGenerateEncryptedKeys.code,
+
+  // bespoke
+  tria_batchGenerateEncryptedKeys: tria_batchGenerateEncryptedKeys.code,
 };
 
 export {
@@ -49,4 +53,7 @@ export {
   // Full export to bundle all lit actions
   litActionRepository,
   litActionRepositoryCommon,
+
+  // bespoke
+  tria_batchGenerateEncryptedKeys,
 };

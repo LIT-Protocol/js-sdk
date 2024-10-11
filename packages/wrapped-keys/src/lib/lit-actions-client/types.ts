@@ -6,7 +6,17 @@ export type LitActionType =
   | 'generateEncryptedKey'
   | 'exportPrivateKey';
 
-export type LitActionTypeCommon = 'batchGenerateEncryptedKeys';
+export type LitActionTypeCommon =
+  | 'batchGenerateEncryptedKeys'
+  | BespokeLitActionTypes;
+
+export type BespokeLitActionTypes = Tria_LitActionTypeCommon;
+// | Foo_LitActionTypeCommon
+// | Bar_LitActionTypeCommon
+
+export type Tria_LitActionTypeCommon = 'tria_batchGenerateEncryptedKeys';
+// export type Foo_LitActionTypeCommon = 'FooBatchGenerateEncryptedKeys';
+// export type Bar_LitActionTypeCommon = 'BarBatchGenerateEncryptedKeys';
 
 export type LitCidRepositoryEntry = Readonly<Record<Network, string>>;
 

@@ -8,6 +8,9 @@ import {
   storeEncryptedKey,
   listEncryptedKeyMetadata,
   batchGeneratePrivateKeys,
+
+  // bespoke
+  triaBatchGeneratePrivateKeys,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -71,6 +74,9 @@ export const api = {
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
   batchGeneratePrivateKeys,
+
+  // bespoke
+  triaBatchGeneratePrivateKeys,
 };
 
 export const config = {

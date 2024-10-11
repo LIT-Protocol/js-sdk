@@ -53,11 +53,9 @@ function assertIsLitActionRepositoryEntry(
 ): asserts entry is LitActionCodeRepositoryEntry {
   if (
     typeof entry !== 'object' ||
-    !entry ||
-    // @ts-expect-error assert function
-    ('evm' in entry && typeof entry.evm !== 'string') ||
-    // @ts-expect-error assert function
-    ('solana' in entry && typeof entry.solana !== 'string') ||
+    entry === null || // Ensure entry is not null
+    ('evm' in entry && typeof (entry as any).evm !== 'string') ||
+    ('solana' in entry && typeof (entry as any).solana !== 'string') ||
     Object.keys(entry).some((key) => !['evm', 'solana'].includes(key))
   ) {
     throw new Error(
@@ -89,6 +87,9 @@ function setLitActionsCode(repository: LitActionCodeRepositoryInput) {
  */
 const litActionCodeRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: '',
+
+  // bespoke
+  tria_batchGenerateEncryptedKeys: '',
 };
 
 function assertIsLitActionKeyCommon(
