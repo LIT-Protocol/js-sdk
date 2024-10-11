@@ -30,6 +30,18 @@ export interface StoreKeyParams extends BaseApiParams {
   >;
 }
 
+export interface StoreKeyBatchParams extends BaseApiParams {
+  storedKeyMetadataBatch: Pick<
+    StoredKeyData,
+    | 'pkpAddress'
+    | 'publicKey'
+    | 'keyType'
+    | 'dataToEncryptHash'
+    | 'ciphertext'
+    | 'memo'
+  >[];
+}
+
 export interface BaseRequestParams {
   sessionSig: AuthSig;
   method: 'GET' | 'POST';
