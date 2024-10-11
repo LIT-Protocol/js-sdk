@@ -1,3 +1,4 @@
+import { getFirstSessionSig, getPkpAddressFromSessionSig } from './utils';
 import { storePrivateKeyBatch } from '../service-client';
 import { StoreKeyBatchParams } from '../service-client/types';
 import {
@@ -5,7 +6,6 @@ import {
   StoreEncryptedKeyBatchParams,
   StoreEncryptedKeyBatchResult,
 } from '../types';
-import { getFirstSessionSig, getPkpAddressFromSessionSig } from '../utils';
 
 /** Stores a batch of encrypted private keys and their metadata to the wrapped keys backend service
  *
@@ -46,9 +46,8 @@ export async function storeEncryptedKeyBatch(
     );
 
   return storePrivateKeyBatch({
-    pkpAddress,
     storedKeyMetadataBatch,
-    sessionSig: getFirstSessionSig(pkpSessionSigs),
+    sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
   });
 }

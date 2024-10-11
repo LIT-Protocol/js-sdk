@@ -1,4 +1,9 @@
-import { getKeyTypeFromNetwork } from './utils';
+import {
+  getFirstSessionSig,
+  getKeyTypeFromNetwork,
+  getPkpAccessControlCondition,
+  getPkpAddressFromSessionSig,
+} from './utils';
 import { batchGenerateKeysWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCidCommon } from '../lit-actions-client/utils';
 import { storePrivateKeyBatch } from '../service-client';
@@ -7,11 +12,6 @@ import {
   BatchGeneratePrivateKeysParams,
   BatchGeneratePrivateKeysResult,
 } from '../types';
-import {
-  getFirstSessionSig,
-  getPkpAccessControlCondition,
-  getPkpAddressFromSessionSig,
-} from '../utils';
 
 /**
  *  TODO: Document batch behaviour
@@ -50,7 +50,6 @@ export async function batchGeneratePrivateKeys(
   });
 
   const { ids } = await storePrivateKeyBatch({
-    pkpAddress,
     sessionSig,
     storedKeyMetadataBatch: keyParamsBatch,
     litNetwork: litNodeClient.config.litNetwork,

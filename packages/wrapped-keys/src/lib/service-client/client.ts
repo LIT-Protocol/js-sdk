@@ -11,7 +11,6 @@ import {
   StoreEncryptedKeyBatchResult,
   StoreEncryptedKeyResult,
 } from '../types';
-import { getPkpAddressFromSessionSig } from '../utils';
 
 /** Fetches previously stored private key metadata from the wrapped keys service.
  * Note that this list will not include `cipherText` or `dataToEncryptHash` necessary to decrypt the keys.
@@ -23,7 +22,7 @@ import { getPkpAddressFromSessionSig } from '../utils';
 export async function listPrivateKeyMetadata(
   params: ListKeysParams
 ): Promise<StoredKeyMetadata[]> {
-  const { litNetwork, sessionSig } = params;
+  const { litNetwork, sessionSig, pkpAddress } = params;
 
   const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
@@ -32,8 +31,6 @@ export async function listPrivateKeyMetadata(
     method: 'GET',
     requestId,
   });
-
-  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
   return makeRequest<StoredKeyMetadata[]>({
     url: `${baseUrl}/${pkpAddress}`,
@@ -51,7 +48,7 @@ export async function listPrivateKeyMetadata(
 export async function fetchPrivateKey(
   params: FetchKeyParams
 ): Promise<StoredKeyData> {
-  const { litNetwork, sessionSig, id } = params;
+  const { litNetwork, sessionSig, id, pkpAddress } = params;
 
   const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
@@ -60,7 +57,6 @@ export async function fetchPrivateKey(
     method: 'GET',
     requestId,
   });
-  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
   return makeRequest<StoredKeyData>({
     url: `${baseUrl}/${pkpAddress}/${id}`,

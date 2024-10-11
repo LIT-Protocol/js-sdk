@@ -2,21 +2,17 @@ import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import nacl from 'tweetnacl';
-import bs58 from 'bs58';
-import { ethers } from 'ethers';
-import { BatchGeneratePrivateKeysActionResult } from '../../../packages/wrapped-keys/src/lib/types';
 import { batchGenerateKeysWithLitAction } from '../../../packages/wrapped-keys/src/lib/lit-actions-client';
+import { getLitActionCodeOrCidCommon } from '../../../packages/wrapped-keys/src/lib/lit-actions-client/utils';
 import {
   getFirstSessionSig,
+  getKeyTypeFromNetwork,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
-} from '../../../packages/wrapped-keys/src/lib/utils';
-import { getLitActionCodeOrCidCommon } from '../../../packages/wrapped-keys/src/lib/lit-actions-client/utils';
-import { getKeyTypeFromNetwork } from '../../../packages/wrapped-keys/src/lib/api/utils';
+} from '../../../packages/wrapped-keys/src/lib/api/utils';
 import { listEncryptedKeyMetadata } from '../../../packages/wrapped-keys/src/lib/api';
 
-const { batchGeneratePrivateKeys, storeEncryptedKeyBatch } = api;
+const { storeEncryptedKeyBatch } = api;
 
 /**
  * Test Commands:
