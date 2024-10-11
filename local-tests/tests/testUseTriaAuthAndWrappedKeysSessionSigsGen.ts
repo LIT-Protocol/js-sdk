@@ -6,7 +6,12 @@ import {
   getLitActionSessionSigsUsingIpfsId,
 } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+import { api, utils } from '@lit-protocol/wrapped-keys';
 
+import Hash from "typestub-ipfs-only-hash";
+import { AuthMethodScope } from '@lit-protocol/constants';
+
+const { triaBatchGeneratePrivateKeys, exportPrivateKey } = api;
 /**
  * Test Commands:
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseTriaAuthAndWrappedKeysSessionSigsGen
@@ -57,6 +62,46 @@ export const testUseTriaAuthAndWrappedKeysSessionSigsGen = async (
   console.log(`     - Capacity Token ID: ${capacityTokenId}`);
 
   // -- Get the lit action code..
+  const { litActionCode, litActionIpfsCid } = utils.getLitActionCodeOrCidCommon(
+    'tria_batchGenerateEncryptedKeys'
+  );
+
+  // -- detect which one we got
+  const hashOfLitActionCode = litActionCode
+    ? await Hash.of(Buffer.from(litActionCode))
+    : litActionIpfsCid;
+  console.log(`   ✅ Lit Action Code IPFS CID: ${hashOfLitActionCode}`);
+
+  console.log(`🔄 Adding permitted action...`);
+  const permitTx = await devEnv.contractsClient.addPermittedAction({
+    ipfsId: hashOfLitActionCode,
+    pkpTokenId: pkp.tokenId,
+    authMethodScopes: [AuthMethodScope.SignAnything]
+  });
+  console.log(`   ✅ Permitted action added:`);
+  console.log(`     - Transaction Hash: ${permitTx.transactionHash}`);
+
+  const solanaMessageToSign = 'This is a test solana message';
+  const evmMessageToSign = 'This is a test evm message';
+
+  const { results } = await triaBatchGeneratePrivateKeys({
+    ipfsId: hashOfLitActionCode,
+    pkpPublicKey: pkp.publicKey,
+    actions: [
+      {
+        network: 'evm',
+        signMessageParams: { messageToSign: evmMessageToSign },
+        generateKeyParams: { memo: 'Test evm key' },
+      },
+      {
+        network: 'solana',
+        signMessageParams: { messageToSign: solanaMessageToSign },
+        generateKeyParams: { memo: 'Test solana key' },
+      },
+    ],
+    litNodeClient: devEnv.litNodeClient,
+  });
+
 
   process.exit();
 

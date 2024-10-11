@@ -29,6 +29,7 @@ import {
   LitActionCodeRepositoryCommon,
   LitActionCodeRepositoryEntry,
 } from './lib/lit-actions-client/types';
+import { getLitActionCodeOrCidCommon } from './lib/lit-actions-client/utils';
 
 import type { SupportedNetworks } from './lib/service-client/types';
 import type {
@@ -74,12 +75,19 @@ export const api = {
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
   batchGeneratePrivateKeys,
+
+  // bespoke
+  triaBatchGeneratePrivateKeys,
 };
 
 export const config = {
   setLitActionsCode,
   setLitActionsCodeCommon,
 };
+
+export const utils = {
+  getLitActionCodeOrCidCommon
+}
 
 export {
   ApiParamsSupportedNetworks,

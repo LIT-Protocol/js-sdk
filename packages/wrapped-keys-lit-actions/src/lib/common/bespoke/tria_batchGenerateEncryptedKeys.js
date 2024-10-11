@@ -130,20 +130,28 @@ function validateParams(actions) {
   });
 }
 
-(async () => {
-  try {
-    validateParams(actions);
+// (async () => {
+//   try {
+//     validateParams(actions);
 
-    const batchGeneratePrivateKeysActionResult = await processActions(actions);
+//     const batchGeneratePrivateKeysActionResult = await processActions(actions);
 
-    Lit.Actions.setResponse({
-      response: JSON.stringify(batchGeneratePrivateKeysActionResult),
-    });
+//     Lit.Actions.setResponse({
+//       response: JSON.stringify(batchGeneratePrivateKeysActionResult),
+//     });
 
-    // 1. Generate both EVM and solana private keys
-    // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
-    // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
-  } catch (err) {
-    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
-  }
-})();
+//     // 1. Generate both EVM and solana private keys
+//     // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
+//     // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
+//   } catch (err) {
+//     Lit.Actions.setResponse({ response: `Error: ${err.message}` });
+//   }
+// })();
+
+const go = async () => {
+  LitActions.setResponse({
+    response: "(true, 'Something else is here!')",
+  });
+};
+
+go();
