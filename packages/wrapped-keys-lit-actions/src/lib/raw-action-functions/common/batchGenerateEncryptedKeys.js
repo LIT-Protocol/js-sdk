@@ -10,8 +10,6 @@ const {
 } = require('../../internal/solana/generatePrivateKey');
 const { signMessageSolanaKey } = require('../../internal/solana/signMessage');
 
-/* global Lit*/
-
 async function processEthereumAction({ action, accessControlConditions }) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -140,22 +138,10 @@ export async function batchGenerateEncryptedKeys({
   actions,
   accessControlConditions,
 }) {
-  try {
-    validateParams(actions);
+  validateParams(actions);
 
-    const batchGeneratePrivateKeysActionResult = await processActions({
-      actions,
-      accessControlConditions,
-    });
-
-    Lit.Actions.setResponse({
-      response: JSON.stringify(batchGeneratePrivateKeysActionResult),
-    });
-
-    // 1. Generate both EVM and solana private keys
-    // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
-    // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
-  } catch (err) {
-    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
-  }
+  return processActions({
+    actions,
+    accessControlConditions,
+  });
 }
