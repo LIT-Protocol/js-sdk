@@ -2,9 +2,6 @@ const {
   getDecryptedKeyToSingleNode,
 } = require('../../internal/common/getDecryptedKeyToSingleNode');
 const { signMessageSolanaKey } = require('../../internal/solana/signMessage');
-const { removeSaltFromDecryptedKey } = require('../../utils');
-
-/* global Lit */
 
 /**
  *
