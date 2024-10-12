@@ -1,12 +1,15 @@
 /* global accessControlConditions, ciphertext, dataToEncryptHash, unsignedTransaction, broadcast */
 
+import { litActionHandler } from '../../litActionHandler';
 import { signTransactionWithEncryptedEthereumKey } from '../../raw-action-functions/ethereum/signTransactionWithEncryptedEthereumKey';
 
 (async () =>
-  signTransactionWithEncryptedEthereumKey({
-    accessControlConditions,
-    ciphertext,
-    dataToEncryptHash,
-    unsignedTransaction,
-    broadcast,
-  }))();
+  litActionHandler(async () =>
+    signTransactionWithEncryptedEthereumKey({
+      accessControlConditions,
+      ciphertext,
+      dataToEncryptHash,
+      unsignedTransaction,
+      broadcast,
+    })
+  ))();

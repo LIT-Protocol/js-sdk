@@ -5,9 +5,6 @@ const {
   signTransactionEthereumKey,
   getValidatedUnsignedTx,
 } = require('../../internal/ethereum/signTransaction');
-const { removeSaltFromDecryptedKey } = require('../../utils');
-
-/* global Lit */
 
 /**
  *
@@ -29,33 +26,18 @@ export async function signTransactionWithEncryptedEthereumKey({
   unsignedTransaction,
   broadcast,
 }) {
-  try {
-    const validatedTx = getValidatedUnsignedTx(unsignedTransaction);
+  const validatedTx = getValidatedUnsignedTx(unsignedTransaction);
 
-    const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
-      accessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-    });
+  const privateKey = await getDecryptedKeyToSingleNode({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+  });
 
-    if (!decryptedPrivateKey) {
-      // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-      return;
-    }
-
-    const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-
-    const txResult = await signTransactionEthereumKey({
-      broadcast,
-      privateKey,
-      unsignedTransaction,
-      validatedTx,
-    });
-
-    Lit.Actions.setResponse({ response: txResult });
-  } catch (err) {
-    Lit.Actions.setResponse({
-      response: `Error: ${err.message}`,
-    });
-  }
+  return signTransactionEthereumKey({
+    broadcast,
+    privateKey,
+    unsignedTransaction,
+    validatedTx,
+  });
 }
