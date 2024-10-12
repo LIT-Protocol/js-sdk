@@ -25,27 +25,14 @@ export async function signMessageWithEncryptedSolanaKey({
   dataToEncryptHash,
   messageToSign,
 }) {
-  try {
-    const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
-      accessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-    });
+  const privateKey = await getDecryptedKeyToSingleNode({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+  });
 
-    if (!decryptedPrivateKey) {
-      // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-      return;
-    }
-
-    const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-
-    const signature = await signMessageSolanaKey({
-      messageToSign,
-      privateKey,
-    });
-
-    Lit.Actions.setResponse({ response: signature });
-  } catch (err) {
-    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
-  }
+  return signMessageSolanaKey({
+    messageToSign,
+    privateKey,
+  });
 }
