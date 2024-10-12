@@ -5,9 +5,6 @@ const {
   signTransactionSolanaKey,
   validateUnsignedTransaction,
 } = require('../../internal/solana/signTransaction');
-const { removeSaltFromDecryptedKey } = require('../../utils');
-
-/* global Lit */
 
 /**
  *
@@ -30,32 +27,17 @@ export async function signTransactionWithEncryptedSolanaKey({
   unsignedTransaction,
   broadcast,
 }) {
-  try {
-    validateUnsignedTransaction(unsignedTransaction);
+  validateUnsignedTransaction(unsignedTransaction);
 
-    const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
-      accessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-    });
+  const privateKey = await getDecryptedKeyToSingleNode({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+  });
 
-    if (!decryptedPrivateKey) {
-      // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-      return;
-    }
-
-    const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-
-    const txResult = await signTransactionSolanaKey({
-      broadcast,
-      privateKey,
-      unsignedTransaction,
-    });
-
-    Lit.Actions.setResponse({ response: txResult });
-  } catch (err) {
-    Lit.Actions.setResponse({
-      response: `Error: ${err.message}`,
-    });
-  }
+  return signTransactionSolanaKey({
+    broadcast,
+    privateKey,
+    unsignedTransaction,
+  });
 }
