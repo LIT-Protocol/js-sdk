@@ -1,6 +1,9 @@
 /* global Lit */
 
-export async function getDecryptedKeyToSingleNode({
+import { AbortError } from '../../abortError';
+import { removeSaltFromDecryptedKey } from '../../utils';
+
+async function tryDecryptToSingleNode({
   accessControlConditions,
   ciphertext,
   dataToEncryptHash,
@@ -17,4 +20,23 @@ export async function getDecryptedKeyToSingleNode({
   } catch (err) {
     throw new Error(`When decrypting key to a single node - ${err.message}`);
   }
+}
+
+export async function getDecryptedKeyToSingleNode({
+  accessControlConditions,
+  ciphertext,
+  dataToEncryptHash,
+}) {
+  const decryptedPrivateKey = await tryDecryptToSingleNode({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+  });
+
+  if (!decryptedPrivateKey) {
+    // Silently exit on nodes which didn't run the `decryptToSingleNode` code
+    throw new AbortError();
+  }
+
+  return removeSaltFromDecryptedKey(decryptedPrivateKey);
 }
