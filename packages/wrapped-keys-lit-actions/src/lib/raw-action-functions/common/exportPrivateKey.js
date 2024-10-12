@@ -1,9 +1,6 @@
 const {
   getDecryptedKeyToSingleNode,
 } = require('../../internal/common/getDecryptedKeyToSingleNode');
-const { removeSaltFromDecryptedKey } = require('../../utils');
-
-/* global Lit */
 
 /**
  *
@@ -22,21 +19,9 @@ export async function exportPrivateKey({
   ciphertext,
   dataToEncryptHash,
 }) {
-  try {
-    const decryptedPrivateKey = await getDecryptedKeyToSingleNode({
-      accessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-    });
-
-    if (!decryptedPrivateKey) {
-      // Silently exit on nodes which didn't run the `decryptToSingleNode` code
-      return;
-    }
-
-    const privateKey = removeSaltFromDecryptedKey(decryptedPrivateKey);
-    Lit.Actions.setResponse({ response: privateKey });
-  } catch (err) {
-    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
-  }
+  return getDecryptedKeyToSingleNode({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+  });
 }
