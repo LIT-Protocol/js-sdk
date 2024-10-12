@@ -1,8 +1,11 @@
 /* global accessControlConditions */
 
+import { litActionHandler } from '../../litActionHandler';
 import { generateEncryptedSolanaPrivateKey } from '../../raw-action-functions/solana/generateEncryptedSolanaPrivateKey';
 
 (async () =>
-  generateEncryptedSolanaPrivateKey({
-    accessControlConditions,
-  }))();
+  litActionHandler(async () =>
+    generateEncryptedSolanaPrivateKey({
+      accessControlConditions,
+    })
+  ))();
