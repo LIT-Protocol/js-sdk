@@ -35,7 +35,22 @@ const litActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: batchGenerateEncryptedKeys.code,
 };
 
+// const rawFunctions = {
+//   batchGenerateEncryptedKeysFunc,
+//   exportPrivateKeyFunc,
+//   generateEncryptedEthereumPrivateKeyFunc,
+//   signMessageWithEthereumEncryptedKeyFunc,
+//   signTransactionWithEthereumEncryptedKeyFunc,
+//   generateEncryptedSolanaPrivateKeyFunc,
+//   signMessageWithSolanaEncryptedKeyFunc,
+//   signTransactionWithSolanaEncryptedKeyFunc,
+// };
+
 export {
+  // Raw functions, <not wrapped in IIFEs>, for consumers to be able to compose these into their own LIT actions
+  // Facilitates running e.g. `batchGenerateEncryptedKeys` using `Lit.Actions.runOnce` inside of another action
+  // rawFunctions,
+
   // Individual exports to allow tree-shaking and only importing the lit actions you need
   batchGenerateEncryptedKeys,
   exportPrivateKey,
