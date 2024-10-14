@@ -141,9 +141,6 @@ function validateTriaParams(triaParams) {
   if (!triaParams.publicKey) {
     throw new Error('Missing required field: publicKey');
   }
-  if (!triaParams.accessControlConditions) {
-    throw new Error('Missing required field: accessControlConditions');
-  }
   const { accessToken, authMethodType } = triaParams.authMethod;
 
   if (!accessToken) {
@@ -167,13 +164,7 @@ async function triaAuth({ accessToken, publicKey, authMethodType }) {
   console.log('data', data);
 
   if (!data.success) {
-    Lit.Actions.setResponse({
-      response: JSON.stringify({
-        success: false,
-        message: 'Authentication Failed',
-      }),
-    });
-    return;
+    throw new Error(`Authentication Failed`);
   }
 
   // -- Authorization
@@ -242,31 +233,25 @@ export async function triaAuthAndBatchGenerateEncryptedKeys({
   // -- Authenticate and authorize with Tria
   await triaAuth({
     accessToken: triaParams.authMethod.accessToken,
-    publicKey: triaParams.publicKey,
     authMethodType: triaParams.authMethod.authMethodType,
+    publicKey: triaParams.publicKey,
   });
 
   // -- Run once
-  try {
-    let res = await Lit.Actions.runOnce(
-      { waitForResponse: false, name: 'tria-auth-and-wrapped-keys' },
-      async () => {
-        const processedActions = await processActions({
-          actions,
-          accessControlConditions,
-        });
-        return JSON.stringify(processedActions);
-      }
-    );
 
-    Lit.Actions.setResponse({
-      response: JSON.stringify(`(true, ${res})`),
-    });
+  let res = await Lit.Actions.runOnce(
+    { waitForResponse: false, name: 'tria-auth-and-wrapped-keys' },
+    async () => {
+      const processedActions = await processActions({
+        actions,
+        accessControlConditions,
+      });
+      return JSON.stringify(processedActions);
+    }
+  );
 
-    // 1. Generate both EVM and solana private keys
-    // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
-    // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
-  } catch (err) {
-    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
-  }
+  return JSON.stringify(`(true, ${res})`);
+  // 1. Generate both EVM and solana private keys
+  // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
+  // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
 }

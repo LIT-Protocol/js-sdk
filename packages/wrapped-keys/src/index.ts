@@ -9,6 +9,7 @@ import {
   listEncryptedKeyMetadata,
   batchGeneratePrivateKeys,
   storeEncryptedKeyBatch,
+  triaBatchGeneratePrivateKeys,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -27,6 +28,7 @@ import {
   LitActionCodeRepositoryCommon,
   LitActionCodeRepositoryEntry,
 } from './lib/lit-actions-client/types';
+import { getLitActionCodeOrCidCommon } from './lib/lit-actions-client/utils';
 
 import type { SupportedNetworks } from './lib/service-client/types';
 import type {
@@ -75,6 +77,8 @@ export const api = {
   storeEncryptedKey,
   storeEncryptedKeyBatch,
   batchGeneratePrivateKeys,
+  triaBatchGeneratePrivateKeys,
+  getLitActionCodeOrCidCommon,
 };
 
 export const config = {

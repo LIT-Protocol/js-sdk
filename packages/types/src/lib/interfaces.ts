@@ -1943,6 +1943,11 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
       })
   ) & {
     ipfsOptions?: IpfsOptions;
+
+    /**
+     * Special property to return all node responses
+     */
+    getNodeResponses?: boolean;
   };
 
 export interface SessionKeyCache {

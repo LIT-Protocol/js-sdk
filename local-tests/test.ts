@@ -109,6 +109,7 @@ import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/tes
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
 import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
+import { testUseTriaAuthAndWrappedKeysSessionSigsGen } from './tests/testUseTriaAuthAndWrappedKeysSessionSigsGen';
 
 // Use the current LIT action code to test against
 setLitActionsCodeToLocal();
@@ -174,6 +175,7 @@ setLitActionsCodeToLocal();
     testUseEoaSessionSigsToEncryptDecryptFile,
     testUseEoaSessionSigsToEncryptDecryptZip,
     testUseEoaSessionSigsToRequestSingleResponse,
+    testUseTriaAuthAndWrappedKeysSessionSigsGen
   };
 
   const pkpSessionSigsTests = {
