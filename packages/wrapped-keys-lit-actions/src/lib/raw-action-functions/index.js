@@ -2,7 +2,7 @@ const {
   batchGenerateEncryptedKeys,
 } = require('./common/batchGenerateEncryptedKeys');
 const {
-  triaAuthAndBatchGenerateEncryptedKeys
+  triaAuthAndBatchGenerateEncryptedKeys,
 } = require('./common/triaAuthAndBatchGenerateEncryptedKeys');
 const { exportPrivateKey } = require('./common/exportPrivateKey');
 const {

@@ -8,7 +8,7 @@ import {
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 
-import Hash from "typestub-ipfs-only-hash";
+import Hash from 'typestub-ipfs-only-hash';
 import { AuthMethodScope } from '@lit-protocol/constants';
 
 const { triaBatchGeneratePrivateKeys, exportPrivateKey } = api;
@@ -81,7 +81,7 @@ export const testUseTriaAuthAndWrappedKeysSessionSigsGen = async (
   const permitTx = await devEnv.contractsClient.addPermittedAction({
     ipfsId: hashOfLitActionCode,
     pkpTokenId: pkp.tokenId,
-    authMethodScopes: [AuthMethodScope.SignAnything]
+    authMethodScopes: [AuthMethodScope.SignAnything],
   });
   console.log(`   ✅ Permitted action added:`);
   console.log(`     - Transaction Hash: ${permitTx.transactionHash}`);
@@ -108,5 +108,5 @@ export const testUseTriaAuthAndWrappedKeysSessionSigsGen = async (
     authMethod: triaAuthMethod,
   });
 
-  console.log("results:", results);
+  console.log('results:', results);
 };

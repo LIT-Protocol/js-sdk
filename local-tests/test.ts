@@ -175,7 +175,7 @@ setLitActionsCodeToLocal();
     testUseEoaSessionSigsToEncryptDecryptFile,
     testUseEoaSessionSigsToEncryptDecryptZip,
     testUseEoaSessionSigsToRequestSingleResponse,
-    testUseTriaAuthAndWrappedKeysSessionSigsGen
+    testUseTriaAuthAndWrappedKeysSessionSigsGen,
   };
 
   const pkpSessionSigsTests = {

@@ -137,7 +137,8 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient {
+  implements LitClientSessionManager, ILitNodeClient
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1294,8 +1295,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-          authMethods: params.authMethods,
-        }),
+            authMethods: params.authMethods,
+          }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1881,15 +1882,20 @@ export class LitNodeClientNodeJs
     });
 
     // -- resolve promises
-    const numberToResolve = params?.handleAllResponses ? this.connectedNodes.size : this.config.minNodeCount;
-    log(`[signSessionKey] number of node promises to resolve:`, numberToResolve);
+    const numberToResolve = params?.handleAllResponses
+      ? this.connectedNodes.size
+      : this.config.minNodeCount;
+    log(
+      `[signSessionKey] number of node promises to resolve:`,
+      numberToResolve
+    );
 
     let res;
     try {
       res = await this.handleNodePromises(
         nodePromises,
         requestId,
-        numberToResolve,
+        numberToResolve
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
@@ -1902,7 +1908,7 @@ export class LitNodeClientNodeJs
     try {
       customAuthResources = parseCustomResources(res);
     } catch (e) {
-      log(`Failed to parse custom resources, not a problem.`)
+      log(`Failed to parse custom resources, not a problem.`);
     }
 
     logWithRequestId(requestId, 'handleNodePromises res:', res);
@@ -2006,7 +2012,8 @@ export class LitNodeClientNodeJs
       );
     }
 
-    const commonStringStrategy = params?.strategy === 'mostCommon' ? mostCommonString : leastCommonString;
+    const commonStringStrategy =
+      params?.strategy === 'mostCommon' ? mostCommonString : leastCommonString;
 
     const blsSignedData: BlsResponseData[] =
       validatedSignedDataList as BlsResponseData[];
@@ -2028,7 +2035,9 @@ export class LitNodeClientNodeJs
     const publicKey = removeHexPrefix(params.pkpPublicKey);
     log(`[signSessionKey] publicKey:`, publicKey);
 
-    const dataSigned = commonStringStrategy(blsSignedData.map((s) => s.dataSigned));
+    const dataSigned = commonStringStrategy(
+      blsSignedData.map((s) => s.dataSigned)
+    );
     log(`[signSessionKey] dataSigned:`, dataSigned);
 
     const mostCommonSiweMessage = commonStringStrategy(
@@ -2050,7 +2059,9 @@ export class LitNodeClientNodeJs
         derivedVia: 'lit.bls',
         signedMessage,
         address: computeAddress(hexPrefixed(publicKey)),
-        ...(customAuthResources && { customAuthResources: customAuthResources })
+        ...(customAuthResources && {
+          customAuthResources: customAuthResources,
+        }),
       },
       pkpPublicKey: publicKey,
     };
@@ -2112,8 +2123,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2137,7 +2148,6 @@ export class LitNodeClientNodeJs
       }),
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
-
 
     const needToResignSessionKey = await this.checkNeedToResignSessionKey({
       authSig,
@@ -2197,10 +2207,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-        ...(params.capabilityAuthSigs ?? []),
-        params.capacityDelegationAuthSig,
-        authSig,
-      ]
+          ...(params.capabilityAuthSigs ?? []),
+          params.capacityDelegationAuthSig,
+          authSig,
+        ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
@@ -2336,7 +2346,9 @@ export class LitNodeClientNodeJs
           }),
           ...(props.jsParams && { jsParams: props.jsParams }),
 
-          ...(params.handleAllResponses && { handleAllResponses: params.handleAllResponses })
+          ...(params.handleAllResponses && {
+            handleAllResponses: params.handleAllResponses,
+          }),
         });
 
         return response.authSig;

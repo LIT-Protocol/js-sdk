@@ -7,8 +7,8 @@ export type LitActionType =
   | 'exportPrivateKey';
 
 export type LitActionTypeCommon =
-  'batchGenerateEncryptedKeys' |
-  'triaAuthAndBatchGenerateEncryptedKeys';
+  | 'batchGenerateEncryptedKeys'
+  | 'triaAuthAndBatchGenerateEncryptedKeys';
 
 export type LitCidRepositoryEntry = Readonly<Record<Network, string>>;
 

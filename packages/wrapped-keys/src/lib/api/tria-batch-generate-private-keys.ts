@@ -6,7 +6,11 @@ import {
 } from './utils';
 import { batchGenerateKeysWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCidCommon } from '../lit-actions-client/utils';
-import { LitAbility, LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
+import {
+  LitAbility,
+  LitActionResource,
+  LitPKPResource,
+} from '@lit-protocol/auth-helpers';
 import { storePrivateKeyBatch } from '../service-client';
 import {
   BatchGeneratePrivateKeysActionResult,
@@ -29,10 +33,9 @@ export async function triaBatchGeneratePrivateKeys(
     authMethod: {
       authMethodType: string | `0x${string}`;
       accessToken: string | `eyJ${string}`;
-    }
+    };
   }
 ): Promise<BatchGeneratePrivateKeysResult> {
-
   if (!params.litNodeClient) {
     throw new Error(`Error: litNodeClient is required`);
   }

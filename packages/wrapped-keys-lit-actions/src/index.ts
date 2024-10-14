@@ -35,7 +35,8 @@ const litActionRepository: LitActionCodeRepository = {
 
 const litActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: batchGenerateEncryptedKeys.code,
-  triaAuthAndBatchGenerateEncryptedKeys: triaAuthAndBatchGenerateEncryptedKeys.code,
+  triaAuthAndBatchGenerateEncryptedKeys:
+    triaAuthAndBatchGenerateEncryptedKeys.code,
 };
 
 export {

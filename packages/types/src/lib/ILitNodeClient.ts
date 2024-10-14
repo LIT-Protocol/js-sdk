@@ -231,12 +231,12 @@ export interface ILitNodeClient {
   ): Promise<ISessionCapabilityObject>;
 
   /**
- * Retrieves session signatures specifically for Lit Actions.
- * Unlike `getPkpSessionSigs`, this function requires either `litActionCode` or `litActionIpfsId`, and `jsParams` must be provided.
- *
- * @param params - The parameters required for retrieving the session signatures.
- * @returns A promise that resolves with the session signatures.
- */
+   * Retrieves session signatures specifically for Lit Actions.
+   * Unlike `getPkpSessionSigs`, this function requires either `litActionCode` or `litActionIpfsId`, and `jsParams` must be provided.
+   *
+   * @param params - The parameters required for retrieving the session signatures.
+   * @returns A promise that resolves with the session signatures.
+   */
   getLitActionSessionSigs(
     params: GetLitActionSessionSigs
   ): Promise<SessionSigsMap>;
