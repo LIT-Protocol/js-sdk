@@ -130,7 +130,7 @@ describe('logger', () => {
     const requestIds = lm.LoggerIds;
 
     expect(requestIds.length).toBe(2);
-    expect(loggerA.timestamp).toEqual(requestIds[0]);
-    expect(loggerB.timestamp).toEqual(requestIds[1]);
+    expect(loggerA.id).toEqual(requestIds[0]);
+    expect(loggerB.id).toEqual(requestIds[1]);
   });
 });
