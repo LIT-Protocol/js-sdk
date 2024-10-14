@@ -217,14 +217,6 @@ async function triaAuth({ accessToken, publicKey, authMethodType }) {
 export async function triaAuthAndBatchGenerateEncryptedKeys({
   actions,
   accessControlConditions,
-
-  /**
-   * @type {Object}
-   * @property {Object} authMethod
-   * @property {string} authMethod.accessToken
-   * @property {string} authMethod.authMethodType
-   * @property {string} publicKey
-   */
   triaParams,
 }) {
   validateActionParams(actions);
@@ -238,7 +230,6 @@ export async function triaAuthAndBatchGenerateEncryptedKeys({
   });
 
   // -- Run once
-
   let res = await Lit.Actions.runOnce(
     { waitForResponse: false, name: 'tria-auth-and-wrapped-keys' },
     async () => {
