@@ -43,6 +43,7 @@ import {
   findMostCommonResponse,
   formatSessionSigs,
   hexPrefixed,
+  leastCommonString,
   log,
   logError,
   logErrorWithRequestId,
@@ -1881,8 +1882,8 @@ export class LitNodeClientNodeJs
 
     // -- resolve promises
     const numberToResolve = params?.handleAllResponses ? this.connectedNodes.size : this.config.minNodeCount;
+    log(`[signSessionKey] number of node promises to resolve:`, numberToResolve);
 
-    console.log("numberToResolve:", numberToResolve);
     let res;
     try {
       res = await this.handleNodePromises(
@@ -1896,18 +1897,13 @@ export class LitNodeClientNodeJs
     }
 
     // -- handle all responses
-    let customResources;
-
-
-    console.log("res:", res);
+    let customAuthResources;
 
     try {
-      customResources = parseCustomResources(res);
+      customAuthResources = parseCustomResources(res);
     } catch (e) {
       log(`Failed to parse custom resources, not a problem.`)
     }
-
-    console.log("customResources:", customResources);
 
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
@@ -2010,10 +2006,12 @@ export class LitNodeClientNodeJs
       );
     }
 
+    const commonStringStrategy = params?.strategy === 'mostCommon' ? mostCommonString : leastCommonString;
+
     const blsSignedData: BlsResponseData[] =
       validatedSignedDataList as BlsResponseData[];
 
-    const sigType = mostCommonString(blsSignedData.map((s) => s.curveType));
+    const sigType = commonStringStrategy(blsSignedData.map((s) => s.curveType));
     log(`[signSessionKey] sigType:`, sigType);
 
     const signatureShares = getBlsSignatures(blsSignedData);
@@ -2030,10 +2028,10 @@ export class LitNodeClientNodeJs
     const publicKey = removeHexPrefix(params.pkpPublicKey);
     log(`[signSessionKey] publicKey:`, publicKey);
 
-    const dataSigned = mostCommonString(blsSignedData.map((s) => s.dataSigned));
+    const dataSigned = commonStringStrategy(blsSignedData.map((s) => s.dataSigned));
     log(`[signSessionKey] dataSigned:`, dataSigned);
 
-    const mostCommonSiweMessage = mostCommonString(
+    const mostCommonSiweMessage = commonStringStrategy(
       blsSignedData.map((s) => s.siweMessage)
     );
 
@@ -2052,7 +2050,7 @@ export class LitNodeClientNodeJs
         derivedVia: 'lit.bls',
         signedMessage,
         address: computeAddress(hexPrefixed(publicKey)),
-        ...(customResources && { customResources: customResources })
+        ...(customAuthResources && { customAuthResources: customAuthResources })
       },
       pkpPublicKey: publicKey,
     };
@@ -2139,6 +2137,7 @@ export class LitNodeClientNodeJs
       }),
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
+
 
     const needToResignSessionKey = await this.checkNeedToResignSessionKey({
       authSig,

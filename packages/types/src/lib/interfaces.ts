@@ -1047,7 +1047,7 @@ export interface CreateCustomAuthMethodRequest {
 //     pub auth_sig: Option<AuthSigItem>,
 //     pub siwe_message: String,
 // }
-export interface SignSessionKeyProp extends LitActionSdkParams {
+export interface SignSessionKeyProp extends LitActionSdkParams, RespondHandling {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
    */
@@ -1091,11 +1091,6 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
    * A LIT resource ability is a combination of a LIT resource and a LIT ability.
    */
   resourceAbilityRequests?: LitResourceAbilityRequest[];
-
-  /**
-   * By default, it handles minNodeCount of responses
-   */
-  handleAllResponses?: boolean;
 }
 
 export interface SignSessionKeyResponse {
@@ -1915,7 +1910,7 @@ export interface SignerLike {
 
 export interface GetPkpSessionSigs
   extends CommonGetSessionSigsProps,
-  LitActionSdkParams {
+  LitActionSdkParams, RespondHandling {
   pkpPublicKey: string;
 
   /**
@@ -1929,8 +1924,6 @@ export interface GetPkpSessionSigs
   authMethods?: AuthMethod[];
 
   ipfsOptions?: IpfsOptions;
-
-  handleAllResponses?: boolean;
 }
 
 /**
@@ -1950,12 +1943,19 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
     })
   ) & {
     ipfsOptions?: IpfsOptions;
+  } & RespondHandling;
 
-    /**
-     * Special property to return all node responses
-     */
-    handleAllResponses?: boolean;
-  };
+export interface RespondHandling {
+  /**
+   * Weather to handle all responses or threshold/minNodeCount responses
+   */
+  handleAllResponses?: boolean;
+
+  /**
+   * Strategy to handle responses
+   */
+  strategy?: ResponseStrategy;
+}
 
 export interface SessionKeyCache {
   value: SessionKeyPair;

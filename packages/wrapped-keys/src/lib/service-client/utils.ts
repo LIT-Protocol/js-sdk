@@ -135,9 +135,8 @@ export async function makeRequest<T>({
     return result;
   } catch (e: unknown) {
     throw new Error(
-      `Request(${requestId}) for wrapped key failed. Error: ${
-        (e as Error).message
-        // @ts-expect-error Unknown, but `cause` is on `TypeError: fetch failed` errors
+      `Request(${requestId}) for wrapped key failed. Error: ${(e as Error).message
+      // @ts-expect-error Unknown, but `cause` is on `TypeError: fetch failed` errors
       }${e.cause ? ' - ' + e.cause : ''}`
     );
   }

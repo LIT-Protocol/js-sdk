@@ -67,19 +67,9 @@ export async function triaBatchGeneratePrivateKeys(
     accessControlConditions: [allowPkpAddressToDecrypt],
   };
 
-  // const { pkpSessionSigs, litNodeClient } = params;
-
-  // const sessionSig = getFirstSessionSig(pkpSessionSigs);
-  // const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
-
-  // const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
-
-  // const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCidCommon(
-  //   'batchGenerateEncryptedKeys'
-  // );
-
   try {
     litActionSessionSigs = await params.litNodeClient.getLitActionSessionSigs({
+      expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
       pkpPublicKey: params.pkpPublicKey,
       resourceAbilityRequests: [
         {
@@ -94,52 +84,56 @@ export async function triaBatchGeneratePrivateKeys(
       litActionIpfsId: params.ipfsId,
       jsParams: _jsParams,
       handleAllResponses: true,
+      strategy: 'leastCommon',
     });
   } catch (e) {
     throw new Error(`Error getting Lit Action Session Sigs: ${e}`);
   }
 
-  console.log("litActionSessionSigs:", litActionSessionSigs);
+  const firstSessionSig = Object.entries(litActionSessionSigs)[0][1];
 
-  process.exit();
+  const firstSignedMessage = JSON.parse(firstSessionSig.signedMessage);
 
-  return { pkpAddress: pkpEthAddress, results: [] };
+  const firstCapabilities = firstSignedMessage.capabilities[0];
 
-  // TODO: Uncomment below
-  // const keyParamsBatch = actionResults.map((keyData) => {
-  //   const { generateEncryptedPrivateKey, network } = keyData;
-  //   return {
-  //     ...generateEncryptedPrivateKey,
-  //     keyType: getKeyTypeFromNetwork(network),
-  //   };
-  // });
+  const theCustomAuthResources = firstCapabilities.customAuthResources;
 
-  // const { ids } = await storePrivateKeyBatch({
-  //   sessionSig,
-  //   storedKeyMetadataBatch: keyParamsBatch,
-  //   litNetwork: litNodeClient.config.litNetwork,
-  // });
+  const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
 
-  // const results = actionResults.map(
-  //   (actionResult, ndx): BatchGeneratePrivateKeysActionResult => {
-  //     const {
-  //       generateEncryptedPrivateKey: { memo, publicKey },
-  //     } = actionResult;
-  //     const id = ids[ndx]; // Result of writes is in same order as provided
+  const keyParamsBatch = theCustomAuthResources.map((keyData: any) => {
+    const { generateEncryptedPrivateKey, network } = keyData;
+    return {
+      ...generateEncryptedPrivateKey,
+      keyType: getKeyTypeFromNetwork(network),
+    };
+  });
 
-  //     const signature = actionResult.signMessage?.signature;
+  const { ids } = await storePrivateKeyBatch({
+    sessionSig: firstSessionSig,
+    storedKeyMetadataBatch: keyParamsBatch,
+    litNetwork: params.litNodeClient.config.litNetwork,
+  });
 
-  //     return {
-  //       ...(signature ? { signMessage: { signature } } : {}),
-  //       generateEncryptedPrivateKey: {
-  //         memo: memo,
-  //         id,
-  //         generatedPublicKey: publicKey,
-  //         pkpAddress,
-  //       },
-  //     };
-  //   }
-  // );
+  const results = theCustomAuthResources.map(
+    (actionResult: any, ndx: any): BatchGeneratePrivateKeysActionResult => {
+      const {
+        generateEncryptedPrivateKey: { memo, publicKey },
+      } = actionResult;
+      const id = ids[ndx]; // Result of writes is in same order as provided
 
-  // return { pkpAddress, results };
+      const signature = actionResult.signMessage?.signature;
+
+      return {
+        ...(signature ? { signMessage: { signature } } : {}),
+        generateEncryptedPrivateKey: {
+          memo: memo,
+          id,
+          generatedPublicKey: publicKey,
+          pkpAddress,
+        },
+      };
+    }
+  );
+
+  return { pkpAddress, results };
 }

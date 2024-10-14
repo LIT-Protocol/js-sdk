@@ -3,25 +3,25 @@ export function parseCustomResources(nodeResponses: any) {
     return {
       signedMessage: item.siweMessage
     };
-  }).map((v: any) => {
+  }).map((v: any, i: number) => {
     const signedMessage = v.signedMessage;
     const urnLine = signedMessage.match(/urn:recap:[\w\d]+/)![0];
 
     const authContext = JSON.parse(atob(urnLine.split(':')[2])).att['lit-resolvedauthcontext://*']['Auth/Auth'][0]['auth_context'];
 
     const extractedCustomAuthResource = (authContext['customAuthResource']).slice(8, -2);
-    const formattedCustomAuthResource = extractedCustomAuthResource.replace(/\\"/g, '"');
+    const customAuthResources = extractedCustomAuthResource.replace(/\\"/g, '"');
     let result;
 
     try {
-      result = JSON.parse(formattedCustomAuthResource);
+      result = JSON.parse(customAuthResources);
     } catch (e) {
       result = extractedCustomAuthResource
     }
 
     return {
-      authContext,
-      formattedCustomAuthResource: result,
+      customAuthResources: result,
+      // authContext,
     };
-  }).find((item: any) => item.formattedCustomAuthResource !== 'undefined')))?.formattedCustomAuthResource
+  }).find((item: any) => item.customAuthResources !== 'undefined'))).customAuthResources;
 }
