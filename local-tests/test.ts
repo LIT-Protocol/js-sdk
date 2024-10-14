@@ -105,6 +105,7 @@ import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey'
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
+import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
 import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
@@ -153,6 +154,7 @@ import { testPkpSessionSigsIsValidAfterEllapsedTime } from './tests/testPkpSessi
     testFailEthereumSignTransactionWrappedKeyWithMissingParam,
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
     testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
+    testFailBatchGeneratePrivateKeysAtomic,
 
     // -- import wrapped keys
     testFailImportWrappedKeysWithSamePrivateKey,

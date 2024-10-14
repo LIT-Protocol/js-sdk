@@ -1,6 +1,6 @@
+import { getFirstSessionSig, getPkpAddressFromSessionSig } from './utils';
 import { listPrivateKeyMetadata } from '../service-client';
 import { ListEncryptedKeyMetadataParams, StoredKeyMetadata } from '../types';
-import { getFirstSessionSig } from '../utils';
 
 /** Get list of metadata for previously encrypted and persisted private keys
  * Note that this method does include the `ciphertext` or `dataToEncryptHash` values necessary to decrypt the keys.
@@ -13,9 +13,12 @@ export async function listEncryptedKeyMetadata(
   params: ListEncryptedKeyMetadataParams
 ): Promise<StoredKeyMetadata[]> {
   const { pkpSessionSigs, litNodeClient } = params;
+  const sessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
   return listPrivateKeyMetadata({
-    sessionSig: getFirstSessionSig(pkpSessionSigs),
+    pkpAddress,
+    sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
   });
 }

@@ -1,11 +1,16 @@
-import { FetchKeyParams, ListKeysParams, StoreKeyParams } from './types';
+import {
+  FetchKeyParams,
+  ListKeysParams,
+  StoreKeyBatchParams,
+  StoreKeyParams,
+} from './types';
 import { generateRequestId, getBaseRequestParams, makeRequest } from './utils';
 import {
   StoredKeyData,
   StoredKeyMetadata,
+  StoreEncryptedKeyBatchResult,
   StoreEncryptedKeyResult,
 } from '../types';
-import { getPkpAddressFromSessionSig } from '../utils';
 
 /** Fetches previously stored private key metadata from the wrapped keys service.
  * Note that this list will not include `cipherText` or `dataToEncryptHash` necessary to decrypt the keys.
@@ -17,7 +22,7 @@ import { getPkpAddressFromSessionSig } from '../utils';
 export async function listPrivateKeyMetadata(
   params: ListKeysParams
 ): Promise<StoredKeyMetadata[]> {
-  const { litNetwork, sessionSig } = params;
+  const { litNetwork, sessionSig, pkpAddress } = params;
 
   const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
@@ -26,8 +31,6 @@ export async function listPrivateKeyMetadata(
     method: 'GET',
     requestId,
   });
-
-  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
   return makeRequest<StoredKeyMetadata[]>({
     url: `${baseUrl}/${pkpAddress}`,
@@ -45,7 +48,7 @@ export async function listPrivateKeyMetadata(
 export async function fetchPrivateKey(
   params: FetchKeyParams
 ): Promise<StoredKeyData> {
-  const { litNetwork, sessionSig, id } = params;
+  const { litNetwork, sessionSig, id, pkpAddress } = params;
 
   const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
@@ -54,7 +57,6 @@ export async function fetchPrivateKey(
     method: 'GET',
     requestId,
   });
-  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
   return makeRequest<StoredKeyData>({
     url: `${baseUrl}/${pkpAddress}/${id}`,
@@ -91,4 +93,34 @@ export async function storePrivateKey(
   });
 
   return { pkpAddress, id };
+}
+
+/** Stores a batch of up to 25 private key metadata into the wrapped keys service backend
+ *
+ * @param { StoreKeyParams } params Parameters required to store the private key metadata
+ * @returns { Promise<StoreEncryptedKeyResult> } `true` on successful write to the service. Otherwise, this method throws an error.
+ */
+export async function storePrivateKeyBatch(
+  params: StoreKeyBatchParams
+): Promise<StoreEncryptedKeyBatchResult> {
+  const { litNetwork, sessionSig, storedKeyMetadataBatch } = params;
+
+  const requestId = generateRequestId();
+  const { baseUrl, initParams } = getBaseRequestParams({
+    litNetwork,
+    sessionSig,
+    method: 'POST',
+    requestId,
+  });
+
+  const { pkpAddress, ids } = await makeRequest<StoreEncryptedKeyBatchResult>({
+    url: `${baseUrl}_batch`,
+    init: {
+      ...initParams,
+      body: JSON.stringify({ keyParamsBatch: storedKeyMetadataBatch }),
+    },
+    requestId,
+  });
+
+  return { pkpAddress, ids };
 }

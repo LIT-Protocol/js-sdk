@@ -1,6 +1,6 @@
+import { getFirstSessionSig, getPkpAddressFromSessionSig } from './utils';
 import { fetchPrivateKey } from '../service-client';
 import { GetEncryptedKeyDataParams, StoredKeyData } from '../types';
-import { getFirstSessionSig } from '../utils';
 
 /** Get a previously encrypted and persisted private key and its metadata.
  * Note that this method does _not_ decrypt the private key; only the _encrypted_ key and its metadata will be returned to the caller.
@@ -13,9 +13,13 @@ export async function getEncryptedKey(
 ): Promise<StoredKeyData> {
   const { pkpSessionSigs, litNodeClient, id } = params;
 
+  const sessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+
   return fetchPrivateKey({
+    pkpAddress,
     id,
-    sessionSig: getFirstSessionSig(pkpSessionSigs),
+    sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
   });
 }

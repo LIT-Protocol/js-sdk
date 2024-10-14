@@ -1,8 +1,12 @@
+import {
+  getFirstSessionSig,
+  getPkpAccessControlCondition,
+  getPkpAddressFromSessionSig,
+} from './utils';
 import { exportPrivateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { fetchPrivateKey } from '../service-client';
 import { ExportPrivateKeyParams, ExportPrivateKeyResult } from '../types';
-import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 
 /**
  * Exports a previously persisted private key from the wrapped keys service for direct use by the caller, along with the keys metadata.
@@ -19,7 +23,10 @@ export async function exportPrivateKey(
   const { litNodeClient, network, pkpSessionSigs, id } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+
   const storedKeyMetadata = await fetchPrivateKey({
+    pkpAddress,
     id,
     sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
