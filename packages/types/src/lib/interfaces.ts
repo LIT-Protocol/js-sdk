@@ -1950,7 +1950,7 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
 
 export interface RespondHandling {
   /**
-   * Weather to handle all responses or threshold/minNodeCount responses
+   * Whether to handle all responses or threshold/minNodeCount responses
    */
   handleAllResponses?: boolean;
 
