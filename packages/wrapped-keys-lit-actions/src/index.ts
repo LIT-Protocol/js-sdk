@@ -1,4 +1,5 @@
 import * as batchGenerateEncryptedKeys from './generated/common/batchGenerateEncryptedKeys';
+import * as triaAuthAndBatchGenerateEncryptedKeys from './generated/common/triaAuthAndBatchGenerateEncryptedKeys';
 import * as exportPrivateKey from './generated/common/exportPrivateKey';
 import * as generateEncryptedEthereumPrivateKey from './generated/ethereum/generateEncryptedEthereumPrivateKey';
 import * as signMessageWithEthereumEncryptedKey from './generated/ethereum/signMessageWithEncryptedEthereumKey';
@@ -34,6 +35,7 @@ const litActionRepository: LitActionCodeRepository = {
 
 const litActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: batchGenerateEncryptedKeys.code,
+  triaAuthAndBatchGenerateEncryptedKeys: triaAuthAndBatchGenerateEncryptedKeys.code,
 };
 
 export {
@@ -43,6 +45,7 @@ export {
 
   // Individual exports to allow tree-shaking and only importing the lit actions you need
   batchGenerateEncryptedKeys,
+  triaAuthAndBatchGenerateEncryptedKeys,
   exportPrivateKey,
   generateEncryptedEthereumPrivateKey,
   signMessageWithEthereumEncryptedKey,

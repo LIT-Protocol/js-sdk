@@ -89,6 +89,7 @@ function setLitActionsCode(repository: LitActionCodeRepositoryInput) {
  */
 const litActionCodeRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: '',
+  triaAuthAndBatchGenerateEncryptedKeys: '',
 };
 
 function assertIsLitActionKeyCommon(

@@ -1,6 +1,9 @@
 const {
   batchGenerateEncryptedKeys,
 } = require('./common/batchGenerateEncryptedKeys');
+const {
+  triaAuthAndBatchGenerateEncryptedKeys
+} = require('./common/triaAuthAndBatchGenerateEncryptedKeys');
 const { exportPrivateKey } = require('./common/exportPrivateKey');
 const {
   generateEncryptedEthereumPrivateKey,
@@ -24,6 +27,7 @@ const {
 export const rawActionFunctions = {
   exportPrivateKey,
   batchGenerateEncryptedKeys,
+  triaAuthAndBatchGenerateEncryptedKeys,
   generateEncryptedEthereumPrivateKey,
   signMessageWithEncryptedEthereumKey,
   signTransactionWithEncryptedEthereumKey,
