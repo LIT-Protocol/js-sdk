@@ -93,7 +93,7 @@ export async function triaBatchGeneratePrivateKeys(
       ],
       litActionIpfsId: params.ipfsId,
       jsParams: _jsParams,
-      getNodeResponses: true,
+      handleAllResponses: true,
     });
   } catch (e) {
     throw new Error(`Error getting Lit Action Session Sigs: ${e}`);

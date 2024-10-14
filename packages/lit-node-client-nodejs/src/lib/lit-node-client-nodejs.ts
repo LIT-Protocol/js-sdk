@@ -76,6 +76,7 @@ import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
+import { parseCustomResources } from './helpers/parseCustomResources';
 
 import type {
   AuthCallback,
@@ -135,8 +136,7 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1293,8 +1293,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1880,17 +1880,34 @@ export class LitNodeClientNodeJs
     });
 
     // -- resolve promises
+    const numberToResolve = params?.handleAllResponses ? this.connectedNodes.size : this.config.minNodeCount;
+
+    console.log("numberToResolve:", numberToResolve);
     let res;
     try {
       res = await this.handleNodePromises(
         nodePromises,
         requestId,
-        this.config.minNodeCount
+        numberToResolve,
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
       throw new Error(`Error when handling node promises: ${e}`);
     }
+
+    // -- handle all responses
+    let customResources;
+
+
+    console.log("res:", res);
+
+    try {
+      customResources = parseCustomResources(res);
+    } catch (e) {
+      log(`Failed to parse custom resources, not a problem.`)
+    }
+
+    console.log("customResources:", customResources);
 
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
@@ -2035,6 +2052,7 @@ export class LitNodeClientNodeJs
         derivedVia: 'lit.bls',
         signedMessage,
         address: computeAddress(hexPrefixed(publicKey)),
+        ...(customResources && { customResources: customResources })
       },
       pkpPublicKey: publicKey,
     };
@@ -2096,8 +2114,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2180,10 +2198,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
@@ -2318,6 +2336,8 @@ export class LitNodeClientNodeJs
             litActionIpfsId: props.litActionIpfsId,
           }),
           ...(props.jsParams && { jsParams: props.jsParams }),
+
+          ...(params.handleAllResponses && { handleAllResponses: params.handleAllResponses })
         });
 
         return response.authSig;
