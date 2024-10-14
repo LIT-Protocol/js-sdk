@@ -1902,7 +1902,7 @@ export class LitNodeClientNodeJs
       throw new Error(`Error when handling node promises: ${e}`);
     }
 
-    // -- handle all responses
+    // -- parse that custom thing
     let customAuthResources;
 
     try {
