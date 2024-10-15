@@ -65,6 +65,23 @@ export const mostCommonString = (arr: Array<any>): any => {
     .pop();
 };
 
+/**
+ *
+ * Find the element that occurs the least in an array
+ *
+ * @param { Array<any> } arr
+ * @returns { any } the element that appeared the least
+ */
+export const leastCommonString = (arr: Array<any>): any => {
+  return arr
+    .sort(
+      (a: any, b: any) =>
+        arr.filter((v: any) => v === b).length -
+        arr.filter((v: any) => v === a).length
+    )
+    .pop();
+};
+
 export const findMostCommonResponse = (responses: Array<object>): object => {
   const result: { [key: string]: any } = {};
 
