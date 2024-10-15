@@ -561,11 +561,11 @@ export const JsonExecutionSdkParamsSchema = LitActionSdkParamsSchema.pick({
     /**
      *  JS code to run on the nodes
      */
-    code: z.string().optional(), // TODO one or the other
+    code: z.string().optional(),
     /**
      * The IPFS ID of some JS code to run on the nodes
      */
-    ipfsId: z.string().optional(), // TODO one or the other
+    ipfsId: z.string().optional(),
     /**
      * the session signatures to use to authorize the user with the nodes
      */
@@ -574,7 +574,13 @@ export const JsonExecutionSdkParamsSchema = LitActionSdkParamsSchema.pick({
      * auth methods to resolve
      */
     authMethods: z.array(AuthMethodSchema).optional(),
-  });
+  })
+  .refine(
+    (data) => (data.code && !data.ipfsId) || (!data.code && data.ipfsId),
+    {
+      message: 'Either `code` or `ipfsId` must be provided, but not both.',
+    }
+  );
 
 export const SigResponseSchema = z.object({
   r: z.string(),
