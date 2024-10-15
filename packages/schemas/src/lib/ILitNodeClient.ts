@@ -18,6 +18,7 @@ import {
   JsonHandshakeResponseSchema,
   MultipleAccessControlConditionsSchema,
   NodeBlsSigningShareSchema,
+  NodeCommandResponseSchema,
   NodeCommandServerKeysResponseSchema,
   RejectedNodePromisesSchema,
   SendNodeCommandSchema,
@@ -100,18 +101,39 @@ export const ILitNodeClientSchema = z.object({
   // ========== Promise Handlers ==========
 
   /**
-   *
    * Get and gather node promises
    *
-   * @param { any } callback
+   * @param { function } callback
    *
-   * @returns { Array<Promise<any>> }
+   * @returns { Array<Promise<NodeCommandResponse>> }
    *
    */
   getNodePromises: z
     .function()
-    .args(z.function().args(z.string()).returns(z.promise(z.any()))) // TODO improve
-    .returns(z.array(z.promise(z.any()))), // TODO
+    .args(
+      z
+        .function()
+        .args(z.string().url())
+        .returns(z.promise(NodeCommandResponseSchema))
+    )
+    .returns(z.array(z.promise(NodeCommandResponseSchema))),
+  /**
+   * Get one node promise
+   *
+   * @param { function } callback
+   *
+   * @returns { Array<Promise<NodeCommandResponse>> }
+   *
+   */
+  getRandomNodePromise: z
+    .function()
+    .args(
+      z
+        .function()
+        .args(z.string().url())
+        .returns(z.promise(NodeCommandResponseSchema))
+    )
+    .returns(z.array(z.promise(NodeCommandResponseSchema)).length(1)),
   /**
    * Handle node promises
    *

@@ -64,6 +64,7 @@ import {
   MultipleAccessControlConditions,
   NodeClientErrorV0,
   NodeClientErrorV1,
+  NodeCommandResponse,
   NodeCommandServerKeysResponse,
   RejectedNodePromises,
   SendNodeCommand,
@@ -1055,21 +1056,16 @@ export class LitCore {
   };
 
   /**
-   *
    * Get and gather node promises
    *
-   * @param { any } callback
+   * @param { function } callback
    *
-   * @returns { Array<Promise<any>> }
+   * @returns { Array<Promise<NodeCommandResponse>> }
    *
    */
   getNodePromises = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (url: string) => Promise<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any>[] => {
-    // FIXME: Replace <any> usage with explicit, strongly typed handlers
-
+    callback: (url: string) => Promise<NodeCommandResponse>
+  ): Promise<NodeCommandResponse>[] => {
     const nodePromises = [];
 
     for (const url of this.connectedNodes) {
@@ -1080,10 +1076,8 @@ export class LitCore {
   };
 
   getRandomNodePromise(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (url: string) => Promise<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any>[] {
+    callback: (url: string) => Promise<NodeCommandResponse>
+  ): Promise<NodeCommandResponse>[] {
     const randomNodeIndex = Math.floor(
       Math.random() * this.connectedNodes.size
     );

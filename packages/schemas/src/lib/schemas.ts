@@ -62,6 +62,12 @@ export const LitAbilitySchema = z.enum([
   'lit-action-execution',
 ] as const);
 
+export const CapacityDelegationRequestSchema = z.object({
+  nft_id: z.array(z.string()).optional(), // Optional array of strings
+  delegate_to: z.array(z.string()).optional(), // Optional array of modified address strings
+  uses: z.string().optional(),
+});
+
 /**
  * Type for a contract resolver instance which will be used
  * In place of LitContractContext for loading addresses of lit contracts
@@ -694,4 +700,58 @@ export const DecryptResponseSchema = z.object({
 export const SuccessNodePromisesSchema = z.object({
   success: z.literal(true),
   values: z.array(z.any()), // TODO add back generics
+});
+
+/**
+ * Struct in rust
+ * -----
+ pub struct JsonExecutionRequest {
+ pub auth_sig: AuthSigItem,
+ #[serde(default = "default_epoch")]
+ pub epoch: u64,
+
+ pub ipfs_id: Option<String>,
+ pub code: Option<String>,
+ pub js_params: Option<Value>,
+ pub auth_methods: Option<Vec<AuthMethod>>,
+ }
+ */
+export const JsonExecutionRequestSchema = LitActionSdkParamsSchema.pick({
+  jsParams: true,
+}).extend({
+  authSig: AuthSigSchema,
+  /**
+   * auto-filled before sending each command to the node, but
+   * in the rust struct, this type is required.
+   */
+  // epoch: z.string(),
+  ipfsId: z.string().optional(),
+  code: z.string().optional(),
+  authMethods: z.array(AuthMethodSchema).optional(),
+});
+
+export const CallRequestSchema = z.object({
+  // to - The address of the contract that will be queried
+  to: z.string(),
+  // The address calling the function.
+  from: z.string().optional(),
+  // Hex encoded data to send to the contract.
+  data: z.string(),
+});
+
+export const JsonSignChainDataRequestSchema = z.object({
+  callRequests: z.array(z.string()),
+  chain: ChainSchema,
+  iat: z.number(),
+  exp: z.number(),
+});
+
+export const JsonRequestSchema = z.union([
+  JsonExecutionRequestSchema,
+  JsonSignChainDataRequestSchema,
+]);
+
+export const NodeCommandResponseSchema = z.object({
+  url: z.string(),
+  data: JsonRequestSchema,
 });

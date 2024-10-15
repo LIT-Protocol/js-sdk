@@ -41,6 +41,10 @@ import {
   RejectedNodePromisesSchema,
   NodeAttestationSchema,
   ExecuteJsAdvancedOptionsSchema,
+  CapacityDelegationRequestSchema,
+  JsonExecutionRequestSchema,
+  NodeCommandResponseSchema,
+  CallRequestSchema,
 } from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
@@ -180,21 +184,6 @@ export interface ClaimKeyResponse {
   pubkey: string;
   mintTx: string;
 }
-
-/**
- * Struct in rust
- * -----
-pub struct JsonExecutionRequest {
-  pub auth_sig: AuthSigItem,
-  #[serde(default = "default_epoch")]
-  pub epoch: u64,
-
-  pub ipfs_id: Option<String>,
-  pub code: Option<String>,
-    pub js_params: Option<Value>,
-    pub auth_methods: Option<Vec<AuthMethod>>,
-}
- */
 
 export interface BaseJsonPkpSignRequest {
   authMethods?: AuthMethod[];
@@ -365,19 +354,7 @@ export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
   targetNodeRange: number;
 }
 
-export interface JsonExecutionRequest
-  extends Pick<LitActionSdkParams, 'jsParams'> {
-  authSig: AuthSig;
-
-  /**
-   * auto-filled before sending each command to the node, but
-   * in the rust struct, this type is required.
-   */
-  // epoch: number;
-  ipfsId?: string;
-  code?: string;
-  authMethods?: AuthMethod[];
-}
+export type JsonExecutionRequest = z.infer<typeof JsonExecutionRequestSchema>;
 
 export type SessionSigsOrAuthSig = z.infer<typeof SessionSigsOrAuthSigSchema>;
 
@@ -563,16 +540,7 @@ export interface NodeLog {
   logs: any;
 }
 
-export interface CallRequest {
-  // to - The address of the contract that will be queried
-  to: string;
-
-  // The address calling the function.
-  from?: string;
-
-  // Hex encoded data to send to the contract.
-  data: string;
-}
+export type CallRequest = z.infer<typeof CallRequestSchema>;
 
 export interface SignedChainDataToken {
   // The call requests to make.  The responses will be signed and returned.
@@ -582,10 +550,7 @@ export interface SignedChainDataToken {
   chain: Chain;
 }
 
-export interface NodeCommandResponse {
-  url: string;
-  data: JsonRequest;
-}
+export type NodeCommandResponse = z.infer<typeof NodeCommandResponseSchema>;
 
 export type NodeCommandServerKeysResponse = z.infer<
   typeof NodeCommandServerKeysResponseSchema
@@ -1425,11 +1390,9 @@ export interface CapacityDelegationFields extends BaseSiweMessage {
   uses?: string;
 }
 
-export interface CapacityDelegationRequest {
-  nft_id?: string[]; // Optional array of strings
-  delegate_to?: string[]; // Optional array of modified address strings
-  uses?: string;
-}
+export type CapacityDelegationRequest = z.infer<
+  typeof CapacityDelegationRequestSchema
+>;
 
 export interface CapacityCreditsReq {
   dAppOwnerWallet: SignerLike;
