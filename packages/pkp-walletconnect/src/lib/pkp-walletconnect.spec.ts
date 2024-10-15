@@ -44,7 +44,7 @@ describe('PKPWalletConnect', () => {
             const toSign = await createSiweMessageWithRecaps({
               uri: params.uri!,
               expiration: params.expiration!,
-              resources: params.resourceAbilityRequests!,
+              resources: [params.resourceAbilityRequests!],
               walletAddress: wallet.address,
               nonce: await litNodeClient.getLatestBlockhash(),
               litNodeClient,
