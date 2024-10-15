@@ -1,15 +1,8 @@
-// @ts-nocheck
-
-// This will prevent it logging the following
-// [Lit-JS-SDK v2.2.39] ✅ [BLS SDK] wasmExports loaded
-// [Lit-JS-SDK v2.2.39] ✅ [ECDSA SDK NodeJS] wasmECDSA loaded.
-global.jestTesting = true;
-
-import { LIT_NETWORK } from '@lit-protocol/constants';
+import { LIT_NETWORK, InvalidArgumentException } from '@lit-protocol/constants';
 
 import { LitNodeClientNodeJs } from './lit-node-client-nodejs';
 
-const isClass = (v) => {
+const isClass = (v: any) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
 };
 
@@ -49,9 +42,32 @@ describe('LitNodeClientNodeJs', () => {
     Object.defineProperty(globalThis, 'localStorage', { value: tmp });
   });
 
+  it('should throw when constructor is passed invalid params', () => {
+    // @ts-expect-error testing invalid params
+    expect(() => new LitNodeClientNodeJs({ litNetwork: 'invalid' })).toThrow(
+      InvalidArgumentException
+    );
+
+    expect(
+      () =>
+        new LitNodeClientNodeJs({
+          litNetwork: LIT_NETWORK.Datil,
+          // @ts-expect-error testing invalid params
+          checkNodeAttestation: 1,
+          // @ts-expect-error testing invalid params
+          minNodeCount: 'something',
+          rpcUrl: 'notAnURL',
+        })
+    ).toThrow(InvalidArgumentException);
+  });
+
   it('gets expiration', () => {
     const expiration = LitNodeClientNodeJs.getExpiration();
 
-    expect(expiration).toContain('T');
+    // Regex pattern for ISO 8601 date format
+    const dateRegex =
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?$/;
+
+    expect(expiration).toMatch(dateRegex);
   });
 });

@@ -21,7 +21,6 @@ import {
   LIT_CURVE,
   LIT_CURVE_VALUES,
   LIT_ENDPOINT,
-  LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
@@ -30,7 +29,6 @@ import {
   STAKING_STATES_VALUES,
   version,
   InitError,
-  InvalidParamType,
   NodeError,
   UnknownError,
   InvalidArgumentException,
@@ -57,7 +55,6 @@ import {
 import {
   AuthSig,
   BlockHashErrorResponse,
-  CustomNetwork,
   EpochInfo,
   EthBlockhashInfo,
   FormattedMultipleAccs,
@@ -74,6 +71,7 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
+import { LitNodeClientConfigSchema } from '@lit-protocol/schemas';
 
 import { composeLitUrl } from './endpoint-version';
 
@@ -166,33 +164,46 @@ export class LitCore {
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
 
   // ========== Constructor ==========
-  constructor(config: LitNodeClientConfig | CustomNetwork) {
-    if (!(config.litNetwork in LIT_NETWORKS)) {
-      const validNetworks = Object.keys(LIT_NETWORKS).join(', ');
-      throw new InvalidParamType(
-        {},
-        'Unsupported network has been provided please use a "litNetwork" option which is supported (%s)',
-        validNetworks
+  constructor(config: LitNodeClientConfig) {
+    let _args: LitNodeClientConfig;
+    try {
+      _args = LitNodeClientConfigSchema.parse(config);
+    } catch (e) {
+      throw new InvalidArgumentException(
+        {
+          cause: e,
+          info: {
+            config,
+          },
+        },
+        'must provide LitNodeClient parameters'
       );
     }
 
+    // Zod makes a deep copy hence it might drop the storageProvider class
+    if ('storageProvider' in config && config.storageProvider?.provider) {
+      _args.storageProvider = {
+        provider: config.storageProvider?.provider,
+      };
+    }
+
     // Initialize default config based on litNetwork
-    switch (config?.litNetwork) {
+    switch (_args?.litNetwork) {
       // Official networks; default value for `checkNodeAttestation` according to network provided.
       case LIT_NETWORK.DatilDev:
         this.config = {
           ...this.config,
           checkNodeAttestation: NETWORKS_REQUIRING_SEV.includes(
-            config?.litNetwork
+            _args?.litNetwork
           ),
-          ...config,
+          ..._args,
         };
         break;
       default:
         // `custom`; no opinion about checkNodeAttestation
         this.config = {
           ...this.config,
-          ...config,
+          ..._args,
         };
     }
 

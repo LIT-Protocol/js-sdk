@@ -63,6 +63,7 @@ import {
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
+import { LitNodeClientConfigSchema } from '@lit-protocol/schemas';
 import {
   uint8arrayFromString,
   uint8arrayToString,
@@ -89,7 +90,6 @@ import type {
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
-  CustomNetwork,
   DecryptRequest,
   DecryptResponse,
   EncryptRequest,
@@ -110,7 +110,6 @@ import type {
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
-  SigShare,
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
@@ -142,15 +141,27 @@ export class LitNodeClientNodeJs
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
-  constructor(args: LitNodeClientConfig | CustomNetwork) {
-    if (!args) {
-      throw new ParamsMissingError({}, 'must provide LitNodeClient parameters');
+  constructor(args: LitNodeClientConfig) {
+    let _args: LitNodeClientConfig;
+    try {
+      _args = LitNodeClientConfigSchema.parse(args);
+    } catch (e) {
+      throw new InvalidArgumentException(
+        {
+          cause: e,
+          info: {
+            args,
+          },
+        },
+        'must provide LitNodeClient parameters'
+      );
     }
 
+    // Passing args instead of _args so parent can make its own assertions without the ones here interfering
     super(args);
 
-    if ('defaultAuthCallback' in args) {
-      this.defaultAuthCallback = args.defaultAuthCallback;
+    if ('defaultAuthCallback' in _args) {
+      this.defaultAuthCallback = _args.defaultAuthCallback;
     }
   }
 

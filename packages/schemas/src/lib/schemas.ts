@@ -383,15 +383,6 @@ export const LitNodeClientConfigSchema = z.object({
   rpcUrl: z.string().optional(),
 });
 
-export const CustomNetworkSchema = z.intersection(
-  LitNodeClientConfigSchema.pick({
-    litNetwork: true,
-    contractContext: true,
-    checkNodeAttestation: true,
-  }),
-  LitNodeClientConfigSchema.pick({ minNodeCount: true }).partial()
-);
-
 export const DerivedAddressesSchema = z.object({
   publicKey: z.string(),
   publicKeyBuffer: z.instanceof(Buffer),
@@ -886,7 +877,7 @@ export const ILitNodeClientSchema = z.object({
 
   // ========== Constructor ==========
   // ** IMPORTANT !! You have to create your constructor when implementing this class **
-  // constructor: z.function().args(z.union([LitNodeClientConfigSchema, CustomNetworkSchema])),
+  // constructor: z.function().args(LitNodeClientConfigSchema),
 
   // ========== Scoped Class Helpers ==========
 

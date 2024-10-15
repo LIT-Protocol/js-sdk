@@ -10,7 +10,6 @@ import {
   AuthCallbackParamsSchema,
   StorageProviderSchema,
   LitNodeClientConfigSchema,
-  CustomNetworkSchema,
   EncryptResponseSchema,
   JsonHandshakeResponseSchema,
   BlsSignatureShareSchema,
@@ -168,8 +167,6 @@ export type StorageProvider = z.infer<typeof StorageProviderSchema>;
 
 /** ---------- Lit Node Client ---------- */
 export type LitNodeClientConfig = z.infer<typeof LitNodeClientConfigSchema>;
-
-export type CustomNetwork = z.infer<typeof CustomNetworkSchema>;
 
 export interface Signature {
   r: string;
