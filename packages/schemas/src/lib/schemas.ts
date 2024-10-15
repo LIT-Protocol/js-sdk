@@ -147,7 +147,7 @@ export const AuthSigSchema = z.object({
   /**
    * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
    */
-  sig: z.string(), // TODO it was any?
+  sig: z.string(),
   /**
    * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
    */
@@ -352,11 +352,11 @@ export const BlsSignatureShareSchema = z.object({
 });
 
 export const NodeBlsSigningShareSchema = z.object({
-  shareIndex: z.number(), // any(),
-  unsignedJwt: z.string().optional(), // any(),
+  shareIndex: z.number(),
+  unsignedJwt: z.string().optional(),
   signatureShare: BlsSignatureShareSchema,
-  response: z.any(), // TODO
-  logs: z.string().optional(), // any(),
+  response: z.any().optional(), // TODO this depends on the type of operation that nodes do
+  logs: z.string().optional(),
 });
 
 export const AccessControlConditionsSchema = z.array(z.any()); // TODO AccessControlConditions
