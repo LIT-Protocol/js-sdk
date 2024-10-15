@@ -22,7 +22,7 @@ import { SessionSigsMap } from '@lit-protocol/types';
 
 /**
  * Generates a batch of private keys and optionally signs messages.
- * 
+ *
  * @param {Object} params - Parameters for generating keys and signing messages.
  * @param {string} params.pkpPublicKey - The public key for the PKP (e.g., "0x123...").
  * @param {string} params.ipfsId - The IPFS ID (e.g., "Qm...").
@@ -31,9 +31,9 @@ import { SessionSigsMap } from '@lit-protocol/types';
  * @param {string} params.authMethod.accessToken - The access token (e.g., "eyJ...").
  * @param {Object} params.litNodeClient - The Lit Node client instance.
  * @param {Array} params.actions - The actions to perform.
- * 
+ *
  * @returns {Promise<BatchGeneratePrivateKeysResult>} - The generated keys and optionally signed messages.
- * 
+ *
  * @throws {Error} - Throws an error if required parameters are missing or if the Lit Action Session Sigs cannot be retrieved.
  */
 export async function triaBatchGeneratePrivateKeys(
@@ -56,7 +56,9 @@ export async function triaBatchGeneratePrivateKeys(
     throw new Error(`Error: ipfsId is required`);
   }
 
-  let pkpPubKey = params.pkpPublicKey.startsWith('0x') ? params.pkpPublicKey.slice(2) : params.pkpPublicKey;
+  let pkpPubKey = params.pkpPublicKey.startsWith('0x')
+    ? params.pkpPublicKey.slice(2)
+    : params.pkpPublicKey;
 
   const pkpPubkeyBuffer = Buffer.from(pkpPubKey, 'hex');
   const pkpEthAddress = computeAddress(pkpPubkeyBuffer);
