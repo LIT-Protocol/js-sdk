@@ -20,6 +20,15 @@ export const LIT_AUTH_SIG_CHAIN_KEYS = [
 export const AUTH_SIGNATURE_BODY =
   'I am creating an account to use Lit Protocol at {{timestamp}}';
 
+// ========== Chains ==========
+export const VMTYPE = {
+  EVM: 'EVM',
+  SVM: 'SVM',
+  CVM: 'CVM',
+} as const;
+export type VMTYPE_TYPE = keyof typeof VMTYPE;
+export type VMTYPE_VALUES = (typeof VMTYPE)[keyof typeof VMTYPE];
+
 const yellowstoneChain = {
   contractAddress: null,
   chainId: 175188,
@@ -30,7 +39,7 @@ const yellowstoneChain = {
   rpcUrls: ['https://yellowstone-rpc.litprotocol.com/'] as const,
   blockExplorerUrls: ['https://yellowstone-explorer.litprotocol.com/'] as const,
   type: null,
-  vmType: 'EVM',
+  vmType: VMTYPE.EVM,
 } as const;
 
 /**
@@ -51,7 +60,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE',
     ] as const,
     blockExplorerUrls: ['https://etherscan.io'] as const,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   polygon: {
     contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
@@ -62,7 +71,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://polygon-rpc.com'] as const,
     blockExplorerUrls: ['https://explorer.matic.network'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fantom: {
     contractAddress: '0x5bD3Fe8Ab542f0AaBF7552FAAf376Fd8Aa9b3869',
@@ -73,7 +82,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpcapi.fantom.network'] as const,
     blockExplorerUrls: ['https://ftmscan.com'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   xdai: {
     contractAddress: '0xDFc2Fd83dFfD0Dafb216F412aB3B18f2777406aF',
@@ -84,7 +93,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.gnosischain.com'] as const,
     blockExplorerUrls: [' https://blockscout.com/xdai/mainnet'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   bsc: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -95,7 +104,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://bsc-dataseed.binance.org/'] as const,
     blockExplorerUrls: [' https://bscscan.com/'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   arbitrum: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -106,7 +115,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     type: 'ERC1155',
     rpcUrls: ['https://arb1.arbitrum.io/rpc'] as const,
     blockExplorerUrls: ['https://arbiscan.io/'] as const,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   arbitrumSepolia: {
     contractAddress: null,
@@ -119,7 +128,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     ] as const,
     blockExplorerUrls: ['https://sepolia.arbiscan.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   avalanche: {
     contractAddress: '0xBB118507E802D17ECDD4343797066dDc13Cde7C6',
@@ -130,7 +139,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     type: 'ERC1155',
     rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'] as const,
     blockExplorerUrls: ['https://snowtrace.io/'] as const,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fuji: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -141,7 +150,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     type: 'ERC1155',
     rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'] as const,
     blockExplorerUrls: ['https://testnet.snowtrace.io/'] as const,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   harmony: {
     contractAddress: '0xBB118507E802D17ECDD4343797066dDc13Cde7C6',
@@ -152,7 +161,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     type: 'ERC1155',
     rpcUrls: ['https://api.harmony.one'] as const,
     blockExplorerUrls: ['https://explorer.harmony.one/'] as const,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   mumbai: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -165,7 +174,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     ] as const,
     blockExplorerUrls: ['https://mumbai.polygonscan.com'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   goerli: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -178,7 +187,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     ] as const,
     blockExplorerUrls: ['https://goerli.etherscan.io'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   cronos: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -189,7 +198,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://evm-cronos.org'] as const,
     blockExplorerUrls: ['https://cronos.org/explorer/'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   optimism: {
     contractAddress: '0xbF68B4c9aCbed79278465007f20a08Fa045281E0',
@@ -200,7 +209,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://mainnet.optimism.io'] as const,
     blockExplorerUrls: ['https://optimistic.etherscan.io'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   celo: {
     contractAddress: '0xBB118507E802D17ECDD4343797066dDc13Cde7C6',
@@ -211,7 +220,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://forno.celo.org'] as const,
     blockExplorerUrls: ['https://explorer.celo.org'] as const,
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   aurora: {
     contractAddress: null,
@@ -222,7 +231,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://mainnet.aurora.dev'] as const,
     blockExplorerUrls: ['https://aurorascan.dev'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   eluvio: {
     contractAddress: null,
@@ -233,7 +242,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://host-76-74-28-226.contentfabric.io/eth'] as const,
     blockExplorerUrls: ['https://explorer.eluv.io'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   alfajores: {
     contractAddress: null,
@@ -246,7 +255,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://alfajores-blockscout.celo-testnet.org',
     ] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   xdc: {
     contractAddress: null,
@@ -257,7 +266,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.xinfin.network'] as const,
     blockExplorerUrls: ['https://explorer.xinfin.network'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   evmos: {
     contractAddress: null,
@@ -268,7 +277,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://eth.bd.evmos.org:8545'] as const,
     blockExplorerUrls: ['https://evm.evmos.org'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   evmosTestnet: {
     contractAddress: null,
@@ -279,7 +288,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://eth.bd.evmos.dev:8545'] as const,
     blockExplorerUrls: ['https://evm.evmos.dev'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   bscTestnet: {
     contractAddress: null,
@@ -290,7 +299,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'] as const,
     blockExplorerUrls: ['https://testnet.bscscan.com/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   baseGoerli: {
     contractAddress: null,
@@ -301,7 +310,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://goerli.base.org'] as const,
     blockExplorerUrls: ['https://goerli.basescan.org'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   baseSepolia: {
     contractAddress: null,
@@ -312,7 +321,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://sepolia.base.org'] as const,
     blockExplorerUrls: ['https://sepolia.basescan.org'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   moonbeam: {
     contractAddress: null,
@@ -323,7 +332,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.api.moonbeam.network'] as const,
     blockExplorerUrls: ['https://moonscan.io'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   moonriver: {
     contractAddress: null,
@@ -334,7 +343,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.api.moonriver.moonbeam.network'] as const,
     blockExplorerUrls: ['https://moonriver.moonscan.io'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   moonbaseAlpha: {
     contractAddress: null,
@@ -345,7 +354,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.api.moonbase.moonbeam.network'] as const,
     blockExplorerUrls: ['https://moonbase.moonscan.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   filecoin: {
     contractAddress: null,
@@ -356,7 +365,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://api.node.glif.io/rpc/v1'] as const,
     blockExplorerUrls: ['https://filfox.info/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   hyperspace: {
     contractAddress: null,
@@ -367,7 +376,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://api.hyperspace.node.glif.io/rpc/v1'] as const,
     blockExplorerUrls: ['https://hyperspace.filscan.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   sepolia: {
     contractAddress: null,
@@ -378,7 +387,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'] as const,
     blockExplorerUrls: ['https://sepolia.etherscan.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   scrollAlphaTestnet: {
     contractAddress: null,
@@ -389,7 +398,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://alpha-rpc.scroll.io/l2'] as const,
     blockExplorerUrls: ['https://blockscout.scroll.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   scroll: {
     contractAddress: null,
@@ -400,7 +409,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.scroll.io'] as const,
     blockExplorerUrls: ['https://scrollscan.com/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zksync: {
     contractAddress: null,
@@ -411,7 +420,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://mainnet.era.zksync.io'] as const,
     blockExplorerUrls: ['https://explorer.zksync.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   base: {
     contractAddress: null,
@@ -422,7 +431,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://mainnet.base.org'] as const,
     blockExplorerUrls: ['https://basescan.org'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lukso: {
     contractAddress: null,
@@ -435,7 +444,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://explorer.execution.mainnet.lukso.network/',
     ] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   luksoTestnet: {
     contractAddress: null,
@@ -448,7 +457,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://explorer.execution.testnet.lukso.network',
     ] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zora: {
     contractAddress: null,
@@ -459,7 +468,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.zora.energy/'] as const,
     blockExplorerUrls: ['https://explorer.zora.energy'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zoraGoerli: {
     contractAddress: null,
@@ -470,7 +479,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://testnet.rpc.zora.energy'] as const,
     blockExplorerUrls: ['https://testnet.explorer.zora.energy'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zksyncTestnet: {
     contractAddress: null,
@@ -481,7 +490,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://testnet.era.zksync.dev'] as const,
     blockExplorerUrls: ['https://goerli.explorer.zksync.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lineaGoerli: {
     contractAddress: null,
@@ -492,7 +501,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.goerli.linea.build'] as const,
     blockExplorerUrls: ['https://explorer.goerli.linea.build'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lineaSepolia: {
     contractAddress: null,
@@ -503,7 +512,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.sepolia.linea.build'],
     blockExplorerUrls: ['https://explorer.sepolia.linea.build'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
 
   /**
@@ -522,7 +531,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.chiadochain.net'] as const,
     blockExplorerUrls: ['https://blockscout.chiadochain.net'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zkEvm: {
     contractAddress: null,
@@ -533,7 +542,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://zkevm-rpc.com'] as const,
     blockExplorerUrls: ['https://zkevm.polygonscan.com/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   mantleTestnet: {
     contractAddress: null,
@@ -544,7 +553,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.testnet.mantle.xyz'] as const,
     blockExplorerUrls: ['https://explorer.testnet.mantle.xyz/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   mantle: {
     contractAddress: null,
@@ -555,7 +564,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.mantle.xyz'] as const,
     blockExplorerUrls: ['http://explorer.mantle.xyz/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   klaytn: {
     contractAddress: null,
@@ -566,7 +575,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://klaytn.blockpi.network/v1/rpc/public'] as const,
     blockExplorerUrls: ['https://www.klaytnfinder.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   publicGoodsNetwork: {
     contractAddress: null,
@@ -577,7 +586,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.publicgoods.network'] as const,
     blockExplorerUrls: ['https://explorer.publicgoods.network/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   optimismGoerli: {
     contractAddress: null,
@@ -588,7 +597,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://optimism-goerli.publicnode.com'] as const,
     blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   waevEclipseTestnet: {
     contractAddress: null,
@@ -599,7 +608,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://api.evm.waev.eclipsenetwork.xyz'] as const,
     blockExplorerUrls: ['http://waev.explorer.modular.cloud/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   waevEclipseDevnet: {
     contractAddress: null,
@@ -610,7 +619,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://api.evm.waev.dev.eclipsenetwork.xyz'] as const,
     blockExplorerUrls: ['http://waev.explorer.modular.cloud/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   verifyTestnet: {
     contractAddress: null,
@@ -621,7 +630,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.verify-testnet.gelato.digital'] as const,
     blockExplorerUrls: ['https://verify-testnet.blockscout.com/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fuse: {
     contractAddress: null,
@@ -632,7 +641,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.fuse.io/'] as const,
     blockExplorerUrls: ['https://explorer.fuse.io/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   campNetwork: {
     contractAddress: null,
@@ -645,7 +654,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://explorer.camp-network-testnet.gelato.digital/',
     ] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   vanar: {
     contractAddress: null,
@@ -656,7 +665,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc-vanguard.vanarchain.com'] as const,
     blockExplorerUrls: ['https://explorer-vanguard.vanarchain.com'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lisk: {
     contractAddress: null,
@@ -667,7 +676,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://lisk.drpc.org'] as const,
     blockExplorerUrls: ['https://blockscout.lisk.com/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   chilizMainnet: {
     contractAddress: null,
@@ -678,7 +687,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://rpc.ankr.com/chiliz'] as const,
     blockExplorerUrls: ['https://chiliscan.com/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   chilizTestnet: {
     contractAddress: null,
@@ -689,7 +698,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://spicy-rpc.chiliz.com/'] as const,
     blockExplorerUrls: ['https://testnet.chiliscan.com/'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleTestnet: {
     contractAddress: null,
@@ -704,7 +713,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://lanky-ill-funny-testnet.explorer.testnet.skalenodes.com',
     ] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skale: {
     contractAddress: null,
@@ -719,7 +728,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://green-giddy-denebola.explorer.mainnet.skalenodes.com',
     ] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleCalypso: {
     contractAddress: null,
@@ -732,7 +741,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
       'https://giant-half-dual-testnet.explorer.testnet.skalenodes.com/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fhenixHelium: {
     contractAddress: null,
@@ -743,7 +752,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://api.helium.fhenix.zone'] as const,
     blockExplorerUrls: ['https://explorer.helium.fhenix.zone'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   hederaTestnet: {
     contractAddress: null,
@@ -754,7 +763,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://testnet.hashio.io/api'] as const,
     blockExplorerUrls: ['https://hashscan.io/testnet/dashboard'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   bitTorrentTestnet: {
     contractAddress: null,
@@ -765,7 +774,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://test-rpc.bittorrentchain.io'] as const,
     blockExplorerUrls: ['https://testnet.bttcscan.com'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   storyProtocolTestnet: {
     contractAddress: null,
@@ -776,7 +785,7 @@ export const LIT_CHAINS: { [key: string]: any } = {
     rpcUrls: ['https://testnet.storyrpc.io'] as const,
     blockExplorerUrls: ['https://testnet.storyscan.xyz'] as const,
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
 } as const;
 export const LIT_EVM_CHAINS = LIT_CHAINS;
@@ -944,7 +953,7 @@ export const LIT_SVM_CHAINS: { [key: string]: any } = {
     decimals: 9,
     rpcUrls: ['https://api.mainnet-beta.solana.com'] as const,
     blockExplorerUrls: ['https://explorer.solana.com/'] as const,
-    vmType: 'SVM',
+    vmType: VMTYPE.SVM,
   },
   solanaDevnet: {
     name: 'Solana Devnet',
@@ -952,7 +961,7 @@ export const LIT_SVM_CHAINS: { [key: string]: any } = {
     decimals: 9,
     rpcUrls: ['https://api.devnet.solana.com'] as const,
     blockExplorerUrls: ['https://explorer.solana.com/'] as const,
-    vmType: 'SVM',
+    vmType: VMTYPE.SVM,
   },
   solanaTestnet: {
     name: 'Solana Testnet',
@@ -960,7 +969,7 @@ export const LIT_SVM_CHAINS: { [key: string]: any } = {
     decimals: 9,
     rpcUrls: ['https://api.testnet.solana.com'] as const,
     blockExplorerUrls: ['https://explorer.solana.com/'] as const,
-    vmType: 'SVM',
+    vmType: VMTYPE.SVM,
   },
 } as const;
 
@@ -978,7 +987,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'cosmoshub-4',
     rpcUrls: ['https://lcd-cosmoshub.keplr.app'] as const,
     blockExplorerUrls: ['https://atomscan.com/'] as const,
-    vmType: 'CVM', // TODO replace all these with the constant
+    vmType: VMTYPE.CVM,
   },
   kyve: {
     name: 'Kyve',
@@ -987,7 +996,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'korellia',
     rpcUrls: ['https://api.korellia.kyve.network'] as const,
     blockExplorerUrls: ['https://explorer.kyve.network/'] as const,
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   evmosCosmos: {
     name: 'EVMOS Cosmos',
@@ -996,7 +1005,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'evmos_9001-2',
     rpcUrls: ['https://rest.bd.evmos.org:1317'] as const,
     blockExplorerUrls: ['https://evmos.bigdipper.live'] as const,
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   evmosCosmosTestnet: {
     name: 'Evmos Cosmos Testnet',
@@ -1005,7 +1014,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'evmos_9000-4',
     rpcUrls: ['https://rest.bd.evmos.dev:1317'] as const,
     blockExplorerUrls: ['https://testnet.bigdipper.live'] as const,
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   cheqdMainnet: {
     name: 'Cheqd Mainnet',
@@ -1014,7 +1023,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'cheqd-mainnet-1',
     rpcUrls: ['https://api.cheqd.net'] as const,
     blockExplorerUrls: ['https://explorer.cheqd.io'] as const,
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   cheqdTestnet: {
     name: 'Cheqd Testnet',
@@ -1023,7 +1032,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'cheqd-testnet-6',
     rpcUrls: ['https://api.cheqd.network'] as const,
     blockExplorerUrls: ['https://testnet-explorer.cheqd.io'] as const,
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   juno: {
     name: 'Juno',
@@ -1032,7 +1041,7 @@ export const LIT_COSMOS_CHAINS: { [key: string]: any } = {
     chainId: 'juno-1',
     rpcUrls: ['https://rest.cosmos.directory/juno'] as const,
     blockExplorerUrls: ['https://www.mintscan.io/juno'] as const,
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
 } as const;
 
@@ -1100,15 +1109,6 @@ export const SIWE_DELEGATION_URI = 'lit:capability:delegation' as const;
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3' as const;
-
-// ========== Chains ==========
-export const VMTYPE = {
-  EVM: 'EVM',
-  SVM: 'SVM',
-  CVM: 'CVM',
-} as const;
-export type VMTYPE_TYPE = keyof typeof VMTYPE;
-export type VMTYPE_VALUES = (typeof VMTYPE)[keyof typeof VMTYPE];
 
 export const LIT_CURVE = {
   BLS: 'BLS',
