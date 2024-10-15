@@ -164,7 +164,7 @@ export const ISessionCapabilityObjectSchema = z.object({
     .args(
       ILitResourceSchema,
       LitAbilitySchema,
-      z.any().optional() // TODO
+      z.record(z.string(), JsonSchema).optional()
     )
     .returns(z.void()),
   /**

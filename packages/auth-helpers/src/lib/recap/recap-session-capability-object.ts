@@ -76,7 +76,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   addCapabilityForResource(
     litResource: ILitResource,
     ability: LIT_ABILITY_VALUES,
-    data: any = {}
+    data = {}
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
@@ -93,14 +93,6 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
     const { recapNamespace, recapAbility } =
       getRecapNamespaceAndAbility(ability);
-
-    if (!data) {
-      return this.addAttenuation(
-        litResource.getResourceKey(),
-        recapNamespace,
-        recapAbility
-      );
-    }
 
     return this.addAttenuation(
       litResource.getResourceKey(),

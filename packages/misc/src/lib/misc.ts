@@ -686,7 +686,7 @@ export function getEnv({
   return defaultValue;
 }
 
-export function sendRequest(
+export async function sendRequest(
   url: string,
   req: RequestInit,
   requestId: string

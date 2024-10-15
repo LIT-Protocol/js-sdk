@@ -152,7 +152,7 @@ export const ILitNodeClientSchema = z.object({
   sendCommandToNode: z
     .function()
     .args(SendNodeCommandSchema)
-    .returns(z.promise(z.any())), // TODO
+    .returns(z.promise(z.instanceof(Response))),
   /**
    *
    * Handshake with SGX
@@ -219,7 +219,7 @@ export const ILitNodeClientSchema = z.object({
    * @returns { Promise } A promise that resolves when the nodes are connected.
    *
    */
-  connect: z.function().returns(z.promise(z.any())), // TODO
+  connect: z.function().returns(z.promise(z.void())),
   /**
    * Generates a session capability object
    *
