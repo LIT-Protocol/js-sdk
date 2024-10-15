@@ -803,6 +803,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  hushedNorthstar: {
+    contractAddress: null,
+    chainId: 42161,
+    name: 'Hushed Northstar Devnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.buildbear.io/yielddev'],
+    blockExplorerUrls: ['https://explorer.buildbear.io/yielddev/transactions'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**
