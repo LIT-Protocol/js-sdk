@@ -116,7 +116,6 @@ export const LitEVMChainSchema = LitBaseChainSchema.extend({
   chainId: z.number(),
   contractAddress: z.union([z.string().optional(), z.null()]),
   type: z.union([z.string().optional(), z.null()]),
-  extra: z.boolean().optional(), // TODO Check if we need this
 })
   .strict()
   .readonly();
