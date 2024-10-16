@@ -64,11 +64,11 @@ import {
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
 import { LitNodeClientConfigSchema } from '@lit-protocol/schemas';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
@@ -1441,8 +1441,7 @@ export class LitNodeClientNodeJs
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { sessionSigs, authSig, chain, ciphertext, dataToEncryptHash } =
-      params;
+    const { chain, ciphertext, dataToEncryptHash } = params;
 
     // ========== Validate Params ==========
     // -- validate if it's ready
@@ -1527,7 +1526,8 @@ export class LitNodeClientNodeJs
     const requestId = this._getNewRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
-      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+      const authSigToSend =
+        'sessionSigs' in params ? params.sessionSigs[url] : params.authSig;
 
       if (!authSigToSend) {
         throw new InvalidArgumentException(
@@ -1794,7 +1794,7 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    let curveType = responseData[0]?.curveType;
+    const curveType = responseData[0]?.curveType;
 
     if (curveType === 'ECDSA') {
       throw new Error(

@@ -45,6 +45,12 @@ import {
   JsonExecutionRequestSchema,
   NodeCommandResponseSchema,
   CallRequestSchema,
+  EncryptUint8ArrayRequestSchema,
+  EncryptRequestSchema,
+  EncryptStringRequestSchema,
+  EncryptFileRequestSchema,
+  EncryptToJsonPayloadSchema,
+  ChainedSessionSigsOrAuthSigSchema,
 } from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
@@ -55,7 +61,6 @@ import {
   Chain,
   EvmContractConditions,
   IRelayAuthStatus,
-  JsonRequest,
   ResponseStrategy,
   SolRpcConditions,
   SymmetricKey,
@@ -356,36 +361,26 @@ export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
 
 export type JsonExecutionRequest = z.infer<typeof JsonExecutionRequestSchema>;
 
+export type ChainedSessionSigsOrAuthSig = z.infer<
+  typeof ChainedSessionSigsOrAuthSigSchema
+>;
+
 export type SessionSigsOrAuthSig = z.infer<typeof SessionSigsOrAuthSigSchema>;
 
 export type DecryptRequestBase = z.infer<typeof DecryptRequestBaseSchema>;
 export type EncryptSdkParams = z.infer<typeof EncryptSdkParamsSchema>;
 
-export interface EncryptRequest extends DecryptRequestBase {
-  // The data that you wish to encrypt as a Uint8Array
-  dataToEncrypt: Uint8Array;
-}
+export type EncryptRequest = z.infer<typeof EncryptRequestSchema>;
 
 export type EncryptResponse = z.infer<typeof EncryptResponseSchema>;
 
-export interface EncryptUint8ArrayRequest
-  extends MultipleAccessControlConditions {
-  /**
-   * The uint8array that you wish to encrypt
-   */
-  dataToEncrypt: Uint8Array;
-}
+export type EncryptUint8ArrayRequest = z.infer<
+  typeof EncryptUint8ArrayRequestSchema
+>;
 
-export interface EncryptStringRequest extends MultipleAccessControlConditions {
-  /**
-   * String that you wish to encrypt
-   */
-  dataToEncrypt: string;
-}
+export type EncryptStringRequest = z.infer<typeof EncryptStringRequestSchema>;
 
-export interface EncryptFileRequest extends DecryptRequestBase {
-  file: AcceptedFileType;
-}
+export type EncryptFileRequest = z.infer<typeof EncryptFileRequestSchema>;
 
 export type DecryptRequest = z.infer<typeof DecryptRequestSchema>;
 
@@ -603,13 +598,7 @@ export interface EncryptToJsonProps extends MultipleAccessControlConditions {
   litNodeClient: ILitNodeClient;
 }
 
-export type EncryptToJsonDataType = 'string' | 'file';
-
-export interface EncryptToJsonPayload extends DecryptRequestBase {
-  ciphertext: string;
-  dataToEncryptHash: string;
-  dataType: EncryptToJsonDataType;
-}
+export type EncryptToJsonPayload = z.infer<typeof EncryptToJsonPayloadSchema>;
 
 export interface DecryptFromJsonProps {
   // the session signatures to use to authorize the user with the nodes

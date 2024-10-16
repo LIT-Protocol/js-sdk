@@ -669,38 +669,111 @@ export const EncryptSdkParamsSchema =
   });
 
 /**
- * This interface is mainly used for access control conditions & decrypt requests.
+ * These schemas are mainly used for access control conditions & decrypt requests.
  * For signing operations such as executeJs and pkpSign, only sessionSigs is used.
  */
-export const SessionSigsOrAuthSigSchema = z.object({
-  // TODO pretty sure this has to be one OR the other but at least one is required
+const SessionSigsAuthenticationSchema = z.object({
   /**
    * the session signatures to use to authorize the user with the nodes
    */
-  sessionSigs: SessionSigsSchema.optional(),
+  sessionSigs: SessionSigsSchema,
+});
+const AuthSigAuthenticationSchema = z.object({
   /**
    * This is a bare authSig generated client side by the user. It can only be used for access control conditions/encrypt/decrypt operations. It CANNOT be used for signing operation.
    */
-  authSig: AuthSigSchema.optional(),
+  authSig: AuthSigSchema,
 });
+export const SessionSigsOrAuthSigSchema = z.union([
+  SessionSigsAuthenticationSchema,
+  AuthSigAuthenticationSchema,
+]);
 
-export const DecryptRequestBaseSchema = SessionSigsOrAuthSigSchema.merge(
-  MultipleAccessControlConditionsSchema
-).extend({
+const ChainedSchema = z.object({
   /**
-   * The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
+   * The chain name of the chain that will be used. See LIT_CHAINS for currently supported chains.
    */
   chain: ChainSchema,
 });
 
-export const DecryptRequestSchema = EncryptResponseSchema.merge(
-  DecryptRequestBaseSchema
-).extend({});
+export const ChainedSessionSigsOrAuthSigSchema = z.union([
+  SessionSigsAuthenticationSchema.merge(ChainedSchema.partial()),
+  AuthSigAuthenticationSchema.merge(ChainedSchema.partial()),
+]);
+
+const ChainMultipleAccessControlConditionsSchema =
+  MultipleAccessControlConditionsSchema.merge(ChainedSchema);
+const SessionSigsDecryptRequestBaseSchema =
+  ChainMultipleAccessControlConditionsSchema.merge(
+    SessionSigsAuthenticationSchema
+  );
+const AuthSigDecryptRequestBaseSchema =
+  ChainMultipleAccessControlConditionsSchema.merge(AuthSigAuthenticationSchema);
+export const DecryptRequestBaseSchema = z.union([
+  SessionSigsDecryptRequestBaseSchema,
+  AuthSigDecryptRequestBaseSchema,
+]);
+
+export const DecryptRequestSchema = z.union([
+  EncryptResponseSchema.merge(SessionSigsDecryptRequestBaseSchema),
+  EncryptResponseSchema.merge(AuthSigDecryptRequestBaseSchema),
+]);
 
 export const DecryptResponseSchema = z.object({
   // The decrypted data as a Uint8Array
   decryptedData: z.instanceof(Uint8Array),
 });
+
+const EncryptRequestBaseSchema = z.object({
+  // The data to encrypt as a Uint8Array
+  dataToEncrypt: z.instanceof(Uint8Array),
+});
+const SessionSigsEncryptRequestBaseSchema = EncryptRequestBaseSchema.merge(
+  SessionSigsDecryptRequestBaseSchema
+);
+const AuthSigEncryptRequestBaseSchema = EncryptRequestBaseSchema.merge(
+  AuthSigDecryptRequestBaseSchema
+);
+export const EncryptRequestSchema = z.union([
+  SessionSigsEncryptRequestBaseSchema,
+  AuthSigEncryptRequestBaseSchema,
+]);
+
+export const EncryptUint8ArrayRequestSchema =
+  MultipleAccessControlConditionsSchema.extend({
+    /**
+     * The uint8array that you wish to encrypt
+     */
+    dataToEncrypt: z.instanceof(Uint8Array),
+  });
+
+export const EncryptStringRequestSchema =
+  MultipleAccessControlConditionsSchema.extend({
+    /**
+     * The string that you wish to encrypt
+     */
+    dataToEncrypt: z.string(),
+  });
+
+export const EncryptFileRequestSchema =
+  MultipleAccessControlConditionsSchema.extend({
+    file: z.union([z.instanceof(File), z.instanceof(Blob)]),
+  });
+
+const EncryptToJsonPayloadBaseSchema = z.object({
+  ciphertext: z.string(),
+  dataToEncryptHash: z.string(),
+  dataType: z.enum(['string', 'file'] as const),
+});
+const SessionSigsEncryptToJsonPayloadSchema =
+  EncryptToJsonPayloadBaseSchema.merge(SessionSigsDecryptRequestBaseSchema);
+const AuthSigEncryptToJsonPayloadSchema = EncryptToJsonPayloadBaseSchema.merge(
+  AuthSigDecryptRequestBaseSchema
+);
+export const EncryptToJsonPayloadSchema = z.union([
+  SessionSigsEncryptToJsonPayloadSchema,
+  AuthSigEncryptToJsonPayloadSchema,
+]);
 
 export const SuccessNodePromisesSchema = z.object({
   success: z.literal(true),
