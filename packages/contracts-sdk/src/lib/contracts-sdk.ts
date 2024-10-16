@@ -1081,7 +1081,7 @@ export class LitContracts {
     const activeValidatorStructs: ValidatorStruct[] =
       activeUnkickedValidatorStructs.map((item: any) => {
         return {
-          ip: `0.0.0.0`,
+          ip: item[0],
           ipv6: item[1],
           port: item[2],
           nodeAddress: item[3],
