@@ -1,6 +1,6 @@
+import { getFirstSessionSig, getPkpAddressFromSessionSig } from './utils';
 import { storePrivateKey } from '../service-client';
 import { StoreEncryptedKeyParams, StoreEncryptedKeyResult } from '../types';
-import { getFirstSessionSig, getPkpAddressFromSessionSig } from '../utils';
 
 /** Stores an encrypted private key and its metadata to the wrapped keys backend service
  *
@@ -12,7 +12,6 @@ export async function storeEncryptedKey(
 ): Promise<StoreEncryptedKeyResult> {
   const { pkpSessionSigs, litNodeClient } = params;
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
-  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
   const { publicKey, keyType, dataToEncryptHash, ciphertext, memo } = params;
 
@@ -22,10 +21,9 @@ export async function storeEncryptedKey(
       keyType,
       dataToEncryptHash,
       ciphertext,
-      pkpAddress,
       memo,
     },
-    sessionSig: getFirstSessionSig(pkpSessionSigs),
+    sessionSig,
     litNetwork: litNodeClient.config.litNetwork,
   });
 }

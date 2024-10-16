@@ -9,10 +9,11 @@ interface BaseApiParams {
 }
 
 export type FetchKeyParams = BaseApiParams & {
+  pkpAddress: string;
   id: string;
 };
 
-export type ListKeysParams = BaseApiParams;
+export type ListKeysParams = BaseApiParams & { pkpAddress: string };
 
 export type SupportedNetworks = Extract<
   LIT_NETWORK_VALUES,
@@ -22,13 +23,15 @@ export type SupportedNetworks = Extract<
 export interface StoreKeyParams extends BaseApiParams {
   storedKeyMetadata: Pick<
     StoredKeyData,
-    | 'pkpAddress'
-    | 'publicKey'
-    | 'keyType'
-    | 'dataToEncryptHash'
-    | 'ciphertext'
-    | 'memo'
+    'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext' | 'memo'
   >;
+}
+
+export interface StoreKeyBatchParams extends BaseApiParams {
+  storedKeyMetadataBatch: Pick<
+    StoredKeyData,
+    'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext' | 'memo'
+  >[];
 }
 
 export interface BaseRequestParams {
