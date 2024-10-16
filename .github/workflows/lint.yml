@@ -24,7 +24,7 @@ jobs:
         run: yarn nx format:check --all
         continue-on-error: true  # Continue even if the check fails
       - name: Auto-format and commit changes if needed
-        if: ${{ failure() }}
+        if: ${{ steps.lint_check.conclusion == 'failure' }}
         run: |
           yarn nx format:write --all
           git config --global user.name "GitHub Actions"
