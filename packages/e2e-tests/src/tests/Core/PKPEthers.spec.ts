@@ -39,9 +39,10 @@ try {
 describe('PKP Ethers', () => {
   let devEnv: TinnyEnvironment;
   let alice: TinnyPerson;
+
   beforeAll(async () => {
-    //@ts-expect-error defined in global
-    devEnv = global.devEnv;
+    devEnv = new TinnyEnvironment();
+    await devEnv.init();
   });
 
   beforeEach(async () => {
@@ -53,7 +54,11 @@ describe('PKP Ethers', () => {
   });
 
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+    jest.spyOn(console, 'warn').mockImplementation(
+      jest.fn(() => {
+        return void 0;
+      })
+    );
   });
 
   afterAll(async () => {
@@ -758,13 +763,10 @@ const signWithAuthContext = async (
   });
 
   await pkpEthersWallet.init();
+  const signature: string = await pkpEthersWallet.signMessage(alice.loveLetter);
 
-  expect(
-    pkpEthersWallet.signMessage(alice.loveLetter).then((signature) => {
-      expect(signature).toBeDefined();
-      expect(signature.length).toEqual(132);
-    })
-  ).resolves.not.toThrowError();
+  expect(signature).toBeDefined();
+  expect(signature.length).toEqual(132);
 };
 
 const ethPersonalSign = async (

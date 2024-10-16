@@ -1,9 +1,12 @@
 name: lint
 on:
-  pull_request:
-  push:
-    branches:
-      - master
+  workflow_call:
+    outputs:
+      lint_result:
+        description: 'lint result'
+        value: ${{jobs.linter.result}}
+
+  workflow_dispatch: {}
 jobs:
   linter:
     runs-on: ubuntu-latest
@@ -22,3 +25,18 @@ jobs:
         run: yarn install
       - name: Lint
         run: yarn nx format:check --all
+  check_status:
+    needs:
+      [
+        linter,
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Status
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [ ${{ needs.linter.result }} != 'success' ]; then
+              echo "Linting failed"
+              exit 1
+          fi
+          echo "All tests passed"
