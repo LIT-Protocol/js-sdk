@@ -42,6 +42,19 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Checkout Lit Actions
+        uses: actions/checkout@v4
+        id: checkout
+        with: 
+          fetch-depth: 0
+          repository: LIT-Protocol/lit-assets
+          ref: ${{env.DATIL_COMMIT_HASH}}
+          token: ${{secrets.GH_PAT}}
+          path: ${{ github.workspace }}/lit-assets/
+          submodules: false
+          sparse-checkout: |
+            blockchain
+            rust/lit-node
       - name: Docker login
         id: login
         run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
@@ -50,9 +63,7 @@ jobs:
         run: docker pull ghcr.io/lit-protocol/shiva:latest 
       - name: Run Shiva Container
         id: shiva-runner
-        run: |
-          mkdir ${{github.workspace}}/data
-          docker run -d -m 32g -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/data:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH=$DATIL_COMMIT_HASH -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:snap-shot-test
+        run: docker run -d -m 32g -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/data:/data -e GH_PAT=${{secrets.GH_PAT}} -e HASH=$DATIL_COMMIT_HASH -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:snap-shot-test
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
