@@ -59,7 +59,6 @@ function humanReadableAtt(obj: any, indentLevel: number = 0): string {
   return result;
 }
 
-
 export function formatSessionSigs(
   sessionSigs: string,
   currentTime: Date = new Date()
@@ -110,10 +109,9 @@ export function formatSessionSigs(
       const decodedRecap = atob(encodedRecap);
       const jsonRecap = JSON.parse(decodedRecap);
       attenuation = humanReadableAtt(jsonRecap.att, 6);
-
     } catch (e) {
       // swallow error
-      console.log("Error parsing attenuation::", e);
+      console.log('Error parsing attenuation::', e);
     }
 
     const capIssuedAt = new Date(parsedCapMessage['Issued At'] || '');
