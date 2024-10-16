@@ -3,11 +3,13 @@ import {
   NoWalletException,
   ParamsMissingError,
 } from '@lit-protocol/constants';
-import { TokenInfo } from '@lit-protocol/types';
+import { DerivedAddresses } from '@lit-protocol/types';
 import { bech32 } from 'bech32';
 import { createHash } from 'crypto';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
+import { z } from 'zod';
+import { fromError, isZodErrorLike } from 'zod-validation-error';
 
 /**
  * Converts a public key between compressed and uncompressed formats.
@@ -142,23 +144,30 @@ function deriveCosmosAddress(
   return bech32.encode(prefix, bech32.toWords(ripemd160Hash));
 }
 
-type DerivedAddressesParams =
-  | {
-      publicKey: string;
-      pkpTokenId?: never;
-      pkpContractAddress?: never;
-      defaultRPCUrl?: never;
-      options?: never;
-    }
-  | {
-      publicKey?: never;
-      pkpTokenId: string;
-      pkpContractAddress: string;
-      defaultRPCUrl: string;
-      options?: {
-        cacheContractCall?: boolean;
-      };
-    };
+const PublicKeyParamsSchema = z.object({
+  publicKey: z.string(),
+  pkpTokenId: z.undefined(),
+  pkpContractAddress: z.undefined(),
+  defaultRPCUrl: z.undefined(),
+  options: z.undefined(),
+});
+const PKPTokenParamsSchema = z.object({
+  publicKey: z.undefined(),
+  pkpTokenId: z.string(),
+  pkpContractAddress: z.string(),
+  defaultRPCUrl: z.string(),
+  options: z
+    .object({
+      cacheContractCall: z.boolean().optional(),
+    })
+    .optional(),
+});
+const DerivedAddressesParamsSchema = z.union([
+  PublicKeyParamsSchema,
+  PKPTokenParamsSchema,
+]);
+
+type DerivedAddressesParams = z.infer<typeof DerivedAddressesParamsSchema>;
 
 /**
  * Derives multiple blockchain addresses (Ethereum, Bitcoin, and Cosmos) from a given uncompressed eth public key
@@ -173,7 +182,6 @@ type DerivedAddressesParams =
  * @param params.options.cacheContractCall - Whether to cache the contract call result in local storage (default: false).
  *
  * @returns A Promise that resolves to an object containing token information:
- *   @property {string} tokenId - The PKP token ID.
  *   @property {string} publicKey - The Ethereum public key as a hex string.
  *   @property {Buffer} publicKeyBuffer - The buffer representation of the public key.
  *   @property {string} ethAddress - The derived Ethereum address.
@@ -185,27 +193,34 @@ type DerivedAddressesParams =
  * @throws {ParamsMissingError} If neither publicKey nor pkpTokenId is provided.
  * @throws {MultiError} If any of the derived addresses (btcAddress, ethAddress, cosmosAddress) are undefined.
  */
-export const derivedAddresses = async ({
-  publicKey,
-  pkpTokenId,
-  pkpContractAddress,
-  defaultRPCUrl,
-  options = {
-    cacheContractCall: false,
-  },
-}: DerivedAddressesParams): Promise<TokenInfo | any> => {
-  // one of the two must be provided
-  if (!publicKey && !pkpTokenId) {
+export const derivedAddresses = async (
+  params: DerivedAddressesParams
+): Promise<DerivedAddresses> => {
+  let _params: DerivedAddressesParams;
+  try {
+    _params = DerivedAddressesParamsSchema.parse(params);
+  } catch (e) {
     throw new ParamsMissingError(
       {
         info: {
-          publicKey,
-          pkpTokenId,
+          publicKey: params.publicKey,
+          pkpTokenId: params.pkpTokenId,
         },
+        cause: isZodErrorLike(e) ? fromError(e) : e,
       },
       'publicKey or pkpTokenId must be provided'
     );
   }
+
+  let {
+    publicKey,
+    pkpTokenId,
+    pkpContractAddress,
+    defaultRPCUrl,
+    options = {
+      cacheContractCall: false,
+    },
+  } = _params;
 
   // if pkpTokenId is provided, we must get the public key from it (in cache or from the contract)
   let isNewPKP = false;
@@ -347,7 +362,6 @@ export const derivedAddresses = async ({
   }
 
   return {
-    tokenId: pkpTokenId,
     publicKey: `0x${publicKey}`,
     publicKeyBuffer: pubkeyBuffer,
     ethAddress,

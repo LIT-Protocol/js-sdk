@@ -1,0 +1,50 @@
+{
+  "name": "schemas",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/schemas/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/schemas",
+        "main": "packages/schemas/src/index.ts",
+        "tsConfig": "packages/schemas/tsconfig.lib.json",
+        "assets": ["packages/schemas/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "generateDoc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn typedoc --entryPointStrategy expand packages/schemas/src --exclude packages/schemas/src/**/*.spec.** --tsconfig packages/schemas/tsconfig.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/schemas/**/*.ts"]
+      }
+    },
+    "testPackage": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/schemas"],
+      "options": {
+        "jestConfig": "packages/schemas/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/schemas"],
+      "options": {
+        "jestConfig": "packages/schemas/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}

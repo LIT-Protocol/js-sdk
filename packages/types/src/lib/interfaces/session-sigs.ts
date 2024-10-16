@@ -1,32 +1,13 @@
-import { AuthSig } from '../interfaces';
+import { z } from 'zod';
 
-export interface ParsedSignedMessage {
-  // Known keys
-  URI?: string;
-  Version?: string;
-  'Chain ID'?: string;
-  Nonce?: string;
-  'Issued At'?: string;
+import {
+  CapabilitySchema,
+  ParsedSessionMessageSchema,
+  ParsedSignedMessageSchema,
+} from '@lit-protocol/schemas';
 
-  /**
-   * Inner expiration
-   */
-  'Expiration Time'?: string;
-  Resources?: string[]; // Should be an array of strings
+export type ParsedSignedMessage = z.infer<typeof ParsedSignedMessageSchema>;
 
-  /**
-   * Outer expiration
-   */
-  expiration?: string;
+export type Capability = z.infer<typeof CapabilitySchema>;
 
-  // Dynamic keys
-  [key: string]: unknown;
-}
-
-export interface ParsedSessionMessage extends ParsedSignedMessage {
-  capabilities: Capability[];
-}
-
-export interface Capability extends AuthSig {
-  parsedSignedMessage?: ParsedSignedMessage;
-}
+export type ParsedSessionMessage = z.infer<typeof ParsedSessionMessageSchema>;

@@ -1,19 +1,66 @@
 import { Provider } from '@ethersproject/abstract-provider';
 import depd from 'depd';
+import { z } from 'zod';
+
+import {
+  AuthSigSchema,
+  CosmosWalletTypeSchema,
+  SessionKeyPairSchema,
+  LitActionSdkParamsSchema,
+  AuthCallbackParamsSchema,
+  StorageProviderSchema,
+  LitNodeClientConfigSchema,
+  EncryptResponseSchema,
+  JsonHandshakeResponseSchema,
+  BlsSignatureShareSchema,
+  NodeBlsSigningShareSchema,
+  SessionSigsSchema,
+  AuthMethodSchema,
+  JsonSigningResourceIdSchema,
+  SendNodeCommandSchema,
+  HandshakeWithNodeSchema,
+  NodeCommandServerKeysResponseSchema,
+  IpfsOptionsSchema,
+  JsonExecutionSdkParamsSchema,
+  SigResponseSchema,
+  ExecuteJsResponseBaseSchema,
+  ExecuteJsResponseSchema,
+  GetSignedTokenRequestSchema,
+  MultipleAccessControlConditionsSchema,
+  EncryptSdkParamsSchema,
+  DecryptResponseSchema,
+  DecryptRequestBaseSchema,
+  SessionSigsOrAuthSigSchema,
+  DecryptRequestSchema,
+  FormattedMultipleAccsSchema,
+  JsonAccsRequestSchema,
+  JsonSigningRetrieveRequestSchema,
+  JsonEncryptionRetrieveRequestSchema,
+  SuccessNodePromisesSchema,
+  NodeErrorV1Schema,
+  RejectedNodePromisesSchema,
+  NodeAttestationSchema,
+  ExecuteJsAdvancedOptionsSchema,
+  CapacityDelegationRequestSchema,
+  JsonExecutionRequestSchema,
+  NodeCommandResponseSchema,
+  CallRequestSchema,
+  EncryptUint8ArrayRequestSchema,
+  EncryptRequestSchema,
+  EncryptStringRequestSchema,
+  EncryptFileRequestSchema,
+  EncryptToJsonPayloadSchema,
+  ChainedSessionSigsOrAuthSigSchema,
+} from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
   EvmContractConditions,
   IRelayAuthStatus,
-  JsonRequest,
-  LIT_NETWORKS_KEYS,
-  LitContractContext,
-  LitContractResolverContext,
   ResponseStrategy,
   SolRpcConditions,
   SymmetricKey,
@@ -38,35 +85,7 @@ export interface AccsOperatorParams {
 /**
  * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE ReCap](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
  */
-export interface AuthSig {
-  /**
-   * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
-   */
-  sig: any;
-
-  /**
-   * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
-   */
-  derivedVia: string;
-
-  /**
-   * An [ERC-5573](https://eips.ethereum.org/EIPS/eip-5573) SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
-   * -  [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
-   * -  [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
-   * -  [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
-   */
-  signedMessage: string;
-
-  /**
-   * The Ethereum address that was used to sign `signedMessage` and create the `sig`.
-   */
-  address: string;
-
-  /**
-   * An optional property only seen when generating session signatures, this is the signing algorithm used to generate session signatures.
-   */
-  algo?: string;
-}
+export type AuthSig = z.infer<typeof AuthSigSchema>;
 
 export interface SolanaAuthSig extends AuthSig {
   derivedVia: 'solana.signMessage';
@@ -76,58 +95,13 @@ export interface CosmosAuthSig extends AuthSig {
   derivedVia: 'cosmos.signArbitrary';
 }
 
-export type CosmosWalletType = 'keplr' | 'leap';
+export type CosmosWalletType = z.infer<typeof CosmosWalletTypeSchema>;
 
-export interface AuthCallbackParams extends LitActionSdkParams {
-  /**
-   * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
-   */
-  sessionKey?: SessionKeyPair;
+export type SessionKeyPair = z.infer<typeof SessionKeyPairSchema>;
 
-  /**
-   * The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
-   */
-  chain: Chain;
+export type LitActionSdkParams = z.infer<typeof LitActionSdkParamsSchema>;
 
-  /**
-   *   The statement that describes what the user is signing. If the auth callback is for signing a SIWE message, you MUST add this statement to the end of the SIWE statement.
-   */
-  statement?: string;
-
-  /**
-   * The blockhash that the nodes return during the handshake
-   */
-  nonce: string;
-
-  /**
-   * Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
-   */
-  resources?: string[];
-
-  /**
-   * Optional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
-   */
-  switchChain?: boolean;
-
-  // --- Following for Session Auth ---
-  expiration?: string;
-
-  uri?: string;
-
-  /**
-   * Cosmos wallet type, to support mutliple popular cosmos wallets
-   * Keplr & Cypher -> window.keplr
-   * Leap -> window.leap
-   */
-  cosmosWalletType?: CosmosWalletType;
-
-  /**
-   * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
-   */
-  walletConnectProjectId?: string;
-
-  resourceAbilityRequests?: LitResourceAbilityRequest[];
-}
+export type AuthCallbackParams = z.infer<typeof AuthCallbackParamsSchema>;
 
 /** ---------- Web3 ---------- */
 export interface IProvider {
@@ -193,34 +167,15 @@ export interface HumanizedAccsProps {
 /** ---------- Key Value Type ---------- */
 export type KV = Record<string, any>;
 
-/** ---------- Lit Node Client ---------- */
-export interface LitNodeClientConfig {
-  litNetwork: LIT_NETWORKS_KEYS;
-  alertWhenUnauthorized?: boolean;
-  minNodeCount?: number;
-  debug?: boolean;
-  connectTimeout?: number;
-  checkNodeAttestation?: boolean;
-  contractContext?: LitContractContext | LitContractResolverContext;
-  storageProvider?: StorageProvider;
-  defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
-  rpcUrl?: string;
-}
-
-export type CustomNetwork = Pick<
-  LitNodeClientConfig,
-  'litNetwork' | 'contractContext' | 'checkNodeAttestation'
-> &
-  Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
-
 /**
  * Override for LocalStorage and SessionStorage
  * if running in NodeJs and this is implicitly
  * binded globally
  */
-export interface StorageProvider {
-  provider: Storage;
-}
+export type StorageProvider = z.infer<typeof StorageProviderSchema>;
+
+/** ---------- Lit Node Client ---------- */
+export type LitNodeClientConfig = z.infer<typeof LitNodeClientConfigSchema>;
 
 export interface Signature {
   r: string;
@@ -234,21 +189,6 @@ export interface ClaimKeyResponse {
   pubkey: string;
   mintTx: string;
 }
-
-/**
- * Struct in rust
- * -----
-pub struct JsonExecutionRequest {
-  pub auth_sig: AuthSigItem,
-  #[serde(default = "default_epoch")]
-  pub epoch: u64,
-
-  pub ipfs_id: Option<String>,
-  pub code: Option<String>,
-    pub js_params: Option<Value>,
-    pub auth_methods: Option<Vec<AuthMethod>>,
-}
- */
 
 export interface BaseJsonPkpSignRequest {
   authMethods?: AuthMethod[];
@@ -354,77 +294,19 @@ export interface BlsResponseData {
   blsRootPubkey: string;
 }
 
-/**
- * Struct in rust
- * -----
- pub struct JsonSigningResourceId {
-    pub base_url: String,
-    pub path: String,
-    pub org_id: String,
-    pub role: String,
-    pub extra_data: String,
-}
-*/
-export interface JsonSigningResourceId {
-  baseUrl: string;
-  path: string;
-  orgId: string;
-  role: string;
-  extraData: string;
-}
+export type JsonSigningResourceId = z.infer<typeof JsonSigningResourceIdSchema>;
 
-export interface MultipleAccessControlConditions {
-  // The access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  accessControlConditions?: AccessControlConditions;
+export type MultipleAccessControlConditions = z.infer<
+  typeof MultipleAccessControlConditionsSchema
+>;
 
-  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  evmContractConditions?: EvmContractConditions;
+export type JsonAccsRequest = z.infer<typeof JsonAccsRequestSchema>;
 
-  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.
-  solRpcConditions?: SolRpcConditions;
+export type JsonSigningRetrieveRequest = z.infer<
+  typeof JsonSigningRetrieveRequestSchema
+>;
 
-  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
-}
-
-export interface JsonAccsRequest extends MultipleAccessControlConditions {
-  // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
-  chain?: Chain;
-
-  // The resourceId representing something on the web via a URL
-  resourceId?: JsonSigningResourceId;
-
-  // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
-  authSig?: AuthSig;
-
-  sessionSigs?: SessionSigsMap;
-}
-
-/**
- * Struct in rust
- * -----
-pub struct JsonSigningRetrieveRequest {
-    pub access_control_conditions: Option<Vec<AccessControlConditionItem>>,
-    pub evm_contract_conditions: Option<Vec<EVMContractConditionItem>>,
-    pub sol_rpc_conditions: Option<Vec<SolRpcConditionItem>>,
-    pub unified_access_control_conditions: Option<Vec<UnifiedAccessControlConditionItem>>,
-    pub chain: Option<String>,
-    pub resource_id: JsonSigningResourceId,
-    pub auth_sig: AuthSigItem,
-    pub iat: u64,
-    pub exp: u64,
-}
-*/
-export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
-  iat?: number;
-  exp?: number;
-  sessionSigs?: any;
-}
-
-export interface GetSignedTokenRequest
-  extends SigningAccessControlConditionRequest {
-  sessionSigs: SessionSigsMap;
-}
+export type GetSignedTokenRequest = z.infer<typeof GetSignedTokenRequestSchema>;
 
 /**
  * Struct in rust
@@ -447,23 +329,9 @@ export interface JsonSigningStoreRequest {
   sessionSigs?: object;
 }
 
-/**
- * Struct in rust
- * -----
- pub struct JsonEncryptionRetrieveRequest {
-    pub access_control_conditions: Option<Vec<AccessControlConditionItem>>,
-    pub evm_contract_conditions: Option<Vec<EVMContractConditionItem>>,
-    pub sol_rpc_conditions: Option<Vec<SolRpcConditionItem>>,
-    pub unified_access_control_conditions: Option<Vec<UnifiedAccessControlConditionItem>>,
-    pub chain: Option<String>,
-    pub to_decrypt: String,
-    pub auth_sig: AuthSigItem,
-}
- */
-export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
-  // The ciphertext that you wish to decrypt encoded as a hex string
-  toDecrypt: string;
-}
+export type JsonEncryptionRetrieveRequest = z.infer<
+  typeof JsonEncryptionRetrieveRequestSchema
+>;
 
 export interface LitActionResponseStrategy {
   strategy: ResponseStrategy;
@@ -472,187 +340,66 @@ export interface LitActionResponseStrategy {
   ) => Record<string, string>;
 }
 
-export interface IpfsOptions {
-  overwriteCode?: boolean;
-  gatewayUrl?: `https://${string}/ipfs/`;
-}
+export type IpfsOptions = z.infer<typeof IpfsOptionsSchema>;
 
 export interface JsonExecutionSdkParamsTargetNode
   extends JsonExecutionSdkParams {
   targetNodeRange: number;
 }
 
-export interface JsonExecutionSdkParams
-  extends Pick<LitActionSdkParams, 'jsParams'>,
-    ExecuteJsAdvancedOptions {
-  /**
-   *  JS code to run on the nodes
-   */
-  code?: string;
+export type JsonExecutionSdkParams = z.infer<
+  typeof JsonExecutionSdkParamsSchema
+>;
 
-  /**
-   * The IPFS ID of some JS code to run on the nodes
-   */
-  ipfsId?: string;
-
-  /**
-   * the session signatures to use to authorize the user with the nodes
-   */
-  sessionSigs: SessionSigsMap;
-
-  /**
-   * auth methods to resolve
-   */
-  authMethods?: AuthMethod[];
-}
-
-export interface ExecuteJsAdvancedOptions {
-  /**
-   * a strategy for proccessing `reponse` objects returned from the
-   * Lit Action execution context
-   */
-  responseStrategy?: LitActionResponseStrategy;
-
-  /**
-   * Allow overriding the default `code` property in the `JsonExecutionSdkParams`
-   */
-  ipfsOptions?: IpfsOptions;
-
-  /**
-   * Only run the action on a single node; this will only work if all code in your action is non-interactive
-   */
-  useSingleNode?: boolean;
-}
+export type ExecuteJsAdvancedOptions = z.infer<
+  typeof ExecuteJsAdvancedOptionsSchema
+>;
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
   targetNodeRange: number;
 }
 
-export interface JsonExecutionRequest
-  extends Pick<LitActionSdkParams, 'jsParams'> {
-  authSig: AuthSig;
+export type JsonExecutionRequest = z.infer<typeof JsonExecutionRequestSchema>;
 
-  /**
-   * auto-filled before sending each command to the node, but
-   * in the rust struct, this type is required.
-   */
-  // epoch: number;
-  ipfsId?: string;
-  code?: string;
-  authMethods?: AuthMethod[];
-}
+export type ChainedSessionSigsOrAuthSig = z.infer<
+  typeof ChainedSessionSigsOrAuthSigSchema
+>;
 
-/**
- * This interface is mainly used for access control conditions & decrypt requests.
- * For signing operations such as executeJs and pkpSign, only sessionSigs is used.
- */
-export interface SessionSigsOrAuthSig {
-  /**
-   * the session signatures to use to authorize the user with the nodes
-   */
-  sessionSigs?: SessionSigsMap;
+export type SessionSigsOrAuthSig = z.infer<typeof SessionSigsOrAuthSigSchema>;
 
-  /**
-   * This is a bare authSig generated client side by the user. It can only be used for access control conditions/encrypt/decrypt operations. It CANNOT be used for signing operation.
-   */
-  authSig?: AuthSig;
-}
+export type DecryptRequestBase = z.infer<typeof DecryptRequestBaseSchema>;
+export type EncryptSdkParams = z.infer<typeof EncryptSdkParamsSchema>;
 
-export interface DecryptRequestBase
-  extends SessionSigsOrAuthSig,
-    MultipleAccessControlConditions {
-  /**
-   * The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-   */
-  chain: Chain;
-}
-export interface EncryptSdkParams extends MultipleAccessControlConditions {
-  dataToEncrypt: Uint8Array;
-}
+export type EncryptRequest = z.infer<typeof EncryptRequestSchema>;
 
-export interface EncryptRequest extends DecryptRequestBase {
-  // The data that you wish to encrypt as a Uint8Array
-  dataToEncrypt: Uint8Array;
-}
+export type EncryptResponse = z.infer<typeof EncryptResponseSchema>;
 
-export interface EncryptResponse {
-  /**
-   * The base64-encoded ciphertext
-   */
-  ciphertext: string;
+export type EncryptUint8ArrayRequest = z.infer<
+  typeof EncryptUint8ArrayRequestSchema
+>;
 
-  /**
-   * The hash of the data that was encrypted
-   */
-  dataToEncryptHash: string;
-}
+export type EncryptStringRequest = z.infer<typeof EncryptStringRequestSchema>;
 
-export interface EncryptUint8ArrayRequest
-  extends MultipleAccessControlConditions {
-  /**
-   * The uint8array that you wish to encrypt
-   */
-  dataToEncrypt: Uint8Array;
-}
+export type EncryptFileRequest = z.infer<typeof EncryptFileRequestSchema>;
 
-export interface EncryptStringRequest extends MultipleAccessControlConditions {
-  /**
-   * String that you wish to encrypt
-   */
-  dataToEncrypt: string;
-}
+export type DecryptRequest = z.infer<typeof DecryptRequestSchema>;
 
-export interface EncryptFileRequest extends DecryptRequestBase {
-  file: AcceptedFileType;
-}
-
-export interface DecryptRequest extends EncryptResponse, DecryptRequestBase {}
-
-export interface DecryptResponse {
-  // The decrypted data as a Uint8Array
-  decryptedData: Uint8Array;
-}
+export type DecryptResponse = z.infer<typeof DecryptResponseSchema>;
 
 export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
   dataToEncryptHash: string;
 }
 
-export interface SigResponse {
-  r: string;
-  s: string;
-  recid: number;
-  signature: string; // 0x...
-  publicKey: string; // pkp public key (no 0x prefix)
-  dataSigned: string;
-}
+export type SigResponse = z.infer<typeof SigResponseSchema>;
 
-export interface ExecuteJsResponseBase {
-  signatures:
-    | {
-        sig: SigResponse;
-      }
-    | any;
-}
+export type ExecuteJsResponseBase = z.infer<typeof ExecuteJsResponseBaseSchema>;
 
 /**
  *
  * An object containing the resulting signatures.  Each signature comes with the public key and the data signed.
  *
  */
-export interface ExecuteJsResponse extends ExecuteJsResponseBase {
-  success?: boolean;
-
-  // FIXME: Fix if and when we enable decryptions from within a Lit Action.
-  // decryptions: any[];
-  response: string | object;
-  logs: string;
-  claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
-  debug?: {
-    allNodeResponses: NodeResponse[];
-    allNodeLogs: NodeLog[];
-    rawNodeHTTPResponses: any;
-  };
-}
+export type ExecuteJsResponse = z.infer<typeof ExecuteJsResponseSchema>;
 
 export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
   claims: {};
@@ -663,11 +410,7 @@ export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
 
 export interface LitNodePromise {}
 
-export interface SendNodeCommand {
-  url: string;
-  data: any;
-  requestId: string;
-}
+export type SendNodeCommand = z.infer<typeof SendNodeCommandSchema>;
 export interface SigShare {
   sigType:
     | 'BLS'
@@ -694,7 +437,7 @@ export interface PkpSignedData {
   sigType: string;
   dataSigned: string;
 }
-export interface NodeShare {
+export interface NodeShare extends NodeLog {
   claimData: any;
   shareIndex: any;
 
@@ -703,7 +446,6 @@ export interface NodeShare {
   signedData: SigShare;
   decryptedData: any;
   response: any;
-  logs: any;
   success?: boolean | '';
 }
 
@@ -713,27 +455,13 @@ export interface PKPSignShare {
   signatureShare: any;
 }
 
-export interface NodeBlsSigningShare {
-  shareIndex: any;
-  unsignedJwt?: any;
-  signatureShare: BlsSignatureShare;
-  response?: any;
-  logs?: any;
-}
+export type NodeBlsSigningShare = z.infer<typeof NodeBlsSigningShareSchema>;
 
-export interface BlsSignatureShare {
-  ProofOfPossession: string;
-}
+export type BlsSignatureShare = z.infer<typeof BlsSignatureShareSchema>;
 
-export interface SuccessNodePromises<T> {
-  success: true;
-  values: T[];
-}
+export type SuccessNodePromises = z.infer<typeof SuccessNodePromisesSchema>;
 
-export interface RejectedNodePromises {
-  success: false;
-  error: NodeErrorV1;
-}
+export type RejectedNodePromises = z.infer<typeof RejectedNodePromisesSchema>;
 
 export interface NodePromiseResponse {
   status?: string;
@@ -741,13 +469,7 @@ export interface NodePromiseResponse {
   reason?: any;
 }
 
-export interface NodeErrorV1 {
-  errorKind: string;
-  status: number;
-  details: string[];
-  message?: string;
-  errorCode?: string;
-}
+export type NodeErrorV1 = z.infer<typeof NodeErrorV1Schema>;
 
 export interface NodeErrorV3 {
   errorKind: string;
@@ -813,16 +535,7 @@ export interface NodeLog {
   logs: any;
 }
 
-export interface CallRequest {
-  // to - The address of the contract that will be queried
-  to: string;
-
-  // The address calling the function.
-  from?: string;
-
-  // Hex encoded data to send to the contract.
-  data: string;
-}
+export type CallRequest = z.infer<typeof CallRequestSchema>;
 
 export interface SignedChainDataToken {
   // The call requests to make.  The responses will be signed and returned.
@@ -832,28 +545,13 @@ export interface SignedChainDataToken {
   chain: Chain;
 }
 
-export interface NodeCommandResponse {
-  url: string;
-  data: JsonRequest;
-}
+export type NodeCommandResponse = z.infer<typeof NodeCommandResponseSchema>;
 
-export interface NodeCommandServerKeysResponse {
-  serverPublicKey: string;
-  subnetPublicKey: string;
-  networkPublicKey: string;
-  networkPublicKeySet: string;
-  hdRootPubkeys: string[];
-  attestation?: NodeAttestation;
-  latestBlockhash?: string;
-}
+export type NodeCommandServerKeysResponse = z.infer<
+  typeof NodeCommandServerKeysResponseSchema
+>;
 
-export interface FormattedMultipleAccs {
-  error: boolean;
-  formattedAccessControlConditions: any;
-  formattedEVMContractConditions: any;
-  formattedSolRpcConditions: any;
-  formattedUnifiedAccessControlConditions: any;
-}
+export type FormattedMultipleAccs = z.infer<typeof FormattedMultipleAccsSchema>;
 
 export interface SignWithECDSA {
   // TODO: The message to be signed - note this message is not currently converted to a digest!!!!!
@@ -872,31 +570,11 @@ export interface CombinedECDSASignature {
   recid: number;
 }
 
-export interface HandshakeWithNode {
-  url: string;
-  challenge: string;
-}
+export type HandshakeWithNode = z.infer<typeof HandshakeWithNodeSchema>;
 
-export interface NodeAttestation {
-  type: string;
-  noonce: string;
-  data: {
-    INSTANCE_ID: string;
-    RELEASE_ID: string;
-    UNIX_TIME: string;
-  };
-  signatures: string[];
-  report: string;
-}
+export type NodeAttestation = z.infer<typeof NodeAttestationSchema>;
 
-export interface JsonHandshakeResponse {
-  serverPubKey: string;
-  subnetPubKey: string;
-  networkPubKey: string;
-  networkPubKeySet: string;
-  hdRootPubkeys: string[];
-  latestBlockhash?: string;
-}
+export type JsonHandshakeResponse = z.infer<typeof JsonHandshakeResponseSchema>;
 
 export interface EncryptToJsonProps extends MultipleAccessControlConditions {
   /**
@@ -920,13 +598,7 @@ export interface EncryptToJsonProps extends MultipleAccessControlConditions {
   litNodeClient: ILitNodeClient;
 }
 
-export type EncryptToJsonDataType = 'string' | 'file';
-
-export interface EncryptToJsonPayload extends DecryptRequestBase {
-  ciphertext: string;
-  dataToEncryptHash: string;
-  dataType: EncryptToJsonDataType;
-}
+export type EncryptToJsonPayload = z.infer<typeof EncryptToJsonPayloadSchema>;
 
 export interface DecryptFromJsonProps {
   // the session signatures to use to authorize the user with the nodes
@@ -968,21 +640,8 @@ export interface SessionSigsProp {
   litNodeClient: ILitNodeClient;
 }
 
-export interface SessionKeyPair {
-  publicKey: string;
-  secretKey: string;
-}
-
 /** ========== Session ========== */
-
-// pub struct AuthMethod {
-//     pub auth_method_type: u32,
-//     pub access_token: String,
-// }
-export interface AuthMethod {
-  authMethodType: number;
-  accessToken: string;
-}
+export type AuthMethod = z.infer<typeof AuthMethodSchema>;
 
 export interface CreateCustomAuthMethodRequest {
   /**
@@ -1135,22 +794,7 @@ export interface GetSessionSigsProps
 }
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
-/**
- * A map of node addresses to the session signature payload
- * for that node specifically.
- *
- * Each individual session signature for each node includes the following properties:
- * -  `sig`: The signature produced by the ECDSA key pair signing the `signedMessage` payload.
- *
- * -  `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
- *
- * -  `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
- *
- * -  `address`: When the session key signs the SIWE ReCap message, this will be the session key pair public key. If an EOA wallet signs the message, then this will be the EOA Ethereum address.
- *
- * -  `algo`: The signing algorithm used to generate the session signature.
- */
-export type SessionSigsMap = Record<string, AuthSig>;
+export type SessionSigsMap = z.infer<typeof SessionSigsSchema>;
 
 export type SessionSigs = Record<string, AuthSig>;
 
@@ -1735,11 +1379,9 @@ export interface CapacityDelegationFields extends BaseSiweMessage {
   uses?: string;
 }
 
-export interface CapacityDelegationRequest {
-  nft_id?: string[]; // Optional array of strings
-  delegate_to?: string[]; // Optional array of modified address strings
-  uses?: string;
-}
+export type CapacityDelegationRequest = z.infer<
+  typeof CapacityDelegationRequestSchema
+>;
 
 export interface CapacityCreditsReq {
   dAppOwnerWallet: SignerLike;
@@ -1769,56 +1411,6 @@ export interface CapacityCreditsReq {
 }
 export interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
-}
-
-export interface LitActionSdkParams {
-  /**
-   * The litActionCode is the JavaScript code that will run on the nodes.
-   * You will need to convert the string content to base64.
-   *
-   * @example
-   * Buffer.from(litActionCodeString).toString('base64');
-   */
-  litActionCode?: string;
-
-  /**
-   * You can obtain the Lit Action IPFS CID by converting your JavaScript code using this tool:
-   * https://explorer.litprotocol.com/create-action
-   *
-   * Note: You do not need to pin your code to IPFS necessarily.
-   * You can convert a code string to an IPFS hash using the "ipfs-hash-only" or 'ipfs-unixfs-importer' library.
-   *
-   * @example
-   * async function stringToIpfsHash(input: string): Promise<string> {
-   *   // Convert the input string to a Buffer
-   *   const content = Buffer.from(input);
-   *
-   *   // Import the content to create an IPFS file
-   *   const files = importer([{ content }], {} as any, { onlyHash: true });
-   *
-   *   // Get the first (and only) file result
-   *   const result = (await files.next()).value;
-   *
-   *   const ipfsHash = (result as any).cid.toString();
-   *   if (!ipfsHash.startsWith('Qm')) {
-   *     throw new Error('Generated hash does not start with Qm');
-   *   }
-   *
-   *   return ipfsHash;
-   * }
-   */
-  litActionIpfsId?: string;
-
-  /**
-   * An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-   */
-  jsParams?:
-    | {
-        [key: string]: any;
-        publicKey?: string;
-        sigName?: string;
-      }
-    | any;
 }
 
 export interface LitEndpoint {
