@@ -2093,10 +2093,12 @@ export class LitNodeClientNodeJs
     const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
     // First get or generate the session capability object for the specified resources.
-    const sessionCapabilityObject = params.sessionCapabilityObject
-      ?       params.sessionCapabilityObject
-      :    await this.generateSessionCapabilityObjectWithWildcards(
-                     params.resourceAbilityRequests.map((r) => r.resource)
+        const sessionCapabilityObject = params.sessionCapabilityObject
+      ? params.sessionCapabilityObject
+      : await this.generateSessionCapabilityObjectWithWildcards(
+        params.resourceAbilityRequests.map((
+          r
+        ) => r.resource)
       );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
