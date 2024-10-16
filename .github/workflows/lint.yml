@@ -27,14 +27,13 @@ jobs:
         id: lint_result_check
         run: |
           if [ $? -ne 0 ]; then
-            echo "Linting failed, setting output..."
-            echo "::set-output name=lint_failed::true"
+            echo "lint_failed=true" >> $GITHUB_ENV
           else
-            echo "::set-output name=lint_failed::false"
+            echo "lint_failed=false" >> $GITHUB_ENV
           fi
 
       - name: Auto-format and commit changes if needed
-        if: ${{ steps.lint_result_check.outputs.lint_failed == 'true' }}
+        if: ${{ env.lint_failed == 'true' }}
         run: |
           yarn nx format:write --all
           git config --global user.name "GitHub Actions"
