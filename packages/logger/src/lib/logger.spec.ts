@@ -121,4 +121,16 @@ describe('logger', () => {
     expect(lm.getLogsForId('foo7').length).toEqual(count);
     expect(lm.LoggerIds.length).toEqual(10);
   });
+
+  it('should order logs based on logger creation timestamp', async () => {
+    const loggerA = lm.get('a', '1');
+    await new Promise((res) => setTimeout(res, 100));
+    const loggerB = lm.get('b', '2');
+
+    const requestIds = lm.LoggerIds;
+
+    expect(requestIds.length).toBe(2);
+    expect(loggerA.id).toEqual(requestIds[0]);
+    expect(loggerB.id).toEqual(requestIds[1]);
+  });
 });

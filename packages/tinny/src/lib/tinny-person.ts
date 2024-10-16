@@ -48,7 +48,10 @@ export class TinnyPerson {
     this.envConfig = envConfig;
 
     this.privateKey = privateKey;
-    this.provider = new ethers.providers.JsonRpcProvider(this.envConfig.rpc);
+    this.provider = new ethers.providers.StaticJsonRpcProvider({
+      url: this.envConfig.rpc,
+      skipFetchSetup: true,
+    });
     this.wallet = new ethers.Wallet(privateKey, this.provider);
   }
 

@@ -36,6 +36,7 @@ import {
   loadModules,
   unloadModules,
 } from '@lit-protocol/crypto';
+import { LogLevel } from '@lit-protocol/logger';
 import {
   bootstrapLogManager,
   isBrowser,
@@ -202,7 +203,10 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
-    bootstrapLogManager('core');
+    bootstrapLogManager(
+      'core',
+      this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
+    );
 
     // -- configure local storage if not present
     // LitNodeClientNodejs is a base for LitNodeClient
@@ -502,9 +506,10 @@ export class LitCore {
     if (!this.config.contractContext) {
       this.config.contractContext = await LitContracts.getContractAddresses(
         this.config.litNetwork,
-        new ethers.providers.StaticJsonRpcProvider(
-          this.config.rpcUrl || RPC_URL_BY_NETWORK[this.config.litNetwork]
-        )
+        new ethers.providers.StaticJsonRpcProvider({
+          url: this.config.rpcUrl || RPC_URL_BY_NETWORK[this.config.litNetwork],
+          skipFetchSetup: true,
+        })
       );
     } else if (
       !this.config.contractContext.Staking &&
@@ -697,6 +702,7 @@ export class LitCore {
               errorCode: LIT_ERROR.INIT_ERROR.name,
             });
           } catch (e) {
+            logErrorWithRequestId(requestId, e);
             reject(e);
           }
         }, this.config.connectTimeout);
@@ -1067,6 +1073,18 @@ export class LitCore {
     return nodePromises;
   };
 
+  getRandomNodePromise(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    callback: (url: string) => Promise<any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any>[] {
+    const randomNodeIndex = Math.floor(
+      Math.random() * this.connectedNodes.size
+    );
+
+    const nodeUrlsArr = Array.from(this.connectedNodes);
+    return [callback(nodeUrlsArr[randomNodeIndex])];
+  }
   /**
    * Retrieves the session signature for a given URL from the sessionSigs map.
    * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.

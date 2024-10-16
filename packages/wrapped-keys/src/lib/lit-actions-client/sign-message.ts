@@ -1,8 +1,8 @@
+import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
 import { SignMessageWithEncryptedKeyParams, StoredKeyData } from '../types';
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 
 interface SignMessageWithLitActionParams
   extends SignMessageWithEncryptedKeyParams {

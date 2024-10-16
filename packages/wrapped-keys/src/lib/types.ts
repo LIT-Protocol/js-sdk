@@ -77,7 +77,7 @@ export interface StoredKeyData extends StoredKeyMetadata {
   dataToEncryptHash: string;
 }
 
-/** Fetching a previously persisted key's metadata only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
+/** Properties required to persist an encrypted key into the wrapped-keys backend storage service
  *
  * @typedef StoreEncryptedKeyParams
  * @extends BaseApiParams
@@ -98,6 +98,31 @@ export type StoreEncryptedKeyParams = BaseApiParams &
  */
 export interface StoreEncryptedKeyResult {
   id: string;
+  pkpAddress: string;
+}
+
+/** Properties required to persist a batch of encrypted keys into the wrapped-keys backend storage service
+ *
+ * @typedef StoreEncryptedKeyBatchParams
+ * @extends BaseApiParams
+ *
+ */
+export type StoreEncryptedKeyBatchParams = BaseApiParams & {
+  keyBatch: Pick<
+    StoredKeyData,
+    'publicKey' | 'keyType' | 'dataToEncryptHash' | 'ciphertext' | 'memo'
+  >[];
+};
+
+/** Result of storing a batch of private keys in the wrapped keys backend service
+ * Includes an array of unique identifiers, which are necessary to get the encrypted ciphertext and dataToEncryptHash in the future
+ *
+ * @typedef StoreEncryptedKeyBatchResult
+ * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
+ * @property { string[] } ids Array of the unique identifiers (UUID V4) of the encrypted private keys in the same order provided
+ */
+export interface StoreEncryptedKeyBatchResult {
+  ids: string[];
   pkpAddress: string;
 }
 
@@ -132,6 +157,34 @@ export interface ExportPrivateKeyResult {
   keyType: KeyType;
   memo: string;
   id: string;
+}
+
+/** @typedef GeneratePrivateKeyAction
+ * @extends ApiParamsSupportedNetworks
+ */
+export type GeneratePrivateKeyAction = ApiParamsSupportedNetworks & {
+  generateKeyParams: { memo: string };
+  signMessageParams?: { messageToSign: string | Uint8Array };
+};
+
+/** @typedef BatchGeneratePrivateKeysParams
+ * @extends BaseApiParams
+ */
+export type BatchGeneratePrivateKeysParams = BaseApiParams & {
+  actions: GeneratePrivateKeyAction[];
+};
+
+/** @typedef GeneratePrivateKeyAction
+ * @extends ApiParamsSupportedNetworks
+ */
+export interface BatchGeneratePrivateKeysActionResult {
+  generateEncryptedPrivateKey: GeneratePrivateKeyResult & { memo: string };
+  signMessage?: { signature: string };
+}
+
+export interface BatchGeneratePrivateKeysResult {
+  pkpAddress: string;
+  results: BatchGeneratePrivateKeysActionResult[];
 }
 
 /** @typedef GeneratePrivateKeyParams

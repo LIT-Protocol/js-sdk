@@ -7,6 +7,8 @@ import {
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
   listEncryptedKeyMetadata,
+  batchGeneratePrivateKeys,
+  storeEncryptedKeyBatch,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -16,9 +18,13 @@ import {
   KEYTYPE_K256,
   KEYTYPE_ED25519,
 } from './lib/constants';
-import { setLitActionsCode } from './lib/lit-actions-client/code-repository';
+import {
+  setLitActionsCode,
+  setLitActionsCodeCommon,
+} from './lib/lit-actions-client/code-repository';
 import {
   LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
   LitActionCodeRepositoryEntry,
 } from './lib/lit-actions-client/types';
 
@@ -40,11 +46,13 @@ import type {
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
   StoreEncryptedKeyParams,
+  StoreEncryptedKeyBatchParams,
   StoredKeyData,
   StoredKeyMetadata,
   ListEncryptedKeyMetadataParams,
   StoreEncryptedKeyResult,
   ImportPrivateKeyResult,
+  StoreEncryptedKeyBatchResult,
 } from './lib/types';
 
 export const constants = {
@@ -65,10 +73,13 @@ export const api = {
   signMessageWithEncryptedKey,
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
+  storeEncryptedKeyBatch,
+  batchGeneratePrivateKeys,
 };
 
 export const config = {
   setLitActionsCode,
+  setLitActionsCodeCommon,
 };
 
 export {
@@ -84,6 +95,7 @@ export {
   ImportPrivateKeyResult,
   ListEncryptedKeyMetadataParams,
   LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
   LitActionCodeRepositoryEntry,
   SerializedTransaction,
   SignTransactionParams,
@@ -93,6 +105,8 @@ export {
   SignTransactionWithEncryptedKeyParams,
   StoreEncryptedKeyParams,
   StoreEncryptedKeyResult,
+  StoreEncryptedKeyBatchParams,
+  StoreEncryptedKeyBatchResult,
   StoredKeyData,
   StoredKeyMetadata,
   SupportedNetworks,

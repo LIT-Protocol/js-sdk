@@ -1,8 +1,12 @@
+import {
+  getFirstSessionSig,
+  getPkpAccessControlCondition,
+  getPkpAddressFromSessionSig,
+} from './utils';
 import { signTransactionWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { fetchPrivateKey } from '../service-client';
 import { SignTransactionWithEncryptedKeyParams } from '../types';
-import { getFirstSessionSig, getPkpAccessControlCondition } from '../utils';
 
 /**
  * Signs a transaction inside the Lit Action using the previously persisted wrapped key associated with the current LIT PK.
@@ -18,9 +22,12 @@ export async function signTransactionWithEncryptedKey(
   params: SignTransactionWithEncryptedKeyParams
 ): Promise<string> {
   const { litNodeClient, network, pkpSessionSigs, id } = params;
+
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
+  const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
 
   const storedKeyMetadata = await fetchPrivateKey({
+    pkpAddress,
     id,
     sessionSig,
     litNetwork: litNodeClient.config.litNetwork,

@@ -20,7 +20,7 @@
   "scripts": {
     "test:long-run": "node src/tests/long-running/build.mjs && dotenvx run --env-file=../../.env -- node src/tests/long-running/build/test.mjs"
   },
-  "version": "6.4.10",
+  "version": "6.10.0",
   "private": true,
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"

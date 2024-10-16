@@ -1,13 +1,13 @@
 import { encryptString } from '@lit-protocol/encryption';
 
-import { LIT_PREFIX } from '../constants';
-import { storePrivateKey } from '../service-client';
-import { ImportPrivateKeyParams, ImportPrivateKeyResult } from '../types';
 import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
-} from '../utils';
+} from './utils';
+import { LIT_PREFIX } from '../constants';
+import { storePrivateKey } from '../service-client';
+import { ImportPrivateKeyParams, ImportPrivateKeyResult } from '../types';
 
 /**
  * Import a provided private key into the wrapped keys service backend.
@@ -52,7 +52,6 @@ export async function importPrivateKey(
       publicKey,
       keyType,
       dataToEncryptHash,
-      pkpAddress,
       memo,
     },
   });
