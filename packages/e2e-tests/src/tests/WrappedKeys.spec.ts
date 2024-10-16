@@ -32,9 +32,9 @@ import {
   api,
 } from '@lit-protocol/wrapped-keys';
 // Using absolute pathing as these members are not exported from the module
+import { getPkpAccessControlCondition } from '@lit-protocol/wrapped-keys/src/lib/api/utils';
 import { LIT_PREFIX } from '@lit-protocol/wrapped-keys/src/lib/constants';
 import { LIT_ACTION_CID_REPOSITORY } from '@lit-protocol/wrapped-keys/src/lib/lit-actions-client/constants';
-import { getPkpAccessControlCondition } from '@lit-protocol/wrapped-keys/src/lib/utils';
 
 const {
   importPrivateKey,
