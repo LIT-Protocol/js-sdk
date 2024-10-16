@@ -37,4 +37,14 @@ jobs:
           git config --global user.email "actions@github.com"
           git add .
           git commit -m "Auto-format code" || echo "No changes to commit"
-          git push || echo "No changes to push"
+          
+          # Get the current branch name
+          BRANCH_NAME=$(git symbolic-ref --short HEAD || git rev-parse --abbrev-ref HEAD)
+          
+          # If we're in detached HEAD state, use the GitHub event information
+          if [ "$BRANCH_NAME" = "HEAD" ]; then
+            BRANCH_NAME=${{ github.head_ref || github.ref_name }}
+          fi
+          
+          # Push changes
+          git push origin HEAD:$BRANCH_NAME || echo "No changes to push"
