@@ -21,24 +21,20 @@ jobs:
       - name: Install project dependencies
         run: yarn install
       - name: Lint
+        id: lint
         run: yarn nx format:check --all
         continue-on-error: true  # Continue even if the check fails
+
       - name: Check Lint Results
-        id: lint_result_check
-        run: |
-          if [ $? -ne 0 ]; then
-            echo "Linting failed, setting output..."
-            echo "::set-output name=lint_failed::true"
-          else
-            echo "::set-output name=lint_failed::false"
-          fi
+        if: steps.lint.outcome == 'failure'
+        run: echo "lint_failed=true" >> $GITHUB_OUTPUT
 
       - name: Auto-format and commit changes if needed
-        if: ${{ steps.lint_result_check.outputs.lint_failed == 'true' }}
+        if: steps.lint.outcome == 'failure'
         run: |
           yarn nx format:write --all
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "fmt"
-          git push
+          git commit -m "Auto-format code" || echo "No changes to commit"
+          git push || echo "No changes to push"
