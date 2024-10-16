@@ -1,17 +1,17 @@
-import { getKeyTypeFromNetwork } from './utils';
+import {
+  getFirstSessionSig,
+  getKeyTypeFromNetwork,
+  getPkpAccessControlCondition,
+  getPkpAddressFromSessionSig,
+} from './utils';
 import { batchGenerateKeysWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCidCommon } from '../lit-actions-client/utils';
-import { storePrivateKey } from '../service-client';
+import { storePrivateKeyBatch } from '../service-client';
 import {
   BatchGeneratePrivateKeysActionResult,
   BatchGeneratePrivateKeysParams,
   BatchGeneratePrivateKeysResult,
 } from '../types';
-import {
-  getFirstSessionSig,
-  getPkpAccessControlCondition,
-  getPkpAddressFromSessionSig,
-} from '../utils';
 
 /**
  *  TODO: Document batch behaviour
@@ -41,34 +41,39 @@ export async function batchGeneratePrivateKeys(
     pkpSessionSigs,
   });
 
-  const results = await Promise.all(
-    actionResults.map(
-      async (result): Promise<BatchGeneratePrivateKeysActionResult> => {
-        const { generateEncryptedPrivateKey, network } = result;
+  const keyParamsBatch = actionResults.map((keyData) => {
+    const { generateEncryptedPrivateKey, network } = keyData;
+    return {
+      ...generateEncryptedPrivateKey,
+      keyType: getKeyTypeFromNetwork(network),
+    };
+  });
 
-        const signature = result.signMessage?.signature;
+  const { ids } = await storePrivateKeyBatch({
+    sessionSig,
+    storedKeyMetadataBatch: keyParamsBatch,
+    litNetwork: litNodeClient.config.litNetwork,
+  });
 
-        const { id } = await storePrivateKey({
-          sessionSig,
-          storedKeyMetadata: {
-            ...generateEncryptedPrivateKey,
-            keyType: getKeyTypeFromNetwork(network),
-            pkpAddress,
-          },
-          litNetwork: litNodeClient.config.litNetwork,
-        });
+  const results = actionResults.map(
+    (actionResult, ndx): BatchGeneratePrivateKeysActionResult => {
+      const {
+        generateEncryptedPrivateKey: { memo, publicKey },
+      } = actionResult;
+      const id = ids[ndx]; // Result of writes is in same order as provided
 
-        return {
-          ...(signature ? { signMessage: { signature } } : {}),
-          generateEncryptedPrivateKey: {
-            memo: generateEncryptedPrivateKey.memo,
-            id,
-            generatedPublicKey: generateEncryptedPrivateKey.publicKey,
-            pkpAddress,
-          },
-        };
-      }
-    )
+      const signature = actionResult.signMessage?.signature;
+
+      return {
+        ...(signature ? { signMessage: { signature } } : {}),
+        generateEncryptedPrivateKey: {
+          memo: memo,
+          id,
+          generatedPublicKey: publicKey,
+          pkpAddress,
+        },
+      };
+    }
   );
 
   return { pkpAddress, results };

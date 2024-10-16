@@ -1,13 +1,13 @@
-import { getKeyTypeFromNetwork } from './utils';
+import {
+  getFirstSessionSig,
+  getKeyTypeFromNetwork,
+  getPkpAccessControlCondition,
+  getPkpAddressFromSessionSig,
+} from './utils';
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
 import { storePrivateKey } from '../service-client';
 import { GeneratePrivateKeyParams, GeneratePrivateKeyResult } from '../types';
-import {
-  getFirstSessionSig,
-  getPkpAccessControlCondition,
-  getPkpAddressFromSessionSig,
-} from '../utils';
 
 /**
  * Generates a random private key inside a Lit Action, and persists the key and its metadata to the wrapped keys service.
@@ -55,7 +55,6 @@ export async function generatePrivateKey(
       publicKey,
       keyType: getKeyTypeFromNetwork(network),
       dataToEncryptHash,
-      pkpAddress,
       memo,
     },
     litNetwork: litNodeClient.config.litNetwork,
