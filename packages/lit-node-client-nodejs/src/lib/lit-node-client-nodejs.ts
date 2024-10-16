@@ -135,8 +135,7 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1293,8 +1292,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -2066,23 +2065,30 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Get session signatures for a set of [Lit resources](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.ILitResource.html#resource).
-   *
-   * How this function works on a high level:
-   * 1. Generate or retrieve [session keys](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.SessionKeyPair.html) (a public and private key pair)
-   * 2. Generate or retrieve the [`AuthSig`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.AuthSig.html) that specifies the session [abilities](https://v6-api-doc-lit-js-sdk.vercel.app/enums/auth_helpers_src.LitAbility.html)
-   * 3. Sign the specific resources with the session key
-   *
-   *
-   * Note: When generating session signatures for different PKPs or auth methods,
-   * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
-   *
-   *
-   * @param { GetSessionSigsProps } params
-   *
-   * An example of how this function is used can be found in the Lit developer-guides-code repository [here](https://github.com/LIT-Protocol/developer-guides-code/tree/master/session-signatures/getSessionSigs).
-   *
-   */
+  * 
+  * Retrieves or generates sessionSigs (think access token) for accessing Lit Network resources.
+  * 
+  * How this function works on a high level:
+  * 1. Generate or retrieve [session keys](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.SessionKeyPair.html) (a public and private key pair)
+  * 2. Generate or retrieve the [`AuthSig`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.AuthSig.html) that specifies the session [abilities](https://v6-api-doc-lit-js-sdk.vercel.app/enums/auth_helpers_src.LitAbility.html)
+  * 3. Sign the specific resources with the session key
+  *
+  * The process follows these steps:
+  * 1. Retrieves or generates a session key pair (Ed25519) for the user's device. The session key is either fetched from local storage or newly created if not found. The key does not expire.
+  * 2. Generates an authentication signature (`authSig`) by signing an ERC-5573 “Sign-in with Ethereum” message, which includes resource ability requests, capabilities, expiration, the user's device session public key, and a nonce. The `authSig` is retrieved from local storage, and if it has expired, the user will be prompted to re-sign.
+  * 3. Uses the session private key to sign the session public key along with the resource ability requests, capabilities, issuedAt, and expiration details. This creates a device-generated signature.
+  * 4. Constructs the session signatures (`sessionSigs`) by including the device-generated signature and the original message. The `sessionSigs` provide access to Lit Network features such as `executeJs` and `pkpSign`.
+  * 
+  * See Sequence Diagram: https://www.plantuml.com/plantuml/uml/VPH1RnCn48Nl_XLFlT1Av00eGkm15QKLWY8K9K9SO-rEar4sjcLFalBl6NjJAuaMRl5utfjlPjQvJsAZx7UziQtuY5-9eWaQufQ3TOAR77cJy407Rka6zlNdHTRouUbIzSEtjiTIBUswg5v_NwMnuAVlA9KKFPN3I0x9qSSj7bqNF3iPykl9c4o9oUSJMuElv2XQ8IHAYRt3bluWM8wuVUpUJwVlFjsP8JUh5B_1DyV2AYdD6DjhLsTQTaYd3W3ad28SGWqM997fG5ZrB9DJqOaALuRwH1TMpik8tIYze-E8OrPKU5I6cMqtem2kCqOhr4vdaRAvtSjcoMkTo68scKu_Vi1EPMfrP_xVtj7sFMaHNg-6GVqk0MW0z18uKdVULTvDWtdqko28b7KktvUB2hKOBd1asU2QgDfTzrj7T4bLPdv6TR0zLwPQKkkZpIRTY4CTMbrBpg_VKuXyi49beUAHqIlirOUrL2zq9JPPdpRR5OMLVQGoGlLcjyRyQNv6MHz4W_fG42W--xWhUfNyOxiLL1USS6lRLeyAkYLNjrkVJuClm_qp5I8Lq0krUw7lwIt2DgY9oiozrjA_Yhy0
+  * 
+  * Note: When generating session signatures for different PKPs or auth methods,
+  * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
+  *
+  * @param { GetSessionSigsProps } params
+  *
+  * An example of how this function is used can be found in the Lit developer-guides-code repository [here](https://github.com/LIT-Protocol/developer-guides-code/tree/master/session-signatures/getSessionSigs).
+  *
+  */
   getSessionSigs = async (
     params: GetSessionSigsProps
   ): Promise<SessionSigsMap> => {
@@ -2096,8 +2102,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2180,10 +2186,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
