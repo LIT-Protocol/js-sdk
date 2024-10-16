@@ -4,6 +4,14 @@
   "sourceRoot": "packages/wrapped-keys/src",
   "projectType": "library",
   "targets": {
+    "prebuild": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["yarn --cwd ./packages/wrapped-keys update-ipfs-cids"],
+        "cwd": "."
+      },
+      "dependsOn": ["wrapped-keys-lit-actions:prebuild"]
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
@@ -13,7 +21,8 @@
         "tsConfig": "packages/wrapped-keys/tsconfig.lib.json",
         "assets": ["packages/wrapped-keys/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
-      }
+      },
+      "dependsOn": ["prebuild", "^build"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",

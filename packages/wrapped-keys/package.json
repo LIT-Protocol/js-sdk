@@ -23,6 +23,9 @@
   "buildOptions": {
     "genReact": false
   },
+  "scripts": {
+    "update-ipfs-cids": "yarn node ./update-ipfs-cids.js"
+  },
   "version": "6.10.0",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
