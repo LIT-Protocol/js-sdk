@@ -50,14 +50,14 @@ module.exports = {
 (async () => {
   await esbuild.build({
     entryPoints: [
-      './src/lib/solana/signTransactionWithEncryptedSolanaKey.js',
-      './src/lib/solana/signMessageWithEncryptedSolanaKey.js',
-      './src/lib/solana/generateEncryptedSolanaPrivateKey.js',
-      './src/lib/ethereum/signTransactionWithEncryptedEthereumKey.js',
-      './src/lib/ethereum/signMessageWithEncryptedEthereumKey.js',
-      './src/lib/ethereum/generateEncryptedEthereumPrivateKey.js',
-      './src/lib/common/exportPrivateKey.js',
-      './src/lib/common/batchGenerateEncryptedKeys.js',
+      './src/lib/self-executing-actions/solana/signTransactionWithEncryptedSolanaKey.js',
+      './src/lib/self-executing-actions/solana/signMessageWithEncryptedSolanaKey.js',
+      './src/lib/self-executing-actions/solana/generateEncryptedSolanaPrivateKey.js',
+      './src/lib/self-executing-actions/ethereum/signTransactionWithEncryptedEthereumKey.js',
+      './src/lib/self-executing-actions/ethereum/signMessageWithEncryptedEthereumKey.js',
+      './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.js',
+      './src/lib/self-executing-actions/common/exportPrivateKey.js',
+      './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.js',
     ],
     bundle: true,
     minify: true,
