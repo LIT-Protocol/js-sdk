@@ -185,7 +185,7 @@ export const spawnCommand = (
     if (options2.logExit) {
       console.log(`child process exited with code ${code}`);
     }
-    options2.exitCallback(code);
+    options2.exitCallback?.(code);
   });
 };
 
