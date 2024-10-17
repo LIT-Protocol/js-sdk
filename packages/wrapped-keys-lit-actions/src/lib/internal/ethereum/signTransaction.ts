@@ -10,7 +10,9 @@ interface UnsignedTransaction {
   gasLimit?: number;
 }
 
-export function getValidatedUnsignedTx(unsignedTransaction: UnsignedTransaction) {
+export function getValidatedUnsignedTx(
+  unsignedTransaction: UnsignedTransaction
+) {
   try {
     if (!unsignedTransaction.toAddress) {
       throw new Error('Missing required field: toAddress');
@@ -41,7 +43,13 @@ export function getValidatedUnsignedTx(unsignedTransaction: UnsignedTransaction)
   }
 }
 
-async function getLatestNonce({ walletAddress, chain }: { walletAddress: string; chain: string }) {
+async function getLatestNonce({
+  walletAddress,
+  chain,
+}: {
+  walletAddress: string;
+  chain: string;
+}) {
   try {
     const nonce = await Lit.Actions.getLatestNonce({
       address: walletAddress,
@@ -62,11 +70,19 @@ async function getEthersRPCProvider({ chain }: { chain: string }) {
 
     return new ethers.providers.JsonRpcProvider(rpcUrl);
   } catch (err: unknown) {
-    throw new Error(`Getting the rpc for the chain: ${chain} - ${(err as Error).message}`);
+    throw new Error(
+      `Getting the rpc for the chain: ${chain} - ${(err as Error).message}`
+    );
   }
 }
 
-async function getGasPrice({ userProvidedGasPrice, provider }: { userProvidedGasPrice?: string; provider: any }) {
+async function getGasPrice({
+  userProvidedGasPrice,
+  provider,
+}: {
+  userProvidedGasPrice?: string;
+  provider: any;
+}) {
   try {
     if (userProvidedGasPrice) {
       return ethers.utils.parseUnits(userProvidedGasPrice, 'gwei');
@@ -78,7 +94,15 @@ async function getGasPrice({ userProvidedGasPrice, provider }: { userProvidedGas
   }
 }
 
-async function getGasLimit({ provider, userProvidedGasLimit, validatedTx }: { provider: any; userProvidedGasLimit?: number; validatedTx: any }) {
+async function getGasLimit({
+  provider,
+  userProvidedGasLimit,
+  validatedTx,
+}: {
+  provider: any;
+  userProvidedGasLimit?: number;
+  validatedTx: any;
+}) {
   if (userProvidedGasLimit) {
     return userProvidedGasLimit;
   } else {
@@ -90,7 +114,13 @@ async function getGasLimit({ provider, userProvidedGasLimit, validatedTx }: { pr
   }
 }
 
-async function signTransaction({ validatedTx, wallet }: { validatedTx: any; wallet: any }) {
+async function signTransaction({
+  validatedTx,
+  wallet,
+}: {
+  validatedTx: any;
+  wallet: any;
+}) {
   try {
     return await wallet.signTransaction(validatedTx);
   } catch (err: unknown) {
@@ -98,7 +128,13 @@ async function signTransaction({ validatedTx, wallet }: { validatedTx: any; wall
   }
 }
 
-async function broadcastTransaction({ provider, signedTx }: { provider: any; signedTx: string }) {
+async function broadcastTransaction({
+  provider,
+  signedTx,
+}: {
+  provider: any;
+  signedTx: string;
+}) {
   try {
     return await provider.sendTransaction(signedTx);
   } catch (err: unknown) {

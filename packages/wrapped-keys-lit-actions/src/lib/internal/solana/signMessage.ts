@@ -15,7 +15,9 @@ interface VerifyMessageSignatureParams {
   messageToSign: string;
 }
 
-function signMessage({ messageToSign, solanaKeyPair }: SignMessageParams): { signature: Uint8Array } {
+function signMessage({ messageToSign, solanaKeyPair }: SignMessageParams): {
+  signature: Uint8Array;
+} {
   try {
     const signature = nacl.sign.detached(
       new TextEncoder().encode(messageToSign),
@@ -28,7 +30,11 @@ function signMessage({ messageToSign, solanaKeyPair }: SignMessageParams): { sig
   }
 }
 
-function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }: VerifyMessageSignatureParams): boolean {
+function verifyMessageSignature({
+  signature,
+  solanaKeyPair,
+  messageToSign,
+}: VerifyMessageSignatureParams): boolean {
   try {
     const isValid = nacl.sign.detached.verify(
       Buffer.from(messageToSign),
@@ -39,12 +45,20 @@ function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }: Ver
     return isValid;
   } catch (err: unknown) {
     throw new Error(
-      `When validating signed Solana message is valid: ${(err as Error).message}`
+      `When validating signed Solana message is valid: ${
+        (err as Error).message
+      }`
     );
   }
 }
 
-export async function signMessageSolanaKey({ messageToSign, privateKey }: { messageToSign: string; privateKey: string }): Promise<string> {
+export async function signMessageSolanaKey({
+  messageToSign,
+  privateKey,
+}: {
+  messageToSign: string;
+  privateKey: string;
+}): Promise<string> {
   const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
   const { signature } = signMessage({

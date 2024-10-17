@@ -16,7 +16,11 @@ interface GenerateEncryptedEthereumPrivateKeyParams {
 
 export async function generateEncryptedEthereumPrivateKey({
   accessControlConditions,
-}: GenerateEncryptedEthereumPrivateKeyParams): Promise<{ciphertext: string, dataToEncryptHash: string, publicKey: string}> {
+}: GenerateEncryptedEthereumPrivateKeyParams): Promise<{
+  ciphertext: string;
+  dataToEncryptHash: string;
+  publicKey: string;
+}> {
   const { privateKey, publicKey } = generateEthereumPrivateKey();
   return encryptPrivateKey({
     accessControlConditions,

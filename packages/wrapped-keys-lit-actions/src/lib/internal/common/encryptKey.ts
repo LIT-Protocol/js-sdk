@@ -14,7 +14,11 @@ export async function encryptPrivateKey({
   accessControlConditions: string;
   privateKey: string;
   publicKey: string;
-}): Promise<{ ciphertext: string; dataToEncryptHash: string; publicKey: string; }> {
+}): Promise<{
+  ciphertext: string;
+  dataToEncryptHash: string;
+  publicKey: string;
+}> {
   const { ciphertext, dataToEncryptHash } = await Lit.Actions.encrypt({
     accessControlConditions,
     to_encrypt: new TextEncoder().encode(LIT_PREFIX + privateKey),

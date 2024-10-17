@@ -1,5 +1,8 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
-import { signTransactionSolanaKey, validateUnsignedTransaction } from '../../internal/solana/signTransaction';
+import {
+  signTransactionSolanaKey,
+  validateUnsignedTransaction,
+} from '../../internal/solana/signTransaction';
 
 interface SignTransactionWithEncryptedSolanaKeyParams {
   accessControlConditions: any; // Define a more specific type if possible

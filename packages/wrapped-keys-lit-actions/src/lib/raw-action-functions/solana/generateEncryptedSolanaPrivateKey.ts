@@ -14,7 +14,11 @@ interface GenerateEncryptedSolanaPrivateKeyParams {
 
 export async function generateEncryptedSolanaPrivateKey({
   accessControlConditions,
-}: GenerateEncryptedSolanaPrivateKeyParams): Promise<{ ciphertext: string, dataToEncryptHash: string, publicKey: string }> {
+}: GenerateEncryptedSolanaPrivateKeyParams): Promise<{
+  ciphertext: string;
+  dataToEncryptHash: string;
+  publicKey: string;
+}> {
   const { privateKey, publicKey } = generateSolanaPrivateKey();
 
   return encryptPrivateKey({

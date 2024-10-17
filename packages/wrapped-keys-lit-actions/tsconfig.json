@@ -12,10 +12,7 @@
     "checkJs": false
   },
   "files": [],
-  "include": [
-    "global.d.ts",
-    "node_modules/ethers/lib/ethers.d.ts",
-  ],
+  "include": ["global.d.ts", "node_modules/ethers/lib/ethers.d.ts"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

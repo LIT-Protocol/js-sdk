@@ -1,16 +1,19 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
-import { signTransactionEthereumKey, getValidatedUnsignedTx } from '../../internal/ethereum/signTransaction';
+import {
+  signTransactionEthereumKey,
+  getValidatedUnsignedTx,
+} from '../../internal/ethereum/signTransaction';
 
 interface SignTransactionWithEncryptedEthereumKeyParams {
-  accessControlConditions: any; 
+  accessControlConditions: any;
   ciphertext: string;
   dataToEncryptHash: string;
-  unsignedTransaction: any; 
+  unsignedTransaction: any;
   broadcast: boolean;
 }
 
 /**
- * 
+ *
  * Signs a transaction with the Ethers wallet whose private key is decrypted inside the Lit Action.
  * @returns {Promise<string>} - Returns the transaction hash if broadcast is set as true else returns only the signed transaction. Or returns errors if any.
  */

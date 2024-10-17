@@ -10,6 +10,5 @@ declare global {
 
 (async () =>
   litActionHandler(async () =>
-
     batchGenerateEncryptedKeys({ actions, accessControlConditions })
   ))();

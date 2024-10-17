@@ -2,7 +2,6 @@ import { ethers as EthersType } from 'ethers';
 
 // @ts-nocheck - got this directly from the lit-assets repo
 declare global {
-
   export const ethers: typeof EthersType;
 
   export declare namespace Lit {
@@ -334,7 +333,10 @@ declare global {
        * @param {string} to_encrypt The message to encrypt
        * @returns { {ciphertext: string, dataToEncryptHash: string} } Contains two items: The ciphertext result after encryption, named "ciphertext" and the dataToEncryptHash, named "dataToEncryptHash"
        */
-      function encrypt({ accessControlConditions, to_encrypt }: {
+      function encrypt({
+        accessControlConditions,
+        to_encrypt,
+      }: {
         accessControlConditions: string;
         to_encrypt: Uint8Array;
       }): {
@@ -344,7 +346,6 @@ declare global {
     }
 
     export namespace Auth {
-
       /**
        * Array of action IPFS IDs.
        * @type {Array<`Qm${string}` | string>}
@@ -386,4 +387,4 @@ declare global {
   }
 }
 
-export { };
+export {};

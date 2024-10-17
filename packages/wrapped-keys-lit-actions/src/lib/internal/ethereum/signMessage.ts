@@ -10,7 +10,10 @@ interface VerifyMessageSignatureParams {
   signature: string;
 }
 
-async function signMessage({ privateKey, messageToSign }: SignMessageParams): Promise<{ signature: string; walletAddress: string }> {
+async function signMessage({
+  privateKey,
+  messageToSign,
+}: SignMessageParams): Promise<{ signature: string; walletAddress: string }> {
   try {
     const wallet = new ethers.Wallet(privateKey);
     const signature = await wallet.signMessage(messageToSign);
@@ -21,17 +24,25 @@ async function signMessage({ privateKey, messageToSign }: SignMessageParams): Pr
   }
 }
 
-function verifyMessageSignature({ messageToSign, signature }: VerifyMessageSignatureParams): string {
+function verifyMessageSignature({
+  messageToSign,
+  signature,
+}: VerifyMessageSignatureParams): string {
   try {
     return ethers.utils.verifyMessage(messageToSign, signature);
   } catch (err: unknown) {
     throw new Error(
-      `When validating signed Ethereum message is valid: ${(err as Error).message}`
+      `When validating signed Ethereum message is valid: ${
+        (err as Error).message
+      }`
     );
   }
 }
 
-export async function signMessageEthereumKey({ privateKey, messageToSign }: SignMessageParams): Promise<string> {
+export async function signMessageEthereumKey({
+  privateKey,
+  messageToSign,
+}: SignMessageParams): Promise<string> {
   const { signature, walletAddress } = await signMessage({
     privateKey,
     messageToSign,

@@ -1,13 +1,7 @@
 import { encryptPrivateKey } from '../../internal/common/encryptKey';
-import {
-  generateEthereumPrivateKey,
-} from '../../internal/ethereum/generatePrivateKey';
-import {
-  signMessageEthereumKey,
-} from '../../internal/ethereum/signMessage';
-import {
-  generateSolanaPrivateKey,
-} from '../../internal/solana/generatePrivateKey';
+import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
+import { signMessageEthereumKey } from '../../internal/ethereum/signMessage';
+import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateKey';
 import { signMessageSolanaKey } from '../../internal/solana/signMessage';
 
 interface Action {
@@ -20,7 +14,13 @@ interface Action {
   };
 }
 
-async function processEthereumAction({ action, accessControlConditions }: { action: Action; accessControlConditions: any }) {
+async function processEthereumAction({
+  action,
+  accessControlConditions,
+}: {
+  action: Action;
+  accessControlConditions: any;
+}) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
 
@@ -34,9 +34,9 @@ async function processEthereumAction({ action, accessControlConditions }: { acti
     }),
     messageToSign
       ? signMessageEthereumKey({
-        messageToSign: messageToSign,
-        privateKey: ethereumKey.privateKey,
-      })
+          messageToSign: messageToSign,
+          privateKey: ethereumKey.privateKey,
+        })
       : Promise.resolve(),
   ]);
 
@@ -52,7 +52,13 @@ async function processEthereumAction({ action, accessControlConditions }: { acti
   };
 }
 
-async function processSolanaAction({ action, accessControlConditions }: { action: Action; accessControlConditions: any }) {
+async function processSolanaAction({
+  action,
+  accessControlConditions,
+}: {
+  action: Action;
+  accessControlConditions: any;
+}) {
   const { network, generateKeyParams } = action;
 
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -67,9 +73,9 @@ async function processSolanaAction({ action, accessControlConditions }: { action
     }),
     messageToSign
       ? signMessageSolanaKey({
-        messageToSign: messageToSign,
-        privateKey: solanaKey.privateKey,
-      })
+          messageToSign: messageToSign,
+          privateKey: solanaKey.privateKey,
+        })
       : Promise.resolve(),
   ]);
 
@@ -85,7 +91,13 @@ async function processSolanaAction({ action, accessControlConditions }: { action
   };
 }
 
-async function processActions({ actions, accessControlConditions }: { actions: Action[]; accessControlConditions: any }) {
+async function processActions({
+  actions,
+  accessControlConditions,
+}: {
+  actions: Action[];
+  accessControlConditions: any;
+}) {
   return Promise.all(
     actions.map(async (action, ndx) => {
       const { network } = action;
