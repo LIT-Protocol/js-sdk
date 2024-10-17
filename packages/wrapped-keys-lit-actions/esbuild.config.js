@@ -48,24 +48,30 @@ module.exports = {
 };
 
 (async () => {
-  await esbuild.build({
-    entryPoints: [
-      './src/lib/self-executing-actions/solana/signTransactionWithEncryptedSolanaKey.js',
-      './src/lib/self-executing-actions/solana/signMessageWithEncryptedSolanaKey.js',
-      './src/lib/self-executing-actions/solana/generateEncryptedSolanaPrivateKey.js',
-      './src/lib/self-executing-actions/ethereum/signTransactionWithEncryptedEthereumKey.js',
-      './src/lib/self-executing-actions/ethereum/signMessageWithEncryptedEthereumKey.js',
-      './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.js',
-      './src/lib/self-executing-actions/common/exportPrivateKey.js',
-      './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.js',
-    ],
-    bundle: true,
-    minify: true,
-    sourcemap: false,
-    treeShaking: true,
-    outdir: './src/generated/',
-    inject: ['./buffer.shim.js'],
-    plugins: [wrapIIFEInStringPlugin],
-    platform: 'browser',
-  });
+  try {
+    await esbuild.build({
+      entryPoints: [
+        './src/lib/self-executing-actions/solana/signTransactionWithEncryptedSolanaKey.ts',
+        './src/lib/self-executing-actions/solana/signMessageWithEncryptedSolanaKey.ts',
+        './src/lib/self-executing-actions/solana/generateEncryptedSolanaPrivateKey.ts',
+        './src/lib/self-executing-actions/ethereum/signTransactionWithEncryptedEthereumKey.ts',
+        './src/lib/self-executing-actions/ethereum/signMessageWithEncryptedEthereumKey.ts',
+        './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.ts',
+        './src/lib/self-executing-actions/common/exportPrivateKey.ts',
+        './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.ts',
+      ],
+      bundle: true,
+      minify: true,
+      sourcemap: false,
+      treeShaking: true,
+      outdir: './src/generated/',
+      inject: ['./buffer.shim.js'],
+      plugins: [wrapIIFEInStringPlugin],
+      platform: 'browser',
+    });
+    console.log('✅ Lit actions built successfully');
+  } catch (e) {
+    console.error('❌ Error building lit actions: ', e);
+    process.exit(1);
+  }
 })();

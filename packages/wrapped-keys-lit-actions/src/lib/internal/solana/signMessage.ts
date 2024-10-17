@@ -1,9 +1,21 @@
 import { Keypair } from '@solana/web3.js';
 import nacl from 'tweetnacl';
+import { Buffer } from 'buffer';
 
 /* global ethers */
 
-function signMessage({ messageToSign, solanaKeyPair }) {
+interface SignMessageParams {
+  messageToSign: string;
+  solanaKeyPair: Keypair;
+}
+
+interface VerifyMessageSignatureParams {
+  signature: Uint8Array;
+  solanaKeyPair: Keypair;
+  messageToSign: string;
+}
+
+function signMessage({ messageToSign, solanaKeyPair }: SignMessageParams): { signature: Uint8Array } {
   try {
     const signature = nacl.sign.detached(
       new TextEncoder().encode(messageToSign),
@@ -11,12 +23,12 @@ function signMessage({ messageToSign, solanaKeyPair }) {
     );
 
     return { signature };
-  } catch (err) {
-    throw new Error(`When signing message - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`When signing message - ${(err as Error).message}`);
   }
 }
 
-function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }) {
+function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }: VerifyMessageSignatureParams): boolean {
   try {
     const isValid = nacl.sign.detached.verify(
       Buffer.from(messageToSign),
@@ -25,14 +37,14 @@ function verifyMessageSignature({ signature, solanaKeyPair, messageToSign }) {
     );
 
     return isValid;
-  } catch (err) {
+  } catch (err: unknown) {
     throw new Error(
-      `When validating signed Solana message is valid: ${err.message}`
+      `When validating signed Solana message is valid: ${(err as Error).message}`
     );
   }
 }
 
-export async function signMessageSolanaKey({ messageToSign, privateKey }) {
+export async function signMessageSolanaKey({ messageToSign, privateKey }: { messageToSign: string; privateKey: string }): Promise<string> {
   const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
   const { signature } = signMessage({

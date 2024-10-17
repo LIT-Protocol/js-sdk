@@ -1,13 +1,13 @@
-const {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  Transaction,
-} = require('@solana/web3.js');
+import { Cluster, clusterApiUrl, Connection, Keypair, Transaction } from '@solana/web3.js';
 
 /* global ethers */
 
-export function validateUnsignedTransaction(unsignedTransaction) {
+interface UnsignedTransaction {
+  chain: string;
+  serializedTransaction: string;
+}
+
+export function validateUnsignedTransaction(unsignedTransaction: UnsignedTransaction) {
   const VALID_NETWORKS = ['devnet', 'testnet', 'mainnet-beta'];
 
   if (!VALID_NETWORKS.includes(unsignedTransaction.chain)) {
@@ -16,7 +16,7 @@ export function validateUnsignedTransaction(unsignedTransaction) {
 
   if (
     !unsignedTransaction.serializedTransaction ||
-    !unsignedTransaction.serializedTransaction.length === 0
+    unsignedTransaction.serializedTransaction.length === 0
   ) {
     throw new Error(
       `Invalid serializedTransaction: ${unsignedTransaction.serializedTransaction}`
@@ -24,22 +24,27 @@ export function validateUnsignedTransaction(unsignedTransaction) {
   }
 }
 
-function signTransaction({ solanaKeyPair, transaction }) {
+function signTransaction({ solanaKeyPair, transaction }: { solanaKeyPair: Keypair; transaction: Transaction }) {
   try {
     transaction.sign(solanaKeyPair);
 
+    if (!transaction.signature) {
+      throw new Error('Transaction signature is null');
+    }
+
     return { signature: ethers.utils.base58.encode(transaction.signature) };
-  } catch (err) {
-    throw new Error(`When signing transaction - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`When signing transaction - ${(err as Error).message}`);
   }
 }
 
-async function sendTransaction({ chain, transaction }) {
+async function sendTransaction({ chain, transaction }: { chain: Cluster; transaction: Transaction }) {
+
   try {
     const solanaConnection = new Connection(clusterApiUrl(chain), 'confirmed');
     return await solanaConnection.sendRawTransaction(transaction.serialize());
-  } catch (err) {
-    throw new Error(`When sending transaction - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`When sending transaction - ${(err as Error).message}`);
   }
 }
 
@@ -47,6 +52,10 @@ export async function signTransactionSolanaKey({
   broadcast,
   privateKey,
   unsignedTransaction,
+}: {
+  broadcast: boolean;
+  privateKey: string;
+  unsignedTransaction: UnsignedTransaction;
 }) {
   // Be sure you call validateUnsignedTransaction(unsignedTransaction); before calling this method!
 
@@ -61,9 +70,11 @@ export async function signTransactionSolanaKey({
   if (!broadcast) {
     return signature;
   }
+  // Ensure the chain is a valid Cluster type
+  const chain: Cluster = unsignedTransaction.chain as Cluster;
 
   return await sendTransaction({
-    chain: unsignedTransaction.chain,
+    chain,
     transaction,
   });
 }

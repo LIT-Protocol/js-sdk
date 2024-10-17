@@ -1,16 +1,26 @@
-const { encryptPrivateKey } = require('../../internal/common/encryptKey');
-const {
+import { encryptPrivateKey } from '../../internal/common/encryptKey';
+import {
   generateEthereumPrivateKey,
-} = require('../../internal/ethereum/generatePrivateKey');
-const {
+} from '../../internal/ethereum/generatePrivateKey';
+import {
   signMessageEthereumKey,
-} = require('../../internal/ethereum/signMessage');
-const {
+} from '../../internal/ethereum/signMessage';
+import {
   generateSolanaPrivateKey,
-} = require('../../internal/solana/generatePrivateKey');
-const { signMessageSolanaKey } = require('../../internal/solana/signMessage');
+} from '../../internal/solana/generatePrivateKey';
+import { signMessageSolanaKey } from '../../internal/solana/signMessage';
 
-async function processEthereumAction({ action, accessControlConditions }) {
+interface Action {
+  network: 'evm' | 'solana';
+  generateKeyParams: {
+    memo: string;
+  };
+  signMessageParams?: {
+    messageToSign?: string;
+  };
+}
+
+async function processEthereumAction({ action, accessControlConditions }: { action: Action; accessControlConditions: any }) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
 
@@ -24,9 +34,9 @@ async function processEthereumAction({ action, accessControlConditions }) {
     }),
     messageToSign
       ? signMessageEthereumKey({
-          messageToSign: messageToSign,
-          privateKey: ethereumKey.privateKey,
-        })
+        messageToSign: messageToSign,
+        privateKey: ethereumKey.privateKey,
+      })
       : Promise.resolve(),
   ]);
 
@@ -42,7 +52,7 @@ async function processEthereumAction({ action, accessControlConditions }) {
   };
 }
 
-async function processSolanaAction({ action, accessControlConditions }) {
+async function processSolanaAction({ action, accessControlConditions }: { action: Action; accessControlConditions: any }) {
   const { network, generateKeyParams } = action;
 
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -57,9 +67,9 @@ async function processSolanaAction({ action, accessControlConditions }) {
     }),
     messageToSign
       ? signMessageSolanaKey({
-          messageToSign: messageToSign,
-          privateKey: solanaKey.privateKey,
-        })
+        messageToSign: messageToSign,
+        privateKey: solanaKey.privateKey,
+      })
       : Promise.resolve(),
   ]);
 
@@ -75,7 +85,7 @@ async function processSolanaAction({ action, accessControlConditions }) {
   };
 }
 
-async function processActions({ actions, accessControlConditions }) {
+async function processActions({ actions, accessControlConditions }: { actions: Action[]; accessControlConditions: any }) {
   return Promise.all(
     actions.map(async (action, ndx) => {
       const { network } = action;
@@ -98,7 +108,7 @@ async function processActions({ actions, accessControlConditions }) {
   );
 }
 
-function validateParams(actions) {
+function validateParams(actions: Action[]) {
   if (!actions) {
     throw new Error('Missing required field: actions');
   }
@@ -137,6 +147,9 @@ function validateParams(actions) {
 export async function batchGenerateEncryptedKeys({
   actions,
   accessControlConditions,
+}: {
+  actions: Action[];
+  accessControlConditions: any;
 }) {
   validateParams(actions);
 
