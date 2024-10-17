@@ -1,3 +1,8 @@
+import {
+  InvalidArgumentException,
+  ParamsMissingError,
+} from '@lit-protocol/constants';
+
 export interface IPFSHash {
   digest: string;
   hashFunction: number;
@@ -36,20 +41,41 @@ export const getBytes32FromMultihash = (
   CID: CIDParser
 ): IPFSHash => {
   if (!CID) {
-    throw new Error(
+    throw new ParamsMissingError(
+      {
+        info: {
+          ipfsId,
+          CID,
+        },
+      },
       'CID is required. Please import from "multiformats/cid" package, and pass the CID object to the function.'
     );
   }
 
   if (!ipfsId) {
-    throw new Error('ipfsId is required');
+    throw new ParamsMissingError(
+      {
+        info: {
+          ipfsId,
+        },
+      },
+      'ipfsId is required'
+    );
   }
 
   let cid;
   try {
     cid = CID.parse(ipfsId);
   } catch (e) {
-    throw new Error('Error parsing CID');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          ipfsId,
+          CID,
+        },
+      },
+      'Error parsing CID'
+    );
   }
 
   const hashFunction = cid.multihash.code;

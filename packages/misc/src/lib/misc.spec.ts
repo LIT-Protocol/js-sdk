@@ -4,7 +4,6 @@ global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
-import { LitErrorKind, LIT_ERROR, CAYENNE_URL } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
 
 describe('utils', () => {
@@ -45,60 +44,12 @@ describe('utils', () => {
     expect(mostOccured).toBe(0);
   });
 
-  it('should throwError in the Lit standardized way', () => {
-    let err: Error;
-
-    try {
-      err = utilsModule.throwError({
-        message: 'Message!',
-        errorKind: 'hello',
-        errorCode: 'world',
-      });
-    } catch (e) {
-      err = e as Error;
-    }
-
-    const keys = Object.keys(err);
-    const values = Object.values(err);
-
-    expect(keys).toContain('message');
-    expect(keys).toContain('errorKind');
-    expect(keys).toContain('errorCode');
-    expect(values).toContain('Message!');
-    expect(values).toContain('hello');
-    expect(values).toContain('world');
-  });
-
-  // it('should able to use the error type from constants', () => {
-  //   let err: Error;
-
-  //   try {
-  //     err = utilsModule.throwError({
-  //       message: 'custom message',
-  //       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-  //       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-  //     });
-  //   } catch (e) {
-  //     err = e as Error;
-  //   }
-
-  //   const keys = Object.keys(err);
-  //   const values = Object.values(err);
-
-  //   expect(keys).toContain('message');
-  //   expect(keys).toContain('errorKind');
-  //   expect(keys).toContain('errorCode');
-  //   expect(values).toContain('custom message');
-  //   expect(values).toContain(LitErrorKind.Validation);
-  //   expect(values).toContain(LIT_ERROR.INVALID_PARAM_TYPE.name);
-  // });
-
   it('should get value type by a given value', () => {
     const fooString = 'fooString';
     const fooBool = true;
     const fooNumber = 6;
     const fooList: number[] = [1, 2, 3];
-    const fooArray: Array<string> = ['a', 'b', 'c'];
+    const fooArray: string[] = ['a', 'b', 'c'];
     const fooTuple: [string, number] = ['hello', 10];
     const fooUint8Arr = new Uint8Array([1, 2, 3, 4, 5]);
     const fooUint16Arr = new Uint16Array([1, 2, 3, 4, 5]);

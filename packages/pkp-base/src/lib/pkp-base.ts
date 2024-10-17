@@ -7,11 +7,14 @@
  * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
-
-import { publicKeyConvert } from 'secp256k1';
-
+import depd from 'depd';
+import {
+  InitError,
+  LitNodeClientNotReadyError,
+  UnknownError,
+} from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { logError } from '@lit-protocol/misc';
+import { logError, publicKeyConvert } from '@lit-protocol/misc';
 import {
   AuthenticationProps,
   JsonExecutionSdkParams,
@@ -23,6 +26,8 @@ import {
   AuthMethod,
   SessionSigsMap,
 } from '@lit-protocol/types';
+
+const deprecated = depd('lit-js-sdk:pkp-base:pkp-base');
 
 /**
  * Compresses a given public key.
@@ -36,7 +41,7 @@ const compressPubKey = (pubKey: string): string => {
   }
 
   // const hex = Buffer.from(pubKey, 'hex');
-  const uint8array = new Uint8Array(Buffer.from(pubKey, 'hex'));
+  const uint8array = Buffer.from(pubKey, 'hex');
   const compressedKey = publicKeyConvert(uint8array, true);
   const hex = Buffer.from(compressedKey).toString('hex');
 
@@ -49,8 +54,7 @@ const compressPubKey = (pubKey: string): string => {
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
 
-  // @deprecated
-  controllerAuthSig?: AuthSig;
+  private _controllerAuthSig?: AuthSig;
   controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigsMap;
   authContext?: AuthenticationProps;
@@ -71,19 +75,29 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   private PREFIX = '[PKPBase]';
   private orange = '\x1b[33m';
   private reset = '\x1b[0m';
-  private red = '\x1b[31m';
 
   get litNodeClientReady(): boolean {
     return this.litNodeClient.ready;
   }
 
   /**
-   * Constructor for the PKPBase class.
-   * Initializes the instance with the provided properties.
-   * Marked as private to make class final. When creating an instance use PKPBase.createInstance
-   *
-   * @param { PKPBaseProp } pkpBaseProp - The properties for the PKPBase instance.
+   * @deprecated - Use a different authentication method instead.
    */
+  get controllerAuthSig(): AuthSig | undefined {
+    deprecated('controllerAuthSig is deprecated.');
+    return this._controllerAuthSig;
+  }
+
+  /**
+   * @deprecated - Use a different authentication method instead.
+   */
+  set controllerAuthSig(value: AuthSig | undefined) {
+    deprecated('controllerAuthSig is deprecated.');
+    this._controllerAuthSig = value;
+  }
+
+  // Rest of the PKPBase class...
+
   private constructor(pkpBaseProp: PKPBaseProp) {
     const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
 
@@ -130,7 +144,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       this.uncompressedPubKey = prop.pkpPubKey;
       this.uncompressedPubKeyBuffer = Buffer.from(prop.pkpPubKey, 'hex');
     } catch (e) {
-      return this.throwError(
+      throw new UnknownError(
+        {
+          info: {
+            param: 'pkpPubKey',
+            value: prop.pkpPubKey,
+          },
+          cause: e,
+        },
         'Failed to set uncompressed public key and buffer'
       );
     }
@@ -146,7 +167,16 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       this.compressedPubKey = compressPubKey(prop.pkpPubKey);
       this.compressedPubKeyBuffer = Buffer.from(this.compressedPubKey, 'hex');
     } catch (e) {
-      return this.throwError('Failed to set compressed public key and buffer');
+      throw new UnknownError(
+        {
+          info: {
+            param: 'pkpPubKey',
+            value: prop.pkpPubKey,
+          },
+          cause: e,
+        },
+        'Failed to set compressed public key and buffer'
+      );
     }
   }
 
@@ -163,7 +193,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.litActionIPFS = pkpBaseProp.litActionIPFS;
 
     if (pkpBaseProp.litActionCode && pkpBaseProp.litActionIPFS) {
-      return this.throwError(
+      throw new InitError(
+        {
+          info: {
+            pkpBaseProp,
+          },
+        },
         'Both litActionCode and litActionIPFS cannot be present at the same time.'
       );
     }
@@ -198,7 +233,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       await this.litNodeClient.connect();
       this.log('Connected to Lit Node');
     } catch (e) {
-      return this.throwError('Failed to connect to Lit Node');
+      throw new LitNodeClientNotReadyError(
+        {
+          info: {
+            litNodeConfig: this.litNodeClient.config,
+          },
+          cause: e,
+        },
+        'Failed to connect to Lit Node'
+      );
     }
   }
 
@@ -223,12 +266,28 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         logError('authContext is provided');
       }
 
-      this.throwError('Must specify one, and only one, authentication method ');
+      throw new InitError(
+        {
+          info: {
+            authContext: this.authContext,
+            controllerAuthSig: this.controllerAuthSig,
+            controllerSessionSigs: this.controllerSessionSigs,
+          },
+        },
+        'Must specify one, and only one, authentication method '
+      );
     }
 
     // Check if authContext is provided correctly
     if (this.authContext && !this.authContext.getSessionSigsProps) {
-      this.throwError('authContext must be an object with getSessionSigsProps');
+      throw new InitError(
+        {
+          info: {
+            authContext: this.authContext,
+          },
+        },
+        'authContext must be an object with getSessionSigsProps'
+      );
     }
   }
 
@@ -240,10 +299,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       : this.controllerSessionSigs;
 
     if (!sessionSigs) {
-      this.throwError('Could not get sessionSigs');
+      throw new UnknownError({}, 'Could not get sessionSigs');
     }
 
-    return sessionSigs!;
+    return sessionSigs;
   }
 
   /**
@@ -259,7 +318,13 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
     // -- validate executeJsArgs
     if (this.litActionCode && this.litActionIPFS) {
-      return this.throwError(
+      throw new InitError(
+        {
+          info: {
+            litActionCode: this.litActionCode,
+            litActionIPFS: this.litActionIPFS,
+          },
+        },
         'litActionCode and litActionIPFS cannot exist at the same time'
       );
     }
@@ -268,7 +333,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      this.throwError('pkpPubKey (aka. uncompressesPubKey) is required');
+      throw new InitError(
+        {},
+        'pkpPubKey (aka. uncompressedPubKey) is required'
+      );
     }
 
     this.validateAuthContext();
@@ -293,7 +361,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     // check if executeJsArgs has either code or ipfsId
     if (!executeJsArgs.code && !executeJsArgs.ipfsId) {
-      return this.throwError('executeJsArgs must have either code or ipfsId');
+      throw new InitError(
+        {
+          info: {
+            litActionCode: this.litActionCode,
+            litActionIPFS: this.litActionIPFS,
+          },
+        },
+        'executeJsArgs must have either code or ipfsId'
+      );
     }
 
     this.log('executeJsArgs:', executeJsArgs);
@@ -328,7 +404,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      this.throwError('pkpPubKey (aka. uncompressedPubKey) is required');
+      throw new InitError(
+        {},
+        'pkpPubKey (aka. uncompressedPubKey) is required'
+      );
     }
 
     this.validateAuthContext();
@@ -343,7 +422,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       });
 
       if (!sig) {
-        throw new Error('No signature returned');
+        throw new UnknownError({}, 'No signature returned');
       }
 
       // pad sigs with 0 if length is odd
@@ -381,19 +460,4 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       console.log(this.orange + this.PREFIX + this.reset, ...args);
     }
   }
-
-  /**
-   * Logs an error message to the console and throws an Error with the same message.
-   *
-   * @param {string} message - The error message to be logged and thrown.
-   *
-   * @returns {never} - This function does not return a value since it always throws an Error.
-   */
-  throwError = (message: string): never => {
-    console.error(
-      this.orange + this.PREFIX + this.reset,
-      this.red + message + this.reset
-    );
-    throw new Error(message);
-  };
 }

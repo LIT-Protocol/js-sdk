@@ -1,7 +1,12 @@
 import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 
-import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import {
+  LIT_CHAINS,
+  AUTH_METHOD_TYPE,
+  InvalidArgumentException,
+  WrongParamFormat,
+} from '@lit-protocol/constants';
 import {
   LitNodeClient,
   checkAndSignAuthMessage,
@@ -17,6 +22,11 @@ import {
 
 import { BaseProvider } from './BaseProvider';
 
+interface DomainAndOrigin {
+  domain?: string;
+  origin?: string;
+}
+
 export default class EthWalletProvider extends BaseProvider {
   /**
    * The domain from which the signing request is made
@@ -30,16 +40,24 @@ export default class EthWalletProvider extends BaseProvider {
   constructor(options: EthWalletProviderOptions & BaseProviderOptions) {
     super(options);
 
+    const { domain, origin } = EthWalletProvider.getDomainAndOrigin(options);
+    this.domain = domain;
+    this.origin = origin;
+  }
+
+  private static getDomainAndOrigin(options: DomainAndOrigin) {
+    let domain, origin;
     try {
-      this.domain = options.domain || window.location.hostname;
-      this.origin = options.origin || window.location.origin;
+      domain = options.domain || window.location.hostname;
+      origin = options.origin || window.location.origin;
     } catch (e) {
       log(
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
-      this.domain = options.domain || 'localhost';
-      this.origin = options.origin || 'http://localhost';
+      domain = options.domain || 'localhost';
+      origin = options.origin || 'http://localhost';
     }
+    return { domain, origin };
   }
 
   /**
@@ -47,7 +65,6 @@ export default class EthWalletProvider extends BaseProvider {
    *
    * @param {EthWalletAuthenticateOptions} options
    * @param {string} [options.address] - Address to sign with
-   * @param {function} [options.signMessage] - Function to sign message with
    * @param {string} [options.chain] - Name of chain to use for signature
    * @param {number} [options.expiration] - When the auth signature expires
    *
@@ -57,17 +74,22 @@ export default class EthWalletProvider extends BaseProvider {
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
     if (!options) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            options,
+          },
+        },
         'Options are required to authenticate with EthWalletProvider.'
       );
     }
 
     return EthWalletProvider.authenticate({
       signer: options,
-      address: options?.address,
-      chain: options?.chain,
+      address: options.address,
+      chain: options.chain,
       litNodeClient: this.litNodeClient,
-      expiration: options?.expiration,
+      expiration: options.expiration,
       domain: this.domain,
       origin: this.origin,
     });
@@ -77,10 +99,13 @@ export default class EthWalletProvider extends BaseProvider {
    * Generate a wallet signature to use as an auth method
    *
    * @param {EthWalletAuthenticateOptions} options
+   * @param {object} options.signer - Signer object
+   * @param {object} options.litNodeClient - LitNodeClient instance
    * @param {string} [options.address] - Address to sign with
-   * @param {function} [options.signMessage] - Function to sign message with
    * @param {string} [options.chain] - Name of chain to use for signature
    * @param {number} [options.expiration] - When the auth signature expires
+   * @param {string} [options.domain] - Domain from which the signing request is made
+   * @param {string} [options.origin] - Origin from which the signing request is made
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    * @static
    * @memberof EthWalletProvider
@@ -121,7 +146,13 @@ export default class EthWalletProvider extends BaseProvider {
       (signer as ethers.Wallet)?.address;
 
     if (!address) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            address,
+            signer,
+          },
+        },
         `Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`
       );
     }
@@ -137,10 +168,13 @@ export default class EthWalletProvider extends BaseProvider {
       expiration =
         expiration || new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
+      const { domain: resolvedDomain, origin: resolvedOrigin } =
+        EthWalletProvider.getDomainAndOrigin({ domain, origin });
+
       // Prepare Sign in with Ethereum message
       const preparedMessage: Partial<SiweMessage> = {
-        domain: domain || 'localhost',
-        uri: origin || 'http://localhost',
+        domain: resolvedDomain,
+        uri: resolvedOrigin,
         address,
         version: '1',
         chainId,
@@ -168,7 +202,7 @@ export default class EthWalletProvider extends BaseProvider {
     }
 
     const authMethod = {
-      authMethodType: AuthMethodType.EthWallet,
+      authMethodType: AUTH_METHOD_TYPE.EthWallet,
       accessToken: JSON.stringify(authSig),
     };
     return authMethod;
@@ -192,8 +226,14 @@ export default class EthWalletProvider extends BaseProvider {
     try {
       address = JSON.parse(authMethod.accessToken).address;
     } catch (err) {
-      throw new Error(
-        `Error when parsing auth method to generate auth method ID for Eth wallet: ${err}`
+      throw new WrongParamFormat(
+        {
+          info: {
+            authMethod,
+          },
+          cause: err,
+        },
+        'Error when parsing auth method to generate auth method ID for Eth wallet'
       );
     }
 

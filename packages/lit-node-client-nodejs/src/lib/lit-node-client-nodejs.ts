@@ -4,8 +4,6 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
 import {
-  ILitResource,
-  ISessionCapabilityObject,
   LitAccessControlConditionResource,
   LitResourceAbilityRequest,
   decode,
@@ -15,29 +13,38 @@ import {
   createSiweMessageWithRecaps,
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
-import * as blsSdk from '@lit-protocol/bls-sdk';
 import {
-  AuthMethodType,
+  AUTH_METHOD_TYPE,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
-  LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
-  LitNetwork,
+  ParamsMissingError,
+  ParamNullError,
+  NoValidShares,
+  UnknownSignatureType,
+  UnknownSignatureError,
+  LitNodeClientNotReadyError,
+  InvalidParamType,
+  InvalidArgumentException,
+  WalletSignatureNotFoundError,
+  UnknownError,
+  InvalidSignatureError,
+  UnsupportedMethodError,
+  InvalidSessionSigs,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
-  combineEcdsaShares,
   combineSignatureShares,
   encrypt,
   generateSessionKeyPair,
   verifyAndDecryptWithSignatureShares,
+  verifySignature,
 } from '@lit-protocol/crypto';
-import { safeParams } from '@lit-protocol/encryption';
 import {
   defaultMintClaimCallback,
   findMostCommonResponse,
@@ -49,8 +56,8 @@ import {
   logWithRequestId,
   mostCommonString,
   normalizeAndStringify,
+  safeParams,
   removeHexPrefix,
-  throwError,
   validateSessionSigs,
 } from '@lit-protocol/misc';
 import {
@@ -63,6 +70,7 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
@@ -142,11 +150,7 @@ export class LitNodeClientNodeJs
   // ========== Constructor ==========
   constructor(args: LitNodeClientConfig | CustomNetwork) {
     if (!args) {
-      throwError({
-        message: 'must provide LitNodeClient parameters',
-        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-      });
+      throw new ParamsMissingError({}, 'must provide LitNodeClient parameters');
     }
 
     super(args);
@@ -164,7 +168,14 @@ export class LitNodeClientNodeJs
   ): Promise<CapacityCreditsRes> => {
     // -- validate
     if (!params.dAppOwnerWallet) {
-      throw new Error('dAppOwnerWallet must exist');
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'dAppOwnerWallet must exist'
+      );
     }
 
     // Useful log for debugging
@@ -239,7 +250,7 @@ export class LitNodeClientNodeJs
       storedSessionKeyOrError.result === ''
     ) {
       console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
 
       // Generate new one
@@ -250,7 +261,7 @@ export class LitNodeClientNodeJs
         localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
       } catch (e) {
         log(
-          `[getSessionKey] Localstorage not available.Not a problem. Contiune...`
+          `[getSessionKey] Localstorage not available.Not a problem. Continue...`
         );
       }
 
@@ -397,11 +408,10 @@ export class LitNodeClientNodeJs
         log('getWalletSig - flow 1.2');
         if (!this.defaultAuthCallback) {
           log('getWalletSig - flow 1.2.1');
-          return throwError({
-            message: 'No default auth callback provided',
-            errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-            errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-          });
+          throw new ParamsMissingError(
+            {},
+            'No authNeededCallback nor default auth callback provided'
+          );
         }
 
         log('getWalletSig - flow 1.2.2');
@@ -459,11 +469,10 @@ export class LitNodeClientNodeJs
       authSig = await authCallback(authCallbackParams);
     } else {
       if (!this.defaultAuthCallback) {
-        return throwError({
-          message: 'No default auth callback provided',
-          errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-          errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-        });
+        throw new ParamsMissingError(
+          {},
+          'No authCallback nor default auth callback provided'
+        );
       }
       authSig = await this.defaultAuthCallback(authCallbackParams);
     }
@@ -521,13 +530,13 @@ export class LitNodeClientNodeJs
           { suppressExceptions: false }
         );
       } catch (e) {
-        log(`Error while verifying ECDSA signature: `, e);
+        log(`Error while verifying BLS signature: `, e);
         return true;
       }
     } else if (authSig.algo === `LIT_BLS`) {
       try {
-        blsSessionSigVerify(
-          blsSdk.verify_signature,
+        await blsSessionSigVerify(
+          verifySignature,
           this.networkPubKey!,
           authSig,
           authSigSiweMessage
@@ -537,11 +546,17 @@ export class LitNodeClientNodeJs
         return true;
       }
     } else {
-      throwError({
-        message: `Unsupported signature algo for session signature. Expected ed25519 or LIT_BLS received ${authSig.algo}`,
-        errorKind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
-        errorCode: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.code,
-      });
+      throw new InvalidSignatureError(
+        {
+          info: {
+            authSig,
+            resourceAbilityRequests,
+            sessionKeyUri,
+          },
+        },
+        'Unsupported signature algo for session signature. Expected ed25519 or LIT_BLS received %s',
+        authSig.algo
+      );
     }
 
     // make sure the sig is for the correct session key
@@ -596,10 +611,10 @@ export class LitNodeClientNodeJs
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT = (
+  combineSharesAndGetJWT = async (
     signatureShares: NodeBlsSigningShare[],
     requestId: string = ''
-  ): string => {
+  ): Promise<string> => {
     // ========== Shares Validations ==========
     // -- sanity check
     if (
@@ -617,7 +632,7 @@ export class LitNodeClientNodeJs
     signatureShares.sort((a, b) => a.shareIndex - b.shareIndex);
 
     // ========== Combine Shares ==========
-    const signature = combineSignatureShares(
+    const signature = await combineSignatureShares(
       signatureShares.map((s) => s.signatureShare)
     );
 
@@ -642,7 +657,7 @@ export class LitNodeClientNodeJs
     identityParam: Uint8Array,
     ciphertext: string,
     signatureShares: NodeBlsSigningShare[]
-  ): Uint8Array => {
+  ): Promise<Uint8Array> => {
     const sigShares = signatureShares.map((s) => s.signatureShare);
 
     return verifyAndDecryptWithSignatureShares(
@@ -709,11 +724,14 @@ export class LitNodeClientNodeJs
     log('running runOnTargetedNodes:', params.targetNodeRange);
 
     if (!params.targetNodeRange) {
-      return throwError({
-        message: 'targetNodeRange is required',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'targetNodeRange is required'
+      );
     }
 
     // determine which node to run on
@@ -751,7 +769,7 @@ export class LitNodeClientNodeJs
 
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     const nodePromises = [];
 
     for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
@@ -796,159 +814,6 @@ export class LitNodeClientNodeJs
       requestId,
       params.targetNodeRange
     )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
-  };
-
-  /**
-   *
-   * Get signatures from signed data
-   *
-   * @param { Array<any> } signedData
-   *
-   * @returns { any }
-   *
-   */
-  getSessionSignatures = (signedData: any[]): any => {
-    // -- prepare
-    const signatures: any = {};
-
-    // TOOD: get keys of signedData
-    const keys = Object.keys(signedData[0]);
-
-    // removeExtraBackslashesAndQuotes
-    const sanitise = (str: string) => {
-      // Check if str is a string and remove extra backslashes
-      if (typeof str === 'string') {
-        // Remove backslashes
-        let newStr = str.replace(/\\+/g, '');
-        // Remove leading and trailing double quotes
-        newStr = newStr.replace(/^"|"$/g, '');
-        return newStr;
-      }
-      return str;
-    };
-
-    // -- execute
-    keys.forEach((key) => {
-      log('key:', key);
-
-      const shares = signedData.map((r) => r[key]);
-
-      log('shares:', shares);
-
-      shares.sort((a, b) => a.shareIndex - b.shareIndex);
-
-      const sigShares: SigShare[] = shares.map((s, index: number) => {
-        log('Original Share Struct:', s);
-
-        const share = getFlattenShare(s);
-
-        log('share:', share);
-
-        if (!share) {
-          throw new Error('share is null or undefined');
-        }
-
-        if (!share.bigr) {
-          throw new Error(
-            `bigR is missing in share ${index}. share ${JSON.stringify(share)}`
-          );
-        }
-
-        const sanitisedBigR = sanitise(share.bigr);
-        const sanitisedSigShare = sanitise(share.publicKey);
-
-        log('sanitisedBigR:', sanitisedBigR);
-        log('sanitisedSigShare:', sanitisedSigShare);
-
-        return {
-          sigType: share.sigType,
-          signatureShare: sanitise(share.signatureShare),
-          shareIndex: share.shareIndex,
-          bigR: sanitise(share.bigr),
-          publicKey: share.publicKey,
-          dataSigned: share.dataSigned,
-          siweMessage: share.siweMessage,
-        };
-      });
-
-      log('getSessionSignatures - sigShares', sigShares);
-
-      const sigType = mostCommonString(sigShares.map((s) => s.sigType));
-
-      // -- validate if this.networkPubKeySet is null
-      if (this.networkPubKeySet === null) {
-        throwError({
-          message: 'networkPubKeySet cannot be null',
-          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-        });
-        return;
-      }
-
-      // -- validate if signature type is ECDSA
-      if (
-        sigType !== LIT_CURVE.EcdsaCaitSith &&
-        sigType !== LIT_CURVE.EcdsaK256 &&
-        sigType !== LIT_CURVE.EcdsaCAITSITHP256
-      ) {
-        throwError({
-          message: `signature type is ${sigType} which is invalid`,
-          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
-          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
-        });
-        return;
-      }
-
-      const signature = combineEcdsaShares(sigShares);
-      if (!signature.r) {
-        throwError({
-          message: 'siganture could not be combined',
-          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
-          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
-        });
-      }
-
-      const encodedSig = joinSignature({
-        r: '0x' + signature.r,
-        s: '0x' + signature.s,
-        v: signature.recid,
-      });
-
-      signatures[key] = {
-        ...signature,
-        signature: encodedSig,
-        publicKey: mostCommonString(sigShares.map((s) => s.publicKey)),
-        dataSigned: mostCommonString(sigShares.map((s) => s.dataSigned)),
-        siweMessage: mostCommonString(sigShares.map((s) => s.siweMessage)),
-      };
-    });
-
-    return signatures;
-  };
-
-  /**
-   *
-   * Get a single signature
-   *
-   * @param { Array<any> } shareData from all node promises
-   * @param { string } requestId
-   *
-   * @returns { string } signature
-   *
-   */
-  getSignature = async (shareData: any[], requestId: string): Promise<any> => {
-    // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
-    const R_x = shareData[0].local_x;
-    const R_y = shareData[0].local_y;
-
-    const valid_shares = shareData.map((s) => s.signature_share);
-    const shares = JSON.stringify(valid_shares);
-
-    await wasmECDSA.initWasmEcdsaSdk(); // init WASM
-    const signature = wasmECDSA.combine_signature(R_x, R_y, shares);
-    logWithRequestId(requestId, 'raw ecdsa sig', signature);
-
-    return signature;
   };
 
   // ========== Scoped Business Logics ==========
@@ -1036,11 +901,7 @@ export class LitNodeClientNodeJs
       const message =
         '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError({}, message);
     }
 
     const paramsIsSafe = safeParams({
@@ -1049,22 +910,24 @@ export class LitNodeClientNodeJs
     });
 
     if (!paramsIsSafe) {
-      return throwError({
-        message: 'executeJs params are not valid',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'executeJs params are not valid'
+      );
     }
 
     // validate session sigs
     const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
 
     if (checkedSessionSigs.isValid === false) {
-      return throwError({
-        message: `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidSessionSigs(
+        {},
+        `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
+      );
     }
 
     // Format the params
@@ -1094,7 +957,7 @@ export class LitNodeClientNodeJs
       };
     }
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
     const getNodePromises = async () => {
@@ -1119,7 +982,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1175,7 +1038,7 @@ export class LitNodeClientNodeJs
       signedDataList
     );
 
-    const signatures = getSignatures({
+    const signatures = await getSignatures({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
       minNodeCount: params.useSingleNode ? 1 : this.config.minNodeCount,
@@ -1243,11 +1106,16 @@ export class LitNodeClientNodeJs
 
     (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
       if (!params[key]) {
-        throwError({
-          message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
-          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-        });
+        throw new ParamNullError(
+          {
+            info: {
+              params,
+              key,
+            },
+          },
+          `"%s" cannot be undefined, empty, or null. Please provide a valid value.`,
+          key
+        );
       }
     });
 
@@ -1256,25 +1124,28 @@ export class LitNodeClientNodeJs
       !params.sessionSigs &&
       (!params.authMethods || params.authMethods.length <= 0)
     ) {
-      throwError({
-        message: `Either sessionSigs or authMethods (length > 0) must be present.`,
-        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-      });
+      throw new ParamNullError(
+        {
+          info: {
+            params,
+          },
+        },
+        'Either sessionSigs or authMethods (length > 0) must be present.'
+      );
     }
+
+    const requestId = this._getNewRequestId();
 
     // validate session sigs
     const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
 
     if (checkedSessionSigs.isValid === false) {
-      return throwError({
-        message: `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidSessionSigs(
+        {},
+        `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
+      );
     }
 
-    const requestId = this.getRequestId();
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
 
@@ -1310,13 +1181,13 @@ export class LitNodeClientNodeJs
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
+      this.connectedNodes.size
     );
 
     // ========== Handle Response ==========
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1332,7 +1203,7 @@ export class LitNodeClientNodeJs
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = parsePkpSignResponse(responseData);
 
-    const signatures = getSignatures<{ signature: SigResponse }>({
+    const signatures = await getSignatures<{ signature: SigResponse }>({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
       minNodeCount: this.config.minNodeCount,
@@ -1360,22 +1231,15 @@ export class LitNodeClientNodeJs
     // ========== Validation ==========
     // -- validate if it's ready
     if (!this.ready) {
-      const message =
-        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError(
+        {},
+        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
+      );
     }
 
     // -- validate if this.networkPubKeySet is null
     if (this.networkPubKeySet === null) {
-      return throwError({
-        message: 'networkPubKeySet cannot be null',
-        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-      });
+      throw new ParamNullError({}, 'networkPubKeySet cannot be null');
     }
 
     const paramsIsSafe = safeParams({
@@ -1384,11 +1248,14 @@ export class LitNodeClientNodeJs
     });
 
     if (!paramsIsSafe) {
-      return throwError({
-        message: `Parameter validation failed.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'Parameter validation failed.'
+      );
     }
 
     // ========== Prepare ==========
@@ -1407,15 +1274,18 @@ export class LitNodeClientNodeJs
     }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
 
     if (error) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
     }
 
     // ========== Get Node Promises ==========
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
       const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
@@ -1448,7 +1318,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     const signatureShares: NodeBlsSigningShare[] = (
@@ -1458,7 +1328,7 @@ export class LitNodeClientNodeJs
     log('signatureShares', signatureShares);
 
     // ========== Result ==========
-    const finalJwt: string = this.combineSharesAndGetJWT(
+    const finalJwt: string = await this.combineSharesAndGetJWT(
       signatureShares,
       requestId
     );
@@ -1486,23 +1356,15 @@ export class LitNodeClientNodeJs
     // ========== Validate Params ==========
     // -- validate if it's ready
     if (!this.ready) {
-      const message =
-        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError(
+        {},
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
+      );
     }
 
     // -- validate if this.subnetPubKey is null
     if (!this.subnetPubKey) {
-      const message = 'subnetPubKey cannot be null';
-      return throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError({}, 'subnetPubKey cannot be null');
     }
 
     const paramsIsSafe = safeParams({
@@ -1511,11 +1373,14 @@ export class LitNodeClientNodeJs
     });
 
     if (!paramsIsSafe) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
     }
 
     // ========== Validate Access Control Conditions Schema ==========
@@ -1527,11 +1392,14 @@ export class LitNodeClientNodeJs
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
     }
 
     const hashOfConditionsStr = uint8arrayToString(
@@ -1557,7 +1425,7 @@ export class LitNodeClientNodeJs
     );
 
     // ========== Encrypt ==========
-    const ciphertext = encrypt(
+    const ciphertext = await encrypt(
       this.subnetPubKey,
       params.dataToEncrypt,
       uint8arrayFromString(identityParam, 'utf8')
@@ -1572,28 +1440,21 @@ export class LitNodeClientNodeJs
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
+    const { sessionSigs, authSig, chain, ciphertext, dataToEncryptHash } =
+      params;
 
     // ========== Validate Params ==========
     // -- validate if it's ready
     if (!this.ready) {
-      const message =
-        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError(
+        {},
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
+      );
     }
 
     // -- validate if this.subnetPubKey is null
     if (!this.subnetPubKey) {
-      const message = 'subnetPubKey cannot be null';
-      return throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError({}, 'subnetPubKey cannot be null');
     }
 
     const paramsIsSafe = safeParams({
@@ -1602,11 +1463,14 @@ export class LitNodeClientNodeJs
     });
 
     if (!paramsIsSafe) {
-      return throwError({
-        message: `Parameter validation failed.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'Parameter validation failed.'
+      );
     }
 
     // ========== Hashing Access Control Conditions =========
@@ -1615,11 +1479,14 @@ export class LitNodeClientNodeJs
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
     }
 
     const hashOfConditionsStr = uint8arrayToString(
@@ -1637,11 +1504,14 @@ export class LitNodeClientNodeJs
     }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
 
     if (error) {
-      throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
     }
 
     // ========== Assemble identity parameter ==========
@@ -1653,17 +1523,20 @@ export class LitNodeClientNodeJs
     log('identityParam', identityParam);
 
     // ========== Get Network Signature ==========
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
-      const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
+      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
       if (!authSigToSend) {
-        return throwError({
-          message: `authSig is required`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
+        throw new InvalidArgumentException(
+          {
+            info: {
+              params,
+            },
+          },
+          'authSig is required'
+        );
       }
 
       const reqBody: EncryptionSignRequest = {
@@ -1694,7 +1567,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises, requestId);
+      this._throwNodeError(res, requestId);
     }
 
     const signatureShares: NodeBlsSigningShare[] = (
@@ -1704,7 +1577,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'signatureShares', signatureShares);
 
     // ========== Result ==========
-    const decryptedData = this._decryptWithSignatureShares(
+    const decryptedData = await this._decryptWithSignatureShares(
       this.subnetPubKey,
       uint8arrayFromString(identityParam, 'utf8'),
       ciphertext,
@@ -1723,11 +1596,14 @@ export class LitNodeClientNodeJs
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
     }
 
     const hashOfConditionsStr = uint8arrayToString(
@@ -1775,14 +1651,10 @@ export class LitNodeClientNodeJs
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
     if (!this.ready) {
-      const message =
-        '[signSessionKey] ]LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError(
+        {},
+        '[signSessionKey] ]LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
+      );
     }
 
     // -- construct SIWE message that will be signed by node to generate an authSig.
@@ -1801,7 +1673,12 @@ export class LitNodeClientNodeJs
     );
 
     if (!sessionKeyUri) {
-      throw new Error(
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
         '[signSessionKey] sessionKeyUri is not defined. Please provide a sessionKeyUri or a sessionKey.'
       );
     }
@@ -1866,7 +1743,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] body:`, body);
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
     logWithRequestId(requestId, 'signSessionKey body', body);
     const nodePromises = this.getNodePromises((url: string) => {
       const reqBody: JsonSignSessionKeyRequestV1 = body;
@@ -1889,7 +1766,15 @@ export class LitNodeClientNodeJs
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
-      throw new Error(`Error when handling node promises: ${e}`);
+      throw new UnknownError(
+        {
+          info: {
+            requestId,
+          },
+          cause: e,
+        },
+        'Error when handling node promises'
+      );
     }
 
     logWithRequestId(requestId, 'handleNodePromises res:', res);
@@ -1911,9 +1796,10 @@ export class LitNodeClientNodeJs
     // -- 1. combine signed data as a list, and get the signatures from it
     let curveType = responseData[0]?.curveType;
 
-    if (!curveType) {
-      log(`[signSessionKey] curveType not found. Defaulting to ECDSA.`);
-      curveType = 'ECDSA';
+    if (curveType === 'ECDSA') {
+      throw new Error(
+        'The ECDSA curve type is not supported in this version. Please use version 6.x.x instead.'
+      );
     }
 
     log(`[signSessionKey] curveType is "${curveType}"`);
@@ -1923,7 +1809,16 @@ export class LitNodeClientNodeJs
     if (signedDataList.length <= 0) {
       const err = `[signSessionKey] signedDataList is empty.`;
       log(err);
-      throw new Error(err);
+      throw new InvalidSignatureError(
+        {
+          info: {
+            requestId,
+            responseData,
+            signedDataList,
+          },
+        },
+        err
+      );
     }
 
     logWithRequestId(
@@ -1965,7 +1860,16 @@ export class LitNodeClientNodeJs
         if (!data.signatureShare.ProofOfPossession) {
           const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`;
           log(err);
-          throw new Error(err);
+          throw new InvalidSignatureError(
+            {
+              info: {
+                requestId,
+                responseData,
+                data,
+              },
+            },
+            err
+          );
         }
 
         return data;
@@ -1988,7 +1892,15 @@ export class LitNodeClientNodeJs
       this.config.minNodeCount
     );
     if (validatedSignedDataList.length < this.config.minNodeCount) {
-      throw new Error(
+      throw new InvalidSignatureError(
+        {
+          info: {
+            requestId,
+            responseData,
+            validatedSignedDataList,
+            minNodeCount: this.config.minNodeCount,
+          },
+        },
         `[signSessionKey] not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`
       );
     }
@@ -2003,10 +1915,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] signatureShares:`, signatureShares);
 
-    // TODO: refactor type with merger of PR 'https://github.com/LIT-Protocol/js-sdk/pull/503`
-    const blsCombinedSignature = blsSdk.combine_signature_shares(
-      signatureShares.map((s) => JSON.stringify(s))
-    );
+    const blsCombinedSignature = await combineSignatureShares(signatureShares);
 
     log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
 
@@ -2022,7 +1931,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] mostCommonSiweMessage:`, mostCommonSiweMessage);
 
-    const signedMessage = normalizeAndStringify(mostCommonSiweMessage);
+    const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
 
     log(`[signSessionKey] signedMessage:`, signedMessage);
 
@@ -2169,13 +2078,14 @@ export class LitNodeClientNodeJs
       authSig.sig === '' ||
       authSig.signedMessage === ''
     ) {
-      throwError({
-        message: 'No wallet signature found',
-        errorKind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
-        errorCode: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
-      });
-      // @ts-ignore - we throw an error above, so below should never be reached
-      return;
+      throw new WalletSignatureNotFoundError(
+        {
+          info: {
+            authSig,
+          },
+        },
+        'No wallet signature found'
+      );
     }
 
     // ===== AFTER we have Valid Signed Session Key =====
@@ -2259,24 +2169,46 @@ export class LitNodeClientNodeJs
       authNeededCallback: async (props: AuthCallbackParams) => {
         // -- validate
         if (!props.expiration) {
-          throw new Error(
+          throw new ParamsMissingError(
+            {
+              info: {
+                props,
+              },
+            },
             '[getPkpSessionSigs/callback] expiration is required'
           );
         }
 
         if (!props.resources) {
-          throw new Error('[getPkpSessionSigs/callback]resources is required');
+          throw new ParamsMissingError(
+            {
+              info: {
+                props,
+              },
+            },
+            '[getPkpSessionSigs/callback]resources is required'
+          );
         }
 
         if (!props.resourceAbilityRequests) {
-          throw new Error(
+          throw new ParamsMissingError(
+            {
+              info: {
+                props,
+              },
+            },
             '[getPkpSessionSigs/callback]resourceAbilityRequests is required'
           );
         }
 
         // lit action code and ipfs id cannot exist at the same time
         if (props.litActionCode && props.litActionIpfsId) {
-          throw new Error(
+          throw new UnsupportedMethodError(
+            {
+              info: {
+                props,
+              },
+            },
             '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
         }
@@ -2344,14 +2276,26 @@ export class LitNodeClientNodeJs
   getLitActionSessionSigs = async (params: GetLitActionSessionSigs) => {
     // Check if either litActionCode or litActionIpfsId is provided
     if (!params.litActionCode && !params.litActionIpfsId) {
-      throw new Error(
-        "Either 'litActionCode' or 'litActionIpfsId' must be provided."
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'Either "litActionCode" or "litActionIpfsId" must be provided.'
       );
     }
 
     // Check if jsParams is provided
     if (!params.jsParams) {
-      throw new Error("'jsParams' is required.");
+      throw new ParamsMissingError(
+        {
+          info: {
+            params,
+          },
+        },
+        "'jsParams' is required."
+      );
     }
 
     return this.getPkpSessionSigs(params);
@@ -2381,27 +2325,28 @@ export class LitNodeClientNodeJs
     if (!this.ready) {
       const message =
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError({}, message);
     }
 
-    if (params.authMethod.authMethodType == AuthMethodType.WebAuthn) {
-      throwError({
-        message:
-          'Unsupported auth method type. Webauthn, and Lit Actions are not supported for claiming',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+    if (params.authMethod.authMethodType == AUTH_METHOD_TYPE.WebAuthn) {
+      throw new LitNodeClientNotReadyError(
+        {},
+        'Unsupported auth method type. Webauthn, and Lit Actions are not supported for claiming'
+      );
     }
 
-    const requestId = this.getRequestId();
+    const requestId = this._getNewRequestId();
 
     const nodePromises = this.getNodePromises((url: string) => {
       if (!params.authMethod) {
-        throw new Error('authMethod is required');
+        throw new ParamsMissingError(
+          {
+            info: {
+              params,
+            },
+          },
+          'authMethod is required'
+        );
       }
 
       const reqBody: JsonPKPClaimKeyRequest = {
@@ -2423,9 +2368,7 @@ export class LitNodeClientNodeJs
     );
 
     if (responseData.success) {
-      const nodeSignatures: Signature[] = (
-        responseData as SuccessNodePromises<any>
-      ).values.map((r) => {
+      const nodeSignatures: Signature[] = responseData.values.map((r) => {
         const sig = ethers.utils.splitSignature(`0x${r.signature}`);
         return {
           r: sig.r,
@@ -2439,10 +2382,9 @@ export class LitNodeClientNodeJs
         `responseData: ${JSON.stringify(responseData, null, 2)}`
       );
 
-      const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
-        .derivedKeyId;
+      const derivedKeyId = responseData.values[0].derivedKeyId;
 
-      const pubkey: string = this.computeHDPubKey(derivedKeyId);
+      const pubkey = await this.computeHDPubKey(derivedKeyId);
       logWithRequestId(
         requestId,
         `pubkey ${pubkey} derived from key id ${derivedKeyId}`
@@ -2461,7 +2403,7 @@ export class LitNodeClientNodeJs
             signer: (params as ClaimRequest<'client'>).signer,
             ...relayParams,
           },
-          this.config.litNetwork as LitNetwork
+          this.config.litNetwork
         );
       } else {
         mintTx = await defaultMintClaimCallback(
@@ -2472,7 +2414,7 @@ export class LitNodeClientNodeJs
             pubkey,
             ...relayParams,
           },
-          this.config.litNetwork as LitNetwork
+          this.config.litNetwork
         );
       }
 
@@ -2483,11 +2425,16 @@ export class LitNodeClientNodeJs
         mintTx,
       };
     } else {
-      return throwError({
-        message: `Claim request has failed. Request trace id: lit_${requestId} `,
-        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
-      });
+      throw new UnknownError(
+        {
+          info: {
+            requestId,
+            responseData,
+          },
+        },
+        `Claim request has failed. Request trace id: lit_%s`,
+        requestId
+      );
     }
   }
 }

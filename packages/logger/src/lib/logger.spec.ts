@@ -1,4 +1,4 @@
-import { Logger, LogLevel, LogManager } from './logger';
+import { LOG_LEVEL, LogManager } from './logger';
 
 describe('logger', () => {
   let lm: LogManager;
@@ -34,7 +34,7 @@ describe('logger', () => {
       condenseLogs: true,
     });
     let logger = lm.get('category', 'bar');
-    logger.setLevel(LogLevel.INFO);
+    logger.setLevel(LOG_LEVEL.INFO);
     expect(logger.Config?.['condenseLogs']).toEqual(true);
     logger.info('hello');
     logger.info('hello');
@@ -44,7 +44,7 @@ describe('logger', () => {
 
   it('should respect info logging level', () => {
     const logger = lm.get('info-logger', 'foo');
-    logger.setLevel(LogLevel.INFO);
+    logger.setLevel(LOG_LEVEL.INFO);
     logger.info('logging');
     logger.debug('shouldnt log');
     let logs = lm.getLogsForId('foo');
@@ -53,7 +53,7 @@ describe('logger', () => {
 
   it('should log error at any level', () => {
     const logger = lm.get('info-logger', 'foo2');
-    logger.setLevel(LogLevel.DEBUG);
+    logger.setLevel(LOG_LEVEL.DEBUG);
     logger.debug('logging');
     logger.error('error');
     let logs = lm.getLogsForId('foo2');
@@ -62,7 +62,7 @@ describe('logger', () => {
 
   it('should safe serialize circular references', () => {
     const logger = lm.get('info-logger', 'foo3');
-    logger.setLevel(LogLevel.DEBUG);
+    logger.setLevel(LOG_LEVEL.DEBUG);
     let circ: any = { foo: 'bar' };
     circ.circ = circ;
     logger.debug('circular reference to serialize', circ);
@@ -72,9 +72,9 @@ describe('logger', () => {
 
   it('should trace logs through multiple categories', () => {
     const logger = lm.get('info-logger', 'foo4');
-    logger.setLevel(LogLevel.DEBUG);
+    logger.setLevel(LOG_LEVEL.DEBUG);
     const logger2 = lm.get('debug-logger', 'foo4');
-    logger2.setLevel(LogLevel.DEBUG);
+    logger2.setLevel(LOG_LEVEL.DEBUG);
     logger2.debug('foo');
     logger.debug('bar');
     expect(lm.getLogsForId('foo4').length).toEqual(2);
@@ -84,7 +84,7 @@ describe('logger', () => {
     const count = 1_000;
     for (let i = 0; i < count; i++) {
       const logger = lm.get('' + i, 'foo5');
-      logger.setLevel(LogLevel.OFF);
+      logger.setLevel(LOG_LEVEL.OFF);
       logger.debug(i + '');
     }
 
@@ -95,7 +95,7 @@ describe('logger', () => {
     const count = 10_000;
     for (let i = 0; i < count; i++) {
       const logger = lm.get('' + i, 'foo6');
-      logger.setLevel(LogLevel.DEBUG);
+      logger.setLevel(LOG_LEVEL.DEBUG);
       logger.debug(i + '');
     }
 

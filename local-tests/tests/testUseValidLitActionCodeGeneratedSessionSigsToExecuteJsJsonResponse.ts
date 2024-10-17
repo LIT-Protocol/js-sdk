@@ -1,19 +1,13 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
- * ❌ Not supported on manzano
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
     const alice = await devEnv.createRandomPerson();
     const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 

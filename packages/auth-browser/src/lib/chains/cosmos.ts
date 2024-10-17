@@ -1,17 +1,15 @@
 import {
+  AUTH_SIGNATURE_BODY,
+  LIT_COSMOS_CHAINS,
+  LOCAL_STORAGE_KEYS,
+  NoWalletException,
+} from '@lit-protocol/constants';
+import { log, sortedObject } from '@lit-protocol/misc';
+import { AuthSig, CosmosWalletType } from '@lit-protocol/types';
+import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-
-import {
-  AUTH_SIGNATURE_BODY,
-  LIT_COSMOS_CHAINS,
-  LIT_ERROR,
-  LOCAL_STORAGE_KEYS,
-} from '@lit-protocol/constants';
-
-import { AuthSig, CosmosWalletType } from '@lit-protocol/types';
-import { log, sortedObject, throwError } from '@lit-protocol/misc';
 
 /** ---------- Declaration ---------- */
 declare global {
@@ -68,17 +66,15 @@ const getProvider = (walletType: CosmosWalletType): any => {
       }
   }
 
-  // -- finally
-  const message =
-    'No web3 wallet was found that works with Cosmos.  Install a Cosmos wallet or choose another chain';
-
-  const error = LIT_ERROR.NO_WALLET_EXCEPTION;
-
-  throwError({
-    message,
-    errorKind: error.kind,
-    errorCode: error.name,
-  });
+  // no provider found
+  throw new NoWalletException(
+    {
+      info: {
+        walletType,
+      },
+    },
+    'No web3 wallet was found that works with Cosmos. Install a Cosmos wallet or choose another chain'
+  );
 };
 
 /** ---------- Exports ---------- */
@@ -138,19 +134,19 @@ export const checkAndSignCosmosAuthMessage = async ({
 
   const storageKey = LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE;
 
-  let authSig: AuthSig | any = localStorage.getItem(storageKey);
+  let authSigString = localStorage.getItem(storageKey);
 
   // -- if not found in local storage
-  if (!authSig) {
+  if (!authSigString) {
     log('signing auth message because sig is not in local storage');
 
     await signAndSaveAuthMessage(connectedCosmosProvider);
 
-    authSig = localStorage.getItem(storageKey);
+    authSigString = localStorage.getItem(storageKey)!;
   }
 
   // -- if found in local storage
-  authSig = JSON.parse(authSig);
+  let authSig: AuthSig = JSON.parse(authSigString);
 
   // -- validate
   if (connectedCosmosProvider.account != authSig.address) {
@@ -158,8 +154,8 @@ export const checkAndSignCosmosAuthMessage = async ({
       'signing auth message because account is not the same as the address in the auth sig'
     );
     await signAndSaveAuthMessage(connectedCosmosProvider);
-    authSig = localStorage.getItem(storageKey);
-    authSig = JSON.parse(authSig);
+    authSigString = localStorage.getItem(storageKey)!;
+    authSig = JSON.parse(authSigString);
   }
 
   log('authSig', authSig);
@@ -214,7 +210,7 @@ export const signAndSaveAuthMessage = async (
 
   const digest_hex = uint8arrayToString(new Uint8Array(digest), 'base16');
 
-  let authSig: AuthSig = {
+  const authSig: AuthSig = {
     sig: signed.signature,
     derivedVia: 'cosmos.signArbitrary',
     signedMessage: digest_hex,

@@ -1,7 +1,7 @@
-export enum LIT_ENDPOINT_VERSION {
-  V0 = '/',
-  V1 = '/v1',
-}
+export const LIT_ENDPOINT_VERSION = {
+  V0: '/',
+  V1: '/v1',
+};
 
 export const LIT_ENDPOINT = {
   HANDSHAKE: {

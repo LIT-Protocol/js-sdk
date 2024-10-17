@@ -2,7 +2,7 @@ import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { Keypair } from '@solana/web3.js';
-import bs58 from 'bs58';
+import { ethers } from 'ethers';
 import nacl from 'tweetnacl';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
@@ -10,9 +10,9 @@ const { importPrivateKey, signMessageWithEncryptedKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
+ * ✅ NETWORK=custom yarn test:local --filter=testSignMessageWithSolanaEncryptedKey
  */
 export const testSignMessageWithSolanaEncryptedKey = async (
   devEnv: TinnyEnvironment
@@ -68,7 +68,7 @@ export const testSignMessageWithSolanaEncryptedKey = async (
 
     const signatureIsValidForPublicKey = nacl.sign.detached.verify(
       Buffer.from(messageToSign),
-      bs58.decode(signature),
+      ethers.utils.base58.decode(signature),
       solanaKeypair.publicKey.toBuffer()
     );
 

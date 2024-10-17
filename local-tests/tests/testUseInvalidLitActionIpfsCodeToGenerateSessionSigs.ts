@@ -1,13 +1,10 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getInvalidLitActionIpfsSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseInvalidLitActionIpfsCodeToGenerateSessionSigs
- * ❌ NOT AVAILABLE IN MANZANO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseInvalidLitActionIpfsCodeToGenerateSessionSigs
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseInvalidLitActionIpfsCodeToGenerateSessionSigs
+ * ✅ NETWORK=custom yarn test:local --filter=testUseInvalidLitActionIpfsCodeToGenerateSessionSigs
  */
 export const testUseInvalidLitActionIpfsCodeToGenerateSessionSigs = async (
   devEnv: TinnyEnvironment

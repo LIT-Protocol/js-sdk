@@ -1,12 +1,13 @@
-// @ts-nocheck
 import { ELeft, ERight } from './utils';
+import { UnknownError } from '../errors';
 
 describe('error handling utils ELeft/Right works', () => {
-  const res = ELeft('ANSWER');
+  const unknownError = new UnknownError({}, 'ERROR');
+  const res = ELeft(unknownError);
   const res2 = ERight('ANSWER');
 
   it('returns result on ELeft()', () => {
-    expect(res.result).toBe('ANSWER');
+    expect(res.result).toBe(unknownError);
   });
 
   it('returns type on ELeft()', () => {
