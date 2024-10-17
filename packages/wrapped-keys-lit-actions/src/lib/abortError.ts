@@ -1,8 +1,8 @@
 export class AbortError extends Error {
-  name = 'AbortError';
+  override name = 'AbortError';
 }
 
-export const rethrowIfAbortError = (err) => {
+export const rethrowIfAbortError = (err: any) => {
   if (err instanceof AbortError) {
     throw err;
   }

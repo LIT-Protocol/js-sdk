@@ -3,11 +3,17 @@
 import { AbortError } from '../../abortError';
 import { removeSaltFromDecryptedKey } from '../../utils';
 
+interface TryDecryptToSingleNodeParams {
+  accessControlConditions: any;
+  ciphertext: string;
+  dataToEncryptHash: string;
+}
+
 async function tryDecryptToSingleNode({
   accessControlConditions,
   ciphertext,
   dataToEncryptHash,
-}) {
+}: TryDecryptToSingleNodeParams): Promise<string | undefined> {
   try {
     // May be undefined, since we're using `decryptToSingleNode`
     return await Lit.Actions.decryptToSingleNode({
@@ -17,16 +23,22 @@ async function tryDecryptToSingleNode({
       chain: 'ethereum',
       authSig: null,
     });
-  } catch (err) {
+  } catch (err: any) {
     throw new Error(`When decrypting key to a single node - ${err.message}`);
   }
+}
+
+interface GetDecryptedKeyToSingleNodeParams {
+  accessControlConditions: string; // Define a more specific type if possible
+  ciphertext: string; // Define a more specific type if possible
+  dataToEncryptHash: string; // Define a more specific type if possible
 }
 
 export async function getDecryptedKeyToSingleNode({
   accessControlConditions,
   ciphertext,
   dataToEncryptHash,
-}) {
+}: GetDecryptedKeyToSingleNodeParams): Promise<string> {
   const decryptedPrivateKey = await tryDecryptToSingleNode({
     accessControlConditions,
     ciphertext,
