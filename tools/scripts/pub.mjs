@@ -12,7 +12,6 @@ import {
   redLog,
   question,
   writeJsonFile,
-  yellowLog,
 } from './utils.mjs';
 
 const args = getArgs();
@@ -101,7 +100,22 @@ await question('Are you sure you want to publish to? (y/n)', {
     // await 1 second
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    // first publish the wrapped keys lit actions by running yarn publish-lit-actions in ./packages/wrapped-keys-lit-actions
+    await spawnCommand(
+      'dotenvx',
+      ['run', '-f', '../../.env', '--', 'yarn', 'publish-lit-actions'],
+      {
+        cwd: './packages/wrapped-keys-lit-actions',
+      },
+      {
+        logExit: false,
+      }
+    );
+
     let counter = 0;
+
+    // await 10 seconds to ipfs getting updated
+    await new Promise((resolve) => setTimeout(resolve, 10*1000));
 
     await asyncForEach(dirs, async (dir) => {
       // read the package.json file
@@ -178,7 +192,7 @@ await question('Are you sure you want to publish to? (y/n)', {
     });
 
     while (true) {
-      // wait for 1 second
+      // wait a few secs to check again if all packages are published
       await new Promise((resolve) => setTimeout(resolve, 2000));
       if (counter >= dirs.length) {
         greenLog('🎉 Publish complete!', true);
