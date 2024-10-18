@@ -1,16 +1,16 @@
-const { encryptPrivateKey } = require('./internal/encryptKey');
+const { encryptPrivateKey } = require('../../internal/common/encryptKey');
 const {
   generateEthereumPrivateKey,
-} = require('../ethereum/internal/generatePrivateKey');
-const { signMessageEthereumKey } = require('../ethereum/internal/signMessage');
+} = require('../../internal/ethereum/generatePrivateKey');
+const {
+  signMessageEthereumKey,
+} = require('../../internal/ethereum/signMessage');
 const {
   generateSolanaPrivateKey,
-} = require('../solana/internal/generatePrivateKey');
-const { signMessageSolanaKey } = require('../solana/internal/signMessage');
+} = require('../../internal/solana/generatePrivateKey');
+const { signMessageSolanaKey } = require('../../internal/solana/signMessage');
 
-/* global accessControlConditions, actions, Lit*/
-
-async function processEthereumAction(action) {
+async function processEthereumAction({ action, accessControlConditions }) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
 
@@ -42,7 +42,7 @@ async function processEthereumAction(action) {
   };
 }
 
-async function processSolanaAction(action) {
+async function processSolanaAction({ action, accessControlConditions }) {
   const { network, generateKeyParams } = action;
 
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -75,15 +75,21 @@ async function processSolanaAction(action) {
   };
 }
 
-async function processActions(actions) {
+async function processActions({ actions, accessControlConditions }) {
   return Promise.all(
     actions.map(async (action, ndx) => {
       const { network } = action;
 
       if (network === 'evm') {
-        return await processEthereumAction(action, ndx);
+        return await processEthereumAction({
+          action,
+          accessControlConditions,
+        });
       } else if (network === 'solana') {
-        return await processSolanaAction(action, ndx);
+        return await processSolanaAction({
+          action,
+          accessControlConditions,
+        });
       } else {
         // Just in case :tm:
         throw new Error(`Invalid network for action[${ndx}]: ${network}`);
@@ -128,20 +134,14 @@ function validateParams(actions) {
   });
 }
 
-(async () => {
-  try {
-    validateParams(actions);
+export async function batchGenerateEncryptedKeys({
+  actions,
+  accessControlConditions,
+}) {
+  validateParams(actions);
 
-    const batchGeneratePrivateKeysActionResult = await processActions(actions);
-
-    Lit.Actions.setResponse({
-      response: JSON.stringify(batchGeneratePrivateKeysActionResult),
-    });
-
-    // 1. Generate both EVM and solana private keys
-    // 2. Run appropriate signMessage for each key _and_ encrypt the keys for persistence to wrapped-keys backend
-    // 3. Return results for both signMessage ops and both encrypted key payloads for persistence
-  } catch (err) {
-    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
-  }
-})();
+  return processActions({
+    actions,
+    accessControlConditions,
+  });
+}
