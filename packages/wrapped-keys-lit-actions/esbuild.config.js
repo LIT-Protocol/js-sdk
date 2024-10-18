@@ -49,26 +49,40 @@ module.exports = {
 
 (async () => {
   try {
-    await esbuild.build({
-      entryPoints: [
-        './src/lib/self-executing-actions/solana/signTransactionWithEncryptedSolanaKey.ts',
-        './src/lib/self-executing-actions/solana/signMessageWithEncryptedSolanaKey.ts',
-        './src/lib/self-executing-actions/solana/generateEncryptedSolanaPrivateKey.ts',
-        './src/lib/self-executing-actions/ethereum/signTransactionWithEncryptedEthereumKey.ts',
-        './src/lib/self-executing-actions/ethereum/signMessageWithEncryptedEthereumKey.ts',
-        './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.ts',
-        './src/lib/self-executing-actions/common/exportPrivateKey.ts',
-        './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.ts',
-      ],
-      bundle: true,
-      minify: true,
-      sourcemap: false,
-      treeShaking: true,
-      outdir: './src/generated/',
-      inject: ['./buffer.shim.js'],
-      plugins: [wrapIIFEInStringPlugin],
-      platform: 'browser',
-    });
+    await esbuild
+      .build({
+        entryPoints: [
+          './src/lib/self-executing-actions/solana/signTransactionWithEncryptedSolanaKey.ts',
+          './src/lib/self-executing-actions/solana/signMessageWithEncryptedSolanaKey.ts',
+          './src/lib/self-executing-actions/solana/generateEncryptedSolanaPrivateKey.ts',
+          './src/lib/self-executing-actions/ethereum/signTransactionWithEncryptedEthereumKey.ts',
+          './src/lib/self-executing-actions/ethereum/signMessageWithEncryptedEthereumKey.ts',
+          './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.ts',
+          './src/lib/self-executing-actions/common/exportPrivateKey.ts',
+          './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.ts',
+        ],
+        bundle: true,
+        minify: true,
+        sourcemap: false,
+        treeShaking: true,
+        outdir: './src/generated/',
+        inject: ['./buffer.shim.js'],
+        plugins: [wrapIIFEInStringPlugin],
+        platform: 'browser',
+      })
+      .then((result) => {
+        result.outputFiles.forEach((file) => {
+          const bytes = file.text.length;
+          const mbInBinary = (bytes / (1024 * 1024)).toFixed(4);
+          const mbInDecimal = (bytes / 1_000_000).toFixed(4);
+
+          console.log(
+            `✅ ${file.path
+              .split('/')
+              .pop()}\n- ${mbInDecimal} MB (in decimal)\n- ${mbInBinary} MB (in binary)`
+          );
+        });
+      });
     console.log('✅ Lit actions built successfully');
   } catch (e) {
     console.error('❌ Error building lit actions: ', e);
