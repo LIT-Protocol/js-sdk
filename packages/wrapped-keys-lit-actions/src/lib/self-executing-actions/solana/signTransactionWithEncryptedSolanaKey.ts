@@ -5,7 +5,7 @@ import { litActionHandler } from '../../litActionHandler';
 import { signTransactionWithEncryptedSolanaKey } from '../../raw-action-functions/solana/signTransactionWithEncryptedSolanaKey';
 
 declare global {
-  var accessControlConditions: string
+  var accessControlConditions: string;
   var ciphertext: any;
   var dataToEncryptHash: any;
   var unsignedTransaction: UnsignedTransaction;

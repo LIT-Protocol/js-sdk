@@ -4,7 +4,7 @@ import { litActionHandler } from '../../litActionHandler';
 import { exportPrivateKey } from '../../raw-action-functions/common/exportPrivateKey';
 
 declare global {
-  var accessControlConditions: string
+  var accessControlConditions: string;
   var ciphertext: any;
   var dataToEncryptHash: any;
 }

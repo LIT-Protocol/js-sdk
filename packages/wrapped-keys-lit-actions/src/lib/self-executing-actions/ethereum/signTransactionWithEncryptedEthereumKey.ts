@@ -5,7 +5,7 @@ import { litActionHandler } from '../../litActionHandler';
 import { signTransactionWithEncryptedEthereumKey } from '../../raw-action-functions/ethereum/signTransactionWithEncryptedEthereumKey';
 
 declare global {
-  var accessControlConditions: string
+  var accessControlConditions: string;
   var ciphertext: any;
   var dataToEncryptHash: any;
   var unsignedTransaction: UnsignedTransaction;

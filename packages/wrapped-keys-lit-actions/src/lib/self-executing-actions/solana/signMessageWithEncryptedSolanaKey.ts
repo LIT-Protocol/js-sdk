@@ -4,7 +4,7 @@ import { litActionHandler } from '../../litActionHandler';
 import { signMessageWithEncryptedSolanaKey } from '../../raw-action-functions/solana/signMessageWithEncryptedSolanaKey';
 
 declare global {
-  var accessControlConditions: string
+  var accessControlConditions: string;
   var ciphertext: any;
   var dataToEncryptHash: any;
   var messageToSign: any;

@@ -11,7 +11,7 @@ import {
 import { ethers } from 'ethers';
 
 interface SignTransactionWithEncryptedSolanaKeyParams {
-  accessControlConditions: string
+  accessControlConditions: string;
   ciphertext: string; // The encrypted Wrapped Key
   dataToEncryptHash: string; // The hash of the data to encrypt
   unsignedTransaction: UnsignedTransaction;

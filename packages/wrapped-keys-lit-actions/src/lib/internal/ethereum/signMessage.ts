@@ -39,7 +39,8 @@ function verifyMessageSignature({
     return ethers.utils.verifyMessage(messageToSign, signature);
   } catch (err: unknown) {
     throw new Error(
-      `When validating signed Ethereum message is valid: ${(err as Error).message
+      `When validating signed Ethereum message is valid: ${
+        (err as Error).message
       }`
     );
   }

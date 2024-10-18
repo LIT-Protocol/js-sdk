@@ -4,7 +4,7 @@ import { litActionHandler } from '../../litActionHandler';
 import { generateEncryptedEthereumPrivateKey } from '../../raw-action-functions/ethereum/generateEncryptedEthereumPrivateKey';
 
 declare global {
-  var accessControlConditions: string
+  var accessControlConditions: string;
 }
 
 (async () =>

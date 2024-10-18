@@ -52,7 +52,8 @@ function verifyMessageSignature({
     return isValid;
   } catch (err: unknown) {
     throw new Error(
-      `When validating signed Solana message is valid: ${(err as Error).message
+      `When validating signed Solana message is valid: ${
+        (err as Error).message
       }`
     );
   }

@@ -1,6 +1,5 @@
 // @ts-nocheck - got this directly from the lit-assets repo
 declare global {
-
   export declare namespace Lit {
     export namespace Actions {
       /**
@@ -384,4 +383,4 @@ declare global {
   }
 }
 
-export { };
+export {};

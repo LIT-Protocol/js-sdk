@@ -5,9 +5,8 @@ import {
   UnsignedTransaction,
 } from '../../internal/ethereum/signTransaction';
 
-
 interface SignTransactionWithEncryptedEthereumKeyParams {
-  accessControlConditions: string
+  accessControlConditions: string;
   ciphertext: string;
   dataToEncryptHash: string;
   unsignedTransaction: UnsignedTransaction;
