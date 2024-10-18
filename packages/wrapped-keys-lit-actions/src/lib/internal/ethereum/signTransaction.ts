@@ -6,6 +6,7 @@
 import { ethers } from 'ethers';
 
 // This is weird - ethers.UnsignedTransaction is not the same as the one being used here..
+// We should fix this soon, but not a hard blocker
 export interface UnsignedTransaction {
   toAddress: string;
   chain: string;
