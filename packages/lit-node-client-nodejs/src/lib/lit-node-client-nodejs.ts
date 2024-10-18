@@ -43,6 +43,7 @@ import {
   findMostCommonResponse,
   formatSessionSigs,
   hexPrefixed,
+  leastCommonString,
   log,
   logError,
   logErrorWithRequestId,
@@ -76,6 +77,7 @@ import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
+import { parseCustomResources } from './helpers/parseCustomResources';
 
 import type {
   AuthCallback,
@@ -1880,16 +1882,33 @@ export class LitNodeClientNodeJs
     });
 
     // -- resolve promises
+    const numberToResolve = params?.handleAllResponses
+      ? this.connectedNodes.size
+      : this.config.minNodeCount;
+    log(
+      `[signSessionKey] number of node promises to resolve:`,
+      numberToResolve
+    );
+
     let res;
     try {
       res = await this.handleNodePromises(
         nodePromises,
         requestId,
-        this.config.minNodeCount
+        numberToResolve
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
       throw new Error(`Error when handling node promises: ${e}`);
+    }
+
+    // -- parse that custom thing
+    let customAuthResources;
+
+    try {
+      customAuthResources = parseCustomResources(res);
+    } catch (e) {
+      log(`Failed to parse custom resources, not a problem.`);
     }
 
     logWithRequestId(requestId, 'handleNodePromises res:', res);
@@ -1993,10 +2012,13 @@ export class LitNodeClientNodeJs
       );
     }
 
+    const commonStringStrategy =
+      params?.strategy === 'mostCommon' ? mostCommonString : leastCommonString;
+
     const blsSignedData: BlsResponseData[] =
       validatedSignedDataList as BlsResponseData[];
 
-    const sigType = mostCommonString(blsSignedData.map((s) => s.curveType));
+    const sigType = commonStringStrategy(blsSignedData.map((s) => s.curveType));
     log(`[signSessionKey] sigType:`, sigType);
 
     const signatureShares = getBlsSignatures(blsSignedData);
@@ -2013,10 +2035,12 @@ export class LitNodeClientNodeJs
     const publicKey = removeHexPrefix(params.pkpPublicKey);
     log(`[signSessionKey] publicKey:`, publicKey);
 
-    const dataSigned = mostCommonString(blsSignedData.map((s) => s.dataSigned));
+    const dataSigned = commonStringStrategy(
+      blsSignedData.map((s) => s.dataSigned)
+    );
     log(`[signSessionKey] dataSigned:`, dataSigned);
 
-    const mostCommonSiweMessage = mostCommonString(
+    const mostCommonSiweMessage = commonStringStrategy(
       blsSignedData.map((s) => s.siweMessage)
     );
 
@@ -2035,6 +2059,9 @@ export class LitNodeClientNodeJs
         derivedVia: 'lit.bls',
         signedMessage,
         address: computeAddress(hexPrefixed(publicKey)),
+        ...(customAuthResources && {
+          customAuthResources: customAuthResources,
+        }),
       },
       pkpPublicKey: publicKey,
     };
@@ -2325,6 +2352,10 @@ export class LitNodeClientNodeJs
             litActionIpfsId: props.litActionIpfsId,
           }),
           ...(props.jsParams && { jsParams: props.jsParams }),
+
+          ...(params.handleAllResponses && {
+            handleAllResponses: params.handleAllResponses,
+          }),
         });
 
         return response.authSig;

@@ -58,6 +58,7 @@ module.exports = {
       './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.js',
       './src/lib/self-executing-actions/common/exportPrivateKey.js',
       './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.js',
+      './src/lib/self-executing-actions/common/triaAuthAndBatchGenerateEncryptedKeys.js',
     ],
     bundle: true,
     minify: true,

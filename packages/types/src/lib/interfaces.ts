@@ -1047,7 +1047,9 @@ export interface CreateCustomAuthMethodRequest {
 //     pub auth_sig: Option<AuthSigItem>,
 //     pub siwe_message: String,
 // }
-export interface SignSessionKeyProp extends LitActionSdkParams {
+export interface SignSessionKeyProp
+  extends LitActionSdkParams,
+    RespondHandling {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
    */
@@ -1910,7 +1912,8 @@ export interface SignerLike {
 
 export interface GetPkpSessionSigs
   extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
+    LitActionSdkParams,
+    RespondHandling {
   pkpPublicKey: string;
 
   /**
@@ -1943,7 +1946,19 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
       })
   ) & {
     ipfsOptions?: IpfsOptions;
-  };
+  } & RespondHandling;
+
+export interface RespondHandling {
+  /**
+   * Whether to handle all responses or threshold/minNodeCount responses
+   */
+  handleAllResponses?: boolean;
+
+  /**
+   * Strategy to handle responses
+   */
+  strategy?: ResponseStrategy;
+}
 
 export interface SessionKeyCache {
   value: SessionKeyPair;

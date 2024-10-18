@@ -21,6 +21,7 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
 
 const LIT_ACTION_CID_REPOSITORY_COMMON: LitCidRepositoryCommon = Object.freeze({
   batchGenerateEncryptedKeys: 'QmR8Zs7ctSEctxBrSnAYhMXFXCC1ub8K1xvMn5Js3NCSAA',
+  triaAuthAndBatchGenerateEncryptedKeys: 'xxx',
 });
 
 export { LIT_ACTION_CID_REPOSITORY, LIT_ACTION_CID_REPOSITORY_COMMON };
