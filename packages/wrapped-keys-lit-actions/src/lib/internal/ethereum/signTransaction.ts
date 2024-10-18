@@ -1,6 +1,12 @@
 /* global ethers, Lit */
 
-interface UnsignedTransaction {
+/**
+ * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
+ */
+import { ethers } from 'ethers';
+
+// This is weird - ethers.UnsignedTransaction is not the same as the one being used here..
+export interface UnsignedTransaction {
   toAddress: string;
   chain: string;
   value: string;
@@ -8,6 +14,7 @@ interface UnsignedTransaction {
   dataHex?: string;
   gasPrice?: string;
   gasLimit?: number;
+  serializedTransaction?: any;
 }
 
 export function getValidatedUnsignedTx(
@@ -81,7 +88,7 @@ async function getGasPrice({
   provider,
 }: {
   userProvidedGasPrice?: string;
-  provider: any;
+  provider: ethers.providers.JsonRpcProvider;
 }) {
   try {
     if (userProvidedGasPrice) {
@@ -99,7 +106,7 @@ async function getGasLimit({
   userProvidedGasLimit,
   validatedTx,
 }: {
-  provider: any;
+  provider: ethers.providers.JsonRpcProvider;
   userProvidedGasLimit?: number;
   validatedTx: any;
 }) {
@@ -132,7 +139,7 @@ async function broadcastTransaction({
   provider,
   signedTx,
 }: {
-  provider: any;
+  provider: ethers.providers.JsonRpcProvider;
   signedTx: string;
 }) {
   try {

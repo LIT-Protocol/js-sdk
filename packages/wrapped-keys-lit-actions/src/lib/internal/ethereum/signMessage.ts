@@ -1,4 +1,7 @@
-/* global ethers */
+/**
+ * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
+ */
+import { ethers } from 'ethers';
 
 interface SignMessageParams {
   privateKey: string;
@@ -20,7 +23,11 @@ async function signMessage({
 
     return { signature, walletAddress: wallet.address };
   } catch (err: unknown) {
-    throw new Error(`When signing message - ${(err as Error).message}`);
+    if (err instanceof Error) {
+      throw new Error(`When signing message - ${err.message}`);
+    } else {
+      throw new Error(`An unexpected error occurred: ${err}`);
+    }
   }
 }
 
@@ -32,8 +39,7 @@ function verifyMessageSignature({
     return ethers.utils.verifyMessage(messageToSign, signature);
   } catch (err: unknown) {
     throw new Error(
-      `When validating signed Ethereum message is valid: ${
-        (err as Error).message
+      `When validating signed Ethereum message is valid: ${(err as Error).message
       }`
     );
   }

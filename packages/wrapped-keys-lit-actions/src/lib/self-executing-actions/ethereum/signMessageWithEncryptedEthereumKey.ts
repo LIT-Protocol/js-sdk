@@ -4,7 +4,7 @@ import { litActionHandler } from '../../litActionHandler';
 import { signMessageWithEncryptedEthereumKey } from '../../raw-action-functions/ethereum/signMessageWithEncryptedEthereumKey';
 
 declare global {
-  var accessControlConditions: any;
+  var accessControlConditions: string
   var ciphertext: any;
   var dataToEncryptHash: any;
   var messageToSign: any;

@@ -2,7 +2,10 @@ import { Keypair } from '@solana/web3.js';
 import nacl from 'tweetnacl';
 import { Buffer } from 'buffer';
 
-/* global ethers */
+/**
+ * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
+ */
+import { ethers } from 'ethers';
 
 interface SignMessageParams {
   messageToSign: string;
@@ -26,7 +29,11 @@ function signMessage({ messageToSign, solanaKeyPair }: SignMessageParams): {
 
     return { signature };
   } catch (err: unknown) {
-    throw new Error(`When signing message - ${(err as Error).message}`);
+    if (err instanceof Error) {
+      throw new Error(`When signing message - ${err.message}`);
+    } else {
+      throw new Error(`An unexpected error occurred: ${err}`);
+    }
   }
 }
 
@@ -45,8 +52,7 @@ function verifyMessageSignature({
     return isValid;
   } catch (err: unknown) {
     throw new Error(
-      `When validating signed Solana message is valid: ${
-        (err as Error).message
+      `When validating signed Solana message is valid: ${(err as Error).message
       }`
     );
   }

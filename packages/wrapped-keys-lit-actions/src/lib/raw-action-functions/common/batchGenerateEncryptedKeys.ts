@@ -19,7 +19,7 @@ async function processEthereumAction({
   accessControlConditions,
 }: {
   action: Action;
-  accessControlConditions: any;
+  accessControlConditions: string
 }) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -57,7 +57,7 @@ async function processSolanaAction({
   accessControlConditions,
 }: {
   action: Action;
-  accessControlConditions: any;
+  accessControlConditions: string
 }) {
   const { network, generateKeyParams } = action;
 
@@ -96,7 +96,7 @@ async function processActions({
   accessControlConditions,
 }: {
   actions: Action[];
-  accessControlConditions: any;
+  accessControlConditions: string
 }) {
   return Promise.all(
     actions.map(async (action, ndx) => {
@@ -161,7 +161,7 @@ export async function batchGenerateEncryptedKeys({
   accessControlConditions,
 }: {
   actions: Action[];
-  accessControlConditions: any;
+  accessControlConditions: string
 }) {
   validateParams(actions);
 

@@ -2,13 +2,15 @@ import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedK
 import {
   signTransactionEthereumKey,
   getValidatedUnsignedTx,
+  UnsignedTransaction,
 } from '../../internal/ethereum/signTransaction';
 
+
 interface SignTransactionWithEncryptedEthereumKeyParams {
-  accessControlConditions: any;
+  accessControlConditions: string
   ciphertext: string;
   dataToEncryptHash: string;
-  unsignedTransaction: any;
+  unsignedTransaction: UnsignedTransaction;
   broadcast: boolean;
 }
 

@@ -6,12 +6,11 @@ import {
   Transaction,
 } from '@solana/web3.js';
 
-/* global ethers */
-
-interface UnsignedTransaction {
-  chain: string;
-  serializedTransaction: string;
-}
+/**
+ * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
+ */
+import { ethers } from 'ethers';
+import { UnsignedTransaction } from '../ethereum/signTransaction';
 
 export function validateUnsignedTransaction(
   unsignedTransaction: UnsignedTransaction

@@ -5,7 +5,7 @@ import { batchGenerateEncryptedKeys } from '../../raw-action-functions/common/ba
 
 declare global {
   var actions: any[];
-  var accessControlConditions: any;
+  var accessControlConditions: string
 }
 
 (async () =>

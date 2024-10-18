@@ -4,7 +4,7 @@ import { AbortError } from '../../abortError';
 import { removeSaltFromDecryptedKey } from '../../utils';
 
 interface TryDecryptToSingleNodeParams {
-  accessControlConditions: any;
+  accessControlConditions: string
   ciphertext: string;
   dataToEncryptHash: string;
 }

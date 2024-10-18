@@ -1,14 +1,20 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
+import { UnsignedTransaction } from '../../internal/ethereum/signTransaction';
 import {
   signTransactionSolanaKey,
   validateUnsignedTransaction,
 } from '../../internal/solana/signTransaction';
 
+/**
+ * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
+ */
+import { ethers } from 'ethers';
+
 interface SignTransactionWithEncryptedSolanaKeyParams {
-  accessControlConditions: any; // Define a more specific type if possible
+  accessControlConditions: string
   ciphertext: string; // The encrypted Wrapped Key
   dataToEncryptHash: string; // The hash of the data to encrypt
-  unsignedTransaction: any; // Define a more specific type if possible
+  unsignedTransaction: UnsignedTransaction;
   broadcast: boolean; // Flag to determine if the transaction should be broadcasted
 }
 

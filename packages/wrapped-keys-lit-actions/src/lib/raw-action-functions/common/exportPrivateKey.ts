@@ -1,7 +1,7 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
 
 interface ExportPrivateKeyParams {
-  accessControlConditions: any;
+  accessControlConditions: string
   ciphertext: string;
   dataToEncryptHash: string;
 }

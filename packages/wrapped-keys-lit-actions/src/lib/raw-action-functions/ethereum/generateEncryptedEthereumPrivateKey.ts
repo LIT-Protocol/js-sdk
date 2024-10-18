@@ -11,7 +11,7 @@ import { encryptPrivateKey } from '../../internal/common/encryptKey';
 import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
 
 interface GenerateEncryptedEthereumPrivateKeyParams {
-  accessControlConditions: any;
+  accessControlConditions: string
 }
 
 export async function generateEncryptedEthereumPrivateKey({

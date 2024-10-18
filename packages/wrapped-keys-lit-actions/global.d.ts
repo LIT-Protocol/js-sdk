@@ -1,8 +1,5 @@
-import { ethers as EthersType } from 'ethers';
-
 // @ts-nocheck - got this directly from the lit-assets repo
 declare global {
-  export const ethers: typeof EthersType;
 
   export declare namespace Lit {
     export namespace Actions {
@@ -387,4 +384,4 @@ declare global {
   }
 }
 
-export {};
+export { };
