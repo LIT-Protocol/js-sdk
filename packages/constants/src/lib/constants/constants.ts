@@ -805,7 +805,9 @@ export const LIT_CHAINS: { [key: string]: any } = {
     symbol: 'ETH',
     decimals: 18,
     rpcUrls: ['https://rpc.buildbear.io/yielddev'] as const,
-    blockExplorerUrls: ['https://explorer.buildbear.io/yielddev/transactions'] as const,
+    blockExplorerUrls: [
+      'https://explorer.buildbear.io/yielddev/transactions',
+    ] as const,
     type: null,
     vmType: VMTYPE.EVM,
   },
