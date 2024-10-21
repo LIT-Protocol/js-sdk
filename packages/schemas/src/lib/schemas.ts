@@ -942,3 +942,15 @@ export const JsonSigningStoreRequestSchema = z.object({
   authSsig: AuthSigSchema.optional(),
   sessionSigs: z.object({}).optional(),
 });
+
+export const PKPSignShareSchema = z.object({
+  success: z.boolean(),
+  signedData: z.any(), // TODO
+  signatureShare: z.any(), // TODO
+});
+
+export const CombinedECDSASignatureSchema = z.object({
+  r: z.string(),
+  s: z.string(),
+  recid: z.number(),
+});

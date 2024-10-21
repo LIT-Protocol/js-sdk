@@ -75,6 +75,10 @@ import {
   SigningAccessControlConditionJWTPayloadSchema,
   GetSigningShareForDecryptionRequestSchema,
   ExecuteJsNoSigningResponseSchema,
+  NodeResponseSchema,
+  PKPSignShareSchema,
+  NodeLogSchema,
+  CombinedECDSASignatureSchema,
 } from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
@@ -299,7 +303,7 @@ export type ExecuteJsNoSigningResponse = z.infer<
 >;
 
 /**
- * @deprecated
+ * @deprecated will be removed in v8
  */
 export interface LitNodePromise {}
 
@@ -342,11 +346,7 @@ export interface NodeShare extends NodeLog {
   success?: boolean | '';
 }
 
-export interface PKPSignShare {
-  success: boolean;
-  signedData: any;
-  signatureShare: any;
-}
+export type PKPSignShare = z.infer<typeof PKPSignShareSchema>;
 
 export type NodeBlsSigningShare = z.infer<typeof NodeBlsSigningShareSchema>;
 
@@ -356,6 +356,9 @@ export type SuccessNodePromises = z.infer<typeof SuccessNodePromisesSchema>;
 
 export type RejectedNodePromises = z.infer<typeof RejectedNodePromisesSchema>;
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface NodePromiseResponse {
   status?: string;
   value?: any;
@@ -412,24 +415,29 @@ export interface NodeClientErrorV1 {
   requestId?: string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface SignedData {
   signedData: any;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface DecryptedData {
   decryptedData: any;
 }
 
-export interface NodeResponse {
-  response: any;
-}
+export type NodeResponse = z.infer<typeof NodeResponseSchema>;
 
-export interface NodeLog {
-  logs: any;
-}
+export type NodeLog = z.infer<typeof NodeLogSchema>;
 
 export type CallRequest = z.infer<typeof CallRequestSchema>;
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface SignedChainDataToken {
   // The call requests to make.  The responses will be signed and returned.
   callRequests: CallRequest[];
@@ -446,6 +454,9 @@ export type NodeCommandServerKeysResponse = z.infer<
 
 export type FormattedMultipleAccs = z.infer<typeof FormattedMultipleAccsSchema>;
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface SignWithECDSA {
   // TODO: The message to be signed - note this message is not currently converted to a digest!!!!!
   message: string;
@@ -457,11 +468,9 @@ export interface SignWithECDSA {
   exp: number;
 }
 
-export interface CombinedECDSASignature {
-  r: string;
-  s: string;
-  recid: number;
-}
+export type CombinedECDSASignature = z.infer<
+  typeof CombinedECDSASignatureSchema
+>;
 
 export type HandshakeWithNode = z.infer<typeof HandshakeWithNodeSchema>;
 
@@ -496,6 +505,9 @@ export interface SessionKeySignedMessage {
   nodeAddress: string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface SessionSigsProp {
   expiration?: any;
   chain: Chain;
@@ -692,6 +704,9 @@ export interface SessionSigningTemplate {
   nodeAddress: string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface WebAuthnAuthenticationVerificationParams {
   id: string;
   rawId: string;
@@ -807,6 +822,10 @@ export interface PKPClientHelpers {
 
 /**
  * ========== Lit Auth Client ==========
+ */
+
+/**
+ * @deprecated will be removed in v8
  */
 export interface OtpSessionResult {
   /**
@@ -967,6 +986,9 @@ export interface IRelayFetchResponse {
   error?: string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface IRelayPollingEvent {
   /**
    * Polling count
@@ -1056,6 +1078,9 @@ export interface WebAuthnProviderOptions {
   rpName?: string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface SignInWithOTPParams {
   /**
    * otp transport (email or phone #)
@@ -1077,6 +1102,9 @@ export interface SignInWithOTPParams {
   customName?: string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface OtpProviderOptions {
   baseUrl?: string;
   port?: string;
@@ -1089,6 +1117,9 @@ export interface OtpEmailCustomizationOptions {
   fromName: string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface SignInWithStytchOTPParams {
   // JWT from an authenticated session
   // see stych docs for more info: https://stytch.com/docs/api/session-get
@@ -1162,6 +1193,9 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   getAddress?: () => string;
 }
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
   /**
    * User provided authentication code
@@ -1332,6 +1366,9 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
     ipfsOptions?: IpfsOptions;
   };
 
+/**
+ * @deprecated will be removed in v8
+ */
 export interface SessionKeyCache {
   value: SessionKeyPair;
   timestamp: number;
