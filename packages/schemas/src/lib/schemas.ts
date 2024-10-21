@@ -211,6 +211,11 @@ export const CosmosAuthSigSchema = AuthSigSchema.extend({
   derivedVia: z.literal('cosmos.signArbitrary'),
 });
 
+export const SignSessionKeyResponseSchema = z.object({
+  pkpPublicKey: z.string(),
+  authSig: AuthSigSchema,
+});
+
 /**
  * A map of node addresses to the session signature payload
  * for that node specifically.
@@ -235,6 +240,27 @@ export const SessionSigsMapSchema = z.record(z.string(), AuthSigSchema);
 export const AuthMethodSchema = z.object({
   authMethodType: z.number(),
   accessToken: z.string(),
+});
+
+export const SessionRequestBodySchema = z.object({
+  sessionKey: z.string(),
+  authMethods: z.array(AuthMethodSchema),
+  pkpPublicKey: z.string().optional(),
+  authSig: AuthSigSchema.optional(),
+  siweMessage: z.string(),
+});
+
+export const CreateCustomAuthMethodRequestSchema = z.object({
+  /**
+   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
+   */
+  authMethodId: z.union([z.string(), z.instanceof(Uint8Array)]),
+  authMethodType: z.number(),
+  /**
+   * Permission scopes:
+   * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+   */
+  scopes: z.union([z.array(z.string()), z.array(z.number())]),
 });
 
 export const BaseJsonPkpSignRequestSchema = z.object({

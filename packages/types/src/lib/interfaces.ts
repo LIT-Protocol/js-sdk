@@ -79,17 +79,37 @@ import {
   PKPSignShareSchema,
   NodeLogSchema,
   CombinedECDSASignatureSchema,
+  CreateCustomAuthMethodRequestSchema,
+  SignSessionKeyResponseSchema,
+  SessionRequestBodySchema,
+  AuthCallbackSchema,
+  RPCUrlsSchema,
+  GetWalletSigPropsSchema,
+  SessionSigningTemplateSchema,
+  SignSessionKeyPropSchema,
+  CommonGetSessionSigsPropsSchema,
+  GetSessionSigsPropsSchema,
+  GetPkpSessionSigsSchema,
+  LitClientSessionManagerSchema,
+  AuthenticationPropsSchema,
+  PKPBasePropSchema,
+  PKPWalletSchema,
+  PKPEthersWalletPropSchema,
+  PKPClientPropSchema,
+  PKPBaseDefaultParamsSchema,
+  PKPClientHelpersSchema,
+  PKPCosmosWalletPropSchema,
+  BaseProviderGetSessionSigsPropsSchema,
 } from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
-import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
+import { LitResourceAbilityRequest } from './models';
 import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
   EvmContractConditions,
   IRelayAuthStatus,
-  ResponseStrategy,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -520,189 +540,42 @@ export interface SessionSigsProp {
 /** ========== Session ========== */
 export type AuthMethod = z.infer<typeof AuthMethodSchema>;
 
-export interface CreateCustomAuthMethodRequest {
-  /**
-   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
-   */
-  authMethodId: string | Uint8Array;
+export type CreateCustomAuthMethodRequest = z.infer<
+  typeof CreateCustomAuthMethodRequestSchema
+>;
 
-  authMethodType: number;
+export type SignSessionKeyProp = z.infer<typeof SignSessionKeyPropSchema>;
 
-  /**
-   * Permission scopes:
-   * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
-   */
-  scopes: string[] | number[];
-}
-
-// pub struct JsonSignSessionKeyRequest {
-//     pub session_key: String,
-//     pub auth_methods: Vec<AuthMethod>,
-//     pub pkp_public_key: String,
-//     pub auth_sig: Option<AuthSigItem>,
-//     pub siwe_message: String,
-// }
-export interface SignSessionKeyProp extends LitActionSdkParams {
-  /**
-   * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
-   */
-  sessionKey?: SessionKeyPair;
-
-  /**
-   * The statement text to place at the end of the SIWE statement field.
-   */
-  statement?: string;
-
-  /**
-   * The auth methods to use to sign the session key
-   */
-  authMethods: AuthMethod[];
-
-  /**
-   * The public key of the PKP
-   */
-  pkpPublicKey?: string;
-
-  /**
-   * The auth sig of the user.  Returned via the checkAndSignAuthMessage function
-   */
-  authSig?: AuthSig;
-
-  /**
-   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
-   */
-  expiration?: string;
-
-  resources: any;
-
-  chainId?: number;
-
-  /**
-   * domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
-   */
-  domain?: string;
-
-  /**
-   * A LIT resource ability is a combination of a LIT resource and a LIT ability.
-   */
-  resourceAbilityRequests?: LitResourceAbilityRequest[];
-}
-
-export interface SignSessionKeyResponse {
-  pkpPublicKey: string;
-  authSig: AuthSig;
-}
+export type SignSessionKeyResponse = z.infer<
+  typeof SignSessionKeyResponseSchema
+>;
 
 export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
-export interface CommonGetSessionSigsProps {
-  /**
-   * Session signature properties shared across all functions that generate session signatures.
-   */
-  pkpPublicKey?: string;
+export type CommonGetSessionSigsProps = z.infer<
+  typeof CommonGetSessionSigsPropsSchema
+>;
 
-  /**
-   * When this session signature will expire. After this time is up you will need to reauthenticate, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
-   */
-  expiration?: any;
+export type BaseProviderGetSessionSigsProps = z.infer<
+  typeof BaseProviderGetSessionSigsPropsSchema
+>;
 
-  /**
-   * The chain to use for the session signature and sign the session key. This value is almost always `ethereum`. If you're using EVM, this parameter isn't very important.
-   */
-  chain?: Chain;
+export type GetSessionSigsProps = z.infer<typeof GetSessionSigsPropsSchema>;
 
-  /**
-   * An array of resource abilities that you want to request for this session. These will be signed with the session key.
-   * For example, an ability is added to grant a session permission to decrypt content associated with a particular Access Control Conditions (ACC) hash. When trying to decrypt, this ability is checked in the `resourceAbilityRequests` to verify if the session has the required decryption capability.
-   * @example
-   * [{ resource: new LitAccessControlConditionResource('someAccHash`), ability: LitAbility.AccessControlConditionDecryption }]
-   */
-  resourceAbilityRequests: LitResourceAbilityRequest[];
-
-  /**
-   * The session capability object that you want to request for this session.
-   * It is likely you will not need this, as the object will be automatically derived from the `resourceAbilityRequests`.
-   * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
-   * The wildcard means that the session will be granted the ability to to perform operations with any access control condition.
-   */
-  sessionCapabilityObject?: ISessionCapabilityObject;
-
-  /**
-   * If you want to ask MetaMask to try and switch the user's chain, you may pass true here. This will only work if the user is using MetaMask, otherwise this will be ignored.
-   */
-  switchChain?: boolean;
-  /**
-   * The serialized session key pair to sign.
-   * If not provided, a session key pair will be fetched from localStorage or generated.
-   */
-  sessionKey?: SessionKeyPair;
-
-  /**
-   * @deprecated - use capabilityAuthSigs instead
-   * Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * Capacity credits are required on the paid Lit networks (mainnets and certain testnets), and are not required on the unpaid Lit networks (certain testnets).
-   * See more [here](https://developer.litprotocol.com/sdk/capacity-credits).
-   */
-  capacityDelegationAuthSig?: AuthSig;
-
-  /**
-   * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
-   */
-  capabilityAuthSigs?: AuthSig[];
-}
-
-export interface BaseProviderGetSessionSigsProps
-  extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
-  /**
-   * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
-   */
-  authNeededCallback?: AuthCallback;
-}
-
-export interface GetSessionSigsProps
-  extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
-  /**
-   * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
-   */
-  authNeededCallback: AuthCallback;
-}
-export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
+export type AuthCallback = z.infer<typeof AuthCallbackSchema>;
 
 export type SessionSigsMap = z.infer<typeof SessionSigsMapSchema>;
 
 export type SessionSigs = Record<string, AuthSig>;
 
-export interface SessionRequestBody {
-  sessionKey: string;
-  authMethods: AuthMethod[];
-  pkpPublicKey?: string;
-  authSig?: AuthSig;
-  siweMessage: string;
-}
+export type SessionRequestBody = z.infer<typeof SessionRequestBodySchema>;
 
-export interface GetWalletSigProps extends LitActionSdkParams {
-  authNeededCallback?: AuthCallback;
-  chain: string;
-  sessionCapabilityObject: ISessionCapabilityObject;
-  switchChain?: boolean;
-  expiration: string;
-  sessionKey: SessionKeyPair;
-  sessionKeyUri: string;
-  nonce: string;
-  resourceAbilityRequests?: LitResourceAbilityRequest[];
-}
+export type GetWalletSigProps = z.infer<typeof GetWalletSigPropsSchema>;
 
-export interface SessionSigningTemplate {
-  sessionKey: string;
-  resourceAbilityRequests: LitResourceAbilityRequest[];
-  capabilities: any[];
-  issuedAt: string;
-  expiration: string;
-  nodeAddress: string;
-}
+export type SessionSigningTemplate = z.infer<
+  typeof SessionSigningTemplateSchema
+>;
 
 /**
  * @deprecated will be removed in v8
@@ -718,107 +591,36 @@ export interface WebAuthnAuthenticationVerificationParams {
   };
   type: string;
   clientExtensionResults: object;
-  authenticatorAttachment: AuthenticatorAttachment;
+  authenticatorAttachment: 'cross-platform' | 'platform';
 }
-
-export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 
 /**
  * ========== PKP ==========
  */
-export interface LitClientSessionManager {
-  getSessionKey: () => SessionKeyPair;
-  isSessionKeyPair(obj: any): boolean;
-  getExpiration: () => string;
-  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
-  // #authCallbackAndUpdateStorageItem: (params: {
-  //   authCallbackParams: AuthCallbackParams;
-  //   authCallback?: AuthCallback;
-  // }) => Promise<AuthSig>;
-  getPkpSessionSigs: (params: GetPkpSessionSigs) => Promise<SessionSigsMap>;
-  checkNeedToResignSessionKey: (params: {
-    authSig: AuthSig;
-    sessionKeyUri: any;
-    resourceAbilityRequests: LitResourceAbilityRequest[];
-  }) => Promise<boolean>;
-  getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
-  signSessionKey: (
-    params: SignSessionKeyProp
-  ) => Promise<SignSessionKeyResponse>;
-}
+export type LitClientSessionManager = z.infer<
+  typeof LitClientSessionManagerSchema
+>;
 
-export interface AuthenticationProps {
-  /**
-   * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
-   */
-  getSessionSigsProps: GetSessionSigsProps;
-}
+export type AuthenticationProps = z.infer<typeof AuthenticationPropsSchema>;
 
-export interface PKPBaseProp {
-  litNodeClient: ILitNodeClient;
-  pkpPubKey: string;
-  rpcs?: RPCUrls;
-  authContext?: AuthenticationProps;
-  debug?: boolean;
-  litActionCode?: string;
-  litActionIPFS?: string;
-  litActionJsParams?: any;
-  controllerSessionSigs?: SessionSigs;
+export type RPCUrls = z.infer<typeof RPCUrlsSchema>;
 
-  /**
-   * @deprecated - use authContext
-   */
-  controllerAuthMethods?: AuthMethod[];
+export type PKPBaseProp = z.infer<typeof PKPBasePropSchema>;
 
-  /**
-   * @deprecated - use authContext
-   */
-  controllerAuthSig?: AuthSig;
-}
+export type PKPWallet = z.infer<typeof PKPWalletSchema>;
 
-export interface RPCUrls {
-  eth?: string;
-  cosmos?: string;
-  btc?: string;
-}
+export type PKPEthersWalletProp = z.infer<typeof PKPEthersWalletPropSchema>;
 
-export interface PKPWallet {
-  getAddress: () => Promise<string>;
-  init: () => Promise<void>;
-  runLitAction: (toSign: Uint8Array, sigName: string) => Promise<any>;
-  runSign: (toSign: Uint8Array) => Promise<SigResponse>;
-}
+export type PKPCosmosWalletProp = z.infer<typeof PKPCosmosWalletPropSchema>;
 
-export type PKPEthersWalletProp = Omit<
-  PKPBaseProp,
-  'controllerAuthSig' | 'controllerAuthMethods'
-> & {
-  litNodeClient: ILitNodeClient;
-  provider?: Provider;
-  rpc?: string;
-};
+/**
+ * @deprecated will be removed in v8
+ */
+export type PKPClientProp = z.infer<typeof PKPClientPropSchema>;
 
-export interface PKPCosmosWalletProp extends PKPBaseProp {
-  addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
-  rpc?: string;
-}
+export type PKPBaseDefaultParams = z.infer<typeof PKPBaseDefaultParamsSchema>;
 
-// note: Omit removes the 'addressPrefix' from PKPCosmosWalletProp
-export interface PKPClientProp extends PKPBaseProp {
-  cosmosAddressPrefix?: string | 'cosmos';
-}
-
-export interface PKPBaseDefaultParams {
-  toSign: Uint8Array;
-  publicKey: Uint8Array;
-  sigName: string;
-}
-
-export interface PKPClientHelpers {
-  handleRequest: (request: any) => Promise<any>;
-  setRpc: (rpc: string) => void;
-  getRpc: () => string;
-}
+export type PKPClientHelpers = z.infer<typeof PKPClientHelpersSchema>;
 
 /**
  * ========== Lit Auth Client ==========
@@ -1329,23 +1131,7 @@ export interface SignerLike {
   getAddress: () => Promise<string>;
 }
 
-export interface GetPkpSessionSigs
-  extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
-  pkpPublicKey: string;
-
-  /**
-   * Lit Protocol supported auth methods: https://developer.litprotocol.com/v3/sdk/wallets/auth-methods
-   * This CANNOT be used for custom auth methods. For custom auth methods, please pass the customAuth
-   * object to jsParams, and handle the custom auth method in your Lit Action.
-   *
-   * Notes for internal dev: for the SDK, this value can be omitted, but it needs to be an empty array [] set in the SDK before
-   * sending it to the node
-   */
-  authMethods?: AuthMethod[];
-
-  ipfsOptions?: IpfsOptions;
-}
+export type GetPkpSessionSigs = z.infer<typeof GetPkpSessionSigsSchema>;
 
 /**
  * Includes common session signature properties, parameters for a Lit Action,

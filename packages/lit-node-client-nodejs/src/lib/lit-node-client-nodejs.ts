@@ -521,7 +521,7 @@ export class LitNodeClientNodeJs
     resourceAbilityRequests,
   }: {
     authSig: AuthSig;
-    sessionKeyUri: any;
+    sessionKeyUri: string;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
