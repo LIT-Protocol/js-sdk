@@ -4,12 +4,12 @@ import {
   SessionSigsMap,
 } from '@lit-protocol/types';
 
-import { CHAIN_ETHEREUM } from './constants';
 import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
 } from './utils';
+import { CHAIN_ETHEREUM } from '../constants';
 
 describe('getFirstSessionSig from sessionSigs record', () => {
   const sessionSigs: SessionSigsMap = {
