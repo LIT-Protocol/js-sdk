@@ -3,6 +3,7 @@ import depd from 'depd';
 import { z } from 'zod';
 
 import {
+  ABIParamsSchema,
   AuthSigSchema,
   CosmosWalletTypeSchema,
   SessionKeyPairSchema,
@@ -14,7 +15,7 @@ import {
   JsonHandshakeResponseSchema,
   BlsSignatureShareSchema,
   NodeBlsSigningShareSchema,
-  SessionSigsSchema,
+  SessionSigsMapSchema,
   AuthMethodSchema,
   JsonSigningResourceIdSchema,
   SendNodeCommandSchema,
@@ -51,6 +52,29 @@ import {
   EncryptFileRequestSchema,
   EncryptToJsonPayloadSchema,
   ChainedSessionSigsOrAuthSigSchema,
+  DecryptFromJsonPropsSchema,
+  EncryptToJsonPropsSchema,
+  AccsOperatorParamsSchema,
+  SolanaAuthSigSchema,
+  CosmosAuthSigSchema,
+  IProviderSchema,
+  VerifyJWTPropsSchema,
+  JWTHeaderSchema,
+  ClaimKeyResponseSchema,
+  SignatureSchema,
+  BaseJsonPkpSignRequestSchema,
+  JsonPkpSignSdkParamsSchema,
+  JsonPkpSignRequestSchema,
+  JsonSignChainDataRequestSchema,
+  JsonSignSessionKeyRequestV1Schema,
+  BlsResponseDataSchema,
+  JsonSigningStoreRequestSchema,
+  JsonExecutionSdkParamsTargetNodeSchema,
+  LitActionResponseStrategySchema,
+  JsonExecytionRequestTargetNodeSchema,
+  SigningAccessControlConditionJWTPayloadSchema,
+  GetSigningShareForDecryptionRequestSchema,
+  ExecuteJsNoSigningResponseSchema,
 } from '@lit-protocol/schemas';
 
 import { ILitNodeClient } from './ILitNodeClient';
@@ -69,16 +93,11 @@ import {
 
 const deprecated = depd('lit-js-sdk:types:interfaces');
 
+export type ABIParams = z.infer<typeof ABIParamsSchema>;
+
 /** ---------- Access Control Conditions Interfaces ---------- */
 
-export interface ABIParams {
-  name: string;
-  type: string;
-}
-
-export interface AccsOperatorParams {
-  operator: string;
-}
+export type AccsOperatorParams = z.infer<typeof AccsOperatorParamsSchema>;
 
 /** ---------- Auth Sig ---------- */
 
@@ -87,13 +106,9 @@ export interface AccsOperatorParams {
  */
 export type AuthSig = z.infer<typeof AuthSigSchema>;
 
-export interface SolanaAuthSig extends AuthSig {
-  derivedVia: 'solana.signMessage';
-}
+export type SolanaAuthSig = z.infer<typeof SolanaAuthSigSchema>;
 
-export interface CosmosAuthSig extends AuthSig {
-  derivedVia: 'cosmos.signArbitrary';
-}
+export type CosmosAuthSig = z.infer<typeof CosmosAuthSigSchema>;
 
 export type CosmosWalletType = z.infer<typeof CosmosWalletTypeSchema>;
 
@@ -104,28 +119,27 @@ export type LitActionSdkParams = z.infer<typeof LitActionSdkParamsSchema>;
 export type AuthCallbackParams = z.infer<typeof AuthCallbackParamsSchema>;
 
 /** ---------- Web3 ---------- */
-export interface IProvider {
-  provider: any;
-  account: string;
-}
+export type IProvider = z.infer<typeof IProviderSchema>;
 
 /** ---------- Crypto ---------- */
 
+/**
+ * @deprecated
+ */
 export interface EncryptedFile {
   encryptedFile: Blob;
   symmetricKey: SymmetricKey;
 }
 
+/**
+ * @deprecated
+ */
 export interface DecryptFileProps {
   file: AcceptedFileType;
   symmetricKey: SymmetricKey;
 }
 
-export interface VerifyJWTProps {
-  publicKey: string;
-  // A JWT signed by the LIT network using the BLS12-381 algorithm
-  jwt: string;
-}
+export type VerifyJWTProps = z.infer<typeof VerifyJWTPropsSchema>;
 
 export interface IJWT<T> {
   verified: boolean;
@@ -134,19 +148,11 @@ export interface IJWT<T> {
   signature: Uint8Array;
 }
 
-export interface JWTHeader {
-  alg: string;
-  typ: string;
-}
+export type JWTHeader = z.infer<typeof JWTHeaderSchema>;
 
-export interface SigningAccessControlConditionJWTPayload
-  extends MultipleAccessControlConditions {
-  iss: string;
-  sub: string;
-  chain?: string;
-  iat: number;
-  exp: number;
-}
+export type SigningAccessControlConditionJWTPayload = z.infer<
+  typeof SigningAccessControlConditionJWTPayloadSchema
+>;
 
 export interface HumanizedAccsProps {
   // The array of access control conditions that you want to humanize
@@ -164,7 +170,10 @@ export interface HumanizedAccsProps {
   myWalletAddress?: string;
 }
 
-/** ---------- Key Value Type ---------- */
+/**
+ * ---------- Key Value Type ----------
+ * @deprecated
+ * */
 export type KV = Record<string, any>;
 
 /**
@@ -177,122 +186,27 @@ export type StorageProvider = z.infer<typeof StorageProviderSchema>;
 /** ---------- Lit Node Client ---------- */
 export type LitNodeClientConfig = z.infer<typeof LitNodeClientConfigSchema>;
 
-export interface Signature {
-  r: string;
-  s: string;
-  v: number;
-}
+export type Signature = z.infer<typeof SignatureSchema>;
 
-export interface ClaimKeyResponse {
-  signatures: Signature[];
-  claimedKeyId: string;
-  pubkey: string;
-  mintTx: string;
-}
+export type ClaimKeyResponse = z.infer<typeof ClaimKeyResponseSchema>;
 
-export interface BaseJsonPkpSignRequest {
-  authMethods?: AuthMethod[];
-  toSign: ArrayLike<number>;
-}
+export type BaseJsonPkpSignRequest = z.infer<
+  typeof BaseJsonPkpSignRequestSchema
+>;
 
-/**
- * The 'pkpSign' function param. Please note that the structure
- * is different than the payload sent to the node.
- */
-export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
-  pubKey: string;
-  sessionSigs: SessionSigsMap;
-}
+export type JsonPkpSignSdkParams = z.infer<typeof JsonPkpSignSdkParamsSchema>;
 
-/**
- * The actual payload structure sent to the node /pkp/sign endpoint.
- */
-export interface JsonPkpSignRequest extends BaseJsonPkpSignRequest {
-  authSig: AuthSig;
+export type JsonPkpSignRequest = z.infer<typeof JsonPkpSignRequestSchema>;
 
-  /**
-   * note that 'key' is in lower case, because this is what the node expects
-   */
-  pubkey: string;
-}
+export type JsonSignChainDataRequest = z.infer<
+  typeof JsonSignChainDataRequestSchema
+>;
 
-/**
- * Struct in rust
- * -----
-pub struct JsonSignChainDataRequest {
-    pub call_requests: Vec<web3::types::CallRequest>,
-    pub chain: Chain,
-    pub iat: u64,
-    pub exp: u64,
-}
-*/
-export interface JsonSignChainDataRequest {
-  callRequests: CallRequest[];
-  chain: Chain;
-  iat: number;
-  exp: number;
-}
+export type JsonSignSessionKeyRequestV1 = z.infer<
+  typeof JsonSignSessionKeyRequestV1Schema
+>;
 
-export interface JsonSignSessionKeyRequestV1
-  extends Pick<LitActionSdkParams, 'jsParams'>,
-    Pick<LitActionSdkParams, 'litActionIpfsId'> {
-  sessionKey: string;
-  authMethods: AuthMethod[];
-  pkpPublicKey?: string;
-  siweMessage: string;
-  curveType: 'BLS';
-  epoch?: number;
-
-  // custom auth params
-  code?: string;
-}
-
-// [
-//   {
-//     "result": "success",
-//     "signatureShare": {
-//       "ProofOfPossession": "01b191b1d281857a95d2fd189683db366ab1088723338c1805daa4650459e9fcaebaa57b58108c284d233404dd5f2e58f208aafb87d981098aba3fe850980184a4b29643a21107b03f1d928646245b57af3745a81418989e0b6aad9bd1f192723c"
-//     },
-//     "shareIndex": 0,
-//     "curveType": "BLS",
-//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
-//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
-//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
-//   },
-//   {
-//     "result": "success",
-//     "signatureShare": {
-//       "ProofOfPossession": "038178034edcd5b48da4e2af6eb0891ece41389aa6119c80546d3fa00b5d2ba87eaec327b18d8013714b486246807498c8198e70cf8e917b1a5f1d8d0846787172521d41994de95bd641bdc1d9ccee9b459ceeb03f156cf357a4ff8faf5d2e167d"
-//     },
-//     "shareIndex": 2,
-//     "curveType": "BLS",
-//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
-//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
-//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
-//   },
-//   {
-//     "result": "success",
-//     "signatureShare": {
-//       "ProofOfPossession": "0292a026325a166398b85b53f3a7a34d147c5337e189d75c33c0f227f7926c839b408dfcc5d242a8685a81c68e0ccedc080c051219161dbc37f06627259b19d15120ab2f710075a44b1dcef18d511bb99b6625c8f575d2688c6b5b01ba6bf448c9"
-//     },
-//     "shareIndex": 1,
-//     "curveType": "BLS",
-//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
-//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
-//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
-//   }
-// ]
-export interface BlsResponseData {
-  result: boolean | 'success';
-  signatureShare: {
-    ProofOfPossession: string;
-  };
-  shareIndex: number;
-  curveType: string;
-  siweMessage: string;
-  dataSigned: string;
-  blsRootPubkey: string;
-}
+export type BlsResponseData = z.infer<typeof BlsResponseDataSchema>;
 
 export type JsonSigningResourceId = z.infer<typeof JsonSigningResourceIdSchema>;
 
@@ -308,44 +222,23 @@ export type JsonSigningRetrieveRequest = z.infer<
 
 export type GetSignedTokenRequest = z.infer<typeof GetSignedTokenRequestSchema>;
 
-/**
- * Struct in rust
- * -----
-pub struct JsonSigningStoreRequest {
-    pub key: String,
-    pub val: String,
-    pub chain: Option<String>,
-    pub permanant: Option<usize>,
-    pub auth_sig: AuthSigItem,
-}
- */
-export interface JsonSigningStoreRequest {
-  key: string;
-  val: string;
-  chain?: string;
-  permanant?: 0 | 1;
-  permanent?: 0 | 1;
-  authSig?: AuthSig;
-  sessionSigs?: object;
-}
+export type JsonSigningStoreRequest = z.infer<
+  typeof JsonSigningStoreRequestSchema
+>;
 
 export type JsonEncryptionRetrieveRequest = z.infer<
   typeof JsonEncryptionRetrieveRequestSchema
 >;
 
-export interface LitActionResponseStrategy {
-  strategy: ResponseStrategy;
-  customFilter?: (
-    responses: Record<string, string>[]
-  ) => Record<string, string>;
-}
+export type LitActionResponseStrategy = z.infer<
+  typeof LitActionResponseStrategySchema
+>;
 
 export type IpfsOptions = z.infer<typeof IpfsOptionsSchema>;
 
-export interface JsonExecutionSdkParamsTargetNode
-  extends JsonExecutionSdkParams {
-  targetNodeRange: number;
-}
+export type JsonExecutionSdkParamsTargetNode = z.infer<
+  typeof JsonExecutionSdkParamsTargetNodeSchema
+>;
 
 export type JsonExecutionSdkParams = z.infer<
   typeof JsonExecutionSdkParamsSchema
@@ -355,11 +248,11 @@ export type ExecuteJsAdvancedOptions = z.infer<
   typeof ExecuteJsAdvancedOptionsSchema
 >;
 
-export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
-  targetNodeRange: number;
-}
-
 export type JsonExecutionRequest = z.infer<typeof JsonExecutionRequestSchema>;
+
+export type JsonExecutionRequestTargetNode = z.infer<
+  typeof JsonExecytionRequestTargetNodeSchema
+>;
 
 export type ChainedSessionSigsOrAuthSig = z.infer<
   typeof ChainedSessionSigsOrAuthSigSchema
@@ -386,9 +279,9 @@ export type DecryptRequest = z.infer<typeof DecryptRequestSchema>;
 
 export type DecryptResponse = z.infer<typeof DecryptResponseSchema>;
 
-export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
-  dataToEncryptHash: string;
-}
+export type GetSigningShareForDecryptionRequest = z.infer<
+  typeof GetSigningShareForDecryptionRequestSchema
+>;
 
 export type SigResponse = z.infer<typeof SigResponseSchema>;
 
@@ -401,13 +294,13 @@ export type ExecuteJsResponseBase = z.infer<typeof ExecuteJsResponseBaseSchema>;
  */
 export type ExecuteJsResponse = z.infer<typeof ExecuteJsResponseSchema>;
 
-export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
-  claims: {};
-  decryptions: [];
-  response: any;
-  logs: string;
-}
+export type ExecuteJsNoSigningResponse = z.infer<
+  typeof ExecuteJsNoSigningResponseSchema
+>;
 
+/**
+ * @deprecated
+ */
 export interface LitNodePromise {}
 
 export type SendNodeCommand = z.infer<typeof SendNodeCommandSchema>;
@@ -576,39 +469,11 @@ export type NodeAttestation = z.infer<typeof NodeAttestationSchema>;
 
 export type JsonHandshakeResponse = z.infer<typeof JsonHandshakeResponseSchema>;
 
-export interface EncryptToJsonProps extends MultipleAccessControlConditions {
-  /**
-   * The chain
-   */
-  chain: string;
-
-  /**
-   * The string you wish to encrypt
-   */
-  string?: string;
-
-  /**
-   * The file you wish to encrypt
-   */
-  file?: AcceptedFileType;
-
-  /**
-   * An instance of LitNodeClient that is already connected
-   */
-  litNodeClient: ILitNodeClient;
-}
+export type EncryptToJsonProps = z.infer<typeof EncryptToJsonPropsSchema>;
 
 export type EncryptToJsonPayload = z.infer<typeof EncryptToJsonPayloadSchema>;
 
-export interface DecryptFromJsonProps {
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
-
-  // An instance of LitNodeClient that is already connected
-  litNodeClient: ILitNodeClient;
-
-  parsedJsonData: EncryptToJsonPayload;
-}
+export type DecryptFromJsonProps = z.infer<typeof DecryptFromJsonPropsSchema>;
 
 /**
  * Struct in rust
@@ -794,7 +659,7 @@ export interface GetSessionSigsProps
 }
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
-export type SessionSigsMap = z.infer<typeof SessionSigsSchema>;
+export type SessionSigsMap = z.infer<typeof SessionSigsMapSchema>;
 
 export type SessionSigs = Record<string, AuthSig>;
 
@@ -1356,7 +1221,7 @@ export interface BaseSiweMessage {
   statement?: string;
   version?: string;
   chainId?: number;
-  litNodeClient?: any;
+  litNodeClient?: any; // TODO ILitNodeClient but not always required
 }
 
 export interface WithRecap extends BaseSiweMessage {
@@ -1373,7 +1238,7 @@ export interface WithCapacityDelegation extends BaseSiweMessage {
 }
 
 export interface CapacityDelegationFields extends BaseSiweMessage {
-  litNodeClient: any;
+  litNodeClient: ILitNodeClient;
   capacityTokenId?: string;
   delegateeAddresses?: string[];
   uses?: string;

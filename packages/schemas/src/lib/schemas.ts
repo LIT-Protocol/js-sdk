@@ -10,7 +10,41 @@ export const JsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([literalSchema, z.array(JsonSchema), z.record(JsonSchema)])
 );
 
+export const ABIParamsSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+});
+
+export const IProviderSchema = z.object({
+  provider: z.any(),
+  account: z.string(),
+});
+
 export const ChainSchema = z.string();
+
+export const VerifyJWTPropsSchema = z.object({
+  publicKey: z.string(),
+  // A JWT signed by the LIT network using the BLS12-381 algorithm
+  jwt: z.string(),
+});
+
+export const JWTHeaderSchema = z.object({
+  alg: z.string(),
+  typ: z.string(),
+});
+
+export const SignatureSchema = z.object({
+  r: z.string(),
+  s: z.string(),
+  v: z.number(),
+});
+
+export const ClaimKeyResponseSchema = z.object({
+  signatures: z.array(SignatureSchema),
+  claimedKeyId: z.string(),
+  pubkey: z.string(),
+  mintTx: z.string(),
+});
 
 export const LitNetworkKeysSchema = z.enum([
   'datil-dev',
@@ -169,6 +203,14 @@ export const AuthSigSchema = z.object({
   algo: z.string().optional(),
 });
 
+export const SolanaAuthSigSchema = AuthSigSchema.extend({
+  derivedVia: z.literal('solana.signMessage'),
+});
+
+export const CosmosAuthSigSchema = AuthSigSchema.extend({
+  derivedVia: z.literal('cosmos.signArbitrary'),
+});
+
 /**
  * A map of node addresses to the session signature payload
  * for that node specifically.
@@ -184,7 +226,7 @@ export const AuthSigSchema = z.object({
  *
  * -  `algo`: The signing algorithm used to generate the session signature.
  */
-export const SessionSigsSchema = z.record(z.string(), AuthSigSchema);
+export const SessionSigsMapSchema = z.record(z.string(), AuthSigSchema);
 
 // pub struct AuthMethod {
 //     pub auth_method_type: u32,
@@ -193,6 +235,32 @@ export const SessionSigsSchema = z.record(z.string(), AuthSigSchema);
 export const AuthMethodSchema = z.object({
   authMethodType: z.number(),
   accessToken: z.string(),
+});
+
+export const BaseJsonPkpSignRequestSchema = z.object({
+  authMethods: z.array(AuthMethodSchema).optional(),
+  toSign: z.array(z.number()),
+});
+
+/**
+ * The 'pkpSign' function param. Please note that the structure
+ * is different than the payload sent to the node.
+ */
+export const JsonPkpSignSdkParamsSchema = BaseJsonPkpSignRequestSchema.extend({
+  pubKey: z.string(),
+  sessionSigs: SessionSigsMapSchema,
+});
+
+/**
+ * The actual payload structure sent to the node /pkp/sign endpoint.
+ */
+export const JsonPkpSignRequestSchema = BaseJsonPkpSignRequestSchema.extend({
+  authSig: AuthSigSchema,
+
+  /**
+   * note that 'key' is in lower case, because this is what the node expects
+   */
+  pubkey: z.string(),
 });
 
 export const ParsedSignedMessageSchema = z
@@ -336,17 +404,6 @@ export const JsonHandshakeResponseSchema = z.object({
   latestBlockhash: z.string().optional(),
 });
 
-export const EncryptResponseSchema = z.object({
-  /**
-   * The base64-encoded ciphertext
-   */
-  ciphertext: z.string(),
-  /**
-   * The hash of the data that was encrypted
-   */
-  dataToEncryptHash: z.string(),
-});
-
 export const BlsSignatureShareSchema = z.object({
   ProofOfPossession: z.string(),
 });
@@ -379,6 +436,15 @@ export const MultipleAccessControlConditionsSchema = z.object({
     UnifiedAccessControlConditionsSchema.optional(),
 });
 
+export const SigningAccessControlConditionJWTPayloadSchema =
+  MultipleAccessControlConditionsSchema.extend({
+    iss: z.string(),
+    sub: z.string(),
+    chain: ChainSchema.optional(),
+    iat: z.number(),
+    exp: z.number(),
+  });
+
 /**
  * Struct in rust
  * -----
@@ -409,7 +475,12 @@ export const JsonAccsRequestSchema =
     // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
     authSig: AuthSigSchema.optional(),
 
-    sessionSigs: SessionSigsSchema.optional(),
+    sessionSigs: SessionSigsMapSchema.optional(),
+  });
+
+export const GetSigningShareForDecryptionRequestSchema =
+  JsonAccsRequestSchema.extend({
+    dataToEncryptHash: z.string(),
   });
 
 /**
@@ -553,7 +624,7 @@ export const ExecuteJsAdvancedOptionsSchema = z.object({
   useSingleNode: z.boolean().optional(),
 });
 
-export const JsonExecutionSdkParamsSchema = LitActionSdkParamsSchema.pick({
+const JsonExecutionSdkParamsBaseSchema = LitActionSdkParamsSchema.pick({
   jsParams: true,
 })
   .merge(ExecuteJsAdvancedOptionsSchema)
@@ -569,13 +640,24 @@ export const JsonExecutionSdkParamsSchema = LitActionSdkParamsSchema.pick({
     /**
      * the session signatures to use to authorize the user with the nodes
      */
-    sessionSigs: SessionSigsSchema,
+    sessionSigs: SessionSigsMapSchema,
     /**
      * auth methods to resolve
      */
     authMethods: z.array(AuthMethodSchema).optional(),
-  })
-  .refine(
+  });
+export const JsonExecutionSdkParamsSchema =
+  JsonExecutionSdkParamsBaseSchema.refine(
+    (data) => (data.code && !data.ipfsId) || (!data.code && data.ipfsId),
+    {
+      message: 'Either `code` or `ipfsId` must be provided, but not both.',
+    }
+  );
+
+export const JsonExecutionSdkParamsTargetNodeSchema =
+  JsonExecutionSdkParamsBaseSchema.extend({
+    targetNodeRange: z.number(),
+  }).refine(
     (data) => (data.code && !data.ipfsId) || (!data.code && data.ipfsId),
     {
       message: 'Either `code` or `ipfsId` must be provided, but not both.',
@@ -598,11 +680,13 @@ export const ExecuteJsResponseBaseSchema = z.object({
   ]),
 });
 
-export const SignatureSchema = z.object({
-  r: z.string(),
-  s: z.string(),
-  v: z.number(),
-});
+export const ExecuteJsNoSigningResponseSchema =
+  ExecuteJsResponseBaseSchema.extend({
+    claims: z.object({}), // TODO
+    decryptions: z.array(z.any()).optional(), // TODO
+    response: z.union([z.string(), z.object({})]),
+    logs: z.string(),
+  });
 
 export const NodeResponseSchema = z.object({
   response: z.any(), // TODO
@@ -660,7 +744,7 @@ export const SigningAccessControlConditionRequestSchema =
 
 export const GetSignedTokenRequestSchema =
   SigningAccessControlConditionRequestSchema.extend({
-    sessionSigs: SessionSigsSchema,
+    sessionSigs: SessionSigsMapSchema,
   });
 
 export const EncryptSdkParamsSchema =
@@ -672,13 +756,13 @@ export const EncryptSdkParamsSchema =
  * These schemas are mainly used for access control conditions & decrypt requests.
  * For signing operations such as executeJs and pkpSign, only sessionSigs is used.
  */
-const SessionSigsAuthenticationSchema = z.object({
+export const SessionSigsAuthenticationSchema = z.object({
   /**
    * the session signatures to use to authorize the user with the nodes
    */
-  sessionSigs: SessionSigsSchema,
+  sessionSigs: SessionSigsMapSchema,
 });
-const AuthSigAuthenticationSchema = z.object({
+export const AuthSigAuthenticationSchema = z.object({
   /**
    * This is a bare authSig generated client side by the user. It can only be used for access control conditions/encrypt/decrypt operations. It CANNOT be used for signing operation.
    */
@@ -689,7 +773,7 @@ export const SessionSigsOrAuthSigSchema = z.union([
   AuthSigAuthenticationSchema,
 ]);
 
-const ChainedSchema = z.object({
+export const ChainedSchema = z.object({
   /**
    * The chain name of the chain that will be used. See LIT_CHAINS for currently supported chains.
    */
@@ -699,80 +783,6 @@ const ChainedSchema = z.object({
 export const ChainedSessionSigsOrAuthSigSchema = z.union([
   SessionSigsAuthenticationSchema.merge(ChainedSchema.partial()),
   AuthSigAuthenticationSchema.merge(ChainedSchema.partial()),
-]);
-
-const ChainMultipleAccessControlConditionsSchema =
-  MultipleAccessControlConditionsSchema.merge(ChainedSchema);
-const SessionSigsDecryptRequestBaseSchema =
-  ChainMultipleAccessControlConditionsSchema.merge(
-    SessionSigsAuthenticationSchema
-  );
-const AuthSigDecryptRequestBaseSchema =
-  ChainMultipleAccessControlConditionsSchema.merge(AuthSigAuthenticationSchema);
-export const DecryptRequestBaseSchema = z.union([
-  SessionSigsDecryptRequestBaseSchema,
-  AuthSigDecryptRequestBaseSchema,
-]);
-
-export const DecryptRequestSchema = z.union([
-  EncryptResponseSchema.merge(SessionSigsDecryptRequestBaseSchema),
-  EncryptResponseSchema.merge(AuthSigDecryptRequestBaseSchema),
-]);
-
-export const DecryptResponseSchema = z.object({
-  // The decrypted data as a Uint8Array
-  decryptedData: z.instanceof(Uint8Array),
-});
-
-const EncryptRequestBaseSchema = z.object({
-  // The data to encrypt as a Uint8Array
-  dataToEncrypt: z.instanceof(Uint8Array),
-});
-const SessionSigsEncryptRequestBaseSchema = EncryptRequestBaseSchema.merge(
-  SessionSigsDecryptRequestBaseSchema
-);
-const AuthSigEncryptRequestBaseSchema = EncryptRequestBaseSchema.merge(
-  AuthSigDecryptRequestBaseSchema
-);
-export const EncryptRequestSchema = z.union([
-  SessionSigsEncryptRequestBaseSchema,
-  AuthSigEncryptRequestBaseSchema,
-]);
-
-export const EncryptUint8ArrayRequestSchema =
-  MultipleAccessControlConditionsSchema.extend({
-    /**
-     * The uint8array that you wish to encrypt
-     */
-    dataToEncrypt: z.instanceof(Uint8Array),
-  });
-
-export const EncryptStringRequestSchema =
-  MultipleAccessControlConditionsSchema.extend({
-    /**
-     * The string that you wish to encrypt
-     */
-    dataToEncrypt: z.string(),
-  });
-
-export const EncryptFileRequestSchema =
-  MultipleAccessControlConditionsSchema.extend({
-    file: z.union([z.instanceof(File), z.instanceof(Blob)]),
-  });
-
-const EncryptToJsonPayloadBaseSchema = z.object({
-  ciphertext: z.string(),
-  dataToEncryptHash: z.string(),
-  dataType: z.enum(['string', 'file'] as const),
-});
-const SessionSigsEncryptToJsonPayloadSchema =
-  EncryptToJsonPayloadBaseSchema.merge(SessionSigsDecryptRequestBaseSchema);
-const AuthSigEncryptToJsonPayloadSchema = EncryptToJsonPayloadBaseSchema.merge(
-  AuthSigDecryptRequestBaseSchema
-);
-export const EncryptToJsonPayloadSchema = z.union([
-  SessionSigsEncryptToJsonPayloadSchema,
-  AuthSigEncryptToJsonPayloadSchema,
 ]);
 
 export const SuccessNodePromisesSchema = z.object({
@@ -808,6 +818,11 @@ export const JsonExecutionRequestSchema = LitActionSdkParamsSchema.pick({
   authMethods: z.array(AuthMethodSchema).optional(),
 });
 
+export const JsonExecytionRequestTargetNodeSchema =
+  JsonExecutionRequestSchema.extend({
+    targetNodeRange: z.number(),
+  });
+
 export const CallRequestSchema = z.object({
   // to - The address of the contract that will be queried
   to: z.string(),
@@ -817,8 +832,18 @@ export const CallRequestSchema = z.object({
   data: z.string(),
 });
 
+/**
+ * Struct in rust
+ * -----
+ pub struct JsonSignChainDataRequest {
+ pub call_requests: Vec<web3::types::CallRequest>,
+ pub chain: Chain,
+ pub iat: u64,
+ pub exp: u64,
+ }
+ */
 export const JsonSignChainDataRequestSchema = z.object({
-  callRequests: z.array(z.string()),
+  callRequests: z.array(CallRequestSchema),
   chain: ChainSchema,
   iat: z.number(),
   exp: z.number(),
@@ -832,4 +857,88 @@ export const JsonRequestSchema = z.union([
 export const NodeCommandResponseSchema = z.object({
   url: z.string(),
   data: JsonRequestSchema,
+});
+
+export const JsonSignSessionKeyRequestV1Schema = LitActionSdkParamsSchema.pick({
+  jsParams: true,
+  litActionIpfsId: true,
+}).extend({
+  sessionKey: z.string(),
+  authMethods: z.array(AuthMethodSchema),
+  pkpPublicKey: z.string().optional(),
+  siweMessage: z.string(),
+  curveType: z.literal('BLS'),
+  epoch: z.number().optional(),
+
+  // custom auth params
+  code: z.string().optional(),
+});
+
+// [
+//   {
+//     "result": "success",
+//     "signatureShare": {
+//       "ProofOfPossession": "01b191b1d281857a95d2fd189683db366ab1088723338c1805daa4650459e9fcaebaa57b58108c284d233404dd5f2e58f208aafb87d981098aba3fe850980184a4b29643a21107b03f1d928646245b57af3745a81418989e0b6aad9bd1f192723c"
+//     },
+//     "shareIndex": 0,
+//     "curveType": "BLS",
+//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
+//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
+//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
+//   },
+//   {
+//     "result": "success",
+//     "signatureShare": {
+//       "ProofOfPossession": "038178034edcd5b48da4e2af6eb0891ece41389aa6119c80546d3fa00b5d2ba87eaec327b18d8013714b486246807498c8198e70cf8e917b1a5f1d8d0846787172521d41994de95bd641bdc1d9ccee9b459ceeb03f156cf357a4ff8faf5d2e167d"
+//     },
+//     "shareIndex": 2,
+//     "curveType": "BLS",
+//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
+//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
+//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
+//   },
+//   {
+//     "result": "success",
+//     "signatureShare": {
+//       "ProofOfPossession": "0292a026325a166398b85b53f3a7a34d147c5337e189d75c33c0f227f7926c839b408dfcc5d242a8685a81c68e0ccedc080c051219161dbc37f06627259b19d15120ab2f710075a44b1dcef18d511bb99b6625c8f575d2688c6b5b01ba6bf448c9"
+//     },
+//     "shareIndex": 1,
+//     "curveType": "BLS",
+//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
+//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
+//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
+//   }
+// ]
+export const BlsResponseDataSchema = z.object({
+  result: z.union([z.boolean(), z.literal('success')]),
+  signatureShare: z.object({
+    ProofOfPossession: z.string(),
+  }),
+  shareIndex: z.number(),
+  curveType: z.string(),
+  siweMessage: z.string(),
+  dataSigned: z.string(),
+  blsRootPubkey: z.string(),
+});
+
+/**
+ * @deprecated
+ * Struct in rust
+ * -----
+ pub struct JsonSigningStoreRequest {
+ pub key: String,
+ pub val: String,
+ pub chain: Option<String>,
+ pub permanant: Option<usize>,
+ pub auth_sig: AuthSigItem,
+ }
+ */
+export const JsonSigningStoreRequestSchema = z.object({
+  key: z.string(),
+  val: z.string(),
+  chain: ChainSchema.optional(),
+  permanant: z.union([z.literal(0), z.literal(1)]).optional(),
+  permanent: z.union([z.literal(0), z.literal(1)]).optional(),
+  authSsig: AuthSigSchema.optional(),
+  sessionSigs: z.object({}).optional(),
 });

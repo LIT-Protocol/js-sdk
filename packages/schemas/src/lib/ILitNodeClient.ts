@@ -1,14 +1,16 @@
 import { z } from 'zod';
 
 import {
+  DecryptRequestSchema,
+  DecryptResponseSchema,
+  EncryptResponseSchema,
+} from './encryption';
+import {
   ILitResourceSchema,
   ISessionCapabilityObjectSchema,
   LitNodeClientConfigSchema,
 } from './models';
 import {
-  DecryptRequestSchema,
-  DecryptResponseSchema,
-  EncryptResponseSchema,
   EncryptSdkParamsSchema,
   ExecuteJsResponseSchema,
   FormattedMultipleAccsSchema,

@@ -8,6 +8,7 @@
  * initializing the class instances.
  */
 import depd from 'depd';
+
 import {
   InitError,
   LitNodeClientNotReadyError,
@@ -416,7 +417,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     try {
       const sig = await this.litNodeClient.pkpSign({
-        toSign,
+        toSign: Array.from(toSign),
         pubKey: this.uncompressedPubKey,
         sessionSigs: controllerSessionSigs,
       });
