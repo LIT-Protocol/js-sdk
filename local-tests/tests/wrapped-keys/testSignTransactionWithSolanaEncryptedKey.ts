@@ -12,6 +12,7 @@ import {
 } from '@solana/web3.js';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { ethers } from 'ethers';
+import { getSolanaTransaction } from './util';
 
 const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 
@@ -57,11 +58,6 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
       memo: 'Test key',
     });
 
-    const solanaConnection = new Connection(
-      clusterApiUrl('devnet'),
-      'confirmed'
-    );
-
     // Request Solana Airdrop
     // const balance = await solanaConnection.getBalance(solanaKeypair.publicKey);
     // console.log("balance- ", balance); // Should be 0, in fact if we get the balance right after the Air Drop it will also be 0 unless we wait. We're skipping the balance confirmation
@@ -81,30 +77,8 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
-    const solanaTransaction = new Transaction();
-    solanaTransaction.add(
-      SystemProgram.transfer({
-        fromPubkey: solanaKeypair.publicKey,
-        toPubkey: new PublicKey(solanaKeypair.publicKey),
-        lamports: LAMPORTS_PER_SOL / 100, // Transfer 0.01 SOL
-      })
-    );
-    solanaTransaction.feePayer = solanaKeypair.publicKey;
-
-    const { blockhash } = await solanaConnection.getLatestBlockhash();
-    solanaTransaction.recentBlockhash = blockhash;
-
-    const serializedTransaction = solanaTransaction
-      .serialize({
-        requireAllSignatures: false, // should be false as we're not signing the message
-        verifySignatures: false, // should be false as we're not signing the message
-      })
-      .toString('base64');
-
-    const unsignedTransaction: SerializedTransaction = {
-      serializedTransaction,
-      chain: 'devnet',
-    };
+    const { unsignedTransaction, solanaTransaction } =
+      await getSolanaTransaction({ solanaKeypair });
 
     const signedTx = await signTransactionWithEncryptedKey({
       pkpSessionSigs: pkpSessionSigsSigning,

@@ -1,17 +1,25 @@
 import { LIT_NETWORKS_KEYS } from '@lit-protocol/types';
 import { LIT_CHAINS } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
-import { config } from '@lit-protocol/wrapped-keys';
-import {
-  litActionRepositoryCommon,
-  litActionRepository,
-} from '@lit-protocol/wrapped-keys-lit-actions';
-
 import type {
+  EthereumLitTransaction,
   LitActionCodeRepository,
   LitActionCodeRepositoryCommon,
-  EthereumLitTransaction,
 } from '@lit-protocol/wrapped-keys';
+import { config, SerializedTransaction } from '@lit-protocol/wrapped-keys';
+import {
+  litActionRepository,
+  litActionRepositoryCommon,
+} from '@lit-protocol/wrapped-keys-lit-actions';
+import {
+  clusterApiUrl,
+  Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from '@solana/web3.js';
 
 const emptyLitActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: '',
@@ -116,5 +124,45 @@ export function getBaseTransactionForNetwork({
     dataHex: ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
+  };
+}
+
+export async function getSolanaTransaction({
+  solanaKeypair,
+}: {
+  solanaKeypair: Keypair;
+}): Promise<{
+  unsignedTransaction: SerializedTransaction;
+  solanaTransaction: Transaction;
+}> {
+  const solanaConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+
+  const solanaTransaction = new Transaction();
+
+  solanaTransaction.add(
+    SystemProgram.transfer({
+      fromPubkey: solanaKeypair.publicKey,
+      toPubkey: new PublicKey(solanaKeypair.publicKey),
+      lamports: LAMPORTS_PER_SOL / 100, // Transfer 0.01 SOL
+    })
+  );
+  solanaTransaction.feePayer = solanaKeypair.publicKey;
+
+  const { blockhash } = await solanaConnection.getLatestBlockhash();
+  solanaTransaction.recentBlockhash = blockhash;
+
+  const serializedTransaction = solanaTransaction
+    .serialize({
+      requireAllSignatures: false, // should be false as we're not signing the message
+      verifySignatures: false, // should be false as we're not signing the message
+    })
+    .toString('base64');
+
+  return {
+    solanaTransaction,
+    unsignedTransaction: {
+      serializedTransaction,
+      chain: 'devnet',
+    },
   };
 }
