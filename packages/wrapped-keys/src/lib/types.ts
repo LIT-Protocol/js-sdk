@@ -159,13 +159,32 @@ export interface ExportPrivateKeyResult {
   id: string;
 }
 
-/** @typedef GeneratePrivateKeyAction
- * @extends ApiParamsSupportedNetworks
- */
-export type GeneratePrivateKeyAction = ApiParamsSupportedNetworks & {
+export type GeneratePrivateKeyActionBase = ApiParamsSupportedNetworks & {
   generateKeyParams: { memo: string };
   signMessageParams?: { messageToSign: string | Uint8Array };
 };
+
+export type GeneratePrivateKeyActionSolana = GeneratePrivateKeyActionBase & {
+  network: Extract<Network, 'solana'>;
+  signTransactionParams: {
+    unsignedTransaction: SerializedTransaction;
+    broadcast?: boolean;
+  };
+};
+
+export type GeneratePrivateKeyActionEthereum = GeneratePrivateKeyActionBase & {
+  network: Extract<Network, 'evm'>;
+  signTransactionParams: {
+    unsignedTransaction: EthereumLitTransaction;
+    broadcast?: boolean;
+  };
+};
+
+/** @typedef GeneratePrivateKeyAction
+ */
+export type GeneratePrivateKeyAction =
+  | GeneratePrivateKeyActionSolana
+  | GeneratePrivateKeyActionEthereum;
 
 /** @typedef BatchGeneratePrivateKeysParams
  * @extends BaseApiParams
@@ -180,6 +199,7 @@ export type BatchGeneratePrivateKeysParams = BaseApiParams & {
 export interface BatchGeneratePrivateKeysActionResult {
   generateEncryptedPrivateKey: GeneratePrivateKeyResult & { memo: string };
   signMessage?: { signature: string };
+  signTransaction?: { signature: string };
 }
 
 export interface BatchGeneratePrivateKeysResult {
