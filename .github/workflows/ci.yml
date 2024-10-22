@@ -109,7 +109,7 @@ jobs:
         run: docker rmi ghcr.io/lit-protocol/shiva 
   ping-lit-configuration-guides:
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests]  # Make sure this job runs after others complete
+    # needs: [unit-tests, integration-tests]  # Make sure this job runs after others complete
     steps:
       - name: Get PR labels
         id: pr-labels
