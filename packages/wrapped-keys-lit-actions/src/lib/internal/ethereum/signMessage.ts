@@ -1,8 +1,3 @@
-/**
- * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
- */
-import { ethers } from 'ethers';
-
 interface SignMessageParams {
   privateKey: string;
   messageToSign: string;

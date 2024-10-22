@@ -1,10 +1,3 @@
-/* global ethers, Lit */
-
-/**
- * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
- */
-import { ethers } from 'ethers';
-
 // This is weird - ethers.UnsignedTransaction is not the same as the one being used here..
 // We should fix this soon, but not a hard blocker
 export interface UnsignedTransaction {
@@ -89,7 +82,7 @@ async function getGasPrice({
   provider,
 }: {
   userProvidedGasPrice?: string;
-  provider: ethers.providers.JsonRpcProvider;
+  provider: ethers['providers']['JsonRpcProvider'];
 }) {
   try {
     if (userProvidedGasPrice) {
@@ -107,7 +100,7 @@ async function getGasLimit({
   userProvidedGasLimit,
   validatedTx,
 }: {
-  provider: ethers.providers.JsonRpcProvider;
+  provider: ethers['providers']['JsonRpcProvider'];
   userProvidedGasLimit?: number;
   validatedTx: any;
 }) {
@@ -140,7 +133,7 @@ async function broadcastTransaction({
   provider,
   signedTx,
 }: {
-  provider: ethers.providers.JsonRpcProvider;
+  provider: ethers['providers']['JsonRpcProvider'];
   signedTx: string;
 }) {
   try {

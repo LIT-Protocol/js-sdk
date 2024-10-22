@@ -1,3 +1,6 @@
+import { ethers as Ethers } from 'ethers';
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck - got this directly from the lit-assets repo
 declare global {
   export declare namespace Lit {
@@ -61,7 +64,7 @@ declare global {
         tokenId,
       }: {
         tokenId: string;
-      }): Promise<Array<string>>;
+      }): Promise<string[]>;
       /**
        * Get the full list of addresses that are permitted to sign using a given PKP tokenId
        * @function getPermittedAddresses
@@ -73,7 +76,7 @@ declare global {
         tokenId,
       }: {
         tokenId: string;
-      }): Promise<Array<string>>;
+      }): Promise<string[]>;
       /**
        * Get the full list of auth methods that are permitted to sign using a given PKP tokenId
        * @function getPermittedAuthMethods
@@ -85,7 +88,7 @@ declare global {
         tokenId,
       }: {
         tokenId: string;
-      }): Promise<Array<any>>;
+      }): Promise<any[]>;
       /**
        * Get the permitted auth method scopes for a given PKP tokenId and auth method type + id
        * @function getPermittedAuthMethodScopes
@@ -106,7 +109,7 @@ declare global {
         authMethodType: string;
         userId: Uint8Array;
         maxScopeId: number;
-      }): Promise<Array<boolean>>;
+      }): Promise<boolean[]>;
       /**
        * Converts a PKP public key to a PKP token ID by hashing it with keccak256
        * @function pubkeyToTokenId
@@ -184,7 +187,7 @@ declare global {
         authSig,
         chain,
       }: {
-        conditions: Array<any>;
+        conditions: any[];
         authSig: any;
         chain: string;
       }): Promise<boolean>;
@@ -346,7 +349,7 @@ declare global {
        * Array of action IPFS IDs.
        * @type {Array<`Qm${string}` | string>}
        */
-      const actionIpfsIds: Array<`Qm${string}` | string>;
+      const actionIpfsIds: (`Qm${string}` | string)[];
 
       /**
        * Array of authentication method contexts.
@@ -372,7 +375,7 @@ declare global {
        * Array of resources.
        * @type {Array<any>}
        */
-      const resources: Array<any>;
+      const resources: any[];
 
       /**
        * Custom authentication resource.
@@ -381,6 +384,11 @@ declare global {
       const customAuthResource: string | `"\\(true,${string})\\"`;
     }
   }
+  // eslint-disable-next-line import/export
+  export type ethers = Ethers;
+  export const ethers: typeof Ethers;
 }
+
+global.ethers = Ethers;
 
 export {};
