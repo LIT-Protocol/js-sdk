@@ -147,24 +147,6 @@ export interface DecryptFileProps {
   symmetricKey: SymmetricKey;
 }
 
-export interface VerifyJWTProps {
-  publicKey: string;
-  // A JWT signed by the LIT network using the BLS12-381 algorithm
-  jwt: string;
-}
-
-export interface IJWT<T> {
-  verified: boolean;
-  header: JWTHeader;
-  payload: T;
-  signature: Uint8Array;
-}
-
-export interface JWTHeader {
-  alg: string;
-  typ: string;
-}
-
 export interface SigningAccessControlConditionJWTPayload
   extends MultipleAccessControlConditions {
   iss: string;
@@ -295,7 +277,7 @@ export interface JsonSignChainDataRequest {
 
 export interface JsonSignSessionKeyRequestV1
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    Pick<LitActionSdkParams, 'litActionIpfsId'> {
+  Pick<LitActionSdkParams, 'litActionIpfsId'> {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
@@ -421,11 +403,6 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
   sessionSigs?: any;
 }
 
-export interface GetSignedTokenRequest
-  extends SigningAccessControlConditionRequest {
-  sessionSigs: SessionSigsMap;
-}
-
 /**
  * Struct in rust
  * -----
@@ -484,7 +461,7 @@ export interface JsonExecutionSdkParamsTargetNode
 
 export interface JsonExecutionSdkParams
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    ExecuteJsAdvancedOptions {
+  ExecuteJsAdvancedOptions {
   /**
    *  JS code to run on the nodes
    */
@@ -560,7 +537,7 @@ export interface SessionSigsOrAuthSig {
 
 export interface DecryptRequestBase
   extends SessionSigsOrAuthSig,
-    MultipleAccessControlConditions {
+  MultipleAccessControlConditions {
   /**
    * The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
    */
@@ -606,7 +583,7 @@ export interface EncryptFileRequest extends DecryptRequestBase {
   file: AcceptedFileType;
 }
 
-export interface DecryptRequest extends EncryptResponse, DecryptRequestBase {}
+export interface DecryptRequest extends EncryptResponse, DecryptRequestBase { }
 
 export interface DecryptResponse {
   // The decrypted data as a Uint8Array
@@ -628,10 +605,10 @@ export interface SigResponse {
 
 export interface ExecuteJsResponseBase {
   signatures:
-    | {
-        sig: SigResponse;
-      }
-    | any;
+  | {
+    sig: SigResponse;
+  }
+  | any;
 }
 
 /**
@@ -661,7 +638,7 @@ export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
   logs: string;
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -670,10 +647,10 @@ export interface SendNodeCommand {
 }
 export interface SigShare {
   sigType:
-    | 'BLS'
-    | 'K256'
-    | 'ECDSA_CAIT_SITH' // Legacy alias of K256
-    | 'EcdsaCaitSithP256';
+  | 'BLS'
+  | 'K256'
+  | 'ECDSA_CAIT_SITH' // Legacy alias of K256
+  | 'EcdsaCaitSithP256';
 
   signatureShare: string;
   shareIndex?: number;
@@ -1118,7 +1095,7 @@ export interface CommonGetSessionSigsProps {
 
 export interface BaseProviderGetSessionSigsProps
   extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
+  LitActionSdkParams {
   /**
    * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
    */
@@ -1127,7 +1104,7 @@ export interface BaseProviderGetSessionSigsProps
 
 export interface GetSessionSigsProps
   extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
+  LitActionSdkParams {
   /**
    * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
    */
@@ -1622,7 +1599,7 @@ export interface BaseProviderSessionSigsParams {
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1688,9 +1665,9 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-    MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond,
-    GasLimitParam {}
+  MintCapacityCreditsPerSecond,
+  MintCapacityCreditsPerKilosecond,
+  GasLimitParam { }
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1813,12 +1790,12 @@ export interface LitActionSdkParams {
    * An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
    */
   jsParams?:
-    | {
-        [key: string]: any;
-        publicKey?: string;
-        sigName?: string;
-      }
-    | any;
+  | {
+    [key: string]: any;
+    publicKey?: string;
+    sigName?: string;
+  }
+  | any;
 }
 
 export interface LitEndpoint {
@@ -1840,7 +1817,7 @@ export interface SignerLike {
 
 export interface GetPkpSessionSigs
   extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
+  LitActionSdkParams {
   pkpPublicKey: string;
 
   /**
@@ -1866,11 +1843,11 @@ export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
   Pick<Required<LitActionSdkParams>, 'jsParams'> &
   (
     | (Pick<Required<LitActionSdkParams>, 'litActionCode'> & {
-        litActionIpfsId?: never;
-      })
+      litActionIpfsId?: never;
+    })
     | (Pick<Required<LitActionSdkParams>, 'litActionIpfsId'> & {
-        litActionCode?: never;
-      })
+      litActionCode?: never;
+    })
   ) & {
     ipfsOptions?: IpfsOptions;
   };

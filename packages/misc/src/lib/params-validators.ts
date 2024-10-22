@@ -28,7 +28,6 @@ import {
   EncryptToJsonPayload,
   EncryptToJsonProps,
   EvmContractConditions,
-  GetSignedTokenRequest,
   JsonExecutionSdkParams,
   SessionSigsOrAuthSig,
   SolRpcConditions,
@@ -106,11 +105,6 @@ export const paramsValidators: Record<
   decryptFromJson: (params: DecryptFromJsonProps) => [
     new AuthMaterialValidator('decryptFromJson', params),
     new DecryptFromJsonValidator('decryptFromJson', params.parsedJsonData),
-  ],
-
-  getSignedToken: (params: GetSignedTokenRequest) => [
-    new AccessControlConditionsValidator('decrypt', params),
-    new AuthMaterialValidator('decrypt', params, true),
   ],
 };
 
