@@ -7,12 +7,10 @@ import {
 } from '../../internal/ethereum/signTransaction';
 import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateKey';
 import { signMessageSolanaKey } from '../../internal/solana/signMessage';
-import {
-  signTransactionSolanaKey,
-  type UnsignedTransaction as UnsignedTransactionSolana,
-} from '../../internal/solana/signTransaction';
+import { signTransactionSolanaKey } from '../../internal/solana/signTransaction';
 
 import type { UnsignedTransaction as UnsignedTransactionEthereum } from '../../internal/ethereum/signTransaction';
+import type { UnsignedTransaction as UnsignedTransactionSolana } from '../../internal/solana/signTransaction';
 
 interface BaseAction {
   generateKeyParams: {
