@@ -73,7 +73,8 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length
+      `Invalid public key length. Expecting 96 characters, got ${
+        publicKeyHex.replace('0x', '').length
       } instead.`
     );
   }
@@ -470,4 +471,3 @@ declare global {
   // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var LitNodeClient: any;
 }
-

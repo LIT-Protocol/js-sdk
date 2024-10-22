@@ -32,7 +32,7 @@ import {
   ParamsMissingError,
   UnknownError,
   UnsupportedMethodError,
-  WalletSignatureNotFoundError
+  WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -131,7 +131,7 @@ import type {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
-  SuccessNodePromises
+  SuccessNodePromises,
 } from '@lit-protocol/types';
 
 export class LitNodeClientNodeJs
