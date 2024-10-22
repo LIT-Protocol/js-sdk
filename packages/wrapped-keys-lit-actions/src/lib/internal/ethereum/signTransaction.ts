@@ -163,7 +163,7 @@ export async function signTransactionEthereumKey({
   privateKey: string;
   validatedTx: ValidatedTransaction;
   unsignedTransaction: UnsignedTransaction;
-}) {
+}): Promise<string> {
   const wallet = new ethers.Wallet(privateKey);
 
   validatedTx.from = wallet.address;

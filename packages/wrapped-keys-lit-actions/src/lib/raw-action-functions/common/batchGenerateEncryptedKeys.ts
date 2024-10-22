@@ -1,11 +1,20 @@
 import { encryptPrivateKey } from '../../internal/common/encryptKey';
 import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
 import { signMessageEthereumKey } from '../../internal/ethereum/signMessage';
+import {
+  getValidatedUnsignedTx,
+  signTransactionEthereumKey,
+} from '../../internal/ethereum/signTransaction';
 import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateKey';
 import { signMessageSolanaKey } from '../../internal/solana/signMessage';
+import {
+  signTransactionSolanaKey,
+  type UnsignedTransaction as UnsignedTransactionSolana,
+} from '../../internal/solana/signTransaction';
 
-interface Action {
-  network: 'evm' | 'solana';
+import type { UnsignedTransaction as UnsignedTransactionEthereum } from '../../internal/ethereum/signTransaction';
+
+interface BaseAction {
   generateKeyParams: {
     memo: string;
   };
@@ -13,6 +22,24 @@ interface Action {
     messageToSign?: string;
   };
 }
+
+interface ActionSolana extends BaseAction {
+  network: 'solana';
+  signTransactionParams?: {
+    unsignedTransaction: UnsignedTransactionSolana;
+    broadcast: boolean;
+  };
+}
+
+interface ActionEthereum extends BaseAction {
+  network: 'evm';
+  signTransactionParams?: {
+    unsignedTransaction: UnsignedTransactionEthereum;
+    broadcast: boolean;
+  };
+}
+
+type Action = ActionSolana | ActionEthereum;
 
 export interface BatchGenerateEncryptedKeysParams {
   actions: Action[];
@@ -23,27 +50,38 @@ async function processEthereumAction({
   action,
   accessControlConditions,
 }: {
-  action: Action;
+  action: ActionEthereum;
   accessControlConditions: string;
 }) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
+  const unsignedTransaction = action.signTransactionParams?.unsignedTransaction;
 
   const ethereumKey = generateEthereumPrivateKey();
 
-  const [generatedPrivateKey, messageSignature] = await Promise.all([
-    encryptPrivateKey({
-      accessControlConditions,
-      publicKey: ethereumKey.publicKey,
-      privateKey: ethereumKey.privateKey,
-    }),
-    messageToSign
-      ? signMessageEthereumKey({
-          messageToSign: messageToSign,
-          privateKey: ethereumKey.privateKey,
-        })
-      : Promise.resolve(),
-  ]);
+  const [generatedPrivateKey, messageSignature, transactionSignature] =
+    await Promise.all([
+      encryptPrivateKey({
+        accessControlConditions,
+        publicKey: ethereumKey.publicKey,
+        privateKey: ethereumKey.privateKey,
+      }),
+      messageToSign
+        ? signMessageEthereumKey({
+            messageToSign: messageToSign,
+            privateKey: ethereumKey.privateKey,
+          })
+        : Promise.resolve(),
+
+      unsignedTransaction
+        ? signTransactionEthereumKey({
+            unsignedTransaction,
+            broadcast: action.signTransactionParams?.broadcast || false,
+            privateKey: ethereumKey.privateKey,
+            validatedTx: getValidatedUnsignedTx(unsignedTransaction),
+          })
+        : Promise.resolve(),
+    ]);
 
   return {
     network,
@@ -54,6 +92,9 @@ async function processEthereumAction({
     ...(messageSignature
       ? { signMessage: { signature: messageSignature } }
       : {}),
+    ...(transactionSignature
+      ? { signTransaction: { signature: transactionSignature } }
+      : {}),
   };
 }
 
@@ -61,28 +102,37 @@ async function processSolanaAction({
   action,
   accessControlConditions,
 }: {
-  action: Action;
+  action: ActionSolana;
   accessControlConditions: string;
 }) {
   const { network, generateKeyParams } = action;
 
   const messageToSign = action.signMessageParams?.messageToSign;
+  const unsignedTransaction = action.signTransactionParams?.unsignedTransaction;
 
   const solanaKey = generateSolanaPrivateKey();
 
-  const [generatedPrivateKey, messageSignature] = await Promise.all([
-    encryptPrivateKey({
-      accessControlConditions,
-      publicKey: solanaKey.publicKey,
-      privateKey: solanaKey.privateKey,
-    }),
-    messageToSign
-      ? signMessageSolanaKey({
-          messageToSign: messageToSign,
-          privateKey: solanaKey.privateKey,
-        })
-      : Promise.resolve(),
-  ]);
+  const [generatedPrivateKey, messageSignature, transactionSignature] =
+    await Promise.all([
+      encryptPrivateKey({
+        accessControlConditions,
+        publicKey: solanaKey.publicKey,
+        privateKey: solanaKey.privateKey,
+      }),
+      messageToSign
+        ? signMessageSolanaKey({
+            messageToSign: messageToSign,
+            privateKey: solanaKey.privateKey,
+          })
+        : Promise.resolve(),
+      unsignedTransaction
+        ? signTransactionSolanaKey({
+            broadcast: action.signTransactionParams?.broadcast || false,
+            unsignedTransaction,
+            privateKey: solanaKey.privateKey,
+          })
+        : Promise.resolve(),
+    ]);
 
   return {
     network,
@@ -92,6 +142,9 @@ async function processSolanaAction({
     },
     ...(messageSignature
       ? { signMessage: { signature: messageSignature } }
+      : {}),
+    ...(transactionSignature
+      ? { signTransaction: { signature: transactionSignature } }
       : {}),
   };
 }
