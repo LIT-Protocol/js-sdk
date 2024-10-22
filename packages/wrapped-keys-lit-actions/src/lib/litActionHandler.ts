@@ -1,6 +1,6 @@
 import { AbortError } from './abortError';
 
-export async function litActionHandler(actionFunc: () => Promise<any>) {
+export async function litActionHandler(actionFunc: () => Promise<unknown>) {
   try {
     const litActionResult = await actionFunc();
     // Don't re-stringify a string; we don't want to double-escape it
@@ -10,7 +10,7 @@ export async function litActionHandler(actionFunc: () => Promise<any>) {
         : JSON.stringify(litActionResult);
 
     Lit.Actions.setResponse({ response });
-  } catch (err: any) {
+  } catch (err: unknown) {
     // AbortError means exit immediately and do _NOT_ set a response
     // Nested code should really only throw this in cases where using e.g. `decryptToSingleNode`
     // And this execution isn't that node.
@@ -18,6 +18,6 @@ export async function litActionHandler(actionFunc: () => Promise<any>) {
       return;
     }
 
-    Lit.Actions.setResponse({ response: `Error: ${err.message}` });
+    Lit.Actions.setResponse({ response: `Error: ${(err as Error).message}` });
   }
 }

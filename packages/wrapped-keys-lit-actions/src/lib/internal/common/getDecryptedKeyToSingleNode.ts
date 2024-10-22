@@ -23,8 +23,10 @@ async function tryDecryptToSingleNode({
       chain: 'ethereum',
       authSig: null,
     });
-  } catch (err: any) {
-    throw new Error(`When decrypting key to a single node - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(
+      `When decrypting key to a single node - ${(err as Error).message}`
+    );
   }
 }
 

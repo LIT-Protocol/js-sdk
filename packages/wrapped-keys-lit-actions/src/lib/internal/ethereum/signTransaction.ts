@@ -10,9 +10,20 @@ export interface UnsignedTransaction {
   gasLimit?: number;
 }
 
+export interface ValidatedTransaction {
+  to: string;
+  value: string;
+  chainId: number;
+  data?: string;
+  from?: string;
+  nonce?: string;
+  gasPrice?: string;
+  gasLimit?: number;
+}
+
 export function getValidatedUnsignedTx(
   unsignedTransaction: UnsignedTransaction
-) {
+): ValidatedTransaction {
   try {
     if (!unsignedTransaction.toAddress) {
       throw new Error('Missing required field: toAddress');
@@ -101,7 +112,7 @@ async function getGasLimit({
 }: {
   provider: ethers['providers']['JsonRpcProvider'];
   userProvidedGasLimit?: number;
-  validatedTx: any;
+  validatedTx: ValidatedTransaction;
 }) {
   if (userProvidedGasLimit) {
     return userProvidedGasLimit;
@@ -118,8 +129,8 @@ async function signTransaction({
   validatedTx,
   wallet,
 }: {
-  validatedTx: any;
-  wallet: any;
+  validatedTx: ValidatedTransaction;
+  wallet: ethers['wallet'];
 }) {
   try {
     return await wallet.signTransaction(validatedTx);
@@ -150,7 +161,7 @@ export async function signTransactionEthereumKey({
 }: {
   broadcast: boolean;
   privateKey: string;
-  validatedTx: any;
+  validatedTx: ValidatedTransaction;
   unsignedTransaction: UnsignedTransaction;
 }) {
   const wallet = new ethers.Wallet(privateKey);
