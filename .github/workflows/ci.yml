@@ -121,15 +121,15 @@ jobs:
               .map(label => label.name)
               .filter(name => name.startsWith('tag:'))
               .map(name => name.split(':')[1]);
-            const tag = labels.length > 0 ? labels[0] : 'alpha';
-            core.setOutput('tag', tag);
-
+            if (labels.length > 0) {
+              core.setOutput('tag', labels[0]);
+            } else {
+              core.setOutput('skip', 'true');
+            }
       - name: Trigger dependencies bot in lit-configuration-guides
+        if: steps.pr-labels.outputs.skip != 'true'
         run: |
           TAG="${{ steps.pr-labels.outputs.tag }}"
-          if [ -z "$TAG" ]; then
-            TAG="alpha"  # Default to alpha if no tag found
-          fi
           curl -X POST \
           -H "Accept: application/vnd.github.everest-preview+json" \
           -H "Authorization: token ${{ secrets.GH_PAT_LIT_CONFIGURATION_GUIDES_REPO }}" \
