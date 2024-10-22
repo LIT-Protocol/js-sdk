@@ -293,22 +293,22 @@ setLitActionsCodeToLocal();
     tests: {
       // testExample,
       // testBundleSpeed,
-      // ...eoaSessionSigsTests,
-      // ...pkpSessionSigsTests,
-      // ...litActionSessionSigsTests,
-      // ...litActionIpfsIdSessionSigsTests,
-      // ...capacityDelegationTests,
-      // ...bareAuthSigTests,
-      //
-      // ...pkpEthersTest.eoaSessionSigs,
-      // ...pkpEthersTest.pkpSessionSigs,
-      // ...pkpEthersTest.litActionSessionSigs,
-      //
-      // ...litActionCombiningTests.broadcastAndCombine,
-      // ...litActionCombiningTests.decryptAndCombine,
-      // ...litActionCombiningTests.ecdsaSignAndCombine,
-      //
-      // ...relayerTests,
+      ...eoaSessionSigsTests,
+      ...pkpSessionSigsTests,
+      ...litActionSessionSigsTests,
+      ...litActionIpfsIdSessionSigsTests,
+      ...capacityDelegationTests,
+      ...bareAuthSigTests,
+
+      ...pkpEthersTest.eoaSessionSigs,
+      ...pkpEthersTest.pkpSessionSigs,
+      ...pkpEthersTest.litActionSessionSigs,
+
+      ...litActionCombiningTests.broadcastAndCombine,
+      ...litActionCombiningTests.decryptAndCombine,
+      ...litActionCombiningTests.ecdsaSignAndCombine,
+
+      ...relayerTests,
       ...wrappedKeysTests,
     },
     devEnv,
