@@ -166,7 +166,7 @@ export type GeneratePrivateKeyActionBase = ApiParamsSupportedNetworks & {
 
 export type GeneratePrivateKeyActionSolana = GeneratePrivateKeyActionBase & {
   network: Extract<Network, 'solana'>;
-  signTransactionParams: {
+  signTransactionParams?: {
     unsignedTransaction: SerializedTransaction;
     broadcast?: boolean;
   };
@@ -174,7 +174,7 @@ export type GeneratePrivateKeyActionSolana = GeneratePrivateKeyActionBase & {
 
 export type GeneratePrivateKeyActionEthereum = GeneratePrivateKeyActionBase & {
   network: Extract<Network, 'evm'>;
-  signTransactionParams: {
+  signTransactionParams?: {
     unsignedTransaction: EthereumLitTransaction;
     broadcast?: boolean;
   };
