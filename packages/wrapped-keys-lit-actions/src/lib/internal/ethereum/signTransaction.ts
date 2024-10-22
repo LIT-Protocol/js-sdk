@@ -8,7 +8,6 @@ export interface UnsignedTransaction {
   dataHex?: string;
   gasPrice?: string;
   gasLimit?: number;
-  serializedTransaction?: any;
 }
 
 export function getValidatedUnsignedTx(

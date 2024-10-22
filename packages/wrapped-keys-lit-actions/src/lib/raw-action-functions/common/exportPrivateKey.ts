@@ -1,6 +1,6 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
 
-interface ExportPrivateKeyParams {
+export interface ExportPrivateKeyParams {
   accessControlConditions: string;
   ciphertext: string;
   dataToEncryptHash: string;
@@ -10,10 +10,10 @@ interface ExportPrivateKeyParams {
  *
  * Exports the private key after decrypting and removing the salt from it.
  *
- * @param {string} pkpAddress - The Eth address of the PKP which is associated with the Wrapped Key
- * @param {string} ciphertext - For the encrypted Wrapped Key
- * @param {string} dataToEncryptHash - For the encrypted Wrapped Key
- * @param {any} accessControlConditions - The access control condition that allows only the pkpAddress to decrypt the Wrapped Key
+ * @param {object} params
+ * @param {string} params.ciphertext - For the encrypted Wrapped Key
+ * @param {string} params.dataToEncryptHash - For the encrypted Wrapped Key
+ * @param {string} params.accessControlConditions - The access control condition that allows only the pkpAddress to decrypt the Wrapped Key
  *
  * @returns { Promise<string> } - Returns a decrypted private key.
  */

@@ -1,11 +1,7 @@
-import { Keypair } from '@solana/web3.js';
-import nacl from 'tweetnacl';
 import { Buffer } from 'buffer';
 
-/**
- * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
- */
-import { ethers } from 'ethers';
+import { Keypair } from '@solana/web3.js';
+import nacl from 'tweetnacl';
 
 interface SignMessageParams {
   messageToSign: string;

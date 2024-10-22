@@ -1,5 +1,3 @@
-/* global Lit */
-
 import { AbortError } from './abortError';
 
 export async function litActionHandler(actionFunc: () => Promise<any>) {

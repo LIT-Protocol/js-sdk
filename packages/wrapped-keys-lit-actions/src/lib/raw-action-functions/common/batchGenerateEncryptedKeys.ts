@@ -14,6 +14,11 @@ interface Action {
   };
 }
 
+export interface BatchGenerateEncryptedKeysParams {
+  actions: Action[];
+  accessControlConditions: string;
+}
+
 async function processEthereumAction({
   action,
   accessControlConditions,
@@ -94,10 +99,7 @@ async function processSolanaAction({
 async function processActions({
   actions,
   accessControlConditions,
-}: {
-  actions: Action[];
-  accessControlConditions: string;
-}) {
+}: BatchGenerateEncryptedKeysParams) {
   return Promise.all(
     actions.map(async (action, ndx) => {
       const { network } = action;
@@ -159,10 +161,7 @@ function validateParams(actions: Action[]) {
 export async function batchGenerateEncryptedKeys({
   actions,
   accessControlConditions,
-}: {
-  actions: Action[];
-  accessControlConditions: string;
-}) {
+}: BatchGenerateEncryptedKeysParams) {
   validateParams(actions);
 
   return processActions({

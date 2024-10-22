@@ -6,11 +6,11 @@ import {
   Transaction,
 } from '@solana/web3.js';
 
-/**
- * The global ethers library (5.7.0) is available on Lit Action (Unbundled)
- */
-import { ethers } from 'ethers';
-import { UnsignedTransaction } from '../ethereum/signTransaction';
+// Solana transactions are pre-serialized; much simpler API than ethereum transactions
+export interface UnsignedTransaction {
+  chain: string;
+  serializedTransaction: string;
+}
 
 export function validateUnsignedTransaction(
   unsignedTransaction: UnsignedTransaction
@@ -88,6 +88,7 @@ export async function signTransactionSolanaKey({
   if (!broadcast) {
     return signature;
   }
+
   // Ensure the chain is a valid Cluster type
   const chain: Cluster = unsignedTransaction.chain as Cluster;
 

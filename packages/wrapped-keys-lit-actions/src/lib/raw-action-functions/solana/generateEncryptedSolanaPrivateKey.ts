@@ -8,7 +8,7 @@ import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateK
  *
  * @returns { Promise<{ciphertext: string, dataToEncryptHash: string, publicKey: string}> } - Returns JSON object with ciphertext & dataToEncryptHash which are the result of the encryption. Also returns the publicKey of the newly generated Solana Wrapped Key.
  */
-interface GenerateEncryptedSolanaPrivateKeyParams {
+export interface GenerateEncryptedSolanaPrivateKeyParams {
   accessControlConditions: string;
 }
 

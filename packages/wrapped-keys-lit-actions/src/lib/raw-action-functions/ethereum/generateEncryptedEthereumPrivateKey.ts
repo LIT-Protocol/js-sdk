@@ -10,7 +10,7 @@
 import { encryptPrivateKey } from '../../internal/common/encryptKey';
 import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
 
-interface GenerateEncryptedEthereumPrivateKeyParams {
+export interface GenerateEncryptedEthereumPrivateKeyParams {
   accessControlConditions: string;
 }
 

@@ -1,7 +1,7 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
 import { signMessageSolanaKey } from '../../internal/solana/signMessage';
 
-interface SignMessageWithEncryptedSolanaKeyParams {
+export interface SignMessageWithEncryptedSolanaKeyParams {
   accessControlConditions: string;
   ciphertext: string;
   dataToEncryptHash: string;

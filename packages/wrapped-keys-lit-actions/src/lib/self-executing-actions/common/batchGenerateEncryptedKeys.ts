@@ -1,12 +1,11 @@
 import { litActionHandler } from '../../litActionHandler';
 import { batchGenerateEncryptedKeys } from '../../raw-action-functions/common/batchGenerateEncryptedKeys';
 
-/* global actions accessControlConditions */
+import type { BatchGenerateEncryptedKeysParams } from '../../raw-action-functions/common/batchGenerateEncryptedKeys';
 
-declare global {
-  var actions: any[];
-  var accessControlConditions: string;
-}
+// Using local declarations to avoid _every file_ thinking these are always in scope
+declare const actions: BatchGenerateEncryptedKeysParams['actions'];
+declare const accessControlConditions: BatchGenerateEncryptedKeysParams['accessControlConditions'];
 
 (async () =>
   litActionHandler(async () =>

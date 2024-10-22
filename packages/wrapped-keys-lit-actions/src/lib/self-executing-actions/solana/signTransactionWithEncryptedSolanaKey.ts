@@ -1,16 +1,16 @@
-/* global accessControlConditions, ciphertext, dataToEncryptHash, unsignedTransaction, broadcast */
-
-import { UnsignedTransaction } from '../../internal/ethereum/signTransaction';
 import { litActionHandler } from '../../litActionHandler';
 import { signTransactionWithEncryptedSolanaKey } from '../../raw-action-functions/solana/signTransactionWithEncryptedSolanaKey';
 
-declare global {
-  var accessControlConditions: string;
-  var ciphertext: any;
-  var dataToEncryptHash: any;
-  var unsignedTransaction: UnsignedTransaction;
-  var broadcast: any;
-}
+import type { SignTransactionWithEncryptedSolanaKeyParams } from '../../raw-action-functions/solana/signTransactionWithEncryptedSolanaKey';
+
+// Using local declarations to avoid _every file_ thinking these are always in scope
+// Ugly, but using `declare global` causes conflicts with `ethereum`'s `unsignedTransaction` which is different
+// as well as making all of our functions think all other functions args are valid globals in every file in the package
+declare const accessControlConditions: SignTransactionWithEncryptedSolanaKeyParams['accessControlConditions'];
+declare const ciphertext: SignTransactionWithEncryptedSolanaKeyParams['ciphertext'];
+declare const dataToEncryptHash: SignTransactionWithEncryptedSolanaKeyParams['dataToEncryptHash'];
+declare const unsignedTransaction: SignTransactionWithEncryptedSolanaKeyParams['unsignedTransaction'];
+declare const broadcast: SignTransactionWithEncryptedSolanaKeyParams['broadcast'];
 
 (async () =>
   litActionHandler(async () =>

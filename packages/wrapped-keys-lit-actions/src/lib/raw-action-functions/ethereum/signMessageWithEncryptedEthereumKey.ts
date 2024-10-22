@@ -1,7 +1,7 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
 import { signMessageEthereumKey } from '../../internal/ethereum/signMessage';
 
-interface SignMessageWithEncryptedEthereumKeyParams {
+export interface SignMessageWithEncryptedEthereumKeyParams {
   accessControlConditions: string;
   ciphertext: string;
   dataToEncryptHash: string;

@@ -1,14 +1,13 @@
-/* global accessControlConditions, ciphertext, dataToEncryptHash, messageToSign */
-
 import { litActionHandler } from '../../litActionHandler';
 import { signMessageWithEncryptedEthereumKey } from '../../raw-action-functions/ethereum/signMessageWithEncryptedEthereumKey';
 
-declare global {
-  var accessControlConditions: string;
-  var ciphertext: any;
-  var dataToEncryptHash: any;
-  var messageToSign: any;
-}
+import type { SignMessageWithEncryptedEthereumKeyParams } from '../../raw-action-functions/ethereum/signMessageWithEncryptedEthereumKey';
+
+// Using local declarations to avoid _every file_ thinking these are always in scope
+declare const accessControlConditions: SignMessageWithEncryptedEthereumKeyParams['accessControlConditions'];
+declare const ciphertext: SignMessageWithEncryptedEthereumKeyParams['ciphertext'];
+declare const dataToEncryptHash: SignMessageWithEncryptedEthereumKeyParams['dataToEncryptHash'];
+declare const messageToSign: SignMessageWithEncryptedEthereumKeyParams['messageToSign'];
 
 (async () =>
   litActionHandler(async () =>
