@@ -29,13 +29,8 @@ const {
 } = require('../wrapped-keys-lit-actions/src/generated/solana/signTransactionWithEncryptedSolanaKey');
 
 async function updateConstants() {
-  const constantsPath = path.join(
-    __dirname,
-    './src/lib/lit-actions-client/constants.ts'
-  );
-  let constantsContent = fs.readFileSync(constantsPath, 'utf-8');
-
-  const newCIDs = {
+  // Generate new CID hashes
+  const litActionCIDRepository = {
     signTransaction: {
       evm: await Hash.of(signTransactionWithEncryptedEthereumKey),
       solana: await Hash.of(signTransactionWithEncryptedSolanaKey),
@@ -52,23 +47,29 @@ async function updateConstants() {
       evm: await Hash.of(exportPrivateKey),
       solana: await Hash.of(exportPrivateKey),
     },
+  };
+  const litActionCIDRepositoryCommon = {
     batchGenerateEncryptedKeys: await Hash.of(batchGenerateEncryptedKey),
   };
 
-  Object.entries(newCIDs).forEach(([key, value]) => {
-    if (typeof value === 'object') {
-      Object.entries(value).forEach(([subKey, cid]) => {
-        const regex = new RegExp(
-          `(${key}:\\s*Object\\.freeze\\(\\{[^}]*${subKey}:\\s*')([a-zA-Z0-9]+)(')`,
-          'g'
-        );
-        constantsContent = constantsContent.replace(regex, `$1${cid}$3`);
-      });
-    } else {
-      const regex = new RegExp(`(${key}:\\s*')([a-zA-Z0-9]+)(')`, 'g');
-      constantsContent = constantsContent.replace(regex, `$1${value}$3`);
-    }
-  });
+  // Write constant json files with lit action hashes
+  fs.writeFileSync(
+    path.join(
+      __dirname,
+      './src/lib/lit-actions-client/lit-action-cid-repository.json'
+    ),
+    JSON.stringify(litActionCIDRepository, null, 2),
+    'utf-8'
+  );
+  fs.writeFileSync(
+    path.join(
+      __dirname,
+      './src/lib/lit-actions-client/lit-action-cid-repository-common.json'
+    ),
+    JSON.stringify(litActionCIDRepositoryCommon, null, 2),
+    'utf-8'
+  );
+}
 
 updateConstants().then(() => {
   console.log('Constants file updated successfully!');
