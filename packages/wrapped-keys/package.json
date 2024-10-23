@@ -24,6 +24,7 @@
     "genReact": false
   },
   "scripts": {
+    "prepare": "yarn update-ipfs-cids",
     "update-ipfs-cids": "yarn node ./update-ipfs-cids.js"
   },
   "version": "6.10.0",
