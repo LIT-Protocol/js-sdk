@@ -70,13 +70,6 @@ async function updateConstants() {
     }
   });
 
-  fs.writeFileSync(constantsPath, constantsContent, 'utf-8');
-}
-
-updateConstants()
-  .then(() => {
-    console.log('Constants file updated successfully!');
-  })
-  .catch((err) => {
-    console.error('Error updating constants:', err);
-  });
+updateConstants().then(() => {
+  console.log('Constants file updated successfully!');
+});
