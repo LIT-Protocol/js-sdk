@@ -1,0 +1,11 @@
+{
+  "name": "@lit-protocol/tinny",
+  "version": "6.10.0",
+  "private": true,
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "type": "commonjs",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}
