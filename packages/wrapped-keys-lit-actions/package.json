@@ -26,5 +26,7 @@
   "scripts": {
     "generate-lit-actions": "yarn node ./esbuild.config.js"
   },
-  "version": "6.10.0"
+  "version": "7.0.0-alpha.8",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

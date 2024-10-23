@@ -6,33 +6,33 @@ import { SiweMessage } from 'siwe';
 import {
   LitAccessControlConditionResource,
   LitResourceAbilityRequest,
-  decode,
   RecapSessionCapabilityObject,
-  generateAuthSig,
+  createSiweMessage,
   createSiweMessageWithCapacityDelegation,
   createSiweMessageWithRecaps,
-  createSiweMessage,
+  decode,
+  generateAuthSig,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
+  InvalidSessionSigs,
+  InvalidSignatureError,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
-  ParamsMissingError,
-  ParamNullError,
   LitNodeClientNotReadyError,
+  ParamNullError,
+  ParamsMissingError,
   InvalidParamType,
   InvalidArgumentException,
-  WalletSignatureNotFoundError,
   UnknownError,
-  InvalidSignatureError,
   UnsupportedMethodError,
-  InvalidSessionSigs,
+  WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -53,8 +53,8 @@ import {
   logWithRequestId,
   mostCommonString,
   normalizeAndStringify,
-  safeParams,
   removeHexPrefix,
+  safeParams,
   validateSessionSigs,
 } from '@lit-protocol/misc';
 import {
@@ -87,6 +87,9 @@ import type {
   AuthCallback,
   AuthCallbackParams,
   AuthSig,
+  BlsResponseData,
+  CapacityCreditsReq,
+  CapacityCreditsRes,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -94,13 +97,25 @@ import type {
   DecryptResponse,
   EncryptRequest,
   EncryptResponse,
+  EncryptSdkParams,
+  EncryptionSignRequest,
+  ExecuteJsNoSigningResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
+  GetLitActionSessionSigs,
+  GetPkpSessionSigs,
   GetSessionSigsProps,
-  GetSignedTokenRequest,
+  GetSignSessionKeySharesProp,
   GetWalletSigProps,
+  ILitNodeClient,
   JsonExecutionRequest,
+  JsonExecutionRequestTargetNode,
+  JsonExecutionSdkParams,
+  JsonExecutionSdkParamsTargetNode,
+  JsonPKPClaimKeyRequest,
   JsonPkpSignRequest,
+  JsonPkpSignSdkParams,
+  JsonSignSessionKeyRequestV1,
   LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
@@ -110,28 +125,11 @@ import type {
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
+  SigResponse,
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
   SuccessNodePromises,
-  ILitNodeClient,
-  GetPkpSessionSigs,
-  CapacityCreditsReq,
-  CapacityCreditsRes,
-  JsonSignSessionKeyRequestV1,
-  BlsResponseData,
-  JsonExecutionSdkParamsTargetNode,
-  JsonExecutionRequestTargetNode,
-  JsonExecutionSdkParams,
-  ExecuteJsNoSigningResponse,
-  JsonPkpSignSdkParams,
-  SigResponse,
-  EncryptSdkParams,
-  GetLitActionSessionSigs,
-  GetSignSessionKeySharesProp,
-  EncryptionSignRequest,
-  SigningAccessControlConditionRequest,
-  JsonPKPClaimKeyRequest,
 } from '@lit-protocol/types';
 
 export class LitNodeClientNodeJs
@@ -1215,126 +1213,6 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, `signature combination`, signatures);
 
     return signatures.signature; // only a single signature is ever present, so we just return it.
-  };
-
-  /**
-   *
-   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
-   *
-   * @param { GetSignedTokenRequest } params
-   *
-   * @returns { Promise<string> } final JWT
-   *
-   */
-  getSignedToken = async (params: GetSignedTokenRequest): Promise<string> => {
-    // ========== Prepare Params ==========
-    const { chain, authSig, sessionSigs } = params;
-
-    // ========== Validation ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      throw new LitNodeClientNotReadyError(
-        {},
-        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
-      );
-    }
-
-    // -- validate if this.networkPubKeySet is null
-    if (this.networkPubKeySet === null) {
-      throw new ParamNullError({}, 'networkPubKeySet cannot be null');
-    }
-
-    const paramsIsSafe = safeParams({
-      functionName: 'getSignedToken',
-      params,
-    });
-
-    if (!paramsIsSafe) {
-      throw new InvalidParamType(
-        {
-          info: {
-            params,
-          },
-        },
-        'Parameter validation failed.'
-      );
-    }
-
-    // ========== Prepare ==========
-    // we need to send jwt params iat (issued at) and exp (expiration)
-    // because the nodes may have different wall clock times
-    // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.getJWTParams();
-
-    // ========== Formatting Access Control Conditions =========
-    const {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
-
-    if (error) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            params,
-          },
-        },
-        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
-      );
-    }
-
-    // ========== Get Node Promises ==========
-    const requestId = this._getNewRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- if session key is available, use it
-      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
-
-      const reqBody: SigningAccessControlConditionRequest = {
-        accessControlConditions: formattedAccessControlConditions,
-        evmContractConditions: formattedEVMContractConditions,
-        solRpcConditions: formattedSolRpcConditions,
-        unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
-        chain,
-        authSig: authSigToSend,
-        iat,
-        exp,
-      };
-
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.SIGN_ACCS,
-      });
-
-      return this.generatePromise(urlWithPath, reqBody, requestId);
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(
-      nodePromises,
-      requestId,
-      this.config.minNodeCount
-    );
-
-    // -- case: promises rejected
-    if (!res.success) {
-      this._throwNodeError(res, requestId);
-    }
-
-    const signatureShares: NodeBlsSigningShare[] = (res as SuccessNodePromises)
-      .values;
-
-    log('signatureShares', signatureShares);
-
-    // ========== Result ==========
-    const finalJwt: string = await this.combineSharesAndGetJWT(
-      signatureShares,
-      requestId
-    );
-
-    return finalJwt;
   };
 
   /**
