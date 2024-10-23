@@ -4,15 +4,15 @@
   "sourceRoot": "packages/wrapped-keys-lit-actions/src",
   "projectType": "library",
   "targets": {
-    "build-la": {
-      "cache": false,
+    "prebuild": {
       "executor": "nx:run-commands",
       "options": {
         "commands": [
           "yarn --cwd ./packages/wrapped-keys-lit-actions generate-lit-actions"
         ],
         "cwd": "."
-      }
+      },
+      "dependsOn": []
     },
     "build": {
       "cache": false,
@@ -32,7 +32,7 @@
         ],
         "updateBuildableProjectDepsInPackageJson": true
       },
-      "dependsOn": ["build-la", "^build"]
+      "dependsOn": ["wrapped-keys:build"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
