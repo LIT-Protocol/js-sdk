@@ -14,7 +14,6 @@ import {
   EncryptSdkParamsSchema,
   ExecuteJsResponseSchema,
   FormattedMultipleAccsSchema,
-  GetSignedTokenRequestSchema,
   HandshakeWithNodeSchema,
   JsonExecutionSdkParamsSchema,
   JsonHandshakeResponseSchema,
@@ -205,19 +204,6 @@ export const ILitNodeClientSchema = z.object({
     .function()
     .args(JsonExecutionSdkParamsSchema)
     .returns(z.promise(z.union([ExecuteJsResponseSchema, z.undefined()]))),
-  /**
-   *
-   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
-   *
-   * @param { GetSignedTokenRequest } params
-   *
-   * @returns { Promise<string> } final JWT
-   *
-   */
-  getSignedToken: z
-    .function()
-    .args(GetSignedTokenRequestSchema)
-    .returns(z.promise(z.union([z.string(), z.undefined()]))),
   /**
    * Encrypt data with Lit identity-based Timelock Encryption.
    *

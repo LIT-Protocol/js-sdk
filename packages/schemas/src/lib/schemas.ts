@@ -22,17 +22,6 @@ export const IProviderSchema = z.object({
 
 export const ChainSchema = z.string();
 
-export const VerifyJWTPropsSchema = z.object({
-  publicKey: z.string(),
-  // A JWT signed by the LIT network using the BLS12-381 algorithm
-  jwt: z.string(),
-});
-
-export const JWTHeaderSchema = z.object({
-  alg: z.string(),
-  typ: z.string(),
-});
-
 export const SignatureSchema = z.object({
   r: z.string(),
   s: z.string(),
@@ -265,7 +254,7 @@ export const CreateCustomAuthMethodRequestSchema = z.object({
 
 export const BaseJsonPkpSignRequestSchema = z.object({
   authMethods: z.array(AuthMethodSchema).optional(),
-  toSign: z.array(z.number()),
+  toSign: z.instanceof(Uint8Array),
 });
 
 /**
@@ -281,6 +270,9 @@ export const JsonPkpSignSdkParamsSchema = BaseJsonPkpSignRequestSchema.extend({
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
 export const JsonPkpSignRequestSchema = BaseJsonPkpSignRequestSchema.extend({
+  // Nodes can sign number[], not Uint8Array. Must use normalizeArray function
+  toSign: z.array(z.number()),
+
   authSig: AuthSigSchema,
 
   /**
@@ -766,11 +758,6 @@ export const SigningAccessControlConditionRequestSchema =
 
     iat: z.number().optional(),
     exp: z.number().optional(),
-  });
-
-export const GetSignedTokenRequestSchema =
-  SigningAccessControlConditionRequestSchema.extend({
-    sessionSigs: SessionSigsMapSchema,
   });
 
 export const EncryptSdkParamsSchema =

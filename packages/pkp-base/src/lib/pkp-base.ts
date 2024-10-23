@@ -417,7 +417,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     try {
       const sig = await this.litNodeClient.pkpSign({
-        toSign: Array.from(toSign),
+        toSign,
         pubKey: this.uncompressedPubKey,
         sessionSigs: controllerSessionSigs,
       });

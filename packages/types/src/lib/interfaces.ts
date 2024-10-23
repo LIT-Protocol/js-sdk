@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider';
 import depd from 'depd';
 import { z } from 'zod';
 
@@ -26,7 +25,6 @@ import {
   SigResponseSchema,
   ExecuteJsResponseBaseSchema,
   ExecuteJsResponseSchema,
-  GetSignedTokenRequestSchema,
   MultipleAccessControlConditionsSchema,
   EncryptSdkParamsSchema,
   DecryptResponseSchema,
@@ -58,8 +56,6 @@ import {
   SolanaAuthSigSchema,
   CosmosAuthSigSchema,
   IProviderSchema,
-  VerifyJWTPropsSchema,
-  JWTHeaderSchema,
   ClaimKeyResponseSchema,
   SignatureSchema,
   BaseJsonPkpSignRequestSchema,
@@ -163,17 +159,6 @@ export interface DecryptFileProps {
   symmetricKey: SymmetricKey;
 }
 
-export type VerifyJWTProps = z.infer<typeof VerifyJWTPropsSchema>;
-
-export interface IJWT<T> {
-  verified: boolean;
-  header: JWTHeader;
-  payload: T;
-  signature: Uint8Array;
-}
-
-export type JWTHeader = z.infer<typeof JWTHeaderSchema>;
-
 export type SigningAccessControlConditionJWTPayload = z.infer<
   typeof SigningAccessControlConditionJWTPayloadSchema
 >;
@@ -238,14 +223,18 @@ export type MultipleAccessControlConditions = z.infer<
   typeof MultipleAccessControlConditionsSchema
 >;
 
+/**
+ * @deprecated
+ */
 export type JsonAccsRequest = z.infer<typeof JsonAccsRequestSchema>;
 
 export type JsonSigningRetrieveRequest = z.infer<
   typeof JsonSigningRetrieveRequestSchema
 >;
 
-export type GetSignedTokenRequest = z.infer<typeof GetSignedTokenRequestSchema>;
-
+/**
+ * @deprecated
+ */
 export type JsonSigningStoreRequest = z.infer<
   typeof JsonSigningStoreRequestSchema
 >;

@@ -88,7 +88,7 @@ export const AuthCallbackParamsSchema = LitActionSdkParamsSchema.extend({
    * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
    */
   walletConnectProjectId: z.string().optional(),
-  resourceAbilityRequests: LitResourceAbilityRequestSchema.optional(),
+  resourceAbilityRequests: z.array(LitResourceAbilityRequestSchema).optional(),
 });
 
 export const LitNodeClientConfigSchema = z.object({
