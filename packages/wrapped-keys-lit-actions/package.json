@@ -24,6 +24,7 @@
     "genReact": false
   },
   "scripts": {
+    "prepublishOnly": "yarn generate-lit-actions && yarn publish-lit-actions",
     "generate-lit-actions": "yarn node ./esbuild.config.js",
     "publish-lit-actions": "yarn node ./sync-actions-to-ipfs"
   },
