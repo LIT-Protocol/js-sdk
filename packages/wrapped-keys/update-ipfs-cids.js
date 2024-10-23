@@ -53,12 +53,13 @@ async function updateConstants() {
   };
 
   // Write constant json files with lit action hashes
+  // Extra \n is for prettier rule
   fs.writeFileSync(
     path.join(
       __dirname,
       './src/lib/lit-actions-client/lit-action-cid-repository.json'
     ),
-    JSON.stringify(litActionCIDRepository, null, 2),
+    JSON.stringify(litActionCIDRepository, null, 2) + '\n',
     'utf-8'
   );
   fs.writeFileSync(
@@ -66,7 +67,7 @@ async function updateConstants() {
       __dirname,
       './src/lib/lit-actions-client/lit-action-cid-repository-common.json'
     ),
-    JSON.stringify(litActionCIDRepositoryCommon, null, 2),
+    JSON.stringify(litActionCIDRepositoryCommon, null, 2) + '\n',
     'utf-8'
   );
 }
