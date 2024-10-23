@@ -1,16 +1,31 @@
-const { encryptPrivateKey } = require('../../internal/common/encryptKey');
-const {
-  generateEthereumPrivateKey,
-} = require('../../internal/ethereum/generatePrivateKey');
-const {
-  signMessageEthereumKey,
-} = require('../../internal/ethereum/signMessage');
-const {
-  generateSolanaPrivateKey,
-} = require('../../internal/solana/generatePrivateKey');
-const { signMessageSolanaKey } = require('../../internal/solana/signMessage');
+import { encryptPrivateKey } from '../../internal/common/encryptKey';
+import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
+import { signMessageEthereumKey } from '../../internal/ethereum/signMessage';
+import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateKey';
+import { signMessageSolanaKey } from '../../internal/solana/signMessage';
 
-async function processEthereumAction({ action, accessControlConditions }) {
+interface Action {
+  network: 'evm' | 'solana';
+  generateKeyParams: {
+    memo: string;
+  };
+  signMessageParams?: {
+    messageToSign?: string;
+  };
+}
+
+export interface BatchGenerateEncryptedKeysParams {
+  actions: Action[];
+  accessControlConditions: string;
+}
+
+async function processEthereumAction({
+  action,
+  accessControlConditions,
+}: {
+  action: Action;
+  accessControlConditions: string;
+}) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
 
@@ -42,7 +57,13 @@ async function processEthereumAction({ action, accessControlConditions }) {
   };
 }
 
-async function processSolanaAction({ action, accessControlConditions }) {
+async function processSolanaAction({
+  action,
+  accessControlConditions,
+}: {
+  action: Action;
+  accessControlConditions: string;
+}) {
   const { network, generateKeyParams } = action;
 
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -75,7 +96,10 @@ async function processSolanaAction({ action, accessControlConditions }) {
   };
 }
 
-async function processActions({ actions, accessControlConditions }) {
+async function processActions({
+  actions,
+  accessControlConditions,
+}: BatchGenerateEncryptedKeysParams) {
   return Promise.all(
     actions.map(async (action, ndx) => {
       const { network } = action;
@@ -98,7 +122,7 @@ async function processActions({ actions, accessControlConditions }) {
   );
 }
 
-function validateParams(actions) {
+function validateParams(actions: Action[]) {
   if (!actions) {
     throw new Error('Missing required field: actions');
   }
@@ -137,7 +161,7 @@ function validateParams(actions) {
 export async function batchGenerateEncryptedKeys({
   actions,
   accessControlConditions,
-}) {
+}: BatchGenerateEncryptedKeysParams) {
   validateParams(actions);
 
   return processActions({

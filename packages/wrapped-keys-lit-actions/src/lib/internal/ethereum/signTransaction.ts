@@ -1,6 +1,29 @@
-/* global ethers, Lit */
+// This is weird - ethers.UnsignedTransaction is not the same as the one being used here..
+// We should fix this soon, but not a hard blocker
+export interface UnsignedTransaction {
+  toAddress: string;
+  chain: string;
+  value: string;
+  chainId: number;
+  dataHex?: string;
+  gasPrice?: string;
+  gasLimit?: number;
+}
 
-export function getValidatedUnsignedTx(unsignedTransaction) {
+export interface ValidatedTransaction {
+  to: string;
+  value: string;
+  chainId: number;
+  data?: string;
+  from?: string;
+  nonce?: string;
+  gasPrice?: string;
+  gasLimit?: number;
+}
+
+export function getValidatedUnsignedTx(
+  unsignedTransaction: UnsignedTransaction
+): ValidatedTransaction {
   try {
     if (!unsignedTransaction.toAddress) {
       throw new Error('Missing required field: toAddress');
@@ -26,12 +49,18 @@ export function getValidatedUnsignedTx(unsignedTransaction) {
       chainId: unsignedTransaction.chainId,
       data: unsignedTransaction.dataHex,
     };
-  } catch (err) {
-    throw new Error(`Invalid unsignedTransaction - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`Invalid unsignedTransaction - ${(err as Error).message}`);
   }
 }
 
-async function getLatestNonce({ walletAddress, chain }) {
+async function getLatestNonce({
+  walletAddress,
+  chain,
+}: {
+  walletAddress: string;
+  chain: string;
+}) {
   try {
     const nonce = await Lit.Actions.getLatestNonce({
       address: walletAddress,
@@ -39,60 +68,88 @@ async function getLatestNonce({ walletAddress, chain }) {
     });
 
     return nonce;
-  } catch (err) {
-    throw new Error(`Unable to get latest nonce - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`Unable to get latest nonce - ${(err as Error).message}`);
   }
 }
 
-async function getEthersRPCProvider({ chain }) {
+async function getEthersRPCProvider({ chain }: { chain: string }) {
   try {
     const rpcUrl = await Lit.Actions.getRpcUrl({
       chain,
     });
 
     return new ethers.providers.JsonRpcProvider(rpcUrl);
-  } catch (err) {
-    throw new Error(`Getting the rpc for the chain: ${chain} - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(
+      `Getting the rpc for the chain: ${chain} - ${(err as Error).message}`
+    );
   }
 }
 
-async function getGasPrice({ userProvidedGasPrice, provider }) {
+async function getGasPrice({
+  userProvidedGasPrice,
+  provider,
+}: {
+  userProvidedGasPrice?: string;
+  provider: ethers['providers']['JsonRpcProvider'];
+}) {
   try {
     if (userProvidedGasPrice) {
       return ethers.utils.parseUnits(userProvidedGasPrice, 'gwei');
     } else {
       return await provider.getGasPrice();
     }
-  } catch (err) {
-    throw new Error(`When getting gas price - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`When getting gas price - ${(err as Error).message}`);
   }
 }
 
-async function getGasLimit({ provider, userProvidedGasLimit, validatedTx }) {
+async function getGasLimit({
+  provider,
+  userProvidedGasLimit,
+  validatedTx,
+}: {
+  provider: ethers['providers']['JsonRpcProvider'];
+  userProvidedGasLimit?: number;
+  validatedTx: ValidatedTransaction;
+}) {
   if (userProvidedGasLimit) {
     return userProvidedGasLimit;
   } else {
     try {
       return await provider.estimateGas(validatedTx);
-    } catch (err) {
-      throw new Error(`When estimating gas - ${err.message}`);
+    } catch (err: unknown) {
+      throw new Error(`When estimating gas - ${(err as Error).message}`);
     }
   }
 }
 
-async function signTransaction({ validatedTx, wallet }) {
+async function signTransaction({
+  validatedTx,
+  wallet,
+}: {
+  validatedTx: ValidatedTransaction;
+  wallet: ethers['wallet'];
+}) {
   try {
     return await wallet.signTransaction(validatedTx);
-  } catch (err) {
-    throw new Error(`When signing transaction - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`When signing transaction - ${(err as Error).message}`);
   }
 }
 
-async function broadcastTransaction({ provider, signedTx }) {
+async function broadcastTransaction({
+  provider,
+  signedTx,
+}: {
+  provider: ethers['providers']['JsonRpcProvider'];
+  signedTx: string;
+}) {
   try {
     return await provider.sendTransaction(signedTx);
-  } catch (err) {
-    throw new Error(`When sending transaction - ${err.message}`);
+  } catch (err: unknown) {
+    throw new Error(`When sending transaction - ${(err as Error).message}`);
   }
 }
 
@@ -101,6 +158,11 @@ export async function signTransactionEthereumKey({
   privateKey,
   validatedTx,
   unsignedTransaction,
+}: {
+  broadcast: boolean;
+  privateKey: string;
+  validatedTx: ValidatedTransaction;
+  unsignedTransaction: UnsignedTransaction;
 }) {
   const wallet = new ethers.Wallet(privateKey);
 
