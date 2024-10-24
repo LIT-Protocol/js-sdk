@@ -28,7 +28,7 @@
     "crypto": false,
     "stream": false
   },
-  "version": "7.0.0-alpha.8",
+  "version": "7.0.0-alpha.9",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
