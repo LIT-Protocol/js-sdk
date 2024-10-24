@@ -120,6 +120,7 @@
     "prettier": "^2.6.2",
     "ts-jest": "29.2.5",
     "typedoc": "^0.26.6",
+    "typedoc-theme-hierarchy": "^5.0.0",
     "typescript": "5.5.4"
   },
   "workspaces": [
