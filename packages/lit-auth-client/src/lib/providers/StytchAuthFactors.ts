@@ -1,3 +1,4 @@
+import { WrongParamFormat } from '@lit-protocol/constants';
 import { StytchToken } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 
@@ -14,11 +15,25 @@ export const emailOtpAuthFactorParser = (
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }
@@ -44,11 +59,25 @@ export const smsOtpAuthFactorParser = (
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }
@@ -74,11 +103,25 @@ export const whatsAppOtpAuthFactorParser = (
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }
@@ -104,11 +147,25 @@ export const totpAuthFactorParser = (
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new WrongParamFormat(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }

@@ -51,13 +51,6 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
   chainId: number;
 } {
   switch (network) {
-    case 'cayenne':
-    case 'habanero':
-    case 'manzano':
-      return {
-        chain: 'chronicleTestnet',
-        chainId: LIT_CHAINS['chronicleTestnet'].chainId,
-      };
     case 'datil-dev':
       return {
         chain: 'yellowstone',
@@ -83,13 +76,6 @@ export function getGasParamsForNetwork(network: LIT_NETWORKS_KEYS): {
   gasLimit: number;
 } {
   switch (network) {
-    case 'cayenne':
-    case 'habanero':
-    case 'manzano':
-      return {
-        gasPrice: '0.001',
-        gasLimit: 30000,
-      };
     case 'datil-dev':
       return { gasLimit: 5000000 };
     case 'datil-test':

@@ -7,21 +7,15 @@ import {
   LPACC_EVM_BASIC,
 } from '@lit-protocol/accs-schemas';
 
-import { AuthMethodType } from './enums';
 import {
   AuthMethod,
   LitRelayConfig,
-  SignInWithOTPParams,
   Signature,
-  StytchOtpProviderOptions,
-  WebAuthnProviderOptions,
   AccsOperatorParams,
-  EthWalletProviderOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
-  OAuthProviderOptions,
   BaseAuthenticateOptions,
 } from './interfaces';
 
@@ -118,15 +112,7 @@ export type LITCosmosChain = LITChainRequiredProps & {
  */
 export type LITChain<T> = Record<string, T>;
 
-export type LIT_NETWORKS_KEYS =
-  | 'cayenne'
-  | 'datil-dev'
-  | 'datil-test'
-  | 'datil'
-  | 'localhost'
-  | 'custom'
-  | 'habanero'
-  | 'manzano';
+export type LIT_NETWORKS_KEYS = 'datil-dev' | 'datil-test' | 'datil' | 'custom';
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;
@@ -136,13 +122,6 @@ export type AcceptedFileType = File | Blob;
  * ========== Lit Auth Client ==========
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
-
-export type ProviderOptions =
-  | OAuthProviderOptions
-  | EthWalletProviderOptions
-  | SignInWithOTPParams
-  | StytchOtpProviderOptions
-  | WebAuthnProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
 
@@ -174,7 +153,7 @@ export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
  */
 export type MintCallback<T = ClaimProcessor> = (
   response: ClaimResult<T>,
-  network: string
+  network: LIT_NETWORKS_KEYS
 ) => Promise<string>;
 
 /**
@@ -195,7 +174,7 @@ export type ClaimRequest<T = ClaimProcessor> = {
 export type ClaimResult<T = ClaimProcessor> = {
   signatures: Signature[];
   derivedKeyId: string;
-  authMethodType: AuthMethodType;
+  authMethodType: number;
   pubkey: string;
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
@@ -250,6 +229,29 @@ export interface LitContractResolverContext {
 }
 
 export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
+
+export type LitResourcePrefix =
+  | 'lit-accesscontrolcondition'
+  | 'lit-pkp'
+  | 'lit-ratelimitincrease'
+  | 'lit-litaction';
+
+export type LitAbility =
+  | 'access-control-condition-decryption'
+  | 'access-control-condition-signing'
+  | 'pkp-signing'
+  | 'rate-limit-increase-auth'
+  | 'lit-action-execution';
+
+export interface TokenInfo {
+  tokenId: string;
+  publicKey: string;
+  publicKeyBuffer: Buffer;
+  ethAddress: string;
+  btcAddress: string;
+  cosmosAddress: string;
+  isNewPKP: boolean;
+}
 
 /**
  * from the `getActiveUnkickedValidatorStructsAndCounts` Staking contract function

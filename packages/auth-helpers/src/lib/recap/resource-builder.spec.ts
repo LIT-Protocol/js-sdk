@@ -1,4 +1,4 @@
-import { LitAbility } from '../models';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import {
   LitAccessControlConditionResource,
   LitActionResource,
@@ -26,11 +26,11 @@ describe('ResourceAbilityRequestBuilder', () => {
       JSON.stringify([
         {
           resource: new LitPKPResource('123'),
-          ability: LitAbility.PKPSigning,
+          ability: LIT_ABILITY.PKPSigning,
         },
         {
           resource: new LitActionResource('456'),
-          ability: LitAbility.LitActionExecution,
+          ability: LIT_ABILITY.LitActionExecution,
         },
       ])
     );
@@ -49,23 +49,23 @@ describe('ResourceAbilityRequestBuilder', () => {
       JSON.stringify([
         {
           resource: new LitPKPResource('123'),
-          ability: LitAbility.PKPSigning,
+          ability: LIT_ABILITY.PKPSigning,
         },
         {
           resource: new LitActionResource('456'),
-          ability: LitAbility.LitActionExecution,
+          ability: LIT_ABILITY.LitActionExecution,
         },
         {
           resource: new LitAccessControlConditionResource('789'),
-          ability: LitAbility.AccessControlConditionSigning,
+          ability: LIT_ABILITY.AccessControlConditionSigning,
         },
         {
           resource: new LitAccessControlConditionResource('abc'),
-          ability: LitAbility.AccessControlConditionDecryption,
+          ability: LIT_ABILITY.AccessControlConditionDecryption,
         },
         {
           resource: new LitRLIResource('def'),
-          ability: LitAbility.RateLimitIncreaseAuth,
+          ability: LIT_ABILITY.RateLimitIncreaseAuth,
         },
       ])
     );

@@ -3,6 +3,8 @@
 // @param {string} str - The input string to be encoded.
 // @returns {Uint8Array} utf8Array - The UTF-8 encoded Uint8Array of the input string.
 // */
+import { InvalidParamType } from '@lit-protocol/constants';
+
 function utf8Encode(str: string): Uint8Array {
   // Initialize an empty array to store the UTF-8 encoded dat
   let utf8Array: number[] = [];
@@ -147,7 +149,15 @@ export function uint8arrayFromString(
     case 'base64urlpad':
       return base64ToUint8Array(base64UrlPadToBase64(str));
     default:
-      throw new Error(`Unsupported encoding "${encoding}"`);
+      throw new InvalidParamType(
+        {
+          info: {
+            encoding,
+            str,
+          },
+        },
+        `Unsupported encoding "${encoding}"`
+      );
   }
 }
 
@@ -170,6 +180,14 @@ export function uint8arrayToString(
     case 'base64urlpad':
       return base64ToBase64UrlPad(uint8ArrayToBase64(_uint8array));
     default:
-      throw new Error(`Unsupported encoding "${encoding}"`);
+      throw new InvalidParamType(
+        {
+          info: {
+            encoding,
+            _uint8array,
+          },
+        },
+        `Unsupported encoding "${encoding}"`
+      );
   }
 }

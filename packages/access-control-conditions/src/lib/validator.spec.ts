@@ -314,8 +314,8 @@ describe('validator.ts', () => {
     }
 
     expect(error).toBeDefined();
-    expect(error!.errorKind).toBe(LIT_ERROR.INVALID_PARAM_TYPE.kind);
-    expect(error!.errorCode).toBe(LIT_ERROR.INVALID_PARAM_TYPE.name);
+    expect(error!.errorKind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
+    expect(error!.errorCode).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].name);
   });
 
   it('should throw when schema has invalid fields', async () => {
@@ -348,8 +348,8 @@ describe('validator.ts', () => {
     }
 
     expect(error).toBeDefined();
-    expect(error!.errorKind).toBe(LIT_ERROR.INVALID_PARAM_TYPE.kind);
-    expect(error!.errorCode).toBe(LIT_ERROR.INVALID_PARAM_TYPE.name);
+    expect(error!.errorKind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
+    expect(error!.errorCode).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].name);
   });
 
   it('should throw when schema of a nested ACC does not validate', async () => {
@@ -407,7 +407,7 @@ describe('validator.ts', () => {
     }
 
     expect(error).toBeDefined();
-    expect(error!.errorKind).toBe(LIT_ERROR.INVALID_PARAM_TYPE.kind);
-    expect(error!.errorCode).toBe(LIT_ERROR.INVALID_PARAM_TYPE.name);
+    expect(error!.errorKind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
+    expect(error!.errorCode).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].name);
   });
 });

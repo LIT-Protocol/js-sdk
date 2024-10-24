@@ -1,16 +1,13 @@
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { ILitNodeClient, LitAbility, SolanaAuthSig } from '@lit-protocol/types';
+import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
-import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testSolAuthSigToEncryptDecryptString
- * ✅ NETWORK=manzano yarn test:local --filter=testSolAuthSigToEncryptDecryptString
- * ✅ NETWORK=localchain yarn test:local --filter=testSolAuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testSolAuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-test yarn test:local --filter=testSolAuthSigToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testSolAuthSigToEncryptDecryptString
  */
 export const testSolAuthSigToEncryptDecryptString = async (
   devEnv: TinnyEnvironment
@@ -19,7 +16,7 @@ export const testSolAuthSigToEncryptDecryptString = async (
     userAddress: devEnv.bareSolAuthSig.address,
   });
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       solRpcConditions: accs,
       dataToEncrypt: 'Hello world',
@@ -45,7 +42,7 @@ export const testSolAuthSigToEncryptDecryptString = async (
   }
 
   // -- Decrypt the encrypted string
-  const decryptRes = await LitJsSdk.decryptToString(
+  const decryptRes = await decryptToString(
     {
       solRpcConditions: accs,
       ciphertext: encryptRes.ciphertext,
