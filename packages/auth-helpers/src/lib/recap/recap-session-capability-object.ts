@@ -1,22 +1,15 @@
-import {
-  InvalidArgumentException,
-  RemovedFunctionError,
-} from '@lit-protocol/constants';
-import depd from 'depd';
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
-import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
-import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
-import {
-  AuthSig,
-  AttenuationsObject,
-  CID as CIDString,
-  PlainJSON,
-} from '../models';
-import { getRecapNamespaceAndAbility } from './utils';
-import { sanitizeSiweMessage } from '../siwe/siwe-helper';
 
-const deprecated = depd('lit-js-sdk:auth-recap:session-capability-object');
+import {
+  InvalidArgumentException,
+  LIT_ABILITY_VALUES,
+} from '@lit-protocol/constants';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
+
+import { getRecapNamespaceAndAbility } from './utils';
+import { AttenuationsObject, CID as CIDString } from '../models';
+import { sanitizeSiweMessage } from '../siwe/siwe-helper';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   private _inner: Recap;
@@ -32,7 +25,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const recap = Recap.decode_urn(encoded);
     return new this(
       recap.attenuations,
-      recap.proofs.map((cid: any) => cid.toString())
+      recap.proofs.map((cid) => cid.toString())
     );
   }
 
@@ -40,7 +33,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const recap = Recap.extract_and_verify(siwe);
     return new this(
       recap.attenuations,
-      recap.proofs.map((cid: any) => cid.toString())
+      recap.proofs.map((cid) => cid.toString())
     );
   }
 
@@ -49,7 +42,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   get proofs(): Array<CIDString> {
-    return this._inner.proofs.map((cid: any) => cid.toString());
+    return this._inner.proofs.map((cid) => cid.toString());
   }
 
   get statement(): string {
@@ -62,9 +55,9 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
   addAttenuation(
     resource: string,
-    namespace: string = '*',
-    name: string = '*',
-    restriction: { [key: string]: PlainJSON } = {}
+    namespace = '*',
+    name = '*',
+    restriction = {}
   ) {
     return this._inner.addAttenuation(resource, namespace, name, restriction);
   }
@@ -81,7 +74,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   addCapabilityForResource(
     litResource: ILitResource,
     ability: LIT_ABILITY_VALUES,
-    data: any = {}
+    data = {}
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
@@ -98,14 +91,6 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
     const { recapNamespace, recapAbility } =
       getRecapNamespaceAndAbility(ability);
-
-    if (!data) {
-      return this.addAttenuation(
-        litResource.getResourceKey(),
-        recapNamespace,
-        recapAbility
-      );
-    }
 
     return this.addAttenuation(
       litResource.getResourceKey(),

@@ -21,7 +21,6 @@ import {
   LIT_CURVE,
   LIT_CURVE_VALUES,
   LIT_ENDPOINT,
-  LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
@@ -30,7 +29,6 @@ import {
   STAKING_STATES_VALUES,
   version,
   InitError,
-  InvalidParamType,
   NodeError,
   UnknownError,
   InvalidArgumentException,
@@ -57,7 +55,6 @@ import {
 import {
   AuthSig,
   BlockHashErrorResponse,
-  CustomNetwork,
   EpochInfo,
   EthBlockhashInfo,
   FormattedMultipleAccs,
@@ -67,14 +64,15 @@ import {
   MultipleAccessControlConditions,
   NodeClientErrorV0,
   NodeClientErrorV1,
+  NodeCommandResponse,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
+import { LitNodeClientConfigSchema } from '@lit-protocol/schemas';
 
 import { composeLitUrl } from './endpoint-version';
 
@@ -167,33 +165,46 @@ export class LitCore {
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
 
   // ========== Constructor ==========
-  constructor(config: LitNodeClientConfig | CustomNetwork) {
-    if (!(config.litNetwork in LIT_NETWORKS)) {
-      const validNetworks = Object.keys(LIT_NETWORKS).join(', ');
-      throw new InvalidParamType(
-        {},
-        'Unsupported network has been provided please use a "litNetwork" option which is supported (%s)',
-        validNetworks
+  constructor(config: LitNodeClientConfig) {
+    let _args: LitNodeClientConfig;
+    try {
+      _args = LitNodeClientConfigSchema.parse(config);
+    } catch (e) {
+      throw new InvalidArgumentException(
+        {
+          cause: e,
+          info: {
+            config,
+          },
+        },
+        'must provide LitNodeClient parameters'
       );
     }
 
+    // Zod makes a deep copy hence it might drop the storageProvider class
+    if ('storageProvider' in config && config.storageProvider?.provider) {
+      _args.storageProvider = {
+        provider: config.storageProvider?.provider,
+      };
+    }
+
     // Initialize default config based on litNetwork
-    switch (config?.litNetwork) {
+    switch (_args?.litNetwork) {
       // Official networks; default value for `checkNodeAttestation` according to network provided.
       case LIT_NETWORK.DatilDev:
         this.config = {
           ...this.config,
           checkNodeAttestation: NETWORKS_REQUIRING_SEV.includes(
-            config?.litNetwork
+            _args?.litNetwork
           ),
-          ...config,
+          ..._args,
         };
         break;
       default:
         // `custom`; no opinion about checkNodeAttestation
         this.config = {
           ...this.config,
-          ...config,
+          ..._args,
         };
     }
 
@@ -1045,21 +1056,16 @@ export class LitCore {
   };
 
   /**
-   *
    * Get and gather node promises
    *
-   * @param { any } callback
+   * @param { function } callback
    *
-   * @returns { Array<Promise<any>> }
+   * @returns { Array<Promise<NodeCommandResponse>> }
    *
    */
   getNodePromises = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (url: string) => Promise<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any>[] => {
-    // FIXME: Replace <any> usage with explicit, strongly typed handlers
-
+    callback: (url: string) => Promise<NodeCommandResponse>
+  ): Promise<NodeCommandResponse>[] => {
     const nodePromises = [];
 
     for (const url of this.connectedNodes) {
@@ -1070,10 +1076,8 @@ export class LitCore {
   };
 
   getRandomNodePromise(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (url: string) => Promise<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any>[] {
+    callback: (url: string) => Promise<NodeCommandResponse>
+  ): Promise<NodeCommandResponse>[] {
     const randomNodeIndex = Math.floor(
       Math.random() * this.connectedNodes.size
     );
@@ -1200,7 +1204,7 @@ export class LitCore {
     nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number
-  ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
+  ): Promise<SuccessNodePromises | RejectedNodePromises> => {
     async function waitForNSuccessesWithErrors<T>(
       promises: Promise<T>[],
       n: number

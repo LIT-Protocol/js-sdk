@@ -29,9 +29,9 @@ import {
   EncryptToJsonProps,
   EvmContractConditions,
   JsonExecutionSdkParams,
-  SessionSigsOrAuthSig,
   SolRpcConditions,
   UnifiedAccessControlConditions,
+  ChainedSessionSigsOrAuthSig,
 } from '@lit-protocol/types';
 
 import { checkIfAuthSigRequiresChainParam, checkType, is, log } from './misc';
@@ -450,9 +450,7 @@ class FileValidator implements ParamsValidator {
   }
 }
 
-export interface AuthMaterialValidatorProps extends SessionSigsOrAuthSig {
-  chain?: string;
-}
+export type AuthMaterialValidatorProps = ChainedSessionSigsOrAuthSig;
 
 class AuthMaterialValidator implements ParamsValidator {
   private readonly fnName: string;
@@ -470,15 +468,16 @@ class AuthMaterialValidator implements ParamsValidator {
   }
 
   validate(): IEither<void> {
-    const { authSig, sessionSigs } = this.authMaterial;
-
-    if (authSig && !is(authSig, 'Object', 'authSig', this.fnName))
+    if (
+      'authSig' in this.authMaterial &&
+      !is(this.authMaterial.authSig, 'Object', 'authSig', this.fnName)
+    )
       return ELeft(
         new InvalidParamType(
           {
             info: {
               param: 'authSig',
-              value: authSig,
+              value: this.authMaterial.authSig,
               functionName: this.fnName,
             },
           },
@@ -501,9 +500,9 @@ class AuthMaterialValidator implements ParamsValidator {
         );
 
       if (
-        authSig &&
+        'authSig' in this.authMaterial &&
         !checkIfAuthSigRequiresChainParam(
-          authSig,
+          this.authMaterial.authSig,
           this.authMaterial.chain,
           this.fnName
         )
@@ -513,7 +512,7 @@ class AuthMaterialValidator implements ParamsValidator {
             {
               info: {
                 param: 'authSig',
-                value: authSig,
+                value: this.authMaterial.authSig,
                 functionName: this.fnName,
               },
             },
@@ -522,13 +521,16 @@ class AuthMaterialValidator implements ParamsValidator {
         );
     }
 
-    if (sessionSigs && !is(sessionSigs, 'Object', 'sessionSigs', this.fnName))
+    if (
+      'sessionSigs' in this.authMaterial &&
+      !is(this.authMaterial.sessionSigs, 'Object', 'sessionSigs', this.fnName)
+    )
       return ELeft(
         new InvalidParamType(
           {
             info: {
               param: 'sessionSigs',
-              value: sessionSigs,
+              value: this.authMaterial.sessionSigs,
               functionName: this.fnName,
             },
           },
@@ -536,14 +538,16 @@ class AuthMaterialValidator implements ParamsValidator {
         )
       );
 
-    if (!sessionSigs && !authSig)
+    if (
+      !('sessionSigs' in this.authMaterial) &&
+      !('authSig' in this.authMaterial)
+    )
       return ELeft(
         new InvalidArgumentException(
           {
             info: {
               functionName: this.fnName,
-              sessionSigs,
-              authSig,
+              authMaterial: this.authMaterial,
             },
           },
           'You must pass either authSig or sessionSigs'
@@ -551,14 +555,13 @@ class AuthMaterialValidator implements ParamsValidator {
       );
 
     // -- validate: if sessionSig and authSig exists
-    if (sessionSigs && authSig)
+    if ('sessionSigs' in this.authMaterial && 'authSig' in this.authMaterial)
       return ELeft(
         new InvalidArgumentException(
           {
             info: {
               functionName: this.fnName,
-              sessionSigs,
-              authSig,
+              authMaterial: this.authMaterial,
             },
           },
           'You cannot have both authSig and sessionSigs'
