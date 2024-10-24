@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V6.5.x</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V7.x.x</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -88,7 +88,8 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 | Version          | Link                                                     |
 | ---------------- | -------------------------------------------------------- |
-| V6 (Beta)        | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
+| V7 (Beta)        | [7.x.x docs](https://v7-api-doc-lit-js-sdk.vercel.app/)  |
+| V6               | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
 | V5 (**Current**) | [5.x.x docs](https://v3.api-docs.getlit.dev/)            |
 | V2               | [2.x.x docs](http://docs.lit-js-sdk-v2.litprotocol.com/) |
 
