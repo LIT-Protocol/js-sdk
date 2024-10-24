@@ -1,17 +1,15 @@
-import {
-  InvalidArgumentException,
-  RemovedFunctionError,
-} from '@lit-protocol/constants';
-import depd from 'depd';
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
-import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
-import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
-import { AttenuationsObject, CID as CIDString } from '../models';
-import { getRecapNamespaceAndAbility } from './utils';
-import { sanitizeSiweMessage } from '../siwe/siwe-helper';
 
-const deprecated = depd('lit-js-sdk:auth-recap:session-capability-object');
+import {
+  InvalidArgumentException,
+  LIT_ABILITY_VALUES,
+} from '@lit-protocol/constants';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
+
+import { getRecapNamespaceAndAbility } from './utils';
+import { AttenuationsObject, CID as CIDString } from '../models';
+import { sanitizeSiweMessage } from '../siwe/siwe-helper';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   private _inner: Recap;
@@ -27,7 +25,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const recap = Recap.decode_urn(encoded);
     return new this(
       recap.attenuations,
-      recap.proofs.map((cid: any) => cid.toString())
+      recap.proofs.map((cid) => cid.toString())
     );
   }
 
@@ -35,7 +33,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const recap = Recap.extract_and_verify(siwe);
     return new this(
       recap.attenuations,
-      recap.proofs.map((cid: any) => cid.toString())
+      recap.proofs.map((cid) => cid.toString())
     );
   }
 
@@ -44,7 +42,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   get proofs(): Array<CIDString> {
-    return this._inner.proofs.map((cid: any) => cid.toString());
+    return this._inner.proofs.map((cid) => cid.toString());
   }
 
   get statement(): string {
