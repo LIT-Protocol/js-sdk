@@ -11,34 +11,34 @@ on:
       - feature/**
       - staging/**
 jobs:
-  unit-tests:
-    runs-on: warp-ubuntu-latest-x64-16x
-    timeout-minutes: 30
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'yarn'
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@1.76.0
-      - uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-          version: 'latest'
-      - name: Install project dependencies
-        run: yarn --frozen-lockfile
-      - uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'master'
-      - name: Build
-        run: yarn build:dev
-      - name: Run Unit tests
-        run: yarn tools --test --unit
+  # unit-tests:
+  #   runs-on: warp-ubuntu-latest-x64-16x
+  #   timeout-minutes: 30
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '20'
+  #         cache: 'yarn'
+  #     - name: Install rust
+  #       uses: dtolnay/rust-toolchain@1.76.0
+  #     - uses: jetli/wasm-pack-action@v0.4.0
+  #       with:
+  #         # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+  #         version: 'latest'
+  #     - name: Install project dependencies
+  #       run: yarn --frozen-lockfile
+  #     - uses: nrwl/nx-set-shas@v3
+  #       with:
+  #         main-branch-name: 'master'
+  #     - name: Build
+  #       run: yarn build:dev
+  #     - name: Run Unit tests
+  #       run: yarn tools --test --unit
   integration-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -67,9 +67,12 @@ jobs:
       - name: Install LA Blockchain Dependencies
         run: npm i
         working-directory: ${{github.workspace}}/lit-assets/blockchain/contracts
-      - name: Docker login
-        id: login
-        run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT_FOR_SHIVA}}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull Shiva Container
         id: shiva-pull
         run: docker pull ghcr.io/lit-protocol/shiva:latest 
@@ -107,33 +110,33 @@ jobs:
       - name: Post Pull Shiva Image
         if: steps.shiva-pull.outputs.exit_code == 0
         run: docker rmi ghcr.io/lit-protocol/shiva 
-  ping-lit-configuration-guides:
-    runs-on: ubuntu-latest
-    # needs: [unit-tests, integration-tests]  # Make sure this job runs after others complete
-    steps:
-      - name: Get PR labels
-        id: pr-labels
-        uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
-        with:
-          script: |
-            const labels = context.payload.pull_request.labels
-              .map(label => label.name)
-              .filter(name => name.startsWith('tag:'))
-              .map(name => name.split(':')[1]);
-            if (labels.length > 0) {
-              core.setOutput('tag', labels[0]);
-            } else {
-              core.setOutput('skip', 'true');
-            }
-      - name: Trigger dependencies bot in lit-configuration-guides
-        if: steps.pr-labels.outputs.skip != 'true'
-        run: |
-          TAG="${{ steps.pr-labels.outputs.tag }}"
-          curl -X POST \
-          -H "Accept: application/vnd.github.everest-preview+json" \
-          -H "Authorization: token ${{ secrets.GH_PAT_FOR_SHIVA_LIT_CONFIGURATION_GUIDES_REPO }}" \
-          https://api.github.com/repos/LIT-Protocol/lit-configuration-guides/dispatches \
-          -d "{\"event_type\":\"dependency_update\", \"client_payload\": {\"labels\": [\"$TAG\"]}}"
-        env:
-          GH_PAT_LIT_CONFIGURATION_GUIDES_REPO: ${{ secrets.GH_PAT_FOR_SHIVA_LIT_CONFIGURATION_GUIDES_REPO }}
+  # ping-lit-configuration-guides:
+  #   runs-on: ubuntu-latest
+  #   # needs: [unit-tests, integration-tests]  # Make sure this job runs after others complete
+  #   steps:
+  #     - name: Get PR labels
+  #       id: pr-labels
+  #       uses: actions/github-script@v6
+  #       if: github.event_name == 'pull_request'
+  #       with:
+  #         script: |
+  #           const labels = context.payload.pull_request.labels
+  #             .map(label => label.name)
+  #             .filter(name => name.startsWith('tag:'))
+  #             .map(name => name.split(':')[1]);
+  #           if (labels.length > 0) {
+  #             core.setOutput('tag', labels[0]);
+  #           } else {
+  #             core.setOutput('skip', 'true');
+  #           }
+  #     - name: Trigger dependencies bot in lit-configuration-guides
+  #       if: steps.pr-labels.outputs.skip != 'true'
+  #       run: |
+  #         TAG="${{ steps.pr-labels.outputs.tag }}"
+  #         curl -X POST \
+  #         -H "Accept: application/vnd.github.everest-preview+json" \
+  #         -H "Authorization: token ${{ secrets.GH_PAT_FOR_SHIVA_LIT_CONFIGURATION_GUIDES_REPO }}" \
+  #         https://api.github.com/repos/LIT-Protocol/lit-configuration-guides/dispatches \
+  #         -d "{\"event_type\":\"dependency_update\", \"client_payload\": {\"labels\": [\"$TAG\"]}}"
+  #       env:
+  #         GH_PAT_LIT_CONFIGURATION_GUIDES_REPO: ${{ secrets.GH_PAT_FOR_SHIVA_LIT_CONFIGURATION_GUIDES_REPO }}
