@@ -72,7 +72,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_PAT_FOR_SHIVA }}
+          password: ${{ secrets.GH_PAT }}
       - name: List Available Images in GitHub Container Registry
         run: |
           curl -s -H "Authorization: Bearer ${{ secrets.GH_PAT_FOR_SHIVA }}" \
