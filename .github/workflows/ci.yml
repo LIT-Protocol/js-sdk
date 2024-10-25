@@ -67,9 +67,12 @@ jobs:
       # - name: Install LA Blockchain Dependencies
       #   run: npm i
       #   working-directory: ${{github.workspace}}/lit-assets/blockchain/contracts
-      - name: Docker login
-        id: login
-        run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT}}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT_FOR_SHIVA }}
       - name: Pull Shiva Container
         id: shiva-pull
         run: docker pull ghcr.io/lit-protocol/shiva:latest
