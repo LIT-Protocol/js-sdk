@@ -1,11 +1,12 @@
 import { z } from 'zod';
 
+import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
+
 import { ILitNodeClientSchema } from './ILitNodeClient';
 import {
   AuthSigAuthenticationSchema,
   ChainSchema,
   ChainedSchema,
-  MultipleAccessControlConditionsSchema,
   SessionSigsAuthenticationSchema,
   SessionSigsMapSchema,
 } from './schemas';

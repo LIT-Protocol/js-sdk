@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
+
 import {
   DecryptRequestSchema,
   DecryptResponseSchema,
@@ -17,7 +19,6 @@ import {
   HandshakeWithNodeSchema,
   JsonExecutionSdkParamsSchema,
   JsonHandshakeResponseSchema,
-  MultipleAccessControlConditionsSchema,
   NodeBlsSigningShareSchema,
   NodeCommandResponseSchema,
   NodeCommandServerKeysResponseSchema,

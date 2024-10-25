@@ -14,6 +14,7 @@ import {
   validateSolRpcConditionsSchema,
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
+import { type MultipleAccessControlConditions } from '@lit-protocol/access-control-conditions-schemas';
 import {
   CENTRALISATION_BY_NETWORK,
   HTTP,
@@ -52,6 +53,7 @@ import {
   sendRequest,
   setMiscLitConfig,
 } from '@lit-protocol/misc';
+import { LitNodeClientConfigSchema } from '@lit-protocol/schemas';
 import {
   AuthSig,
   BlockHashErrorResponse,
@@ -61,7 +63,6 @@ import {
   HandshakeWithNode,
   JsonHandshakeResponse,
   LitNodeClientConfig,
-  MultipleAccessControlConditions,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandResponse,
@@ -72,7 +73,6 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
-import { LitNodeClientConfigSchema } from '@lit-protocol/schemas';
 
 import { composeLitUrl } from './endpoint-version';
 

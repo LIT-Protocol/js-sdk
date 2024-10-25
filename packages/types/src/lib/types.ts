@@ -2,11 +2,12 @@ import * as ethers from 'ethers';
 import { z } from 'zod';
 
 import {
-  LPACC_EVM_ATOM,
-  LPACC_EVM_CONTRACT,
-  LPACC_SOL,
-  LPACC_EVM_BASIC,
-} from '@lit-protocol/accs-schemas';
+  type AtomAcc,
+  type EvmBasicAcc,
+  type EvmContractAcc,
+  type OperatorAcc,
+  type SolAcc,
+} from '@lit-protocol/access-control-conditions-schemas';
 import {
   AllLitChainsSchema,
   ChainSchema,
@@ -34,7 +35,6 @@ import {
   AuthMethod,
   LitRelayConfig,
   Signature,
-  AccsOperatorParams,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
@@ -44,10 +44,11 @@ import {
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
-export type AccsDefaultParams = LPACC_EVM_BASIC;
-export type AccsSOLV2Params = LPACC_SOL;
-export type AccsEVMParams = LPACC_EVM_CONTRACT;
-export type AccsCOSMOSParams = LPACC_EVM_ATOM;
+// Backwards compatibility with @lit-protocol/accs-schemas
+export type AccsDefaultParams = EvmBasicAcc;
+export type AccsSOLV2Params = SolAcc;
+export type AccsEVMParams = EvmContractAcc;
+export type AccsCOSMOSParams = AtomAcc;
 
 // union type for all the different types of conditions
 export type AccsParams =
@@ -57,29 +58,32 @@ export type AccsParams =
   | AccsCOSMOSParams;
 
 // union type for all the different types of conditions including operator
-export type ConditionItem = AccsParams | AccsOperatorParams;
+export type ConditionItem = AccsParams | OperatorAcc;
 
 export type AccessControlConditions = (
   | AccsDefaultParams
-  | AccsOperatorParams
+  | OperatorAcc
   | AccessControlConditions
 )[];
 export type EvmContractConditions = (
   | AccsEVMParams
-  | AccsOperatorParams
+  | OperatorAcc
   | EvmContractConditions
 )[];
 export type SolRpcConditions = (
   | AccsSOLV2Params
-  | AccsOperatorParams
+  | OperatorAcc
   | SolRpcConditions
 )[];
 export type UnifiedAccessControlConditions = (
   | AccsParams
-  | AccsOperatorParams
+  | OperatorAcc
   | UnifiedAccessControlConditions
 )[];
 
+/**
+ * @deprecated
+ */
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 
 export type SupportedJsonRequests =

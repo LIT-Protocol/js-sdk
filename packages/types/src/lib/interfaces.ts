@@ -25,7 +25,6 @@ import {
   SigResponseSchema,
   ExecuteJsResponseBaseSchema,
   ExecuteJsResponseSchema,
-  MultipleAccessControlConditionsSchema,
   EncryptSdkParamsSchema,
   DecryptResponseSchema,
   DecryptRequestBaseSchema,
@@ -52,7 +51,6 @@ import {
   ChainedSessionSigsOrAuthSigSchema,
   DecryptFromJsonPropsSchema,
   EncryptToJsonPropsSchema,
-  AccsOperatorParamsSchema,
   SolanaAuthSigSchema,
   CosmosAuthSigSchema,
   IProviderSchema,
@@ -114,10 +112,6 @@ import {
 const deprecated = depd('lit-js-sdk:types:interfaces');
 
 export type ABIParams = z.infer<typeof ABIParamsSchema>;
-
-/** ---------- Access Control Conditions Interfaces ---------- */
-
-export type AccsOperatorParams = z.infer<typeof AccsOperatorParamsSchema>;
 
 /** ---------- Auth Sig ---------- */
 
@@ -218,10 +212,6 @@ export type JsonSignSessionKeyRequestV1 = z.infer<
 export type BlsResponseData = z.infer<typeof BlsResponseDataSchema>;
 
 export type JsonSigningResourceId = z.infer<typeof JsonSigningResourceIdSchema>;
-
-export type MultipleAccessControlConditions = z.infer<
-  typeof MultipleAccessControlConditionsSchema
->;
 
 /**
  * @deprecated

@@ -1,6 +1,7 @@
 import * as ethers from 'ethers';
 import { z } from 'zod';
 
+import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
 import { LIT_AUTH_SIG_CHAIN_KEYS, VMTYPE } from '@lit-protocol/constants';
 
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
@@ -432,26 +433,6 @@ export const NodeBlsSigningShareSchema = z.object({
   signatureShare: BlsSignatureShareSchema,
   response: z.any().optional(), // TODO this depends on the type of operation that nodes do
   logs: z.string().optional(),
-});
-
-export const AccessControlConditionsSchema = z.array(z.any()); // TODO AccessControlConditions
-export const EvmContractConditionsSchema = z.array(z.any()); // TODO EvmContractConditions
-export const SolRpcConditionsSchema = z.array(z.any()); // TODO SolRpcConditions
-export const UnifiedAccessControlConditionsSchema = z.array(z.any()); // TODO UnifiedAccessControlConditions
-
-export const MultipleAccessControlConditionsSchema = z.object({
-  // The access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  accessControlConditions: AccessControlConditionsSchema.optional(),
-
-  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  evmContractConditions: EvmContractConditionsSchema.optional(),
-
-  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.
-  solRpcConditions: SolRpcConditionsSchema.optional(),
-
-  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  unifiedAccessControlConditions:
-    UnifiedAccessControlConditionsSchema.optional(),
 });
 
 export const SigningAccessControlConditionJWTPayloadSchema =
