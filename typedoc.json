@@ -30,5 +30,8 @@
     "./packages/wrapped-keys-lit-actions/src/index.ts"
   ],
   "out": "doc",
-  "skipErrorChecking": true
+  "skipErrorChecking": true,
+  "plugin": ["typedoc-theme-hierarchy"],
+  "theme": "hierarchy",
+  "customCss": "doc.css"
 }

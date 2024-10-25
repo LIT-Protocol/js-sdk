@@ -24,7 +24,7 @@ export const testGenerateEthereumWrappedKey = async (
       alice,
       null,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
-    ); // 10 mins expiry
+    );
 
     const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs,
