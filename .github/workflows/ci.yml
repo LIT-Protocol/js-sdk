@@ -74,10 +74,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GH_PAT_FOR_SHIVA }}
       - name: List Available Images in GitHub Container Registry
-      run: |
-        curl -s -H "Authorization: Bearer ${{ secrets.GH_PAT_FOR_SHIVA }}" \
-          -H "Accept: application/vnd.github+json" \
-          "https://api.github.com/orgs/LIT-Protocol/packages?package_type=container" | jq '.[] | .name'
+        run: |
+          curl -s -H "Authorization: Bearer ${{ secrets.GH_PAT_FOR_SHIVA }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/orgs/LIT-Protocol/packages?package_type=container" | jq '.[] | .name'
       - name: Pull Shiva Container
         id: shiva-pull
         run: docker pull ghcr.io/lit-protocol/shiva:snap-shot-test
