@@ -490,7 +490,7 @@ export const checkAndSignEVMAuthMessage = async ({
       derivedVia: '',
       signedMessage: '',
       address: '',
-    } as AuthSig;
+    };
   }
 
   // --- scoped methods ---

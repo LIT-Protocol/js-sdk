@@ -3,7 +3,7 @@ import { EITHER_TYPE } from '@lit-protocol/constants';
 import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { isNode, log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
+import { LitNodeClientConfig } from '@lit-protocol/types';
 
 /**
  * You can find all these available networks in the `constants` package
@@ -19,7 +19,7 @@ import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
  * ```
  */
 export class LitNodeClient extends LitNodeClientNodeJs {
-  constructor(args: LitNodeClientConfig | CustomNetwork) {
+  constructor(args: LitNodeClientConfig) {
     super({
       ...args,
       defaultAuthCallback: checkAndSignAuthMessage,

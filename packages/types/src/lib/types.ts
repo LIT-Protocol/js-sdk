@@ -1,17 +1,40 @@
 import * as ethers from 'ethers';
+import { z } from 'zod';
 
 import {
-  LPACC_EVM_ATOM,
-  LPACC_EVM_CONTRACT,
-  LPACC_SOL,
-  LPACC_EVM_BASIC,
-} from '@lit-protocol/accs-schemas';
+  type AtomAcc,
+  type EvmBasicAcc,
+  type EvmContractAcc,
+  type OperatorAcc,
+  type SolAcc,
+} from '@lit-protocol/access-control-conditions-schemas';
+import {
+  AllLitChainsSchema,
+  ChainSchema,
+  ExclusiveLitContractContextSchema,
+  LitAbilitySchema,
+  LitBaseChainSchema,
+  LitContractContextSchema,
+  LitContractResolverContextSchema,
+  LitResourcePrefixSchema,
+  LitContractSchema,
+  LitEVMChainSchema,
+  LitEVMChainsSchema,
+  LitSVMChainSchema,
+  LitSVMChainsSchema,
+  LitCosmosChainSchema,
+  LitCosmosChainsSchema,
+  LitNetworkKeysSchema,
+  EpochInfoSchema,
+  TokenInfoSchema,
+  DerivedAddressesSchema,
+  ResponseStrategySchema,
+} from '@lit-protocol/schemas';
 
 import {
   AuthMethod,
   LitRelayConfig,
   Signature,
-  AccsOperatorParams,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
@@ -21,10 +44,11 @@ import {
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
-export type AccsDefaultParams = LPACC_EVM_BASIC;
-export type AccsSOLV2Params = LPACC_SOL;
-export type AccsEVMParams = LPACC_EVM_CONTRACT;
-export type AccsCOSMOSParams = LPACC_EVM_ATOM;
+// Backwards compatibility with @lit-protocol/accs-schemas
+export type AccsDefaultParams = EvmBasicAcc;
+export type AccsSOLV2Params = SolAcc;
+export type AccsEVMParams = EvmContractAcc;
+export type AccsCOSMOSParams = AtomAcc;
 
 // union type for all the different types of conditions
 export type AccsParams =
@@ -34,36 +58,39 @@ export type AccsParams =
   | AccsCOSMOSParams;
 
 // union type for all the different types of conditions including operator
-export type ConditionItem = AccsParams | AccsOperatorParams;
+export type ConditionItem = AccsParams | OperatorAcc;
 
 export type AccessControlConditions = (
   | AccsDefaultParams
-  | AccsOperatorParams
+  | OperatorAcc
   | AccessControlConditions
 )[];
 export type EvmContractConditions = (
   | AccsEVMParams
-  | AccsOperatorParams
+  | OperatorAcc
   | EvmContractConditions
 )[];
 export type SolRpcConditions = (
   | AccsSOLV2Params
-  | AccsOperatorParams
+  | OperatorAcc
   | SolRpcConditions
 )[];
 export type UnifiedAccessControlConditions = (
   | AccsParams
-  | AccsOperatorParams
+  | OperatorAcc
   | UnifiedAccessControlConditions
 )[];
 
+/**
+ * @deprecated
+ */
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 
 export type SupportedJsonRequests =
   | JsonSigningRetrieveRequest
   | JsonEncryptionRetrieveRequest;
 
-export type Chain = string;
+export type Chain = z.infer<typeof ChainSchema>;
 
 /**
  *
@@ -71,14 +98,7 @@ export type Chain = string;
  *
  * @typedef { Object } LITChainRequiredProps
  */
-export interface LITChainRequiredProps {
-  name: string;
-  symbol: string;
-  decimals: number;
-  rpcUrls: string[];
-  blockExplorerUrls: string[];
-  vmType: string;
-}
+export type LITChainRequiredProps = z.infer<typeof LitBaseChainSchema>;
 
 /**
  * @typedef { Object } LITEVMChain
@@ -86,33 +106,30 @@ export interface LITChainRequiredProps {
  * @property { string } chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
  * @property { string } name - The human readable name of the chain
  */
-export type LITEVMChain = LITChainRequiredProps & {
-  contractAddress: string | null;
-  chainId: number;
-  type: string | null;
-};
+export type LITEVMChain = z.infer<typeof LitEVMChainSchema>;
+export type LITEVMChains = z.infer<typeof LitEVMChainsSchema>;
 
 /**
  * @typedef { Object } LITSVMChain
  */
-export type LITSVMChain = LITChainRequiredProps;
+export type LITSVMChain = z.infer<typeof LitSVMChainSchema>;
+export type LITSVMChains = z.infer<typeof LitSVMChainsSchema>;
 
 /**
  * @typedef { Object } LITCosmosChain
  * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
  */
-export type LITCosmosChain = LITChainRequiredProps & {
-  chainId: string;
-};
+export type LITCosmosChain = z.infer<typeof LitCosmosChainSchema>;
+export type LITCosmosChains = z.infer<typeof LitCosmosChainsSchema>;
 
 /**
  * @typedef {Object} LITChain
  * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
  * @property {string} name - The human readable name of the chain
  */
-export type LITChain<T> = Record<string, T>;
+export type LITChain = z.infer<typeof AllLitChainsSchema>;
 
-export type LIT_NETWORKS_KEYS = 'datil-dev' | 'datil-test' | 'datil' | 'custom';
+export type LIT_NETWORKS_KEYS = z.infer<typeof LitNetworkKeysSchema>;
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;
@@ -178,93 +195,27 @@ export type ClaimResult<T = ClaimProcessor> = {
   pubkey: string;
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
-export interface LitContract {
-  address?: string;
-  abi?: any;
-  name?: string;
-}
+export type LitContract = z.infer<typeof LitContractSchema>;
 
-/**
- * Defines a set of contract metadata for bootstrapping
- * network context and interfacing with contracts on Chroncile blockchain
- *
- */
-export interface ExclusiveLitContractContext {
-  Allowlist: LitContract;
-  LITToken: LitContract;
-  Multisender: LitContract;
-  PKPHelper: LitContract;
-  PKPNFT: LitContract;
-  PKPNFTMetadata: LitContract;
-  PKPPermissions: LitContract;
-  PubkeyRouter: LitContract;
-  RateLimitNFT: LitContract;
-  Staking: LitContract;
-  StakingBalances: LitContract;
-}
-export interface LitContractContext extends ExclusiveLitContractContext {
-  [index: string]: string | any;
-}
+export type ExclusiveLitContractContext = z.infer<
+  typeof ExclusiveLitContractContextSchema
+>;
+export type LitContractContext = z.infer<typeof LitContractContextSchema>;
 
 export type ContractName = keyof ExclusiveLitContractContext;
 
-/**
- * Type for a contract resolver instance which will be used
- * In place of LitContractContext for loading addresses of lit contracts
- * an instance of LitContractContext can still be provided. which will be used for abi data.
- *
- */
-export interface LitContractResolverContext {
-  [index: string]:
-    | string
-    | LitContractContext
-    | ethers.providers.JsonRpcProvider
-    | undefined
-    | number;
-  resolverAddress: string;
-  abi: any;
-  environment: number;
-  contractContext?: LitContractContext;
-  provider?: ethers.providers.JsonRpcProvider;
-}
+export type LitContractResolverContext = z.infer<
+  typeof LitContractResolverContextSchema
+>;
 
-export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
+export type ResponseStrategy = z.infer<typeof ResponseStrategySchema>;
 
-export type LitResourcePrefix =
-  | 'lit-accesscontrolcondition'
-  | 'lit-pkp'
-  | 'lit-ratelimitincrease'
-  | 'lit-litaction';
+export type LitResourcePrefix = z.infer<typeof LitResourcePrefixSchema>;
 
-export type LitAbility =
-  | 'access-control-condition-decryption'
-  | 'access-control-condition-signing'
-  | 'pkp-signing'
-  | 'rate-limit-increase-auth'
-  | 'lit-action-execution';
+export type LitAbility = z.infer<typeof LitAbilitySchema>;
 
-export interface TokenInfo {
-  tokenId: string;
-  publicKey: string;
-  publicKeyBuffer: Buffer;
-  ethAddress: string;
-  btcAddress: string;
-  cosmosAddress: string;
-  isNewPKP: boolean;
-}
+export type DerivedAddresses = z.infer<typeof DerivedAddressesSchema>;
 
-/**
- * from the `getActiveUnkickedValidatorStructsAndCounts` Staking contract function
-   epochLength: _BigNumber { _hex: '0x05dc', _isBigNumber: true },
-  number: _BigNumber { _hex: '0x04c5', _isBigNumber: true },
-  endTime: _BigNumber { _hex: '0x66c75b12', _isBigNumber: true },
-  retries: _BigNumber { _hex: '0x03', _isBigNumber: true },
-  timeout: _BigNumber { _hex: '0x3c', _isBigNumber: true }
- */
-export type EpochInfo = {
-  epochLength: number;
-  number: number;
-  endTime: number;
-  retries: number;
-  timeout: number;
-};
+export type TokenInfo = z.infer<typeof TokenInfoSchema>;
+
+export type EpochInfo = z.infer<typeof EpochInfoSchema>;

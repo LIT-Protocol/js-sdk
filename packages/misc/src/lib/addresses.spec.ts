@@ -9,7 +9,6 @@ describe('adddresses', () => {
       publicKey: COMPRESSED_PUBLIC_KEY,
     });
     expect(derivedAddress).toEqual({
-      tokenId: undefined,
       publicKey: `0x${COMPRESSED_PUBLIC_KEY}`,
       publicKeyBuffer: Buffer.from(COMPRESSED_PUBLIC_KEY, 'hex'),
       ethAddress: '0x7206cB69380ee83c4Ef13f05713e814F3e4dee0f',

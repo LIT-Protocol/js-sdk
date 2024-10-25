@@ -18,8 +18,6 @@ import {
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
-  InvalidArgumentException,
-  InvalidParamType,
   InvalidSessionSigs,
   InvalidSignatureError,
   LIT_ACTION_IPFS_HASH,
@@ -30,6 +28,8 @@ import {
   LitNodeClientNotReadyError,
   ParamNullError,
   ParamsMissingError,
+  InvalidParamType,
+  InvalidArgumentException,
   UnknownError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
@@ -63,6 +63,7 @@ import {
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
+import { LitNodeClientConfigSchema } from '@lit-protocol/schemas';
 import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -92,7 +93,6 @@ import type {
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
-  CustomNetwork,
   DecryptRequest,
   DecryptResponse,
   EncryptRequest,
@@ -120,9 +120,7 @@ import type {
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
-  NodeLog,
   NodeShare,
-  PKPSignShare,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -141,15 +139,27 @@ export class LitNodeClientNodeJs
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
-  constructor(args: LitNodeClientConfig | CustomNetwork) {
-    if (!args) {
-      throw new ParamsMissingError({}, 'must provide LitNodeClient parameters');
+  constructor(args: LitNodeClientConfig) {
+    let _args: LitNodeClientConfig;
+    try {
+      _args = LitNodeClientConfigSchema.parse(args);
+    } catch (e) {
+      throw new InvalidArgumentException(
+        {
+          cause: e,
+          info: {
+            args,
+          },
+        },
+        'must provide LitNodeClient parameters'
+      );
     }
 
+    // Passing args instead of _args so parent can make its own assertions without the ones here interfering
     super(args);
 
-    if (args !== undefined && args !== null && 'defaultAuthCallback' in args) {
-      this.defaultAuthCallback = args.defaultAuthCallback;
+    if ('defaultAuthCallback' in _args) {
+      this.defaultAuthCallback = _args.defaultAuthCallback;
     }
   }
 
@@ -509,7 +519,7 @@ export class LitNodeClientNodeJs
     resourceAbilityRequests,
   }: {
     authSig: AuthSig;
-    sessionKeyUri: any;
+    sessionKeyUri: string;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
@@ -600,6 +610,7 @@ export class LitNodeClientNodeJs
    * Combine Shares from network public key set and signature shares
    *
    * @param { NodeBlsSigningShare } signatureShares
+   * @param { string } requestId
    *
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
@@ -711,9 +722,7 @@ export class LitNodeClientNodeJs
    */
   runOnTargetedNodes = async (
     params: JsonExecutionSdkParamsTargetNode
-  ): Promise<
-    SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises
-  > => {
+  ): Promise<SuccessNodePromises | RejectedNodePromises> => {
     log('running runOnTargetedNodes:', params.targetNodeRange);
 
     if (!params.targetNodeRange) {
@@ -806,7 +815,7 @@ export class LitNodeClientNodeJs
       nodePromises,
       requestId,
       params.targetNodeRange
-    )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
+    )) as SuccessNodePromises | RejectedNodePromises;
   };
 
   // ========== Scoped Business Logics ==========
@@ -979,7 +988,7 @@ export class LitNodeClientNodeJs
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<NodeShare>).values;
+    const responseData = (res as SuccessNodePromises).values as NodeShare[];
 
     logWithRequestId(
       requestId,
@@ -1042,9 +1051,7 @@ export class LitNodeClientNodeJs
     const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
 
     // -- 3. combine logs
-    const mostCommonLogs: string = mostCommonString(
-      responseData.map((r: NodeLog) => r.logs)
-    );
+    const mostCommonLogs = mostCommonString(responseData.map((r) => r.logs));
 
     // -- 4. combine claims
     const claimsList = getClaimsList(responseData);
@@ -1184,7 +1191,7 @@ export class LitNodeClientNodeJs
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
+    const responseData = (res as SuccessNodePromises).values;
 
     logWithRequestId(
       requestId,
@@ -1312,8 +1319,7 @@ export class LitNodeClientNodeJs
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { sessionSigs, authSig, chain, ciphertext, dataToEncryptHash } =
-      params;
+    const { chain, ciphertext, dataToEncryptHash } = params;
 
     // ========== Validate Params ==========
     // -- validate if it's ready
@@ -1398,7 +1404,8 @@ export class LitNodeClientNodeJs
     const requestId = this._getNewRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
-      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+      const authSigToSend =
+        'sessionSigs' in params ? params.sessionSigs[url] : params.authSig;
 
       if (!authSigToSend) {
         throw new InvalidArgumentException(
@@ -1442,9 +1449,8 @@ export class LitNodeClientNodeJs
       this._throwNodeError(res, requestId);
     }
 
-    const signatureShares: NodeBlsSigningShare[] = (
-      res as SuccessNodePromises<NodeBlsSigningShare>
-    ).values;
+    const signatureShares: NodeBlsSigningShare[] = (res as SuccessNodePromises)
+      .values;
 
     logWithRequestId(requestId, 'signatureShares', signatureShares);
 
@@ -1666,7 +1672,7 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    let curveType = responseData[0]?.curveType;
+    const curveType = responseData[0]?.curveType;
 
     if (curveType === 'ECDSA') {
       throw new Error(
@@ -1823,9 +1829,9 @@ export class LitNodeClientNodeJs
     return signSessionKeyRes;
   };
 
-  private _isSuccessNodePromises = <T>(
-    res: SuccessNodePromises<T> | RejectedNodePromises
-  ): res is SuccessNodePromises<T> => {
+  private _isSuccessNodePromises = (
+    res: SuccessNodePromises | RejectedNodePromises
+  ): res is SuccessNodePromises => {
     return res.success;
   };
 

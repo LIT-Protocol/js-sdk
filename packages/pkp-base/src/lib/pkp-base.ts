@@ -8,6 +8,7 @@
  * initializing the class instances.
  */
 import depd from 'depd';
+
 import {
   InitError,
   LitNodeClientNotReadyError,
