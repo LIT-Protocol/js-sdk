@@ -6,6 +6,7 @@ export * from './lib/constants/constants';
 export * from './lib/constants/mappers';
 export * from './lib/constants/endpoints';
 export * from './lib/constants/mappers';
+export * from './lib/constants/crypto';
 
 // ----------- Interfaces -----------
 export * from './lib/interfaces/i-errors';

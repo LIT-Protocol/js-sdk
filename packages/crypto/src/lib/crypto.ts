@@ -22,14 +22,27 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import {
+
+  // ecdsa
   EcdsaVariant,
+  ecdsaCombine,
+  ecdsaDeriveKey,
+  ecdsaVerify,
+
+  // bls
   blsCombine,
   blsDecrypt,
   blsEncrypt,
   blsVerify,
-  ecdsaCombine,
-  ecdsaDeriveKey,
-  ecdsaVerify,
+
+  // frost
+  FrostVariant,
+  // frostCombine,
+  // frostDecrypt,
+  // frostEncrypt,
+  // frostVerify,
+
+  // sev-snp
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
@@ -73,8 +86,7 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${
-        publicKeyHex.replace('0x', '').length
+      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length
       } instead.`
     );
   }

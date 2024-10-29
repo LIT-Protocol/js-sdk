@@ -2,12 +2,13 @@
 import {
   BlsVariant,
   EcdsaVariant,
+  FrostVariant,
   InitOutput,
   //@ts-ignore source map not found
   getModule,
   initSync,
 } from './pkg/wasm-internal';
-export type { BlsVariant, EcdsaVariant } from './pkg/wasm-internal';
+export type { BlsVariant, EcdsaVariant, FrostVariant } from './pkg/wasm-internal';
 
 import * as wasmInternal from './pkg/wasm-internal';
 
@@ -261,4 +262,36 @@ export async function sevSnpVerify(
     challenge,
     vcek_certificate
   );
+}
+
+export namespace LitFrost {
+  /**
+   * NOTE: We don't need to call this directly, it's called by the Lit node
+   * Generates FROST key shares for DKG
+   * 
+   * @param {FrostVariant} variant - The FROST variant to use (e.g. 'Ed25519Sha512', 'P384Sha384')
+   * @param {number} min_signers - Minimum number of signers required for threshold signature
+   * @param {number} max_signers - Maximum number of total signers
+   */
+  export async function generateKeys(
+    variant: FrostVariant,
+    min_signers: number,
+    max_signers: number
+  ): Promise<{
+    scheme: FrostVariant;
+    shares: {
+      scheme: FrostVariant;
+      participant_id: string;
+      signing_share: string;
+      verifying_share: string;
+      hiding_nonce: string;
+      binding_nonce: string;
+    }[];
+    group_verifying_key: string;
+    threshold: number;
+    max_signers: number;
+  }> {
+    await loadModules();
+    return wasmInternal.frostGenerateKeys(variant, min_signers, max_signers);
+  }
 }
