@@ -24,6 +24,12 @@ use frost_ed448::keys::{ SigningShare as Ed448SigningShare };
 use frost_p256::keys::{ SigningShare as P256SigningShare };
 
 use crate::abi::{ from_js, into_uint8array, JsResult };
+use gennaro_dkg::*;
+use std::num::NonZeroU8;
+use rand::rngs::OsRng;
+// use lit_frost::Scheme;
+// use crate::abi::JsResult;
+
 
 impl From<FrostVariant> for Scheme {
   fn from(variant: FrostVariant) -> Self {
@@ -40,18 +46,17 @@ impl From<FrostVariant> for Scheme {
   }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Serialize)]
 struct KeygenOutput {
   scheme: FrostVariant,
   shares: Vec<ParticipantShare>,
   group_verifying_key: String, // Hex encoded
   threshold: u16,
-  max_signers: u16,
+  limit: u16,
 }
 
 #[derive(Serialize, Clone, Deserialize)]
 struct ParticipantShare {
-  scheme: FrostVariant,
   participant_id: String, // Hex encoded
   signing_share: String, // Hex encoded
   verifying_share: String, // Hex encoded
@@ -72,54 +77,52 @@ pub enum FrostVariant {
   K256Taproot,
 }
 
-#[wasm_bindgen(js_name = "frostGenerateKeys")]
-pub fn frost_generate_keys(
+// 1. Key Generation and Distribution (DKG)
+#[wasm_bindgen(js_name = "frostDkg")]
+pub fn frost_dkg(
   variant: FrostVariant,
-  min_signers: u16,
-  max_signers: u16
+  threshold: u16,
+  num_participants: u16
 ) -> JsResult<JsValue> {
-  let mut rng = rand::thread_rng();
-  let scheme = Scheme::from(variant.clone());
+  let scheme: Scheme = variant.clone().into();
+  let mut rng = OsRng;
 
-  // Generate the secret shares and public key
-  let (shares, verifying_key) = scheme
-    .generate_with_trusted_dealer(min_signers, max_signers, &mut rng)
-    .map_err(|e| JsError::new(&e.to_string()))?;
+  let (secret_shares, verifying_key) = scheme
+    .generate_with_trusted_dealer(threshold, num_participants, &mut rng)
+    .map_err(|e| JsError::new(&format!("DKG failed: {}", e)))?;
 
-  let mut shares_vec = Vec::with_capacity(shares.len());
+  let mut shares = Vec::new();
+  for (id, secret_share) in secret_shares {
+    // Generate initial nonces for each participant
+    let (nonces, _) = scheme
+      .pregenerate_signing_nonces(
+        NonZeroU8::new(1).unwrap(),
+        &secret_share,
+        &mut rng
+      )
+      .map_err(|e| JsError::new(&format!("Nonce generation failed: {}", e)))?;
 
-  // Process each participant's shares
-  for (id, secret_share) in shares {
-    // Generate signing nonces
-    let (nonces, _commitments) = scheme
-      .signing_round1(&secret_share, &mut rng)
-      .map_err(|e| JsError::new(&e.to_string()))?;
-
-    // Get the public share for this participant
     let verifying_share = scheme
       .verifying_share(&secret_share)
-      .map_err(|e| JsError::new(&e.to_string()))?;
+      .map_err(|e|
+        JsError::new(&format!("Verifying share generation failed: {}", e))
+      )?;
 
-    // Create the participant's complete share package
-    let share = ParticipantShare {
-      scheme: variant.clone(),
-      participant_id: hex::encode(Vec::<u8>::from(&id)),
-      signing_share: hex::encode(Vec::<u8>::from(&secret_share)),
-      verifying_share: hex::encode(Vec::<u8>::from(&verifying_share)),
-      hiding_nonce: hex::encode(&nonces.hiding),
-      binding_nonce: hex::encode(&nonces.binding),
-    };
-
-    shares_vec.push(share);
+    shares.push(ParticipantShare {
+      participant_id: hex::encode(&id.id),
+      signing_share: hex::encode(&secret_share.value),
+      verifying_share: hex::encode(&verifying_share.value),
+      hiding_nonce: hex::encode(&nonces[0].hiding),
+      binding_nonce: hex::encode(&nonces[0].binding),
+    });
   }
 
-  // Create the complete output
   let output = KeygenOutput {
-    shares: shares_vec,
-    group_verifying_key: hex::encode(Vec::<u8>::from(&verifying_key)),
-    threshold: min_signers,
-    max_signers,
     scheme: variant,
+    shares,
+    group_verifying_key: hex::encode(&verifying_key.value),
+    threshold,
+    limit: num_participants,
   };
 
   Ok(serde_wasm_bindgen::to_value(&output)?)

@@ -79,13 +79,15 @@ wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.7", optional = true }
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
 
+gennaro-dkg = "1.0.0-pre3"
+
+
 # development dependencies
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
 ciborium = "0.2"
 group = "0.13"
 ff = "0.13"
-gennaro-dkg = "1.0.0-pre3"
 lazy_static = "1.4"
 maplit = "1.0"
 rstest = "0.23"
