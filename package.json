@@ -65,6 +65,7 @@
     "dotenv-parse-variables": "^2.0.0",
     "download": "^8.0.0",
     "ethers": "^5.7.1",
+    "eventemitter3": "^5.0.1",
     "jose": "^4.14.4",
     "jszip": "^3.10.1",
     "micromodal": "^0.4.10",
