@@ -1723,7 +1723,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const tx = await this._callWithAdjustedOverrides(
       this.pkpHelperContract.write,
       'claimAndMintNextAndAddAuthMethodsWithTypes',
-      [claimMaterial, authMethodData],
+      [claimMaterial, authMethodData]
     );
 
     this.log('Claim and mint PKP with auth method tx:', tx);
