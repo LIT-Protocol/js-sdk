@@ -24,8 +24,8 @@ export const testUseEoaSessionSigsClaimAndMint = async (
 
   const { signatures, derivedKeyId } = claims.keyId;
 
-  console.log("signatures:", signatures);
-  console.log("derivedKeyId:", derivedKeyId);
+  console.log('signatures:', signatures);
+  console.log('derivedKeyId:', derivedKeyId);
 
   const keyType = 2;
 
@@ -33,7 +33,7 @@ export const testUseEoaSessionSigsClaimAndMint = async (
     keyType: keyType,
     derivedKeyId: `0x${derivedKeyId}`,
     signatures: signatures,
-  }
+  };
 
   const authMethodData = {
     keyType: keyType,
@@ -48,18 +48,18 @@ export const testUseEoaSessionSigsClaimAndMint = async (
     addPkpEthAddressAsPermittedAddress: true,
     addPkpPubkeyAsPermittedAuthMethod: true,
     sendPkpToItself: true,
-  }
+  };
 
-  const tx = await devEnv.contractsClient.pkpHelperContract.write.claimAndMintNextAndAddAuthMethodsWithTypes(
-    claimMaterial,
-    authMethodData,
-    {
-      gasLimit: 500000
-    }
-  )
+  const tx =
+    await devEnv.contractsClient.pkpHelperContract.write.claimAndMintNextAndAddAuthMethodsWithTypes(
+      claimMaterial,
+      authMethodData,
+      {
+        gasLimit: 500000,
+      }
+    );
 
-
-  console.log("tx:", tx);
+  console.log('tx:', tx);
 
   devEnv.releasePrivateKeyFromUser(alice);
 
