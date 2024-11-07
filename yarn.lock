@@ -3042,10 +3042,10 @@
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.0.63":
-  version "0.0.63"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.63.tgz#8700c37df9d2422e9c97aa27871fb64de6186f6c"
-  integrity sha512-CAorNt72ybIY/g//dDeR837izNGuYQR99XwPSK2X2AJ6c+aZX1kdXCrOnxsbY40BzFrOk/dIFo+ymJ9E3qh48w==
+"@lit-protocol/contracts@^0.0.71":
+  version "0.0.71"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.71.tgz#f436b35a4cfe5b49e7ceaf3ea1dc4d73ad953c53"
+  integrity sha512-T5cPgo7tZG3+qLmNk2KDbB5t8f0yBThJEVs5lxsagkhZaabx0AOte0kJpGioWICvlaiGYKtACWh6ukBEo3bKzw==
 
 "@ljharb/resumer@~0.0.1":
   version "0.0.1"
