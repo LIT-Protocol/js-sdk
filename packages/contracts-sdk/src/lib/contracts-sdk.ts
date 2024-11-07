@@ -1663,6 +1663,74 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     }
   };
 
+  /**
+   * Claims and mints a PKP with auth methods
+   * @param {Object} params - The parameters object
+   * @param {Object} params.claimMaterial - The claim material containing keyType, derivedKeyId and signatures
+   * @param {number} params.claimMaterial.keyType - The type of key to mint
+   * @param {string} params.claimMaterial.derivedKeyId - The derived key ID
+   * @param {Array<{signature: string, derivedKeyId: string, signedData: string}>} params.claimMaterial.signatures - Array of signature objects
+   * @param {Object} params.authMethodData - The auth method data for permissions
+   * @param {number} params.authMethodData.keyType - The type of key
+   * @param {string[]} params.authMethodData.permittedIpfsCIDs - Permitted IPFS CIDs
+   * @param {string[][]} params.authMethodData.permittedIpfsCIDScopes - Scopes for permitted IPFS CIDs
+   * @param {string[]} params.authMethodData.permittedAddresses - Permitted addresses
+   * @param {string[][]} params.authMethodData.permittedAddressScopes - Scopes for permitted addresses
+   * @param {number[]} params.authMethodData.permittedAuthMethodTypes - Types of permitted auth methods
+   * @param {string[]} params.authMethodData.permittedAuthMethodIds - IDs of permitted auth methods
+   * @param {string[]} params.authMethodData.permittedAuthMethodPubkeys - Public keys of permitted auth methods
+   * @param {string[][]} params.authMethodData.permittedAuthMethodScopes - Scopes for permitted auth methods
+   * @param {boolean} params.authMethodData.addPkpEthAddressAsPermittedAddress - Whether to add PKP ETH address
+   * @param {boolean} params.authMethodData.addPkpPubkeyAsPermittedAuthMethod - Whether to add PKP pubkey
+   * @param {boolean} params.authMethodData.sendPkpToItself - Whether to send PKP to itself
+   * @returns {Promise<ethers.ContractTransaction>} The transaction result
+   */
+  claimAndMintPKPWithAuth = async ({
+    claimMaterial,
+    authMethodData,
+  }: {
+    claimMaterial: {
+      keyType: number;
+      derivedKeyId: string;
+      signatures: Array<{
+        r: `0x${string}` | string;
+        s: `0x${string}` | string;
+        v: number;
+      }>;
+    };
+    authMethodData: {
+      keyType: number;
+      permittedIpfsCIDs: string[];
+      permittedIpfsCIDScopes: string[][];
+      permittedAddresses: string[];
+      permittedAddressScopes: string[][];
+      permittedAuthMethodTypes: number[];
+      permittedAuthMethodIds: string[];
+      permittedAuthMethodPubkeys: string[];
+      permittedAuthMethodScopes: string[][];
+      addPkpEthAddressAsPermittedAddress: boolean;
+      addPkpPubkeyAsPermittedAuthMethod: boolean;
+      sendPkpToItself: boolean;
+    };
+  }): Promise<ethers.ContractTransaction> => {
+    // Ensure derivedKeyId has 0x prefix
+    const derivedKeyId = claimMaterial.derivedKeyId.startsWith('0x')
+      ? claimMaterial.derivedKeyId
+      : `0x${claimMaterial.derivedKeyId}`;
+
+    claimMaterial.derivedKeyId = derivedKeyId;
+
+    const tx = await this._callWithAdjustedOverrides(
+      this.pkpHelperContract.write,
+      'claimAndMintNextAndAddAuthMethodsWithTypes',
+      [claimMaterial, authMethodData],
+    );
+
+    this.log('Claim and mint PKP with auth method tx:', tx);
+
+    return tx;
+  };
+
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
