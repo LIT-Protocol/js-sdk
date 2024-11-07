@@ -18,7 +18,7 @@ export const testUseEoaSessionSigsClaimAndMint = async (
   const { claims } = await devEnv.litNodeClient.executeJs({
     sessionSigs: eoaSessionSigs,
     code: `(async () => {
-      Lit.Actions.claimKey({keyId: "keyId"});
+      Lit.Actions.claimKey({ keyId: "keyId" });
     })();`,
   });
 
@@ -31,12 +31,12 @@ export const testUseEoaSessionSigsClaimAndMint = async (
 
   const claimMaterial = {
     keyType: keyType,
-    derivedKeyId: derivedKeyId,
+    derivedKeyId: `0x${derivedKeyId}`,
     signatures: signatures,
   }
 
   const authMethodData = {
-    keyType: 2,
+    keyType: keyType,
     permittedIpfsCIDs: [],
     permittedIpfsCIDScopes: [],
     permittedAddresses: [],
@@ -50,15 +50,14 @@ export const testUseEoaSessionSigsClaimAndMint = async (
     sendPkpToItself: true,
   }
 
-  const mintCost = await devEnv.contractsClient.pkpNftContract.read.mintCost();
-
   const tx = await devEnv.contractsClient.pkpHelperContract.write.claimAndMintNextAndAddAuthMethodsWithTypes(
     claimMaterial,
     authMethodData,
     {
-      value: mintCost,
+      gasLimit: 500000
     }
   )
+
 
   console.log("tx:", tx);
 
