@@ -2,6 +2,7 @@ import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
+import Hash from "typestub-ipfs-only-hash";
 
 import {
   ILitResource,
@@ -135,8 +136,7 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -654,40 +654,10 @@ export class LitNodeClientNodeJs
   };
 
   // ========== Promise Handlers ==========
-  getIpfsId = async ({
-    dataToHash,
-    sessionSigs,
-  }: {
-    dataToHash: string;
-    sessionSigs: SessionSigsMap;
-    debug?: boolean;
-  }) => {
-    const res = await this.executeJs({
-      ipfsId: LIT_ACTION_IPFS_HASH,
-      sessionSigs,
-      jsParams: {
-        dataToHash,
-      },
-    }).catch((e) => {
-      logError('Error getting IPFS ID', e);
-      throw e;
-    });
-
-    let data;
-
-    if (typeof res.response === 'string') {
-      try {
-        data = JSON.parse(res.response).res;
-      } catch (e) {
-        data = res.response;
-      }
-    }
-
-    if (!data.success) {
-      logError('Error getting IPFS ID', data.data);
-    }
-
-    return data.data;
+  getIpfsId = async ({ str }: {
+    str: string
+  }): Promise<`Qm${string}`> => {
+    return await Hash.of(Buffer.from(str)) as `Qm${string}`;
   };
 
   /**
@@ -716,10 +686,17 @@ export class LitNodeClientNodeJs
       });
     }
 
+    if (!params.code) {
+      return throwError({
+        message: 'code is required',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+    }
+
     // determine which node to run on
     const ipfsId = await this.getIpfsId({
-      dataToHash: params.code!,
-      sessionSigs: params.sessionSigs,
+      str: params.code,
     });
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
@@ -1293,8 +1270,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -2103,8 +2080,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2187,10 +2164,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
