@@ -227,7 +227,7 @@ export class LitContracts {
     this.randomPrivateKey = args?.randomPrivatekey ?? false;
     this.options = args?.options;
     this.debug = args?.debug ?? false;
-    this.network = args?.network || 'cayenne';
+    this.network = args?.network || 'datil-dev';
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = RPC_URL_BY_NETWORK[this.network];
