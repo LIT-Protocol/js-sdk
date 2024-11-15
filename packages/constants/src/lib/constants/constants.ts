@@ -814,6 +814,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  amoy: {
+    contractAddress: null,
+    chainId: 80002,
+    name: 'Amoy',
+    symbol: 'POL',
+    decimals: 18,
+    rpcUrls: ['https://rpc-amoy.polygon.technology'],
+    blockExplorerUrls: ['https://amoy.polygonscan.com'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**
