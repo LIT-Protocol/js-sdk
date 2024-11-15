@@ -3475,10 +3475,10 @@
   resolved "https://registry.yarnpkg.com/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.2.0.tgz#353ce4a76c83fadec272ea5674ede767650762fd"
   integrity sha512-yWJKmpGE6lUURKAaIltoPIE/wrbY3TEkqQt+X0m+7fQNnAv0keydnYvbiJFP1PnMhizmIWRWOG5KLhYyc/xl+g==
 
-"@lit-protocol/accs-schemas@^0.0.16":
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.16.tgz#af76e83416a17b3ae3ff992130de2281c60d7d0e"
-  integrity sha512-B64gQENzldUqlrzjMsnK7MxntaL1GMnOOwf9pd7kByoZ1e3+sp3RpO/VR9PQ8LECmke4pDSi7UU750PVHCyPQg==
+"@lit-protocol/accs-schemas@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.17.tgz#d7fcd6c7c533fb415a87b14dfaeb5bfa611fdd79"
+  integrity sha512-Vh0+U0O70S66w/d6/BUX8LvZ350MKzr/UYghk3EP8Ekcp+qt/V3CL7qSTtqkLxA9KjD5eAcHCneySbDxRalXVQ==
   dependencies:
     ajv "^8.12.0"
 
