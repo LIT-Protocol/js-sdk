@@ -261,23 +261,11 @@ export class TinnyEnvironment {
       throw new Error(`Network not supported: "${this.network}"`);
     }
 
-    if (globalThis.wasmExports) {
-      console.warn(
-        'WASM modules already loaded. Will overide when connect is called'
+    this.litNodeClient.on('connected', () => {
+      console.log(
+        'Received `connected` event from `litNodeClient. Ready to go!'
       );
-    }
-
-    if (globalThis.wasmECDSA) {
-      console.warn(
-        'WASM modules already loaded. wil overide. when connect is called'
-      );
-    }
-
-    if (globalThis.wasmSevSnpUtils) {
-      console.warn(
-        'WASM modules already loaded. wil overide. when connect is called'
-      );
-    }
+    });
 
     await this.litNodeClient.connect();
 

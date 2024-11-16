@@ -2203,6 +2203,18 @@ export class LitNodeClientNodeJs
 
     const signatures: SessionSigsMap = {};
 
+    if (!this.ready) {
+      // If the client isn't ready, `connectedNodes` may be out-of-date, and we should throw an error immediately
+      const message =
+        '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+
+      throwError({
+        message,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+      });
+    }
+
     this.connectedNodes.forEach((nodeAddress: string) => {
       const toSign: SessionSigningTemplate = {
         ...signingTemplate,

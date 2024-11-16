@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { EventEmitter } from 'eventemitter3';
 
 import {
   canonicalAccessControlConditionFormatter,
@@ -63,7 +64,6 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
@@ -132,7 +132,7 @@ const FALLBACK_RPC_URLS = [
   'https://eth.llamarpc.com',
 ];
 
-export class LitCore {
+export class LitCore extends EventEmitter {
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
@@ -165,6 +165,8 @@ export class LitCore {
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
+    super();
+
     if (!(config.litNetwork in LIT_NETWORKS)) {
       const supportedNetwork = Object.values(LIT_NETWORK).join(', ');
 
@@ -308,20 +310,16 @@ export class LitCore {
 
   // ========== Scoped Class Helpers ==========
   private async _handleStakingContractStateChange(state: StakingStates) {
-    log(`New state detected: "${state}"`);
+    try {
+      log(`New state detected: "${state}"`);
 
-    const validatorData = await this._getValidatorData();
+      if (state === StakingStates.Active) {
+        const validatorData = await this._getValidatorData();
 
-    if (state === StakingStates.Active) {
-      // We always want to track the most recent epoch number on _all_ networks
-
-      this._epochState = await this._fetchCurrentEpochState(
-        validatorData.epochInfo
-      );
-
-      if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
-        try {
+        if (
+          CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised'
+        ) {
           log(
             'State found to be new validator set locked, checking validator set'
           );
@@ -330,39 +328,55 @@ export class LitCore {
           const delta: string[] = validatorData.bootstrapUrls.filter((item) =>
             existingNodeUrls.includes(item)
           );
-          // if the sets differ we reconnect.
+
+          // check if the node sets are non-matching and re-connect if they do not.
           if (delta.length > 1) {
-            // check if the node sets are non-matching and re-connect if they do not.
             /*
-                TODO: This covers *most* cases where a node may come in or out of the active
-                set which we will need to re attest to the execution environments.
-                However, the sdk currently does not know if there is an active network operation pending.
-                Such that the state when the request was sent will now mutate when the response is sent back.
-                The sdk should be able to understand its current execution environment and wait on an active
-                network request to the previous epoch's node set before changing over.
-              */
+                  TODO: This covers *most* cases where a node may come in or out of the active
+                  set which we will need to re attest to the execution environments.
+                  However, the sdk currently does not know if there is an active network operation pending.
+                  Such that the state when the request was sent will now mutate when the response is sent back.
+                  The sdk should be able to understand its current execution environment and wait on an active
+                  network request to the previous epoch's node set before changing over.
+                */
             log(
               'Active validator sets changed, new validators ',
               delta,
               'starting node connection'
             );
+            await this.connect(); // Will update `epochInfo`
           }
-
-          await this.connect();
-        } catch (err: unknown) {
-          // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
-          // But for now, our every-30-second network sync will fix things in at most 30s from now.
-          // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
-          const { message = '' } = err as
-            | Error
-            | NodeClientErrorV0
-            | NodeClientErrorV1;
-          logError(
-            'Error while attempting to reconnect to nodes after epoch transition:',
-            message
+        } else {
+          // In case of centralised networks, we don't run `connect()` flow, so we will manually update epochInfo here
+          this._epochState = await this._fetchCurrentEpochState(
+            validatorData.epochInfo
           );
         }
       }
+    } catch (err: unknown) {
+      // Ensure that any methods that check `this.ready` throw errors to the caller, and any consumers can check appropriately
+      this.ready = false;
+
+      const { message = '' } = err as
+        | Error
+        | NodeClientErrorV0
+        | NodeClientErrorV1;
+      logError(
+        'Error while attempting to reconnect to nodes after epoch transition:',
+        message
+      );
+
+      // Signal to any listeners that we've encountered a fatal error
+      this.emit(
+        'error',
+        new Error(
+          'Error while attempting to reconnect to nodes after epoch transition:' +
+            message
+        )
+      );
+
+      // Signal to any listeners that we're 'disconnected' from LIT network
+      this.emit('disconnected', true);
     }
   }
 
@@ -408,6 +422,7 @@ export class LitCore {
     this._stopListeningForNewEpoch();
     // this._stopNetworkPolling();
     if (globalThis.litConfig) delete globalThis.litConfig;
+    this.emit('disconnected', true);
   }
 
   // _stopNetworkPolling() {
@@ -492,11 +507,6 @@ export class LitCore {
   }
 
   private async _connect() {
-    // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
-    this._stopListeningForNewEpoch();
-    // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
-    // this._stopNetworkPolling();
-
     // Initialize a contractContext if we were not given one; this allows interaction against the staking contract
     // to be handled locally from then on
     if (!this.config.contractContext) {
@@ -531,7 +541,6 @@ export class LitCore {
     }
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
-    // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
     const validatorData = await this._getValidatorData();
 
     this._stakingContract = validatorData.stakingContract;
@@ -564,6 +573,8 @@ export class LitCore {
       subnetPubkey: this.subnetPubKey,
       latestBlockhash: this.latestBlockhash,
     });
+
+    this.emit('connected', true);
 
     // browser only
     if (isBrowser()) {
