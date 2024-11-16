@@ -113,6 +113,8 @@ import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoa
 // Use the current LIT action code to test against
 setLitActionsCodeToLocal();
 
+import { testPkpSessionSigsIsValidAfterEllapsedTime } from './tests/testPkpSessionSigsIsValidAfterEllapsedTime';
+
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
@@ -187,6 +189,7 @@ setLitActionsCodeToLocal();
     testUsePkpSessionSigsToEncryptDecryptString,
     testUsePkpSessionSigsToEncryptDecryptFile,
     testUsePkpSessionSigsToEncryptDecryptZip,
+    testPkpSessionSigsIsValidAfterEllapsedTime,
   };
 
   const litActionSessionSigsTests = {
