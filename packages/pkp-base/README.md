@@ -22,11 +22,4 @@ This submodule defines a PKPBase class, providing shared wallet functionality fo
 yarn add @lit-protocol/pkp-base
 ```
 
-### Vanilla JS (UMD)
 
-```js
-<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-base-vanilla/pkp-base.js"></script>
-<script>
-  console.log(LitJsSdk_pkpBase);
-</script>
-```
