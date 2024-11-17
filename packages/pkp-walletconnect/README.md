@@ -25,3 +25,7 @@ Run `nx build pkp-walletconnect` to build the library.
 ### Running unit tests
 
 Run `nx test pkp-walletconnect` to execute the unit tests via [Jest](https://jestjs.io).
+
+### Usage 
+
+This libraray is primmarily intended for use with the `pkp-client` and is integrated within the Lit Protocol ecosystem.
