@@ -1,16 +1,22 @@
+import {
+  InvalidArgumentException,
+  RemovedFunctionError,
+} from '@lit-protocol/constants';
+import depd from 'depd';
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
+import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 import {
+  AuthSig,
   AttenuationsObject,
   CID as CIDString,
-  ILitResource,
-  ISessionCapabilityObject,
-  LitAbility,
   PlainJSON,
 } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe/siwe-helper';
-import { AuthSig } from '../models';
+
+const deprecated = depd('lit-js-sdk:auth-recap:session-capability-object');
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   private _inner: Recap;
@@ -74,12 +80,18 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   /** LIT specific methods */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility,
+    ability: LIT_ABILITY_VALUES,
     data: any = {}
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            litResource,
+            ability,
+          },
+        },
         `The specified Lit resource does not support the specified ability.`
       );
     }
@@ -105,7 +117,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
   verifyCapabilitiesForResource(
     litResource: ILitResource,
-    ability: LitAbility
+    ability: LIT_ABILITY_VALUES
   ): boolean {
     // Validate Lit ability is compatible with the Lit resource.
     // The only exception is if there's a wildcard resource key in the session capability object.

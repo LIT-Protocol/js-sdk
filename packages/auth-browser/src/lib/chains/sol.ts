@@ -4,12 +4,13 @@ import {
   ELeft,
   ERight,
   IEither,
-  LIT_ERROR,
   LOCAL_STORAGE_KEYS,
+  NoWalletException,
+  UnknownError,
 } from '@lit-protocol/constants';
 
 import { IProvider, AuthSig } from '@lit-protocol/types';
-import { log, throwError } from '@lit-protocol/misc';
+import { log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 // import { toString as uint8arrayToString } from 'uint8arrays';
 
@@ -34,15 +35,12 @@ const getProvider = (): IEither<any> => {
     // @ts-ignore
     resultOrError = ERight(window?.solana ?? window?.backpack);
   } else {
-    // -- finally
-    const message =
-      'No web3 wallet was found that works with Solana.  Install a Solana wallet or choose another chain';
-
-    resultOrError = ELeft({
-      message,
-      errorKind: LIT_ERROR.NO_WALLET_EXCEPTION.kind,
-      errorCode: LIT_ERROR.NO_WALLET_EXCEPTION.name,
-    });
+    resultOrError = ELeft(
+      new NoWalletException(
+        {},
+        'No web3 wallet was found that works with Solana. Install a Solana wallet or choose another chain'
+      )
+    );
   }
 
   return resultOrError;
@@ -52,17 +50,23 @@ const getProvider = (): IEither<any> => {
  *
  * Get Solana provider
  *
- * @returns { Promise<IProvider | undefined }
+ * @returns { Promise<IProvider }
  */
-export const connectSolProvider = async (): Promise<IProvider | undefined> => {
+export const connectSolProvider = async (): Promise<IProvider> => {
   const providerOrError = getProvider();
 
   if (providerOrError.type === 'ERROR') {
-    throwError(providerOrError.result);
-    return;
+    throw new UnknownError(
+      {
+        info: {
+          provider: providerOrError.result,
+        },
+      },
+      'Failed to get provider'
+    );
   }
 
-  let provider: any = providerOrError.result;
+  const provider = providerOrError.result;
 
   // No need to reconnect if already connected, some wallets such as Backpack throws an error when doing so.
   if (!provider.isConnected) {
@@ -93,32 +97,20 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
 
   let authSigOrError = getStorageItem(key);
 
-  // let authSig = localStorage.getItem("lit-auth-sol-signature");
-  let authSig: AuthSig;
-
   // -- case: if unable to get auth from local storage
   if (authSigOrError.type === EITHER_TYPE.ERROR) {
     log('signing auth message because sig is not in local storage');
 
     await signAndSaveAuthMessage({ provider });
 
-    authSigOrError.type = EITHER_TYPE.SUCCESS;
-    // @ts-ignore
-    authSigOrError.result = getStorageItem(key);
+    // Refetch authSigOrError written in previous line
+    authSigOrError = getStorageItem(key);
   }
 
   //   @ts-ignore
   window.test = authSigOrError;
 
-  try {
-    // when it's not in local storage, it's a string
-    // @ts-ignore
-    authSig = JSON.parse(authSigOrError.result.result);
-  } catch (e) {
-    // when it's in local storage, it's an object
-    // @ts-ignore
-    authSig = JSON.parse(authSigOrError.result);
-  }
+  let authSig: AuthSig = JSON.parse(authSigOrError.result as string);
 
   // -- if the wallet address isn't the same as the address from local storage
   if (account !== authSig.address) {
@@ -128,11 +120,8 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
 
     await signAndSaveAuthMessage({ provider });
 
-    authSigOrError.type = EITHER_TYPE.SUCCESS;
-    // @ts-ignore
-    authSigOrError.result = getStorageItem(key);
-    // @ts-ignore
-    authSig = JSON.parse(authSigOrError.result);
+    authSigOrError = getStorageItem(key);
+    authSig = JSON.parse(authSigOrError.result as string);
   }
 
   log('authSig', authSig);
@@ -152,7 +141,7 @@ export const signAndSaveAuthMessage = async ({
   provider,
 }: {
   provider: any;
-}): Promise<AuthSig | undefined> => {
+}): Promise<AuthSig> => {
   const now = new Date().toISOString();
   const body = AUTH_SIGNATURE_BODY.replace('{{timestamp}}', now);
 

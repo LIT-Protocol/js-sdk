@@ -8,9 +8,9 @@ import { getBaseTransactionForNetwork } from './util';
 const { importPrivateKey, signTransactionWithEncryptedKey } = api;
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
- * ✅ NETWORK=manzano yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
- * ✅ NETWORK=localchain yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=datil-test yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
+ * ✅ NETWORK=custom yarn test:local --filter=testFailEthereumSignTransactionWrappedKeyWithInvalidParam
  */
 export const testFailEthereumSignTransactionWrappedKeyWithInvalidParam = async (
   devEnv: TinnyEnvironment

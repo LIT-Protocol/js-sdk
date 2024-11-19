@@ -1,15 +1,14 @@
-import { LIT_ERROR } from '@lit-protocol/constants';
-
+import { InvalidAccessControlConditions } from '@lit-protocol/constants';
+import { log } from '@lit-protocol/misc';
 import {
   AccessControlConditions,
-  ConditionItem,
   EvmContractConditions,
   JsonSigningResourceId,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
+import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
-import { log, throwError } from '@lit-protocol/misc';
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -17,7 +16,6 @@ import {
   canonicalSolRpcConditionFormatter,
   canonicalUnifiedAccessControlConditionFormatter,
 } from './canonicalFormatter';
-import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 // Same as:
 // const unifiedAccs = [
@@ -99,19 +97,25 @@ export const hashUnifiedAccessControlConditions = (
   // check if there's any undefined in the conditions
   const hasUndefined = conditions.some((c) => c === undefined);
   if (hasUndefined) {
-    throwError({
-      message: 'Invalid access control conditions',
-      errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-      errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-    });
+    throw new InvalidAccessControlConditions(
+      {
+        info: {
+          conditions,
+        },
+      },
+      'Invalid access control conditions'
+    );
   }
 
   if (conditions.length === 0) {
-    throwError({
-      message: 'No conditions provided',
-      errorKind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
-      errorCode: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
-    });
+    throw new InvalidAccessControlConditions(
+      {
+        info: {
+          conditions,
+        },
+      },
+      'No conditions provided'
+    );
   }
   const toHash = JSON.stringify(conditions);
 
