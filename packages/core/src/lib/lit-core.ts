@@ -112,6 +112,7 @@ export type LitNodeClientConfigWithDefaults = Required<
     bootstrapUrls: string[];
   } & {
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+    networkType?: 'mainnet' | 'cloneNet';
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
@@ -145,6 +146,7 @@ export class LitCore {
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
+    networkType: 'mainnet',
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -246,7 +248,9 @@ export class LitCore {
    * @returns An object containing the validator data.
    * @throws Error if minNodeCount is not provided, is less than or equal to 0, or if bootstrapUrls are not available.
    */
-  private async _getValidatorData(): Promise<{
+  private async _getValidatorData(
+    networkType: 'mainnet' | 'cloneNet'
+  ): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
@@ -258,6 +262,7 @@ export class LitCore {
         networkContext: this.config.contractContext,
         rpcUrl: this.config.rpcUrl,
         nodeProtocol: this.config.nodeProtocol,
+        networkType,
       });
 
     // Validate minNodeCount
@@ -297,7 +302,9 @@ export class LitCore {
   ) {
     log(`New state detected: "${state}"`);
 
-    const validatorData = await this._getValidatorData();
+    const validatorData = await this._getValidatorData(
+      this.config.networkType || 'mainnet'
+    );
 
     if (state === STAKING_STATES.Active) {
       // We always want to track the most recent epoch number on _all_ networks
@@ -519,7 +526,9 @@ export class LitCore {
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
     // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
-    const validatorData = await this._getValidatorData();
+    const validatorData = await this._getValidatorData(
+      this.config.networkType || 'mainnet'
+    );
 
     this._stakingContract = validatorData.stakingContract;
     this.config.minNodeCount = validatorData.minNodeCount;
@@ -952,7 +961,9 @@ export class LitCore {
         'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
       );
       try {
-        const validatorData = await this._getValidatorData();
+        const validatorData = await this._getValidatorData(
+          this.config.networkType || 'mainnet'
+        );
         epochInfo = validatorData.epochInfo;
       } catch (error) {
         throw new UnknownError(

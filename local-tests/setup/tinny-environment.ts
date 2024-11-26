@@ -50,6 +50,9 @@ export class TinnyEnvironment {
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
+    NETWORK_TYPE: (process.env['NETWORK_TYPE'] || 'mainnet') as
+      | 'mainnet'
+      | 'cloneNet',
 
     // Available Accounts
     // ==================
@@ -242,18 +245,21 @@ export class TinnyEnvironment {
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
+        networkType: this.processEnvs.NETWORK_TYPE || 'mainnet',
       });
     } else if (centralisation === 'decentralised') {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: true,
         debug: this.processEnvs.DEBUG,
+        networkType: this.processEnvs.NETWORK_TYPE || 'mainnet',
       });
     } else if (centralisation === 'centralised') {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: false,
         debug: this.processEnvs.DEBUG,
+        networkType: this.processEnvs.NETWORK_TYPE || 'mainnet',
       });
     } else {
       throw new Error(`Network not supported: "${this.network}"`);

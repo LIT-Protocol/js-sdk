@@ -6,6 +6,7 @@ import {
   EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
+  LitContract,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
@@ -632,11 +633,13 @@ export class LitContracts {
    * @returns The Staking contract instance.
    * @throws Error if required contract data is missing or if the Staking contract cannot be obtained.
    */
-  public static async getStakingContract(
+  public static async getContractInstance<T = ethers.Contract>(
     network: LIT_NETWORKS_KEYS,
+    contractName: string,
     context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string
-  ) {
+    rpcUrl?: string,
+    contractAddress?: string
+  ): Promise<T> {
     let provider: ethers.providers.StaticJsonRpcProvider;
 
     const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
@@ -651,82 +654,80 @@ export class LitContracts {
     }
 
     if (!context) {
-      const contractData = await LitContracts._resolveContractContext(
-        network
-        //context
+      const contractData = await LitContracts._resolveContractContext(network);
+
+      const contractInfo = contractData.find(
+        (item: { name: string }) => item.name === contractName
       );
 
-      const stakingContract = contractData.find(
-        (item: { name: string }) => item.name === 'Staking'
-      );
-      const { address, abi } = stakingContract!;
-
-      // Validate the required data
-      if (!address || !abi) {
+      if (!contractInfo || !contractInfo.address || !contractInfo.abi) {
         throw new InitError(
           {
             info: {
-              address,
-              abi,
+              contractName,
               network,
             },
           },
-          '❌ Required contract data is missing'
+          `❌ Required contract data for ${contractName} is missing`
         );
       }
 
-      return new ethers.Contract(address, abi, provider);
+      return new ethers.Contract(
+        contractInfo.address,
+        contractInfo.abi,
+        provider
+      ) as T;
     } else {
-      // if we have contract context then we determine if there exists a `resolverAddress`
-      // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
-        const stakingContract = (context as LitContractContext).Staking;
+        const contractContext = (context as LitContractContext)[contractName];
 
-        if (!stakingContract.address) {
+        if (!contractContext?.address) {
           throw new InitError(
             {
               info: {
-                stakingContract,
+                contractName,
                 context,
               },
             },
-            '❌ Could not get staking contract address from contract context'
+            `❌ Could not get ${contractName} address from contract context`
           );
         }
+
         return new ethers.Contract(
-          stakingContract.address,
-          stakingContract.abi ?? StakingData.abi,
+          contractAddress || contractContext.address,
+          contractContext.abi,
           provider
-        );
+        ) as T;
       } else {
         const contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
           provider,
-          ['Staking']
+          [contractName as ContractName]
         );
-        if (!contractContext.Staking.address) {
+
+        const resolvedContract = contractContext[contractName];
+
+        if (!resolvedContract?.address) {
           throw new InitError(
             {
               info: {
-                contractContext,
+                contractName,
                 context,
               },
             },
-            '❌ Could not get Staking Contract from contract resolver instance'
+            `❌ Could not get ${contractName} from contract resolver instance`
           );
         }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore data is callable as an array type
-        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
-          (data: any) => {
-            return data.name === 'Staking';
-          }
-        );
+
+        const contractABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
+          (data: any) => data.name === contractName
+        )?.contracts?.[0]?.ABI;
+
         return new ethers.Contract(
-          contractContext.Staking.address,
-          contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
+          contractAddress || resolvedContract.address,
+          resolvedContract.abi ?? contractABI,
           provider
-        );
+        ) as T;
       }
     }
   }
@@ -923,6 +924,11 @@ export class LitContracts {
           addresses.Multisender.address = contract.address;
           addresses.Multisender.abi = contract?.abi ?? MultisenderData.abi;
           break;
+        case 'CloneNet':
+          addresses.CloneNet = {};
+          addresses.CloneNet.address = contract.address;
+          addresses.CloneNet.abi = contract?.abi;
+          break;
       }
     }
 
@@ -951,8 +957,9 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) => {
-    const contract = await LitContracts.getStakingContract(
+    const contract = await LitContracts.getContractInstance(
       network,
+      'Staking',
       context,
       rpcUrl
     );
@@ -981,8 +988,9 @@ export class LitContracts {
     rpcUrl?: string,
     nodeProtocol?: typeof HTTP | typeof HTTPS | null
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(
+    const contract = await LitContracts.getContractInstance(
       network,
+      'Staking',
       context,
       rpcUrl
     );
@@ -1057,6 +1065,110 @@ export class LitContracts {
     return networks;
   };
 
+  public static async _getAllActiveUnkickedValidatorStructsAndCounts(
+    network: LIT_NETWORKS_KEYS,
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string,
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null
+  ) {
+    const cloneNetContract = await LitContracts.getContractInstance(
+      network,
+      'CloneNet',
+      context,
+      rpcUrl
+    );
+
+    // First get all the active staking contract addresses.
+    const activeStakingContractAddresses = await cloneNetContract[
+      'getActiveStakingContracts'
+    ]();
+
+    // Then, for each active staking contract, get the epoch, current validator count, and active unkicked validator structs.
+    const stakingAggregateDetails = [];
+
+    for (let i = 0; i < activeStakingContractAddresses.length; i++) {
+      const stakingContractAddress = activeStakingContractAddresses[i];
+
+      const stakingContract = await LitContracts.getContractInstance(
+        network,
+        'Staking',
+        context,
+        rpcUrl,
+        stakingContractAddress
+      );
+
+      console.log('stakingContract.address:', stakingContract.address);
+
+      // Get the epoch, current validator count, and active unkicked validator structs.
+      const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
+        await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
+
+      const typedEpochInfo: EpochInfo = {
+        epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
+        number: ethers.BigNumber.from(epochInfo[1]).toNumber(),
+        endTime: ethers.BigNumber.from(epochInfo[2]).toNumber(),
+        retries: ethers.BigNumber.from(epochInfo[3]).toNumber(),
+        timeout: ethers.BigNumber.from(epochInfo[4]).toNumber(),
+      };
+
+      const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
+
+      if (!minNodeCountInt) {
+        throw new Error('❌ Minimum validator count is not set');
+      }
+
+      if (activeUnkickedValidatorStructs.length < minNodeCountInt) {
+        throw new Error(
+          `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
+        );
+      }
+
+      console.log('typedEpochInfo:', typedEpochInfo);
+
+      const activeValidatorStructs: ValidatorStruct[] =
+        activeUnkickedValidatorStructs.map((item: any) => {
+          return {
+            ip: item[0],
+            ipv6: item[1],
+            port: item[2],
+            nodeAddress: item[3],
+            reward: item[4],
+            seconderPubkey: item[5],
+            receiverPubkey: item[6],
+          };
+        });
+
+      const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
+        // Convert the integer IP to a string format
+        const ip = intToIP(item.ip);
+        const port = item.port;
+
+        // Determine the protocol to use based on various conditions
+        const protocol =
+          // If nodeProtocol is defined, use it
+          nodeProtocol ||
+          // If port is 443, use HTTPS, otherwise use network-specific HTTP
+          (port === 443 ? HTTPS : HTTP_BY_NETWORK[network]) ||
+          // Fallback to HTTP if no other conditions are met
+          HTTP;
+
+        const url = `${protocol}${ip}:${port}`;
+
+        LitContracts.logger.debug("Validator's URL:", url);
+
+        return url;
+      });
+
+      stakingAggregateDetails.push({
+        stakingContract: stakingContract,
+        epochInfo: typedEpochInfo,
+        minNodeCount: minNodeCountInt,
+        bootstrapUrls: networks,
+      });
+    }
+    return stakingAggregateDetails;
+  }
+
   /**
    * Retrieves the connection information for a given network.
    *
@@ -1075,22 +1187,47 @@ export class LitContracts {
     networkContext,
     rpcUrl,
     nodeProtocol,
+    networkType,
   }: {
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+    networkType?: 'mainnet' | 'cloneNet';
   }): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
   }> => {
-    const stakingContract = await LitContracts.getStakingContract(
+    console.log('networkType:', networkType);
+
+    const stakingContract = await LitContracts.getContractInstance(
       litNetwork,
+      'Staking',
       networkContext,
       rpcUrl
     );
+
+    if (litNetwork === 'datil-test') {
+      const connectionInfoWithCloneNet =
+        await LitContracts._getAllActiveUnkickedValidatorStructsAndCounts(
+          litNetwork,
+          networkContext,
+          rpcUrl
+        );
+
+      console.log('connectionInfoWithCloneNet:', connectionInfoWithCloneNet);
+
+      const cloneNetInfo = connectionInfoWithCloneNet[0];
+      const mainNetInfo = connectionInfoWithCloneNet[1];
+
+      if (networkType === 'mainnet') {
+        return mainNetInfo;
+      } else {
+        return cloneNetInfo;
+      }
+    }
 
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
@@ -1189,11 +1326,13 @@ export class LitContracts {
     }
 
     // Normalize the data to the LitContractContext type
-    return data.data.map((c: any) => ({
+    const normalisedData = data.data.map((c: any) => ({
       address: c.contracts[0].address_hash,
       abi: c.contracts[0].ABI,
       name: c.name,
     }));
+
+    return normalisedData;
   }
 
   /**
