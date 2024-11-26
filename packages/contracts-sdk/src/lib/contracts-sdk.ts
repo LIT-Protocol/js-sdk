@@ -632,11 +632,12 @@ export class LitContracts {
    * @returns The Staking contract instance.
    * @throws Error if required contract data is missing or if the Staking contract cannot be obtained.
    */
-  public static async getStakingContract(
+  public static async getContractInstance<T = ethers.Contract>(
     network: LIT_NETWORKS_KEYS,
+    contractName: string,
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
-  ) {
+  ): Promise<T> {
     let provider: ethers.providers.StaticJsonRpcProvider;
 
     const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
@@ -651,82 +652,80 @@ export class LitContracts {
     }
 
     if (!context) {
-      const contractData = await LitContracts._resolveContractContext(
-        network
-        //context
+      const contractData = await LitContracts._resolveContractContext(network);
+
+      const contractInfo = contractData.find(
+        (item: { name: string }) => item.name === contractName
       );
 
-      const stakingContract = contractData.find(
-        (item: { name: string }) => item.name === 'Staking'
-      );
-      const { address, abi } = stakingContract!;
-
-      // Validate the required data
-      if (!address || !abi) {
+      if (!contractInfo || !contractInfo.address || !contractInfo.abi) {
         throw new InitError(
           {
             info: {
-              address,
-              abi,
+              contractName,
               network,
             },
           },
-          '❌ Required contract data is missing'
+          `❌ Required contract data for ${contractName} is missing`
         );
       }
 
-      return new ethers.Contract(address, abi, provider);
+      return new ethers.Contract(
+        contractInfo.address,
+        contractInfo.abi,
+        provider
+      ) as T;
     } else {
-      // if we have contract context then we determine if there exists a `resolverAddress`
-      // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
-        const stakingContract = (context as LitContractContext).Staking;
+        const contractContext = (context as LitContractContext)[contractName];
 
-        if (!stakingContract.address) {
+        if (!contractContext?.address) {
           throw new InitError(
             {
               info: {
-                stakingContract,
+                contractName,
                 context,
               },
             },
-            '❌ Could not get staking contract address from contract context'
+            `❌ Could not get ${contractName} address from contract context`
           );
         }
+
         return new ethers.Contract(
-          stakingContract.address,
-          stakingContract.abi ?? StakingData.abi,
+          contractContext.address,
+          contractContext.abi,
           provider
-        );
+        ) as T;
       } else {
         const contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
           provider,
-          ['Staking']
+          [contractName as ContractName]
         );
-        if (!contractContext.Staking.address) {
+
+        const resolvedContract = contractContext[contractName];
+
+        if (!resolvedContract?.address) {
           throw new InitError(
             {
               info: {
-                contractContext,
+                contractName,
                 context,
               },
             },
-            '❌ Could not get Staking Contract from contract resolver instance'
+            `❌ Could not get ${contractName} from contract resolver instance`
           );
         }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore data is callable as an array type
-        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
-          (data: any) => {
-            return data.name === 'Staking';
-          }
-        );
+
+        const contractABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
+          (data: any) => data.name === contractName
+        )?.contracts?.[0]?.ABI;
+
         return new ethers.Contract(
-          contractContext.Staking.address,
-          contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
+          resolvedContract.address,
+          resolvedContract.abi ?? contractABI,
           provider
-        );
+        ) as T;
       }
     }
   }
@@ -923,6 +922,11 @@ export class LitContracts {
           addresses.Multisender.address = contract.address;
           addresses.Multisender.abi = contract?.abi ?? MultisenderData.abi;
           break;
+        case 'CloneNet':
+          addresses.CloneNet = {};
+          addresses.CloneNet.address = contract.address;
+          addresses.CloneNet.abi = contract?.abi;
+          break;
       }
     }
 
@@ -951,8 +955,10 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) => {
-    const contract = await LitContracts.getStakingContract(
+
+    const contract = await LitContracts.getContractInstance(
       network,
+      'Staking',
       context,
       rpcUrl
     );
@@ -981,8 +987,9 @@ export class LitContracts {
     rpcUrl?: string,
     nodeProtocol?: typeof HTTP | typeof HTTPS | null
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(
+    const contract = await LitContracts.getContractInstance(
       network,
+      'Staking',
       context,
       rpcUrl
     );
@@ -1086,11 +1093,28 @@ export class LitContracts {
     minNodeCount: number;
     bootstrapUrls: string[];
   }> => {
-    const stakingContract = await LitContracts.getStakingContract(
+
+    const stakingContract = await LitContracts.getContractInstance(
       litNetwork,
+      'Staking',
       networkContext,
       rpcUrl
     );
+
+    if (litNetwork === 'datil-test') {
+      const cloneNetContract = await LitContracts.getContractInstance(
+        litNetwork,
+        'CloneNet',
+        networkContext,
+        rpcUrl
+      );
+      console.log("cloneNetContract:", cloneNetContract);
+      console.log("cloneNetContract address:", cloneNetContract.address);
+
+      const test = await cloneNetContract['getActiveStakingContracts']();
+      console.log("test:", test);
+      process.exit();
+    }
 
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
@@ -1189,11 +1213,13 @@ export class LitContracts {
     }
 
     // Normalize the data to the LitContractContext type
-    return data.data.map((c: any) => ({
+    const normalisedData = data.data.map((c: any) => ({
       address: c.contracts[0].address_hash,
       abi: c.contracts[0].ABI,
       name: c.name,
     }));
+
+    return normalisedData;
   }
 
   /**
