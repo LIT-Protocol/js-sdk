@@ -6,6 +6,7 @@ import {
   EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
+  LitContract,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
@@ -636,7 +637,8 @@ export class LitContracts {
     network: LIT_NETWORKS_KEYS,
     contractName: string,
     context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string
+    rpcUrl?: string,
+    contractAddress?: string,
   ): Promise<T> {
     let provider: ethers.providers.StaticJsonRpcProvider;
 
@@ -692,7 +694,7 @@ export class LitContracts {
         }
 
         return new ethers.Contract(
-          contractContext.address,
+          contractAddress || contractContext.address,
           contractContext.abi,
           provider
         ) as T;
@@ -722,7 +724,7 @@ export class LitContracts {
         )?.contracts?.[0]?.ABI;
 
         return new ethers.Contract(
-          resolvedContract.address,
+          contractAddress || resolvedContract.address,
           resolvedContract.abi ?? contractABI,
           provider
         ) as T;
@@ -1064,6 +1066,109 @@ export class LitContracts {
     return networks;
   };
 
+  public static async _getAllActiveUnkickedValidatorStructsAndCounts(
+    network: LIT_NETWORKS_KEYS,
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string,
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null,
+  ) {
+
+    const cloneNetContract = await LitContracts.getContractInstance(
+      network,
+      'CloneNet',
+      context,
+      rpcUrl
+    );
+
+    // First get all the active staking contract addresses.
+    const activeStakingContractAddresses = await cloneNetContract['getActiveStakingContracts']();
+
+    // Then, for each active staking contract, get the epoch, current validator count, and active unkicked validator structs.
+    const stakingAggregateDetails = [];
+
+    for (let i = 0; i < activeStakingContractAddresses.length; i++) {
+      const stakingContractAddress = activeStakingContractAddresses[i];
+
+      const stakingContract = await LitContracts.getContractInstance(
+        network,
+        'Staking',
+        context,
+        rpcUrl,
+        stakingContractAddress
+      );
+
+      console.log("stakingContract.address:", stakingContract.address);
+
+      // Get the epoch, current validator count, and active unkicked validator structs.
+      const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
+        await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
+
+      const typedEpochInfo: EpochInfo = {
+        epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
+        number: ethers.BigNumber.from(epochInfo[1]).toNumber(),
+        endTime: ethers.BigNumber.from(epochInfo[2]).toNumber(),
+        retries: ethers.BigNumber.from(epochInfo[3]).toNumber(),
+        timeout: ethers.BigNumber.from(epochInfo[4]).toNumber(),
+      };
+
+      const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
+
+      if (!minNodeCountInt) {
+        throw new Error('❌ Minimum validator count is not set');
+      }
+
+      if (activeUnkickedValidatorStructs.length < minNodeCountInt) {
+        throw new Error(
+          `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
+        );
+      }
+
+      console.log("typedEpochInfo:", typedEpochInfo);
+
+      const activeValidatorStructs: ValidatorStruct[] =
+        activeUnkickedValidatorStructs.map((item: any) => {
+          return {
+            ip: item[0],
+            ipv6: item[1],
+            port: item[2],
+            nodeAddress: item[3],
+            reward: item[4],
+            seconderPubkey: item[5],
+            receiverPubkey: item[6],
+          };
+        });
+
+      const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
+        // Convert the integer IP to a string format
+        const ip = intToIP(item.ip);
+        const port = item.port;
+
+        // Determine the protocol to use based on various conditions
+        const protocol =
+          // If nodeProtocol is defined, use it
+          nodeProtocol ||
+          // If port is 443, use HTTPS, otherwise use network-specific HTTP
+          (port === 443 ? HTTPS : HTTP_BY_NETWORK[network]) ||
+          // Fallback to HTTP if no other conditions are met
+          HTTP;
+
+        const url = `${protocol}${ip}:${port}`;
+
+        LitContracts.logger.debug("Validator's URL:", url);
+
+        return url;
+      });
+
+      stakingAggregateDetails.push({
+        stakingContract: stakingContract,
+        epochInfo: typedEpochInfo,
+        minNodeCount: minNodeCountInt,
+        bootstrapUrls: networks,
+      });
+    }
+    return stakingAggregateDetails;
+  }
+
   /**
    * Retrieves the connection information for a given network.
    *
@@ -1082,17 +1187,21 @@ export class LitContracts {
     networkContext,
     rpcUrl,
     nodeProtocol,
+    networkType,
   }: {
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+    networkType?: 'mainnet' | 'cloneNet'
   }): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
   }> => {
+
+    console.log("networkType:", networkType);
 
     const stakingContract = await LitContracts.getContractInstance(
       litNetwork,
@@ -1102,18 +1211,22 @@ export class LitContracts {
     );
 
     if (litNetwork === 'datil-test') {
-      const cloneNetContract = await LitContracts.getContractInstance(
+      const connectionInfoWithCloneNet = await LitContracts._getAllActiveUnkickedValidatorStructsAndCounts(
         litNetwork,
-        'CloneNet',
         networkContext,
         rpcUrl
       );
-      console.log("cloneNetContract:", cloneNetContract);
-      console.log("cloneNetContract address:", cloneNetContract.address);
 
-      const test = await cloneNetContract['getActiveStakingContracts']();
-      console.log("test:", test);
-      process.exit();
+      console.log("connectionInfoWithCloneNet:", connectionInfoWithCloneNet);
+
+      const cloneNetInfo = connectionInfoWithCloneNet[0];
+      const mainNetInfo = connectionInfoWithCloneNet[1];
+
+      if (networkType === 'mainnet') {
+        return mainNetInfo;
+      } else {
+        return cloneNetInfo;
+      }
     }
 
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =

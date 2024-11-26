@@ -187,6 +187,7 @@ export interface LitNodeClientConfig {
   storageProvider?: StorageProvider;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string;
+  networkType?: 'mainnet' | 'cloneNet';
 }
 
 export type CustomNetwork = Pick<
