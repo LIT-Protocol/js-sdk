@@ -36,7 +36,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-        (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -50,7 +50,9 @@ export class TinnyEnvironment {
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
-    NETWORK_TYPE: (process.env['NETWORK_TYPE'] || 'mainnet') as 'mainnet' | 'cloneNet',
+    NETWORK_TYPE: (process.env['NETWORK_TYPE'] || 'mainnet') as
+      | 'mainnet'
+      | 'cloneNet',
 
     // Available Accounts
     // ==================

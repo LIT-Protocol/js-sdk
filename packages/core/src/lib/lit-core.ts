@@ -248,7 +248,9 @@ export class LitCore {
    * @returns An object containing the validator data.
    * @throws Error if minNodeCount is not provided, is less than or equal to 0, or if bootstrapUrls are not available.
    */
-  private async _getValidatorData(networkType: 'mainnet' | 'cloneNet'): Promise<{
+  private async _getValidatorData(
+    networkType: 'mainnet' | 'cloneNet'
+  ): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
@@ -300,7 +302,9 @@ export class LitCore {
   ) {
     log(`New state detected: "${state}"`);
 
-    const validatorData = await this._getValidatorData(this.config.networkType || 'mainnet');
+    const validatorData = await this._getValidatorData(
+      this.config.networkType || 'mainnet'
+    );
 
     if (state === STAKING_STATES.Active) {
       // We always want to track the most recent epoch number on _all_ networks
@@ -522,7 +526,9 @@ export class LitCore {
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
     // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
-    const validatorData = await this._getValidatorData(this.config.networkType || 'mainnet');
+    const validatorData = await this._getValidatorData(
+      this.config.networkType || 'mainnet'
+    );
 
     this._stakingContract = validatorData.stakingContract;
     this.config.minNodeCount = validatorData.minNodeCount;
@@ -674,9 +680,11 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not handshake with nodes after timeout of ${this.config.connectTimeout
-            }ms. Could only connect to ${Object.keys(serverKeys).length} of ${this.config.bootstrapUrls.length
-            } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          const msg = `Error: Could not handshake with nodes after timeout of ${
+            this.config.connectTimeout
+          }ms. Could only connect to ${Object.keys(serverKeys).length} of ${
+            this.config.bootstrapUrls.length
+          } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             throw new InitError({}, msg);
@@ -953,7 +961,9 @@ export class LitCore {
         'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
       );
       try {
-        const validatorData = await this._getValidatorData(this.config.networkType || 'mainnet');
+        const validatorData = await this._getValidatorData(
+          this.config.networkType || 'mainnet'
+        );
         epochInfo = validatorData.epochInfo;
       } catch (error) {
         throw new UnknownError(
@@ -982,8 +992,8 @@ export class LitCore {
       this._epochCache.currentNumber &&
       this._epochCache.startTime &&
       Math.floor(Date.now() / 1000) <
-      this._epochCache.startTime +
-      Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
+        this._epochCache.startTime +
+          Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
       this._epochCache.currentNumber >= 3 // FIXME: Why this check?
     ) {
       return this._epochCache.currentNumber - 1;
@@ -1014,7 +1024,7 @@ export class LitCore {
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    SendNodeCommand): Promise<any> => {
+  SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epoch: this.currentEpochNumber };
 
