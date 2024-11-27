@@ -1,0 +1,37 @@
+{
+  "name": "automation",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/automation/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "cache": false,
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/automation",
+        "main": "packages/automation/src/index.ts",
+        "tsConfig": "packages/automation/tsconfig.lib.json",
+        "assets": ["packages/automation/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/automation/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/automation"],
+      "options": {
+        "jestConfig": "packages/automation/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

@@ -86,6 +86,7 @@
     "@nx/web": "17.3.0",
     "@solana/web3.js": "^1.95.3",
     "@types/depd": "^1.1.36",
+    "@types/events": "^3.0.3",
     "@types/jest": "27.4.1",
     "@types/node": "18.19.18",
     "@types/secp256k1": "^4.0.6",
