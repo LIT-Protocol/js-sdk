@@ -18,7 +18,8 @@ type MachineStatus = 'running' | 'stopped';
  * A StateMachine class that manages states and transitions between them.
  */
 export class StateMachine {
-  private status: MachineStatus = 'stopped';
+  public id: string;
+  public status: MachineStatus = 'stopped';
   private states = new Map<string, State>();
   private transitions = new Map<string, Map<string, Transition>>();
   private currentState?: State;
@@ -26,6 +27,7 @@ export class StateMachine {
   private debug = false;
 
   constructor(params: BaseStateMachineParams = {}) {
+    this.id = this.generateId();
     this.debug = params.debug ?? false;
   }
 
@@ -172,5 +174,9 @@ export class StateMachine {
       this.currentState = undefined;
       throw new Error(`Could not enter state ${stateKey}`);
     }
+  }
+
+  private generateId(): string {
+    return Math.random().toString(36).substring(2);
   }
 }

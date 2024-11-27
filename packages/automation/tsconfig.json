@@ -1,16 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "system",
+    "module": "commonjs",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowJs": true,
-    "checkJs": false,
-    "resolveJsonModule": false
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "include": ["global.d.ts"],

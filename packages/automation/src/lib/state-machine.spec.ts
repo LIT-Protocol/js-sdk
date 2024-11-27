@@ -38,6 +38,13 @@ describe('StateMachine', () => {
     });
   });
 
+  it('should generate a unique id for each state machine instance', () => {
+    const anotherStateMachine = new StateMachine();
+    expect(stateMachine.id).toBeDefined();
+    expect(anotherStateMachine.id).toBeDefined();
+    expect(stateMachine.id).not.toEqual(anotherStateMachine.id);
+  });
+
   it('should add states and transitions correctly', () => {
     stateMachine.addTransition({
       fromState: 'A',

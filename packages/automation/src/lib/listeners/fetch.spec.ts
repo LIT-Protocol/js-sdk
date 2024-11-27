@@ -28,7 +28,9 @@ describe('FetchListener', () => {
 
   it('should fetch data and emit the correct value', async () => {
     let callbackCalled: () => void;
-    const callbackPromise = new Promise<void>(resolve => callbackCalled = resolve);
+    const callbackPromise = new Promise<void>(
+      (resolve) => (callbackCalled = resolve)
+    );
 
     const callback = jest.fn(async () => {
       callbackCalled();
