@@ -857,15 +857,15 @@ export class LitCore {
       const provider = await this._getProviderWithFallback();
 
       if (!provider) {
-        logError(
-          'All fallback RPC URLs failed. Unable to retrieve blockhash.'
-        );
+        logError('All fallback RPC URLs failed. Unable to retrieve blockhash.');
         return;
       }
 
       try {
         // We use a previous block to avoid nodes not having received the latest block yet
-        const priorBlock = await provider.getBlock(BLOCKHASH_COUNT_PROVIDER_DELAY);
+        const priorBlock = await provider.getBlock(
+          BLOCKHASH_COUNT_PROVIDER_DELAY
+        );
         this.latestBlockhash = priorBlock.hash;
         this.lastBlockHashRetrieved = priorBlock.timestamp;
         log(

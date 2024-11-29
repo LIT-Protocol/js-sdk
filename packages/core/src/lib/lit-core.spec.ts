@@ -8,7 +8,8 @@ describe('LitCore', () => {
   describe('getLatestBlockhash', () => {
     let originalFetch: typeof fetch;
     let originalDateNow: typeof Date.now;
-    const mockBlockhashUrl = 'https://block-indexer-url.com/get_most_recent_valid_block';
+    const mockBlockhashUrl =
+      'https://block-indexer-url.com/get_most_recent_valid_block';
 
     beforeEach(() => {
       core = new LitCore({
@@ -51,7 +52,12 @@ describe('LitCore', () => {
       const blockNumber = 12345;
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ blockhash: mockBlockhash, timestamp: currentTime, blockNumber }),
+        json: () =>
+          Promise.resolve({
+            blockhash: mockBlockhash,
+            timestamp: currentTime,
+            blockNumber,
+          }),
       });
       Date.now = jest.fn().mockReturnValue(currentTime);
 
@@ -73,7 +79,9 @@ describe('LitCore', () => {
       core['_getProviderWithFallback'] = jest.fn(() => Promise.resolve(null));
 
       // Execute & Assert
-      await expect(core.getLatestBlockhash()).rejects.toThrow(InvalidEthBlockhash);
+      await expect(core.getLatestBlockhash()).rejects.toThrow(
+        InvalidEthBlockhash
+      );
     });
 
     it('should handle fetch failure and use fallback RPC', async () => {
@@ -87,7 +95,7 @@ describe('LitCore', () => {
         getBlock: jest.fn().mockResolvedValue({
           hash: mockBlockhash,
           number: 12345,
-          timestamp: currentTime
+          timestamp: currentTime,
         }),
       };
       jest.spyOn(core as any, '_getProviderWithFallback').mockResolvedValue({
@@ -110,17 +118,18 @@ describe('LitCore', () => {
       Date.now = jest.fn().mockReturnValue(currentTime);
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          blockhash: null,
-          blockNumber: null
-        }),
+        json: () =>
+          Promise.resolve({
+            blockhash: null,
+            blockNumber: null,
+          }),
       });
       const mockProvider = {
         getBlockNumber: jest.fn().mockResolvedValue(12345),
         getBlock: jest.fn().mockResolvedValue({
           hash: mockBlockhash,
           number: 12345,
-          timestamp: currentTime
+          timestamp: currentTime,
         }),
       };
       jest.spyOn(core as any, '_getProviderWithFallback').mockResolvedValue({
@@ -141,11 +150,14 @@ describe('LitCore', () => {
       const currentTime = 1000000;
       Date.now = jest.fn().mockReturnValue(currentTime);
 
-      global.fetch = jest.fn().mockImplementation(() =>
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Network timeout')), 1000)
-        )
-      );
+      global.fetch = jest
+        .fn()
+        .mockImplementation(
+          () =>
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Network timeout')), 1000)
+            )
+        );
 
       const mockProvider = {
         getBlockNumber: jest.fn().mockResolvedValue(12345),
@@ -162,5 +174,4 @@ describe('LitCore', () => {
       );
     });
   });
-
 });
