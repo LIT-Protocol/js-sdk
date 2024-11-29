@@ -1,9 +1,12 @@
 import { Listener } from '../listeners';
 
+export type Check = (values: (any | undefined)[]) => Promise<boolean>;
+
 /**
  * A Transition class that manages state transitions based on listeners and conditions.
  */
 export interface BaseTransitionParams {
+  debug?: boolean;
   listeners?: Listener<any>[];
   check?: (values: (any | undefined)[]) => Promise<boolean>;
   onMatch: (values: (any | undefined)[]) => Promise<void>;
@@ -14,7 +17,7 @@ export class Transition {
   private debug = false;
   private listeners: Listener<any>[];
   private readonly values: (any | undefined)[];
-  private readonly check?: (values: (any | undefined)[]) => Promise<boolean>;
+  private readonly check?: Check;
   private readonly onMatch: (values: (any | undefined)[]) => Promise<void>;
   private readonly onMismatch?: (values: (any | undefined)[]) => Promise<void>;
 
@@ -24,11 +27,13 @@ export class Transition {
    * @param params An object containing listeners, check function, and optional onMatch and onMismatch functions.
    */
   constructor({
+    debug,
     listeners = [],
     check,
     onMatch,
     onMismatch,
   }: BaseTransitionParams) {
+    this.debug = debug ?? false;
     this.listeners = listeners;
     this.check = check;
     this.onMatch = onMatch;

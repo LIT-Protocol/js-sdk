@@ -1,8 +1,56 @@
+import { ethers } from 'ethers';
+
+import { LIT_EVM_CHAINS } from '@lit-protocol/constants';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+
+import {
+  ContractEventData,
+  EVMContractEventListener,
+  Listener,
+  TimerListener,
+} from './listeners';
 import { State, StateParams } from './states';
-import { Transition, BaseTransitionParams } from './transitions';
+import { Check, Transition, BaseTransitionParams } from './transitions';
 
 export interface BaseStateMachineParams {
   debug?: boolean;
+  litNodeClient: LitNodeClient;
+  litContracts: LitContracts;
+}
+
+export interface StateDefinition {
+  key: string;
+}
+
+interface TimerTransitionDefinition {
+  interval: number;
+  offset: number;
+  step: number;
+  until: number;
+}
+
+interface EvmContractEventTransitionDefinition {
+  evmChainId: number;
+  contractAddress: string;
+  abi: ethers.ContractInterface;
+  eventName: string;
+  eventParams?: any;
+}
+
+export interface TransitionDefinition {
+  fromState: string;
+  toState: string;
+  timer?: TimerTransitionDefinition;
+  evmContractEvent?: EvmContractEventTransitionDefinition;
+}
+
+export interface StateMachineDefinition
+  extends Omit<BaseStateMachineParams, 'litNodeClient' | 'litContracts'> {
+  litNodeClient: LitNodeClient | ConstructorParameters<typeof LitNodeClient>[0];
+  litContracts: LitContracts | ConstructorParameters<typeof LitContracts>[0];
+  states: StateDefinition[];
+  transitions: TransitionDefinition[];
 }
 
 export interface TransitionParams
@@ -12,23 +60,119 @@ export interface TransitionParams
   toState: string;
 }
 
-type MachineStatus = 'running' | 'stopped';
+export type MachineStatus = 'running' | 'stopped';
 
 /**
  * A StateMachine class that manages states and transitions between them.
  */
 export class StateMachine {
+  private debug = false;
+
+  private litNodeClient: LitNodeClient;
+  private litContracts: LitContracts;
+
   public id: string;
   public status: MachineStatus = 'stopped';
   private states = new Map<string, State>();
   private transitions = new Map<string, Map<string, Transition>>();
   private currentState?: State;
   private onStopCallback?: () => Promise<void>;
-  private debug = false;
 
-  constructor(params: BaseStateMachineParams = {}) {
+  constructor(params: BaseStateMachineParams) {
     this.id = this.generateId();
     this.debug = params.debug ?? false;
+
+    this.litNodeClient = params.litNodeClient;
+    this.litContracts = params.litContracts;
+  }
+
+  static fromDefinition(machineConfig: StateMachineDefinition): StateMachine {
+    const { litNodeClient, litContracts = {} } = machineConfig;
+
+    const litNodeClientInstance =
+      'connect' in litNodeClient
+        ? litNodeClient
+        : new LitNodeClient(litNodeClient);
+    const litContractsInstance =
+      'connect' in litContracts ? litContracts : new LitContracts(litContracts);
+
+    if (
+      litNodeClientInstance.config.litNetwork !== litContractsInstance.network
+    ) {
+      throw new Error(
+        'litNodeClient and litContracts should not use different networks'
+      );
+    }
+
+    const stateMachine = new StateMachine({
+      debug: machineConfig.debug,
+      litNodeClient: litNodeClientInstance,
+      litContracts: litContractsInstance,
+    });
+
+    machineConfig.states.forEach((state) => {
+      stateMachine.addState(state);
+    });
+
+    machineConfig.transitions.forEach((transition, index) => {
+      const { fromState, toState, timer, evmContractEvent } = transition;
+
+      const transitionConfig: TransitionParams = {
+        fromState,
+        toState,
+      };
+
+      const listeners: Listener<any>[] = [];
+      const checks: Check[] = [];
+
+      if (timer) {
+        listeners.push(
+          new TimerListener(timer.interval, timer.offset, timer.step)
+        );
+        checks.push(async (values) => values[index] === timer.until);
+      }
+
+      if (evmContractEvent) {
+        const chain = Object.values(LIT_EVM_CHAINS).find(
+          (chain) => chain.chainId === evmContractEvent.evmChainId
+        );
+        if (!chain) {
+          throw new Error(
+            `EVM chain with chainId ${evmContractEvent.evmChainId} not found`
+          );
+        }
+
+        listeners.push(
+          new EVMContractEventListener(
+            chain.rpcUrls[0],
+            {
+              address: evmContractEvent.contractAddress,
+              abi: evmContractEvent.abi,
+            },
+            {
+              name: evmContractEvent.eventName,
+              filter: evmContractEvent.eventParams,
+            }
+          )
+        );
+        checks.push(async (values) => {
+          const eventData = values[index] as ContractEventData;
+          return eventData.event.event === evmContractEvent.eventName;
+        });
+      }
+
+      // Add all listeners to the transition
+      transitionConfig.listeners = listeners;
+      // Aggregate (AND) all listener checks to a single function result
+      transitionConfig.check = async (values) =>
+        Promise.all(checks.map((check) => check(values))).then((results) =>
+          results.every((result) => result)
+        );
+
+      stateMachine.addTransition(transitionConfig);
+    });
+
+    return stateMachine;
   }
 
   get isRunning() {
@@ -72,6 +216,7 @@ export class StateMachine {
     };
 
     const transition = new Transition({
+      debug: this.debug,
       listeners,
       check,
       onMatch: transitioningOnMatch,

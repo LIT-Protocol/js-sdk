@@ -11,10 +11,10 @@ export type StateParams = BaseStateParams;
  * A State class that represents a state with optional entry and exit actions.
  */
 export class State {
+  private debug = false;
   public readonly key: string;
   public readonly onEnter: (() => Promise<void>) | undefined;
   public readonly onExit: (() => Promise<void>) | undefined;
-  private debug = false;
 
   constructor(private params: BaseStateParams) {
     this.key = params.key;
