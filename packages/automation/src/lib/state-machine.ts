@@ -1,64 +1,36 @@
 import { ethers } from 'ethers';
 
-import { LIT_EVM_CHAINS } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 import {
   ContractEventData,
   EVMContractEventListener,
+  IntervalListener,
   Listener,
   TimerListener,
 } from './listeners';
 import { State, StateParams } from './states';
-import { Check, Transition, BaseTransitionParams } from './transitions';
+import { Check, Transition } from './transitions';
+import { getChain } from './utils/chain';
+import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
 
-export interface BaseStateMachineParams {
-  debug?: boolean;
-  litNodeClient: LitNodeClient;
-  litContracts: LitContracts;
-}
-
-export interface StateDefinition {
-  key: string;
-}
-
-interface TimerTransitionDefinition {
-  interval: number;
-  offset: number;
-  step: number;
-  until: number;
-}
-
-interface EvmContractEventTransitionDefinition {
-  evmChainId: number;
-  contractAddress: string;
-  abi: ethers.ContractInterface;
-  eventName: string;
-  eventParams?: any;
-}
-
-export interface TransitionDefinition {
-  fromState: string;
-  toState: string;
-  timer?: TimerTransitionDefinition;
-  evmContractEvent?: EvmContractEventTransitionDefinition;
-}
-
-export interface StateMachineDefinition
-  extends Omit<BaseStateMachineParams, 'litNodeClient' | 'litContracts'> {
-  litNodeClient: LitNodeClient | ConstructorParameters<typeof LitNodeClient>[0];
-  litContracts: LitContracts | ConstructorParameters<typeof LitContracts>[0];
-  states: StateDefinition[];
-  transitions: TransitionDefinition[];
-}
-
-export interface TransitionParams
-  extends Omit<BaseTransitionParams, 'onMatch'>,
-    Partial<Pick<BaseTransitionParams, 'onMatch'>> {
-  fromState: string;
-  toState: string;
-}
+import type {
+  Address,
+  BalanceTransitionDefinition,
+  BaseBalanceTransitionDefinition,
+  BaseStateMachineParams,
+  ERC20BalanceTransitionDefinition,
+  EvmContractEventTransitionDefinition,
+  IntervalTransitionDefinition,
+  NativeBalanceTransitionDefinition,
+  OnEvmChainEvent,
+  StateDefinition,
+  StateMachineDefinition,
+  TimerTransitionDefinition,
+  TransitionDefinition,
+  TransitionParams,
+} from './types';
 
 export type MachineStatus = 'running' | 'stopped';
 
@@ -114,8 +86,9 @@ export class StateMachine {
       stateMachine.addState(state);
     });
 
-    machineConfig.transitions.forEach((transition, index) => {
-      const { fromState, toState, timer, evmContractEvent } = transition;
+    machineConfig.transitions.forEach((transition) => {
+      const { balances, evmContractEvent, fromState, timer, toState } =
+        transition;
 
       const transitionConfig: TransitionParams = {
         fromState,
@@ -126,21 +99,16 @@ export class StateMachine {
       const checks: Check[] = [];
 
       if (timer) {
+        const transitionIndex = checks.length;
         listeners.push(
           new TimerListener(timer.interval, timer.offset, timer.step)
         );
-        checks.push(async (values) => values[index] === timer.until);
+        checks.push(async (values) => values[transitionIndex] === timer.until);
       }
 
       if (evmContractEvent) {
-        const chain = Object.values(LIT_EVM_CHAINS).find(
-          (chain) => chain.chainId === evmContractEvent.evmChainId
-        );
-        if (!chain) {
-          throw new Error(
-            `EVM chain with chainId ${evmContractEvent.evmChainId} not found`
-          );
-        }
+        const transitionIndex = checks.length;
+        const chain = getChain(evmContractEvent);
 
         listeners.push(
           new EVMContractEventListener(
@@ -156,18 +124,76 @@ export class StateMachine {
           )
         );
         checks.push(async (values) => {
-          const eventData = values[index] as ContractEventData;
-          return eventData.event.event === evmContractEvent.eventName;
+          const eventData = values[transitionIndex] as
+            | ContractEventData
+            | undefined;
+          return eventData?.event.event === evmContractEvent.eventName;
+        });
+      }
+
+      if (balances) {
+        balances.forEach((balance) => {
+          const transitionIndex = checks.length;
+          const chain = getChain(balance);
+
+          const chainProvider = new ethers.providers.JsonRpcProvider(
+            chain.rpcUrls[0],
+            chain.chainId
+          );
+
+          switch (balance.type) {
+            case 'native':
+              listeners.push(
+                new IntervalListener(
+                  () => chainProvider.getBalance(balance.address),
+                  balance.interval
+                )
+              );
+              checks.push(getBalanceTransitionCheck(transitionIndex, balance));
+              break;
+            case 'ERC20':
+              listeners.push(
+                new IntervalListener(
+                  () =>
+                    getERC20Balance(
+                      chainProvider,
+                      balance.tokenAddress,
+                      balance.tokenDecimals,
+                      balance.address
+                    ),
+                  balance.interval
+                )
+              );
+              checks.push(getBalanceTransitionCheck(transitionIndex, balance));
+              break;
+            // case 'ERC721':
+            // case 'ERC1155':
+            default:
+              throw new Error(
+                `TODO balance check type ${balance['type']} unknown or not yet implemented`
+              );
+          }
         });
       }
 
       // Add all listeners to the transition
       transitionConfig.listeners = listeners;
       // Aggregate (AND) all listener checks to a single function result
-      transitionConfig.check = async (values) =>
-        Promise.all(checks.map((check) => check(values))).then((results) =>
-          results.every((result) => result)
+      transitionConfig.check = async (values) => {
+        console.log(
+          `${transition.fromState} -> ${transition.toState} values`,
+          values
         );
+        return Promise.all(checks.map((check) => check(values))).then(
+          (results) => {
+            console.log(
+              `${transition.fromState} -> ${transition.toState} results`,
+              results
+            );
+            return results.every((result) => result);
+          }
+        );
+      };
 
       stateMachine.addTransition(transitionConfig);
     });
@@ -236,6 +262,11 @@ export class StateMachine {
    */
   async startMachine(initialState: string, onStop?: () => Promise<void>) {
     this.debug && console.log('Starting state machine...');
+
+    await Promise.all([
+      this.litContracts.connect(),
+      this.litNodeClient.connect(),
+    ]);
 
     this.onStopCallback = onStop;
     await this.enterState(initialState);
