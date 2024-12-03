@@ -1,6 +1,19 @@
 import { ethers } from 'ethers';
 
+import {
+  // createSiweMessageWithRecaps,
+  // generateAuthSig,
+  LitActionResource,
+  // LitPKPResource,
+} from '@lit-protocol/auth-helpers';
+import {
+  LIT_ABILITY,
+  LIT_EVM_CHAINS,
+  LIT_RPC,
+  LIT_NETWORK,
+} from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 import {
@@ -34,6 +47,15 @@ import type {
 
 export type MachineStatus = 'running' | 'stopped';
 
+const ethPrivateKey = process.env['ETHEREUM_PRIVATE_KEY'];
+if (!ethPrivateKey) {
+  throw new Error('ethPrivateKey not defined');
+}
+const yellowstoneSigner = new ethers.Wallet(
+  ethPrivateKey,
+  new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
+);
+
 /**
  * A StateMachine class that manages states and transitions between them.
  */
@@ -66,7 +88,12 @@ export class StateMachine {
         ? litNodeClient
         : new LitNodeClient(litNodeClient);
     const litContractsInstance =
-      'connect' in litContracts ? litContracts : new LitContracts(litContracts);
+      'connect' in litContracts
+        ? litContracts
+        : new LitContracts({
+            signer: yellowstoneSigner,
+            ...litContracts,
+          });
 
     if (
       litNodeClientInstance.config.litNetwork !== litContractsInstance.network
@@ -83,7 +110,62 @@ export class StateMachine {
     });
 
     machineConfig.states.forEach((state) => {
-      stateMachine.addState(state);
+      const { litAction } = state;
+
+      const stateConfig: StateParams = {
+        key: state.key,
+      };
+
+      if (litAction) {
+        let pkpPublicKey: string = litAction.pkpPublicKey;
+
+        stateConfig.onEnter = async () => {
+          const yellowstoneSigner = new ethers.Wallet(
+            litAction.pkpOwnerKey,
+            new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
+          );
+
+          if (!pkpPublicKey) {
+            console.log(`No PKP for LitAction, minting one...`);
+            const mintingReceipt =
+              await litContractsInstance.pkpNftContractUtils.write.mint();
+            const pkp = mintingReceipt.pkp;
+            pkpPublicKey = pkp.publicKey;
+            console.log(`Minted PKP: ${pkp}`);
+          }
+
+          const pkpSessionSigs = await litNodeClientInstance.getPkpSessionSigs({
+            pkpPublicKey,
+            capabilityAuthSigs: [],
+            authMethods: [
+              await EthWalletProvider.authenticate({
+                signer: yellowstoneSigner,
+                litNodeClient: litNodeClientInstance,
+                expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
+              }),
+            ],
+            resourceAbilityRequests: [
+              {
+                resource: new LitActionResource('*'),
+                ability: LIT_ABILITY.LitActionExecution,
+              },
+            ],
+          });
+
+          // Run a LitAction
+          const executeJsResponse = await litNodeClientInstance.executeJs({
+            sessionSigs: pkpSessionSigs,
+            ipfsId: litAction.ipfsId,
+            code: litAction.code,
+            jsParams: litAction.jsParams,
+          });
+
+          // TODO send user this result with a webhook maybe
+          console.log(`============ executeJsResponse:`, executeJsResponse);
+        };
+      }
+
+      stateMachine.addState(stateConfig);
     });
 
     machineConfig.transitions.forEach((transition) => {

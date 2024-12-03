@@ -7,8 +7,17 @@ import { BaseTransitionParams } from './transitions';
 
 export type Address = `0x${string}`;
 
+export interface LitActionStateDefinition {
+  pkpOwnerKey: string;
+  pkpPublicKey: string;
+  ipfsId?: string; // TODO separate into another without code
+  code: string;
+  jsParams: Record<string, any>;
+}
+
 export interface StateDefinition {
   key: string;
+  litAction?: LitActionStateDefinition;
 }
 
 export interface OnEvmChainEvent {
