@@ -84,7 +84,7 @@
     "@nx/plugin": "17.3.0",
     "@nx/react": "17.3.0",
     "@nx/web": "17.3.0",
-    "@solana/web3.js": "^1.95.3",
+    "@solana/web3.js": "1.95.3",
     "@types/depd": "^1.1.36",
     "@types/jest": "27.4.1",
     "@types/node": "18.19.18",
@@ -125,6 +125,5 @@
   },
   "workspaces": [
     "packages/*"
-  ],
-  "packageManager": "yarn@1.22.22"
+  ]
 }
