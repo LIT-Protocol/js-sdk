@@ -1,17 +1,7 @@
 import { ethers } from 'ethers';
 
-import {
-  // createSiweMessageWithRecaps,
-  // generateAuthSig,
-  LitActionResource,
-  // LitPKPResource,
-} from '@lit-protocol/auth-helpers';
-import {
-  LIT_ABILITY,
-  LIT_EVM_CHAINS,
-  LIT_RPC,
-  LIT_NETWORK,
-} from '@lit-protocol/constants';
+import { LitActionResource } from '@lit-protocol/auth-helpers';
+import { LIT_ABILITY, LIT_RPC } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -23,25 +13,15 @@ import {
   Listener,
   TimerListener,
 } from './listeners';
+import { signWithLitActionCode } from './litActions';
 import { State, StateParams } from './states';
 import { Check, Transition } from './transitions';
 import { getChain } from './utils/chain';
 import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
 
 import type {
-  Address,
-  BalanceTransitionDefinition,
-  BaseBalanceTransitionDefinition,
   BaseStateMachineParams,
-  ERC20BalanceTransitionDefinition,
-  EvmContractEventTransitionDefinition,
-  IntervalTransitionDefinition,
-  NativeBalanceTransitionDefinition,
-  OnEvmChainEvent,
-  StateDefinition,
   StateMachineDefinition,
-  TimerTransitionDefinition,
-  TransitionDefinition,
   TransitionParams,
 } from './types';
 
@@ -51,10 +31,57 @@ const ethPrivateKey = process.env['ETHEREUM_PRIVATE_KEY'];
 if (!ethPrivateKey) {
   throw new Error('ethPrivateKey not defined');
 }
-const yellowstoneSigner = new ethers.Wallet(
+const yellowstoneLitSigner = new ethers.Wallet(
   ethPrivateKey,
   new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 );
+
+// TODO improve and move
+interface ExecuteLitAction {
+  litNodeClient: LitNodeClient;
+  pkpPublicKey: string;
+  machineSigner: ethers.Wallet;
+  ipfsId?: string;
+  code: string;
+  jsParams: Record<string, any>;
+}
+
+async function executeLitAction({
+  litNodeClient,
+  pkpPublicKey,
+  machineSigner,
+  ipfsId,
+  code,
+  jsParams,
+}: ExecuteLitAction) {
+  const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
+    pkpPublicKey,
+    capabilityAuthSigs: [],
+    authMethods: [
+      await EthWalletProvider.authenticate({
+        signer: machineSigner,
+        litNodeClient: litNodeClient,
+        expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
+      }),
+    ],
+    resourceAbilityRequests: [
+      {
+        resource: new LitActionResource('*'),
+        ability: LIT_ABILITY.LitActionExecution,
+      },
+    ],
+  });
+
+  // Run a LitAction
+  const executeJsResponse = await litNodeClient.executeJs({
+    ipfsId,
+    code,
+    jsParams,
+    sessionSigs: pkpSessionSigs,
+  });
+
+  return executeJsResponse;
+}
 
 /**
  * A StateMachine class that manages states and transitions between them.
@@ -83,6 +110,7 @@ export class StateMachine {
   static fromDefinition(machineConfig: StateMachineDefinition): StateMachine {
     const { litNodeClient, litContracts = {} } = machineConfig;
 
+    // Create litNodeClient and litContracts instances
     const litNodeClientInstance =
       'connect' in litNodeClient
         ? litNodeClient
@@ -91,7 +119,7 @@ export class StateMachine {
       'connect' in litContracts
         ? litContracts
         : new LitContracts({
-            signer: yellowstoneSigner,
+            signer: yellowstoneLitSigner,
             ...litContracts,
           });
 
@@ -110,17 +138,19 @@ export class StateMachine {
     });
 
     machineConfig.states.forEach((state) => {
-      const { litAction } = state;
+      const { litAction, transaction } = state;
 
       const stateConfig: StateParams = {
         key: state.key,
       };
 
+      const onEnterFunctions = [] as (() => Promise<void>)[];
+
       if (litAction) {
         let pkpPublicKey: string = litAction.pkpPublicKey;
 
-        stateConfig.onEnter = async () => {
-          const yellowstoneSigner = new ethers.Wallet(
+        onEnterFunctions.push(async () => {
+          const yellowstoneMachineSigner = new ethers.Wallet(
             litAction.pkpOwnerKey,
             new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
           );
@@ -134,36 +164,98 @@ export class StateMachine {
             console.log(`Minted PKP: ${pkp}`);
           }
 
-          const pkpSessionSigs = await litNodeClientInstance.getPkpSessionSigs({
+          const litActionResponse = await executeLitAction({
+            litNodeClient: litNodeClientInstance,
             pkpPublicKey,
-            capabilityAuthSigs: [],
-            authMethods: [
-              await EthWalletProvider.authenticate({
-                signer: yellowstoneSigner,
-                litNodeClient: litNodeClientInstance,
-                expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
-              }),
-            ],
-            resourceAbilityRequests: [
-              {
-                resource: new LitActionResource('*'),
-                ability: LIT_ABILITY.LitActionExecution,
-              },
-            ],
-          });
-
-          // Run a LitAction
-          const executeJsResponse = await litNodeClientInstance.executeJs({
-            sessionSigs: pkpSessionSigs,
+            machineSigner: yellowstoneMachineSigner,
             ipfsId: litAction.ipfsId,
             code: litAction.code,
             jsParams: litAction.jsParams,
           });
 
-          // TODO send user this result with a webhook maybe
-          console.log(`============ executeJsResponse:`, executeJsResponse);
-        };
+          // TODO send user this result with a webhook and log
+          console.log(`============ litActionResponse:`, litActionResponse);
+        });
       }
+
+      if (transaction) {
+        onEnterFunctions.push(async () => {
+          const yellowstoneMachineSigner = new ethers.Wallet(
+            transaction.pkpOwnerKey,
+            new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
+          );
+
+          const chain = getChain(transaction);
+          const chainProvider = new ethers.providers.JsonRpcProvider(
+            chain.rpcUrls[0],
+            chain.chainId
+          );
+
+          const contract = new ethers.Contract(
+            transaction.contractAddress,
+            transaction.contractABI,
+            chainProvider
+          );
+
+          const txData = await contract.populateTransaction[transaction.method](
+            ...(transaction.params || [])
+          );
+          const gasLimit = await chainProvider.estimateGas({
+            to: transaction.contractAddress,
+            data: txData.data,
+            from: transaction.pkpEthAddress,
+          });
+          const gasPrice = await chainProvider.getGasPrice();
+          const nonce = await chainProvider.getTransactionCount(
+            transaction.pkpEthAddress
+          );
+
+          const rawTx = {
+            chainId: chain.chainId,
+            data: txData.data,
+            gasLimit: gasLimit.toHexString(),
+            gasPrice: gasPrice.toHexString(),
+            nonce,
+            to: transaction.contractAddress,
+          };
+          const rawTxHash = ethers.utils.keccak256(
+            ethers.utils.serializeTransaction(rawTx)
+          );
+
+          // Sign with the PKP in a LitAction
+          const litActionResponse = await executeLitAction({
+            litNodeClient: litNodeClientInstance,
+            pkpPublicKey: transaction.pkpPublicKey,
+            machineSigner: yellowstoneMachineSigner,
+            code: signWithLitActionCode,
+            jsParams: {
+              toSign: ethers.utils.arrayify(rawTxHash),
+              publicKey: transaction.pkpPublicKey,
+              sigName: 'signedTransaction',
+            },
+          });
+
+          const signature = litActionResponse.response as string;
+          const jsonSignature = JSON.parse(signature);
+          jsonSignature.r = '0x' + jsonSignature.r.substring(2);
+          jsonSignature.s = '0x' + jsonSignature.s;
+          const hexSignature = ethers.utils.joinSignature(jsonSignature);
+
+          const signedTx = ethers.utils.serializeTransaction(
+            rawTx,
+            hexSignature
+          );
+
+          const receipt = await chainProvider.sendTransaction(signedTx);
+
+          // TODO send user this result with a webhook and log
+          console.log('Transaction Receipt:', receipt);
+        });
+      }
+
+      stateConfig.onEnter = async () => {
+        await Promise.all(onEnterFunctions.map((onEnter) => onEnter()));
+      };
 
       stateMachine.addState(stateConfig);
     });
@@ -430,6 +522,7 @@ export class StateMachine {
       this.isRunning && (await this.enterState(stateKey));
     } catch (e) {
       this.currentState = undefined;
+      console.error(e);
       throw new Error(`Could not enter state ${stateKey}`);
     }
   }

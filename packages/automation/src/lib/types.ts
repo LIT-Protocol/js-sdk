@@ -7,21 +7,34 @@ import { BaseTransitionParams } from './transitions';
 
 export type Address = `0x${string}`;
 
-export interface LitActionStateDefinition {
+export interface OnEvmChain {
+  evmChainId: number;
+}
+
+export interface UsesPkp {
   pkpOwnerKey: string;
   pkpPublicKey: string;
+  pkpEthAddress: Address;
+}
+
+export interface LitActionStateDefinition extends UsesPkp {
   ipfsId?: string; // TODO separate into another without code
   code: string;
   jsParams: Record<string, any>;
 }
 
+export interface TransactionStateDefinition extends UsesPkp, OnEvmChain {
+  contractAddress: Address;
+  contractABI: ethers.ContractInterface;
+  method: string;
+  value?: string;
+  params?: any[];
+}
+
 export interface StateDefinition {
   key: string;
   litAction?: LitActionStateDefinition;
-}
-
-export interface OnEvmChainEvent {
-  evmChainId: number;
+  transaction?: TransactionStateDefinition;
 }
 
 export interface IntervalTransitionDefinition {
@@ -30,7 +43,7 @@ export interface IntervalTransitionDefinition {
 
 export interface BaseBalanceTransitionDefinition
   extends IntervalTransitionDefinition,
-    OnEvmChainEvent {
+    OnEvmChain {
   address: Address;
   comparator: '>' | '>=' | '=' | '!=' | '<=' | '<';
   amount: string;
@@ -44,7 +57,7 @@ export interface NativeBalanceTransitionDefinition
 export interface ERC20BalanceTransitionDefinition
   extends BaseBalanceTransitionDefinition {
   type: 'ERC20';
-  tokenAddress: string;
+  tokenAddress: Address;
   tokenDecimals: number;
 }
 
@@ -60,9 +73,9 @@ export interface TimerTransitionDefinition
   until: number;
 }
 
-export interface EvmContractEventTransitionDefinition extends OnEvmChainEvent {
-  contractAddress: string;
-  abi: ethers.ContractInterface;
+export interface EvmContractEventTransitionDefinition extends OnEvmChain {
+  contractAddress: Address;
+  abi: ethers.ContractInterface; // TODO rename a contractABI
   eventName: string;
   eventParams?: any;
 }
