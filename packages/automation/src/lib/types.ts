@@ -41,6 +41,7 @@ export interface StateDefinition {
   key: string;
   litAction?: LitActionStateDefinition;
   transaction?: TransactionStateDefinition;
+  transitions?: Omit<TransitionDefinition, 'fromState'>[];
 }
 
 export interface IntervalTransitionDefinition {
