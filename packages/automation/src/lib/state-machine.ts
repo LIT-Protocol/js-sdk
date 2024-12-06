@@ -245,7 +245,7 @@ export class StateMachine {
             chain.rpcUrls[0],
             {
               address: evmContractEvent.contractAddress,
-              abi: evmContractEvent.abi,
+              abi: evmContractEvent.contractABI,
             },
             {
               name: evmContractEvent.eventName,
