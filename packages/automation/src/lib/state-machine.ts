@@ -21,6 +21,7 @@ import {
   BaseStateMachineParams,
   PKPInfo,
   StateMachineDefinition,
+  TransitionDefinition,
   TransitionParams,
 } from './types';
 
@@ -94,8 +95,9 @@ export class StateMachine {
       pkp,
     });
 
-    machineConfig.states.forEach((state) => {
-      const { litAction, transaction } = state;
+    const stateTransitions = [] as TransitionDefinition[];
+    states.forEach((state) => {
+      const { litAction, transaction, transitions = [] } = state;
 
       const stateConfig: StateParams = {
         key: state.key,
@@ -214,7 +216,7 @@ export class StateMachine {
       stateMachine.addState(stateConfig);
     });
 
-    machineConfig.transitions.forEach((transition) => {
+    [...stateTransitions, ...transitions].forEach((transition) => {
       const { balances, evmContractEvent, fromState, timer, toState } =
         transition;
 
