@@ -1,9 +1,7 @@
 import { ethers } from 'ethers';
 
-import { LitActionResource } from '@lit-protocol/auth-helpers';
-import { LIT_ABILITY, LIT_RPC } from '@lit-protocol/constants';
+import { LIT_RPC } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 import {
@@ -13,75 +11,20 @@ import {
   Listener,
   TimerListener,
 } from './listeners';
-import { signWithLitActionCode } from './litActions';
+import { signWithLitActionCode, executeLitAction } from './litActions';
 import { State, StateParams } from './states';
 import { Check, Transition } from './transitions';
 import { getChain } from './utils/chain';
 import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
 
-import type {
+import {
   BaseStateMachineParams,
+  PKPInfo,
   StateMachineDefinition,
   TransitionParams,
 } from './types';
 
 export type MachineStatus = 'running' | 'stopped';
-
-const ethPrivateKey = process.env['ETHEREUM_PRIVATE_KEY'];
-if (!ethPrivateKey) {
-  throw new Error('ethPrivateKey not defined');
-}
-const yellowstoneLitSigner = new ethers.Wallet(
-  ethPrivateKey,
-  new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
-);
-
-// TODO improve and move
-interface ExecuteLitAction {
-  litNodeClient: LitNodeClient;
-  pkpPublicKey: string;
-  machineSigner: ethers.Wallet;
-  ipfsId?: string;
-  code: string;
-  jsParams: Record<string, any>;
-}
-
-async function executeLitAction({
-  litNodeClient,
-  pkpPublicKey,
-  machineSigner,
-  ipfsId,
-  code,
-  jsParams,
-}: ExecuteLitAction) {
-  const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
-    pkpPublicKey,
-    capabilityAuthSigs: [],
-    authMethods: [
-      await EthWalletProvider.authenticate({
-        signer: machineSigner,
-        litNodeClient: litNodeClient,
-        expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
-      }),
-    ],
-    resourceAbilityRequests: [
-      {
-        resource: new LitActionResource('*'),
-        ability: LIT_ABILITY.LitActionExecution,
-      },
-    ],
-  });
-
-  // Run a LitAction
-  const executeJsResponse = await litNodeClient.executeJs({
-    ipfsId,
-    code,
-    jsParams,
-    sessionSigs: pkpSessionSigs,
-  });
-
-  return executeJsResponse;
-}
 
 /**
  * A StateMachine class that manages states and transitions between them.
@@ -91,6 +34,8 @@ export class StateMachine {
 
   private litNodeClient: LitNodeClient;
   private litContracts: LitContracts;
+  private privateKey?: string;
+  private pkp?: PKPInfo;
 
   public id: string;
   public status: MachineStatus = 'stopped';
@@ -105,10 +50,20 @@ export class StateMachine {
 
     this.litNodeClient = params.litNodeClient;
     this.litContracts = params.litContracts;
+    this.privateKey = params.privateKey;
+    this.pkp = params.pkp;
   }
 
   static fromDefinition(machineConfig: StateMachineDefinition): StateMachine {
-    const { litNodeClient, litContracts = {} } = machineConfig;
+    const {
+      debug = false,
+      litNodeClient,
+      litContracts = {},
+      privateKey,
+      pkp,
+      states = [],
+      transitions = [],
+    } = machineConfig;
 
     // Create litNodeClient and litContracts instances
     const litNodeClientInstance =
@@ -119,7 +74,7 @@ export class StateMachine {
       'connect' in litContracts
         ? litContracts
         : new LitContracts({
-            signer: yellowstoneLitSigner,
+            privateKey,
             ...litContracts,
           });
 
@@ -132,9 +87,11 @@ export class StateMachine {
     }
 
     const stateMachine = new StateMachine({
-      debug: machineConfig.debug,
+      debug,
       litNodeClient: litNodeClientInstance,
       litContracts: litContractsInstance,
+      privateKey,
+      pkp,
     });
 
     machineConfig.states.forEach((state) => {
@@ -143,31 +100,28 @@ export class StateMachine {
       const stateConfig: StateParams = {
         key: state.key,
       };
+      stateTransitions.push(
+        ...transitions.map((transition) => ({
+          ...transition,
+          fromState: state.key,
+        }))
+      );
 
       const onEnterFunctions = [] as (() => Promise<void>)[];
 
       if (litAction) {
-        let pkpPublicKey: string = litAction.pkpPublicKey;
-
         onEnterFunctions.push(async () => {
-          const yellowstoneMachineSigner = new ethers.Wallet(
-            litAction.pkpOwnerKey,
+          await stateMachine.validateMachinePKP();
+
+          const signer = new ethers.Wallet(
+            stateMachine.privateKey!,
             new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
           );
 
-          if (!pkpPublicKey) {
-            console.log(`No PKP for LitAction, minting one...`);
-            const mintingReceipt =
-              await litContractsInstance.pkpNftContractUtils.write.mint();
-            const pkp = mintingReceipt.pkp;
-            pkpPublicKey = pkp.publicKey;
-            console.log(`Minted PKP: ${pkp}`);
-          }
-
           const litActionResponse = await executeLitAction({
             litNodeClient: litNodeClientInstance,
-            pkpPublicKey,
-            machineSigner: yellowstoneMachineSigner,
+            pkpPublicKey: stateMachine.pkp!.publicKey,
+            authSigner: signer,
             ipfsId: litAction.ipfsId,
             code: litAction.code,
             jsParams: litAction.jsParams,
@@ -226,7 +180,7 @@ export class StateMachine {
           const litActionResponse = await executeLitAction({
             litNodeClient: litNodeClientInstance,
             pkpPublicKey: transaction.pkpPublicKey,
-            machineSigner: yellowstoneMachineSigner,
+            authSigner: yellowstoneMachineSigner,
             code: signWithLitActionCode,
             jsParams: {
               toSign: ethers.utils.arrayify(rawTxHash),
@@ -460,6 +414,31 @@ export class StateMachine {
     this.status = 'stopped';
 
     this.debug && console.log('State machine stopped');
+  }
+
+  /**
+   * Validates whether a PKP (Private Key Pair) is configured in the state machine.
+   * If a PKP is not present, it initiates the minting of a new PKP through the
+   * associated `litContracts`. Once minted, the state machine configures itself
+   * to use the newly minted PKP.
+   *
+   * @remarks
+   * This validation ensures that the state machine has a PKP to operate suitably
+   * within its workflow, avoiding any disruptions due to lack of a necessary PKP.
+   */
+  private async validateMachinePKP() {
+    if (this.pkp) {
+      console.log(`PKP in state machine is configured. No need to mint one`);
+    } else {
+      console.log(`No PKP in state machine, minting one...`);
+      const mintingReceipt =
+        await this.litContracts.pkpNftContractUtils.write.mint();
+      const pkp = mintingReceipt.pkp;
+      console.log(`Minted PKP: ${pkp}. Machine will now use it`);
+      this.pkp = pkp;
+    }
+
+    console.log(`Machine is using PKP: ${this.pkp.tokenId}`);
   }
 
   /**

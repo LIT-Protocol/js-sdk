@@ -7,6 +7,12 @@ import { BaseTransitionParams } from './transitions';
 
 export type Address = `0x${string}`;
 
+export type PKPInfo = {
+  tokenId: string;
+  publicKey: string;
+  ethAddress: string;
+};
+
 export interface OnEvmChain {
   evmChainId: number;
 }
@@ -92,6 +98,8 @@ export interface BaseStateMachineParams {
   debug?: boolean;
   litNodeClient: LitNodeClient;
   litContracts: LitContracts;
+  privateKey?: string;
+  pkp?: PKPInfo;
 }
 
 export interface StateMachineDefinition
