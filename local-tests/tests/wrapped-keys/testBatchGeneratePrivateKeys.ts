@@ -6,6 +6,8 @@ import nacl from 'tweetnacl';
 import bs58 from 'bs58';
 import { ethers } from 'ethers';
 import { BatchGeneratePrivateKeysActionResult } from '../../../packages/wrapped-keys/src/lib/types';
+import { getBaseTransactionForNetwork, getSolanaTransaction } from './util';
+import { Keypair } from '@solana/web3.js';
 
 const { batchGeneratePrivateKeys } = api;
 
@@ -81,6 +83,13 @@ export const testBatchGeneratePrivateKeys = async (
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
     ); // 10 mins expiry
 
+    const solanaKeypair = Keypair.generate();
+
+    const {
+      solanaTransaction,
+      unsignedTransaction: solanaUnsignedTransaction,
+    } = await getSolanaTransaction({ solanaKeypair });
+
     const solanaMessageToSign = 'This is a test solana message';
     const evmMessageToSign = 'This is a test evm message';
     const { results } = await batchGeneratePrivateKeys({
@@ -90,11 +99,20 @@ export const testBatchGeneratePrivateKeys = async (
           network: 'evm',
           signMessageParams: { messageToSign: evmMessageToSign },
           generateKeyParams: { memo: 'Test evm key' },
+          signTransactionParams: {
+            unsignedTransaction: getBaseTransactionForNetwork({
+              network: devEnv.litNodeClient.config.litNetwork,
+              toAddress: alice.wallet.address,
+            }),
+          },
         },
         {
           network: 'solana',
           signMessageParams: { messageToSign: solanaMessageToSign },
           generateKeyParams: { memo: 'Test solana key' },
+          // signTransactionParams: {
+          //   unsignedTransaction: solanaUnsignedTransaction,
+          // },
         },
       ],
       litNodeClient: devEnv.litNodeClient,
@@ -122,12 +140,30 @@ export const testBatchGeneratePrivateKeys = async (
       throw new Error('Missing message signature in response');
     }
 
-    console.log('solana verify sig');
+    console.log('solana verify message sig');
     await verifySolanaSignature(results[1], solanaMessageToSign);
 
-    console.log('evm verify sig');
+    console.log('evm verify message sig');
     await verifyEvmSignature(results[0], evmMessageToSign);
     console.log('results', results);
+
+    const signedEthTx = results[0].signTransaction.signature;
+
+    // Test eth signed tx:
+    if (!ethers.utils.isHexString(signedEthTx)) {
+      throw new Error(`signedTx isn't hex: ${signedEthTx}`);
+    }
+
+    // test solana signed tx:
+    //
+    // const signatureBuffer = Buffer.from(ethers.utils.base58.decode(signedTx));
+    // solanaTransaction.addSignature(solanaKeypair.publicKey, signatureBuffer);
+    //
+    // if (!solanaTransaction.verifySignatures()) {
+    //   throw new Error(
+    //     `Signature: ${signedTx} doesn't validate for the Solana transaction.`
+    //   );
+    // }
 
     log('✅ testBatchGenerateEncryptedKeys');
   } catch (err) {
