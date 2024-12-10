@@ -23,7 +23,7 @@ export interface ProcessEnvs {
    */
   NETWORK: LIT_NETWORK_VALUES;
 
-  NETWORK_TYPE: 'mainnet' | 'cloneNet';
+  NETWORK_TYPE: 'mainnet' | 'cloneNet' | 'random';
 
   /**
    * The number of milliseconds to wait between each request.

@@ -1,5 +1,5 @@
 /* eslint-disable import/order */
-import { isBrowser, isNode } from '@lit-protocol/misc';
+import { isBrowser, isNode, log } from '@lit-protocol/misc';
 import {
   ContractName,
   CreateCustomAuthMethodRequest,
@@ -1204,11 +1204,18 @@ export class LitContracts {
           rpcUrl
         );
 
-      console.log('connectionInfoWithCloneNet:', connectionInfoWithCloneNet);
-
       const cloneNetInfo = connectionInfoWithCloneNet[0];
       const mainNetInfo = connectionInfoWithCloneNet[1];
 
+      // Randomly select network type if not specified
+      if (!networkType) {
+        networkType = Math.floor(Math.random() * 100) % 2 === 0 ? 'mainnet' : 'cloneNet';
+        log('Randomly selected network type:', networkType);
+      }
+
+      log("Selected network type:", networkType);
+
+      // Return info based on network type
       if (networkType === 'mainnet') {
         return mainNetInfo;
       } else {

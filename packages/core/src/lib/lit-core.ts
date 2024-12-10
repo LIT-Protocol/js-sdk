@@ -146,7 +146,7 @@ export class LitCore {
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
-    networkType: 'mainnet',
+    networkType: undefined,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -304,6 +304,13 @@ export class LitCore {
     };
   }
 
+  private _getNetworkType = (): 'mainnet' | 'cloneNet' => {
+    const networkType = this.config.networkType
+      || Math.floor(Math.random() * 100) % 2 === 0 ? 'mainnet' : 'cloneNet';
+
+    return networkType;
+  }
+
   // ========== Scoped Class Helpers ==========
   private async _handleStakingContractStateChange(
     state: STAKING_STATES_VALUES
@@ -311,7 +318,7 @@ export class LitCore {
     log(`New state detected: "${state}"`);
 
     const validatorData = await this._getValidatorData(
-      this.config.networkType || 'mainnet'
+      this._getNetworkType(),
     );
 
     if (state === STAKING_STATES.Active) {
@@ -535,7 +542,7 @@ export class LitCore {
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
     // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
     const validatorData = await this._getValidatorData(
-      this.config.networkType || 'mainnet'
+      this._getNetworkType(),
     );
 
     this._stakingContract = validatorData.stakingContract;
@@ -968,7 +975,7 @@ export class LitCore {
       );
       try {
         const validatorData = await this._getValidatorData(
-          this.config.networkType || 'mainnet'
+          this._getNetworkType(),
         );
         epochInfo = validatorData.epochInfo;
       } catch (error) {
