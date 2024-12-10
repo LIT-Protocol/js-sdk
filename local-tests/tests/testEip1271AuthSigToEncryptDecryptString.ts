@@ -19,6 +19,7 @@ export const testEip1271AuthSigToEncryptDecryptString = async (
 ) => {
   const dataToEncrypt = 'Decrypted from EIP1271 AuthSig';
   const contractAddress = '0x88105De2349f59767278Fd15c0858f806c08d615';
+  const deployerAddress = '0x0b1C5E9E82393AD5d1d1e9a498BF7bAAC13b31Ee'; // No purpose other than to be a random address
   const abi = [
     "function setTempOwner(address _tempOwner) external",
     "function getTempOwner() external view returns (address)",
@@ -45,7 +46,7 @@ export const testEip1271AuthSigToEncryptDecryptString = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  // log('encryptRes:', encryptRes);
 
   if (!encryptRes.ciphertext) {
     throw new Error(`Expected "ciphertext" in encryptRes`);
@@ -62,37 +63,13 @@ export const testEip1271AuthSigToEncryptDecryptString = async (
   });
 
   const siweSignature = await alice.wallet.signMessage(siweMessage);
-  console.log('siweSignature: ', siweSignature);
+  log('siweSignature: ', siweSignature);
 
   // Internally generate from wallet.signMessage
   const hash = hashMessage(siweMessage);
   const hashUint8Array = ethers.utils.arrayify(hash);
-  console.log('hash:', hash);
-  console.log('hashUint8Array: ', hashUint8Array); // Match it against the hash done on the nodes before calling verifySignature()
-
-  // Test from the contract
-  const contract = new ethers.Contract(contractAddress, abi, alice.wallet);
-
-  console.log("1. Setting temp owner...");
-  const setTempOwnerTx = await contract.setTempOwner(alice.wallet.address);
-  await setTempOwnerTx.wait();
-  console.log("Set temp owner transaction hash: ", setTempOwnerTx.hash);
-
-  const tempOwner = await contract.getTempOwner();
-  if (tempOwner.toLowerCase() !== alice.wallet.address.toLowerCase()) {
-    throw new Error(`Expected temp owner to be ${alice.wallet.address} but got ${tempOwner}`);
-  }
-
-  console.log("2. Checking isValidSignature...");
-  try {
-    const isValid = await contract.isValidSignature(hash, siweSignature);
-    if (isValid !== "0x1626ba7e") {
-      throw new Error(`Expected isValidSignature to be 0x1626ba7e but got ${isValid}`);
-    }
-  } catch (error) {
-    console.error("Error calling isValidSignature:", error);
-    throw error;
-  }
+  log('hash:', hash);
+  log('hashUint8Array: ', hashUint8Array); // Match it against the hash done on the nodes before calling verifySignature()
 
   const eip1271AuthSig: AuthSig = {
     address: contractAddress,
@@ -102,6 +79,64 @@ export const testEip1271AuthSigToEncryptDecryptString = async (
   };
 
   // log(eip1271AuthSig);
+
+  // Test from the contract
+  const contract = new ethers.Contract(contractAddress, abi, alice.wallet);
+  const setDeployerAsTempOwnerTx = await contract.setTempOwner(deployerAddress);
+  await setDeployerAsTempOwnerTx.wait();
+
+  log("0. isValidSignature should FAIL since Alice (AuthSig.sig) is not the tempOwner yet");
+  try {
+    const isValid = await contract.isValidSignature(hash, siweSignature);
+    if (isValid === "0x1626ba7e") {
+      throw new Error(`Expected isValidSignature to be 0xffffffff but got ${isValid}`);
+    }
+  } catch (error) {
+    log("Error calling isValidSignature:", error);
+    throw error;
+  }
+
+  try {
+    const _decryptRes = await decryptToString(
+      {
+        accessControlConditions: accs,
+        ciphertext: encryptRes.ciphertext,
+        dataToEncryptHash: encryptRes.dataToEncryptHash,
+        authSig: eip1271AuthSig,
+        chain: 'yellowstone', // Deployed chain
+      },
+      devEnv.litNodeClient as unknown as ILitNodeClient
+    );
+  } catch (error) {
+    if (!error.message.includes('NodeContractAuthsigUnauthorized') ||
+      !error.message.includes('Access control failed for Smart contract') ||
+      !error.message.includes('validation error: Authsig failed for contract 0x88105De2349f59767278Fd15c0858f806c08d615.  Return value was ffffffff.')
+      ) {
+      throw new Error(`Expected error message to contain specific EIP1271 validation failure, but got: ${error}`);
+    }
+  }
+
+  // Should PASS now
+  log("1. Setting temp owner...");
+  const setTempOwnerTx = await contract.setTempOwner(alice.wallet.address);
+  await setTempOwnerTx.wait();
+  log("Set tempOwner transaction hash: ", setTempOwnerTx.hash);
+
+  const tempOwner = await contract.getTempOwner();
+  if (tempOwner.toLowerCase() !== alice.wallet.address.toLowerCase()) {
+    throw new Error(`Expected temp owner to be ${alice.wallet.address} but got ${tempOwner}`);
+  }
+
+  log("2. Checking isValidSignature...");
+  try {
+    const isValid = await contract.isValidSignature(hash, siweSignature);
+    if (isValid !== "0x1626ba7e") {
+      throw new Error(`Expected isValidSignature to be 0x1626ba7e but got ${isValid}`);
+    }
+  } catch (error) {
+    log("Error calling isValidSignature:", error);
+    throw error;
+  }
 
   // -- Decrypt the encrypted string
   const decryptRes = await decryptToString(
@@ -121,5 +156,5 @@ export const testEip1271AuthSigToEncryptDecryptString = async (
     );
   }
 
-  console.log('✅ decryptRes:', decryptRes);
+  log('✅ decryptRes:', decryptRes);
 };
