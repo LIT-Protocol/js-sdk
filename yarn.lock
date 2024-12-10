@@ -3042,10 +3042,10 @@
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.0.73":
-  version "0.0.73"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.73.tgz#6ee22099f8ccf3122beb9476c8cc7955753a5523"
-  integrity sha512-w0gwYACj4jpjck5m+2J5UbLXM8FFEoYIXn8ADOZpNErnTjEsMFFIZkIqNIQjcNHiy6KVWCAlyM4fLPacw1AvZA==
+"@lit-protocol/contracts@feature-clonenet":
+  version "0.0.74-local-publish"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.74-local-publish.tgz#72041c70713678a4227552a4bbdcc5015cee9004"
+  integrity sha512-r2rbmN9zGII9N3VggqIx4QCqOcpVbsZZAbs/4sHTkQIZK/QR51TQ+0Woei/sCE3hL/hnky0NWty14icJ0dko9w==
 
 "@ljharb/resumer@~0.0.1":
   version "0.0.1"

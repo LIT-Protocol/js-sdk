@@ -621,17 +621,20 @@ export class LitContracts {
   };
 
   /**
-   * Retrieves the Staking contract instance based on the provided network, context, and RPC URL.
-   * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
-   * If a resolver address is present in the context, it retrieves the Staking contract from the contract resolver instance.
-   * Otherwise, it retrieves the Staking contract using the contract address and ABI from the contract context.
-   * Throws an error if required contract data is missing or if the Staking contract cannot be obtained.
+   * Retrieves a contract instance based on the provided network, contract name, context, and RPC URL.
+   * 
+   * This method handles three scenarios:
+   * 1. No context provided - Resolves contract data from network context
+   * 2. Context without resolver - Uses contract data directly from context
+   * 3. Context with resolver - Retrieves contract data from a contract resolver
    *
-   * @param network - The network key.
-   * @param context - The contract context or contract resolver context.
-   * @param rpcUrl - The RPC URL.
-   * @returns The Staking contract instance.
-   * @throws Error if required contract data is missing or if the Staking contract cannot be obtained.
+   * @param network - The network key identifying which network to connect to
+   * @param contractName - The name of the contract to instantiate
+   * @param context - Optional contract context containing contract data or resolver info
+   * @param rpcUrl - Optional RPC URL to override the default network RPC
+   * @param contractAddress - Optional contract address to override the resolved address
+   * @returns A typed contract instance
+   * @throws InitError if required contract data is missing or cannot be resolved
    */
   public static async getContractInstance<T = ethers.Contract>(
     network: LIT_NETWORKS_KEYS,
@@ -1078,10 +1081,14 @@ export class LitContracts {
       rpcUrl
     );
 
+    const allThings = await cloneNetContract['getAllActiveUnkickedValidatorStructsAndCounts']();
+
     // First get all the active staking contract addresses.
-    const activeStakingContractAddresses = await cloneNetContract[
-      'getActiveStakingContracts'
-    ]();
+    const activeStakingContractAddresses = allThings.map((item: any) => item[0]);
+
+    if (activeStakingContractAddresses.length < 2) {
+      throw new Error('❌ Not enough active staking contracts');
+    }
 
     // Then, for each active staking contract, get the epoch, current validator count, and active unkicked validator structs.
     const stakingAggregateDetails = [];
@@ -1089,26 +1096,17 @@ export class LitContracts {
     for (let i = 0; i < activeStakingContractAddresses.length; i++) {
       const stakingContractAddress = activeStakingContractAddresses[i];
 
-      const stakingContract = await LitContracts.getContractInstance(
-        network,
-        'Staking',
-        context,
-        rpcUrl,
-        stakingContractAddress
-      );
+      const contractInfo = allThings.find((item: any) => item.stakingContractAddress === stakingContractAddress);
 
-      console.log('stakingContract.address:', stakingContract.address);
-
-      // Get the epoch, current validator count, and active unkicked validator structs.
-      const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
-        await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
+      const epochInfo = contractInfo.details.epoch;
+      const minNodeCount = contractInfo.details.currentValidatorCountForConsensus;
 
       const typedEpochInfo: EpochInfo = {
-        epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
-        number: ethers.BigNumber.from(epochInfo[1]).toNumber(),
-        endTime: ethers.BigNumber.from(epochInfo[2]).toNumber(),
-        retries: ethers.BigNumber.from(epochInfo[3]).toNumber(),
-        timeout: ethers.BigNumber.from(epochInfo[4]).toNumber(),
+        epochLength: ethers.BigNumber.from(epochInfo.epochLength).toNumber(),
+        number: ethers.BigNumber.from(epochInfo.number).toNumber(),
+        endTime: ethers.BigNumber.from(epochInfo.endTime).toNumber(),
+        retries: ethers.BigNumber.from(epochInfo.retries).toNumber(),
+        timeout: ethers.BigNumber.from(epochInfo.timeout).toNumber(),
       };
 
       const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
@@ -1117,16 +1115,13 @@ export class LitContracts {
         throw new Error('❌ Minimum validator count is not set');
       }
 
-      if (activeUnkickedValidatorStructs.length < minNodeCountInt) {
+      if (contractInfo.details.activeUnkickedValidators.length < minNodeCountInt) {
         throw new Error(
-          `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
+          `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${contractInfo.details.activeUnkickedValidators.length}`
         );
       }
-
-      console.log('typedEpochInfo:', typedEpochInfo);
-
       const activeValidatorStructs: ValidatorStruct[] =
-        activeUnkickedValidatorStructs.map((item: any) => {
+        contractInfo.details.activeUnkickedValidators.map((item: any) => {
           return {
             ip: item[0],
             ipv6: item[1],
@@ -1195,19 +1190,11 @@ export class LitContracts {
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
     networkType?: 'mainnet' | 'cloneNet';
   }): Promise<{
-    stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
   }> => {
     console.log('networkType:', networkType);
-
-    const stakingContract = await LitContracts.getContractInstance(
-      litNetwork,
-      'Staking',
-      networkContext,
-      rpcUrl
-    );
 
     if (litNetwork === 'datil-test') {
       const connectionInfoWithCloneNet =
@@ -1228,6 +1215,13 @@ export class LitContracts {
         return cloneNetInfo;
       }
     }
+
+    const stakingContract = await LitContracts.getContractInstance(
+      litNetwork,
+      'Staking',
+      networkContext,
+      rpcUrl
+    );
 
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
@@ -1289,7 +1283,6 @@ export class LitContracts {
     });
 
     return {
-      stakingContract,
       epochInfo: typedEpochInfo,
       minNodeCount: minNodeCountInt,
       bootstrapUrls: networks,
