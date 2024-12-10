@@ -4,17 +4,18 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
 import { encryptString, decryptToString } from '@lit-protocol/encryption';
 import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
-import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
+import { createSiweMessage } from '@lit-protocol/auth-helpers';
 import { hashMessage } from 'ethers/lib/utils';
 import { ethers } from 'ethers';
+import { createHash } from 'crypto';
 
 /**
  * Test Commands:
- * ✅ NETWORK=datil-dev yarn test:local --filter=testEip1271AuthSigToEncryptDecryptString
- * ✅ NETWORK=datil-test yarn test:local --filter=testEip1271AuthSigToEncryptDecryptString
- * ✅ NETWORK=custom yarn test:local --filter=testEip1271AuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testKeccakEip1271AuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-test yarn test:local --filter=testKeccakEip1271AuthSigToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testKeccakEip1271AuthSigToEncryptDecryptString
  */
-export const testEip1271AuthSigToEncryptDecryptString = async (
+export const testKeccakEip1271AuthSigToEncryptDecryptString = async (
   devEnv: TinnyEnvironment
 ) => {
   const dataToEncrypt = 'Decrypted from EIP1271 AuthSig';
