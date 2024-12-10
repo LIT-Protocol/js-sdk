@@ -44,6 +44,7 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
 import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
 import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
 import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
+import { testEip1271AuthSigToEncryptDecryptString } from './tests/testEip1271AuthSigToEncryptDecryptString';
 import { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
 import { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
 import { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
@@ -232,6 +233,10 @@ setLitActionsCodeToLocal();
     testCosmosAuthSigToEncryptDecryptString,
   };
 
+  const eip1271AuthSigTests = {
+    testEip1271AuthSigToEncryptDecryptString,
+  };
+
   const pkpEthersTest = {
     eoaSessionSigs: {
       testPkpEthersWithEoaSessionSigsToSignWithAuthContext,
@@ -294,6 +299,7 @@ setLitActionsCodeToLocal();
       ...litActionIpfsIdSessionSigsTests,
       ...capacityDelegationTests,
       ...bareAuthSigTests,
+      ...eip1271AuthSigTests,
 
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
