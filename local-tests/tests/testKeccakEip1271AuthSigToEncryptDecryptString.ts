@@ -22,9 +22,9 @@ export const testKeccakEip1271AuthSigToEncryptDecryptString = async (
   const contractAddress = '0x88105De2349f59767278Fd15c0858f806c08d615';
   const deployerAddress = '0x0b1C5E9E82393AD5d1d1e9a498BF7bAAC13b31Ee'; // No purpose other than to be a random address
   const abi = [
-    "function setTempOwner(address _tempOwner) external",
-    "function getTempOwner() external view returns (address)",
-    "function isValidSignature(bytes32 _hash, bytes calldata _signature) external view returns (bytes4)"
+    'function setTempOwner(address _tempOwner) external',
+    'function getTempOwner() external view returns (address)',
+    'function isValidSignature(bytes32 _hash, bytes calldata _signature) external view returns (bytes4)',
   ];
 
   const alice = await devEnv.createRandomPerson();
@@ -75,7 +75,7 @@ export const testKeccakEip1271AuthSigToEncryptDecryptString = async (
   const eip1271AuthSig: AuthSig = {
     address: contractAddress,
     sig: siweSignature,
-    derivedVia: "EIP1271",
+    derivedVia: 'EIP1271',
     signedMessage: siweMessage,
   };
 
@@ -86,14 +86,18 @@ export const testKeccakEip1271AuthSigToEncryptDecryptString = async (
   const setDeployerAsTempOwnerTx = await contract.setTempOwner(deployerAddress);
   await setDeployerAsTempOwnerTx.wait();
 
-  log("0. isValidSignature should FAIL since Alice (AuthSig.sig) is not the tempOwner yet");
+  log(
+    '0. isValidSignature should FAIL since Alice (AuthSig.sig) is not the tempOwner yet'
+  );
   try {
     const isValid = await contract.isValidSignature(hash, siweSignature);
-    if (isValid === "0x1626ba7e") {
-      throw new Error(`Expected isValidSignature to be 0xffffffff but got ${isValid}`);
+    if (isValid === '0x1626ba7e') {
+      throw new Error(
+        `Expected isValidSignature to be 0xffffffff but got ${isValid}`
+      );
     }
   } catch (error) {
-    log("Error calling isValidSignature:", error);
+    log('Error calling isValidSignature:', error);
     throw error;
   }
 
@@ -109,33 +113,42 @@ export const testKeccakEip1271AuthSigToEncryptDecryptString = async (
       devEnv.litNodeClient as unknown as ILitNodeClient
     );
   } catch (error) {
-    if (!error.message.includes('NodeContractAuthsigUnauthorized') ||
+    if (
+      !error.message.includes('NodeContractAuthsigUnauthorized') ||
       !error.message.includes('Access control failed for Smart contract') ||
-      !error.message.includes('validation error: Authsig failed for contract 0x88105De2349f59767278Fd15c0858f806c08d615.  Return value was ffffffff.')
-      ) {
-      throw new Error(`Expected error message to contain specific EIP1271 validation failure, but got: ${error}`);
+      !error.message.includes(
+        'validation error: Authsig failed for contract 0x88105De2349f59767278Fd15c0858f806c08d615.  Return value was ffffffff.'
+      )
+    ) {
+      throw new Error(
+        `Expected error message to contain specific EIP1271 validation failure, but got: ${error}`
+      );
     }
   }
 
   // Should PASS now
-  log("1. Setting temp owner...");
+  log('1. Setting temp owner...');
   const setTempOwnerTx = await contract.setTempOwner(alice.wallet.address);
   await setTempOwnerTx.wait();
-  log("Set tempOwner transaction hash: ", setTempOwnerTx.hash);
+  log('Set tempOwner transaction hash: ', setTempOwnerTx.hash);
 
   const tempOwner = await contract.getTempOwner();
   if (tempOwner.toLowerCase() !== alice.wallet.address.toLowerCase()) {
-    throw new Error(`Expected temp owner to be ${alice.wallet.address} but got ${tempOwner}`);
+    throw new Error(
+      `Expected temp owner to be ${alice.wallet.address} but got ${tempOwner}`
+    );
   }
 
-  log("2. Checking isValidSignature...");
+  log('2. Checking isValidSignature...');
   try {
     const isValid = await contract.isValidSignature(hash, siweSignature);
-    if (isValid !== "0x1626ba7e") {
-      throw new Error(`Expected isValidSignature to be 0x1626ba7e but got ${isValid}`);
+    if (isValid !== '0x1626ba7e') {
+      throw new Error(
+        `Expected isValidSignature to be 0x1626ba7e but got ${isValid}`
+      );
     }
   } catch (error) {
-    log("Error calling isValidSignature:", error);
+    log('Error calling isValidSignature:', error);
     throw error;
   }
 
