@@ -622,7 +622,7 @@ export class LitContracts {
 
   /**
    * Retrieves a contract instance based on the provided network, contract name, context, and RPC URL.
-   * 
+   *
    * This method handles three scenarios:
    * 1. No context provided - Resolves contract data from network context
    * 2. Context without resolver - Uses contract data directly from context
@@ -1081,10 +1081,14 @@ export class LitContracts {
       rpcUrl
     );
 
-    const allThings = await cloneNetContract['getAllActiveUnkickedValidatorStructsAndCounts']();
+    const allThings = await cloneNetContract[
+      'getAllActiveUnkickedValidatorStructsAndCounts'
+    ]();
 
     // First get all the active staking contract addresses.
-    const activeStakingContractAddresses = allThings.map((item: any) => item[0]);
+    const activeStakingContractAddresses = allThings.map(
+      (item: any) => item[0]
+    );
 
     if (activeStakingContractAddresses.length < 2) {
       throw new Error('❌ Not enough active staking contracts');
@@ -1096,10 +1100,13 @@ export class LitContracts {
     for (let i = 0; i < activeStakingContractAddresses.length; i++) {
       const stakingContractAddress = activeStakingContractAddresses[i];
 
-      const contractInfo = allThings.find((item: any) => item.stakingContractAddress === stakingContractAddress);
+      const contractInfo = allThings.find(
+        (item: any) => item.stakingContractAddress === stakingContractAddress
+      );
 
       const epochInfo = contractInfo.details.epoch;
-      const minNodeCount = contractInfo.details.currentValidatorCountForConsensus;
+      const minNodeCount =
+        contractInfo.details.currentValidatorCountForConsensus;
 
       const typedEpochInfo: EpochInfo = {
         epochLength: ethers.BigNumber.from(epochInfo.epochLength).toNumber(),
@@ -1115,7 +1122,9 @@ export class LitContracts {
         throw new Error('❌ Minimum validator count is not set');
       }
 
-      if (contractInfo.details.activeUnkickedValidators.length < minNodeCountInt) {
+      if (
+        contractInfo.details.activeUnkickedValidators.length < minNodeCountInt
+      ) {
         throw new Error(
           `❌ Active validator set does not meet the threshold. Required: ${minNodeCountInt} but got: ${contractInfo.details.activeUnkickedValidators.length}`
         );
@@ -1209,11 +1218,12 @@ export class LitContracts {
 
       // Randomly select network type if not specified
       if (!networkType) {
-        networkType = Math.floor(Math.random() * 100) % 2 === 0 ? 'mainnet' : 'cloneNet';
+        networkType =
+          Math.floor(Math.random() * 100) % 2 === 0 ? 'mainnet' : 'cloneNet';
         log('Randomly selected network type:', networkType);
       }
 
-      log("Selected network type:", networkType);
+      log('Selected network type:', networkType);
 
       // Return info based on network type
       if (networkType === 'mainnet') {

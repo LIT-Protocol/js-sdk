@@ -36,7 +36,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-        (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -247,7 +247,7 @@ export class TinnyEnvironment {
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
         ...(this.processEnvs.NETWORK_TYPE !== 'random' && {
-          networkType: this.processEnvs.NETWORK_TYPE || 'mainnet'
+          networkType: this.processEnvs.NETWORK_TYPE || 'mainnet',
         }),
       });
     } else if (centralisation === 'decentralised') {
@@ -256,7 +256,7 @@ export class TinnyEnvironment {
         checkNodeAttestation: true,
         debug: this.processEnvs.DEBUG,
         ...(this.processEnvs.NETWORK_TYPE !== 'random' && {
-          networkType: this.processEnvs.NETWORK_TYPE || 'mainnet'
+          networkType: this.processEnvs.NETWORK_TYPE || 'mainnet',
         }),
       });
     } else if (centralisation === 'centralised') {
@@ -265,7 +265,7 @@ export class TinnyEnvironment {
         checkNodeAttestation: false,
         debug: this.processEnvs.DEBUG,
         ...(this.processEnvs.NETWORK_TYPE !== 'random' && {
-          networkType: this.processEnvs.NETWORK_TYPE || 'mainnet'
+          networkType: this.processEnvs.NETWORK_TYPE || 'mainnet',
         }),
       });
     } else {
