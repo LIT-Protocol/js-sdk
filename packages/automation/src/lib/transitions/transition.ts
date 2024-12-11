@@ -14,8 +14,8 @@ export interface BaseTransitionParams {
 }
 
 export class Transition {
-  private debug = false;
-  private listeners: Listener<any>[];
+  private readonly debug: boolean;
+  private readonly listeners: Listener<any>[];
   private readonly values: (any | undefined)[];
   private readonly check?: Check;
   private readonly onMatch: (values: (any | undefined)[]) => Promise<void>;

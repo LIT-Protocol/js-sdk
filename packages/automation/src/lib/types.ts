@@ -17,6 +17,18 @@ export interface OnEvmChain {
   evmChainId: number;
 }
 
+interface ContextRead {
+  contextPath: string;
+}
+
+interface ContextUpdate extends ContextRead {
+  dataPath: string;
+}
+
+export interface UpdatesContext {
+  contextUpdates: ContextUpdate[];
+}
+
 export interface UsesPkp {
   pkpOwnerKey: string;
   pkpPublicKey: string;
@@ -29,15 +41,24 @@ export interface LitActionStateDefinition extends UsesPkp {
   jsParams: Record<string, any>;
 }
 
+export interface ContextStateDefinition {
+  log?: {
+    atEnter?: boolean;
+    atExit?: boolean;
+    path?: string;
+  };
+}
+
 export interface TransactionStateDefinition extends UsesPkp, OnEvmChain {
   contractABI: ethers.ContractInterface;
   contractAddress: Address;
   method: string;
-  params?: any[];
+  params?: (ContextRead | any)[];
   value?: string;
 }
 
 export interface StateDefinition {
+  context?: ContextStateDefinition;
   key: string;
   litAction?: LitActionStateDefinition;
   transaction?: TransactionStateDefinition;
@@ -80,7 +101,7 @@ export interface TimerTransitionDefinition
   until: number;
 }
 
-export interface EvmContractEventTransitionDefinition extends OnEvmChain {
+export interface EvmContractEventTransitionDefinition extends OnEvmChain, UpdatesContext {
   contractABI: ethers.ContractInterface;
   contractAddress: Address;
   eventName: string;
@@ -96,9 +117,10 @@ export interface TransitionDefinition {
 }
 
 export interface BaseStateMachineParams {
+  context?: Record<string, any>;
   debug?: boolean;
-  litNodeClient: LitNodeClient;
   litContracts: LitContracts;
+  litNodeClient: LitNodeClient;
   privateKey?: string;
   pkp?: PKPInfo;
 }

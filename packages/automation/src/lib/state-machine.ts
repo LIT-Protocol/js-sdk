@@ -24,6 +24,7 @@ import {
   TransitionDefinition,
   TransitionParams,
 } from './types';
+import { MachineContext } from './context/machine-context';
 
 export type MachineStatus = 'running' | 'stopped';
 
@@ -32,6 +33,7 @@ export type MachineStatus = 'running' | 'stopped';
  */
 export class StateMachine {
   private debug = false;
+  private context: MachineContext;
 
   private litNodeClient: LitNodeClient;
   private litContracts: LitContracts;
@@ -48,11 +50,20 @@ export class StateMachine {
   constructor(params: BaseStateMachineParams) {
     this.id = this.generateId();
     this.debug = params.debug ?? false;
+    this.context = new MachineContext(params.context);
 
     this.litNodeClient = params.litNodeClient;
     this.litContracts = params.litContracts;
     this.privateKey = params.privateKey;
     this.pkp = params.pkp;
+  }
+
+  public getContext(path?: string | string[]): any {
+    return this.context.get(path);
+  }
+
+  public setContext(path: string | string[], value: any): void {
+    this.context.set(path, value);
   }
 
   static fromDefinition(machineConfig: StateMachineDefinition): StateMachine {
@@ -64,6 +75,7 @@ export class StateMachine {
       pkp,
       states = [],
       transitions = [],
+      context,
     } = machineConfig;
 
     // Create litNodeClient and litContracts instances
@@ -93,11 +105,17 @@ export class StateMachine {
       litContracts: litContractsInstance,
       privateKey,
       pkp,
+      context,
     });
 
     const stateTransitions = [] as TransitionDefinition[];
     states.forEach((state) => {
-      const { litAction, transaction, transitions = [] } = state;
+      const {
+        litAction,
+        context: contextAction,
+        transaction,
+        transitions = [],
+      } = state;
 
       const stateConfig: StateParams = {
         key: state.key,
@@ -110,6 +128,26 @@ export class StateMachine {
       );
 
       const onEnterFunctions = [] as (() => Promise<void>)[];
+      const onExitFunctions = [] as (() => Promise<void>)[];
+
+      if (contextAction) {
+        if (contextAction.log?.atEnter) {
+          onEnterFunctions.push(async () => {
+            console.log(
+              `MachineContext at state ${state.key} enter: `,
+              stateMachine.context.get(contextAction.log?.path),
+            );
+          });
+        }
+        if (contextAction.log?.atExit) {
+          onExitFunctions.push(async () => {
+            console.log(
+              `MachineContext at state ${state.key} exit: `,
+              stateMachine.context.get(contextAction.log?.path),
+            );
+          });
+        }
+      }
 
       if (litAction) {
         onEnterFunctions.push(async () => {
@@ -130,7 +168,7 @@ export class StateMachine {
           });
 
           // TODO send user this result with a webhook and log
-          console.log(`============ litActionResponse:`, litActionResponse);
+          stateMachine.context.set('lastLitActionResponse', litActionResponse);
         });
       }
 
@@ -153,9 +191,12 @@ export class StateMachine {
             chainProvider
           );
 
-          const txData = await contract.populateTransaction[transaction.method](
-            ...(transaction.params || [])
+          const txParams = (transaction.params || []).map(param =>
+            'contextPath' in param
+              ? stateMachine.context.get(param.contextPath)
+              : param
           );
+          const txData = await contract.populateTransaction[transaction.method](...txParams);
           const gasLimit = await chainProvider.estimateGas({
             to: transaction.contractAddress,
             data: txData.data,
@@ -205,12 +246,15 @@ export class StateMachine {
           const receipt = await chainProvider.sendTransaction(signedTx);
 
           // TODO send user this result with a webhook and log
-          console.log('Transaction Receipt:', receipt);
+          stateMachine.context.set('lastTransactionReceipt', receipt);
         });
       }
 
       stateConfig.onEnter = async () => {
         await Promise.all(onEnterFunctions.map((onEnter) => onEnter()));
+      };
+      stateConfig.onExit = async () => {
+        await Promise.all(onExitFunctions.map((onExit) => onExit()));
       };
 
       stateMachine.addState(stateConfig);
@@ -257,6 +301,15 @@ export class StateMachine {
           const eventData = values[transitionIndex] as
             | ContractEventData
             | undefined;
+
+          evmContractEvent.contextUpdates?.forEach(contextUpdate =>
+            stateMachine.context.setFromData(
+              contextUpdate.contextPath,
+              eventData,
+              contextUpdate.dataPath,
+            ),
+          );
+
           return eventData?.event.event === evmContractEvent.eventName;
         });
       }

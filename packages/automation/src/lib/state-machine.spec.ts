@@ -1,5 +1,19 @@
-import { StateMachine } from './state-machine';
+import { LIT_NETWORK } from '@lit-protocol/constants';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+
 import { Listener } from './listeners';
+import { StateMachine } from './state-machine';
+import { BaseStateMachineParams } from './types';
+
+const litContracts = new LitContracts();
+const litNodeClient = new LitNodeClient({
+  litNetwork: LIT_NETWORK.DatilDev,
+});
+const stateMachineParams: BaseStateMachineParams = {
+  litContracts,
+  litNodeClient,
+};
 
 describe('StateMachine', () => {
   let stateMachine: StateMachine;
@@ -10,11 +24,8 @@ describe('StateMachine', () => {
 
   beforeEach(() => {
     callOrder = [];
-    stateMachine = new StateMachine();
-    listener = new Listener({
-      start: async () => {},
-      stop: async () => {},
-    });
+    stateMachine = new StateMachine(stateMachineParams);
+    listener = new Listener();
     check = jest.fn(() => true);
     onMatch = jest.fn();
 
@@ -39,7 +50,7 @@ describe('StateMachine', () => {
   });
 
   it('should generate a unique id for each state machine instance', () => {
-    const anotherStateMachine = new StateMachine();
+    const anotherStateMachine = new StateMachine(stateMachineParams);
     expect(stateMachine.id).toBeDefined();
     expect(anotherStateMachine.id).toBeDefined();
     expect(stateMachine.id).not.toEqual(anotherStateMachine.id);
@@ -156,7 +167,7 @@ describe('StateMachine', () => {
     });
 
     it('should handle errors during cleanup', async () => {
-      const errorStateMachine = new StateMachine();
+      const errorStateMachine = new StateMachine(stateMachineParams);
       const errorMessage = 'Exit error';
       errorStateMachine.addState({
         key: 'error',
@@ -169,6 +180,34 @@ describe('StateMachine', () => {
       await expect(errorStateMachine.stopMachine()).rejects.toThrow(
         errorMessage
       );
+    });
+  });
+
+  describe('Context', () => {
+    let machine: StateMachine;
+    const initialContext = {
+      contracts: {
+        token: '0x123...',
+      },
+      values: {
+        amount: 100
+      }
+    };
+
+    beforeEach(() => {
+      machine = new StateMachine({
+        ...stateMachineParams,
+        context: initialContext
+      });
+    });
+
+    it('should initialize with context', () => {
+      expect(machine.getContext()).toEqual(initialContext);
+    });
+
+    it('should allow getting and setting context values', () => {
+      machine.setContext('new.value', 42);
+      expect(machine.getContext('new.value')).toBe(42);
     });
   });
 });
