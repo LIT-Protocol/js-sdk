@@ -94,7 +94,7 @@ jobs:
         run: yarn build:dev
       - name: Copy ENV File
         run: cp .env.ci .env
-      - name: Setup interactive ssh session
+      - name: Setup an interactive ssh session
         uses: Warpbuilds/action-debugger@v1.3
         with:
           limit-access-to-actor: true
