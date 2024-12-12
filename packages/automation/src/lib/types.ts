@@ -17,13 +17,13 @@ export interface OnEvmChain {
   evmChainId: ContextOrLiteral<number>;
 }
 
-export interface ReadsContext<T> {
+export interface ContextAccess {
   contextPath: string;
 }
 
-export type ContextOrLiteral<T> = T | ReadsContext<T>;
+export type ContextOrLiteral<T> = T | ContextAccess;
 
-interface ContextUpdate extends ReadsContext<unknown> {
+interface ContextUpdate extends ContextAccess {
   dataPath: string;
 }
 

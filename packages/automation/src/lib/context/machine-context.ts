@@ -7,7 +7,10 @@ function parsePath(path?: string | string[]): string[] {
   return path.split(/\.|\[|\]/).filter(Boolean);
 }
 
-function getFromObject(object: Record<string, any>, path?: string | string[]) {
+function getFromObject(
+  object: Record<string, unknown>,
+  path?: string | string[]
+) {
   if (!path) return object;
 
   const parts = parsePath(path);
@@ -85,7 +88,7 @@ export class MachineContext {
 
   public setFromData(
     location: string | string[],
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
     path?: string | string[]
   ) {
     if (!data) return;

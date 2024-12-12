@@ -1,25 +1,26 @@
 import { Listener } from '../listeners';
 
-export type Check = (values: (any | undefined)[]) => Promise<boolean>;
+export type CheckFn = (values: (unknown | undefined)[]) => Promise<boolean>;
+export type resultFn = (values: (unknown | undefined)[]) => Promise<void>;
 
 /**
  * A Transition class that manages state transitions based on listeners and conditions.
  */
 export interface BaseTransitionParams {
   debug?: boolean;
-  listeners?: Listener<any>[];
-  check?: (values: (any | undefined)[]) => Promise<boolean>;
-  onMatch: (values: (any | undefined)[]) => Promise<void>;
-  onMismatch?: (values: (any | undefined)[]) => Promise<void>;
+  listeners?: Listener<any>[]; // should be unknown but that makes callers to cast listeners
+  check?: CheckFn;
+  onMatch: resultFn;
+  onMismatch?: resultFn;
 }
 
 export class Transition {
   private readonly debug: boolean;
-  private readonly listeners: Listener<any>[];
-  private readonly values: (any | undefined)[];
-  private readonly check?: Check;
-  private readonly onMatch: (values: (any | undefined)[]) => Promise<void>;
-  private readonly onMismatch?: (values: (any | undefined)[]) => Promise<void>;
+  private readonly listeners: Listener<unknown>[];
+  private readonly values: (unknown | undefined)[];
+  private readonly check?: CheckFn;
+  private readonly onMatch: resultFn;
+  private readonly onMismatch?: resultFn;
 
   /**
    * Creates a new Transition instance. If no listeners are provided, the transition will automatically match on the next event loop.
@@ -47,7 +48,7 @@ export class Transition {
    */
   private setupListeners() {
     this.listeners.forEach((listener, index) => {
-      listener.onStateChange(async (value: any) => {
+      listener.onStateChange(async (value: unknown) => {
         this.values[index] = value;
         const isMatch = this.check ? await this.check(this.values) : true;
         if (isMatch) {
@@ -69,7 +70,7 @@ export class Transition {
     await Promise.all(this.listeners.map((listener) => listener.start()));
 
     if (!this.listeners.length) {
-      // If the transition does not have any listeners it will never emit. Therefore, we "emit" automatically on next event loop
+      // If the transition does not have any listeners it will never emit. Therefore, we "match" automatically on next event loop
       setTimeout(() => {
         this.debug && console.log('Transition without listeners: auto match');
         this.onMatch([]);

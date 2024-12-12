@@ -13,7 +13,7 @@ import {
 } from './listeners';
 import { signWithLitActionCode, executeLitAction } from './litActions';
 import { State, StateParams } from './states';
-import { Check, Transition } from './transitions';
+import { CheckFn, Transition } from './transitions';
 import { getEvmChain } from './utils/chain';
 import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
 
@@ -33,7 +33,7 @@ export type MachineStatus = 'running' | 'stopped';
  * A StateMachine class that manages states and transitions between them.
  */
 export class StateMachine {
-  private debug = false;
+  private readonly debug;
   private context: MachineContext;
 
   private litNodeClient: LitNodeClient;
@@ -273,7 +273,7 @@ export class StateMachine {
       };
 
       const listeners: Listener<any>[] = [];
-      const checks: Check[] = [];
+      const checks: CheckFn[] = [];
 
       if (timer) {
         const transitionIndex = checks.length;
