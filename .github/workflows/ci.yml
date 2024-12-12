@@ -48,7 +48,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Find latest datil commit hash for last successful "rust/lit-node-build-commit-hash" workflow in the Lit Assets repo
-        uses: LIT-Protocol/last-successful-build-action@1302b463ad21338a0393c7966cb25f1e80a70aad
+        uses: LIT-Protocol/last-successful-build-action@8683b424d63620636091839a649098d4d0e90088
         with:
           token: "${{ secrets.GH_PAT_FOR_SHIVA }}"
           branch: "datil"
