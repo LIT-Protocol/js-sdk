@@ -1,4 +1,5 @@
 import { Listener } from '../listeners';
+import { onError } from '../types';
 
 export type CheckFn = (values: (unknown | undefined)[]) => Promise<boolean>;
 export type resultFn = (values: (unknown | undefined)[]) => Promise<void>;
@@ -13,6 +14,7 @@ export interface BaseTransitionParams {
   check?: CheckFn;
   onMatch: resultFn;
   onMismatch?: resultFn;
+  onError?: onError;
 }
 
 export class Transition {
@@ -22,6 +24,7 @@ export class Transition {
   private readonly check?: CheckFn;
   private readonly onMatch: resultFn;
   private readonly onMismatch?: resultFn;
+  private readonly onError?: onError;
   private readonly queue: Values[] = [];
   private isProcessingQueue = false;
 
@@ -36,12 +39,14 @@ export class Transition {
     check,
     onMatch,
     onMismatch,
+    onError,
   }: BaseTransitionParams) {
     this.debug = debug ?? false;
     this.listeners = listeners;
     this.check = check;
     this.onMatch = onMatch;
     this.onMismatch = onMismatch;
+    this.onError = onError;
     this.values = new Array(listeners.length).fill(undefined);
     this.setupListeners();
   }
@@ -60,6 +65,7 @@ export class Transition {
         // Process the queue
         await this.processQueue();
       });
+      listener.onError?.(this.onError);
     });
   }
 
@@ -67,15 +73,23 @@ export class Transition {
    * Starts all listeners for this transition.
    */
   async startListening() {
-    this.debug && console.log('startListening');
-    await Promise.all(this.listeners.map((listener) => listener.start()));
+    try {
+      this.debug && console.log('startListening');
+      await Promise.all(this.listeners.map((listener) => listener.start()));
 
-    if (!this.listeners.length) {
-      // If the transition does not have any listeners it will never emit. Therefore, we "match" automatically on next event loop
-      setTimeout(() => {
-        this.debug && console.log('Transition without listeners: auto match');
-        this.onMatch([]);
-      }, 0);
+      if (!this.listeners.length) {
+        // If the transition does not have any listeners it will never emit. Therefore, we "match" automatically on next event loop
+        setTimeout(() => {
+          this.debug && console.log('Transition without listeners: auto match');
+          this.onMatch([]);
+        }, 0);
+      }
+    } catch (e) {
+      if (this.onError) {
+        this.onError(e);
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -83,36 +97,52 @@ export class Transition {
    * Stops all listeners for this transition.
    */
   async stopListening() {
-    this.debug && console.log('stopListening');
-    this.queue.length = 0; // Flush the queue as there might be more value arrays to check
-    await Promise.all(this.listeners.map((listener) => listener.stop()));
+    try {
+      this.debug && console.log('stopListening');
+      this.queue.length = 0; // Flush the queue as there might be more value arrays to check
+      await Promise.all(this.listeners.map((listener) => listener.stop()));
+    } catch (e) {
+      if (this.onError) {
+        this.onError(e);
+      } else {
+        throw e;
+      }
+    }
   }
 
   private async processQueue() {
-    // Prevent concurrent queue processing
-    if (this.isProcessingQueue) {
-      return;
-    }
-    this.isProcessingQueue = true;
+    try {
+      // Prevent concurrent queue processing
+      if (this.isProcessingQueue) {
+        return;
+      }
+      this.isProcessingQueue = true;
 
-    while (this.queue.length > 0) {
-      const currentValues = this.queue.shift();
+      while (this.queue.length > 0) {
+        const currentValues = this.queue.shift();
 
-      if (!currentValues) {
-        continue;
+        if (!currentValues) {
+          continue;
+        }
+
+        const isMatch = this.check ? await this.check(currentValues) : true;
+
+        if (isMatch) {
+          this.debug && console.log('match', currentValues);
+          await this.onMatch?.(currentValues);
+        } else {
+          this.debug && console.log('mismatch', currentValues);
+          await this.onMismatch?.(currentValues);
+        }
       }
 
-      const isMatch = this.check ? await this.check(currentValues) : true;
-
-      if (isMatch) {
-        this.debug && console.log('match', currentValues);
-        await this.onMatch?.(currentValues);
+      this.isProcessingQueue = false; // Allow new queue processing
+    } catch (e) {
+      if (this.onError) {
+        this.onError(e);
       } else {
-        this.debug && console.log('mismatch', currentValues);
-        await this.onMismatch?.(currentValues);
+        throw e;
       }
     }
-
-    this.isProcessingQueue = false; // Allow new queue processing
   }
 }

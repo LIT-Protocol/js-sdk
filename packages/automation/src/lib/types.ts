@@ -6,6 +6,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { BaseTransitionParams } from './transitions';
 
 export type Address = `0x${string}`;
+export type onError = (error: unknown) => void;
 
 export type PKPInfo = {
   tokenId: string;
@@ -125,6 +126,7 @@ export interface BaseStateMachineParams {
   debug?: boolean;
   litContracts: LitContracts;
   litNodeClient: LitNodeClient;
+  onError?: (error: unknown, context?: string) => void;
   privateKey?: string;
   pkp?: PKPInfo;
 }

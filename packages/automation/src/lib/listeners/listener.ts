@@ -1,8 +1,11 @@
 import { EventEmitter } from 'events';
 
+import { onError } from '../types';
+
 export interface ListenerParams {
   start?: () => Promise<void>;
   stop?: () => Promise<void>;
+  onError?: onError;
 }
 
 /**
@@ -24,15 +27,22 @@ export class Listener<T = unknown> {
   public stop: () => Promise<void>;
 
   /**
+   * The error handling function to call when an error occurs.
+   */
+  public onError?: onError;
+
+  /**
    * Constructor for the Listener class.
    * @param params The parameters object containing start and stop functions.
    */
   constructor({
     start = async () => {},
     stop = async () => {},
+    onError,
   }: ListenerParams = {}) {
     this.start = start;
     this.stop = stop;
+    this.onError = onError;
   }
 
   /**

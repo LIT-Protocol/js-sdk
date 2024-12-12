@@ -1,6 +1,10 @@
 import { ethers } from 'ethers';
 
-import { LIT_RPC } from '@lit-protocol/constants';
+import {
+  AutomationError,
+  UnknownError,
+  LIT_RPC,
+} from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
@@ -34,6 +38,7 @@ export type MachineStatus = 'running' | 'stopped';
  */
 export class StateMachine {
   private readonly debug;
+  private readonly onError?: (error: unknown, context?: string) => void;
   private context: MachineContext;
 
   private litNodeClient: LitNodeClient;
@@ -51,6 +56,7 @@ export class StateMachine {
   constructor(params: BaseStateMachineParams) {
     this.id = this.generateId();
     this.debug = params.debug ?? false;
+    this.onError = params.onError;
     this.context = new MachineContext(params.context);
 
     this.litNodeClient = params.litNodeClient;
@@ -62,6 +68,7 @@ export class StateMachine {
   static fromDefinition(machineConfig: StateMachineDefinition): StateMachine {
     const {
       debug = false,
+      onError,
       litNodeClient,
       litContracts = {},
       privateKey,
@@ -94,6 +101,7 @@ export class StateMachine {
 
     const stateMachine = new StateMachine({
       debug,
+      onError,
       litNodeClient: litNodeClientInstance,
       litContracts: litContractsInstance,
       privateKey,
@@ -360,16 +368,18 @@ export class StateMachine {
       transitionConfig.listeners = listeners;
       // Aggregate (AND) all listener checks to a single function result
       transitionConfig.check = async (values) => {
-        console.log(
-          `${transition.fromState} -> ${transition.toState} values`,
-          values
-        );
+        debug &&
+          console.log(
+            `${transition.fromState} -> ${transition.toState} values`,
+            values
+          );
         return Promise.all(checks.map((check) => check(values))).then(
           (results) => {
-            console.log(
-              `${transition.fromState} -> ${transition.toState} results`,
-              results
-            );
+            debug &&
+              console.log(
+                `${transition.fromState} -> ${transition.toState} results`,
+                results
+              );
             return results.every((result) => result);
           }
         );
@@ -421,10 +431,15 @@ export class StateMachine {
       await this.transitionTo(toState);
     };
 
+    const onTransitionError = async (error: unknown) => {
+      this.handleError(error, `Error at ${fromState} -> ${toState} transition`);
+    };
+
     const transition = new Transition({
       debug: this.debug,
       listeners,
       check,
+      onError: onTransitionError,
       onMatch: transitioningOnMatch,
       onMismatch,
     });
@@ -461,9 +476,9 @@ export class StateMachine {
   async stopMachine() {
     this.debug && console.log('Stopping state machine...');
 
+    this.status = 'stopped';
     await this.exitCurrentState();
     await this.onStopCallback?.();
-    this.status = 'stopped';
 
     this.debug && console.log('State machine stopped');
   }
@@ -504,10 +519,6 @@ export class StateMachine {
    * Stops listening on the current state's transitions and exits the current state.
    */
   private async exitCurrentState() {
-    if (!this.isRunning) {
-      return;
-    }
-
     this.debug && console.log('exitCurrentState', this.currentState?.key);
 
     const currentTransitions =
@@ -547,7 +558,13 @@ export class StateMachine {
     const nextState = this.states.get(stateKey);
 
     if (!nextState) {
-      throw new Error(`State ${stateKey} not found`);
+      throw new UnknownError(
+        {
+          currentState: this.currentState,
+          nextState: stateKey,
+        },
+        `Machine next state not found`
+      );
     }
     if (this.currentState === nextState) {
       console.warn(`State ${stateKey} is already active. Skipping transition.`);
@@ -560,8 +577,33 @@ export class StateMachine {
       this.isRunning && (await this.enterState(stateKey));
     } catch (e) {
       this.currentState = undefined;
-      console.error(e);
-      throw new Error(`Could not enter state ${stateKey}`);
+      this.handleError(e, `Could not enter state ${stateKey}`);
+    }
+  }
+
+  private handleError(error: unknown, context: string) {
+    // Try to halt machine if it is still running
+    if (this.isRunning) {
+      const publicError = new AutomationError(
+        {
+          info: {
+            stateMachineId: this.id,
+            status: this.status,
+            currentState: this.currentState,
+          },
+          cause: error,
+        },
+        context ?? 'Error running state machine'
+      );
+      if (this.onError) {
+        this.onError(publicError);
+      } else {
+        // This throw will likely crash the server
+        throw publicError;
+      }
+
+      // Throwing when stopping could hide above error
+      this.stopMachine().catch(console.error);
     }
   }
 
