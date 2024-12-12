@@ -1,5 +1,9 @@
-import { TimerListener } from '../listeners';
+import { ConstantListener, TimerListener } from '../listeners';
 import { Transition } from './transition';
+
+function flushPromises() {
+  return new Promise(jest.requireActual('timers').setImmediate);
+}
 
 function coalesce(value: number | undefined) {
   return value ?? 0;
@@ -36,6 +40,8 @@ describe('Transition', () => {
 
     // After 4 seconds (listener1 counter = 4, listener2 counter = 2)
     jest.advanceTimersByTime(4000);
+    await flushPromises();
+
     await expect(check).toHaveBeenCalledTimes(6);
     await expect(onMismatch).toHaveBeenCalledTimes(5); // 4 for listener1, 2 for listener2. But last one matched
     await expect(onMatch).toHaveBeenCalledTimes(1);
@@ -47,6 +53,8 @@ describe('Transition', () => {
 
     // After 3 seconds (listener1 counter = 3, listener2 counter = 1)
     jest.advanceTimersByTime(3000);
+    await flushPromises();
+
     await expect(check).toHaveBeenCalledTimes(4);
     await expect(onMismatch).toHaveBeenCalledTimes(4); // 3 for listener1, 1 for listener2
     await expect(onMismatch).toHaveBeenCalledWith([3, 1]); // Last of failing values
@@ -56,8 +64,10 @@ describe('Transition', () => {
   it('should stop calling callbacks after stopListening', async () => {
     await transition.startListening();
 
-    // After 2 seconds
+    // After 3 seconds
     jest.advanceTimersByTime(3000);
+    await flushPromises();
+
     await expect(check).toHaveBeenCalledTimes(4);
     await expect(onMismatch).toHaveBeenCalledTimes(4); // 3 for listener1, 1 for listener2
     await expect(onMismatch).toHaveBeenCalledWith([3, 1]); // Example of checking values
@@ -91,6 +101,8 @@ describe('Transition', () => {
 
     // After 2 seconds (listener1 counter = 2, listener2 counter = 1)
     jest.advanceTimersByTime(2000);
+    await flushPromises();
+
     await expect(onMatch).toHaveBeenCalledTimes(3); // Called for each state change
     await expect(onMatch).toHaveBeenCalledWith([2, 1]);
   });
@@ -105,6 +117,44 @@ describe('Transition', () => {
     jest.runAllTimers();
     await expect(onMatch).toHaveBeenCalledTimes(1);
     await expect(onMatch).toHaveBeenCalledWith([]);
+  });
+
+  it('should handle multiple simultaneous listener updates and call onMatch only once when it stops listeners', async () => {
+    const listener1 = new ConstantListener(1000);
+    const listener2 = new ConstantListener(2000);
+    const transition = new Transition({
+      listeners: [listener1, listener2],
+      check,
+      onMatch,
+      onMismatch,
+    });
+    // Overload onMatch
+    const stoppingOnMatch = jest.fn(() => {
+      transition.stopListening();
+    });
+    // @ts-expect-error overwriting a readonly property
+    transition['onMatch'] = stoppingOnMatch;
+
+    await transition.startListening();
+
+    // Simulate rapid listener updates
+    listener1['emit'](1);
+    listener1['emit'](2);
+    listener1['emit'](3);
+    listener2['emit'](1);
+    listener2['emit'](2); // This call should match. No more calls to anything after this
+    listener2['emit'](2); // Since this event, transition doesn't call check more values
+    listener2['emit'](2);
+    listener1['emit'](3);
+    listener1['emit'](3);
+
+    jest.runAllTimers();
+    await flushPromises();
+
+    await expect(check).toHaveBeenCalledTimes(5); // Check should only be called once for each queued values
+    await expect(onMismatch).toHaveBeenCalledTimes(4); // onMismatch should be called always until a match is found, but not more
+    await expect(stoppingOnMatch).toHaveBeenCalledTimes(1); // onMatch should only be called once
+    await expect(stoppingOnMatch).toHaveBeenCalledWith([3, 2]);
   });
 
   afterEach(async () => {
