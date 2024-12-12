@@ -101,10 +101,6 @@ jobs:
         run: yarn build:dev
       - name: Copy ENV File
         run: cp .env.ci .env
-      # - name: Setup an interactive ssh session
-      #   uses: Warpbuilds/action-debugger@v1.3
-      #   with:
-      #     limit-access-to-actor: true
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
         run: yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString,testExecuteJsSignAndCombineEcdsa,testExecutJsDecryptAndCombine,testExecuteJsBroadcastAndCollect --exclude=Parallel
