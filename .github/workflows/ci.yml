@@ -51,7 +51,7 @@ jobs:
         uses: LIT-Protocol/last-successful-build-action@1302b463ad21338a0393c7966cb25f1e80a70aad
         with:
           token: "${{ secrets.GH_PAT_FOR_SHIVA }}"
-          branch: "fix/shiva-libc6-dependency" # for testing, change to datil when finished
+          branch: "datil"
           workflow: "rust/lit-node-build-commit-hash"
           repo: LIT-Protocol/lit-assets
           # this outputs to dollarSign{{ github.sha }}
