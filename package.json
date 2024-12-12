@@ -72,9 +72,8 @@
     "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
-    "@nrwl/devkit": "19.6.3",
-    "@nrwl/eslint-plugin-nx": "19.6.3",
-    "@nx/esbuild": "^17.3.0",
+    "@nx/devkit": "17.3.0",
+    "@nx/esbuild": "17.3.0",
     "@nx/eslint-plugin": "17.3.0",
     "@nx/jest": "17.3.0",
     "@nx/js": "17.3.0",
