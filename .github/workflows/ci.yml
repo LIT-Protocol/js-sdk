@@ -55,7 +55,7 @@ jobs:
           branch: "datil"
           workflow: "rust/lit-node-build-commit-hash"
           repo: LIT-Protocol/lit-assets
-          # this outputs to dollarSign{{ github.lastSuccessfulBuildSha }}
+          # this outputs to dollarSign{{ steps.last-successful-build.outputs.lastSuccessfulBuildSha }}
       - name: Checkout Lit Assets
         uses: actions/checkout@v4
         id: checkout
