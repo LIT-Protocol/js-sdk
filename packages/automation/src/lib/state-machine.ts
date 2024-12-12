@@ -59,14 +59,6 @@ export class StateMachine {
     this.pkp = params.pkp;
   }
 
-  public getContext(path?: string | string[]): any {
-    return this.context.get(path);
-  }
-
-  public setContext(path: string | string[], value: any): void {
-    this.context.set(path, value);
-  }
-
   static fromDefinition(machineConfig: StateMachineDefinition): StateMachine {
     const {
       debug = false,

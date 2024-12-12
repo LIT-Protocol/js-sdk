@@ -202,12 +202,12 @@ describe('StateMachine', () => {
     });
 
     it('should initialize with context', () => {
-      expect(machine.getContext()).toEqual(initialContext);
+      expect(machine['context']['context']).toEqual(initialContext);
     });
 
     it('should allow getting and setting context values', () => {
-      machine.setContext('new.value', 42);
-      expect(machine.getContext('new.value')).toBe(42);
+      machine['context'].set('new.value', 42);
+      expect(machine['context'].get('new.value')).toBe(42);
     });
   });
 });
