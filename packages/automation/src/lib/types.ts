@@ -14,14 +14,16 @@ export type PKPInfo = {
 };
 
 export interface OnEvmChain {
-  evmChainId: number;
+  evmChainId: ContextOrLiteral<number>;
 }
 
-interface ContextRead {
+export interface ReadsContext<T> {
   contextPath: string;
 }
 
-interface ContextUpdate extends ContextRead {
+export type ContextOrLiteral<T> = T | ReadsContext<T>;
+
+interface ContextUpdate extends ReadsContext<unknown> {
   dataPath: string;
 }
 
@@ -30,15 +32,15 @@ export interface UpdatesContext {
 }
 
 export interface UsesPkp {
-  pkpOwnerKey: string;
-  pkpPublicKey: string;
-  pkpEthAddress: Address;
+  pkpOwnerKey: ContextOrLiteral<string>;
+  pkpPublicKey: ContextOrLiteral<string>;
+  pkpEthAddress: ContextOrLiteral<Address>;
 }
 
-export interface LitActionStateDefinition extends UsesPkp {
-  ipfsId?: string; // TODO separate into another without code
-  code: string;
-  jsParams: Record<string, any>;
+interface LitActionStateDefinition extends UsesPkp {
+  code?: ContextOrLiteral<string>;
+  ipfsId?: ContextOrLiteral<string>;
+  jsParams?: Record<string, any>;
 }
 
 export interface ContextStateDefinition {
@@ -51,10 +53,10 @@ export interface ContextStateDefinition {
 
 export interface TransactionStateDefinition extends UsesPkp, OnEvmChain {
   contractABI: ethers.ContractInterface;
-  contractAddress: Address;
-  method: string;
-  params?: (ContextRead | any)[];
-  value?: string;
+  contractAddress: ContextOrLiteral<Address>;
+  method: ContextOrLiteral<string>;
+  params?: ContextOrLiteral<any>[];
+  value?: ContextOrLiteral<string>;
 }
 
 export interface StateDefinition {
@@ -101,7 +103,9 @@ export interface TimerTransitionDefinition
   until: number;
 }
 
-export interface EvmContractEventTransitionDefinition extends OnEvmChain, UpdatesContext {
+export interface EvmContractEventTransitionDefinition
+  extends OnEvmChain,
+    UpdatesContext {
   contractABI: ethers.ContractInterface;
   contractAddress: Address;
   eventName: string;

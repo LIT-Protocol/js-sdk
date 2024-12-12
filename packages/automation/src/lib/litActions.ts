@@ -15,24 +15,16 @@ export const signWithLitActionCode = `(async () =>  {
             Lit.Actions.setResponse({ response: signature });
           })();`;
 
-interface ExecuteLitActionBase {
+interface ExecuteLitAction {
   litNodeClient: LitNodeClient;
   pkpPublicKey: string;
   authSigner: ethers.Wallet;
   ipfsId?: string;
-  code: string;
-  jsParams: Record<string, any>;
+  code?: string;
+  jsParams?: Record<string, any>;
 }
 
-interface ExecuteCodeLitAction extends ExecuteLitActionBase {
-  code: string;
-}
-
-interface ExecuteIPFSLitAction extends ExecuteLitActionBase {
-  ipfsId: string;
-}
-
-type ExecuteLitAction = ExecuteCodeLitAction | ExecuteIPFSLitAction;
+const ONE_MINUTE = 1 * 60 * 1000;
 
 export async function executeLitAction({
   litNodeClient,
@@ -49,7 +41,7 @@ export async function executeLitAction({
       await EthWalletProvider.authenticate({
         signer: authSigner,
         litNodeClient: litNodeClient,
-        expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
+        expiration: new Date(Date.now() + ONE_MINUTE).toISOString(),
       }),
     ],
     resourceAbilityRequests: [

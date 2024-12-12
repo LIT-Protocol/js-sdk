@@ -1,13 +1,11 @@
 import { LIT_EVM_CHAINS } from '@lit-protocol/constants';
 
-import { OnEvmChain } from '../types';
-
-export function getChain(event: OnEvmChain) {
+export function getEvmChain(evmChainId: number) {
   const chain = Object.values(LIT_EVM_CHAINS).find(
-    (chain) => chain.chainId === event.evmChainId
+    (chain) => chain.chainId === evmChainId
   );
   if (!chain) {
-    throw new Error(`EVM chain with chainId ${event.evmChainId} not found`);
+    throw new Error(`EVM chain with chainId ${evmChainId} not found`);
   }
 
   return chain;

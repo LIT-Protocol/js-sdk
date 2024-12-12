@@ -190,14 +190,14 @@ describe('StateMachine', () => {
         token: '0x123...',
       },
       values: {
-        amount: 100
-      }
+        amount: 100,
+      },
     };
 
     beforeEach(() => {
       machine = new StateMachine({
         ...stateMachineParams,
-        context: initialContext
+        context: initialContext,
       });
     });
 

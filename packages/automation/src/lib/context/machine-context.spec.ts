@@ -9,9 +9,9 @@ describe('MachineContext', () => {
       token: '0x123...',
     },
     values: {
-      amount: 100
+      amount: 100,
     },
-    existingArray: [1, 2, 3]
+    existingArray: [1, 2, 3],
   };
 
   beforeEach(() => {
@@ -53,13 +53,15 @@ describe('MachineContext', () => {
 
   it('should create intermediate objects when setting deep paths', () => {
     context.set('a.b.c', 'value');
-    expect(context.get()).toEqual(expect.objectContaining({
-      a: {
-        b: {
-          c: 'value'
-        }
-      }
-    }));
+    expect(context.get()).toEqual(
+      expect.objectContaining({
+        a: {
+          b: {
+            c: 'value',
+          },
+        },
+      })
+    );
   });
 
   it('should override existing values', () => {
@@ -115,19 +117,21 @@ describe('MachineContext', () => {
 
   describe('array indexing', () => {
     beforeEach(() => {
-      context = new MachineContext(deepCopy({
-        simple: ['a', 'b', 'c'],
-        complex: [
-          { id: 1, value: { foo: 'bar' } },
-          { id: 2, value: { foo: 'baz' } }
-        ],
-        nested: {
-          arrays: [
-            [1, 2],
-            [3, 4]
-          ]
-        }
-      }));
+      context = new MachineContext(
+        deepCopy({
+          simple: ['a', 'b', 'c'],
+          complex: [
+            { id: 1, value: { foo: 'bar' } },
+            { id: 2, value: { foo: 'baz' } },
+          ],
+          nested: {
+            arrays: [
+              [1, 2],
+              [3, 4],
+            ],
+          },
+        })
+      );
     });
 
     it('should access array elements using index notation', () => {
@@ -152,7 +156,11 @@ describe('MachineContext', () => {
 
     it('should create arrays when setting with index notation', () => {
       context.set('new[2].foo', 'bar');
-      expect(context.get('new')).toEqual([undefined, undefined, { foo: 'bar' }]);
+      expect(context.get('new')).toEqual([
+        undefined,
+        undefined,
+        { foo: 'bar' },
+      ]);
     });
 
     it('should handle array notation with dot notation mixed', () => {

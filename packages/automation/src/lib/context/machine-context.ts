@@ -47,14 +47,16 @@ export class MachineContext {
           if (isLast) {
             current[index] = value;
           } else {
-            current[index] = current[index] ?? (isNaN(parseInt(parts[i + 1])) ? {} : []);
+            current[index] =
+              current[index] ?? (isNaN(parseInt(parts[i + 1])) ? {} : []);
             current = current[index];
           }
         } else {
           if (isLast) {
             current[key] = value;
           } else {
-            current[key] = current[key] ?? (isNaN(parseInt(parts[i + 1])) ? {} : []);
+            current[key] =
+              current[key] ?? (isNaN(parseInt(parts[i + 1])) ? {} : []);
             current = current[key];
           }
         }
@@ -62,7 +64,8 @@ export class MachineContext {
         if (isLast) {
           current[key] = value;
         } else {
-          current = current[key] = current[key] ?? (isNaN(parseInt(parts[i + 1])) ? {} : []);
+          current = current[key] =
+            current[key] ?? (isNaN(parseInt(parts[i + 1])) ? {} : []);
         }
       }
     }
@@ -80,7 +83,11 @@ export class MachineContext {
     }
   }
 
-  public setFromData(location: string | string[], data?: Record<string, any>, path?: string | string[]) {
+  public setFromData(
+    location: string | string[],
+    data?: Record<string, any>,
+    path?: string | string[]
+  ) {
     if (!data) return;
 
     const value = getFromObject(data, path);

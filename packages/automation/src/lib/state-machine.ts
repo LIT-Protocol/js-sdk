@@ -14,11 +14,12 @@ import {
 import { signWithLitActionCode, executeLitAction } from './litActions';
 import { State, StateParams } from './states';
 import { Check, Transition } from './transitions';
-import { getChain } from './utils/chain';
+import { getEvmChain } from './utils/chain';
 import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
 
 import {
   BaseStateMachineParams,
+  ContextOrLiteral,
   PKPInfo,
   StateMachineDefinition,
   TransitionDefinition,
@@ -135,7 +136,7 @@ export class StateMachine {
           onEnterFunctions.push(async () => {
             console.log(
               `MachineContext at state ${state.key} enter: `,
-              stateMachine.context.get(contextAction.log?.path),
+              stateMachine.context.get(contextAction.log?.path)
             );
           });
         }
@@ -143,7 +144,7 @@ export class StateMachine {
           onExitFunctions.push(async () => {
             console.log(
               `MachineContext at state ${state.key} exit: `,
-              stateMachine.context.get(contextAction.log?.path),
+              stateMachine.context.get(contextAction.log?.path)
             );
           });
         }
@@ -162,8 +163,8 @@ export class StateMachine {
             litNodeClient: litNodeClientInstance,
             pkpPublicKey: stateMachine.pkp!.publicKey,
             authSigner: signer,
-            ipfsId: litAction.ipfsId,
-            code: litAction.code,
+            ipfsId: stateMachine.resolveValue(litAction.ipfsId),
+            code: stateMachine.resolveValue(litAction.code),
             jsParams: litAction.jsParams,
           });
 
@@ -175,36 +176,38 @@ export class StateMachine {
       if (transaction) {
         onEnterFunctions.push(async () => {
           const yellowstoneMachineSigner = new ethers.Wallet(
-            transaction.pkpOwnerKey,
+            stateMachine.resolveValue(transaction.pkpOwnerKey),
             new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
           );
 
-          const chain = getChain(transaction);
+          const chainId = stateMachine.resolveValue(transaction.evmChainId);
+          const chain = getEvmChain(chainId);
           const chainProvider = new ethers.providers.JsonRpcProvider(
             chain.rpcUrls[0],
             chain.chainId
           );
 
           const contract = new ethers.Contract(
-            transaction.contractAddress,
+            stateMachine.resolveValue(transaction.contractAddress),
             transaction.contractABI,
             chainProvider
           );
 
-          const txParams = (transaction.params || []).map(param =>
-            'contextPath' in param
-              ? stateMachine.context.get(param.contextPath)
-              : param
+          const txParams = (transaction.params || []).map(
+            stateMachine.resolveValue.bind(stateMachine)
           );
-          const txData = await contract.populateTransaction[transaction.method](...txParams);
+          const txMethod = stateMachine.resolveValue(transaction.method);
+          const txData = await contract.populateTransaction[txMethod](
+            ...txParams
+          );
           const gasLimit = await chainProvider.estimateGas({
-            to: transaction.contractAddress,
+            to: stateMachine.resolveValue(transaction.contractAddress),
             data: txData.data,
-            from: transaction.pkpEthAddress,
+            from: stateMachine.resolveValue(transaction.pkpEthAddress),
           });
           const gasPrice = await chainProvider.getGasPrice();
           const nonce = await chainProvider.getTransactionCount(
-            transaction.pkpEthAddress
+            stateMachine.resolveValue(transaction.pkpEthAddress)
           );
 
           const rawTx = {
@@ -213,7 +216,7 @@ export class StateMachine {
             gasLimit: gasLimit.toHexString(),
             gasPrice: gasPrice.toHexString(),
             nonce,
-            to: transaction.contractAddress,
+            to: stateMachine.resolveValue(transaction.contractAddress),
           };
           const rawTxHash = ethers.utils.keccak256(
             ethers.utils.serializeTransaction(rawTx)
@@ -222,7 +225,7 @@ export class StateMachine {
           // Sign with the PKP in a LitAction
           const litActionResponse = await executeLitAction({
             litNodeClient: litNodeClientInstance,
-            pkpPublicKey: transaction.pkpPublicKey,
+            pkpPublicKey: stateMachine.resolveValue(transaction.pkpPublicKey),
             authSigner: yellowstoneMachineSigner,
             code: signWithLitActionCode,
             jsParams: {
@@ -282,7 +285,8 @@ export class StateMachine {
 
       if (evmContractEvent) {
         const transitionIndex = checks.length;
-        const chain = getChain(evmContractEvent);
+        const chainId = stateMachine.resolveValue(evmContractEvent.evmChainId);
+        const chain = getEvmChain(chainId);
 
         listeners.push(
           new EVMContractEventListener(
@@ -302,12 +306,12 @@ export class StateMachine {
             | ContractEventData
             | undefined;
 
-          evmContractEvent.contextUpdates?.forEach(contextUpdate =>
+          evmContractEvent.contextUpdates?.forEach((contextUpdate) =>
             stateMachine.context.setFromData(
               contextUpdate.contextPath,
               eventData,
-              contextUpdate.dataPath,
-            ),
+              contextUpdate.dataPath
+            )
           );
 
           return eventData?.event.event === evmContractEvent.eventName;
@@ -317,7 +321,8 @@ export class StateMachine {
       if (balances) {
         balances.forEach((balance) => {
           const transitionIndex = checks.length;
-          const chain = getChain(balance);
+          const chainId = stateMachine.resolveValue(balance.evmChainId);
+          const chain = getEvmChain(chainId);
 
           const chainProvider = new ethers.providers.JsonRpcProvider(
             chain.rpcUrls[0],
@@ -469,6 +474,13 @@ export class StateMachine {
     this.status = 'stopped';
 
     this.debug && console.log('State machine stopped');
+  }
+
+  public resolveValue<T = unknown>(value: ContextOrLiteral<T> | T): T {
+    if (value && typeof value === 'object' && 'contextPath' in value) {
+      return this.context.get(value.contextPath) as T;
+    }
+    return value;
   }
 
   /**
