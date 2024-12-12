@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      DATIL_COMMIT_HASH: 2f38a85e7b72c1f352ec51b05768db7971697b2c
+      DATIL_COMMIT_HASH: de4511a8cfa5995187c955fe7dbe0b436db36212
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
