@@ -12,6 +12,7 @@ export interface SignTransactionWithEncryptedSolanaKeyParams {
   dataToEncryptHash: string; // The hash of the data to encrypt
   unsignedTransaction: UnsignedTransaction;
   broadcast: boolean; // Flag to determine if the transaction should be broadcasted
+  versionedTransaction: boolean; // Flag to determine if the transaction is a versioned one or a legacy one
 }
 
 /**
@@ -28,6 +29,7 @@ export async function signTransactionWithEncryptedSolanaKey({
   dataToEncryptHash,
   unsignedTransaction,
   broadcast,
+  versionedTransaction
 }: SignTransactionWithEncryptedSolanaKeyParams): Promise<string> {
   validateUnsignedTransaction(unsignedTransaction);
 
@@ -41,5 +43,6 @@ export async function signTransactionWithEncryptedSolanaKey({
     broadcast,
     privateKey,
     unsignedTransaction,
+    versionedTransaction
   });
 }
