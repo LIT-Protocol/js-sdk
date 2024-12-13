@@ -879,6 +879,28 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  coreDao: {
+    contractAddress: null,
+    chainId: 1116,
+    name: 'Core DAO',
+    symbol: 'CORE',
+    decimals: 18,
+    rpcUrls: ['https://rpc.coredao.org'],
+    blockExplorerUrls: ['https://scan.coredao.org/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  zkCandySepoliaTestnet: {
+    contractAddress: null,
+    chainId: 302,
+    name: 'ZKcandy Sepolia Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://sepolia.rpc.zkcandy.io'],
+    blockExplorerUrls: ['https://sepolia.explorer.zkcandy.io'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**
