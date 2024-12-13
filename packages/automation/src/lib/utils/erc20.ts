@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-import { BalanceTransitionDefinition } from '../types';
+import { Address, BalanceTransitionDefinition } from '../types';
 
 export const ERC20ABI = [
   {
@@ -25,9 +25,9 @@ export const ERC20ABI = [
 
 export async function getERC20Balance(
   provider: ethers.providers.Provider,
-  tokenAddress: string,
+  tokenAddress: Address,
   tokenDecimals: number,
-  accountAddress: string
+  accountAddress: Address
 ) {
   const contract = new ethers.Contract(tokenAddress, ERC20ABI, provider);
   const balance = (await contract['balanceOf'](

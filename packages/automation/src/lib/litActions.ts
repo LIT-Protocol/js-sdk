@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 import { LitActionResource } from '@lit-protocol/auth-helpers';
-import { LIT_ABILITY } from '@lit-protocol/constants';
+import { LIT_ABILITY, LIT_NETWORK } from '@lit-protocol/constants';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
@@ -17,6 +17,8 @@ export const signWithLitActionCode = `(async () =>  {
 
 interface ExecuteLitAction {
   litNodeClient: LitNodeClient;
+  capacityTokenId?: string;
+  pkpEthAddress: string;
   pkpPublicKey: string;
   authSigner: ethers.Wallet;
   ipfsId?: string;
@@ -28,20 +30,38 @@ const ONE_MINUTE = 1 * 60 * 1000;
 
 export async function executeLitAction({
   litNodeClient,
+  capacityTokenId,
+  pkpEthAddress,
   pkpPublicKey,
   authSigner,
   ipfsId,
   code,
   jsParams,
 }: ExecuteLitAction) {
+  let capacityDelegationAuthSig;
+  if (litNodeClient.config.litNetwork !== LIT_NETWORK.DatilDev) {
+    const capacityDelegationAuthSigRes =
+      await litNodeClient.createCapacityDelegationAuthSig({
+        dAppOwnerWallet: authSigner,
+        capacityTokenId,
+        delegateeAddresses: [pkpEthAddress],
+        uses: '1',
+      });
+    capacityDelegationAuthSig =
+      capacityDelegationAuthSigRes.capacityDelegationAuthSig;
+  }
+
+  const expiration = new Date(Date.now() + ONE_MINUTE).toISOString();
   const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
     pkpPublicKey,
-    capabilityAuthSigs: [],
+    capabilityAuthSigs: capacityDelegationAuthSig
+      ? [capacityDelegationAuthSig]
+      : [],
     authMethods: [
       await EthWalletProvider.authenticate({
         signer: authSigner,
         litNodeClient: litNodeClient,
-        expiration: new Date(Date.now() + ONE_MINUTE).toISOString(),
+        expiration,
       }),
     ],
     resourceAbilityRequests: [
@@ -50,6 +70,7 @@ export async function executeLitAction({
         ability: LIT_ABILITY.LitActionExecution,
       },
     ],
+    expiration,
   });
 
   const executeJsResponse = await litNodeClient.executeJs({

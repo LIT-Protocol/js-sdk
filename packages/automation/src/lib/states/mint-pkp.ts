@@ -1,12 +1,7 @@
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 import { State, StateParams } from './state';
-
-export interface PKPInfo {
-  tokenId: string;
-  publicKey: string;
-  ethAddress: string;
-}
+import { PKPInfo } from '../types';
 
 export interface MintPKPStateParams extends StateParams {
   litContracts: LitContracts;

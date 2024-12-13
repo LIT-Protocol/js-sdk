@@ -13,6 +13,7 @@ const litNodeClient = new LitNodeClient({
 const stateMachineParams: BaseStateMachineParams = {
   litContracts,
   litNodeClient,
+  privateKey: '0xPRIVATE_KEY',
 };
 
 describe('StateMachine', () => {

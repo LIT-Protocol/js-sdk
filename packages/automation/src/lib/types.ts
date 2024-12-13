@@ -8,11 +8,11 @@ import { BaseTransitionParams } from './transitions';
 export type Address = `0x${string}`;
 export type onError = (error: unknown) => void;
 
-export type PKPInfo = {
+export interface PKPInfo {
   tokenId: string;
   publicKey: string;
   ethAddress: string;
-};
+}
 
 export interface OnEvmChain {
   evmChainId: ContextOrLiteral<number>;
@@ -32,13 +32,7 @@ export interface UpdatesContext {
   contextUpdates: ContextUpdate[];
 }
 
-export interface UsesPkp {
-  pkpOwnerKey: ContextOrLiteral<string>;
-  pkpPublicKey: ContextOrLiteral<string>;
-  pkpEthAddress: ContextOrLiteral<Address>;
-}
-
-interface LitActionStateDefinition extends UsesPkp {
+interface LitActionStateDefinition {
   code?: ContextOrLiteral<string>;
   ipfsId?: ContextOrLiteral<string>;
   jsParams?: Record<string, any>;
@@ -52,12 +46,29 @@ export interface ContextStateDefinition {
   };
 }
 
-export interface TransactionStateDefinition extends UsesPkp, OnEvmChain {
+export interface TransactionStateDefinition extends OnEvmChain {
   contractABI: ethers.ContractInterface;
   contractAddress: ContextOrLiteral<Address>;
   method: ContextOrLiteral<string>;
   params?: ContextOrLiteral<any>[];
   value?: ContextOrLiteral<string>;
+}
+
+export interface MintStateDefinition {
+  mint: boolean;
+}
+
+export interface usePkpStateDefinition {
+  pkp: ContextOrLiteral<PKPInfo>;
+}
+
+export interface mintCapacityNFTStateDefinition extends MintStateDefinition {
+  daysUntilUTCMidnightExpiration: number;
+  requestPerSecond: number;
+}
+
+export interface useCapacityNFTStateDefinition {
+  capacityTokenId: ContextOrLiteral<string>;
 }
 
 export interface StateDefinition {
@@ -66,6 +77,10 @@ export interface StateDefinition {
   litAction?: LitActionStateDefinition;
   transaction?: TransactionStateDefinition;
   transitions?: Omit<TransitionDefinition, 'fromState'>[];
+  useCapacityNFT?:
+    | useCapacityNFTStateDefinition
+    | mintCapacityNFTStateDefinition;
+  usePkp?: usePkpStateDefinition | MintStateDefinition;
 }
 
 export interface IntervalTransitionDefinition {
@@ -122,13 +137,13 @@ export interface TransitionDefinition {
 }
 
 export interface BaseStateMachineParams {
+  capacityToken?: string;
   context?: Record<string, any>;
   debug?: boolean;
   litContracts: LitContracts;
   litNodeClient: LitNodeClient;
   onError?: (error: unknown, context?: string) => void;
-  privateKey?: string;
-  pkp?: PKPInfo;
+  privateKey: string;
 }
 
 export interface StateMachineDefinition
@@ -136,7 +151,7 @@ export interface StateMachineDefinition
   litNodeClient: LitNodeClient | ConstructorParameters<typeof LitNodeClient>[0];
   litContracts: LitContracts | ConstructorParameters<typeof LitContracts>[0];
   states: StateDefinition[];
-  transitions: TransitionDefinition[];
+  transitions?: TransitionDefinition[];
 }
 
 export interface TransitionParams
