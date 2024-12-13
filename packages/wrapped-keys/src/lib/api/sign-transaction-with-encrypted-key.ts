@@ -11,7 +11,8 @@ import { SignTransactionWithEncryptedKeyParams } from '../types';
 /**
  * Signs a transaction inside the Lit Action using the previously persisted wrapped key associated with the current LIT PK.
  * This method fetches the encrypted key from the wrapped keys service, then executes a Lit Action that decrypts the key inside the LIT action and uses
- * the decrypted key to sign the provided transaction
+ * the decrypted key to sign the provided transaction 
+ * use `versionedTransaction: true` to sign a versioned transaction and `false` for a legacy one
  * Optionally, if you pass `broadcast: true`, the LIT action will also submit the signed transaction to the associated RPC endpoint on your behalf
  *
  * @param { SignTransactionWithEncryptedKeyParams } params Parameters required to sign the requested transaction

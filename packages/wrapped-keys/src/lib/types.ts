@@ -291,6 +291,7 @@ export interface SignTransactionParamsSupportedSolana
   extends SignTransactionParams {
   unsignedTransaction: SerializedTransaction;
   network: Extract<Network, 'solana'>;
+  versionedTransaction: boolean;
 }
 
 /** @typedef SignTransactionWithEncryptedKeyParams
