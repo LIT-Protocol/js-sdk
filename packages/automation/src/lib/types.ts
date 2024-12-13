@@ -137,7 +137,6 @@ export interface TransitionDefinition {
 }
 
 export interface BaseStateMachineParams {
-  capacityToken?: string;
   context?: Record<string, any>;
   debug?: boolean;
   litContracts: LitContracts;

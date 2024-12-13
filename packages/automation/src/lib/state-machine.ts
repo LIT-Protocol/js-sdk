@@ -609,6 +609,35 @@ export class StateMachine {
   }
 
   /**
+   * Gets a value from the machine context
+   * If value or path do not exist it returns undefined
+   * @param path the context path to read
+   */
+  public getFromContext(path?: string | string[]): any {
+    return this.context.get(path);
+  }
+
+  /**
+   * Sets a value in the machine context
+   * If path does not exist, it is created
+   * @param path the context path to write
+   * @param value the value to write in the context path
+   */
+  public setToContext(path: string | string[], value: any): void {
+    this.context.set(path, value);
+  }
+
+  /**
+   * Pushes a value in the machine context. The value will be converted to an array if it is not
+   * If path does not exist, it is created
+   * @param path the context path to write
+   * @param value the value to write in the context path
+   */
+  public pushToContext(path: string | string[], value: any): void {
+    this.context.push(path, value);
+  }
+
+  /**
    * Stops the state machine by exiting the current state and not moving to another one.
    */
   async stopMachine() {

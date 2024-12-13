@@ -1,6 +1,6 @@
 import { Listener } from './listener';
 
-export class IntervalListener<T extends unknown> extends Listener<T> {
+export class IntervalListener<T> extends Listener<T> {
   private intervalId?: ReturnType<typeof setInterval>;
 
   constructor(callback: () => Promise<T>, interval = 1000) {
