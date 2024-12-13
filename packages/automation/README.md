@@ -24,10 +24,13 @@ yarn add @lit-protocol/automation
 ## Core Concepts
 
 ### State Machine
+
 A state machine consists of states, and transitions between those states which are triggered based on a collection of Listeners.
 
 ### States
+
 States represent different phases of your automation. Each state can:
+
 - Execute code when entered and/or exited
 - Configure PKPs and Capacity Credits for the machine
 - Run Lit Actions
@@ -35,7 +38,9 @@ States represent different phases of your automation. Each state can:
 - Run custom code
 
 ### Transitions
+
 Transitions define how the machine moves between states. They can be triggered automatically or by any combination of:
+
 - Blockchain events
 - Token balance changes
 - Timers and intervals
@@ -43,7 +48,9 @@ Transitions define how the machine moves between states. They can be triggered a
 - Custom conditions
 
 ### Listeners
+
 Listeners monitor various events and feed data to transitions:
+
 - EVMBlockListener: Monitors new blocks
 - EVMContractEventListener: Monitors EVM smart contract events
 - TimerListener: Triggers based on time
@@ -122,13 +129,12 @@ runLitActionInterval().catch(console.error);
 
 There care cases where such a declarative interface won't be enough for your use case. When that happens, the machines can also accept generic states, transitions and listeners where it is possible to write any logic.
 
-
 Here is an example that listens to Ethereum blocks looking one whose numbers ends in 0
 
 ```typescript
 async function monitorEthereumBlocksWithHashEndingWithZero() {
   const litNodeClient = new LitNodeClient({
-    litNetwork: 'datil-dev'
+    litNetwork: 'datil-dev',
   });
   const litContracts = new LitContracts({
     network: 'datil-dev',
@@ -144,7 +150,8 @@ async function monitorEthereumBlocksWithHashEndingWithZero() {
   // Add each state individually
   stateMachine.addState({
     key: 'listenBlocks',
-    onEnter: async () => console.log('Waiting for a block with a hash ending in 0'),
+    onEnter: async () =>
+      console.log('Waiting for a block with a hash ending in 0'),
     onExit: async () => console.log('Found a block whose hash ends in 0!'),
   });
   stateMachine.addState({
@@ -191,6 +198,7 @@ Last machine could have been implemented with just the `listenBlocks` state and 
 Each State Machine has its own information repository called `context`.
 
 When using the defined states in the declarative interface, some values are already populated and then used later
+
 - `StateDefinition.usePkp` populates `context.activePkp` with the minted PKP data
 - `StateDefinition.useCapacityNFT` populates `context.activeCapacityTokenId` with the minted Capacity Token Id
 - `StateDefinition.litAction` populates `context.lastLitActionResponse` with the lit action response
@@ -292,7 +300,8 @@ async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
               eventName: 'Transfer',
               // Filter events using params for just listening the pkp.ethAddress as destination
               eventParams: [null, pkp.ethAddress],
-              contextUpdates: [ // The transition can perform some updates to the context
+              contextUpdates: [
+                // The transition can perform some updates to the context
                 {
                   contextPath: 'transfer.sender', // The context path to update
                   dataPath: 'event.args[0]', // The value from the event to save in the context
