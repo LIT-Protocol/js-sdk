@@ -358,6 +358,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  filecoinCalibrationTestnet: {
+    contractAddress: null,
+    chainId: 314159,
+    name: 'Filecoin Calibration Testnet',
+    symbol: 'tFIL',
+    decimals: 18,
+    rpcUrls: ['https://api.calibration.node.glif.io/rpc/v1'],
+    blockExplorerUrls: ['https://calibration.filscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
   hyperspace: {
     contractAddress: null,
     chainId: 3141,
