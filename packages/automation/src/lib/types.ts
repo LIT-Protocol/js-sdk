@@ -51,7 +51,7 @@ export interface TransactionStateDefinition extends OnEvmChain {
   contractABI: ethers.ContractInterface;
   contractAddress: ContextOrLiteral<Address>;
   method: ContextOrLiteral<string>;
-  params?: ContextOrLiteral<any>[];
+  params?: ContextOrLiteral<unknown>[];
   value?: ContextOrLiteral<string>;
 }
 
@@ -126,7 +126,7 @@ export interface EvmContractEventTransitionDefinition
   contractABI: ethers.ContractInterface;
   contractAddress: Address;
   eventName: string;
-  eventParams?: any[];
+  eventParams?: unknown[];
 }
 
 export interface TransitionDefinition {
@@ -138,7 +138,7 @@ export interface TransitionDefinition {
 }
 
 export interface BaseStateMachineParams {
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   debug?: boolean;
   litContracts: LitContracts;
   litNodeClient: LitNodeClient;
