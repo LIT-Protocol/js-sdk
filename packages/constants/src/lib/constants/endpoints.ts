@@ -1,6 +1,7 @@
 export const LIT_ENDPOINT_VERSION = {
   V0: '/',
   V1: '/v1',
+  V2: '/v2',
 };
 
 export const LIT_ENDPOINT = {
@@ -10,15 +11,15 @@ export const LIT_ENDPOINT = {
   },
   SIGN_SESSION_KEY: {
     path: '/web/sign_session_key',
-    version: LIT_ENDPOINT_VERSION.V1,
+    version: LIT_ENDPOINT_VERSION.V2,
   },
   EXECUTE_JS: {
     path: '/web/execute',
-    version: LIT_ENDPOINT_VERSION.V1,
+    version: LIT_ENDPOINT_VERSION.V2,
   },
   PKP_SIGN: {
     path: '/web/pkp/sign',
-    version: LIT_ENDPOINT_VERSION.V1,
+    version: LIT_ENDPOINT_VERSION.V2,
   },
   PKP_CLAIM: {
     path: '/web/pkp/claim',
@@ -30,6 +31,6 @@ export const LIT_ENDPOINT = {
   },
   ENCRYPTION_SIGN: {
     path: '/web/encryption/sign',
-    version: LIT_ENDPOINT_VERSION.V0,
+    version: LIT_ENDPOINT_VERSION.V2,
   },
 };
