@@ -27,15 +27,19 @@ yarn add @lit-protocol/automation
 
 A state machine consists of states, and transitions between those states which are triggered based on a collection of Listeners.
 
-### States
+### Actions
 
-States represent different phases of your automation. Each state can:
+Actions are the different tasks the state machine will do. Each action can:
 
 - Execute code when entered and/or exited
 - Configure PKPs and Capacity Credits for the machine
 - Run Lit Actions
 - Send blockchain transactions
 - Run custom code
+
+### States
+
+States represent different states the machine will stand and move between. Each state can have a combination of Actions to perform when entering or exiting itself.
 
 ### Transitions
 
