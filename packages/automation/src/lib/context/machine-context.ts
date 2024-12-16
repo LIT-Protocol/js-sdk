@@ -30,8 +30,8 @@ export class MachineContext {
     this.context = initialContext ?? {};
   }
 
-  public get(path?: string | string[]): unknown {
-    return getFromObject(this.context, path);
+  public get<T = unknown>(path?: string | string[]): T {
+    return getFromObject(this.context, path) as T;
   }
 
   public set(path: string | string[], value: unknown = undefined): void {

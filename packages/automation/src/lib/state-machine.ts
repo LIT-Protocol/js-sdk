@@ -637,8 +637,21 @@ export class StateMachine {
    * If value or path do not exist it returns undefined
    * @param path the context path to read
    */
-  public getFromContext(path?: string | string[]): any {
-    return this.context.get(path);
+  public getFromContext<T>(path?: string | string[]): T {
+    return this.context.get<T>(path);
+  }
+
+  /**
+   * Resolves a value from the context if it specifies a path or returns it as a literal
+   * @param value the literal value or read context object
+   */
+  public resolveContextPathOrLiteral<T = unknown>(
+    value: ContextOrLiteral<T> | T
+  ): T {
+    if (value && typeof value === 'object' && 'contextPath' in value) {
+      return this.context.get<T>(value.contextPath);
+    }
+    return value;
   }
 
   /**
@@ -647,7 +660,7 @@ export class StateMachine {
    * @param path the context path to write
    * @param value the value to write in the context path
    */
-  public setToContext(path: string | string[], value: any): void {
+  public setToContext(path: string | string[], value: unknown): void {
     this.context.set(path, value);
   }
 
@@ -657,7 +670,7 @@ export class StateMachine {
    * @param path the context path to write
    * @param value the value to write in the context path
    */
-  public pushToContext(path: string | string[], value: any): void {
+  public pushToContext(path: string | string[], value: unknown): void {
     this.context.push(path, value);
   }
 
@@ -672,15 +685,6 @@ export class StateMachine {
     await this.onStopCallback?.();
 
     this.debug && console.log('State machine stopped');
-  }
-
-  private resolveContextPathOrLiteral<T = unknown>(
-    value: ContextOrLiteral<T> | T
-  ): T {
-    if (value && typeof value === 'object' && 'contextPath' in value) {
-      return this.context.get(value.contextPath) as T;
-    }
-    return value;
   }
 
   /**
