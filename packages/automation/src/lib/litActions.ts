@@ -23,7 +23,7 @@ interface ExecuteLitAction {
   authSigner: ethers.Wallet;
   ipfsId?: string;
   code?: string;
-  jsParams?: Record<string, any>;
+  jsParams?: Record<string, unknown>;
 }
 
 const ONE_MINUTE = 1 * 60 * 1000;

@@ -35,7 +35,7 @@ export interface UpdatesContext {
 interface LitActionStateDefinition {
   code?: ContextOrLiteral<string>;
   ipfsId?: ContextOrLiteral<string>;
-  jsParams?: Record<string, any>;
+  jsParams?: Record<string, unknown>;
 }
 
 export interface ContextStateDefinition {
@@ -125,7 +125,7 @@ export interface EvmContractEventTransitionDefinition
   contractABI: ethers.ContractInterface;
   contractAddress: Address;
   eventName: string;
-  eventParams?: any;
+  eventParams?: any[];
 }
 
 export interface TransitionDefinition {
