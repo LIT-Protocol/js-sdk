@@ -49,16 +49,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Find latest datil commit hash for last successful "rust/lit-node-build-commit-hash" workflow in the Lit Assets repo
-        uses: LIT-Protocol/last-successful-build-action@372ea3325a894558ee74d970217ca421ea562fba
-        id: last-successful-build
-        with:
-          token: "${{ secrets.GH_PAT_FOR_SHIVA }}"
-          branch: "datil"
-          workflow: "rust/lit-node-build-commit-hash"
-          repo: LIT-Protocol/lit-assets
-          # this outputs to dollarSign{{ steps.last-successful-build.outputs.lastSuccessfulBuildSha }}
-      - name: Checkout Lit Assets
+      - name: Checkout Lit Actions
         uses: actions/checkout@v4
         id: checkout
         with:
@@ -78,13 +69,13 @@ jobs:
         working-directory: ${{github.workspace}}/lit-assets/blockchain/contracts
       - name: Docker login
         id: login
-        run: docker login ghcr.io/ -u ${{ github.actor }} --password ${{secrets.GH_PAT_FOR_SHIVA}}
+        run: docker login ghcr.io/ -u ${{secrets.GH_USER}} --password ${{secrets.GH_PAT_FOR_SHIVA}}
       - name: Pull Shiva Container
         id: shiva-pull
         run: docker pull ghcr.io/lit-protocol/shiva:latest
       - name: Run Shiva Container
         id: shiva-runner
-        run: docker run -d -m 32g -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT_FOR_SHIVA}} -e HASH=${{ steps.last-successful-build.outputs.lastSuccessfulBuildSha }} -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:latest
+        run: docker run -d -m 32g -p 8000:8000 -p 8545:8545 -p 7470:7470 -p 7471:7471 -p 7472:7472 -p 7473:7473 -p 7474:7474 -p 7475:7475 -v ${{github.workspace}}/lit-assets:/data -e GH_PAT=${{secrets.GH_PAT_FOR_SHIVA}} -e HASH=$NAGA_COMMIT_HASH -e IPFS_API_KEY=${{secrets.IPFS_API_KEY}} --name shiva ghcr.io/lit-protocol/shiva:latest
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -115,34 +106,4 @@ jobs:
         run: docker stop shiva && docker rm shiva
       - name: Post Pull Shiva Image
         if: steps.shiva-pull.outputs.exit_code == 0
-        run: docker rmi ghcr.io/lit-protocol/shiva 
-  ping-lit-configuration-guides:
-    runs-on: ubuntu-latest
-    # needs: [unit-tests, integration-tests]  # Make sure this job runs after others complete
-    steps:
-      - name: Get PR labels
-        id: pr-labels
-        uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
-        with:
-          script: |
-            const labels = context.payload.pull_request.labels
-              .map(label => label.name)
-              .filter(name => name.startsWith('tag:'))
-              .map(name => name.split(':')[1]);
-            if (labels.length > 0) {
-              core.setOutput('tag', labels[0]);
-            } else {
-              core.setOutput('skip', 'true');
-            }
-      - name: Trigger dependencies bot in lit-configuration-guides
-        if: steps.pr-labels.outputs.skip != 'true'
-        run: |
-          TAG="${{ steps.pr-labels.outputs.tag }}"
-          curl -X POST \
-          -H "Accept: application/vnd.github.everest-preview+json" \
-          -H "Authorization: token ${{ secrets.GH_PAT_LIT_CONFIGURATION_GUIDES_REPO }}" \
-          https://api.github.com/repos/LIT-Protocol/lit-configuration-guides/dispatches \
-          -d "{\"event_type\":\"dependency_update\", \"client_payload\": {\"labels\": [\"$TAG\"]}}"
-        env:
-          GH_PAT_LIT_CONFIGURATION_GUIDES_REPO: ${{ secrets.GH_PAT_LIT_CONFIGURATION_GUIDES_REPO }}
+        run: docker rmi ghcr.io/lit-protocol/shiva
