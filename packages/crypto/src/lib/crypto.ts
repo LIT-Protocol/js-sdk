@@ -55,7 +55,6 @@ export const encrypt = async (
   message: Uint8Array,
   identity: Uint8Array
 ): Promise<string> => {
-
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
   /**
