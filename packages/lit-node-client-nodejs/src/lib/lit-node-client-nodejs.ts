@@ -5,6 +5,9 @@ import { SiweMessage } from 'siwe';
 
 import {
   LitAccessControlConditionResource,
+  LitActionResource,
+  LitPKPResource,
+  LitRLIResource,
   LitResourceAbilityRequest,
   RecapSessionCapabilityObject,
   createSiweMessage,
@@ -15,6 +18,7 @@ import {
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
+  CENTRALISATION_BY_NETWORK,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
@@ -22,6 +26,7 @@ import {
   InvalidParamType,
   InvalidSessionSigs,
   InvalidSignatureError,
+  LIT_ABILITY,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
@@ -118,6 +123,7 @@ import type {
   JsonSignSessionKeyRequestV1,
   LitClientSessionManager,
   LitNodeClientConfig,
+  LitSession,
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeLog,
@@ -136,8 +142,7 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -661,154 +666,6 @@ export class LitNodeClientNodeJs
     );
   };
 
-  // ========== Promise Handlers ==========
-  getIpfsId = async ({
-    dataToHash,
-    sessionSigs,
-  }: {
-    dataToHash: string;
-    sessionSigs: SessionSigsMap;
-    debug?: boolean;
-  }) => {
-    const res = await this.executeJs({
-      ipfsId: LIT_ACTION_IPFS_HASH,
-      sessionSigs,
-      jsParams: {
-        dataToHash,
-      },
-    }).catch((e) => {
-      logError('Error getting IPFS ID', e);
-      throw e;
-    });
-
-    let data;
-
-    if (typeof res.response === 'string') {
-      try {
-        data = JSON.parse(res.response).res;
-      } catch (e) {
-        data = res.response;
-      }
-    }
-
-    if (!data.success) {
-      logError('Error getting IPFS ID', data.data);
-    }
-
-    return data.data;
-  };
-
-  /**
-   * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.
-   *
-   * Lit Action: dataToHash -> IPFS CID
-   * QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3
-   *
-   * @param { ExecuteJsProps } params
-   *
-   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
-   *
-   */
-  runOnTargetedNodes = async (
-    params: JsonExecutionSdkParamsTargetNode
-  ): Promise<
-    SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises
-  > => {
-    log('running runOnTargetedNodes:', params.targetNodeRange);
-
-    if (!params.targetNodeRange) {
-      throw new InvalidParamType(
-        {
-          info: {
-            params,
-          },
-        },
-        'targetNodeRange is required'
-      );
-    }
-
-    // determine which node to run on
-    const ipfsId = await this.getIpfsId({
-      dataToHash: params.code!,
-      sessionSigs: params.sessionSigs,
-    });
-
-    // select targetNodeRange number of random index of the bootstrapUrls.length
-    const randomSelectedNodeIndexes: number[] = [];
-
-    let nodeCounter = 0;
-
-    while (randomSelectedNodeIndexes.length < params.targetNodeRange) {
-      const str = `${nodeCounter}:${ipfsId.toString()}`;
-      const cidBuffer = Buffer.from(str);
-      const hash = sha256(cidBuffer);
-      const hashAsNumber = BigNumber.from(hash);
-
-      const nodeIndex = hashAsNumber
-        .mod(this.config.bootstrapUrls.length)
-        .toNumber();
-
-      log('nodeIndex:', nodeIndex);
-
-      // must be unique & less than bootstrapUrls.length
-      if (
-        !randomSelectedNodeIndexes.includes(nodeIndex) &&
-        nodeIndex < this.config.bootstrapUrls.length
-      ) {
-        randomSelectedNodeIndexes.push(nodeIndex);
-      }
-      nodeCounter++;
-    }
-
-    log('Final Selected Indexes:', randomSelectedNodeIndexes);
-
-    const requestId = this._getNewRequestId();
-    const nodePromises = [];
-
-    for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
-      // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
-      // const jsParams = params.jsParams || {};
-      // const jsParamsString = JSON.stringify(jsParams);
-
-      const nodeIndex = randomSelectedNodeIndexes[i];
-
-      // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
-      // should be using something like the list of nodes from the staking contract
-      // because the staking nodes can change, and the rust code will use the same list
-      const url = this.config.bootstrapUrls[nodeIndex];
-
-      log(`running on node ${nodeIndex} at ${url}`);
-
-      // -- choose the right signature
-      const sessionSig = this.getSessionSigByUrl({
-        sessionSigs: params.sessionSigs,
-        url,
-      });
-
-      const reqBody: JsonExecutionRequestTargetNode = {
-        ...params,
-        targetNodeRange: params.targetNodeRange,
-        authSig: sessionSig,
-      };
-
-      // this return { url: string, data: JsonRequest }
-      // const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
-      const singleNodePromise = this.sendCommandToNode({
-        url: url,
-        data: params,
-        requestId: requestId,
-      });
-
-      nodePromises.push(singleNodePromise);
-    }
-
-    return (await this.handleNodePromises(
-      nodePromises,
-      requestId,
-      params.targetNodeRange
-    )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
-  };
-
   // ========== Scoped Business Logics ==========
 
   /**
@@ -877,6 +734,105 @@ export class LitNodeClientNodeJs
 
     return this.generatePromise(urlWithPath, reqBody, requestId);
   }
+
+  private async _getSessionToken(params: LitSession<ethers.Signer>) {
+
+    const resourceAbilityRequests = params.resources.map(resource => {
+      switch (resource.type) {
+        case 'access-control-condition-signing':
+          return {
+            resource: new LitAccessControlConditionResource(resource.request),
+            ability: LIT_ABILITY.AccessControlConditionSigning,
+          }
+        case 'access-control-condition-decryption':
+          return {
+            resource: new LitAccessControlConditionResource(resource.request),
+            ability: LIT_ABILITY.AccessControlConditionDecryption,
+          }
+        case 'lit-action-execution':
+          return {
+            resource: new LitActionResource(resource.request),
+            ability: LIT_ABILITY.LitActionExecution,
+          }
+        case 'rate-limit-increase-auth'
+          : return {
+            resource: new LitRLIResource(resource.request),
+            ability: LIT_ABILITY.RateLimitIncreaseAuth,
+          }
+        case 'pkp-signing':
+          return {
+            resource: new LitPKPResource(resource.request),
+            ability: LIT_ABILITY.PKPSigning,
+          }
+        default:
+          throw new Error(`Resource type ${resource.type} is not supported`);
+      }
+    });
+
+    const centralisation = CENTRALISATION_BY_NETWORK[this.config.litNetwork];
+
+    if (params.type === 'eoa') {
+      const sessionSigs = await this.getSessionSigs({
+        chain: 'ethereum',
+        resourceAbilityRequests: resourceAbilityRequests,
+        authNeededCallback: async ({
+          uri,
+          expiration,
+          resourceAbilityRequests,
+        }: AuthCallbackParams) => {
+          console.log('resourceAbilityRequests:', resourceAbilityRequests);
+
+          if (!expiration) {
+            throw new Error('expiration is required');
+          }
+
+          if (!resourceAbilityRequests) {
+            throw new Error('resourceAbilityRequests is required');
+          }
+
+          if (!uri) {
+            throw new Error('uri is required');
+          }
+
+          if (!params.signer) {
+            throw new Error('signer is required');
+          }
+
+          if (!params.capabilityAuthSigs) {
+            throw new Error('capabilityAuthSigs is required');
+          }
+
+          const walletAddress = await params.signer.getAddress();
+
+          const toSign = await createSiweMessageWithRecaps({
+            uri: uri,
+            expiration: expiration,
+            resources: resourceAbilityRequests,
+            walletAddress: walletAddress,
+            nonce: await this.getLatestBlockhash(),
+            litNodeClient: this,
+          });
+
+          const authSig = await generateAuthSig({
+            signer: params.signer,
+            toSign,
+          });
+
+          return authSig;
+        },
+
+        ...(centralisation === 'decentralised' && {
+          capabilityAuthSigs: params.capabilityAuthSigs,
+        }),
+      });
+
+      return sessionSigs;
+    }
+
+    throw new Error(`Type ${params.type} is not supported yet.`);
+
+  }
+
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
@@ -889,6 +845,26 @@ export class LitNodeClientNodeJs
   executeJs = async (
     params: JsonExecutionSdkParams
   ): Promise<ExecuteJsResponse> => {
+
+    if (!params.sessionSigs) {
+
+      if (!params.capabilityAuthSigs) {
+        throw new Error('capabilityAuthSigs is required');
+      }
+
+      const autoSessionSigs = await this._getSessionToken({
+        type: 'eoa' || params.sessionType,
+        resources: [{
+          type: 'lit-action-execution',
+          request: '*',
+        }],
+        expiration: params.expiration || LitNodeClientNodeJs.getExpiration(),
+        capabilityAuthSigs: params.capabilityAuthSigs,
+      });
+
+      params.sessionSigs = autoSessionSigs;
+    }
+
     // ========== Validate Params ==========
     if (!this.ready) {
       const message =
@@ -1157,8 +1133,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1884,8 +1860,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1969,10 +1945,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     const signingTemplate = {
