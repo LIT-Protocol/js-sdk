@@ -12,12 +12,10 @@ import { checkType, log } from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
 import {
   CombinedECDSASignature,
-  IJWT,
   NodeAttestation,
   SessionKeyPair,
   SigningAccessControlConditionJWTPayload,
   SigShare,
-  VerifyJWTProps,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -61,15 +59,14 @@ export const encrypt = async (
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
   /**
- * Our system uses BLS12-381 on the G1 curve for encryption.
- * However, on the SDK side (this function), we expect the public key
- * to use the G2 curve for signature purposes, hence the switch on public key length.
- *
- * The G2 curve, `Bls12381G2`, is typically associated with signature generation/verification,
- * while G1 is associated with encryption. Here, the length of the public key determines how 
- * we handle the encryption and the format of the returned encrypted message.
- */
-
+   * Our system uses BLS12-381 on the G1 curve for encryption.
+   * However, on the SDK side (this function), we expect the public key
+   * to use the G2 curve for signature purposes, hence the switch on public key length.
+   *
+   * The G2 curve, `Bls12381G2`, is typically associated with signature generation/verification,
+   * while G1 is associated with encryption. Here, the length of the public key determines how
+   * we handle the encryption and the format of the returned encrypted message.
+   */
   if (publicKeyHex.replace('0x', '').length !== 96) {
     throw new InvalidParamType(
       {
@@ -77,13 +74,14 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length} instead.`
+      `Invalid public key length. Expecting 96 characters, got ${
+        publicKeyHex.replace('0x', '').length
+      } instead.`
     );
   }
   return Buffer.from(
     await blsEncrypt('Bls12381G2', publicKey, message, identity)
   ).toString('base64');
-
 };
 
 /**
@@ -474,59 +472,3 @@ declare global {
   // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var LitNodeClient: any;
 }
-
-/**
- * // TODO check for expiration
- *
- * Verify a JWT from the LIT network.  Use this for auth on your server.  For some background, users can specify access control conditions for various URLs, and then other users can then request a signed JWT proving that their ETH account meets those on-chain conditions using the getSignedToken function.  Then, servers can verify that JWT using this function.  A successful verification proves that the user meets the access control conditions defined earlier.  For example, the on-chain condition could be posession of a specific NFT.
- *
- * @param { VerifyJWTProps } jwt
- *
- * @returns { IJWT<T> } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
- */
-export const verifyJwt = async ({
-  publicKey,
-  jwt,
-}: VerifyJWTProps): Promise<IJWT<SigningAccessControlConditionJWTPayload>> => {
-  // -- validate
-  if (
-    !checkType({
-      value: jwt,
-      allowedTypes: ['String'],
-      paramName: 'jwt',
-      functionName: 'verifyJwt',
-    })
-  )
-    throw new InvalidParamType(
-      {
-        info: {
-          jwt,
-        },
-      },
-      'jwt must be a string'
-    );
-
-  log('verifyJwt', jwt);
-
-  const jwtParts = jwt.split('.');
-  const signature = uint8arrayFromString(jwtParts[2], 'base64url');
-
-  const unsignedJwt = `${jwtParts[0]}.${jwtParts[1]}`;
-
-  const message = uint8arrayFromString(unsignedJwt);
-
-  await verifySignature(publicKey, message, signature);
-
-  const _jwt: IJWT<SigningAccessControlConditionJWTPayload> = {
-    verified: true,
-    header: JSON.parse(
-      uint8arrayToString(uint8arrayFromString(jwtParts[0], 'base64url'))
-    ),
-    payload: JSON.parse(
-      uint8arrayToString(uint8arrayFromString(jwtParts[1], 'base64url'))
-    ),
-    signature,
-  };
-
-  return _jwt;
-};

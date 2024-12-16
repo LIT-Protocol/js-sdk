@@ -44,6 +44,8 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
 import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
 import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
 import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
+import { testKeccakEip1271AuthSigToEncryptDecryptString } from './tests/testKeccakEip1271AuthSigToEncryptDecryptString';
+import { testShaEip1271AuthSigToEncryptDecryptString } from './tests/testShaEip1271AuthSigToEncryptDecryptString';
 import { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
 import { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
 import { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
@@ -103,6 +105,7 @@ import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey'
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
+import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
 import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
@@ -149,6 +152,7 @@ setLitActionsCodeToLocal();
     testFailEthereumSignTransactionWrappedKeyWithMissingParam,
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
     testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
+    testFailBatchGeneratePrivateKeysAtomic,
 
     // -- import wrapped keys
     testFailImportWrappedKeysWithSamePrivateKey,
@@ -230,6 +234,11 @@ setLitActionsCodeToLocal();
     testCosmosAuthSigToEncryptDecryptString,
   };
 
+  const eip1271AuthSigTests = {
+    testKeccakEip1271AuthSigToEncryptDecryptString,
+    testShaEip1271AuthSigToEncryptDecryptString,
+  };
+
   const pkpEthersTest = {
     eoaSessionSigs: {
       testPkpEthersWithEoaSessionSigsToSignWithAuthContext,
@@ -292,6 +301,7 @@ setLitActionsCodeToLocal();
       ...litActionIpfsIdSessionSigsTests,
       ...capacityDelegationTests,
       ...bareAuthSigTests,
+      ...eip1271AuthSigTests,
 
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,

@@ -147,24 +147,6 @@ export interface DecryptFileProps {
   symmetricKey: SymmetricKey;
 }
 
-export interface VerifyJWTProps {
-  publicKey: string;
-  // A JWT signed by the LIT network using the BLS12-381 algorithm
-  jwt: string;
-}
-
-export interface IJWT<T> {
-  verified: boolean;
-  header: JWTHeader;
-  payload: T;
-  signature: Uint8Array;
-}
-
-export interface JWTHeader {
-  alg: string;
-  typ: string;
-}
-
 export interface SigningAccessControlConditionJWTPayload
   extends MultipleAccessControlConditions {
   iss: string;
@@ -419,11 +401,6 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
   iat?: number;
   exp?: number;
   sessionSigs?: any;
-}
-
-export interface GetSignedTokenRequest
-  extends SigningAccessControlConditionRequest {
-  sessionSigs: SessionSigsMap;
 }
 
 /**

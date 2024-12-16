@@ -7,7 +7,7 @@ import bs58 from 'bs58';
 import { ethers } from 'ethers';
 import { BatchGeneratePrivateKeysActionResult } from '../../../packages/wrapped-keys/src/lib/types';
 
-const { batchGeneratePrivateKeys, exportPrivateKey } = api;
+const { batchGeneratePrivateKeys } = api;
 
 async function verifySolanaSignature(
   solanaResult: BatchGeneratePrivateKeysActionResult,

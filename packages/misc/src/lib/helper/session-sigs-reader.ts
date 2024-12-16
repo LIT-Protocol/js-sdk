@@ -30,6 +30,35 @@ function formatStatus(expirationDate: Date, currentDate: Date): string {
   }
 }
 
+/**
+ * Convert this format:
+ * {"lit-ratelimitincrease://25364":{"Auth/Auth":[{"nft_id":["25364"]}]}}
+ * to human readable format
+ */
+function humanReadableAtt(obj: any, indentLevel: number = 0): string {
+  const indent = ' '.repeat(indentLevel * 2);
+  let result = '';
+
+  for (const key in obj) {
+    result += `${indent}* ${key}\n`;
+
+    if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+      result += humanReadableAtt(obj[key], indentLevel + 1);
+    } else if (Array.isArray(obj[key])) {
+      obj[key].forEach((item: any) => {
+        if (typeof item === 'object') {
+          result += humanReadableAtt(item, indentLevel + 1);
+        } else {
+          result += `${indent}  * ${item}\n`;
+        }
+      });
+    } else {
+      result += `${indent}  * ${obj[key]}\n`;
+    }
+  }
+  return result;
+}
+
 export function formatSessionSigs(
   sessionSigs: string,
   currentTime: Date = new Date()
@@ -73,6 +102,17 @@ export function formatSessionSigs(
   signedMessage.capabilities.forEach((cap: any, index: number) => {
     const capType = cap.derivedVia;
     const parsedCapMessage = parseSignedMessage(cap.signedMessage);
+    let attenuation: string = '';
+
+    try {
+      const encodedRecap = (parsedCapMessage['- urn'] as string)?.split(':')[1];
+      const decodedRecap = atob(encodedRecap);
+      const jsonRecap = JSON.parse(decodedRecap);
+      attenuation = humanReadableAtt(jsonRecap.att, 6);
+    } catch (e) {
+      // swallow error
+      console.log('Error parsing attenuation::', e);
+    }
 
     const capIssuedAt = new Date(parsedCapMessage['Issued At'] || '');
     const capExpiration = new Date(parsedCapMessage['Expiration Time'] || '');
@@ -85,7 +125,8 @@ export function formatSessionSigs(
       capExpiration
     )}\n`;
     result += `        * Status: ${formatStatus(capExpiration, currentDate)}\n`;
+    result += `        * Attenuation:\n`;
+    result += attenuation;
   });
-
   return result;
 }

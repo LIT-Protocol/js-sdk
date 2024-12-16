@@ -1,41 +1,38 @@
 import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
-import { joinSignature, sha256 } from 'ethers/lib/utils';
+import { sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
 import {
   LitAccessControlConditionResource,
   LitResourceAbilityRequest,
-  decode,
   RecapSessionCapabilityObject,
-  generateAuthSig,
+  createSiweMessage,
   createSiweMessageWithCapacityDelegation,
   createSiweMessageWithRecaps,
-  createSiweMessage,
+  decode,
+  generateAuthSig,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
+  InvalidArgumentException,
+  InvalidParamType,
+  InvalidSessionSigs,
+  InvalidSignatureError,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
   LIT_ENDPOINT,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
-  ParamsMissingError,
-  ParamNullError,
-  NoValidShares,
-  UnknownSignatureType,
-  UnknownSignatureError,
   LitNodeClientNotReadyError,
-  InvalidParamType,
-  InvalidArgumentException,
-  WalletSignatureNotFoundError,
+  ParamNullError,
+  ParamsMissingError,
   UnknownError,
-  InvalidSignatureError,
   UnsupportedMethodError,
-  InvalidSessionSigs,
+  WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -56,8 +53,8 @@ import {
   logWithRequestId,
   mostCommonString,
   normalizeAndStringify,
-  safeParams,
   removeHexPrefix,
+  safeParams,
   validateSessionSigs,
 } from '@lit-protocol/misc';
 import {
@@ -66,17 +63,17 @@ import {
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
 import { getClaimsList } from './helpers/get-claims-list';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { getSignatures } from './helpers/get-signatures';
 import { normalizeArray } from './helpers/normalize-array';
 import { normalizeJsParams } from './helpers/normalize-params';
 import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
@@ -89,6 +86,9 @@ import type {
   AuthCallback,
   AuthCallbackParams,
   AuthSig,
+  BlsResponseData,
+  CapacityCreditsReq,
+  CapacityCreditsRes,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -97,13 +97,25 @@ import type {
   DecryptResponse,
   EncryptRequest,
   EncryptResponse,
+  EncryptSdkParams,
+  EncryptionSignRequest,
+  ExecuteJsNoSigningResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
+  GetLitActionSessionSigs,
+  GetPkpSessionSigs,
   GetSessionSigsProps,
-  GetSignedTokenRequest,
+  GetSignSessionKeySharesProp,
   GetWalletSigProps,
+  ILitNodeClient,
   JsonExecutionRequest,
+  JsonExecutionRequestTargetNode,
+  JsonExecutionSdkParams,
+  JsonExecutionSdkParamsTargetNode,
+  JsonPKPClaimKeyRequest,
   JsonPkpSignRequest,
+  JsonPkpSignSdkParams,
+  JsonSignSessionKeyRequestV1,
   LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
@@ -115,30 +127,11 @@ import type {
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
-  SigShare,
+  SigResponse,
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
   SuccessNodePromises,
-  ILitNodeClient,
-  GetPkpSessionSigs,
-  CapacityCreditsReq,
-  CapacityCreditsRes,
-  JsonSignSessionKeyRequestV1,
-  BlsResponseData,
-  JsonExecutionSdkParamsTargetNode,
-  JsonExecutionRequestTargetNode,
-  JsonExecutionSdkParams,
-  ExecuteJsNoSigningResponse,
-  JsonPkpSignSdkParams,
-  SigResponse,
-  EncryptSdkParams,
-  GetLitActionSessionSigs,
-  GetSignSessionKeySharesProp,
-  EncryptionSignRequest,
-  SigningAccessControlConditionRequest,
-  JsonPKPClaimKeyRequest,
-  IpfsOptions,
 } from '@lit-protocol/types';
 
 export class LitNodeClientNodeJs
@@ -1217,127 +1210,6 @@ export class LitNodeClientNodeJs
 
   /**
    *
-   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
-   *
-   * @param { GetSignedTokenRequest } params
-   *
-   * @returns { Promise<string> } final JWT
-   *
-   */
-  getSignedToken = async (params: GetSignedTokenRequest): Promise<string> => {
-    // ========== Prepare Params ==========
-    const { chain, authSig, sessionSigs } = params;
-
-    // ========== Validation ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      throw new LitNodeClientNotReadyError(
-        {},
-        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
-      );
-    }
-
-    // -- validate if this.networkPubKeySet is null
-    if (this.networkPubKeySet === null) {
-      throw new ParamNullError({}, 'networkPubKeySet cannot be null');
-    }
-
-    const paramsIsSafe = safeParams({
-      functionName: 'getSignedToken',
-      params,
-    });
-
-    if (!paramsIsSafe) {
-      throw new InvalidParamType(
-        {
-          info: {
-            params,
-          },
-        },
-        'Parameter validation failed.'
-      );
-    }
-
-    // ========== Prepare ==========
-    // we need to send jwt params iat (issued at) and exp (expiration)
-    // because the nodes may have different wall clock times
-    // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.getJWTParams();
-
-    // ========== Formatting Access Control Conditions =========
-    const {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
-
-    if (error) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            params,
-          },
-        },
-        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
-      );
-    }
-
-    // ========== Get Node Promises ==========
-    const requestId = this._getNewRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- if session key is available, use it
-      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
-
-      const reqBody: SigningAccessControlConditionRequest = {
-        accessControlConditions: formattedAccessControlConditions,
-        evmContractConditions: formattedEVMContractConditions,
-        solRpcConditions: formattedSolRpcConditions,
-        unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
-        chain,
-        authSig: authSigToSend,
-        iat,
-        exp,
-      };
-
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.SIGN_ACCS,
-      });
-
-      return this.generatePromise(urlWithPath, reqBody, requestId);
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(
-      nodePromises,
-      requestId,
-      this.config.minNodeCount
-    );
-
-    // -- case: promises rejected
-    if (!res.success) {
-      this._throwNodeError(res, requestId);
-    }
-
-    const signatureShares: NodeBlsSigningShare[] = (
-      res as SuccessNodePromises<NodeBlsSigningShare>
-    ).values;
-
-    log('signatureShares', signatureShares);
-
-    // ========== Result ==========
-    const finalJwt: string = await this.combineSharesAndGetJWT(
-      signatureShares,
-      requestId
-    );
-
-    return finalJwt;
-  };
-
-  /**
-   *
    * Encrypt data using the LIT network public key.
    *
    * @param { EncryptSdkParams } params
@@ -1975,17 +1847,24 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * Get session signatures for a set of [Lit resources](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.ILitResource.html#resource).
+   *
+   * Retrieves or generates sessionSigs (think access token) for accessing Lit Network resources.
    *
    * How this function works on a high level:
    * 1. Generate or retrieve [session keys](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.SessionKeyPair.html) (a public and private key pair)
    * 2. Generate or retrieve the [`AuthSig`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.AuthSig.html) that specifies the session [abilities](https://v6-api-doc-lit-js-sdk.vercel.app/enums/auth_helpers_src.LitAbility.html)
    * 3. Sign the specific resources with the session key
    *
+   * The process follows these steps:
+   * 1. Retrieves or generates a session key pair (Ed25519) for the user's device. The session key is either fetched from local storage or newly created if not found. The key does not expire.
+   * 2. Generates an authentication signature (`authSig`) by signing an ERC-5573 “Sign-in with Ethereum” message, which includes resource ability requests, capabilities, expiration, the user's device session public key, and a nonce. The `authSig` is retrieved from local storage, and if it has expired, the user will be prompted to re-sign.
+   * 3. Uses the session private key to sign the session public key along with the resource ability requests, capabilities, issuedAt, and expiration details. This creates a device-generated signature.
+   * 4. Constructs the session signatures (`sessionSigs`) by including the device-generated signature and the original message. The `sessionSigs` provide access to Lit Network features such as `executeJs` and `pkpSign`.
+   *
+   * See Sequence Diagram: https://www.plantuml.com/plantuml/uml/VPH1RnCn48Nl_XLFlT1Av00eGkm15QKLWY8K9K9SO-rEar4sjcLFalBl6NjJAuaMRl5utfjlPjQvJsAZx7UziQtuY5-9eWaQufQ3TOAR77cJy407Rka6zlNdHTRouUbIzSEtjiTIBUswg5v_NwMnuAVlA9KKFPN3I0x9qSSj7bqNF3iPykl9c4o9oUSJMuElv2XQ8IHAYRt3bluWM8wuVUpUJwVlFjsP8JUh5B_1DyV2AYdD6DjhLsTQTaYd3W3ad28SGWqM997fG5ZrB9DJqOaALuRwH1TMpik8tIYze-E8OrPKU5I6cMqtem2kCqOhr4vdaRAvtSjcoMkTo68scKu_Vi1EPMfrP_xVtj7sFMaHNg-6GVqk0MW0z18uKdVULTvDWtdqko28b7KktvUB2hKOBd1asU2QgDfTzrj7T4bLPdv6TR0zLwPQKkkZpIRTY4CTMbrBpg_VKuXyi49beUAHqIlirOUrL2zq9JPPdpRR5OMLVQGoGlLcjyRyQNv6MHz4W_fG42W--xWhUfNyOxiLL1USS6lRLeyAkYLNjrkVJuClm_qp5I8Lq0krUw7lwIt2DgY9oiozrjA_Yhy0
    *
    * Note: When generating session signatures for different PKPs or auth methods,
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
-   *
    *
    * @param { GetSessionSigsProps } params
    *
