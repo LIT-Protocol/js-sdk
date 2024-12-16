@@ -110,7 +110,9 @@ async function runLitActionInterval() {
           {
             toState: 'runLitAction',
             timer: {
-              until: 1 * 60 * 60 * 1000,
+              // One hour, checking every second
+              until: 1 * 60 * 60, // 3600 times
+              interval: 1000, // one second
             },
           },
         ],
