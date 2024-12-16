@@ -6,6 +6,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { BaseTransitionParams } from './transitions';
 
 export type Address = `0x${string}`;
+export type voidAsyncFunction = () => void;
 export type onError = (error: unknown) => void;
 
 export interface PKPInfo {
@@ -32,7 +33,7 @@ export interface UpdatesContext {
   contextUpdates: ContextUpdate[];
 }
 
-interface LitActionStateDefinition {
+export interface LitActionStateDefinition {
   code?: ContextOrLiteral<string>;
   ipfsId?: ContextOrLiteral<string>;
   jsParams?: Record<string, unknown>;

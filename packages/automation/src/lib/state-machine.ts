@@ -3,11 +3,20 @@ import { ethers } from 'ethers';
 import {
   AutomationError,
   UnknownError,
-  LIT_RPC,
+  RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
+import {
+  Action,
+  LitActionAction,
+  LogContextAction,
+  MintCapacityCreditAction,
+  MintPkpAction,
+  TransactionAction,
+} from './actions';
+import { MachineContext } from './context/machine-context';
 import {
   ContractEventData,
   EVMContractEventListener,
@@ -15,22 +24,18 @@ import {
   Listener,
   TimerListener,
 } from './listeners';
-import { signWithLitActionCode, executeLitAction } from './litActions';
 import { State, StateParams } from './states';
 import { CheckFn, Transition } from './transitions';
-import { getEvmChain } from './utils/chain';
-import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
-
 import {
   BaseStateMachineParams,
   ContextOrLiteral,
-  PKPInfo,
   StateDefinition,
   StateMachineDefinition,
   TransitionDefinition,
   TransitionParams,
 } from './types';
-import { MachineContext } from './context/machine-context';
+import { getEvmChain } from './utils/chain';
+import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
 
 export type MachineStatus = 'running' | 'stopped';
 
@@ -47,9 +52,9 @@ export class StateMachine {
   private readonly onError?: (error: unknown, context?: string) => void;
   private context: MachineContext;
 
-  private litNodeClient: LitNodeClient;
-  private litContracts: LitContracts;
-  private privateKey?: string;
+  public readonly litNodeClient: LitNodeClient;
+  private readonly privateKey?: string;
+  public litContracts: LitContracts;
 
   public id: string;
   public status: MachineStatus = 'stopped';
@@ -190,12 +195,11 @@ export class StateMachine {
       debug: this.debug,
     };
 
-    const onEnterFunctions = [] as (() => Promise<void>)[];
-    const onExitFunctions = [] as (() => Promise<void>)[];
+    const onEnterActions = [] as Action[];
+    const onExitActions = [] as Action[];
 
     const {
       context: contextAction,
-      key,
       litAction,
       transaction,
       useCapacityNFT,
@@ -204,159 +208,41 @@ export class StateMachine {
 
     if (contextAction) {
       if (contextAction.log?.atEnter) {
-        onEnterFunctions.push(async () => {
-          console.log(
-            `MachineContext at state ${key} enter: `,
-            this.context.get(contextAction.log?.path)
-          );
-        });
+        onEnterActions.push(
+          new LogContextAction({
+            debug: this.debug,
+            stateMachine: this,
+            path: contextAction.log?.path,
+          })
+        );
       }
       if (contextAction.log?.atExit) {
-        onExitFunctions.push(async () => {
-          console.log(
-            `MachineContext at state ${key} exit: `,
-            this.context.get(contextAction.log?.path)
-          );
-        });
+        onExitActions.push(
+          new LogContextAction({
+            debug: this.debug,
+            stateMachine: this,
+            path: contextAction.log?.path,
+          })
+        );
       }
     }
 
     if (litAction) {
-      onEnterFunctions.push(async () => {
-        const activePkp = this.resolveContextPathOrLiteral({
-          contextPath: 'activePkp',
-        }) as unknown as PKPInfo;
-        if (!activePkp) {
-          throw new AutomationError(
-            {
-              info: {
-                machineId: this.id,
-                activePkp,
-              },
-            },
-            `There is no active pkp. Must configure it to run a Lit Action`
-          );
-        }
-
-        const signer = new ethers.Wallet(
-          this.privateKey!,
-          new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
-        );
-
-        const litActionResponse = await executeLitAction({
-          litNodeClient: this.litNodeClient,
-          capacityTokenId: this.resolveContextPathOrLiteral({
-            contextPath: 'activeCapacityTokenId',
-          }) as unknown as string,
-          pkpEthAddress: activePkp.ethAddress,
-          pkpPublicKey: activePkp.publicKey,
-          authSigner: signer,
-          ipfsId: this.resolveContextPathOrLiteral(litAction.ipfsId),
-          code: this.resolveContextPathOrLiteral(litAction.code),
-          jsParams: litAction.jsParams,
-        });
-
-        // TODO send user this result with a webhook and log
-        this.context.set('lastLitActionResponse', litActionResponse);
+      const litActionAction = new LitActionAction({
+        debug: this.debug,
+        stateMachine: this,
+        ...litAction,
       });
+      onEnterActions.push(litActionAction);
     }
 
     if (transaction) {
-      onEnterFunctions.push(async () => {
-        const activePkp = this.resolveContextPathOrLiteral({
-          contextPath: 'activePkp',
-        }) as unknown as PKPInfo;
-        if (!activePkp.ethAddress) {
-          throw new AutomationError(
-            {
-              info: {
-                machineId: this.id,
-                activePkp,
-              },
-            },
-            `There is no active pkp. Must configure it to run a transaction`
-          );
-        }
-
-        const yellowstoneMachineSigner = new ethers.Wallet(
-          this.privateKey!,
-          new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
-        );
-
-        const chainId = this.resolveContextPathOrLiteral(
-          transaction.evmChainId
-        );
-        const chain = getEvmChain(chainId);
-        const chainProvider = new ethers.providers.JsonRpcProvider(
-          chain.rpcUrls[0],
-          chain.chainId
-        );
-
-        const contract = new ethers.Contract(
-          this.resolveContextPathOrLiteral(transaction.contractAddress),
-          transaction.contractABI,
-          chainProvider
-        );
-
-        const txParams = (transaction.params || []).map(
-          this.resolveContextPathOrLiteral.bind(this)
-        );
-        const txMethod = this.resolveContextPathOrLiteral(transaction.method);
-        const txData = await contract.populateTransaction[txMethod](
-          ...txParams
-        );
-        const gasLimit = await chainProvider.estimateGas({
-          to: this.resolveContextPathOrLiteral(transaction.contractAddress),
-          data: txData.data,
-          from: activePkp.ethAddress,
-        });
-        const gasPrice = await chainProvider.getGasPrice();
-        const nonce = await chainProvider.getTransactionCount(
-          activePkp.ethAddress
-        );
-
-        const rawTx = {
-          chainId: chain.chainId,
-          data: txData.data,
-          gasLimit: gasLimit.toHexString(),
-          gasPrice: gasPrice.toHexString(),
-          nonce,
-          to: this.resolveContextPathOrLiteral(transaction.contractAddress),
-        };
-        const rawTxHash = ethers.utils.keccak256(
-          ethers.utils.serializeTransaction(rawTx)
-        );
-
-        // Sign with the PKP in a LitAction
-        const litActionResponse = await executeLitAction({
-          litNodeClient: this.litNodeClient,
-          capacityTokenId: this.resolveContextPathOrLiteral({
-            contextPath: 'activeCapacityTokenId',
-          }) as unknown as string,
-          pkpEthAddress: activePkp.ethAddress,
-          pkpPublicKey: activePkp.publicKey,
-          authSigner: yellowstoneMachineSigner,
-          code: signWithLitActionCode,
-          jsParams: {
-            toSign: ethers.utils.arrayify(rawTxHash),
-            publicKey: activePkp.publicKey,
-            sigName: 'signedTransaction',
-          },
-        });
-
-        const signature = litActionResponse.response as string;
-        const jsonSignature = JSON.parse(signature);
-        jsonSignature.r = '0x' + jsonSignature.r.substring(2);
-        jsonSignature.s = '0x' + jsonSignature.s;
-        const hexSignature = ethers.utils.joinSignature(jsonSignature);
-
-        const signedTx = ethers.utils.serializeTransaction(rawTx, hexSignature);
-
-        const receipt = await chainProvider.sendTransaction(signedTx);
-
-        // TODO send user this result with a webhook and log
-        this.context.set('lastTransactionReceipt', receipt);
+      const transactionAction = new TransactionAction({
+        debug: this.debug,
+        stateMachine: this,
+        ...transaction,
       });
+      onEnterActions.push(transactionAction);
     }
 
     if (usePkp) {
@@ -366,13 +252,11 @@ export class StateMachine {
           this.resolveContextPathOrLiteral(usePkp.pkp)
         );
       } else if ('mint' in usePkp) {
-        onEnterFunctions.push(async () => {
-          const mintingReceipt =
-            await this.litContracts!.pkpNftContractUtils.write.mint();
-          const pkp = mintingReceipt.pkp;
-          this.debug && console.log(`Minted PKP: ${pkp}`);
-          this.context.set('activePkp', pkp);
+        const mintPkpAction = new MintPkpAction({
+          debug: this.debug,
+          stateMachine: this,
         });
+        onEnterActions.push(mintPkpAction);
       }
       if (this.debug) {
         const activePkp = this.context.get('activePkp');
@@ -387,17 +271,14 @@ export class StateMachine {
           this.resolveContextPathOrLiteral(useCapacityNFT.capacityTokenId)
         );
       } else if ('mint' in useCapacityNFT) {
-        onEnterFunctions.push(async () => {
-          const capacityCreditNFT =
-            await this.litContracts.mintCapacityCreditsNFT({
-              requestsPerSecond: useCapacityNFT.requestPerSecond,
-              daysUntilUTCMidnightExpiration:
-                useCapacityNFT.daysUntilUTCMidnightExpiration,
-            });
-          const capacityTokeId = capacityCreditNFT.capacityTokenIdStr;
-          this.debug && console.log(`Minted PKP: ${capacityTokeId}`);
-          this.context.set(`activeCapacityTokenId`, capacityTokeId);
+        const mintCapacityCreditAction = new MintCapacityCreditAction({
+          daysUntilUTCMidnightExpiration:
+            useCapacityNFT.daysUntilUTCMidnightExpiration,
+          debug: this.debug,
+          requestPerSecond: useCapacityNFT.requestPerSecond,
+          stateMachine: this,
         });
+        onEnterActions.push(mintCapacityCreditAction);
       }
       if (this.debug) {
         const activeCapacityTokenId = this.context.get('activePkp');
@@ -407,12 +288,12 @@ export class StateMachine {
       }
     }
 
-    // Merge all state functions
+    // Merge all state actions
     stateParams.onEnter = async () => {
-      await Promise.all(onEnterFunctions.map((onEnter) => onEnter()));
+      await Promise.all(onEnterActions.map((action) => action.run()));
     };
     stateParams.onExit = async () => {
-      await Promise.all(onExitFunctions.map((onExit) => onExit()));
+      await Promise.all(onExitActions.map((action) => action.run()));
     };
 
     this.addState(stateParams);
