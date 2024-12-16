@@ -62,10 +62,16 @@ export async function batchGeneratePrivateKeys(
       } = actionResult;
       const id = ids[ndx]; // Result of writes is in same order as provided
 
-      const signature = actionResult.signMessage?.signature;
+      const messageSignature = actionResult.signMessage?.signature;
+      const transactionSignature = actionResult.signTransaction?.signature;
 
       return {
-        ...(signature ? { signMessage: { signature } } : {}),
+        ...(messageSignature
+          ? { signMessage: { signature: messageSignature } }
+          : {}),
+        ...(transactionSignature
+          ? { signTransaction: { signature: transactionSignature } }
+          : {}),
         generateEncryptedPrivateKey: {
           memo: memo,
           id,
