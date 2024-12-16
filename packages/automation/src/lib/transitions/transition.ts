@@ -10,7 +10,7 @@ type Values = (unknown | undefined)[];
  */
 export interface BaseTransitionParams {
   debug?: boolean;
-  listeners?: Listener<any>[]; // should be unknown but that makes callers to cast listeners
+  listeners?: Listener<any>[]; // should be unknown but that demands callers to cast listeners to their correct type
   check?: CheckFn;
   onMatch: resultFn;
   onMismatch?: resultFn;

@@ -140,8 +140,32 @@ export class StateMachine {
     return stateMachine;
   }
 
+  /**
+   * Indicates if the state machine is running
+   */
   get isRunning() {
     return this.status === 'running';
+  }
+
+  /**
+   * Returns an ethers Wallet the state machine can use
+   */
+  get signer() {
+    if (!this.privateKey) {
+      throw new AutomationError(
+        {
+          info: {},
+        },
+        `Cannot use state machine signer without a private key. Pass a PK to the machine when creating it`
+      );
+    }
+
+    return new ethers.Wallet(
+      this.privateKey,
+      new ethers.providers.JsonRpcProvider(
+        RPC_URL_BY_NETWORK[this.litNodeClient.config.litNetwork]
+      )
+    );
   }
 
   /**
@@ -722,7 +746,9 @@ export class StateMachine {
       );
     }
     if (this.currentState === nextState) {
-      console.warn(`State ${stateKey} is already active. Skipping transition.`);
+      console.warn(
+        `State ${stateKey} is already active. Skipping state change.`
+      );
       return;
     }
 
