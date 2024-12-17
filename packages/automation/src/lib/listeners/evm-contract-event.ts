@@ -2,12 +2,12 @@ import { ethers } from 'ethers';
 
 import { Listener } from './listener';
 
-export type ContractEventData = {
+export interface ContractEventData {
   event: ethers.Event;
-  args: any[];
+  args: unknown[];
   blockNumber: number;
   transactionHash: string;
-};
+}
 
 export interface ContractInfo {
   address: string;
@@ -16,7 +16,7 @@ export interface ContractInfo {
 
 export interface EventInfo {
   name: string;
-  filter?: any[];
+  filter?: unknown[];
 }
 
 export class EVMContractEventListener extends Listener<ContractEventData> {

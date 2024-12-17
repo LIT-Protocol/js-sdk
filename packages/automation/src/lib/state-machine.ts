@@ -33,6 +33,7 @@ import {
   StateMachineDefinition,
   TransitionDefinition,
   TransitionParams,
+  voidAsyncFunction,
 } from './types';
 import { getEvmChain } from './utils/chain';
 import { getBalanceTransitionCheck, getERC20Balance } from './utils/erc20';
@@ -61,7 +62,7 @@ export class StateMachine {
   private states = new Map<string, State>();
   private transitions = new Map<string, Map<string, Transition>>();
   private currentState?: State;
-  private onStopCallback?: () => Promise<void>;
+  private onStopCallback?: voidAsyncFunction;
 
   constructor(params: BaseStateMachineParams) {
     this.id = this.generateId();
@@ -148,14 +149,14 @@ export class StateMachine {
   /**
    * Indicates if the state machine is running
    */
-  get isRunning() {
+  get isRunning(): boolean {
     return this.status === 'running';
   }
 
   /**
    * Returns an ethers Wallet the state machine can use
    */
-  get signer() {
+  get signer(): ethers.Wallet {
     if (!this.privateKey) {
       throw new AutomationError(
         {
@@ -177,7 +178,7 @@ export class StateMachine {
    * Adds a custom state to the state machine.
    * @param params The parameters for the state.
    */
-  addState(params: StateParams) {
+  addState(params: StateParams): void {
     const state = new State(params);
     this.states.set(state.key, state);
     if (!this.transitions.has(state.key)) {
@@ -189,7 +190,7 @@ export class StateMachine {
    * Adds a state to the state machine using the declarative interface.
    * @param stateDefinition The state definition.
    */
-  addStateFromDefinition(stateDefinition: StateDefinition) {
+  addStateFromDefinition(stateDefinition: StateDefinition): void {
     const stateParams: StateParams = {
       key: stateDefinition.key,
       debug: this.debug,
@@ -306,7 +307,7 @@ export class StateMachine {
     check,
     onMatch,
     onMismatch,
-  }: TransitionParams) {
+  }: TransitionParams): void {
     if (!this.states.has(fromState)) {
       throw new AutomationError(
         {
@@ -404,7 +405,7 @@ export class StateMachine {
         evmContractEvent.contextUpdates?.forEach((contextUpdate) =>
           this.context.setFromData(
             contextUpdate.contextPath,
-            eventData,
+            eventData as Record<string, unknown> | undefined,
             contextUpdate.dataPath
           )
         );
@@ -494,7 +495,10 @@ export class StateMachine {
    * @param initialState The key of the initial state.
    * @param onStop Optional callback to execute when the machine is stopped.
    */
-  async startMachine(initialState: string, onStop?: () => Promise<void>) {
+  async startMachine(
+    initialState: string,
+    onStop?: voidAsyncFunction
+  ): Promise<void> {
     this.debug && console.log('Starting state machine...');
 
     await Promise.all([
@@ -554,7 +558,7 @@ export class StateMachine {
   /**
    * Stops the state machine by exiting the current state and not moving to another one.
    */
-  async stopMachine() {
+  public async stopMachine(): Promise<void> {
     this.debug && console.log('Stopping state machine...');
 
     this.status = 'stopped';
@@ -567,7 +571,7 @@ export class StateMachine {
   /**
    * Stops listening on the current state's transitions and exits the current state.
    */
-  private async exitCurrentState() {
+  private async exitCurrentState(): Promise<void> {
     this.debug && console.log('exitCurrentState', this.currentState?.key);
 
     const currentTransitions =
@@ -584,7 +588,7 @@ export class StateMachine {
    * Moves to a new state.
    * @param stateKey The key of the new state.
    */
-  private async enterState(stateKey: string) {
+  private async enterState(stateKey: string): Promise<void> {
     const state = this.states.get(stateKey);
     if (!state) {
       throw new AutomationError(
@@ -613,7 +617,7 @@ export class StateMachine {
    * Triggers a transition to a new state.
    * @param stateKey The key of the target state.
    */
-  private async transitionTo(stateKey: string) {
+  private async transitionTo(stateKey: string): Promise<void> {
     const nextState = this.states.get(stateKey);
 
     if (!nextState) {
@@ -644,6 +648,13 @@ export class StateMachine {
   }
 
   private handleError(error: unknown, context: string) {
+  /**
+   * Handles errors in the state machine.
+   * @param error
+   * @param context
+   * @private
+   */
+  private handleError(error: unknown, context: string): void {
     // Try to halt machine if it is still running
     if (this.isRunning) {
       const publicError = new AutomationError(
@@ -669,6 +680,11 @@ export class StateMachine {
     }
   }
 
+  /**
+   * Generates a unique identifier for the state machine.
+   * @returns A unique identifier string.
+   * @private
+   */
   private generateId(): string {
     return Math.random().toString(36).substring(2);
   }

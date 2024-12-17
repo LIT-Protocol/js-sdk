@@ -1,7 +1,9 @@
+import { voidAsyncFunction } from '../types';
+
 export interface BaseStateParams {
   key: string;
-  onEnter?: () => Promise<void>;
-  onExit?: () => Promise<void>;
+  onEnter?: voidAsyncFunction;
+  onExit?: voidAsyncFunction;
   debug?: boolean;
 }
 
@@ -13,8 +15,8 @@ export type StateParams = BaseStateParams;
 export class State {
   private readonly debug;
   public readonly key: string;
-  public readonly onEnter: (() => Promise<void>) | undefined;
-  public readonly onExit: (() => Promise<void>) | undefined;
+  public readonly onEnter: voidAsyncFunction | undefined;
+  public readonly onExit: voidAsyncFunction | undefined;
 
   constructor(params: BaseStateParams) {
     this.key = params.key;

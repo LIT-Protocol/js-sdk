@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
 
-import { onError } from '../types';
+import { onError, voidAsyncFunction } from '../types';
 
 export interface ListenerParams {
-  start?: () => Promise<void>;
-  stop?: () => Promise<void>;
+  start?: voidAsyncFunction;
+  stop?: voidAsyncFunction;
   onError?: onError;
 }
 
@@ -19,12 +19,12 @@ export class Listener<T = unknown> {
   /**
    * The start function called when all listeners are started.
    */
-  public start: () => Promise<void>;
+  public start: voidAsyncFunction;
 
   /**
    * The stop function called when all listeners are stopped.
    */
-  public stop: () => Promise<void>;
+  public stop: voidAsyncFunction;
 
   /**
    * The error handling function to call when an error occurs.

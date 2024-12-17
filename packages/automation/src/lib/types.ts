@@ -6,7 +6,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { BaseTransitionParams } from './transitions';
 
 export type Address = `0x${string}`;
-export type voidAsyncFunction = () => void;
+export type voidAsyncFunction = () => Promise<void>;
 export type onError = (error: unknown) => void;
 
 export interface PKPInfo {

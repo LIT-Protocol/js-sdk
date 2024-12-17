@@ -5,9 +5,6 @@ export type CheckFn = (values: (unknown | undefined)[]) => Promise<boolean>;
 export type resultFn = (values: (unknown | undefined)[]) => Promise<void>;
 type Values = (unknown | undefined)[];
 
-/**
- * A Transition class that manages state transitions based on listeners and conditions.
- */
 export interface BaseTransitionParams {
   debug?: boolean;
   listeners?: Listener<any>[]; // should be unknown but that demands callers to cast listeners to their correct type
@@ -17,6 +14,9 @@ export interface BaseTransitionParams {
   onError?: onError;
 }
 
+/**
+ * A Transition class that manages state transitions based on listeners and conditions.
+ */
 export class Transition {
   private readonly debug: boolean;
   private readonly listeners: Listener<unknown>[];
