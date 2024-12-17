@@ -21,6 +21,7 @@ interface SignTransactionWithLitActionParams {
   storedKeyMetadata: StoredKeyData;
   accessControlConditions: AccessControlConditions;
   broadcast: boolean;
+  versionedTransaction?: boolean;
 }
 
 export async function signTransactionWithLitAction({
@@ -32,6 +33,7 @@ export async function signTransactionWithLitAction({
   pkpSessionSigs,
   storedKeyMetadata: { ciphertext, dataToEncryptHash, pkpAddress },
   unsignedTransaction,
+  versionedTransaction,
 }: SignTransactionWithLitActionParams): Promise<string> {
   const result = await litNodeClient.executeJs({
     sessionSigs: pkpSessionSigs,
@@ -44,6 +46,7 @@ export async function signTransactionWithLitAction({
       unsignedTransaction,
       broadcast,
       accessControlConditions,
+      versionedTransaction,
     },
     ipfsOptions: {
       overwriteCode:

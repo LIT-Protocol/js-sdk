@@ -11,6 +11,7 @@ declare const ciphertext: SignTransactionWithEncryptedSolanaKeyParams['ciphertex
 declare const dataToEncryptHash: SignTransactionWithEncryptedSolanaKeyParams['dataToEncryptHash'];
 declare const unsignedTransaction: SignTransactionWithEncryptedSolanaKeyParams['unsignedTransaction'];
 declare const broadcast: SignTransactionWithEncryptedSolanaKeyParams['broadcast'];
+declare const versionedTransaction: SignTransactionWithEncryptedSolanaKeyParams['versionedTransaction'];
 
 (async () =>
   litActionHandler(async () =>
@@ -20,5 +21,6 @@ declare const broadcast: SignTransactionWithEncryptedSolanaKeyParams['broadcast'
       dataToEncryptHash,
       unsignedTransaction,
       broadcast,
+      versionedTransaction,
     })
   ))();
