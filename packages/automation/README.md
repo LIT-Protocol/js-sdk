@@ -39,7 +39,7 @@ Actions are the different tasks the state machine will do. Each action can:
 
 ### States
 
-States represent different states the machine will stand and move between. Each state can have a combination of Actions to perform when entering or exiting itself.
+States represent different states the machine will stand and move between. Each state can have an array of Actions to perform when entering or exiting itself.
 
 ### Transitions
 
@@ -78,34 +78,43 @@ async function runLitActionInterval() {
     states: [
       {
         key: 'setPKP',
-        usePkp: {
-          mint: true,
-        },
+        actions: [
+          {
+            key: 'usePkp',
+            mint: true,
+          },
+        ],
         transitions: [{ toState: 'setCapacityNFT' }],
       },
       {
         key: 'setCapacityNFT',
-        useCapacityNFT: {
-          mint: true,
-          daysUntilUTCMidnightExpiration: 10,
-          requestPerSecond: 1,
-        },
+        actions: [
+          {
+            key: 'useCapacityNFT',
+            mint: true,
+            daysUntilUTCMidnightExpiration: 10,
+            requestPerSecond: 1,
+          },
+        ],
         transitions: [{ toState: 'runLitAction' }],
       },
       {
         key: 'runLitAction',
-        litAction: {
-          code: `(async () => {
+        actions: [
+          {
+            key: 'litAction',
+            code: `(async () => {
               if (magicNumber >= 42) {
                   LitActions.setResponse({ response:"The number is greater than or equal to 42!" });
               } else {
                   LitActions.setResponse({ response: "The number is less than 42!" });
               }
             })();`,
-          jsParams: {
-            magicNumber: Math.floor(Math.random() * 100),
+            jsParams: {
+              magicNumber: Math.floor(Math.random() * 100),
+            },
           },
-        },
+        ],
         transitions: [{ toState: 'cooldown' }],
       },
       {
@@ -115,8 +124,8 @@ async function runLitActionInterval() {
             toState: 'runLitAction',
             timer: {
               // One hour, checking every second
-              until: 1 * 60 * 60, // 3600 times
               interval: 1000, // one second
+              until: 1 * 60 * 60, // 3600 times
             },
           },
         ],
@@ -133,7 +142,7 @@ runLitActionInterval().catch(console.error);
 
 ## Functional interface
 
-There care cases where such a declarative interface won't be enough for your use case. When that happens, the machines can also accept generic states, transitions and listeners where it is possible to write any logic.
+There care cases where such a declarative interface won't be enough for your use case. When that happens, the machines can also accept generic states, actions, transitions and listeners where it is possible to write any logic.
 
 Here is an example that listens to Ethereum blocks looking one whose numbers ends in 0
 
@@ -205,14 +214,16 @@ Each State Machine has its own information repository called `context`.
 
 When using the defined states in the declarative interface, some values are already populated and then used later
 
-- `StateDefinition.usePkp` populates `context.activePkp` with the minted PKP data
-- `StateDefinition.useCapacityNFT` populates `context.activeCapacityTokenId` with the minted Capacity Token Id
-- `StateDefinition.litAction` populates `context.lastLitActionResponse` with the lit action response
-- `StateDefinition.transaction` populates `context.lastTransactionReceipt` with the transaction receipt
+- `usePkp` action populates `context.activePkp` with the minted PKP data
+- `useCapacityNFT` action populates `context.activeCapacityTokenId` with the minted Capacity Token Id
+- `litAction` action populates `context.lastLitActionResponse` with the lit action response
+- `transaction` action populates `context.lastTransactionReceipt` with the transaction receipt
+
+When executing a `litAction` or `transaction` action, the `context` must have `activePkp` and `activeCapacityTokenId` (if needed) populated.
 
 Several places in the machine definition can read values from the context. Instead of passing a literal value, pass an object with the `contextPath` property, like in the following example.
 
-The machine context can be accessed using its `getFromContext`, `setToContext` or `pushToContext` methods to read or write.
+The machine context can be manually accessed using its `getFromContext`, `setToContext` or `pushToContext` methods to read or write.
 
 ### Advance example
 
@@ -248,16 +259,22 @@ async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
     states: [
       {
         key: 'setPKP',
-        usePkp: {
-          pkp, // Configure the pkp passed. Not minting a new one
-        },
+        actions: [
+          {
+            key: 'usePkp',
+            pkp, // Configure the pkp passed. Not minting a new one
+          },
+        ],
         transitions: [{ toState: 'setCapacityNFT' }],
       },
       {
         key: 'setCapacityNFT',
-        useCapacityNFT: {
-          capacityTokenId: capacityTokenId, // Configure the capacity token to use. Not minting a new one
-        },
+        actions: [
+          {
+            key: 'useCapacityNFT',
+            capacityTokenId: capacityTokenId, // Configure the capacity token to use. Not minting a new one
+          },
+        ],
         transitions: [{ toState: 'waitForFunds' }],
       },
       {
@@ -289,12 +306,14 @@ async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
       },
       {
         key: 'waitForTransfer',
-        context: {
-          log: {
-            atEnter: true,
-            atExit: true,
+        actions: [
+          {
+            key: 'context',
+            log: {
+              path: '', // We want to log the full context for debugging
+            },
           },
-        },
+        ],
         transitions: [
           // Waits to receive an USDC transfer in our listening chain
           {
@@ -324,23 +343,26 @@ async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
       {
         key: 'transferFunds',
         // Sends a transaction to transfer some USDC in destination chain
-        transaction: {
-          evmChainId: evmDestinationNetwork.chainId,
-          contractAddress: USDC_ETH_SEPOLIA_ADDRESS,
-          contractABI: [
-            'function transfer(address to, uint256 amount) public returns (bool)',
-          ],
-          method: 'transfer',
-          params: [
-            // Params can be hardcoded values such as ['0x123...', '100'] or values from the state machine context
-            {
-              contextPath: 'transfer.sender',
-            },
-            {
-              contextPath: 'transfer.amount',
-            },
-          ],
-        },
+        actions: [
+          {
+            key: 'transaction',
+            evmChainId: evmDestinationNetwork.chainId,
+            contractAddress: USDC_ETH_SEPOLIA_ADDRESS,
+            contractABI: [
+              'function transfer(address to, uint256 amount) public returns (bool)',
+            ],
+            method: 'transfer',
+            params: [
+              // Params can be hardcoded values such as ['0x123...', '100'] or values from the state machine context
+              {
+                contextPath: 'transfer.sender',
+              },
+              {
+                contextPath: 'transfer.amount',
+              },
+            ],
+          },
+        ],
         // Going back to waitForFunds to suspend machine if we need more sepolia eth or sepolia USDC
         transitions: [{ toState: 'waitForFunds' }],
       },
