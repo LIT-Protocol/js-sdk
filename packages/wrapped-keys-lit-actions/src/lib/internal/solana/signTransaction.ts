@@ -89,25 +89,27 @@ export async function signTransactionSolanaKey({
   broadcast,
   privateKey,
   unsignedTransaction,
-  versionedTransaction
+  versionedTransaction,
 }: {
   broadcast: boolean;
   privateKey: string;
   unsignedTransaction: UnsignedTransaction;
-  versionedTransaction: boolean
+  versionedTransaction?: boolean;
 }) {
   // Be sure you call validateUnsignedTransaction(unsignedTransaction); before calling this method!
 
   const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
 
-  let transaction
-  let signature
+  let transaction;
+  let signature;
   if (versionedTransaction) {
-    const swapTransactionBuf = Buffer.from(unsignedTransaction.serializedTransaction, 'base64');
+    const swapTransactionBuf = Buffer.from(
+      unsignedTransaction.serializedTransaction,
+      'base64'
+    );
     transaction = VersionedTransaction.deserialize(swapTransactionBuf);
     signature = signVersionedTransaction({ transaction, solanaKeyPair });
   } else {
-
     transaction = Transaction.from(
       Buffer.from(unsignedTransaction.serializedTransaction, 'base64')
     );

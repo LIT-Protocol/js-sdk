@@ -21,6 +21,6 @@ declare const versionedTransaction: SignTransactionWithEncryptedSolanaKeyParams[
       dataToEncryptHash,
       unsignedTransaction,
       broadcast,
-      versionedTransaction
+      versionedTransaction,
     })
   ))();
