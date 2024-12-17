@@ -120,7 +120,9 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: 'Arbitrum Sepolia',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://arbitrum-sepolia.blockpi.network/v1/rpc/public'],
+    rpcUrls: [
+      'https://arb-sepolia.g.alchemy.com/v2/qMVvG2hTF1Gs8Sy-dLIZHn1V5M3hrfVv',
+    ],
     blockExplorerUrls: ['https://sepolia.arbiscan.io/'],
     type: null,
     vmType: 'EVM',
