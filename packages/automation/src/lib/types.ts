@@ -23,6 +23,7 @@ export interface ContextAccess {
   contextPath: string;
 }
 
+// Context Types
 export type ContextOrLiteral<T> = T | ContextAccess;
 
 interface ContextUpdate extends ContextAccess {
@@ -33,21 +34,23 @@ export interface UpdatesContext {
   contextUpdates: ContextUpdate[];
 }
 
-export interface LitActionStateDefinition {
+// Action Types
+export interface LitActionActionDefinition {
+  key: 'litAction';
   code?: ContextOrLiteral<string>;
   ipfsId?: ContextOrLiteral<string>;
   jsParams?: Record<string, unknown>;
 }
 
-export interface ContextStateDefinition {
+export interface ContextActionDefinition {
+  key: 'context';
   log?: {
-    atEnter?: boolean;
-    atExit?: boolean;
-    path?: string;
+    path: string;
   };
 }
 
-export interface TransactionStateDefinition extends OnEvmChain {
+export interface TransactionActionDefinition extends OnEvmChain {
+  key: 'transaction';
   contractABI: ethers.ContractInterface;
   contractAddress: ContextOrLiteral<Address>;
   method: ContextOrLiteral<string>;
@@ -55,35 +58,47 @@ export interface TransactionStateDefinition extends OnEvmChain {
   value?: ContextOrLiteral<string>;
 }
 
-export interface MintStateDefinition {
-  mint: boolean;
+export interface MintActionDefinition {
+  mint: true;
 }
 
-export interface usePkpStateDefinition {
-  pkp: ContextOrLiteral<PKPInfo>;
+export interface MintPkpActionDefinition extends MintActionDefinition {
+  key: 'usePkp';
 }
 
-export interface mintCapacityNFTStateDefinition extends MintStateDefinition {
+export interface MintCapacityNFTActionDefinition extends MintActionDefinition {
+  key: 'useCapacityNFT';
   daysUntilUTCMidnightExpiration: number;
   requestPerSecond: number;
 }
 
-export interface useCapacityNFTStateDefinition {
+export interface UsePkpActionDefinition {
+  key: 'usePkp';
+  pkp: ContextOrLiteral<PKPInfo>;
+}
+
+export interface UseCapacityNFTActionDefinition {
+  key: 'useCapacityNFT';
   capacityTokenId: ContextOrLiteral<string>;
 }
 
+export type ActionDefinition =
+  | ContextActionDefinition
+  | LitActionActionDefinition
+  | MintCapacityNFTActionDefinition
+  | MintPkpActionDefinition
+  | TransactionActionDefinition
+  | UseCapacityNFTActionDefinition
+  | UsePkpActionDefinition;
+
+// State Types
 export interface StateDefinition {
-  context?: ContextStateDefinition;
   key: string;
-  litAction?: LitActionStateDefinition;
-  transaction?: TransactionStateDefinition;
+  actions?: ActionDefinition[];
   transitions?: Omit<TransitionDefinition, 'fromState'>[];
-  useCapacityNFT?:
-    | useCapacityNFTStateDefinition
-    | mintCapacityNFTStateDefinition;
-  usePkp?: usePkpStateDefinition | MintStateDefinition;
 }
 
+// Transition Types
 export interface IntervalTransitionDefinition {
   interval?: number;
 }
@@ -137,6 +152,14 @@ export interface TransitionDefinition {
   toState: string;
 }
 
+export interface TransitionParams
+  extends Omit<BaseTransitionParams, 'onMatch'>,
+    Partial<Pick<BaseTransitionParams, 'onMatch'>> {
+  fromState: string;
+  toState: string;
+}
+
+// Machine Types
 export interface BaseStateMachineParams {
   context?: Record<string, unknown>;
   debug?: boolean;
@@ -152,11 +175,4 @@ export interface StateMachineDefinition
   litContracts: LitContracts | ConstructorParameters<typeof LitContracts>[0];
   states: StateDefinition[];
   transitions?: TransitionDefinition[];
-}
-
-export interface TransitionParams
-  extends Omit<BaseTransitionParams, 'onMatch'>,
-    Partial<Pick<BaseTransitionParams, 'onMatch'>> {
-  fromState: string;
-  toState: string;
 }

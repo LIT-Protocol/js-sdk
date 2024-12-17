@@ -198,95 +198,91 @@ export class StateMachine {
     const onEnterActions = [] as Action[];
     const onExitActions = [] as Action[];
 
-    const {
-      context: contextAction,
-      litAction,
-      transaction,
-      useCapacityNFT,
-      usePkp,
-    } = stateDefinition;
+    const { actions = [] } = stateDefinition;
 
-    if (contextAction) {
-      if (contextAction.log?.atEnter) {
-        onEnterActions.push(
-          new LogContextAction({
-            debug: this.debug,
-            stateMachine: this,
-            path: contextAction.log?.path,
-          })
-        );
+    actions.forEach((action) => {
+      switch (action.key) {
+        case 'context':
+          if (action.log?.path) {
+            onEnterActions.push(
+              new LogContextAction({
+                debug: this.debug,
+                stateMachine: this,
+                path: action.log.path,
+              })
+            );
+          }
+          break;
+        case 'litAction':
+          onEnterActions.push(
+            new LitActionAction({
+              debug: this.debug,
+              stateMachine: this,
+              ...action,
+            })
+          );
+          break;
+        case 'transaction':
+          onEnterActions.push(
+            new TransactionAction({
+              debug: this.debug,
+              stateMachine: this,
+              ...action,
+            })
+          );
+          break;
+        case 'useCapacityNFT':
+          if ('capacityTokenId' in action) {
+            this.context.set(
+              'activeCapacityTokenId',
+              this.resolveContextPathOrLiteral(action.capacityTokenId)
+            );
+          } else if ('mint' in action) {
+            const mintCapacityCreditAction = new MintCapacityCreditAction({
+              daysUntilUTCMidnightExpiration:
+                action.daysUntilUTCMidnightExpiration,
+              debug: this.debug,
+              requestPerSecond: action.requestPerSecond,
+              stateMachine: this,
+            });
+            onEnterActions.push(mintCapacityCreditAction);
+          }
+          if (this.debug) {
+            const activeCapacityTokenId = this.context.get('activePkp');
+            console.log(
+              `Machine configured to use capacity token ${activeCapacityTokenId}`
+            );
+          }
+          break;
+        case 'usePkp':
+          if ('pkp' in action) {
+            this.context.set(
+              'activePkp',
+              this.resolveContextPathOrLiteral(action.pkp)
+            );
+          } else if ('mint' in action) {
+            const mintPkpAction = new MintPkpAction({
+              debug: this.debug,
+              stateMachine: this,
+            });
+            onEnterActions.push(mintPkpAction);
+          }
+          if (this.debug) {
+            const activePkp = this.context.get('activePkp');
+            console.log(`Machine configured to use pkp ${activePkp}`);
+          }
+          break;
+        default:
+          throw new AutomationError(
+            {
+              info: {
+                action,
+              },
+            },
+            `Unknown action. Check error info.`
+          );
       }
-      if (contextAction.log?.atExit) {
-        onExitActions.push(
-          new LogContextAction({
-            debug: this.debug,
-            stateMachine: this,
-            path: contextAction.log?.path,
-          })
-        );
-      }
-    }
-
-    if (litAction) {
-      const litActionAction = new LitActionAction({
-        debug: this.debug,
-        stateMachine: this,
-        ...litAction,
-      });
-      onEnterActions.push(litActionAction);
-    }
-
-    if (transaction) {
-      const transactionAction = new TransactionAction({
-        debug: this.debug,
-        stateMachine: this,
-        ...transaction,
-      });
-      onEnterActions.push(transactionAction);
-    }
-
-    if (usePkp) {
-      if ('pkp' in usePkp) {
-        this.context.set(
-          'activePkp',
-          this.resolveContextPathOrLiteral(usePkp.pkp)
-        );
-      } else if ('mint' in usePkp) {
-        const mintPkpAction = new MintPkpAction({
-          debug: this.debug,
-          stateMachine: this,
-        });
-        onEnterActions.push(mintPkpAction);
-      }
-      if (this.debug) {
-        const activePkp = this.context.get('activePkp');
-        console.log(`Machine configured to use pkp ${activePkp}`);
-      }
-    }
-
-    if (useCapacityNFT) {
-      if ('capacityTokenId' in useCapacityNFT) {
-        this.context.set(
-          'activeCapacityTokenId',
-          this.resolveContextPathOrLiteral(useCapacityNFT.capacityTokenId)
-        );
-      } else if ('mint' in useCapacityNFT) {
-        const mintCapacityCreditAction = new MintCapacityCreditAction({
-          daysUntilUTCMidnightExpiration:
-            useCapacityNFT.daysUntilUTCMidnightExpiration,
-          debug: this.debug,
-          requestPerSecond: useCapacityNFT.requestPerSecond,
-          stateMachine: this,
-        });
-        onEnterActions.push(mintCapacityCreditAction);
-      }
-      if (this.debug) {
-        const activeCapacityTokenId = this.context.get('activePkp');
-        console.log(
-          `Machine configured to use capacity token ${activeCapacityTokenId}`
-        );
-      }
-    }
+    });
 
     // Merge all state actions
     stateParams.onEnter = async () => {
