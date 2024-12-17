@@ -366,6 +366,7 @@ export class StateMachine {
       toState,
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Listeners can be any type
     const listeners: Listener<any>[] = [];
     const checks: CheckFn[] = [];
 

@@ -7,7 +7,8 @@ type Values = (unknown | undefined)[];
 
 export interface BaseTransitionParams {
   debug?: boolean;
-  listeners?: Listener<any>[]; // should be unknown but that demands callers to cast listeners to their correct type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Listeners can be any type
+  listeners?: Listener<any>[];
   check?: CheckFn;
   onMatch: resultFn;
   onMismatch?: resultFn;
