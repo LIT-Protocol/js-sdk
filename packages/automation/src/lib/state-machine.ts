@@ -27,6 +27,7 @@ import {
 import { State, StateParams } from './states';
 import { CheckFn, Transition } from './transitions';
 import {
+  ActionDefinition,
   BaseStateMachineParams,
   ContextOrLiteral,
   StateDefinition,
@@ -196,102 +197,9 @@ export class StateMachine {
       debug: this.debug,
     };
 
-    const onEnterActions = [] as Action[];
-    const onExitActions = [] as Action[];
-
-    const { actions = [] } = stateDefinition;
-
-    actions.forEach((action) => {
-      switch (action.key) {
-        case 'context':
-          if (action.log?.path) {
-            onEnterActions.push(
-              new LogContextAction({
-                debug: this.debug,
-                stateMachine: this,
-                path: action.log.path,
-              })
-            );
-          }
-          break;
-        case 'litAction':
-          onEnterActions.push(
-            new LitActionAction({
-              debug: this.debug,
-              stateMachine: this,
-              ...action,
-            })
-          );
-          break;
-        case 'transaction':
-          onEnterActions.push(
-            new TransactionAction({
-              debug: this.debug,
-              stateMachine: this,
-              ...action,
-            })
-          );
-          break;
-        case 'useCapacityNFT':
-          if ('capacityTokenId' in action) {
-            this.context.set(
-              'activeCapacityTokenId',
-              this.resolveContextPathOrLiteral(action.capacityTokenId)
-            );
-          } else if ('mint' in action) {
-            const mintCapacityCreditAction = new MintCapacityCreditAction({
-              daysUntilUTCMidnightExpiration:
-                action.daysUntilUTCMidnightExpiration,
-              debug: this.debug,
-              requestPerSecond: action.requestPerSecond,
-              stateMachine: this,
-            });
-            onEnterActions.push(mintCapacityCreditAction);
-          }
-          if (this.debug) {
-            const activeCapacityTokenId = this.context.get('activePkp');
-            console.log(
-              `Machine configured to use capacity token ${activeCapacityTokenId}`
-            );
-          }
-          break;
-        case 'usePkp':
-          if ('pkp' in action) {
-            this.context.set(
-              'activePkp',
-              this.resolveContextPathOrLiteral(action.pkp)
-            );
-          } else if ('mint' in action) {
-            const mintPkpAction = new MintPkpAction({
-              debug: this.debug,
-              stateMachine: this,
-            });
-            onEnterActions.push(mintPkpAction);
-          }
-          if (this.debug) {
-            const activePkp = this.context.get('activePkp');
-            console.log(`Machine configured to use pkp ${activePkp}`);
-          }
-          break;
-        default:
-          throw new AutomationError(
-            {
-              info: {
-                action,
-              },
-            },
-            `Unknown action. Check error info.`
-          );
-      }
-    });
-
     // Merge all state actions
-    stateParams.onEnter = async () => {
-      await Promise.all(onEnterActions.map((action) => action.run()));
-    };
-    stateParams.onExit = async () => {
-      await Promise.all(onExitActions.map((action) => action.run()));
-    };
+    const { actions = [] } = stateDefinition;
+    stateParams.onEnter = this.mergeActions(actions);
 
     this.addState(stateParams);
   }
@@ -301,6 +209,7 @@ export class StateMachine {
    * @param params The parameters for the transition.
    */
   addTransition({
+    actions = [],
     fromState,
     toState,
     listeners,
@@ -334,6 +243,7 @@ export class StateMachine {
     }
 
     const transitioningOnMatch = async (values: (unknown | undefined)[]) => {
+      await this.mergeActions(actions)();
       await onMatch?.(values);
       await this.transitionTo(toState);
     };
@@ -358,10 +268,11 @@ export class StateMachine {
   }
 
   addTransitionFromDefinition(transitionDefinition: TransitionDefinition) {
-    const { balances, evmContractEvent, fromState, timer, toState } =
+    const { actions, balances, evmContractEvent, fromState, timer, toState } =
       transitionDefinition;
 
     const transitionConfig: TransitionParams = {
+      actions,
       fromState,
       toState,
     };
@@ -648,7 +559,108 @@ export class StateMachine {
     }
   }
 
-  private handleError(error: unknown, context: string) {
+  /**
+   * Merges the given action definitions into a single function that executes all actions concurrently.
+   * @param actionDefinitions
+   * @returns A function that executes all actions concurrently.
+   * @private
+   */
+  private mergeActions(
+    actionDefinitions: ActionDefinition[]
+  ): voidAsyncFunction {
+    const actions = [] as Action[];
+
+    actionDefinitions.forEach((action) => {
+      switch (action.key) {
+        case 'context':
+          if (action.log?.path) {
+            actions.push(
+              new LogContextAction({
+                debug: this.debug,
+                stateMachine: this,
+                path: action.log.path,
+              })
+            );
+          }
+          break;
+        case 'litAction':
+          actions.push(
+            new LitActionAction({
+              debug: this.debug,
+              stateMachine: this,
+              ...action,
+            })
+          );
+          break;
+        case 'transaction':
+          actions.push(
+            new TransactionAction({
+              debug: this.debug,
+              stateMachine: this,
+              ...action,
+            })
+          );
+          break;
+        case 'useCapacityNFT':
+          if ('capacityTokenId' in action) {
+            this.context.set(
+              'activeCapacityTokenId',
+              this.resolveContextPathOrLiteral(action.capacityTokenId)
+            );
+          } else if ('mint' in action) {
+            const mintCapacityCreditAction = new MintCapacityCreditAction({
+              daysUntilUTCMidnightExpiration:
+                action.daysUntilUTCMidnightExpiration,
+              debug: this.debug,
+              requestPerSecond: action.requestPerSecond,
+              stateMachine: this,
+            });
+            actions.push(mintCapacityCreditAction);
+          }
+          if (this.debug) {
+            const activeCapacityTokenId = this.context.get('activePkp');
+            console.log(
+              `Machine configured to use capacity token ${activeCapacityTokenId}`
+            );
+          }
+          break;
+        case 'usePkp':
+          if ('pkp' in action) {
+            this.context.set(
+              'activePkp',
+              this.resolveContextPathOrLiteral(action.pkp)
+            );
+          } else if ('mint' in action) {
+            const mintPkpAction = new MintPkpAction({
+              debug: this.debug,
+              stateMachine: this,
+            });
+            actions.push(mintPkpAction);
+          }
+          if (this.debug) {
+            const activePkp = this.context.get('activePkp');
+            console.log(`Machine configured to use pkp ${activePkp}`);
+          }
+          break;
+        default:
+          throw new AutomationError(
+            {
+              info: {
+                action,
+              },
+            },
+            `Unknown action. Check error info.`
+          );
+      }
+    });
+
+    return async () => {
+      await Promise.all(actions.map((action) => action.run())).catch((err) => {
+        this.handleError(err, `Error running actions. Check details.`);
+      });
+    };
+  }
+
   /**
    * Handles errors in the state machine.
    * @param error

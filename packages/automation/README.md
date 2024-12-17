@@ -51,6 +51,10 @@ Transitions define how the machine moves between states. They can be triggered a
 - HTTP requests (polling)
 - Custom conditions
 
+When a Transition gets new values, it uses its `check` function to determine if the values are a match or not.
+
+Depending on the `check` result, it calls the `onMatch` or `onMismatch` function. Also, when there is a match, it can trigger actions and move the state machine to the next state.
+
 ### Listeners
 
 Listeners monitor various events and feed data to transitions:

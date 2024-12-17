@@ -150,11 +150,13 @@ export interface TransitionDefinition {
   fromState: string;
   timer?: TimerTransitionDefinition;
   toState: string;
+  actions?: ActionDefinition[];
 }
 
 export interface TransitionParams
   extends Omit<BaseTransitionParams, 'onMatch'>,
     Partial<Pick<BaseTransitionParams, 'onMatch'>> {
+  actions?: ActionDefinition[];
   fromState: string;
   toState: string;
 }
