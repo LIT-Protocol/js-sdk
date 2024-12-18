@@ -49,14 +49,27 @@ export interface ContextActionDefinition {
   };
 }
 
-export interface TransactionActionDefinition extends OnEvmChain {
+interface TransactionActionBaseDefinition extends OnEvmChain {
   key: 'transaction';
-  contractABI: ethers.ContractInterface;
   contractAddress: ContextOrLiteral<Address>;
-  method: ContextOrLiteral<string>;
-  params?: ContextOrLiteral<unknown>[];
   value?: ContextOrLiteral<string>;
 }
+
+interface TransactionActionWithoutDataDefinition
+  extends TransactionActionBaseDefinition {
+  contractABI: ethers.ContractInterface;
+  method: ContextOrLiteral<string>;
+  params?: ContextOrLiteral<unknown> | ContextOrLiteral<unknown>[];
+}
+
+interface TransactionActionWithDataDefinition
+  extends TransactionActionBaseDefinition {
+  data?: ContextOrLiteral<string>;
+}
+
+export type TransactionActionDefinition =
+  | TransactionActionWithoutDataDefinition
+  | TransactionActionWithDataDefinition;
 
 export interface MintActionDefinition {
   mint: true;

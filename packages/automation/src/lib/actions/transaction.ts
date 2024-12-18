@@ -8,16 +8,32 @@ import { StateMachine } from '../state-machine';
 import { Address, ContextOrLiteral, PKPInfo } from '../types';
 import { getEvmChain } from '../utils/chain';
 
-interface TransactionActionParams {
+function arrayfy(value: unknown) {
+  return Array.isArray(value) ? value : [value];
+}
+
+interface TransactionActionBaseParams {
   debug?: boolean;
   stateMachine: StateMachine;
   evmChainId: ContextOrLiteral<number>;
-  contractABI: ethers.ContractInterface;
   contractAddress: ContextOrLiteral<Address>;
-  method: ContextOrLiteral<string>;
-  params?: ContextOrLiteral<unknown>[];
   value?: ContextOrLiteral<string>;
 }
+
+interface TransactionActionWithoutDataParams
+  extends TransactionActionBaseParams {
+  contractABI: ethers.ContractInterface;
+  method: ContextOrLiteral<string>;
+  params?: ContextOrLiteral<unknown> | ContextOrLiteral<unknown>[];
+}
+
+interface TransactionActionWithDataParams extends TransactionActionBaseParams {
+  data?: ContextOrLiteral<string>;
+}
+
+type TransactionActionParams =
+  | TransactionActionWithoutDataParams
+  | TransactionActionWithDataParams;
 
 export class TransactionAction extends Action {
   constructor(params: TransactionActionParams) {
@@ -37,37 +53,54 @@ export class TransactionAction extends Action {
         );
       }
 
-      const yellowstoneMachineSigner = params.stateMachine.signer;
-
-      const chainId = params.stateMachine.resolveContextPathOrLiteral(
+      // Resolve transaction data from context
+      const txChainId = params.stateMachine.resolveContextPathOrLiteral(
         params.evmChainId
       );
-      const chain = getEvmChain(chainId);
+      const chain = getEvmChain(txChainId);
       const chainProvider = new ethers.providers.JsonRpcProvider(
         chain.rpcUrls[0],
         chain.chainId
       );
 
-      const contract = new ethers.Contract(
-        params.stateMachine.resolveContextPathOrLiteral(params.contractAddress),
-        params.contractABI,
-        chainProvider
+      const txContractAddress = params.stateMachine.resolveContextPathOrLiteral(
+        params.contractAddress
       );
+      const txValue = params.stateMachine.resolveContextPathOrLiteral(
+        params.value
+      );
+      // transaction can have data or the fields necessary to populate it
+      let txData: ethers.BytesLike | undefined;
+      if (!('contractABI' in params)) {
+        txData = params.stateMachine.resolveContextPathOrLiteral(params.data);
+      } else {
+        const txMethod = params.stateMachine.resolveContextPathOrLiteral(
+          params.method
+        );
+        const txParams = arrayfy(
+          !Array.isArray(params.params)
+            ? params.stateMachine.resolveContextPathOrLiteral(params.params)
+            : params.params.map(
+                params.stateMachine.resolveContextPathOrLiteral.bind(
+                  params.stateMachine
+                )
+              )
+        );
 
-      const txParams = (params.params || []).map(
-        params.stateMachine.resolveContextPathOrLiteral.bind(
-          params.stateMachine
-        )
-      );
-      const txMethod = params.stateMachine.resolveContextPathOrLiteral(
-        params.method
-      );
-      const txData = await contract.populateTransaction[txMethod](...txParams);
+        const contract = new ethers.Contract(
+          txContractAddress,
+          params.contractABI,
+          chainProvider
+        );
+        const populatedTx = await contract.populateTransaction[txMethod](
+          ...txParams
+        );
+        txData = populatedTx.data;
+      }
+
       const gasLimit = await chainProvider.estimateGas({
-        to: params.stateMachine.resolveContextPathOrLiteral(
-          params.contractAddress
-        ),
-        data: txData.data,
+        to: txContractAddress,
+        data: txData,
         from: activePkp.ethAddress,
       });
       const gasPrice = await chainProvider.getGasPrice();
@@ -75,21 +108,21 @@ export class TransactionAction extends Action {
         activePkp.ethAddress
       );
 
-      const rawTx = {
+      const rawTx: ethers.UnsignedTransaction = {
         chainId: chain.chainId,
-        data: txData.data,
+        data: txData,
         gasLimit: gasLimit.toHexString(),
         gasPrice: gasPrice.toHexString(),
         nonce,
-        to: params.stateMachine.resolveContextPathOrLiteral(
-          params.contractAddress
-        ),
+        to: txContractAddress,
+        value: txValue,
       };
       const rawTxHash = ethers.utils.keccak256(
         ethers.utils.serializeTransaction(rawTx)
       );
 
       // Sign with the PKP in a LitAction
+      const yellowstoneMachineSigner = params.stateMachine.signer;
       const litActionResponse = await executeLitAction({
         litNodeClient: params.stateMachine.litNodeClient,
         capacityTokenId: params.stateMachine.resolveContextPathOrLiteral({
@@ -113,6 +146,11 @@ export class TransactionAction extends Action {
               evmChainId: params.evmChainId,
               contractAddress: params.contractAddress,
               value: params.value,
+              data: 'data' in params ? params.data : undefined,
+              contractABI:
+                'contractABI' in params ? params.contractABI : undefined,
+              method: 'method' in params ? params.method : undefined,
+              params: 'params' in params ? params.params : undefined,
               logs: litActionResponse.logs,
             },
           },
