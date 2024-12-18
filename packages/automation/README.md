@@ -1,17 +1,14 @@
 # @lit-protocol/automation
 
-A TypeScript library for creating and managing state machines that can automate complex workflows involving the Lit Protocol network, blockchain events, and other triggers.
-
-## Overview
+A TypeScript library for creating and managing automated workflows using Lit Protocol.
 
 The automation package provides a flexible state machine implementation that allows you to:
 
-- Create automated workflows that respond to blockchain events
-- Execute Lit Actions based on custom triggers
-- Mint PKPs and Capacity Delegation Tokens
-- Monitor token balances and prices
-- Bridge tokens across chains automatically using PKPs
-- Automate PKP (Programmable Key Pair) operations overall
+- Execute automated Lit Action workflows based on custom triggers, such as events on blockchains or off-chain platforms
+- Automate the minting of PKPs, Capacity Credits, and other Lit operations
+- Monitor token balances and price info
+- Perform cross-chain messaging and transaction execution
+- And more...
 
 ## Installation
 
@@ -148,7 +145,7 @@ runLitActionInterval().catch(console.error);
 
 There care cases where such a declarative interface won't be enough for your use case. When that happens, the machines can also accept generic states, actions, transitions and listeners where it is possible to write any logic.
 
-Here is an example that listens to Ethereum blocks looking one whose numbers ends in 0
+Here is an example that listens to Ethereum block hashes, looking for those that end in '0'
 
 ```typescript
 async function monitorEthereumBlocksWithHashEndingWithZero() {
@@ -231,9 +228,9 @@ The machine context can be manually accessed using its `getFromContext`, `setToC
 
 ### Advance example
 
-By leveraging the State Machine context and the ability of Lit PKPs to sign transaction of a variety of chains, it is possible to implement a Token Bridge that composes multiple chains and even offchain interaction if needed among other uses cases.
+By leveraging context from the State Machine in combination with Lit PKPs, it is possible to implement a cross-chain messaging service that can be used to read and write data across virtually any blockchain.
 
-In this example, when a State Machine PKP receives USDC in Base Sepolia, it will send the same amount to the sender but in Ethereum Sepolia
+In this example, when a State Machine PKP receives USDC in Base Sepolia, it will send the same amount to the sender but in Ethereum Sepolia.
 
 ```typescript
 async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
