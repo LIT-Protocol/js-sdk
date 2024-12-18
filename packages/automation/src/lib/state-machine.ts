@@ -573,7 +573,7 @@ export class StateMachine {
     actionDefinitions.forEach((action) => {
       switch (action.key) {
         case 'context':
-          if (action.log?.path) {
+          if (typeof action.log?.path === 'string') {
             actions.push(
               new LogContextAction({
                 debug: this.debug,
