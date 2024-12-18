@@ -31,7 +31,7 @@ interface ContextUpdate extends ContextAccess {
 }
 
 export interface UpdatesContext {
-  contextUpdates: ContextUpdate[];
+  contextUpdates?: ContextUpdate[];
 }
 
 // Action Types
