@@ -105,6 +105,20 @@ export class TransactionAction extends Action {
           sigName: 'signedTransaction',
         },
       });
+      if (!litActionResponse.success) {
+        throw new AutomationError(
+          {
+            info: {
+              machineId: params.stateMachine.id,
+              evmChainId: params.evmChainId,
+              contractAddress: params.contractAddress,
+              value: params.value,
+              logs: litActionResponse.logs,
+            },
+          },
+          `Failed to sign transaction`
+        );
+      }
 
       const signature = litActionResponse.response as string;
       const jsonSignature = JSON.parse(signature);
