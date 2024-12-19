@@ -1197,7 +1197,7 @@ export class LitNodeClientNodeJs
 
     logWithRequestId(
       requestId,
-      'responseData',
+      'pkpSign responseData',
       JSON.stringify(responseData, null, 2)
     );
 
@@ -1205,16 +1205,21 @@ export class LitNodeClientNodeJs
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = parsePkpSignResponse(responseData);
 
-    const signatures = await getSignatures<{ signature: SigResponse }>({
-      requestId,
-      networkPubKeySet: this.networkPubKeySet,
-      minNodeCount: this.config.minNodeCount,
-      signedData: signedDataList,
-    });
+    try {
+      const signatures = await getSignatures<{ signature: SigResponse }>({
+        requestId,
+        networkPubKeySet: this.networkPubKeySet,
+        minNodeCount: this.config.minNodeCount,
+        signedData: signedDataList,
+      });
 
-    logWithRequestId(requestId, `signature combination`, signatures);
+      logWithRequestId(requestId, `signature combination`, signatures);
 
-    return signatures.signature; // only a single signature is ever present, so we just return it.
+      return signatures.signature; // only a single signature is ever present, so we just return it.
+    } catch (e) {
+      console.error("Error getting signature", e);
+      throw e;
+    }
   };
 
   /**
@@ -1991,8 +1996,6 @@ export class LitNodeClientNodeJs
     });
 
     // console.log("priceFeedInfo:", priceFeedInfo);
-
-    // process.exit();
 
     // This is the template that will be combined with the node address as a single object, then signed by the session key
     // so that the node can verify the session signature

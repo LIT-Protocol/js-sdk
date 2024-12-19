@@ -671,7 +671,8 @@ export interface SigShare {
   | 'BLS'
   | 'K256'
   | 'ECDSA_CAIT_SITH' // Legacy alias of K256
-  | 'EcdsaCaitSithP256';
+  | 'EcdsaCaitSithP256'
+  | 'EcdsaK256Sha256'
 
   signatureShare: string;
   shareIndex?: number;
