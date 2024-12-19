@@ -166,6 +166,7 @@ const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
   [LIT_CURVE.EcdsaCaitSith]: 'K256',
   [LIT_CURVE.EcdsaK256]: 'K256',
   [LIT_CURVE.EcdsaCAITSITHP256]: 'P256',
+  [LIT_CURVE.EcdsaK256Sha256]: 'K256',
 };
 
 /**

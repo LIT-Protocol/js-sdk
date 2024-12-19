@@ -122,18 +122,6 @@ export const getSignatures = async <T>(params: {
           delete signatureResponse[sigName];
         } else {
           let share = getFlattenShare(signatureResponse[sigName]);
-
-          // FIXME: we should not be hacking the sigType here, but the wsam package is expecting enum EcdsaVariant which
-          // might not have account for the sha256 variant.  This is a temporary fix until the wsam package is updated.
-          // This is the wasm error we are getting:
-          // Error: invalid type: unit value, expected enum EcdsaVariant
-          // at imports.wbg.__wbindgen_throw (file:///js-sdk/local-tests/build/test.mjs:101518:11)
-          // at wasm://wasm/0028e512:wasm-function[1245]:0x90506
-          // at wasm://wasm/0028e512:wasm-function[538]:0x6a4f9
-          // if (share.sigType === LIT_CURVE.EcdsaK256Sha256) {
-          //   share.sigType = LIT_CURVE.EcdsaK256;
-          // }
-
           share = {
             sigType: share.sigType,
             signatureShare: share.signatureShare,
@@ -181,9 +169,7 @@ export const getSignatures = async <T>(params: {
     shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
     let sigName = shares[0].sigName;
-    if (sigName === LIT_CURVE.EcdsaK256Sha256) {
-      sigName = LIT_CURVE.EcdsaK256;
-    }
+
     logWithRequestId(
       requestId,
       `starting signature combine for sig name: ${sigName}`,
@@ -247,7 +233,8 @@ export const getSignatures = async <T>(params: {
     if (
       sigType !== LIT_CURVE.EcdsaCaitSith &&
       sigType !== LIT_CURVE.EcdsaK256 &&
-      sigType !== LIT_CURVE.EcdsaCAITSITHP256
+      sigType !== LIT_CURVE.EcdsaCAITSITHP256 &&
+      sigType! == LIT_CURVE.EcdsaK256Sha256
     ) {
       throw new UnknownSignatureType(
         {
