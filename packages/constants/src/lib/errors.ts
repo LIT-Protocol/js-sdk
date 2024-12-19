@@ -217,6 +217,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'transaction_error',
     kind: LitErrorKind.Unexpected,
   },
+  AUTOMATION_ERROR: {
+    name: 'AutomationError',
+    code: 'automation_error',
+    kind: LitErrorKind.Unexpected,
+  },
 };
 
 export const LIT_ERROR_CODE = {
@@ -292,6 +297,7 @@ const MultiError = VError.MultiError;
 export { MultiError };
 
 export const {
+  AutomationError,
   InitError,
   InvalidAccessControlConditions,
   InvalidArgumentException,

@@ -11,6 +11,6 @@ export default {
     '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/types',
+  coverageDirectory: '../../coverage/packages/wrapped-keys',
   setupFilesAfterEnv: ['../../jest.setup.js'],
 };
