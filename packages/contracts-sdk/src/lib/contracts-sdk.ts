@@ -620,18 +620,18 @@ export class LitContracts {
   };
 
   /**
- * Retrieves the PriceFeed contract instance based on the provided network, context, and RPC URL.
- * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
- * If a resolver address is present in the context, it retrieves the PriceFeed contract from the contract resolver instance.
- * Otherwise, it retrieves the PriceFeed contract using the contract address and ABI.
- * Throws an error if required contract data is missing or if the PriceFeed contract cannot be obtained.
- *
- * @param network - The network key.
- * @param context - The contract context or contract resolver context.
- * @param rpcUrl - The RPC URL.
- * @returns The PriceFeed contract instance.
- * @throws Error if required contract data is missing or if the PriceFeed contract cannot be obtained.
- */
+   * Retrieves the PriceFeed contract instance based on the provided network, context, and RPC URL.
+   * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
+   * If a resolver address is present in the context, it retrieves the PriceFeed contract from the contract resolver instance.
+   * Otherwise, it retrieves the PriceFeed contract using the contract address and ABI.
+   * Throws an error if required contract data is missing or if the PriceFeed contract cannot be obtained.
+   *
+   * @param network - The network key.
+   * @param context - The contract context or contract resolver context.
+   * @param rpcUrl - The RPC URL.
+   * @returns The PriceFeed contract instance.
+   * @throws Error if required contract data is missing or if the PriceFeed contract cannot be obtained.
+   */
   public static async getPriceFeedContract(
     network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext,
@@ -1281,7 +1281,7 @@ export class LitContracts {
     rpcUrl,
     nodeProtocol,
   }: {
-    litNetwork: LIT_NETWORKS_KEYS,
+    litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
@@ -1289,8 +1289,8 @@ export class LitContracts {
     const priceFeedContract = await LitContracts.getPriceFeedContract(
       litNetwork,
       networkContext,
-      rpcUrl,
-    )
+      rpcUrl
+    );
 
     const nodesForRequest = await priceFeedContract['getNodesForRequest']([0]);
 
@@ -1300,18 +1300,20 @@ export class LitContracts {
 
     // const totalNodes = nodesAndPrices.length;
 
-    const activeValidatorStructs: ValidatorStruct[] = nodesAndPrices.map((item: any) => {
-      const activeUnkickedValidatorStruct = item.validator;
-      return {
-        ip: activeUnkickedValidatorStruct.ip,
-        ipv6: activeUnkickedValidatorStruct.ipv6,
-        port: activeUnkickedValidatorStruct.port,
-        nodeAddress: activeUnkickedValidatorStruct.nodeAddress,
-        reward: activeUnkickedValidatorStruct.reward,
-        seconderPubkey: activeUnkickedValidatorStruct.seconderPubkey,
-        receiverPubkey: activeUnkickedValidatorStruct.receiverPubkey,
+    const activeValidatorStructs: ValidatorStruct[] = nodesAndPrices.map(
+      (item: any) => {
+        const activeUnkickedValidatorStruct = item.validator;
+        return {
+          ip: activeUnkickedValidatorStruct.ip,
+          ipv6: activeUnkickedValidatorStruct.ipv6,
+          port: activeUnkickedValidatorStruct.port,
+          nodeAddress: activeUnkickedValidatorStruct.nodeAddress,
+          reward: activeUnkickedValidatorStruct.reward,
+          seconderPubkey: activeUnkickedValidatorStruct.seconderPubkey,
+          receiverPubkey: activeUnkickedValidatorStruct.receiverPubkey,
+        };
       }
-    });
+    );
 
     const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
       // Convert the integer IP to a string format
@@ -1334,21 +1336,23 @@ export class LitContracts {
       return url;
     });
 
-    console.log("networks:", networks);
+    console.log('networks:', networks);
 
     const prices = nodesAndPrices.flatMap((item: any) => {
       // Flatten the nested prices array and convert BigNumber to number
-      return item.prices.map((price: ethers.BigNumber) => parseFloat(price.toString()));
+      return item.prices.map((price: ethers.BigNumber) =>
+        parseFloat(price.toString())
+      );
     });
 
-    console.log("Prices as numbers:", prices);
+    console.log('Prices as numbers:', prices);
 
     const networkPriceMap = networks.reduce((acc: any, network, index) => {
       acc[network] = prices[index];
       return acc;
     }, {});
 
-    console.log("Network to Price Map:", networkPriceMap);
+    console.log('Network to Price Map:', networkPriceMap);
 
     const networkPriceObjArr = networks.map((network, index) => {
       return {
@@ -1362,10 +1366,10 @@ export class LitContracts {
       minNodeCount,
       networkPrices: {
         arrObjects: networkPriceObjArr,
-        map: networkPriceMap
+        map: networkPriceMap,
       },
-    }
-  }
+    };
+  };
 
   private static async _resolveContractContext(
     network: LIT_NETWORK_VALUES

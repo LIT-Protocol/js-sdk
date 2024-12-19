@@ -137,7 +137,8 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient {
+  implements LitClientSessionManager, ILitNodeClient
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1164,8 +1165,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-          authMethods: params.authMethods,
-        }),
+            authMethods: params.authMethods,
+          }),
 
         nodeSet,
       };
@@ -1217,7 +1218,7 @@ export class LitNodeClientNodeJs
 
       return signatures.signature; // only a single signature is ever present, so we just return it.
     } catch (e) {
-      console.error("Error getting signature", e);
+      console.error('Error getting signature', e);
       throw e;
     }
   };
@@ -1898,8 +1899,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1981,10 +1982,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-        ...(params.capabilityAuthSigs ?? []),
-        params.capacityDelegationAuthSig,
-        authSig,
-      ]
+          ...(params.capabilityAuthSigs ?? []),
+          params.capacityDelegationAuthSig,
+          authSig,
+        ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     // get max price from contract
@@ -2014,7 +2015,6 @@ export class LitNodeClientNodeJs
     const sessionSigs: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
-
       const maxPrice = priceFeedInfo.networkPrices.map[nodeAddress];
 
       if (maxPrice <= 0) {
