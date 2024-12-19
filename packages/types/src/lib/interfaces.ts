@@ -249,7 +249,9 @@ export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
 /**
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
-export interface JsonPkpSignRequest extends BaseJsonPkpSignRequest {
+export interface JsonPkpSignRequest
+  extends BaseJsonPkpSignRequest,
+    NodeSetPassable {
   authSig: AuthSig;
 
   /**
@@ -275,9 +277,23 @@ export interface JsonSignChainDataRequest {
   exp: number;
 }
 
+// Naga V8: Selected Nodes for ECDSA endpoints #1223
+// https://github.com/LIT-Protocol/lit-assets/pull/1223/
+export interface NodeSet {
+  nodeAddress: string;
+  value: number;
+}
+
+// Naga V8: Ability to pass selected nodes to ECDSA endpoints, and use these instead of the nodes' self-determined peers.
+// https://github.com/LIT-Protocol/lit-assets/pull/1223
+export interface NodeSetPassable {
+  nodeSet: NodeSet;
+}
+
 export interface JsonSignSessionKeyRequestV1
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    Pick<LitActionSdkParams, 'litActionIpfsId'> {
+    Pick<LitActionSdkParams, 'litActionIpfsId'>,
+    NodeSetPassable {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
@@ -506,7 +522,8 @@ export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
 }
 
 export interface JsonExecutionRequest
-  extends Pick<LitActionSdkParams, 'jsParams'> {
+  extends Pick<LitActionSdkParams, 'jsParams'>,
+    NodeSetPassable {
   authSig: AuthSig;
 
   /**
