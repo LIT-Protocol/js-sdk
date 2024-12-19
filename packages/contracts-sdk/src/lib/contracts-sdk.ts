@@ -620,6 +620,121 @@ export class LitContracts {
   };
 
   /**
+ * Retrieves the PriceFeed contract instance based on the provided network, context, and RPC URL.
+ * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
+ * If a resolver address is present in the context, it retrieves the PriceFeed contract from the contract resolver instance.
+ * Otherwise, it retrieves the PriceFeed contract using the contract address and ABI.
+ * Throws an error if required contract data is missing or if the PriceFeed contract cannot be obtained.
+ *
+ * @param network - The network key.
+ * @param context - The contract context or contract resolver context.
+ * @param rpcUrl - The RPC URL.
+ * @returns The PriceFeed contract instance.
+ * @throws Error if required contract data is missing or if the PriceFeed contract cannot be obtained.
+ */
+  public static async getPriceFeedContract(
+    network: LIT_NETWORKS_KEYS,
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
+  ) {
+    let provider: ethers.providers.StaticJsonRpcProvider;
+
+    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
+
+    if (context && 'provider' in context!) {
+      provider = context.provider;
+    } else {
+      provider = new ethers.providers.StaticJsonRpcProvider({
+        url: _rpcUrl,
+        skipFetchSetup: true,
+      });
+    }
+
+    if (!context) {
+      const contractData = await LitContracts._resolveContractContext(network);
+
+      const priceFeedContract = contractData.find(
+        (item: { name: string }) => item.name === 'PriceFeed'
+      );
+      const { address, abi } = priceFeedContract!;
+
+      // Validate the required data
+      if (!address || !abi) {
+        throw new InitError(
+          {
+            info: {
+              address,
+              abi,
+              network,
+            },
+          },
+          '❌ Required contract data is missing for PriceFeed'
+        );
+      }
+
+      return new ethers.Contract(address, abi, provider);
+    } else {
+      if (!context.resolverAddress) {
+        const priceFeedContract = (context as LitContractContext).PriceFeed;
+
+        if (!priceFeedContract.address) {
+          throw new InitError(
+            {
+              info: {
+                priceFeedContract,
+                context,
+              },
+            },
+            '❌ Could not get PriceFeed contract address from contract context'
+          );
+        }
+        return new ethers.Contract(
+          priceFeedContract.address,
+
+          // FIXME: NOTE!! PriceFeedData.abi is not used since we don't use the imported ABIs in this package.
+          // We should remove all imported ABIs and exclusively use NETWORK_CONTEXT_BY_NETWORK to retrieve ABIs for all other contracts.
+
+          // old convention: priceFeedContract.abi ?? PriceFeedData.abi
+
+          // new convention
+          priceFeedContract.abi,
+          provider
+        );
+      } else {
+        const contractContext = await LitContracts._getContractsFromResolver(
+          context as LitContractResolverContext,
+          provider,
+          ['PriceFeed']
+        );
+
+        if (!contractContext.PriceFeed.address) {
+          throw new InitError(
+            {
+              info: {
+                contractContext,
+                context,
+              },
+            },
+            '❌ Could not get PriceFeed contract from contract resolver instance'
+          );
+        }
+
+        const priceFeedABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
+          (data: any) => {
+            return data.name === 'PriceFeed';
+          }
+        );
+
+        return new ethers.Contract(
+          contractContext.PriceFeed.address,
+          contractContext.PriceFeed.abi ?? priceFeedABI?.contracts[0].ABI,
+          provider
+        );
+      }
+    }
+  }
+
+  /**
    * Retrieves the Staking contract instance based on the provided network, context, and RPC URL.
    * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
    * If a resolver address is present in the context, it retrieves the Staking contract from the contract resolver instance.
@@ -722,6 +837,7 @@ export class LitContracts {
             return data.name === 'Staking';
           }
         );
+
         return new ethers.Contract(
           contractContext.Staking.address,
           contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
@@ -944,6 +1060,7 @@ export class LitContracts {
   }
 
   /**
+   * FIXME: Remove this for Naga
    * @deprecated - Use {@link getConnectionInfo } instead, which provides more information.
    */
   public static getMinNodeCount = async (
@@ -973,6 +1090,7 @@ export class LitContracts {
   };
 
   /**
+   * FIXME: remove this for Naga
    * @deprecated - Use {@link getConnectionInfo } instead, which provides more information.
    */
   public static getValidators = async (
@@ -1156,6 +1274,98 @@ export class LitContracts {
       bootstrapUrls: networks,
     };
   };
+
+  public static getPriceFeedInfo = async ({
+    litNetwork,
+    networkContext,
+    rpcUrl,
+    nodeProtocol,
+  }: {
+    litNetwork: LIT_NETWORKS_KEYS,
+    networkContext?: LitContractContext | LitContractResolverContext;
+    rpcUrl?: string;
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+  }) => {
+    const priceFeedContract = await LitContracts.getPriceFeedContract(
+      litNetwork,
+      networkContext,
+      rpcUrl,
+    )
+
+    const nodesForRequest = await priceFeedContract['getNodesForRequest']([0]);
+
+    const epochId = nodesForRequest[0].toNumber();
+    const minNodeCount = nodesForRequest[1].toNumber();
+    const nodesAndPrices = nodesForRequest[2];
+
+    // const totalNodes = nodesAndPrices.length;
+
+    const activeValidatorStructs: ValidatorStruct[] = nodesAndPrices.map((item: any) => {
+      const activeUnkickedValidatorStruct = item.validator;
+      return {
+        ip: activeUnkickedValidatorStruct.ip,
+        ipv6: activeUnkickedValidatorStruct.ipv6,
+        port: activeUnkickedValidatorStruct.port,
+        nodeAddress: activeUnkickedValidatorStruct.nodeAddress,
+        reward: activeUnkickedValidatorStruct.reward,
+        seconderPubkey: activeUnkickedValidatorStruct.seconderPubkey,
+        receiverPubkey: activeUnkickedValidatorStruct.receiverPubkey,
+      }
+    });
+
+    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
+      // Convert the integer IP to a string format
+      const ip = intToIP(item.ip);
+      const port = item.port;
+
+      // Determine the protocol to use based on various conditions
+      const protocol =
+        // If nodeProtocol is defined, use it
+        nodeProtocol ||
+        // If port is 443, use HTTPS, otherwise use network-specific HTTP
+        (port === 443 ? HTTPS : HTTP_BY_NETWORK[litNetwork]) ||
+        // Fallback to HTTP if no other conditions are met
+        HTTP;
+
+      const url = `${protocol}${ip}:${port}`;
+
+      LitContracts.logger.debug("Validator's URL:", url);
+
+      return url;
+    });
+
+    console.log("networks:", networks);
+
+    const prices = nodesAndPrices.flatMap((item: any) => {
+      // Flatten the nested prices array and convert BigNumber to number
+      return item.prices.map((price: ethers.BigNumber) => parseFloat(price.toString()));
+    });
+
+    console.log("Prices as numbers:", prices);
+
+    const networkPriceMap = networks.reduce((acc: any, network, index) => {
+      acc[network] = prices[index];
+      return acc;
+    }, {});
+
+    console.log("Network to Price Map:", networkPriceMap);
+
+    const networkPriceObjArr = networks.map((network, index) => {
+      return {
+        network, // The key will be the network URL
+        price: prices[index], // The value will be the corresponding price
+      };
+    });
+
+    return {
+      epochId,
+      minNodeCount,
+      networkPrices: {
+        arrObjects: networkPriceObjArr,
+        map: networkPriceMap
+      },
+    }
+  }
 
   private static async _resolveContractContext(
     network: LIT_NETWORK_VALUES
