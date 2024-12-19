@@ -123,6 +123,12 @@ export const getSignatures = async <T>(params: {
         } else {
           let share = getFlattenShare(signatureResponse[sigName]);
 
+          // FIXME: we should not be hacking the sigType here, but the wsam package is expecting enum EcdsaVariant which
+          // might not have account for the sha256 variant.  This is a temporary fix until the wsam package is updated.
+          if (share.sigType === LIT_CURVE.EcdsaK256Sha256) {
+            share.sigType = LIT_CURVE.EcdsaK256;
+          }
+
           share = {
             sigType: share.sigType,
             signatureShare: share.signatureShare,
@@ -169,7 +175,10 @@ export const getSignatures = async <T>(params: {
 
     shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
-    const sigName = shares[0].sigName;
+    let sigName = shares[0].sigName;
+    if (sigName === LIT_CURVE.EcdsaK256Sha256) {
+      sigName = LIT_CURVE.EcdsaK256;
+    }
     logWithRequestId(
       requestId,
       `starting signature combine for sig name: ${sigName}`,
@@ -211,7 +220,7 @@ export const getSignatures = async <T>(params: {
       );
     }
 
-    const sigType = mostCommonString(shares.map((s) => s.sigType));
+    let sigType = mostCommonString(shares.map((s) => s.sigType));
 
     // -- validate if this.networkPubKeySet is null
     if (networkPubKeySet === null) {
@@ -225,12 +234,15 @@ export const getSignatures = async <T>(params: {
       );
     }
 
+    if (sigType === LIT_CURVE.EcdsaK256Sha256) {
+      sigType = LIT_CURVE.EcdsaK256;
+    }
+
     // -- validate if signature type is ECDSA
     if (
       sigType !== LIT_CURVE.EcdsaCaitSith &&
       sigType !== LIT_CURVE.EcdsaK256 &&
-      sigType !== LIT_CURVE.EcdsaCAITSITHP256 &&
-      sigType !== LIT_CURVE.EcdsaK256Sha256
+      sigType !== LIT_CURVE.EcdsaCAITSITHP256
     ) {
       throw new UnknownSignatureType(
         {
