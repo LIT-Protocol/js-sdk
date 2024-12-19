@@ -70,6 +70,7 @@ import {
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
   NodeErrorV3,
+  NodeSet,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
@@ -388,6 +389,30 @@ export class LitCore {
   }
 
   /**
+   * Gets the set of nodes from validator data, transforming bootstrap URLs into NodeSet objects.
+   * 
+   * @returns {Promise<NodeSet[]>} A promise that resolves with an array of NodeSet objects.
+   */
+  protected _getNodeSet = async (): Promise<NodeSet[]> => {
+    const validatorData = await this._getValidatorData();
+    const bootstrapUrls = validatorData.bootstrapUrls;
+
+    const nodeSet = bootstrapUrls.map((url) => {
+      // remove protocol from the url as we only need ip:port
+      const urlWithoutProtocol = url.replace(/(^\w+:|^)\/\//, '') as string;
+
+      return {
+        socketAddress: urlWithoutProtocol,
+
+        // FIXME: This is a placeholder value, we need to get the actual value from the contract
+        value: 1,
+      };
+    });
+
+    return nodeSet;
+  };
+
+  /**
    *  Stops internal listeners/polling that refresh network state and watch for epoch changes.
    *  Removes global objects created internally
    */
@@ -674,11 +699,9 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not handshake with nodes after timeout of ${
-            this.config.connectTimeout
-          }ms. Could only connect to ${Object.keys(serverKeys).length} of ${
-            this.config.bootstrapUrls.length
-          } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          const msg = `Error: Could not handshake with nodes after timeout of ${this.config.connectTimeout
+            }ms. Could only connect to ${Object.keys(serverKeys).length} of ${this.config.bootstrapUrls.length
+            } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             throw new InitError({}, msg);
@@ -1006,8 +1029,8 @@ export class LitCore {
       this._epochCache.currentNumber &&
       this._epochCache.startTime &&
       Math.floor(Date.now() / 1000) <
-        this._epochCache.startTime +
-          Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
+      this._epochCache.startTime +
+      Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
       this._epochCache.currentNumber >= 3 // FIXME: Why this check?
     ) {
       return this._epochCache.currentNumber - 1;
@@ -1038,7 +1061,7 @@ export class LitCore {
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  SendNodeCommand): Promise<any> => {
+    SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epoch: this.currentEpochNumber };
 

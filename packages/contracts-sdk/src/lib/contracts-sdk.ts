@@ -1129,7 +1129,6 @@ export class LitContracts {
       });
 
     const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
-      const centralisation = CENTRALISATION_BY_NETWORK[litNetwork];
 
       // Convert the integer IP to a string format
       const ip = intToIP(item.ip);
