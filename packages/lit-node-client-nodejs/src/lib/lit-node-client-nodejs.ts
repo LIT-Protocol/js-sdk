@@ -133,11 +133,11 @@ import type {
   Signature,
   SuccessNodePromises,
 } from '@lit-protocol/types';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -785,6 +785,8 @@ export class LitNodeClientNodeJs
         url,
       });
 
+      // FIXME - will be removing this function in another PR. Temporary fix.
+      // @ts-ignore
       const reqBody: JsonExecutionRequestTargetNode = {
         ...params,
         targetNodeRange: params.targetNodeRange,
@@ -865,9 +867,12 @@ export class LitNodeClientNodeJs
       url,
     });
 
+    const nodeSet = await this._getNodeSet();
+
     const reqBody: JsonExecutionRequest = {
       ...formattedParams,
       authSig: sessionSig,
+      nodeSet,
     };
 
     const urlWithPath = composeLitUrl({
@@ -1139,6 +1144,8 @@ export class LitNodeClientNodeJs
       );
     }
 
+    const nodeSet = await this._getNodeSet();
+
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
 
@@ -1157,8 +1164,10 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
+
+        nodeSet,
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1884,8 +1893,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1915,8 +1924,6 @@ export class LitNodeClientNodeJs
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
-
-    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
@@ -1969,26 +1976,52 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
-    const signingTemplate = {
+    // get max price from contract
+    // FIXME: https://github.com/LIT-Protocol/lit-assets/blob/36d4306912c6cc51de8a3ad261febf37eb84c94d/blockchain/contracts/contracts/lit-node/PriceFeed/PriceFeedFacet.sol#L134
+    const priceFeedInfo = await LitContracts.getPriceFeedInfo({
+      litNetwork: this.config.litNetwork,
+      networkContext: this.config.contractContext,
+      rpcUrl: this.config.rpcUrl,
+    });
+
+    // console.log("priceFeedInfo:", priceFeedInfo);
+
+    // process.exit();
+
+    // This is the template that will be combined with the node address as a single object, then signed by the session key
+    // so that the node can verify the session signature
+    const sessionSigningTemplate = {
       sessionKey: sessionKey.publicKey,
       resourceAbilityRequests: params.resourceAbilityRequests,
       capabilities,
       issuedAt: new Date().toISOString(),
       expiration: sessionExpiration,
+
+      // fetch it from the contract, i don't want to spend more than 10 cents on signing
+      // FIXME: This is a dummy value for now
+      // maxPrice: '0x1234567890abcdef1234567890abcdef12345678',
     };
 
-    const signatures: SessionSigsMap = {};
+    const sessionSigs: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
+
+      const maxPrice = priceFeedInfo.networkPrices.map[nodeAddress];
+
+      if (maxPrice <= 0) {
+        throw new Error(`Invalid maxPrice for node: ${nodeAddress}`);
+      }
+
       const toSign: SessionSigningTemplate = {
-        ...signingTemplate,
+        ...sessionSigningTemplate,
         nodeAddress,
+        maxPrice: maxPrice.toString(),
       };
 
       const signedMessage = JSON.stringify(toSign);
@@ -2001,7 +2034,7 @@ export class LitNodeClientNodeJs
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
 
-      signatures[nodeAddress] = {
+      sessionSigs[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),
         derivedVia: 'litSessionSignViaNacl',
         signedMessage: signedMessage,
@@ -2010,11 +2043,11 @@ export class LitNodeClientNodeJs
       };
     });
 
-    log('signatures:', signatures);
+    log('sessionSigs:', sessionSigs);
 
     try {
       const formattedSessionSigs = formatSessionSigs(
-        JSON.stringify(signatures)
+        JSON.stringify(sessionSigs)
       );
       log(formattedSessionSigs);
     } catch (e) {
@@ -2022,7 +2055,7 @@ export class LitNodeClientNodeJs
       log('Error formatting session signatures: ', e);
     }
 
-    return signatures;
+    return sessionSigs;
   };
 
   /**

@@ -229,7 +229,8 @@ export const getSignatures = async <T>(params: {
     if (
       sigType !== LIT_CURVE.EcdsaCaitSith &&
       sigType !== LIT_CURVE.EcdsaK256 &&
-      sigType !== LIT_CURVE.EcdsaCAITSITHP256
+      sigType !== LIT_CURVE.EcdsaCAITSITHP256 &&
+      sigType !== LIT_CURVE.EcdsaK256Sha256
     ) {
       throw new UnknownSignatureType(
         {
