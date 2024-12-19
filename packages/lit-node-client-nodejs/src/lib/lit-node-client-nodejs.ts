@@ -136,7 +136,8 @@ import type {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient {
+  implements LitClientSessionManager, ILitNodeClient
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -871,7 +872,7 @@ export class LitNodeClientNodeJs
     const reqBody: JsonExecutionRequest = {
       ...formattedParams,
       authSig: sessionSig,
-      nodeSet
+      nodeSet,
     };
 
     const urlWithPath = composeLitUrl({
@@ -1163,10 +1164,10 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-          authMethods: params.authMethods,
-        }),
+            authMethods: params.authMethods,
+          }),
 
-        nodeSet
+        nodeSet,
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1892,8 +1893,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1975,10 +1976,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-        ...(params.capabilityAuthSigs ?? []),
-        params.capacityDelegationAuthSig,
-        authSig,
-      ]
+          ...(params.capabilityAuthSigs ?? []),
+          params.capacityDelegationAuthSig,
+          authSig,
+        ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     // This is the template that will be combined with the node address as a single object, then signed by the session key

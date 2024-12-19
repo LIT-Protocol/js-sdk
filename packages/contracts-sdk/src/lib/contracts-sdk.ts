@@ -1129,7 +1129,6 @@ export class LitContracts {
       });
 
     const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
-
       // Convert the integer IP to a string format
       const ip = intToIP(item.ip);
       const port = item.port;
