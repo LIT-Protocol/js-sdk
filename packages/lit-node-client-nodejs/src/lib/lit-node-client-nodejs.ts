@@ -137,8 +137,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1165,8 +1164,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
 
         nodeSet,
       };
@@ -1899,8 +1898,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1982,21 +1981,27 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
-    // get max price from contract
-    // FIXME: https://github.com/LIT-Protocol/lit-assets/blob/36d4306912c6cc51de8a3ad261febf37eb84c94d/blockchain/contracts/contracts/lit-node/PriceFeed/PriceFeedFacet.sol#L134
-    const priceFeedInfo = await LitContracts.getPriceFeedInfo({
-      litNetwork: this.config.litNetwork,
-      networkContext: this.config.contractContext,
-      rpcUrl: this.config.rpcUrl,
-    });
 
-    // console.log("priceFeedInfo:", priceFeedInfo);
+    // Get new price feed info from the contract if user wants to
+
+    let priceByNetwork = this.config.priceByNetwork;
+
+    if (params.getNewPrices) {
+      log(`Getting new prices from the contract`)
+      const priceFeedInfo = await LitContracts.getPriceFeedInfo({
+        litNetwork: this.config.litNetwork,
+        networkContext: this.config.contractContext,
+        rpcUrl: this.config.rpcUrl,
+      });
+      priceByNetwork = priceFeedInfo.networkPrices.mapByAddress;
+    }
+
 
     // This is the template that will be combined with the node address as a single object, then signed by the session key
     // so that the node can verify the session signature
@@ -2015,7 +2020,7 @@ export class LitNodeClientNodeJs
     const sessionSigs: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
-      const maxPrice = priceFeedInfo.networkPrices.map[nodeAddress];
+      const maxPrice = priceByNetwork[nodeAddress];
 
       if (maxPrice <= 0) {
         throw new Error(`Invalid maxPrice for node: ${nodeAddress}`);
