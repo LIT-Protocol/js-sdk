@@ -65,6 +65,7 @@ import {
   ParamsMissingError,
   InvalidArgumentException,
   TransactionError,
+  PRODUCT_IDS,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { TokenInfo } from '@lit-protocol/types';
@@ -1254,9 +1255,11 @@ export class LitContracts {
   }) => {
     if (!productIds || productIds.length === 0) {
       log('No product IDs provided. Defaulting to 0');
-
-      // You should use all [0,1,2] because we fetch the price first to connect to the cheapest node. And after that the user calls the actual function
-      productIds = [0, 1, 2];
+      productIds = [
+        PRODUCT_IDS.DECRYPTION,
+        PRODUCT_IDS.LA,
+        PRODUCT_IDS.SIGN,
+      ]
     }
 
     const priceFeedContract = await LitContracts.getPriceFeedContract(
