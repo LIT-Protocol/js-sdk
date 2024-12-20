@@ -11,6 +11,6 @@ export default {
     '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/automation',
+  coverageDirectory: '../../coverage/packages/event-listener',
   setupFilesAfterEnv: ['../../jest.setup.js'],
 };

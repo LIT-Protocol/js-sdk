@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/automation",
+  "name": "@lit-protocol/event-listener",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -15,7 +15,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/automation"
+    "directory": "../../dist/packages/event-listener"
   },
   "tags": [
     "universal"

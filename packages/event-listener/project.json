@@ -1,7 +1,7 @@
 {
-  "name": "automation",
+  "name": "event-listener",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/automation/src",
+  "sourceRoot": "packages/event-listener/src",
   "projectType": "library",
   "targets": {
     "build": {
@@ -9,10 +9,10 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/automation",
-        "main": "packages/automation/src/index.ts",
-        "tsConfig": "packages/automation/tsconfig.lib.json",
-        "assets": ["packages/automation/*.md"],
+        "outputPath": "dist/packages/event-listener",
+        "main": "packages/event-listener/src/index.ts",
+        "tsConfig": "packages/event-listener/tsconfig.lib.json",
+        "assets": ["packages/event-listener/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": ["^build"]
@@ -21,14 +21,14 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/automation/**/*.ts"]
+        "lintFilePatterns": ["packages/event-listener/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/packages/automation"],
+      "outputs": ["{workspaceRoot}/coverage/packages/event-listener"],
       "options": {
-        "jestConfig": "packages/automation/jest.config.ts",
+        "jestConfig": "packages/event-listener/jest.config.ts",
         "passWithNoTests": true
       }
     }

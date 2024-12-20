@@ -1,8 +1,8 @@
-# @lit-protocol/automation
+# @lit-protocol/event-listener
 
 A TypeScript library for creating and managing automated workflows using Lit Protocol.
 
-The automation package provides a flexible state machine implementation that allows you to:
+The event listener package provides a flexible state machine implementation that allows you to:
 
 - Execute automated Lit Action workflows based on custom triggers, such as events on blockchains or off-chain platforms
 - Automate the minting of PKPs, Capacity Credits, and other Lit operations
@@ -13,9 +13,9 @@ The automation package provides a flexible state machine implementation that all
 ## Installation
 
 ```bash
-npm install @lit-protocol/automation
+npm install @lit-protocol/event-listener
 # or
-yarn add @lit-protocol/automation
+yarn add @lit-protocol/event-listener
 ```
 
 ## Core Concepts
