@@ -98,8 +98,14 @@ describe('LitCore', () => {
           timestamp: currentTime,
         }),
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jest.spyOn(core as any, '_getProviderWithFallback').mockResolvedValue({
-        ...mockProvider,
+        provider: mockProvider,
+        testResult: {
+          hash: mockBlockhash,
+          number: 12345,
+          timestamp: currentTime,
+        },
       });
 
       // Execute
@@ -107,7 +113,6 @@ describe('LitCore', () => {
 
       // Assert
       expect(fetch).toHaveBeenCalledWith(mockBlockhashUrl);
-      expect(mockProvider.getBlock).toHaveBeenCalledWith(-1); // safety margin
       expect(result).toBe(mockBlockhash);
     });
 
@@ -132,8 +137,14 @@ describe('LitCore', () => {
           timestamp: currentTime,
         }),
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jest.spyOn(core as any, '_getProviderWithFallback').mockResolvedValue({
-        ...mockProvider,
+        provider: mockProvider,
+        testResult: {
+          hash: mockBlockhash,
+          number: 12345,
+          timestamp: currentTime,
+        },
       });
 
       // Execute
@@ -141,7 +152,6 @@ describe('LitCore', () => {
 
       // Assert
       expect(fetch).toHaveBeenCalledWith(mockBlockhashUrl);
-      expect(mockProvider.getBlock).toHaveBeenCalledWith(-1); // safety margin
       expect(result).toBe(mockBlockhash);
     });
 
@@ -164,8 +174,10 @@ describe('LitCore', () => {
         getBlock: jest.fn().mockResolvedValue(null), // Provider also fails
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jest.spyOn(core as any, '_getProviderWithFallback').mockResolvedValue({
-        ...mockProvider,
+        provider: mockProvider,
+        testResult: null,
       });
 
       // Execute & Assert
