@@ -201,6 +201,7 @@ export interface ExclusiveLitContractContext {
   RateLimitNFT: LitContract;
   Staking: LitContract;
   StakingBalances: LitContract;
+  PriceFeed: LitContract;
 }
 export interface LitContractContext extends ExclusiveLitContractContext {
   [index: string]: string | any;

@@ -1,5 +1,5 @@
 /* eslint-disable import/order */
-import { isBrowser, isNode } from '@lit-protocol/misc';
+import { isBrowser, isNode, log } from '@lit-protocol/misc';
 import {
   ContractName,
   CreateCustomAuthMethodRequest,
@@ -65,6 +65,7 @@ import {
   ParamsMissingError,
   InvalidArgumentException,
   TransactionError,
+  PRODUCT_IDS,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
 import { TokenInfo } from '@lit-protocol/types';
@@ -620,6 +621,121 @@ export class LitContracts {
   };
 
   /**
+   * Retrieves the PriceFeed contract instance based on the provided network, context, and RPC URL.
+   * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
+   * If a resolver address is present in the context, it retrieves the PriceFeed contract from the contract resolver instance.
+   * Otherwise, it retrieves the PriceFeed contract using the contract address and ABI.
+   * Throws an error if required contract data is missing or if the PriceFeed contract cannot be obtained.
+   *
+   * @param network - The network key.
+   * @param context - The contract context or contract resolver context.
+   * @param rpcUrl - The RPC URL.
+   * @returns The PriceFeed contract instance.
+   * @throws Error if required contract data is missing or if the PriceFeed contract cannot be obtained.
+   */
+  public static async getPriceFeedContract(
+    network: LIT_NETWORKS_KEYS,
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
+  ) {
+    let provider: ethers.providers.StaticJsonRpcProvider;
+
+    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
+
+    if (context && 'provider' in context!) {
+      provider = context.provider;
+    } else {
+      provider = new ethers.providers.StaticJsonRpcProvider({
+        url: _rpcUrl,
+        skipFetchSetup: true,
+      });
+    }
+
+    if (!context) {
+      const contractData = await LitContracts._resolveContractContext(network);
+
+      const priceFeedContract = contractData.find(
+        (item: { name: string }) => item.name === 'PriceFeed'
+      );
+      const { address, abi } = priceFeedContract!;
+
+      // Validate the required data
+      if (!address || !abi) {
+        throw new InitError(
+          {
+            info: {
+              address,
+              abi,
+              network,
+            },
+          },
+          '❌ Required contract data is missing for PriceFeed'
+        );
+      }
+
+      return new ethers.Contract(address, abi, provider);
+    } else {
+      if (!context.resolverAddress) {
+        const priceFeedContract = (context as LitContractContext).PriceFeed;
+
+        if (!priceFeedContract.address) {
+          throw new InitError(
+            {
+              info: {
+                priceFeedContract,
+                context,
+              },
+            },
+            '❌ Could not get PriceFeed contract address from contract context'
+          );
+        }
+        return new ethers.Contract(
+          priceFeedContract.address,
+
+          // FIXME: NOTE!! PriceFeedData.abi is not used since we don't use the imported ABIs in this package.
+          // We should remove all imported ABIs and exclusively use NETWORK_CONTEXT_BY_NETWORK to retrieve ABIs for all other contracts.
+
+          // old convention: priceFeedContract.abi ?? PriceFeedData.abi
+
+          // new convention
+          priceFeedContract.abi,
+          provider
+        );
+      } else {
+        const contractContext = await LitContracts._getContractsFromResolver(
+          context as LitContractResolverContext,
+          provider,
+          ['PriceFeed']
+        );
+
+        if (!contractContext.PriceFeed.address) {
+          throw new InitError(
+            {
+              info: {
+                contractContext,
+                context,
+              },
+            },
+            '❌ Could not get PriceFeed contract from contract resolver instance'
+          );
+        }
+
+        const priceFeedABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
+          (data: any) => {
+            return data.name === 'PriceFeed';
+          }
+        );
+
+        return new ethers.Contract(
+          contractContext.PriceFeed.address,
+          contractContext.PriceFeed.abi ?? priceFeedABI?.contracts[0].ABI,
+          provider
+        );
+      }
+    }
+  }
+
+  /**
    * Retrieves the Staking contract instance based on the provided network, context, and RPC URL.
    * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
    * If a resolver address is present in the context, it retrieves the Staking contract from the contract resolver instance.
@@ -722,6 +838,7 @@ export class LitContracts {
             return data.name === 'Staking';
           }
         );
+
         return new ethers.Contract(
           contractContext.Staking.address,
           contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
@@ -822,7 +939,7 @@ export class LitContracts {
     const names = contractNames ?? LitContracts.contractNames;
 
     const contractContext: LitContractContext = {} as LitContractContext;
-    // Ah, Bluebird.props(), we miss you 🫗
+    // Ah, Bluebird.props(), we miss you ����
     await Promise.all(
       names.map(async (contractName) => {
         const contracts = context?.contractContext;
@@ -944,118 +1061,59 @@ export class LitContracts {
   }
 
   /**
-   * @deprecated - Use {@link getConnectionInfo } instead, which provides more information.
+   * Generates an array of validator URLs based on the given validator structs and network configurations.
+   *
+   * @property {ValidatorStruct[]} activeValidatorStructs - Array of validator structures containing IP and port information.
+   * @property {string | undefined} nodeProtocol - Optional node protocol to override the default protocol selection logic.
+   * @property {string} litNetwork - The name of the network used to determine HTTP/HTTPS settings.
+   * @returns {string[]} Array of constructed validator URLs.
+   *
+   * @example
+   * // Example input
+   * const activeValidatorStructs = [
+   *   { ip: 3232235777, port: 443 }, // IP: 192.168.1.1
+   *   { ip: 3232235778, port: 80 },  // IP: 192.168.1.2
+   * ];
+   * const nodeProtocol = undefined;
+   * const litNetwork = "mainnet";
+   *
+   * // Example output
+   * const urls = generateValidatorURLs(activeValidatorStructs, nodeProtocol, litNetwork);
+   * console.log(urls);
+   * Output: [
+   *   "https://192.168.1.1:443",
+   *   "http://192.168.1.2:80"
+   * ]
    */
-  public static getMinNodeCount = async (
-    network: LIT_NETWORKS_KEYS,
-    context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string
-  ) => {
-    const contract = await LitContracts.getStakingContract(
-      network,
-      context,
-      rpcUrl
-    );
-
-    const minNodeCount = await contract['currentValidatorCountForConsensus']();
-
-    if (!minNodeCount) {
-      throw new InitError(
-        {
-          info: {
-            minNodeCount,
-          },
-        },
-        '❌ Minimum validator count is not set'
-      );
-    }
-    return minNodeCount;
-  };
-
-  /**
-   * @deprecated - Use {@link getConnectionInfo } instead, which provides more information.
-   */
-  public static getValidators = async (
-    network: LIT_NETWORKS_KEYS,
-    context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string,
-    nodeProtocol?: typeof HTTP | typeof HTTPS | null
-  ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(
-      network,
-      context,
-      rpcUrl
-    );
-
-    // Fetch contract data
-    const [activeValidators, currentValidatorsCount, kickedValidators] =
-      await Promise.all([
-        contract['getValidatorsInCurrentEpoch'](),
-        contract['currentValidatorCountForConsensus'](),
-        contract['getKickedValidators'](),
-      ]);
-
-    const validators = [];
-
-    // Check if active validator set meets the threshold
-    if (
-      activeValidators.length - kickedValidators.length >=
-      currentValidatorsCount
-    ) {
-      // Process each validator
-      for (const validator of activeValidators) {
-        validators.push(validator);
-      }
-    } else {
-      LitContracts.logger.error(
-        '❌ Active validator set does not meet the threshold'
-      );
-    }
-
-    // remove kicked validators in active validators
-    const cleanedActiveValidators = activeValidators.filter(
-      (av: any) => !kickedValidators.some((kv: any) => kv === av)
-    );
-
-    const activeValidatorStructs: ValidatorStruct[] = (
-      await contract['getValidatorsStructs'](cleanedActiveValidators)
-    ).map((item: any) => {
-      return {
-        ip: item[0],
-        ipv6: item[1],
-        port: item[2],
-        nodeAddress: item[3],
-        reward: item[4],
-        seconderPubkey: item[5],
-        receiverPubkey: item[6],
-      };
-    });
-
-    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
-      const centralisation = CENTRALISATION_BY_NETWORK[network];
-
+  public static generateValidatorURLs({
+    activeValidatorStructs,
+    nodeProtocol,
+    litNetwork,
+  }: {
+    activeValidatorStructs: ValidatorStruct[];
+    nodeProtocol?: string;
+    litNetwork: LIT_NETWORK_VALUES;
+  }): string[] {
+    return activeValidatorStructs.map((item) => {
       // Convert the integer IP to a string format
       const ip = intToIP(item.ip);
       const port = item.port;
 
-      // Determine the protocol to use based on various conditions
+      // Determine the protocol to use based on conditions
       const protocol =
-        // If nodeProtocol is defined, use it
-        nodeProtocol ||
-        // If port is 443, use HTTPS, otherwise use network-specific HTTP
-        (port === 443 ? HTTPS : HTTP_BY_NETWORK[network]) ||
-        // Fallback to HTTP if no other conditions are met
-        HTTP;
+        nodeProtocol || // Use nodeProtocol if defined
+        (port === 443 ? HTTPS : HTTP_BY_NETWORK[litNetwork]) || // HTTPS for port 443 or network-specific HTTP
+        HTTP; // Fallback to HTTP
 
+      // Construct the URL
       const url = `${protocol}${ip}:${port}`;
 
+      // Log the constructed URL for debugging
       LitContracts.logger.debug("Validator's URL:", url);
 
       return url;
     });
-
-    return networks;
-  };
+  }
 
   /**
    * Retrieves the connection information for a given network.
@@ -1075,17 +1133,30 @@ export class LitContracts {
     networkContext,
     rpcUrl,
     nodeProtocol,
+    sortByPrice,
   }: {
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+    sortByPrice?: boolean;
   }): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
+    priceByNetwork: Record<string, number>;
   }> => {
+    // if it's true, we will sort the networks by price feed from lowest to highest
+    // if it's false, we will not sort the networks
+    let _sortByPrice = sortByPrice || true;
+
+    if (_sortByPrice) {
+      log('Sorting networks by price feed from lowest to highest');
+    } else {
+      log('Not sorting networks by price feed');
+    }
+
     const stakingContract = await LitContracts.getStakingContract(
       litNetwork,
       networkContext,
@@ -1128,34 +1199,137 @@ export class LitContracts {
         };
       });
 
-    const networks = activeValidatorStructs.map((item: ValidatorStruct) => {
-      const centralisation = CENTRALISATION_BY_NETWORK[litNetwork];
-
-      // Convert the integer IP to a string format
-      const ip = intToIP(item.ip);
-      const port = item.port;
-
-      // Determine the protocol to use based on various conditions
-      const protocol =
-        // If nodeProtocol is defined, use it
-        nodeProtocol ||
-        // If port is 443, use HTTPS, otherwise use network-specific HTTP
-        (port === 443 ? HTTPS : HTTP_BY_NETWORK[litNetwork]) ||
-        // Fallback to HTTP if no other conditions are met
-        HTTP;
-
-      const url = `${protocol}${ip}:${port}`;
-
-      LitContracts.logger.debug("Validator's URL:", url);
-
-      return url;
+    const unsortedNetworks = LitContracts.generateValidatorURLs({
+      activeValidatorStructs,
+      litNetwork,
     });
+
+    // networks are all the nodes we know from the `getActiveUnkickedValidatorStructsAndCounts` function, but we also want to sort it by price feed
+    // which we need to call the price feed contract
+    const priceFeedInfo = await LitContracts.getPriceFeedInfo({
+      litNetwork,
+      networkContext,
+      rpcUrl,
+      nodeProtocol,
+    });
+
+    // example of Network to Price Map: {
+    //   'http://xxx:7470': 100, <-- lowest price
+    //   'http://yyy:7471': 300, <-- highest price
+    //   'http://zzz:7472': 200 <-- middle price
+    // }
+    const PRICE_BY_NETWORK = priceFeedInfo.networkPrices.mapByAddress;
+
+    // sorted networks by prices (lowest to highest)
+    // [
+    //   'http://xxx:7470', <-- lowest price
+    //   'http://zzz:7472', <-- middle price
+    //   'http://yyy:7471' <-- highest price
+    // ]
+    const sortedNetworks = unsortedNetworks.sort(
+      (a, b) => PRICE_BY_NETWORK[a] - PRICE_BY_NETWORK[b]
+    );
+
+    const bootstrapUrls = _sortByPrice ? sortedNetworks : unsortedNetworks;
 
     return {
       stakingContract,
       epochInfo: typedEpochInfo,
       minNodeCount: minNodeCountInt,
-      bootstrapUrls: networks,
+      bootstrapUrls: bootstrapUrls,
+      priceByNetwork: PRICE_BY_NETWORK,
+    };
+  };
+
+  public static getPriceFeedInfo = async ({
+    litNetwork,
+    networkContext,
+    rpcUrl,
+    productIds, // Array of product IDs
+  }: {
+    litNetwork: LIT_NETWORKS_KEYS;
+    networkContext?: LitContractContext | LitContractResolverContext;
+    rpcUrl?: string;
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+    productIds?: number[];
+  }) => {
+    if (!productIds || productIds.length === 0) {
+      log('No product IDs provided. Defaulting to 0');
+      productIds = [
+        PRODUCT_IDS.DECRYPTION,
+        PRODUCT_IDS.LA,
+        PRODUCT_IDS.SIGN,
+      ]
+    }
+
+    const priceFeedContract = await LitContracts.getPriceFeedContract(
+      litNetwork,
+      networkContext,
+      rpcUrl
+    );
+
+    const nodesForRequest = await priceFeedContract['getNodesForRequest'](
+      productIds
+    );
+
+    const epochId = nodesForRequest[0].toNumber();
+    const minNodeCount = nodesForRequest[1].toNumber();
+    const nodesAndPrices = nodesForRequest[2];
+
+    const activeValidatorStructs: ValidatorStruct[] = nodesAndPrices.map(
+      (item: any) => {
+        return {
+          ip: item.validator.ip,
+          ipv6: item.validator.ipv6,
+          port: item.validator.port,
+          nodeAddress: item.validator.nodeAddress,
+          reward: item.validator.reward,
+          seconderPubkey: item.validator.seconderPubkey,
+          receiverPubkey: item.validator.receiverPubkey,
+        };
+      }
+    );
+
+    const networks = LitContracts.generateValidatorURLs({
+      activeValidatorStructs,
+      litNetwork,
+    });
+
+    console.log('networks:', networks);
+
+    const prices = nodesAndPrices.flatMap((item: any) => {
+      // Flatten the nested prices array and convert BigNumber to number
+      return item.prices.map((price: ethers.BigNumber) =>
+        parseFloat(price.toString())
+      );
+    });
+
+    console.log('Prices as numbers:', prices);
+
+    const networkPriceMap: Record<string, number> = networks.reduce(
+      (acc: any, network, index) => {
+        acc[network] = prices[index];
+        return acc;
+      },
+      {}
+    );
+
+    console.log('Network to Price Map:', networkPriceMap);
+
+    const networkPriceObjArr = networks.map((network, index) => {
+      return {
+        network, // The key will be the network URL
+        price: prices[index], // The value will be the corresponding price
+      };
+    });
+
+    return {
+      epochId,
+      minNodeCount,
+      networkPrices: {
+        arr: networkPriceObjArr,
+        mapByAddress: networkPriceMap,
+      },
     };
   };
 

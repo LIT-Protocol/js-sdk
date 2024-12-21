@@ -70,6 +70,7 @@ import {
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
   NodeErrorV3,
+  NodeSet,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
@@ -113,6 +114,8 @@ export type LitNodeClientConfigWithDefaults = Required<
     bootstrapUrls: string[];
   } & {
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+  } & {
+    priceByNetwork: Record<string, number>; // eg. <nodeAddress, price>
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
@@ -148,6 +151,7 @@ export class LitCore {
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
+    priceByNetwork: {},
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -254,14 +258,21 @@ export class LitCore {
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
+    priceByNetwork: Record<string, number>;
   }> {
-    const { stakingContract, epochInfo, minNodeCount, bootstrapUrls } =
-      await LitContracts.getConnectionInfo({
-        litNetwork: this.config.litNetwork,
-        networkContext: this.config.contractContext,
-        rpcUrl: this.config.rpcUrl,
-        nodeProtocol: this.config.nodeProtocol,
-      });
+    const {
+      stakingContract,
+      epochInfo,
+      minNodeCount,
+      bootstrapUrls,
+      priceByNetwork,
+    } = await LitContracts.getConnectionInfo({
+      litNetwork: this.config.litNetwork,
+      networkContext: this.config.contractContext,
+      rpcUrl: this.config.rpcUrl,
+      nodeProtocol: this.config.nodeProtocol,
+      sortByPrice: true,
+    });
 
     // Validate minNodeCount
     if (!minNodeCount) {
@@ -291,6 +302,7 @@ export class LitCore {
       epochInfo,
       minNodeCount,
       bootstrapUrls,
+      priceByNetwork,
     };
   }
 
@@ -386,6 +398,30 @@ export class LitCore {
       this._stakingContract.on('StateChanged', this._stakingContractListener);
     }
   }
+
+  /**
+   * Gets the set of nodes from validator data, transforming bootstrap URLs into NodeSet objects.
+   *
+   * @returns {Promise<NodeSet[]>} A promise that resolves with an array of NodeSet objects.
+   */
+  protected _getNodeSet = async (): Promise<NodeSet[]> => {
+    const validatorData = await this._getValidatorData();
+    const bootstrapUrls = validatorData.bootstrapUrls;
+
+    const nodeSet = bootstrapUrls.map((url) => {
+      // remove protocol from the url as we only need ip:port
+      const urlWithoutProtocol = url.replace(/(^\w+:|^)\/\//, '') as string;
+
+      return {
+        socketAddress: urlWithoutProtocol,
+
+        // FIXME: This is a placeholder value. Brendon said: It's not used anymore in the nodes, but leaving it as we may need it in the future.
+        value: 1,
+      };
+    });
+
+    return nodeSet;
+  };
 
   /**
    *  Stops internal listeners/polling that refresh network state and watch for epoch changes.
@@ -527,6 +563,7 @@ export class LitCore {
     this._stakingContract = validatorData.stakingContract;
     this.config.minNodeCount = validatorData.minNodeCount;
     this.config.bootstrapUrls = validatorData.bootstrapUrls;
+    this.config.priceByNetwork = validatorData.priceByNetwork;
 
     this._epochState = await this._fetchCurrentEpochState(
       validatorData.epochInfo

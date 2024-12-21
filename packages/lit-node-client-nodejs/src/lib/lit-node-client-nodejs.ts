@@ -133,6 +133,7 @@ import type {
   Signature,
   SuccessNodePromises,
 } from '@lit-protocol/types';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -785,6 +786,8 @@ export class LitNodeClientNodeJs
         url,
       });
 
+      // FIXME - will be removing this function in another PR. Temporary fix.
+      // @ts-ignore
       const reqBody: JsonExecutionRequestTargetNode = {
         ...params,
         targetNodeRange: params.targetNodeRange,
@@ -865,9 +868,12 @@ export class LitNodeClientNodeJs
       url,
     });
 
+    const nodeSet = await this._getNodeSet();
+
     const reqBody: JsonExecutionRequest = {
       ...formattedParams,
       authSig: sessionSig,
+      nodeSet,
     };
 
     const urlWithPath = composeLitUrl({
@@ -1139,6 +1145,8 @@ export class LitNodeClientNodeJs
       );
     }
 
+    const nodeSet = await this._getNodeSet();
+
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
 
@@ -1159,6 +1167,8 @@ export class LitNodeClientNodeJs
           params.authMethods.length > 0 && {
             authMethods: params.authMethods,
           }),
+
+        nodeSet,
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1188,7 +1198,7 @@ export class LitNodeClientNodeJs
 
     logWithRequestId(
       requestId,
-      'responseData',
+      'pkpSign responseData',
       JSON.stringify(responseData, null, 2)
     );
 
@@ -1196,16 +1206,21 @@ export class LitNodeClientNodeJs
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = parsePkpSignResponse(responseData);
 
-    const signatures = await getSignatures<{ signature: SigResponse }>({
-      requestId,
-      networkPubKeySet: this.networkPubKeySet,
-      minNodeCount: this.config.minNodeCount,
-      signedData: signedDataList,
-    });
+    try {
+      const signatures = await getSignatures<{ signature: SigResponse }>({
+        requestId,
+        networkPubKeySet: this.networkPubKeySet,
+        minNodeCount: this.config.minNodeCount,
+        signedData: signedDataList,
+      });
 
-    logWithRequestId(requestId, `signature combination`, signatures);
+      logWithRequestId(requestId, `signature combination`, signatures);
 
-    return signatures.signature; // only a single signature is ever present, so we just return it.
+      return signatures.signature; // only a single signature is ever present, so we just return it.
+    } catch (e) {
+      console.error('Error getting signature', e);
+      throw e;
+    }
   };
 
   /**
@@ -1916,8 +1931,6 @@ export class LitNodeClientNodeJs
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
-    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
-
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
       log('need to re-sign session key. Signing...');
@@ -1975,20 +1988,47 @@ export class LitNodeClientNodeJs
         ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
-    const signingTemplate = {
+    // Get new price feed info from the contract if user wants to
+
+    let priceByNetwork = this.config.priceByNetwork;
+
+    if (params.getNewPrices) {
+      log(`Getting new prices from the contract`);
+      const priceFeedInfo = await LitContracts.getPriceFeedInfo({
+        litNetwork: this.config.litNetwork,
+        networkContext: this.config.contractContext,
+        rpcUrl: this.config.rpcUrl,
+      });
+      priceByNetwork = priceFeedInfo.networkPrices.mapByAddress;
+    }
+
+    // This is the template that will be combined with the node address as a single object, then signed by the session key
+    // so that the node can verify the session signature
+    const sessionSigningTemplate = {
       sessionKey: sessionKey.publicKey,
       resourceAbilityRequests: params.resourceAbilityRequests,
       capabilities,
       issuedAt: new Date().toISOString(),
       expiration: sessionExpiration,
+
+      // fetch it from the contract, i don't want to spend more than 10 cents on signing
+      // FIXME: This is a dummy value for now
+      // maxPrice: '0x1234567890abcdef1234567890abcdef12345678',
     };
 
-    const signatures: SessionSigsMap = {};
+    const sessionSigs: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
+      const maxPrice = priceByNetwork[nodeAddress];
+
+      if (maxPrice <= 0) {
+        throw new Error(`Invalid maxPrice for node: ${nodeAddress}`);
+      }
+
       const toSign: SessionSigningTemplate = {
-        ...signingTemplate,
+        ...sessionSigningTemplate,
         nodeAddress,
+        maxPrice: maxPrice.toString(),
       };
 
       const signedMessage = JSON.stringify(toSign);
@@ -2001,7 +2041,7 @@ export class LitNodeClientNodeJs
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
 
-      signatures[nodeAddress] = {
+      sessionSigs[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),
         derivedVia: 'litSessionSignViaNacl',
         signedMessage: signedMessage,
@@ -2010,11 +2050,11 @@ export class LitNodeClientNodeJs
       };
     });
 
-    log('signatures:', signatures);
+    log('sessionSigs:', sessionSigs);
 
     try {
       const formattedSessionSigs = formatSessionSigs(
-        JSON.stringify(signatures)
+        JSON.stringify(sessionSigs)
       );
       log(formattedSessionSigs);
     } catch (e) {
@@ -2022,7 +2062,7 @@ export class LitNodeClientNodeJs
       log('Error formatting session signatures: ', e);
     }
 
-    return signatures;
+    return sessionSigs;
   };
 
   /**
