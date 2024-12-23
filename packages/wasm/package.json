@@ -1,0 +1,34 @@
+{
+  "name": "@lit-protocol/wasm",
+  "version": "7.0.2",
+  "type": "commonjs",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lit-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/Lit-Protocol/js-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/wasm"
+  },
+  "browser": {
+    "crypto": false,
+    "stream": false
+  },
+  "tags": [
+    "universal"
+  ],
+  "scripts": {
+    "rust:build": "wasm-pack build ./rust --target web --release --out-name wasm-internal && yarn rust:postbuild",
+    "rust:postbuild": "node scripts/copyWasmBinary.mjs && rm -rf src/pkg && mkdir src/pkg && mv rust/pkg/wasm-internal.js src/pkg && mv rust/pkg/wasm-internal.d.ts src/pkg",
+    "rust:build:debug": "wasm-pack build ./rust --target web --dev --out-name wasm-internal && yarn rust:postbuild"
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}

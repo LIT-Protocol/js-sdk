@@ -54,9 +54,7 @@ function assertIsLitActionRepositoryEntry(
   if (
     typeof entry !== 'object' ||
     !entry ||
-    // @ts-expect-error assert function
     ('evm' in entry && typeof entry.evm !== 'string') ||
-    // @ts-expect-error assert function
     ('solana' in entry && typeof entry.solana !== 'string') ||
     Object.keys(entry).some((key) => !['evm', 'solana'].includes(key))
   ) {

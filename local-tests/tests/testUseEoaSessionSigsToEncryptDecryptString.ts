@@ -1,16 +1,17 @@
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
+import { LIT_ABILITY } from '@lit-protocol/constants';
+import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
- * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
- * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
  */
 export const testUseEoaSessionSigsToEncryptDecryptString = async (
   devEnv: TinnyEnvironment
@@ -21,7 +22,7 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
     userAddress: alice.wallet.address,
   });
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       accessControlConditions: accs,
       dataToEncrypt: 'Hello world',
@@ -57,12 +58,12 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
   const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, alice, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
-      ability: LitAbility.AccessControlConditionDecryption,
+      ability: LIT_ABILITY.AccessControlConditionDecryption,
     },
   ]);
 
   // -- Decrypt the encrypted string
-  const decryptRes = await LitJsSdk.decryptToString(
+  const decryptRes = await decryptToString(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,

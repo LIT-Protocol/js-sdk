@@ -1,11 +1,13 @@
 /**
  * FIXME: SessionSigs are only supported for EVM chains at the moment.  This will be expanded to other chains in the future.
  */
-import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
-
+import {
+  ALL_LIT_CHAINS,
+  UnsupportedChainException,
+  VMTYPE,
+} from '@lit-protocol/constants';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
-import { throwError } from '@lit-protocol/misc';
 import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
 import { checkAndSignEVMAuthMessage } from './chains/eth';
 import { checkAndSignSolAuthMessage } from './chains/sol';
@@ -37,13 +39,15 @@ export const checkAndSignAuthMessage = ({
 
   // -- validate: if chain info not found
   if (!chainInfo) {
-    throwError({
-      message: `Unsupported chain selected.  Please select one of: ${Object.keys(
-        ALL_LIT_CHAINS
-      )}`,
-      errorKind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
-      errorCode: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
-    });
+    throw new UnsupportedChainException(
+      {
+        info: {
+          chain,
+        },
+      },
+      `Unsupported chain selected.  Please select one of: %s`,
+      Object.keys(ALL_LIT_CHAINS)
+    );
   }
 
   if (!expiration) {
@@ -69,13 +73,17 @@ export const checkAndSignAuthMessage = ({
       chain,
       walletType: cosmosWalletType || 'keplr',
     }); // Keplr is defaulted here, being the Cosmos wallet with the highest market share
-  } else {
-    return throwError({
-      message: `vmType not found for this chain: ${chain}.  This should not happen.  Unsupported chain selected.  Please select one of: ${Object.keys(
-        ALL_LIT_CHAINS
-      )}`,
-      errorKind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
-      errorCode: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
-    });
   }
+
+  // Else, throw an error
+  throw new UnsupportedChainException(
+    {
+      info: {
+        chain,
+      },
+    },
+    `vmType not found for this chain: %s. This should not happen. Unsupported chain selected. Please select one of: %s`,
+    chain,
+    Object.keys(ALL_LIT_CHAINS)
+  );
 };

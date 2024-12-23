@@ -1,14 +1,12 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToPkpSign
- * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToPkpSign
- * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToPkpSign
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUsePkpSessionSigsToPkpSign
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUsePkpSessionSigsToPkpSign
+ * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToPkpSign
  */
 export const testUsePkpSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment

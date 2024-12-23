@@ -1,32 +1,26 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
-import { LitAbility } from '@lit-protocol/types';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
- * ❌ NOT AVAILABLE IN HABANERO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: TinnyEnvironment) => {
     //
-    // devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
     const alice = await devEnv.createRandomPerson();
     const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [
       {
         resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+        ability: LIT_ABILITY.PKPSigning,
       },
       {
         resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
+        ability: LIT_ABILITY.LitActionExecution,
       },
     ]);
 

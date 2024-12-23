@@ -1,5 +1,8 @@
 import { JSONSchemaType } from 'ajv';
-import { LIT_ERROR } from '@lit-protocol/constants';
+
+import { loadSchema } from '@lit-protocol/accs-schemas';
+import { InvalidArgumentException } from '@lit-protocol/constants';
+import { checkSchema } from '@lit-protocol/misc';
 import {
   AccessControlConditions,
   ConditionType,
@@ -7,8 +10,6 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-import { checkSchema, throwError } from '@lit-protocol/misc';
-import { loadSchema } from '@lit-protocol/accs-schemas';
 
 const SCHEMA_NAME_MAP: { [K in ConditionType]: string } = {
   cosmos: 'LPACC_ATOM',
@@ -24,11 +25,15 @@ async function getSchema<T>(
     const schemaName = SCHEMA_NAME_MAP[accType];
     return loadSchema(schemaName) as Promise<JSONSchemaType<T>>;
   } catch (err) {
-    return throwError({
-      message: `No schema found for condition type ${accType}`,
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-    });
+    throw new InvalidArgumentException(
+      {
+        info: {
+          accType,
+        },
+      },
+      `No schema found for condition type %s`,
+      accType
+    );
   }
 }
 
@@ -164,11 +169,15 @@ export const validateUnifiedAccessControlConditionsSchema = async (
         'validateUnifiedAccessControlConditionsSchema'
       );
     } else {
-      throwError({
-        message: `Missing schema to validate condition type ${acc.conditionType}`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {
+          info: {
+            acc,
+          },
+        },
+        `Missing schema to validate condition type %s`,
+        acc.conditionType
+      );
     }
   }
 

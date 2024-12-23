@@ -1,3 +1,10 @@
+import {
+  InvalidArgumentException,
+  InvalidParamType,
+  NetworkError,
+  NoWalletException,
+  WrongParamFormat,
+} from '@lit-protocol/constants';
 import { StytchToken } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
@@ -30,7 +37,12 @@ export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
       authMethodId = await getStytchFactorAuthMethodId(authMethod);
       break;
     default:
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            authMethod,
+          },
+        },
         `Unsupported auth method type: ${authMethod.authMethodType}`
       );
   }
@@ -44,21 +56,35 @@ export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
  * @returns
  */
 export function getEthAuthMethodId(authMethod: any): string {
-  let address: string;
   let accessToken: any;
 
   // -- try if access token can be parsed as JSON object first
   try {
     accessToken = JSON.parse(authMethod.accessToken);
   } catch (err) {
-    throw new Error('Unable to parse access token as JSON object');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          authMethod,
+        },
+        cause: err,
+      },
+      'Unable to parse access token as JSON object'
+    );
   }
 
-  address = accessToken.address;
+  const address = accessToken.address;
 
   // -- check if address is empty
   if (!address) {
-    throw new Error('No address found in access token');
+    throw new NoWalletException(
+      {
+        info: {
+          authMethod,
+        },
+      },
+      'No address found in access token'
+    );
   }
 
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${address}:lit`));
@@ -79,7 +105,14 @@ async function getDiscordAuthId(authMethod: any): Promise<string> {
     const user = await meResponse.json();
     userId = user.id;
   } else {
-    throw new Error('Unable to verify Discord account');
+    throw new NetworkError(
+      {
+        info: {
+          authMethod,
+        },
+      },
+      'Unable to verify Discord account'
+    );
   }
 
   // -- get auth method id
@@ -98,8 +131,14 @@ async function getWebauthnAuthId(authMethod: any): Promise<string> {
   try {
     credentialId = JSON.parse(authMethod.accessToken).rawId;
   } catch (err) {
-    throw new Error(
-      `Error when parsing auth method to generate auth method ID for WebAuthn: ${err}`
+    throw new InvalidArgumentException(
+      {
+        info: {
+          authMethod,
+        },
+        cause: err,
+      },
+      `Error when parsing auth method to generate auth method ID for WebAuthn`
     );
   }
 
@@ -111,7 +150,7 @@ async function getWebauthnAuthId(authMethod: any): Promise<string> {
 
 async function getStytchAuthId(authMethod: any): Promise<string> {
   try {
-    let tokenBody = _parseJWT(authMethod.accessToken);
+    const tokenBody = _parseJWT(authMethod.accessToken);
     const userId = tokenBody['sub'] as string;
     const orgId = (tokenBody['aud'] as string[])[0];
     const authMethodId = ethers.utils.keccak256(
@@ -119,8 +158,14 @@ async function getStytchAuthId(authMethod: any): Promise<string> {
     );
     return authMethodId;
   } catch (err) {
-    throw new Error(
-      `Error while parsing auth method to generate auth method id for Stytch OTP: ${err}`
+    throw new InvalidArgumentException(
+      {
+        info: {
+          authMethod,
+        },
+        cause: err,
+      },
+      `Error while parsing auth method to generate auth method id for Stytch OTP`
     );
   }
 }
@@ -153,7 +198,14 @@ function getStytchFactorAuthMethodId(authMethod: any): Promise<string> {
         factor = 'totp';
         break;
       default:
-        throw new Error('Unsupport stytch auth type');
+        throw new InvalidArgumentException(
+          {
+            info: {
+              authMethod,
+            },
+          },
+          `Unsupport stytch auth type`
+        );
     }
     const factorParser = _resolveAuthFactor(factor).parser;
     try {
@@ -182,7 +234,14 @@ async function getGoogleJwtAuthId(authMethod: any): Promise<string> {
 function _parseJWT(jwt: string): StytchToken {
   const parts = jwt.split('.');
   if (parts.length !== 3) {
-    throw new Error('Invalid token length');
+    throw new WrongParamFormat(
+      {
+        info: {
+          jwt,
+        },
+      },
+      'Invalid token length'
+    );
   }
   const body = Buffer.from(parts[1], 'base64');
   const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));
@@ -196,16 +255,30 @@ export const emailOtpAuthFactorParser = (
 ): string => {
   const session = parsedToken[provider];
   const authFactors: any[] = session['authentication_factors'];
-  let authFactor = authFactors.find((value, _index, _obj) => {
+  const authFactor = authFactors.find((value, _index, _obj) => {
     if (value.email_factor) return value;
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }
@@ -231,11 +304,25 @@ export const smsOtpAuthFactorParser = (
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }
@@ -261,11 +348,25 @@ export const whatsAppOtpAuthFactorParser = (
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }
@@ -291,11 +392,25 @@ export const totpAuthFactorParser = (
   });
 
   if (!authFactor) {
-    throw new Error('Could not find email authentication info in session');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
+      'Could not find email authentication info in session'
+    );
   }
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
-    throw new Error(
+    throw new InvalidArgumentException(
+      {
+        info: {
+          parsedToken,
+          provider,
+        },
+      },
       'Token does not contain an audience (project identifier), aborting'
     );
   }
@@ -337,7 +452,14 @@ function _resolveAuthFactor(factor: any): {
       };
   }
 
-  throw new Error(`Error could not find auth with factor ${factor}`);
+  throw new InvalidArgumentException(
+    {
+      info: {
+        factor,
+      },
+    },
+    `Error could not find auth with factor ${factor}`
+  );
 }
 
 /**
@@ -351,6 +473,13 @@ export const stringToArrayify = (str: string): Uint8Array => {
     const encoder = new TextEncoder();
     return encoder.encode(str);
   } catch (e) {
-    throw new Error(`Error converting string to arrayify: ${e}`);
+    throw new InvalidParamType(
+      {
+        info: {
+          str,
+        },
+      },
+      `Error converting string to arrayify`
+    );
   }
 };
