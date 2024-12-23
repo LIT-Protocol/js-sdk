@@ -7,10 +7,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowJs": true,
-    "checkJs": false,
-    "resolveJsonModule": false
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "include": ["global.d.ts"],
