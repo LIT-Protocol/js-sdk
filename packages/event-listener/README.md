@@ -390,3 +390,11 @@ With some minor modifications, the previous example can be adapted to listen tra
 To see the example with the full implementation, check the [Chain Signatures example](https://github.com/LIT-Protocol/chain-signatures).
 
 This opens up a wide range of possibilities, such as cross-chain messaging, token swaps, gas sponsorship, offchain multisigs, and more.
+
+## Long-running machines
+
+Most likely you would want to run the state machines in a long-running process, such as a server. This way, the machine can keep running and listening to events, executing actions, and transitioning between states.
+
+We offer a basic express server that can be used to receive state machines declarative definition and run/stop them when needed.
+
+Check [`LIT-Protocol/automation`](https://github.com/LIT-Protocol/automation) repository and feel free to fork or contribute there.
