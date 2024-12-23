@@ -6,22 +6,8 @@ Demo: https://demo-contracts-sdk-react.vercel.app/
 
 # Installation
 
-```js
-yarn add @lit-protocol/contracts-sdk
 ```
-
-# Vanilla JS (UMD)
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/contracts-sdk-vanilla/contracts-sdk.js"></script>
-<script>
-  (async () => {
-    const { LitContracts } = LitJsSdk_contractsSdk;
-
-    const litContracts = new LitContracts();
-    await litContracts.connect();
-  })();
-</script>
+yarn add @lit-protocol/contracts-sdk
 ```
 
 # Quick Start

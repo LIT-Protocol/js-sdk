@@ -33,6 +33,10 @@ import {
 } from '@cosmjs/stargate';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
+import {
+  InvalidArgumentException,
+  RemovedFunctionError,
+} from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
@@ -86,7 +90,14 @@ export class PKPCosmosWallet
   };
 
   handleRequest = async (): Promise<void> => {
-    throw new Error('Method not implemented.');
+    throw new RemovedFunctionError(
+      {
+        info: {
+          functionName: 'handleRequest',
+        },
+      },
+      'Method not implemented.'
+    );
   };
 
   /**
@@ -151,7 +162,15 @@ export class PKPCosmosWallet
 
     // Check if the provided address matches the wallet address, and throw an error if it doesn't.
     if (address !== this.address) {
-      return this.pkpBase.throwError(`Address ${address} not found in wallet`);
+      throw new InvalidArgumentException(
+        {
+          info: {
+            address,
+            walletAddress: this.address,
+          },
+        },
+        `Address ${address} not found in wallet`
+      );
     }
 
     // Hash the binary format of the transaction data.
@@ -196,7 +215,7 @@ export class PKPCosmosWallet
 
   /**
    * The following methods do not exists in the original DirectSecp256k1HdWallet class, but are
-   * added to the PKPCosmosWallet class to enable it to be used as a PKPClient instance.
+   * added to the PKPCosmosWallet class to enable it to be used along other PKP wallets.
    */
 
   /**

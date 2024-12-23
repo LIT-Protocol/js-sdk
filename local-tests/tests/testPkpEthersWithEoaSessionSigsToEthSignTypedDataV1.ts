@@ -9,9 +9,9 @@ import {
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1
- * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1
- * ✅ NETWORK=localchain yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1
+ * ✅ NETWORK=datil-test yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1
+ * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1
  */
 export const testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1 = async (
   devEnv: TinnyEnvironment

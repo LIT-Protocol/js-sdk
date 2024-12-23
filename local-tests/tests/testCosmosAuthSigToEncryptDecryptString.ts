@@ -1,14 +1,14 @@
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ❌ NETWORK=cayenne yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
- * ❌ NETWORK=manzano yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
- * ❌ NETWORK=localchain yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
+ * ❌ NETWORK=datil-dev yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
+ * ❌ NETWORK=datil-test yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
+ * ❌ NETWORK=custom yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  * ❌ NETWORK=datil-dev yarn test:local --filter=testCosmosAuthSigToEncryptDecryptString
  */
 export const testCosmosAuthSigToEncryptDecryptString = async (
@@ -16,16 +16,14 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
 ) => {
   console.log('❌❌ THIS IS A KNOWN FAILING TEST, PLEASE IGNORE FOR NOW. ❌❌');
 
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
-  devEnv.setUnavailable(LIT_TESTNET.LOCALCHAIN);
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-  devEnv.setUnavailable(LIT_TESTNET.DATIL_DEV);
+  devEnv.setUnavailable(LIT_NETWORK.Custom);
+  devEnv.setUnavailable(LIT_NETWORK.DatilDev);
 
   const accs = AccessControlConditions.getCosmosBasicAccessControlConditions({
     userAddress: devEnv.bareCosmosAuthSig.address,
   });
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       unifiedAccessControlConditions: accs,
       dataToEncrypt: 'Hello world',
@@ -52,7 +50,7 @@ export const testCosmosAuthSigToEncryptDecryptString = async (
 
   // -- Decrypt the encrypted string
   try {
-    const decryptRes = await LitJsSdk.decryptToString(
+    const decryptRes = await decryptToString(
       {
         unifiedAccessControlConditions: accs,
         ciphertext: encryptRes.ciphertext,

@@ -1,16 +1,17 @@
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
-import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
+import { LIT_ABILITY } from '@lit-protocol/constants';
+import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { encryptString, decryptToFile } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
- * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
- * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
+ * ✅ NETWORK=custom yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptFile
  */
 export const testUsePkpSessionSigsToEncryptDecryptFile = async (
   devEnv: TinnyEnvironment
@@ -26,7 +27,7 @@ export const testUsePkpSessionSigsToEncryptDecryptFile = async (
     userAddress: alice.authMethodOwnedPkp.ethAddress,
   });
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       accessControlConditions: accs,
       dataToEncrypt: 'Hello world',
@@ -62,12 +63,12 @@ export const testUsePkpSessionSigsToEncryptDecryptFile = async (
   const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, alice, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
-      ability: LitAbility.AccessControlConditionDecryption,
+      ability: LIT_ABILITY.AccessControlConditionDecryption,
     },
   ]);
 
   // -- Decrypt the encrypted string
-  const decriptedFile = await LitJsSdk.decryptToFile(
+  const decriptedFile = await decryptToFile(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,

@@ -1,7 +1,18 @@
-import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import depd from 'depd';
+import { ethers } from 'ethers';
+
+import {
+  ALL_LIT_CHAINS,
+  AUTH_METHOD_TYPE,
+  AUTH_METHOD_TYPE_VALUES,
+  InvalidArgumentException,
+  LitNodeClientNotReadyError,
+  ParamsMissingError,
+  UnknownError,
+} from '@lit-protocol/constants';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
-  AuthCallback,
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
@@ -15,12 +26,13 @@ import {
   IRelayPKP,
   IRelayRequestData,
   MintRequestBody,
-  RelayClaimProcessor,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
-import { ethers } from 'ethers';
+
 import { validateMintRequestBody } from '../validators';
+
+const deprecated = depd('lit-js-sdk:auth-browser:base-provider');
 
 export abstract class BaseProvider {
   /**
@@ -79,7 +91,14 @@ export abstract class BaseProvider {
     const data = await this.prepareRelayRequestData(authMethod);
 
     if (customArgs && !validateMintRequestBody(customArgs)) {
-      throw new Error('Invalid mint request body');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            customArgs,
+          },
+        },
+        'Invalid mint request body'
+      );
     }
 
     const body = this.prepareMintBody(
@@ -88,12 +107,20 @@ export abstract class BaseProvider {
     );
     const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
-      throw new Error('Missing mint response or request ID from relay server');
+      throw new UnknownError(
+        {
+          info: {
+            mintRes,
+          },
+        },
+        'Missing mint response or request ID from relay server'
+      );
     }
     return mintRes.requestId;
   }
 
   /**
+   * @deprecated - Use {@link fetchPKPs} instead
    * Fetch PKPs associated with given auth method from relay server
    *
    * @param {AuthMethod} authMethod - Auth method object
@@ -103,13 +130,111 @@ export abstract class BaseProvider {
   public async fetchPKPsThroughRelayer(
     authMethod: AuthMethod
   ): Promise<IRelayPKP[]> {
+    deprecated('fetchPKPsThroughRelayer is deprecated. Use fetchPKPs instead.');
     const data = await this.prepareRelayRequestData(authMethod);
     const body = this.prepareFetchBody(data);
     const fetchRes = await this.relay.fetchPKPs(body);
     if (!fetchRes || !fetchRes.pkps) {
-      throw new Error('Missing PKPs in fetch response from relay server');
+      throw new ParamsMissingError(
+        {
+          info: {
+            fetchRes,
+          },
+        },
+        'Missing PKPs in fetch response from relay server'
+      );
     }
     return fetchRes.pkps;
+  }
+
+  /**
+   * Fetch PKPs associated with given auth method type and id from pkp contract
+   *
+   * @param {AUTH_METHOD_TYPE} authMethodType - Auth method type
+   * @param {string} authMethodId - Auth method id
+   *
+   * @returns {Promise<IRelayPKP[]>} - Array of PKPs
+   */
+  async getPKPsForAuthMethod({
+    authMethodType,
+    authMethodId,
+  }: {
+    authMethodType: AUTH_METHOD_TYPE_VALUES;
+    authMethodId: string;
+  }): Promise<IRelayPKP[]> {
+    if (!authMethodType || !authMethodId) {
+      throw new InvalidArgumentException(
+        {
+          info: {
+            authMethodType,
+            authMethodId,
+          },
+        },
+        'Auth method type and id are required to fetch PKPs by auth method'
+      );
+    }
+
+    const litContracts = new LitContracts({
+      randomPrivatekey: true,
+      network: this.litNodeClient.config.litNetwork,
+    });
+    try {
+      await litContracts.connect();
+    } catch (err) {
+      throw new UnknownError(
+        {
+          cause: err,
+        },
+        'Unable to connect to LitContracts'
+      );
+    }
+
+    try {
+      const pkpPermissions = litContracts.pkpPermissionsContract;
+      const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
+        authMethodType,
+        authMethodId
+      );
+      const pkps: IRelayPKP[] = [];
+      for (const tokenId of tokenIds) {
+        const pubkey = await pkpPermissions.read.getPubkey(tokenId);
+        if (pubkey) {
+          const ethAddress = ethers.utils.computeAddress(pubkey);
+          pkps.push({
+            tokenId: tokenId.toString(),
+            publicKey: pubkey,
+            ethAddress: ethAddress,
+          });
+        }
+      }
+      return pkps;
+    } catch (err) {
+      throw new UnknownError(
+        {
+          cause: err,
+        },
+        'Unable to get PKPs for auth method'
+      );
+    }
+  }
+
+  /**
+   * Fetch PKPs associated with given auth method from pkp contract
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<IRelayPKP[]>} - Array of PKPs
+   */
+  public async fetchPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
+    const authMethodId = await this.getAuthMethodId(authMethod);
+    const authMethodType = authMethod.authMethodType as AUTH_METHOD_TYPE_VALUES;
+
+    const pkps = await this.getPKPsForAuthMethod({
+      authMethodType,
+      authMethodId,
+    });
+
+    return pkps;
   }
 
   /**
@@ -173,7 +298,7 @@ export abstract class BaseProvider {
           }),
         };
 
-        if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
+        if (params.authMethod.authMethodType === AUTH_METHOD_TYPE.EthWallet) {
           const authSig = JSON.parse(params.authMethod.accessToken);
 
           response = await nodeClient.signSessionKey({
@@ -212,9 +337,7 @@ export abstract class BaseProvider {
     claimRequest: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
     if (!this.litNodeClient.ready) {
-      await this.litNodeClient.connect().catch((err) => {
-        throw err; // throw error up to caller
-      });
+      await this.litNodeClient.connect();
     }
 
     const res = await this.litNodeClient.claimKeyId(claimRequest);
@@ -240,7 +363,15 @@ export abstract class BaseProvider {
     let authMethodId = await this.getAuthMethodId(authMethod);
     authMethodId = authMethodId.slice(2);
     if (!this.litNodeClient) {
-      throw new Error('Lit Node Client is configured');
+      throw new LitNodeClientNotReadyError(
+        {
+          info: {
+            authMethod,
+            method: 'computePublicKeyFromAuthMethod',
+          },
+        },
+        'Lit Node Client is not configured'
+      );
     }
     return this.litNodeClient.computeHDPubKey(authMethodId);
   };

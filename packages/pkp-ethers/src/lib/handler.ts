@@ -4,6 +4,14 @@
 
 import { joinSignature } from '@ethersproject/bytes';
 import { typedSignatureHash } from '@metamask/eth-sig-util';
+import {
+  InvalidArgumentException,
+  InvalidParamType,
+  ParamsMissingError,
+  UnauthorizedException,
+  UnknownError,
+  UnsupportedMethodError,
+} from '@lit-protocol/constants';
 
 import { PKPEthersWallet } from './pkp-ethers';
 import {
@@ -71,11 +79,17 @@ export const signTypedDataLegacy = async <T>(
   let sig;
 
   if ((signer as PKPEthersWallet).runLitAction) {
-    let _signer = signer as PKPEthersWallet;
+    const _signer = signer as PKPEthersWallet;
     sig = await _signer.runSign(ethers.utils.arrayify(messageHash));
   } else {
-    throw new Error(
-      `Unabled to runLitAction. This signer is not a PKPEthersWallet`
+    throw new InvalidArgumentException(
+      {
+        info: {
+          signer,
+          msgParams,
+        },
+      },
+      'Unabled to runLitAction. This signer is not a PKPEthersWallet'
     );
     // let _signer = signer as Signer;
     // sig = await _signer.signMessage(messageHash);
@@ -104,7 +118,15 @@ export const validateAddressesMatch = (
   requestAddress: string
 ) => {
   if (signerAddress.toLowerCase() !== requestAddress.toLowerCase()) {
-    throw new Error('PKPWallet address does not match address requested');
+    throw new UnauthorizedException(
+      {
+        info: {
+          signerAddress,
+          requestAddress,
+        },
+      },
+      `PKPWallet address does not match address requested`
+    );
   }
 };
 
@@ -117,7 +139,14 @@ export const validateAddressesMatch = (
  */
 export const validateSignature = (signature: string) => {
   if (signature === null || signature === undefined || signature === '') {
-    throw new Error('Signature is null or undefined');
+    throw new InvalidParamType(
+      {
+        info: {
+          signature,
+        },
+      },
+      'Signature is null or undefined'
+    );
   }
 };
 
@@ -129,7 +158,14 @@ export const validateSignature = (signature: string) => {
  */
 export function getTypedDataVersionInfo({ signer, payload }: ETHHandlerReq) {
   if (!payload.params[0]) {
-    throw new Error(`signTypedDataHandler: payload.params[0] is not defined`);
+    throw new InvalidParamType(
+      {
+        info: {
+          payload,
+        },
+      },
+      'signTypedDataHandler: payload.params[0] is not defined'
+    );
   }
 
   const ethersIsAddress = ethers.utils.isAddress(payload.params[0]);
@@ -173,7 +209,15 @@ export const signTypedDataHandler: ETHRequestHandler = async ({
 }: ETHHandlerReq): Promise<ETHHandlerRes> => {
   // -- validate
   if (!signer || !payload) {
-    throw new Error(`signer or payload is not defined`);
+    throw new ParamsMissingError(
+      {
+        info: {
+          signer,
+          payload,
+        },
+      },
+      `signer or payload is not defined`
+    );
   }
 
   const { msgParams, info } = getTypedDataVersionInfo({
@@ -181,7 +225,7 @@ export const signTypedDataHandler: ETHRequestHandler = async ({
     payload,
   });
 
-  let signature = await info.signTypedDataFn(signer, msgParams);
+  const signature = await info.signTypedDataFn(signer, msgParams);
 
   validateSignature(signature);
 
@@ -373,7 +417,13 @@ export const ethRequestHandler = async <T = ETHSignature>({
 }: ETHHandlerReq): Promise<T> => {
   // -- validate if method exists
   if (!methodHandlers.hasOwnProperty(payload.method)) {
-    throw new Error(
+    throw new UnsupportedMethodError(
+      {
+        info: {
+          payload,
+          signer,
+        },
+      },
       `Ethereum JSON-RPC signing method "${payload.method}" is not supported`
     );
   }
@@ -396,7 +446,16 @@ export const ethRequestHandler = async <T = ETHSignature>({
 
     return data;
   } catch (e: any) {
-    throw new Error(e);
+    throw new UnknownError(
+      {
+        info: {
+          payload,
+          signer,
+        },
+        cause: e,
+      },
+      'Something went wrong when handling Ethereum JSON-RPC requests for the given method and payload'
+    );
   }
 };
 

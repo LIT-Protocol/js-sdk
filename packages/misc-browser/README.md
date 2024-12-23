@@ -7,12 +7,3 @@ This submodule includes functions for interaction with local storage (get, set, 
 ```
 yarn add @lit-protocol/misc-browser
 ```
-
-### Vanilla JS (UMD)
-
-```js
-<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-browser-vanilla/misc-browser.js"></script>
-<script>
-  console.log(LitJsSdk_miscBrowser);
-</script>
-```
