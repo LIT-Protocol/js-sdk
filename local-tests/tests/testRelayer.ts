@@ -1,38 +1,27 @@
 import { log } from '@lit-protocol/misc';
-import {
-  ClaimRequest,
-  ClaimResult,
-  ClientClaimProcessor,
-} from '@lit-protocol/types';
+import { ClaimRequest, ClientClaimProcessor } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import {
-  EthWalletProvider,
-  LitAuthClient,
-} from '@lit-protocol/lit-auth-client';
-import { ProviderType } from '@lit-protocol/constants';
-import { withTimeout } from 'local-tests/setup/tinny-utils';
+import { EthWalletProvider, LitRelay } from '@lit-protocol/lit-auth-client';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testRelayer
- * ✅ NETWORK=manzano yarn test:local --filter=testRelayer
- * ✅ NETWORK=localchain yarn test:local --filter=testRelayer
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testRelayer
+ * ✅ NETWORK=datil-test yarn test:local --filter=testRelayer
+ * ✅ NETWORK=custom yarn test:local --filter=testRelayer
  * ✅ NETWORK=datil-dev yarn test:local --filter=testRelayer
  */
 export const testRelayer = async (devEnv: TinnyEnvironment) => {
   const alice = await devEnv.createRandomPerson();
 
-  const litAuthClient = new LitAuthClient({
-    litRelayConfig: {
-      relayApiKey: 'test-api-key',
-    },
+  // -- test fetch pkps
+  const litRelay = new LitRelay({
+    relayUrl: LitRelay.getRelayUrl(devEnv.network),
+    relayApiKey: 'test-api-key',
+  });
+  const ethWalletProvider = new EthWalletProvider({
+    relay: litRelay,
     litNodeClient: devEnv.litNodeClient,
   });
-
-  // -- test fetch pkps
-  const ethWalletProvider = litAuthClient.initProvider<EthWalletProvider>(
-    ProviderType.EthWallet
-  );
 
   const pkps = await ethWalletProvider.fetchPKPsThroughRelayer(
     alice.authMethod

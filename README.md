@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V6.5.x</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V7.x.x</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -61,25 +61,23 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [@lit-protocol/access-control-conditions](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/access-control-conditions) | ![access-control-conditions](https://img.shields.io/badge/-universal-8A6496 'access-control-conditions') | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/access-control-conditions"><img src="https://img.shields.io/npm/v/@lit-protocol/access-control-conditions"/></a> |
 | [@lit-protocol/auth-helpers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-helpers)                           | ![auth-helpers](https://img.shields.io/badge/-universal-8A6496 'auth-helpers')                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-helpers"><img src="https://img.shields.io/npm/v/@lit-protocol/auth-helpers"/></a>                           |
-| [@lit-protocol/bls-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/bls-sdk)                                     | ![bls-sdk](https://img.shields.io/badge/-universal-8A6496 'bls-sdk')                                     | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/bls-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/bls-sdk"/></a>                                     |
 | [@lit-protocol/constants](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/constants)                                 | ![constants](https://img.shields.io/badge/-universal-8A6496 'constants')                                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/constants"><img src="https://img.shields.io/npm/v/@lit-protocol/constants"/></a>                                 |
 | [@lit-protocol/contracts-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk)                         | ![contracts-sdk](https://img.shields.io/badge/-universal-8A6496 'contracts-sdk')                         | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/contracts-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/contracts-sdk"/></a>                         |
 | [@lit-protocol/core](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/core)                                           | ![core](https://img.shields.io/badge/-universal-8A6496 'core')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/core"><img src="https://img.shields.io/npm/v/@lit-protocol/core"/></a>                                           |
 | [@lit-protocol/crypto](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/crypto)                                       | ![crypto](https://img.shields.io/badge/-universal-8A6496 'crypto')                                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/crypto"><img src="https://img.shields.io/npm/v/@lit-protocol/crypto"/></a>                                       |
-| [@lit-protocol/ecdsa-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/ecdsa-sdk)                                 | ![ecdsa-sdk](https://img.shields.io/badge/-universal-8A6496 'ecdsa-sdk')                                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/ecdsa-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/ecdsa-sdk"/></a>                                 |
 | [@lit-protocol/encryption](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/encryption)                               | ![encryption](https://img.shields.io/badge/-universal-8A6496 'encryption')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/encryption"><img src="https://img.shields.io/npm/v/@lit-protocol/encryption"/></a>                               |
+| [@lit-protocol/event-listener](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/event-listener)                       | ![event-listener](https://img.shields.io/badge/-universal-8A6496 'event-listener')                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/event-listener"><img src="https://img.shields.io/npm/v/@lit-protocol/event-listener"/></a>                       |
 | [@lit-protocol/logger](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/logger)                                       | ![logger](https://img.shields.io/badge/-universal-8A6496 'logger')                                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/logger"><img src="https://img.shields.io/npm/v/@lit-protocol/logger"/></a>                                       |
 | [@lit-protocol/misc](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc)                                           | ![misc](https://img.shields.io/badge/-universal-8A6496 'misc')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc"><img src="https://img.shields.io/npm/v/@lit-protocol/misc"/></a>                                           |
 | [@lit-protocol/nacl](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/nacl)                                           | ![nacl](https://img.shields.io/badge/-universal-8A6496 'nacl')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/nacl"><img src="https://img.shields.io/npm/v/@lit-protocol/nacl"/></a>                                           |
 | [@lit-protocol/pkp-base](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-base)                                   | ![pkp-base](https://img.shields.io/badge/-universal-8A6496 'pkp-base')                                   | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-base"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-base"/></a>                                   |
-| [@lit-protocol/pkp-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-client)                               | ![pkp-client](https://img.shields.io/badge/-universal-8A6496 'pkp-client')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-client"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-client"/></a>                               |
 | [@lit-protocol/pkp-cosmos](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-cosmos)                               | ![pkp-cosmos](https://img.shields.io/badge/-universal-8A6496 'pkp-cosmos')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-cosmos"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-cosmos"/></a>                               |
 | [@lit-protocol/pkp-ethers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-ethers)                               | ![pkp-ethers](https://img.shields.io/badge/-universal-8A6496 'pkp-ethers')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-ethers"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-ethers"/></a>                               |
 | [@lit-protocol/pkp-sui](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-sui)                                     | ![pkp-sui](https://img.shields.io/badge/-universal-8A6496 'pkp-sui')                                     | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-sui"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-sui"/></a>                                     |
 | [@lit-protocol/pkp-walletconnect](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-walletconnect)                 | ![pkp-walletconnect](https://img.shields.io/badge/-universal-8A6496 'pkp-walletconnect')                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-walletconnect"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-walletconnect"/></a>                 |
-| [@lit-protocol/sev-snp-utils-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/sev-snp-utils-sdk)                 | ![sev-snp-utils-sdk](https://img.shields.io/badge/-universal-8A6496 'sev-snp-utils-sdk')                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/sev-snp-utils-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/sev-snp-utils-sdk"/></a>                 |
 | [@lit-protocol/types](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/types)                                         | ![types](https://img.shields.io/badge/-universal-8A6496 'types')                                         | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/types"><img src="https://img.shields.io/npm/v/@lit-protocol/types"/></a>                                         |
 | [@lit-protocol/uint8arrays](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/uint8arrays)                             | ![uint8arrays](https://img.shields.io/badge/-universal-8A6496 'uint8arrays')                             | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/uint8arrays"><img src="https://img.shields.io/npm/v/@lit-protocol/uint8arrays"/></a>                             |
+| [@lit-protocol/wasm](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/wasm)                                           | ![wasm](https://img.shields.io/badge/-universal-8A6496 'wasm')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/wasm"><img src="https://img.shields.io/npm/v/@lit-protocol/wasm"/></a>                                           |
 | [@lit-protocol/wrapped-keys](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/wrapped-keys)                           | ![wrapped-keys](https://img.shields.io/badge/-universal-8A6496 'wrapped-keys')                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/wrapped-keys"><img src="https://img.shields.io/npm/v/@lit-protocol/wrapped-keys"/></a>                           |
 | [@lit-protocol/wrapped-keys-lit-actions](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/wrapped-keys-lit-actions)   | ![wrapped-keys-lit-actions](https://img.shields.io/badge/-universal-8A6496 'wrapped-keys-lit-actions')   | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/wrapped-keys-lit-actions"><img src="https://img.shields.io/npm/v/@lit-protocol/wrapped-keys-lit-actions"/></a>   |
 | [@lit-protocol/auth-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-browser)                           | ![auth-browser](https://img.shields.io/badge/-browser-E98869 'auth-browser')                             | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-browser"><img src="https://img.shields.io/npm/v/@lit-protocol/auth-browser"/></a>                           |
@@ -89,11 +87,12 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## API Doc
 
-| Version          | Link                                                     |
-| ---------------- | -------------------------------------------------------- |
-| V6 (Beta)        | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
-| V5 (**Current**) | [5.x.x docs](https://v3.api-docs.getlit.dev/)            |
-| V2               | [2.x.x docs](http://docs.lit-js-sdk-v2.litprotocol.com/) |
+| Version      | Link                                                     |
+| ------------ | -------------------------------------------------------- |
+| V7 (Current) | [7.x.x docs](https://v7-api-doc-lit-js-sdk.vercel.app/)  |
+| V6           | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
+| V5           | [5.x.x docs](https://v3.api-docs.getlit.dev/)            |
+| V2           | [2.x.x docs](http://docs.lit-js-sdk-v2.litprotocol.com/) |
 
 </div>
 
@@ -102,6 +101,8 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 ## Prerequisite
 
 - node (v19.x or above)
+- rust (v1.70.00 or above)
+- [wasm-pack](https://github.com/rustwasm/wasm-pack)
 
 ## Recommended
 
@@ -149,7 +150,7 @@ yarn test:local
 
 ## Create a new react demo app using the Lit JS SDK
 
-```js
+```sh
 yarn tools --create --react contracts-sdk --demo
 ```
 
@@ -165,13 +166,13 @@ yarn delete:package <package-name>
 
 ## Building
 
-```jsx
+```sh
 yarn build
 ```
 
 ### Building target package
 
-```jsx
+```sh
 yarn nx run <project-name>:build
 ```
 
@@ -209,6 +210,10 @@ Having done this setup, this is what the development cycle looks like moving for
 2. Rebuild specific package
 3. Rebuild client application.
 
+### Building changes to Rust source
+
+If changes are made to `packages/wasm` see [here](./packages/wasm/README.md) for info on building from source.
+
 ## Publishing
 
 You must have at least nodejs v18 to do this.
@@ -223,18 +228,9 @@ You must have at least nodejs v18 to do this.
 
 5. Update the docs with `yarn gen:docs --push`
 
-6. Finally, publish with the `@cayenne` tag: `yarn publish:cayenne`
+6. Finally, publish with `yarn publish:packages`
 
 7. Commit these changes "Published version X.X.X"
-
-### Publishing to Serrano / Jalapno
-
-```sh
-git checkout serrano
-yarn bump
-yarn build
-yarn node ./tools/scripts/pub.mjs --tag serrano-jalapeno
-```
 
 ## Testing
 
@@ -248,7 +244,7 @@ yarn test:local
 
 ### Unit Tests
 
-```jsx
+```sh
 yarn test:unit
 ```
 
@@ -283,6 +279,56 @@ To run manual tests:
 - LIT_JS_SDK_LOCAL_NODE_DEV - set to true to use a local node
 - LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY - set to a funded wallet on Chronicle Testnet
 
+# Error Handling
+
+This SDK uses custom error classes derived from [@openagenda/verror](https://github.com/OpenAgenda/verror) to handle errors between packages and to the SDK consumers.
+Normal error handling is also supported as VError extends the native Error class, but using VError allows for better error composition and information propagation.
+You can check their documentation for the extra fields that are added to the error object and methods on how to handle them in a safe way.
+
+## Example
+
+```ts
+import { VError } from '@openagenda/verror';
+import { LitNodeClientBadConfigError } from '@lit-protocol/constants';
+
+try {
+  const someNativeError = new Error('some native error');
+
+  throw new LitNodeClientBadConfigError(
+    {
+      cause: someNativeError,
+      info: {
+        foo: 'bar',
+      },
+      meta: {
+        baz: 'qux',
+      },
+    },
+    'some useful message'
+  );
+} catch (e) {
+  console.log(e.name); // LitNodeClientBadConfigError
+  console.log(e.message); // some useful message: some native error
+  console.log(e.info); // { foo: 'bar' }
+  console.log(e.baz); // qux
+  // VError.cause(e) is someNativeError
+  // VError.info(e) is { foo: 'bar' }
+  // VError.meta(e) is { baz: 'qux', code: 'lit_node_client_bad_config_error', kind: 'Config' }
+  // Verror.fullStack(e) is the full stack trace composed of the error chain including the causes
+}
+```
+
+## Creating a new error
+
+In file `packages/constants/src/lib/errors.ts` you can find the list of errors that are currently supported and add new ones if needed.
+
+To create and use a new error, you need to:
+
+1. Add the error information to the `LIT_ERROR` object in `packages/constants/src/lib/errors.ts`
+2. Export the error from the `errors.ts` file at the end of the file
+3. Import the error where you need it
+4. Throw the error in your code adding all the information a user might need to know about the error such as the cause, the info, etc.
+
 # Dockerfile
 
 ...coming soon
@@ -313,34 +359,6 @@ eg.
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-```
-
-</details>
-
-<details>
-<summary>Web bundling using esbuild</summary>
-
-It’s currently using a custom plugin [@websaam/nx-esbuild](https://www.npmjs.com/package/@websaam/nx-esbuild) which is a fork from [@wanews/nx-esbuild](https://www.npmjs.com/package/@wanews/nx-esbuild)
-
-```json
-"_buildWeb": {
-    "executor": "@websaam/nx-esbuild:package",
-    "options": {
-      "banner": {
-        "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
-      },
-      "globalName": "LitJsSdk_CoreBrowser",
-      "outfile":"dist/packages/core-browser-vanilla/core-browser.js",
-      "entryPoints": ["./packages/core-browser/src/index.ts"],
-      "define": { "global": "window" },
-      "plugins":[
-        {
-          "package": "esbuild-node-builtins",
-          "function": "nodeBuiltIns"
-        }
-      ]
-    }
-  }
 ```
 
 </details>

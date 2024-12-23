@@ -1,4 +1,12 @@
-import { ELeft, ERight, IEither, LIT_ERROR } from '@lit-protocol/constants';
+import {
+  ELeft,
+  ERight,
+  IEither,
+  InvalidArgumentException,
+  LocalStorageItemNotFoundException,
+  LocalStorageItemNotRemovedException,
+  LocalStorageItemNotSetException,
+} from '@lit-protocol/constants';
 import {
   uint8arrayFromString,
   uint8arrayToString,
@@ -19,11 +27,17 @@ export const getStorageItem = (key: string): IEither<string> => {
   }
 
   if (!item) {
-    return ELeft({
-      message: `Failed to get ${key} from local storage`,
-      errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
-      errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
-    });
+    return ELeft(
+      new LocalStorageItemNotFoundException(
+        {
+          info: {
+            storageKey: key,
+          },
+        },
+        `Failed to get %s from local storage`,
+        key
+      )
+    );
   }
 
   return ERight(item);
@@ -41,10 +55,17 @@ export const setStorageItem = (key: string, value: string): IEither<string> => {
     localStorage.setItem(key, value);
     return ERight(value);
   } catch (e) {
-    return ELeft({
-      message: `Failed to set ${key} in local storage`,
-      error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_SET_EXCEPTION,
-    });
+    return ELeft(
+      new LocalStorageItemNotSetException(
+        {
+          info: {
+            storageKey: key,
+          },
+        },
+        `Failed to set %s in local storage`,
+        key
+      )
+    );
   }
 };
 
@@ -60,10 +81,17 @@ export const removeStorageItem = (key: string): IEither<string> => {
     localStorage.removeItem(key);
     return ERight(key);
   } catch (e) {
-    return ELeft({
-      message: `Failed to remove ${key} from local storage`,
-      error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_REMOVED_EXCEPTION,
-    });
+    return ELeft(
+      new LocalStorageItemNotRemovedException(
+        {
+          info: {
+            storageKey: key,
+          },
+        },
+        `Failed to remove %s from local storage`,
+        key
+      )
+    );
   }
 };
 
@@ -106,7 +134,7 @@ export const base64StringToBlob = (base64String: string): Blob => {
 export const fileToDataUrl = (
   file: File
 ): Promise<string | ArrayBuffer | null> => {
-  return new Promise((resolve: any) => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       resolve(reader.result);
@@ -181,15 +209,25 @@ export const injectViewerIFrame = ({
 }): void => {
   if (fileUrl.includes('data:')) {
     // data urls are not safe, refuse to do this
-    throw new Error(
-      'You can not inject an iFrame with a data url.  Try a regular https URL.'
+    throw new InvalidArgumentException(
+      {
+        info: {
+          fileUrl,
+        },
+      },
+      'You can not inject an iFrame with a data url. Try a regular https URL.'
     );
   }
 
   const url = new URL(fileUrl);
   if (url.host.toLowerCase() === window.location.host.toLowerCase()) {
-    throw new Error(
-      'You cannot host a LIT on the same domain as the parent webpage.  This is because iFrames with the same origin have access to localstorage and cookies in the parent webpage which is unsafe'
+    throw new InvalidArgumentException(
+      {
+        info: {
+          fileUrl,
+        },
+      },
+      'You cannot host a LIT on the same domain as the parent webpage. This is because iFrames with the same origin have access to localstorage and cookies in the parent webpage which is unsafe'
     );
   }
 

@@ -1,7 +1,8 @@
 import { SiweMessage } from 'siwe';
-import { BaseSiweMessage, CapacityDelegationFields } from '@lit-protocol/types';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import {
-  LitAbility,
+  BaseSiweMessage,
+  CapacityDelegationFields,
   WithCapacityDelegation,
   WithRecap,
 } from '@lit-protocol/types';
@@ -30,7 +31,7 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
     Date.now() + 1000 * 60 * 60 * 24 * 7
   ).toISOString();
 
-  let siweParams = {
+  const siweParams = {
     domain: params?.domain ?? 'localhost',
     address: params.walletAddress,
     statement:
@@ -59,7 +60,7 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
     params.resources = [
       {
         resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
-        ability: LitAbility.RateLimitIncreaseAuth,
+        ability: LIT_ABILITY.RateLimitIncreaseAuth,
         data: capabilities,
       },
     ];
