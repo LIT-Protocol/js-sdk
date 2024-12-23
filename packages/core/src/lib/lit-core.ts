@@ -75,6 +75,10 @@ import { composeLitUrl } from './endpoint-version';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
 
+type providerTest<T> = (
+  provider: ethers.providers.JsonRpcProvider
+) => Promise<T>;
+
 interface CoreNodeConfig {
   subnetPubKey: string;
   networkPubKey: string;
@@ -112,8 +116,8 @@ export type LitNodeClientConfigWithDefaults = Required<
 const EPOCH_PROPAGATION_DELAY = 45_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
-// When fetching the blockhash from a provider (not lit), we use a previous block to avoid a nodes not knowing about the new block yet
-const BLOCKHASH_COUNT_PROVIDER_DELAY = -1;
+// When fetching the blockhash from a provider (not lit), we use a 5 minutes old block to ensure the nodes centralized indexer has it
+const BLOCKHASH_COUNT_PROVIDER_DELAY = -30; // 30 blocks ago. Eth block are mined every 12s. 30 blocks is 6 minutes, indexer/nodes must have it by now
 
 // Intentionally not including datil-dev here per discussion with Howard
 const NETWORKS_REQUIRING_SEV: string[] = [
@@ -778,24 +782,31 @@ export class LitCore {
     };
   }
 
-  private _getProviderWithFallback =
-    async (): Promise<ethers.providers.JsonRpcProvider | null> => {
-      for (const url of FALLBACK_RPC_URLS) {
-        try {
-          const provider = new ethers.providers.JsonRpcProvider({
-            url: url,
+  private _getProviderWithFallback = async <T>(
+    providerTest: providerTest<T>
+  ): Promise<{
+    provider: ethers.providers.JsonRpcProvider;
+    testResult: T;
+  } | null> => {
+    for (const url of FALLBACK_RPC_URLS) {
+      try {
+        const provider = new ethers.providers.JsonRpcProvider({
+          url: url,
 
-            // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
-            timeout: 60000,
-          });
-          await provider.getBlockNumber(); // Simple check to see if the provider is working
-          return provider;
-        } catch (error) {
-          logError(`RPC URL failed: ${url}`);
-        }
+          // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
+          timeout: 60000,
+        });
+        const testResult = await providerTest(provider); // Check to see if the provider is working
+        return {
+          provider,
+          testResult,
+        };
+      } catch (error) {
+        logError(`RPC URL failed: ${url}`);
       }
-      return null;
-    };
+    }
+    return null;
+  };
 
   /**
    * Fetches the latest block hash and log any errors that are returned
@@ -862,20 +873,20 @@ export class LitCore {
       log(
         'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
       );
-      const provider = await this._getProviderWithFallback();
+      const { testResult } =
+        (await this._getProviderWithFallback<ethers.providers.Block>(
+          // We use a previous block to avoid nodes not having received the latest block yet
+          (provider) => provider.getBlock(BLOCKHASH_COUNT_PROVIDER_DELAY)
+        )) || {};
 
-      if (!provider) {
+      if (!testResult || !testResult.hash) {
         logError('All fallback RPC URLs failed. Unable to retrieve blockhash.');
         return;
       }
 
       try {
-        // We use a previous block to avoid nodes not having received the latest block yet
-        const priorBlock = await provider.getBlock(
-          BLOCKHASH_COUNT_PROVIDER_DELAY
-        );
-        this.latestBlockhash = priorBlock.hash;
-        this.lastBlockHashRetrieved = priorBlock.timestamp;
+        this.latestBlockhash = testResult.hash;
+        this.lastBlockHashRetrieved = testResult.timestamp;
         log(
           'Successfully retrieved blockhash manually: ',
           this.latestBlockhash
