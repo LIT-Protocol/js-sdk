@@ -397,4 +397,4 @@ Most likely you would want to run the state machines in a long-running process, 
 
 We offer a basic express server that can be used to receive state machines declarative definition and run/stop them when needed.
 
-Check [`LIT-Protocol/automation`](https://github.com/LIT-Protocol/automation) repository and feel free to fork or contribute there.
+Check [`LIT-Protocol/event-listener`](https://github.com/LIT-Protocol/event-listener) repository and feel free to fork or contribute there.
