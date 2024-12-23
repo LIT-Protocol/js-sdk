@@ -147,7 +147,7 @@ runLitActionInterval().catch(console.error);
 
 ## Functional interface
 
-There care cases where such a declarative interface won't be enough for your use case. When that happens, the machines can also accept generic states, actions, transitions and listeners where it is possible to write any logic.
+There are cases where such a declarative interface won't be enough for your use case. When that happens, the machines can also accept generic states, actions, transitions and listeners where it is possible to write any logic.
 
 Here is an example that listens to Ethereum block hashes, looking for those that end in '0'
 
