@@ -20,6 +20,8 @@ yarn add @lit-protocol/event-listener
 
 ## Core Concepts
 
+![State Machine](./graphs/stateMachine.png)
+
 ### State Machine
 
 A state machine consists of states, and transitions between those states which are triggered based on a collection of Listeners.
@@ -65,6 +67,8 @@ Listeners monitor various events and feed data to transitions:
 ## Basic Example
 
 Here's a simple example that mints a PKP, a Capacity Delegation NFT and then runs a Lit Action every hour:
+
+![Run LitAction Interval](./graphs/runLitActionInterval.png)
 
 ```typescript
 async function runLitActionInterval() {
@@ -146,6 +150,8 @@ runLitActionInterval().catch(console.error);
 There care cases where such a declarative interface won't be enough for your use case. When that happens, the machines can also accept generic states, actions, transitions and listeners where it is possible to write any logic.
 
 Here is an example that listens to Ethereum block hashes, looking for those that end in '0'
+
+![Listen Ethereum Blocks](./graphs/ethZeroBlockhash.png)
 
 ```typescript
 async function monitorEthereumBlocksWithHashEndingWithZero() {
@@ -231,6 +237,8 @@ The machine context can be manually accessed using its `getFromContext`, `setToC
 By leveraging context from the State Machine in combination with Lit PKPs, it is possible to implement a cross-chain messaging service that can be used to read and write data across virtually any blockchain.
 
 In this example, when a State Machine PKP receives USDC in Base Sepolia, it will send the same amount to the sender but in Ethereum Sepolia.
+
+![USDC Bridge](./graphs/usdcBridge.png)
 
 ```typescript
 async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
@@ -374,3 +382,11 @@ async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
 }
 bridgeBaseSepoliaUSDCToEthereumSepolia().catch(console.error);
 ```
+
+### Chain Signatures example
+
+With some minor modifications, the previous example can be adapted to listen transaction requests in a source chain and broadcast transactions in, another, destination chain.
+
+To see the example with the full implementation, check the [Chain Signatures example](https://github.com/LIT-Protocol/chain-signatures).
+
+This opens up a wide range of possibilities, such as cross-chain messaging, token swaps, gas sponsorship, offchain multisigs, and more.
