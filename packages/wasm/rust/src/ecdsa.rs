@@ -58,22 +58,22 @@ where
         presignature: Uint8Array,
         signature_shares: Vec<Uint8Array>,
     ) -> JsResult<EcdsaSignature> {
-        let (big_r, s) = Self::combine_inner(presignature, signature_shares)?;
-        Self::signature_into_js(big_r.to_affine(), s)
+        let (big_r, s, was_flipped) = Self::combine_inner(presignature, signature_shares)?;
+        Self::signature_into_js(big_r.to_affine(), s, was_flipped)
     }
 
     pub(crate) fn combine_inner(
         presignature: Uint8Array,
         signature_shares: Vec<Uint8Array>,
-    ) -> JsResult<(C::ProjectivePoint, C::Scalar)> {
+    ) -> JsResult<(C::ProjectivePoint, C::Scalar, bool)> {
         let signature_shares = signature_shares
             .into_iter()
             .map(Self::scalar_from_js)
             .collect::<JsResult<Vec<_>>>()?;
 
         let big_r: C::AffinePoint = Self::point_from_js(presignature)?;
-        let s = Self::sum_scalars(signature_shares)?;
-        Ok((C::ProjectivePoint::from(big_r), s))
+        let (s, was_flipped) = Self::sum_scalars(signature_shares)?;
+        Ok((C::ProjectivePoint::from(big_r), s, was_flipped))
     }
 
     pub fn verify(
@@ -108,13 +108,14 @@ where
         Ok(())
     }
 
-    fn sum_scalars(values: Vec<C::Scalar>) -> JsResult<C::Scalar> {
+    fn sum_scalars(values: Vec<C::Scalar>) -> JsResult<(C::Scalar, bool)> {
         if values.is_empty() {
             return Err(JsError::new("no shares provided"));
         }
         let mut acc: C::Scalar = values.into_iter().sum();
+        let acc_flipped = acc.is_high().into();
         acc.conditional_assign(&(-acc), acc.is_high());
-        Ok(acc)
+        Ok((acc, acc_flipped))
     }
 
     pub fn derive_key(id: Uint8Array, public_keys: Vec<Uint8Array>) -> JsResult<Uint8Array> {
@@ -168,10 +169,15 @@ where
         Ok((r, s, v))
     }
 
-    fn signature_into_js(big_r: C::AffinePoint, s: C::Scalar) -> JsResult<EcdsaSignature> {
+    fn signature_into_js(big_r: C::AffinePoint, s: C::Scalar, was_flipped: bool) -> JsResult<EcdsaSignature> {
         let r = Self::x_coordinate(&big_r).to_repr();
         let s = s.to_repr();
-        let v = u8::conditional_select(&0, &1, big_r.y_is_odd());
+        let mut v = u8::conditional_select(&0, &1, big_r.y_is_odd());
+
+        // Flip v if s was normalized (flipped, low-s rule)
+        if was_flipped {
+            v = 1 - v;
+        }
 
         Ok(EcdsaSignature {
             obj: into_js(&(Bytes::new(&r), Bytes::new(&s), v))?,
@@ -222,7 +228,7 @@ where
         public_key: C::ProjectivePoint,
     ) -> JsResult<EcdsaSignature> {
         let z = Self::scalar_from_hash(message_hash)?;
-        let (big_r, s) = Self::combine_inner(pre_signature, signature_shares)?;
+        let (big_r, s, was_flipped) = Self::combine_inner(pre_signature, signature_shares)?;
         let r = Self::x_coordinate(&big_r.to_affine());
 
         if z.is_zero().into() {
@@ -241,7 +247,7 @@ where
             .is_identity()
             .into()
         {
-            Self::signature_into_js(big_r.to_affine(), s)
+            Self::signature_into_js(big_r.to_affine(), s, was_flipped)
         } else {
             Err(JsError::new("invalid signature"))
         }

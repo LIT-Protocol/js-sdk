@@ -259,7 +259,7 @@ export const getSignatures = async <T>(params: {
     const encodedSig = joinSignature({
       r: '0x' + signature.r,
       s: '0x' + signature.s,
-      v: signature.recid,
+      recoveryParam: signature.recid,
     });
 
     signatures[key] = {
