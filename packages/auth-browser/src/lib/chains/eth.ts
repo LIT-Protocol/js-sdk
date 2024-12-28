@@ -5,12 +5,7 @@ import { hexlify } from '@ethersproject/bytes';
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
 
-// import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { verifyMessage } from '@ethersproject/wallet';
-import {
-  EthereumProvider,
-  default as WalletConnectProvider,
-} from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
@@ -43,9 +38,14 @@ import {
   validateSessionSig,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
+import { AuthSig, AuthCallbackParams, LITEVMChain } from '@lit-protocol/types';
 
-import LitConnectModal from '../connect-modal/modal';
+import {
+  createConfig,
+} from 'wagmi';
+import { connect as wagmiConnect, disconnect as wagmiDisconnect, getWalletClient, Config } from '@wagmi/core';
+import { injected, walletConnect } from '@wagmi/connectors'
+import { http } from 'viem';
 
 const deprecated = depd('lit-js-sdk:auth-browser:index');
 
@@ -73,8 +73,6 @@ interface ConnectWeb3Result {
   web3: Web3Provider | any;
   account: string | any;
 }
-
-type RPCUrls = Record<string, string>;
 
 interface signAndSaveAuthParams {
   web3: Web3Provider;
@@ -131,8 +129,7 @@ export type WALLET_ERROR_VALUES =
 
 /** ---------- Local Helpers ---------- */
 
-let litWCProvider: WalletConnectProvider | undefined;
-
+let wagmiConfig: Config;
 /**
  *
  * Convert chain hex id to chain name
@@ -291,35 +288,6 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
   return mustResign;
 };
 
-/**
- *
- * Get RPC Urls in the correct format
- * need to make it look like this:
-   ---
-   rpc: {
-        1: "https://mainnet.mycustomnode.com",
-        3: "https://ropsten.mycustomnode.com",
-        100: "https://dai.poa.network",
-        // ...
-    },
-   ---
- *
- * @returns
- */
-export const getRPCUrls = (): RPCUrls => {
-  const rpcUrls: RPCUrls = {};
-
-  const keys: string[] = Object.keys(LIT_CHAINS);
-
-  for (const chainName of keys) {
-    const chainId = LIT_CHAINS[chainName].chainId;
-    const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
-    rpcUrls[chainId.toString()] = rpcUrl;
-  }
-
-  return rpcUrls;
-};
-
 /** ---------- Exports ---------- */
 /**
  * @deprecated
@@ -353,6 +321,49 @@ export const decodeCallResult = deprecated.function(
   'decodeCallResult will be removed.'
 );
 
+const getWagmiProvider = async (chainId: number, walletConnectProjectId?: string) => {
+  const chain = Object.values(LIT_CHAINS).find(c => c.chainId === chainId);
+  if (!chain) {
+    throw new Error(`Chain ID ${chainId} not supported`);
+  }
+
+  const litChainToWagmiChain = (litChain: LITEVMChain) => ({
+    id: litChain.chainId,
+    name: litChain.name,
+    network: litChain.name.toLowerCase(),
+    nativeCurrency: {
+      name: litChain.name,
+      symbol: litChain.symbol,
+      decimals: litChain.decimals,
+    },
+    rpcUrls: {
+      default: { http: litChain.rpcUrls },
+      public: { http: litChain.rpcUrls },
+    },
+  });
+
+  const litChain = litChainToWagmiChain(chain);
+
+  const config = createConfig({
+    chains: [litChain],
+    transports: {
+      [litChain.id]: http(litChain.rpcUrls.default.http[0])
+    },
+    connectors: [
+      injected(),
+      ...(walletConnectProjectId
+        ? [
+            walletConnect({
+              projectId: walletConnectProjectId
+            })
+          ]
+        : []),
+    ]
+  });
+
+  return config;
+};
+
 /**
  * @browserOnly
  * Connect to web 3
@@ -371,58 +382,33 @@ export const connectWeb3 = async ({
     return { web3: null, account: null };
   }
 
-  const rpcUrls: RPCUrls = getRPCUrls();
+  log('getting provider via wagmi');
 
-  let providerOptions = {};
-
-  if (walletConnectProjectId) {
-    const wcProvider = await EthereumProvider.init({
-      projectId: walletConnectProjectId,
-      chains: [chainId],
-      showQrModal: true,
-      optionalMethods: ['eth_sign'],
-      rpcMap: rpcUrls,
-    });
-
-    providerOptions = {
-      walletconnect: {
-        provider: wcProvider,
-      },
-    };
-
-    if (isBrowser()) {
-      litWCProvider = wcProvider;
-    }
-  }
-
-  log('getting provider via lit connect modal');
-
-  const dialog = new LitConnectModal({ providerOptions });
-
-  const provider = await dialog.getWalletProvider();
+  const config = await getWagmiProvider(chainId, walletConnectProjectId);
+  wagmiConfig = config;
+  
+  const result = await wagmiConnect(config, {
+    connector: config.connectors[0],
+    chainId,
+  });
+  
 
   log('got provider');
-
-  // @ts-ignore
-  const web3 = new Web3Provider(provider);
-
-  // trigger metamask popup
-  try {
-    deprecated(
-      '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
-    );
-    // @ts-ignore
-    await provider.enable();
-  } catch (e) {
-    log(
-      "error enabling provider but swallowed it because it's not important.  most wallets use a different function now to enable the wallet so you can ignore this error, because those other methods will be tried.",
-      e
-    );
+  if (!result) {
+    throw new Error('Failed to connect wallet');
   }
 
+  const walletClient = await getWalletClient(config);
+  
+  if (!walletClient) {
+    throw new Error('No wallet client found');
+  }
+
+  // @ts-ignore - Create Web3Provider from wallet client
+  const web3 = new Web3Provider(walletClient);
+  
   log('listing accounts');
   const accounts = await web3.listAccounts();
-
   log('accounts', accounts);
   const account = ethers.utils.getAddress(accounts[0]);
 
@@ -437,22 +423,16 @@ export const connectWeb3 = async ({
  *
  * @return { void }
  */
-export const disconnectWeb3 = (): void => {
+export const disconnectWeb3 = async (): Promise<void> => {
   if (isNode()) {
     log('disconnectWeb3 is not supported in nodejs.');
     return;
   }
 
-  // @ts-ignore
-  if (isBrowser() && litWCProvider) {
-    try {
-      litWCProvider.disconnect();
-    } catch (err) {
-      log(
-        'Attempted to disconnect global WalletConnectProvider for lit-connect-modal',
-        err
-      );
-    }
+  try {
+    await wagmiDisconnect(wagmiConfig);
+  } catch (err) {
+    log('Error disconnecting wallet:', err);
   }
 
   const storage = LOCAL_STORAGE_KEYS;
