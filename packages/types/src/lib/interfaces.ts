@@ -42,7 +42,7 @@ export interface AuthSig {
   /**
    * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
    */
-  sig: any;
+  sig: string;
 
   /**
    * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
@@ -598,7 +598,7 @@ export interface SigResponse {
   r: string;
   s: string;
   recid: number;
-  signature: string; // 0x...
+  signature: `0x${string}`;
   publicKey: string; // pkp public key (no 0x prefix)
   dataSigned: string;
 }
