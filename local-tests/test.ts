@@ -2,6 +2,7 @@ import { TinnyEnvironment } from './setup/tinny-environment';
 import { runInBand, runTestsParallel } from './setup/tinny-operations';
 // import { testBundleSpeed } from './tests/test-bundle-speed';
 // import { testExample } from './tests/test-example';
+import { testUseEoaAuthContextToPkpSign } from 'local-tests/tests/testUseEoaAuthContextToPkpSign';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
@@ -163,6 +164,7 @@ setLitActionsCodeToLocal();
   };
 
   const eoaSessionSigsTests = {
+    testUseEoaAuthContextToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigning,
     testUseEoaSessionSigsToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
