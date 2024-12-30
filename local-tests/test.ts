@@ -108,7 +108,6 @@ import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGene
 import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
-import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 
 // Use the current LIT action code to test against
 setLitActionsCodeToLocal();
@@ -316,7 +315,9 @@ setLitActionsCodeToLocal();
     },
     devEnv,
   };
+
   let res;
+
   if (devEnv.processEnvs.RUN_IN_BAND) {
     res = await runInBand(testConfig);
   } else {

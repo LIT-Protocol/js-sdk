@@ -2077,9 +2077,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         for (let i = 0; i < tokenIds.length; i++) {
           const tokenId = tokenIds[i];
           const pubKey = await this.pkpNftContract.read.getPubkey(tokenId);
-          const addrs = await derivedAddresses({
+          const addrs: TokenInfo = await derivedAddresses({
             publicKey: pubKey,
           });
+
+          if (!addrs.tokenId) {
+            addrs.tokenId = tokenId;
+          }
 
           arr.push(addrs);
         }
