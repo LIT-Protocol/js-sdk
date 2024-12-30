@@ -1,6 +1,11 @@
 import { ethers } from 'ethers';
 
-import { createSiweMessageWithRecaps, generateAuthSig, LitPKPResource } from '@lit-protocol/auth-helpers';
+import {
+  createSiweMessageWithRecaps,
+  generateAuthSig,
+  LitActionResource,
+  LitPKPResource,
+} from '@lit-protocol/auth-helpers';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
@@ -23,6 +28,10 @@ export const testUseEoaAuthContextToPkpSign = async (
     {
       resource: new LitPKPResource('*'),
       ability: LIT_ABILITY.PKPSigning,
+    },
+    {
+      resource: new LitActionResource('*'),
+      ability: LIT_ABILITY.LitActionExecution,
     },
   ];
   const litNodeClient = alice.envConfig.litNodeClient;
