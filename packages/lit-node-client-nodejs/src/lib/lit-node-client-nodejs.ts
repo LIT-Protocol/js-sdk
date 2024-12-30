@@ -1130,6 +1130,8 @@ export class LitNodeClientNodeJs
    * @param [params.getSessionSigsPropsOverride] - The props override when obtaining sessionSigs from the auth context
    */
   pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
+    await this.assertConnected();
+
     // -- validate required params
     const requiredParamKeys = ['toSign', 'pubKey'];
     (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {

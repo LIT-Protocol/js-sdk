@@ -1,9 +1,7 @@
 import { ethers } from 'ethers';
 
-import { LitPKPResource } from '@lit-protocol/auth-helpers';
+import { createSiweMessageWithRecaps, generateAuthSig, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LIT_ABILITY } from '@lit-protocol/constants';
-import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { log } from '@lit-protocol/misc';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
@@ -27,36 +25,31 @@ export const testUseEoaAuthContextToPkpSign = async (
       ability: LIT_ABILITY.PKPSigning,
     },
   ];
-  const litNodeClient = new LitNodeClient({
-    litNetwork: alice.envConfig.network,
-    authContext: {
-      getSessionSigsProps: {
-        resourceAbilityRequests,
-        expiration,
-        authNeededCallback: async function (
-          params: AuthCallbackParams
-        ): Promise<AuthSig> {
-          const response = await litNodeClient.signSessionKey({
-            sessionKey: params.sessionKey,
-            statement: params.statement || 'Some custom statement.',
-            authMethods: [
-              await EthWalletProvider.authenticate({
-                signer: alice.wallet,
-                litNodeClient: litNodeClient,
-                expiration: params.expiration,
-              }),
-            ],
-            pkpPublicKey: alice.pkp.publicKey,
-            expiration: params.expiration,
-            resources: params.resources,
-            chainId: 1,
+  const litNodeClient = alice.envConfig.litNodeClient;
 
-            // -- required fields
-            resourceAbilityRequests: params.resourceAbilityRequests,
-          });
+  litNodeClient.setAuthContext({
+    getSessionSigsProps: {
+      chain: 'ethereum',
+      resourceAbilityRequests,
+      expiration,
+      authNeededCallback: async function (
+        params: AuthCallbackParams
+      ): Promise<AuthSig> {
+        const toSign = await createSiweMessageWithRecaps({
+          uri: params.uri,
+          expiration: params.expiration,
+          resources: params.resourceAbilityRequests,
+          walletAddress: alice.wallet.address,
+          nonce: await litNodeClient.getLatestBlockhash(),
+          litNodeClient: devEnv.litNodeClient,
+        });
 
-          return response.authSig;
-        },
+        const authSig = await generateAuthSig({
+          signer: alice.wallet,
+          toSign,
+        });
+
+        return authSig;
       },
     },
   });
