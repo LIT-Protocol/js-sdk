@@ -21,7 +21,7 @@
   "tags": [
     "universal"
   ],
-  "version": "7.0.0-alpha.9",
+  "version": "7.0.3",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

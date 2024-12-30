@@ -21,7 +21,6 @@ import {
   LIT_CURVE,
   LIT_CURVE_VALUES,
   LIT_ENDPOINT,
-  LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
@@ -31,6 +30,7 @@ import {
   version,
   InitError,
   InvalidParamType,
+  NetworkError,
   NodeError,
   UnknownError,
   InvalidArgumentException,
@@ -68,7 +68,6 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
@@ -80,6 +79,10 @@ import { composeLitUrl } from './endpoint-version';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
+
+type providerTest<T> = (
+  provider: ethers.providers.JsonRpcProvider
+) => Promise<T>;
 
 interface CoreNodeConfig {
   subnetPubKey: string;
@@ -118,6 +121,8 @@ export type LitNodeClientConfigWithDefaults = Required<
 const EPOCH_PROPAGATION_DELAY = 45_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
+// When fetching the blockhash from a provider (not lit), we use a 5 minutes old block to ensure the nodes centralized indexer has it
+const BLOCKHASH_COUNT_PROVIDER_DELAY = -30; // 30 blocks ago. Eth block are mined every 12s. 30 blocks is 6 minutes, indexer/nodes must have it by now
 
 // Intentionally not including datil-dev here per discussion with Howard
 const NETWORKS_REQUIRING_SEV: string[] = [
@@ -763,27 +768,36 @@ export class LitCore {
     };
   }
 
-  private _getProviderWithFallback =
-    async (): Promise<ethers.providers.JsonRpcProvider | null> => {
-      for (const url of FALLBACK_RPC_URLS) {
-        try {
-          const provider = new ethers.providers.JsonRpcProvider({
-            url: url,
+  private _getProviderWithFallback = async <T>(
+    providerTest: providerTest<T>
+  ): Promise<{
+    provider: ethers.providers.JsonRpcProvider;
+    testResult: T;
+  } | null> => {
+    for (const url of FALLBACK_RPC_URLS) {
+      try {
+        const provider = new ethers.providers.JsonRpcProvider({
+          url: url,
 
-            // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
-            timeout: 60000,
-          });
-          await provider.getBlockNumber(); // Simple check to see if the provider is working
-          return provider;
-        } catch (error) {
-          logError(`RPC URL failed: ${url}`);
-        }
+          // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
+          timeout: 60000,
+        });
+        const testResult = await providerTest(provider); // Check to see if the provider is working
+        return {
+          provider,
+          testResult,
+        };
+      } catch (error) {
+        logError(`RPC URL failed: ${url}`);
       }
-      return null;
-    };
+    }
+    return null;
+  };
 
   /**
    * Fetches the latest block hash and log any errors that are returned
+   * Nodes will accept any blockhash in the last 30 days but use the latest 10 as challenges for webauthn
+   * Note: last blockhash from providers might not be propagated to the nodes yet, so we need to use a slightly older one
    * @returns void
    */
   private async _syncBlockhash() {
@@ -805,52 +819,72 @@ export class LitCore {
       this.latestBlockhash
     );
 
-    return fetch(this._blockHashUrl)
-      .then(async (resp: Response) => {
-        const blockHashBody: EthBlockhashInfo = await resp.json();
-        this.latestBlockhash = blockHashBody.blockhash;
-        this.lastBlockHashRetrieved = Date.now();
-        log('Done syncing state new blockhash: ', this.latestBlockhash);
-
-        // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
-        if (!this.latestBlockhash) {
-          throw new Error(
-            `Error getting latest blockhash. Received: "${this.latestBlockhash}"`
-          );
-        }
-      })
-      .catch(async (err: BlockHashErrorResponse | Error) => {
-        logError(
-          'Error while attempting to fetch new latestBlockhash:',
-          err instanceof Error ? err.message : err.messages,
-          'Reason: ',
-          err instanceof Error ? err : err.reason
+    try {
+      // This fetches from the lit propagation service so nodes will always have it
+      const resp = await fetch(this._blockHashUrl);
+      // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
+      if (!resp.ok) {
+        throw new NetworkError(
+          {
+            responseResult: resp.ok,
+            responseStatus: resp.status,
+          },
+          `Error getting latest blockhash from ${this._blockHashUrl}. Received: "${resp.status}"`
         );
+      }
 
+      const blockHashBody: EthBlockhashInfo = await resp.json();
+      const { blockhash, timestamp } = blockHashBody;
+
+      // If the blockhash retrieval does not have the required fields, throw an error to trigger fallback in catch block
+      if (!blockhash || !timestamp) {
+        throw new NetworkError(
+          {
+            responseResult: resp.ok,
+            blockHashBody,
+          },
+          `Error getting latest blockhash from block indexer. Received: "${blockHashBody}"`
+        );
+      }
+
+      this.latestBlockhash = blockHashBody.blockhash;
+      this.lastBlockHashRetrieved = parseInt(timestamp) * 1000;
+      log('Done syncing state new blockhash: ', this.latestBlockhash);
+    } catch (error: unknown) {
+      const err = error as BlockHashErrorResponse | Error;
+
+      logError(
+        'Error while attempting to fetch new latestBlockhash:',
+        err instanceof Error ? err.message : err.messages,
+        'Reason: ',
+        err instanceof Error ? err : err.reason
+      );
+
+      log(
+        'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
+      );
+      const { testResult } =
+        (await this._getProviderWithFallback<ethers.providers.Block>(
+          // We use a previous block to avoid nodes not having received the latest block yet
+          (provider) => provider.getBlock(BLOCKHASH_COUNT_PROVIDER_DELAY)
+        )) || {};
+
+      if (!testResult || !testResult.hash) {
+        logError('All fallback RPC URLs failed. Unable to retrieve blockhash.');
+        return;
+      }
+
+      try {
+        this.latestBlockhash = testResult.hash;
+        this.lastBlockHashRetrieved = testResult.timestamp;
         log(
-          'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
+          'Successfully retrieved blockhash manually: ',
+          this.latestBlockhash
         );
-        const provider = await this._getProviderWithFallback();
-
-        if (!provider) {
-          logError(
-            'All fallback RPC URLs failed. Unable to retrieve blockhash.'
-          );
-          return;
-        }
-
-        try {
-          const latestBlock = await provider.getBlock('latest');
-          this.latestBlockhash = latestBlock.hash;
-          this.lastBlockHashRetrieved = Date.now();
-          log(
-            'Successfully retrieved blockhash manually: ',
-            this.latestBlockhash
-          );
-        } catch (ethersError) {
-          logError('Failed to manually retrieve blockhash using ethers');
-        }
-      });
+      } catch (ethersError) {
+        logError('Failed to manually retrieve blockhash using ethers');
+      }
+    }
   }
 
   /** Currently, we perform a full sync every 30s, including handshaking with every node
