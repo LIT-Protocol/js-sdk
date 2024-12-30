@@ -14,7 +14,7 @@ export {
   getEoaSessionSigs,
   getLitActionSessionSigs,
   getPkpSessionSigs,
-  AccessControlConditions
+  AccessControlConditions,
 };
 
 // Usage
