@@ -924,19 +924,19 @@ export class LitNodeClientNodeJs
 
     // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
     // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
-    // and update the params with the fetched code, removing the ipfsId afterward.
+    // and update the formattedParams with the fetched code, removing the ipfsId afterward.
     const overwriteCode =
       params.ipfsOptions?.overwriteCode ||
       GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
 
-    if (overwriteCode && params.ipfsId) {
+    if (overwriteCode && formattedParams.ipfsId) {
       const code = await this._getFallbackIpfsCode(
-        params.ipfsOptions?.gatewayUrl,
-        params.ipfsId
+        formattedParams.ipfsOptions?.gatewayUrl,
+        formattedParams.ipfsId
       );
 
       formattedParams = {
-        ...params,
+        ...formattedParams,
         code: code,
         ipfsId: undefined,
       };
@@ -946,7 +946,7 @@ export class LitNodeClientNodeJs
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
     const getNodePromises = async () => {
-      if (params.useSingleNode) {
+      if (formattedParams.useSingleNode) {
         return this.getRandomNodePromise((url: string) =>
           this.executeJsNodeRequest(url, formattedParams, requestId)
         );
@@ -962,7 +962,7 @@ export class LitNodeClientNodeJs
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      params.useSingleNode ? 1 : this.connectedNodes.size
+      formattedParams.useSingleNode ? 1 : this.connectedNodes.size
     );
 
     // -- case: promises rejected
