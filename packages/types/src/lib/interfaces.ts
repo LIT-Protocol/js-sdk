@@ -233,7 +233,6 @@ pub struct JsonExecutionRequest {
  */
 
 export interface BaseJsonPkpSignRequest {
-  authMethods?: AuthMethod[];
   toSign: ArrayLike<number>;
 }
 

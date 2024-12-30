@@ -858,14 +858,14 @@ export class LitNodeClientNodeJs
     requestId: string
   ) {
     // -- choose the right signature
-    const sessionSig = this.getSessionSigByUrl({
+    const authSig = this.getSessionSigByUrl({
       sessionSigs: formattedParams.sessionSigs,
       url,
     });
 
     const reqBody: JsonExecutionRequest = {
       ...formattedParams,
-      authSig: sessionSig,
+      authSig,
     };
 
     const urlWithPath = composeLitUrl({
@@ -1136,21 +1136,15 @@ export class LitNodeClientNodeJs
 
     const nodePromises = this.getNodePromises((url: string) => {
       // -- get the session sig from the url key
-      const sessionSig = this.getSessionSigByUrl({
-        sessionSigs: params.sessionSigs,
+      const authSig = this.getSessionSigByUrl({
+        sessionSigs,
         url,
       });
 
       const reqBody: JsonPkpSignRequest = {
         toSign: normalizeArray(params.toSign),
         pubkey: hexPrefixed(params.pubKey),
-        authSig: sessionSig,
-
-        // -- optional params
-        ...(params.authMethods &&
-          params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+        authSig,
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
