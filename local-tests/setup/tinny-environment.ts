@@ -42,11 +42,6 @@ export class TinnyEnvironment {
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
-    BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
-      'http://127.0.0.1:7470',
-      'http://127.0.0.1:7471',
-      'http://127.0.0.1:7472',
-    ],
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
