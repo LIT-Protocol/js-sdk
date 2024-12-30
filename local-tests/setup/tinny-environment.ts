@@ -113,9 +113,12 @@ export class TinnyEnvironment {
       ...override,
     };
 
+    // -- setup network
+    this.network = override.NETWORK || this.processEnvs.NETWORK;
+
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment. Please use one of ${Object.values(
+        `Invalid network environment ${this.network}. Please use one of ${Object.values(
           LIT_NETWORK
         )}`
       );

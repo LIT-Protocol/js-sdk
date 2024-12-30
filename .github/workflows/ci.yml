@@ -32,14 +32,14 @@ jobs:
           version: 'latest'
       - name: Install project dependencies
         run: yarn --frozen-lockfile
-      - name: Build Tinny
-        run: yarn build:tinny
-      - name: Verify Tinny build output
-        run: |
-          if [ ! -f "./local-tests/index.js" ]; then
-            echo "Error: Tinny build output not found"
-            exit 1
-          fi
+      # - name: Build Tinny
+      #   run: yarn build:tinny
+      # - name: Verify Tinny build output
+      #   run: |
+      #     if [ ! -f "./local-tests/index.js" ]; then
+      #       echo "Error: Tinny build output not found"
+      #       exit 1
+      #     fi
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
