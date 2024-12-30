@@ -4,6 +4,7 @@ import * as tinnyTests from './tests';
 import { getEoaSessionSigs } from './setup/session-sigs/get-eoa-session-sigs';
 import { getLitActionSessionSigs } from './setup/session-sigs/get-lit-action-session-sigs';
 import { getPkpSessionSigs } from './setup/session-sigs/get-pkp-session-sigs';
+import { AccessControlConditions } from './setup/accs/accs';
 
 export {
   TinnyEnvironment,
@@ -13,6 +14,7 @@ export {
   getEoaSessionSigs,
   getLitActionSessionSigs,
   getPkpSessionSigs,
+  AccessControlConditions
 };
 
 // Usage
