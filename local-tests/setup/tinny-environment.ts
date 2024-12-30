@@ -36,7 +36,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-        (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -106,21 +106,28 @@ export class TinnyEnvironment {
   private _contractContext: LitContractContext | LitContractResolverContext;
 
   constructor(override?: Partial<ProcessEnvs>) {
-
     // Merge default processEnvs with custom overrides
     this.processEnvs = {
       ...this.processEnvs,
       ...override,
     };
 
+    // if there are only 1 private key, duplicate it to make it 10 cus we might not have enough
+    // for the setup process
+    if (this.processEnvs.PRIVATE_KEYS.length === 1) {
+      this.processEnvs.PRIVATE_KEYS = new Array(10).fill(
+        this.processEnvs.PRIVATE_KEYS[0]
+      );
+    }
+
     // -- setup network
     this.network = override.NETWORK || this.processEnvs.NETWORK;
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment ${this.network}. Please use one of ${Object.values(
-          LIT_NETWORK
-        )}`
+        `Invalid network environment ${
+          this.network
+        }. Please use one of ${Object.values(LIT_NETWORK)}`
       );
     }
 
