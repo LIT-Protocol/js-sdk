@@ -270,9 +270,10 @@ export class LitNodeClientNodeJs
    * @param obj - The object to check.
    * @returns True if the object is of type SessionKeyPair.
    */
-  isSessionKeyPair(obj: any): obj is SessionKeyPair {
+  isSessionKeyPair(obj: unknown): obj is SessionKeyPair {
     return (
       typeof obj === 'object' &&
+      obj !== null &&
       'publicKey' in obj &&
       'secretKey' in obj &&
       typeof obj.publicKey === 'string' &&
@@ -509,7 +510,7 @@ export class LitNodeClientNodeJs
     resourceAbilityRequests,
   }: {
     authSig: AuthSig;
-    sessionKeyUri: any;
+    sessionKeyUri: string;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
@@ -1666,7 +1667,7 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    let curveType = responseData[0]?.curveType;
+    const curveType = responseData[0]?.curveType;
 
     if (curveType === 'ECDSA') {
       throw new Error(

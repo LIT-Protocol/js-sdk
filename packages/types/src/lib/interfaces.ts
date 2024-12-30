@@ -1046,7 +1046,7 @@ export interface CommonGetSessionSigsProps {
   /**
    * When this session signature will expire. After this time is up you will need to reauthenticate, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
    */
-  expiration?: any;
+  expiration?: string;
 
   /**
    * The chain to use for the session signature and sign the session key. This value is almost always `ethereum`. If you're using EVM, this parameter isn't very important.
