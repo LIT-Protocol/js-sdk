@@ -560,6 +560,13 @@ export class LitCore {
     }
   }
 
+  protected async assertConnected() {
+    // -- if it's not ready yet, then connect
+    if (!this.ready) {
+      await this.connect();
+    }
+  }
+
   private async _handshakeAndVerifyNodeAttestation({
     url,
     requestId,

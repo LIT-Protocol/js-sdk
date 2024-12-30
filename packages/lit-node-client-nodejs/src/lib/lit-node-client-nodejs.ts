@@ -184,10 +184,7 @@ export class LitNodeClientNodeJs
       await params.dAppOwnerWallet.getAddress()
     );
 
-    // -- if it's not ready yet, then connect
-    if (!this.ready) {
-      await this.connect();
-    }
+    await this.assertConnected();
 
     const siweMessage = await createSiweMessageWithCapacityDelegation({
       uri: 'lit:capability:delegation',
@@ -890,13 +887,7 @@ export class LitNodeClientNodeJs
   executeJs = async (
     params: JsonExecutionSdkParams
   ): Promise<ExecuteJsResponse> => {
-    // ========== Validate Params ==========
-    if (!this.ready) {
-      const message =
-        '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-
-      throw new LitNodeClientNotReadyError({}, message);
-    }
+    await this.assertConnected();
 
     const paramsIsSafe = safeParams({
       functionName: 'executeJs',
@@ -1226,15 +1217,9 @@ export class LitNodeClientNodeJs
    * @throws { Error } if the subnetPubKey is null
    */
   encrypt = async (params: EncryptSdkParams): Promise<EncryptResponse> => {
-    // ========== Validate Params ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      throw new LitNodeClientNotReadyError(
-        {},
-        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
-      );
-    }
+    await this.assertConnected();
 
+    // ========== Validate Params ==========
     // -- validate if this.subnetPubKey is null
     if (!this.subnetPubKey) {
       throw new LitNodeClientNotReadyError({}, 'subnetPubKey cannot be null');
@@ -1316,15 +1301,9 @@ export class LitNodeClientNodeJs
     const { sessionSigs, authSig, chain, ciphertext, dataToEncryptHash } =
       params;
 
-    // ========== Validate Params ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      throw new LitNodeClientNotReadyError(
-        {},
-        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
-      );
-    }
+    await this.assertConnected();
 
+    // ========== Validate Params ==========
     // -- validate if this.subnetPubKey is null
     if (!this.subnetPubKey) {
       throw new LitNodeClientNotReadyError({}, 'subnetPubKey cannot be null');
@@ -1521,15 +1500,9 @@ export class LitNodeClientNodeJs
   ): Promise<SignSessionKeyResponse> => {
     log(`[signSessionKey] params:`, params);
 
-    // ========== Validate Params ==========
-    // -- validate: If it's NOT ready
-    if (!this.ready) {
-      throw new LitNodeClientNotReadyError(
-        {},
-        '[signSessionKey] ]LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
-      );
-    }
+    await this.assertConnected();
 
+    // ========== Validate Params ==========
     // -- construct SIWE message that will be signed by node to generate an authSig.
     const _expiration =
       params.expiration ||
@@ -2195,11 +2168,7 @@ export class LitNodeClientNodeJs
   async claimKeyId(
     params: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
-    if (!this.ready) {
-      const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throw new LitNodeClientNotReadyError({}, message);
-    }
+    await this.assertConnected();
 
     if (params.authMethod.authMethodType == AUTH_METHOD_TYPE.WebAuthn) {
       throw new LitNodeClientNotReadyError(
