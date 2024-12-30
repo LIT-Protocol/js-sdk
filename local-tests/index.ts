@@ -1,8 +1,19 @@
 import { TinnyEnvironment } from './setup/tinny-environment';
 import { runInBand, runTestsParallel } from './setup/tinny-operations';
 import * as tinnyTests from './tests';
+import { getEoaSessionSigs } from './setup/session-sigs/get-eoa-session-sigs';
+import { getLitActionSessionSigs } from './setup/session-sigs/get-lit-action-session-sigs';
+import { getPkpSessionSigs } from './setup/session-sigs/get-pkp-session-sigs';
 
-export { TinnyEnvironment, runInBand, runTestsParallel, tinnyTests };
+export {
+  TinnyEnvironment,
+  runInBand,
+  runTestsParallel,
+  tinnyTests,
+  getEoaSessionSigs,
+  getLitActionSessionSigs,
+  getPkpSessionSigs,
+};
 
 // Usage
 // const devEnv = new TinnyEnvironment();
