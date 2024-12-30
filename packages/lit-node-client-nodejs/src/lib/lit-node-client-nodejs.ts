@@ -30,6 +30,7 @@ import {
   LitNodeClientNotReadyError,
   ParamNullError,
   ParamsMissingError,
+  UnauthorizedException,
   UnknownError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
@@ -63,7 +64,11 @@ import {
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
-import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
+import {
+  AuthenticationProps,
+  ILitResource,
+  ISessionCapabilityObject,
+} from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
@@ -139,6 +144,7 @@ export class LitNodeClientNodeJs
   implements LitClientSessionManager, ILitNodeClient
 {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
+  authContext?: AuthenticationProps;
 
   // ========== Constructor ==========
   constructor(args: LitNodeClientConfig | CustomNetwork) {
@@ -151,6 +157,30 @@ export class LitNodeClientNodeJs
     if (args !== undefined && args !== null && 'defaultAuthCallback' in args) {
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
+
+    this.setAuthContext(args.authContext);
+  }
+
+  public setAuthContext(authContext?: AuthenticationProps) {
+    this.authContext = authContext;
+  }
+
+  public async getAuthContextSessionSigs(
+    getSessionSigsPropsOverride?: Partial<GetSessionSigsProps>
+  ): Promise<SessionSigsMap> {
+    if (!this.authContext) {
+      throw new UnauthorizedException(
+        {
+          info: {},
+        },
+        'authContext is not set. Cannot authenticate using it'
+      );
+    }
+
+    return this.getSessionSigs({
+      ...this.authContext?.getSessionSigsProps,
+      ...(getSessionSigsPropsOverride || {}),
+    });
   }
 
   // ========== Rate Limit NFT ==========
@@ -725,10 +755,15 @@ export class LitNodeClientNodeJs
       );
     }
 
+    const sessionSigs = await this._getValidSessionSigs(
+      params.sessionSigs,
+      params.getSessionSigsPropsOverride
+    );
+
     // determine which node to run on
     const ipfsId = await this.getIpfsId({
       dataToHash: params.code!,
-      sessionSigs: params.sessionSigs,
+      sessionSigs,
     });
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
@@ -779,7 +814,7 @@ export class LitNodeClientNodeJs
 
       // -- choose the right signature
       const sessionSig = this.getSessionSigByUrl({
-        sessionSigs: params.sessionSigs,
+        sessionSigs,
         url,
       });
 
@@ -857,6 +892,18 @@ export class LitNodeClientNodeJs
     formattedParams: JsonExecutionSdkParams,
     requestId: string
   ) {
+    if (!formattedParams.sessionSigs) {
+      throw new UnauthorizedException(
+        {
+          info: {
+            url,
+            requestId,
+          },
+        },
+        `sessionSigs missing on execute js request`
+      );
+    }
+
     // -- choose the right signature
     const authSig = this.getSessionSigByUrl({
       sessionSigs: formattedParams.sessionSigs,
@@ -905,21 +952,18 @@ export class LitNodeClientNodeJs
       );
     }
 
-    // validate session sigs
-    const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
-
-    if (checkedSessionSigs.isValid === false) {
-      throw new InvalidSessionSigs(
-        {},
-        `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
-      );
-    }
+    // -- get sessionSigs
+    const sessionSigs = await this._getValidSessionSigs(
+      params.sessionSigs,
+      params.getSessionSigsPropsOverride
+    );
 
     // Format the params
     let formattedParams: JsonExecutionSdkParams = {
       ...params,
       ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
       ...(params.code && { code: encodeCode(params.code) }),
+      sessionSigs,
     };
 
     // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
@@ -1082,13 +1126,12 @@ export class LitNodeClientNodeJs
    * @param { JsonPkpSignSdkParams } params
    * @param params.toSign - The data to sign
    * @param params.pubKey - The public key to sign with
-   * @param params.sessionSigs - The session signatures to use
-   * @param params.authMethods - (optional) The auth methods to use
+   * @param [params.sessionSigs] - The session signatures to use
+   * @param [params.getSessionSigsPropsOverride] - The props override when obtaining sessionSigs from the auth context
    */
   pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
     // -- validate required params
     const requiredParamKeys = ['toSign', 'pubKey'];
-
     (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
       if (!params[key]) {
         throw new ParamNullError(
@@ -1104,35 +1147,14 @@ export class LitNodeClientNodeJs
       }
     });
 
-    // -- validate present of accepted auth methods
-    if (
-      !params.sessionSigs &&
-      (!params.authMethods || params.authMethods.length <= 0)
-    ) {
-      throw new ParamNullError(
-        {
-          info: {
-            params,
-          },
-        },
-        'Either sessionSigs or authMethods (length > 0) must be present.'
-      );
-    }
-
-    const requestId = this._getNewRequestId();
-
-    // validate session sigs
-    const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
-
-    if (checkedSessionSigs.isValid === false) {
-      throw new InvalidSessionSigs(
-        {},
-        `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
-      );
-    }
-
     // ========== Get Node Promises ==========
+    // -- get sessionSigs
+    const sessionSigs = await this._getValidSessionSigs(
+      params.sessionSigs,
+      params.getSessionSigsPropsOverride
+    );
     // Handle promises for commands sent to Lit nodes
+    const requestId = this._getNewRequestId();
 
     const nodePromises = this.getNodePromises((url: string) => {
       // -- get the session sig from the url key
@@ -1991,6 +2013,41 @@ export class LitNodeClientNodeJs
     }
 
     return signatures;
+  };
+
+  private _getValidSessionSigs = async (
+    providedSessionSigs?: SessionSigsMap,
+    getSessionSigsPropsOverride?: Partial<GetSessionSigsProps>
+  ) => {
+    const sessionSigs =
+      providedSessionSigs ||
+      (await this.getAuthContextSessionSigs(getSessionSigsPropsOverride));
+
+    if (!sessionSigs) {
+      throw new ParamNullError(
+        {
+          info: {
+            providedSessionSigs,
+            authContext: this.authContext,
+          },
+        },
+        'Could not get sessionSigs. Must provide them or set an authContext on construction or with setAuthContext'
+      );
+    }
+    const checkedSessionSigs = validateSessionSigs(sessionSigs);
+    if (!checkedSessionSigs.isValid) {
+      throw new InvalidSessionSigs(
+        {
+          info: {
+            sessionSigsValidation: checkedSessionSigs.isValid,
+            sessionSigsErrors: checkedSessionSigs.errors,
+          },
+        },
+        `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
+      );
+    }
+
+    return sessionSigs;
   };
 
   /**

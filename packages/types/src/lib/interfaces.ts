@@ -186,14 +186,18 @@ export interface LitNodeClientConfig {
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
+  authContext?: AuthenticationProps;
   rpcUrl?: string;
 }
 
 export type CustomNetwork = Pick<
   LitNodeClientConfig,
-  'litNetwork' | 'contractContext' | 'checkNodeAttestation'
-> &
-  Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
+  | 'litNetwork'
+  | 'contractContext'
+  | 'checkNodeAttestation'
+  | 'authContext'
+  | 'minNodeCount'
+>;
 
 /**
  * Override for LocalStorage and SessionStorage
@@ -238,11 +242,12 @@ export interface BaseJsonPkpSignRequest {
 
 /**
  * The 'pkpSign' function param. Please note that the structure
- * is different than the payload sent to the node.
+ * is different from the payload sent to the node.
  */
 export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
-  sessionSigs: SessionSigsMap;
+  sessionSigs?: SessionSigsMap;
+  getSessionSigsPropsOverride?: Partial<GetSessionSigsProps>;
 }
 
 /**
@@ -474,12 +479,12 @@ export interface JsonExecutionSdkParams
   /**
    * the session signatures to use to authorize the user with the nodes
    */
-  sessionSigs: SessionSigsMap;
+  sessionSigs?: SessionSigsMap;
 
   /**
-   * auth methods to resolve
+   * the lit node client auth context props to get session sigs override
    */
-  authMethods?: AuthMethod[];
+  getSessionSigsPropsOverride?: Partial<GetSessionSigsProps>;
 }
 
 export interface ExecuteJsAdvancedOptions {
