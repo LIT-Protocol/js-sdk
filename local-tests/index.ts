@@ -2,12 +2,7 @@ import { TinnyEnvironment } from './setup/tinny-environment';
 import { runInBand, runTestsParallel } from './setup/tinny-operations';
 import * as tinnyTests from './tests';
 
-export {
-  TinnyEnvironment,
-  runInBand,
-  runTestsParallel,
-  tinnyTests
-}
+export { TinnyEnvironment, runInBand, runTestsParallel, tinnyTests };
 
 // Usage
 // const devEnv = new TinnyEnvironment();

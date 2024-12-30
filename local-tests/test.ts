@@ -325,5 +325,4 @@ setLitActionsCodeToLocal();
   }
   await devEnv.stopTestnet();
   process.exit(res);
-
 })();

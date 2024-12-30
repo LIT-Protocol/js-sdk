@@ -1,12 +1,16 @@
 {
-  "name": "tinnytest",
-  "version": "0.0.18",
+  "name": "@lit-protocol/tinny",
+  "version": "0.0.3",
   "description": "A package to run the test script for Lit Protocol with custom commands",
   "type": "module",
   "main": "./index.js",
   "typings": "./index.ts",
   "license": "MIT",
   "author": "Anson (https://github.com/ansonhkg)",
+  "publishConfig": {
+    "access": "public",
+    "directory": "./"
+  },
   "dependencies": {
     "@cosmjs/amino": "0.30.1",
     "@cosmjs/crypto": "0.30.1",

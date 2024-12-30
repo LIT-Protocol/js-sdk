@@ -36,7 +36,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
+        (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -105,9 +105,13 @@ export class TinnyEnvironment {
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
 
-  constructor(network?: LIT_NETWORK_VALUES) {
-    // -- setup network
-    this.network = network || this.processEnvs.NETWORK;
+  constructor(override?: Partial<ProcessEnvs>) {
+
+    // Merge default processEnvs with custom overrides
+    this.processEnvs = {
+      ...this.processEnvs,
+      ...override,
+    };
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(

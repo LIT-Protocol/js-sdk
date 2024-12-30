@@ -6,6 +6,7 @@
 /out-tsc
 **/dist
 **/out-tsc
+local-tests/**/*.js
 
 # dependencies
 node_modules

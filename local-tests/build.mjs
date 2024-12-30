@@ -1,8 +1,8 @@
 import * as esbuild from 'esbuild';
 import { nodeExternalsPlugin } from 'esbuild-node-externals';
 import fs from 'fs';
-
-const TEST_DIR = 'local-tests';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
 /**
  * Builds the project using esbuild.
@@ -10,30 +10,8 @@ const TEST_DIR = 'local-tests';
  */
 export const build = async () => {
   await esbuild.build({
-    entryPoints: [`${TEST_DIR}/test.ts`],
-    outfile: `./${TEST_DIR}/build/test.mjs`,
-    bundle: true,
-    plugins: [
-      nodeExternalsPlugin({
-        allowList: [
-          'ethers',
-          '@lit-protocol/accs-schemas',
-          '@lit-protocol/contracts',
-          'crypto',
-          'secp256k1',
-        ],
-      }),
-    ],
-    platform: 'node',
-    target: 'esnext',
-    format: 'esm',
-    inject: [`./${TEST_DIR}/shim.mjs`],
-    mainFields: ['module', 'main'],
-  });
-
-  await esbuild.build({
-    entryPoints: [`${TEST_DIR}/index.ts`],
-    outfile: `./${TEST_DIR}/index.js`,
+    entryPoints: [fileURLToPath(new URL('./index.ts', import.meta.url))],
+    outfile: fileURLToPath(new URL('./index.js', import.meta.url)),
     bundle: true,
     globalName: 'tinnySdk',
     plugins: [
@@ -50,39 +28,14 @@ export const build = async () => {
     platform: 'node',
     target: 'esnext',
     format: 'esm',
-    inject: [`./${TEST_DIR}/shim.mjs`],
+    inject: [fileURLToPath(new URL('./shim.mjs', import.meta.url))],
     mainFields: ['module', 'main'],
   });
-};
-
-/**
- * Inserts a polyfill at the beginning of a file.
- * The polyfill ensures that the global `fetch` function is available.
- * @returns {void}
- */
-export const postBuildPolyfill = () => {
-  try {
-    const file = fs.readFileSync(`./${TEST_DIR}/build/test.mjs`, 'utf8');
-    const content = `import fetch from 'node-fetch';
-try {
-  if (!globalThis.fetch) {
-    globalThis.fetch = fetch;
-  }
-} catch (error) {
-  console.error('❌ Error in polyfill', error);
-}
-`;
-    const newFile = content + file;
-    fs.writeFileSync(`./${TEST_DIR}/build/test.mjs`, newFile);
-  } catch (e) {
-    throw new Error(`Error in postBuildPolyfill: ${e}`);
-  }
 };
 
 // Go!
 (async () => {
   const start = Date.now();
   await build();
-  postBuildPolyfill();
   console.log(`[build.mjs] 🚀 Build time: ${Date.now() - start}ms`);
 })();
