@@ -22,8 +22,22 @@ import {
 } from '@lit-protocol/constants';
 
 console.log('checking env', process.env['DEBUG']);
+
+const DEFAULT_ANVIL_PRIVATE_KEYS = [
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+  '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
+  '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
+  '0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a',
+  '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba',
+  '0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e',
+  '0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356',
+  '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
+  '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
+];
+
 export class TinnyEnvironment {
   public network: LIT_NETWORK_VALUES;
+  public customNetworkContext: any;
 
   /**
    * Environment variables used in the process.
@@ -42,11 +56,6 @@ export class TinnyEnvironment {
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
-    BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
-      'http://127.0.0.1:7470',
-      'http://127.0.0.1:7471',
-      'http://127.0.0.1:7472',
-    ],
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
@@ -62,17 +71,10 @@ export class TinnyEnvironment {
     // (7) "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955" (10000.000000000000000000 ETH)
     // (8) "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f" (10000.000000000000000000 ETH)
     // (9) "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720" (10000.000000000000000000 ETH)
-    PRIVATE_KEYS: process.env['PRIVATE_KEYS']?.split(',') || [
-      '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
-      '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
-      '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
-      '0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a',
-      '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba',
-      '0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e',
-      '0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356',
-      '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
-      '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
-    ],
+    PRIVATE_KEYS:
+      process.env['NETWORK'] === LIT_NETWORK.Custom
+        ? DEFAULT_ANVIL_PRIVATE_KEYS
+        : process.env['PRIVATE_KEYS']?.split(',') || DEFAULT_ANVIL_PRIVATE_KEYS,
     KEY_IN_USE: new Array(),
     NO_SETUP: process.env['NO_SETUP'] === 'true',
     USE_SHIVA: process.env['USE_SHIVA'] === 'true',
@@ -105,15 +107,33 @@ export class TinnyEnvironment {
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
 
-  constructor(network?: LIT_NETWORK_VALUES) {
+  constructor(
+    override?: Partial<ProcessEnvs> & { customNetworkContext?: any }
+  ) {
+    this.customNetworkContext = override?.customNetworkContext;
+
+    // Merge default processEnvs with custom overrides
+    this.processEnvs = {
+      ...this.processEnvs,
+      ...override,
+    };
+
+    // if there are only 1 private key, duplicate it to make it 10 cus we might not have enough
+    // for the setup process
+    if (this.processEnvs.PRIVATE_KEYS.length === 1) {
+      this.processEnvs.PRIVATE_KEYS = new Array(10).fill(
+        this.processEnvs.PRIVATE_KEYS[0]
+      );
+    }
+
     // -- setup network
-    this.network = network || this.processEnvs.NETWORK;
+    this.network = override?.NETWORK || this.processEnvs.NETWORK;
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment. Please use one of ${Object.values(
-          LIT_NETWORK
-        )}`
+        `Invalid network environment ${
+          this.network
+        }. Please use one of ${Object.values(LIT_NETWORK)}`
       );
     }
 
@@ -235,7 +255,8 @@ export class TinnyEnvironment {
 
     if (this.network === LIT_NETWORK.Custom || centralisation === 'unknown') {
       const networkContext =
-        this?.testnet?.ContractContext ?? this._contractContext;
+        this.customNetworkContext ||
+        (this?.testnet?.ContractContext ?? this._contractContext);
       this.litNodeClient = new LitNodeClient({
         litNetwork: LIT_NETWORK.Custom,
         rpcUrl: this.rpc,
@@ -341,8 +362,8 @@ export class TinnyEnvironment {
    * Creates a random person.
    * @returns A promise that resolves to the created person.
    */
-  async createRandomPerson() {
-    return await this.createNewPerson('Alice');
+  async createRandomPerson(name?: string) {
+    return await this.createNewPerson(name || 'Alice');
   }
 
   setUnavailable = (network: LIT_NETWORK_VALUES) => {
@@ -373,7 +394,8 @@ export class TinnyEnvironment {
 
         await this.testnet.getTestnetConfig();
       } else if (this.network === LIT_NETWORK.Custom) {
-        const context = await import('./networkContext.json');
+        const context =
+          this.customNetworkContext || (await import('./networkContext.json'));
         this._contractContext = context;
       }
 
@@ -483,7 +505,7 @@ export class TinnyEnvironment {
         debug: this.processEnvs.DEBUG,
         rpc: this.rpc,
         customContext: networkContext,
-        network: 'custom',
+        network: LIT_NETWORK.Custom,
       });
     } else if (
       CENTRALISATION_BY_NETWORK[this.network] === 'decentralised' ||

@@ -122,7 +122,6 @@ export const getSignatures = async <T>(params: {
           delete signatureResponse[sigName];
         } else {
           let share = getFlattenShare(signatureResponse[sigName]);
-
           share = {
             sigType: share.sigType,
             signatureShare: share.signatureShare,
@@ -169,7 +168,8 @@ export const getSignatures = async <T>(params: {
 
     shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
-    const sigName = shares[0].sigName;
+    let sigName = shares[0].sigName;
+
     logWithRequestId(
       requestId,
       `starting signature combine for sig name: ${sigName}`,
@@ -211,7 +211,7 @@ export const getSignatures = async <T>(params: {
       );
     }
 
-    const sigType = mostCommonString(shares.map((s) => s.sigType));
+    let sigType = mostCommonString(shares.map((s) => s.sigType));
 
     // -- validate if this.networkPubKeySet is null
     if (networkPubKeySet === null) {
@@ -225,11 +225,16 @@ export const getSignatures = async <T>(params: {
       );
     }
 
+    if (sigType === LIT_CURVE.EcdsaK256Sha256) {
+      sigType = LIT_CURVE.EcdsaK256;
+    }
+
     // -- validate if signature type is ECDSA
     if (
       sigType !== LIT_CURVE.EcdsaCaitSith &&
       sigType !== LIT_CURVE.EcdsaK256 &&
-      sigType !== LIT_CURVE.EcdsaCAITSITHP256
+      sigType !== LIT_CURVE.EcdsaCAITSITHP256 &&
+      sigType! == LIT_CURVE.EcdsaK256Sha256
     ) {
       throw new UnknownSignatureType(
         {

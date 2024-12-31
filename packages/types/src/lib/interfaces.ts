@@ -249,7 +249,9 @@ export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
 /**
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
-export interface JsonPkpSignRequest extends BaseJsonPkpSignRequest {
+export interface JsonPkpSignRequest
+  extends BaseJsonPkpSignRequest,
+    NodeSetRequired {
   authSig: AuthSig;
 
   /**
@@ -275,9 +277,27 @@ export interface JsonSignChainDataRequest {
   exp: number;
 }
 
+// Naga V8: Selected Nodes for ECDSA endpoints #1223
+// https://github.com/LIT-Protocol/lit-assets/pull/1223/
+export interface NodeSet {
+  // reference: https://github.com/LIT-Protocol/lit-assets/blob/f82b28e83824a861547307aaed981a6186e51d48/rust/lit-node/common/lit-node-testnet/src/node_collection.rs#L185-L191
+  // eg: 192.168.0.1:8080
+  socketAddress: string;
+
+  // (See PR description) the value parameter is a U64 that generates a sort order. This could be pricing related information, or another value to help select the right nodes. The value could also be zero with only the correct number of nodes participating in the signing request.
+  value: number;
+}
+
+// Naga V8: Ability to pass selected nodes to ECDSA endpoints, and use these instead of the nodes' self-determined peers.
+// https://github.com/LIT-Protocol/lit-assets/pull/1223
+export interface NodeSetRequired {
+  nodeSet: NodeSet[];
+}
+
 export interface JsonSignSessionKeyRequestV1
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    Pick<LitActionSdkParams, 'litActionIpfsId'> {
+    Pick<LitActionSdkParams, 'litActionIpfsId'>,
+    NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
@@ -506,7 +526,8 @@ export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
 }
 
 export interface JsonExecutionRequest
-  extends Pick<LitActionSdkParams, 'jsParams'> {
+  extends Pick<LitActionSdkParams, 'jsParams'>,
+    NodeSetRequired {
   authSig: AuthSig;
 
   /**
@@ -650,7 +671,8 @@ export interface SigShare {
     | 'BLS'
     | 'K256'
     | 'ECDSA_CAIT_SITH' // Legacy alias of K256
-    | 'EcdsaCaitSithP256';
+    | 'EcdsaCaitSithP256'
+    | 'EcdsaK256Sha256';
 
   signatureShare: string;
   shareIndex?: number;
@@ -1109,6 +1131,11 @@ export interface GetSessionSigsProps
    * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
    */
   authNeededCallback: AuthCallback;
+
+  /**
+   * This allow user to get new prices from the node. If not, we will just use the one we got when we first connected to the nodes.
+   */
+  getNewPrices?: boolean;
 }
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
@@ -1158,6 +1185,7 @@ export interface SessionSigningTemplate {
   issuedAt: string;
   expiration: string;
   nodeAddress: string;
+  maxPrice: string;
 }
 
 export interface WebAuthnAuthenticationVerificationParams {

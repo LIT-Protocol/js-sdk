@@ -16,7 +16,6 @@ export const testUseEoaSessionSigsToPkpSign = async (
   const alice = await devEnv.createRandomPerson();
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
   const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
     toSign: alice.loveLetter,
     pubKey: alice.pkp.publicKey,
