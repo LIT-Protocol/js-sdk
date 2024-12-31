@@ -50,7 +50,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-        (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -107,8 +107,9 @@ export class TinnyEnvironment {
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
 
-  constructor(override?: Partial<ProcessEnvs> & { customNetworkContext?: any }) {
-
+  constructor(
+    override?: Partial<ProcessEnvs> & { customNetworkContext?: any }
+  ) {
     this.customNetworkContext = override?.customNetworkContext;
 
     // Merge default processEnvs with custom overrides
@@ -126,11 +127,12 @@ export class TinnyEnvironment {
     }
 
     // -- setup network
-    this.network = override.NETWORK || this.processEnvs.NETWORK;
+    this.network = override?.NETWORK || this.processEnvs.NETWORK;
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment ${this.network
+        `Invalid network environment ${
+          this.network
         }. Please use one of ${Object.values(LIT_NETWORK)}`
       );
     }
@@ -253,7 +255,8 @@ export class TinnyEnvironment {
 
     if (this.network === LIT_NETWORK.Custom || centralisation === 'unknown') {
       const networkContext =
-        this.customNetworkContext || (this?.testnet?.ContractContext ?? this._contractContext);
+        this.customNetworkContext ||
+        (this?.testnet?.ContractContext ?? this._contractContext);
       this.litNodeClient = new LitNodeClient({
         litNetwork: LIT_NETWORK.Custom,
         rpcUrl: this.rpc,
@@ -391,7 +394,8 @@ export class TinnyEnvironment {
 
         await this.testnet.getTestnetConfig();
       } else if (this.network === LIT_NETWORK.Custom) {
-        const context = this.customNetworkContext || await import('./networkContext.json');
+        const context =
+          this.customNetworkContext || (await import('./networkContext.json'));
         this._contractContext = context;
       }
 
