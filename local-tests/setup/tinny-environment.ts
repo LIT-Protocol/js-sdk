@@ -121,7 +121,7 @@ export class TinnyEnvironment {
     }
 
     // -- setup network
-    this.network = override.NETWORK || this.processEnvs.NETWORK;
+    this.network = override?.NETWORK || this.processEnvs.NETWORK;
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(

@@ -2,7 +2,14 @@ import * as esbuild from 'esbuild';
 import { nodeExternalsPlugin } from 'esbuild-node-externals';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+
+const ALLOW_LIST = [
+  'ethers',
+  '@lit-protocol/accs-schemas',
+  '@lit-protocol/contracts',
+  'crypto',
+  'secp256k1',
+];
 
 /**
  * Build the CLI enabled version of Tinny.
@@ -15,13 +22,7 @@ export const build = async () => {
     bundle: true,
     plugins: [
       nodeExternalsPlugin({
-        allowList: [
-          'ethers',
-          '@lit-protocol/accs-schemas',
-          '@lit-protocol/contracts',
-          'crypto',
-          'secp256k1',
-        ],
+        allowList: ALLOW_LIST,
       }),
     ],
     platform: 'node',
@@ -43,13 +44,7 @@ export const bundle = async () => {
     globalName: 'tinnySdk',
     plugins: [
       nodeExternalsPlugin({
-        allowList: [
-          'ethers',
-          '@lit-protocol/accs-schemas',
-          '@lit-protocol/contracts',
-          'crypto',
-          'secp256k1',
-        ],
+        allowList: ALLOW_LIST,
       }),
     ],
     platform: 'node',
