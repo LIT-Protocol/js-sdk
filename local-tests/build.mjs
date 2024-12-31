@@ -1,6 +1,5 @@
 import * as esbuild from 'esbuild';
 import { nodeExternalsPlugin } from 'esbuild-node-externals';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const ALLOW_LIST = [
@@ -11,54 +10,57 @@ const ALLOW_LIST = [
   'secp256k1',
 ];
 
+const getPath = (relativePath) =>
+  fileURLToPath(new URL(relativePath, import.meta.url));
+
 /**
- * Build the CLI enabled version of Tinny.
- * @returns {Promise<void>} A promise that resolves when the build is complete.
+ * Common esbuild configuration options.
+ * @param {string} entry - Entry file path.
+ * @param {string} outfile - Output file path.
+ * @param {string} [globalName] - Optional global name for the bundle.
+ * @returns {esbuild.BuildOptions} Esbuild configuration object.
+ */
+const createBuildConfig = (entry, outfile, globalName) => ({
+  entryPoints: [getPath(entry)],
+  outfile: getPath(outfile),
+  bundle: true,
+  plugins: [
+    nodeExternalsPlugin({
+      allowList: ALLOW_LIST,
+    }),
+  ],
+  platform: 'node',
+  target: 'esnext',
+  format: 'esm',
+  inject: [getPath('./shim.mjs')],
+  mainFields: ['module', 'main'],
+  ...(globalName ? { globalName } : {}),
+});
+
+/**
+ * Builds the CLI-enabled version of Tinny.
  */
 export const build = async () => {
-  await esbuild.build({
-    entryPoints: [fileURLToPath(new URL('./test.ts', import.meta.url))],
-    outfile: fileURLToPath(new URL('./build/test.mjs', import.meta.url)),
-    bundle: true,
-    plugins: [
-      nodeExternalsPlugin({
-        allowList: ALLOW_LIST,
-      }),
-    ],
-    platform: 'node',
-    target: 'esnext',
-    format: 'esm',
-    inject: [fileURLToPath(new URL('./shim.mjs', import.meta.url))],
-    mainFields: ['module', 'main'],
-  });
+  await esbuild.build(createBuildConfig('./test.ts', './build/test.mjs'));
 };
 
 /**
- * Bundle Tinny to be a standalone package.
+ * Bundles Tinny as a standalone package.
  */
 export const bundle = async () => {
-  await esbuild.build({
-    entryPoints: [fileURLToPath(new URL('./index.ts', import.meta.url))],
-    outfile: fileURLToPath(new URL('./index.js', import.meta.url)),
-    bundle: true,
-    globalName: 'tinnySdk',
-    plugins: [
-      nodeExternalsPlugin({
-        allowList: ALLOW_LIST,
-      }),
-    ],
-    platform: 'node',
-    target: 'esnext',
-    format: 'esm',
-    inject: [fileURLToPath(new URL('./shim.mjs', import.meta.url))],
-    mainFields: ['module', 'main'],
-  });
+  await esbuild.build(
+    createBuildConfig('./index.ts', './index.js', 'tinnySdk')
+  );
 };
 
 // Go!
 (async () => {
   const start = Date.now();
-  await build();
-  await bundle();
-  console.log(`[build.mjs] 🚀 Build time: ${Date.now() - start}ms`);
+  try {
+    await build();
+    await bundle();
+    console.log(`[build.mjs] 🚀 Build time: ${Date.now() - start}ms`);
+  } catch (error) {
+    console.error(`[build.mjs] ❌ Build failed:`, error);
+  }
 })();
