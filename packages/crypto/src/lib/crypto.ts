@@ -202,14 +202,20 @@ export const combineEcdsaShares = async (
     Buffer.from(share.signatureShare, 'hex')
   );
 
-  const [r, s, v] = await ecdsaCombine(variant!, presignature, signatureShares);
+  const [r, s, recId] = await ecdsaCombine(
+    variant!,
+    presignature,
+    signatureShares
+  );
 
   const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
   const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
 
-  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, v]);
+  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, recId]);
 
-  const signature = splitSignature(Buffer.concat([r, s, Buffer.from([v])]));
+  const signature = splitSignature(
+    Buffer.concat([r, s, Buffer.from([recId + 27])])
+  );
 
   return {
     r: signature.r.slice('0x'.length),
