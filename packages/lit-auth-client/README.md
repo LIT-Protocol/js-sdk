@@ -15,7 +15,7 @@ import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 // Initialize the auth client
 const client = new LitAuthClient({
-  redirectUri: 'https://your-app.com/callback'
+  redirectUri: 'https://your-app.com/callback',
 });
 
 // Handle social login

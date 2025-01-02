@@ -343,6 +343,28 @@ yarn graph
 
 ![](https://i.ibb.co/2dLyMTW/Screenshot-2022-11-15-at-15-18-46.png)
 
+# Core Systems and Services
+
+The Lit Protocol SDK provides the following core systems:
+
+- Cryptographic key management (PKP - Public Key Protocol)
+- Blockchain wallet interactions (Ethereum, Solana, Cosmos)
+- Decentralized authentication and authorization
+- Distributed computing and signing
+- Smart contract management
+- Access control and encryption services
+
+# Main Functions and Classes
+
+Key components available across packages:
+
+- `PKPEthersWallet`: Ethereum wallet management for PKP
+- `LitNodeClient`: Network interaction client
+- `executeJs()`: Decentralized JavaScript execution
+- `signMessageWithEncryptedKey()`: Cryptographic signing
+- `generatePrivateKey()`: Key generation utilities
+- `TinnyEnvironment`: Testing environment setup
+
 # FAQs & Common Errors
 
 <details>

@@ -11,9 +11,9 @@ yarn add @lit-protocol/auth-helpers
 ## Quick Start
 
 ```typescript
-import { 
+import {
   encodeSessionCapabilities,
-  verifyCapabilities 
+  verifyCapabilities,
 } from '@lit-protocol/auth-helpers';
 
 // Encode session capabilities

@@ -36,13 +36,13 @@ const signature = await pkpBase.runLitAction(dataToSign, 'sign');
 
 ## Core Methods
 
-| Method | Description |
-| ------ | ----------- |
-| `init()` | Initialize and connect to LIT node |
-| `compressPubKey()` | Compress public keys |
-| `runLitAction()` | Execute LIT actions |
-| `createAndSetSessionSigs()` | Manage session signatures |
-| `ensureLitNodeClientReady()` | Verify node connection |
+| Method                       | Description                        |
+| ---------------------------- | ---------------------------------- |
+| `init()`                     | Initialize and connect to LIT node |
+| `compressPubKey()`           | Compress public keys               |
+| `runLitAction()`             | Execute LIT actions                |
+| `createAndSetSessionSigs()`  | Manage session signatures          |
+| `ensureLitNodeClientReady()` | Verify node connection             |
 
 ## Development
 

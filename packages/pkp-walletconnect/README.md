@@ -20,8 +20,8 @@ const client = new PKPWalletConnect({
     name: 'Your App',
     description: 'Your app description',
     url: 'https://your-app.com',
-    icons: ['https://your-app.com/icon.png']
-  }
+    icons: ['https://your-app.com/icon.png'],
+  },
 });
 
 // Handle session proposals

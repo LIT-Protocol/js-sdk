@@ -25,7 +25,7 @@ const address = await wallet.getAddress();
 // Sign transaction
 const signedTx = await wallet.signTransaction({
   to: recipient,
-  value: ethers.utils.parseEther("0.1"),
+  value: ethers.utils.parseEther('0.1'),
 });
 ```
 

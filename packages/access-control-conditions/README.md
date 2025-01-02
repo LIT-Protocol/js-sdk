@@ -11,9 +11,9 @@ yarn add @lit-protocol/access-control-conditions
 ## Quick Start
 
 ```typescript
-import { 
+import {
   validateAccessControlConditions,
-  hashAccessControlConditions 
+  hashAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
 
 // Validate conditions

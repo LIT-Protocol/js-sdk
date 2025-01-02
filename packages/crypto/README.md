@@ -11,10 +11,7 @@ yarn add @lit-protocol/crypto
 ## Quick Start
 
 ```typescript
-import { 
-  generatePrivateKey,
-  encryptWithSignature 
-} from '@lit-protocol/crypto';
+import { generatePrivateKey, encryptWithSignature } from '@lit-protocol/crypto';
 
 // Generate a new private key
 const privateKey = await generatePrivateKey();

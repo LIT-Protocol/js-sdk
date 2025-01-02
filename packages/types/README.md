@@ -11,11 +11,11 @@ yarn add @lit-protocol/types
 ## Quick Start
 
 ```typescript
-import { 
+import {
   AccessControlConditions,
   ChainProperties,
   AuthStatus,
-  WalletProvider 
+  WalletProvider,
 } from '@lit-protocol/types';
 
 // Use types in your code
