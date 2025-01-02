@@ -26,7 +26,11 @@
     "tweetnacl-util": "^0.13.3",
     "util": "^0.12.4",
     "web-vitals": "^3.0.4",
-    "@lit-protocol/contracts": "^0.0.74"
+    "@lit-protocol/contracts": "^0.0.74",
+    "wagmi": "^2.14.6",
+    "viem": "^2.0.0",
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^18.0.0"
   },
   "tags": [
     "browser"
