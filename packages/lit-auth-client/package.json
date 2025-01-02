@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-auth-client",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
