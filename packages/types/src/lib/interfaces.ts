@@ -79,8 +79,8 @@ export interface CosmosAuthSig extends AuthSig {
 export type CosmosWalletType = 'keplr' | 'leap';
 
 export enum AuthProvider {
-  Wagmi = "wagmi",
-  LitConnectModal = "litConnectModal",
+  Wagmi = 'wagmi',
+  LitConnectModal = 'litConnectModal',
 }
 
 export interface AuthCallbackParams extends LitActionSdkParams {
