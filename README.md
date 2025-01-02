@@ -148,22 +148,6 @@ yarn test:local
 
 `nx generate @nx/js:library`
 
-## Create a new react demo app using the Lit JS SDK
-
-```sh
-yarn tools --create --react contracts-sdk --demo
-```
-
-## Deleting a package or app
-
-```
-// delete an app from ./app/<app-name>
-yarn delete:app <app-name>
-
-// delete a package from ./packages/<package-name>
-yarn delete:package <package-name>
-```
-
 ## Building
 
 ```sh
@@ -275,9 +259,11 @@ To run manual tests:
 
 ## ENV Vars
 
-- LIT_JS_SDK_GITHUB_ACCESS_TOKEN - a github access token to get the contract ABIs from a private repo
-- LIT_JS_SDK_LOCAL_NODE_DEV - set to true to use a local node
-- LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY - set to a funded wallet on Chronicle Testnet
+| Variable | Description |
+| -------- | ----------- |
+| LIT_JS_SDK_GITHUB_ACCESS_TOKEN | A GitHub access token to get the contract ABIs from a private repo |
+| LIT_JS_SDK_LOCAL_NODE_DEV | Set to true to use a local node |
+| LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY | Set to a funded wallet on Chronicle Testnet |
 
 # Error Handling
 
