@@ -46,7 +46,7 @@ yarn add @lit-protocol/lit-node-client
 
 # Packages
 
-📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. <br/>Get started with interacting with Lit network!
+📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client. <br/>Get started with interacting with Lit network!
 
 <!-- autogen:package:start -->
 
@@ -55,7 +55,7 @@ yarn add @lit-protocol/lit-node-client
 | [@lit-protocol/lit-node-client-nodejs](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client-nodejs) | ![lit-node-client-nodejs](https://img.shields.io/badge/-nodejs-2E8B57 'lit-node-client-nodejs') | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client-nodejs"><img src="https://img.shields.io/npm/v/@lit-protocol/lit-node-client-nodejs"/></a> |
 | [@lit-protocol/lit-node-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client)               | ![lit-node-client](https://img.shields.io/badge/-universal-8A6496 'lit-node-client')            | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client"><img src="https://img.shields.io/npm/v/@lit-protocol/lit-node-client"/></a>               |
 
-If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case::
+If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case:
 
 | Package                                                                                                                          | Category                                                                                                 | Download                                                                                                                                                                              |
 | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -246,7 +246,8 @@ You must have at least nodejs v18 to do this.
 
 2. Build all the packages with `yarn build`
 
-3. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally & ensure that they pass
+3. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally &
+   ensure that they pass
 
 4. Update the docs with `yarn gen:docs --push`
 
