@@ -109,6 +109,7 @@ Before you begin, ensure you have the following installed:
 ## Development Tools
 
 Recommended for better development experience:
+
 - [NX Console](https://nx.dev/core-features/integrate-with-editors) - Visual Studio Code extension for NX workspace management
 
 # Quick Start
@@ -116,6 +117,7 @@ Recommended for better development experience:
 To start developing with this repository:
 
 1. Install dependencies:
+
 ```
 yarn
 ```
@@ -149,8 +151,6 @@ yarn test:local
 ## Creating a new library
 
 `nx generate @nx/js:library`
-
-
 
 ## Building
 
@@ -205,9 +205,11 @@ For changes to WebAssembly components in `packages/wasm`, refer to the [WebAssem
 ## Publishing New Versions
 
 Prerequisites:
+
 - Node.js v18.0.0 or later
 
 Publishing steps:
+
 1. Update dependencies: `yarn install`
 2. Increment version: `yarn bump`
 3. Build packages: `yarn build`
@@ -222,13 +224,15 @@ Publishing steps:
 
 ### Available Test Commands
 
-| Command | Description |
-|---------|-------------|
-| `yarn test:unit` | Run unit tests for all packages |
+| Command           | Description                                            |
+| ----------------- | ------------------------------------------------------ |
+| `yarn test:unit`  | Run unit tests for all packages                        |
 | `yarn test:local` | Launch E2E tests with Cypress and serve React test app |
 
 ### Running Tests
+
 1. Unit Tests:
+
    ```sh
    yarn test:unit
    ```
@@ -245,9 +249,11 @@ Publishing steps:
 ## Local Development with Lit Node
 
 ### Setup Local Environment
+
 1. Deploy Lit Node Contracts (addresses will be read from `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json`)
 
 2. Configure environment variables:
+
 ```sh
 # Enable local node development
 export LIT_JS_SDK_LOCAL_NODE_DEV="true"
@@ -257,6 +263,7 @@ export LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY="your-funded-private-key"
 ```
 
 3. Update and build contracts:
+
 ```sh
 # Fetch and generate contract updates
 yarn update:contracts-sdk --fetch
@@ -267,22 +274,25 @@ yarn build:packages
 ```
 
 4. Start local development server:
+
 ```sh
 yarn nx run nodejs:serve
 ```
 
 ## Environment Variables
 
-| Variable | Description | Usage |
-|----------|-------------|--------|
-| `LIT_JS_SDK_GITHUB_ACCESS_TOKEN` | GitHub access token | Required for accessing contract ABIs from private repository |
-| `LIT_JS_SDK_LOCAL_NODE_DEV` | Local node development flag | Set to `true` to use a local Lit node |
-| `LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY` | Funded wallet private key | Required for Chronicle Testnet transactions |
+| Variable                               | Description                 | Usage                                                        |
+| -------------------------------------- | --------------------------- | ------------------------------------------------------------ |
+| `LIT_JS_SDK_GITHUB_ACCESS_TOKEN`       | GitHub access token         | Required for accessing contract ABIs from private repository |
+| `LIT_JS_SDK_LOCAL_NODE_DEV`            | Local node development flag | Set to `true` to use a local Lit node                        |
+| `LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY` | Funded wallet private key   | Required for Chronicle Testnet transactions                  |
 
 # Error Handling Guide
 
 ## Overview
+
 The SDK implements a robust error handling system using [@openagenda/verror](https://github.com/OpenAgenda/verror). This system provides:
+
 - Detailed error information with cause tracking
 - Error composition and chaining
 - Additional context through metadata
@@ -291,6 +301,7 @@ The SDK implements a robust error handling system using [@openagenda/verror](htt
 ## Using Error Handling
 
 ### Basic Example
+
 ```ts
 import { VError } from '@openagenda/verror';
 import { LitNodeClientBadConfigError } from '@lit-protocol/constants';
@@ -310,10 +321,10 @@ try {
   );
 } catch (e) {
   // Access error details
-  console.log(e.name);     // LitNodeClientBadConfigError
-  console.log(e.message);  // some useful message: some native error
-  console.log(e.info);     // { foo: 'bar' }
-  console.log(e.baz);      // qux
+  console.log(e.name); // LitNodeClientBadConfigError
+  console.log(e.message); // some useful message: some native error
+  console.log(e.info); // { foo: 'bar' }
+  console.log(e.baz); // qux
 
   // Additional error information
   // - VError.cause(e): Original error (someNativeError)
@@ -332,11 +343,18 @@ To add new error types:
 3. Export the new error class
 4. Import and use in your code with relevant context:
    ```ts
-   throw new YourCustomError({
-     cause: originalError,
-     info: { /* context */ },
-     meta: { /* metadata */ }
-   }, "Error message");
+   throw new YourCustomError(
+     {
+       cause: originalError,
+       info: {
+         /* context */
+       },
+       meta: {
+         /* metadata */
+       },
+     },
+     'Error message'
+   );
    ```
 
 # Dockerfile
@@ -344,8 +362,6 @@ To add new error types:
 ...coming soon
 
 ## Other Commands
-
-
 
 # Core Systems and Services
 
@@ -374,10 +390,12 @@ Key components available across packages:
 ## Common Issues and Solutions
 
 ### React Source Map Error
+
 **Problem:** "Failed to parse source map from" error in React
 
-**Solution:** 
+**Solution:**
 Disable source map generation in your React `package.json`:
+
 ```json
 {
   "scripts": {
@@ -390,10 +408,12 @@ Disable source map generation in your React `package.json`:
 ```
 
 ### Crypto API Error
+
 **Problem:** "Reference Error: crypto is not defined"
 
-**Solution:** 
+**Solution:**
 Add the following polyfill for environments without native crypto:
+
 ```js
 import crypto, { createHash } from 'crypto';
 
@@ -402,7 +422,7 @@ Object.defineProperty(globalThis, 'crypto', {
   value: {
     // Implement getRandomValues
     getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
-    
+
     // Implement subtle crypto
     subtle: {
       digest: (algorithm: string, data: Uint8Array) => {
