@@ -11,6 +11,10 @@ import {
   getWalletClient,
   Config,
 } from '@wagmi/core';
+import {
+  EthereumProvider,
+  default as WalletConnectProvider,
+} from '@walletconnect/ethereum-provider';
 import depd from 'depd';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
@@ -43,7 +47,14 @@ import {
   validateSessionSig,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import { AuthSig, AuthCallbackParams, LITEVMChain } from '@lit-protocol/types';
+import {
+  AuthSig,
+  AuthCallbackParams,
+  LITEVMChain,
+  AuthProvider,
+} from '@lit-protocol/types';
+
+import LitConnectModal from '../connect-modal/modal';
 
 const deprecated = depd('lit-js-sdk:auth-browser:index');
 
@@ -60,6 +71,9 @@ if (globalThis && typeof globalThis.Buffer === 'undefined') {
 
 // log("_nacl:", _nacl);
 // log("_naclUtil:", _naclUtil);
+
+type RPCUrls = Record<string, string>;
+let litWCProvider: WalletConnectProvider | undefined;
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {
@@ -367,13 +381,13 @@ const getWagmiProvider = async (
 
 /**
  * @browserOnly
- * Connect to web 3
+ * Connect to web 3 using wagmi as provider
  *
- * @param { ConnectWeb3 }
+ * @param { connectWeb3WithWagmi }
  *
  * @return { Promise<ConnectWeb3Result> } web3, account
  */
-export const connectWeb3 = async ({
+export const connectWeb3WithWagmi = async ({
   chainId = 1,
   walletConnectProjectId,
 }: ConnectWeb3): Promise<ConnectWeb3Result> => {
@@ -417,6 +431,111 @@ export const connectWeb3 = async ({
 };
 
 /**
+ *
+ * Get RPC Urls in the correct format
+ * need to make it look like this:
+   ---
+   rpc: {
+        1: "https://mainnet.mycustomnode.com",
+        3: "https://ropsten.mycustomnode.com",
+        100: "https://dai.poa.network",
+        // ...
+    },
+   ---
+ *
+ * @returns
+ */
+export const getRPCUrls = (): RPCUrls => {
+  const rpcUrls: RPCUrls = {};
+
+  const keys: string[] = Object.keys(LIT_CHAINS);
+
+  for (const chainName of keys) {
+    const chainId = LIT_CHAINS[chainName].chainId;
+    const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
+    rpcUrls[chainId.toString()] = rpcUrl;
+  }
+
+  return rpcUrls;
+};
+
+/**
+ * @browserOnly
+ * Connect to web 3 using lit connect modal as provider
+ *
+ * @param { connectWeb3WithLitConnectModal }
+ *
+ * @return { Promise<ConnectWeb3Result> } web3, account
+ */
+export const connectWeb3WithLitConnectModal = async ({
+  chainId = 1,
+  walletConnectProjectId,
+}: ConnectWeb3): Promise<ConnectWeb3Result> => {
+  // -- check if it's nodejs
+  if (isNode()) {
+    log('connectWeb3 is not supported in nodejs.');
+    return { web3: null, account: null };
+  }
+
+  const rpcUrls: RPCUrls = getRPCUrls();
+
+  let providerOptions = {};
+
+  if (walletConnectProjectId) {
+    const wcProvider = await EthereumProvider.init({
+      projectId: walletConnectProjectId,
+      chains: [chainId],
+      showQrModal: true,
+      optionalMethods: ['eth_sign'],
+      rpcMap: rpcUrls,
+    });
+
+    providerOptions = {
+      walletconnect: {
+        provider: wcProvider,
+      },
+    };
+
+    if (isBrowser()) {
+      litWCProvider = wcProvider;
+    }
+  }
+
+  log('getting provider via lit connect modal');
+
+  const dialog = new LitConnectModal({ providerOptions });
+
+  const provider = await dialog.getWalletProvider();
+
+  log('got provider');
+
+  // @ts-ignore
+  const web3 = new Web3Provider(provider);
+
+  // trigger metamask popup
+  try {
+    deprecated(
+      '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
+    );
+    // @ts-ignore
+    await provider.enable();
+  } catch (e) {
+    log(
+      "error enabling provider but swallowed it because it's not important.  most wallets use a different function now to enable the wallet so you can ignore this error, because those other methods will be tried.",
+      e
+    );
+  }
+
+  log('listing accounts');
+  const accounts = await web3.listAccounts();
+
+  log('accounts', accounts);
+  const account = ethers.utils.getAddress(accounts[0]);
+
+  return { web3, account };
+};
+
+/**
  * @browserOnly
  * Delete any saved AuthSigs from local storage. Takes no params and returns
  * nothing. This will also clear out the WalletConnect cache in local storage.
@@ -429,11 +548,16 @@ export const disconnectWeb3 = async (): Promise<void> => {
     log('disconnectWeb3 is not supported in nodejs.');
     return;
   }
-
-  try {
-    await wagmiDisconnect(wagmiConfig);
-  } catch (err) {
-    log('Error disconnecting wallet:', err);
+  if (isBrowser()) {
+    try {
+      if (litWCProvider) {
+        litWCProvider.disconnect();
+      } else {
+        await wagmiDisconnect(wagmiConfig);
+      }
+    } catch (err) {
+      log('Error disconnecting wallet:', err);
+    }
   }
 
   const storage = LOCAL_STORAGE_KEYS;
@@ -460,6 +584,7 @@ export const checkAndSignEVMAuthMessage = async ({
   uri,
   walletConnectProjectId,
   nonce,
+  provider = AuthProvider.LitConnectModal,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
@@ -494,10 +619,20 @@ export const checkAndSignEVMAuthMessage = async ({
   const selectedChain = LIT_CHAINS[chain];
   const expirationString = expiration ?? getDefaultExpiration();
 
-  const { web3, account } = await connectWeb3({
-    chainId: selectedChain.chainId,
-    walletConnectProjectId,
-  });
+  let web3: Web3Provider;
+  let account: string;
+
+  if (provider === AuthProvider.Wagmi) {
+    ({ web3, account } = await connectWeb3WithWagmi({
+      chainId: selectedChain.chainId,
+      walletConnectProjectId,
+    }));
+  } else {
+    ({ web3, account } = await connectWeb3WithLitConnectModal({
+      chainId: selectedChain.chainId,
+      walletConnectProjectId,
+    }));
+  }
 
   log(`got web3 and account: ${account}`);
 

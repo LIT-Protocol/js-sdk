@@ -78,6 +78,11 @@ export interface CosmosAuthSig extends AuthSig {
 
 export type CosmosWalletType = 'keplr' | 'leap';
 
+export enum AuthProvider {
+  Wagmi = "wagmi",
+  LitConnectModal = "litConnectModal",
+}
+
 export interface AuthCallbackParams extends LitActionSdkParams {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
@@ -127,6 +132,11 @@ export interface AuthCallbackParams extends LitActionSdkParams {
   walletConnectProjectId?: string;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+
+  /**
+   * The provider to use for the auth callback.  Defaults to `litConnectModal`.
+   */
+  provider?: AuthProvider;
 }
 
 /** ---------- Web3 ---------- */
