@@ -8,12 +8,9 @@ import {
   NoWalletException,
   UnknownError,
 } from '@lit-protocol/constants';
-
-import { IProvider, AuthSig } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-// import { toString as uint8arrayToString } from 'uint8arrays';
-
+import { IProvider, AuthSig } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,

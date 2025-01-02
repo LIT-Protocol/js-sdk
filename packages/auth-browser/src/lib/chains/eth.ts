@@ -1,20 +1,25 @@
 import { Buffer as BufferPolyfill } from 'buffer';
-import depd from 'depd';
 
 import { hexlify } from '@ethersproject/bytes';
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
-
 import { verifyMessage } from '@ethersproject/wallet';
+import { injected, walletConnect } from '@wagmi/connectors';
+import {
+  connect as wagmiConnect,
+  disconnect as wagmiDisconnect,
+  getWalletClient,
+  Config,
+} from '@wagmi/core';
+import depd from 'depd';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
-
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import * as nacl from 'tweetnacl';
 import * as naclUtil from 'tweetnacl-util';
+import { http } from 'viem';
+import { createConfig } from 'wagmi';
 
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import {
   ELeft,
   ERight,
@@ -39,13 +44,6 @@ import {
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { AuthSig, AuthCallbackParams, LITEVMChain } from '@lit-protocol/types';
-
-import {
-  createConfig,
-} from 'wagmi';
-import { connect as wagmiConnect, disconnect as wagmiDisconnect, getWalletClient, Config } from '@wagmi/core';
-import { injected, walletConnect } from '@wagmi/connectors'
-import { http } from 'viem';
 
 const deprecated = depd('lit-js-sdk:auth-browser:index');
 
@@ -321,8 +319,11 @@ export const decodeCallResult = deprecated.function(
   'decodeCallResult will be removed.'
 );
 
-const getWagmiProvider = async (chainId: number, walletConnectProjectId?: string) => {
-  const chain = Object.values(LIT_CHAINS).find(c => c.chainId === chainId);
+const getWagmiProvider = async (
+  chainId: number,
+  walletConnectProjectId?: string
+) => {
+  const chain = Object.values(LIT_CHAINS).find((c) => c.chainId === chainId);
   if (!chain) {
     throw new Error(`Chain ID ${chainId} not supported`);
   }
@@ -347,18 +348,18 @@ const getWagmiProvider = async (chainId: number, walletConnectProjectId?: string
   const config = createConfig({
     chains: [litChain],
     transports: {
-      [litChain.id]: http(litChain.rpcUrls.default.http[0])
+      [litChain.id]: http(litChain.rpcUrls.default.http[0]),
     },
     connectors: [
       injected(),
       ...(walletConnectProjectId
         ? [
             walletConnect({
-              projectId: walletConnectProjectId
-            })
+              projectId: walletConnectProjectId,
+            }),
           ]
         : []),
-    ]
+    ],
   });
 
   return config;
@@ -386,12 +387,11 @@ export const connectWeb3 = async ({
 
   const config = await getWagmiProvider(chainId, walletConnectProjectId);
   wagmiConfig = config;
-  
+
   const result = await wagmiConnect(config, {
     connector: config.connectors[0],
     chainId,
   });
-  
 
   log('got provider');
   if (!result) {
@@ -399,14 +399,15 @@ export const connectWeb3 = async ({
   }
 
   const walletClient = await getWalletClient(config);
-  
+
   if (!walletClient) {
     throw new Error('No wallet client found');
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore - Create Web3Provider from wallet client
   const web3 = new Web3Provider(walletClient);
-  
+
   log('listing accounts');
   const accounts = await web3.listAccounts();
   log('accounts', accounts);
