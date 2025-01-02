@@ -10,20 +10,7 @@ yarn add @lit-protocol/lit-auth-client
 
 ## Quick Start
 
-```typescript
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
-
-// Initialize the auth client
-const client = new LitAuthClient({
-  redirectUri: 'https://your-app.com/callback',
-});
-
-// Handle social login
-await client.initializeGoogleLogin();
-
-// Handle wallet authentication
-await client.initializeWalletConnect();
-```
+See the lit-pkp-auth-demo [here](https://github.com/LIT-Protocol/lit-pkp-auth-demo/blob/8f9e301e82e655b28fe9ab767ad3778bfe74701d/src/utils/lit.ts#L75-L85)
 
 ## Key Features
 
@@ -37,13 +24,3 @@ await client.initializeWalletConnect();
 ## Documentation
 
 For detailed API documentation, visit the [API reference](https://docs.lit-js-sdk-v2.litprotocol.com/modules/lit_auth_client_src.html).
-
-## Development
-
-### Building
-
-Run `nx build lit-auth-client` to build the library.
-
-### Testing
-
-Run `nx test lit-auth-client` to execute the unit tests via [Jest](https://jestjs.io).

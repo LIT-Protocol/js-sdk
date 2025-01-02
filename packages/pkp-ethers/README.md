@@ -48,13 +48,3 @@ const signedTx = await wallet.signTransaction({
 
 For detailed API documentation, visit:
 https://docs.ethers.org/v4/api-wallet.html
-
-## Development
-
-### Building
-
-Run `nx build pkp-ethers` to build the library.
-
-### Testing
-
-Run `nx test pkp-ethers` to execute the unit tests.

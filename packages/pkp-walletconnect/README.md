@@ -14,15 +14,7 @@ yarn add @lit-protocol/pkp-walletconnect
 import { PKPWalletConnect } from '@lit-protocol/pkp-walletconnect';
 
 // Initialize WalletConnect client
-const client = new PKPWalletConnect({
-  projectId: 'your-project-id',
-  metadata: {
-    name: 'Your App',
-    description: 'Your app description',
-    url: 'https://your-app.com',
-    icons: ['https://your-app.com/icon.png'],
-  },
-});
+const client = new PKPWalletConnect();
 
 // Handle session proposals
 client.on('session_proposal', async (proposal) => {
@@ -53,13 +45,3 @@ client.on('session_request', async (request) => {
 - Chain Configuration: Support multiple blockchains
 
 For detailed API documentation, visit the [API reference](https://docs.lit-js-sdk-v2.litprotocol.com/modules/pkp_walletconnect_src.html).
-
-## Development
-
-### Building
-
-Run `nx build pkp-walletconnect` to build the library.
-
-### Testing
-
-Run `nx test pkp-walletconnect` to execute the unit tests.

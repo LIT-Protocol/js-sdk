@@ -43,13 +43,3 @@ const signature = await pkpBase.runLitAction(dataToSign, 'sign');
 | `runLitAction()`             | Execute LIT actions                |
 | `createAndSetSessionSigs()`  | Manage session signatures          |
 | `ensureLitNodeClientReady()` | Verify node connection             |
-
-## Development
-
-### Building
-
-Run `nx build pkp-base` to build the library.
-
-### Testing
-
-Run `nx test pkp-base` to execute the unit tests.
