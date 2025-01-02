@@ -63,11 +63,6 @@ export interface ProcessEnvs {
   LIT_RPC_URL: string;
 
   /**
-   * This is usually used when you're running tests locally depending how many nodes you are running.
-   */
-  BOOTSTRAP_URLS: string[];
-
-  /**
    * The list of private keys to use for testing.
    */
   PRIVATE_KEYS: string[];

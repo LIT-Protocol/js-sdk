@@ -23,6 +23,8 @@
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:beta": "yarn node ./tools/scripts/pub.mjs --tag beta",
     "publish:staging": "yarn node ./tools/scripts/pub.mjs --tag staging",
+    "build:tinny": "node ./local-tests/build.mjs",
+    "publish:tinny": "cd ./local-tests && npm publish",
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
     "update:contracts-sdk": "yarn node ./packages/contracts-sdk/tools.mjs",
