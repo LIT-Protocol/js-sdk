@@ -1,8 +1,8 @@
 # WASM
 
-Core lit utilities implemented in `Rust` and compiled to `WebAssembly` through `wasm-pack` implementations within this package wrap the compiled implementations from `rust` and provides functionality for converting the compiled artifact to a `base64` encoded string for binding to the generated bridge. the functionality contained within this package exposes the functinoality provided from the wasm utilities.
+This package provides high-performance cryptographic operations for the Lit Protocol by implementing core utilities in Rust and compiling them to WebAssembly. It enables efficient cross-platform execution of critical cryptographic functions while maintaining security and performance. The package handles the compilation process through wasm-pack and provides JavaScript bindings for seamless integration.
 
-For information on implementations see the [rust](./rust/README.md) directory.
+For detailed implementation information, see the [rust](./rust/README.md) directory.
 
 ### Building
 
