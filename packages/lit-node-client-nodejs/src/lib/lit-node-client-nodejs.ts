@@ -2,7 +2,7 @@ import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
 import { sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
-import Hash from 'typestub-ipfs-only-hash';
+import * as Hash from 'typestub-ipfs-only-hash';
 
 import {
   LitAccessControlConditionResource,
