@@ -1,6 +1,12 @@
 # logger
 
-This library was generated with [Nx](https://nx.dev).
+This submodule provides logging functionalities for the Lit Protocol, including methods for logging messages with different levels of severity (info, warn, error).
+
+### node.js / browser
+
+```
+yarn add @lit-protocol/logger
+```
 
 ## Building
 

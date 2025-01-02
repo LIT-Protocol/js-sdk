@@ -20,3 +20,80 @@ This submodule defines a PKPBase class, providing shared wallet functionality fo
 ```
 yarn add @lit-protocol/pkp-base
 ```
+
+## Description
+
+The `@lit-protocol/pkp-base` package provides a foundational class for managing PKP (Public Key Pair) signers. This class offers shared wallet functionality, including public key compression, initialization and connection to the LIT node, execution of LIT actions, and debugging capabilities.
+
+## Installation
+
+To install the `@lit-protocol/pkp-base` package, you can use either npm or yarn:
+
+```bash
+npm install @lit-protocol/pkp-base
+```
+
+or
+
+```bash
+yarn add @lit-protocol/pkp-base
+```
+
+## Usage
+
+Here are some examples of how to use the `PKPBase` class provided by the `@lit-protocol/pkp-base` package:
+
+### Compressing a Public Key
+
+The `compressPubKey` method allows you to compress a provided public key.
+
+```javascript
+import { PKPBase } from '@lit-protocol/pkp-base';
+
+const pkpBase = new PKPBase();
+const compressedPubKey = pkpBase.compressPubKey('your-public-key');
+console.log(compressedPubKey);
+```
+
+### Setting Uncompressed Public Key and Buffer
+
+The `setUncompressPubKeyAndBuffer` method sets the uncompressed public key and its buffer representation.
+
+```javascript
+import { PKPBase } from '@lit-protocol/pkp-base';
+
+const pkpBase = new PKPBase();
+pkpBase.setUncompressPubKeyAndBuffer({ pubKey: 'your-public-key' });
+```
+
+### Initializing the PKPBase Instance
+
+The `init` method initializes the PKPBase instance by connecting to the LIT node.
+
+```javascript
+import { PKPBase } from '@lit-protocol/pkp-base';
+
+const pkpBase = new PKPBase();
+await pkpBase.init();
+```
+
+### Running a LIT Action
+
+The `runLitAction` method runs the specified LIT action with the given parameters.
+
+```javascript
+import { PKPBase } from '@lit-protocol/pkp-base';
+
+const pkpBase = new PKPBase();
+const toSign = new Uint8Array([/* your data */]);
+const sigName = 'your-signature-name';
+await pkpBase.runLitAction(toSign, sigName);
+```
+
+## Contributing
+
+We welcome contributions to the `@lit-protocol/pkp-base` package. If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request on the GitHub repository.
+
+## License
+
+The `@lit-protocol/pkp-base` package is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
