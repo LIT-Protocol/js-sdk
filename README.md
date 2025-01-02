@@ -46,7 +46,7 @@ yarn add @lit-protocol/lit-node-client
 
 # Packages
 
-📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. <br/>Get started with interacting with Lit network!
+📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client. <br/>Get started with interacting with Lit network!
 
 <!-- autogen:package:start -->
 
@@ -55,7 +55,7 @@ yarn add @lit-protocol/lit-node-client
 | [@lit-protocol/lit-node-client-nodejs](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client-nodejs) | ![lit-node-client-nodejs](https://img.shields.io/badge/-nodejs-2E8B57 'lit-node-client-nodejs') | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client-nodejs"><img src="https://img.shields.io/npm/v/@lit-protocol/lit-node-client-nodejs"/></a> |
 | [@lit-protocol/lit-node-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client)               | ![lit-node-client](https://img.shields.io/badge/-universal-8A6496 'lit-node-client')            | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client"><img src="https://img.shields.io/npm/v/@lit-protocol/lit-node-client"/></a>               |
 
-If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case::
+If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case:
 
 | Package                                                                                                                          | Category                                                                                                 | Download                                                                                                                                                                              |
 | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -214,23 +214,50 @@ Having done this setup, this is what the development cycle looks like moving for
 
 If changes are made to `packages/wasm` see [here](./packages/wasm/README.md) for info on building from source.
 
+## Package Versioning
+
+Starting from version 7.x.x, this monorepo uses independent versioning for packages. This means:
+
+- Each package maintains its own version number
+- Only modified packages have their versions incremented during releases
+- Internal package dependencies use semver ranges (e.g., ^1.2.3) instead of exact versions
+- Package versions are no longer synchronized across all packages
+
+This change improves developer experience by:
+
+- Avoiding unnecessary version bumps for unchanged packages
+- Making package version history more meaningful
+- Allowing packages to evolve at their own pace
+- Providing clearer dependency relationships between packages
+
+### Breaking Changes
+
+If you're upgrading from a previous version, note that this is a breaking change in how versions are managed. You may need to update your dependency management practices to:
+
+- Use appropriate semver ranges for internal dependencies
+- Track individual package versions instead of a single SDK version
+- Handle potentially different versions of related packages
+
 ## Publishing
 
 You must have at least nodejs v18 to do this.
 
 1. Install the latest packages with `yarn install`
 
-2. Run `yarn bump` to bump the version
+2. Build all the packages with `yarn build`
 
-3. Build all the packages with `yarn build`
+3. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally &
+   ensure that they pass
 
-4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally & ensure that they pass
+4. Update the docs with `yarn gen:docs --push`
 
-5. Update the docs with `yarn gen:docs --push`
+5. Publish packages with `yarn publish:packages`. This will:
 
-6. Finally, publish with `yarn publish:packages`
+   - Prompt for version increments for modified packages
+   - Update internal dependencies automatically
+   - Publish only the packages that have changed
 
-7. Commit these changes "Published version X.X.X"
+6. Commit these changes with a message describing the published updates
 
 ## Testing
 

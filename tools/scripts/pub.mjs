@@ -45,23 +45,15 @@ if (OPTION) {
   }
 }
 
-// read lerna.json version
-const lerna = await readJsonFile('lerna.json');
-const lernaVersion = lerna.version;
-
 let dirs = await listDirsRecursive('dist/packages', false);
 
 console.log('Ready to publish the following packages:');
-
-let publishVersion = null;
 
 await asyncForEach(dirs, async (dir) => {
   // read the package.json file
   const pkg = await readJsonFile(`${dir}/package.json`);
 
   greenLog(`${pkg.name} => ${pkg.version}`);
-
-  publishVersion = pkg.version;
 
   // remove peer dependencies
   delete pkg.peerDependencies;
@@ -107,41 +99,14 @@ await question('Are you sure you want to publish to? (y/n)', {
       // read the package.json file
       const pkg = await readJsonFile(`${dir}/package.json`);
 
-      // also read the individual package.json and update the version
-      try {
-        const pkg2 = await readJsonFile(
-          `${dir.replace('dist/', '')}/package.json`
-        );
+      // Keep the original package version for publishing
+      const originalVersion = pkg.version;
 
-        if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
-          pkg2.version = publishVersion;
-        } else {
-          pkg2.version = lernaVersion;
-        }
-
-        // write the package.json file
-        await writeJsonFile(`${dir.replace('dist/', '')}/package.json`, pkg2);
-      } catch (e) {
-        const path = `${dir.replace('dist/', '')}/package.json`;
-
-        // swallow error if it's not a vanilla package
-        if (!path.includes('vanilla')) {
-          yellowLog(`No such file or directory: ${path}`);
-        }
-      }
-
-      // update version
-      if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
-        pkg.version = publishVersion;
-      } else {
-        pkg.version = lernaVersion;
-      }
-
-      // write the package.json file
+      // write the package.json file back
       await writeJsonFile(`${dir}/package.json`, pkg);
 
       if (OPTION === '--tag') {
-        greenLog(`Publishing ${dir} with tag ${VALUE}`);
+        greenLog(`Publishing ${dir} with version ${originalVersion} and tag ${VALUE}`);
 
         spawnCommand(
           'npm',
@@ -153,13 +118,14 @@ await question('Are you sure you want to publish to? (y/n)', {
             logExit: false,
             exitCallback: () => {
               counter++;
-              // console.log(`${dir} published with tag ${VALUE}`)
             },
           }
         );
       }
 
       if (OPTION === '--prod') {
+        greenLog(`Publishing ${dir} with version ${originalVersion}`);
+
         spawnCommand(
           'npm',
           ['publish', '--access', 'public'],
@@ -170,7 +136,6 @@ await question('Are you sure you want to publish to? (y/n)', {
             logExit: false,
             exitCallback: () => {
               counter++;
-              // console.log(`${dir} published with tag ${VALUE}`)
             },
           }
         );
