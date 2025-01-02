@@ -1,9 +1,36 @@
-# Quick Start
+# Lit Node Client
 
-This module is the main module of this monorepo. It sets a default authentication callback using the `checkAndSignAuthMessage` function from the auth-browser submodule, which is designed to work in both browser and Node.js environments, facilitating interaction with Lit nodes.
+This module is the main interface for interacting with the Lit Protocol network. It provides a robust client implementation that handles network communication, authentication, and node interactions in both browser and Node.js environments.
 
-### node.js / browser
+## Installation
 
-```
+```bash
 yarn add @lit-protocol/lit-node-client
 ```
+
+## Quick Start
+
+```typescript
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+
+// Initialize the client
+const client = new LitNodeClient({
+  alertWhenUnauthorized: false,
+});
+
+// Connect to the network
+await client.connect();
+```
+
+## Key Features
+
+- Seamless authentication with Lit nodes
+- Default authentication callback using `checkAndSignAuthMessage`
+- Cross-platform support (browser and Node.js)
+- Network connection management
+- Secure node communication
+- Automatic request handling and retries
+
+## Authentication
+
+The client automatically sets up authentication using the `checkAndSignAuthMessage` function from the auth-browser submodule. This provides a secure and consistent way to interact with Lit nodes across different environments.

@@ -1,27 +1,49 @@
-# lit-auth-client
+# Lit Auth Client
 
-`lit-auth-client` makes it easy to manage PKP authentication with Lit Protocol. This library offers convenient classes for social logins, Ethereum wallet sign-ins, and minting and fetching of PKPs linked to auth methods.
+A comprehensive authentication client for managing PKP (Programmable Key Pair) authentication with Lit Protocol. This package simplifies the integration of various authentication methods including social logins and Ethereum wallet sign-ins.
 
-## 📜 API Reference
-
-Check out the [API reference](https://docs.lit-js-sdk-v2.litprotocol.com/modules/lit_auth_client_src.html).
-
-## 📦 Installation
-
-Get started by installing the package:
+## Installation
 
 ```bash
 yarn add @lit-protocol/lit-auth-client
 ```
 
-## 🙌 Contributing
+## Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+```typescript
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+
+// Initialize the auth client
+const client = new LitAuthClient({
+  redirectUri: 'https://your-app.com/callback'
+});
+
+// Handle social login
+await client.initializeGoogleLogin();
+
+// Handle wallet authentication
+await client.initializeWalletConnect();
+```
+
+## Key Features
+
+- Social login integration
+- Ethereum wallet authentication
+- PKP minting and management
+- Auth method linking
+- Secure token handling
+- Multiple provider support
+
+## Documentation
+
+For detailed API documentation, visit the [API reference](https://docs.lit-js-sdk-v2.litprotocol.com/modules/lit_auth_client_src.html).
+
+## Development
 
 ### Building
 
 Run `nx build lit-auth-client` to build the library.
 
-### Running unit tests
+### Testing
 
 Run `nx test lit-auth-client` to execute the unit tests via [Jest](https://jestjs.io).
