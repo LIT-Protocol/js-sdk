@@ -227,7 +227,7 @@ Publishing steps:
 | Command           | Description                                            |
 | ----------------- | ------------------------------------------------------ |
 | `yarn test:unit`  | Run unit tests for all packages                        |
-| `yarn test:local` | Launch E2E tests with Cypress and serve React test app |
+| `yarn test:local` | Run E2E tests in Node.js environment |
 
 ### Running Tests
 
@@ -241,10 +241,14 @@ Publishing steps:
    ```sh
    yarn test:local
    ```
-   This command:
-   - Starts the React testing application
-   - Launches Cypress test runner
-   - Executes E2E test suites
+   Optional Environment Variables:
+   - NETWORK=<network_name> (datil, datil-test, datil-dev, etc.)
+   - DEBUG=true/false
+
+   Optional Flags:
+   - --filter=<test-name>
+
+   See more in `local-tests/README.md`
 
 ## Local Development with Lit Node
 
@@ -260,23 +264,6 @@ export LIT_JS_SDK_LOCAL_NODE_DEV="true"
 
 # Set funded wallet for Chronicle testnet
 export LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY="your-funded-private-key"
-```
-
-3. Update and build contracts:
-
-```sh
-# Fetch and generate contract updates
-yarn update:contracts-sdk --fetch
-yarn update:contracts-sdk --gen
-
-# Build all packages
-yarn build:packages
-```
-
-4. Start local development server:
-
-```sh
-yarn nx run nodejs:serve
 ```
 
 ## Environment Variables
@@ -388,24 +375,6 @@ Key components available across packages:
 # Troubleshooting Guide
 
 ## Common Issues and Solutions
-
-### React Source Map Error
-
-**Problem:** "Failed to parse source map from" error in React
-
-**Solution:**
-Disable source map generation in your React `package.json`:
-
-```json
-{
-  "scripts": {
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  }
-}
-```
 
 ### Crypto API Error
 
