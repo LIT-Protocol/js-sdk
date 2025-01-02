@@ -224,9 +224,9 @@ Publishing steps:
 
 ### Available Test Commands
 
-| Command           | Description                                            |
-| ----------------- | ------------------------------------------------------ |
-| `yarn test:unit`  | Run unit tests for all packages                        |
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `yarn test:unit`  | Run unit tests for all packages      |
 | `yarn test:local` | Run E2E tests in Node.js environment |
 
 ### Running Tests
@@ -238,14 +238,18 @@ Publishing steps:
    ```
 
 2. End-to-End Tests:
+
    ```sh
    yarn test:local
    ```
+
    Optional Environment Variables:
+
    - NETWORK=<network_name> (datil, datil-test, datil-dev, etc.)
    - DEBUG=true/false
 
    Optional Flags:
+
    - --filter=<test-name>
 
    See more in `local-tests/README.md`
