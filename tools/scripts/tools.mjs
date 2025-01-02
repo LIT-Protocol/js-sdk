@@ -635,22 +635,8 @@ async function setupLocalDevFunc() {
 }
 
 async function matchVersionsFunc() {
-  // async foreach packages
-  const packageList = await listDirsRecursive('./packages', false);
-
-  // get lerna version
-  const lernaJson = await readJsonFile(`lerna.json`);
-
-  await asyncForEach(packageList, async (pkg) => {
-    const packageJson = await readJsonFile(`${pkg}/package.json`);
-    packageJson.version = lernaJson.version;
-
-    greenLog(
-      `Updating ${pkg}/package.json version ${packageJson.version} => ${lernaJson.version}...`
-    );
-    await writeJsonFile(`${pkg}/package.json`, packageJson);
-  });
-
+  // This function has been deprecated as we now use independent versioning
+  greenLog('matchVersionsFunc is deprecated - packages now use independent versioning');
   exit();
 }
 
@@ -664,60 +650,41 @@ async function validateDependencyVersions() {
     }
   );
 
-  const packageTotal = packageList.length;
-  let packagePasses = 0;
+  let hasErrors = false;
 
-  await asyncForEach(packageList, async (pkg, i) => {
+  await asyncForEach(packageList, async (pkg) => {
     const packageJson = await readJsonFile(pkg);
-    const pkgVersion = packageJson.version;
-
     const dependencies = packageJson?.dependencies ?? {};
 
-    let total = 0;
-    let passes = 0;
-    let fails = 0;
-
-    // search for dependencies that start with @lit-protocol
+    // Validate semver ranges for internal dependencies
     for (const [key, value] of Object.entries(dependencies)) {
       if (key.includes(PREFIX) && !ignoreList.includes(key)) {
-        total++;
-        if (value !== pkgVersion) {
-          fails++;
+        if (!value.match(/^\^|~|>=|>|<=|<|\d+\.\d+\.\d+$/)) {
+          redLog(`❌ ${pkg} has invalid semver range for ${key}: ${value}`);
+          hasErrors = true;
         } else {
-          passes++;
+          greenLog(`✅ ${pkg} has valid semver range for ${key}: ${value}`);
         }
       }
     }
-
-    if (fails > 0) {
-      redLog(
-        `❌ ${pkg} has ${fails} dependencies with versions that do not match.`
-      );
-    } else {
-      greenLog(
-        `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
-      );
-      packagePasses++;
-    }
   });
 
-  // log that to make sure the builds works, make sure we have tested it
-  if (packagePasses >= packageTotal) {
-    greenLog(
-      `
+  if (!hasErrors) {
+    greenLog(`
     ❗️ Before publishing, make sure you have tested the build!
       - yarn test:unit     | run unit tests
       - yarn test:local    | run e2e tests on nodejs 
-      `,
-      true
-    );
+    `, true);
 
     console.log(`
     Note: for e2e nodejs test, you can use the following options:
     -------------------------------------------------------------
     --filter flag to filter tests (eg. yarn test:local --filter=Encryption)
     `);
+  } else {
+    process.exit(1);
   }
+  
   process.exit(0);
 }
 
