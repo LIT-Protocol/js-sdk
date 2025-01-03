@@ -76,22 +76,64 @@ async function updatePackageJson(packagePath) {
  */
 async function updateSourceFile(filePath) {
   const content = await fs.promises.readFile(filePath, 'utf8');
-  const patterns = [
-    `from '${OLD_NAMESPACE}/`,
-    `from "${OLD_NAMESPACE}/`,
-    `require('${OLD_NAMESPACE}/`,
-    `require("${OLD_NAMESPACE}/`,
-  ];
-
   let modified = false;
   let updatedContent = content;
 
-  for (const pattern of patterns) {
+  // Simple string replacements
+  const simplePatterns = [
+    // ES Module imports/exports
+    `from '${OLD_NAMESPACE}/`,
+    `from "${OLD_NAMESPACE}/`,
+    `export * from '${OLD_NAMESPACE}/`,
+    `export * from "${OLD_NAMESPACE}/`,
+    // CommonJS requires
+    `require('${OLD_NAMESPACE}/`,
+    `require("${OLD_NAMESPACE}/`,
+    // Direct string references
+    `'${OLD_NAMESPACE}/`,
+    `"${OLD_NAMESPACE}/`,
+  ];
+
+  for (const pattern of simplePatterns) {
     if (updatedContent.includes(pattern)) {
       updatedContent = updatedContent.replaceAll(pattern, pattern.replace(OLD_NAMESPACE, newNamespace));
       modified = true;
     }
   }
+
+  // Regex-based replacements for more complex patterns
+  const regexPatterns = [
+    // TypeScript type imports
+    new RegExp(`import\\s+type\\s+{[^}]*}\\s+from\\s+['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+    // Named imports
+    new RegExp(`import\\s+{[^}]*}\\s+from\\s+['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+    // Default imports
+    new RegExp(`import\\s+[^{\\s]+\\s+from\\s+['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+    // Re-exports
+    new RegExp(`export\\s+{[^}]*}\\s+from\\s+['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+    // Dynamic imports
+    new RegExp(`import\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
+    // Jest/Test imports
+    new RegExp(`jest\\.mock\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+  ];
+
+  for (const regex of regexPatterns) {
+    const matches = updatedContent.match(regex);
+    if (matches) {
+      updatedContent = updatedContent.replace(regex, (match) => 
+        match.replace(new RegExp(OLD_NAMESPACE, 'g'), newNamespace)
+      );
+      modified = true;
+    }
+  }
+
+  if (modified) {
+    await fs.promises.writeFile(filePath, updatedContent);
+    greenLog(`Updated imports in ${filePath}`);
+  } else {
+    yellowLog(`No changes needed in ${filePath}`);
+  }
+  return modified;
 
   if (modified) {
     await fs.promises.writeFile(filePath, updatedContent);
@@ -139,13 +181,27 @@ async function main() {
 
     // Update source files
     yellowLog('\nUpdating source files...');
-    await asyncForEach(packageDirs, async (dir) => {
-      const srcDir = path.join(dir, 'src');
-      if (fs.existsSync(srcDir)) {
-        const files = await listDirsRecursive(srcDir);
+    const dirsToCheck = [
+      path.resolve(process.cwd(), 'src'),
+      path.resolve(process.cwd(), 'lib'),
+      path.resolve(process.cwd(), 'local-tests'),
+      path.resolve(process.cwd(), 'tools'),
+      ...packageDirs.map(dir => path.join(dir, 'src')),
+      ...packageDirs.map(dir => path.join(dir, 'lib')),
+      ...packageDirs.map(dir => path.join(dir, 'test')),
+      ...packageDirs.map(dir => path.join(dir, '__tests__')),
+    ];
+
+    await asyncForEach(dirsToCheck, async (dir) => {
+      if (fs.existsSync(dir)) {
+        const files = await listDirsRecursive(dir);
         await asyncForEach(files, async (file) => {
-          if (file.endsWith('.ts') || file.endsWith('.js')) {
-            await updateSourceFile(file);
+          if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs')) {
+            try {
+              await updateSourceFile(file);
+            } catch (error) {
+              redLog(`Error processing ${file}: ${error.message}`);
+            }
           }
         });
       }
