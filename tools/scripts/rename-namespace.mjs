@@ -134,6 +134,42 @@ async function updateSourceFile(filePath) {
     yellowLog(`No changes needed in ${filePath}`);
   }
   return modified;
+}
+
+async function updateDocFile(filePath) {
+  const content = await fs.promises.readFile(filePath, 'utf8');
+  let modified = false;
+  let updatedContent = content;
+
+  // Replace package references in code blocks and text
+  const patterns = [
+    // Package installation examples
+    new RegExp(`@lit-protocol/([a-zA-Z0-9-]+)`, 'g'),
+    // URLs in markdown links
+    new RegExp(`\\[([^\\]]*)\\]\\(https://(?:www\\.)?npmjs\\.com/package/@lit-protocol/([^)]+)\\)`, 'g'),
+    // Badge URLs
+    new RegExp(`https://img\\.shields\\.io/npm/v/@lit-protocol/([^"\\s]+)`, 'g'),
+    // GitHub repository links
+    new RegExp(`https://github\\.com/LIT-Protocol/js-sdk/tree/[^/]+/packages/([^)\\s]+)`, 'g'),
+  ];
+
+  // Replace all occurrences
+  for (const pattern of patterns) {
+    if (updatedContent.match(pattern)) {
+      updatedContent = updatedContent.replace(pattern, (match) => 
+        match.replace(/@lit-protocol/g, newNamespace)
+      );
+      modified = true;
+    }
+  }
+
+  if (modified) {
+    await fs.promises.writeFile(filePath, updatedContent);
+    greenLog(`Updated documentation in ${filePath}`);
+  } else {
+    yellowLog(`No changes needed in ${filePath}`);
+  }
+  return modified;
 
   if (modified) {
     await fs.promises.writeFile(filePath, updatedContent);
@@ -179,26 +215,32 @@ async function main() {
       }
     });
 
-    // Update source files
-    yellowLog('\nUpdating source files...');
+    // Update source files and documentation
+    yellowLog('\nUpdating source files and documentation...');
     const dirsToCheck = [
       path.resolve(process.cwd(), 'src'),
       path.resolve(process.cwd(), 'lib'),
       path.resolve(process.cwd(), 'local-tests'),
       path.resolve(process.cwd(), 'tools'),
+      path.resolve(process.cwd(), '.'),  // Root directory for README.md and other docs
       ...packageDirs.map(dir => path.join(dir, 'src')),
       ...packageDirs.map(dir => path.join(dir, 'lib')),
       ...packageDirs.map(dir => path.join(dir, 'test')),
       ...packageDirs.map(dir => path.join(dir, '__tests__')),
+      ...packageDirs.map(dir => path.join(dir, '.')),  // Package root directories
     ];
 
     await asyncForEach(dirsToCheck, async (dir) => {
       if (fs.existsSync(dir)) {
         const files = await listDirsRecursive(dir);
         await asyncForEach(files, async (file) => {
-          if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs')) {
+          if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.md')) {
             try {
-              await updateSourceFile(file);
+              if (file.endsWith('.md')) {
+                await updateDocFile(file);
+              } else {
+                await updateSourceFile(file);
+              }
             } catch (error) {
               redLog(`Error processing ${file}: ${error.message}`);
             }
