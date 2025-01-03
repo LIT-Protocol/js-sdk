@@ -21,6 +21,7 @@ interface GeneratePrivateKeyLitActionResult {
 interface BatchGeneratePrivateKeysWithLitActionResult {
   network: Network;
   signMessage?: { signature: string };
+  signTransaction?: { signature: string };
   generateEncryptedPrivateKey: GeneratePrivateKeyLitActionResult;
 }
 
