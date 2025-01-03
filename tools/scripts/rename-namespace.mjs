@@ -190,49 +190,52 @@ async function updateDocFile(filePath) {
 
   // Replace package references in code blocks and text
   const patterns = [
-    // Package installation examples
-    new RegExp(`@lit-protocol/([a-zA-Z0-9-]+)`, 'g'),
-    // URLs in markdown links
-    new RegExp(`\\[([^\\]]*)\\]\\(https://(?:www\\.)?npmjs\\.com/package/@lit-protocol/([^)]+)\\)`, 'g'),
-    // Badge URLs
-    new RegExp(`https://img\\.shields\\.io/npm/v/@lit-protocol/([^"\\s]+)`, 'g'),
-    // GitHub repository links
-    new RegExp(`https://github\\.com/LIT-Protocol/js-sdk/tree/[^/]+/packages/([^)\\s]+)`, 'g'),
-    // Code blocks with package references
-    new RegExp('```[^`]*@lit-protocol/[^`]*```', 'g'),
-    // Inline code with package references
-    new RegExp('`[^`]*@lit-protocol/[^`]*`', 'g'),
-    // List items with package references
-    new RegExp('^\\s*[\\*\\-]\\s+.*@lit-protocol/[^\\n]*', 'gm'),
-    // Table cells with package references
-    new RegExp('\\|[^|]*@lit-protocol/[^|]*\\|', 'g'),
-    // HTML comments with package references
-    new RegExp('<!--[^-]*@lit-protocol/[^-]*-->', 'g'),
-    // JSDoc-style comments
-    new RegExp('@(param|returns|see|example)\\s+.*@lit-protocol/[^\\n]*', 'g'),
-    // Import/require examples in documentation
-    new RegExp('(import|require)\\s*\\([^)]*@lit-protocol/[^)]*\\)', 'g'),
-    new RegExp('import\\s+.*\\s+from\\s+[\'"]@lit-protocol/[^\'"]*[\'"]', 'g'),
-    // Package name in text
-    new RegExp('(?<=\\s|^)@lit-protocol/[a-zA-Z0-9-]+(?=\\s|$)', 'g'),
-    // Package name in HTML attributes
-    new RegExp('(?<=")[^"]*@lit-protocol/[^"]*(?=")', 'g'),
+    // Dynamic imports
+    new RegExp(`await\\s+import\\(['"]@lit-protocol/[^'"]*['"]\\)`, 'g'),
+    // Import statements with type
+    new RegExp(`import\\s+type\\s+{[^}]*}\\s+from\\s+['"]@lit-protocol/[^'"]*['"]`, 'g'),
+    // Import statements with named imports
+    new RegExp(`import\\s+{[^}]*}\\s+from\\s+['"]@lit-protocol/[^'"]*['"]`, 'g'),
+    // Import statements with default import
+    new RegExp(`import\\s+[^{\\s]+\\s+from\\s+['"]@lit-protocol/[^'"]*['"]`, 'g'),
+    // Require statements
+    new RegExp(`require\\(['"]@lit-protocol/[^'"]*['"]\\)`, 'g'),
+    // Package references in strings
+    new RegExp(`['"]@lit-protocol/[^'"]*['"]`, 'g'),
+    // Package name in package.json
+    new RegExp(`"name":\\s*"@lit-protocol/[^"]*"`, 'g'),
+    // Dependencies in package.json
+    new RegExp(`"@lit-protocol/[^"]*":\\s*"[^"]*"`, 'g'),
+    // URLs with subdomains
+    new RegExp('https://[^/]*\\.litprotocol\\.com(/[^\\s\'"]*)?', 'g'),
+    // Main domain URLs
+    new RegExp('https://litprotocol\\.com(/[^\\s\'"]*)?', 'g'),
     // Email addresses
     new RegExp('([a-zA-Z0-9._%+-]+@)litprotocol\\.com', 'g'),
-    // URLs and endpoints
-    new RegExp('https://[^/]*\\.?litprotocol\\.com(/[^\\s\'"]*)?', 'g'),
+    // Documentation references
+    new RegExp('\\[([^\\]]*)\\]\\(https://(?:www\\.)?npmjs\\.com/package/@lit-protocol/([^)]+)\\)', 'g'),
+    // Badge URLs
+    new RegExp('https://img\\.shields\\.io/npm/v/@lit-protocol/([^"\\s]+)', 'g'),
+    // GitHub repository links
+    new RegExp('https://github\\.com/LIT-Protocol/js-sdk/tree/[^/]+/packages/([^)\\s]+)', 'g'),
+    // Code blocks
+    new RegExp('```[^`]*@lit-protocol/[^`]*```', 'g'),
+    // Inline code
+    new RegExp('`[^`]*@lit-protocol/[^`]*`', 'g'),
+    // List items
+    new RegExp('^\\s*[\\*\\-]\\s+.*@lit-protocol/[^\\n]*', 'gm'),
+    // Table cells
+    new RegExp('\\|[^|]*@lit-protocol/[^|]*\\|', 'g'),
+    // HTML comments
+    new RegExp('<!--[^-]*@lit-protocol/[^-]*-->', 'g'),
+    // JSDoc comments
+    new RegExp('@(param|returns|see|example)\\s+.*@lit-protocol/[^\\n]*', 'g'),
+    // Environment variables
+    new RegExp('(LIT_[A-Z_]+)\\s*=\\s*[\'"].*?litprotocol\\.com', 'g'),
     // Configuration values
     new RegExp('(["\'`])(.*?)litprotocol\\.com(.*?)(["\'`])', 'g'),
     // Test assertions and mocks
     new RegExp('\\b(expect|mock|spy)\\s*\\([\'"].*?@lit-protocol/[^\'"]*[\'"]\\)', 'g'),
-    // Environment variables and constants
-    new RegExp('(LIT_[A-Z_]+)\\s*=\\s*[\'"].*?litprotocol\\.com', 'g'),
-    // Import statements in test files
-    new RegExp('import\\s*{[^}]*}\\s*from\\s*[\'"]@lit-protocol/[^\'"]*[\'"]', 'g'),
-    // Require statements in test files
-    new RegExp('require\\s*\\([\'"]@lit-protocol/[^\'"]*[\'"]\\)', 'g'),
-    // TypeScript imports in test files
-    new RegExp('import\\s+type\\s*{[^}]*}\\s*from\\s*[\'"]@lit-protocol/[^\'"]*[\'"]', 'g'),
   ];
 
   // Replace all occurrences
