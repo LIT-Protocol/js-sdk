@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/types",
+  "name": "@test-namespace/types",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",

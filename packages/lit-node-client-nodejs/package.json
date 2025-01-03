@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/lit-node-client-nodejs",
+  "name": "@test-namespace/lit-node-client-nodejs",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",

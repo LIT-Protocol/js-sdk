@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/pkp-walletconnect",
+  "name": "@test-namespace/pkp-walletconnect",
   "version": "7.0.4",
   "type": "commonjs",
   "license": "MIT",

@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/contracts-sdk",
+  "name": "@test-namespace/contracts-sdk",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

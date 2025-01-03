@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/js-sdk",
+  "name": "@test-namespace/js-sdk",
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
@@ -14,7 +14,7 @@
     "build:verify": "yarn tools --verify",
     "bundles": "yarn node ./esbuilder/lit-connect-modal/esbuild.js",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
-    "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
+    "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist ${npm_config_namespace:-@lit-protocol}",
     "test:ci": "nx affected --target=test --all --code-coverage",
     "test:local": "node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/test.mjs",
     "test:unit": "nx run-many --target=test",
@@ -40,8 +40,8 @@
     "@cosmjs/proto-signing": "0.30.1",
     "@cosmjs/stargate": "0.30.1",
     "@dotenvx/dotenvx": "^1.6.4",
-    "@lit-protocol/accs-schemas": "^0.0.22",
-    "@lit-protocol/contracts": "^0.0.74",
+    "@test-namespace/accs-schemas": "^0.0.22",
+    "@test-namespace/contracts": "^0.0.74",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
     "@openagenda/verror": "^3.1.4",

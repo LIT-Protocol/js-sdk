@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/uint8arrays",
+  "name": "@test-namespace/uint8arrays",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

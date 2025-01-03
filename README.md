@@ -26,19 +26,43 @@ https://developer.litprotocol.com/SDK/Explanation/installation
 
 Removed browser-specific methods, e.g., checkAndSignAuthSig
 
-```
+```bash
+# Using default namespace
 yarn add @lit-protocol/lit-node-client-nodejs
-```
 
-or..
+# Or with custom namespace (after running rename-namespace.mjs)
+yarn add @your-namespace/lit-node-client-nodejs
+```
 
 ### Isomorphic Implementation
 
 Operable in both Node.js and the browser
 
-```
+```bash
+# Using default namespace
 yarn add @lit-protocol/lit-node-client
+
+# Or with custom namespace (after running rename-namespace.mjs)
+yarn add @your-namespace/lit-node-client
 ```
+
+### Using Custom Namespace
+
+To use packages under your own namespace instead of @lit-protocol:
+
+1. Clone the repository
+2. Run the namespace change script:
+   ```bash
+   node tools/scripts/rename-namespace.mjs your-namespace
+   ```
+3. Build the packages:
+   ```bash
+   yarn build:packages
+   ```
+4. Install packages using your namespace:
+   ```bash
+   yarn add @your-namespace/[package-name]
+   ```
 
 </div>
 
@@ -46,7 +70,9 @@ yarn add @lit-protocol/lit-node-client
 
 # Packages
 
-📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client. <br/>Get started with interacting with Lit network!
+📝 If you're looking to use the SDK, you're probably all set with just the lit-node-client. <br/>Get started with interacting with the network!
+
+Note: All packages are published under the @lit-protocol namespace by default. If you want to use a different namespace, see the "Using Custom Namespace" section below.
 
 <!-- autogen:package:start -->
 

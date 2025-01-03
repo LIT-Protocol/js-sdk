@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/event-listener",
+  "name": "@test-namespace/event-listener",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",

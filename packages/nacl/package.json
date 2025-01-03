@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/nacl",
+  "name": "@test-namespace/nacl",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

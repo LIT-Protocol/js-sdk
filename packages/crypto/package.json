@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/crypto",
+  "name": "@test-namespace/crypto",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

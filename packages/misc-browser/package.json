@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/misc-browser",
+  "name": "@test-namespace/misc-browser",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

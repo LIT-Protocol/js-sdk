@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/wrapped-keys-lit-actions",
+  "name": "@test-namespace/wrapped-keys-lit-actions",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",

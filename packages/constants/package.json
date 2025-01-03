@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/constants",
+  "name": "@test-namespace/constants",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/pkp-cosmos",
+  "name": "@test-namespace/pkp-cosmos",
   "version": "7.0.4",
   "type": "commonjs",
   "license": "MIT",

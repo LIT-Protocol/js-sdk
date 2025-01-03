@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/pkp-base",
+  "name": "@test-namespace/pkp-base",
   "version": "7.0.4",
   "type": "commonjs",
   "license": "MIT",

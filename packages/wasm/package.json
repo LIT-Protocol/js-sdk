@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/wasm",
+  "name": "@test-namespace/wasm",
   "version": "7.0.4",
   "type": "commonjs",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",

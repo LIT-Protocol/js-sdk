@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/logger",
+  "name": "@test-namespace/logger",
   "version": "7.0.4",
   "type": "commonjs",
   "tags": [
