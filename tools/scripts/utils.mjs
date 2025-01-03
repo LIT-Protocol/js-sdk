@@ -77,25 +77,25 @@ export function replaceContent(options) {
 
 // read the file and return as json
 export async function readJsonFile(filename) {
-  const filePath = path.join(process.cwd(), filename);
+  const filePath = path.isAbsolute(filename) ? filename : path.join(process.cwd(), filename);
   const fileContents = fs.readFileSync(filePath, 'utf8');
   return JSON.parse(fileContents);
 }
 
 export async function readFile(filename) {
-  const filePath = path.join(process.cwd(), filename);
+  const filePath = path.isAbsolute(filename) ? filename : path.join(process.cwd(), filename);
   const fileContents = fs.readFileSync(filePath, 'utf8');
   return fileContents;
 }
 
 // create a function to write to file
 export async function writeJsonFile(filename, content) {
-  const filePath = path.join(process.cwd(), filename);
+  const filePath = path.isAbsolute(filename) ? filename : path.join(process.cwd(), filename);
   fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
 }
 
 export async function writeFile(filename, content) {
-  const filePath = path.join(process.cwd(), filename);
+  const filePath = path.isAbsolute(filename) ? filename : path.join(process.cwd(), filename);
   fs.writeFileSync(filePath, content);
 }
 
