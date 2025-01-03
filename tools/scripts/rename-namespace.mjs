@@ -217,6 +217,22 @@ async function updateDocFile(filePath) {
     new RegExp('(?<=\\s|^)@lit-protocol/[a-zA-Z0-9-]+(?=\\s|$)', 'g'),
     // Package name in HTML attributes
     new RegExp('(?<=")[^"]*@lit-protocol/[^"]*(?=")', 'g'),
+    // Email addresses
+    new RegExp('([a-zA-Z0-9._%+-]+@)litprotocol\\.com', 'g'),
+    // URLs and endpoints
+    new RegExp('https://[^/]*\\.?litprotocol\\.com(/[^\\s\'"]*)?', 'g'),
+    // Configuration values
+    new RegExp('(["\'`])(.*?)litprotocol\\.com(.*?)(["\'`])', 'g'),
+    // Test assertions and mocks
+    new RegExp('\\b(expect|mock|spy)\\s*\\([\'"].*?@lit-protocol/[^\'"]*[\'"]\\)', 'g'),
+    // Environment variables and constants
+    new RegExp('(LIT_[A-Z_]+)\\s*=\\s*[\'"].*?litprotocol\\.com', 'g'),
+    // Import statements in test files
+    new RegExp('import\\s*{[^}]*}\\s*from\\s*[\'"]@lit-protocol/[^\'"]*[\'"]', 'g'),
+    // Require statements in test files
+    new RegExp('require\\s*\\([\'"]@lit-protocol/[^\'"]*[\'"]\\)', 'g'),
+    // TypeScript imports in test files
+    new RegExp('import\\s+type\\s*{[^}]*}\\s*from\\s*[\'"]@lit-protocol/[^\'"]*[\'"]', 'g'),
   ];
 
   // Replace all occurrences
@@ -231,8 +247,11 @@ async function updateDocFile(filePath) {
   }
 
   // Handle any remaining direct references that might have been missed
-  if (updatedContent.includes('@lit-protocol')) {
-    updatedContent = updatedContent.replace(/@lit-protocol/g, newNamespace);
+  if (updatedContent.includes('@lit-protocol') || updatedContent.includes('litprotocol.com')) {
+    updatedContent = updatedContent
+      .replace(/@lit-protocol/g, newNamespace)
+      .replace(/([a-zA-Z0-9._%+-]+@)litprotocol\.com/g, `$1${newNamespace.replace('@', '')}.com`)
+      .replace(/https:\/\/[^/]*\.?litprotocol\.com/g, `https://${newNamespace.replace('@', '')}.com`);
     modified = true;
   }
 
