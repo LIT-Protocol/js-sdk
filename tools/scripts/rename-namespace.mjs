@@ -198,16 +198,42 @@ async function updateDocFile(filePath) {
     new RegExp(`https://img\\.shields\\.io/npm/v/@lit-protocol/([^"\\s]+)`, 'g'),
     // GitHub repository links
     new RegExp(`https://github\\.com/LIT-Protocol/js-sdk/tree/[^/]+/packages/([^)\\s]+)`, 'g'),
+    // Code blocks with package references
+    new RegExp('```[^`]*@lit-protocol/[^`]*```', 'g'),
+    // Inline code with package references
+    new RegExp('`[^`]*@lit-protocol/[^`]*`', 'g'),
+    // List items with package references
+    new RegExp('^\\s*[\\*\\-]\\s+.*@lit-protocol/[^\\n]*', 'gm'),
+    // Table cells with package references
+    new RegExp('\\|[^|]*@lit-protocol/[^|]*\\|', 'g'),
+    // HTML comments with package references
+    new RegExp('<!--[^-]*@lit-protocol/[^-]*-->', 'g'),
+    // JSDoc-style comments
+    new RegExp('@(param|returns|see|example)\\s+.*@lit-protocol/[^\\n]*', 'g'),
+    // Import/require examples in documentation
+    new RegExp('(import|require)\\s*\\([^)]*@lit-protocol/[^)]*\\)', 'g'),
+    new RegExp('import\\s+.*\\s+from\\s+[\'"]@lit-protocol/[^\'"]*[\'"]', 'g'),
+    // Package name in text
+    new RegExp('(?<=\\s|^)@lit-protocol/[a-zA-Z0-9-]+(?=\\s|$)', 'g'),
+    // Package name in HTML attributes
+    new RegExp('(?<=")[^"]*@lit-protocol/[^"]*(?=")', 'g'),
   ];
 
   // Replace all occurrences
   for (const pattern of patterns) {
-    if (updatedContent.match(pattern)) {
+    const matches = updatedContent.match(pattern);
+    if (matches) {
       updatedContent = updatedContent.replace(pattern, (match) => 
         match.replace(/@lit-protocol/g, newNamespace)
       );
       modified = true;
     }
+  }
+
+  // Handle any remaining direct references that might have been missed
+  if (updatedContent.includes('@lit-protocol')) {
+    updatedContent = updatedContent.replace(/@lit-protocol/g, newNamespace);
+    modified = true;
   }
 
   if (modified) {
@@ -217,11 +243,6 @@ async function updateDocFile(filePath) {
     yellowLog(`No changes needed in ${filePath}`);
   }
   return modified;
-
-  if (modified) {
-    await fs.promises.writeFile(filePath, updatedContent);
-    greenLog(`Updated imports in ${filePath}`);
-  }
 }
 
 /**
