@@ -234,16 +234,24 @@ async function main() {
       if (fs.existsSync(dir)) {
         const files = await listDirsRecursive(dir);
         await asyncForEach(files, async (file) => {
-          if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.md')) {
-            try {
-              if (file.endsWith('.md')) {
-                await updateDocFile(file);
-              } else {
-                await updateSourceFile(file);
+          // Skip node_modules, .nx, and dist directories
+          if (file.includes('node_modules') || file.includes('.nx') || file.includes('dist')) {
+            return;
+          }
+
+          try {
+            const stats = await fs.promises.stat(file);
+            if (!stats.isDirectory()) {
+              if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.md')) {
+                if (file.endsWith('.md')) {
+                  await updateDocFile(file);
+                } else {
+                  await updateSourceFile(file);
+                }
               }
-            } catch (error) {
-              redLog(`Error processing ${file}: ${error.message}`);
             }
+          } catch (error) {
+            redLog(`Error processing ${file}: ${error.message}`);
           }
         });
       }
