@@ -92,6 +92,16 @@ async function updateSourceFile(filePath) {
     // Direct string references
     `'${OLD_NAMESPACE}/`,
     `"${OLD_NAMESPACE}/`,
+    // Package references in strings
+    `@lit-protocol/`,
+    // Test-specific patterns
+    `import { } from '${OLD_NAMESPACE}/`,
+    `import { } from "${OLD_NAMESPACE}/`,
+    `const { } = require('${OLD_NAMESPACE}/`,
+    `const { } = require("${OLD_NAMESPACE}/`,
+    // Package references in comments
+    `* @package ${OLD_NAMESPACE}/`,
+    `* @see ${OLD_NAMESPACE}/`,
   ];
 
   for (const pattern of simplePatterns) {
@@ -251,17 +261,49 @@ async function main() {
           try {
             const stats = await fs.promises.stat(file);
             if (!stats.isDirectory()) {
-              if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.md')) {
-                if (file.endsWith('.md')) {
+              if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.md') || file.endsWith('.json')) {
+                if (file.endsWith('.json')) {
+                  // Handle JSON files
+                  const content = await fs.promises.readFile(file, 'utf8');
+                  if (content.includes('@lit-protocol')) {
+                    try {
+                      const jsonContent = JSON.parse(content);
+                      const updatedContent = JSON.stringify(jsonContent, null, 2).replace(
+                        new RegExp('@lit-protocol', 'g'),
+                        newNamespace
+                      );
+                      await fs.promises.writeFile(file, updatedContent);
+                      greenLog(`Updated JSON file: ${file}`);
+                    } catch (error) {
+                      redLog(`Error processing JSON file ${file}: ${error.message}`);
+                    }
+                  }
+                } else if (file.endsWith('.md')) {
                   await updateDocFile(file);
+                  // Double-check for any missed references in code blocks
+                  const content = await fs.promises.readFile(file, 'utf8');
+                  if (content.includes('@lit-protocol')) {
+                    await updateSourceFile(file);
+                  }
                 } else if (file.includes('local-tests')) {
                   // Handle test files with additional patterns
                   await updateSourceFile(file);
                   // Double-check local-tests specific patterns
                   const content = await fs.promises.readFile(file, 'utf8');
                   const testPatterns = [
+                    // Basic imports and requires
                     new RegExp(`from\\s+['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
                     new RegExp(`require\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
+                    // Test-specific patterns
+                    new RegExp(`import\\s+type\\s+{[^}]*}\\s+from\\s+['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    new RegExp(`jest\\.mock\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    new RegExp(`describe\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    new RegExp(`test\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    new RegExp(`it\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    // Test utility functions
+                    new RegExp(`setupTest\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    new RegExp(`mockFunction\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    new RegExp(`spyOn\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
                   ];
                   let modified = false;
                   let updatedContent = content;
