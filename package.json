@@ -30,7 +30,8 @@
     "graph": "nx graph",
     "v": "node ./tools/scripts/get-npm-version.mjs",
     "prettier": "nx format:write --all",
-    "prettier:check": "nx format:check --all"
+    "prettier:check": "nx format:check --all",
+    "changelog": "standard-version"
   },
   "private": true,
   "dependencies": {
@@ -121,9 +122,17 @@
     "ts-jest": "29.2.5",
     "typedoc": "^0.26.6",
     "typedoc-theme-hierarchy": "^5.0.0",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "commitlint": "^17.0.3",
+    "husky": "^8.0.1",
+    "standard-version": "^9.5.0"
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  }
 }
