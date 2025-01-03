@@ -81,6 +81,14 @@ async function updateSourceFile(filePath) {
 
   // Simple string replacements
   const simplePatterns = [
+    // Package references in imports
+    `'${OLD_NAMESPACE}/'`,
+    `"${OLD_NAMESPACE}/"`,
+    `'${OLD_NAMESPACE}'`,
+    `"${OLD_NAMESPACE}"`,
+    // Direct namespace references
+    `@lit-protocol/`,
+    `@lit-protocol`,
     // ES Module imports/exports
     `from '${OLD_NAMESPACE}/`,
     `from "${OLD_NAMESPACE}/`,
@@ -102,6 +110,26 @@ async function updateSourceFile(filePath) {
     // Package references in comments
     `* @package ${OLD_NAMESPACE}/`,
     `* @see ${OLD_NAMESPACE}/`,
+    // Additional test patterns
+    `jest.mock('${OLD_NAMESPACE}/`,
+    `jest.mock("${OLD_NAMESPACE}/`,
+    `describe('${OLD_NAMESPACE}/`,
+    `describe("${OLD_NAMESPACE}/`,
+    `test('${OLD_NAMESPACE}/`,
+    `test("${OLD_NAMESPACE}/`,
+    `it('${OLD_NAMESPACE}/`,
+    `it("${OLD_NAMESPACE}/`,
+    // Documentation patterns
+    `\`${OLD_NAMESPACE}/`,
+    `\`@lit-protocol/`,
+    // JSON patterns
+    `"name": "${OLD_NAMESPACE}/`,
+    `"name": "@lit-protocol/`,
+    // Dependencies
+    `"${OLD_NAMESPACE}/`,
+    `"@lit-protocol/`,
+    // Additional package references
+    `@lit-protocol`,
   ];
 
   for (const pattern of simplePatterns) {
@@ -253,8 +281,26 @@ async function main() {
       if (fs.existsSync(dir)) {
         const files = await listDirsRecursive(dir);
         await asyncForEach(files, async (file) => {
-          // Skip node_modules, .nx, and dist directories
-          if (file.includes('node_modules') || file.includes('.nx') || file.includes('dist')) {
+          // Skip node_modules and dist directories
+          if (file.includes('node_modules') || file.includes('dist')) {
+            return;
+          }
+
+          // Special handling for .nx cache files
+          if (file.includes('.nx') && file.endsWith('.json')) {
+            try {
+              const content = await fs.promises.readFile(file, 'utf8');
+              if (content.includes('@lit-protocol')) {
+                const updated = content.replace(
+                  new RegExp('@lit-protocol', 'g'),
+                  newNamespace
+                );
+                await fs.promises.writeFile(file, updated);
+                greenLog(`Updated .nx cache file: ${file}`);
+              }
+            } catch (error) {
+              redLog(`Error processing .nx cache file ${file}: ${error.message}`);
+            }
             return;
           }
 
@@ -268,11 +314,41 @@ async function main() {
                   if (content.includes('@lit-protocol')) {
                     try {
                       const jsonContent = JSON.parse(content);
-                      const updatedContent = JSON.stringify(jsonContent, null, 2).replace(
-                        new RegExp('@lit-protocol', 'g'),
-                        newNamespace
-                      );
-                      await fs.promises.writeFile(file, updatedContent);
+                      // Handle package.json files specifically
+                      if (file.endsWith('package.json')) {
+                        // Update package name
+                        if (jsonContent.name && jsonContent.name.includes('@lit-protocol')) {
+                          jsonContent.name = jsonContent.name.replace('@lit-protocol', newNamespace);
+                        }
+                        
+                        // Update dependencies
+                        ['dependencies', 'devDependencies', 'peerDependencies'].forEach(depType => {
+                          if (jsonContent[depType]) {
+                            const updatedDeps = {};
+                            for (const [key, value] of Object.entries(jsonContent[depType])) {
+                              if (key.startsWith('@lit-protocol')) {
+                                updatedDeps[key.replace('@lit-protocol', newNamespace)] = value;
+                              } else {
+                                updatedDeps[key] = value;
+                              }
+                            }
+                            jsonContent[depType] = updatedDeps;
+                          }
+                        });
+                      } else {
+                        // For other JSON files, do a simple string replacement
+                        const stringified = JSON.stringify(jsonContent, null, 2);
+                        if (stringified.includes('@lit-protocol')) {
+                          jsonContent = JSON.parse(
+                            stringified.replace(
+                              new RegExp('@lit-protocol', 'g'),
+                              newNamespace
+                            )
+                          );
+                        }
+                      }
+                      
+                      await fs.promises.writeFile(file, JSON.stringify(jsonContent, null, 2));
                       greenLog(`Updated JSON file: ${file}`);
                     } catch (error) {
                       redLog(`Error processing JSON file ${file}: ${error.message}`);
