@@ -115,6 +115,15 @@ async function updateSourceFile(filePath) {
     new RegExp(`import\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
     // Jest/Test imports
     new RegExp(`jest\\.mock\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+    // Test-specific imports
+    new RegExp(`import\\s+{[^}]*}\\s+from\\s+['"]local-tests/([^'"]*)['"](;?)`, 'g'),
+    // Test assertions and expectations
+    new RegExp(`expect\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
+    // Test mocks and spies
+    new RegExp(`mock\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
+    new RegExp(`spyOn\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
+    // Test setup and configuration
+    new RegExp(`setupTestFromEnv\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
   ];
 
   for (const regex of regexPatterns) {
@@ -245,6 +254,31 @@ async function main() {
               if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.md')) {
                 if (file.endsWith('.md')) {
                   await updateDocFile(file);
+                } else if (file.includes('local-tests')) {
+                  // Handle test files with additional patterns
+                  await updateSourceFile(file);
+                  // Double-check local-tests specific patterns
+                  const content = await fs.promises.readFile(file, 'utf8');
+                  const testPatterns = [
+                    new RegExp(`from\\s+['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)`, 'g'),
+                    new RegExp(`require\\(['"]${OLD_NAMESPACE}/([^'"]*)['"](;?)\\)`, 'g'),
+                  ];
+                  let modified = false;
+                  let updatedContent = content;
+                  
+                  for (const pattern of testPatterns) {
+                    if (updatedContent.match(pattern)) {
+                      updatedContent = updatedContent.replace(pattern, (match) =>
+                        match.replace(new RegExp(OLD_NAMESPACE, 'g'), newNamespace)
+                      );
+                      modified = true;
+                    }
+                  }
+                  
+                  if (modified) {
+                    await fs.promises.writeFile(file, updatedContent);
+                    greenLog(`Updated test imports in ${file}`);
+                  }
                 } else {
                   await updateSourceFile(file);
                 }
