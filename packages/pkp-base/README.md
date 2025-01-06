@@ -39,7 +39,5 @@ const signature = await pkpBase.runLitAction(dataToSign, 'sign');
 | Method                       | Description                        |
 | ---------------------------- | ---------------------------------- |
 | `init()`                     | Initialize and connect to LIT node |
-| `compressPubKey()`           | Compress public keys               |
 | `runLitAction()`             | Execute LIT actions                |
-| `createAndSetSessionSigs()`  | Manage session signatures          |
-| `ensureLitNodeClientReady()` | Verify node connection             |
+| `runSign()`                  | Signs a message                    |
