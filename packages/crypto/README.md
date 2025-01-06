@@ -11,13 +11,17 @@ yarn add @lit-protocol/crypto
 ## Quick Start
 
 ```typescript
-import { generatePrivateKey, encryptWithSignature } from '@lit-protocol/crypto';
+import { generateSessionKeyPair, encrypt } from '@lit-protocol/crypto';
 
-// Generate a new private key
-const privateKey = await generatePrivateKey();
+// Generate a new key pair
+const keyPair = await generateSessionKeyPair();
 
-// Encrypt data with signature
-const encryptedData = await encryptWithSignature(data, signature);
+// Encrypt data with public key and identity param
+const encryptedData = await encrypt(
+  keyPair.slice(2),
+  new Uint8Array([1, 2, 3]),
+  new Uint8Array([4, 5, 6])
+);
 ```
 
 ## Key Features

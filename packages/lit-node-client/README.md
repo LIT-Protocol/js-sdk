@@ -15,7 +15,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 // Initialize the client
 const client = new LitNodeClient({
-  alertWhenUnauthorized: false,
+  litNetwork: 'datil',
 });
 
 // Connect to the network
@@ -30,7 +30,3 @@ await client.connect();
 - Network connection management
 - Secure node communication
 - Automatic request handling and retries
-
-## Authentication
-
-The client automatically sets up authentication using the `checkAndSignAuthMessage` function from the auth-browser submodule. This provides a secure and consistent way to interact with Lit nodes across different environments.
