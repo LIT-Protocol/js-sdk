@@ -372,7 +372,7 @@ To add new error types:
 
 The Lit Protocol SDK provides the following core systems:
 
-- Cryptographic key management (PKP - Public Key Protocol)
+- Cryptographic key management (PKP - Programmable Key Pair)
 - Blockchain wallet interactions (Ethereum, Solana, Cosmos)
 - Decentralized authentication and authorization
 - Distributed computing and signing
@@ -426,10 +426,9 @@ Object.defineProperty(globalThis, 'crypto', {
 });
 ```
 
-</details>
-<details>
-<summary>error Command failed with exit code 13.</summary>
+### Unexpected Error on Node
 
+**Problem:** Exit code 13
+
+**Solution:**
 Make sure your node version is above v18.0.0
-
-</details>
