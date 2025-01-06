@@ -36,8 +36,8 @@ const signature = await pkpBase.runLitAction(dataToSign, 'sign');
 
 ## Core Methods
 
-| Method                       | Description                        |
-| ---------------------------- | ---------------------------------- |
-| `init()`                     | Initialize and connect to LIT node |
-| `runLitAction()`             | Execute LIT actions                |
-| `runSign()`                  | Signs a message                    |
+| Method           | Description                        |
+| ---------------- | ---------------------------------- |
+| `init()`         | Initialize and connect to LIT node |
+| `runLitAction()` | Execute LIT actions                |
+| `runSign()`      | Signs a message                    |
