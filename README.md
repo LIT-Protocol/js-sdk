@@ -117,11 +117,13 @@ Recommended for better development experience:
 To start developing with this repository:
 
 1. Install dependencies:
+
 ```
 yarn
 ```
 
 2. Build the packages:
+
 ```
 yarn build:dev
 ```
@@ -215,6 +217,7 @@ Prerequisites:
 Publishing steps:
 
 1. Create a release PR:
+
    - Create a new branch from master with format `vX.X.X-Publish`
    - Add changelog as PR description
    - Add "Release" label to the PR
