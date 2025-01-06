@@ -117,9 +117,13 @@ Recommended for better development experience:
 To start developing with this repository:
 
 1. Install dependencies:
-
 ```
 yarn
+```
+
+2. Build the packages:
+```
+yarn build:dev
 ```
 
 ## Building
@@ -210,15 +214,22 @@ Prerequisites:
 
 Publishing steps:
 
-1. Update dependencies: `yarn install`
-2. Increment version: `yarn bump`
-3. Build packages: `yarn build`
-4. Run tests:
-   - Unit tests: `yarn test:unit`
-   - E2E tests: `yarn test:local`
-5. Generate documentation: `yarn gen:docs --push`
-6. Publish packages: `yarn publish:packages`
-7. Commit with message: "Published version X.X.X"
+1. Create a release PR:
+   - Create a new branch from master with format `vX.X.X-Publish`
+   - Add changelog as PR description
+   - Add "Release" label to the PR
+   - Reference example: https://github.com/LIT-Protocol/js-sdk/pull/753
+
+2. After PR approval, proceed with publishing:
+   - Update dependencies: `yarn install`
+   - Increment version: `yarn bump`
+   - Build packages: `yarn build`
+   - Run tests:
+     - Unit tests: `yarn test:unit`
+     - E2E tests: `yarn test:local`
+   - Generate documentation: `yarn gen:docs --push`
+   - Publish packages: `yarn publish:packages`
+   - Commit with message: "Published version X.X.X"
 
 ## Testing Guide
 
