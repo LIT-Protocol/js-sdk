@@ -217,11 +217,11 @@ export type ContractName = keyof ExclusiveLitContractContext;
  */
 export interface LitContractResolverContext {
   [index: string]:
-    | string
-    | LitContractContext
-    | ethers.providers.JsonRpcProvider
-    | undefined
-    | number;
+  | string
+  | LitContractContext
+  | ethers.providers.JsonRpcProvider
+  | undefined
+  | number;
   resolverAddress: string;
   abi: any;
   environment: number;
@@ -269,3 +269,12 @@ export type EpochInfo = {
   retries: number;
   timeout: number;
 };
+
+export type PriceFeedInfo = {
+  epochId: number;
+  minNodeCount: number;
+  networkPrices: {
+    arr: Array<{ network: string, price: number }>,
+    mapByAddress: Record<string, number>
+  }
+}

@@ -13,6 +13,7 @@ import {
   MintNextAndAddAuthMethods,
   MintWithAuthParams,
   MintWithAuthResponse,
+  PriceFeedInfo,
 } from '@lit-protocol/types';
 import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
 import { decToHex, hexToDec, intToIP } from './hex2dec';
@@ -1241,6 +1242,25 @@ export class LitContracts {
     };
   };
 
+  /**
+   * Gets price feed information for nodes in the network.
+   * 
+   * @param {Object} params - The parameters object
+   * @param {LIT_NETWORKS_KEYS} params.litNetwork - The Lit network to get price feed info for
+   * @param {LitContractContext | LitContractResolverContext} [params.networkContext] - Optional network context
+   * @param {string} [params.rpcUrl] - Optional RPC URL to use
+   * @param {number[]} [params.productIds] - Optional array of product IDs to get prices for. Defaults to [DECRYPTION, LA, SIGN]
+   * @param {typeof HTTP | typeof HTTPS | null} [params.nodeProtocol] - Optional node protocol to use
+   * 
+   * @returns {Promise<{
+   *   epochId: number,
+   *   minNodeCount: number,
+   *   networkPrices: {
+   *     arr: Array<{network: string, price: number}>,
+   *     mapByAddress: Record<string, number>
+   *   }
+   * }>} 
+   */
   public static getPriceFeedInfo = async ({
     litNetwork,
     networkContext,
@@ -1251,16 +1271,20 @@ export class LitContracts {
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
-    productIds?: number[];
-  }) => {
+    productIds?: (typeof PRODUCT_IDS)[keyof typeof PRODUCT_IDS][];
+  }): Promise<PriceFeedInfo> => {
+
     if (!productIds || productIds.length === 0) {
       log('No product IDs provided. Defaulting to 0');
-      productIds = [
-        PRODUCT_IDS.DECRYPTION,
-        PRODUCT_IDS.LA,
-        PRODUCT_IDS.SIGN,
-      ]
+      productIds = [PRODUCT_IDS.DECRYPTION, PRODUCT_IDS.LA, PRODUCT_IDS.SIGN];
     }
+
+    // check if productIds is any numbers in the PRODUCT_IDS object
+    productIds.forEach((productId) => {
+      if (!Object.values(PRODUCT_IDS).includes(productId)) {
+        throw new Error(`❌ Invalid product ID: ${productId}. We only accept ${Object.values(PRODUCT_IDS).join(', ')}`);
+      }
+    });
 
     const priceFeedContract = await LitContracts.getPriceFeedContract(
       litNetwork,
