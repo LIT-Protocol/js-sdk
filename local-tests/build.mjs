@@ -8,6 +8,7 @@ const ALLOW_LIST = [
   '@lit-protocol/contracts',
   'crypto',
   'secp256k1',
+  'cross-fetch',
 ];
 
 const getPath = (relativePath) =>
