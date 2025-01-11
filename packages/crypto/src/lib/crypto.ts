@@ -278,15 +278,16 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   return sessionKeyPair;
 };
 
-function doDecrypt(
+async function doDecrypt(
   ciphertextBase64: string,
   signature: Uint8Array
 ): Promise<Uint8Array> {
   console.log('signature from encrypt op: ', signature);
   const ciphertext = Buffer.from(ciphertextBase64, 'base64');
-  const decrypt = blsDecrypt('Bls12381G2', ciphertext, signature);
-  console.log("decrypt:", decrypt);
-  process.exit();
+
+  console.log("ciphertext:", ciphertext);
+
+  const decrypt = await blsDecrypt('Bls12381G2', ciphertext, signature);
   return decrypt;
 }
 

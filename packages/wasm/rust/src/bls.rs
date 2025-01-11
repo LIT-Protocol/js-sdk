@@ -54,9 +54,11 @@ impl<C: BlsSignatureImpl> Bls<C>
     })?;
 
     // Serialize the signature to JSON
-    let signature_json = serde_json::to_string(&signature).map_err(|e| {
-      JsError::new(&format!("Failed to serialize signature to JSON: {}", e))
-    })?;
+    let signature_json = serde_json
+      ::to_string(&signature)
+      .map_err(|e| {
+        JsError::new(&format!("Failed to serialize signature to JSON: {}", e))
+      })?;
 
     let signature_bytes = signature_json.as_bytes().to_vec();
     let signature_uint8array = Uint8Array::from(signature_bytes.as_slice());
@@ -156,18 +158,28 @@ impl<C: BlsSignatureImpl> Bls<C>
 
   pub fn decrypt(
     ciphertext: Uint8Array,
-    decryption_key: Uint8Array
+    signature: Uint8Array
   ) -> JsResult<Uint8Array> {
-    let decryption_key = from_uint8array(decryption_key)?;
+    // Convert Uint8Array back to a Vec<u8>
+    let signature_bytes = signature.to_vec();
+
+    // Convert Vec<u8> back to a String
+    let signature_string = String::from_utf8(signature_bytes).map_err(|e| {
+      JsError::new(&format!("Failed to convert bytes to string: {}", e))
+    })?;
+
+    let signature = serde_json
+      ::from_str::<Signature<C>>(&signature_string)
+      .map_err(|e| {
+        JsError::new(&format!("Failed to parse signature: {}", e))
+      })?;
 
     let ciphertext = from_js::<Vec<u8>>(ciphertext)?;
     let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(
       &ciphertext
     )?;
 
-    let message = ciphertext.decrypt(
-      &Signature::ProofOfPossession(decryption_key)
-    );
+    let message = ciphertext.decrypt(&signature);
     let message = Option::<Vec<u8>>
       ::from(message)
       .ok_or_else(|| JsError::new("decryption failed"))?;
@@ -223,12 +235,12 @@ pub fn bls_encrypt(
 pub fn bls_decrypt(
   variant: BlsVariant,
   ciphertext: Uint8Array,
-  decryption_key: Uint8Array
+  signature: Uint8Array
 ) -> JsResult<Uint8Array> {
   match variant {
     BlsVariant::Bls12381G1 =>
-      Bls::<Bls12381G1Impl>::decrypt(ciphertext, decryption_key),
+      Bls::<Bls12381G1Impl>::decrypt(ciphertext, signature),
     BlsVariant::Bls12381G2 =>
-      Bls::<Bls12381G2Impl>::decrypt(ciphertext, decryption_key),
+      Bls::<Bls12381G2Impl>::decrypt(ciphertext, signature),
   }
 }
