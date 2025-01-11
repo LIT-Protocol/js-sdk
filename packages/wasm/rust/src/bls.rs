@@ -34,59 +34,34 @@ impl<C: BlsSignatureImpl> Bls<C>
     C::Signature: TryFrom<Vec<u8>>,
     C::SignatureShare: TryFrom<Vec<u8>>
 {
-  pub fn combine_signature_shares_inner_v2<
-    D: BlsSignatureImpl + DeserializeOwned
-  >(shares: &[String]) -> JsResult<Uint8Array> {
-    console::log_1(&format!("Input shares: {:?}", shares).into());
-
+  pub fn combine<D: BlsSignatureImpl + DeserializeOwned>(
+    shares: &[String]
+  ) -> JsResult<Uint8Array> {
     let signature_shares: Vec<SignatureShare<D>> = shares
       .iter()
       .map(|share| {
-        console::log_1(&format!("Processing share: {}", share).into());
         match serde_json::from_str::<SignatureShare<D>>(share) {
-          Ok(parsed_share) => {
-            console::log_1(&format!("Parsed share: {:?}", parsed_share).into());
-            Ok(parsed_share)
-          }
+          Ok(parsed_share) => { Ok(parsed_share) }
           Err(e) => {
-            console::log_1(&format!("Failed to parse share: {}", e).into());
             Err(JsError::new(&format!("Failed to parse share: {}", e)))
           }
         }
       })
       .collect::<Result<Vec<_>, _>>()?;
 
-    console::log_1(&format!("Signature shares: {:?}", signature_shares).into());
-
     let signature = Signature::from_shares(&signature_shares).map_err(|_e| {
-      console::log_1(
-        &format!("Failed to combine signature shares: {}", _e).into()
-      );
       JsError::new(&format!("Failed to combine signature shares: {}", _e))
     })?;
 
-    let signature_string = signature.to_string();
-    console::log_1(
-      &format!("Combined signature string: {}", signature_string).into()
-    );
+    // Serialize the signature to JSON
+    let signature_json = serde_json::to_string(&signature).map_err(|e| {
+      JsError::new(&format!("Failed to serialize signature to JSON: {}", e))
+    })?;
 
-    let signature_bytes = signature_string.as_bytes().to_vec();
-    console::log_1(&format!("Signature bytes: {:?}", signature_bytes).into());
-
+    let signature_bytes = signature_json.as_bytes().to_vec();
     let signature_uint8array = Uint8Array::from(signature_bytes.as_slice());
 
     Ok(signature_uint8array)
-  }
-
-  pub fn combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    let signature_shares = signature_shares
-      .into_iter()
-      .map(from_uint8array)
-      .collect::<JsResult<Vec<_>>>()?;
-
-    let signature = C::core_combine_signature_shares(&signature_shares)?;
-
-    into_uint8array(signature.to_bytes())
   }
 
   pub fn verify(
@@ -94,15 +69,68 @@ impl<C: BlsSignatureImpl> Bls<C>
     message: Uint8Array,
     signature: Uint8Array
   ) -> JsResult<()> {
-    let public_key = from_uint8array(public_key)?;
-    let signature = from_uint8array(signature)?;
-    let message = from_js::<Vec<u8>>(message)?;
+    console::log_1(&"1. Starting verification process".into());
 
-    let signature = Signature::<C>::ProofOfPossession(signature);
+    let public_key = from_uint8array(public_key).map_err(|e| {
+      console::log_1(&format!("Failed to convert public_key: {:?}", e).into());
+      e
+    })?;
+    console::log_1(&"2. Public key converted successfully".into());
 
-    signature.verify(&PublicKey(public_key), message)?;
+    // Convert Uint8Array back to a Vec<u8>
+    let signature_bytes = signature.to_vec();
 
-    Ok(())
+    // Convert Vec<u8> back to a String
+    let signature_string = String::from_utf8(signature_bytes).map_err(|e| {
+      JsError::new(&format!("Failed to convert bytes to string: {}", e))
+    })?;
+
+    console::log_1(
+      &format!("3. Signature string: {}", signature_string).into()
+    );
+
+    let signature = serde_json
+      ::from_str::<Signature<C>>(&signature_string)
+      .map_err(|e| {
+        JsError::new(&format!("Failed to parse signature: {}", e))
+      })?;
+
+    console::log_1(&format!("4. Signature: {:?}", signature).into());
+
+    console::log_1(&"Signature converted successfully".into());
+
+    let message = from_js::<Vec<u8>>(message).map_err(|e| {
+      console::log_1(&format!("Failed to convert message: {:?}", e).into());
+      e
+    })?;
+    console::log_1(&"5. Message converted successfully".into());
+
+    // Log the public key and message for verification
+    console::log_1(&format!("Public Key: {:?}", public_key).into());
+    console::log_1(&format!("Message: {:?}", message).into());
+
+    // Ensure the signature verification is done correctly
+    let verification_result = signature.verify(
+      &PublicKey(public_key),
+      &message
+    );
+
+    match verification_result {
+      Ok(_) => {
+        console::log_1(&"6. Signature verified successfully".into());
+        Ok(())
+      }
+      Err(e) => {
+        console::log_1(
+          &format!("Signature verification failed: {:?}", e).into()
+        );
+        // Log additional context about the failure
+        console::log_1(&format!("Public Key Type: {:?}", public_key).into());
+        console::log_1(&format!("Message Type: {:?}", message).into());
+        console::log_1(&format!("Signature Type: {:?}", signature).into());
+        Err(JsError::new(&format!("Signature verification failed: {:?}", e)))
+      }
+    }
   }
 
   pub fn encrypt(
@@ -155,13 +183,9 @@ pub fn bls_combine(
 ) -> JsResult<Uint8Array> {
   match variant {
     BlsVariant::Bls12381G1 =>
-      Bls::<Bls12381G1Impl>::combine_signature_shares_inner_v2::<Bls12381G1Impl>(
-        &signature_shares
-      ),
+      Bls::<Bls12381G1Impl>::combine::<Bls12381G1Impl>(&signature_shares),
     BlsVariant::Bls12381G2 =>
-      Bls::<Bls12381G2Impl>::combine_signature_shares_inner_v2::<Bls12381G2Impl>(
-        &signature_shares
-      ),
+      Bls::<Bls12381G2Impl>::combine::<Bls12381G2Impl>(&signature_shares),
   }
 }
 
