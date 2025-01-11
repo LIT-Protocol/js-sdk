@@ -1,6 +1,6 @@
 {
   "Allowlist": {
-    "address": "0xf5059a5D33d5853360D16C683c16e67980206f36",
+    "address": "0x9e491001d8b466cb3D0d4423930b4E115137C26B",
     "abi": [
       {
         "inputs": [],
@@ -231,7 +231,7 @@
     "name": "Allowlist"
   },
   "LITToken": {
-    "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+    "address": "0xd78089bAAe410f5d0eae31D0D56157c73a3Ff98B",
     "abi": [
       {
         "inputs": [
@@ -1279,7 +1279,7 @@
     "name": "LITToken"
   },
   "Multisender": {
-    "address": "0xFD471836031dc5108809D173A067e8486B9047A3",
+    "address": "0xe113C4318330A7B30ecfc554415E62A720eaeb3A",
     "abi": [
       {
         "anonymous": false,
@@ -1388,7 +1388,7 @@
     "name": "Multisender"
   },
   "PKPHelper": {
-    "address": "0x202CCe504e04bEd6fC0521238dDf04Bc9E8E15aB",
+    "address": "0x13e23D381B3f7952D510A9275e7e6F5F1BED40F8",
     "abi": [
       {
         "inputs": [
@@ -2370,7 +2370,7 @@
     "name": "PKPHelper"
   },
   "PKPNFT": {
-    "address": "0x9d4454B023096f34B160D6B654540c56A1F81688",
+    "address": "0xF4e4D17f6386D655BE861B06FF4c05ff1a8950e8",
     "abi": [
       {
         "inputs": [
@@ -3569,7 +3569,7 @@
     "name": "PKPNFT"
   },
   "PKPNFTMetadata": {
-    "address": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe",
+    "address": "0x829153d42CAF4de6b3aDD39002790A7498bbCA38",
     "abi": [
       {
         "inputs": [
@@ -3727,7 +3727,7 @@
     "name": "PKPNFTMetadata"
   },
   "PKPPermissions": {
-    "address": "0x0355B7B8cb128fA5692729Ab3AAa199C1753f726",
+    "address": "0xCE1f66d900794626a6933D8b01A0AA2Cb349b3b5",
     "abi": [
       {
         "inputs": [
@@ -5017,7 +5017,7 @@
     "name": "PKPPermissions"
   },
   "PubkeyRouter": {
-    "address": "0xc351628EB244ec633d5f21fBD6621e1a683B1181",
+    "address": "0x4AD54D7757605ae56330556D0C268397a41F90D7",
     "abi": [
       {
         "inputs": [
@@ -5933,7 +5933,7 @@
     "name": "PubkeyRouter"
   },
   "RateLimitNFT": {
-    "address": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
+    "address": "0xDBb5BB4836752B33D6D9a0ddd133989e6BdBb97f",
     "abi": [
       {
         "inputs": [
@@ -7322,7 +7322,7 @@
     "name": "RateLimitNFT"
   },
   "Staking": {
-    "address": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
+    "address": "0x4A031f223f1BDcc1eC2aB6f6346ca9E501d0C11D",
     "abi": [
       {
         "inputs": [
@@ -10263,7 +10263,7 @@
     "name": "Staking"
   },
   "StakingBalances": {
-    "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+    "address": "0x60d5184AB5f7F9010998851CF931aB4CD9bFB99a",
     "abi": [
       {
         "inputs": [
@@ -11504,187 +11504,8 @@
     ],
     "name": "StakingBalances"
   },
-  "CloneNet": {
-    "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
-    "abi": [
-      {
-        "type": "error",
-        "inputs": [],
-        "name": "CallerNotOwner"
-      },
-      {
-        "type": "function",
-        "inputs": [
-          {
-            "name": "stakingContractAddress",
-            "internalType": "address",
-            "type": "address"
-          }
-        ],
-        "name": "adminAddActiveStakingContract",
-        "outputs": [],
-        "stateMutability": "nonpayable"
-      },
-      {
-        "type": "function",
-        "inputs": [
-          {
-            "name": "stakingContractAddress",
-            "internalType": "address",
-            "type": "address"
-          }
-        ],
-        "name": "adminRemoveActiveStakingContract",
-        "outputs": [],
-        "stateMutability": "nonpayable"
-      },
-      {
-        "type": "function",
-        "inputs": [],
-        "name": "getActiveStakingContracts",
-        "outputs": [
-          {
-            "name": "",
-            "internalType": "address[]",
-            "type": "address[]"
-          }
-        ],
-        "stateMutability": "view"
-      },
-      {
-        "type": "function",
-        "inputs": [],
-        "name": "getAllActiveUnkickedValidatorStructsAndCounts",
-        "outputs": [
-          {
-            "name": "",
-            "internalType": "struct LibStakingStorage.KeyedStakingAggregateDetails[]",
-            "type": "tuple[]",
-            "components": [
-              {
-                "name": "stakingContractAddress",
-                "internalType": "address",
-                "type": "address"
-              },
-              {
-                "name": "details",
-                "internalType": "struct LibStakingStorage.StakingAggregateDetails",
-                "type": "tuple",
-                "components": [
-                  {
-                    "name": "epoch",
-                    "internalType": "struct LibStakingStorage.Epoch",
-                    "type": "tuple",
-                    "components": [
-                      {
-                        "name": "epochLength",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "number",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "endTime",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "retries",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "timeout",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "startTime",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      }
-                    ]
-                  },
-                  {
-                    "name": "currentValidatorCountForConsensus",
-                    "internalType": "uint256",
-                    "type": "uint256"
-                  },
-                  {
-                    "name": "activeUnkickedValidators",
-                    "internalType": "struct LibStakingStorage.Validator[]",
-                    "type": "tuple[]",
-                    "components": [
-                      {
-                        "name": "ip",
-                        "internalType": "uint32",
-                        "type": "uint32"
-                      },
-                      {
-                        "name": "ipv6",
-                        "internalType": "uint128",
-                        "type": "uint128"
-                      },
-                      {
-                        "name": "port",
-                        "internalType": "uint32",
-                        "type": "uint32"
-                      },
-                      {
-                        "name": "nodeAddress",
-                        "internalType": "address",
-                        "type": "address"
-                      },
-                      {
-                        "name": "reward",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "senderPubKey",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "receiverPubKey",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      },
-                      {
-                        "name": "lastActiveEpoch",
-                        "internalType": "uint256",
-                        "type": "uint256"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "stateMutability": "view"
-      },
-      {
-        "type": "function",
-        "inputs": [],
-        "name": "numActiveStakingContracts",
-        "outputs": [
-          {
-            "name": "",
-            "internalType": "uint256",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view"
-      }
-    ],
-    "name": "CloneNet"
-  },
   "ContractResolver": {
-    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "address": "0x8b62F63AFd74d81c25504634d1539d1Abc78c52E",
     "abi": [
       {
         "inputs": [
@@ -11857,19 +11678,6 @@
       {
         "inputs": [],
         "name": "BACKUP_RECOVERY_CONTRACT",
-        "outputs": [
-          {
-            "internalType": "bytes32",
-            "name": "",
-            "type": "bytes32"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "CLONE_NET_CONTRACT",
         "outputs": [
           {
             "internalType": "bytes32",
@@ -12370,7 +12178,7 @@
     "name": "ContractResolver"
   },
   "PriceFeed": {
-    "address": "0xF8e31cb472bc70500f08Cd84917E5A1912Ec8397",
+    "address": "0x229E5A0694b79A5254244178eF38b5B019dc7B63",
     "abi": [
       {
         "inputs": [
@@ -13156,7 +12964,7 @@
     "name": "PriceFeed"
   },
   "Ledger": {
-    "address": "0xe8D2A1E88c91DCd5433208d4152Cc4F399a7e91d",
+    "address": "0xDCC4973Fe2D38be9cb3480967a8916789C9beac8",
     "abi": [
       {
         "inputs": [
