@@ -41,7 +41,7 @@ export interface BlsSignatureShare {
   ProofOfPossession: {
     identifier: string;
     value: string;
-  }
+  };
 }
 
 /**
@@ -76,7 +76,8 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length
+      `Invalid public key length. Expecting 96 characters, got ${
+        publicKeyHex.replace('0x', '').length
       } instead.`
     );
   }
@@ -290,15 +291,14 @@ async function doDecrypt(
 async function doCombineSignatureShares(
   shares: BlsSignatureShare[]
 ): Promise<Uint8Array> {
-
   const sigShares = shares.map((s, index) => {
     return JSON.stringify({
       ProofOfPossession: {
         identifier: s.ProofOfPossession.identifier,
-        value: s.ProofOfPossession.value
-      }
-    })
-  })
+        value: s.ProofOfPossession.value,
+      },
+    });
+  });
 
   const signature = await blsCombine('Bls12381G2', sigShares);
 

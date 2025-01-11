@@ -11,9 +11,9 @@ const deprecated = depd('lit-js-sdk:constants:mappers');
  */
 export const NETWORK_CONTEXT_BY_NETWORK: {
   [key in LIT_NETWORK_VALUES]:
-  | typeof datilDev
-  | typeof datilTest
-  | typeof datil;
+    | typeof datilDev
+    | typeof datilTest
+    | typeof datil;
 } = {
   'datil-dev': datilDev,
   'datil-test': datilTest,
@@ -34,9 +34,9 @@ export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
 
 /**
  * Product IDs used for price feed and node selection
- * 
+ *
  * - DECRYPTION (0): Used for decryption operations
- * - SIGN (1): Used for signing operations 
+ * - SIGN (1): Used for signing operations
  * - LA (2): Used for Lit Actions execution
  */
 export const PRODUCT_IDS = {
