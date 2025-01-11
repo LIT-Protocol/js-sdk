@@ -1,5 +1,4 @@
 use std::convert::TryFrom;
-
 use blsful::{
   Bls12381G1Impl,
   Bls12381G2Impl,
@@ -10,14 +9,12 @@ use blsful::{
   SignatureSchemes,
   TimeCryptCiphertext,
 };
-use elliptic_curve::group::GroupEncoding;
 use js_sys::Uint8Array;
 use serde::Deserialize;
 use tsify::Tsify;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 use crate::abi::{ from_js, from_uint8array, into_uint8array, JsResult };
-use serde::{ de::DeserializeOwned, Serialize };
+use serde::{ de::DeserializeOwned };
 
 #[derive(Tsify, Deserialize)]
 #[tsify(from_wasm_abi)]
@@ -34,36 +31,41 @@ impl<C: BlsSignatureImpl> Bls<C>
     C::Signature: TryFrom<Vec<u8>>,
     C::SignatureShare: TryFrom<Vec<u8>>
 {
+  fn parse_signature(signature: Uint8Array) -> JsResult<Signature<C>> {
+    let signature_bytes = signature.to_vec();
+    let signature_string = String::from_utf8(signature_bytes).map_err(|e|
+      JsError::new(&format!("Failed to convert bytes to string: {}", e))
+    )?;
+
+    serde_json
+      ::from_str::<Signature<C>>(&signature_string)
+      .map_err(|e| JsError::new(&format!("Failed to parse signature: {}", e)))
+  }
+
   pub fn combine<D: BlsSignatureImpl + DeserializeOwned>(
     shares: &[String]
   ) -> JsResult<Uint8Array> {
     let signature_shares: Vec<SignatureShare<D>> = shares
       .iter()
       .map(|share| {
-        match serde_json::from_str::<SignatureShare<D>>(share) {
-          Ok(parsed_share) => { Ok(parsed_share) }
-          Err(e) => {
-            Err(JsError::new(&format!("Failed to parse share: {}", e)))
-          }
-        }
+        serde_json
+          ::from_str::<SignatureShare<D>>(share)
+          .map_err(|e| JsError::new(&format!("Failed to parse share: {}", e)))
       })
       .collect::<Result<Vec<_>, _>>()?;
 
-    let signature = Signature::from_shares(&signature_shares).map_err(|_e| {
-      JsError::new(&format!("Failed to combine signature shares: {}", _e))
-    })?;
+    let signature = Signature::from_shares(&signature_shares).map_err(|e|
+      JsError::new(&format!("Failed to combine signature shares: {}", e))
+    )?;
 
-    // Serialize the signature to JSON
     let signature_json = serde_json
       ::to_string(&signature)
-      .map_err(|e| {
+      .map_err(|e|
         JsError::new(&format!("Failed to serialize signature to JSON: {}", e))
-      })?;
+      )?;
 
     let signature_bytes = signature_json.as_bytes().to_vec();
-    let signature_uint8array = Uint8Array::from(signature_bytes.as_slice());
-
-    Ok(signature_uint8array)
+    Ok(Uint8Array::from(signature_bytes.as_slice()))
   }
 
   pub fn verify(
@@ -71,68 +73,15 @@ impl<C: BlsSignatureImpl> Bls<C>
     message: Uint8Array,
     signature: Uint8Array
   ) -> JsResult<()> {
-    console::log_1(&"1. Starting verification process".into());
+    let public_key = from_uint8array(public_key)?;
+    let message = from_js::<Vec<u8>>(message)?;
+    let signature = Self::parse_signature(signature)?;
 
-    let public_key = from_uint8array(public_key).map_err(|e| {
-      console::log_1(&format!("Failed to convert public_key: {:?}", e).into());
-      e
-    })?;
-    console::log_1(&"2. Public key converted successfully".into());
-
-    // Convert Uint8Array back to a Vec<u8>
-    let signature_bytes = signature.to_vec();
-
-    // Convert Vec<u8> back to a String
-    let signature_string = String::from_utf8(signature_bytes).map_err(|e| {
-      JsError::new(&format!("Failed to convert bytes to string: {}", e))
-    })?;
-
-    console::log_1(
-      &format!("3. Signature string: {}", signature_string).into()
-    );
-
-    let signature = serde_json
-      ::from_str::<Signature<C>>(&signature_string)
-      .map_err(|e| {
-        JsError::new(&format!("Failed to parse signature: {}", e))
-      })?;
-
-    console::log_1(&format!("4. Signature: {:?}", signature).into());
-
-    console::log_1(&"Signature converted successfully".into());
-
-    let message = from_js::<Vec<u8>>(message).map_err(|e| {
-      console::log_1(&format!("Failed to convert message: {:?}", e).into());
-      e
-    })?;
-    console::log_1(&"5. Message converted successfully".into());
-
-    // Log the public key and message for verification
-    console::log_1(&format!("Public Key: {:?}", public_key).into());
-    console::log_1(&format!("Message: {:?}", message).into());
-
-    // Ensure the signature verification is done correctly
-    let verification_result = signature.verify(
-      &PublicKey(public_key),
-      &message
-    );
-
-    match verification_result {
-      Ok(_) => {
-        console::log_1(&"6. Signature verified successfully".into());
-        Ok(())
-      }
-      Err(e) => {
-        console::log_1(
-          &format!("Signature verification failed: {:?}", e).into()
-        );
-        // Log additional context about the failure
-        console::log_1(&format!("Public Key Type: {:?}", public_key).into());
-        console::log_1(&format!("Message Type: {:?}", message).into());
-        console::log_1(&format!("Signature Type: {:?}", signature).into());
-        Err(JsError::new(&format!("Signature verification failed: {:?}", e)))
-      }
-    }
+    signature
+      .verify(&PublicKey(public_key), &message)
+      .map_err(|e|
+        JsError::new(&format!("Signature verification failed: {:?}", e))
+      )
   }
 
   pub fn encrypt(
@@ -142,7 +91,6 @@ impl<C: BlsSignatureImpl> Bls<C>
   ) -> JsResult<Uint8Array> {
     let encryption_key = from_uint8array(encryption_key)?;
     let encryption_key = PublicKey::<C>(encryption_key);
-
     let message = from_js::<Vec<u8>>(message)?;
     let identity = from_js::<Vec<u8>>(identity)?;
 
@@ -152,7 +100,6 @@ impl<C: BlsSignatureImpl> Bls<C>
       identity
     )?;
     let ciphertext = serde_bare::to_vec(&ciphertext)?;
-
     into_uint8array(ciphertext)
   }
 
@@ -160,20 +107,7 @@ impl<C: BlsSignatureImpl> Bls<C>
     ciphertext: Uint8Array,
     signature: Uint8Array
   ) -> JsResult<Uint8Array> {
-    // Convert Uint8Array back to a Vec<u8>
-    let signature_bytes = signature.to_vec();
-
-    // Convert Vec<u8> back to a String
-    let signature_string = String::from_utf8(signature_bytes).map_err(|e| {
-      JsError::new(&format!("Failed to convert bytes to string: {}", e))
-    })?;
-
-    let signature = serde_json
-      ::from_str::<Signature<C>>(&signature_string)
-      .map_err(|e| {
-        JsError::new(&format!("Failed to parse signature: {}", e))
-      })?;
-
+    let signature = Self::parse_signature(signature)?;
     let ciphertext = from_js::<Vec<u8>>(ciphertext)?;
     let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(
       &ciphertext

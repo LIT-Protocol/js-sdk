@@ -1,3 +1,4 @@
+// DEBUG=true LIT_RPC_URL=https://yellowstone-rpc.litprotocol.com NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
