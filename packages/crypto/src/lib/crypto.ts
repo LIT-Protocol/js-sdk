@@ -1,4 +1,4 @@
-import { splitSignature } from 'ethers/lib/utils';
+import { joinSignature, splitSignature } from 'ethers/lib/utils';
 
 import {
   InvalidParamType,
@@ -8,13 +8,12 @@ import {
   NoValidShares,
   UnknownError,
 } from '@lit-protocol/constants';
-import { checkType, log } from '@lit-protocol/misc';
+import { log } from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
 import {
   CombinedECDSASignature,
   NodeAttestation,
   SessionKeyPair,
-  SigningAccessControlConditionJWTPayload,
   SigShare,
 } from '@lit-protocol/types';
 import {
@@ -33,6 +32,49 @@ import {
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
+
+export function joinEcdsaSignature(signature: {
+  r: string;
+  s: string;
+  recid: number;
+}): string {
+  if (signature.r.length === 98) {
+    // For P384 signatures (48 bytes/98 hex each for r and s)
+    const rBuf = Buffer.from(signature.r.replace('0x', ''), 'hex');
+    const sBuf = Buffer.from(signature.s.replace('0x', ''), 'hex');
+    const recIdBuf = Buffer.from([signature.recid]);
+    const joinedSignature =
+      '0x' + Buffer.concat([rBuf, sBuf, recIdBuf]).toString('hex');
+    return joinedSignature;
+  } else {
+    // For K256/P256 signatures
+    const joinedSignature = joinSignature({
+      r: signature.r,
+      s: signature.s,
+      recoveryParam: signature.recid,
+    });
+    return joinedSignature;
+  }
+}
+
+export function splitEcdsaSignature(signature: Buffer): CombinedECDSASignature {
+  if (signature.length === 97) {
+    // For P384 signatures (97 bytes)
+    return {
+      r: '0x' + signature.slice(0, 48).toString('hex'),
+      s: '0x' + signature.slice(48, 96).toString('hex'),
+      recid: signature[96],
+    };
+  } else {
+    // For K256/P256 signatures (64/65 bytes)
+    const ethersSignature = splitSignature(signature);
+    return {
+      r: ethersSignature.r,
+      s: ethersSignature.s,
+      recid: ethersSignature.recoveryParam,
+    };
+  }
+}
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
@@ -167,6 +209,8 @@ const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
   [LIT_CURVE.EcdsaK256]: 'K256',
   [LIT_CURVE.EcdsaCAITSITHP256]: 'P256',
   [LIT_CURVE.EcdsaK256Sha256]: 'K256',
+  [LIT_CURVE.EcdsaP256Sha256]: 'P256',
+  [LIT_CURVE.EcdsaP384Sha384]: 'P384',
 };
 
 /**
@@ -214,14 +258,14 @@ export const combineEcdsaShares = async (
 
   await ecdsaVerify(variant!, messageHash, publicKey, [r, s, recId]);
 
-  const signature = splitSignature(
+  const signature = splitEcdsaSignature(
     Buffer.concat([r, s, Buffer.from([recId + 27])])
   );
 
   return {
     r: signature.r.slice('0x'.length),
     s: signature.s.slice('0x'.length),
-    recid: signature.recoveryParam,
+    recid: signature.recid,
   };
 };
 

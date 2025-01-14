@@ -36,6 +36,7 @@ const createBuildConfig = (entry, outfile, globalName) => ({
   inject: [getPath('./shim.mjs')],
   mainFields: ['module', 'main'],
   ...(globalName ? { globalName } : {}),
+  sourcemap: true,
 });
 
 /**

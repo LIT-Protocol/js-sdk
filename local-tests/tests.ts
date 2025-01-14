@@ -1,5 +1,7 @@
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
-import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
+import { testUseEoaSessionSigsToPkpSignK256 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignK256';
+import { testUseEoaSessionSigsToPkpSignP256 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignP256';
+import { testUseEoaSessionSigsToPkpSignP384 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignP384';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
 import { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToPkpSign';
 import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
@@ -103,7 +105,9 @@ import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/tes
 import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 
 export { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
-export { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
+export { testUseEoaSessionSigsToPkpSignK256 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignK256';
+export { testUseEoaSessionSigsToPkpSignP256 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignP256';
+export { testUseEoaSessionSigsToPkpSignP384 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignP384';
 export { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
 export { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToPkpSign';
 export { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
@@ -251,7 +255,9 @@ const wrappedKeysTests = {
 
 const eoaSessionSigsTests = {
   testUseEoaSessionSigsToExecuteJsSigning,
-  testUseEoaSessionSigsToPkpSign,
+  testUseEoaSessionSigsToPkpSignK256,
+  testUseEoaSessionSigsToPkpSignP256,
+  testUseEoaSessionSigsToPkpSignP384,
   testUseEoaSessionSigsToExecuteJsSigningInParallel,
   testUseEoaSessionSigsToExecuteJsClaimKeys,
   testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,

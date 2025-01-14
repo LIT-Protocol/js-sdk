@@ -1,5 +1,3 @@
-import { joinSignature } from 'ethers/lib/utils';
-
 import {
   LIT_CURVE,
   NoValidShares,
@@ -7,13 +5,13 @@ import {
   UnknownSignatureError,
   UnknownSignatureType,
 } from '@lit-protocol/constants';
-import { combineEcdsaShares } from '@lit-protocol/crypto';
+import { combineEcdsaShares, joinEcdsaSignature } from '@lit-protocol/crypto';
 import {
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
 } from '@lit-protocol/misc';
-import { SigResponse, SigShare } from '@lit-protocol/types';
+import { ECDSASigResponse, SigShare } from '@lit-protocol/types';
 
 export const getFlattenShare = (share: any): SigShare => {
   // flatten the signature object so that the properties of the signature are top level
@@ -90,7 +88,7 @@ export const getFlattenShare = (share: any): SigShare => {
  * @param {number} params.minNodeCount - The threshold number of nodes
  * @param {any[]} params.signedData - The array of signature shares from each node.
  * @param {string} [params.requestId=''] - The optional request ID for logging purposes.
- * @returns {T | { signature: SigResponse; sig: SigResponse }} - The final signatures or an object containing the final signatures.
+ * @returns {T | { signature: ECDSASigResponse; sig: ECDSASigResponse }} - The final signatures or an object containing the final signatures.
  *
  * @example
  *
@@ -102,7 +100,7 @@ export const getSignatures = async <T>(params: {
   minNodeCount: number;
   signedData: any[];
   requestId: string;
-}): Promise<T | { signature: SigResponse; sig: SigResponse }> => {
+}): Promise<T | { signature: ECDSASigResponse; sig: ECDSASigResponse }> => {
   const { networkPubKeySet, minNodeCount, signedData, requestId } = params;
 
   const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
@@ -168,7 +166,7 @@ export const getSignatures = async <T>(params: {
 
     shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
-    let sigName = shares[0].sigName;
+    const sigName = shares[0].sigName;
 
     logWithRequestId(
       requestId,
@@ -231,10 +229,14 @@ export const getSignatures = async <T>(params: {
 
     // -- validate if signature type is ECDSA
     if (
-      sigType !== LIT_CURVE.EcdsaCaitSith &&
-      sigType !== LIT_CURVE.EcdsaK256 &&
-      sigType !== LIT_CURVE.EcdsaCAITSITHP256 &&
-      sigType! == LIT_CURVE.EcdsaK256Sha256
+      ![
+        LIT_CURVE.EcdsaCaitSith,
+        LIT_CURVE.EcdsaK256,
+        LIT_CURVE.EcdsaCAITSITHP256,
+        LIT_CURVE.EcdsaK256Sha256,
+        LIT_CURVE.EcdsaP256Sha256,
+        LIT_CURVE.EcdsaP384Sha384,
+      ].includes(sigType)
     ) {
       throw new UnknownSignatureType(
         {
@@ -261,10 +263,10 @@ export const getSignatures = async <T>(params: {
       );
     }
 
-    const encodedSig = joinSignature({
+    const encodedSig = joinEcdsaSignature({
       r: '0x' + signature.r,
       s: '0x' + signature.s,
-      recoveryParam: signature.recid,
+      recid: signature.recid,
     });
 
     signatures[key] = {

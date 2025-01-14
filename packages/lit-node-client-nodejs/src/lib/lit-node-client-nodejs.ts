@@ -127,7 +127,7 @@ import type {
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
-  SigResponse,
+  ECDSASigResponse,
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
@@ -1099,7 +1099,7 @@ export class LitNodeClientNodeJs
    * @param params.sessionSigs - The session signatures to use
    * @param params.authMethods - (optional) The auth methods to use
    */
-  pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
+  pkpSign = async (params: JsonPkpSignSdkParams): Promise<ECDSASigResponse> => {
     // -- validate required params
     const requiredParamKeys = ['toSign', 'pubKey'];
 
@@ -1159,6 +1159,7 @@ export class LitNodeClientNodeJs
 
       const reqBody: JsonPkpSignRequest = {
         toSign: normalizeArray(params.toSign),
+        signingScheme: params.signingScheme,
         pubkey: hexPrefixed(params.pubKey),
         authSig: sessionSig,
 
@@ -1181,7 +1182,7 @@ export class LitNodeClientNodeJs
       return this.generatePromise(urlWithPath, reqBody, requestId);
     });
 
-    const res = await this.handleNodePromises(
+    const res = await this.handleNodePromises<PKPSignShare>(
       nodePromises,
       requestId,
       this.connectedNodes.size
@@ -1190,11 +1191,11 @@ export class LitNodeClientNodeJs
     // ========== Handle Response ==========
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res, requestId);
+      return this._throwNodeError(res, requestId);
     }
 
-    // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
+    // -- case: promises success
+    const responseData = res.values;
 
     logWithRequestId(
       requestId,
@@ -1207,7 +1208,7 @@ export class LitNodeClientNodeJs
     const signedDataList = parsePkpSignResponse(responseData);
 
     try {
-      const signatures = await getSignatures<{ signature: SigResponse }>({
+      const signatures = await getSignatures<{ signature: ECDSASigResponse }>({
         requestId,
         networkPubKeySet: this.networkPubKeySet,
         minNodeCount: this.config.minNodeCount,

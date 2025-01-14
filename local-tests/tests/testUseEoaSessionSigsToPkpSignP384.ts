@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { createHash } from 'crypto';
 
 import { log } from '@lit-protocol/misc';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
@@ -6,20 +7,23 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToPkpSign
- * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToPkpSign
- * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToPkpSign
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToPkpSignP384
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToPkpSignP384
+ * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToPkpSignP384
  */
-export const testUseEoaSessionSigsToPkpSign = async (
+export const testUseEoaSessionSigsToPkpSignP384 = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
+  const messageToSign = new Uint8Array([1, 2, 3, 4, 5]);
+  const messageHash = createHash('sha384').update(messageToSign).digest();
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
   const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
-    toSign: alice.loveLetter,
     pubKey: alice.pkp.publicKey,
     sessionSigs: eoaSessionSigs,
+    toSign: messageHash,
+    signingScheme: 'EcdsaP384Sha384',
   });
 
   devEnv.releasePrivateKeyFromUser(alice);
@@ -59,6 +63,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
     throw new Error(`Expected "recid" to be parseable as a number`);
   }
 
+  // TODO fix after fixing P256
   const signature = ethers.utils.joinSignature({
     r: '0x' + runWithSessionSigs.r,
     s: '0x' + runWithSessionSigs.s,
@@ -69,19 +74,18 @@ export const testUseEoaSessionSigsToPkpSign = async (
     signature
   );
 
-  console.log("recoveredPubKey:", recoveredPubKey);
+  console.log('recoveredPubKey:', recoveredPubKey);
 
-  // FIXME: Consider adding these assertions back after the v flipping PR is merged
-  // if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {
-  //   throw new Error(
-  //     `Expected recovered public key to match runWithSessionSigs.publicKey`
-  //   );
-  // }
-  // if (recoveredPubKey !== `0x${alice.pkp.publicKey.toLowerCase()}`) {
-  //   throw new Error(
-  //     `Expected recovered public key to match alice.pkp.publicKey`
-  //   );
-  // }
+  if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {
+    throw new Error(
+      `Expected recovered public key to match runWithSessionSigs.publicKey`
+    );
+  }
+  if (recoveredPubKey !== `0x${alice.pkp.publicKey.toLowerCase()}`) {
+    throw new Error(
+      `Expected recovered public key to match alice.pkp.publicKey`
+    );
+  }
 
-  log('✅ testUseEoaSessionSigsToPkpSign');
+  log('✅ testUseEoaSessionSigsToPkpSignP384');
 };

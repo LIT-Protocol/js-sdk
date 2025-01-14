@@ -10,6 +10,7 @@ type ContractAbis = {
   pubkeyRouter: string;
   pkpPermissions: string;
   pkpHelper: string;
+  priceFeed: string;
   contractResolver: string;
   paymentDelegation: string;
 };
