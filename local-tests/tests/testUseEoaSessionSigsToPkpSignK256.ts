@@ -1,4 +1,5 @@
-import { ethers } from 'ethers';
+import EC from 'elliptic';
+import { createHash } from 'crypto';
 
 import { log } from '@lit-protocol/misc';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
@@ -15,9 +16,7 @@ export const testUseEoaSessionSigsToPkpSignK256 = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
   const messageToSign = [1, 2, 3, 4, 5];
-  const messageHash = ethers.utils.arrayify(
-    ethers.utils.keccak256(messageToSign)
-  );
+  const messageHash = createHash('sha256').update(Buffer.from(messageToSign)).digest();
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
   const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
@@ -54,27 +53,25 @@ export const testUseEoaSessionSigsToPkpSignK256 = async (
     throw new Error(`Expected "recid" to be parseable as a number`);
   }
 
-  const signature = ethers.utils.joinSignature({
-    r: '0x' + runWithSessionSigs.r,
-    s: '0x' + runWithSessionSigs.s,
-    recoveryParam: runWithSessionSigs.recid,
-  });
-  const recoveredPubKey = ethers.utils.recoverPublicKey(messageHash, signature);
+  const ec = new EC.ec('secp256k1');
 
-  console.log('recoveredPubKey:', recoveredPubKey);
-
-  const runWithSessionSigsUncompressedPublicKey = ethers.utils.computePublicKey(
-    '0x' + runWithSessionSigs.publicKey
+  // Public key derived from message and signature
+  const recoveredPubKey = ec.recoverPubKey(
+    messageHash,
+    runWithSessionSigs,
+    runWithSessionSigs.recid
   );
-  if (
-    runWithSessionSigsUncompressedPublicKey !==
-    `0x${alice.pkp.publicKey.toLowerCase()}`
-  ) {
+  // Public key returned from nodes
+  const runWithSessionSigsUncompressedPublicKey = ec
+    .keyFromPublic(runWithSessionSigs.publicKey, 'hex')
+    .getPublic(false, 'hex');
+
+  if (runWithSessionSigsUncompressedPublicKey !== recoveredPubKey.encode('hex', false)) {
     throw new Error(
-      `Expected recovered public key to match runWithSessionSigsUncompressedPublicKey and alice.pkp.publicKey`
+      `Expected recovered public key to match runWithSessionSigsUncompressedPublicKey and recoveredPubKey.encode('hex', false)`
     );
   }
-  if (recoveredPubKey !== `0x${alice.pkp.publicKey.toLowerCase()}`) {
+  if (recoveredPubKey.encode('hex', false) !== alice.pkp.publicKey) {
     throw new Error(
       `Expected recovered public key to match alice.pkp.publicKey`
     );
