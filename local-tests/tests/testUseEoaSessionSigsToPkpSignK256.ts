@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { createHash } from 'crypto';
 
 import { log } from '@lit-protocol/misc';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
@@ -15,9 +14,9 @@ export const testUseEoaSessionSigsToPkpSignK256 = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  const messageToSign = new Uint8Array([1, 2, 3, 4, 5]);
+  const messageToSign = [1, 2, 3, 4, 5];
   const messageHash = ethers.utils.arrayify(
-    createHash('sha256').update(messageToSign).digest().toString('hex')
+    ethers.utils.keccak256(messageToSign)
   );
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
@@ -29,16 +28,6 @@ export const testUseEoaSessionSigsToPkpSignK256 = async (
   });
 
   devEnv.releasePrivateKeyFromUser(alice);
-
-  // Expected output:
-  // {
-  //   r: "25fc0d2fecde8ed801e9fee5ad26f2cf61d82e6f45c8ad1ad1e4798d3b747fd9",
-  //   s: "549fe745b4a09536e6e7108d814cf7e44b93f1d73c41931b8d57d1b101833214",
-  //   recid: 1,
-  //   signature: "0x25fc0d2fecde8ed801e9fee5ad26f2cf61d82e6f45c8ad1ad1e4798d3b747fd9549fe745b4a09536e6e7108d814cf7e44b93f1d73c41931b8d57d1b1018332141c",
-  //   publicKey: "04A3CD53CCF63597D3FFCD1DF1E8236F642C7DF8196F532C8104625635DC55A1EE59ABD2959077432FF635DF2CED36CC153050902B71291C4D4867E7DAAF964049",
-  //   dataSigned: "7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4",
-  // }
 
   // -- assertions
   // r, s, dataSigned, and public key should be present
@@ -74,10 +63,15 @@ export const testUseEoaSessionSigsToPkpSignK256 = async (
 
   console.log('recoveredPubKey:', recoveredPubKey);
 
-  // TODO fix
-  if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {
+  const runWithSessionSigsUncompressedPublicKey = ethers.utils.computePublicKey(
+    '0x' + runWithSessionSigs.publicKey
+  );
+  if (
+    runWithSessionSigsUncompressedPublicKey !==
+    `0x${alice.pkp.publicKey.toLowerCase()}`
+  ) {
     throw new Error(
-      `Expected recovered public key to match runWithSessionSigs.publicKey`
+      `Expected recovered public key to match runWithSessionSigsUncompressedPublicKey and alice.pkp.publicKey`
     );
   }
   if (recoveredPubKey !== `0x${alice.pkp.publicKey.toLowerCase()}`) {
