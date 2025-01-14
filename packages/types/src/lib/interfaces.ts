@@ -347,7 +347,10 @@ export interface JsonSignSessionKeyRequestV1
 export interface BlsResponseData {
   result: boolean | 'success';
   signatureShare: {
-    ProofOfPossession: string;
+    ProofOfPossession: {
+      identifier: string;
+      value: string;
+    };
   };
   shareIndex: number;
   curveType: string;
@@ -721,7 +724,10 @@ export interface NodeBlsSigningShare {
 }
 
 export interface BlsSignatureShare {
-  ProofOfPossession: string;
+  ProofOfPossession: {
+    identifier: string;
+    value: string;
+  };
 }
 
 export interface SuccessNodePromises<T> {
