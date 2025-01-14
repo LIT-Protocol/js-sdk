@@ -277,4 +277,4 @@ export interface PriceFeedInfo {
     arr: { network: string; price: number }[];
     mapByAddress: Record<string, number>;
   };
-};
+}
