@@ -73,7 +73,6 @@ describe('parsePkpSignResponse', () => {
       {
         signature: {
           digest: 'fail',
-          shareIndex: 0,
           signatureShare: '',
           bigR: '',
           publicKey: '',
@@ -85,7 +84,6 @@ describe('parsePkpSignResponse', () => {
         signature: {
           digest:
             '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
-          shareIndex: 0,
           signatureShare:
             '3ED0A844FAE40DF6210A6B2EACB9426E52E8339E243E697E33CF14E0CDE2B827',
           bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
@@ -100,7 +98,6 @@ describe('parsePkpSignResponse', () => {
         signature: {
           digest:
             '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
-          shareIndex: 0,
           signatureShare:
             'B1AA643E88F8937B71CE2D43DCB73E0180AC96D1E39ECC579F0EC9635F37D4CB',
           bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',

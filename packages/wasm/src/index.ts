@@ -208,7 +208,7 @@ export async function ecdsaVerify(
  * @param {Uint8Array} public_key
  * @param {[Uint8Array, Uint8Array, number]} signature
  */
-export async function ecdsaCombnieAndVerify(
+export async function ecdsaCombineAndVerify(
   variant: EcdsaVariant,
   pre_signature: Uint8Array,
   signature_shares: Uint8Array[],

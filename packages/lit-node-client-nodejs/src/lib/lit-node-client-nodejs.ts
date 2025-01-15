@@ -34,6 +34,7 @@ import {
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
   combineSignatureShares,
@@ -133,7 +134,6 @@ import type {
   Signature,
   SuccessNodePromises,
 } from '@lit-protocol/types';
-import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -620,10 +620,6 @@ export class LitNodeClientNodeJs
         'Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things';
       logErrorWithRequestId(requestId, msg);
     }
-
-    // ========== Sorting ==========
-    // -- sort the sig shares by share index.  this is important when combining the shares.
-    signatureShares.sort((a, b) => a.shareIndex - b.shareIndex);
 
     // ========== Combine Shares ==========
     const signature = await combineSignatureShares(
@@ -1610,9 +1606,12 @@ export class LitNodeClientNodeJs
       siweMessage = await createSiweMessage(siweParams);
     }
 
+    const nodeSet = await this._getNodeSet();
+
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
     const body: JsonSignSessionKeyRequestV1 = {
+      nodeSet,
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
@@ -1681,7 +1680,7 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    let curveType = responseData[0]?.curveType;
+    const curveType = responseData[0]?.curveType;
 
     if (curveType === 'ECDSA') {
       throw new Error(
@@ -1721,7 +1720,6 @@ export class LitNodeClientNodeJs
         const requiredFields = [
           'signatureShare',
           'curveType',
-          'shareIndex',
           'siweMessage',
           'dataSigned',
           'blsRootPubkey',
