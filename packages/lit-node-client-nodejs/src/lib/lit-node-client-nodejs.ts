@@ -36,7 +36,6 @@ import {
   WalletSignatureNotFoundError,
   PRODUCT_IDS,
 } from '@lit-protocol/constants';
-import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
   combineSignatureShares,
@@ -1976,21 +1975,6 @@ export class LitNodeClientNodeJs
         ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
-    // Get new price feed info from the contract if user wants to
-
-    let priceByNetwork = this.config.priceByNetwork;
-
-    if (params.getNewPrices) {
-      log(`Getting new prices from the contract`);
-      const priceFeedInfo = await LitContracts.getPriceFeedInfo({
-        realmId: REALM_ID,
-        litNetwork: this.config.litNetwork,
-        networkContext: this.config.contractContext,
-        rpcUrl: this.config.rpcUrl,
-      });
-      priceByNetwork = priceFeedInfo.networkPrices.mapByAddress;
-    }
-
     // This is the template that will be combined with the node address as a single object, then signed by the session key
     // so that the node can verify the session signature
     const sessionSigningTemplate = {
@@ -1999,26 +1983,31 @@ export class LitNodeClientNodeJs
       capabilities,
       issuedAt: new Date().toISOString(),
       expiration: sessionExpiration,
-
-      // fetch it from the contract, i don't want to spend more than 10 cents on signing
-      // FIXME: This is a dummy value for now
-      // maxPrice: '0x1234567890abcdef1234567890abcdef12345678',
     };
 
     const sessionSigs: SessionSigsMap = {};
 
+    // console.log(
+    //   'getSessionSigs()',
+    //   util.inspect(
+    //     {
+    //       maxPricesByNodeUrl: params.maxPricesByNodeUrl,
+    //     },
+    //     { depth: 4 }
+    //   )
+    // );
+
     this.connectedNodes.forEach((nodeAddress: string) => {
-      const maxPrice = priceByNetwork[nodeAddress];
-
-      if (maxPrice <= 0) {
-        throw new Error(`Invalid maxPrice for node: ${nodeAddress}`);
-      }
-
       const toSign: SessionSigningTemplate = {
         ...sessionSigningTemplate,
         nodeAddress,
-        maxPrice: maxPrice.toString(),
+        maxPrice: params.maxPricesByNodeUrl[nodeAddress].toString(),
       };
+
+      console.log(
+        'Setting...nodeAddress maxprice',
+        params.maxPricesByNodeUrl[nodeAddress].toString()
+      );
 
       const signedMessage = JSON.stringify(toSign);
 
@@ -2067,6 +2056,9 @@ export class LitNodeClientNodeJs
     const pkpSessionSigs = this.getSessionSigs({
       chain,
       ...params,
+      maxPricesByNodeUrl: this.getMaxPricesForNodes({
+        product: params.product,
+      }),
       authNeededCallback: async (props: AuthCallbackParams) => {
         // -- validate
         if (!props.expiration) {
@@ -2199,7 +2191,7 @@ export class LitNodeClientNodeJs
       );
     }
 
-    return this.getPkpSessionSigs(params);
+    return this.getPkpSessionSigs({ ...params, product: 'LA' });
   };
 
   /**
