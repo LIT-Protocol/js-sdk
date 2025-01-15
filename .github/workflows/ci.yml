@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      NAGA_COMMIT_HASH: 3711e1285651e5960eef3c1cd7ec99508e8244fb
+      NAGA_COMMIT_HASH: 5576b7a53fba2fc46e70fac44aa2cfa312ddbee5
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
