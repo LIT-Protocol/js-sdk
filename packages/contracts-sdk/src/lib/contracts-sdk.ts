@@ -2024,7 +2024,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         txOpts: ethers.CallOverrides = {},
         stakingContractAddress?: string
       ) => {
-
         let params = [2, derivedKeyId, signatures];
 
         if (stakingContractAddress) {
