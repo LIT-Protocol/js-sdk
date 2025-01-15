@@ -25,7 +25,11 @@ jobs:
           node-version: '20'
           cache: 'yarn'
       - name: Install rust
-        uses: dtolnay/rust-toolchain@1.76.0
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.83.0
+          override: true
+          components: rust-std
       - uses: jetli/wasm-pack-action@v0.4.0
         with:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
