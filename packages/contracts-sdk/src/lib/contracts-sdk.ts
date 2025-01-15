@@ -2021,13 +2021,23 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       claimAndMint: async (
         derivedKeyId: BytesLike,
         signatures: IPubkeyRouter.SignatureStruct[],
-        txOpts: ethers.CallOverrides = {}
+        txOpts: ethers.CallOverrides = {},
+        stakingContractAddress?: string
       ) => {
+
+        let params = [2, derivedKeyId, signatures];
+
+        if (stakingContractAddress) {
+          params.push(stakingContractAddress);
+        }
+
         try {
           const tx = await this._callWithAdjustedOverrides(
             this.pkpNftContract.write,
             'claimAndMint',
-            [2, derivedKeyId, signatures],
+            // @ts-ignore - upcoming refactor will include inferred types from the ABIs instead of using the generated types, which in this case are incorrect/out-of-date
+            // Thanks zach-is-my-name for reporting this issue :)
+            params,
             {
               ...txOpts,
               value:
