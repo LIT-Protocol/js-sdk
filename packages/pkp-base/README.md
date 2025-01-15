@@ -1,22 +1,43 @@
-# Quick Start
+# PKP Base
 
-This submodule defines a PKPBase class, providing shared wallet functionality for PKP signers, responsible for managing public key compression, initializing and connecting to the LIT node, running LIT actions, and offering debug functions for logging and error handling.
+A foundational package providing shared wallet functionality for PKP (Programmable Key Pair) signers in the Lit Protocol ecosystem. This package manages public key operations, LIT node connections, and action execution.
 
-| Method/Property                                                      | Description                                                                   |
-| -------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `compressPubKey(pubKey: string)`                                     | Compresses a provided public key                                              |
-| `setUncompressPubKeyAndBuffer(prop: PKPBaseProp)`                    | Sets the uncompressed public key and its buffer representation                |
-| `setCompressedPubKeyAndBuffer(prop: PKPBaseProp)`                    | Sets the compressed public key and its buffer representation                  |
-| `setLitAction(prop: PKPBaseProp)`                                    | Sets the Lit action to be executed by the LitNode client                      |
-| `setLitActionJsParams<CustomType extends T = T>(params: CustomType)` | Sets the value of the `litActionJsParams` property to the given params object |
-| `createAndSetSessionSigs(sessionParams: GetSessionSigsProps)`        | Creates and sets the session sigs and their expiration                        |
-| `init()`                                                             | Initializes the PKPBase instance by connecting to the LIT node                |
-| `runLitAction(toSign: Uint8Array, sigName: string)`                  | Runs the specified Lit action with the given parameters                       |
-| `ensureLitNodeClientReady()`                                         | Ensures that the LitNode client is ready for use                              |
-| `log(...args: any[])`                                                | Logs the provided arguments to the console, but only if debugging is enabled  |
+## Installation
 
-### node.js / browser
-
-```
+```bash
 yarn add @lit-protocol/pkp-base
 ```
+
+## Quick Start
+
+```typescript
+import { PKPBase } from '@lit-protocol/pkp-base';
+
+// Initialize PKP Base
+const pkpBase = new PKPBase({
+  controllerAuthSig: authSig,
+  pkpPubKey: publicKey,
+});
+
+// Connect to LIT node
+await pkpBase.init();
+
+// Run LIT action
+const signature = await pkpBase.runLitAction(dataToSign, 'sign');
+```
+
+## Key Features
+
+- Public key compression and management
+- LIT node connection handling
+- Session signature management
+- LIT action execution
+- Debug logging capabilities
+
+## Core Methods
+
+| Method           | Description                        |
+| ---------------- | ---------------------------------- |
+| `init()`         | Initialize and connect to LIT node |
+| `runLitAction()` | Execute LIT actions                |
+| `runSign()`      | Signs a message                    |
