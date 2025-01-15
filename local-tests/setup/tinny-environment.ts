@@ -24,6 +24,7 @@ import {
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
   public network: LIT_NETWORK_VALUES;
+  public customNetworkContext: any;
 
   /**
    * Environment variables used in the process.
@@ -42,11 +43,6 @@ export class TinnyEnvironment {
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
-    BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
-      'http://127.0.0.1:7470',
-      'http://127.0.0.1:7471',
-      'http://127.0.0.1:7472',
-    ],
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
@@ -105,15 +101,33 @@ export class TinnyEnvironment {
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
 
-  constructor(network?: LIT_NETWORK_VALUES) {
+  constructor(
+    override?: Partial<ProcessEnvs> & { customNetworkContext?: any }
+  ) {
+    this.customNetworkContext = override?.customNetworkContext;
+
+    // Merge default processEnvs with custom overrides
+    this.processEnvs = {
+      ...this.processEnvs,
+      ...override,
+    };
+
+    // if there are only 1 private key, duplicate it to make it 10 cus we might not have enough
+    // for the setup process
+    if (this.processEnvs.PRIVATE_KEYS.length === 1) {
+      this.processEnvs.PRIVATE_KEYS = new Array(10).fill(
+        this.processEnvs.PRIVATE_KEYS[0]
+      );
+    }
+
     // -- setup network
-    this.network = network || this.processEnvs.NETWORK;
+    this.network = override?.NETWORK || this.processEnvs.NETWORK;
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment. Please use one of ${Object.values(
-          LIT_NETWORK
-        )}`
+        `Invalid network environment ${
+          this.network
+        }. Please use one of ${Object.values(LIT_NETWORK)}`
       );
     }
 
@@ -235,7 +249,8 @@ export class TinnyEnvironment {
 
     if (this.network === LIT_NETWORK.Custom || centralisation === 'unknown') {
       const networkContext =
-        this?.testnet?.ContractContext ?? this._contractContext;
+        this.customNetworkContext ||
+        (this?.testnet?.ContractContext ?? this._contractContext);
       this.litNodeClient = new LitNodeClient({
         litNetwork: LIT_NETWORK.Custom,
         rpcUrl: this.rpc,
@@ -341,8 +356,8 @@ export class TinnyEnvironment {
    * Creates a random person.
    * @returns A promise that resolves to the created person.
    */
-  async createRandomPerson() {
-    return await this.createNewPerson('Alice');
+  async createRandomPerson(name?: string) {
+    return await this.createNewPerson(name || 'Alice');
   }
 
   setUnavailable = (network: LIT_NETWORK_VALUES) => {
@@ -373,7 +388,8 @@ export class TinnyEnvironment {
 
         await this.testnet.getTestnetConfig();
       } else if (this.network === LIT_NETWORK.Custom) {
-        const context = await import('./networkContext.json');
+        const context =
+          this.customNetworkContext || (await import('./networkContext.json'));
         this._contractContext = context;
       }
 
