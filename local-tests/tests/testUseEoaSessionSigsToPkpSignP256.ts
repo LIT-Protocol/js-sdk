@@ -16,7 +16,9 @@ export const testUseEoaSessionSigsToPkpSignP256 = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
   const messageToSign = [1, 2, 3, 4, 5];
-  const messageHash = createHash('sha256').update(Buffer.from(messageToSign)).digest();
+  const messageHash = createHash('sha256')
+    .update(Buffer.from(messageToSign))
+    .digest();
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
   const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
@@ -66,7 +68,10 @@ export const testUseEoaSessionSigsToPkpSignP256 = async (
     .keyFromPublic(runWithSessionSigs.publicKey, 'hex')
     .getPublic(false, 'hex');
 
-  if (runWithSessionSigsUncompressedPublicKey !== recoveredPubKey.encode('hex', false)) {
+  if (
+    runWithSessionSigsUncompressedPublicKey !==
+    recoveredPubKey.encode('hex', false)
+  ) {
     throw new Error(
       `Expected recovered public key to match runWithSessionSigsUncompressedPublicKey and recoveredPubKey.encode('hex', false)`
     );

@@ -259,7 +259,7 @@ export const combineEcdsaShares = async (
   await ecdsaVerify(variant!, messageHash, publicKey, [r, s, recId]);
 
   const signature = splitEcdsaSignature(
-    Buffer.concat([r, s, Buffer.from([recId + 27])])
+    Buffer.concat([r, s, Buffer.from([recId])])
   );
 
   return {
