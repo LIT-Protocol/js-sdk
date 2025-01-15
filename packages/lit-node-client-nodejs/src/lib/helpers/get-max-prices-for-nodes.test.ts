@@ -4,53 +4,58 @@ import { getMaxPricesForNodes } from './get-max-prices-for-nodes';
 
 describe('getMaxPricesForNodes', () => {
   const pricesByNodeAddress = {
-    node1: [50, 60, 70],
-    node2: [30, 40, 50],
-    node3: [20, 25, 30],
+    node1: [500n, 600n, 700n],
+    node2: [300n, 400n, 500n],
+    node3: [200n, 250n, 300n],
   };
 
   test('distributes prices correctly when userMaxPrice is sufficient', () => {
-    const result = getMaxPricesForNodes(
-      pricesByNodeAddress,
-      105,
-      PRODUCT_IDS.LA,
-      2
-    );
+    const result = getMaxPricesForNodes({
+      pricesByNodeAddress: pricesByNodeAddress,
+      userMaxPrice: 1050n,
+      productId: PRODUCT_IDS.LA,
+      numRequiredNodes: 2,
+    });
     expect(result).toEqual({
-      node3: 42.5,
-      node2: 62.5,
+      node3: 425n,
+      node2: 625n,
     });
   });
 
   test('throws an error if base cost exceeds userMaxPrice', () => {
     expect(() => {
-      getMaxPricesForNodes(pricesByNodeAddress, 40, PRODUCT_IDS.LA, 2);
+      getMaxPricesForNodes({
+        pricesByNodeAddress: pricesByNodeAddress,
+        userMaxPrice: 400n,
+        productId: PRODUCT_IDS.LA,
+        numRequiredNodes: 2,
+      });
     }).toThrow('Max price is too low');
   });
 
   test('handles exact userMaxPrice correctly', () => {
-    const result = getMaxPricesForNodes(
-      pricesByNodeAddress,
-      80,
-      PRODUCT_IDS.LA,
-      2
-    );
+    const result = getMaxPricesForNodes({
+      pricesByNodeAddress: pricesByNodeAddress,
+      userMaxPrice: 800n,
+      productId: PRODUCT_IDS.LA,
+      numRequiredNodes: 2,
+    });
     expect(result).toEqual({
-      node3: 30,
-      node2: 50,
+      node3: 300n,
+      node2: 500n,
     });
   });
 
   test('uses only the requested productId for calculations', () => {
-    const result = getMaxPricesForNodes(
-      pricesByNodeAddress,
-      60,
-      PRODUCT_IDS.DECRYPTION,
-      2
-    );
+    const result = getMaxPricesForNodes({
+      pricesByNodeAddress: pricesByNodeAddress,
+      userMaxPrice: 600n,
+      productId: PRODUCT_IDS.DECRYPTION,
+      numRequiredNodes: 2,
+    });
     expect(result).toEqual({
-      node3: 25,
-      node2: 35,
+      node3: 250n,
+      node2: 350n,
     });
   });
 });

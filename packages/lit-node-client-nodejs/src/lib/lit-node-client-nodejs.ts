@@ -34,6 +34,7 @@ import {
   UnknownError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
+  PRODUCT_IDS,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
@@ -75,6 +76,7 @@ import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
 import { getClaimsList } from './helpers/get-claims-list';
+import { getMaxPricesForNodes } from './helpers/get-max-prices-for-nodes';
 import { getSignatures } from './helpers/get-signatures';
 import { normalizeArray } from './helpers/normalize-array';
 import { normalizeJsParams } from './helpers/normalize-params';
@@ -104,26 +106,19 @@ import type {
   ExecuteJsNoSigningResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
-  GetLitActionSessionSigs,
-  GetPkpSessionSigs,
-  GetSessionSigsProps,
   GetSignSessionKeySharesProp,
   GetWalletSigProps,
   ILitNodeClient,
   JsonExecutionRequest,
-  JsonExecutionRequestTargetNode,
   JsonExecutionSdkParams,
-  JsonExecutionSdkParamsTargetNode,
   JsonPKPClaimKeyRequest,
   JsonPkpSignRequest,
   JsonPkpSignSdkParams,
   JsonSignSessionKeyRequestV1,
   JsonSignSessionKeyRequestV2,
-  LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
-  NodeLog,
   NodeShare,
   PKPSignEndpointResponse,
   RejectedNodePromises,
@@ -141,8 +136,19 @@ import type {
 const REALM_ID = 1;
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
+  implements ILitNodeClient
 {
+  /** Tracks the total max price a user is willing to pay for each supported product type
+   * This must be distributed across all nodes; each node will get a percentage of this price
+   *
+   * If the user never sets a max price, it means 'unlimited'
+   */
+  defaultMaxPriceByProduct: Record<keyof typeof PRODUCT_IDS, bigint> = {
+    DECRYPTION: BigInt(-1),
+    SIGN: BigInt(-1),
+    LA: BigInt(-1),
+  };
+
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -158,6 +164,14 @@ export class LitNodeClientNodeJs
     }
   }
   // ========== Payment Delegation ==========
+
+  setDefaultMaxPrice(product: keyof typeof PRODUCT_IDS, price: bigint) {
+    this.defaultMaxPriceByProduct[product] = price;
+  }
+
+  // ========== Rate Limit NFT ==========
+
+  // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
   createCapacityDelegationAuthSig = async (
     params: CapacityCreditsReq
   ): Promise<CapacityCreditsRes> => {
@@ -270,6 +284,7 @@ export class LitNodeClientNodeJs
    * @param obj - The object to check.
    * @returns True if the object is of type SessionKeyPair.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isSessionKeyPair(obj: any): obj is SessionKeyPair {
     return (
       typeof obj === 'object' &&
@@ -509,7 +524,7 @@ export class LitNodeClientNodeJs
     resourceAbilityRequests,
   }: {
     authSig: AuthSig;
-    sessionKeyUri: any;
+    sessionKeyUri: string;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
@@ -761,6 +776,7 @@ export class LitNodeClientNodeJs
     const requestId = this._getNewRequestId();
     const nodePromises = [];
 
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
       // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
       // const jsParams = params.jsParams || {};
@@ -782,7 +798,8 @@ export class LitNodeClientNodeJs
       });
 
       // FIXME - will be removing this function in another PR. Temporary fix.
-      // @ts-ignore
+      // @ts-expect-error Dead code
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const reqBody: JsonExecutionRequestTargetNode = {
         ...params,
         targetNodeRange: params.targetNodeRange,
@@ -1085,6 +1102,7 @@ export class LitNodeClientNodeJs
    */
   generatePromise = async (
     url: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params: any,
     requestId: string
   ): Promise<NodeCommandResponse> => {
@@ -1150,6 +1168,7 @@ export class LitNodeClientNodeJs
       );
     }
 
+    // FIXME: Use keys from price map
     const nodeSet = await this._getNodeSet();
 
     // get the threshold number of nodes randomly
@@ -1801,6 +1820,32 @@ export class LitNodeClientNodeJs
       url: urlWithPath,
       data: params.body,
       requestId,
+    });
+  };
+
+  getMaxPricesForNodes = ({
+    userMaxPrice,
+    product,
+  }: {
+    userMaxPrice?: bigint;
+    product: keyof typeof PRODUCT_IDS;
+  }) => {
+    console.log('getMaxPricesForNodes()', { product });
+    const getUserMaxPrice = () => {
+      if (userMaxPrice) {
+        return userMaxPrice;
+      }
+
+      if (this.defaultMaxPriceByProduct[product] === -1n) {
+        return 9999999999999999999999999999999999999999n;
+      }
+      return this.defaultMaxPriceByProduct[product];
+    };
+
+    return getMaxPricesForNodes({
+      pricesByNodeAddress: this.config.pricesByNodeUrl,
+      userMaxPrice: getUserMaxPrice(),
+      productId: PRODUCT_IDS.DECRYPTION,
     });
   };
 

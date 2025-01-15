@@ -68,7 +68,6 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   NodeSet,
   RejectedNodePromises,
   SendNodeCommand,
@@ -118,7 +117,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   } & {
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   } & {
-    priceByNetwork: Record<string, number>; // eg. <nodeAddress, price>
+    pricesByNodeUrl: Record<string, bigint[]>; // eg. <nodeAddress, price[]>
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
@@ -154,7 +153,7 @@ export class LitCore {
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
-    priceByNetwork: {},
+    pricesByNodeUrl: {},
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -261,20 +260,19 @@ export class LitCore {
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
-    priceByNetwork: Record<string, number>;
+    pricesByNodeUrl: Record<string, bigint[]>;
   }> {
     const {
       stakingContract,
       epochInfo,
       minNodeCount,
       bootstrapUrls,
-      priceByNetwork,
+      pricesByNodeUrl,
     } = await LitContracts.getConnectionInfo({
       litNetwork: this.config.litNetwork,
       networkContext: this.config.contractContext,
       rpcUrl: this.config.rpcUrl,
       nodeProtocol: this.config.nodeProtocol,
-      sortByPrice: true,
     });
 
     // Validate minNodeCount
@@ -305,7 +303,7 @@ export class LitCore {
       epochInfo,
       minNodeCount,
       bootstrapUrls,
-      priceByNetwork,
+      pricesByNodeUrl,
     };
   }
 
@@ -574,7 +572,7 @@ export class LitCore {
     this._stakingContract = validatorData.stakingContract;
     this.config.minNodeCount = validatorData.minNodeCount;
     this.config.bootstrapUrls = validatorData.bootstrapUrls;
-    this.config.priceByNetwork = validatorData.priceByNetwork;
+    this.config.pricesByNodeUrl = validatorData.pricesByNodeUrl;
 
     this._epochState = await this._fetchCurrentEpochState(
       validatorData.epochInfo
