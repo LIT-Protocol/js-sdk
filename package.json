@@ -47,6 +47,8 @@
     "@openagenda/verror": "^3.1.4",
     "@simplewebauthn/browser": "^7.2.0",
     "@simplewebauthn/typescript-types": "^7.0.0",
+    "@tanstack/react-query": "^5.62.11",
+    "@wagmi/core": "^2.16.3",
     "@walletconnect/ethereum-provider": "2.9.2",
     "@walletconnect/jsonrpc-utils": "1.0.8",
     "@walletconnect/types": "2.9.2",
@@ -64,12 +66,15 @@
     "micromodal": "^0.4.10",
     "multiformats": "^9.7.1",
     "pako": "^2.1.0",
+    "react": "^19.0.0",
     "siwe": "^2.3.2",
     "siwe-recap": "0.0.2-alpha.0",
     "tslib": "^2.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "viem": "^2.21.57",
+    "wagmi": "^2.14.6"
   },
   "devDependencies": {
     "@nx/devkit": "17.3.0",
