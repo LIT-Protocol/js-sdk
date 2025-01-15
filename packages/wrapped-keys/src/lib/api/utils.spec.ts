@@ -87,19 +87,17 @@ describe('getPkpAccessControlCondition', () => {
   it('should correctly create the ACC', () => {
     const pkpAddress = '0xd1Af1AAC50aC837C873200D17b78664aFCde597C';
     const acc = getPkpAccessControlCondition(pkpAddress);
-    expect(acc).toEqual([
-      {
-        contractAddress: '',
-        standardContractType: '',
-        chain: CHAIN_ETHEREUM,
-        method: '',
-        parameters: [':userAddress'],
-        returnValueTest: {
-          comparator: '=',
-          value: pkpAddress,
-        },
+    expect(acc).toEqual({
+      contractAddress: '',
+      standardContractType: '',
+      chain: CHAIN_ETHEREUM,
+      method: '',
+      parameters: [':userAddress'],
+      returnValueTest: {
+        comparator: '=',
+        value: pkpAddress,
       },
-    ]);
+    });
   });
 
   it('should throw an error for non-Ethereum address', () => {
