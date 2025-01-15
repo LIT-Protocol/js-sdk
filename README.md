@@ -98,35 +98,45 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 # Contributing and developing to this SDK
 
-## Prerequisite
+## Prerequisites
 
-- node (v19.x or above)
-- rust (v1.70.00 or above)
-- [wasm-pack](https://github.com/rustwasm/wasm-pack)
+Before you begin, ensure you have the following installed:
 
-## Recommended
+- Node.js v19.0.0 or later
+- Rust v1.70.0 or later
+- [wasm-pack](https://github.com/rustwasm/wasm-pack) for WebAssembly compilation
 
-- NX Console: https://nx.dev/core-features/integrate-with-editors
+## Development Tools
+
+Recommended for better development experience:
+
+- [NX Console](https://nx.dev/core-features/integrate-with-editors) - Visual Studio Code extension for NX workspace management
 
 # Quick Start
 
-The following commands will help you start developing with this repository.
+To start developing with this repository:
 
-First, install the dependencies via yarn:
+1. Install dependencies:
 
 ```
 yarn
 ```
 
-## Building
-
-You can build the project with the following commands:
+2. Build the packages:
 
 ```
-// for local development - It stripped away operations that don't matter for local dev
+yarn build:dev
+```
+
+## Building
+
+Build the project using one of these commands:
+
+```
+// For local development (optimized, excludes production-only operations)
 yarn build:dev
 
-// you should never need to use yarn build unless you want to test or publish it
+// For testing and publishing (full build with all operations)
 yarn build
 ```
 
@@ -147,22 +157,6 @@ yarn test:local
 ## Creating a new library
 
 `nx generate @nx/js:library`
-
-## Create a new react demo app using the Lit JS SDK
-
-```sh
-yarn tools --create --react contracts-sdk --demo
-```
-
-## Deleting a package or app
-
-```
-// delete an app from ./app/<app-name>
-yarn delete:app <app-name>
-
-// delete a package from ./packages/<package-name>
-yarn delete:package <package-name>
-```
 
 ## Building
 
@@ -210,124 +204,163 @@ Having done this setup, this is what the development cycle looks like moving for
 2. Rebuild specific package
 3. Rebuild client application.
 
-### Building changes to Rust source
+### Building Rust Components
 
-If changes are made to `packages/wasm` see [here](./packages/wasm/README.md) for info on building from source.
+For changes to WebAssembly components in `packages/wasm`, refer to the [WebAssembly build guide](./packages/wasm/README.md).
 
-## Publishing
+## Publishing New Versions
 
-You must have at least nodejs v18 to do this.
+Prerequisites:
 
-1. Install the latest packages with `yarn install`
+- Node.js v18.0.0 or later
 
-2. Run `yarn bump` to bump the version
+Publishing steps:
 
-3. Build all the packages with `yarn build`
+1. Create a release PR:
 
-4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally & ensure that they pass
+   - Create a new branch from master with format `vX.X.X-Publish`
+   - Add changelog as PR description
+   - Add "Release" label to the PR
+   - Reference example: https://github.com/LIT-Protocol/js-sdk/pull/753
 
-5. Update the docs with `yarn gen:docs --push`
+2. After PR approval, proceed with publishing:
+   - Update dependencies: `yarn install`
+   - Increment version: `yarn bump`
+   - Build packages: `yarn build`
+   - Run tests:
+     - Unit tests: `yarn test:unit`
+     - E2E tests: `yarn test:local`
+   - Generate documentation: `yarn gen:docs --push`
+   - Publish packages: `yarn publish:packages`
+   - Commit with message: "Published version X.X.X"
 
-6. Finally, publish with `yarn publish:packages`
+## Testing Guide
 
-7. Commit these changes "Published version X.X.X"
+### Available Test Commands
 
-## Testing
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `yarn test:unit`  | Run unit tests for all packages      |
+| `yarn test:local` | Run E2E tests in Node.js environment |
 
-### Quick Start on E2E Testing
+### Running Tests
 
-The following will serve the react testing app and launch the cypress e2e testing after
+1. Unit Tests:
+
+   ```sh
+   yarn test:unit
+   ```
+
+2. End-to-End Tests:
+
+   ```sh
+   yarn test:local
+   ```
+
+   Optional Environment Variables:
+
+   - NETWORK=<network_name> (datil, datil-test, datil-dev, etc.)
+   - DEBUG=true/false
+
+   Optional Flags:
+
+   - --filter=<test-name>
+
+   See more in `local-tests/README.md`
+
+## Local Development with Lit Node
+
+### Setup Local Environment
+
+1. Deploy Lit Node Contracts (addresses will be read from `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json`)
+
+2. Configure environment variables:
 
 ```sh
-yarn test:local
-```
-
-### Unit Tests
-
-```sh
-yarn test:unit
-```
-
-## Testing with a Local Lit Node
-
-First, deploy your Lit Node Contracts, since the correct addresses will be pulled from the `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json` file.
-
-Set these two env vars:
-
-```sh
+# Enable local node development
 export LIT_JS_SDK_LOCAL_NODE_DEV="true"
-export LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY="putAFundedPrivateKeyOnChronicleHere"
+
+# Set funded wallet for Chronicle testnet
+export LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY="your-funded-private-key"
 ```
 
-Run:
+## Environment Variables
 
-```sh
-yarn update:contracts-sdk --fetch
-yarn update:contracts-sdk --gen
-yarn build:packages
-```
+| Variable                               | Description                 | Usage                                                        |
+| -------------------------------------- | --------------------------- | ------------------------------------------------------------ |
+| `LIT_JS_SDK_GITHUB_ACCESS_TOKEN`       | GitHub access token         | Required for accessing contract ABIs from private repository |
+| `LIT_JS_SDK_LOCAL_NODE_DEV`            | Local node development flag | Set to `true` to use a local Lit node                        |
+| `LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY` | Funded wallet private key   | Required for Chronicle Testnet transactions                  |
 
-To run manual tests:
+# Error Handling Guide
 
-```sh
- yarn nx run nodejs:serve
-```
+## Overview
 
-## ENV Vars
+The SDK implements a robust error handling system using [@openagenda/verror](https://github.com/OpenAgenda/verror). This system provides:
 
-- LIT_JS_SDK_GITHUB_ACCESS_TOKEN - a github access token to get the contract ABIs from a private repo
-- LIT_JS_SDK_LOCAL_NODE_DEV - set to true to use a local node
-- LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY - set to a funded wallet on Chronicle Testnet
+- Detailed error information with cause tracking
+- Error composition and chaining
+- Additional context through metadata
+- Compatibility with native JavaScript Error handling
 
-# Error Handling
+## Using Error Handling
 
-This SDK uses custom error classes derived from [@openagenda/verror](https://github.com/OpenAgenda/verror) to handle errors between packages and to the SDK consumers.
-Normal error handling is also supported as VError extends the native Error class, but using VError allows for better error composition and information propagation.
-You can check their documentation for the extra fields that are added to the error object and methods on how to handle them in a safe way.
-
-## Example
+### Basic Example
 
 ```ts
 import { VError } from '@openagenda/verror';
 import { LitNodeClientBadConfigError } from '@lit-protocol/constants';
 
 try {
+  // Simulate an error condition
   const someNativeError = new Error('some native error');
 
+  // Throw a Lit-specific error with context
   throw new LitNodeClientBadConfigError(
     {
       cause: someNativeError,
-      info: {
-        foo: 'bar',
-      },
-      meta: {
-        baz: 'qux',
-      },
+      info: { foo: 'bar' },
+      meta: { baz: 'qux' },
     },
     'some useful message'
   );
 } catch (e) {
+  // Access error details
   console.log(e.name); // LitNodeClientBadConfigError
   console.log(e.message); // some useful message: some native error
   console.log(e.info); // { foo: 'bar' }
   console.log(e.baz); // qux
-  // VError.cause(e) is someNativeError
-  // VError.info(e) is { foo: 'bar' }
-  // VError.meta(e) is { baz: 'qux', code: 'lit_node_client_bad_config_error', kind: 'Config' }
-  // Verror.fullStack(e) is the full stack trace composed of the error chain including the causes
+
+  // Additional error information
+  // - VError.cause(e): Original error (someNativeError)
+  // - VError.info(e): Additional context ({ foo: 'bar' })
+  // - VError.meta(e): Metadata ({ baz: 'qux', code: 'lit_node_client_bad_config_error', kind: 'Config' })
+  // - VError.fullStack(e): Complete error chain stack trace
 }
 ```
 
-## Creating a new error
+## Creating Custom Errors
 
-In file `packages/constants/src/lib/errors.ts` you can find the list of errors that are currently supported and add new ones if needed.
+To add new error types:
 
-To create and use a new error, you need to:
-
-1. Add the error information to the `LIT_ERROR` object in `packages/constants/src/lib/errors.ts`
-2. Export the error from the `errors.ts` file at the end of the file
-3. Import the error where you need it
-4. Throw the error in your code adding all the information a user might need to know about the error such as the cause, the info, etc.
+1. Locate `packages/constants/src/lib/errors.ts`
+2. Add your error definition to the `LIT_ERROR` object
+3. Export the new error class
+4. Import and use in your code with relevant context:
+   ```ts
+   throw new YourCustomError(
+     {
+       cause: originalError,
+       info: {
+         /* context */
+       },
+       meta: {
+         /* metadata */
+       },
+     },
+     'Error message'
+   );
+   ```
 
 # Dockerfile
 
@@ -335,45 +368,52 @@ To create and use a new error, you need to:
 
 ## Other Commands
 
-### Interactive graph dependencies using NX
+# Core Systems and Services
 
-```
-yarn graph
-```
+The Lit Protocol SDK provides the following core systems:
 
-![](https://i.ibb.co/2dLyMTW/Screenshot-2022-11-15-at-15-18-46.png)
+- Cryptographic key management (PKP - Programmable Key Pair)
+- Blockchain wallet interactions (Ethereum, Solana, Cosmos)
+- Decentralized authentication and authorization
+- Distributed computing and signing
+- Smart contract management
+- Access control and encryption services
 
-# FAQs & Common Errors
+# Main Functions and Classes
 
-<details>
-<summary>(React) Failed to parse source map from</summary>
+Key components available across packages:
 
-In your React package.json, add `GENERATE_SOURCEMAP=false` to your start script
+- `PKPEthersWallet`: Ethereum wallet management for PKP
+- `LitNodeClient`: Network interaction client
+- `executeJs()`: Decentralized JavaScript execution
+- `signMessageWithEncryptedKey()`: Cryptographic signing
+- `generatePrivateKey()`: Key generation utilities
+- `TinnyEnvironment`: Testing environment setup
 
-eg.
+# Troubleshooting Guide
 
-```
-  "scripts": {
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-```
+## Common Issues and Solutions
 
-</details>
+### Crypto API Error
 
-<details>
-<summary>Reference Error: crypto is not defined</summary>
+**Problem:** "Reference Error: crypto is not defined"
+
+**Solution:**
+Add the following polyfill for environments without native crypto:
 
 ```js
 import crypto, { createHash } from 'crypto';
+
+// Add crypto to global scope
 Object.defineProperty(globalThis, 'crypto', {
   value: {
+    // Implement getRandomValues
     getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
+
+    // Implement subtle crypto
     subtle: {
       digest: (algorithm: string, data: Uint8Array) => {
-        return new Promise((resolve, reject) =>
+        return new Promise((resolve) =>
           resolve(
             createHash(algorithm.toLowerCase().replace('-', ''))
               .update(data)
@@ -386,10 +426,9 @@ Object.defineProperty(globalThis, 'crypto', {
 });
 ```
 
-</details>
-<details>
-<summary>error Command failed with exit code 13.</summary>
+### Unexpected Error on Node
 
+**Problem:** Exit code 13
+
+**Solution:**
 Make sure your node version is above v18.0.0
-
-</details>

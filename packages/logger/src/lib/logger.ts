@@ -1,6 +1,7 @@
 import { version, LOG_LEVEL, LOG_LEVEL_VALUES } from '@lit-protocol/constants';
 import { hashMessage } from 'ethers/lib/utils';
 
+export { LOG_LEVEL };
 export enum LogLevel {
   OFF = -1,
   ERROR = 0,
