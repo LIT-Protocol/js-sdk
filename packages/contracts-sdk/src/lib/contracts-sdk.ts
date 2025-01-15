@@ -1,4 +1,5 @@
 /* eslint-disable import/order */
+import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
 import {
   Abi,
   AbiFunction,
@@ -6,7 +7,6 @@ import {
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
 } from 'abitype';
-import { derivedAddresses, isBrowser, isNode, log } from '@lit-protocol/misc';
 import {
   ContractName,
   CreateCustomAuthMethodRequest,
@@ -51,7 +51,11 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { ValidatorStruct } from './types';
+import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
+import { ValidatorStruct, type ValidatorWithPrices } from './types';
+import * as util from 'node:util';
+
+const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 
 // FIXME: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
@@ -787,7 +791,7 @@ export class LitContracts {
     litNetwork,
   }: {
     activeValidatorStructs: ValidatorStruct[];
-    nodeProtocol?: string;
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
     litNetwork: LIT_NETWORK_VALUES;
   }): string[] {
     return activeValidatorStructs.map((item) => {
@@ -829,30 +833,18 @@ export class LitContracts {
     networkContext,
     rpcUrl,
     nodeProtocol,
-    sortByPrice,
   }: {
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
-    sortByPrice?: boolean;
   }): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
-    priceByNetwork: Record<string, number>;
+    pricesByNodeUrl: Record<string, bigint[]>;
   }> => {
-    // if it's true, we will sort the networks by price feed from lowest to highest
-    // if it's false, we will not sort the networks
-    const _sortByPrice = sortByPrice ?? true;
-
-    if (_sortByPrice) {
-      log('Sorting networks by price feed from lowest to highest');
-    } else {
-      log('Not sorting networks by price feed');
-    }
-
     const stakingContract = await LitContracts.getStakingContract(
       litNetwork,
       networkContext,
@@ -897,7 +889,7 @@ export class LitContracts {
         };
       });
 
-    const unsortedNetworks = LitContracts.generateValidatorURLs({
+    const bootstrapUrls = LitContracts.generateValidatorURLs({
       activeValidatorStructs,
       litNetwork,
     });
@@ -917,78 +909,28 @@ export class LitContracts {
     //   'http://yyy:7471': 300, <-- highest price
     //   'http://zzz:7472': 200 <-- middle price
     // }
-    const PRICE_BY_NETWORK = priceFeedInfo.networkPrices.mapByAddress;
-
-    // sorted networks by prices (lowest to highest)
-    // [
-    //   'http://xxx:7470', <-- lowest price
-    //   'http://zzz:7472', <-- middle price
-    //   'http://yyy:7471' <-- highest price
-    // ]
-    const sortedNetworks = unsortedNetworks.sort(
-      (a, b) => PRICE_BY_NETWORK[a] - PRICE_BY_NETWORK[b]
-    );
-
-    const bootstrapUrls = _sortByPrice ? sortedNetworks : unsortedNetworks;
-
     return {
       stakingContract,
       epochInfo: typedEpochInfo,
       minNodeCount: minNodeCountInt,
       bootstrapUrls: bootstrapUrls,
-      priceByNetwork: PRICE_BY_NETWORK,
+      pricesByNodeUrl: priceFeedInfo.networkPrices.mapByAddress,
     };
   };
 
-  /**
-   * Gets price feed information for nodes in the network.
-   *
-   * @param {Object} params - The parameters object
-   * @param {LIT_NETWORKS_KEYS} params.litNetwork - The Lit network to get price feed info for
-   * @param {LitContractContext | LitContractResolverContext} [params.networkContext] - Optional network context
-   * @param {string} [params.rpcUrl] - Optional RPC URL to use
-   * @param {number[]} [params.productIds] - Optional array of product IDs to get prices for. Defaults to [DECRYPTION, LA, SIGN]
-   * @param {typeof HTTP | typeof HTTPS | null} [params.nodeProtocol] - Optional node protocol to use
-   *
-   * @returns {Promise<{
-   *   epochId: number,
-   *   minNodeCount: number,
-   *   networkPrices: {
-   *     arr: Array<{network: string, price: number}>,
-   *     mapByAddress: Record<string, number>
-   *   }
-   * }>}
-   */
   public static getPriceFeedInfo = async ({
     realmId,
     litNetwork,
     networkContext,
     rpcUrl,
-    productIds, // Array of product IDs
+    nodeProtocol,
   }: {
     realmId: number;
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
-    productIds?: (typeof PRODUCT_IDS)[keyof typeof PRODUCT_IDS][];
-  }): Promise<PriceFeedInfo> => {
-    if (!productIds || productIds.length === 0) {
-      log('No product IDs provided. Defaulting to 0');
-      productIds = [PRODUCT_IDS.DECRYPTION, PRODUCT_IDS.LA, PRODUCT_IDS.SIGN];
-    }
-
-    // check if productIds is any numbers in the PRODUCT_IDS object
-    productIds.forEach((productId) => {
-      if (!Object.values(PRODUCT_IDS).includes(productId)) {
-        throw new Error(
-          `❌ Invalid product ID: ${productId}. We only accept ${Object.values(
-            PRODUCT_IDS
-          ).join(', ')}`
-        );
-      }
-    });
-
+  }) => {
     const priceFeedContract = await LitContracts.getPriceFeedContract(
       litNetwork,
       networkContext,
@@ -996,33 +938,24 @@ export class LitContracts {
     );
 
     const nodesForRequest = await priceFeedContract['getNodesForRequest'](
-      realmId,
-      productIds
+      PRODUCT_IDS_ARRAY
     );
 
-    const epochId = nodesForRequest[0].toNumber();
-    const minNodeCount = nodesForRequest[1].toNumber();
-    const nodesAndPrices = nodesForRequest[2];
+    const epochId: number[] = nodesForRequest[0].toNumber();
+    const minNodeCount: number[] = nodesForRequest[1].toNumber();
+    const nodesAndPrices: ValidatorWithPrices[] = nodesForRequest[2];
 
-    const activeValidatorStructs: ValidatorStruct[] = nodesAndPrices.map(
-      (item: any) => {
-        return {
-          ip: item.validator.ip,
-          ipv6: item.validator.ipv6,
-          port: item.validator.port,
-          nodeAddress: item.validator.nodeAddress,
-          reward: item.validator.reward,
-          seconderPubkey: item.validator.seconderPubkey,
-          receiverPubkey: item.validator.receiverPubkey,
-        };
-      }
-    );
-
-    const networks = LitContracts.generateValidatorURLs({
-      activeValidatorStructs,
+    const networkUrls = LitContracts.generateValidatorURLs({
+      activeValidatorStructs: nodesAndPrices.map(({ validator }) => validator),
       litNetwork,
+      nodeProtocol,
     });
 
+    const networkPriceMap = networkUrls.reduce<Record<string, bigint[]>>(
+      (acc, network, index) => {
+        acc[network] = nodesAndPrices[index].prices.map((ethersPrice) =>
+          ethersPrice.toBigInt()
+        );
     console.log('networks:', networks);
 
     const prices = nodesAndPrices.flatMap((item: any) => {
@@ -1042,22 +975,25 @@ export class LitContracts {
       {} as Record<string, number>
     );
 
-    console.log('Network to Price Map:', networkPriceMap);
-
-    const networkPriceObjArr = networks.map((network, index) => {
-      return {
-        network, // The key will be the network URL
-        price: prices[index], // The value will be the corresponding price
-      };
-    });
+    // FIXME: Remove before publish
+    console.log(
+      'getPriceFeedInfo()',
+      util.inspect(
+        {
+          epochId,
+          minNodeCount,
+          networkPrices: {
+            mapByAddress: networkPriceMap,
+          },
+        },
+        { depth: 4 }
+      )
+    );
 
     return {
       epochId,
       minNodeCount,
-      networkPrices: {
-        arr: networkPriceObjArr,
-        mapByAddress: networkPriceMap,
-      },
+      networkPrices: { mapByAddress: networkPriceMap },
     };
   };
 
