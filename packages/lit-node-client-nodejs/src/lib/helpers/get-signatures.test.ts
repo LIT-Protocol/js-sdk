@@ -1,4 +1,4 @@
-import { SigResponse } from '@lit-protocol/types';
+import { ECDSASigResponse } from '@lit-protocol/types';
 
 import { getSignatures } from './get-signatures';
 
@@ -46,7 +46,7 @@ describe('getSignatures', () => {
     ];
     const requestId = '';
 
-    const signatures = await getSignatures<{ sig: SigResponse }>({
+    const signatures = await getSignatures<{ sig: ECDSASigResponse }>({
       networkPubKeySet,
       minNodeCount,
       signedData,

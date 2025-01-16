@@ -42,7 +42,7 @@ import {
   PKPClientHelpers,
   PKPCosmosWalletProp,
   PKPWallet,
-  SigResponse,
+  ECDSASigResponse,
 } from '@lit-protocol/types';
 
 export { Long } from 'cosmjs-types/helpers';
@@ -338,7 +338,7 @@ export class PKPCosmosWallet
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+  async runSign(toSign: Uint8Array): Promise<ECDSASigResponse> {
     return this.pkpBase.runSign(toSign);
   }
 }

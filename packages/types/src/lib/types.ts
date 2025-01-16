@@ -267,19 +267,19 @@ export interface TokenInfo {
   retries: _BigNumber { _hex: '0x03', _isBigNumber: true },
   timeout: _BigNumber { _hex: '0x3c', _isBigNumber: true }
  */
-export type EpochInfo = {
+export interface EpochInfo {
   epochLength: number;
   number: number;
   endTime: number;
   retries: number;
   timeout: number;
-};
+}
 
-export type PriceFeedInfo = {
+export interface PriceFeedInfo {
   epochId: number;
   minNodeCount: number;
   networkPrices: {
-    arr: Array<{ network: string; price: number }>;
+    arr: { network: string; price: number }[];
     mapByAddress: Record<string, number>;
   };
-};
+}
