@@ -17,7 +17,9 @@ export const snakeToCamel = (s: string): string =>
  * @param obj - The object whose keys need to be converted.
  * @returns The object with keys converted to camelCase.
  */
-export const convertKeysToCamelCase = (obj: { [key: string]: any }): any =>
+export const convertKeysToCamelCase = <T extends Record<string, unknown>>(
+  obj: T
+): Record<string, unknown> =>
   Object.keys(obj).reduce(
     (acc, key) => ({
       ...acc,
@@ -31,7 +33,9 @@ export const convertKeysToCamelCase = (obj: { [key: string]: any }): any =>
  * @param obj - The object to clean string values from.
  * @returns A new object with string values cleaned.
  */
-export const cleanStringValues = (obj: { [key: string]: any }): any =>
+export const cleanStringValues = <T extends Record<string, unknown>>(
+  obj: T
+): Record<string, unknown> =>
   Object.keys(obj).reduce(
     (acc, key) => ({
       ...acc,
@@ -54,7 +58,7 @@ export const parsePkpSignResponse = (
     delete signatureShare.result;
 
     const camelCaseShare = convertKeysToCamelCase(signatureShare);
-    const cleanedShare = cleanStringValues(camelCaseShare);
+    const cleanedShare = cleanStringValues(camelCaseShare) as any; // TODO fix the types in this file
 
     // Change 'dataSigned' from 'digest'
     if (cleanedShare.digest) {

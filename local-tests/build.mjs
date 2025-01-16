@@ -33,6 +33,7 @@ const createBuildConfig = (entry, outfile, globalName) => ({
   platform: 'node',
   target: 'esnext',
   format: 'esm',
+  sourcemap: true,
   inject: [getPath('./shim.mjs')],
   mainFields: ['module', 'main'],
   ...(globalName ? { globalName } : {}),

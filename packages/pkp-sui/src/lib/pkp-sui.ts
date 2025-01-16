@@ -31,7 +31,7 @@ import { blake2b } from '@noble/hashes/blake2b';
 import { sha256 } from '@noble/hashes/sha256';
 
 import { PKPBase } from '@lit-protocol/pkp-base';
-import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
+import { PKPBaseProp, PKPWallet, ECDSASigResponse } from '@lit-protocol/types';
 import {
   InvalidArgumentException,
   UnknownError,
@@ -331,7 +331,7 @@ export class PKPSuiWallet implements PKPWallet, Signer {
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+  async runSign(toSign: Uint8Array): Promise<ECDSASigResponse> {
     return this.pkpBase.runSign(toSign);
   }
 }

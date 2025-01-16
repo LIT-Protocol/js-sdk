@@ -1292,6 +1292,8 @@ export const LIT_CURVE = {
   EcdsaCaitSith: 'ECDSA_CAIT_SITH', // Legacy alias of K256
   EcdsaCAITSITHP256: 'EcdsaCaitSithP256',
   EcdsaK256Sha256: 'EcdsaK256Sha256', // same as caitsith
+  EcdsaP256Sha256: 'EcdsaP256Sha256',
+  EcdsaP384Sha384: 'EcdsaP384Sha384',
 } as const;
 
 export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;

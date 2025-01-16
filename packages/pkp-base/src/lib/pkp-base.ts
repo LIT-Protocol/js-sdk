@@ -21,7 +21,7 @@ import {
   PKPBaseProp,
   AuthSig,
   PKPBaseDefaultParams,
-  SigResponse,
+  ECDSASigResponse,
   RPCUrls,
   AuthMethod,
   SessionSigsMap,
@@ -399,7 +399,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+  async runSign(toSign: Uint8Array): Promise<ECDSASigResponse> {
     await this.ensureLitNodeClientReady();
 
     // If no PKP public key is provided, throw error
@@ -419,6 +419,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         toSign,
         pubKey: this.uncompressedPubKey,
         sessionSigs: controllerSessionSigs,
+        signingScheme: 'EcdsaK256Sha256',
       });
 
       if (!sig) {

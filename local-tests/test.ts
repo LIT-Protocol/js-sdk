@@ -3,7 +3,9 @@ import { runInBand, runTestsParallel } from './setup/tinny-operations';
 // import { testBundleSpeed } from './tests/test-bundle-speed';
 // import { testExample } from './tests/test-example';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
-import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
+import { testUseEoaSessionSigsToPkpSignK256 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignK256';
+import { testUseEoaSessionSigsToPkpSignP256 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignP256';
+import { testUseEoaSessionSigsToPkpSignP384 } from 'local-tests/tests/testUseEoaSessionSigsToPkpSignP384';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
 import { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToPkpSign';
 import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
@@ -163,7 +165,9 @@ setLitActionsCodeToLocal();
 
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
-    testUseEoaSessionSigsToPkpSign,
+    testUseEoaSessionSigsToPkpSignK256,
+    testUseEoaSessionSigsToPkpSignP256,
+    testUseEoaSessionSigsToPkpSignP384,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
     testUseEoaSessionSigsToExecuteJsClaimKeys,
     testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
