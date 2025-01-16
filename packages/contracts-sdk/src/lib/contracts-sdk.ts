@@ -148,6 +148,7 @@ export class LitContracts {
     'Multisender',
     'LITToken',
     'StakingBalances',
+    'PriceFeed'
   ];
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -653,6 +654,7 @@ export class LitContracts {
     }
 
     if (!context) {
+
       const contractData = await LitContracts._resolveContractContext(network);
 
       const priceFeedContract = contractData.find(
@@ -676,6 +678,7 @@ export class LitContracts {
 
       return new ethers.Contract(address, abi, provider);
     } else {
+
       if (!context.resolverAddress) {
         const priceFeedContract = (context as LitContractContext).PriceFeed;
 
@@ -934,6 +937,12 @@ export class LitContracts {
             environment
           );
           break;
+        case 'PriceFeed':
+          address = await resolverContract['getContract'](
+            await resolverContract['PRICE_FEED_CONTRACT'](),
+            environment
+          );
+          break;
       }
 
       return address;
@@ -1043,6 +1052,11 @@ export class LitContracts {
           addresses.Multisender.address = contract.address;
           addresses.Multisender.abi = contract?.abi ?? MultisenderData.abi;
           break;
+        case 'PriceFeed':
+          addresses.PriceFeed = {};
+          addresses.PriceFeed.address = contract.address;
+          addresses.PriceFeed.abi = contract?.abi;
+          break;
       }
     }
 
@@ -1150,6 +1164,7 @@ export class LitContracts {
     bootstrapUrls: string[];
     priceByNetwork: Record<string, number>;
   }> => {
+
     // if it's true, we will sort the networks by price feed from lowest to highest
     // if it's false, we will not sort the networks
     let _sortByPrice = sortByPrice || true;
@@ -1166,7 +1181,7 @@ export class LitContracts {
       rpcUrl
     );
 
-    // this will be dynamically set see https://github.com/LIT-Protocol/js-sdk/pull/724
+    // this will be dynamically set see 
     const realmId = 1;
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](realmId);
@@ -1212,12 +1227,12 @@ export class LitContracts {
     // networks are all the nodes we know from the `getActiveUnkickedValidatorStructsAndCounts` function, but we also want to sort it by price feed
     // which we need to call the price feed contract
     const priceFeedInfo = await LitContracts.getPriceFeedInfo({
+      realmId,
       litNetwork,
       networkContext,
       rpcUrl,
       nodeProtocol,
     });
-
     // example of Network to Price Map: {
     //   'http://xxx:7470': 100, <-- lowest price
     //   'http://yyy:7471': 300, <-- highest price
@@ -1266,11 +1281,13 @@ export class LitContracts {
    * }>}
    */
   public static getPriceFeedInfo = async ({
+    realmId,
     litNetwork,
     networkContext,
     rpcUrl,
     productIds, // Array of product IDs
   }: {
+    realmId: number;
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
@@ -1298,8 +1315,9 @@ export class LitContracts {
       networkContext,
       rpcUrl
     );
-
+    console.log("priceFeedContract:", priceFeedContract);
     const nodesForRequest = await priceFeedContract['getNodesForRequest'](
+      realmId,
       productIds
     );
 
