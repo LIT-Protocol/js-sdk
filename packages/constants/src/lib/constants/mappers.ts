@@ -1,6 +1,6 @@
 import depd from 'depd';
 
-import { datilDev, datilTest, datil, nagaDev } from '@lit-protocol/contracts';
+import { datilDev, datilTest, datil, _nagaDev } from '@lit-protocol/contracts';
 
 import { LIT_NETWORK_VALUES } from './constants';
 
@@ -14,12 +14,12 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
     | typeof datilDev
     | typeof datilTest
     | typeof datil
-    | typeof nagaDev;
+    | typeof _nagaDev;
 } = {
   'datil-dev': datilDev,
   'datil-test': datilTest,
   datil: datil,
-  'naga-dev': nagaDev,
+  'naga-dev': _nagaDev,
   custom: datilDev,
 } as const;
 

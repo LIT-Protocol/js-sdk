@@ -754,6 +754,7 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
+
     let provider: ethers.providers.StaticJsonRpcProvider;
 
     const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
@@ -810,6 +811,7 @@ export class LitContracts {
             '❌ Could not get staking contract address from contract context'
           );
         }
+
         return new ethers.Contract(
           stakingContract.address,
           stakingContract.abi ?? StakingData.abi,
@@ -1164,8 +1166,10 @@ export class LitContracts {
       rpcUrl
     );
 
+    // this will be dynamically set see https://github.com/LIT-Protocol/js-sdk/pull/724
+    const realmId = 1;
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
-      await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
+      await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](realmId);
 
     const typedEpochInfo: EpochInfo = {
       epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
