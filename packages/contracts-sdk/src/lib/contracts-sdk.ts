@@ -82,6 +82,9 @@ import {
 import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 import { ValidatorStruct } from './types';
 
+// FIXME: this should be dynamically set, but we only have 1 net atm.
+const REALM_ID = 1;
+
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 
@@ -148,6 +151,7 @@ export class LitContracts {
     'Multisender',
     'LITToken',
     'StakingBalances',
+    'PriceFeed',
   ];
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -810,6 +814,7 @@ export class LitContracts {
             '❌ Could not get staking contract address from contract context'
           );
         }
+
         return new ethers.Contract(
           stakingContract.address,
           stakingContract.abi ?? StakingData.abi,
@@ -932,6 +937,12 @@ export class LitContracts {
             environment
           );
           break;
+        case 'PriceFeed':
+          address = await resolverContract['getContract'](
+            await resolverContract['PRICE_FEED_CONTRACT'](),
+            environment
+          );
+          break;
       }
 
       return address;
@@ -1040,6 +1051,11 @@ export class LitContracts {
           addresses.Multisender = {};
           addresses.Multisender.address = contract.address;
           addresses.Multisender.abi = contract?.abi ?? MultisenderData.abi;
+          break;
+        case 'PriceFeed':
+          addresses.PriceFeed = {};
+          addresses.PriceFeed.address = contract.address;
+          addresses.PriceFeed.abi = contract?.abi;
           break;
       }
     }
@@ -1165,7 +1181,9 @@ export class LitContracts {
     );
 
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
-      await stakingContract['getActiveUnkickedValidatorStructsAndCounts']();
+      await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
+        REALM_ID
+      );
 
     const typedEpochInfo: EpochInfo = {
       epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
@@ -1208,12 +1226,12 @@ export class LitContracts {
     // networks are all the nodes we know from the `getActiveUnkickedValidatorStructsAndCounts` function, but we also want to sort it by price feed
     // which we need to call the price feed contract
     const priceFeedInfo = await LitContracts.getPriceFeedInfo({
+      realmId: REALM_ID,
       litNetwork,
       networkContext,
       rpcUrl,
       nodeProtocol,
     });
-
     // example of Network to Price Map: {
     //   'http://xxx:7470': 100, <-- lowest price
     //   'http://yyy:7471': 300, <-- highest price
@@ -1262,11 +1280,13 @@ export class LitContracts {
    * }>}
    */
   public static getPriceFeedInfo = async ({
+    realmId,
     litNetwork,
     networkContext,
     rpcUrl,
     productIds, // Array of product IDs
   }: {
+    realmId: number;
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
@@ -1296,6 +1316,7 @@ export class LitContracts {
     );
 
     const nodesForRequest = await priceFeedContract['getNodesForRequest'](
+      realmId,
       productIds
     );
 
