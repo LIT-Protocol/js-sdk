@@ -984,6 +984,7 @@ export const LIT_NETWORK = {
   DatilDev: 'datil-dev',
   DatilTest: 'datil-test',
   Datil: 'datil',
+  NagaDev: 'naga-dev',
   Custom: 'custom',
 } as const;
 /**
@@ -1018,6 +1019,7 @@ export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
 export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
   'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
   'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
+  'naga-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
   datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
 };
@@ -1030,6 +1032,7 @@ export const RELAYER_URL_BY_NETWORK: {
 } = {
   'datil-dev': 'https://datil-dev-relayer.getlit.dev',
   'datil-test': 'https://datil-test-relayer.getlit.dev',
+  'naga-dev': 'https://naga-dev-relayer.getlit.dev',
   datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
 };
@@ -1043,6 +1046,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
 > = {
   'datil-dev': METAMASK_CHAIN_INFO.yellowstone,
   'datil-test': METAMASK_CHAIN_INFO.yellowstone,
+  'naga-dev': METAMASK_CHAIN_INFO.yellowstone,
   datil: METAMASK_CHAIN_INFO.yellowstone,
   custom: METAMASK_CHAIN_INFO.yellowstone,
 };
@@ -1059,6 +1063,7 @@ export const HTTP_BY_NETWORK: Record<
 > = {
   'datil-dev': HTTPS,
   'datil-test': HTTPS,
+  'naga-dev': HTTPS,
   datil: HTTPS,
   custom: HTTP, // default, can be changed by config
 };
@@ -1072,6 +1077,7 @@ export const CENTRALISATION_BY_NETWORK: Record<
 > = {
   'datil-dev': 'centralised',
   'datil-test': 'decentralised',
+  'naga-dev': 'centralised',
   datil: 'decentralised',
   custom: 'unknown',
 } as const;
@@ -1223,6 +1229,7 @@ export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
   'datil-dev': [],
   'datil-test': [],
   datil: [],
+  'naga-dev': [],
   custom: [],
 };
 
