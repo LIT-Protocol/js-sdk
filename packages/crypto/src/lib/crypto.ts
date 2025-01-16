@@ -135,6 +135,13 @@ export const combineSignatureShares = async (
   shares: BlsSignatureShare[]
 ): Promise<string> => {
   const signature = await doCombineSignatureShares(shares);
+  const hex = Buffer.from(signature).toString('hex');
+  
+  if (hex.length !== 192) {
+    throw new Error(
+      `❌ Invalid signature length: ${hex.length}. Expected 192.`
+    );
+  }
 
   return Buffer.from(signature).toString('hex');
 };
