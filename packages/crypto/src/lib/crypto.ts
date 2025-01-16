@@ -38,7 +38,10 @@ import {
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
 
 export interface BlsSignatureShare {
-  ProofOfPossession: string;
+  ProofOfPossession: {
+    identifier: string;
+    value: string;
+  };
 }
 
 /**
@@ -116,6 +119,7 @@ export const verifyAndDecryptWithSignatureShares = async (
 ): Promise<Uint8Array> => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
   const signature = await doCombineSignatureShares(shares);
+
   await blsVerify('Bls12381G2', publicKey, identity, signature);
 
   return doDecrypt(ciphertextBase64, signature);
@@ -275,20 +279,29 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   return sessionKeyPair;
 };
 
-function doDecrypt(
+async function doDecrypt(
   ciphertextBase64: string,
   signature: Uint8Array
 ): Promise<Uint8Array> {
-  console.log('signature from encrypt op: ', signature);
   const ciphertext = Buffer.from(ciphertextBase64, 'base64');
-  return blsDecrypt('Bls12381G2', ciphertext, signature);
+  const decrypt = await blsDecrypt('Bls12381G2', ciphertext, signature);
+  return decrypt;
 }
 
-function doCombineSignatureShares(
+async function doCombineSignatureShares(
   shares: BlsSignatureShare[]
 ): Promise<Uint8Array> {
-  const sigShares = shares.map((s) => Buffer.from(s.ProofOfPossession, 'hex'));
-  const signature = blsCombine('Bls12381G2', sigShares);
+  const sigShares = shares.map((s, index) => {
+    return JSON.stringify({
+      ProofOfPossession: {
+        identifier: s.ProofOfPossession.identifier,
+        value: s.ProofOfPossession.value,
+      },
+    });
+  });
+
+  const signature = await blsCombine('Bls12381G2', sigShares);
+
   return signature;
 }
 

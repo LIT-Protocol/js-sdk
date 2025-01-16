@@ -1,6 +1,6 @@
 import depd from 'depd';
 
-import { datilDev, datilTest, datil } from '@lit-protocol/contracts';
+import { datilDev, datilTest, datil, _nagaDev } from '@lit-protocol/contracts';
 
 import { LIT_NETWORK_VALUES } from './constants';
 
@@ -11,15 +11,15 @@ const deprecated = depd('lit-js-sdk:constants:mappers');
  */
 export const NETWORK_CONTEXT_BY_NETWORK: {
   [key in LIT_NETWORK_VALUES]:
-  | typeof datilDev
-  | typeof datilTest
-  | typeof datil;
+    | typeof datilDev
+    | typeof datilTest
+    | typeof datil
+    | typeof _nagaDev;
 } = {
   'datil-dev': datilDev,
   'datil-test': datilTest,
   datil: datil,
-
-  // just use datil dev abis for custom
+  'naga-dev': _nagaDev,
   custom: datilDev,
 } as const;
 
@@ -29,14 +29,15 @@ export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
   'datil-dev': false,
   'datil-test': false,
   datil: false,
+  'naga-dev': false,
   custom: false,
-};
+} as const;
 
 /**
  * Product IDs used for price feed and node selection
- * 
+ *
  * - DECRYPTION (0): Used for decryption operations
- * - SIGN (1): Used for signing operations 
+ * - SIGN (1): Used for signing operations
  * - LA (2): Used for Lit Actions execution
  */
 export const PRODUCT_IDS = {

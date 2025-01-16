@@ -347,9 +347,11 @@ export interface JsonSignSessionKeyRequestV1
 export interface BlsResponseData {
   result: boolean | 'success';
   signatureShare: {
-    ProofOfPossession: string;
+    ProofOfPossession: {
+      identifier: string;
+      value: string;
+    };
   };
-  shareIndex: number;
   curveType: string;
   siweMessage: string;
   dataSigned: string;
@@ -675,7 +677,6 @@ export interface SigShare {
     | 'EcdsaK256Sha256';
 
   signatureShare: string;
-  shareIndex?: number;
   bigr?: string; // backward compatibility
   bigR?: string;
   publicKey: string;
@@ -686,7 +687,6 @@ export interface SigShare {
 
 export interface PkpSignedData {
   digest: string;
-  shareIndex: number;
   signatureShare: string;
   bigR: string;
   publicKey: string;
@@ -695,7 +695,6 @@ export interface PkpSignedData {
 }
 export interface NodeShare {
   claimData: any;
-  shareIndex: any;
 
   // I think this is deprecated
   unsignedJwt: any;
@@ -713,7 +712,6 @@ export interface PKPSignShare {
 }
 
 export interface NodeBlsSigningShare {
-  shareIndex: any;
   unsignedJwt?: any;
   signatureShare: BlsSignatureShare;
   response?: any;
@@ -721,7 +719,10 @@ export interface NodeBlsSigningShare {
 }
 
 export interface BlsSignatureShare {
-  ProofOfPossession: string;
+  ProofOfPossession: {
+    identifier: string;
+    value: string;
+  };
 }
 
 export interface SuccessNodePromises<T> {

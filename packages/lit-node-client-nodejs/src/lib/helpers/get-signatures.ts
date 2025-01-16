@@ -28,7 +28,6 @@ export const getFlattenShare = (share: any): SigShare => {
       'sigType',
       'dataSigned',
       'signatureShare',
-      'shareIndex',
       'bigR',
       'publicKey',
     ];
@@ -125,7 +124,6 @@ export const getSignatures = async <T>(params: {
           share = {
             sigType: share.sigType,
             signatureShare: share.signatureShare,
-            shareIndex: share.shareIndex,
             bigR: share.bigR,
             publicKey: share.publicKey,
             dataSigned: share.dataSigned,
@@ -166,9 +164,7 @@ export const getSignatures = async <T>(params: {
       .map((r) => r[key])
       .filter((r) => r !== undefined);
 
-    shares.sort((a, b) => a.shareIndex - b.shareIndex);
-
-    let sigName = shares[0].sigName;
+    const sigName = shares[0].sigName;
 
     logWithRequestId(
       requestId,
@@ -234,7 +230,7 @@ export const getSignatures = async <T>(params: {
       sigType !== LIT_CURVE.EcdsaCaitSith &&
       sigType !== LIT_CURVE.EcdsaK256 &&
       sigType !== LIT_CURVE.EcdsaCAITSITHP256 &&
-      sigType! == LIT_CURVE.EcdsaK256Sha256
+      sigType !== LIT_CURVE.EcdsaK256Sha256
     ) {
       throw new UnknownSignatureType(
         {

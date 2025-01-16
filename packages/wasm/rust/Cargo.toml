@@ -14,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-blsful = { version = "2.5.7", default-features = false, features = ["rust"] }
+blsful = {  version = "3.0.0-pre8", default-features = false, features = ["rust"] }
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
@@ -44,6 +44,7 @@ serde_bytes = "0.11.14"
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
 jubjub-plus = { version = "0.10.4" }
 
+web-sys = { version = "0.3", features = ["console"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"

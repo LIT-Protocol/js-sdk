@@ -15,8 +15,12 @@ export function getBlsSignatures(
   }
 
   const signatureShares = responseData.map((s) => ({
-    ProofOfPossession: s.signatureShare.ProofOfPossession,
+    ProofOfPossession: {
+      identifier: s.signatureShare.ProofOfPossession.identifier,
+      value: s.signatureShare.ProofOfPossession.value,
+    },
   }));
+
   log(`[getBlsSignatures] signatureShares:`, signatureShares);
 
   if (!signatureShares || signatureShares.length <= 0) {
@@ -24,9 +28,4 @@ export function getBlsSignatures(
   }
 
   return signatureShares;
-
-  // const signedDataList = responseData.map((s) => s.dataSigned);
-  // log(`[getBlsSignatures] signedDataList:`, signedDataList);
-
-  // return signedDataList;
 }

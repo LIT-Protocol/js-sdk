@@ -69,7 +69,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
     signature
   );
 
-  console.log("recoveredPubKey:", recoveredPubKey);
+  console.log('recoveredPubKey:', recoveredPubKey);
 
   // FIXME: Consider adding these assertions back after the v flipping PR is merged
   // if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {

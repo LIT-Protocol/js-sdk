@@ -112,7 +112,12 @@ export type LITCosmosChain = LITChainRequiredProps & {
  */
 export type LITChain<T> = Record<string, T>;
 
-export type LIT_NETWORKS_KEYS = 'datil-dev' | 'datil-test' | 'datil' | 'custom';
+export type LIT_NETWORKS_KEYS =
+  | 'datil-dev'
+  | 'datil-test'
+  | 'datil'
+  | 'naga-dev'
+  | 'custom';
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;
@@ -217,11 +222,11 @@ export type ContractName = keyof ExclusiveLitContractContext;
  */
 export interface LitContractResolverContext {
   [index: string]:
-  | string
-  | LitContractContext
-  | ethers.providers.JsonRpcProvider
-  | undefined
-  | number;
+    | string
+    | LitContractContext
+    | ethers.providers.JsonRpcProvider
+    | undefined
+    | number;
   resolverAddress: string;
   abi: any;
   environment: number;
@@ -274,7 +279,7 @@ export type PriceFeedInfo = {
   epochId: number;
   minNodeCount: number;
   networkPrices: {
-    arr: Array<{ network: string, price: number }>,
-    mapByAddress: Record<string, number>
-  }
-}
+    arr: Array<{ network: string; price: number }>;
+    mapByAddress: Record<string, number>;
+  };
+};
