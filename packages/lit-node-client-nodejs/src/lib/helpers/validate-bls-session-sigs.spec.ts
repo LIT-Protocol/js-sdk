@@ -56,6 +56,7 @@ describe('BlsSessionSigVerify', () => {
             Date.now() + 1000 * 60 * 60 * 24 * 7
           ).toISOString(),
           notBefore: new Date(Date.now()).toISOString(),
+          issuedAt: new Date().toISOString(),
         })
       )
     ).toBeUndefined();
