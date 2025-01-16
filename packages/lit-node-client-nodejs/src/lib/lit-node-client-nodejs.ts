@@ -135,6 +135,8 @@ import type {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 
+// FIXME: this should be dynamically set, but we only have 1 net atm.
+const REALM_ID = 1;
 export class LitNodeClientNodeJs
   extends LitCore
   implements LitClientSessionManager, ILitNodeClient
@@ -1993,6 +1995,7 @@ export class LitNodeClientNodeJs
     if (params.getNewPrices) {
       log(`Getting new prices from the contract`);
       const priceFeedInfo = await LitContracts.getPriceFeedInfo({
+        realmId: REALM_ID,
         litNetwork: this.config.litNetwork,
         networkContext: this.config.contractContext,
         rpcUrl: this.config.rpcUrl,

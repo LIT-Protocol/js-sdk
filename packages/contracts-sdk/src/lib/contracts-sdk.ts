@@ -82,6 +82,9 @@ import {
 import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 import { ValidatorStruct } from './types';
 
+// FIXME: this should be dynamically set, but we only have 1 net atm.
+const REALM_ID = 1;
+
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 
@@ -148,7 +151,7 @@ export class LitContracts {
     'Multisender',
     'LITToken',
     'StakingBalances',
-    'PriceFeed'
+    'PriceFeed',
   ];
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -654,7 +657,6 @@ export class LitContracts {
     }
 
     if (!context) {
-
       const contractData = await LitContracts._resolveContractContext(network);
 
       const priceFeedContract = contractData.find(
@@ -678,7 +680,6 @@ export class LitContracts {
 
       return new ethers.Contract(address, abi, provider);
     } else {
-
       if (!context.resolverAddress) {
         const priceFeedContract = (context as LitContractContext).PriceFeed;
 
@@ -757,7 +758,6 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
-
     let provider: ethers.providers.StaticJsonRpcProvider;
 
     const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
@@ -1164,7 +1164,6 @@ export class LitContracts {
     bootstrapUrls: string[];
     priceByNetwork: Record<string, number>;
   }> => {
-
     // if it's true, we will sort the networks by price feed from lowest to highest
     // if it's false, we will not sort the networks
     let _sortByPrice = sortByPrice || true;
@@ -1181,10 +1180,10 @@ export class LitContracts {
       rpcUrl
     );
 
-    // this will be dynamically set see 
-    const realmId = 1;
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
-      await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](realmId);
+      await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
+        REALM_ID
+      );
 
     const typedEpochInfo: EpochInfo = {
       epochLength: ethers.BigNumber.from(epochInfo[0]).toNumber(),
@@ -1227,7 +1226,7 @@ export class LitContracts {
     // networks are all the nodes we know from the `getActiveUnkickedValidatorStructsAndCounts` function, but we also want to sort it by price feed
     // which we need to call the price feed contract
     const priceFeedInfo = await LitContracts.getPriceFeedInfo({
-      realmId,
+      realmId: REALM_ID,
       litNetwork,
       networkContext,
       rpcUrl,
@@ -1315,7 +1314,7 @@ export class LitContracts {
       networkContext,
       rpcUrl
     );
-    console.log("priceFeedContract:", priceFeedContract);
+
     const nodesForRequest = await priceFeedContract['getNodesForRequest'](
       realmId,
       productIds
