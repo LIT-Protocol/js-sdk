@@ -120,22 +120,27 @@ pub fn bls_encrypt(
 pub fn bls_decrypt(
   variant: BlsVariant,
   ciphertext: Uint8Array,
-  decryption_key: Uint8Array
+  signature_shares: JsValue
 ) -> JsResult<Uint8Array> {
   let ciphertext_base64 = base64_encode_bytes(&ciphertext.to_vec());
-  let decryption_key_hex = hex::encode(decryption_key.to_vec());
 
-  let shares = serde_json
-    ::to_value(vec![decryption_key_hex])
-    .map_err(|e|
-      JsValue::from_str(
-        &format!("Failed to serialize decryption shares: {}", e)
-      )
-    )?;
+  let shares: Vec<String> = serde_wasm_bindgen
+    ::from_value(signature_shares)
+    .map_err(|e| JsValue::from_str(&format!("Failed to parse shares: {}", e)))?;
 
-  let plaintext = decrypt_with_signature_shares(
-    &ciphertext_base64,
-    serde_wasm_bindgen::to_value(&shares).unwrap()
+  let shares_json = serde_wasm_bindgen::to_value(&shares).unwrap();
+
+  web_sys::console::log_1(
+    &JsValue::from_str(&format!("Shares: {:?}", shares))
+  );
+
+  let plaintext = (
+    match variant {
+      BlsVariant::Bls12381G1 =>
+        decrypt_with_signature_shares(&ciphertext_base64, shares_json),
+      BlsVariant::Bls12381G2 =>
+        decrypt_with_signature_shares(&ciphertext_base64, shares_json),
+    }
   ).map_err(|e| JsValue::from_str(&format!("Decryption failed: {}", e)))?;
 
   let decoded_plaintext = base64_decode(&plaintext);

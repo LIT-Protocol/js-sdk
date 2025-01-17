@@ -17,7 +17,7 @@ const oldFormattedSignatureShareJSONStrings = [
 // <resource>://<hashOfAccs>/<hashOfPrivateData>
 const identityParamsUtf8Buffer = Buffer.from("lit-accesscontrolcondition://998a67a9f2a362bd00a884bb7ac1252a470c7396fdd877a3d9a51c96fbf3ea63/64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c", 'utf8');
 
-const cipherText = "gde2ccRMkMpC42544vHngsOG2Wdl5a7IpeTNmq+h0FKzVargGrOWToM48pc02EtHXSyewu8Khrr1YlF+l4xo4pR2tApEnIYp/22zQgS2LvcgURe9pbcLeJ57fsxsdbrmMQVgg6hPcqbmWT4tU0+7KTAC";
+const cipherText = Buffer.from("gde2ccRMkMpC42544vHngsOG2Wdl5a7IpeTNmq+h0FKzVargGrOWToM48pc02EtHXSyewu8Khrr1YlF+l4xo4pR2tApEnIYp/22zQgS2LvcgURe9pbcLeJ57fsxsdbrmMQVgg6hPcqbmWT4tU0+7KTAC", 'base64');
 
 describe('BLS', () => {
   it('should encrypt', async () => {
@@ -44,15 +44,27 @@ describe('BLS', () => {
 
     it("should combine and verify", async () => {
       const combinedSignature = await blsCombine('Bls12381G2', oldFormattedSignatureShareJSONStrings);
-      
+
       // Should not throw if verification succeeds
       await expect(blsVerify(
-          'Bls12381G2', 
-          blsRootkeyHexBuffer, 
-          identityParamsUtf8Buffer, 
-          combinedSignature
+        'Bls12381G2',
+        blsRootkeyHexBuffer,
+        identityParamsUtf8Buffer,
+        combinedSignature
       )).resolves.toBeUndefined();
-    })
+    });
+
+    it('should decrypt', async () => {
+      const decryptedMessageBuffer = await blsDecrypt(
+        'Bls12381G2',
+        cipherText,
+        oldFormattedSignatureShareJSONStrings
+      );
+
+      // convert to base64
+      const decryptedMessage = Buffer.from(decryptedMessageBuffer).toString('utf-8');
+      expect(decryptedMessage).toEqual('Hello world');
+    });
   });
 
   describe('new format', () => {
@@ -63,14 +75,25 @@ describe('BLS', () => {
 
     it("should combine and verify", async () => {
       const combinedSignature = await blsCombine('Bls12381G2', signatureShareJSONStrings);
-      
+
       // Should not throw if verification succeeds
       await expect(blsVerify(
-          'Bls12381G2', 
-          blsRootkeyHexBuffer, 
-          identityParamsUtf8Buffer, 
-          combinedSignature
+        'Bls12381G2',
+        blsRootkeyHexBuffer,
+        identityParamsUtf8Buffer,
+        combinedSignature
       )).resolves.toBeUndefined();
     })
+
+    it('should decrypt', async () => {
+      const decryptedMessageBuffer = await blsDecrypt(
+        'Bls12381G2',
+        cipherText,
+        signatureShareJSONStrings
+      );
+
+      const decryptedMessage = Buffer.from(decryptedMessageBuffer).toString('utf-8');
+      expect(decryptedMessage).toEqual('Hello world');
+    });
   });
 });
