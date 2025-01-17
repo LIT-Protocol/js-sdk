@@ -1,3 +1,4 @@
+// @ts-nocheck
 //@ts-ignore source map not found
 import {
   BlsVariant,
@@ -83,10 +84,10 @@ export async function blsCombine(
 export async function blsDecrypt(
   variant: BlsVariant,
   ciphertext: Uint8Array,
-  decryption_key: Uint8Array
+  signature_shares: string[]
 ): Promise<Uint8Array> {
   await loadModules();
-  return wasmInternal.blsDecrypt(variant, ciphertext, decryption_key);
+  return wasmInternal.blsDecrypt(variant, ciphertext, signature_shares);
 }
 
 /**

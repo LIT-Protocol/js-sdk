@@ -181,6 +181,8 @@ export const runTestsParallel = async ({
         );
         return `${testName} (Passed in ${timeTaken} ms)`;
       } catch (error) {
+        console.log("error:", error);
+
         if (error.message === 'LIT_IGNORE_TEST') {
           return `${testName} (Skipped)`;
         }

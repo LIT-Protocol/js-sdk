@@ -15,6 +15,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 blsful = {  version = "3.0.0-pre8", default-features = false, features = ["rust"] }
+lit-bls-wasm = { git = "https://github.com/LIT-Protocol/lit-bls-wasm.git", branch = "main" }
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"

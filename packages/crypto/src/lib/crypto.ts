@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { splitSignature } from 'ethers/lib/utils';
 
 import {
@@ -76,8 +77,7 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${
-        publicKeyHex.replace('0x', '').length
+      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length
       } instead.`
     );
   }
@@ -301,7 +301,8 @@ async function doCombineSignatureShares(
   });
 
   const signature = await blsCombine('Bls12381G2', sigShares);
-
+  // console.log("signature:", signature);
+  // process.exit();
   return signature;
 }
 
