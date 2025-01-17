@@ -2,6 +2,7 @@
  * This file serves as a central location for all Lit node endpoints and their request/response interfaces & types.
  */
 
+import { SigningScheme } from '../curveTypes';
 import {
   AuthMethod,
   AuthSig,
@@ -67,4 +68,5 @@ export interface EncryptionSignRequest {
   dataToEncryptHash: string;
   authSig: AuthSig;
   epoch: number;
+  signingScheme: SigningScheme
 }

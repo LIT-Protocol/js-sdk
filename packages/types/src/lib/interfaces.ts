@@ -19,6 +19,7 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
+import { SigningScheme } from './curveTypes';
 
 const deprecated = depd('lit-js-sdk:types:interfaces');
 
@@ -258,6 +259,8 @@ export interface JsonPkpSignRequest
    * note that 'key' is in lower case, because this is what the node expects
    */
   pubkey: string;
+
+  signingScheme: SigningScheme;
 }
 
 /**
