@@ -1,8 +1,6 @@
 # Getting Started
 
-This `LitNodeClientNodeJs` is created solely to run on Node.js.
-
-The usual `checkAndSignAuthMessage` is not included in this package, so you need to add it manually to the constructor if you decide to use it on a browser, or with any custom auth callback.
+This package provides a Node.js-specific implementation of the Lit Protocol client, enabling server-side applications to interact with the Lit network. It offers optimized Node.js performance while maintaining all core Lit Protocol functionality, excluding browser-specific authentication which can be manually added if needed.
 
 ```js
 import * as LitJsSdkNodeJs from '@lit-protocol/lit-node-client-nodejs';

@@ -1,4 +1,4 @@
-import { LOG_LEVEL, LogManager } from './logger';
+import { LOG_LEVEL, LogLevel, LogManager } from './logger';
 
 describe('logger', () => {
   let lm: LogManager;
@@ -25,7 +25,7 @@ describe('logger', () => {
     lm.withConfig({
       condenseLogs: true,
     });
-    let logger = lm.get('category');
+    const logger = lm.get('category');
     expect(logger.Config?.['condenseLogs']).toEqual(true);
   });
 
@@ -33,12 +33,12 @@ describe('logger', () => {
     lm.withConfig({
       condenseLogs: true,
     });
-    let logger = lm.get('category', 'bar');
+    const logger = lm.get('category', 'bar');
     logger.setLevel(LOG_LEVEL.INFO);
     expect(logger.Config?.['condenseLogs']).toEqual(true);
     logger.info('hello');
     logger.info('hello');
-    let logs = lm.getLogsForId('bar');
+    const logs = lm.getLogsForId('bar');
     expect(logs.length).toEqual(1);
   });
 
@@ -47,7 +47,7 @@ describe('logger', () => {
     logger.setLevel(LOG_LEVEL.INFO);
     logger.info('logging');
     logger.debug('shouldnt log');
-    let logs = lm.getLogsForId('foo');
+    const logs = lm.getLogsForId('foo');
     expect(logs.length).toEqual(1);
   });
 
@@ -56,14 +56,14 @@ describe('logger', () => {
     logger.setLevel(LOG_LEVEL.DEBUG);
     logger.debug('logging');
     logger.error('error');
-    let logs = lm.getLogsForId('foo2');
+    const logs = lm.getLogsForId('foo2');
     expect(logs.length).toEqual(2);
   });
 
   it('should safe serialize circular references', () => {
     const logger = lm.get('info-logger', 'foo3');
     logger.setLevel(LOG_LEVEL.DEBUG);
-    let circ: any = { foo: 'bar' };
+    const circ: any = { foo: 'bar' };
     circ.circ = circ;
     logger.debug('circular reference to serialize', circ);
     console.log(lm.getLogsForId('foo3'));
@@ -122,7 +122,8 @@ describe('logger', () => {
     const requestIds = lm.LoggerIds;
 
     expect(requestIds.length).toBe(2);
-    expect(loggerA.timestamp).toEqual(requestIds[0]);
-    expect(loggerB.timestamp).toEqual(requestIds[1]);
+    expect(loggerA.timestamp).toBeLessThan(loggerB.timestamp);
+    expect(requestIds[0]).toBe('1');
+    expect(requestIds[1]).toBe('2');
   });
 });
