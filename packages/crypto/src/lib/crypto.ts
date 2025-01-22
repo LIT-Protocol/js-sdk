@@ -21,14 +21,19 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import {
-  EcdsaVariant,
+  // BLS
   blsCombine,
   blsDecrypt,
   blsEncrypt,
   blsVerify,
+  // ECDSA
+  EcdsaVariant,
   ecdsaCombine,
   ecdsaDeriveKey,
   ecdsaVerify,
+  // FROST
+  // FrostVariant,
+  // SEV-SNP
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
@@ -335,7 +340,7 @@ async function doDecrypt(
 async function doCombineSignatureShares(
   shares: BlsSignatureShare[]
 ): Promise<Uint8Array> {
-  const sigShares = shares.map((s, index) => {
+  const sigShares = shares.map((s) => {
     return JSON.stringify({
       ProofOfPossession: {
         identifier: s.ProofOfPossession.identifier,

@@ -13,52 +13,37 @@ crate-type = ["cdylib", "rlib"]
 [features]
 
 [dependencies]
+# wasm and serialization support
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-blsful = {  version = "3.0.0-pre8", default-features = false, features = ["rust"] }
-base64_light = "0.1"
-getrandom = { version = "0.2", features = ["js"] }
-hex = "0.4"
-hd-keys-curves-wasm = { version = "1.0.1", default-features = false, features = ["k256", "p256", "p384"] }
 serde = "1.0"
 serde_json = "1.0"
 serde_bare = "0.5"
+serde_bytes = "0.11.14"
 serde-wasm-bindgen = "0.6"
 
+# cryptographic dependencies
+blsful = {  version = "3.0.0-pre8", default-features = false, features = ["rust"] }
+hd-keys-curves-wasm = { version = "1.0.1", default-features = false, features = ["k256", "p256", "p384"] }
+lit-frost = { version = "0.2.0", git = "https://github.com/LIT-Protocol/lit-frost" }
+
+# curve and elliptic-curve cryptography
 elliptic-curve = "0.13"
-k256 = { version = "0.13", features = ["arithmetic"] }
+k256 = { version = "0.13", features = ["arithmetic", "schnorr"] }
 p256 = { version = "0.13", features = ["arithmetic"] }
 p384 = { version = "0.13", features = ["arithmetic"] }
+subtle = "2.6"
+
+# hash and encoding utilities
 sha2 = "0.10"
+hex = "0.4"
 
-wee_alloc = { version = "0.4.5", optional = true }
-
-console_error_panic_hook = { version = "0.1.7", optional = true }
-wasm-bindgen-futures = "0.4.40"
+# WASM and JS bindings
 js-sys = "0.3.67"
-
-sev = { version = "2.0.2", default-features = false, features = [
-  "snp",
-  "crypto_nossl",
-] }
-rand = "0.8"
-serde_bytes = "0.11.14"
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
-jubjub-plus = { version = "0.10.4" }
 
-web-sys = { version = "0.3", features = ["console"] }
+# SEV (Secure Encrypted Virtualization) support
+sev = { version = "2.0.2", default-features = false, features = ["snp", "crypto_nossl"] }
 
+# development dependencies
 [dev-dependencies]
-wasm-bindgen-test = "0.3.34"
-ciborium = "0.2"
-k256 = "0.13"
-rand = "0.8"
-rand_chacha = "0.3"
-digest = "0.10"
-
-[profile.release]
-opt-level = "z"
-lto = true
-wasm-opt=['-Os']
-
-[package.metadata.wasm-pack.profile.profiling]
-wasm-opt = ['-g', '-O']
+group = "0.13"

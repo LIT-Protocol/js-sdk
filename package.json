@@ -72,7 +72,8 @@
     "tslib": "^2.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@nx/devkit": "17.3.0",
