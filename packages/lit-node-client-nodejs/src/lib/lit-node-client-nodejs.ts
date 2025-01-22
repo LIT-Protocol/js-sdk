@@ -600,7 +600,7 @@ export class LitNodeClientNodeJs
   // ==================== API Calls to Nodes ====================
 
   /**
-   *
+   * @deprecated - Delete me for Naga
    * Combine Shares from network public key set and signature shares
    *
    * @param { NodeBlsSigningShare } signatureShares
