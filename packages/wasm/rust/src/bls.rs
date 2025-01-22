@@ -64,8 +64,22 @@ impl<C: BlsSignatureImpl> Bls<C>
         JsError::new(&format!("Failed to serialize signature to JSON: {}", e))
       )?;
 
-    let signature_bytes = signature_json.as_bytes().to_vec();
-    Ok(Uint8Array::from(signature_bytes.as_slice()))
+    // Parse the signature JSON to get the ProofOfPossession value
+    let signature_json: serde_json::Value = serde_json::from_str(
+      &signature_json
+    )?;
+    let proof_of_possession = signature_json
+      .get("ProofOfPossession")
+      .ok_or_else(|| JsError::new("Missing ProofOfPossession field"))?
+      .as_str()
+      .ok_or_else(|| JsError::new("ProofOfPossession is not a string"))?;
+
+    // Convert hex string to bytes
+    let proof_bytes = hex
+      ::decode(proof_of_possession)
+      .map_err(|e| JsError::new(&format!("Failed to decode hex: {}", e)))?;
+
+    Ok(Uint8Array::from(proof_bytes.as_slice()))
   }
 
   pub fn verify(
