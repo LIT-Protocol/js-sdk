@@ -1,6 +1,7 @@
 pub mod abi;
 pub mod bls;
 pub mod ecdsa;
+pub mod frost;
 pub mod sev_snp;
 
 use wasm_bindgen::prelude::*;

@@ -116,6 +116,9 @@ export class TestnetClient {
         PKPHelper: {
           abi: JSON.parse(testNetConfig.contractAbis.pkpHelper),
         },
+        PriceFeed: {
+          abi: JSON.parse(testNetConfig.contractAbis.priceFeed),
+        },
         LITToken: {
           abi: JSON.parse(testNetConfig.contractAbis.litToken),
         },

@@ -2,12 +2,17 @@
 import {
   BlsVariant,
   EcdsaVariant,
+  FrostVariant,
   InitOutput,
   //@ts-ignore source map not found
   getModule,
   initSync,
 } from './pkg/wasm-internal';
-export type { BlsVariant, EcdsaVariant } from './pkg/wasm-internal';
+export type {
+  BlsVariant,
+  EcdsaVariant,
+  FrostVariant,
+} from './pkg/wasm-internal';
 
 import * as wasmInternal from './pkg/wasm-internal';
 
@@ -136,8 +141,9 @@ export async function blsVerify(
  * Combine ECDSA signatures shares
  *
  * Supports:
- *  - K256
- *  - P256
+ *  - k256
+ *  - p256
+ *  - p384
  * @param {EcdsaVariant} variant
  * @param {Uint8Array} presignature
  * @param {(Uint8Array)[]} signature_shares
@@ -158,6 +164,7 @@ export async function ecdsaCombine(
  * Supports:
  * - k256
  * - p256
+ * - p384
  * @param {EcdsaVariant} variant ecdsa scheme
  * @param {Uint8Array} id keyid which will be used for the key derivation
  * @param {(Uint8Array)[]} public_keys ecdsa root keys
@@ -178,6 +185,7 @@ export async function ecdsaDeriveKey(
  * Supports:
  * - k256
  * - p256
+ * - p384
  ** Note ** Not currently supported through the lit network. Please use other ECSDSA signature verification
  * @param {EcdsaVariant} variant
  * @param {Uint8Array} message_hash
@@ -200,13 +208,13 @@ export async function ecdsaVerify(
  * Supports:
  * - k256
  * - p256
+ * - p384
  *  ** Note ** Not currently supported through the lit network. Please use other ECSDSA signature verification
  * @param {EcdsaVariant} variant
  * @param {Uint8Array} pre_signature
  * @param {Uint8Array[]} signature_shares
  * @param {Uint8Array} message_hash
  * @param {Uint8Array} public_key
- * @param {[Uint8Array, Uint8Array, number]} signature
  */
 export async function ecdsaCombineAndVerify(
   variant: EcdsaVariant,
@@ -223,6 +231,78 @@ export async function ecdsaCombineAndVerify(
     message_hash,
     public_key
   );
+}
+
+/**
+ * Aggregates FROST signature shares
+ *
+ * supports:
+ * - Ed25519Sha512
+ * - Ed448Shake256
+ * - Ristretto25519Sha512
+ * - K256Sha256
+ * - P256Sha256
+ * - P384Sha384
+ * - RedJubjubBlake2b512
+ * - K256Taproot
+ *
+ * @param {FrostVariant} variant
+ * @param {Uint8Array} message
+ * @param {Uint8Array[]} identifiers
+ * @param {Uint8Array[]} signing_commitments
+ * @param {Uint8Array[]} signature_shares
+ * @param {Uint8Array} signer_pubkeys
+ * @param {Uint8Array} verifying_key
+ *
+ * @returns {[FrostVariant, Uint8Array]}
+ */
+export async function frostAggregate(
+  variant: FrostVariant,
+  message: Uint8Array,
+  identifiers: Uint8Array[],
+  signing_commitments: Uint8Array[],
+  signature_shares: Uint8Array[],
+  signer_pubkeys: Uint8Array[],
+  verifying_key: Uint8Array
+): Promise<[FrostVariant, Uint8Array]> {
+  await loadModules();
+  return wasmInternal.frostAggregate(
+    variant,
+    message,
+    identifiers,
+    signing_commitments,
+    signature_shares,
+    signer_pubkeys,
+    verifying_key
+  );
+}
+
+/**
+ * Verifier for FROST signatures
+ *
+ * supports:
+ * - Ed25519Sha512
+ * - Ed448Shake256
+ * - Ristretto25519Sha512
+ * - K256Sha256
+ * - P256Sha256
+ * - P384Sha384
+ * - RedJubjubBlake2b512
+ * - K256Taproot
+ *
+ * @param {Uint8Array} message
+ * @param {Uint8Array} verifying_key
+ * @param {[FrostVariant, Uint8Array]} signature
+ * @returns {void}
+ *
+ */
+export async function frostVerify(
+  message: Uint8Array,
+  verifying_key: Uint8Array,
+  signature: [FrostVariant, Uint8Array]
+): Promise<void> {
+  await loadModules();
+  return wasmInternal.frostVerify(message, verifying_key, signature);
 }
 
 /**
