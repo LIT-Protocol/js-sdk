@@ -1,4 +1,5 @@
-import { PKPSignShare, PkpSignedData } from '@lit-protocol/types';
+import { LIT_CURVE_VALUES } from '@lit-protocol/constants';
+import { EcdsaSignedMessageShareParsed, PKPSignEndpointResponse } from '@lit-protocol/types';
 
 /**
  * Converts a snake_case string to camelCase.
@@ -42,24 +43,30 @@ export const cleanStringValues = (obj: { [key: string]: any }): any =>
   );
 
 /**
- * Parses the PKP sign response data and transforms it into a standardised format.
+ * Parses the PKP sign response data and transforms it into a standardised format because the raw response contains snake cases and double quotes.
  * @param responseData - The response data containing PKP sign shares.
  * @returns An array of objects with the signature data.
  */
 export const parsePkpSignResponse = (
-  responseData: PKPSignShare[]
-): { signature: PkpSignedData }[] =>
-  responseData.map(({ signatureShare }) => {
-    // Remove 'result' key if it exists
-    delete signatureShare.result;
+  responseData: PKPSignEndpointResponse[]
+): EcdsaSignedMessageShareParsed[] => {
 
-    const camelCaseShare = convertKeysToCamelCase(signatureShare);
-    const cleanedShare = cleanStringValues(camelCaseShare);
+  const ecdsaSignedMessageShares = responseData.map(({ signatureShare }) => {
 
-    // Change 'dataSigned' from 'digest'
-    if (cleanedShare.digest) {
-      cleanedShare.dataSigned = cleanedShare.digest;
+    const rawShareMessage = signatureShare.EcdsaSignedMessageShare;
+
+    const camelCaseShare = convertKeysToCamelCase(rawShareMessage);
+    const parsedShareMessage = cleanStringValues(camelCaseShare);
+
+    // Rename `digest` to `dataSigned`
+    if (parsedShareMessage.digest) {
+      parsedShareMessage.dataSigned = parsedShareMessage.digest;
     }
 
-    return { signature: cleanedShare };
+    delete parsedShareMessage.result;
+
+    return parsedShareMessage;
   });
+
+  return ecdsaSignedMessageShares;
+};

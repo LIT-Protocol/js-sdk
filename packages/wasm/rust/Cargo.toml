@@ -19,6 +19,7 @@ base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
 hd-keys-curves-wasm = { version = "1.0.1", default-features = false, features = ["k256", "p256"] }
+lit-bls-wasm = { git = "https://github.com/LIT-Protocol/lit-bls-wasm" }
 serde = "1.0"
 serde_json = "1.0"
 serde_bare = "0.5"

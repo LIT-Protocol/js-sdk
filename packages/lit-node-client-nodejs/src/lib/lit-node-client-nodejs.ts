@@ -24,6 +24,7 @@ import {
   InvalidSignatureError,
   LIT_ACTION_IPFS_HASH,
   LIT_CURVE,
+  LIT_CURVE_TYPE,
   LIT_ENDPOINT,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
@@ -117,12 +118,14 @@ import type {
   JsonPkpSignRequest,
   JsonPkpSignSdkParams,
   JsonSignSessionKeyRequestV1,
+  JsonSignSessionKeyRequestV2,
   LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeLog,
   NodeShare,
+  PKPSignEndpointResponse,
   PKPSignShare,
   RejectedNodePromises,
   SessionKeyPair,
@@ -139,8 +142,7 @@ import type {
 const REALM_ID = 1;
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient
-{
+  implements LitClientSessionManager, ILitNodeClient {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -1035,11 +1037,11 @@ export class LitNodeClientNodeJs
       signedDataList
     );
 
-    const signatures = await getSignatures({
+    const signatures = await getSignatures<{ signature: SigResponse }>({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
-      minNodeCount: params.useSingleNode ? 1 : this.config.minNodeCount,
-      signedData: signedDataList,
+      threshold: params.useSingleNode ? 1 : this.config.minNodeCount,
+      signedMessageShares: signedDataList,
     });
 
     // -- 2. combine responses as a string, and parse it as JSON if possible
@@ -1149,13 +1151,14 @@ export class LitNodeClientNodeJs
     // Handle promises for commands sent to Lit nodes
 
     const nodePromises = this.getNodePromises((url: string) => {
+
       // -- get the session sig from the url key
       const sessionSig = this.getSessionSigByUrl({
         sessionSigs: params.sessionSigs,
         url,
       });
 
-      const reqBody: JsonPkpSignRequest = {
+      const reqBody: JsonPkpSignRequest<LIT_CURVE_TYPE> = {
         toSign: normalizeArray(params.toSign),
         pubkey: hexPrefixed(params.pubKey),
         authSig: sessionSig,
@@ -1163,10 +1166,11 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-            authMethods: params.authMethods,
-          }),
+          authMethods: params.authMethods,
+        }),
 
         nodeSet,
+        signingScheme: 'EcdsaK256Sha256',
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1179,6 +1183,15 @@ export class LitNodeClientNodeJs
       return this.generatePromise(urlWithPath, reqBody, requestId);
     });
 
+    // Example output: 
+    // {
+    //   success: true,
+    //   values: [
+    //     { success: true, signedData: [Array], signatureShare: [Object] },
+    //     { success: true, signedData: [Array], signatureShare: [Object] },
+    //     { success: true, signedData: [Array], signatureShare: [Object] }
+    //   ]
+    // }
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
@@ -1192,7 +1205,7 @@ export class LitNodeClientNodeJs
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
+    const responseData = (res as SuccessNodePromises<PKPSignEndpointResponse>).values;
 
     logWithRequestId(
       requestId,
@@ -1202,19 +1215,22 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = parsePkpSignResponse(responseData);
+    const signedMessageShares = parsePkpSignResponse(responseData);
+
+    // DELETEME
+    log(`signedMessageShares: ${JSON.stringify(signedMessageShares, null, 2)}`);
 
     try {
-      const signatures = await getSignatures<{ signature: SigResponse }>({
+      const signatures = await getSignatures({
         requestId,
         networkPubKeySet: this.networkPubKeySet,
-        minNodeCount: this.config.minNodeCount,
-        signedData: signedDataList,
+        threshold: this.config.minNodeCount,
+        signedMessageShares: signedMessageShares,
       });
 
       logWithRequestId(requestId, `signature combination`, signatures);
 
-      return signatures.signature; // only a single signature is ever present, so we just return it.
+      return signatures;
     } catch (e) {
       console.error('Error getting signature', e);
       throw e;
@@ -1612,7 +1628,7 @@ export class LitNodeClientNodeJs
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
-    const body: JsonSignSessionKeyRequestV1 = {
+    const body: JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE> = {
       nodeSet,
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
@@ -1627,6 +1643,7 @@ export class LitNodeClientNodeJs
       ...(params?.litActionCode && { code: params.litActionCode }),
       ...(params?.jsParams && { jsParams: params.jsParams }),
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
+      signingScheme: LIT_CURVE.BLS,
     };
 
     log(`[signSessionKey] body:`, body);
@@ -1650,7 +1667,7 @@ export class LitNodeClientNodeJs
       res = await this.handleNodePromises(
         nodePromises,
         requestId,
-        this.config.minNodeCount
+        this.connectedNodes.size,
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
@@ -1899,8 +1916,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1982,10 +1999,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capacityDelegationAuthSig,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     // Get new price feed info from the contract if user wants to

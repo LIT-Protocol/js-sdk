@@ -1,4 +1,4 @@
-import { splitSignature } from 'ethers/lib/utils';
+import { joinSignature, splitSignature } from 'ethers/lib/utils';
 
 import {
   InvalidParamType,
@@ -7,6 +7,7 @@ import {
   NetworkError,
   NoValidShares,
   UnknownError,
+  UnknownSignatureError,
 } from '@lit-protocol/constants';
 import { checkType, log } from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
@@ -22,6 +23,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import {
+  BlsSignatureShareJsonString,
   EcdsaVariant,
   blsCombine,
   blsDecrypt,
@@ -76,8 +78,7 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${
-        publicKeyHex.replace('0x', '').length
+      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length
       } instead.`
     );
   }
@@ -97,7 +98,7 @@ export const decryptWithSignatureShares = async (
   ciphertextBase64: string,
   shares: BlsSignatureShare[]
 ): Promise<Uint8Array> => {
-  const signature = await doCombineSignatureShares(shares);
+  const signature = await combineSignatureShares(shares);
 
   return doDecrypt(ciphertextBase64, signature);
 };
@@ -118,7 +119,7 @@ export const verifyAndDecryptWithSignatureShares = async (
   shares: BlsSignatureShare[]
 ): Promise<Uint8Array> => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
-  const signature = await doCombineSignatureShares(shares);
+  const signature = await combineSignatureShares(shares);
 
   await blsVerify('Bls12381G2', publicKey, identity, signature);
 
@@ -134,9 +135,18 @@ export const verifyAndDecryptWithSignatureShares = async (
 export const combineSignatureShares = async (
   shares: BlsSignatureShare[]
 ): Promise<string> => {
-  const signature = await doCombineSignatureShares(shares);
 
-  return Buffer.from(signature).toString('hex');
+  const sigShares = shares.map(s => {
+    return JSON.stringify(s);
+  }) as BlsSignatureShareJsonString[];
+
+  const signature = await blsCombine(sigShares);
+
+  if (signature.length !== 192) {
+    throw new Error(`Signature length is not 192. Got ${signature.length} instead.`);
+  }
+
+  return signature;
 };
 
 /**
@@ -155,16 +165,6 @@ export const verifySignature = async (
 
   await blsVerify('Bls12381G2', publicKey, message, signature);
 };
-
-// export interface EcdsaSignatureShare {
-//   sigType: SIGTYPE;
-//   signatureShare: string;
-//   shareIndex: number; // ignored
-//   publicKey: string;
-//   dataSigned: string;
-//   bigR: string;
-//   sigName: string; // ignored
-// }
 
 const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
   [LIT_CURVE.EcdsaCaitSith]: 'K256',
@@ -222,10 +222,33 @@ export const combineEcdsaShares = async (
     Buffer.concat([r, s, Buffer.from([recId + 27])])
   );
 
+  // validate r before returning
+  if (!signature.r) {
+    throw new UnknownSignatureError(
+      {
+        info: {
+          signature,
+        },
+      },
+      'signature could not be combined'
+    );
+  }
+
+  const _r = signature.r.slice('0x'.length);
+  const _s = signature.s.slice('0x'.length);
+  const _recid = signature.recoveryParam;
+
+  const encodedSig = joinSignature({
+    r: '0x' + _r,
+    s: '0x' + _s,
+    recoveryParam: _recid,
+  }) as `0x${string}`;
+
   return {
-    r: signature.r.slice('0x'.length),
-    s: signature.s.slice('0x'.length),
-    recid: signature.recoveryParam,
+    r: _r,
+    s: _s,
+    recid: _recid,
+    signature: encodedSig,
   };
 };
 
@@ -286,23 +309,6 @@ async function doDecrypt(
   const ciphertext = Buffer.from(ciphertextBase64, 'base64');
   const decrypt = await blsDecrypt('Bls12381G2', ciphertext, signature);
   return decrypt;
-}
-
-async function doCombineSignatureShares(
-  shares: BlsSignatureShare[]
-): Promise<Uint8Array> {
-  const sigShares = shares.map((s, index) => {
-    return JSON.stringify({
-      ProofOfPossession: {
-        identifier: s.ProofOfPossession.identifier,
-        value: s.ProofOfPossession.value,
-      },
-    });
-  });
-
-  const signature = await blsCombine('Bls12381G2', sigShares);
-
-  return signature;
 }
 
 /**

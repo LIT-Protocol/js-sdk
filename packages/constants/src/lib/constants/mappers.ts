@@ -3,6 +3,7 @@ import depd from 'depd';
 import { datilDev, datilTest, datil, _nagaDev } from '@lit-protocol/contracts';
 
 import { LIT_NETWORK_VALUES } from './constants';
+import { LIT_CURVE } from './curves';
 
 const deprecated = depd('lit-js-sdk:constants:mappers');
 
@@ -11,10 +12,10 @@ const deprecated = depd('lit-js-sdk:constants:mappers');
  */
 export const NETWORK_CONTEXT_BY_NETWORK: {
   [key in LIT_NETWORK_VALUES]:
-    | typeof datilDev
-    | typeof datilTest
-    | typeof datil
-    | typeof _nagaDev;
+  | typeof datilDev
+  | typeof datilTest
+  | typeof datil
+  | typeof _nagaDev;
 } = {
   'datil-dev': datilDev,
   'datil-test': datilTest,

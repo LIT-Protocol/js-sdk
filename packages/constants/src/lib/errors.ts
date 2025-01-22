@@ -157,6 +157,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'param_null_error',
     kind: LIT_ERROR_KIND.Validation,
   },
+  CURVE_TYPE_NOT_FOUND_ERROR: {
+    name: 'CurveTypeNotFoundError',
+    code: 'curve_type_not_found_error',
+    kind: LIT_ERROR_KIND.Validation,
+  },
   UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR: {
     name: 'UnknownDecryptionAlgorithmTypeError',
     code: 'unknown_decryption_algorithm_type_error',
@@ -334,4 +339,5 @@ export const {
   WasmInitError,
   WrongNetworkException,
   WrongParamFormat,
+  CurveTypeNotFoundError,
 } = errorClasses;

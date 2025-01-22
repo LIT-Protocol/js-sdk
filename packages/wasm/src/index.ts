@@ -19,6 +19,8 @@ async function initWasm() {
   return initSync(getModule());
 }
 
+export type BlsSignatureShareJsonString = `{"ProofOfPossession":{"identifier":"${string}","value":"${string}"}}`;
+
 /**
  * Initializes the wasm module and keeps the module in scope within
  * the module context. Does not expose the module context as it is
@@ -51,21 +53,27 @@ async function loadModules() {
 }
 
 /**
- * Combines bls signature shares to decrypt
- *
- * Supports:
- * - 12381G2
- * - 12381G1
- * @param {BlsVariant} variant
- * @param {(Uint8Array)[]} signature_shares
- * @returns {Uint8Array}
+ * Combines BLS signature shares into a single signature.
+ * This is a raw mapping function to the WASM implementation.
+ * 
+ * @param {BlsSignatureShareJsonString[]} signature_shares - Array of signature shares in JSON string format
+ * 
+ * Each share has format: {"ProofOfPossession":{"identifier":"xx","value":"yy"}}
+ * @returns {Promise<string>} Combined signature as hex string
+ * 
+ * @example
+ * const shares = [
+ *   '{"ProofOfPossession":{"identifier":"7acf36...","value":"8b5c1c..."}}',
+ *   '{"ProofOfPossession":{"identifier":"7d734...","value":"aaa72a..."}}'
+ * ];
+ * const combinedSig = await blsCombine(shares);
+ * // Returns: "9619c87c08ed705b..."
  */
 export async function blsCombine(
-  variant: BlsVariant,
-  signature_shares: string[]
-): Promise<Uint8Array> {
+  signature_shares: BlsSignatureShareJsonString[]
+): Promise<string> {
   await loadModules();
-  return wasmInternal.blsCombine(variant, signature_shares);
+  return wasmInternal.blsCombine(signature_shares);
 }
 
 /**
@@ -83,10 +91,10 @@ export async function blsCombine(
 export async function blsDecrypt(
   variant: BlsVariant,
   ciphertext: Uint8Array,
-  decryption_key: Uint8Array
+  signature_shares: string[]
 ): Promise<Uint8Array> {
   await loadModules();
-  return wasmInternal.blsDecrypt(variant, ciphertext, decryption_key);
+  return wasmInternal.blsDecrypt(variant, ciphertext, signature_shares);
 }
 
 /**
