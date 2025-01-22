@@ -126,7 +126,6 @@ import type {
   NodeLog,
   NodeShare,
   PKPSignEndpointResponse,
-  PKPSignShare,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -135,7 +134,7 @@ import type {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
-  SuccessNodePromises,
+  SuccessNodePromises
 } from '@lit-protocol/types';
 
 // FIXME: this should be dynamically set, but we only have 1 net atm.
@@ -1037,7 +1036,7 @@ export class LitNodeClientNodeJs
       signedDataList
     );
 
-    const signatures = await getSignatures<{ signature: SigResponse }>({
+    const signatures = await getSignatures({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
       threshold: params.useSingleNode ? 1 : this.config.minNodeCount,
@@ -1149,7 +1148,6 @@ export class LitNodeClientNodeJs
 
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-
     const nodePromises = this.getNodePromises((url: string) => {
 
       // -- get the session sig from the url key
@@ -1183,15 +1181,6 @@ export class LitNodeClientNodeJs
       return this.generatePromise(urlWithPath, reqBody, requestId);
     });
 
-    // Example output: 
-    // {
-    //   success: true,
-    //   values: [
-    //     { success: true, signedData: [Array], signatureShare: [Object] },
-    //     { success: true, signedData: [Array], signatureShare: [Object] },
-    //     { success: true, signedData: [Array], signatureShare: [Object] }
-    //   ]
-    // }
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
@@ -1199,12 +1188,10 @@ export class LitNodeClientNodeJs
     );
 
     // ========== Handle Response ==========
-    // -- case: promises rejected
     if (!res.success) {
       this._throwNodeError(res, requestId);
     }
 
-    // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<PKPSignEndpointResponse>).values;
 
     logWithRequestId(
@@ -1213,12 +1200,8 @@ export class LitNodeClientNodeJs
       JSON.stringify(responseData, null, 2)
     );
 
-    // ========== Extract shares from response data ==========
-    // -- 1. combine signed data as a list, and get the signatures from it
+    // clean up the response data (as there are double quotes & snake cases in the response)
     const signedMessageShares = parsePkpSignResponse(responseData);
-
-    // DELETEME
-    log(`signedMessageShares: ${JSON.stringify(signedMessageShares, null, 2)}`);
 
     try {
       const signatures = await getSignatures({
