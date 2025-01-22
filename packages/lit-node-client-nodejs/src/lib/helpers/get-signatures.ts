@@ -39,7 +39,7 @@ export const getSignatures = async (params: {
   requestId: string;
 }): Promise<SigResponse> => {
 
-  const { networkPubKeySet, threshold, signedMessageShares, requestId } = params;
+  let { networkPubKeySet, threshold, signedMessageShares, requestId } = params;
 
   if (networkPubKeySet === null) {
     throw new ParamNullError(

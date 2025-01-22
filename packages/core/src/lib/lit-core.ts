@@ -276,12 +276,12 @@ export class LitCore {
       nodeProtocol: this.config.nodeProtocol,
       sortByPrice: true,
     });
-
+    
     // Validate minNodeCount
     if (!minNodeCount) {
       throw new InvalidArgumentException(
         {},
-        `minNodeCount is %s, which is invalid. Please check your network connection and try again.`,
+        `minimum validator count is %s, which is invalid. Please check your network connection and try again.`,
         minNodeCount
       );
     }
@@ -310,6 +310,14 @@ export class LitCore {
   }
 
   // ========== Scoped Class Helpers ==========
+
+  /**
+   * See rust/lit-node/common/lit-node-testnet/src/validator.rs > threshold for more details
+   */
+  protected _getThreshold = (): number => {
+    return Math.max(3, Math.floor((this.config.minNodeCount * 2) / 3));
+  }
+
   private async _handleStakingContractStateChange(
     state: STAKING_STATES_VALUES
   ) {
@@ -714,11 +722,9 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not handshake with nodes after timeout of ${
-            this.config.connectTimeout
-          }ms. Could only connect to ${Object.keys(serverKeys).length} of ${
-            this.config.bootstrapUrls.length
-          } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          const msg = `Error: Could not handshake with nodes after timeout of ${this.config.connectTimeout
+            }ms. Could only connect to ${Object.keys(serverKeys).length} of ${this.config.bootstrapUrls.length
+            } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             throw new InitError({}, msg);
@@ -1053,8 +1059,8 @@ export class LitCore {
       this._epochCache.currentNumber &&
       this._epochCache.startTime &&
       Math.floor(Date.now() / 1000) <
-        this._epochCache.startTime +
-          Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
+      this._epochCache.startTime +
+      Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
       this._epochCache.currentNumber >= 3 // FIXME: Why this check?
     ) {
       return this._epochCache.currentNumber - 1;
@@ -1085,7 +1091,7 @@ export class LitCore {
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  SendNodeCommand): Promise<any> => {
+    SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epoch: this.currentEpochNumber };
 

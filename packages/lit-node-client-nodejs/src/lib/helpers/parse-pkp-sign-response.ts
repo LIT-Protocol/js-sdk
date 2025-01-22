@@ -1,4 +1,3 @@
-import { LIT_CURVE_VALUES } from '@lit-protocol/constants';
 import { EcdsaSignedMessageShareParsed, PKPSignEndpointResponse } from '@lit-protocol/types';
 
 /**

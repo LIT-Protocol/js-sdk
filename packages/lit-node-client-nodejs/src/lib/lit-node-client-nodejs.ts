@@ -97,6 +97,7 @@ import type {
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
+  EcdsaSignedMessageShareParsed,
   EncryptRequest,
   EncryptResponse,
   EncryptSdkParams,
@@ -894,6 +895,7 @@ export class LitNodeClientNodeJs
   executeJs = async (
     params: JsonExecutionSdkParams
   ): Promise<ExecuteJsResponse> => {
+
     // ========== Validate Params ==========
     if (!this.ready) {
       const message =
@@ -1036,11 +1038,19 @@ export class LitNodeClientNodeJs
       signedDataList
     );
 
+    // Flatten the signedDataList by moving the data within the `sig` (or any other key user may choose) object to the top level.
+    // The specific key name (`sig`) is irrelevant, as the contents of the object are always lifted directly.
+    const key = Object.keys(signedDataList[0])[0]; // Get the first key of the object
+
+    const flattenedSignedMessageShares = signedDataList.map(item => {
+      return item[key]; // Return the value corresponding to that key
+    })
+
     const signatures = await getSignatures({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
-      threshold: params.useSingleNode ? 1 : this.config.minNodeCount,
-      signedMessageShares: signedDataList,
+      threshold: params.useSingleNode ? 1 : this._getThreshold(),
+      signedMessageShares: flattenedSignedMessageShares,
     });
 
     // -- 2. combine responses as a string, and parse it as JSON if possible
@@ -1058,7 +1068,9 @@ export class LitNodeClientNodeJs
     // ========== Result ==========
     const returnVal: ExecuteJsResponse = {
       claims,
-      signatures,
+      signatures: {
+        [key]: signatures,
+      },
       // decryptions: [],
       response: parsedResponse,
       logs: mostCommonLogs,
@@ -1184,7 +1196,7 @@ export class LitNodeClientNodeJs
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this.connectedNodes.size
+      this._getThreshold()
     );
 
     // ========== Handle Response ==========
@@ -1207,7 +1219,7 @@ export class LitNodeClientNodeJs
       const signatures = await getSignatures({
         requestId,
         networkPubKeySet: this.networkPubKeySet,
-        threshold: this.config.minNodeCount,
+        threshold: this._getThreshold(),
         signedMessageShares: signedMessageShares,
       });
 
@@ -1446,7 +1458,7 @@ export class LitNodeClientNodeJs
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this.config.minNodeCount
+      this._getThreshold()
     );
 
     // -- case: promises rejected
@@ -1650,7 +1662,7 @@ export class LitNodeClientNodeJs
       res = await this.handleNodePromises(
         nodePromises,
         requestId,
-        this.connectedNodes.size,
+        this._getThreshold()
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
@@ -1738,7 +1750,7 @@ export class LitNodeClientNodeJs
             data[key] === ''
           ) {
             log(
-              `[signSessionKey] Invalid signed data. "${field}" is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
+              `[signSessionKey] Invalid signed data. "${field}" is missing. Not a problem, we only need ${this._getThreshold()} nodes to sign the session key.`
             );
             return null;
           }
@@ -1775,20 +1787,21 @@ export class LitNodeClientNodeJs
     );
     logWithRequestId(
       requestId,
-      '[signSessionKey] minimum required length:',
-      this.config.minNodeCount
+      '[signSessionKey] minimum threshold:',
+      this._getThreshold()
     );
-    if (validatedSignedDataList.length < this.config.minNodeCount) {
+
+    if (validatedSignedDataList.length < this._getThreshold()) {
       throw new InvalidSignatureError(
         {
           info: {
             requestId,
             responseData,
             validatedSignedDataList,
-            minNodeCount: this.config.minNodeCount,
+            threshold: this._getThreshold(),
           },
         },
-        `[signSessionKey] not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`
+        `[signSessionKey] not enough nodes signed the session key.  Expected ${this._getThreshold()}, got ${validatedSignedDataList.length}`
       );
     }
 

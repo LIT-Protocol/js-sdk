@@ -55,11 +55,12 @@ export interface PKPSignEndpointResponse {
  * }
  */
 export interface EcdsaSignedMessageShareParsed {
-  digest: string;
+  digest?: string;
+  shareId?: string;
   signatureShare: string;
   bigR: string;
+  compressedPublicKey?: string;
   publicKey: string;
   sigType: SigType;
   dataSigned: string;
-  compressedPublicKey: string;
 }
