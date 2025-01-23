@@ -105,8 +105,12 @@ export const getSignatures = async (params: {
   // -- combine
   const combinedSignature = await combineEcdsaShares(signedMessageShares);
 
-  const _publicKey = mostCommonString(signedMessageShares.map((s) => s.publicKey));
-  const _dataSigned = mostCommonString(signedMessageShares.map((s) => s.dataSigned));
+  const _publicKey = mostCommonString(
+    signedMessageShares.map((s) => s.publicKey)
+  );
+  const _dataSigned = mostCommonString(
+    signedMessageShares.map((s) => s.dataSigned)
+  );
 
   if (!_publicKey || !_dataSigned) {
     throw new Error('No valid publicKey or dataSigned found');
