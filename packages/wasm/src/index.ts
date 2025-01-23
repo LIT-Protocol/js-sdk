@@ -1,13 +1,12 @@
 //@ts-ignore source map not found
 import {
-  BlsVariant,
   EcdsaVariant,
   InitOutput,
   //@ts-ignore source map not found
   getModule,
   initSync,
 } from './pkg/wasm-internal';
-export type { BlsVariant, EcdsaVariant } from './pkg/wasm-internal';
+export type { EcdsaVariant } from './pkg/wasm-internal';
 
 import * as wasmInternal from './pkg/wasm-internal';
 
@@ -84,7 +83,6 @@ export async function blsCombine(
  * Supports:
  * - 12381G2
  * - 12381G1
- * @param {BlsVariant} variant
  * @param {Uint8Array} ciphertext
  * @param {Uint8Array} decryption_key
  * @returns {Uint8Array}
@@ -103,7 +101,6 @@ export async function blsDecrypt(
  * Supports:
  * - 12381G2
  * - 12381G1
- * @param {BlsVariant} variant
  * @param {Uint8Array} encryption_key
  * @param {Uint8Array} message
  * @param {Uint8Array} identity
