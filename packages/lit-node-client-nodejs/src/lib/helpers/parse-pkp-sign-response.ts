@@ -52,8 +52,32 @@ export const cleanStringValues = (obj: { [key: string]: any }): any =>
 export const parsePkpSignResponse = (
   responseData: PKPSignEndpointResponse[]
 ): EcdsaSignedMessageShareParsed[] => {
+
   const ecdsaSignedMessageShares = responseData.map(({ signatureShare }) => {
-    const camelCaseShare = convertKeysToCamelCase(signatureShare);
+
+    // Determine if the object is lifted or contains a nested structure
+    // Example scenarios this logic handles:
+    // 1. If `signatureShare` is nested (e.g., { EcdsaSignedMessageShare: { ... } }), 
+    //    it will extract the nested object (i.e., the value of `EcdsaSignedMessageShare`).
+    //    NOTE: against `f8047310fd4ac97ac01ff07a7cd1213808a3396e` in this case 
+    // 2. If `signatureShare` is directly lifted (e.g., { digest: "...", result: "...", share_id: "..." }),
+    //    it will treat `signatureShare` itself as the resolved object.
+    //    NOTE: against `60318791258d273df8209b912b386680d25d0df3` in this case 
+    // 3. If `signatureShare` is null, not an object, or does not match expected patterns, 
+    //    it will throw an error later for invalid structure.
+    const resolvedShare =
+      typeof signatureShare === "object" &&
+        !Array.isArray(signatureShare) &&
+        Object.keys(signatureShare).length === 1 &&
+        typeof signatureShare[Object.keys(signatureShare)[0] as keyof typeof signatureShare] === "object"
+        ? signatureShare[Object.keys(signatureShare)[0] as keyof typeof signatureShare]
+        : signatureShare;
+
+    if (!resolvedShare || typeof resolvedShare !== "object") {
+      throw new Error("Invalid signatureShare structure.");
+    }
+
+    const camelCaseShare = convertKeysToCamelCase(resolvedShare);
     const parsedShareMessage = cleanStringValues(camelCaseShare);
 
     // Rename `digest` to `dataSigned`

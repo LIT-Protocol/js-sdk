@@ -8618,6 +8618,24 @@
         "type": "function"
       },
       {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "realmId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newTimeout",
+            "type": "uint256"
+          }
+        ],
+        "name": "setPendingRejoinTimeout",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
         "inputs": [],
         "name": "ActiveValidatorsCannotLeave",
         "type": "error"
@@ -9281,6 +9299,11 @@
             "internalType": "uint32",
             "name": "port",
             "type": "uint32"
+          },
+          {
+            "internalType": "address",
+            "name": "stakerAddress",
+            "type": "address"
           },
           {
             "internalType": "uint256",
