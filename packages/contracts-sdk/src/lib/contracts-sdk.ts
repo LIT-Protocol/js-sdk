@@ -488,7 +488,7 @@ export class LitContracts {
         ) as litTokenContract.LITToken,
       };
     }
-
+   
     if (addresses.Multisender.abi) {
       this.multisenderContract = {
         read: new ethers.Contract(
@@ -577,20 +577,21 @@ export class LitContracts {
       };
     }
 
-    if (addresses.RateLimitNFT.abi) {
-      this.rateLimitNftContract = {
-        read: new ethers.Contract(
-          addresses.RateLimitNFT.address,
-          addresses.RateLimitNFT.abi as any,
-          this.provider
-        ) as rateLimitNftContract.RateLimitNFT,
-        write: new ethers.Contract(
-          addresses.RateLimitNFT.address,
-          addresses.RateLimitNFT.abi as any,
-          this.signer
-        ) as rateLimitNftContract.RateLimitNFT,
-      };
-    }
+
+    // if (addresses.RateLimitNFT.abi) {
+    //   this.rateLimitNftContract = {
+    //     read: new ethers.Contract(
+    //       addresses.RateLimitNFT.address,
+    //       addresses.RateLimitNFT.abi as any,
+    //       this.provider
+    //     ) as rateLimitNftContract.RateLimitNFT,
+    //     write: new ethers.Contract(
+    //       addresses.RateLimitNFT.address,
+    //       addresses.RateLimitNFT.abi as any,
+    //       this.signer
+    //     ) as rateLimitNftContract.RateLimitNFT,
+    //   };
+    // }
 
     if (addresses.Staking.abi) {
       this.stakingContract = {
@@ -607,21 +608,21 @@ export class LitContracts {
       };
     }
 
-    if (addresses.StakingBalances.abi) {
-      this.stakingBalancesContract = {
-        read: new ethers.Contract(
-          addresses.StakingBalances.address,
-          addresses.StakingBalances.abi as any,
-          this.provider
-        ) as stakingBalancesContract.StakingBalances,
-        write: new ethers.Contract(
-          addresses.StakingBalances.address,
-          addresses.StakingBalances.abi as any,
-          this.signer
-        ) as stakingBalancesContract.StakingBalances,
-      };
-    }
-
+    // if (addresses.StakingBalances.abi) {
+    //   this.stakingBalancesContract = {
+    //     read: new ethers.Contract(
+    //       addresses.StakingBalances.address,
+    //       addresses.StakingBalances.abi as any,
+    //       this.provider
+    //     ) as stakingBalancesContract.StakingBalances,
+    //     write: new ethers.Contract(
+    //       addresses.StakingBalances.address,
+    //       addresses.StakingBalances.abi as any,
+    //       this.signer
+    //     ) as stakingBalancesContract.StakingBalances,
+    //   };
+    // }
+    // process.exit();
     this.connected = true;
   };
 
@@ -1180,6 +1181,7 @@ export class LitContracts {
       rpcUrl
     );
 
+
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
         REALM_ID
@@ -1232,6 +1234,7 @@ export class LitContracts {
       rpcUrl,
       nodeProtocol,
     });
+
     // example of Network to Price Map: {
     //   'http://xxx:7470': 100, <-- lowest price
     //   'http://yyy:7471': 300, <-- highest price
