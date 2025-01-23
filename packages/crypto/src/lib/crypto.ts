@@ -83,7 +83,7 @@ export const encrypt = async (
     );
   }
   return Buffer.from(
-    await blsEncrypt('Bls12381G2', publicKey, message, identity)
+    await blsEncrypt(publicKey, message, identity)
   ).toString('base64');
 };
 
@@ -98,9 +98,8 @@ export const decryptWithSignatureShares = async (
   ciphertextBase64: string,
   shares: BlsSignatureShare[]
 ): Promise<Uint8Array> => {
-  const signature = await combineSignatureShares(shares);
-
-  return doDecrypt(ciphertextBase64, signature);
+  const sigShares = toJSONShares(shares);
+  return doDecrypt(ciphertextBase64, sigShares);
 };
 
 /**
@@ -121,10 +120,18 @@ export const verifyAndDecryptWithSignatureShares = async (
   const publicKey = Buffer.from(publicKeyHex, 'hex');
   const signature = await combineSignatureShares(shares);
 
-  await blsVerify('Bls12381G2', publicKey, identity, signature);
+  await blsVerify(publicKey, identity, signature);
 
-  return doDecrypt(ciphertextBase64, signature);
+  const sigShares = toJSONShares(shares);
+
+  return doDecrypt(ciphertextBase64, sigShares);
 };
+
+const toJSONShares = (shares: BlsSignatureShare[]): BlsSignatureShareJsonString[] => {
+  return shares.map(s => {
+    return JSON.stringify(s);
+  }) as BlsSignatureShareJsonString[];
+}
 
 /**
  * Combine BLS signature shares.
@@ -136,9 +143,7 @@ export const combineSignatureShares = async (
   shares: BlsSignatureShare[]
 ): Promise<string> => {
 
-  const sigShares = shares.map(s => {
-    return JSON.stringify(s);
-  }) as BlsSignatureShareJsonString[];
+  const sigShares = toJSONShares(shares);
 
   const signature = await blsCombine(sigShares);
 
@@ -159,11 +164,11 @@ export const combineSignatureShares = async (
 export const verifySignature = async (
   publicKeyHex: string,
   message: Uint8Array,
-  signature: Uint8Array
+  signature: string
 ): Promise<void> => {
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
-  await blsVerify('Bls12381G2', publicKey, message, signature);
+  await blsVerify(publicKey, message, signature);
 };
 
 const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
@@ -304,10 +309,10 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 
 async function doDecrypt(
   ciphertextBase64: string,
-  signature: Uint8Array
+  shares: BlsSignatureShareJsonString[]
 ): Promise<Uint8Array> {
   const ciphertext = Buffer.from(ciphertextBase64, 'base64');
-  const decrypt = await blsDecrypt('Bls12381G2', ciphertext, signature);
+  const decrypt = await blsDecrypt(ciphertext, shares);
   return decrypt;
 }
 

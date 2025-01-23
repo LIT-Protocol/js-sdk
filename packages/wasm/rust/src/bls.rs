@@ -22,9 +22,7 @@ pub enum BlsVariant {
 // 1. blsCombine
 // -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsCombine")]
-pub fn bls_combine(
-  signature_shares: JsValue
-) -> Result<String, String> {
+pub fn bls_combine(signature_shares: JsValue) -> Result<String, String> {
   let shares: Vec<String> = serde_wasm_bindgen
     ::from_value(signature_shares)
     .map_err(|e| format!("Failed to parse shares: {}", e))?;
@@ -41,42 +39,34 @@ pub fn bls_combine(
 // -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsVerify")]
 pub fn bls_verify(
-  variant: BlsVariant,
-  public_key: Uint8Array,
-  message: Uint8Array,
-  signature: Uint8Array
+  public_key: Uint8Array, // buffer, but will be converted to hex string
+  message: Uint8Array, // buffer, but will be converted to hex string
+  signature: String // this is the result from bls_combine. It's a hex string
 ) -> JsResult<()> {
+  // check if signature is a valid hex string
+  if !signature.chars().all(|c| c.is_ascii_hexdigit()) {
+    return Err(JsValue::from_str("Signature must be a hex string"));
+  }
+  // convert public_key to hex string
   let public_key_hex = hex::encode(public_key.to_vec());
-  let message_base64: String = base64_encode_bytes(&message.to_vec());
 
-  // Verify signature length based on variant
-  let expected_length = match variant {
-    BlsVariant::Bls12381G1 => 48, // 96 hex chars
-    BlsVariant::Bls12381G2 => 96, // 192 hex chars
-  };
+  // convert message to base64 string
+  let message_base64 = base64_encode_bytes(&message.to_vec());
+
+  // Validate all inputs are hex
+  if !public_key_hex.chars().all(|c| c.is_ascii_hexdigit()) {
+    return Err(JsValue::from_str("Public key must be a hex string"));
+  }
+
+  if !signature.chars().all(|c| c.is_ascii_hexdigit()) {
+    return Err(JsValue::from_str("Signature must be a hex string"));
+  }
 
   let signature_bytes = hex
-    ::decode(signature.to_vec())
+    ::decode(&signature)
     .map_err(|e|
-      JsValue::from_str(&format!("Failed to decode hex signature: {}", e))
+      JsValue::from_str(&format!("Failed to decode signature hex: {}", e))
     )?;
-
-  web_sys::console::log_1(
-    &JsValue::from_str(&format!("Signature length: {}", signature_bytes.len()))
-  );
-
-  if signature_bytes.len() != expected_length {
-    return Err(
-      JsValue::from_str(
-        &format!(
-          "Invalid signature length for {:?}. Expected {} bytes, got {} bytes",
-          variant,
-          expected_length,
-          signature_bytes.len()
-        )
-      )
-    );
-  }
 
   let signature_base64 = base64_encode_bytes(&signature_bytes);
 
@@ -90,7 +80,6 @@ pub fn bls_verify(
 // -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsEncrypt")]
 pub fn bls_encrypt(
-  variant: BlsVariant,
   encryption_key: Uint8Array,
   message: Uint8Array,
   identity: Uint8Array
@@ -115,27 +104,18 @@ pub fn bls_encrypt(
 // -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsDecrypt")]
 pub fn bls_decrypt(
-  variant: BlsVariant,
   ciphertext: Uint8Array,
-  signature_shares: JsValue
+  signature_shares: JsValue // this is the result from bls_combine. It's a hex string
 ) -> JsResult<Uint8Array> {
   let ciphertext_base64 = base64_encode_bytes(&ciphertext.to_vec());
 
   let shares: Vec<String> = serde_wasm_bindgen
     ::from_value(signature_shares)
-    .map_err(|e| JsValue::from_str(&format!("Failed to parse shares: {}", e)))?;
+    .map_err(|e| format!("[blsDecrypt] Failed to parse shares: {}", e))?;
 
-  let shares_json = serde_wasm_bindgen::to_value(&shares).unwrap();
-
-  web_sys::console::log_1(&JsValue::from_str(&format!("Shares: {:?}", shares)));
-
-  let plaintext = (
-    match variant {
-      BlsVariant::Bls12381G1 =>
-        decrypt_with_signature_shares(&ciphertext_base64, shares_json),
-      BlsVariant::Bls12381G2 =>
-        decrypt_with_signature_shares(&ciphertext_base64, shares_json),
-    }
+  let plaintext = decrypt_with_signature_shares(
+    &ciphertext_base64,
+    serde_wasm_bindgen::to_value(&shares).unwrap()
   ).map_err(|e| JsValue::from_str(&format!("Decryption failed: {}", e)))?;
 
   let decoded_plaintext = base64_decode(&plaintext);

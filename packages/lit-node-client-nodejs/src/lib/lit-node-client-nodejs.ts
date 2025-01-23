@@ -1645,6 +1645,7 @@ export class LitNodeClientNodeJs
 
     const requestId = this._getNewRequestId();
     logWithRequestId(requestId, 'signSessionKey body', body);
+
     const nodePromises = this.getNodePromises((url: string) => {
       const reqBody: JsonSignSessionKeyRequestV1 = body;
 
@@ -1727,86 +1728,14 @@ export class LitNodeClientNodeJs
       signedDataList
     );
 
-    // -- checking if we have enough shares
-    const validatedSignedDataList = responseData
-      .map((data: BlsResponseData) => {
-        // each of this field cannot be empty
-        const requiredFields = [
-          'signatureShare',
-          'curveType',
-          'siweMessage',
-          'dataSigned',
-          'blsRootPubkey',
-          'result',
-        ];
-
-        // check if all required fields are present
-        for (const field of requiredFields) {
-          const key: keyof BlsResponseData = field as keyof BlsResponseData;
-
-          if (
-            data[key] === undefined ||
-            data[key] === null ||
-            data[key] === ''
-          ) {
-            log(
-              `[signSessionKey] Invalid signed data. "${field}" is missing. Not a problem, we only need ${this._getThreshold()} nodes to sign the session key.`
-            );
-            return null;
-          }
-        }
-
-        if (!data.signatureShare.ProofOfPossession) {
-          const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`;
-          log(err);
-          throw new InvalidSignatureError(
-            {
-              info: {
-                requestId,
-                responseData,
-                data,
-              },
-            },
-            err
-          );
-        }
-
-        return data;
-      })
-      .filter((item) => item !== null);
-
-    logWithRequestId(
+    // -- checking if we have enough shares.
+    const validatedSignedDataList = this._validateSignSessionKeyResponseData(
+      responseData,
       requestId,
-      '[signSessionKey] requested length:',
-      signedDataList.length
-    );
-    logWithRequestId(
-      requestId,
-      '[signSessionKey] validated length:',
-      validatedSignedDataList.length
-    );
-    logWithRequestId(
-      requestId,
-      '[signSessionKey] minimum threshold:',
       this._getThreshold()
     );
 
-    if (validatedSignedDataList.length < this._getThreshold()) {
-      throw new InvalidSignatureError(
-        {
-          info: {
-            requestId,
-            responseData,
-            validatedSignedDataList,
-            threshold: this._getThreshold(),
-          },
-        },
-        `[signSessionKey] not enough nodes signed the session key.  Expected ${this._getThreshold()}, got ${validatedSignedDataList.length}`
-      );
-    }
-
-    const blsSignedData: BlsResponseData[] =
-      validatedSignedDataList as BlsResponseData[];
+    const blsSignedData: BlsResponseData[] = validatedSignedDataList;
 
     const sigType = mostCommonString(blsSignedData.map((s) => s.curveType));
     log(`[signSessionKey] sigType:`, sigType);
@@ -1885,7 +1814,7 @@ export class LitNodeClientNodeJs
    *
    * The process follows these steps:
    * 1. Retrieves or generates a session key pair (Ed25519) for the user's device. The session key is either fetched from local storage or newly created if not found. The key does not expire.
-   * 2. Generates an authentication signature (`authSig`) by signing an ERC-5573 “Sign-in with Ethereum” message, which includes resource ability requests, capabilities, expiration, the user's device session public key, and a nonce. The `authSig` is retrieved from local storage, and if it has expired, the user will be prompted to re-sign.
+   * 2. Generates an authentication signature (`authSig`) by signing an ERC-5573 "Sign-in with Ethereum" message, which includes resource ability requests, capabilities, expiration, the user's device session public key, and a nonce. The `authSig` is retrieved from local storage, and if it has expired, the user will be prompted to re-sign.
    * 3. Uses the session private key to sign the session public key along with the resource ability requests, capabilities, issuedAt, and expiration details. This creates a device-generated signature.
    * 4. Constructs the session signatures (`sessionSigs`) by including the device-generated signature and the original message. The `sessionSigs` provide access to Lit Network features such as `executeJs` and `pkpSign`.
    *
@@ -2362,5 +2291,100 @@ export class LitNodeClientNodeJs
         requestId
       );
     }
+  }
+
+  /**
+   * Note: ✨ This is to check data integrity of the response from the signSessionKey endpoint.
+   * As sometimes the response data structure has changed and we need to update the required fields.
+   * Validates the response data from the signSessionKey endpoint.
+   * Each response data item must have all required fields and valid ProofOfPossession.
+   * 
+   * @param responseData - Array of BlsResponseData to validate
+   * @param requestId - Request ID for logging and error reporting
+   * @param threshold - Minimum number of valid responses needed
+   * @returns Filtered array of valid BlsResponseData
+   * @throws InvalidSignatureError if validation fails
+   */
+  private _validateSignSessionKeyResponseData(
+    responseData: BlsResponseData[],
+    requestId: string,
+    threshold: number
+  ): BlsResponseData[] {
+
+    // each of this field cannot be empty
+    const requiredFields = [
+      'signatureShare',
+      'curveType',
+      'siweMessage',
+      'dataSigned',
+      'blsRootPubkey',
+      'result',
+    ];
+
+    // -- checking if we have enough shares.
+    const validatedSignedDataList = responseData
+      .map((data: BlsResponseData) => {
+
+        // check if all required fields are present
+        for (const field of requiredFields) {
+          const key: keyof BlsResponseData = field as keyof BlsResponseData;
+
+          if (
+            data[key] === undefined ||
+            data[key] === null ||
+            data[key] === ''
+          ) {
+            log(
+              `Invalid signed data. "${field}" is missing. Not a problem, we only need ${threshold} nodes to sign the session key.`
+            );
+            return null;
+          }
+        }
+
+        if (!data.signatureShare.ProofOfPossession) {
+          const err = `Invalid signed data. "ProofOfPossession" is missing.`;
+          log(err);
+          throw new InvalidSignatureError(
+            {
+              info: {
+                requestId,
+                responseData,
+                data,
+              },
+            },
+            err
+          );
+        }
+
+        return data;
+      })
+      .filter((item) => item !== null);
+
+    logWithRequestId(
+      requestId,
+      'validated length:',
+      validatedSignedDataList.length
+    );
+    logWithRequestId(
+      requestId,
+      'minimum threshold:',
+      threshold
+    );
+
+    if (validatedSignedDataList.length < threshold) {
+      throw new InvalidSignatureError(
+        {
+          info: {
+            requestId,
+            responseData,
+            validatedSignedDataList,
+            threshold,
+          },
+        },
+        `not enough nodes signed the session key. Expected ${threshold}, got ${validatedSignedDataList.length}`
+      );
+    }
+
+    return validatedSignedDataList as BlsResponseData[];
   }
 }

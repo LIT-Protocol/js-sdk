@@ -89,12 +89,11 @@ export async function blsCombine(
  * @returns {Uint8Array}
  */
 export async function blsDecrypt(
-  variant: BlsVariant,
   ciphertext: Uint8Array,
-  signature_shares: string[]
+  signature_shares: BlsSignatureShareJsonString[]
 ): Promise<Uint8Array> {
   await loadModules();
-  return wasmInternal.blsDecrypt(variant, ciphertext, signature_shares);
+  return wasmInternal.blsDecrypt(ciphertext, signature_shares);
 }
 
 /**
@@ -110,13 +109,12 @@ export async function blsDecrypt(
  * @returns {Uint8Array}
  */
 export async function blsEncrypt(
-  variant: BlsVariant,
   encryption_key: Uint8Array,
   message: Uint8Array,
   identity: Uint8Array
 ): Promise<Uint8Array> {
   await loadModules();
-  return wasmInternal.blsEncrypt(variant, encryption_key, message, identity);
+  return wasmInternal.blsEncrypt(encryption_key, message, identity);
 }
 
 /**
@@ -125,19 +123,17 @@ export async function blsEncrypt(
  * Supports:
  * - 12381G2
  * - 12381G1
- * @param {BlsVariant} variant
  * @param {Uint8Array} public_key
  * @param {Uint8Array} message
- * @param {Uint8Array} signature
+ * @param {string} signature
  */
 export async function blsVerify(
-  variant: BlsVariant,
   public_key: Uint8Array,
   message: Uint8Array,
-  signature: Uint8Array
+  signature: string
 ): Promise<void> {
   await loadModules();
-  return wasmInternal.blsVerify(variant, public_key, message, signature);
+  return wasmInternal.blsVerify(public_key, message, signature);
 }
 
 /**
