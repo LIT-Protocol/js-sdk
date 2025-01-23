@@ -15,7 +15,11 @@ import {
   logWithRequestId,
   mostCommonString,
 } from '@lit-protocol/misc';
-import { EcdsaSignedMessageShareParsed, SigResponse, SigShare } from '@lit-protocol/types';
+import {
+  EcdsaSignedMessageShareParsed,
+  SigResponse,
+  SigShare,
+} from '@lit-protocol/types';
 
 /**
  * Retrieves and combines signature shares from multiple nodes to generate the final signatures.
@@ -38,7 +42,6 @@ export const getSignatures = async (params: {
   signedMessageShares: EcdsaSignedMessageShareParsed[];
   requestId: string;
 }): Promise<SigResponse> => {
-
   let { networkPubKeySet, threshold, signedMessageShares, requestId } = params;
 
   if (networkPubKeySet === null) {
@@ -81,7 +84,7 @@ export const getSignatures = async (params: {
       },
       'No curve type "%s" found',
       curveType
-    )
+    );
   }
 
   const curveGroup = CURVE_GROUP_BY_CURVE_TYPE[curveType as LIT_CURVE_VALUES];
@@ -104,8 +107,10 @@ export const getSignatures = async (params: {
 
   const sigResponse: SigResponse = {
     ...combinedSignature,
-    publicKey: mostCommonString(signedMessageShares.map((s) => s.publicKey)) ?? '',
-    dataSigned: mostCommonString(signedMessageShares.map((s) => s.dataSigned)) ?? '',
+    publicKey:
+      mostCommonString(signedMessageShares.map((s) => s.publicKey)) ?? '',
+    dataSigned:
+      mostCommonString(signedMessageShares.map((s) => s.dataSigned)) ?? '',
   };
 
   return sigResponse;

@@ -135,14 +135,15 @@ import type {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
-  SuccessNodePromises
+  SuccessNodePromises,
 } from '@lit-protocol/types';
 
 // FIXME: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager, ILitNodeClient {
+  implements LitClientSessionManager, ILitNodeClient
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -895,7 +896,6 @@ export class LitNodeClientNodeJs
   executeJs = async (
     params: JsonExecutionSdkParams
   ): Promise<ExecuteJsResponse> => {
-
     // ========== Validate Params ==========
     if (!this.ready) {
       const message =
@@ -1042,9 +1042,9 @@ export class LitNodeClientNodeJs
     // The specific key name (`sig`) is irrelevant, as the contents of the object are always lifted directly.
     const key = Object.keys(signedDataList[0])[0]; // Get the first key of the object
 
-    const flattenedSignedMessageShares = signedDataList.map(item => {
+    const flattenedSignedMessageShares = signedDataList.map((item) => {
       return item[key]; // Return the value corresponding to that key
-    })
+    });
 
     const signatures = await getSignatures({
       requestId,
@@ -1161,7 +1161,6 @@ export class LitNodeClientNodeJs
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
     const nodePromises = this.getNodePromises((url: string) => {
-
       // -- get the session sig from the url key
       const sessionSig = this.getSessionSigByUrl({
         sessionSigs: params.sessionSigs,
@@ -1176,8 +1175,8 @@ export class LitNodeClientNodeJs
         // -- optional params
         ...(params.authMethods &&
           params.authMethods.length > 0 && {
-          authMethods: params.authMethods,
-        }),
+            authMethods: params.authMethods,
+          }),
 
         nodeSet,
         signingScheme: 'EcdsaK256Sha256',
@@ -1204,7 +1203,8 @@ export class LitNodeClientNodeJs
       this._throwNodeError(res, requestId);
     }
 
-    const responseData = (res as SuccessNodePromises<PKPSignEndpointResponse>).values;
+    const responseData = (res as SuccessNodePromises<PKPSignEndpointResponse>)
+      .values;
 
     logWithRequestId(
       requestId,
@@ -1841,8 +1841,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1924,10 +1924,10 @@ export class LitNodeClientNodeJs
 
     const capabilities = params.capacityDelegationAuthSig
       ? [
-        ...(params.capabilityAuthSigs ?? []),
-        params.capacityDelegationAuthSig,
-        authSig,
-      ]
+          ...(params.capabilityAuthSigs ?? []),
+          params.capacityDelegationAuthSig,
+          authSig,
+        ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     // Get new price feed info from the contract if user wants to
@@ -2298,7 +2298,7 @@ export class LitNodeClientNodeJs
    * As sometimes the response data structure has changed and we need to update the required fields.
    * Validates the response data from the signSessionKey endpoint.
    * Each response data item must have all required fields and valid ProofOfPossession.
-   * 
+   *
    * @param responseData - Array of BlsResponseData to validate
    * @param requestId - Request ID for logging and error reporting
    * @param threshold - Minimum number of valid responses needed
@@ -2310,7 +2310,6 @@ export class LitNodeClientNodeJs
     requestId: string,
     threshold: number
   ): BlsResponseData[] {
-
     // each of this field cannot be empty
     const requiredFields = [
       'signatureShare',
@@ -2324,7 +2323,6 @@ export class LitNodeClientNodeJs
     // -- checking if we have enough shares.
     const validatedSignedDataList = responseData
       .map((data: BlsResponseData) => {
-
         // check if all required fields are present
         for (const field of requiredFields) {
           const key: keyof BlsResponseData = field as keyof BlsResponseData;
@@ -2365,11 +2363,7 @@ export class LitNodeClientNodeJs
       'validated length:',
       validatedSignedDataList.length
     );
-    logWithRequestId(
-      requestId,
-      'minimum threshold:',
-      threshold
-    );
+    logWithRequestId(requestId, 'minimum threshold:', threshold);
 
     if (validatedSignedDataList.length < threshold) {
       throw new InvalidSignatureError(

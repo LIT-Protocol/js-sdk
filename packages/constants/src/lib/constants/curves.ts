@@ -36,10 +36,13 @@ export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
 
 export const CURVE_GROUPS = ['ECDSA', 'BLS'] as const;
 
-export const CURVE_GROUP_BY_CURVE_TYPE: Record<LIT_CURVE_VALUES, typeof CURVE_GROUPS[number]> = {
+export const CURVE_GROUP_BY_CURVE_TYPE: Record<
+  LIT_CURVE_VALUES,
+  (typeof CURVE_GROUPS)[number]
+> = {
   [LIT_CURVE.EcdsaK256]: CURVE_GROUPS[0],
   [LIT_CURVE.EcdsaK256Sha256]: CURVE_GROUPS[0],
   [LIT_CURVE.EcdsaCAITSITHP256]: CURVE_GROUPS[0],
   [LIT_CURVE.EcdsaCaitSith]: CURVE_GROUPS[0],
   [LIT_CURVE.BLS]: CURVE_GROUPS[1],
-} as const; 
+} as const;

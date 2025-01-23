@@ -19,7 +19,8 @@ async function initWasm() {
   return initSync(getModule());
 }
 
-export type BlsSignatureShareJsonString = `{"ProofOfPossession":{"identifier":"${string}","value":"${string}"}}`;
+export type BlsSignatureShareJsonString =
+  `{"ProofOfPossession":{"identifier":"${string}","value":"${string}"}}`;
 
 /**
  * Initializes the wasm module and keeps the module in scope within
@@ -55,12 +56,12 @@ async function loadModules() {
 /**
  * Combines BLS signature shares into a single signature.
  * This is a raw mapping function to the WASM implementation.
- * 
+ *
  * @param {BlsSignatureShareJsonString[]} signature_shares - Array of signature shares in JSON string format
- * 
+ *
  * Each share has format: {"ProofOfPossession":{"identifier":"xx","value":"yy"}}
  * @returns {Promise<string>} Combined signature as hex string
- * 
+ *
  * @example
  * const shares = [
  *   '{"ProofOfPossession":{"identifier":"7acf36...","value":"8b5c1c..."}}',

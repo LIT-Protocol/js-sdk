@@ -1,4 +1,7 @@
-import { EcdsaSignedMessageShareParsed, PKPSignEndpointResponse } from '@lit-protocol/types';
+import {
+  EcdsaSignedMessageShareParsed,
+  PKPSignEndpointResponse,
+} from '@lit-protocol/types';
 
 /**
  * Converts a snake_case string to camelCase.
@@ -49,9 +52,7 @@ export const cleanStringValues = (obj: { [key: string]: any }): any =>
 export const parsePkpSignResponse = (
   responseData: PKPSignEndpointResponse[]
 ): EcdsaSignedMessageShareParsed[] => {
-
   const ecdsaSignedMessageShares = responseData.map(({ signatureShare }) => {
-
     const rawShareMessage = signatureShare.EcdsaSignedMessageShare;
 
     const camelCaseShare = convertKeysToCamelCase(rawShareMessage);

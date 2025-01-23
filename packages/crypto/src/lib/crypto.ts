@@ -78,13 +78,14 @@ export const encrypt = async (
           publicKeyHex,
         },
       },
-      `Invalid public key length. Expecting 96 characters, got ${publicKeyHex.replace('0x', '').length
+      `Invalid public key length. Expecting 96 characters, got ${
+        publicKeyHex.replace('0x', '').length
       } instead.`
     );
   }
-  return Buffer.from(
-    await blsEncrypt(publicKey, message, identity)
-  ).toString('base64');
+  return Buffer.from(await blsEncrypt(publicKey, message, identity)).toString(
+    'base64'
+  );
 };
 
 /**
@@ -127,11 +128,13 @@ export const verifyAndDecryptWithSignatureShares = async (
   return doDecrypt(ciphertextBase64, sigShares);
 };
 
-const toJSONShares = (shares: BlsSignatureShare[]): BlsSignatureShareJsonString[] => {
-  return shares.map(s => {
+const toJSONShares = (
+  shares: BlsSignatureShare[]
+): BlsSignatureShareJsonString[] => {
+  return shares.map((s) => {
     return JSON.stringify(s);
   }) as BlsSignatureShareJsonString[];
-}
+};
 
 /**
  * Combine BLS signature shares.
@@ -142,13 +145,14 @@ const toJSONShares = (shares: BlsSignatureShare[]): BlsSignatureShareJsonString[
 export const combineSignatureShares = async (
   shares: BlsSignatureShare[]
 ): Promise<string> => {
-
   const sigShares = toJSONShares(shares);
 
   const signature = await blsCombine(sigShares);
 
   if (signature.length !== 192) {
-    throw new Error(`Signature length is not 192. Got ${signature.length} instead.`);
+    throw new Error(
+      `Signature length is not 192. Got ${signature.length} instead.`
+    );
   }
 
   return signature;

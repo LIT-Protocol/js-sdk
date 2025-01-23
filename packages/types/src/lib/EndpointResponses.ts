@@ -1,4 +1,5 @@
-export type SigType = 'BLS'
+export type SigType =
+  | 'BLS'
   | 'K256'
   | 'ECDSA_CAIT_SITH' // Legacy alias of K256
   | 'EcdsaCaitSithP256'
@@ -35,14 +36,14 @@ export interface PKPSignEndpointResponse {
   success: boolean;
   signedData: Uint8Array;
   signatureShare: {
-    'EcdsaSignedMessageShare': EcdsaSignedMessageShareRaw
+    EcdsaSignedMessageShare: EcdsaSignedMessageShareRaw;
   };
 }
 
 /**
  * This is the cleaned up version of the EcdsaSignedMessageShareRaw
- * 
- * @example 
+ *
+ * @example
  *   {
  *     "digest": "7d87c5ea75f7378bb701e404c50639161af3eff66293e9f375b5f17eb50476f4",
  *     "shareId": "1A0369823607C6EF403D86BA41534DDB1420730C696060EAD7931DE5DB603937",
