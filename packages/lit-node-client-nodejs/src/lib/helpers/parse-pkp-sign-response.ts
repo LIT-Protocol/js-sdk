@@ -53,7 +53,6 @@ export const parsePkpSignResponse = (
   responseData: PKPSignEndpointResponse[]
 ): EcdsaSignedMessageShareParsed[] => {
   const ecdsaSignedMessageShares = responseData.map(({ signatureShare }) => {
-
     const camelCaseShare = convertKeysToCamelCase(signatureShare);
     const parsedShareMessage = cleanStringValues(camelCaseShare);
 
