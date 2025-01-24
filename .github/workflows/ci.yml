@@ -42,7 +42,7 @@ jobs:
       - name: Build
         run: yarn build:dev
       - name: Run Unit tests
-        run: yarn tools --test --unit
+        run: yarn test:unit
   naga-integration-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
