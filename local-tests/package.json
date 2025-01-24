@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/tinny",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "A package to run the test script for Lit Protocol with custom commands",
   "type": "module",
   "main": "./index.js",
