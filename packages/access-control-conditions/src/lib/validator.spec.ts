@@ -4,7 +4,6 @@ import {
   EvmContractConditions,
   SolRpcConditions,
   UnifiedAccessControlConditions,
-  NodeClientErrorV1,
 } from '@lit-protocol/types';
 
 import {
