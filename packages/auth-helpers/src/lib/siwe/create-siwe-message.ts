@@ -1,12 +1,7 @@
-import { SiweMessage } from 'siwe';
-import { LIT_ABILITY } from '@lit-protocol/constants';
 import { BaseSiweMessage, WithRecap } from '@lit-protocol/types';
-import { LitRLIResource } from '../resources';
+import { SiweMessage } from 'siwe';
 
-import {
-  createCapacityCreditsResourceData,
-  addRecapToSiweMessage,
-} from './siwe-helper';
+import { addRecapToSiweMessage } from './siwe-helper';
 
 /**
  * Creates a SIWE

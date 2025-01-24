@@ -9,7 +9,7 @@ import {
   RecapSessionCapabilityObject,
   createSiweMessage,
   createSiweMessageWithRecaps,
-  decode
+  decode,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
@@ -130,7 +130,7 @@ import type {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
-  SuccessNodePromises
+  SuccessNodePromises,
 } from '@lit-protocol/types';
 
 // FIXME: this should be dynamically set, but we only have 1 net atm.

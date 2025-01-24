@@ -21,5 +21,7 @@
   "tags": [
     "browser"
   ],
-  "version": "8.0.0-alpha.0"
+  "version": "8.0.0-alpha.0",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

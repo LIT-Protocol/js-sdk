@@ -1,11 +1,6 @@
 import { SiweMessage } from 'siwe';
 
-import {
-  CapacityDelegationFields,
-  CapacityDelegationRequest,
-  ILitNodeClient,
-  LitResourceAbilityRequest,
-} from '@lit-protocol/types';
+import { ILitNodeClient, LitResourceAbilityRequest } from '@lit-protocol/types';
 
 /**
  * Sanitizes a SIWE message by unescaping double-escaped newlines and replacing escaped double quotes with single quotes.
@@ -20,27 +15,6 @@ export function sanitizeSiweMessage(message: string): string {
 
   return sanitizedMessage;
 }
-
-/**
- * Creates the resource data for a capacity delegation request.
- * @param params - The capacity delegation fields.
- * @returns The capacity delegation request object.
- */
-export const createCapacityCreditsResourceData = (
-  params: CapacityDelegationFields
-): CapacityDelegationRequest => {
-  return {
-    ...(params.capacityTokenId ? { nft_id: [params.capacityTokenId] } : {}), // Conditionally include nft_id
-    ...(params.delegateeAddresses
-      ? {
-          delegate_to: params.delegateeAddresses.map((address) =>
-            address.startsWith('0x') ? address.slice(2) : address
-          ),
-        }
-      : {}),
-    ...(params.uses !== undefined ? { uses: params.uses.toString() } : {}),
-  };
-};
 
 /**
  * Adds recap capabilities to a SiweMessage.
