@@ -72,9 +72,7 @@ export class TinnyEnvironment {
     // (8) "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f" (10000.000000000000000000 ETH)
     // (9) "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720" (10000.000000000000000000 ETH)
     PRIVATE_KEYS:
-      process.env['NETWORK'] === LIT_NETWORK.Custom
-        ? DEFAULT_ANVIL_PRIVATE_KEYS
-        : process.env['PRIVATE_KEYS']?.split(',') || DEFAULT_ANVIL_PRIVATE_KEYS,
+      process.env['PRIVATE_KEYS']?.split(',') || DEFAULT_ANVIL_PRIVATE_KEYS,
     KEY_IN_USE: new Array(),
     NO_SETUP: process.env['NO_SETUP'] === 'true',
     USE_SHIVA: process.env['USE_SHIVA'] === 'true',

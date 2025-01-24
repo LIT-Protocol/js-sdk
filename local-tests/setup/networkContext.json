@@ -1,6 +1,6 @@
 {
   "Allowlist": {
-    "address": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
+    "address": "0xEa5Ed0BaE3f79D34165A818a64cE05D3107a6614",
     "abi": [
       {
         "inputs": [],
@@ -231,7 +231,7 @@
     "name": "Allowlist"
   },
   "LITToken": {
-    "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+    "address": "0xd78089bAAe410f5d0eae31D0D56157c73a3Ff98B",
     "abi": [
       {
         "inputs": [
@@ -1279,7 +1279,7 @@
     "name": "LITToken"
   },
   "Multisender": {
-    "address": "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90",
+    "address": "0x787966727DA56f981426d22946Ae673A589E1c0B",
     "abi": [
       {
         "anonymous": false,
@@ -1388,7 +1388,7 @@
     "name": "Multisender"
   },
   "PKPHelper": {
-    "address": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+    "address": "0x7A6FAB83424439293d5CfE2E1fcd236A9f5B32BC",
     "abi": [
       {
         "inputs": [
@@ -2370,7 +2370,7 @@
     "name": "PKPHelper"
   },
   "PKPNFT": {
-    "address": "0x998abeb3E57409262aE5b751f60747921B33613E",
+    "address": "0xb0F3A31a9C616a67DE266C84D791a0dB7Fc84A4d",
     "abi": [
       {
         "inputs": [
@@ -3574,7 +3574,7 @@
     "name": "PKPNFT"
   },
   "PKPNFTMetadata": {
-    "address": "0xc351628EB244ec633d5f21fBD6621e1a683B1181",
+    "address": "0xEB8e3de8B53f1e81be58F5D4D3a089Ac7A2CDE53",
     "abi": [
       {
         "inputs": [
@@ -3732,7 +3732,7 @@
     "name": "PKPNFTMetadata"
   },
   "PKPPermissions": {
-    "address": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+    "address": "0xc4B219F15295f62991ACF01dE3eF299Ce1ACD98d",
     "abi": [
       {
         "inputs": [
@@ -5022,7 +5022,7 @@
     "name": "PKPPermissions"
   },
   "PubkeyRouter": {
-    "address": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
+    "address": "0xA5329B84bc3f31c0871a9f713EF05b4C181d869f",
     "abi": [
       {
         "inputs": [
@@ -5962,7 +5962,7 @@
     "name": "PubkeyRouter"
   },
   "RateLimitNFT": {
-    "address": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+    "address": "0x1412f1299F0e88584bdEC5F00d53D520BA49401A",
     "abi": [
       {
         "inputs": [
@@ -7351,7 +7351,7 @@
     "name": "RateLimitNFT"
   },
   "Staking": {
-    "address": "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E",
+    "address": "0x8dD01DE1B3689c8a242a42418C05d180C39bee9B",
     "abi": [
       {
         "inputs": [
@@ -8618,6 +8618,24 @@
         "type": "function"
       },
       {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "realmId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newTimeout",
+            "type": "uint256"
+          }
+        ],
+        "name": "setPendingRejoinTimeout",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
         "inputs": [],
         "name": "ActiveValidatorsCannotLeave",
         "type": "error"
@@ -9281,6 +9299,11 @@
             "internalType": "uint32",
             "name": "port",
             "type": "uint32"
+          },
+          {
+            "internalType": "address",
+            "name": "stakerAddress",
+            "type": "address"
           },
           {
             "internalType": "uint256",
@@ -10982,7 +11005,7 @@
     "name": "Staking"
   },
   "StakingBalances": {
-    "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+    "address": "0x48DD3eB21890739A3763fF53B845146B2C843Bb1",
     "abi": [
       {
         "inputs": [
@@ -12224,7 +12247,7 @@
     "name": "StakingBalances"
   },
   "ContractResolver": {
-    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "address": "0x609127fb07278fD6c31aD01d1c7ADc904A00010c",
     "abi": [
       {
         "inputs": [
@@ -12897,7 +12920,7 @@
     "name": "ContractResolver"
   },
   "PriceFeed": {
-    "address": "0xe8D2A1E88c91DCd5433208d4152Cc4F399a7e91d",
+    "address": "0x3E95Ffa46b158E90AD812D7244871A1aE9286cD6",
     "abi": [
       {
         "inputs": [
@@ -13688,7 +13711,7 @@
     "name": "PriceFeed"
   },
   "Ledger": {
-    "address": "0x86A2EE8FAf9A840F7a2c64CA3d51209F9A02081D",
+    "address": "0xce761B095C76F4a82a92AAF4325dAB2e50f24a67",
     "abi": [
       {
         "inputs": [
