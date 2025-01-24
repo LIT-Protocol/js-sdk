@@ -4,13 +4,13 @@
 import { exit } from 'process';
 import {
   asyncForEach,
+  getArgs,
   greenLog,
   listDirsRecursive,
-  getArgs,
-  spawnCommand,
+  question,
   readJsonFile,
   redLog,
-  question,
+  spawnCommand,
   writeJsonFile,
   yellowLog,
 } from './utils.mjs';
