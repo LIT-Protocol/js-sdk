@@ -1159,9 +1159,9 @@ export class LitNodeClientNodeJs
     const nodeSet = await this._getNodeSet();
 
     // get the threshold number of nodes randomly
-    const thresholdNodeSet = nodeSet
-      .sort(() => Math.random() - 0.5)
-      .slice(0, this._getThreshold());
+    // const thresholdNodeSet = nodeSet
+    //   .sort(() => Math.random() - 0.5)
+    //   .slice(0, this._getThreshold());
 
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
@@ -1183,7 +1183,8 @@ export class LitNodeClientNodeJs
             authMethods: params.authMethods,
           }),
 
-        nodeSet: thresholdNodeSet,
+        // nodeSet: thresholdNodeSet,
+        nodeSet: nodeSet,
         signingScheme: 'EcdsaK256Sha256',
       };
 
@@ -1200,7 +1201,8 @@ export class LitNodeClientNodeJs
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      thresholdNodeSet.length
+      // thresholdNodeSet.length
+      nodeSet.length
     );
 
     // ========== Handle Response ==========
