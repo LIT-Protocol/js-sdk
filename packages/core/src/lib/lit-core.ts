@@ -315,7 +315,7 @@ export class LitCore {
    * See rust/lit-node/common/lit-node-testnet/src/validator.rs > threshold for more details
    */
   protected _getThreshold = (): number => {
-    return Math.max(3, Math.floor((this.config.minNodeCount * 2) / 3));
+    return Math.max(3, Math.floor((this.connectedNodes.size * 2) / 3));
   };
 
   private async _handleStakingContractStateChange(

@@ -11,12 +11,6 @@ use lit_bls_wasm::{
 };
 
 type JsResult<T> = Result<T, JsValue>;
-#[derive(Tsify, Deserialize, Debug)]
-#[tsify(from_wasm_abi)]
-pub enum BlsVariant {
-  Bls12381G1,
-  Bls12381G2,
-}
 
 // -----------------------------------------------------------------------
 // 1. blsCombine
