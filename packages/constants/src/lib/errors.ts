@@ -249,15 +249,17 @@ type LitErrorConstructor = new (
   ...params: any[]
 ) => LitError;
 
+export type LitErrorClass = {
+  name: string;
+  code: string;
+  kind: string;
+};
+
 function createErrorClass({
   name,
   code,
   kind,
-}: {
-  name: string;
-  code: string;
-  kind: string;
-}): LitErrorConstructor {
+}: LitErrorClass): LitErrorConstructor {
   return class extends LitError {
     // VError has optional options parameter, but we make it required so thrower remembers to pass all the useful info
     constructor(options: Error | Options, message: string, ...params: any[]) {
