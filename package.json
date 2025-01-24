@@ -27,7 +27,6 @@
     "publish:tinny": "cd ./local-tests && npm publish",
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
-    "update:contracts-sdk": "yarn node ./packages/contracts-sdk/tools.mjs",
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
     "v": "node ./tools/scripts/get-npm-version.mjs",

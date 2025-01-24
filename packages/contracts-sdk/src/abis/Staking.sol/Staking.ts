@@ -197,7 +197,6 @@ export interface StakingInterface extends utils.Interface {
     'getKeyTypes()': FunctionFragment;
     'getKickedValidators()': FunctionFragment;
     'getNodeStakerAddressMappings(address[])': FunctionFragment;
-    'getStakingBalancesAddress()': FunctionFragment;
     'getTokenAddress()': FunctionFragment;
     'getValidatorsInCurrentEpoch()': FunctionFragment;
     'getValidatorsInCurrentEpochLength()': FunctionFragment;
@@ -267,7 +266,6 @@ export interface StakingInterface extends utils.Interface {
       | 'getKeyTypes'
       | 'getKickedValidators'
       | 'getNodeStakerAddressMappings'
-      | 'getStakingBalancesAddress'
       | 'getTokenAddress'
       | 'getValidatorsInCurrentEpoch'
       | 'getValidatorsInCurrentEpochLength'

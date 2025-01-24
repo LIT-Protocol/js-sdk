@@ -8,8 +8,6 @@ import {
   LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
-  MintCapacityCreditsContext,
-  MintCapacityCreditsRes,
   MintNextAndAddAuthMethods,
   MintWithAuthParams,
   MintWithAuthResponse,
@@ -28,9 +26,7 @@ import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
 import { PKPNFTMetadataData } from '../abis/PKPNFTMetadata.sol/PKPNFTMetadataData';
 import { PKPPermissionsData } from '../abis/PKPPermissions.sol/PKPPermissionsData';
 import { PubkeyRouterData } from '../abis/PubkeyRouter.sol/PubkeyRouterData';
-import { RateLimitNFTData } from '../abis/RateLimitNFT.sol/RateLimitNFTData';
 import { StakingData } from '../abis/Staking.sol/StakingData';
-import { StakingBalancesData } from '../abis/StakingBalances.sol/StakingBalancesData';
 // ----- autogen:import-data:end  -----
 
 // ----- autogen:imports:start  -----
@@ -43,71 +39,42 @@ import * as pkpNftContract from '../abis/PKPNFT.sol/PKPNFT';
 import * as pkpNftMetadataContract from '../abis/PKPNFTMetadata.sol/PKPNFTMetadata';
 import * as pkpPermissionsContract from '../abis/PKPPermissions.sol/PKPPermissions';
 import * as pubkeyRouterContract from '../abis/PubkeyRouter.sol/PubkeyRouter';
-import * as rateLimitNftContract from '../abis/RateLimitNFT.sol/RateLimitNFT';
 import * as stakingContract from '../abis/Staking.sol/Staking';
-import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBalances';
 // ----- autogen:imports:end  -----
 
 import {
-  AUTH_METHOD_TYPE_VALUES,
   AUTH_METHOD_SCOPE_VALUES,
-  METAMASK_CHAIN_INFO_BY_NETWORK,
-  NETWORK_CONTEXT_BY_NETWORK,
-  LIT_NETWORK_VALUES,
-  RPC_URL_BY_NETWORK,
-  HTTP_BY_NETWORK,
-  CENTRALISATION_BY_NETWORK,
-  LIT_NETWORK,
+  AUTH_METHOD_TYPE_VALUES,
   HTTP,
   HTTPS,
+  HTTP_BY_NETWORK,
   InitError,
-  NetworkError,
-  WrongNetworkException,
-  ParamsMissingError,
   InvalidArgumentException,
-  TransactionError,
+  LIT_NETWORK,
+  LIT_NETWORK_VALUES,
+  METAMASK_CHAIN_INFO_BY_NETWORK,
+  NETWORK_CONTEXT_BY_NETWORK,
   PRODUCT_IDS,
+  ParamsMissingError,
+  RPC_URL_BY_NETWORK,
+  TransactionError,
+  WrongNetworkException,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
+import { derivedAddresses } from '@lit-protocol/misc';
 import { TokenInfo } from '@lit-protocol/types';
 import { computeAddress } from 'ethers/lib/utils';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
-import { derivedAddresses } from '@lit-protocol/misc';
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 import { ValidatorStruct } from './types';
 
 // FIXME: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
-
-// const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
-// const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
-
-// This function asynchronously executes a provided callback function for each item in the given array.
-// The callback function is awaited before continuing to the next iteration.
-// The resulting array of callback return values is then returned.
-//
-// @param {Array<any>} array - The array to iterate over
-// @param {Function} callback - The function to execute for each item in the array. This function
-//                              must be asynchronous and should take the following parameters:
-//                              - currentValue: The current item being processed in the array
-//                              - index: The index of the current item being processed in the array
-//                              - array: The array being iterated over
-// @return {Array<any>} The array of callback return values
-export const asyncForEachReturn = async (array: any[], callback: Function) => {
-  const list = [];
-
-  for (let index = 0; index < array.length; index++) {
-    const item = await callback(array[index], index, array);
-    list.push(item);
-  }
-  return list;
-};
 
 declare global {
   interface Window {
@@ -142,7 +109,6 @@ export class LitContracts {
   static contractNames: ContractName[] = [
     'Allowlist',
     'Staking',
-    'RateLimitNFT',
     'PubkeyRouter',
     'PKPHelper',
     'PKPPermissions',
@@ -150,7 +116,6 @@ export class LitContracts {
     'PKPNFT',
     'Multisender',
     'LITToken',
-    'StakingBalances',
     'PriceFeed',
   ];
 
@@ -197,23 +162,12 @@ export class LitContracts {
     write: pubkeyRouterContract.PubkeyRouter;
   };
 
-  rateLimitNftContract: {
-    read: rateLimitNftContract.RateLimitNFT;
-    write: rateLimitNftContract.RateLimitNFT;
-  };
-
   stakingContract: {
     read: stakingContract.Staking;
     write: stakingContract.Staking;
   };
 
-  stakingBalancesContract: {
-    read: stakingBalancesContract.StakingBalances;
-    write: stakingBalancesContract.StakingBalances;
-  };
-
   // ----- autogen:declares:end  -----
-
   // make the constructor args optional
   constructor(args?: {
     provider?: ethers.providers.StaticJsonRpcProvider | any;
@@ -259,9 +213,7 @@ export class LitContracts {
     this.pkpNftMetadataContract = {} as any;
     this.pkpPermissionsContract = {} as any;
     this.pubkeyRouterContract = {} as any;
-    this.rateLimitNftContract = {} as any;
     this.stakingContract = {} as any;
-    this.stakingBalancesContract = {} as any;
     // ----- autogen:blank-init:end  -----
   }
 
@@ -488,7 +440,7 @@ export class LitContracts {
         ) as litTokenContract.LITToken,
       };
     }
-   
+
     if (addresses.Multisender.abi) {
       this.multisenderContract = {
         read: new ethers.Contract(
@@ -577,22 +529,6 @@ export class LitContracts {
       };
     }
 
-
-    // if (addresses.RateLimitNFT.abi) {
-    //   this.rateLimitNftContract = {
-    //     read: new ethers.Contract(
-    //       addresses.RateLimitNFT.address,
-    //       addresses.RateLimitNFT.abi as any,
-    //       this.provider
-    //     ) as rateLimitNftContract.RateLimitNFT,
-    //     write: new ethers.Contract(
-    //       addresses.RateLimitNFT.address,
-    //       addresses.RateLimitNFT.abi as any,
-    //       this.signer
-    //     ) as rateLimitNftContract.RateLimitNFT,
-    //   };
-    // }
-
     if (addresses.Staking.abi) {
       this.stakingContract = {
         read: new ethers.Contract(
@@ -607,22 +543,6 @@ export class LitContracts {
         ) as stakingContract.Staking,
       };
     }
-
-    // if (addresses.StakingBalances.abi) {
-    //   this.stakingBalancesContract = {
-    //     read: new ethers.Contract(
-    //       addresses.StakingBalances.address,
-    //       addresses.StakingBalances.abi as any,
-    //       this.provider
-    //     ) as stakingBalancesContract.StakingBalances,
-    //     write: new ethers.Contract(
-    //       addresses.StakingBalances.address,
-    //       addresses.StakingBalances.abi as any,
-    //       this.signer
-    //     ) as stakingBalancesContract.StakingBalances,
-    //   };
-    // }
-    // process.exit();
     this.connected = true;
   };
 
@@ -920,21 +840,9 @@ export class LitContracts {
             environment
           );
           break;
-        case 'RateLimitNFT':
-          address = await resolverContract['getContract'](
-            await resolverContract['RATE_LIMIT_NFT_CONTRACT'](),
-            environment
-          );
-          break;
         case 'Staking':
           address = await resolverContract['getContract'](
             await resolverContract['STAKING_CONTRACT'](),
-            environment
-          );
-          break;
-        case 'StakingBalances':
-          address = await resolverContract['getContract'](
-            await resolverContract['STAKING_BALANCES_CONTRACT'](),
             environment
           );
           break;
@@ -1017,11 +925,6 @@ export class LitContracts {
           addresses.Staking.address = contract.address;
           addresses.Staking.abi = contract.abi ?? StakingData.abi;
           break;
-        case 'RateLimitNFT':
-          addresses.RateLimitNFT = {};
-          addresses.RateLimitNFT.address = contract.address;
-          addresses.RateLimitNFT.abi = contract.abi ?? RateLimitNFTData.abi;
-          break;
         case 'PKPPermissions':
           addresses.PKPPermissions = {};
           addresses.PKPPermissions.address = contract.address;
@@ -1041,12 +944,6 @@ export class LitContracts {
           addresses.LITToken = {};
           addresses.LITToken.address = contract.address;
           addresses.LITToken.abi = contract?.abi ?? LITTokenData.abi;
-          break;
-        case 'StakingBalances':
-          addresses.StakingBalances = {};
-          addresses.StakingBalances.address = contract.address;
-          addresses.StakingBalances.abi =
-            contract.abi ?? StakingBalancesData.abi;
           break;
         case 'Multisender':
           addresses.Multisender = {};
@@ -1180,7 +1077,6 @@ export class LitContracts {
       networkContext,
       rpcUrl
     );
-
 
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
@@ -1744,183 +1640,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       );
     }
   };
-
-  /**
-   * Mint a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period. The expiration date is calculated to be at midnight UTC, a specific number of days from now.
-   *
-   * @param {MintCapacityCreditsContext} context - The minting context.
-   * @returns {Promise<MintCapacityCreditsRes>} - A promise that resolves to the minted capacity credits NFT response.
-   * @throws {Error} - If the input parameters are invalid or an error occurs during the minting process.
-   */
-  mintCapacityCreditsNFT = async ({
-    requestsPerDay,
-    requestsPerSecond,
-    requestsPerKilosecond,
-    daysUntilUTCMidnightExpiration,
-    gasLimit,
-  }: MintCapacityCreditsContext): Promise<MintCapacityCreditsRes> => {
-    this.log('Minting Capacity Credits NFT...');
-
-    // Validate input: at least one of the request parameters must be provided and more than 0
-    if (
-      (requestsPerDay === null ||
-        requestsPerDay === undefined ||
-        requestsPerDay <= 0) &&
-      (requestsPerSecond === null ||
-        requestsPerSecond === undefined ||
-        requestsPerSecond <= 0) &&
-      (requestsPerKilosecond === null ||
-        requestsPerKilosecond === undefined ||
-        requestsPerKilosecond <= 0)
-    ) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            requestsPerDay,
-            requestsPerSecond,
-            requestsPerKilosecond,
-          },
-        },
-        `At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required and must be more than 0`
-      );
-    }
-
-    // Calculate effectiveRequestsPerKilosecond based on provided parameters
-    let effectiveRequestsPerKilosecond: number | undefined;
-
-    // Determine the effective requests per kilosecond based on the input
-
-    // -- requestsPerDay
-    if (requestsPerDay !== undefined) {
-      effectiveRequestsPerKilosecond = requestsToKilosecond({
-        period: 'day',
-        requests: requestsPerDay,
-      });
-
-      // -- requestsPerSecond
-    } else if (requestsPerSecond !== undefined) {
-      effectiveRequestsPerKilosecond = requestsToKilosecond({
-        period: 'second',
-        requests: requestsPerSecond,
-      });
-
-      // -- requestsPerKilosecond
-    } else if (requestsPerKilosecond !== undefined) {
-      effectiveRequestsPerKilosecond = requestsPerKilosecond;
-    }
-
-    // Check if effectiveRequestsPerKilosecond was successfully set
-    if (
-      effectiveRequestsPerKilosecond === undefined ||
-      effectiveRequestsPerKilosecond <= 0
-    ) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            effectiveRequestsPerKilosecond,
-          },
-        },
-        `Effective requests per kilosecond is required and must be more than 0`
-      );
-    }
-
-    const expiresAt = calculateUTCMidnightExpiration(
-      daysUntilUTCMidnightExpiration
-    );
-
-    let mintCost;
-
-    try {
-      mintCost = await this.rateLimitNftContract.read.calculateCost(
-        effectiveRequestsPerKilosecond,
-        expiresAt
-      );
-    } catch (e) {
-      this.log('Error calculating mint cost:', e);
-      throw e;
-    }
-
-    this.log('Capacity Credits NFT mint cost:', mintCost.toString());
-    if (requestsPerDay) this.log('Requests per day:', requestsPerDay);
-    if (requestsPerSecond) this.log('Requests per second:', requestsPerSecond);
-    this.log(
-      'Effective requests per kilosecond:',
-      effectiveRequestsPerKilosecond
-    );
-    this.log(`Expires at (Unix Timestamp): ${expiresAt}`);
-
-    const expirationDate = new Date(expiresAt * 1000);
-    this.log('Expiration Date (UTC):', expirationDate.toUTCString());
-
-    try {
-      const res = await this._callWithAdjustedOverrides(
-        this.rateLimitNftContract.write,
-        'mint',
-        [expiresAt],
-        { value: mintCost, gasLimit }
-      );
-
-      const txHash = res.hash;
-
-      const tx = await res.wait();
-      this.log('xx Transaction:', tx);
-
-      const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
-
-      return {
-        rliTxHash: txHash,
-        capacityTokenId: tokenId,
-        capacityTokenIdStr: tokenId.toString(),
-      };
-    } catch (e) {
-      throw new TransactionError(
-        {
-          info: {
-            requestsPerDay,
-            requestsPerSecond,
-            requestsPerKilosecond,
-            expiresAt,
-          },
-          cause: e,
-        },
-        'Minting capacity credits NFT failed'
-      );
-    }
-  };
-
-  // getRandomPrivateKeySignerProvider = () => {
-  //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
-
-  //   let provider;
-
-  //   if (isBrowser()) {
-  //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-  //   } else {
-  //     provider = new ethers.providers.StaticJsonRpcProvider({
-  //       url: this.rpc,
-  //       skipFetchSetup: true,
-  //     });
-  //   }
-  //   const signer = new ethers.Wallet(privateKey, provider);
-
-  //   return { privateKey, signer, provider };
-  // };
-
-  // getPrivateKeySignerProvider = (privateKey: string) => {
-  //   let provider;
-
-  //   if (isBrowser()) {
-  //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-  //   } else {
-  //     provider = new ethers.providers.StaticJsonRpcProvider({
-  //       url: this.rpc,
-  //       skipFetchSetup: true,
-  //     });
-  //   }
-  //   const signer = new ethers.Wallet(privateKey, provider);
-
-  //   return { privateKey, signer, provider };
-  // };
 
   utils = {
     hexToDec,
@@ -2667,431 +2386,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         );
 
         this.log('[revokePermittedAction] output<tx>:', tx);
-
-        return tx;
-      },
-    },
-  };
-
-  rateLimitNftContractUtils = {
-    read: {
-      /**
-       * getCapacityByIndex: async (index: number): Promise<any> => {
-       *
-       *  This function takes a token index as a parameter and returns the capacity of the token
-       *  with the given index. The capacity is an object that contains the number of requests
-       *  per millisecond that the token allows, and an object with the expiration timestamp and
-       *  formatted expiration date of the token.
-       *
-       *  @param {number} index - The index of the token.
-       *  @returns {Promise<any>} - A promise that resolves to the capacity of the token.
-       *
-       *  Example:
-       *
-       *  const capacity = await getCapacityByIndex(1);
-       *  this.log(capacity);
-       *  // Output: {
-       *  //   requestsPerMillisecond: 100,
-       *  //   expiresAt: {
-       *  //     timestamp: 1623472800,
-       *  //     formatted: '2022-12-31',
-       *  //   },
-       *  // }
-       *
-       * }
-       */
-      getCapacityByIndex: async (index: number): Promise<any> => {
-        if (!this.connected) {
-          throw new InitError(
-            {
-              info: {
-                connected: this.connected,
-              },
-            },
-            'Contracts are not connected. Please call connect() first'
-          );
-        }
-
-        if (!this.rateLimitNftContract) {
-          throw new InitError(
-            {
-              info: {
-                rateLimitNftContract: this.rateLimitNftContract,
-              },
-            },
-            'Contract is not available'
-          );
-        }
-
-        const capacity = await this.rateLimitNftContract.read.capacity(index);
-
-        return {
-          requestsPerMillisecond: parseInt(capacity[0].toString()),
-          expiresAt: {
-            timestamp: parseInt(capacity[1].toString()),
-            formatted: this.utils.timestamp2Date(capacity[1].toString()),
-          },
-        };
-      },
-
-      /**
-       * getTokenURIByIndex: async (index: number): Promise<string> => {
-       *
-       *  This function takes a token index as a parameter and returns the URI of the token
-       *  with the given index.
-       *
-       *  @param {number} index - The index of the token.
-       *  @returns {Promise<string>} - A promise that resolves to the URI of the token.
-       *
-       *  Example:
-       *
-       *  const URI = await getTokenURIByIndex(1);
-       *  this.log(URI);
-       *  // Output: 'https://tokens.com/1'
-       *
-       * }
-       */
-      getTokenURIByIndex: async (index: number): Promise<string> => {
-        if (!this.connected) {
-          throw new InitError(
-            {
-              info: {
-                connected: this.connected,
-              },
-            },
-            'Contracts are not connected. Please call connect() first'
-          );
-        }
-
-        if (!this.rateLimitNftContract) {
-          throw new InitError(
-            {
-              info: {
-                rateLimitNftContract: this.rateLimitNftContract,
-              },
-            },
-            'Contract is not available'
-          );
-        }
-
-        const base64 = await this.rateLimitNftContract.read.tokenURI(index);
-
-        const data = base64.split('data:application/json;base64,')[1];
-
-        const dataToString = Buffer.from(data, 'base64').toString('binary');
-
-        return JSON.parse(dataToString);
-      },
-
-      /**
-       * getTokensByOwnerAddress: async (ownerAddress: string): Promise<any> => {
-       *
-       *  This function takes an owner address as a parameter and returns an array of tokens
-       *  that are owned by the given address.
-       *
-       *  @param {string} ownerAddress - The address of the owner.
-       *  @returns {Promise<any>} - A promise that resolves to an array of token objects.
-       *
-       *  Example:
-       *
-       *  const tokens = await getTokensByOwnerAddress('0x1234...5678');
-       *  this.log(tokens);
-       *  // Output: [
-       *  //   {
-       *  //     tokenId: 1,
-       *  //     URI: 'https://tokens.com/1',
-       *  //     capacity: 100,
-       *  //     isExpired: false,
-       *  //   },
-       *  //   {
-       *  //     tokenId: 2,
-       *  //     URI: 'https://tokens.com/2',
-       *  //     capacity: 200,
-       *  //     isExpired: true,
-       *  //   },
-       *  //   ...
-       *  // ]
-       *
-       * }
-       */
-      getTokensByOwnerAddress: async (ownerAddress: string): Promise<any> => {
-        if (!this.connected) {
-          throw new InitError(
-            {
-              info: {
-                connected: this.connected,
-              },
-            },
-            'Contracts are not connected. Please call connect() first'
-          );
-        }
-
-        if (!this.rateLimitNftContract) {
-          throw new InitError(
-            {
-              info: {
-                rateLimitNftContract: this.rateLimitNftContract,
-              },
-            },
-            'Contract is not available'
-          );
-        }
-
-        // -- validate
-        if (!ethers.utils.isAddress(ownerAddress)) {
-          throw Error(`Given string is not a valid address "${ownerAddress}"`);
-        }
-
-        let total: any = await this.rateLimitNftContract.read.balanceOf(
-          ownerAddress
-        );
-        total = parseInt(total.toString());
-
-        const tokens = await asyncForEachReturn(
-          [...new Array(total)],
-          async (_: undefined, i: number) => {
-            if (!this.rateLimitNftContract) {
-              throw new InitError(
-                {
-                  info: {
-                    rateLimitNftContract: this.rateLimitNftContract,
-                  },
-                },
-                'Contract is not available'
-              );
-            }
-
-            const token =
-              await this.rateLimitNftContract.read.tokenOfOwnerByIndex(
-                ownerAddress,
-                i
-              );
-
-            const tokenIndex = parseInt(token.toString());
-
-            const URI =
-              await this.rateLimitNftContractUtils.read.getTokenURIByIndex(
-                tokenIndex
-              );
-
-            const capacity =
-              await this.rateLimitNftContractUtils.read.getCapacityByIndex(
-                tokenIndex
-              );
-
-            const isExpired = await this.rateLimitNftContract.read.isExpired(
-              tokenIndex
-            );
-
-            return {
-              tokenId: parseInt(token.toString()),
-              URI,
-              capacity,
-              isExpired,
-            };
-          }
-        );
-
-        return tokens;
-      },
-
-      /**
-       * getTokens: async (): Promise<any> => {
-       *
-       *  This function returns an array of all tokens that have been minted.
-       *
-       *  @returns {Promise<any>} - A promise that resolves to an array of token objects.
-       *
-       *  Example:
-       *
-       *  const tokens = await getTokens();
-       *  this.log(tokens);
-       *  // Output: [
-       *  //   {
-       *  //     tokenId: 1,
-       *  //     URI: 'https://tokens.com/1',
-       *  //     capacity: 100,
-       *  //     isExpired: false,
-       *  //   },
-       *  //   {
-       *  //     tokenId: 2,
-       *  //     URI: 'https://tokens.com/2',
-       *  //     capacity: 200,
-       *  //     isExpired: true,
-       *  //   },
-       *  //   ...
-       *  // ]
-       *
-       * }
-       */
-      getTokens: async (): Promise<any> => {
-        if (!this.connected) {
-          throw new InitError(
-            {
-              info: {
-                connected: this.connected,
-              },
-            },
-            'Contracts are not connected. Please call connect() first'
-          );
-        }
-
-        if (!this.rateLimitNftContract) {
-          throw new InitError(
-            {
-              info: {
-                rateLimitNftContract: this.rateLimitNftContract,
-              },
-            },
-            'Contract is not available'
-          );
-        }
-
-        const bigTotal: ethers.BigNumber =
-          await this.rateLimitNftContract.read.totalSupply();
-        const total = parseInt(bigTotal.toString());
-
-        const tokens = await asyncForEachReturn(
-          [...new Array(total)],
-          async (_: any, i: number) => {
-            if (!this.rateLimitNftContract) {
-              throw new InitError(
-                {
-                  info: {
-                    rateLimitNftContract: this.rateLimitNftContract,
-                  },
-                },
-                'Contract is not available'
-              );
-            }
-
-            const token = await this.rateLimitNftContract.read.tokenByIndex(i);
-
-            const tokenIndex = parseInt(token.toString());
-
-            const URI =
-              await this.rateLimitNftContractUtils.read.getTokenURIByIndex(
-                tokenIndex
-              );
-
-            const capacity =
-              await this.rateLimitNftContractUtils.read.getCapacityByIndex(
-                tokenIndex
-              );
-
-            const isExpired = await this.rateLimitNftContract.read.isExpired(
-              tokenIndex
-            );
-
-            return {
-              tokenId: parseInt(token.toString()),
-              URI,
-              capacity,
-              isExpired,
-            };
-          }
-        );
-
-        return tokens;
-      },
-    },
-    write: {
-      mint: async ({
-        txOpts,
-        timestamp,
-      }: {
-        txOpts: ethers.CallOverrides;
-        timestamp: number;
-      }) => {
-        if (!this.connected) {
-          throw new InitError(
-            {
-              info: {
-                connected: this.connected,
-              },
-            },
-            'Contracts are not connected. Please call connect() first'
-          );
-        }
-
-        if (!this.rateLimitNftContract) {
-          throw new InitError(
-            {
-              info: {
-                rateLimitNftContract: this.rateLimitNftContract,
-              },
-            },
-            'Contract is not available'
-          );
-        }
-
-        const tx = await this._callWithAdjustedOverrides(
-          this.rateLimitNftContract.write,
-          'mint',
-          [timestamp],
-          txOpts
-        );
-
-        const res = await tx.wait();
-
-        const tokenIdFromEvent = res.events?.[0].topics[1];
-
-        return { tx, tokenId: tokenIdFromEvent };
-      },
-      /**
-       * Transfer RLI token from one address to another
-       *
-       * @property { string } fromAddress
-       * @property { string } toAddress
-       * @property { string } RLITokenAddress
-       *
-       * @return { <Promise<void>> } void
-       */
-      transfer: async ({
-        fromAddress,
-        toAddress,
-        RLITokenAddress,
-      }: {
-        fromAddress: string;
-        toAddress: string;
-        RLITokenAddress: string;
-      }): Promise<ethers.ContractTransaction> => {
-        if (!this.connected) {
-          throw new InitError(
-            {
-              info: {
-                connected: this.connected,
-              },
-            },
-            'Contracts are not connected. Please call connect() first'
-          );
-        }
-
-        if (!this.rateLimitNftContract) {
-          throw new InitError(
-            {
-              info: {
-                rateLimitNftContract: this.rateLimitNftContract,
-              },
-            },
-            'Contract is not available'
-          );
-        }
-
-        const tx = await this._callWithAdjustedOverrides(
-          this.rateLimitNftContract.write,
-          'transferFrom',
-          [fromAddress, toAddress, RLITokenAddress]
-        );
-
-        this.log('tx:', tx);
-
-        // const res = await tx.wait();
-
-        // return {
-        //     tx,
-        //     events: res.events
-        // }
 
         return tx;
       },

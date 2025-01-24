@@ -203,9 +203,7 @@ export interface ExclusiveLitContractContext {
   PKPNFTMetadata: LitContract;
   PKPPermissions: LitContract;
   PubkeyRouter: LitContract;
-  RateLimitNFT: LitContract;
   Staking: LitContract;
-  StakingBalances: LitContract;
   PriceFeed: LitContract;
 }
 export interface LitContractContext extends ExclusiveLitContractContext {

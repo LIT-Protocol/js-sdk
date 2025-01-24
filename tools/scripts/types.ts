@@ -3,7 +3,6 @@ export * from './Multisender.sol/Multisender.ts';
 export * from './LITToken.sol/LITToken.ts';
 export * from './PubkeyRouter.sol/PubkeyRouter.ts';
 export * from './PKPNFT.sol/PKPNFT.ts';
-export * from './RateLimitNFT.sol/RateLimitNFT.ts';
 export * from './PKPHelper.sol/PKPHelper.ts';
 export * from './PKPPermissions.sol/PKPPermissions.ts';
 export * from './Allowlist.sol/Allowlist.ts';
