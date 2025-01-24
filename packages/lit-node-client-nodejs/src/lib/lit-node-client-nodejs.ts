@@ -1158,6 +1158,11 @@ export class LitNodeClientNodeJs
 
     const nodeSet = await this._getNodeSet();
 
+    // get the threshold number of nodes randomly
+    const thresholdNodeSet = nodeSet
+      .sort(() => Math.random() - 0.5)
+      .slice(0, this._getThreshold());
+
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
     const nodePromises = this.getNodePromises((url: string) => {
@@ -1178,7 +1183,7 @@ export class LitNodeClientNodeJs
             authMethods: params.authMethods,
           }),
 
-        nodeSet,
+        nodeSet: thresholdNodeSet,
         signingScheme: 'EcdsaK256Sha256',
       };
 
@@ -1195,7 +1200,7 @@ export class LitNodeClientNodeJs
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this._getThreshold()
+      thresholdNodeSet.length
     );
 
     // ========== Handle Response ==========
@@ -1209,7 +1214,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(
       requestId,
       'pkpSign responseData',
-      JSON.stringify(responseData, null, 2)
+      JSON.stringify(responseData)
     );
 
     // clean up the response data (as there are double quotes & snake cases in the response)
