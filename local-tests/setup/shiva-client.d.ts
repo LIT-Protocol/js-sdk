@@ -34,7 +34,6 @@ type TestNetCreateRequest = {
   existingConfigPath: string | null;
   which: string | null;
   ecdsaRoundTimeout: string | null;
-  enableRateLimiting: string | null;
 };
 
 type TestNetInfo = {

@@ -572,18 +572,11 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId = (
-      await this.contractsClient.mintCapacityCreditsNFT({
-        requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
-      })
-    ).capacityTokenIdStr;
-
     try {
       this.superCapacityDelegationAuthSig = (
         await this.litNodeClient.createCapacityDelegationAuthSig({
           dAppOwnerWallet: wallet,
-          capacityTokenId: capacityTokenId,
+          // capacityTokenId: capacityTokenId,
           // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
           uses: '200',
         })

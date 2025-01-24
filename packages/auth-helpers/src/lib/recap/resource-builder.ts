@@ -3,8 +3,8 @@ import { ILitResource } from '@lit-protocol/types';
 import {
   LitAccessControlConditionResource,
   LitActionResource,
+  LitPaymentDelegationResource,
   LitPKPResource,
-  LitRLIResource,
 } from '../resources';
 
 /**
@@ -20,7 +20,7 @@ builder
   .addLitActionExecutionRequest('*') // Lit Action Execution
   .addAccessControlConditionSigningRequest('*') // ACC Signing
   .addAccessControlConditionDecryptionRequest('*') // ACC Decryption
-  .addRateLimitIncreaseAuthRequest('*'); // RLI Authentication
+  .addPaymentDelegationRequest('*'); // Payment Delegation
 
 const requests = builder.build();
 
@@ -88,10 +88,10 @@ export class ResourceAbilityRequestBuilder {
    * @param resourceId - The ID of the resource.
    * @returns The builder instance.
    */
-  addRateLimitIncreaseAuthRequest(resourceId: string): this {
+  addPaymentDelegationRequest(resourceId: string): this {
     this.requests.push({
-      resource: new LitRLIResource(resourceId),
-      ability: LIT_ABILITY.RateLimitIncreaseAuth,
+      resource: new LitPaymentDelegationResource(resourceId),
+      ability: LIT_ABILITY.PaymentDelegation,
     });
     return this;
   }

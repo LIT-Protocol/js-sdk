@@ -1726,6 +1726,48 @@ export interface WithRecap extends BaseSiweMessage {
   resources: LitResourceAbilityRequest[];
 }
 
+export interface WithCapacityDelegation extends BaseSiweMessage {
+  uri: 'lit:capability:delegation';
+  litNodeClient: ILitNodeClient;
+  delegateeAddresses?: string[];
+  // paymentId?: string;
+  uses?: string;
+}
+
+export interface CapacityDelegationFields extends BaseSiweMessage {
+  litNodeClient: any;
+  delegateeAddresses?: string[];
+  uses?: string;
+}
+
+export interface CapacityDelegationRequest {
+  delegate_to?: string[]; // Optional array of modified address strings
+  uses?: string;
+}
+
+export interface CapacityCreditsReq {
+  dAppOwnerWallet: SignerLike;
+
+  /**
+   * 1. Provided: Restricts the use of the delegation to the addresses listed in the array. Only users whose addresses are included can utilize the delegated capabilities.
+   * 2. NOT Provided: The delegation is universally applicable to anyone. There are no restrictions on who can use the delegated capabilities.
+   * 3. Empty Array: No one is allowed to use the delegated capabilities since there are no valid user addresses specified.
+   */
+  delegateeAddresses?: string[];
+
+  // paymentId: string;
+
+  /**
+   * 1. Provided: Sets a limit on the number of times the delegation can be used. The function enforces this limit and prevents use beyond it.
+   * 2. NOT Provided: There is no limit on the number of times the delegation can be used.
+   * 3. Empty Array: Theoretically, an empty value for uses would mean no uses are possible, effectively disabling the delegation, but typically this scenario should either not be allowed by schema/logic or treated as zero, which also disables the delegation.
+   */
+  uses?: string;
+  domain?: string;
+  expiration?: string;
+  statement?: string;
+}
+
 export interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }

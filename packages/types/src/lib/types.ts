@@ -237,14 +237,14 @@ export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
 export type LitResourcePrefix =
   | 'lit-accesscontrolcondition'
   | 'lit-pkp'
-  | 'lit-ratelimitincrease'
+  | 'lit-paymentdelegation'
   | 'lit-litaction';
 
 export type LitAbility =
   | 'access-control-condition-decryption'
   | 'access-control-condition-signing'
   | 'pkp-signing'
-  | 'rate-limit-increase-auth'
+  | 'lit-payment-delegation'
   | 'lit-action-execution';
 
 export interface TokenInfo {

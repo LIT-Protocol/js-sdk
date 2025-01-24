@@ -1,7 +1,16 @@
-import { BaseSiweMessage, WithRecap } from '@lit-protocol/types';
+import {
+  BaseSiweMessage,
+  CapacityDelegationFields,
+  WithCapacityDelegation,
+  WithRecap,
+} from '@lit-protocol/types';
 import { SiweMessage } from 'siwe';
 
-import { addRecapToSiweMessage } from './siwe-helper';
+import {
+  addRecapToSiweMessage,
+  createCapacityCreditsResourceData,
+} from './siwe-helper';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 
 /**
  * Creates a SIWE
@@ -36,6 +45,33 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
   let siweMessage = new SiweMessage(siweParams);
 
+  // -- create a message with capacity credits
+  if (
+    'dAppOwnerWallet' in params || // required param
+    'uses' in params || // optional
+    'delegateeAddresses' in params // optional
+    // 'capacityTokenId' in params // optional
+  ) {
+    const ccParams = params as CapacityDelegationFields;
+
+    const capabilities = createCapacityCreditsResourceData(ccParams);
+
+    params.resources = [
+      {
+        // TODO: new resource to be used
+        //   resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
+        //   ability: LIT_ABILITY.RateLimitIncreaseAuth,
+
+        // @ts-ignore - TODO: new resource to be used
+        resource: null,
+
+        // @ts-ignore - TODO: new ability to be used
+        ability: null,
+        data: capabilities,
+      },
+    ];
+  }
+
   // -- add recap resources if needed
   if (params.resources) {
     siweMessage = await addRecapToSiweMessage({
@@ -57,6 +93,24 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 export const createSiweMessageWithRecaps = async (
   params: WithRecap
 ): Promise<string> => {
+  return createSiweMessage({
+    ...params,
+  });
+};
+
+/**
+ * Creates a SIWE message with capacity delegation.
+ * @param { WithCapacityDelegation } params - The parameters for creating the SIWE message.
+ * @returns A Promise that resolves to the created SIWE message.
+ * @throws An error if litNodeClient is not provided.
+ */
+export const createSiweMessageWithCapacityDelegation = async (
+  params: WithCapacityDelegation
+) => {
+  if (!params.litNodeClient) {
+    throw new Error('litNodeClient is required');
+  }
+
   return createSiweMessage({
     ...params,
   });

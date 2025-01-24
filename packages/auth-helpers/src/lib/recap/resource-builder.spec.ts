@@ -2,8 +2,8 @@ import { LIT_ABILITY } from '@lit-protocol/constants';
 import {
   LitAccessControlConditionResource,
   LitActionResource,
+  LitPaymentDelegationResource,
   LitPKPResource,
-  LitRLIResource,
 } from '../resources';
 import { ResourceAbilityRequestBuilder } from './resource-builder';
 
@@ -42,7 +42,7 @@ describe('ResourceAbilityRequestBuilder', () => {
       .addLitActionExecutionRequest('456') // Lit Action Execution
       .addAccessControlConditionSigningRequest('789') // ACC Signing
       .addAccessControlConditionDecryptionRequest('abc') // ACC Decryption
-      .addRateLimitIncreaseAuthRequest('def'); // RLI Authentication
+      .addPaymentDelegationRequest('def'); // Payment Delegation
 
     const requests = builder.build();
     expect(JSON.stringify(requests)).toBe(
@@ -64,8 +64,8 @@ describe('ResourceAbilityRequestBuilder', () => {
           ability: LIT_ABILITY.AccessControlConditionDecryption,
         },
         {
-          resource: new LitRLIResource('def'),
-          ability: LIT_ABILITY.RateLimitIncreaseAuth,
+          resource: new LitPaymentDelegationResource('def'),
+          ability: LIT_ABILITY.PaymentDelegation,
         },
       ])
     );

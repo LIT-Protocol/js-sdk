@@ -8,8 +8,10 @@ import {
   LitResourceAbilityRequest,
   RecapSessionCapabilityObject,
   createSiweMessage,
+  createSiweMessageWithCapacityDelegation,
   createSiweMessageWithRecaps,
   decode,
+  generateAuthSig,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
@@ -87,6 +89,8 @@ import type {
   AuthCallbackParams,
   AuthSig,
   BlsResponseData,
+  CapacityCreditsReq,
+  CapacityCreditsRes,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -153,7 +157,62 @@ export class LitNodeClientNodeJs
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
   }
-  // ========== Scoped Class Helpers ==========
+  // ========== Payment Delegation ==========
+  createCapacityDelegationAuthSig = async (
+    params: CapacityCreditsReq
+  ): Promise<CapacityCreditsRes> => {
+    // -- validate
+    if (!params.dAppOwnerWallet) {
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'dAppOwnerWallet must exist'
+      );
+    }
+
+    // Useful log for debugging
+    if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
+      log(
+        `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
+      );
+    }
+
+    // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
+    // usage to a list of delegatee addresses
+    const dAppOwnerWalletAddress = ethers.utils.getAddress(
+      await params.dAppOwnerWallet.getAddress()
+    );
+
+    // -- if it's not ready yet, then connect
+    if (!this.ready) {
+      await this.connect();
+    }
+
+    const siweMessage = await createSiweMessageWithCapacityDelegation({
+      uri: 'lit:capability:delegation',
+      litNodeClient: this,
+      walletAddress: dAppOwnerWalletAddress,
+      nonce: await this.getLatestBlockhash(),
+      expiration: params.expiration,
+      domain: params.domain,
+      statement: params.statement,
+
+      // -- capacity delegation specific configuration
+      uses: params.uses,
+      delegateeAddresses: params.delegateeAddresses,
+      // paymentId: params.paymentId,
+    });
+
+    const authSig = await generateAuthSig({
+      signer: params.dAppOwnerWallet,
+      toSign: siweMessage,
+    });
+
+    return { capacityDelegationAuthSig: authSig };
+  };
 
   /**
    *
