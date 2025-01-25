@@ -170,6 +170,13 @@ export class LitNodeClientNodeJs
         'dAppOwnerWallet must exist'
       );
     }
+    // Viem client compatibility
+    if( 'undefined' !== typeof params.dAppOwnerWallet.account ){
+        params.dAppOwnerWallet = new ethers.Wallet(
+            '0x'+params.dAppOwnerWallet.account.getHdKey().privKey.toString(16),
+            new ethers.providers.JsonRpcProvider(params.dAppOwnerWallet.transport.url)
+        );
+    }
 
     // Useful log for debugging
     if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
