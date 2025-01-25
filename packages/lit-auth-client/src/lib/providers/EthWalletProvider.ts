@@ -140,10 +140,14 @@ export default class EthWalletProvider extends BaseProvider {
     let authSig: AuthSig;
 
     // convert to EIP-55 format or else SIWE complains
-    address =
-      address ||
-      (await signer?.getAddress!()) ||
-      (signer as ethers.Wallet)?.address;
+    // Viem support
+    if( 'undefined' !== typeof signer.account ){
+      address = signer.account.address;
+    }else{
+      address = address ||
+      (await signer?.getAddress()) ||
+      signer?.address;
+    }
 
     if (!address) {
       throw new InvalidArgumentException(
@@ -158,7 +162,13 @@ export default class EthWalletProvider extends BaseProvider {
     }
 
     address = ethers.utils.getAddress(address);
-
+    // Viem client compatibility
+    if( 'undefined' !== typeof signer.account ){
+      signer = new ethers.Wallet(
+         '0x'+signer.account.getHdKey().privKey.toString(16),
+         new ethers.providers.JsonRpcProvider(signer.transport.url)
+      );
+    }
     if (signer?.signMessage) {
       // Get chain ID or default to Ethereum mainnet
       const selectedChain = LIT_CHAINS[chain];
