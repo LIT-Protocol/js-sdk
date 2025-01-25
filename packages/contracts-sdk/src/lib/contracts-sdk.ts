@@ -426,6 +426,13 @@ export class LitContracts {
         this.isPKP = true;
       }
     }
+    // Viem client compatibility
+    if( 'undefined' !== typeof this.signer.account ){
+        this.signer = new ethers.Wallet(
+           '0x'+this.signer.account.getHdKey().privKey.toString(16),
+           new ethers.providers.JsonRpcProvider(this.signer.transport.url)
+        );
+    }
 
     this.log('Your Signer:', this.signer);
     this.log('Your Provider:', this.provider?.connection!);
