@@ -29,6 +29,14 @@ export const generateAuthSig = async ({
     throw new Error('signer does not have a signMessage method');
   }
 
+  // Viem client compatibility
+  if('undefined' !== typeof signer.account){        
+    signer = new ethers.Wallet(
+      '0x'+signer.account.getHdKey().privKey.toString(16),
+      new ethers.providers.JsonRpcProvider(signer.transport.url)
+    );
+  }
+
   const signature = await signer.signMessage(toSign);
 
   // If address is not provided, derive it from the signer
