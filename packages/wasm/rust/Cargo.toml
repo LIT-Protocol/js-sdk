@@ -16,6 +16,7 @@ crate-type = ["cdylib", "rlib"]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 blsful = { version = "3.0.0-pre8", default-features = false, features = ["rust"] }
 ecdsa = "0.16.9"
+generic-array = "1.1.1"
 lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git", features = ["verify_only"] }
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
