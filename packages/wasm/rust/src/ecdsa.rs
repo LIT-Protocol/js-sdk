@@ -169,7 +169,11 @@ where
         Ok((r, s, v))
     }
 
-    fn signature_into_js(big_r: C::AffinePoint, s: C::Scalar, was_flipped: bool) -> JsResult<EcdsaSignature> {
+    fn signature_into_js(
+        big_r: C::AffinePoint,
+        s: C::Scalar,
+        was_flipped: bool,
+    ) -> JsResult<EcdsaSignature> {
         let r = Self::x_coordinate(&big_r).to_repr();
         let s = s.to_repr();
         let mut v = u8::conditional_select(&0, &1, big_r.y_is_odd());

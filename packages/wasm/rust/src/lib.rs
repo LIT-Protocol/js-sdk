@@ -1,5 +1,6 @@
 pub mod abi;
 pub mod bls;
+mod combine;
 pub mod ecdsa;
 pub mod sev_snp;
 
