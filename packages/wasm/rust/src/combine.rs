@@ -468,7 +468,7 @@ where
     <ecdsa::VerifyingKey<C> as PrehashVerifier<Signature<C>>>::verify_prehash(
         &vk, &message, &signature,
     )
-    .map_err(|_| JsError::new("ecdsa verification failed"))?;
+    .map_err(|_| JsError::new("ecdsa signature verification failed"))?;
 
     let digest_bytes = hex::decode(&shares[0].digest).map_err(|_| JsError::new("digest"))?;
     let rid = RecoveryId::trial_recovery_from_prehash(&vk, &digest_bytes, &signature)
