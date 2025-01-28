@@ -1,5 +1,8 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LitResourceAbilityRequest } from '@lit-protocol/types';
+import {
+  type GetPkpSessionSigs,
+  LitResourceAbilityRequest,
+} from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import {
   LIT_ABILITY,
@@ -8,20 +11,14 @@ import {
 import { TinnyEnvironment } from '../tinny-environment';
 import { TinnyPerson } from '../tinny-person';
 
-export const getPkpSessionSigs = async (
+export const getPkpAuthContext = (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[],
   expiration?: string
-) => {
+): Omit<GetPkpSessionSigs, 'product'> => {
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
-
-  if (centralisation === 'decentralised') {
-    console.warn(
-      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
-    );
-  }
 
   // Use default resourceAbilityRequests if not provided
   const _resourceAbilityRequests = resourceAbilityRequests || [
@@ -35,7 +32,7 @@ export const getPkpSessionSigs = async (
     },
   ];
 
-  const pkpSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+  const authContext = {
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
     expiration,
@@ -44,9 +41,9 @@ export const getPkpSessionSigs = async (
     ...(centralisation === 'decentralised' && {
       capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
     }),
-  });
+  };
 
-  log('[getPkpSessionSigs]: ', pkpSessionSigs);
+  log('[getPkpAuthContext]: ', authContext);
 
-  return pkpSessionSigs;
+  return authContext;
 };
