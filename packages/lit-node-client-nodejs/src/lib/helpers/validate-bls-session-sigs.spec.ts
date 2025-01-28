@@ -30,13 +30,13 @@ describe('BlsSessionSigVerify', () => {
     expect(
       await blsSessionSigVerify(
         async (
-          publicKey: String,
+          publicKey: string,
           message: Uint8Array,
-          signature: Uint8Array
+          signature: string
         ): Promise<void> => {
           expect(typeof publicKey).toBe('string');
-          expect(typeof message).toBe('object');
-          expect(typeof signature).toBe('object');
+          expect(message).toBeInstanceOf(Buffer);
+          expect(typeof signature).toBe('string');
         },
         networkPubKey,
         authSig,
@@ -55,6 +55,7 @@ describe('BlsSessionSigVerify', () => {
           expirationTime: new Date(
             Date.now() + 1000 * 60 * 60 * 24 * 7
           ).toISOString(),
+          issuedAt: new Date(Date.now()).toISOString(),
           notBefore: new Date(Date.now()).toISOString(),
         })
       )
