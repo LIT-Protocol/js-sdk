@@ -190,14 +190,17 @@ export abstract class BaseProvider {
     }
 
     try {
-      const pkpPermissions = litContracts.pkpPermissionsContract;
-      const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
+      const pkpPermissions = await LitContracts.getLitContract(
+        this.litNodeClient.config.litNetwork,
+        'PKPPermissions'
+      );
+      const tokenIds = await pkpPermissions['getTokenIdsForAuthMethod'](
         authMethodType,
         authMethodId
       );
       const pkps: IRelayPKP[] = [];
       for (const tokenId of tokenIds) {
-        const pubkey = await pkpPermissions.read.getPubkey(tokenId);
+        const pubkey = await pkpPermissions['getPubkey'](tokenId);
         if (pubkey) {
           const ethAddress = ethers.utils.computeAddress(pubkey);
           pkps.push({

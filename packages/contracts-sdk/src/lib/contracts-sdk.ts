@@ -1,5 +1,12 @@
 /* eslint-disable import/order */
-import { isBrowser, isNode, log } from '@lit-protocol/misc';
+import {
+  Abi,
+  AbiFunction,
+  AbiParametersToPrimitiveTypes,
+  ExtractAbiFunction,
+  ExtractAbiFunctionNames,
+} from 'abitype';
+import { derivedAddresses, isBrowser, isNode, log } from '@lit-protocol/misc';
 import {
   ContractName,
   CreateCustomAuthMethodRequest,
@@ -11,36 +18,12 @@ import {
   MintNextAndAddAuthMethods,
   MintWithAuthParams,
   MintWithAuthResponse,
+  TokenInfo,
   PriceFeedInfo,
+  LitContract,
 } from '@lit-protocol/types';
 import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
 import { decToHex, hexToDec, intToIP } from './hex2dec';
-
-// ----- autogen:import-data:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
-import { AllowlistData } from '../abis/Allowlist.sol/AllowlistData';
-import { LITTokenData } from '../abis/LITToken.sol/LITTokenData';
-import { MultisenderData } from '../abis/Multisender.sol/MultisenderData';
-import { PKPHelperData } from '../abis/PKPHelper.sol/PKPHelperData';
-import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
-import { PKPNFTMetadataData } from '../abis/PKPNFTMetadata.sol/PKPNFTMetadataData';
-import { PKPPermissionsData } from '../abis/PKPPermissions.sol/PKPPermissionsData';
-import { PubkeyRouterData } from '../abis/PubkeyRouter.sol/PubkeyRouterData';
-import { StakingData } from '../abis/Staking.sol/StakingData';
-// ----- autogen:import-data:end  -----
-
-// ----- autogen:imports:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
-import * as allowlistContract from '../abis/Allowlist.sol/Allowlist';
-import * as litTokenContract from '../abis/LITToken.sol/LITToken';
-import * as multisenderContract from '../abis/Multisender.sol/Multisender';
-import * as pkpHelperContract from '../abis/PKPHelper.sol/PKPHelper';
-import * as pkpNftContract from '../abis/PKPNFT.sol/PKPNFT';
-import * as pkpNftMetadataContract from '../abis/PKPNFTMetadata.sol/PKPNFTMetadata';
-import * as pkpPermissionsContract from '../abis/PKPPermissions.sol/PKPPermissions';
-import * as pubkeyRouterContract from '../abis/PubkeyRouter.sol/PubkeyRouter';
-import * as stakingContract from '../abis/Staking.sol/Staking';
-// ----- autogen:imports:end  -----
 
 import {
   AUTH_METHOD_SCOPE_VALUES,
@@ -61,10 +44,7 @@ import {
   WrongNetworkException,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
-import { derivedAddresses } from '@lit-protocol/misc';
-import { TokenInfo } from '@lit-protocol/types';
 import { computeAddress } from 'ethers/lib/utils';
-import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
@@ -80,6 +60,10 @@ declare global {
   interface Window {
     ethereum: any;
   }
+}
+
+function _decimalToHex(decimal: number): string {
+  return '0x' + decimal.toString(16);
 }
 
 // Due to the usage of arbitrum stylus contracts the gas limit is increased by 10% to avoid reverts due to out of gas errors
@@ -120,54 +104,7 @@ export class LitContracts {
   ];
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
-  // ----- autogen:declares:start  -----
-  // Generated at 2023-11-07T01:50:52.460Z
-  allowlistContract: {
-    read: allowlistContract.Allowlist;
-    write: allowlistContract.Allowlist;
-  };
 
-  litTokenContract: {
-    read: litTokenContract.LITToken;
-    write: litTokenContract.LITToken;
-  };
-
-  multisenderContract: {
-    read: multisenderContract.Multisender;
-    write: multisenderContract.Multisender;
-  };
-
-  pkpHelperContract: {
-    read: pkpHelperContract.PKPHelper;
-    write: pkpHelperContract.PKPHelper;
-  };
-
-  pkpNftContract: {
-    read: pkpNftContract.PKPNFT;
-    write: pkpNftContract.PKPNFT;
-  };
-
-  pkpNftMetadataContract: {
-    read: pkpNftMetadataContract.PKPNFTMetadata;
-    write: pkpNftMetadataContract.PKPNFTMetadata;
-  };
-
-  pkpPermissionsContract: {
-    read: pkpPermissionsContract.PKPPermissions;
-    write: pkpPermissionsContract.PKPPermissions;
-  };
-
-  pubkeyRouterContract: {
-    read: pubkeyRouterContract.PubkeyRouter;
-    write: pubkeyRouterContract.PubkeyRouter;
-  };
-
-  stakingContract: {
-    read: stakingContract.Staking;
-    write: stakingContract.Staking;
-  };
-
-  // ----- autogen:declares:end  -----
   // make the constructor args optional
   constructor(args?: {
     provider?: ethers.providers.StaticJsonRpcProvider | any;
@@ -202,19 +139,6 @@ export class LitContracts {
     if (!this.rpcs) {
       this.rpcs = [this.rpc];
     }
-
-    // ----- autogen:blank-init:start  -----
-    // Generated at 2023-11-07T01:50:52.460Z
-    this.allowlistContract = {} as any;
-    this.litTokenContract = {} as any;
-    this.multisenderContract = {} as any;
-    this.pkpHelperContract = {} as any;
-    this.pkpNftContract = {} as any;
-    this.pkpNftMetadataContract = {} as any;
-    this.pkpPermissionsContract = {} as any;
-    this.pubkeyRouterContract = {} as any;
-    this.stakingContract = {} as any;
-    // ----- autogen:blank-init:end  -----
   }
 
   /**
@@ -222,7 +146,7 @@ export class LitContracts {
    *
    * @param {any} [args] An optional value to log with the message.
    */
-  log = (...args: any) => {
+  log = (...args: any[]) => {
     if (this.debug) {
       LitContracts.logger.debug(...args);
     }
@@ -257,10 +181,6 @@ export class LitContracts {
           },
           msg
         );
-      }
-
-      function _decimalToHex(decimal: number): string {
-        return '0x' + decimal.toString(16);
       }
 
       const chainInfo = METAMASK_CHAIN_INFO_BY_NETWORK[this.network];
@@ -379,172 +299,181 @@ export class LitContracts {
   // ***********************************************************************************************
         `);
 
-        // @ts-ignore
         this.provider = this.signer.rpcProvider;
         this.isPKP = true;
       }
     }
 
     this.log('Your Signer:', this.signer);
-    this.log('Your Provider:', this.provider?.connection!);
+    this.log('Your Provider:', this.provider?.connection);
 
     if (!this.provider) {
       this.log('No provider found. Will try to use the one from the signer.');
       this.provider = this.signer.provider;
-      this.log('Your Provider(from signer):', this.provider?.connection!);
+      this.log('Your Provider(from signer):', this.provider?.connection);
     }
 
-    const addresses: any = await LitContracts.getContractAddresses(
-      this.network,
-      this.customContext?.provider ?? this.provider,
-      this.customContext
-    );
-
-    const logAddresses = Object.entries(addresses).reduce(
-      (output, [key, val]) => {
-        // @ts-expect-error since the object hash returned by `getContractAddresses` is `any`, we have no types here
-        output[key] = val.address;
-        return output;
-      },
-      {}
-    );
-
-    this.log('resolved contract addresses for: ', this.network, logAddresses);
-
-    if (addresses.Allowlist.abi) {
-      this.allowlistContract = {
-        read: new ethers.Contract(
-          addresses.Allowlist.address,
-          addresses.Allowlist.abi as any,
-          this.provider
-        ) as allowlistContract.Allowlist,
-        write: new ethers.Contract(
-          addresses.Allowlist.address,
-          addresses.Allowlist.abi as any,
-          this.signer
-        ) as allowlistContract.Allowlist,
-      };
-    }
-
-    if (addresses.LITToken.abi) {
-      this.litTokenContract = {
-        read: new ethers.Contract(
-          addresses.LITToken.address,
-          addresses.LITToken.abi as ethers.ContractInterface,
-          this.provider
-        ) as litTokenContract.LITToken,
-        write: new ethers.Contract(
-          addresses.LITToken.address,
-          addresses.LITToken.abi as ethers.ContractInterface,
-          this.signer
-        ) as litTokenContract.LITToken,
-      };
-    }
-
-    if (addresses.Multisender.abi) {
-      this.multisenderContract = {
-        read: new ethers.Contract(
-          addresses.Multisender.address,
-          addresses.Multisender.abi as ethers.ContractInterface,
-          this.provider
-        ) as multisenderContract.Multisender,
-        write: new ethers.Contract(
-          addresses.Multisender.address,
-          addresses.Multisender.abi as ethers.ContractInterface,
-          this.signer
-        ) as multisenderContract.Multisender,
-      };
-    }
-    if (addresses.PKPHelper.abi) {
-      this.pkpHelperContract = {
-        read: new ethers.Contract(
-          addresses.PKPHelper.address,
-          addresses.PKPHelper.abi as ethers.ContractInterface,
-          this.provider
-        ) as pkpHelperContract.PKPHelper,
-        write: new ethers.Contract(
-          addresses.PKPHelper.address,
-          addresses.PKPHelper.abi as any,
-          this.signer
-        ) as pkpHelperContract.PKPHelper,
-      };
-    }
-
-    if (addresses.PKPNFT.abi) {
-      this.pkpNftContract = {
-        read: new ethers.Contract(
-          addresses.PKPNFT.address,
-          addresses.PKPNFT.abi as any,
-          this.provider
-        ) as pkpNftContract.PKPNFT,
-        write: new ethers.Contract(
-          addresses.PKPNFT.address,
-          addresses.PKPNFT.abi as any,
-          this.signer
-        ) as pkpNftContract.PKPNFT,
-      };
-    }
-    if (addresses.PKPNFTMetadata.abi) {
-      this.pkpNftMetadataContract = {
-        read: new ethers.Contract(
-          addresses.PKPNFTMetadata.address,
-          addresses.PKPNFTMetadata.abi as any,
-          this.provider
-        ) as pkpNftMetadataContract.PKPNFTMetadata,
-        write: new ethers.Contract(
-          addresses.PKPNFTMetadata.address,
-          addresses.PKPNFTMetadata.abi as any,
-          this.signer
-        ) as pkpNftMetadataContract.PKPNFTMetadata,
-      };
-    }
-
-    if (addresses.PKPPermissions.abi) {
-      this.pkpPermissionsContract = {
-        read: new ethers.Contract(
-          addresses.PKPPermissions.address,
-          addresses.PKPPermissions.abi as any,
-          this.provider
-        ) as pkpPermissionsContract.PKPPermissions,
-        write: new ethers.Contract(
-          addresses.PKPPermissions.address,
-          addresses.PKPPermissions.abi as any,
-          this.signer
-        ) as pkpPermissionsContract.PKPPermissions,
-      };
-    }
-
-    if (addresses.PubkeyRouter.abi) {
-      this.pubkeyRouterContract = {
-        read: new ethers.Contract(
-          addresses.PubkeyRouter.address,
-          addresses.PubkeyRouter.abi as any,
-          this.provider
-        ) as pubkeyRouterContract.PubkeyRouter,
-        write: new ethers.Contract(
-          addresses.PubkeyRouter.address,
-          addresses.PubkeyRouter.abi as any,
-          this.signer
-        ) as pubkeyRouterContract.PubkeyRouter,
-      };
-    }
-
-    if (addresses.Staking.abi) {
-      this.stakingContract = {
-        read: new ethers.Contract(
-          addresses.Staking.address,
-          addresses.Staking.abi as any,
-          this.provider
-        ) as stakingContract.Staking,
-        write: new ethers.Contract(
-          addresses.Staking.address,
-          addresses.Staking.abi as any,
-          this.signer
-        ) as stakingContract.Staking,
-      };
-    }
     this.connected = true;
   };
+
+  public static resolveLitContract(
+    network: LIT_NETWORKS_KEYS,
+    contractName: ContractName,
+    index = 0
+  ) {
+    const networkContext = NETWORK_CONTEXT_BY_NETWORK[network];
+    const networkData = networkContext.data.find((data) => {
+      return data.name === contractName;
+    });
+    const contractData = networkData?.contracts[index];
+
+    if (!contractData) {
+      throw new WrongNetworkException(
+        {
+          info: {
+            network,
+            contractName,
+            contractData,
+            index,
+          },
+        },
+        'Network or contract data not found'
+      );
+    }
+
+    return contractData;
+  }
+
+  public static async callContract<
+    LitAbi extends Abi,
+    LitFunction extends ExtractAbiFunctionNames<LitAbi>,
+    LitAbiFunction extends AbiFunction = ExtractAbiFunction<LitAbi, LitFunction>
+  >(config: {
+    abi: LitAbi;
+    address: string;
+    functionName: LitFunction;
+    args: AbiParametersToPrimitiveTypes<LitAbiFunction['inputs'], 'inputs'>;
+    signerOrProvider: ethers.Signer | ethers.providers.JsonRpcProvider;
+  }): Promise<
+    AbiParametersToPrimitiveTypes<LitAbiFunction['outputs'], 'outputs'>
+  > {
+    const contract = new ethers.Contract(
+      config.address,
+      config.abi as ethers.ContractInterface,
+      config.signerOrProvider
+    );
+
+    return contract[config.functionName](...config.args) as Promise<
+      AbiParametersToPrimitiveTypes<LitAbiFunction['outputs'], 'outputs'>
+    >;
+  }
+
+  /**
+   * Retrieves any Lit contract instance based on the provided network, context, and RPC URL.
+   * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
+   * If a resolver address is present in the context, it retrieves the Lit contract from the contract resolver instance.
+   * Otherwise, it retrieves the Lit contract using the contract address and ABI.
+   * Throws an error if required contract data is missing or if the Lit contract cannot be obtained.
+   *
+   * @param network - The network key.
+   * @param litContractName - The Lit contract name
+   * @param rpcUrl - The RPC URL.
+   * @param context - The contract context or contract resolver context.
+   * @returns The Lit contract instance.
+   * @throws Error if required contract data is missing or if the Lit contract cannot be obtained.
+   */
+  public static async getLitContract(
+    network: LIT_NETWORKS_KEYS,
+    litContractName: ContractName,
+    rpcUrl = RPC_URL_BY_NETWORK[network],
+    context?: LitContractContext | LitContractResolverContext
+  ): Promise<ethers.Contract> {
+    let provider: ethers.providers.StaticJsonRpcProvider;
+
+    if (context && 'provider' in context!) {
+      provider = context.provider;
+    } else {
+      provider = new ethers.providers.StaticJsonRpcProvider({
+        url: rpcUrl,
+        skipFetchSetup: true,
+      });
+    }
+
+    if (!context) {
+      const litContract = LitContracts._getContractData(
+        network,
+        litContractName
+      );
+      const { address, abi } = litContract;
+
+      // Validate the required data
+      if (!address || !abi) {
+        throw new InitError(
+          {
+            info: {
+              address,
+              abi,
+              network,
+            },
+          },
+          '❌ Required contract data is missing for %s',
+          litContractName
+        );
+      }
+
+      return new ethers.Contract(address, abi, provider);
+    } else {
+      if (!context.resolverAddress) {
+        const litContract = (context as LitContractContext)[litContractName];
+
+        if (!litContract.address || !litContract.abi) {
+          throw new InitError(
+            {
+              info: {
+                litContract,
+                context,
+              },
+            },
+            '❌ Could not get %s contract address or abi from contract context',
+            litContractName
+          );
+        }
+        return new ethers.Contract(
+          litContract.address,
+          litContract.abi,
+          provider
+        );
+      } else {
+        const contractContext = await LitContracts._getContractsFromResolver(
+          context as LitContractResolverContext,
+          provider,
+          [litContractName]
+        );
+
+        const contractAddress = contractContext[litContractName].address;
+        const contractABI =
+          contractContext[litContractName].abi ||
+          LitContracts._getContractData(network, litContractName).abi;
+
+        if (!contractAddress || !contractABI) {
+          throw new InitError(
+            {
+              info: {
+                context,
+                contractABI,
+                contractAddress,
+                contractContext,
+              },
+            },
+            '❌ Could not get %s contract from contract resolver instance',
+            litContractName
+          );
+        }
+
+        return new ethers.Contract(contractAddress, contractABI, provider);
+      }
+    }
+  }
 
   /**
    * Retrieves the PriceFeed contract instance based on the provided network, context, and RPC URL.
@@ -564,101 +493,7 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
-    let provider: ethers.providers.StaticJsonRpcProvider;
-
-    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
-
-    if (context && 'provider' in context!) {
-      provider = context.provider;
-    } else {
-      provider = new ethers.providers.StaticJsonRpcProvider({
-        url: _rpcUrl,
-        skipFetchSetup: true,
-      });
-    }
-
-    if (!context) {
-      const contractData = await LitContracts._resolveContractContext(network);
-
-      const priceFeedContract = contractData.find(
-        (item: { name: string }) => item.name === 'PriceFeed'
-      );
-      const { address, abi } = priceFeedContract!;
-
-      // Validate the required data
-      if (!address || !abi) {
-        throw new InitError(
-          {
-            info: {
-              address,
-              abi,
-              network,
-            },
-          },
-          '❌ Required contract data is missing for PriceFeed'
-        );
-      }
-
-      return new ethers.Contract(address, abi, provider);
-    } else {
-      if (!context.resolverAddress) {
-        const priceFeedContract = (context as LitContractContext).PriceFeed;
-
-        if (!priceFeedContract.address) {
-          throw new InitError(
-            {
-              info: {
-                priceFeedContract,
-                context,
-              },
-            },
-            '❌ Could not get PriceFeed contract address from contract context'
-          );
-        }
-        return new ethers.Contract(
-          priceFeedContract.address,
-
-          // FIXME: NOTE!! PriceFeedData.abi is not used since we don't use the imported ABIs in this package.
-          // We should remove all imported ABIs and exclusively use NETWORK_CONTEXT_BY_NETWORK to retrieve ABIs for all other contracts.
-
-          // old convention: priceFeedContract.abi ?? PriceFeedData.abi
-
-          // new convention
-          priceFeedContract.abi,
-          provider
-        );
-      } else {
-        const contractContext = await LitContracts._getContractsFromResolver(
-          context as LitContractResolverContext,
-          provider,
-          ['PriceFeed']
-        );
-
-        if (!contractContext.PriceFeed.address) {
-          throw new InitError(
-            {
-              info: {
-                contractContext,
-                context,
-              },
-            },
-            '❌ Could not get PriceFeed contract from contract resolver instance'
-          );
-        }
-
-        const priceFeedABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
-          (data: any) => {
-            return data.name === 'PriceFeed';
-          }
-        );
-
-        return new ethers.Contract(
-          contractContext.PriceFeed.address,
-          contractContext.PriceFeed.abi ?? priceFeedABI?.contracts[0].ABI,
-          provider
-        );
-      }
-    }
+    return this.getLitContract(network, 'PriceFeed', rpcUrl, context);
   }
 
   /**
@@ -679,100 +514,7 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
-    let provider: ethers.providers.StaticJsonRpcProvider;
-
-    const _rpcUrl = rpcUrl || RPC_URL_BY_NETWORK[network];
-
-    if (context && 'provider' in context!) {
-      provider = context.provider;
-    } else {
-      provider = new ethers.providers.StaticJsonRpcProvider({
-        url: _rpcUrl,
-        skipFetchSetup: true,
-      });
-    }
-
-    if (!context) {
-      const contractData = await LitContracts._resolveContractContext(
-        network
-        //context
-      );
-
-      const stakingContract = contractData.find(
-        (item: { name: string }) => item.name === 'Staking'
-      );
-      const { address, abi } = stakingContract!;
-
-      // Validate the required data
-      if (!address || !abi) {
-        throw new InitError(
-          {
-            info: {
-              address,
-              abi,
-              network,
-            },
-          },
-          '❌ Required contract data is missing'
-        );
-      }
-
-      return new ethers.Contract(address, abi, provider);
-    } else {
-      // if we have contract context then we determine if there exists a `resolverAddress`
-      // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
-      if (!context.resolverAddress) {
-        const stakingContract = (context as LitContractContext).Staking;
-
-        if (!stakingContract.address) {
-          throw new InitError(
-            {
-              info: {
-                stakingContract,
-                context,
-              },
-            },
-            '❌ Could not get staking contract address from contract context'
-          );
-        }
-
-        return new ethers.Contract(
-          stakingContract.address,
-          stakingContract.abi ?? StakingData.abi,
-          provider
-        );
-      } else {
-        const contractContext = await LitContracts._getContractsFromResolver(
-          context as LitContractResolverContext,
-          provider,
-          ['Staking']
-        );
-        if (!contractContext.Staking.address) {
-          throw new InitError(
-            {
-              info: {
-                contractContext,
-                context,
-              },
-            },
-            '❌ Could not get Staking Contract from contract resolver instance'
-          );
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore data is callable as an array type
-        const stakingABI = NETWORK_CONTEXT_BY_NETWORK[network].data.find(
-          (data: any) => {
-            return data.name === 'Staking';
-          }
-        );
-
-        return new ethers.Contract(
-          contractContext.Staking.address,
-          contractContext.Staking.abi ?? stakingABI?.contracts[0].ABI,
-          provider
-        );
-      }
-    }
+    return this.getLitContract(network, 'Staking', rpcUrl, context);
   }
 
   private static async _getContractsFromResolver(
@@ -787,12 +529,12 @@ export class LitContracts {
     );
 
     const getContract = async function (
-      contract: keyof LitContractContext,
+      contract: ContractName,
       environment: number
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
-        case 'Allowlist' || 'AllowList':
+        case 'Allowlist':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
             environment
@@ -898,7 +640,7 @@ export class LitContracts {
       }
       contractData = flatten;
     } else {
-      contractData = await LitContracts._resolveContractContext(network);
+      contractData = LitContracts._resolveContractContext(network);
     }
 
     // Destructure the data for easier access
@@ -908,47 +650,47 @@ export class LitContracts {
         case 'Allowlist':
           addresses.Allowlist = {};
           addresses.Allowlist.address = contract.address;
-          addresses.Allowlist.abi = contract.abi ?? AllowlistData.abi;
+          addresses.Allowlist.abi = contract.abi;
           break;
         case 'PKPHelper':
           addresses.PKPHelper = {};
           addresses.PKPHelper.address = contract.address;
-          addresses.PKPHelper.abi = contract?.abi ?? PKPHelperData.abi;
+          addresses.PKPHelper.abi = contract.abi;
           break;
         case 'PKPNFT':
           addresses.PKPNFT = {};
           addresses.PKPNFT.address = contract.address;
-          addresses.PKPNFT.abi = contract?.abi ?? PKPNFTData.abi;
+          addresses.PKPNFT.abi = contract.abi;
           break;
         case 'Staking':
           addresses.Staking = {};
           addresses.Staking.address = contract.address;
-          addresses.Staking.abi = contract.abi ?? StakingData.abi;
+          addresses.Staking.abi = contract.abi;
           break;
         case 'PKPPermissions':
           addresses.PKPPermissions = {};
           addresses.PKPPermissions.address = contract.address;
-          addresses.PKPPermissions.abi = contract.abi ?? PKPPermissionsData.abi;
+          addresses.PKPPermissions.abi = contract.abi;
           break;
         case 'PKPNFTMetadata':
           addresses.PKPNFTMetadata = {};
           addresses.PKPNFTMetadata.address = contract.address;
-          addresses.PKPNFTMetadata.abi = contract.abi ?? PKPNFTMetadataData.abi;
+          addresses.PKPNFTMetadata.abi = contract.abi;
           break;
         case 'PubkeyRouter':
           addresses.PubkeyRouter = {};
           addresses.PubkeyRouter.address = contract.address;
-          addresses.PubkeyRouter.abi = contract?.abi ?? PubkeyRouterData.abi;
+          addresses.PubkeyRouter.abi = contract?.abi;
           break;
         case 'LITToken':
           addresses.LITToken = {};
           addresses.LITToken.address = contract.address;
-          addresses.LITToken.abi = contract?.abi ?? LITTokenData.abi;
+          addresses.LITToken.abi = contract?.abi;
           break;
         case 'Multisender':
           addresses.Multisender = {};
           addresses.Multisender.address = contract.address;
-          addresses.Multisender.abi = contract?.abi ?? MultisenderData.abi;
+          addresses.Multisender.abi = contract?.abi;
           break;
         case 'PriceFeed':
           addresses.PriceFeed = {};
@@ -1064,7 +806,7 @@ export class LitContracts {
   }> => {
     // if it's true, we will sort the networks by price feed from lowest to highest
     // if it's false, we will not sort the networks
-    let _sortByPrice = sortByPrice || true;
+    const _sortByPrice = sortByPrice ?? true;
 
     if (_sortByPrice) {
       log('Sorting networks by price feed from lowest to highest');
@@ -1254,11 +996,11 @@ export class LitContracts {
     console.log('Prices as numbers:', prices);
 
     const networkPriceMap: Record<string, number> = networks.reduce(
-      (acc: any, network, index) => {
+      (acc, network, index) => {
         acc[network] = prices[index];
         return acc;
       },
-      {}
+      {} as Record<string, number>
     );
 
     console.log('Network to Price Map:', networkPriceMap);
@@ -1280,12 +1022,11 @@ export class LitContracts {
     };
   };
 
-  private static async _resolveContractContext(
+  private static _resolveContractContext(
     network: LIT_NETWORK_VALUES
-    // context?: LitContractContext | LitContractResolverContext
-  ) {
-    // -- check if it's supported network
-    if (!NETWORK_CONTEXT_BY_NETWORK[network]) {
+  ): LitContract[] {
+    const data = NETWORK_CONTEXT_BY_NETWORK[network];
+    if (!data) {
       throw new WrongNetworkException(
         {
           info: {
@@ -1296,25 +1037,36 @@ export class LitContracts {
       );
     }
 
-    const data = NETWORK_CONTEXT_BY_NETWORK[network];
-
-    if (!data) {
-      throw new WrongNetworkException(
-        {
-          info: {
-            network,
-          },
-        },
-        '[_resolveContractContext] No data found'
-      );
-    }
-
-    // Normalize the data to the LitContractContext type
-    return data.data.map((c: any) => ({
+    // Normalize the data to the LitContract type
+    return data.data.map((c) => ({
       address: c.contracts[0].address_hash,
       abi: c.contracts[0].ABI,
       name: c.name,
     }));
+  }
+
+  private static _getContractData(
+    network: LIT_NETWORKS_KEYS,
+    contractName: ContractName
+  ): LitContract {
+    const contractContexts = LitContracts._resolveContractContext(network);
+
+    const litContract = contractContexts.find((data) => {
+      return data.name === contractName;
+    });
+    if (!litContract) {
+      throw new WrongNetworkException(
+        {
+          info: {
+            network,
+            contractName,
+          },
+        },
+        'Cannot find requested contract for network'
+      );
+    }
+
+    return litContract;
   }
 
   /**
@@ -1347,11 +1099,16 @@ export class LitContracts {
       );
     }
 
-    if (!this.pkpNftContract) {
+    const pkpNftContract = await LitContracts.getLitContract(
+      this.network,
+      'PKPNFT'
+    );
+    if (!pkpNftContract) {
       throw new InitError(
         {
           info: {
-            pkpNftContract: this.pkpNftContract,
+            network: this.network,
+            pkpNftContract,
           },
         },
         'Contract is not available'
@@ -1419,11 +1176,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       authMethodId ?? (await getAuthIdByAuthMethod(authMethod));
 
     // -- go
-    const mintCost = await this.pkpNftContract.read.mintCost();
+    const mintCost = await pkpNftContract['mintCost']();
 
     // -- start minting
+    const pkpHelperContract = await LitContracts.getLitContract(
+      this.network,
+      'PKPHelper'
+    );
     const tx = await this._callWithAdjustedOverrides(
-      this.pkpHelperContract.write,
+      pkpHelperContract,
       'mintNextAndAddAuthMethods',
       [
         2, // key type
@@ -1470,7 +1231,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const maxAttempts = 10;
     let publicKey = '';
     while (tries < maxAttempts) {
-      publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+      publicKey = await pkpNftContract['getPubkey'](tokenId);
       this.log('pkp pub key: ', publicKey);
       if (publicKey !== '0x') {
         break;
@@ -1561,8 +1322,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const _webAuthnPubkey = webAuthnPubkey ?? '0x';
 
     try {
+      const pkpPermissionsContract = await LitContracts.getLitContract(
+        this.network,
+        'PKPPermissions'
+      );
       const res = await this._callWithAdjustedOverrides(
-        this.pkpPermissionsContract.write,
+        pkpPermissionsContract,
         'addPermittedAuthMethod',
         [
           pkpTokenId,
@@ -1617,8 +1382,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const scopes = authMethodScopes ?? [];
 
     try {
+      const pkpPermissionsContract = await LitContracts.getLitContract(
+        this.network,
+        'PKPPermissions'
+      );
       const res = await this._callWithAdjustedOverrides(
-        this.pkpPermissionsContract.write,
+        pkpPermissionsContract,
         'addPermittedAction',
         [pkpTokenId, ipfsIdBytes, scopes]
       );
@@ -1729,11 +1498,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             'Contracts are not connected. Please call connect() first'
           );
         }
-        if (!this.pkpNftContract) {
+        const pkpNftContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPNFT'
+        );
+        if (!pkpNftContract) {
           throw new InitError(
             {
               info: {
-                pkpNftContract: this.pkpNftContract,
+                network: this.network,
+                pkpNftContract,
               },
             },
             'Contract is not available'
@@ -1758,7 +1532,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           let token;
 
           try {
-            token = await this.pkpNftContract.read.tokenOfOwnerByIndex(
+            token = await pkpNftContract['tokenOfOwnerByIndex'](
               ownerAddress,
               i
             );
@@ -1796,11 +1570,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             'Contracts are not connected. Please call connect() first'
           );
         }
-        if (!this.pkpNftContract) {
+        const pkpNftContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPNFT'
+        );
+        if (!pkpNftContract) {
           throw new InitError(
             {
               info: {
-                pkpNftContract: this.pkpNftContract,
+                network: this.network,
+                pkpNftContract,
               },
             },
             'Contract is not available'
@@ -1817,7 +1596,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           let token;
 
           try {
-            token = await this.pkpNftContract.read.tokenByIndex(i);
+            token = await pkpNftContract['tokenByIndex'](i);
 
             token = this.utils.hexToDec(token.toHexString()) as string;
 
@@ -1837,6 +1616,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       getTokensInfoByAddress: async (
         ownerAddress: string
       ): Promise<TokenInfo[]> => {
+        const pkpNftContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPNFT'
+        );
         const tokenIds = await this.pkpNftContractUtils.read.getTokensByAddress(
           ownerAddress
         );
@@ -1846,7 +1629,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         // for each pkp
         for (let i = 0; i < tokenIds.length; i++) {
           const tokenId = tokenIds[i];
-          const pubKey = await this.pkpNftContract.read.getPubkey(tokenId);
+          const pubKey = await pkpNftContract['getPubkey'](tokenId);
           const addrs: TokenInfo = await derivedAddresses({
             publicKey: pubKey,
           });
@@ -1874,11 +1657,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        if (!this.pkpNftContract) {
+        const pkpNftContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPNFT'
+        );
+        if (!pkpNftContract) {
           throw new InitError(
             {
               info: {
-                pkpNftContract: this.pkpNftContract,
+                network: this.network,
+                pkpNftContract,
               },
             },
             'Contract is not available'
@@ -1888,11 +1676,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         let mintCost;
 
         try {
-          mintCost = await this.pkpNftContract.read.mintCost();
+          mintCost = await pkpNftContract['mintCost']();
         } catch (e) {
           throw new TransactionError(
             {
               info: {
+                network: this.network,
                 mintCost,
               },
               cause: e,
@@ -1909,7 +1698,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('...signing and sending tx');
         const sentTx = await this._callWithAdjustedOverrides(
-          this.pkpNftContract.write,
+          pkpNftContract,
           'mintNext',
           [2],
           { value: mintCost, ...param }
@@ -1928,9 +1717,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const maxAttempts = 10;
         let publicKey = '';
         while (tries < maxAttempts) {
-          publicKey = await this.pkpNftContract.read.getPubkey(
-            tokenIdFromEvent
-          );
+          publicKey = await pkpNftContract['getPubkey'](tokenIdFromEvent);
           this.log('pkp pub key: ', publicKey);
           if (publicKey !== '0x') {
             break;
@@ -1964,18 +1751,21 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
       claimAndMint: async (
         derivedKeyId: BytesLike,
-        signatures: IPubkeyRouter.SignatureStruct[],
+        signatures: { r: BytesLike; s: BytesLike; v: BigNumberish }[],
         txOpts: ethers.CallOverrides = {}
       ) => {
         try {
+          const pkpNftContract = await LitContracts.getLitContract(
+            this.network,
+            'PKPNFT'
+          );
           const tx = await this._callWithAdjustedOverrides(
-            this.pkpNftContract.write,
+            pkpNftContract,
             'claimAndMint',
             [2, derivedKeyId, signatures],
             {
               ...txOpts,
-              value:
-                txOpts.value ?? (await this.pkpNftContract.read.mintCost()),
+              value: txOpts.value ?? (await pkpNftContract['mintCost']()),
             }
           );
 
@@ -1984,8 +1774,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const events: any = 'events' in txRec ? txRec.events : txRec.logs;
           const tokenId = events[1].topics[1];
           return { tx, res: txRec, tokenId };
-        } catch (e: any) {
-          this.log(`[claimAndMint] error: ${e.message}`);
+        } catch (e: unknown) {
+          this.log(`[claimAndMint] error: ${(e as Error).message}`);
           throw new TransactionError(
             {
               info: {
@@ -2028,11 +1818,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        if (!this.pkpPermissionsContract) {
+        const pkpPermissionsContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPPermissions'
+        );
+        if (!pkpPermissionsContract) {
           throw new InitError(
             {
               info: {
-                pkpPermissionsContract: this.pkpPermissionsContract,
+                network: this.network,
+                pkpPermissionsContract,
               },
             },
             'Contract is not available'
@@ -2041,7 +1836,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         const pkpIdHex = this.utils.decToHex(tokenId, null) as string;
 
-        const bool = await this.pkpPermissionsContract.read.isPermittedAddress(
+        const bool = await pkpPermissionsContract['isPermittedAddress'](
           pkpIdHex,
           address
         );
@@ -2068,11 +1863,17 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             'Contracts are not connected. Please call connect() first'
           );
         }
-        if (!this.pkpPermissionsContract) {
+
+        const pkpPermissionsContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPPermissions'
+        );
+        if (!pkpPermissionsContract) {
           throw new InitError(
             {
               info: {
-                pkpPermissionsContract: this.pkpPermissionsContract,
+                network: this.network,
+                pkpPermissionsContract,
               },
             },
             'Contract is not available'
@@ -2088,10 +1889,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         while (tries < maxTries) {
           try {
-            addresses =
-              await this.pkpPermissionsContract.read.getPermittedAddresses(
-                tokenId
-              );
+            addresses = await pkpPermissionsContract['getPermittedAddresses'](
+              tokenId
+            );
             if (addresses.length <= 0) {
               await new Promise((resolve) => setTimeout(resolve, 1000));
               tries++;
@@ -2099,10 +1899,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             } else {
               break;
             }
-          } catch (e: any) {
+          } catch (e: unknown) {
             this.log(
               `[getPermittedAddresses] error<e.message | ${tries}>:`,
-              e.message
+              (e as Error).message
             );
             tries++;
           }
@@ -2132,11 +1932,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        if (!this.pkpPermissionsContract) {
+        const pkpPermissionsContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPPermissions'
+        );
+        if (!pkpPermissionsContract) {
           throw new InitError(
             {
               info: {
-                pkpPermissionsContract: this.pkpPermissionsContract,
+                network: this.network,
+                pkpPermissionsContract,
               },
             },
             'Contract is not available'
@@ -2150,10 +1955,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         while (tries < maxTries) {
           try {
-            actions =
-              await this.pkpPermissionsContract.read.getPermittedActions(
-                tokenId
-              );
+            actions = await pkpPermissionsContract['getPermittedActions'](
+              tokenId
+            );
 
             if (actions.length <= 0) {
               await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -2162,10 +1966,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             } else {
               break;
             }
-          } catch (e: any) {
+          } catch (e: unknown) {
             this.log(
               `[getPermittedActions] error<e.message | ${tries}>:`,
-              e.message
+              (e as Error).message
             );
             tries++;
           }
@@ -2198,11 +2002,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        if (!this.pkpPermissionsContract) {
+        const pkpPermissionsContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPPermissions'
+        );
+        if (!pkpPermissionsContract) {
           throw new InitError(
             {
               info: {
-                pkpPermissionsContract: this.pkpPermissionsContract,
+                network: this.network,
+                pkpPermissionsContract,
               },
             },
             'Contract is not available'
@@ -2215,7 +2024,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
         this.log('[isPermittedAction] converted<ipfsHash>:', ipfsHash);
 
-        const bool = await this.pkpPermissionsContract.read.isPermittedAction(
+        const bool = await pkpPermissionsContract['isPermittedAction'](
           pkpId,
           ipfsHash
         );
@@ -2249,12 +2058,21 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        if (!this.pkpPermissionsContract || !this.pubkeyRouterContract) {
+        const pkpPermissionsContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPPermissions'
+        );
+        const pubkeyRouterContract = await LitContracts.getLitContract(
+          this.network,
+          'PubkeyRouter'
+        );
+        if (!pkpPermissionsContract || !pubkeyRouterContract) {
           throw new InitError(
             {
               info: {
-                pkpPermissionsContract: this.pkpPermissionsContract,
-                pubkeyRouterContract: this.pubkeyRouterContract,
+                network: this.network,
+                pkpPermissionsContract,
+                pubkeyRouterContract,
               },
             },
             'Contract is not available'
@@ -2263,7 +2081,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('[addPermittedAction] input<pkpId>:', pkpId);
 
-        const pubKey = await this.pubkeyRouterContract.read.getPubkey(pkpId);
+        const pubKey = await pubkeyRouterContract['getPubkey'](pkpId);
         this.log('[addPermittedAction] converted<pubKey>:', pubKey);
 
         const pubKeyHash = ethers.utils.keccak256(pubKey);
@@ -2278,7 +2096,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         this.log('[addPermittedAction] converted<ipfsIdBytes>:', ipfsIdBytes);
 
         const tx = await this._callWithAdjustedOverrides(
-          this.pkpPermissionsContract.write,
+          pkpPermissionsContract,
           'addPermittedAction',
           [tokenId, ipfsIdBytes, [1]]
         );
@@ -2312,11 +2130,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        if (!this.pkpPermissionsContract) {
+        const pkpPermissionsContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPPermissions'
+        );
+        if (!pkpPermissionsContract) {
           throw new InitError(
             {
               info: {
-                pkpPermissionsContract: this.pkpPermissionsContract,
+                network: this.network,
+                pkpPermissionsContract,
               },
             },
             'Contract is not available'
@@ -2329,7 +2152,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         this.log('[addPermittedAddress] input<pkpId>:', pkpId);
 
         const tx = await this._callWithAdjustedOverrides(
-          this.pkpPermissionsContract.write,
+          pkpPermissionsContract,
           'addPermittedAddress',
           [pkpId, ownerAddress, [1]]
         );
@@ -2362,11 +2185,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        if (!this.pkpPermissionsContract) {
+        const pkpPermissionsContract = await LitContracts.getLitContract(
+          this.network,
+          'PKPPermissions'
+        );
+        if (!pkpPermissionsContract) {
           throw new InitError(
             {
               info: {
-                pkpPermissionsContract: this.pkpPermissionsContract,
+                network: this.network,
+                pkpPermissionsContract,
               },
             },
             'Contract is not available'
@@ -2380,7 +2208,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         this.log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
 
         const tx = await this._callWithAdjustedOverrides(
-          this.pkpPermissionsContract.write,
+          pkpPermissionsContract,
           'removePermittedAction',
           [pkpId, ipfsHash]
         );
@@ -2433,11 +2261,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         sendPkpToItself,
         gasLimit,
       }: MintNextAndAddAuthMethods): Promise<ethers.ContractTransaction> => {
+        const [pkpNftContract, pkpHelperContract] = await Promise.all([
+          LitContracts.getLitContract(this.network, 'PKPNFT'),
+          LitContracts.getLitContract(this.network, 'PKPHelper'),
+        ]);
         // first get mint cost
-        const mintCost = await this.pkpNftContract.read.mintCost();
+        const mintCost = await pkpNftContract['mintCost']();
 
         const tx = await this._callWithAdjustedOverrides(
-          this.pkpHelperContract.write,
+          pkpHelperContract,
           'mintNextAndAddAuthMethods',
           [
             keyType,
@@ -2452,31 +2284,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         );
         return tx;
       },
-      // claimAndMintNextAndAddAuthMethods: async (
-      //   keyType: number,
-      //   derivedKeyId: string,
-      //   signatures: pkpHelperContract.IPubkeyRouter.SignatureStruct[],
-      //   permittedAuthMethodTypes: string[],
-      //   permittedAuthMethodIds: string[],
-      //   permittedAuthMethodPubkeys: string[],
-      //   permittedAuthMethodScopes: string[][],
-      //   addPkpEthAddressAsPermittedAddress: boolean,
-      //   sendPkpToItself: boolean
-      // ): Promise<any> => {
-      //   const mintCost = await this.pkpNftContract.read.mintCost();
-      //   this.pkpHelperContract.write.claimAndMintNextAndAddAuthMethods(
-      //     keyType,
-      //     `0x${derivedKeyId}` as BytesLike,
-      //     signatures,
-      //     permittedAuthMethodTypes,
-      //     permittedAuthMethodIds as BytesLike[],
-      //     permittedAuthMethodPubkeys as BytesLike[],
-      //     permittedAuthMethodScopes,
-      //     addPkpEthAddressAsPermittedAddress,
-      //     sendPkpToItself,
-      //     { value: mintCost }
-      //   );
-      // },
     },
   };
 
