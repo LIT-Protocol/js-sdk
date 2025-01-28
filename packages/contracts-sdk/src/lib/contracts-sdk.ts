@@ -344,26 +344,26 @@ export class LitContracts {
     return contractData;
   }
 
-  public static async callContract<
+  public static async callLitContract<
     LitAbi extends Abi,
     LitFunction extends ExtractAbiFunctionNames<LitAbi>,
     LitAbiFunction extends AbiFunction = ExtractAbiFunction<LitAbi, LitFunction>
-  >(config: {
-    abi: LitAbi;
-    address: string;
-    functionName: LitFunction;
-    args: AbiParametersToPrimitiveTypes<LitAbiFunction['inputs'], 'inputs'>;
-    signerOrProvider: ethers.Signer | ethers.providers.JsonRpcProvider;
-  }): Promise<
+  >(
+    abi: LitAbi,
+    address: string,
+    functionName: LitFunction,
+    args: AbiParametersToPrimitiveTypes<LitAbiFunction['inputs'], 'inputs'>,
+    signerOrProvider: ethers.Signer | ethers.providers.JsonRpcProvider
+  ): Promise<
     AbiParametersToPrimitiveTypes<LitAbiFunction['outputs'], 'outputs'>
   > {
     const contract = new ethers.Contract(
-      config.address,
-      config.abi as ethers.ContractInterface,
-      config.signerOrProvider
+      address,
+      abi as ethers.ContractInterface,
+      signerOrProvider
     );
 
-    return contract[config.functionName](...config.args) as Promise<
+    return contract[functionName](...args) as Promise<
       AbiParametersToPrimitiveTypes<LitAbiFunction['outputs'], 'outputs'>
     >;
   }
