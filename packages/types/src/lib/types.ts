@@ -120,7 +120,6 @@ export type LIT_NETWORKS_KEYS =
   | 'custom';
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
-export type EncryptedSymmetricKey = string | Uint8Array | any;
 export type AcceptedFileType = File | Blob;
 
 /**
@@ -174,7 +173,7 @@ export type ClaimRequest<T = ClaimProcessor> = {
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
 /**
- * Result from network claim proccessing, used in {@link MintCallback}
+ * Result from network claim processing, used in {@link MintCallback}
  */
 export type ClaimResult<T = ClaimProcessor> = {
   signatures: Signature[];
@@ -185,14 +184,13 @@ export type ClaimResult<T = ClaimProcessor> = {
 
 export interface LitContract {
   address?: string;
-  abi?: any;
+  abi?: ethers.ContractInterface;
   name?: string;
 }
 
 /**
  * Defines a set of contract metadata for bootstrapping
- * network context and interfacing with contracts on Chroncile blockchain
- *
+ * network context and interfacing with contracts on Chronicle blockchain
  */
 export interface ExclusiveLitContractContext {
   Allowlist: LitContract;
@@ -223,10 +221,11 @@ export interface LitContractResolverContext {
     | string
     | LitContractContext
     | ethers.providers.JsonRpcProvider
+    | ethers.ContractInterface
     | undefined
     | number;
   resolverAddress: string;
-  abi: any;
+  abi: ethers.ContractInterface;
   environment: number;
   contractContext?: LitContractContext;
   provider?: ethers.providers.JsonRpcProvider;
@@ -265,19 +264,19 @@ export interface TokenInfo {
   retries: _BigNumber { _hex: '0x03', _isBigNumber: true },
   timeout: _BigNumber { _hex: '0x3c', _isBigNumber: true }
  */
-export type EpochInfo = {
+export interface EpochInfo {
   epochLength: number;
   number: number;
   endTime: number;
   retries: number;
   timeout: number;
-};
+}
 
-export type PriceFeedInfo = {
+export interface PriceFeedInfo {
   epochId: number;
   minNodeCount: number;
   networkPrices: {
-    arr: Array<{ network: string; price: number }>;
+    arr: { network: string; price: number }[];
     mapByAddress: Record<string, number>;
   };
-};
+}

@@ -1,11 +1,6 @@
-import depd from 'depd';
-
 import { datilDev, datilTest, datil, _nagaDev } from '@lit-protocol/contracts';
 
 import { LIT_NETWORK_VALUES } from './constants';
-import { LIT_CURVE } from './curves';
-
-const deprecated = depd('lit-js-sdk:constants:mappers');
 
 /**
  * Mapping of network context by network value.
