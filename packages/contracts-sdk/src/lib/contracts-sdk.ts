@@ -322,6 +322,19 @@ export class LitContracts {
     index = 0
   ) {
     const networkContext = NETWORK_CONTEXT_BY_NETWORK[network];
+
+    if (!networkContext) {
+      throw new WrongNetworkException(
+        {
+          info: {
+            network,
+            contractName,
+          },
+        },
+        `Contract "${contractName}" not found in network "${network}". Did you mean ${Object.keys(NETWORK_CONTEXT_BY_NETWORK).join(', ')}?`
+      );
+    }
+
     const networkData = networkContext.data.find((data) => {
       return data.name === contractName;
     });
@@ -545,13 +558,13 @@ export class LitContracts {
 
   private static async _getContractsFromResolver(
     context: LitContractResolverContext,
-    provider: ethers.providers.StaticJsonRpcProvider,
+    signerOrProvider: ethers.Signer | ethers.providers.JsonRpcProvider,
     contractNames?: ContractName[]
   ): Promise<LitContractContext> {
     const resolverContract = new ethers.Contract(
       context.resolverAddress,
       context.abi,
-      provider
+      signerOrProvider
     );
 
     const getContract = async function (
