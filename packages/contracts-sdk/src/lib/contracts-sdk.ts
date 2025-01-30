@@ -938,6 +938,7 @@ export class LitContracts {
     );
 
     const nodesForRequest = await priceFeedContract['getNodesForRequest'](
+      realmId,
       PRODUCT_IDS_ARRAY
     );
 

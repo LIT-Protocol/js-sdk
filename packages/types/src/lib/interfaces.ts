@@ -248,8 +248,7 @@ export interface JsonPkpSignSdkParams {
 /**
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
-export interface JsonPkpSignRequest<T>
-  extends NodeSetRequired {
+export interface JsonPkpSignRequest<T> extends NodeSetRequired {
   toSign: ArrayLike<number>;
   authMethods?: AuthMethod[];
   authSig: AuthSig;

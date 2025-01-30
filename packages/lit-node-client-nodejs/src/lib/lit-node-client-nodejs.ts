@@ -77,7 +77,6 @@ import {
   DecryptRequest,
   DecryptResponse,
   EncryptionSignRequest,
-  EcdsaSignedMessageShareParsed,
   EncryptRequest,
   EncryptResponse,
   EncryptSdkParams,
@@ -116,9 +115,6 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-
-// FIXME: this should be dynamically set, but we only have 1 net atm.
-const REALM_ID = 1;
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
@@ -834,7 +830,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      params.useSingleNode ? 1 : this.config.minNodeCount
+      params.useSingleNode ? 1 : this._getThreshold()
     );
 
     // -- case: promises rejected
@@ -903,13 +899,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       return item[key]; // Return the value corresponding to that key
     });
 
-    const signatures = await getSignatures({
-      requestId,
-      networkPubKeySet: this.networkPubKeySet,
-      threshold: params.useSingleNode ? 1 : this._getThreshold(),
-      signedMessageShares: flattenedSignedMessageShares,
-    });
-
     // -- 2. combine responses as a string, and parse it as JSON if possible
     const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
 
@@ -930,9 +919,16 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // ========== Result ==========
     const returnVal: ExecuteJsResponse = {
       claims,
-      signatures: {
-        [key]: signatures,
-      },
+      signatures: hasSignedData
+        ? {
+            [key]: await getSignatures({
+              requestId,
+              networkPubKeySet: this.networkPubKeySet,
+              threshold: params.useSingleNode ? 1 : this._getThreshold(),
+              signedMessageShares: flattenedSignedMessageShares,
+            }),
+          }
+        : {},
       // decryptions: [],
       response: parsedResponse,
       logs: mostCommonLogs,
@@ -1031,7 +1027,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
         pubkey: hexPrefixed(params.pubKey),
         authSig: sessionSig,
 
-        // -- optional params
+        // -- optional params - no longer allowed in >= Naga?
         // ...(params.authContext.authMethods &&
         //   params.authContext.authMethods.length > 0 && {
         //     authMethods: params.authContext.authMethods,
@@ -1055,8 +1051,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      // thresholdNodeSet.length
-      nodeSet.length
+      this._getThreshold()
     );
 
     // ========== Handle Response ==========
@@ -1724,11 +1719,12 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       return this.defaultMaxPriceByProduct[product];
     };
 
+    console.log('getMaxPricesForNodeProduct():', {});
     return getMaxPricesForNodeProduct({
       nodePrices: this.config.nodePrices,
       userMaxPrice: getUserMaxPrice(),
       productId: PRODUCT_IDS[product],
-      numRequiredNodes: this.config.minNodeCount,
+      numRequiredNodes: this._getThreshold(),
     });
   };
 
@@ -2108,7 +2104,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const responseData = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this.config.minNodeCount
+      this._getThreshold()
     );
 
     if (responseData.success) {
