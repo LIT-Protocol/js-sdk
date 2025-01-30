@@ -10,6 +10,7 @@ import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning } f
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
+import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
@@ -168,6 +169,7 @@ setLitActionsCodeToLocal();
 
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
+    testUseEoaSessionSigsToRequestSingleResponse,
     testUseEoaSessionSigsToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
     testUseEoaSessionSigsToExecuteJsClaimKeys,

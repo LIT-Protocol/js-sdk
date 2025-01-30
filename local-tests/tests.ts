@@ -93,7 +93,6 @@ import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/test
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
 import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
-import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 
 export { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 export { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
@@ -127,9 +126,12 @@ export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } fr
 export { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 export { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 export { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
-export { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
-export { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
-export { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
+
+// DISABLED until Naga supports bare authSig only for encyption_sign endpoint
+// export { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
+// export { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
+// export { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
+
 export { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
 export { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
 export { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
@@ -288,13 +290,11 @@ const litActionIpfsIdSessionSigsTests = {
 
 const bareAuthSigTests = {
   // -- eth auth sig
-  testEthAuthSigToEncryptDecryptString,
-
+  // testEthAuthSigToEncryptDecryptString,
   // -- solana auth sig
-  testSolAuthSigToEncryptDecryptString,
-
+  // testSolAuthSigToEncryptDecryptString,
   // -- cosmos auth sig
-  testCosmosAuthSigToEncryptDecryptString,
+  // testCosmosAuthSigToEncryptDecryptString,
 };
 
 const pkpEthersTest = {
