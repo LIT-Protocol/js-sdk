@@ -369,6 +369,23 @@ export class LitContracts {
   }
 
   /**
+   * Similar to {@link getLitContract} but used for internal purposes,
+   * such as custom rpc url and context.
+   */
+  public async getLitContractWithContext(
+    network: LIT_NETWORKS_KEYS,
+    litContractName: ContractName
+  ) {
+    return LitContracts.getLitContract(
+      network,
+      litContractName,
+      ...(this.rpc ? [this.rpc] : []),
+      ...(this.customContext ? [this.customContext] : []),
+      ...(this.signer ? [this.signer] : [])
+    );
+  }
+
+  /**
    * Retrieves any Lit contract instance based on the provided network, context, and RPC URL.
    * If a context is provided, it determines if a contract resolver is used for bootstrapping contracts.
    * If a resolver address is present in the context, it retrieves the Lit contract from the contract resolver instance.
@@ -386,9 +403,11 @@ export class LitContracts {
     network: LIT_NETWORKS_KEYS,
     litContractName: ContractName,
     rpcUrl = RPC_URL_BY_NETWORK[network],
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    signer?: ethers.Signer | ethers.Wallet
   ): Promise<ethers.Contract> {
     let provider: ethers.providers.StaticJsonRpcProvider;
+    let signerOrProvider: ethers.Signer | ethers.providers.JsonRpcProvider;
 
     if (context && 'provider' in context!) {
       provider = context.provider;
@@ -397,6 +416,12 @@ export class LitContracts {
         url: rpcUrl,
         skipFetchSetup: true,
       });
+    }
+
+    if (signer) {
+      signerOrProvider = signer.connect(provider);
+    } else {
+      signerOrProvider = provider;
     }
 
     if (!context) {
@@ -421,7 +446,7 @@ export class LitContracts {
         );
       }
 
-      return new ethers.Contract(address, abi, provider);
+      return new ethers.Contract(address, abi, signerOrProvider);
     } else {
       if (!context.resolverAddress) {
         const litContract = (context as LitContractContext)[litContractName];
@@ -438,15 +463,16 @@ export class LitContracts {
             litContractName
           );
         }
+
         return new ethers.Contract(
           litContract.address,
           litContract.abi,
-          provider
+          signerOrProvider
         );
       } else {
         const contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
-          provider,
+          signerOrProvider,
           [litContractName]
         );
 
@@ -1026,6 +1052,7 @@ export class LitContracts {
     network: LIT_NETWORK_VALUES
   ): LitContract[] {
     const data = NETWORK_CONTEXT_BY_NETWORK[network];
+
     if (!data) {
       throw new WrongNetworkException(
         {
@@ -1054,6 +1081,7 @@ export class LitContracts {
     const litContract = contractContexts.find((data) => {
       return data.name === contractName;
     });
+
     if (!litContract) {
       throw new WrongNetworkException(
         {
@@ -1099,7 +1127,7 @@ export class LitContracts {
       );
     }
 
-    const pkpNftContract = await LitContracts.getLitContract(
+    const pkpNftContract = await this.getLitContractWithContext(
       this.network,
       'PKPNFT'
     );
@@ -1179,7 +1207,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const mintCost = await pkpNftContract['mintCost']();
 
     // -- start minting
-    const pkpHelperContract = await LitContracts.getLitContract(
+    const pkpHelperContract = await this.getLitContractWithContext(
       this.network,
       'PKPHelper'
     );
@@ -1322,7 +1350,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const _webAuthnPubkey = webAuthnPubkey ?? '0x';
 
     try {
-      const pkpPermissionsContract = await LitContracts.getLitContract(
+      const pkpPermissionsContract = await this.getLitContractWithContext(
         this.network,
         'PKPPermissions'
       );
@@ -1382,7 +1410,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const scopes = authMethodScopes ?? [];
 
     try {
-      const pkpPermissionsContract = await LitContracts.getLitContract(
+      const pkpPermissionsContract = await this.getLitContractWithContext(
         this.network,
         'PKPPermissions'
       );
@@ -1498,7 +1526,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             'Contracts are not connected. Please call connect() first'
           );
         }
-        const pkpNftContract = await LitContracts.getLitContract(
+        const pkpNftContract = await this.getLitContractWithContext(
           this.network,
           'PKPNFT'
         );
@@ -1570,7 +1598,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             'Contracts are not connected. Please call connect() first'
           );
         }
-        const pkpNftContract = await LitContracts.getLitContract(
+        const pkpNftContract = await this.getLitContractWithContext(
           this.network,
           'PKPNFT'
         );
@@ -1616,7 +1644,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       getTokensInfoByAddress: async (
         ownerAddress: string
       ): Promise<TokenInfo[]> => {
-        const pkpNftContract = await LitContracts.getLitContract(
+        const pkpNftContract = await this.getLitContractWithContext(
           this.network,
           'PKPNFT'
         );
@@ -1657,10 +1685,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpNftContract = await LitContracts.getLitContract(
+        const pkpNftContract = await this.getLitContractWithContext(
           this.network,
           'PKPNFT'
         );
+
         if (!pkpNftContract) {
           throw new InitError(
             {
@@ -1697,6 +1726,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         }
 
         this.log('...signing and sending tx');
+
         const sentTx = await this._callWithAdjustedOverrides(
           pkpNftContract,
           'mintNext',
@@ -1755,7 +1785,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         txOpts: ethers.CallOverrides = {}
       ) => {
         try {
-          const pkpNftContract = await LitContracts.getLitContract(
+          const pkpNftContract = await this.getLitContractWithContext(
             this.network,
             'PKPNFT'
           );
@@ -1818,7 +1848,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpPermissionsContract = await LitContracts.getLitContract(
+        const pkpPermissionsContract = await this.getLitContractWithContext(
           this.network,
           'PKPPermissions'
         );
@@ -1864,7 +1894,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpPermissionsContract = await LitContracts.getLitContract(
+        const pkpPermissionsContract = await this.getLitContractWithContext(
           this.network,
           'PKPPermissions'
         );
@@ -1932,7 +1962,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpPermissionsContract = await LitContracts.getLitContract(
+        const pkpPermissionsContract = await this.getLitContractWithContext(
           this.network,
           'PKPPermissions'
         );
@@ -2002,7 +2032,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpPermissionsContract = await LitContracts.getLitContract(
+        const pkpPermissionsContract = await this.getLitContractWithContext(
           this.network,
           'PKPPermissions'
         );
@@ -2058,11 +2088,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpPermissionsContract = await LitContracts.getLitContract(
+        const pkpPermissionsContract = await this.getLitContractWithContext(
           this.network,
           'PKPPermissions'
         );
-        const pubkeyRouterContract = await LitContracts.getLitContract(
+        const pubkeyRouterContract = await this.getLitContractWithContext(
           this.network,
           'PubkeyRouter'
         );
@@ -2130,7 +2160,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpPermissionsContract = await LitContracts.getLitContract(
+        const pkpPermissionsContract = await this.getLitContractWithContext(
           this.network,
           'PKPPermissions'
         );
@@ -2185,7 +2215,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        const pkpPermissionsContract = await LitContracts.getLitContract(
+        const pkpPermissionsContract = await this.getLitContractWithContext(
           this.network,
           'PKPPermissions'
         );

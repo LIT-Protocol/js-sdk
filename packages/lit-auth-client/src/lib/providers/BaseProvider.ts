@@ -190,7 +190,7 @@ export abstract class BaseProvider {
     }
 
     try {
-      const pkpPermissions = await LitContracts.getLitContract(
+      const pkpPermissions = await litContracts.getLitContractWithContext(
         this.litNodeClient.config.litNetwork,
         'PKPPermissions'
       );
