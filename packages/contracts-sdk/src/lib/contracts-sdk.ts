@@ -1,5 +1,5 @@
-/* eslint-disable import/order */
-import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
+// import * as util from 'node:util'; // For inspecting bigInt payloads for pricing data
+
 import {
   Abi,
   AbiFunction,
@@ -7,23 +7,8 @@ import {
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
 } from 'abitype';
-import {
-  ContractName,
-  CreateCustomAuthMethodRequest,
-  EpochInfo,
-  GasLimitParam,
-  LIT_NETWORKS_KEYS,
-  LitContractContext,
-  LitContractResolverContext,
-  MintNextAndAddAuthMethods,
-  MintWithAuthParams,
-  MintWithAuthResponse,
-  TokenInfo,
-  PriceFeedInfo,
-  LitContract,
-} from '@lit-protocol/types';
 import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
-import { decToHex, hexToDec, intToIP } from './hex2dec';
+import { computeAddress } from 'ethers/lib/utils';
 
 import {
   AUTH_METHOD_SCOPE_VALUES,
@@ -44,16 +29,30 @@ import {
   WrongNetworkException,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
-import { computeAddress } from 'ethers/lib/utils';
+import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
+import {
+  ContractName,
+  CreateCustomAuthMethodRequest,
+  EpochInfo,
+  GasLimitParam,
+  LIT_NETWORKS_KEYS,
+  LitContractContext,
+  LitContractResolverContext,
+  MintNextAndAddAuthMethods,
+  MintWithAuthParams,
+  MintWithAuthResponse,
+  TokenInfo,
+  LitContract,
+} from '@lit-protocol/types';
+
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
+import { decToHex, hexToDec, intToIP } from './hex2dec';
 import { ValidatorStruct, type ValidatorWithPrices } from './types';
-// import * as util from 'node:util';
 
 const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 
@@ -62,6 +61,7 @@ const REALM_ID = 1;
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ethereum: any;
   }
 }
@@ -80,6 +80,7 @@ const GAS_LIMIT_ADJUSTMENT = ethers.BigNumber.from(100).add(
 // The class has a number of properties that represent the smart contract instances, such as accessControlConditionsContract, litTokenContract, pkpNftContract, etc. These smart contract instances are created by passing the contract address, ABI, and provider to the ethers.Contract constructor.
 // The class also has a utils object with helper functions for converting between hexadecimal and decimal representation of numbers, as well as functions for working with multihashes and timestamps.
 export class LitContracts {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   provider: ethers.providers.StaticJsonRpcProvider | any;
   rpc: string;
   rpcs: string[];
@@ -111,10 +112,14 @@ export class LitContracts {
 
   // make the constructor args optional
   constructor(args?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     provider?: ethers.providers.StaticJsonRpcProvider | any;
     customContext?: LitContractContext | LitContractResolverContext;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rpcs?: string[] | any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rpc?: string | any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     signer?: ethers.Signer | any;
     privateKey?: string | undefined;
     randomPrivatekey?: boolean;
@@ -150,6 +155,7 @@ export class LitContracts {
    *
    * @param {any} [args] An optional value to log with the message.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   log = (...args: any[]) => {
     if (this.debug) {
       LitContracts.logger.debug(...args);
@@ -686,7 +692,7 @@ export class LitContracts {
       contractData = LitContracts._resolveContractContext(network);
     }
 
-    // Destructure the data for easier access
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
@@ -877,6 +883,7 @@ export class LitContracts {
     }
 
     const activeValidatorStructs: ValidatorStruct[] =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       activeUnkickedValidatorStructs.map((item: any) => {
         return {
           ip: item[0],
@@ -1438,17 +1445,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     getBytes32FromMultihash: (ipfsId: string, CID: CIDParser): IPFSHash => {
       return getBytes32FromMultihash(ipfsId, CID);
     },
-
-    // convert timestamp to YYYY/MM/DD format
-    timestamp2Date: (timestamp: string): string => {
-      const date = require('date-and-time');
-
-      const format = 'YYYY/MM/DD HH:mm:ss';
-
-      const timestampFormatted: Date = new Date(parseInt(timestamp) * 1000);
-
-      return date.format(timestampFormatted, format);
-    },
   };
 
   pkpNftContractUtils = {
@@ -1601,9 +1597,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         const arr = [];
 
-        // for each pkp
-        for (let i = 0; i < tokenIds.length; i++) {
-          const tokenId = tokenIds[i];
+        for (const tokenId of tokenIds) {
           const pubKey = await pkpNftContract['getPubkey'](tokenId);
           const addrs: TokenInfo = await derivedAddresses({
             publicKey: pubKey,
@@ -1683,6 +1677,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('sentTx:', sentTx);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res: any = await sentTx.wait();
         this.log('res:', res);
 
@@ -1748,6 +1743,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
           const txRec = await tx.wait();
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const events: any = 'events' in txRec ? txRec.events : txRec.logs;
           const tokenId = events[1].topics[1];
           return { tx, res: txRec, tokenId };
