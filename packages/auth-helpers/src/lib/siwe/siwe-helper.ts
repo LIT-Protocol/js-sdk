@@ -30,7 +30,6 @@ export const createCapacityCreditsResourceData = (
   params: CapacityDelegationFields
 ): CapacityDelegationRequest => {
   return {
-    ...(params.capacityTokenId ? { nft_id: [params.capacityTokenId] } : {}), // Conditionally include nft_id
     ...(params.delegateeAddresses
       ? {
           delegate_to: params.delegateeAddresses.map((address) =>

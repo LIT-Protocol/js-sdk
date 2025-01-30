@@ -1,10 +1,9 @@
-import { LIT_ERROR } from '@lit-protocol/constants';
+import { LIT_ERROR, LitErrorClass } from '@lit-protocol/constants';
 import {
   AccessControlConditions,
   EvmContractConditions,
   SolRpcConditions,
   UnifiedAccessControlConditions,
-  NodeClientErrorV1,
 } from '@lit-protocol/types';
 
 import {
@@ -304,18 +303,17 @@ describe('validator.ts', () => {
       },
     ] as AccessControlConditions; // Explicit cast to override Typescript type checking
 
-    let error: NodeClientErrorV1 | undefined;
+    let error: LitErrorClass | undefined;
     try {
       await validateAccessControlConditionsSchema(
         evmBasicAccessControlConditions
       );
     } catch (e) {
-      error = e as NodeClientErrorV1;
+      error = e as LitErrorClass;
     }
 
-    expect(error).toBeDefined();
-    expect(error!.errorKind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
-    expect(error!.errorCode).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].name);
+    expect(error!.kind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
+    expect(error!.code).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].code);
   });
 
   it('should throw when schema has invalid fields', async () => {
@@ -338,18 +336,18 @@ describe('validator.ts', () => {
       },
     ];
 
-    let error: NodeClientErrorV1 | undefined;
+    let error: LitErrorClass | undefined;
     try {
       await validateAccessControlConditionsSchema(
         evmBasicAccessControlConditions
       );
     } catch (e) {
-      error = e as NodeClientErrorV1;
+      error = e as LitErrorClass;
     }
 
     expect(error).toBeDefined();
-    expect(error!.errorKind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
-    expect(error!.errorCode).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].name);
+    expect(error!.kind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
+    expect(error!.code).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].code);
   });
 
   it('should throw when schema of a nested ACC does not validate', async () => {
@@ -397,17 +395,17 @@ describe('validator.ts', () => {
       ],
     ] as AccessControlConditions; // Explicit cast to override Typescript type checking
 
-    let error: NodeClientErrorV1 | undefined;
+    let error: LitErrorClass | undefined;
     try {
       await validateAccessControlConditionsSchema(
         evmBasicAccessControlConditions
       );
     } catch (e) {
-      error = e as NodeClientErrorV1;
+      error = e as LitErrorClass;
     }
 
     expect(error).toBeDefined();
-    expect(error!.errorKind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
-    expect(error!.errorCode).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].name);
+    expect(error!.kind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
+    expect(error!.code).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].code);
   });
 });

@@ -72,7 +72,9 @@ export class TinnyEnvironment {
     // (8) "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f" (10000.000000000000000000 ETH)
     // (9) "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720" (10000.000000000000000000 ETH)
     PRIVATE_KEYS:
-      process.env['PRIVATE_KEYS']?.split(',') || DEFAULT_ANVIL_PRIVATE_KEYS,
+      process.env['NETWORK'] === LIT_NETWORK.Custom
+        ? DEFAULT_ANVIL_PRIVATE_KEYS
+        : process.env['PRIVATE_KEYS']?.split(',') || DEFAULT_ANVIL_PRIVATE_KEYS,
     KEY_IN_USE: new Array(),
     NO_SETUP: process.env['NO_SETUP'] === 'true',
     USE_SHIVA: process.env['USE_SHIVA'] === 'true',
@@ -129,9 +131,9 @@ export class TinnyEnvironment {
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment ${
+        `Invalid network environment "${
           this.network
-        }. Please use one of ${Object.values(LIT_NETWORK)}`
+        }". Please use one of ${Object.values(LIT_NETWORK)}`
       );
     }
 
@@ -570,18 +572,11 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId = (
-      await this.contractsClient.mintCapacityCreditsNFT({
-        requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
-      })
-    ).capacityTokenIdStr;
-
     try {
       this.superCapacityDelegationAuthSig = (
         await this.litNodeClient.createCapacityDelegationAuthSig({
           dAppOwnerWallet: wallet,
-          capacityTokenId: capacityTokenId,
+          // capacityTokenId: capacityTokenId,
           // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
           uses: '200',
         })

@@ -75,3 +75,6 @@ local-tests/build
 .env
 
 packages/wrapped-keys-lit-actions/src/generated
+
+digest
+generate-digest.ts

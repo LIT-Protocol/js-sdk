@@ -97,7 +97,6 @@ import type {
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
-  EcdsaSignedMessageShareParsed,
   EncryptRequest,
   EncryptResponse,
   EncryptSdkParams,
@@ -158,10 +157,7 @@ export class LitNodeClientNodeJs
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
   }
-
-  // ========== Rate Limit NFT ==========
-
-  // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
+  // ========== Payment Delegation ==========
   createCapacityDelegationAuthSig = async (
     params: CapacityCreditsReq
   ): Promise<CapacityCreditsRes> => {
@@ -207,7 +203,7 @@ export class LitNodeClientNodeJs
       // -- capacity delegation specific configuration
       uses: params.uses,
       delegateeAddresses: params.delegateeAddresses,
-      capacityTokenId: params.capacityTokenId,
+      // paymentId: params.paymentId,
     });
 
     const authSig = await generateAuthSig({
@@ -217,8 +213,6 @@ export class LitNodeClientNodeJs
 
     return { capacityDelegationAuthSig: authSig };
   };
-
-  // ========== Scoped Class Helpers ==========
 
   /**
    *

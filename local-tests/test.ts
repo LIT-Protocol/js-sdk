@@ -10,13 +10,6 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
-import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
-import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs';
-import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
 import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
 import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
@@ -212,16 +205,6 @@ setLitActionsCodeToLocal();
     testUseInvalidLitActionCodeToGenerateSessionSigs,
   };
 
-  const capacityDelegationTests = {
-    testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
-    testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign,
-    testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs,
-    testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs,
-    testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign,
-    testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs,
-    testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign,
-  };
-
   const bareAuthSigTests = {
     // -- eth auth sig
     testEthAuthSigToEncryptDecryptString,
@@ -298,7 +281,6 @@ setLitActionsCodeToLocal();
       ...pkpSessionSigsTests,
       ...litActionSessionSigsTests,
       ...litActionIpfsIdSessionSigsTests,
-      ...capacityDelegationTests,
       ...bareAuthSigTests,
       ...eip1271AuthSigTests,
 

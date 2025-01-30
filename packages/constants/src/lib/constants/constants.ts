@@ -1421,6 +1421,7 @@ export const LIT_RESOURCE_PREFIX = {
   AccessControlCondition: 'lit-accesscontrolcondition',
   PKP: 'lit-pkp',
   RLI: 'lit-ratelimitincrease',
+  PaymentDelegation: 'lit-paymentdelegation',
   LitAction: 'lit-litaction',
 } as const;
 export type LIT_RESOURCE_PREFIX_TYPE = keyof typeof LIT_RESOURCE_PREFIX;
@@ -1466,11 +1467,9 @@ export const LIT_ABILITY = {
   PKPSigning: 'pkp-signing',
 
   /**
-   * This is the ability to use a Rate Limit Increase (Capacity Credits NFT) token during
-   * authentication with the nodes. The resource will specify the corresponding
-   * Capacity Credits NFT token ID.
+   * This is the ability to use Payment Delegation
    */
-  RateLimitIncreaseAuth: 'rate-limit-increase-auth',
+  PaymentDelegation: 'lit-payment-delegation',
 
   /**
    * This is the ability to execute a Lit Action. The resource will specify the

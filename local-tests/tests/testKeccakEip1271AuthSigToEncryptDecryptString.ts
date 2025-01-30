@@ -28,11 +28,6 @@ export const testKeccakEip1271AuthSigToEncryptDecryptString = async (
   ];
 
   const alice = await devEnv.createRandomPerson();
-  if (CENTRALISATION_BY_NETWORK[devEnv.network] === 'decentralised') {
-    // The capacity credits NFT owner automatically uses the capacity credits
-    // to pay for the encryption
-    await alice.mintCapacityCreditsNFT();
-  }
 
   let accs = AccessControlConditions.getEmvBasicAccessControlConditions({
     userAddress: contractAddress,

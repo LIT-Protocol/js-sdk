@@ -1,17 +1,16 @@
-import { SiweMessage } from 'siwe';
-import { LIT_ABILITY } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
   CapacityDelegationFields,
   WithCapacityDelegation,
   WithRecap,
 } from '@lit-protocol/types';
-import { LitRLIResource } from '../resources';
+import { SiweMessage } from 'siwe';
 
 import {
-  createCapacityCreditsResourceData,
   addRecapToSiweMessage,
+  createCapacityCreditsResourceData,
 } from './siwe-helper';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 
 /**
  * Creates a SIWE
@@ -50,8 +49,8 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
   if (
     'dAppOwnerWallet' in params || // required param
     'uses' in params || // optional
-    'delegateeAddresses' in params || // optional
-    'capacityTokenId' in params // optional
+    'delegateeAddresses' in params // optional
+    // 'capacityTokenId' in params // optional
   ) {
     const ccParams = params as CapacityDelegationFields;
 
@@ -59,8 +58,15 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
     params.resources = [
       {
-        resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
-        ability: LIT_ABILITY.RateLimitIncreaseAuth,
+        // TODO: new resource to be used
+        //   resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
+        //   ability: LIT_ABILITY.RateLimitIncreaseAuth,
+
+        // @ts-ignore - TODO: new resource to be used
+        resource: null,
+
+        // @ts-ignore - TODO: new ability to be used
+        ability: null,
         data: capabilities,
       },
     ];

@@ -5,8 +5,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
- * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testExecuteJsBroadcastAndCollect
+ * ✅ NETWORK=custom yarn test:local --filter=testExecuteJsBroadcastAndCollect
  *
  */
 export const testExecuteJsBroadcastAndCollect = async (

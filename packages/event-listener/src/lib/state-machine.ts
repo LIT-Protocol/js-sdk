@@ -2,8 +2,8 @@ import { ethers } from 'ethers';
 
 import {
   AutomationError,
-  UnknownError,
   RPC_URL_BY_NETWORK,
+  UnknownError,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -12,7 +12,6 @@ import {
   Action,
   LitActionAction,
   LogContextAction,
-  MintCapacityCreditAction,
   MintPkpAction,
   TransactionAction,
 } from './actions';
@@ -600,29 +599,6 @@ export class StateMachine {
               ...action,
             })
           );
-          break;
-        case 'useCapacityNFT':
-          if ('capacityTokenId' in action) {
-            this.context.set(
-              'activeCapacityTokenId',
-              this.resolveContextPathOrLiteral(action.capacityTokenId)
-            );
-          } else if ('mint' in action) {
-            const mintCapacityCreditAction = new MintCapacityCreditAction({
-              daysUntilUTCMidnightExpiration:
-                action.daysUntilUTCMidnightExpiration,
-              debug: this.debug,
-              requestPerSecond: action.requestPerSecond,
-              stateMachine: this,
-            });
-            actions.push(mintCapacityCreditAction);
-          }
-          if (this.debug) {
-            const activeCapacityTokenId = this.context.get('activePkp');
-            console.log(
-              `Machine configured to use capacity token ${activeCapacityTokenId}`
-            );
-          }
           break;
         case 'usePkp':
           if ('pkp' in action) {
