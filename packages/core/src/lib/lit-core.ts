@@ -1300,6 +1300,7 @@ export class LitCore {
               }
             })
             .catch((error) => {
+              console.log('error', error);
               errors.push(error);
             })
             .finally(() => {
@@ -1378,8 +1379,8 @@ export class LitCore {
           },
           cause: res.error,
         },
-        'There was an error getting the signing shares from the nodes. Response from the nodes: %s',
-        JSON.stringify(res)
+        'There was an error getting the signing shares from the nodes.',
+        JSON.stringify(res.error)
       );
     } else {
       throw new UnknownError(
@@ -1388,7 +1389,7 @@ export class LitCore {
             requestId,
           },
         },
-        `There was an error getting the signing shares from the nodes. Response from the nodes: %s`,
+        `There was an error getting the signing shares from the nodes`,
         JSON.stringify(res)
       );
     }

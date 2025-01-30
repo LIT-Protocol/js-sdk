@@ -29,9 +29,9 @@ export function getMaxPricesForNodes({
   const sortedEntries = Object.entries(pricesByNodeAddress).sort(
     ([, pricesA], [, pricesB]) => {
       const diff = pricesA[productId] - pricesB[productId];
-      if (diff > BigInt(0)) {
+      if (diff > 0n) {
         return 1;
-      } else if (diff < 0) {
+      } else if (diff < 0n) {
         return -1;
       } else {
         return 0;
@@ -44,7 +44,7 @@ export function getMaxPricesForNodes({
     ? sortedEntries.slice(0, numRequiredNodes)
     : sortedEntries;
 
-  let totalBaseCost = BigInt(0);
+  let totalBaseCost = 0n;
 
   // Calculate the base total cost without adjustments
   for (const [, prices] of nodesToConsider) {
@@ -69,6 +69,8 @@ export function getMaxPricesForNodes({
    * our request to fail if the price on some of the nodes is higher than we think it was, as long as it's not
    * drastically different than we expect it to be
    */
+  // console.log('totalBaseCost:', totalBaseCost);
+  // console.log('userMaxPrice:', userMaxPrice);
   const excessBalance = userMaxPrice - totalBaseCost;
 
   // Map matching the keys from `pricesByNodeAddress`, but w/ the per-node maxPrice computed based on `userMaxPrice`

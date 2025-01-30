@@ -53,7 +53,7 @@ import {
 } from './helpers/getBytes32FromMultihash';
 import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 import { ValidatorStruct, type ValidatorWithPrices } from './types';
-import * as util from 'node:util';
+// import * as util from 'node:util';
 
 const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 
@@ -975,20 +975,19 @@ export class LitContracts {
       {} as Record<string, number>
     );
 
-    // FIXME: Remove before publish
-    console.log(
-      'getPriceFeedInfo()',
-      util.inspect(
-        {
-          epochId,
-          minNodeCount,
-          networkPrices: {
-            mapByAddress: networkPriceMap,
-          },
-        },
-        { depth: 4 }
-      )
-    );
+    // console.log(
+    //   'getPriceFeedInfo()',
+    //   util.inspect(
+    //     {
+    //       epochId,
+    //       minNodeCount,
+    //       networkPrices: {
+    //         mapByAddress: networkPriceMap,
+    //       },
+    //     },
+    //     { depth: 4 }
+    //   )
+    // );
 
     return {
       epochId,

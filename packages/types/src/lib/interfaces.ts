@@ -3,7 +3,6 @@ import depd from 'depd';
 
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -232,26 +231,28 @@ pub struct JsonExecutionRequest {
 }
  */
 
-export interface BaseJsonPkpSignRequest {
-  authMethods?: AuthMethod[];
-  toSign: ArrayLike<number>;
-}
-
 /**
  * The 'pkpSign' function param. Please note that the structure
  * is different than the payload sent to the node.
  */
-export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
+export interface JsonPkpSignSdkParams {
   pubKey: string;
-  sessionSigs: SessionSigsMap;
+  toSign: ArrayLike<number>;
+  authContext: Omit<
+    GetSessionSigsProps,
+    'maxPricesByNodeUrl' | 'authNeededCallback'
+  > & {
+    authNeededCallback?: AuthCallback;
+  };
 }
 
 /**
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
 export interface JsonPkpSignRequest<T>
-  extends BaseJsonPkpSignRequest,
-    NodeSetRequired {
+  extends NodeSetRequired {
+  toSign: ArrayLike<number>;
+  authMethods?: AuthMethod[];
   authSig: AuthSig;
 
   /**
@@ -495,11 +496,6 @@ export interface IpfsOptions {
   gatewayUrl?: `https://${string}/ipfs/`;
 }
 
-export interface JsonExecutionSdkParamsTargetNode
-  extends JsonExecutionSdkParams {
-  targetNodeRange: number;
-}
-
 export interface JsonExecutionSdkParams
   extends Pick<LitActionSdkParams, 'jsParams'>,
     ExecuteJsAdvancedOptions {
@@ -513,15 +509,12 @@ export interface JsonExecutionSdkParams
    */
   ipfsId?: string;
 
-  /**
-   * the session signatures to use to authorize the user with the nodes
-   */
-  sessionSigs: SessionSigsMap;
-
-  /**
-   * auth methods to resolve
-   */
-  authMethods?: AuthMethod[];
+  authContext: Omit<
+    GetSessionSigsProps,
+    'maxPricesByNodeUrl' | 'authNeededCallback'
+  > & {
+    authNeededCallback?: AuthCallback;
+  };
 }
 
 export interface ExecuteJsAdvancedOptions {
@@ -540,10 +533,6 @@ export interface ExecuteJsAdvancedOptions {
    * Only run the action on a single node; this will only work if all code in your action is non-interactive
    */
   useSingleNode?: boolean;
-}
-
-export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
-  targetNodeRange: number;
 }
 
 export interface JsonExecutionRequest
@@ -577,13 +566,15 @@ export interface SessionSigsOrAuthSig {
   authSig?: AuthSig;
 }
 
-export interface DecryptRequestBase
-  extends SessionSigsOrAuthSig,
-    MultipleAccessControlConditions {
+export interface DecryptRequestBase extends MultipleAccessControlConditions {
   /**
    * The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
    */
   chain: Chain;
+  authSig?: AuthSig;
+  authContext?: Omit<GetSessionSigsProps, 'authNeededCallback'> & {
+    authNeededCallback?: AuthCallback;
+  };
 }
 export interface EncryptSdkParams extends MultipleAccessControlConditions {
   dataToEncrypt: Uint8Array;
@@ -917,6 +908,13 @@ export interface EncryptToJsonProps extends MultipleAccessControlConditions {
    * An instance of LitNodeClient that is already connected
    */
   litNodeClient: ILitNodeClient;
+
+  authContext: Omit<
+    GetSessionSigsProps,
+    'maxPricesByNodeUrl' | 'authNeededCallback'
+  > & {
+    authNeededCallback?: AuthCallback;
+  };
 }
 
 export type EncryptToJsonDataType = 'string' | 'file';
@@ -928,13 +926,16 @@ export interface EncryptToJsonPayload extends DecryptRequestBase {
 }
 
 export interface DecryptFromJsonProps {
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
-
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
 
   parsedJsonData: EncryptToJsonPayload;
+  authContext: Omit<
+    GetSessionSigsProps,
+    'maxPricesByNodeUrl' | 'authNeededCallback'
+  > & {
+    authNeededCallback?: AuthCallback;
+  };
 }
 
 /**
@@ -1130,13 +1131,11 @@ export interface GetSessionSigsProps
   /**
    * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
    */
-  authNeededCallback: AuthCallback;
+  authNeededCallback?: AuthCallback;
 
-  /**
-   * This allow user to get new prices from the node. If not, we will just use the one we got when we first connected to the nodes.
-   */
-  getNewPrices?: boolean;
+  authMethods?: AuthMethod[];
 }
+
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
 /**
@@ -1204,30 +1203,6 @@ export interface WebAuthnAuthenticationVerificationParams {
 
 export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 
-/**
- * ========== PKP ==========
- */
-export interface LitClientSessionManager {
-  getSessionKey: () => SessionKeyPair;
-  isSessionKeyPair(obj: any): boolean;
-  getExpiration: () => string;
-  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
-  // #authCallbackAndUpdateStorageItem: (params: {
-  //   authCallbackParams: AuthCallbackParams;
-  //   authCallback?: AuthCallback;
-  // }) => Promise<AuthSig>;
-  getPkpSessionSigs: (params: GetPkpSessionSigs) => Promise<SessionSigsMap>;
-  checkNeedToResignSessionKey: (params: {
-    authSig: AuthSig;
-    sessionKeyUri: any;
-    resourceAbilityRequests: LitResourceAbilityRequest[];
-  }) => Promise<boolean>;
-  getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
-  signSessionKey: (
-    params: SignSessionKeyProp
-  ) => Promise<SignSessionKeyResponse>;
-}
-
 export interface AuthenticationProps {
   /**
    * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
@@ -1239,22 +1214,11 @@ export interface PKPBaseProp {
   litNodeClient: ILitNodeClient;
   pkpPubKey: string;
   rpcs?: RPCUrls;
-  authContext?: AuthenticationProps;
+  authContext: AuthenticationProps;
   debug?: boolean;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
-  controllerSessionSigs?: SessionSigs;
-
-  /**
-   * @deprecated - use authContext
-   */
-  controllerAuthMethods?: AuthMethod[];
-
-  /**
-   * @deprecated - use authContext
-   */
-  controllerAuthSig?: AuthSig;
 }
 
 export interface RPCUrls {
@@ -1842,7 +1806,7 @@ export interface SignerLike {
 export interface GetPkpSessionSigs
   extends CommonGetSessionSigsProps,
     LitActionSdkParams {
-  pkpPublicKey: string;
+  pkpPublicKey?: string;
 
   /**
    * Lit Protocol supported auth methods: https://developer.litprotocol.com/v3/sdk/wallets/auth-methods
