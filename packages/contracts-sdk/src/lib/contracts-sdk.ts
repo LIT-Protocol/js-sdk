@@ -331,9 +331,7 @@ export class LitContracts {
             contractName,
           },
         },
-        `Contract "${contractName}" not found in network "${network}". Did you mean ${Object.keys(
-          NETWORK_CONTEXT_BY_NETWORK
-        ).join(', ')}?`
+        `Contract "${contractName}" not found on network "${network}". When using a 'custom' network, you must provide a custom context. This function is not intended for use with a 'custom' network.`
       );
     }
 
