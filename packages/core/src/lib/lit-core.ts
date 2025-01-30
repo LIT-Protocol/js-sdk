@@ -1375,12 +1375,11 @@ export class LitCore {
           info: {
             requestId,
             errorCode: res.error.errorCode,
-            message: res.error.message,
+            errorKind: res.error.errorKind,
+            status: res.error.status,
           },
-          cause: res.error,
         },
-        'There was an error getting the signing shares from the nodes.',
-        JSON.stringify(res.error)
+        `There was an error getting the signing shares from the nodes: ${res.error.message}`
       );
     } else {
       throw new UnknownError(

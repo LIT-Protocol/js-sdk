@@ -16,9 +16,13 @@ export const testUseInvalidLitActionIpfsCodeToGenerateSessionSigs = async (
     // @ts-expect-error Testing internal method
     await devEnv.litNodeClient._getSessionSigs(authContext);
   } catch (e: any) {
-    console.log('❌ THIS IS EXPECTED: ', e);
+    console.log('✅  THIS IS EXPECTED: ', e);
 
-    if (e.message === 'An error related to validation has occured.') {
+    if (
+      e.message.includes(
+        'Lit Actions returned false for sessionSig signing authentication'
+      )
+    ) {
       console.log(
         '✅ testUseInvalidLitActionIpfsCodeToGenerateSessionSigs is expected to have an error'
       );
