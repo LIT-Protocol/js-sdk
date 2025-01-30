@@ -10,13 +10,14 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
     | typeof datilDev
     | typeof datilTest
     | typeof datil
-    | typeof _nagaDev;
+    | typeof _nagaDev
+    | undefined;
 } = {
   'datil-dev': datilDev,
   'datil-test': datilTest,
   datil: datil,
   'naga-dev': _nagaDev,
-  custom: datilDev,
+  custom: undefined,
 } as const;
 
 export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {

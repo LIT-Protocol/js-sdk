@@ -131,9 +131,9 @@ export class TinnyEnvironment {
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment ${
+        `Invalid network environment "${
           this.network
-        }. Please use one of ${Object.values(LIT_NETWORK)}`
+        }". Please use one of ${Object.values(LIT_NETWORK)}`
       );
     }
 
