@@ -21,9 +21,7 @@ export const testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1 = async (
   const pkpEthersWallet = new PKPEthersWallet({
     litNodeClient: devEnv.litNodeClient,
     pkpPubKey: alice.pkp.publicKey,
-    authContext: {
-      getSessionSigsProps: getLitActionAuthContext(devEnv, alice),
-    },
+    authContext: getLitActionAuthContext(devEnv, alice),
   });
 
   await pkpEthersWallet.init();

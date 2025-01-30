@@ -1044,7 +1044,7 @@ export interface AuthenticationContext extends LitActionSdkParams {
    * @example
    * [{ resource: new LitAccessControlConditionResource('someAccHash`), ability: LitAbility.AccessControlConditionDecryption }]
    */
-  resourceAbilityRequests: LitResourceAbilityRequest[];
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 
   /**
    * The session capability object that you want to request for this session.

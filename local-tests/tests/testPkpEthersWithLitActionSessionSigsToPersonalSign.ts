@@ -13,12 +13,11 @@ export const testPkpEthersWithLitActionSessionSigsToPersonalSign = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  const authContext = getLitActionAuthContext(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
     litNodeClient: devEnv.litNodeClient,
     pkpPubKey: alice.pkp.publicKey,
-    authContext: { getSessionSigsProps: authContext },
+    authContext: getLitActionAuthContext(devEnv, alice),
   });
 
   await pkpEthersWallet.init();

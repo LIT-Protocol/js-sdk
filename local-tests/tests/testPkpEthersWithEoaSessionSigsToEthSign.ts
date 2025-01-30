@@ -19,7 +19,7 @@ export const testPkpEthersWithEoaSessionSigsToEthSign = async (
   const pkpEthersWallet = new PKPEthersWallet({
     litNodeClient: devEnv.litNodeClient,
     pkpPubKey: alice.pkp.publicKey,
-    authContext: { getSessionSigsProps: getEoaAuthContext(devEnv, alice) },
+    authContext: getEoaAuthContext(devEnv, alice),
   });
 
   await pkpEthersWallet.init();
