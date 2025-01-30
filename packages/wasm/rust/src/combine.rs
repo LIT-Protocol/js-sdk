@@ -51,48 +51,52 @@ pub struct SignedDataOutput {
 }
 
 #[derive(Deserialize)]
-enum SignableOutput {
+#[cfg_attr(feature = "test-shares", derive(Serialize))]
+pub(crate) enum SignableOutput {
     EcdsaSignedMessageShare(EcdsaSignedMessageShare),
     FrostSignedMessageShare(FrostSignedMessageShare),
     BlsSignedMessageShare(BlsSignedMessageShare),
 }
 
 #[derive(Clone, Deserialize)]
-struct EcdsaSignedMessageShare {
-    digest: String,
-    result: String,
-    share_id: String,
-    peer_id: String,
-    signature_share: String,
-    big_r: String,
-    compressed_public_key: String,
-    public_key: String,
-    sig_type: String,
+#[cfg_attr(feature = "test-shares", derive(Serialize))]
+pub(crate) struct EcdsaSignedMessageShare {
+    pub(crate) digest: String,
+    pub(crate) result: String,
+    pub(crate) share_id: String,
+    pub(crate) peer_id: String,
+    pub(crate) signature_share: String,
+    pub(crate) big_r: String,
+    pub(crate) compressed_public_key: String,
+    pub(crate) public_key: String,
+    pub(crate) sig_type: String,
 }
 
 #[derive(Deserialize)]
-struct FrostSignedMessageShare {
-    message: String,
-    result: String,
-    share_id: String,
-    peer_id: String,
-    signature_share: String,
-    signing_commitments: String,
-    verifying_share: String,
-    public_key: String,
-    sig_type: String,
+#[cfg_attr(feature = "test-shares", derive(Serialize))]
+pub(crate) struct FrostSignedMessageShare {
+    pub(crate) message: String,
+    pub(crate) result: String,
+    pub(crate) share_id: String,
+    pub(crate) peer_id: String,
+    pub(crate) signature_share: String,
+    pub(crate) signing_commitments: String,
+    pub(crate) verifying_share: String,
+    pub(crate) public_key: String,
+    pub(crate) sig_type: String,
 }
 
 #[derive(Deserialize)]
-struct BlsSignedMessageShare {
-    message: String,
-    result: String,
-    peer_id: String,
-    share_id: String,
-    signature_share: String,
-    verifying_share: String,
-    public_key: String,
-    sig_type: String,
+#[cfg_attr(feature = "test-shares", derive(Serialize))]
+pub(crate) struct BlsSignedMessageShare {
+    pub(crate) message: String,
+    pub(crate) result: String,
+    pub(crate) peer_id: String,
+    pub(crate) share_id: String,
+    pub(crate) signature_share: String,
+    pub(crate) verifying_share: String,
+    pub(crate) public_key: String,
+    pub(crate) sig_type: String,
 }
 
 /// A signature share
@@ -174,7 +178,7 @@ where
     }
 }
 
-fn x_coordinate<C>(point: &C::ProjectivePoint) -> C::Scalar
+pub(crate) fn x_coordinate<C>(point: &C::ProjectivePoint) -> C::Scalar
 where
     C: PrimeCurve + CurveArithmetic,
 {
