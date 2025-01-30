@@ -1156,6 +1156,7 @@ export class LitCore {
     const nodeUrlsArr = Array.from(this.connectedNodes);
     return [callback(nodeUrlsArr[randomNodeIndex])];
   }
+
   /**
    * Retrieves the session signature for a given URL from the sessionSigs map.
    * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.
@@ -1301,6 +1302,7 @@ export class LitCore {
             })
             .finally(() => {
               responses++;
+
               if (responses === promises.length) {
                 // In case the total number of successful responses is less than n,
                 // resolve what we have when all promises are settled.
@@ -1326,6 +1328,22 @@ export class LitCore {
         success: true,
         values: successes,
       };
+    }
+
+    if (errors.length === 0) {
+      throw new UnknownError(
+        {
+          info: {
+            requestId,
+            successes,
+            errors,
+            minNodeCount,
+            threshold: this._getThreshold(),
+            numPromises: nodePromises.length,
+          },
+        },
+        `Not enough responses from nodes, but no errors either; probably incorrect minNodeCount or threshold."`
+      );
     }
 
     // TODO Likely a good use case for MultiError
