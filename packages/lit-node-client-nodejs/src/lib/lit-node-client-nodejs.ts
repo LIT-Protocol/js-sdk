@@ -803,6 +803,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const userMaxPrices = this.getMaxPricesForNodeProduct({
       product: 'LIT_ACTION',
+      userMaxPrice: params.userMaxPrice,
     });
 
     const targetNodePrices = params.useSingleNode
@@ -995,9 +996,9 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const targetNodePrices = this.getMaxPricesForNodeProduct({
       product: 'SIGN',
+      userMaxPrice: params.userMaxPrice,
     });
 
-    // PKP session sigs disables EOA authNeededCallback :(
     const sessionSigs = await this._getSessionSigs({
       pkpPublicKey: params.pubKey,
       ...params.authContext,
@@ -1281,6 +1282,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     let sessionSigs: SessionSigsMap = {};
     const userMaxPrices = this.getMaxPricesForNodeProduct({
       product: 'DECRYPTION',
+      userMaxPrice: params.userMaxPrice,
     });
 
     if (!authSig) {

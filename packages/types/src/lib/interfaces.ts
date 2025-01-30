@@ -242,6 +242,7 @@ export interface JsonPkpSignSdkParams {
   pubKey: string;
   toSign: ArrayLike<number>;
   authContext: AuthenticationContext;
+  userMaxPrice?: bigint;
 }
 
 /**
@@ -508,6 +509,7 @@ export interface JsonExecutionSdkParams
   ipfsId?: string;
 
   authContext: AuthenticationContext;
+  userMaxPrice?: bigint;
 }
 
 export interface ExecuteJsAdvancedOptions {
@@ -550,6 +552,7 @@ export interface DecryptRequestBase extends MultipleAccessControlConditions {
   chain: Chain;
   authSig?: AuthSig;
   authContext: AuthenticationContext;
+  userMaxPrice?: bigint;
 }
 export interface EncryptSdkParams extends MultipleAccessControlConditions {
   dataToEncrypt: Uint8Array;
