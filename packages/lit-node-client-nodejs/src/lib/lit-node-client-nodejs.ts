@@ -143,7 +143,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   defaultMaxPriceByProduct: Record<keyof typeof PRODUCT_IDS, bigint> = {
     DECRYPTION: BigInt(-1),
     SIGN: BigInt(-1),
-    LA: BigInt(-1),
+    LIT_ACTION: BigInt(-1),
   };
 
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
@@ -802,7 +802,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const requestId = this._getNewRequestId();
 
     const userMaxPrices = this.getMaxPricesForNodeProduct({
-      product: 'LA',
+      product: 'LIT_ACTION',
     });
 
     const targetNodePrices = params.useSingleNode
@@ -1509,7 +1509,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // This may seem a bit weird because we usually only care about prices for sessionSigs...
     // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
     const targetNodePrices = this.getMaxPricesForNodeProduct({
-      product: 'LA',
+      product: 'LIT_ACTION',
     });
 
     // ========== Get Node Promises ==========
@@ -2074,7 +2074,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // This may seem a bit weird because we usually only care about prices for sessionSigs...
     // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
     const targetNodePrices = this.getMaxPricesForNodeProduct({
-      product: 'LA',
+      product: 'LIT_ACTION',
     });
 
     const targetNodeUrls = targetNodePrices.map(({ url }) => url);

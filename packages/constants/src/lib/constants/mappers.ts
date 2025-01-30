@@ -40,5 +40,5 @@ export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
 export const PRODUCT_IDS = {
   DECRYPTION: 0, // For decryption operations
   SIGN: 1, // For signing operations
-  LA: 2, // For Lit Actions execution
+  LIT_ACTION: 2, // For Lit Actions execution
 } as const;

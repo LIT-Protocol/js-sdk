@@ -13,7 +13,7 @@ describe('getMaxPricesForNodes', () => {
     const result = getMaxPricesForNodeProduct({
       nodePrices: nodePrices,
       userMaxPrice: 1050n,
-      productId: PRODUCT_IDS.LA,
+      productId: PRODUCT_IDS.LIT_ACTION,
       numRequiredNodes: 2,
     });
     expect(result).toEqual([
@@ -27,7 +27,7 @@ describe('getMaxPricesForNodes', () => {
       getMaxPricesForNodeProduct({
         nodePrices: nodePrices,
         userMaxPrice: 400n,
-        productId: PRODUCT_IDS.LA,
+        productId: PRODUCT_IDS.LIT_ACTION,
         numRequiredNodes: 2,
       });
     }).toThrow('Max price is too low');
@@ -37,7 +37,7 @@ describe('getMaxPricesForNodes', () => {
     const result = getMaxPricesForNodeProduct({
       nodePrices: nodePrices,
       userMaxPrice: 800n,
-      productId: PRODUCT_IDS.LA,
+      productId: PRODUCT_IDS.LIT_ACTION,
       numRequiredNodes: 2,
     });
     expect(result).toEqual([

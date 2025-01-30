@@ -18,6 +18,7 @@ import {
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
+  PRODUCT_IDS,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 
@@ -79,6 +80,9 @@ export class TinnyEnvironment {
     NO_SETUP: process.env['NO_SETUP'] === 'true',
     USE_SHIVA: process.env['USE_SHIVA'] === 'true',
     NETWORK_CONFIG: process.env['NETWORK_CONFIG'] ?? './networkContext.json',
+    DEFAULT_MAX_PRICES:
+      process.env['DEFAULT_MAX_PRICES']?.split(',').map((v) => BigInt(v)) ??
+      null,
   };
 
   public litNodeClient: LitNodeClient;
@@ -279,22 +283,31 @@ export class TinnyEnvironment {
     } else {
       throw new Error(`Network not supported: "${this.network}"`);
     }
+    if (this.processEnvs.DEFAULT_MAX_PRICES) {
+      if (
+        this.processEnvs.DEFAULT_MAX_PRICES.length !==
+        Object.keys(PRODUCT_IDS).length
+      ) {
+        throw new Error(
+          `DEFAULT_MAX_PRICES must be set for all products; expected: ${
+            Object.keys(PRODUCT_IDS).length
+          }, got: ${this.processEnvs.DEFAULT_MAX_PRICES.length}`
+        );
+      }
 
-    if (globalThis.wasmExports) {
-      console.warn(
-        'WASM modules already loaded. Will override when connect is called'
+      this.litNodeClient.setDefaultMaxPrice(
+        'DECRYPTION',
+        this.processEnvs.DEFAULT_MAX_PRICES[0]
       );
-    }
 
-    if (globalThis.wasmECDSA) {
-      console.warn(
-        'WASM modules already loaded. wil override. when connect is called'
+      this.litNodeClient.setDefaultMaxPrice(
+        'SIGN',
+        this.processEnvs.DEFAULT_MAX_PRICES[1]
       );
-    }
 
-    if (globalThis.wasmSevSnpUtils) {
-      console.warn(
-        'WASM modules already loaded. wil override. when connect is called'
+      this.litNodeClient.setDefaultMaxPrice(
+        'LIT_ACTION',
+        this.processEnvs.DEFAULT_MAX_PRICES[2]
       );
     }
 
