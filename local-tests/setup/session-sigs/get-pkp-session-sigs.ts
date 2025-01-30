@@ -32,7 +32,7 @@ export const getPkpAuthContext = (
     },
   ];
 
-  const authContext = {
+  const authContext = devEnv.litNodeClient.getPkpAuthContext({
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
     expiration,
@@ -41,7 +41,7 @@ export const getPkpAuthContext = (
     ...(centralisation === 'decentralised' && {
       capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
     }),
-  };
+  });
 
   log('[getPkpAuthContext]: ', authContext);
 

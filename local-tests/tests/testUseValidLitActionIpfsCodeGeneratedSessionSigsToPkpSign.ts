@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 import { log } from '@lit-protocol/misc';
-import { getLitActionSessionSigsUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContextUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -13,22 +13,11 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign =
   async (devEnv: TinnyEnvironment) => {
     const alice = await devEnv.createRandomPerson();
-    let litActionSessionSigs;
-
-    try {
-      litActionSessionSigs = await getLitActionSessionSigsUsingIpfsId(
-        devEnv,
-        alice
-      );
-    } catch (e: any) {
-      console.log('❌ This error is NOT expected:', e);
-      throw new Error(e);
-    }
 
     const res = await devEnv.litNodeClient.pkpSign({
+      authContext: getLitActionAuthContextUsingIpfsId(devEnv, alice),
       toSign: alice.loveLetter,
       pubKey: alice.authMethodOwnedPkp.publicKey,
-      sessionSigs: litActionSessionSigs,
     });
     devEnv.releasePrivateKeyFromUser(alice);
     console.log('✅ res:', res);

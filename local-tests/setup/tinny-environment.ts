@@ -466,7 +466,10 @@ export class TinnyEnvironment {
     const privateKey = await this.getAvailablePrivateKey();
 
     try {
-      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+      const provider = new ethers.providers.StaticJsonRpcProvider({
+        url: this.rpc,
+        skipFetchSetup: true,
+      });
       const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
       const tx = await wallet.sendTransaction({

@@ -1,4 +1,4 @@
-import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -22,10 +22,8 @@ export const testUsePkpSessionSigsToExecuteJsClaimKeys = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
-
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: pkpSessionSigs,
+    authContext: getPkpAuthContext(devEnv, alice),
     code: `(async () => {
       Lit.Actions.claimKey({keyId: "foo"});
     })();`,

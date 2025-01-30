@@ -1,4 +1,4 @@
-import { getInvalidLitActionIpfsSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getInvalidLitActionIpfsAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -12,7 +12,9 @@ export const testUseInvalidLitActionIpfsCodeToGenerateSessionSigs = async (
   const alice = await devEnv.createRandomPerson();
 
   try {
-    await getInvalidLitActionIpfsSessionSigs(devEnv, alice);
+    const authContext = getInvalidLitActionIpfsAuthContext(devEnv, alice);
+    // @ts-expect-error Testing internal method
+    await devEnv.litNodeClient._getSessionSigs(authContext);
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
 

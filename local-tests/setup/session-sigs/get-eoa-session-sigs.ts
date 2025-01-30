@@ -26,12 +26,6 @@ export const getEoaAuthContext = (
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
 
-  if (centralisation === 'decentralised') {
-    console.warn(
-      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
-    );
-  }
-
   // Use default resourceAbilityRequests if not provided
   return {
     pkpPublicKey: person.authMethodOwnedPkp.publicKey,
@@ -88,19 +82,13 @@ export const getEoaAuthContext = (
   };
 };
 
-export const getEoaAuthContextWithCapacityDelegations = async (
+export const getEoaAuthContextWithCapacityDelegations = (
   devEnv: TinnyEnvironment,
   fromWallet: ethers.Wallet,
   capacityDelegationAuthSig: AuthSig
 ) => {
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
-
-  if (centralisation === 'decentralised') {
-    console.warn(
-      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
-    );
-  }
 
   return {
     chain: 'ethereum',

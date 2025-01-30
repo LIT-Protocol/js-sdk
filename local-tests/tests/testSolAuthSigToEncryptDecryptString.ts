@@ -2,6 +2,13 @@ import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { encryptString, decryptToString } from '@lit-protocol/encryption';
+import { TinnyPerson } from '../setup/tinny-person';
+import {
+  LitAccessControlConditionResource,
+  LitActionResource,
+  LitPKPResource,
+} from '@lit-protocol/auth-helpers';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 
 /**
  * Test Commands:
@@ -10,7 +17,8 @@ import { encryptString, decryptToString } from '@lit-protocol/encryption';
  * ✅ NETWORK=custom yarn test:local --filter=testSolAuthSigToEncryptDecryptString
  */
 export const testSolAuthSigToEncryptDecryptString = async (
-  devEnv: TinnyEnvironment
+  devEnv: TinnyEnvironment,
+  alice: TinnyPerson
 ) => {
   const accs = AccessControlConditions.getSolBasicAccessControlConditions({
     userAddress: devEnv.bareSolAuthSig.address,
@@ -47,7 +55,23 @@ export const testSolAuthSigToEncryptDecryptString = async (
       solRpcConditions: accs,
       ciphertext: encryptRes.ciphertext,
       dataToEncryptHash: encryptRes.dataToEncryptHash,
-      authSig: devEnv.bareSolAuthSig,
+      authContext: devEnv.litNodeClient.getPkpAuthContext({
+        pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+        resourceAbilityRequests: [
+          {
+            resource: new LitPKPResource('*'),
+            ability: LIT_ABILITY.PKPSigning,
+          },
+          {
+            resource: new LitActionResource('*'),
+            ability: LIT_ABILITY.LitActionExecution,
+          },
+          {
+            resource: new LitAccessControlConditionResource('*'),
+            ability: LIT_ABILITY.AccessControlConditionDecryption,
+          },
+        ],
+      }),
       chain: 'solana',
     },
     devEnv.litNodeClient as unknown as ILitNodeClient

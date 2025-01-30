@@ -67,7 +67,7 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
-import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+import { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 import { testRelayer } from './tests/testRelayer';
 
@@ -164,7 +164,7 @@ export { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 export { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 export { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 export { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
-export { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+export { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 export { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 export { testRelayer } from './tests/testRelayer';
 
@@ -342,7 +342,7 @@ const litActionCombiningTests = {
     testExecuteJsSignAndCombineEcdsa,
   },
   decryptAndCombine: {
-    testExecutJsDecryptAndCombine,
+    testExecuteJsDecryptAndCombine,
   },
   broadcastAndCombine: {
     testExecuteJsBroadcastAndCollect,
