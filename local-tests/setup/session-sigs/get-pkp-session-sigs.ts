@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import {
-  type GetPkpSessionSigs,
+  type AuthenticationContext,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
@@ -16,7 +16,7 @@ export const getPkpAuthContext = (
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[],
   expiration?: string
-): Omit<GetPkpSessionSigs, 'product'> => {
+): AuthenticationContext => {
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
 

@@ -12,7 +12,6 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   AuthMethod,
-  AuthenticateOptions,
   BaseProviderOptions,
   ClaimKeyResponse,
   ClaimProcessor,
@@ -50,8 +49,8 @@ export abstract class BaseProvider {
    * @param {(currentUrl: string, redirectUri: string) => boolean} [urlCheckCallback] - Optional callback to handle authentication data or errors
    * @returns {Promise<AuthMethod>} - Auth method object that contains authentication data
    */
-  abstract authenticate<T extends AuthenticateOptions>(
-    options?: T,
+  abstract authenticate(
+    options?: unknown,
     urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
   ): Promise<AuthMethod>;
 

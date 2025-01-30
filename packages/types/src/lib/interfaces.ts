@@ -1044,13 +1044,13 @@ export interface AuthenticationContext extends LitActionSdkParams {
    * @example
    * [{ resource: new LitAccessControlConditionResource('someAccHash`), ability: LitAbility.AccessControlConditionDecryption }]
    */
-  resourceAbilityRequests?: LitResourceAbilityRequest[];
+  resourceAbilityRequests: LitResourceAbilityRequest[];
 
   /**
    * The session capability object that you want to request for this session.
    * It is likely you will not need this, as the object will be automatically derived from the `resourceAbilityRequests`.
    * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
-   * The wildcard means that the session will be granted the ability to to perform operations with any access control condition.
+   * The wildcard means that the session will be granted the ability to perform operations with any access control condition.
    */
   sessionCapabilityObject?: ISessionCapabilityObject;
 

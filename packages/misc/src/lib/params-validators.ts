@@ -30,8 +30,8 @@ import {
   JsonExecutionSdkParams,
   SolRpcConditions,
   UnifiedAccessControlConditions,
-  type GetSessionSigsProps,
-  type AuthSig,
+  AuthSig,
+  AuthenticationContext,
 } from '@lit-protocol/types';
 
 import { checkIfAuthSigRequiresChainParam, checkType, is, log } from './misc';
@@ -416,7 +416,7 @@ class FileValidator implements ParamsValidator {
 export interface AuthMaterialValidatorProps {
   chain?: string;
   authSig?: AuthSig;
-  authContext?: GetSessionSigsProps;
+  authContext?: AuthenticationContext;
 }
 
 class AuthMaterialValidator implements ParamsValidator {

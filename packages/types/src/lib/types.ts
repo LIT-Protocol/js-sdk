@@ -16,7 +16,6 @@ import {
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
-  BaseAuthenticateOptions,
 } from './interfaces';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
@@ -126,8 +125,6 @@ export type AcceptedFileType = File | Blob;
  * ========== Lit Auth Client ==========
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
-
-export type AuthenticateOptions = BaseAuthenticateOptions;
 
 /**
  * Type for expressing claim results being processed by a relay server
@@ -270,13 +267,4 @@ export interface EpochInfo {
   endTime: number;
   retries: number;
   timeout: number;
-}
-
-export interface PriceFeedInfo {
-  epochId: number;
-  minNodeCount: number;
-  networkPrices: {
-    arr: { network: string; price: number }[];
-    mapByAddress: Record<string, number>;
-  };
 }
