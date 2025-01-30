@@ -843,7 +843,7 @@ export class LitContracts {
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
-    pricesByNodeUrl: Record<string, bigint[]>;
+    nodePrices: { url: string; prices: bigint[] }[];
   }> => {
     const stakingContract = await LitContracts.getStakingContract(
       litNetwork,
@@ -914,7 +914,7 @@ export class LitContracts {
       epochInfo: typedEpochInfo,
       minNodeCount: minNodeCountInt,
       bootstrapUrls: bootstrapUrls,
-      pricesByNodeUrl: priceFeedInfo.networkPrices.mapByAddress,
+      nodePrices: priceFeedInfo.networkPrices,
     };
   };
 
@@ -951,29 +951,27 @@ export class LitContracts {
       nodeProtocol,
     });
 
-    const networkPriceMap = networkUrls.reduce<Record<string, bigint[]>>(
-      (acc, network, index) => {
-        acc[network] = nodesAndPrices[index].prices.map((ethersPrice) =>
-          ethersPrice.toBigInt()
-        );
-    console.log('networks:', networks);
-
-    const prices = nodesAndPrices.flatMap((item: any) => {
-      // Flatten the nested prices array and convert BigNumber to number
-      return item.prices.map((price: ethers.BigNumber) =>
-        parseFloat(price.toString())
-      );
-    });
-
-    console.log('Prices as numbers:', prices);
-
-    const networkPriceMap: Record<string, number> = networks.reduce(
-      (acc, network, index) => {
-        acc[network] = prices[index];
+    const prices = networkUrls
+      .reduce<{ url: string; prices: bigint[] }[]>((acc, network, index) => {
+        acc.push({
+          url: network,
+          prices: nodesAndPrices[index].prices.map((ethersPrice) =>
+            ethersPrice.toBigInt()
+          ),
+        });
         return acc;
-      },
-      {} as Record<string, number>
-    );
+      }, [])
+      .sort(({ prices: pricesA }, { prices: pricesB }) => {
+        // Sort by any price since the cheapest for _any_ product will be the cheapest for _all_ products
+        const diff = pricesA[0] - pricesB[0];
+        if (diff > 0n) {
+          return 1;
+        } else if (diff < 0n) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
 
     // console.log(
     //   'getPriceFeedInfo()',
@@ -992,7 +990,7 @@ export class LitContracts {
     return {
       epochId,
       minNodeCount,
-      networkPrices: { mapByAddress: networkPriceMap },
+      networkPrices: prices,
     };
   };
 

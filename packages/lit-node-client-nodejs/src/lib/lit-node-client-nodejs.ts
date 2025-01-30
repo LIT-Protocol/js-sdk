@@ -99,6 +99,7 @@ import {
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
+  NodeSet,
   NodeShare,
   PKPSignEndpointResponse,
   RejectedNodePromises,
@@ -123,7 +124,7 @@ import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
 import { getClaimsList } from './helpers/get-claims-list';
-import { getMaxPricesForNodes } from './helpers/get-max-prices-for-nodes';
+import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
 import { getSignatures } from './helpers/get-signatures';
 import { normalizeArray } from './helpers/normalize-array';
 import { normalizeJsParams } from './helpers/normalize-params';
@@ -713,15 +714,14 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   private async executeJsNodeRequest(
     url: string,
     formattedParams: JsonExecutionSdkParams & { sessionSigs: SessionSigsMap },
-    requestId: string
+    requestId: string,
+    nodeSet: NodeSet[]
   ) {
     // -- choose the right signature
     const sessionSig = this.getSessionSigByUrl({
       sessionSigs: formattedParams.sessionSigs,
       url,
     });
-
-    const nodeSet = await this._getNodeSet();
 
     const reqBody: JsonExecutionRequest = {
       ...formattedParams,
@@ -801,47 +801,39 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const requestId = this._getNewRequestId();
 
-    const sessionSigs = await this._getSessionSigs({
-      ...params.authContext,
-      maxPricesByNodeUrl: this.getMaxPricesForNodes({
-        product: 'LA',
-      }),
+    const userMaxPrices = this.getMaxPricesForNodeProduct({
+      product: 'LA',
     });
 
+    const targetNodePrices = params.useSingleNode
+      ? userMaxPrices.slice(0, 1)
+      : userMaxPrices;
+
+    const sessionSigs = await this._getSessionSigs({
+      ...params.authContext,
+      userMaxPrices: targetNodePrices,
+    });
+
+    const targetNodeUrls = targetNodePrices.map(({ url }) => url);
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const getNodePromises = async () => {
-      if (params.useSingleNode) {
-        return this.getRandomNodePromise((url: string) =>
-          this.executeJsNodeRequest(
-            url,
-            {
-              ...formattedParams,
-              sessionSigs,
-            },
-            requestId
-          )
-        );
-      }
-      return this.getNodePromises((url: string) =>
-        this.executeJsNodeRequest(
-          url,
-          {
-            ...formattedParams,
-            sessionSigs,
-          },
-          requestId
-        )
-      );
-    };
-
-    const nodePromises = await getNodePromises();
+    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) =>
+      this.executeJsNodeRequest(
+        url,
+        {
+          ...formattedParams,
+          sessionSigs,
+        },
+        requestId,
+        this._getNodeSet(targetNodeUrls)
+      )
+    );
 
     // -- resolve promises
     const res = await this.handleNodePromises(
       nodePromises,
       requestId,
-      params.useSingleNode ? 1 : this.connectedNodes.size
+      params.useSingleNode ? 1 : this.config.minNodeCount
     );
 
     // -- case: promises rejected
@@ -1001,11 +993,15 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const requestId = this._getNewRequestId();
 
+    const targetNodePrices = this.getMaxPricesForNodeProduct({
+      product: 'SIGN',
+    });
+
     // PKP session sigs disables EOA authNeededCallback :(
     const sessionSigs = await this._getSessionSigs({
       pkpPublicKey: params.pubKey,
       ...params.authContext,
-      maxPricesByNodeUrl: this.getMaxPricesForNodes({ product: 'SIGN' }),
+      userMaxPrices: targetNodePrices,
     });
 
     // validate session sigs
@@ -1018,17 +1014,11 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       );
     }
 
-    // FIXME: Use keys from price map
-    const nodeSet = await this._getNodeSet();
-
-    // get the threshold number of nodes randomly
-    // const thresholdNodeSet = nodeSet
-    //   .sort(() => Math.random() - 0.5)
-    //   .slice(0, this._getThreshold());
-
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const nodePromises = this.getNodePromises((url: string) => {
+
+    const targetNodeUrls = targetNodePrices.map(({ url }) => url);
+    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) => {
       // -- get the session sig from the url key
       const sessionSig = this.getSessionSigByUrl({
         sessionSigs,
@@ -1047,7 +1037,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
         //   }),
 
         // nodeSet: thresholdNodeSet,
-        nodeSet: nodeSet,
+        nodeSet: this._getNodeSet(targetNodeUrls),
         signingScheme: 'EcdsaK256Sha256',
       };
 
@@ -1289,6 +1279,9 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     log('identityParam', identityParam);
 
     let sessionSigs: SessionSigsMap = {};
+    const userMaxPrices = this.getMaxPricesForNodeProduct({
+      product: 'DECRYPTION',
+    });
 
     if (!authSig) {
       if (!authContext) {
@@ -1304,47 +1297,49 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
       sessionSigs = await this._getSessionSigs({
         ...authContext,
-        maxPricesByNodeUrl: this.getMaxPricesForNodes({
-          product: 'DECRYPTION',
-        }),
+        userMaxPrices,
       });
     }
 
     // ========== Get Network Signature ==========
     const requestId = this._getNewRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- if session key is available, use it
-      const authSigToSend = authSig ? authSig : sessionSigs[url];
+    const nodePromises = this.getNodePromises(
+      userMaxPrices.map(({ url }) => url),
+      (url: string) => {
+        // -- if session key is available, use it
+        const authSigToSend = authSig ? authSig : sessionSigs[url];
 
-      if (!authSigToSend) {
-        throw new InvalidArgumentException(
-          {
-            info: {
-              params,
+        if (!authSigToSend) {
+          throw new InvalidArgumentException(
+            {
+              info: {
+                params,
+              },
             },
-          },
-          'authSig is required'
-        );
+            'authSig is required'
+          );
+        }
+
+        const reqBody: EncryptionSignRequest = {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          dataToEncryptHash,
+          chain,
+          authSig: authSigToSend,
+          epoch: this.currentEpochNumber!,
+        };
+
+        const urlWithParh = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
+        });
+
+        return this.generatePromise(urlWithParh, reqBody, requestId);
       }
-
-      const reqBody: EncryptionSignRequest = {
-        accessControlConditions: formattedAccessControlConditions,
-        evmContractConditions: formattedEVMContractConditions,
-        solRpcConditions: formattedSolRpcConditions,
-        unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
-        dataToEncryptHash,
-        chain,
-        authSig: authSigToSend,
-        epoch: this.currentEpochNumber!,
-      };
-
-      const urlWithParh = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
-      });
-
-      return this.generatePromise(urlWithParh, reqBody, requestId);
-    });
+    );
 
     // -- resolve promises
     const res = await this.handleNodePromises(
@@ -1511,12 +1506,16 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       siweMessage = await createSiweMessage(siweParams);
     }
 
-    const nodeSet = await this._getNodeSet();
+    // This may seem a bit weird because we usually only care about prices for sessionSigs...
+    // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
+    const targetNodePrices = this.getMaxPricesForNodeProduct({
+      product: 'LA',
+    });
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
     const body: JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE> = {
-      nodeSet,
+      nodeSet: this._getNodeSet(targetNodePrices.map(({ url }) => url)),
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
@@ -1538,7 +1537,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const requestId = this._getNewRequestId();
     logWithRequestId(requestId, 'signSessionKey body', body);
 
-    const nodePromises = this.getNodePromises((url: string) => {
+    const targetNodeUrls = targetNodePrices.map(({ url }) => url);
+    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) => {
       const reqBody: JsonSignSessionKeyRequestV1 = body;
 
       const urlWithPath = composeLitUrl({
@@ -1559,6 +1559,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       );
       log('signSessionKey node promises:', res);
     } catch (e) {
+      logErrorWithRequestId(requestId, e);
       throw new UnknownError(
         {
           info: {
@@ -1695,29 +1696,37 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     });
   };
 
-  getMaxPricesForNodes = ({
+  getMaxPricesForNodeProduct = ({
     userMaxPrice,
     product,
   }: {
     userMaxPrice?: bigint;
     product: keyof typeof PRODUCT_IDS;
   }) => {
-    console.log('getMaxPricesForNodes()', { product });
+    log('getMaxPricesForNodeProduct()', { product });
     const getUserMaxPrice = () => {
       if (userMaxPrice) {
+        log('getMaxPricesForNodeProduct(): User provided maxPrice of', {
+          userMaxPrice,
+        });
         return userMaxPrice;
       }
 
       if (this.defaultMaxPriceByProduct[product] === -1n) {
-        return 9999999999999999999999999999999999999999n;
+        log(
+          `getMaxPricesForNodeProduct(): No user-provided maxPrice and no defaultMaxPrice set for ${product}; setting to max value`
+        );
+
+        return 340_282_366_920_938_463_463_374_607_431_768_211_455n; // Rust U128 max
       }
       return this.defaultMaxPriceByProduct[product];
     };
 
-    return getMaxPricesForNodes({
-      pricesByNodeAddress: this.config.pricesByNodeUrl,
+    return getMaxPricesForNodeProduct({
+      nodePrices: this.config.nodePrices,
       userMaxPrice: getUserMaxPrice(),
-      productId: PRODUCT_IDS.DECRYPTION,
+      productId: PRODUCT_IDS[product],
+      numRequiredNodes: this.config.minNodeCount,
     });
   };
 
@@ -1741,14 +1750,14 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * Note: When generating session signatures for different PKPs or auth methods,
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
    *
-   * @param { GetSessionSigsProps } params
+   * @param { AuthenticationContext } params
    *
    * An example of how this function is used can be found in the Lit developer-guides-code repository [here](https://github.com/LIT-Protocol/developer-guides-code/tree/master/session-signatures/getSessionSigs).
    *
    */
   private _getSessionSigs = async (
     params: AuthenticationContext & {
-      maxPricesByNodeUrl: Record<string, bigint>;
+      userMaxPrices: { url: string; price: bigint }[];
     }
   ): Promise<SessionSigsMap> => {
     // -- prepare
@@ -1866,23 +1875,20 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     //   'getSessionSigs()',
     //   util.inspect(
     //     {
-    //       maxPricesByNodeUrl: params.maxPricesByNodeUrl,
+    //       userMaxPrices: params.userMaxPrices,
     //     },
     //     { depth: 4 }
     //   )
     // );
 
-    this.connectedNodes.forEach((nodeAddress: string) => {
+    params.userMaxPrices.forEach(({ url: nodeAddress, price }) => {
       const toSign: SessionSigningTemplate = {
         ...sessionSigningTemplate,
         nodeAddress,
-        maxPrice: params.maxPricesByNodeUrl[nodeAddress].toString(),
+        maxPrice: price.toString(),
       };
 
-      console.log(
-        'Setting...nodeAddress maxprice',
-        params.maxPricesByNodeUrl[nodeAddress].toString()
-      );
+      log(`Setting maxprice for ${nodeAddress} to `, price.toString());
 
       const signedMessage = JSON.stringify(toSign);
 
@@ -2065,7 +2071,15 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const requestId = this._getNewRequestId();
 
-    const nodePromises = this.getNodePromises((url: string) => {
+    // This may seem a bit weird because we usually only care about prices for sessionSigs...
+    // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
+    const targetNodePrices = this.getMaxPricesForNodeProduct({
+      product: 'LA',
+    });
+
+    const targetNodeUrls = targetNodePrices.map(({ url }) => url);
+
+    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) => {
       if (!params.authMethod) {
         throw new ParamsMissingError(
           {
@@ -2092,7 +2106,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const responseData = await this.handleNodePromises(
       nodePromises,
       requestId,
-      this.connectedNodes.size
+      this.config.minNodeCount
     );
 
     if (responseData.success) {

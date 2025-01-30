@@ -6,13 +6,11 @@ import {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   HandshakeWithNode,
-  JsonExecutionRequest,
   JsonExecutionSdkParams,
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeBlsSigningShare,
-  NodeCommandResponse,
   NodeCommandServerKeysResponse,
   RejectedNodePromises,
   SendNodeCommand,
@@ -91,12 +89,14 @@ export interface ILitNodeClient {
    *
    * Get and gather node promises
    *
+   * @param { string[] } nodeUrls URLs of nodes to get promises for
    * @param { any } callback
    *
    * @returns { Array<Promise<any>> }
    *
    */
-  getNodePromises(callback: Function): Promise<any>[];
+  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
+  getNodePromises(nodeUrls: string[], callback: Function): Promise<any>[];
 
   /**
    * Handle node promises
@@ -127,6 +127,7 @@ export interface ILitNodeClient {
   _throwNodeError(res: RejectedNodePromises, requestId: string): never;
 
   // ========== API Calls to Nodes ==========
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;
 
   /**
@@ -187,6 +188,7 @@ export interface ILitNodeClient {
    * @returns { Promise } A promise that resolves when the nodes are connected.
    *
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   connect(): Promise<any>;
 
   /**

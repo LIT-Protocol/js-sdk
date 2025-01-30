@@ -1,9 +1,9 @@
-import { MaxPriceTooLow } from '@lit-protocol/constants';
+import { MaxPriceTooLow, PRODUCT_IDS } from '@lit-protocol/constants';
 
 interface MaxPricesForNodes {
-  pricesByNodeAddress: Record<string, bigint[]>;
+  nodePrices: { url: string; prices: bigint[] }[];
   userMaxPrice: bigint;
-  productId: number;
+  productId: (typeof PRODUCT_IDS)[keyof typeof PRODUCT_IDS];
   numRequiredNodes?: number;
 }
 
@@ -12,42 +12,28 @@ interface MaxPricesForNodes {
  * Ensures the total cost does not exceed userMaxPrice.
  * Operates in the order of lowest priced node to highest.
  *
- * @param pricesByNodeAddress - An object where keys are node addresses and values are arrays of prices for different action types.
+ * @param nodePrices - An object where keys are node addresses and values are arrays of prices for different action types.
  * @param userMaxPrice - The maximum price the user is willing to pay to execute the request.
  * @param productId - The ID of the product to determine which price to consider.
  * @param numRequiredNodes - Optional number of nodes required to execute the action. Defaults to all nodes.
  * @returns An object with updated prices distributed proportionally.
  * @throws A MaxPriceTooLow error if the total price exceeds userMaxPrice
  */
-export function getMaxPricesForNodes({
-  pricesByNodeAddress,
+export function getMaxPricesForNodeProduct({
+  nodePrices,
   userMaxPrice,
   productId,
   numRequiredNodes,
-}: MaxPricesForNodes): Record<string, bigint> {
-  // Convert the entries to an array and sort by the selected product price (ascending)
-  const sortedEntries = Object.entries(pricesByNodeAddress).sort(
-    ([, pricesA], [, pricesB]) => {
-      const diff = pricesA[productId] - pricesB[productId];
-      if (diff > 0n) {
-        return 1;
-      } else if (diff < 0n) {
-        return -1;
-      } else {
-        return 0;
-      }
-    }
-  );
-
+}: MaxPricesForNodes): { url: string; price: bigint }[] {
   // If we don't need all nodes to service the request, only use the cheapest `n` of them
   const nodesToConsider = numRequiredNodes
-    ? sortedEntries.slice(0, numRequiredNodes)
-    : sortedEntries;
+    ? nodePrices.slice(0, numRequiredNodes)
+    : nodePrices;
 
   let totalBaseCost = 0n;
 
   // Calculate the base total cost without adjustments
-  for (const [, prices] of nodesToConsider) {
+  for (const { prices } of nodesToConsider) {
     totalBaseCost += prices[productId];
   }
 
@@ -60,7 +46,7 @@ export function getMaxPricesForNodes({
           userMaxPrice: userMaxPrice.toString(),
         },
       },
-      `Max price is too low: Minimum required price is ${totalBaseCost.toString()}.`
+      `Max price is too low: Minimum required price is ${totalBaseCost.toString()}, got ${userMaxPrice.toString()}.`
     );
   }
 
@@ -73,14 +59,17 @@ export function getMaxPricesForNodes({
   // console.log('userMaxPrice:', userMaxPrice);
   const excessBalance = userMaxPrice - totalBaseCost;
 
-  // Map matching the keys from `pricesByNodeAddress`, but w/ the per-node maxPrice computed based on `userMaxPrice`
-  const maxPricesPerNode: Record<string, bigint> = {};
+  // Map matching the keys from `nodePrices`, but w/ the per-node maxPrice computed based on `userMaxPrice`
+  const maxPricesPerNode: { url: string; price: bigint }[] = [];
 
-  for (const [address, prices] of nodesToConsider) {
+  for (const { url, prices } of nodesToConsider) {
     // For now, we'll distribute the remaining balance equally across nodes
-    maxPricesPerNode[address] = excessBalance
-      ? prices[productId] + excessBalance / BigInt(nodesToConsider.length)
-      : prices[productId];
+    maxPricesPerNode.push({
+      url,
+      price: excessBalance
+        ? prices[productId] + excessBalance / BigInt(nodesToConsider.length)
+        : prices[productId],
+    });
   }
 
   return maxPricesPerNode;
