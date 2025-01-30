@@ -201,9 +201,10 @@ export interface ExclusiveLitContractContext {
   Staking: LitContract;
   PriceFeed: LitContract;
 }
-export interface LitContractContext extends ExclusiveLitContractContext {
-  [index: string]: string | any;
-}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type LitContractContext = Record<string, string | any> &
+  ExclusiveLitContractContext;
 
 export type ContractName = keyof ExclusiveLitContractContext;
 
