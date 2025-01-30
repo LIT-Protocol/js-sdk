@@ -15,7 +15,7 @@ import {
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from '@lit-protocol/misc';
 import {
-  AuthenticationProps,
+  AuthenticationContext,
   JsonExecutionSdkParams,
   PKPBaseProp,
   PKPBaseDefaultParams,
@@ -48,7 +48,7 @@ const compressPubKey = (pubKey: string): string => {
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
 
-  authContext: AuthenticationProps;
+  authContext: AuthenticationContext;
 
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
@@ -232,14 +232,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     // Check if authContext is provided correctly
-    if (this.authContext && !this.authContext.getSessionSigsProps) {
+    if (!this.authContext) {
       throw new InitError(
         {
           info: {
             authContext: this.authContext,
           },
         },
-        'authContext must be an object with getSessionSigsProps'
+        'authContext must be provided'
       );
     }
   }
@@ -294,7 +294,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           ...this.litActionJsParams,
         },
       },
-      authContext: this.authContext.getSessionSigsProps,
+      authContext: this.authContext,
     };
 
     // check if executeJsArgs has either code or ipfsId
@@ -354,7 +354,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       const sig = await this.litNodeClient.pkpSign({
         toSign,
         pubKey: this.uncompressedPubKey,
-        authContext: this.authContext.getSessionSigsProps,
+        authContext: this.authContext,
       });
 
       if (!sig) {

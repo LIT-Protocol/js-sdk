@@ -3,14 +3,14 @@ import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 
 import {
-  LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
-  RecapSessionCapabilityObject,
   createSiweMessage,
   createSiweMessageWithCapacityDelegation,
   createSiweMessageWithRecaps,
   decode,
   generateAuthSig,
+  LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
+  RecapSessionCapabilityObject,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
@@ -25,16 +25,16 @@ import {
   LIT_CURVE_TYPE,
   LIT_ENDPOINT,
   LIT_SESSION_KEY_URI,
-  LOCAL_STORAGE_KEYS,
   LitNodeClientNotReadyError,
+  LOCAL_STORAGE_KEYS,
   ParamNullError,
   ParamsMissingError,
+  PRODUCT_IDS,
   UnknownError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
-  PRODUCT_IDS,
 } from '@lit-protocol/constants';
-import { LitCore, composeLitUrl } from '@lit-protocol/core';
+import { composeLitUrl, LitCore } from '@lit-protocol/core';
 import {
   combineSignatureShares,
   encrypt,
@@ -63,10 +63,9 @@ import {
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
 import {
-  ILitResource,
-  ISessionCapabilityObject,
   AuthCallback,
   AuthCallbackParams,
+  type AuthenticationContext,
   AuthSig,
   BlsResponseData,
   CapacityCreditsReq,
@@ -77,18 +76,19 @@ import {
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
+  EncryptionSignRequest,
+  EcdsaSignedMessageShareParsed,
   EncryptRequest,
   EncryptResponse,
   EncryptSdkParams,
-  EncryptionSignRequest,
   ExecuteJsNoSigningResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
-  GetPkpSessionSigs,
-  GetSessionSigsProps,
   GetSignSessionKeySharesProp,
   GetWalletSigProps,
   ILitNodeClient,
+  ILitResource,
+  ISessionCapabilityObject,
   JsonExecutionRequest,
   JsonExecutionSdkParams,
   JsonPKPClaimKeyRequest,
@@ -105,10 +105,10 @@ import {
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
-  SigResponse,
+  Signature,
   SignSessionKeyProp,
   SignSessionKeyResponse,
-  Signature,
+  SigResponse,
   SuccessNodePromises,
 } from '@lit-protocol/types';
 import {
@@ -118,6 +118,20 @@ import {
 
 // FIXME: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
+
+import { encodeCode } from './helpers/encode-code';
+import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getClaims } from './helpers/get-claims';
+import { getClaimsList } from './helpers/get-claims-list';
+import { getMaxPricesForNodes } from './helpers/get-max-prices-for-nodes';
+import { getSignatures } from './helpers/get-signatures';
+import { normalizeArray } from './helpers/normalize-array';
+import { normalizeJsParams } from './helpers/normalize-params';
+import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
+import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { removeDoubleQuotes } from './helpers/remove-double-quotes';
+import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -145,7 +159,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
   }
-  // ========== Payment Delegation ==========
 
   setDefaultMaxPrice(product: keyof typeof PRODUCT_IDS, price: bigint) {
     this.defaultMaxPriceByProduct[product] = price;
@@ -909,7 +922,12 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // -- 3. combine logs
     const mostCommonLogs: string = mostCommonString(
-      responseData.map((r: NodeLog) => r.logs)
+      responseData.map(
+        (r: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          logs: any;
+        }) => r.logs
+      )
     );
 
     // -- 4. combine claims
@@ -1729,7 +1747,9 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    *
    */
   private _getSessionSigs = async (
-    params: GetSessionSigsProps & { maxPricesByNodeUrl: Record<string, bigint> }
+    params: AuthenticationContext & {
+      maxPricesByNodeUrl: Record<string, bigint>;
+    }
   ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
@@ -1905,7 +1925,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * @returns A promise that resolves to the PKP sessionSigs.
    * @throws An error if any of the required parameters are missing or if `litActionCode` and `ipfsId` exist at the same time.
    */
-  getPkpAuthContext = (params: GetPkpSessionSigs) => {
+  getPkpAuthContext = (params: AuthenticationContext) => {
     const chain = params?.chain || 'ethereum';
 
     return {

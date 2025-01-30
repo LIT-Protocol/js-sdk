@@ -2,8 +2,6 @@ import depd from 'depd';
 import { ethers } from 'ethers';
 
 import {
-  ALL_LIT_CHAINS,
-  AUTH_METHOD_TYPE,
   AUTH_METHOD_TYPE_VALUES,
   InvalidArgumentException,
   LitNodeClientNotReadyError,
@@ -13,12 +11,9 @@ import {
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
-  AuthCallbackParams,
   AuthMethod,
-  AuthSig,
   AuthenticateOptions,
   BaseProviderOptions,
-  BaseProviderSessionSigsParams,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -26,8 +21,6 @@ import {
   IRelayPKP,
   IRelayRequestData,
   MintRequestBody,
-  SessionSigs,
-  SignSessionKeyResponse,
 } from '@lit-protocol/types';
 
 import { validateMintRequestBody } from '../validators';
