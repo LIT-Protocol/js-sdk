@@ -8,9 +8,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ✅ NETWORK=datil-test yarn test:local --filter=testPkpSessionSigsDomain
  * ✅ NETWORK=custom yarn test:local --filter=testPkpSessionSigsDomain
  */
-export const testPkpSessionSigsDomain = async (
-  devEnv: TinnyEnvironment
-) => {
+export const testPkpSessionSigsDomain = async (devEnv: TinnyEnvironment) => {
   const alice = await devEnv.createRandomPerson();
   const testDomain = 'test.domain.com';
 
@@ -32,7 +30,13 @@ export const testPkpSessionSigsDomain = async (
   //     { resource: [LitActionResource], ability: 'lit-action-execution' }
   //   ]
   // }
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice, undefined, undefined, testDomain);
+  const pkpSessionSigs = await getPkpSessionSigs(
+    devEnv,
+    alice,
+    undefined,
+    undefined,
+    testDomain
+  );
 
   // Get the first session sig to verify
   const firstNodeAddress = Object.keys(pkpSessionSigs)[0];
@@ -40,14 +44,16 @@ export const testPkpSessionSigsDomain = async (
 
   // Parse the signed message to verify domain
   const signedMessage = firstSessionSig.signedMessage;
-  
+
   // Verify that the domain is present in the signed message
   if (!signedMessage.includes(testDomain)) {
-    throw new Error(`Expected domain "${testDomain}" in signed message, but it was not found. Signed message: ${signedMessage}`);
+    throw new Error(
+      `Expected domain "${testDomain}" in signed message, but it was not found. Signed message: ${signedMessage}`
+    );
   }
 
   log('✅ Domain parameter successfully passed through in sessionSigs');
-  
+
   // Clean up
   devEnv.releasePrivateKeyFromUser(alice);
-}; 
+};
