@@ -253,6 +253,10 @@ export class TinnyEnvironment {
     console.log('this.network:', this.network);
     const centralisation = CENTRALISATION_BY_NETWORK[this.network];
 
+    console.log('this.customNetworkContext:', typeof this.customNetworkContext);
+    console.log('this.testnet:', typeof this.testnet);
+    console.log('this._contractContext:', typeof this._contractContext);
+
     if (this.network === LIT_NETWORK.Custom || centralisation === 'unknown') {
       const networkContext =
         this.customNetworkContext ||
