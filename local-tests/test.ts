@@ -1,3 +1,7 @@
+import { ethers } from 'ethers';
+
+import { log } from '@lit-protocol/misc';
+import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from './setup/tinny-environment';
 import { runInBand, runTestsParallel } from './setup/tinny-operations';
 // import { testBundleSpeed } from './tests/test-bundle-speed';
@@ -109,6 +113,7 @@ import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/tes
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
 import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
+import { testPkpSessionSigsDomain } from './tests/testPkpSessionSigsDomain';
 
 // Use the current LIT action code to test against
 setLitActionsCodeToLocal();
@@ -185,6 +190,7 @@ setLitActionsCodeToLocal();
     testUsePkpSessionSigsToExecuteJsConsoleLog,
     testUsePkpSessionSigsToEncryptDecryptString,
     testUsePkpSessionSigsToEncryptDecryptFile,
+    testPkpSessionSigsDomain,
   };
 
   const litActionSessionSigsTests = {
