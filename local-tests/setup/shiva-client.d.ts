@@ -10,6 +10,7 @@ type ContractAbis = {
   pkpHelper: string;
   contractResolver: string;
   paymentDelegation: string;
+  priceFeed: string;
 };
 
 type ContractAddresses = {
