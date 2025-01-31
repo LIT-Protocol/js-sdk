@@ -125,26 +125,36 @@ export class TestnetClient {
 
   /**
    * Polls a given testnet for the ACTIVE state
-   * polls on a 500 milisecond interval
+   * polls on a 3000 millisecond interval
    */
   public async pollTestnetForActive(): Promise<string> {
     let state = 'Busy';
-    while (state != 'Active' && state != `UNKNOWN`) {
+    let pollCount = 0;
+    const startTime = Date.now(); // Capture start time
+
+    while (state !== 'Active' && state !== 'UNKNOWN') {
+      pollCount++;
+
       const res = await fetch(
         this._processEnvs.TESTNET_MANAGER_URL + '/test/poll/testnet/' + this._id
       );
       const stateRes: TestNetResponse<TestNetState> =
         await _processTestnetResponse<TestNetState>(res);
       state = stateRes.body;
-      console.log('found state to be', state);
 
-      await new Promise<void>((res, _) => {
-        setTimeout(() => {
-          res();
-        }, 500);
-      });
+      console.log(`Poll attempt #${pollCount}: found state to be`, state);
+
+      if (state !== 'Active' && state !== 'UNKNOWN') {
+        await new Promise<void>((resolve) => setTimeout(resolve, 3000));
+      }
     }
 
+    const endTime = Date.now(); // Capture end time
+    const elapsedTime = (endTime - startTime) / 1000; // Convert to seconds
+
+    console.log(
+      `✅ Polling completed after ${pollCount} attempts. Time taken: ${elapsedTime} seconds.`
+    );
     return state;
   }
 

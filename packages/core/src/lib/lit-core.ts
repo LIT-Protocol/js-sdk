@@ -554,16 +554,25 @@ export class LitCore {
     }
 
     if (this.config.contractContext) {
+      console.log(
+        '❓ this.config.contractContext:',
+        this.config.contractContext
+      );
       const logAddresses = Object.entries(this.config.contractContext).reduce(
         (output, [key, val]) => {
+
+          console.log('❓ key:', key);
+          console.log('❓ val:', val);
+
           // @ts-expect-error since the object hash returned by `getContractAddresses` is `any`, we have no types here
           output[key] = val.address;
           return output;
         },
         {}
       );
+      console.log('❓ logAddresses:', logAddresses);
       if (this.config.litNetwork === LIT_NETWORK.Custom) {
-        log('using custom contracts: ', logAddresses);
+        log('❓ using custom contracts: ', logAddresses);
       }
     }
 
