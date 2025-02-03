@@ -16,7 +16,6 @@ import {
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
-  BaseAuthenticateOptions,
 } from './interfaces';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
@@ -127,8 +126,6 @@ export type AcceptedFileType = File | Blob;
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 
-export type AuthenticateOptions = BaseAuthenticateOptions;
-
 /**
  * Type for expressing claim results being processed by a relay server
  */
@@ -204,9 +201,10 @@ export interface ExclusiveLitContractContext {
   Staking: LitContract;
   PriceFeed: LitContract;
 }
-export interface LitContractContext extends ExclusiveLitContractContext {
-  [index: string]: string | any;
-}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type LitContractContext = Record<string, string | any> &
+  ExclusiveLitContractContext;
 
 export type ContractName = keyof ExclusiveLitContractContext;
 
@@ -270,13 +268,4 @@ export interface EpochInfo {
   endTime: number;
   retries: number;
   timeout: number;
-}
-
-export interface PriceFeedInfo {
-  epochId: number;
-  minNodeCount: number;
-  networkPrices: {
-    arr: { network: string; price: number }[];
-    mapByAddress: Record<string, number>;
-  };
 }

@@ -1,16 +1,17 @@
+import { SiweMessage } from 'siwe';
+
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
   CapacityDelegationFields,
   WithCapacityDelegation,
   WithRecap,
 } from '@lit-protocol/types';
-import { SiweMessage } from 'siwe';
 
 import {
   addRecapToSiweMessage,
   createCapacityCreditsResourceData,
 } from './siwe-helper';
-import { LIT_ABILITY } from '@lit-protocol/constants';
 
 /**
  * Creates a SIWE
@@ -74,6 +75,10 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
   // -- add recap resources if needed
   if (params.resources) {
+    if (!params.litNodeClient) {
+      throw new Error('litNodeClient is required');
+    }
+
     siweMessage = await addRecapToSiweMessage({
       siweMessage,
       resources: params.resources,

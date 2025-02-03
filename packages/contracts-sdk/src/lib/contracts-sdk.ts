@@ -1,4 +1,5 @@
-/* eslint-disable import/order */
+// import * as util from 'node:util'; // For inspecting bigInt payloads for pricing data
+
 import {
   Abi,
   AbiFunction,
@@ -6,24 +7,8 @@ import {
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
 } from 'abitype';
-import { derivedAddresses, isBrowser, isNode, log } from '@lit-protocol/misc';
-import {
-  ContractName,
-  CreateCustomAuthMethodRequest,
-  EpochInfo,
-  GasLimitParam,
-  LIT_NETWORKS_KEYS,
-  LitContractContext,
-  LitContractResolverContext,
-  MintNextAndAddAuthMethods,
-  MintWithAuthParams,
-  MintWithAuthResponse,
-  TokenInfo,
-  PriceFeedInfo,
-  LitContract,
-} from '@lit-protocol/types';
 import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
-import { decToHex, hexToDec, intToIP } from './hex2dec';
+import { computeAddress } from 'ethers/lib/utils';
 
 import {
   AUTH_METHOD_SCOPE_VALUES,
@@ -44,20 +29,39 @@ import {
   WrongNetworkException,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
-import { computeAddress } from 'ethers/lib/utils';
+import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
+import {
+  ContractName,
+  CreateCustomAuthMethodRequest,
+  EpochInfo,
+  GasLimitParam,
+  LIT_NETWORKS_KEYS,
+  LitContractContext,
+  LitContractResolverContext,
+  MintNextAndAddAuthMethods,
+  MintWithAuthParams,
+  MintWithAuthResponse,
+  TokenInfo,
+  LitContract,
+} from '@lit-protocol/types';
+
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { ValidatorStruct } from './types';
+import { decToHex, hexToDec, intToIP } from './hex2dec';
+import { ValidatorStruct, type ValidatorWithPrices } from './types';
+
+const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 
 // FIXME: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ethereum: any;
   }
 }
@@ -76,6 +80,7 @@ const GAS_LIMIT_ADJUSTMENT = ethers.BigNumber.from(100).add(
 // The class has a number of properties that represent the smart contract instances, such as accessControlConditionsContract, litTokenContract, pkpNftContract, etc. These smart contract instances are created by passing the contract address, ABI, and provider to the ethers.Contract constructor.
 // The class also has a utils object with helper functions for converting between hexadecimal and decimal representation of numbers, as well as functions for working with multihashes and timestamps.
 export class LitContracts {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   provider: ethers.providers.StaticJsonRpcProvider | any;
   rpc: string;
   rpcs: string[];
@@ -107,10 +112,14 @@ export class LitContracts {
 
   // make the constructor args optional
   constructor(args?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     provider?: ethers.providers.StaticJsonRpcProvider | any;
     customContext?: LitContractContext | LitContractResolverContext;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rpcs?: string[] | any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rpc?: string | any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     signer?: ethers.Signer | any;
     privateKey?: string | undefined;
     randomPrivatekey?: boolean;
@@ -146,6 +155,7 @@ export class LitContracts {
    *
    * @param {any} [args] An optional value to log with the message.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   log = (...args: any[]) => {
     if (this.debug) {
       LitContracts.logger.debug(...args);
@@ -682,7 +692,7 @@ export class LitContracts {
       contractData = LitContracts._resolveContractContext(network);
     }
 
-    // Destructure the data for easier access
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
@@ -787,7 +797,7 @@ export class LitContracts {
     litNetwork,
   }: {
     activeValidatorStructs: ValidatorStruct[];
-    nodeProtocol?: string;
+    nodeProtocol?: typeof HTTP | typeof HTTPS | null;
     litNetwork: LIT_NETWORK_VALUES;
   }): string[] {
     return activeValidatorStructs.map((item) => {
@@ -829,30 +839,18 @@ export class LitContracts {
     networkContext,
     rpcUrl,
     nodeProtocol,
-    sortByPrice,
   }: {
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
-    sortByPrice?: boolean;
   }): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
-    priceByNetwork: Record<string, number>;
+    nodePrices: { url: string; prices: bigint[] }[];
   }> => {
-    // if it's true, we will sort the networks by price feed from lowest to highest
-    // if it's false, we will not sort the networks
-    const _sortByPrice = sortByPrice ?? true;
-
-    if (_sortByPrice) {
-      log('Sorting networks by price feed from lowest to highest');
-    } else {
-      log('Not sorting networks by price feed');
-    }
-
     const stakingContract = await LitContracts.getStakingContract(
       litNetwork,
       networkContext,
@@ -885,6 +883,7 @@ export class LitContracts {
     }
 
     const activeValidatorStructs: ValidatorStruct[] =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       activeUnkickedValidatorStructs.map((item: any) => {
         return {
           ip: item[0],
@@ -897,7 +896,7 @@ export class LitContracts {
         };
       });
 
-    const unsortedNetworks = LitContracts.generateValidatorURLs({
+    const bootstrapUrls = LitContracts.generateValidatorURLs({
       activeValidatorStructs,
       litNetwork,
     });
@@ -917,78 +916,28 @@ export class LitContracts {
     //   'http://yyy:7471': 300, <-- highest price
     //   'http://zzz:7472': 200 <-- middle price
     // }
-    const PRICE_BY_NETWORK = priceFeedInfo.networkPrices.mapByAddress;
-
-    // sorted networks by prices (lowest to highest)
-    // [
-    //   'http://xxx:7470', <-- lowest price
-    //   'http://zzz:7472', <-- middle price
-    //   'http://yyy:7471' <-- highest price
-    // ]
-    const sortedNetworks = unsortedNetworks.sort(
-      (a, b) => PRICE_BY_NETWORK[a] - PRICE_BY_NETWORK[b]
-    );
-
-    const bootstrapUrls = _sortByPrice ? sortedNetworks : unsortedNetworks;
-
     return {
       stakingContract,
       epochInfo: typedEpochInfo,
       minNodeCount: minNodeCountInt,
       bootstrapUrls: bootstrapUrls,
-      priceByNetwork: PRICE_BY_NETWORK,
+      nodePrices: priceFeedInfo.networkPrices,
     };
   };
 
-  /**
-   * Gets price feed information for nodes in the network.
-   *
-   * @param {Object} params - The parameters object
-   * @param {LIT_NETWORKS_KEYS} params.litNetwork - The Lit network to get price feed info for
-   * @param {LitContractContext | LitContractResolverContext} [params.networkContext] - Optional network context
-   * @param {string} [params.rpcUrl] - Optional RPC URL to use
-   * @param {number[]} [params.productIds] - Optional array of product IDs to get prices for. Defaults to [DECRYPTION, LA, SIGN]
-   * @param {typeof HTTP | typeof HTTPS | null} [params.nodeProtocol] - Optional node protocol to use
-   *
-   * @returns {Promise<{
-   *   epochId: number,
-   *   minNodeCount: number,
-   *   networkPrices: {
-   *     arr: Array<{network: string, price: number}>,
-   *     mapByAddress: Record<string, number>
-   *   }
-   * }>}
-   */
   public static getPriceFeedInfo = async ({
     realmId,
     litNetwork,
     networkContext,
     rpcUrl,
-    productIds, // Array of product IDs
+    nodeProtocol,
   }: {
     realmId: number;
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
-    productIds?: (typeof PRODUCT_IDS)[keyof typeof PRODUCT_IDS][];
-  }): Promise<PriceFeedInfo> => {
-    if (!productIds || productIds.length === 0) {
-      log('No product IDs provided. Defaulting to 0');
-      productIds = [PRODUCT_IDS.DECRYPTION, PRODUCT_IDS.LA, PRODUCT_IDS.SIGN];
-    }
-
-    // check if productIds is any numbers in the PRODUCT_IDS object
-    productIds.forEach((productId) => {
-      if (!Object.values(PRODUCT_IDS).includes(productId)) {
-        throw new Error(
-          `❌ Invalid product ID: ${productId}. We only accept ${Object.values(
-            PRODUCT_IDS
-          ).join(', ')}`
-        );
-      }
-    });
-
+  }) => {
     const priceFeedContract = await LitContracts.getPriceFeedContract(
       litNetwork,
       networkContext,
@@ -997,67 +946,59 @@ export class LitContracts {
 
     const nodesForRequest = await priceFeedContract['getNodesForRequest'](
       realmId,
-      productIds
+      PRODUCT_IDS_ARRAY
     );
 
-    const epochId = nodesForRequest[0].toNumber();
-    const minNodeCount = nodesForRequest[1].toNumber();
-    const nodesAndPrices = nodesForRequest[2];
+    const epochId: number[] = nodesForRequest[0].toNumber();
+    const minNodeCount: number[] = nodesForRequest[1].toNumber();
+    const nodesAndPrices: ValidatorWithPrices[] = nodesForRequest[2];
 
-    const activeValidatorStructs: ValidatorStruct[] = nodesAndPrices.map(
-      (item: any) => {
-        return {
-          ip: item.validator.ip,
-          ipv6: item.validator.ipv6,
-          port: item.validator.port,
-          nodeAddress: item.validator.nodeAddress,
-          reward: item.validator.reward,
-          seconderPubkey: item.validator.seconderPubkey,
-          receiverPubkey: item.validator.receiverPubkey,
-        };
-      }
-    );
-
-    const networks = LitContracts.generateValidatorURLs({
-      activeValidatorStructs,
+    const networkUrls = LitContracts.generateValidatorURLs({
+      activeValidatorStructs: nodesAndPrices.map(({ validator }) => validator),
       litNetwork,
+      nodeProtocol,
     });
 
-    console.log('networks:', networks);
-
-    const prices = nodesAndPrices.flatMap((item: any) => {
-      // Flatten the nested prices array and convert BigNumber to number
-      return item.prices.map((price: ethers.BigNumber) =>
-        parseFloat(price.toString())
-      );
-    });
-
-    console.log('Prices as numbers:', prices);
-
-    const networkPriceMap: Record<string, number> = networks.reduce(
-      (acc, network, index) => {
-        acc[network] = prices[index];
+    const prices = networkUrls
+      .reduce<{ url: string; prices: bigint[] }[]>((acc, network, index) => {
+        acc.push({
+          url: network,
+          prices: nodesAndPrices[index].prices.map((ethersPrice) =>
+            ethersPrice.toBigInt()
+          ),
+        });
         return acc;
-      },
-      {} as Record<string, number>
-    );
+      }, [])
+      .sort(({ prices: pricesA }, { prices: pricesB }) => {
+        // Sort by any price since the cheapest for _any_ product will be the cheapest for _all_ products
+        const diff = pricesA[0] - pricesB[0];
+        if (diff > 0n) {
+          return 1;
+        } else if (diff < 0n) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
 
-    console.log('Network to Price Map:', networkPriceMap);
-
-    const networkPriceObjArr = networks.map((network, index) => {
-      return {
-        network, // The key will be the network URL
-        price: prices[index], // The value will be the corresponding price
-      };
-    });
+    // console.log(
+    //   'getPriceFeedInfo()',
+    //   util.inspect(
+    //     {
+    //       epochId,
+    //       minNodeCount,
+    //       networkPrices: {
+    //         mapByAddress: networkPriceMap,
+    //       },
+    //     },
+    //     { depth: 4 }
+    //   )
+    // );
 
     return {
       epochId,
       minNodeCount,
-      networkPrices: {
-        arr: networkPriceObjArr,
-        mapByAddress: networkPriceMap,
-      },
+      networkPrices: prices,
     };
   };
 
@@ -1504,17 +1445,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     getBytes32FromMultihash: (ipfsId: string, CID: CIDParser): IPFSHash => {
       return getBytes32FromMultihash(ipfsId, CID);
     },
-
-    // convert timestamp to YYYY/MM/DD format
-    timestamp2Date: (timestamp: string): string => {
-      const date = require('date-and-time');
-
-      const format = 'YYYY/MM/DD HH:mm:ss';
-
-      const timestampFormatted: Date = new Date(parseInt(timestamp) * 1000);
-
-      return date.format(timestampFormatted, format);
-    },
   };
 
   pkpNftContractUtils = {
@@ -1667,9 +1597,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         const arr = [];
 
-        // for each pkp
-        for (let i = 0; i < tokenIds.length; i++) {
-          const tokenId = tokenIds[i];
+        for (const tokenId of tokenIds) {
           const pubKey = await pkpNftContract['getPubkey'](tokenId);
           const addrs: TokenInfo = await derivedAddresses({
             publicKey: pubKey,
@@ -1749,6 +1677,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('sentTx:', sentTx);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res: any = await sentTx.wait();
         this.log('res:', res);
 
@@ -1814,6 +1743,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
           const txRec = await tx.wait();
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const events: any = 'events' in txRec ? txRec.events : txRec.logs;
           const tokenId = events[1].topics[1];
           return { tx, res: txRec, tokenId };

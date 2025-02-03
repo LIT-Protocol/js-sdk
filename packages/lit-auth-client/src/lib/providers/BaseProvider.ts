@@ -2,8 +2,6 @@ import depd from 'depd';
 import { ethers } from 'ethers';
 
 import {
-  ALL_LIT_CHAINS,
-  AUTH_METHOD_TYPE,
   AUTH_METHOD_TYPE_VALUES,
   InvalidArgumentException,
   LitNodeClientNotReadyError,
@@ -13,12 +11,8 @@ import {
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
-  AuthCallbackParams,
   AuthMethod,
-  AuthSig,
-  AuthenticateOptions,
   BaseProviderOptions,
-  BaseProviderSessionSigsParams,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -26,8 +20,6 @@ import {
   IRelayPKP,
   IRelayRequestData,
   MintRequestBody,
-  SessionSigs,
-  SignSessionKeyResponse,
 } from '@lit-protocol/types';
 
 import { validateMintRequestBody } from '../validators';
@@ -57,8 +49,8 @@ export abstract class BaseProvider {
    * @param {(currentUrl: string, redirectUri: string) => boolean} [urlCheckCallback] - Optional callback to handle authentication data or errors
    * @returns {Promise<AuthMethod>} - Auth method object that contains authentication data
    */
-  abstract authenticate<T extends AuthenticateOptions>(
-    options?: T,
+  abstract authenticate(
+    options?: unknown,
     urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
   ): Promise<AuthMethod>;
 
@@ -238,96 +230,6 @@ export abstract class BaseProvider {
     });
 
     return pkps;
-  }
-
-  /**
-   * Generate session sigs for given auth method and PKP
-   *
-   * @param {BaseProviderSessionSigsParams} params
-   * @param {string} params.pkpPublicKey - Public key of PKP to auth with
-   * @param {AuthMethod} params.authMethod - Auth method verifying ownership of PKP
-   * @param {GetSessionSigsProps} params.sessionSigsParams - Params for getSessionSigs function
-   * @param {LitNodeClient} [params.litNodeClient] - Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
-   *
-   * @returns {Promise<SessionSigs>} - Session sigs
-   */
-  public async getSessionSigs(
-    params: BaseProviderSessionSigsParams
-  ): Promise<SessionSigs> {
-    // Use provided LitNodeClient or create a new one
-    if (params.litNodeClient && params.litNodeClient instanceof LitNodeClient) {
-      this.litNodeClient = params.litNodeClient;
-    }
-    // Connect to LitNodeClient if not already connected
-    if (!this.litNodeClient.ready) {
-      await this.litNodeClient.connect();
-    }
-
-    let authNeededCallback = params.sessionSigsParams.authNeededCallback;
-
-    // If no session key is provided, generate a new session key from the LitNodeClient
-    const sessionKey =
-      params.sessionSigsParams.sessionKey || this.litNodeClient.getSessionKey();
-
-    // If no authNeededCallback is provided, create one that uses the provided PKP and auth method
-    // to sign a session key and return an auth sig
-    if (!authNeededCallback) {
-      const nodeClient = this.litNodeClient;
-
-      authNeededCallback = async (
-        authCallbackParams: AuthCallbackParams
-      ): Promise<AuthSig> => {
-        let chainId = 1;
-        try {
-          const chainInfo = ALL_LIT_CHAINS[authCallbackParams.chain];
-          // @ts-expect-error - chainId is not defined on the type
-          chainId = chainInfo.chainId;
-        } catch {
-          // Do nothing
-        }
-
-        let response: SignSessionKeyResponse;
-
-        // common data for the signSessionKey function call
-        const commonData = {
-          sessionKey: sessionKey,
-          statement: authCallbackParams.statement,
-          pkpPublicKey: params.pkpPublicKey,
-          expiration: authCallbackParams.expiration,
-          resources: authCallbackParams.resources,
-          chainId: chainId,
-          ...(params.resourceAbilityRequests && {
-            resourceAbilityRequests: params.resourceAbilityRequests,
-          }),
-        };
-
-        if (params.authMethod.authMethodType === AUTH_METHOD_TYPE.EthWallet) {
-          const authSig = JSON.parse(params.authMethod.accessToken);
-
-          response = await nodeClient.signSessionKey({
-            ...commonData,
-            authSig: authSig,
-            authMethods: [],
-          });
-        } else {
-          response = await nodeClient.signSessionKey({
-            ...commonData,
-            authMethods: [params.authMethod],
-          });
-        }
-
-        return response.authSig;
-      };
-    }
-
-    // Generate session sigs with the given session params
-    const sessionSigs = await this.litNodeClient.getSessionSigs({
-      ...params.sessionSigsParams,
-      sessionKey,
-      authNeededCallback,
-    });
-
-    return sessionSigs;
   }
 
   /**

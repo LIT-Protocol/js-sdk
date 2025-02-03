@@ -18,27 +18,27 @@ import {
   CENTRALISATION_BY_NETWORK,
   HTTP,
   HTTPS,
+  InitError,
+  InvalidArgumentException,
+  InvalidEthBlockhash,
+  InvalidNodeAttestation,
+  InvalidParamType,
   LIT_CURVE,
   LIT_CURVE_VALUES,
   LIT_ENDPOINT,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
+  LitNodeClientBadConfigError,
+  LitNodeClientNotReadyError,
+  LogLevel,
+  NetworkError,
+  NodeError,
   RPC_URL_BY_NETWORK,
   STAKING_STATES,
   STAKING_STATES_VALUES,
-  version,
-  InitError,
-  InvalidParamType,
-  NetworkError,
-  NodeError,
   UnknownError,
-  InvalidArgumentException,
-  LitNodeClientBadConfigError,
-  InvalidEthBlockhash,
-  LitNodeClientNotReadyError,
-  InvalidNodeAttestation,
-  LogLevel,
+  version,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -68,7 +68,6 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   NodeSet,
   RejectedNodePromises,
   SendNodeCommand,
@@ -118,7 +117,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   } & {
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   } & {
-    priceByNetwork: Record<string, number>; // eg. <nodeAddress, price>
+    nodePrices: { url: string; prices: bigint[] }[]; // eg. <nodeAddress, price[]>
   };
 
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
@@ -154,7 +153,7 @@ export class LitCore {
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
-    priceByNetwork: {},
+    nodePrices: [],
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -261,20 +260,19 @@ export class LitCore {
     epochInfo: EpochInfo;
     minNodeCount: number;
     bootstrapUrls: string[];
-    priceByNetwork: Record<string, number>;
+    nodePrices: { url: string; prices: bigint[] }[];
   }> {
     const {
       stakingContract,
       epochInfo,
       minNodeCount,
       bootstrapUrls,
-      priceByNetwork,
+      nodePrices,
     } = await LitContracts.getConnectionInfo({
       litNetwork: this.config.litNetwork,
       networkContext: this.config.contractContext,
       rpcUrl: this.config.rpcUrl,
       nodeProtocol: this.config.nodeProtocol,
-      sortByPrice: true,
     });
 
     // Validate minNodeCount
@@ -305,7 +303,7 @@ export class LitCore {
       epochInfo,
       minNodeCount,
       bootstrapUrls,
-      priceByNetwork,
+      nodePrices,
     };
   }
 
@@ -415,11 +413,8 @@ export class LitCore {
    *
    * @returns {Promise<NodeSet[]>} A promise that resolves with an array of NodeSet objects.
    */
-  protected _getNodeSet = async (): Promise<NodeSet[]> => {
-    const validatorData = await this._getValidatorData();
-    const bootstrapUrls = validatorData.bootstrapUrls;
-
-    const nodeSet = bootstrapUrls.map((url) => {
+  protected _getNodeSet = (bootstrapUrls: string[]): NodeSet[] => {
+    return bootstrapUrls.map((url) => {
       // remove protocol from the url as we only need ip:port
       const urlWithoutProtocol = url.replace(/(^\w+:|^)\/\//, '') as string;
 
@@ -430,8 +425,6 @@ export class LitCore {
         value: 1,
       };
     });
-
-    return nodeSet;
   };
 
   /**
@@ -574,7 +567,7 @@ export class LitCore {
     this._stakingContract = validatorData.stakingContract;
     this.config.minNodeCount = validatorData.minNodeCount;
     this.config.bootstrapUrls = validatorData.bootstrapUrls;
-    this.config.priceByNetwork = validatorData.priceByNetwork;
+    this.config.nodePrices = validatorData.nodePrices;
 
     this._epochState = await this._fetchCurrentEpochState(
       validatorData.epochInfo
@@ -1128,12 +1121,14 @@ export class LitCore {
    *
    * Get and gather node promises
    *
-   * @param { any } callback
+   * @param { string[] } nodeUrls URLs of nodes to get promises for
+   * @param { function } callback
    *
    * @returns { Array<Promise<any>> }
    *
    */
   getNodePromises = (
+    nodeUrls: string[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callback: (url: string) => Promise<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1142,7 +1137,7 @@ export class LitCore {
 
     const nodePromises = [];
 
-    for (const url of this.connectedNodes) {
+    for (const url of nodeUrls) {
       nodePromises.push(callback(url));
     }
 
@@ -1161,6 +1156,7 @@ export class LitCore {
     const nodeUrlsArr = Array.from(this.connectedNodes);
     return [callback(nodeUrlsArr[randomNodeIndex])];
   }
+
   /**
    * Retrieves the session signature for a given URL from the sessionSigs map.
    * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.
@@ -1306,6 +1302,7 @@ export class LitCore {
             })
             .finally(() => {
               responses++;
+
               if (responses === promises.length) {
                 // In case the total number of successful responses is less than n,
                 // resolve what we have when all promises are settled.
@@ -1331,6 +1328,22 @@ export class LitCore {
         success: true,
         values: successes,
       };
+    }
+
+    if (errors.length === 0) {
+      throw new UnknownError(
+        {
+          info: {
+            requestId,
+            successes,
+            errors,
+            minNodeCount,
+            threshold: this._getThreshold(),
+            numPromises: nodePromises.length,
+          },
+        },
+        `Not enough responses from nodes, but no errors either; probably incorrect minNodeCount or threshold."`
+      );
     }
 
     // TODO Likely a good use case for MultiError
@@ -1376,12 +1389,11 @@ export class LitCore {
           info: {
             requestId,
             errorCode: res.error.errorCode,
-            message: res.error.message,
+            errorKind: res.error.errorKind,
+            status: res.error.status,
           },
-          cause: res.error,
         },
-        'There was an error getting the signing shares from the nodes. Response from the nodes: %s',
-        JSON.stringify(res)
+        `There was an error getting the signing shares from the nodes: ${res.error.message}`
       );
     } else {
       throw new UnknownError(
@@ -1390,7 +1402,7 @@ export class LitCore {
             requestId,
           },
         },
-        `There was an error getting the signing shares from the nodes. Response from the nodes: %s`,
+        `There was an error getting the signing shares from the nodes`,
         JSON.stringify(res)
       );
     }

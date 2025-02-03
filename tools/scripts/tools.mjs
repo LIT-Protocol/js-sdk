@@ -149,6 +149,11 @@ async function setupLocalDevFunc() {
       await childRunCommand(`rm -rf ${dirPathToCreate}`);
     }
 
+    if(['wrapped-keys','wrapped-keys-lit-actions'].includes(projectName)) {
+      greenLog(`Skipping ${projectName}`);
+      return;
+    }
+
     // Then, create a symlink of each package's `dist` folder to their corresponding
     // package directory location under the root `dist`.
     const symLinkTarget = `../../dist/packages/${projectName}`; // relative to symlink directory
@@ -214,13 +219,20 @@ async function matchVersionsFunc() {
 
 async function validateDependencyVersions() {
   const PREFIX = '@lit-protocol';
-  const ignoreList = ['@lit-protocol/accs-schemas', '@lit-protocol/contracts'];
+  const ignoreList = ['@lit-protocol/accs-schemas', '@lit-protocol/contracts', '@lit-protocol/wrapped-keys', '@lit-protocol/wrapped-keys-lit-actions'];
 
   const packageList = (await listDirsRecursive('./packages', false)).map(
     (item) => {
       return `dist/${item}/package.json`;
     }
-  );
+  ).filter((item) => {
+    if(item.includes('wrapped-keys')) {
+      greenLog(`Skipping ${item}`);
+      return false
+    }
+
+    return true
+  });
 
   const packageTotal = packageList.length;
   let packagePasses = 0;
@@ -265,7 +277,7 @@ async function validateDependencyVersions() {
       `
     ❗️ Before publishing, make sure you have tested the build!
       - yarn test:unit     | run unit tests
-      - yarn test:local    | run e2e tests on nodejs 
+      - yarn test:local    | run e2e tests on nodejs
       `,
       true
     );

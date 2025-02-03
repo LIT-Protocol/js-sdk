@@ -1251,10 +1251,6 @@ export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
 
-// ========== Lit Actions ==========
-export const LIT_ACTION_IPFS_HASH =
-  'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
-
 // ========== Chains ==========
 export const VMTYPE = {
   EVM: 'EVM',

@@ -121,7 +121,7 @@ export async function decryptFromJson(
 ): Promise<
   ReturnType<typeof decryptToFile> | ReturnType<typeof decryptToString>
 > {
-  const { sessionSigs, parsedJsonData, litNodeClient } = params;
+  const { authContext, parsedJsonData, litNodeClient } = params;
 
   // -- validate
   const paramsIsSafe = safeParams({
@@ -152,7 +152,7 @@ export async function decryptFromJson(
         ciphertext: parsedJsonData.ciphertext,
         dataToEncryptHash: parsedJsonData.dataToEncryptHash,
         chain: parsedJsonData.chain,
-        sessionSigs,
+        authContext,
       },
       litNodeClient
     );
@@ -167,7 +167,7 @@ export async function decryptFromJson(
         ciphertext: parsedJsonData.ciphertext,
         dataToEncryptHash: parsedJsonData.dataToEncryptHash,
         chain: parsedJsonData.chain,
-        sessionSigs,
+        authContext,
       },
       litNodeClient
     );

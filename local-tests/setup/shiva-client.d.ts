@@ -10,6 +10,7 @@ type ContractAbis = {
   pkpHelper: string;
   contractResolver: string;
   paymentDelegation: string;
+  priceFeed: string;
 };
 
 type ContractAddresses = {
@@ -23,6 +24,7 @@ type ContractAddresses = {
   contractResolver: string;
   keyDeriver: string;
   paymentDelegation: string;
+  priceFeed: string;
 };
 
 type TestNetCreateRequest = {

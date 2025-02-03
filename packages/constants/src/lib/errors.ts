@@ -14,6 +14,7 @@ export const LIT_ERROR_KIND = {
   Parser: 'Parser',
   Serializer: 'Serializer',
   Timeout: 'Timeout',
+  Pricing: 'Pricing',
 } as const;
 
 /**
@@ -37,6 +38,11 @@ interface ErrorConfig {
 }
 
 export const LIT_ERROR: Record<string, ErrorConfig> = {
+  MAX_PRICE_TOO_LOW: {
+    name: 'MaxPriceTooLow',
+    code: 'max_price_too_low',
+    kind: LIT_ERROR_KIND.Pricing,
+  },
   INVALID_PARAM_TYPE: {
     name: 'InvalidParamType',
     code: 'invalid_param_type',
@@ -320,6 +326,7 @@ export const {
   LocalStorageItemNotFoundException,
   LocalStorageItemNotRemovedException,
   LocalStorageItemNotSetException,
+  MaxPriceTooLow,
   MintingNotSupported,
   NetworkError,
   NoValidShares,

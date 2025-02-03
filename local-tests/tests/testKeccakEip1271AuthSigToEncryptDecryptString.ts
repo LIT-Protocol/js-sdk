@@ -29,7 +29,7 @@ export const testKeccakEip1271AuthSigToEncryptDecryptString = async (
 
   const alice = await devEnv.createRandomPerson();
 
-  let accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+  let accs = AccessControlConditions.getEvmBasicAccessControlConditions({
     userAddress: contractAddress,
   });
   accs[0].chain = 'yellowstone'; // Contract deployed on Yellowstone
