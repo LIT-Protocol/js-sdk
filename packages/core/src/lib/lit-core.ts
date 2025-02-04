@@ -31,7 +31,7 @@ import {
   LIT_NETWORKS,
   LitNodeClientBadConfigError,
   LitNodeClientNotReadyError,
-  LogLevel,
+  LOG_LEVEL,
   NetworkError,
   NodeError,
   RPC_URL_BY_NETWORK,
@@ -65,8 +65,6 @@ import {
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
-  NodeClientErrorV0,
-  NodeClientErrorV1,
   NodeCommandServerKeysResponse,
   NodeSet,
   RejectedNodePromises,
@@ -213,7 +211,7 @@ export class LitCore {
     setMiscLitConfig(this.config);
     bootstrapLogManager(
       'core',
-      this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
+      this.config.debug ? LOG_LEVEL.DEBUG : LOG_LEVEL.OFF
     );
 
     // -- configure local storage if not present
@@ -364,10 +362,7 @@ export class LitCore {
           // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
           // But for now, our every-30-second network sync will fix things in at most 30s from now.
           // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
-          const { message = '' } = err as
-            | Error
-            | NodeClientErrorV0
-            | NodeClientErrorV1;
+          const { message = '' } = err as Error;
           logError(
             'Error while attempting to reconnect to nodes after epoch transition:',
             message
