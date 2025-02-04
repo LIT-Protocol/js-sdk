@@ -24,7 +24,6 @@ import {
   LIT_CURVE,
   LIT_CURVE_TYPE,
   LIT_ENDPOINT,
-  LIT_SESSION_KEY_URI,
   LitNodeClientNotReadyError,
   LOCAL_STORAGE_KEYS,
   ParamNullError,
@@ -1321,7 +1320,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // Try to get it from local storage, if not generates one~
     const sessionKey: SessionKeyPair =
       params.sessionKey ?? this.getSessionKey();
-    const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+    const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
     log(
       `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
@@ -1919,7 +1918,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * @returns { string } the session key uri
    */
   getSessionKeyUri = (publicKey: string): string => {
-    return LIT_SESSION_KEY_URI + publicKey;
+    return 'lit:session:' + publicKey;
   };
 
   /**

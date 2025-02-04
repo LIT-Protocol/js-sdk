@@ -1208,9 +1208,6 @@ export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
   custom: [],
 };
 
-// ========== Lit Sessions ==========
-export const LIT_SESSION_KEY_URI = 'lit:session:';
-
 // ========== Lit Auth Methods ==========
 
 export const AUTH_METHOD_TYPE_IDS = {
@@ -1274,24 +1271,6 @@ export type AUTH_METHOD_SCOPE_TYPE = keyof typeof AUTH_METHOD_SCOPE;
 export type AUTH_METHOD_SCOPE_VALUES =
   (typeof AUTH_METHOD_SCOPE)[keyof typeof AUTH_METHOD_SCOPE];
 
-// ========== Supported Provider Types ==========
-export const PROVIDER_TYPE = {
-  Discord: 'discord',
-  Google: 'google',
-  EthWallet: 'ethwallet',
-  WebAuthn: 'webauthn',
-  Apple: 'apple',
-  StytchOtp: 'stytchOtp',
-  StytchEmailFactorOtp: 'stytchEmailFactorOtp',
-  StytchSmsFactorOtp: 'stytchSmsFactorOtp',
-  StytchWhatsAppFactorOtp: 'stytchWhatsAppFactorOtp',
-  StytchTotpFactor: 'stytchTotpFactor',
-} as const;
-
-export type PROVIDER_TYPE_TYPE = keyof typeof PROVIDER_TYPE;
-export type PROVIDER_TYPE_VALUES =
-  (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
-
 // ========== Supported Staking States ==========
 export const STAKING_STATES = {
   Active: 0,
@@ -1303,20 +1282,9 @@ export const STAKING_STATES = {
 } as const;
 
 export type STAKING_STATES_TYPE = keyof typeof STAKING_STATES;
+
 export type STAKING_STATES_VALUES =
   (typeof STAKING_STATES)[keyof typeof STAKING_STATES];
-
-// ========== Relay Auth Status ==========
-export const RELAY_AUTH_STATUS = {
-  InProgress: 'InProgress',
-  Succeeded: 'Succeeded',
-  Failed: 'Failed',
-} as const;
-
-export type RELAY_AUTH_STATUS_TYPE = keyof typeof RELAY_AUTH_STATUS;
-export type RELAY_AUTH_STATUS_VALUES =
-  (typeof RELAY_AUTH_STATUS)[keyof typeof RELAY_AUTH_STATUS];
-
 /**
  * Prefixes used for identifying various LIT resources.
  *
@@ -1415,6 +1383,10 @@ export const LOG_LEVEL = {
 export type LOG_LEVEL_TYPE = keyof typeof LOG_LEVEL;
 export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
 
+/**
+ * This is useful when the node is not able to connect to the IPFS gateway,
+ * so the sdk can fallback to these gateways.
+ */
 export const FALLBACK_IPFS_GATEWAYS = [
   'https://flk-ipfs.io/ipfs/',
   'https://litprotocol.mypinata.cloud/ipfs/',
