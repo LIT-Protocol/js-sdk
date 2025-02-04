@@ -732,37 +732,6 @@ export interface NodeErrorV3 {
   details: string[];
 }
 
-/**
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- */
-export const NodeClientErrorV0 = new Proxy(
-  {
-    errorCode: '',
-    message: '',
-    error: '',
-    name: '',
-  },
-  {
-    get(target, prop, receiver) {
-      deprecated(
-        'NodeClientErrorV0 is deprecated and will be removed in a future version. Use NodeClientErrorV1 instead.'
-      );
-      return Reflect.get(target, prop, receiver);
-    },
-  }
-);
-
-/**
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- */
-export type NodeClientErrorV0 = typeof NodeClientErrorV0 & {
-  errorCode?: string;
-  message: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: any;
-  name?: string;
-};
-
 export interface NodeClientErrorV1 {
   message: string;
   errorKind: string;
@@ -1061,14 +1030,6 @@ export interface AuthenticationContext extends LitActionSdkParams {
    * If not provided, a session key pair will be fetched from localStorage or generated.
    */
   sessionKey?: SessionKeyPair;
-
-  /**
-   * @deprecated - use capabilityAuthSigs instead
-   * Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * Capacity credits are required on the paid Lit networks (mainnets and certain testnets), and are not required on the unpaid Lit networks (certain testnets).
-   * See more [here](https://developer.litprotocol.com/sdk/capacity-credits).
-   */
-  capacityDelegationAuthSig?: AuthSig;
 
   /**
    * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.

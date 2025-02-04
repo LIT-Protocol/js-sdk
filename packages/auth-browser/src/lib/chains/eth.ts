@@ -320,39 +320,6 @@ export const getRPCUrls = (): RPCUrls => {
   return rpcUrls;
 };
 
-/** ---------- Exports ---------- */
-/**
- * @deprecated
- * encodeCallData has been removed.
- *
- * @param { IABIEncode }
- * @returns { string }
- */
-export const encodeCallData = deprecated.function(
-  ({ abi, functionName, functionParams }: IABIEncode): string => {
-    throw new RemovedFunctionError({}, 'encodeCallData has been removed.');
-  },
-  'encodeCallData has been removed.'
-);
-
-/**
- * @deprecated
- * (ABI) Decode call data
- *
- * @param { IABIDecode }
- * @returns { string }
- */
-export const decodeCallResult = deprecated.function(
-  ({ abi, functionName, data }: IABIDecode): ethers.utils.Result => {
-    const _interface = new ethers.utils.Interface(abi);
-
-    const decoded = _interface.decodeFunctionResult(functionName, data);
-
-    return decoded;
-  },
-  'decodeCallResult will be removed.'
-);
-
 /**
  * @browserOnly
  * Connect to web 3

@@ -4,44 +4,43 @@ import { runInBand, runTestsParallel } from './setup/tinny-operations';
 // import { testBundleSpeed } from './tests/test-bundle-speed';
 // import { testExample } from './tests/test-example';
 
-import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
+import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
+import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning';
-import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 
-import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
-import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
-import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
-import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
-import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
-import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
-import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
-import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
+import { testUseEoaSessionSigsToEncryptDecryptFile } from './tests/testUseEoaSessionSigsToEncryptDecryptFile';
 import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaSessionSigsToEncryptDecryptString';
 import { testUseEoaSessionSigsToEncryptDecryptUint8Array } from './tests/testUseEoaSessionSigsToEncryptDecryptUint8Array';
-import { testUseEoaSessionSigsToEncryptDecryptFile } from './tests/testUseEoaSessionSigsToEncryptDecryptFile';
+import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
+import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
+import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
+import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
+import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
+import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
+import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 
-import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
 import { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionCodeToGenerateSessionSigs';
+import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel';
 
-import { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToPkpSign';
-import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
-import { testUsePkpSessionSigsToExecuteJsSigningInParallel } from './tests/testUsePkpSessionSigsToExecuteJsSigningInParallel';
+import { testUsePkpSessionSigsToEncryptDecryptFile } from './tests/testUsePkpSessionSigsToEncryptDecryptFile';
 import { testUsePkpSessionSigsToEncryptDecryptString } from './tests/testUsePkpSessionSigsToEncryptDecryptString';
 import { testUsePkpSessionSigsToExecuteJsClaimKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimKeys';
 import { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimMultipleKeys';
-import { testUsePkpSessionSigsToExecuteJsJsonResponse } from './tests/testUsePkpSessionSigsToExecuteJsJsonResponse';
 import { testUsePkpSessionSigsToExecuteJsConsoleLog } from './tests/testUsePkpSessionSigsToExecuteJsConsoleLog';
-import { testUsePkpSessionSigsToEncryptDecryptFile } from './tests/testUsePkpSessionSigsToEncryptDecryptFile';
+import { testUsePkpSessionSigsToExecuteJsJsonResponse } from './tests/testUsePkpSessionSigsToExecuteJsJsonResponse';
+import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
+import { testUsePkpSessionSigsToExecuteJsSigningInParallel } from './tests/testUsePkpSessionSigsToExecuteJsSigningInParallel';
+import { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToPkpSign';
 
+import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
+import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys';
-import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
-import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
+import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
-import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
 
 // DISABLED until NAGA supports bare authsig for encryption_sign endpoint
 // import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
@@ -50,44 +49,44 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
 // import { testShaEip1271AuthSigToEncryptDecryptString } from './tests/testShaEip1271AuthSigToEncryptDecryptString';
 // import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
 
-import { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
-import { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
 import { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
+import { testPkpEthersWithEoaSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTransaction';
 import { testPkpEthersWithEoaSessionSigsToPersonalSign } from './tests/testPkpEthersWithEoaSessionSigsToPersonalSign';
 import { testPkpEthersWithEoaSessionSigsToSendTx } from './tests/testPkpEthersWithEoaSessionSigsToSendTx';
-import { testPkpEthersWithPkpSessionSigsToSignMessage } from './tests/testPkpEthersWithPkpSessionSigsToSignMessage';
+import { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
+import { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
 import { testPkpEthersWithPkpSessionSigsToEthSign } from './tests/testPkpEthersWithPkpSessionSigsToEthSign';
 import { testPkpEthersWithPkpSessionSigsToPersonalSign } from './tests/testPkpEthersWithPkpSessionSigsToPersonalSign';
 import { testPkpEthersWithPkpSessionSigsToSendTx } from './tests/testPkpEthersWithPkpSessionSigsToSendTx';
-import { testPkpEthersWithEoaSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTransaction';
+import { testPkpEthersWithPkpSessionSigsToSignMessage } from './tests/testPkpEthersWithPkpSessionSigsToSignMessage';
 
-import { testPkpEthersWithPkpSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTransaction';
-import { testPkpEthersWithLitActionSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTransaction';
-import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1';
-import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1';
-import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1';
-import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3';
-import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV4';
 import { testPkpEthersWithEoaSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedData';
 import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil';
-import { testPkpEthersWithLitActionSessionSigsToSignMessage } from './tests/testPkpEthersWithLitActionSessionSigsToSignMessage';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV4';
 import { testPkpEthersWithLitActionSessionSigsToEthSign } from './tests/testPkpEthersWithLitActionSessionSigsToEthSign';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTransaction';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedData';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV3';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV4';
 import { testPkpEthersWithLitActionSessionSigsToPersonalSign } from './tests/testPkpEthersWithLitActionSessionSigsToPersonalSign';
 import { testPkpEthersWithLitActionSessionSigsToSendTx } from './tests/testPkpEthersWithLitActionSessionSigsToSendTx';
-import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3';
-import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV3';
-import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4';
-import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV4';
+import { testPkpEthersWithLitActionSessionSigsToSignMessage } from './tests/testPkpEthersWithLitActionSessionSigsToSignMessage';
+import { testPkpEthersWithPkpSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTransaction';
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedData';
-import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedData';
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
-import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4';
 
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 
-import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
-import { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
+import { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
 import { testRelayer } from './tests/testRelayer';
 
 // import { testEthereumSignMessageGeneratedKey } from './tests/wrapped-keys/testEthereumSignMessageGeneratedKey';

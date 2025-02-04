@@ -564,54 +564,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return false;
   };
 
-  // ==================== API Calls to Nodes ====================
-
-  /**
-   * @deprecated - Delete me for Naga
-   * Combine Shares from network public key set and signature shares
-   *
-   * @param { NodeBlsSigningShare } signatureShares
-   *
-   * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
-   *
-   */
-  combineSharesAndGetJWT = async (
-    signatureShares: NodeBlsSigningShare[],
-    requestId: string = ''
-  ): Promise<string> => {
-    // ========== Shares Validations ==========
-    // -- sanity check
-    if (
-      !signatureShares.every(
-        (val, i, arr) => val.unsignedJwt === arr[0].unsignedJwt
-      )
-    ) {
-      const msg =
-        'Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things';
-      logErrorWithRequestId(requestId, msg);
-    }
-
-    // ========== Combine Shares ==========
-    const signature = await combineSignatureShares(
-      signatureShares.map((s) => s.signatureShare)
-    );
-
-    logWithRequestId(requestId, 'signature is', signature);
-
-    const unsignedJwt = mostCommonString(
-      signatureShares.map((s) => s.unsignedJwt)
-    );
-
-    // ========== Result ==========
-    // convert the sig to base64 and append to the jwt
-    const finalJwt: string = `${unsignedJwt}.${uint8arrayToString(
-      uint8arrayFromString(signature, 'base16'),
-      'base64urlpad'
-    )}`;
-
-    return finalJwt;
-  };
-
   private _decryptWithSignatureShares = (
     networkPubKey: string,
     identityParam: Uint8Array,
@@ -1775,10 +1727,10 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const sessionExpiration =
       expiration ?? new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
-    const capabilities = params.capacityDelegationAuthSig
+    const capabilities = params.capabilityAuthSigs
       ? [
           ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
+          params.capabilityAuthSigs,
           authSig,
         ]
       : [...(params.capabilityAuthSigs ?? []), authSig];

@@ -45,19 +45,6 @@ export interface ILitNodeClient {
   setCustomBootstrapUrls(): void;
 
   /**
-   * @deprecated - Delete me for Naga
-   * Combine Shares from signature shares
-   *
-   * @param { NodeBlsSigningShare } signatureShares
-   *
-   * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
-   *
-   */
-  combineSharesAndGetJWT(
-    signatureShares: NodeBlsSigningShare[]
-  ): Promise<string>;
-
-  /**
    *
    * Get different formats of access control conditions, eg. evm, sol, unified etc.
    *
