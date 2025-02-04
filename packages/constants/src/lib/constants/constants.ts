@@ -1217,12 +1217,6 @@ export const AUTH_METHOD_TYPE_IDS = {
   GOOGLE_JWT: 6,
 };
 
-// ========== PKP Client ==========
-export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
-
-// ========== RLI Delegation ==========
-export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
-
 // ========== Chains ==========
 export const VMTYPE = {
   EVM: 'EVM',
@@ -1391,3 +1385,12 @@ export const FALLBACK_IPFS_GATEWAYS = [
   'https://flk-ipfs.io/ipfs/',
   'https://litprotocol.mypinata.cloud/ipfs/',
 ];
+
+export const SIWE_URI_PREFIX = {
+  SESSION_KEY: 'lit:session:',
+  DELEGATION: 'lit:capability:delegation',
+} as const;
+
+export type SIWE_URI_PREFIX_TYPE = keyof typeof SIWE_URI_PREFIX;
+export type SIWE_URI_PREFIX_VALUES =
+  (typeof SIWE_URI_PREFIX)[keyof typeof SIWE_URI_PREFIX];

@@ -29,6 +29,7 @@ import {
   ParamNullError,
   ParamsMissingError,
   PRODUCT_IDS,
+  SIWE_URI_PREFIX,
   UnknownError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
@@ -196,7 +197,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     }
 
     const siweMessage = await createSiweMessageWithCapacityDelegation({
-      uri: 'lit:capability:delegation',
+      uri: SIWE_URI_PREFIX.DELEGATION,
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
       nonce: await this.getLatestBlockhash(),
@@ -224,7 +225,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * if not, generates one.
    * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (): SessionKeyPair => {
+  private _getSessionKey = (): SessionKeyPair => {
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
     const storedSessionKeyOrError = getStorageItem(storageKey);
 
@@ -279,7 +280,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return sessionCapabilityObject;
   }
 
-  // backward compatibility
   async generateSessionCapabilityObjectWithWildcards(
     litResources: ILitResource[]
   ): Promise<ISessionCapabilityObject> {
@@ -1319,8 +1319,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // Try to get it from local storage, if not generates one~
     const sessionKey: SessionKeyPair =
-      params.sessionKey ?? this.getSessionKey();
-    const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+      params.sessionKey ?? this._getSessionKey();
+    const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
     log(
       `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
@@ -1637,9 +1637,9 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey = params.sessionKey ?? this._getSessionKey();
 
-    const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+    const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
@@ -1917,8 +1917,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * @param publicKey is the public key of the session key
    * @returns { string } the session key uri
    */
-  getSessionKeyUri = (publicKey: string): string => {
-    return 'lit:session:' + publicKey;
+  private _getSessionKeyUri = (publicKey: string): string => {
+    return SIWE_URI_PREFIX.SESSION_KEY + publicKey;
   };
 
   /**

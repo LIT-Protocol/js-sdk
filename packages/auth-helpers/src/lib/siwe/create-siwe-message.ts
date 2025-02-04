@@ -1,6 +1,5 @@
 import { SiweMessage } from 'siwe';
 
-import { LIT_ABILITY } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
   CapacityDelegationFields,
