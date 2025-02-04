@@ -77,13 +77,11 @@ import {
   DecryptRequest,
   DecryptResponse,
   EncryptionSignRequest,
-  EncryptRequest,
   EncryptResponse,
   EncryptSdkParams,
   ExecuteJsNoSigningResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
-  GetSignSessionKeySharesProp,
   GetWalletSigProps,
   ILitNodeClient,
   ILitResource,
@@ -116,6 +114,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
+import { AuthMethod } from 'packages/types/src/lib/interfaces';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
@@ -220,19 +219,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return { capacityDelegationAuthSig: authSig };
   };
 
-  /**
-   *
-   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
-   *
-   */
-  getJWTParams = () => {
-    const now = Date.now();
-    const iat = Math.floor(now / 1000);
-    const exp = iat + 12 * 60 * 60; // 12 hours in seconds
-
-    return { iat, exp };
-  };
-
   // ==================== SESSIONS ====================
   /**
    * Try to get the session key in the local storage,
@@ -269,23 +255,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       return JSON.parse(storedSessionKeyOrError.result as string);
     }
   };
-
-  /**
-   * Check if a given object is of type SessionKeyPair.
-   *
-   * @param obj - The object to check.
-   * @returns True if the object is of type SessionKeyPair.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isSessionKeyPair(obj: any): obj is SessionKeyPair {
-    return (
-      typeof obj === 'object' &&
-      'publicKey' in obj &&
-      'secretKey' in obj &&
-      typeof obj.publicKey === 'string' &&
-      typeof obj.secretKey === 'string'
-    );
-  }
 
   /**
    * Generates wildcard capability for each of the LIT resources
@@ -327,11 +296,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    */
   static getExpiration = () => {
     return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
-  };
-
-  // backward compatibility
-  getExpiration = () => {
-    return LitNodeClientNodeJs.getExpiration();
   };
 
   /**
@@ -1367,46 +1331,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return { decryptedData };
   };
 
-  getLitResourceForEncryption = async (
-    params: EncryptRequest
-  ): Promise<LitAccessControlConditionResource> => {
-    // ========== Hashing Access Control Conditions =========
-    // hash the access control conditions
-    const hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
-
-    if (!hashOfConditions) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            params,
-          },
-        },
-        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
-      );
-    }
-
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
-
-    // ========== Hashing Private Data ==========
-    // hash the private data
-    const hashOfPrivateData = await crypto.subtle.digest(
-      'SHA-256',
-      params.dataToEncrypt
-    );
-    const hashOfPrivateDataStr = uint8arrayToString(
-      new Uint8Array(hashOfPrivateData),
-      'base16'
-    );
-
-    return new LitAccessControlConditionResource(
-      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
-    );
-  };
-
   private _getIdentityParamForEncryption = (
     hashOfConditionsStr: string,
     hashOfPrivateDataStr: string
@@ -1571,7 +1495,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
-    if (!this._isSuccessNodePromises(res)) {
+    if (!res.success) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
       return {} as SignSessionKeyResponse;
     }
@@ -1670,15 +1594,17 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return signSessionKeyRes;
   };
 
-  private _isSuccessNodePromises = <T>(
-    res: SuccessNodePromises<T> | RejectedNodePromises
-  ): res is SuccessNodePromises<T> => {
-    return res.success;
-  };
-
   getSignSessionKeyShares = async (
     url: string,
-    params: GetSignSessionKeySharesProp,
+    params: {
+      body: {
+        sessionKey: string;
+        authMethods: AuthMethod[];
+        pkpPublicKey?: string;
+        authSig?: AuthSig;
+        siweMessage: string;
+      };
+    },
     requestId: string
   ) => {
     log('getSignSessionKeyShares');

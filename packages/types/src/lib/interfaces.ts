@@ -1019,10 +1019,6 @@ export interface SignSessionKeyResponse {
   authSig: AuthSig;
 }
 
-export interface GetSignSessionKeySharesProp {
-  body: SessionRequestBody;
-}
-
 export interface AuthenticationContext extends LitActionSdkParams {
   /**
    * Session signature properties shared across all functions that generate session signatures.
@@ -1107,14 +1103,6 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  * -  `algo`: The signing algorithm used to generate the session signature.
  */
 export type SessionSigsMap = Record<string, AuthSig>;
-
-export interface SessionRequestBody {
-  sessionKey: string;
-  authMethods: AuthMethod[];
-  pkpPublicKey?: string;
-  authSig?: AuthSig;
-  siweMessage: string;
-}
 
 export interface GetWalletSigProps extends LitActionSdkParams {
   authNeededCallback?: AuthCallback;
