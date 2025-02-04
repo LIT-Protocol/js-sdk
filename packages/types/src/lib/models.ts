@@ -1,5 +1,4 @@
 import { SiweMessage } from 'siwe';
-import { AuthSig } from './interfaces';
 import { LitAbility, LitResourcePrefix } from './types';
 
 export type PlainJSON =

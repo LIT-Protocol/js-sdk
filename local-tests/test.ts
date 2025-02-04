@@ -41,14 +41,6 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKe
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
-
-// DISABLED until NAGA supports bare authsig for encryption_sign endpoint
-// import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
-// import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
-// import { testKeccakEip1271AuthSigToEncryptDecryptString } from './tests/testKeccakEip1271AuthSigToEncryptDecryptString';
-// import { testShaEip1271AuthSigToEncryptDecryptString } from './tests/testShaEip1271AuthSigToEncryptDecryptString';
-// import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
-
 import { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
 import { testPkpEthersWithEoaSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTransaction';
 import { testPkpEthersWithEoaSessionSigsToPersonalSign } from './tests/testPkpEthersWithEoaSessionSigsToPersonalSign';
@@ -218,17 +210,6 @@ setLitActionsCodeToLocal();
     testUseInvalidLitActionCodeToGenerateSessionSigs,
   };
 
-  // DISABLED until Naga supports bare authSig only for encyption_sign endpoint
-  const bareAuthSigTests = {
-    // -- eth auth sig
-    // testEthAuthSigToEncryptDecryptString,
-    // -- solana auth sig
-    // testSolAuthSigToEncryptDecryptString,
-    //
-    // // -- cosmos auth sig
-    // testCosmosAuthSigToEncryptDecryptString,
-  };
-
   const eip1271AuthSigTests = {
     // testKeccakEip1271AuthSigToEncryptDecryptString,
     // testShaEip1271AuthSigToEncryptDecryptString,
@@ -294,7 +275,6 @@ setLitActionsCodeToLocal();
       ...pkpSessionSigsTests,
       ...litActionSessionSigsTests,
       ...litActionIpfsIdSessionSigsTests,
-      ...bareAuthSigTests,
       ...eip1271AuthSigTests,
 
       ...pkpEthersTest.eoaSessionSigs,

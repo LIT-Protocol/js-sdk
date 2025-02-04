@@ -1,8 +1,8 @@
 import {
   DecryptRequest,
   DecryptResponse,
-  EncryptSdkParams,
   EncryptResponse,
+  EncryptSdkParams,
   ExecuteJsResponse,
   FormattedMultipleAccs,
   HandshakeWithNode,
@@ -10,7 +10,6 @@ import {
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
-  NodeBlsSigningShare,
   NodeCommandServerKeysResponse,
   RejectedNodePromises,
   SendNodeCommand,

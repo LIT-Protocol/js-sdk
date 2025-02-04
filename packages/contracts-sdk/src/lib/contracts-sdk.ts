@@ -32,17 +32,16 @@ import { LogManager, Logger } from '@lit-protocol/logger';
 import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
 import {
   ContractName,
-  CreateCustomAuthMethodRequest,
   EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
+  LitContract,
   LitContractContext,
   LitContractResolverContext,
   MintNextAndAddAuthMethods,
   MintWithAuthParams,
   MintWithAuthResponse,
   TokenInfo,
-  LitContract,
 } from '@lit-protocol/types';
 
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
@@ -1253,9 +1252,20 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    * @throws { Error } - If the contracts are not connected, the contract is not available, authMethodType, or permission scopes are required.
    *
    */
-  mintWithCustomAuth = async (
-    params: CreateCustomAuthMethodRequest
-  ): Promise<MintWithAuthResponse<ContractReceipt>> => {
+  mintWithCustomAuth = async (params: {
+    /**
+     * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
+     */
+    authMethodId: string | Uint8Array;
+
+    authMethodType: number;
+
+    /**
+     * Permission scopes:
+     * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+     */
+    scopes: string[] | number[];
+  }): Promise<MintWithAuthResponse<ContractReceipt>> => {
     const authMethodId =
       typeof params.authMethodId === 'string'
         ? stringToArrayify(params.authMethodId)

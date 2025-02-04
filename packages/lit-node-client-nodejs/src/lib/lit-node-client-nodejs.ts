@@ -114,7 +114,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import { AuthMethod } from 'packages/types/src/lib/interfaces';
+import { AuthMethod } from '@lit-protocol/types';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
