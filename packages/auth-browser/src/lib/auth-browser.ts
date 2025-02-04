@@ -11,7 +11,6 @@ import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 import { checkAndSignEVMAuthMessage } from './chains/eth';
 
 /**
- * SUPPORTED CHAINS: EVM, Solana, Cosmos
  *
  * !! NOTE !!
  * This function is purely used for crafting the authSig for access control conditions & decryption. For SessionSigs, you can pass the `authSig` as `jsParams`
