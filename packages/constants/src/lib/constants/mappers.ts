@@ -20,6 +20,11 @@ export const NETWORK_CONTEXT_BY_NETWORK: {
   custom: undefined,
 } as const;
 
+/**
+ * Whether to overwrite the IPFS code for a given network.
+ * This is useful when the nodes are not able to connect to the IPFS gateway,
+ * so the sdk can fallback to these gateways.
+ */
 export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: {
   [key in LIT_NETWORK_VALUES]: boolean;
 } = {
