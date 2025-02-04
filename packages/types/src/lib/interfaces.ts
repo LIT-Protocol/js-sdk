@@ -871,6 +871,16 @@ export interface CombinedECDSASignature {
   signature: `0x${string}`;
 }
 
+export interface WalletEncryptedPayload {
+  V1: {
+    verification_key: string;
+    ciphertext_and_tag: string;
+    session_signature: string;
+    random: string;
+    created_at: string;
+  }
+}
+
 export interface HandshakeWithNode {
   url: string;
   challenge: string;
