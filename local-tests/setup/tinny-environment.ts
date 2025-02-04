@@ -87,7 +87,6 @@ export class TinnyEnvironment {
   public contractsClient: LitContracts;
   public rpc: string;
   public superCapacityDelegationAuthSig: AuthSig;
-  public bareEthAuthSig: AuthSig;
 
   public testnet: TestnetClient | undefined;
   //=========== PRIVATE MEMBERS ===========
@@ -397,7 +396,6 @@ export class TinnyEnvironment {
 
       await this.setupLitNodeClient();
       await this.setupSuperCapacityDelegationAuthSig();
-      await this.setupBareEthAuthSig();
     } catch (e) {
       const err = toErrorWithMessage(e);
       console.log(
@@ -405,34 +403,6 @@ export class TinnyEnvironment {
       );
       console.log(err.stack);
       process.exit(1);
-    }
-  }
-
-  /**
-   * Setup bare eth auth sig to test access control and decryption
-   */
-  async setupBareEthAuthSig() {
-    const privateKey = await this.getAvailablePrivateKey();
-    try {
-      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
-      const wallet = new ethers.Wallet(privateKey.privateKey, provider);
-
-      const toSign = await createSiweMessage({
-        walletAddress: wallet.address,
-        nonce: await this.litNodeClient.getLatestBlockhash(),
-        expiration: new Date(
-          Date.now() + 29 * 24 * 60 * 60 * 1000
-        ).toISOString(),
-        litNodeClient: this.litNodeClient,
-      });
-
-      this.bareEthAuthSig = await generateAuthSig({
-        signer: wallet,
-        toSign,
-      });
-    } finally {
-      // @ts-expect-error
-      this.releasePrivateKeyFromUser(privateKey);
     }
   }
 
