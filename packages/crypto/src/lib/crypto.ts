@@ -17,6 +17,7 @@ import {
   SessionKeyPair,
   SigningAccessControlConditionJWTPayload,
   SigShare,
+  WalletEncryptedPayload,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -370,6 +371,103 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
     log('[getAmdCert] Direct fetch also failed:', e);
     throw e; // Re-throw to signal that both methods failed
   }
+}
+
+export const walletEncrypt = async(
+  myWalletSecretKey: Uint8Array, 
+  theirWalletPublicKey: Uint8Array,
+  sessionSig: Uint8Array,
+  message: Uint8Array
+): Promise<WalletEncryptedPayload> => {
+  const random = new Uint8Array(16);
+  window.crypto.getRandomValues(random);
+  const dateNow = Date.now();
+  const createdAt = Math.floor(dateNow / 1000);
+  const timestamp = Buffer.alloc(8);
+  timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
+
+  const myWalletPublicKey = new Uint8Array(32);
+  nacl.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
+
+  // Construct AAD
+  const sessionSignature = Buffer.from(sessionSig); // Replace with actual session signature
+  const theirPublicKey = Buffer.from(theirWalletPublicKey); // Replace with their public key
+  const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
+  
+  const aad = Buffer.concat([
+    sessionSignature,
+    random,
+    timestamp,
+    theirPublicKey,
+    myPublicKey,
+  ]);
+  
+  const hash = new Uint8Array(64);
+  nacl.crypto_hash(hash, aad);
+
+  const nonce = hash.slice(0, 24);
+  const ciphertext = nacl.box(message, nonce, theirPublicKey, myWalletSecretKey);
+  return {
+    V1: {
+      verification_key: uint8ArrayToHex(myWalletPublicKey),
+      ciphertext_and_tag: uint8ArrayToHex(ciphertext),
+      session_signature: uint8ArrayToHex(sessionSignature),
+      random: uint8ArrayToHex(random),
+      created_at: dateNow.toISOString(),
+    } 
+  };
+}
+
+export const walletDecrypt = async(
+  myWalletSecretKey: Uint8Array,
+  payload: WalletEncryptedPayload
+): Promise<Uint8Array> => {
+  const dateSent = new Date(payload.V1.created_at)
+  const createdAt = Math.floor(dateSent / 1000);
+  const timestamp = Buffer.alloc(8);
+  timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
+
+  const myWalletPublicKey = new Uint8Array(32);
+  nacl.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
+
+  // Construct AAD
+  const random = Buffer.from(hexToUint8Array(payload.V1.random));
+  const sessionSignature = Buffer.from(hexToUint8Array(payload.V1.session_signature)); // Replace with actual session signature
+  const theirPublicKey = hexToUint8Array(payload.V1.verification_key);
+  const theirPublicKeyBuffer = Buffer.from(theirPublicKey); // Replace with their public key
+  const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
+  
+  const aad = Buffer.concat([
+    sessionSignature,
+    random,
+    timestamp,
+    theirPublicKeyBuffer,
+    myPublicKey,
+  ]);
+  
+  const hash = new Uint8Array(64);
+  nacl.crypto_hash(hash, aad);
+
+  const nonce = hash.slice(0, 24);
+  const message = nacl.box.open(payload.V1.ciphertext_and_tag, nonce, theirPublicKey, myWalletSecretKey);
+  return message;
+}
+
+function uint8ArrayToHex(array: Uint8Array) {
+  return Array.from(array)
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('');
+}
+
+function hexToUint8Array(hexString: string): Uint8Array {
+  if (hexString.length % 2 !== 0) {
+      throw new Error("Hex string must have an even length");
+  }
+  const bytes = new Uint8Array(hexString.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = parseInt(hexString.slice(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
 }
 
 /**
