@@ -667,6 +667,21 @@ export interface LitNodeSignature extends CleanLitNodeSignature {
   sigType: SigType;
 }
 
+export interface WalletEncryptedPayload {
+  V1: {
+    verification_key: string;
+    ciphertext_and_tag: string;
+    session_signature: string;
+    random: string;
+    created_at: string;
+  };
+}
+
+export interface HandshakeWithNode {
+  url: string;
+  challenge: string;
+}
+
 export interface NodeAttestation {
   type: string;
   noonce: string;
