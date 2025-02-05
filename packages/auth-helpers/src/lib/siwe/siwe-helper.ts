@@ -4,8 +4,11 @@ import {
   CapacityDelegationFields,
   CapacityDelegationRequest,
   ILitNodeClient,
+  ILitResource,
+  ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
+import { RecapSessionCapabilityObject } from '../recap/recap-session-capability-object';
 
 /**
  * Sanitizes a SIWE message by unescaping double-escaped newlines and replacing escaped double quotes with single quotes.
@@ -42,6 +45,30 @@ export const createCapacityCreditsResourceData = (
 };
 
 /**
+ * Generates wildcard capability for each of the LIT resources
+ * specified.
+ * @param litResources is an array of LIT resources
+ * @param addAllCapabilities is a boolean that specifies whether to add all capabilities for each resource
+ */
+export const generateSessionCapabilityObjectWithWildcards = async (
+  litResources: ILitResource[],
+  addAllCapabilities?: boolean
+): Promise<ISessionCapabilityObject> => {
+  const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
+
+  // disable for now
+  const _addAllCapabilities = addAllCapabilities ?? false;
+
+  if (_addAllCapabilities) {
+    for (const litResource of litResources) {
+      sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+    }
+  }
+
+  return sessionCapabilityObject;
+};
+
+/**
  * Adds recap capabilities to a SiweMessage.
  * @param siweMessage - The SiweMessage to add recap capabilities to.
  * @param resources - An array of LitResourceAbilityRequest objects representing the resources and abilities to add.
@@ -68,10 +95,9 @@ export const addRecapToSiweMessage = async ({
   }
 
   for (const request of resources) {
-    const recapObject =
-      await litNodeClient.generateSessionCapabilityObjectWithWildcards([
-        request.resource,
-      ]);
+    const recapObject = await generateSessionCapabilityObjectWithWildcards([
+      request.resource,
+    ]);
 
     recapObject.addCapabilityForResource(
       request.resource,
