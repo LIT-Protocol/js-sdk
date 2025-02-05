@@ -19,7 +19,7 @@ jest.mock('@lit-protocol/lit-node-client', () => ({
 
 const litContracts = new LitContracts();
 const litNodeClient = new LitNodeClient({
-  litNetwork: LIT_NETWORK.DatilDev,
+  litNetwork: LIT_NETWORK.NagaDev,
 });
 const stateMachineParams: BaseStateMachineParams = {
   litContracts,
