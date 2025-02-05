@@ -1,6 +1,3 @@
-/**
- * FIXME: SessionSigs are only supported for EVM chains at the moment.  This will be expanded to other chains in the future.
- */
 import {
   ALL_LIT_CHAINS,
   UnsupportedChainException,
@@ -11,7 +8,6 @@ import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 import { checkAndSignEVMAuthMessage } from './chains/eth';
 
 /**
- *
  * !! NOTE !!
  * This function is purely used for crafting the authSig for access control conditions & decryption. For SessionSigs, you can pass the `authSig` as `jsParams`
  * or Eth Wallet Auth Method for `signSessionKey` and claiming, but you won't be able to use this to add resource ability requests in the SIWE message. Instead, you should provide your own signer to the authNeededCallback parameter for the getSessionSigs method.

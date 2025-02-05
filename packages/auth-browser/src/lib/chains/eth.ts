@@ -2,7 +2,7 @@ import { Buffer as BufferPolyfill } from 'buffer';
 import depd from 'depd';
 
 import { hexlify } from '@ethersproject/bytes';
-import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
+import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
 
 // import WalletConnectProvider from '@walletconnect/ethereum-provider';
@@ -21,19 +21,18 @@ import * as naclUtil from 'tweetnacl-util';
 
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import {
+  EITHER_TYPE,
   ELeft,
   ERight,
   IEither,
-  EITHER_TYPE,
+  InvalidSignatureError,
   LIT_CHAINS,
   LOCAL_STORAGE_KEYS,
-  InvalidSignatureError,
-  WrongParamFormat,
-  UnsupportedChainException,
-  UnknownError,
-  RemovedFunctionError,
-  WrongNetworkException,
   LocalStorageItemNotFoundException,
+  UnknownError,
+  UnsupportedChainException,
+  WrongNetworkException,
+  WrongParamFormat,
 } from '@lit-protocol/constants';
 import {
   isBrowser,
@@ -43,7 +42,7 @@ import {
   validateSessionSig,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
+import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
 import LitConnectModal from '../connect-modal/modal';
 
@@ -52,16 +51,6 @@ const deprecated = depd('lit-js-sdk:auth-browser:index');
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
 }
-
-// log("naclUtil:", naclUtil);
-// log("nacl:", nacl);
-
-// -- fix import issues
-// let _nacl = nacl === undefined ? nacl['default'] : nacl;
-// let _naclUtil = naclUtil === undefined ? naclUtil['default'] : naclUtil;
-
-// log("_nacl:", _nacl);
-// log("_naclUtil:", _naclUtil);
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {
@@ -914,32 +903,3 @@ export const signMessageAsync = async (
     return await signer.signMessage(messageBytes);
   }
 };
-
-/**
- *
- * Get the number of decimal places in a token
- *
- * @property { string } contractAddress The token contract address
- * @property { string } chain The chain on which the token is deployed
- *
- * @returns { number } The number of decimal places in the token
- */
-// export const decimalPlaces = async ({
-//     contractAddress,
-//     chain,
-// }: {
-//     contractAddress: string;
-//     chain: Chain;
-// }): Promise<number> => {
-//     const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
-
-//     const web3 = new JsonRpcProvider(rpcUrl);
-
-//     const contract = new Contract(
-//         contractAddress,
-//         (ABI_ERC20 as any).abi,
-//         web3
-//     );
-
-//     return await contract['decimals']();
-// };
