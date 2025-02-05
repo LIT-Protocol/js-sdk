@@ -338,6 +338,8 @@ export interface JsonSigningResourceId {
   extraData: string;
 }
 
+// CHANGE: `MultipleAccessControlConditions` is basically identical to `AccessControlConditions`,
+// but due to the way the types are deeply nested, we will revisit this later.
 export interface MultipleAccessControlConditions {
   // The access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
   accessControlConditions?: AccessControlConditions;
@@ -598,12 +600,6 @@ export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
   logs: string;
 }
 
-export interface SendNodeCommand {
-  url: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
-  requestId: string;
-}
 export interface SigShare {
   sigType: SigType;
   signatureShare: string;
@@ -696,16 +692,6 @@ export interface NodeCommandResponse {
   data: JsonRequest;
 }
 
-export interface NodeCommandServerKeysResponse {
-  serverPublicKey: string;
-  subnetPublicKey: string;
-  networkPublicKey: string;
-  networkPublicKeySet: string;
-  hdRootPubkeys: string[];
-  attestation?: NodeAttestation;
-  latestBlockhash?: string;
-}
-
 export interface FormattedMultipleAccs {
   error: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -716,11 +702,6 @@ export interface FormattedMultipleAccs {
   formattedSolRpcConditions: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formattedUnifiedAccessControlConditions: any;
-}
-
-export interface HandshakeWithNode {
-  url: string;
-  challenge: string;
 }
 
 export interface NodeAttestation {
