@@ -55,7 +55,7 @@ import { ValidatorStruct, type ValidatorWithPrices } from './types';
 
 const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 
-// FIXME: this should be dynamically set, but we only have 1 net atm.
+// CHANGE: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
 
 declare global {
@@ -138,7 +138,7 @@ export class LitContracts {
     this.randomPrivateKey = args?.randomPrivatekey ?? false;
     this.options = args?.options;
     this.debug = args?.debug ?? false;
-    this.network = args?.network || LIT_NETWORK.DatilDev;
+    this.network = args?.network || LIT_NETWORK.NagaDev;
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = RPC_URL_BY_NETWORK[this.network];
