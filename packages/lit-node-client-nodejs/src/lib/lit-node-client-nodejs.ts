@@ -345,6 +345,7 @@ export class LitNodeClientNodeJs
     litActionIpfsId,
     jsParams,
     sessionKey,
+    domain,
   }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig: AuthSig;
 
@@ -384,6 +385,7 @@ export class LitNodeClientNodeJs
           uri: sessionKeyUri,
           sessionKey: sessionKey,
           nonce,
+          domain,
 
           // for recap
           ...(resourceAbilityRequests && { resourceAbilityRequests }),
@@ -418,6 +420,7 @@ export class LitNodeClientNodeJs
           expiration,
           uri: sessionKeyUri,
           nonce,
+          domain,
         });
       }
 
@@ -1857,7 +1860,7 @@ export class LitNodeClientNodeJs
    *
    * The process follows these steps:
    * 1. Retrieves or generates a session key pair (Ed25519) for the user's device. The session key is either fetched from local storage or newly created if not found. The key does not expire.
-   * 2. Generates an authentication signature (`authSig`) by signing an ERC-5573 “Sign-in with Ethereum” message, which includes resource ability requests, capabilities, expiration, the user's device session public key, and a nonce. The `authSig` is retrieved from local storage, and if it has expired, the user will be prompted to re-sign.
+   * 2. Generates an authentication signature (`authSig`) by signing an ERC-5573 "Sign-in with Ethereum" message, which includes resource ability requests, capabilities, expiration, the user's device session public key, and a nonce. The `authSig` is retrieved from local storage, and if it has expired, the user will be prompted to re-sign.
    * 3. Uses the session private key to sign the session public key along with the resource ability requests, capabilities, issuedAt, and expiration details. This creates a device-generated signature.
    * 4. Constructs the session signatures (`sessionSigs`) by including the device-generated signature and the original message. The `sessionSigs` provide access to Lit Network features such as `executeJs` and `pkpSign`.
    *
@@ -1898,6 +1901,7 @@ export class LitNodeClientNodeJs
       sessionKey: sessionKey,
       sessionKeyUri: sessionKeyUri,
       nonce: await this.getLatestBlockhash(),
+      domain: params.domain,
 
       // -- for recap
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -2119,6 +2123,7 @@ export class LitNodeClientNodeJs
           expiration: props.expiration,
           resources: props.resources,
           chainId: 1,
+          domain: props.domain,
 
           // -- required fields
           resourceAbilityRequests: props.resourceAbilityRequests,
