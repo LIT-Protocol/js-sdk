@@ -1065,19 +1065,6 @@ export class LitCore {
     return nodePromises;
   };
 
-  getRandomNodePromise(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (url: string) => Promise<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any>[] {
-    const randomNodeIndex = Math.floor(
-      Math.random() * this.connectedNodes.size
-    );
-
-    const nodeUrlsArr = Array.from(this.connectedNodes);
-    return [callback(nodeUrlsArr[randomNodeIndex])];
-  }
-
   /**
    * Retrieves the session signature for a given URL from the sessionSigs map.
    * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.
