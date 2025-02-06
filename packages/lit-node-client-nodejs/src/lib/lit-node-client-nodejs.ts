@@ -8,9 +8,9 @@ import {
   createSiweMessageWithRecaps,
   decode,
   generateAuthSig,
+  generateSessionCapabilityObjectWithWildcards,
   LitAccessControlConditionResource,
   LitResourceAbilityRequest,
-  RecapSessionCapabilityObject,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
@@ -24,12 +24,12 @@ import {
   LIT_CURVE,
   LIT_CURVE_TYPE,
   LIT_ENDPOINT,
-  LIT_SESSION_KEY_URI,
   LitNodeClientNotReadyError,
   LOCAL_STORAGE_KEYS,
   ParamNullError,
   ParamsMissingError,
   PRODUCT_IDS,
+  SIWE_URI_PREFIX,
   UnknownError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
@@ -77,17 +77,13 @@ import {
   DecryptRequest,
   DecryptResponse,
   EncryptionSignRequest,
-  EncryptRequest,
   EncryptResponse,
   EncryptSdkParams,
   ExecuteJsNoSigningResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
-  GetSignSessionKeySharesProp,
   GetWalletSigProps,
   ILitNodeClient,
-  ILitResource,
-  ISessionCapabilityObject,
   JsonExecutionRequest,
   JsonExecutionSdkParams,
   JsonPKPClaimKeyRequest,
@@ -116,6 +112,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
+import { AuthMethod } from '@lit-protocol/types';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
@@ -129,6 +126,12 @@ import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
+import {
+  getFormattedAccessControlConditions,
+  getHashedAccessControlConditions,
+  validateAccessControlConditions,
+} from '@lit-protocol/access-control-conditions';
+import { getExpiration } from './helpers/get-expiration';
 
 export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -198,7 +201,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     }
 
     const siweMessage = await createSiweMessageWithCapacityDelegation({
-      uri: 'lit:capability:delegation',
+      uri: SIWE_URI_PREFIX.DELEGATION,
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
       nonce: await this.getLatestBlockhash(),
@@ -209,7 +212,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       // -- capacity delegation specific configuration
       uses: params.uses,
       delegateeAddresses: params.delegateeAddresses,
-      // paymentId: params.paymentId,
+      // paymentId: params.paymentId, // CHANGE: Not supported yet
     });
 
     const authSig = await generateAuthSig({
@@ -220,26 +223,13 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return { capacityDelegationAuthSig: authSig };
   };
 
-  /**
-   *
-   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
-   *
-   */
-  getJWTParams = () => {
-    const now = Date.now();
-    const iat = Math.floor(now / 1000);
-    const exp = iat + 12 * 60 * 60; // 12 hours in seconds
-
-    return { iat, exp };
-  };
-
   // ==================== SESSIONS ====================
   /**
    * Try to get the session key in the local storage,
    * if not, generates one.
    * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (): SessionKeyPair => {
+  private _getSessionKey = (): SessionKeyPair => {
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
     const storedSessionKeyOrError = getStorageItem(storageKey);
 
@@ -271,75 +261,9 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   };
 
   /**
-   * Check if a given object is of type SessionKeyPair.
-   *
-   * @param obj - The object to check.
-   * @returns True if the object is of type SessionKeyPair.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isSessionKeyPair(obj: any): obj is SessionKeyPair {
-    return (
-      typeof obj === 'object' &&
-      'publicKey' in obj &&
-      'secretKey' in obj &&
-      typeof obj.publicKey === 'string' &&
-      typeof obj.secretKey === 'string'
-    );
-  }
-
-  /**
-   * Generates wildcard capability for each of the LIT resources
-   * specified.
-   * @param litResources is an array of LIT resources
-   * @param addAllCapabilities is a boolean that specifies whether to add all capabilities for each resource
-   */
-  static async generateSessionCapabilityObjectWithWildcards(
-    litResources: ILitResource[],
-    addAllCapabilities?: boolean
-  ): Promise<ISessionCapabilityObject> {
-    const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
-
-    // disable for now
-    const _addAllCapabilities = addAllCapabilities ?? false;
-
-    if (_addAllCapabilities) {
-      for (const litResource of litResources) {
-        sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
-      }
-    }
-
-    return sessionCapabilityObject;
-  }
-
-  // backward compatibility
-  async generateSessionCapabilityObjectWithWildcards(
-    litResources: ILitResource[]
-  ): Promise<ISessionCapabilityObject> {
-    return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
-      litResources
-    );
-  }
-
-  /**
-   *
-   * Get expiration for session default time is 1 day / 24 hours
-   *
-   */
-  static getExpiration = () => {
-    return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
-  };
-
-  // backward compatibility
-  getExpiration = () => {
-    return LitNodeClientNodeJs.getExpiration();
-  };
-
-  /**
-   *
    * Get the signature from local storage, if not, generates one
-   *
    */
-  getWalletSig = async ({
+  private _getWalletSig = async ({
     authNeededCallback,
     chain,
     sessionCapabilityObject,
@@ -510,7 +434,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * 3. The authSig.signedMessage does not contain at least one session capability object
    *
    */
-  checkNeedToResignSessionKey = async ({
+  private _checkNeedToResignSessionKey = async ({
     authSig,
     sessionKeyUri,
     resourceAbilityRequests,
@@ -600,54 +524,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return false;
   };
 
-  // ==================== API Calls to Nodes ====================
-
-  /**
-   * @deprecated - Delete me for Naga
-   * Combine Shares from network public key set and signature shares
-   *
-   * @param { NodeBlsSigningShare } signatureShares
-   *
-   * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
-   *
-   */
-  combineSharesAndGetJWT = async (
-    signatureShares: NodeBlsSigningShare[],
-    requestId: string = ''
-  ): Promise<string> => {
-    // ========== Shares Validations ==========
-    // -- sanity check
-    if (
-      !signatureShares.every(
-        (val, i, arr) => val.unsignedJwt === arr[0].unsignedJwt
-      )
-    ) {
-      const msg =
-        'Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things';
-      logErrorWithRequestId(requestId, msg);
-    }
-
-    // ========== Combine Shares ==========
-    const signature = await combineSignatureShares(
-      signatureShares.map((s) => s.signatureShare)
-    );
-
-    logWithRequestId(requestId, 'signature is', signature);
-
-    const unsignedJwt = mostCommonString(
-      signatureShares.map((s) => s.unsignedJwt)
-    );
-
-    // ========== Result ==========
-    // convert the sig to base64 and append to the jwt
-    const finalJwt: string = `${unsignedJwt}.${uint8arrayToString(
-      uint8arrayFromString(signature, 'base16'),
-      'base64urlpad'
-    )}`;
-
-    return finalJwt;
-  };
-
   private _decryptWithSignatureShares = (
     networkPubKey: string,
     identityParam: Uint8Array,
@@ -714,7 +590,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     nodeSet: NodeSet[]
   ) {
     // -- choose the right signature
-    const sessionSig = this.getSessionSigByUrl({
+    const sessionSig = this._getSessionSigByUrl({
       sessionSigs: formattedParams.sessionSigs,
       url,
     });
@@ -814,7 +690,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const targetNodeUrls = targetNodePrices.map(({ url }) => url);
     // ========== Get Node Promises ==========
     // Handle promises for commands sent to Lit nodes
-    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) =>
+    const nodePromises = this._getNodePromises(targetNodeUrls, (url: string) =>
       this.executeJsNodeRequest(
         url,
         {
@@ -827,7 +703,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     );
 
     // -- resolve promises
-    const res = await this.handleNodePromises(
+    const res = await this._handleNodePromises(
       nodePromises,
       requestId,
       params.useSingleNode ? 1 : this._getThreshold()
@@ -953,7 +829,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     params: any,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    return await this.sendCommandToNode({
+    return await this._sendCommandToNode({
       url,
       data: params,
       requestId,
@@ -1015,40 +891,43 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // Handle promises for commands sent to Lit nodes
 
     const targetNodeUrls = targetNodePrices.map(({ url }) => url);
-    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) => {
-      // -- get the session sig from the url key
-      const sessionSig = this.getSessionSigByUrl({
-        sessionSigs,
-        url,
-      });
+    const nodePromises = this._getNodePromises(
+      targetNodeUrls,
+      (url: string) => {
+        // -- get the session sig from the url key
+        const sessionSig = this._getSessionSigByUrl({
+          sessionSigs,
+          url,
+        });
 
-      const reqBody: JsonPkpSignRequest<LIT_CURVE_TYPE> = {
-        toSign: normalizeArray(params.toSign),
-        pubkey: hexPrefixed(params.pubKey),
-        authSig: sessionSig,
+        const reqBody: JsonPkpSignRequest<LIT_CURVE_TYPE> = {
+          toSign: normalizeArray(params.toSign),
+          pubkey: hexPrefixed(params.pubKey),
+          authSig: sessionSig,
 
-        // -- optional params - no longer allowed in >= Naga?
-        // ...(params.authContext.authMethods &&
-        //   params.authContext.authMethods.length > 0 && {
-        //     authMethods: params.authContext.authMethods,
-        //   }),
+          // -- optional params - no longer allowed in >= Naga?
+          // ...(params.authContext.authMethods &&
+          //   params.authContext.authMethods.length > 0 && {
+          //     authMethods: params.authContext.authMethods,
+          //   }),
 
-        // nodeSet: thresholdNodeSet,
-        nodeSet: this._getNodeSet(targetNodeUrls),
-        signingScheme: 'EcdsaK256Sha256',
-      };
+          // nodeSet: thresholdNodeSet,
+          nodeSet: this._getNodeSet(targetNodeUrls),
+          signingScheme: 'EcdsaK256Sha256',
+        };
 
-      logWithRequestId(requestId, 'reqBody:', reqBody);
+        logWithRequestId(requestId, 'reqBody:', reqBody);
 
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.PKP_SIGN,
-      });
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.PKP_SIGN,
+        });
 
-      return this.generatePromise(urlWithPath, reqBody, requestId);
-    });
+        return this.generatePromise(urlWithPath, reqBody, requestId);
+      }
+    );
 
-    const res = await this.handleNodePromises(
+    const res = await this._handleNodePromises(
       nodePromises,
       requestId,
       this._getThreshold()
@@ -1089,8 +968,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   };
 
   /**
-   *
    * Encrypt data using the LIT network public key.
+   * See more: https://developer.litprotocol.com/sdk/access-control/encryption
    *
    * @param { EncryptSdkParams } params
    * @param params.dataToEncrypt - The data to encrypt
@@ -1136,12 +1015,12 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     }
 
     // ========== Validate Access Control Conditions Schema ==========
-    await this.validateAccessControlConditionsSchema(params);
+    await validateAccessControlConditions(params);
 
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     const hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
+      await getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
       throw new InvalidArgumentException(
@@ -1228,7 +1107,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     const hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
+      await getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
       throw new InvalidArgumentException(
@@ -1253,7 +1132,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       formattedEVMContractConditions,
       formattedSolRpcConditions,
       formattedUnifiedAccessControlConditions,
-    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
+    }: FormattedMultipleAccs = getFormattedAccessControlConditions(params);
 
     if (error) {
       throw new InvalidArgumentException(
@@ -1300,7 +1179,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // ========== Get Network Signature ==========
     const requestId = this._getNewRequestId();
-    const nodePromises = this.getNodePromises(
+    const nodePromises = this._getNodePromises(
       userMaxPrices.map(({ url }) => url),
       (url: string) => {
         // -- if session key is available, use it
@@ -1339,7 +1218,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     );
 
     // -- resolve promises
-    const res = await this.handleNodePromises(
+    const res = await this._handleNodePromises(
       nodePromises,
       requestId,
       this._getThreshold()
@@ -1367,46 +1246,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return { decryptedData };
   };
 
-  getLitResourceForEncryption = async (
-    params: EncryptRequest
-  ): Promise<LitAccessControlConditionResource> => {
-    // ========== Hashing Access Control Conditions =========
-    // hash the access control conditions
-    const hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
-
-    if (!hashOfConditions) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            params,
-          },
-        },
-        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
-      );
-    }
-
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
-
-    // ========== Hashing Private Data ==========
-    // hash the private data
-    const hashOfPrivateData = await crypto.subtle.digest(
-      'SHA-256',
-      params.dataToEncrypt
-    );
-    const hashOfPrivateDataStr = uint8arrayToString(
-      new Uint8Array(hashOfPrivateData),
-      'base16'
-    );
-
-    return new LitAccessControlConditionResource(
-      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
-    );
-  };
-
   private _getIdentityParamForEncryption = (
     hashOfConditionsStr: string,
     hashOfPrivateDataStr: string
@@ -1422,8 +1261,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * Sign a session public key using a PKP, which generates an authSig.
    * @returns {Object} An object containing the resulting signature.
    */
-
-  signSessionKey = async (
+  private _signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
     log(`[signSessionKey] params:`, params);
@@ -1444,8 +1282,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // Try to get it from local storage, if not generates one~
     const sessionKey: SessionKeyPair =
-      params.sessionKey ?? this.getSessionKey();
-    const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+      params.sessionKey ?? this._getSessionKey();
+    const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
     log(
       `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
@@ -1535,21 +1373,24 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     logWithRequestId(requestId, 'signSessionKey body', body);
 
     const targetNodeUrls = targetNodePrices.map(({ url }) => url);
-    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) => {
-      const reqBody: JsonSignSessionKeyRequestV1 = body;
+    const nodePromises = this._getNodePromises(
+      targetNodeUrls,
+      (url: string) => {
+        const reqBody: JsonSignSessionKeyRequestV1 = body;
 
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
-      });
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
+        });
 
-      return this.generatePromise(urlWithPath, reqBody, requestId);
-    });
+        return this.generatePromise(urlWithPath, reqBody, requestId);
+      }
+    );
 
     // -- resolve promises
     let res;
     try {
-      res = await this.handleNodePromises(
+      res = await this._handleNodePromises(
         nodePromises,
         requestId,
         this._getThreshold()
@@ -1571,7 +1412,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
-    if (!this._isSuccessNodePromises(res)) {
+    if (!res.success) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
       return {} as SignSessionKeyResponse;
     }
@@ -1670,15 +1511,17 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     return signSessionKeyRes;
   };
 
-  private _isSuccessNodePromises = <T>(
-    res: SuccessNodePromises<T> | RejectedNodePromises
-  ): res is SuccessNodePromises<T> => {
-    return res.success;
-  };
-
   getSignSessionKeyShares = async (
     url: string,
-    params: GetSignSessionKeySharesProp,
+    params: {
+      body: {
+        sessionKey: string;
+        authMethods: AuthMethod[];
+        pkpPublicKey?: string;
+        authSig?: AuthSig;
+        siweMessage: string;
+      };
+    },
     requestId: string
   ) => {
     log('getSignSessionKeyShares');
@@ -1686,7 +1529,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       url,
       endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
     });
-    return await this.sendCommandToNode({
+    return await this._sendCommandToNode({
       url: urlWithPath,
       data: params.body,
       requestId,
@@ -1760,20 +1603,20 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey = params.sessionKey ?? this._getSessionKey();
 
-    const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+    const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
-      : await this.generateSessionCapabilityObjectWithWildcards(
+      : await generateSessionCapabilityObjectWithWildcards(
           params.resourceAbilityRequests.map((r) => r.resource)
         );
-    const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
+    const expiration = params.expiration || getExpiration();
 
     // -- (TRY) to get the wallet signature
-    let authSig = await this.getWalletSig({
+    let authSig = await this._getWalletSig({
       authNeededCallback: params.authNeededCallback,
       chain: params.chain || 'ethereum',
       sessionCapabilityObject,
@@ -1794,7 +1637,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
-    const needToResignSessionKey = await this.checkNeedToResignSessionKey({
+    const needToResignSessionKey = await this._checkNeedToResignSessionKey({
       authSig,
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -1849,10 +1692,10 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const sessionExpiration =
       expiration ?? new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
-    const capabilities = params.capacityDelegationAuthSig
+    const capabilities = params.capabilityAuthSigs
       ? [
           ...(params.capabilityAuthSigs ?? []),
-          params.capacityDelegationAuthSig,
+          params.capabilityAuthSigs,
           authSig,
         ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
@@ -2008,7 +1851,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
          */
         const authMethods = params.authMethods || [];
 
-        const response = await this.signSessionKey({
+        const response = await this._signSessionKey({
           sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
           authMethods: [...authMethods],
@@ -2040,8 +1883,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * @param publicKey is the public key of the session key
    * @returns { string } the session key uri
    */
-  getSessionKeyUri = (publicKey: string): string => {
-    return LIT_SESSION_KEY_URI + publicKey;
+  private _getSessionKeyUri = (publicKey: string): string => {
+    return SIWE_URI_PREFIX.SESSION_KEY + publicKey;
   };
 
   /**
@@ -2077,31 +1920,34 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const targetNodeUrls = targetNodePrices.map(({ url }) => url);
 
-    const nodePromises = this.getNodePromises(targetNodeUrls, (url: string) => {
-      if (!params.authMethod) {
-        throw new ParamsMissingError(
-          {
-            info: {
-              params,
+    const nodePromises = this._getNodePromises(
+      targetNodeUrls,
+      (url: string) => {
+        if (!params.authMethod) {
+          throw new ParamsMissingError(
+            {
+              info: {
+                params,
+              },
             },
-          },
-          'authMethod is required'
-        );
+            'authMethod is required'
+          );
+        }
+
+        const reqBody: JsonPKPClaimKeyRequest = {
+          authMethod: params.authMethod,
+        };
+
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.PKP_CLAIM,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, requestId);
       }
+    );
 
-      const reqBody: JsonPKPClaimKeyRequest = {
-        authMethod: params.authMethod,
-      };
-
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.PKP_CLAIM,
-      });
-
-      return this.generatePromise(urlWithPath, reqBody, requestId);
-    });
-
-    const responseData = await this.handleNodePromises(
+    const responseData = await this._handleNodePromises(
       nodePromises,
       requestId,
       this._getThreshold()

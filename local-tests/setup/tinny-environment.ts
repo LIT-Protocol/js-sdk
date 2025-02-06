@@ -1,19 +1,14 @@
-import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   AuthSig,
-  CosmosAuthSig,
   LitContractContext,
   LitContractResolverContext,
-  SolanaAuthSig,
 } from '@lit-protocol/types';
+import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { TinnyPerson } from './tinny-person';
 
-import { ethers, Signer } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
-import { ShivaClient, TestnetClient } from './shiva-client';
-import { toErrorWithMessage } from './tinny-utils';
 import {
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
@@ -21,6 +16,9 @@ import {
   PRODUCT_IDS,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
+import { ethers, Signer } from 'ethers';
+import { ShivaClient, TestnetClient } from './shiva-client';
+import { toErrorWithMessage } from './tinny-utils';
 
 console.log('checking env', process.env['DEBUG']);
 
@@ -89,22 +87,6 @@ export class TinnyEnvironment {
   public contractsClient: LitContracts;
   public rpc: string;
   public superCapacityDelegationAuthSig: AuthSig;
-  public bareEthAuthSig: AuthSig;
-  public bareSolAuthSig: SolanaAuthSig = {
-    sig: '706047fcab06ada3cbfeb6990617c1705d59bafb20f5f1c8103d764fb5eaec297328d164e2b891095866b28acc1ab2df288a8729cf026228ef3c4970238b190a',
-    derivedVia: 'solana.signMessage',
-    signedMessage:
-      'I am creating an account to use Lit Protocol at 2024-05-08T16:39:44.481Z',
-    address: 'F7r6ENi6dqH8SnMYZdK3YxWAQ4cwfSNXZyMzbea5fbS1',
-  };
-
-  public bareCosmosAuthSig: CosmosAuthSig = {
-    sig: 'dE7J8oaWa8zECuMpaI/IVfJXGpLAO1paGLho+/dmtaQkN7Sh1lmJLAdYqZchDyYhQcg+nqfaoEOzLig3CPlosg==',
-    derivedVia: 'cosmos.signArbitrary',
-    signedMessage:
-      '8c857343720203e3f52606409e6818284186a614e74026998f89e7417eed4d4b',
-    address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
-  };
 
   public testnet: TestnetClient | undefined;
   //=========== PRIVATE MEMBERS ===========
@@ -414,7 +396,6 @@ export class TinnyEnvironment {
 
       await this.setupLitNodeClient();
       await this.setupSuperCapacityDelegationAuthSig();
-      await this.setupBareEthAuthSig();
     } catch (e) {
       const err = toErrorWithMessage(e);
       console.log(
@@ -422,34 +403,6 @@ export class TinnyEnvironment {
       );
       console.log(err.stack);
       process.exit(1);
-    }
-  }
-
-  /**
-   * Setup bare eth auth sig to test access control and decryption
-   */
-  async setupBareEthAuthSig() {
-    const privateKey = await this.getAvailablePrivateKey();
-    try {
-      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
-      const wallet = new ethers.Wallet(privateKey.privateKey, provider);
-
-      const toSign = await createSiweMessage({
-        walletAddress: wallet.address,
-        nonce: await this.litNodeClient.getLatestBlockhash(),
-        expiration: new Date(
-          Date.now() + 29 * 24 * 60 * 60 * 1000
-        ).toISOString(),
-        litNodeClient: this.litNodeClient,
-      });
-
-      this.bareEthAuthSig = await generateAuthSig({
-        signer: wallet,
-        toSign,
-      });
-    } finally {
-      // @ts-expect-error
-      this.releasePrivateKeyFromUser(privateKey);
     }
   }
 

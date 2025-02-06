@@ -1,23 +1,22 @@
 import {
+  AuthenticationContext,
+  CapacityCreditsReq,
+  CapacityCreditsRes,
+  ClaimKeyResponse,
   DecryptRequest,
   DecryptResponse,
-  EncryptSdkParams,
   EncryptResponse,
+  EncryptSdkParams,
   ExecuteJsResponse,
-  FormattedMultipleAccs,
-  HandshakeWithNode,
   JsonExecutionSdkParams,
   JsonHandshakeResponse,
+  JsonPkpSignSdkParams,
   LitNodeClientConfig,
-  MultipleAccessControlConditions,
-  NodeBlsSigningShare,
-  NodeCommandServerKeysResponse,
-  RejectedNodePromises,
-  SendNodeCommand,
-  SuccessNodePromises,
+  SigResponse,
 } from './interfaces';
-import { ILitResource, ISessionCapabilityObject } from './models';
-import { SupportedJsonRequests } from './types';
+
+import { PRODUCT_IDS } from '@lit-protocol/constants';
+import { ClaimProcessor, ClaimRequest } from './types';
 
 export interface ILitNodeClient {
   config: LitNodeClientConfig;
@@ -29,143 +28,45 @@ export interface ILitNodeClient {
   networkPubKeySet: string | null;
   latestBlockhash: string | null;
 
-  // ========== Constructor ==========
-  // ** IMPORTANT !! You have to create your constructor when implementing this class **
-  // constructor(customConfig: LitNodeClientConfig);
-
-  // ========== Scoped Class Helpers ==========
-
+  // ========== Core ==========
   /**
-   *
-   * Set bootstrapUrls to match the network litNetwork unless it's set to custom
-   *
-   * @returns { void }
-   *
+   * Connect to the LIT nodes
+   * @returns { Promise } A promise that resolves when the nodes are connected.
    */
-  setCustomBootstrapUrls(): void;
-
-  /**
-   * @deprecated - Delete me for Naga
-   * Combine Shares from signature shares
-   *
-   * @param { NodeBlsSigningShare } signatureShares
-   *
-   * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
-   *
-   */
-  combineSharesAndGetJWT(
-    signatureShares: NodeBlsSigningShare[]
-  ): Promise<string>;
-
-  /**
-   *
-   * Get different formats of access control conditions, eg. evm, sol, unified etc.
-   *
-   * @param { SupportedJsonRequests } params
-   *
-   * @returns { FormattedMultipleAccs }
-   *
-   */
-  getFormattedAccessControlConditions(
-    params: SupportedJsonRequests
-  ): FormattedMultipleAccs;
-
-  /**
-   *
-   * Get hash of access control conditions
-   *
-   * @param { MultipleAccessControlConditions } params
-   *
-   * @returns { Promise<ArrayBuffer | undefined> }
-   *
-   */
-  getHashedAccessControlConditions(
-    params: MultipleAccessControlConditions
-  ): Promise<ArrayBuffer | undefined>;
-
-  // ========== Promise Handlers ==========
-
-  /**
-   *
-   * Get and gather node promises
-   *
-   * @param { string[] } nodeUrls URLs of nodes to get promises for
-   * @param { any } callback
-   *
-   * @returns { Array<Promise<any>> }
-   *
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
-  getNodePromises(nodeUrls: string[], callback: Function): Promise<any>[];
-
-  /**
-   * Handle node promises
-   *
-   * @param { Array<Promise<T>> } nodePromises
-   *
-   * @param {string} requestId request Id used for logging
-   * @param {number} minNodeCount The minimum number of nodes we need a successful response from to continue
-   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
-   *
-   */
-  handleNodePromises<T>(
-    nodePromises: Promise<T>[],
-    requestId: string,
-    minNodeCount: number
-  ): Promise<SuccessNodePromises<T> | RejectedNodePromises>;
-
-  /**
-   *
-   * Throw node error
-   *
-   * @param { RejectedNodePromises } res
-   * @param { string } requestId
-   *
-   * @returns { void }
-   *
-   */
-  _throwNodeError(res: RejectedNodePromises, requestId: string): never;
-
-  // ========== API Calls to Nodes ==========
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;
+  connect(): Promise<any>;
+
+  // ========== Helpers ==========
+  /**
+   * Set the default max price for a specific product
+   * @param product - The product type to set the max price for
+   * @param price - The max price to set
+   */
+  setDefaultMaxPrice(product: keyof typeof PRODUCT_IDS, price: bigint): void;
 
   /**
-   *
-   * Get JS Execution Shares from Nodes
-   *
-   * @param { JsonExecutionRequest } params
-   *
-   * @returns { Promise<any> }
+   * Get PKP authentication context
+   * @param params - Authentication context parameters
+   * @returns Authentication context with PKP-specific configuration
    */
+  getPkpAuthContext(params: AuthenticationContext): AuthenticationContext;
 
   /**
-   *
-   * Handshake with SGX
-   *
-   * @param { HandshakeWithNode } params
-   *
-   * @returns { Promise<NodeCommandServerKeysResponse> }
-   *
+   * Get maximum prices for node products
+   * @param params - Parameters including user max price and product type
    */
-  handshakeWithNode(
-    params: HandshakeWithNode,
-    requestId: string
-  ): Promise<NodeCommandServerKeysResponse>;
+  getMaxPricesForNodeProduct(params: {
+    userMaxPrice?: bigint;
+    product: keyof typeof PRODUCT_IDS;
+  }): { url: string; price: bigint }[];
 
-  // ========== Scoped Business Logics ==========
   /**
-   *
-   * Execute JS on the nodes and combine and return any resulting signatures
-   *
-   * @param { ExecuteJsRequest } params
-   *
-   * @returns { ExecuteJsResponse }
-   *
+   * Create capacity delegation authentication signature
+   * @param params - Capacity credits request parameters
    */
-  executeJs(
-    params: JsonExecutionSdkParams
-  ): Promise<ExecuteJsResponse | undefined>;
+  createCapacityDelegationAuthSig(
+    params: CapacityCreditsReq
+  ): Promise<CapacityCreditsRes>;
 
   /**
    * Encrypt data with Lit identity-based Timelock Encryption.
@@ -174,30 +75,32 @@ export interface ILitNodeClient {
    */
   encrypt(params: EncryptSdkParams): Promise<EncryptResponse>;
 
+  // ========== ENDPOINTS ==========
+
+  /**
+   * Sign using PKP
+   * @param params - PKP signing parameters
+   */
+  pkpSign(params: JsonPkpSignSdkParams): Promise<SigResponse>;
+
+  /**
+   * Execute JS on the nodes and combine and return any resulting signatures
+   * @param { ExecuteJsRequest } params
+   * @returns { ExecuteJsResponse }
+   */
+  executeJs(
+    params: JsonExecutionSdkParams
+  ): Promise<ExecuteJsResponse | undefined>;
+
   /**
    * Decrypt data with Lit identity-based Timelock Encryption.
-   *
    * @param params
    */
   decrypt(params: DecryptRequest): Promise<DecryptResponse>;
 
   /**
-   *
-   * Connect to the LIT nodes
-   *
-   * @returns { Promise } A promise that resolves when the nodes are connected.
-   *
+   * Claim a key ID using authentication method
+   * @param params - Claim request parameters
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  connect(): Promise<any>;
-
-  /**
-   * Generates a session capability object
-   *
-   * @param litResources An array of ILitResource to be processed.
-   * @returns A Promise resolving to an ISessionCapabilityObject.
-   */
-  generateSessionCapabilityObjectWithWildcards(
-    litResources: ILitResource[]
-  ): Promise<ISessionCapabilityObject>;
+  claimKeyId(params: ClaimRequest<ClaimProcessor>): Promise<ClaimKeyResponse>;
 }

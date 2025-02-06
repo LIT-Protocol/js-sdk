@@ -1,11 +1,6 @@
 import depd from 'depd';
 
-import {
-  LITChain,
-  LITCosmosChain,
-  LITEVMChain,
-  LITSVMChain,
-} from '@lit-protocol/types';
+import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from './types';
 
 const deprecated = depd('lit-js-sdk:constants:constants');
 
@@ -945,19 +940,6 @@ export const METAMASK_CHAIN_INFO = {
     iconUrls: ['future'],
   },
 };
-/**
- * @deprecated Will be removed - Use METAMASK_CHAIN_INFO instead
- * Alias for {@link METAMASK_CHAIN_INFO}. Added for backwards compatibility.
- * See {@link METAMASK_CHAIN_INFO}
- */
-export const metamaskChainInfo = new Proxy(METAMASK_CHAIN_INFO, {
-  get(target, prop, receiver) {
-    deprecated(
-      'metamaskChainInfo is deprecated and will be removed in a future version. Use METAMASK_CHAIN_INFO instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 /**
  * Constants representing the available LIT RPC endpoints.
@@ -981,25 +963,10 @@ export const LIT_EVM_CHAINS = LIT_CHAINS;
  * Represents the Lit Network constants.
  */
 export const LIT_NETWORK = {
-  DatilDev: 'datil-dev',
-  DatilTest: 'datil-test',
-  Datil: 'datil',
   NagaDev: 'naga-dev',
   Custom: 'custom',
 } as const;
-/**
- * @deprecated Will be removed. - Use LIT_NETWORK instead
- * Alias for LIT_NETWORK. Added for backwards compatibility.
- * See {@link LIT_NETWORK}
- */
-export const LitNetwork = new Proxy(LIT_NETWORK, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitNetwork is deprecated and will be removed in a future version. Use LIT_NETWORK instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+
 /**
  * The type representing the keys of the LIT_NETWORK object.
  */
@@ -1017,10 +984,7 @@ export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
  * A mapping of network names to their corresponding RPC URLs.
  */
 export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
-  'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
-  'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
   'naga-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
-  datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
   custom: LIT_RPC.LOCAL_ANVIL,
 };
 
@@ -1030,10 +994,7 @@ export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
 export const RELAYER_URL_BY_NETWORK: {
   [key in LIT_NETWORK_VALUES]: string;
 } = {
-  'datil-dev': 'https://datil-dev-relayer.getlit.dev',
-  'datil-test': 'https://datil-test-relayer.getlit.dev',
   'naga-dev': 'https://naga-dev-relayer.getlit.dev',
-  datil: 'https://datil-relayer.getlit.dev',
   custom: 'http://localhost:3000',
 };
 
@@ -1044,10 +1005,7 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   typeof METAMASK_CHAIN_INFO.yellowstone
 > = {
-  'datil-dev': METAMASK_CHAIN_INFO.yellowstone,
-  'datil-test': METAMASK_CHAIN_INFO.yellowstone,
   'naga-dev': METAMASK_CHAIN_INFO.yellowstone,
-  datil: METAMASK_CHAIN_INFO.yellowstone,
   custom: METAMASK_CHAIN_INFO.yellowstone,
 };
 
@@ -1061,10 +1019,7 @@ export const HTTP_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   typeof HTTP | typeof HTTPS
 > = {
-  'datil-dev': HTTPS,
-  'datil-test': HTTPS,
   'naga-dev': HTTPS,
-  datil: HTTPS,
   custom: HTTP, // default, can be changed by config
 };
 
@@ -1075,10 +1030,7 @@ export const CENTRALISATION_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   'centralised' | 'decentralised' | 'unknown'
 > = {
-  'datil-dev': 'centralised',
-  'datil-test': 'decentralised',
   'naga-dev': 'centralised',
-  datil: 'decentralised',
   custom: 'unknown',
 } as const;
 
@@ -1226,15 +1178,9 @@ export const SYMM_KEY_ALGO_PARAMS = {
  * loaded from the chain during initialization
  */
 export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
-  'datil-dev': [],
-  'datil-test': [],
-  datil: [],
   'naga-dev': [],
   custom: [],
 };
-
-// ========== Lit Sessions ==========
-export const LIT_SESSION_KEY_URI = 'lit:session:';
 
 // ========== Lit Auth Methods ==========
 
@@ -1244,12 +1190,6 @@ export const AUTH_METHOD_TYPE_IDS = {
   GOOGLE: 5,
   GOOGLE_JWT: 6,
 };
-
-// ========== PKP Client ==========
-export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
-
-// ========== RLI Delegation ==========
-export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
 
 // ========== Chains ==========
 export const VMTYPE = {
@@ -1287,19 +1227,6 @@ export const AUTH_METHOD_TYPE = {
 export type AUTH_METHOD_TYPE_TYPE = keyof typeof AUTH_METHOD_TYPE;
 export type AUTH_METHOD_TYPE_VALUES =
   (typeof AUTH_METHOD_TYPE)[keyof typeof AUTH_METHOD_TYPE];
-/**
- * @deprecated Will be removed - Use AUTH_METHOD_TYPE instead
- * Alias for AUTH_METHOD_TYPE. Added for backwards compatibility.
- * See {@link AUTH_METHOD_TYPE}
- */
-export const AuthMethodType = new Proxy(AUTH_METHOD_TYPE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'AuthMethodType is deprecated and will be removed in a future version. Use AUTH_METHOD_TYPE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 // ========== Supported PKP Auth Method Scopes ==========
 export const AUTH_METHOD_SCOPE = {
@@ -1312,51 +1239,6 @@ export type AUTH_METHOD_SCOPE_TYPE = keyof typeof AUTH_METHOD_SCOPE;
 export type AUTH_METHOD_SCOPE_VALUES =
   (typeof AUTH_METHOD_SCOPE)[keyof typeof AUTH_METHOD_SCOPE];
 
-/**
- * @deprecated Will be removed - Use AUTH_METHOD_SCOPE instead
- * Alias for AUTH_METHOD_SCOPE. Added for backwards compatibility.
- * See {@link AUTH_METHOD_SCOPE}
- */
-export const AuthMethodScope = new Proxy(AUTH_METHOD_SCOPE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'AuthMethodScope is deprecated and will be removed in a future version. Use AUTH_METHOD_SCOPE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
-
-// ========== Supported Provider Types ==========
-export const PROVIDER_TYPE = {
-  Discord: 'discord',
-  Google: 'google',
-  EthWallet: 'ethwallet',
-  WebAuthn: 'webauthn',
-  Apple: 'apple',
-  StytchOtp: 'stytchOtp',
-  StytchEmailFactorOtp: 'stytchEmailFactorOtp',
-  StytchSmsFactorOtp: 'stytchSmsFactorOtp',
-  StytchWhatsAppFactorOtp: 'stytchWhatsAppFactorOtp',
-  StytchTotpFactor: 'stytchTotpFactor',
-} as const;
-
-export type PROVIDER_TYPE_TYPE = keyof typeof PROVIDER_TYPE;
-export type PROVIDER_TYPE_VALUES =
-  (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
-/**
- * @deprecated Will be removed - Use PROVIDER_TYPE instead
- * Alias for PROVIDER_TYPE. Added for backwards compatibility.
- * See {@link PROVIDER_TYPE}
- */
-export const ProviderType = new Proxy(PROVIDER_TYPE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'ProviderType is deprecated and will be removed in a future version. Use PROVIDER_TYPE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
-
 // ========== Supported Staking States ==========
 export const STAKING_STATES = {
   Active: 0,
@@ -1368,46 +1250,9 @@ export const STAKING_STATES = {
 } as const;
 
 export type STAKING_STATES_TYPE = keyof typeof STAKING_STATES;
+
 export type STAKING_STATES_VALUES =
   (typeof STAKING_STATES)[keyof typeof STAKING_STATES];
-/**
- * @deprecated Will be removed - Use STAKING_STATES instead
- * Alias for STAKING_STATES. Added for backwards compatibility.
- * See {@link STAKING_STATES}
- */
-export const StakingStates = new Proxy(STAKING_STATES, {
-  get(target, prop, receiver) {
-    deprecated(
-      'StakingStates is deprecated and will be removed in a future version. Use STAKING_STATES instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
-
-// ========== Relay Auth Status ==========
-export const RELAY_AUTH_STATUS = {
-  InProgress: 'InProgress',
-  Succeeded: 'Succeeded',
-  Failed: 'Failed',
-} as const;
-
-export type RELAY_AUTH_STATUS_TYPE = keyof typeof RELAY_AUTH_STATUS;
-export type RELAY_AUTH_STATUS_VALUES =
-  (typeof RELAY_AUTH_STATUS)[keyof typeof RELAY_AUTH_STATUS];
-/**
- * @deprecated Will be removed - Use RELAY_AUTH_STATUS instead
- * Alias for RELAY_AUTH_STATUS. Added for backwards compatibility.
- * See {@link RELAY_AUTH_STATUS}
- */
-export const RelayAuthStatus = new Proxy(RELAY_AUTH_STATUS, {
-  get(target, prop, receiver) {
-    deprecated(
-      'RelayAuthStatus is deprecated and will be removed in a future version. Use RELAY_AUTH_STATUS instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
-
 /**
  * Prefixes used for identifying various LIT resources.
  *
@@ -1424,19 +1269,6 @@ export type LIT_RESOURCE_PREFIX_TYPE = keyof typeof LIT_RESOURCE_PREFIX;
 // This should mimic LitResourcePrefix in types package
 export type LIT_RESOURCE_PREFIX_VALUES =
   (typeof LIT_RESOURCE_PREFIX)[keyof typeof LIT_RESOURCE_PREFIX];
-/**
- * @deprecated Will be removed - Use LIT_RESOURCE_PREFIX instead
- * Alias for LIT_RESOURCE_PREFIX. Added for backwards compatibility.
- * See {@link LIT_RESOURCE_PREFIX}
- */
-export const LitResourcePrefix = new Proxy(LIT_RESOURCE_PREFIX, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitResourcePrefix is deprecated and will be removed in a future version. Use LIT_RESOURCE_PREFIX instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 /**
  * User-facing abilities that can be granted to a session.
@@ -1477,19 +1309,6 @@ export const LIT_ABILITY = {
 export type LIT_ABILITY_TYPE = keyof typeof LIT_ABILITY;
 // This should replicate LitAbility in types package
 export type LIT_ABILITY_VALUES = (typeof LIT_ABILITY)[keyof typeof LIT_ABILITY];
-/**
- * @deprecated Will be removed - Use LIT_ABILITY instead
- * Alias for LIT_ABILITY. Added for backwards compatibility.
- * See {@link LIT_ABILITY}
- */
-export const LitAbility = new Proxy(LIT_ABILITY, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitAbility is deprecated and will be removed in a future version. Use LIT_ABILITY instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 /**
  * LIT specific abilities mapped into the Recap specific terminology
@@ -1505,19 +1324,6 @@ export const LIT_RECAP_ABILITY = {
 export type LIT_RECAP_ABILITY_TYPE = keyof typeof LIT_RECAP_ABILITY;
 export type LIT_RECAP_ABILITY_VALUES =
   (typeof LIT_RECAP_ABILITY)[keyof typeof LIT_RECAP_ABILITY];
-/**
- * @deprecated Will be removed - Use LIT_RECAP_ABILITY instead
- * Alias for LIT_RECAP_ABILITY. Added for backwards compatibility.
- * See {@link LIT_RECAP_ABILITY}
- */
-export const LitRecapAbility = new Proxy(LIT_RECAP_ABILITY, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitRecapAbility is deprecated and will be removed in a future version. Use LIT_RECAP_ABILITY instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 export const LIT_NAMESPACE = {
   Auth: 'Auth',
@@ -1527,19 +1333,6 @@ export const LIT_NAMESPACE = {
 export type LIT_NAMESPACE_TYPE = keyof typeof LIT_NAMESPACE;
 export type LIT_NAMESPACE_VALUES =
   (typeof LIT_NAMESPACE)[keyof typeof LIT_NAMESPACE];
-/**
- * @deprecated Will be removed - Use LIT_NAMESPACE instead
- * Alias for LIT_NAMESPACE. Added for backwards compatibility.
- * See {@link LIT_NAMESPACE}
- */
-export const LitNamespace = new Proxy(LIT_NAMESPACE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitNamespace is deprecated and will be removed in a future version. Use LIT_NAMESPACE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 /**
  * SDK Logger levels
@@ -1557,21 +1350,21 @@ export const LOG_LEVEL = {
 
 export type LOG_LEVEL_TYPE = keyof typeof LOG_LEVEL;
 export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
-/**
- * @deprecated Will be removed - Use LOG_LEVEL instead
- * Alias for LOG_LEVEL. Added for backwards compatibility.
- * See {@link LOG_LEVEL}
- */
-export const LogLevel = new Proxy(LOG_LEVEL, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LogLevel is deprecated and will be removed in a future version. Use LOG_LEVEL instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
+/**
+ * This is useful when the node is not able to connect to the IPFS gateway,
+ * so the sdk can fallback to these gateways.
+ */
 export const FALLBACK_IPFS_GATEWAYS = [
   'https://flk-ipfs.io/ipfs/',
   'https://litprotocol.mypinata.cloud/ipfs/',
 ];
+
+export const SIWE_URI_PREFIX = {
+  SESSION_KEY: 'lit:session:',
+  DELEGATION: 'lit:capability:delegation',
+} as const;
+
+export type SIWE_URI_PREFIX_TYPE = keyof typeof SIWE_URI_PREFIX;
+export type SIWE_URI_PREFIX_VALUES =
+  (typeof SIWE_URI_PREFIX)[keyof typeof SIWE_URI_PREFIX];

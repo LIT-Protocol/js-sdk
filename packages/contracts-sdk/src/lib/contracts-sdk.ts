@@ -32,17 +32,16 @@ import { LogManager, Logger } from '@lit-protocol/logger';
 import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
 import {
   ContractName,
-  CreateCustomAuthMethodRequest,
   EpochInfo,
   GasLimitParam,
   LIT_NETWORKS_KEYS,
+  LitContract,
   LitContractContext,
   LitContractResolverContext,
   MintNextAndAddAuthMethods,
   MintWithAuthParams,
   MintWithAuthResponse,
   TokenInfo,
-  LitContract,
 } from '@lit-protocol/types';
 
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
@@ -56,7 +55,7 @@ import { ValidatorStruct, type ValidatorWithPrices } from './types';
 
 const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 
-// FIXME: this should be dynamically set, but we only have 1 net atm.
+// CHANGE: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
 
 declare global {
@@ -139,7 +138,7 @@ export class LitContracts {
     this.randomPrivateKey = args?.randomPrivatekey ?? false;
     this.options = args?.options;
     this.debug = args?.debug ?? false;
-    this.network = args?.network || LIT_NETWORK.DatilDev;
+    this.network = args?.network || LIT_NETWORK.NagaDev;
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = RPC_URL_BY_NETWORK[this.network];
@@ -1253,9 +1252,20 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    * @throws { Error } - If the contracts are not connected, the contract is not available, authMethodType, or permission scopes are required.
    *
    */
-  mintWithCustomAuth = async (
-    params: CreateCustomAuthMethodRequest
-  ): Promise<MintWithAuthResponse<ContractReceipt>> => {
+  mintWithCustomAuth = async (params: {
+    /**
+     * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
+     */
+    authMethodId: string | Uint8Array;
+
+    authMethodType: number;
+
+    /**
+     * Permission scopes:
+     * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+     */
+    scopes: string[] | number[];
+  }): Promise<MintWithAuthResponse<ContractReceipt>> => {
     const authMethodId =
       typeof params.authMethodId === 'string'
         ? stringToArrayify(params.authMethodId)

@@ -64,59 +64,7 @@ export type SupportedJsonRequests =
 
 export type Chain = string;
 
-/**
- *
- * The default required properties of all chains
- *
- * @typedef { Object } LITChainRequiredProps
- */
-export interface LITChainRequiredProps {
-  name: string;
-  symbol: string;
-  decimals: number;
-  rpcUrls: string[];
-  blockExplorerUrls: string[];
-  vmType: string;
-}
-
-/**
- * @typedef { Object } LITEVMChain
- * @property { string } contractAddress - The address of the token contract for the optional predeployed ERC1155 contract.  Only present on EVM chains.
- * @property { string } chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
- * @property { string } name - The human readable name of the chain
- */
-export type LITEVMChain = LITChainRequiredProps & {
-  contractAddress: string | null;
-  chainId: number;
-  type: string | null;
-};
-
-/**
- * @typedef { Object } LITSVMChain
- */
-export type LITSVMChain = LITChainRequiredProps;
-
-/**
- * @typedef { Object } LITCosmosChain
- * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
- */
-export type LITCosmosChain = LITChainRequiredProps & {
-  chainId: string;
-};
-
-/**
- * @typedef {Object} LITChain
- * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
- * @property {string} name - The human readable name of the chain
- */
-export type LITChain<T> = Record<string, T>;
-
-export type LIT_NETWORKS_KEYS =
-  | 'datil-dev'
-  | 'datil-test'
-  | 'datil'
-  | 'naga-dev'
-  | 'custom';
+export type LIT_NETWORKS_KEYS = 'naga-dev' | 'custom';
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type AcceptedFileType = File | Blob;

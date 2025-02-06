@@ -1,6 +1,7 @@
 import { Provider } from '@ethersproject/abstract-provider';
 import depd from 'depd';
 
+import { SigType } from './EndpointResponses';
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import {
@@ -15,18 +16,9 @@ import {
   LitContractResolverContext,
   ResponseStrategy,
   SolRpcConditions,
-  SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
-import { SigType } from './EndpointResponses';
 const deprecated = depd('lit-js-sdk:types:interfaces');
-
-/** ---------- Access Control Conditions Interfaces ---------- */
-
-export interface ABIParams {
-  name: string;
-  type: string;
-}
 
 export interface AccsOperatorParams {
   operator: string;
@@ -67,16 +59,6 @@ export interface AuthSig {
   algo?: string;
 }
 
-export interface SolanaAuthSig extends AuthSig {
-  derivedVia: 'solana.signMessage';
-}
-
-export interface CosmosAuthSig extends AuthSig {
-  derivedVia: 'cosmos.signArbitrary';
-}
-
-export type CosmosWalletType = 'keplr' | 'leap';
-
 export interface AuthCallbackParams extends LitActionSdkParams {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
@@ -114,13 +96,6 @@ export interface AuthCallbackParams extends LitActionSdkParams {
   uri?: string;
 
   /**
-   * Cosmos wallet type, to support mutliple popular cosmos wallets
-   * Keplr & Cypher -> window.keplr
-   * Leap -> window.leap
-   */
-  cosmosWalletType?: CosmosWalletType;
-
-  /**
    * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
    */
   walletConnectProjectId?: string;
@@ -128,33 +103,7 @@ export interface AuthCallbackParams extends LitActionSdkParams {
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
-/** ---------- Web3 ---------- */
-export interface IProvider {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  provider: any;
-  account: string;
-}
-
 /** ---------- Crypto ---------- */
-
-export interface EncryptedFile {
-  encryptedFile: Blob;
-  symmetricKey: SymmetricKey;
-}
-
-export interface DecryptFileProps {
-  file: AcceptedFileType;
-  symmetricKey: SymmetricKey;
-}
-
-export interface SigningAccessControlConditionJWTPayload
-  extends MultipleAccessControlConditions {
-  iss: string;
-  sub: string;
-  chain?: string;
-  iat: number;
-  exp: number;
-}
 
 export interface HumanizedAccsProps {
   // The array of access control conditions that you want to humanize
@@ -173,10 +122,6 @@ export interface HumanizedAccsProps {
   myWalletAddress?: string;
 }
 
-/** ---------- Key Value Type ---------- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type KV = Record<string, any>;
-
 /** ---------- Lit Node Client ---------- */
 export interface LitNodeClientConfig {
   litNetwork: LIT_NETWORKS_KEYS;
@@ -186,7 +131,9 @@ export interface LitNodeClientConfig {
   connectTimeout?: number;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
-  storageProvider?: StorageProvider;
+  storageProvider?: {
+    provider: Storage;
+  };
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string;
 }
@@ -202,10 +149,6 @@ export type CustomNetwork = Pick<
  * if running in NodeJs and this is implicitly
  * binded globally
  */
-export interface StorageProvider {
-  provider: Storage;
-}
-
 export interface Signature {
   r: string;
   s: string;
@@ -395,6 +338,8 @@ export interface JsonSigningResourceId {
   extraData: string;
 }
 
+// CHANGE: `MultipleAccessControlConditions` is basically identical to `AccessControlConditions`,
+// but due to the way the types are deeply nested, we will revisit this later.
 export interface MultipleAccessControlConditions {
   // The access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
   accessControlConditions?: AccessControlConditions;
@@ -655,12 +600,6 @@ export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
   logs: string;
 }
 
-export interface SendNodeCommand {
-  url: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
-  requestId: string;
-}
 export interface SigShare {
   sigType: SigType;
   signatureShare: string;
@@ -732,46 +671,6 @@ export interface NodeErrorV3 {
   details: string[];
 }
 
-/**
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- */
-export const NodeClientErrorV0 = new Proxy(
-  {
-    errorCode: '',
-    message: '',
-    error: '',
-    name: '',
-  },
-  {
-    get(target, prop, receiver) {
-      deprecated(
-        'NodeClientErrorV0 is deprecated and will be removed in a future version. Use NodeClientErrorV1 instead.'
-      );
-      return Reflect.get(target, prop, receiver);
-    },
-  }
-);
-
-/**
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- */
-export type NodeClientErrorV0 = typeof NodeClientErrorV0 & {
-  errorCode?: string;
-  message: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: any;
-  name?: string;
-};
-
-export interface NodeClientErrorV1 {
-  message: string;
-  errorKind: string;
-  errorCode: string;
-  details?: string[];
-  status?: number;
-  requestId?: string;
-}
-
 export interface NodeResponse {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   response: any;
@@ -788,27 +687,9 @@ export interface CallRequest {
   data: string;
 }
 
-export interface SignedChainDataToken {
-  // The call requests to make.  The responses will be signed and returned.
-  callRequests: CallRequest[];
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: Chain;
-}
-
 export interface NodeCommandResponse {
   url: string;
   data: JsonRequest;
-}
-
-export interface NodeCommandServerKeysResponse {
-  serverPublicKey: string;
-  subnetPublicKey: string;
-  networkPublicKey: string;
-  networkPublicKeySet: string;
-  hdRootPubkeys: string[];
-  attestation?: NodeAttestation;
-  latestBlockhash?: string;
 }
 
 export interface FormattedMultipleAccs {
@@ -821,29 +702,6 @@ export interface FormattedMultipleAccs {
   formattedSolRpcConditions: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formattedUnifiedAccessControlConditions: any;
-}
-
-export interface SignWithECDSA {
-  // TODO: The message to be signed - note this message is not currently converted to a digest!!!!!
-  message: string;
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: Chain;
-
-  iat: number;
-  exp: number;
-}
-
-export interface CombinedECDSASignature {
-  r: string;
-  s: string;
-  recid: number;
-  signature: `0x${string}`;
-}
-
-export interface HandshakeWithNode {
-  url: string;
-  challenge: string;
 }
 
 export interface NodeAttestation {
@@ -936,28 +794,9 @@ export interface SessionKeyPair {
 
 /** ========== Session ========== */
 
-// pub struct AuthMethod {
-//     pub auth_method_type: u32,
-//     pub access_token: String,
-// }
 export interface AuthMethod {
   authMethodType: number;
   accessToken: string;
-}
-
-export interface CreateCustomAuthMethodRequest {
-  /**
-   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
-   */
-  authMethodId: string | Uint8Array;
-
-  authMethodType: number;
-
-  /**
-   * Permission scopes:
-   * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
-   */
-  scopes: string[] | number[];
 }
 
 // pub struct JsonSignSessionKeyRequest {
@@ -1019,10 +858,6 @@ export interface SignSessionKeyResponse {
   authSig: AuthSig;
 }
 
-export interface GetSignSessionKeySharesProp {
-  body: SessionRequestBody;
-}
-
 export interface AuthenticationContext extends LitActionSdkParams {
   /**
    * Session signature properties shared across all functions that generate session signatures.
@@ -1067,14 +902,6 @@ export interface AuthenticationContext extends LitActionSdkParams {
   sessionKey?: SessionKeyPair;
 
   /**
-   * @deprecated - use capabilityAuthSigs instead
-   * Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * Capacity credits are required on the paid Lit networks (mainnets and certain testnets), and are not required on the unpaid Lit networks (certain testnets).
-   * See more [here](https://developer.litprotocol.com/sdk/capacity-credits).
-   */
-  capacityDelegationAuthSig?: AuthSig;
-
-  /**
    * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
    */
   capabilityAuthSigs?: AuthSig[];
@@ -1108,14 +935,6 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  */
 export type SessionSigsMap = Record<string, AuthSig>;
 
-export interface SessionRequestBody {
-  sessionKey: string;
-  authMethods: AuthMethod[];
-  pkpPublicKey?: string;
-  authSig?: AuthSig;
-  siweMessage: string;
-}
-
 export interface GetWalletSigProps extends LitActionSdkParams {
   authNeededCallback?: AuthCallback;
   chain: string;
@@ -1138,22 +957,6 @@ export interface SessionSigningTemplate {
   nodeAddress: string;
   maxPrice: string;
 }
-
-export interface WebAuthnAuthenticationVerificationParams {
-  id: string;
-  rawId: string;
-  response: {
-    authenticatorData: string;
-    clientDataJSON: string;
-    signature: string;
-    userHandle: string;
-  };
-  type: string;
-  clientExtensionResults: object;
-  authenticatorAttachment: AuthenticatorAttachment;
-}
-
-export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 
 export interface PKPBaseProp {
   litNodeClient: ILitNodeClient;
@@ -1196,9 +999,6 @@ export interface PKPCosmosWalletProp extends PKPBaseProp {
 }
 
 // note: Omit removes the 'addressPrefix' from PKPCosmosWalletProp
-export interface PKPClientProp extends PKPBaseProp {
-  cosmosAddressPrefix?: string | 'cosmos';
-}
 
 export interface PKPBaseDefaultParams {
   toSign: Uint8Array;
@@ -1211,24 +1011,6 @@ export interface PKPClientHelpers {
   handleRequest: (request: any) => Promise<any>;
   setRpc: (rpc: string) => void;
   getRpc: () => string;
-}
-
-/**
- * ========== Lit Auth Client ==========
- */
-export interface OtpSessionResult {
-  /**
-   * Status message of the request
-   */
-  message?: string;
-  /**
-   * jwt from successful otp check
-   */
-  token_jwt?: string;
-  /**
-   * status of the otp check
-   */
-  status?: string;
 }
 
 export interface LoginUrlParams {
@@ -1377,17 +1159,6 @@ export interface IRelayFetchResponse {
   error?: string;
 }
 
-export interface IRelayPollingEvent {
-  /**
-   * Polling count
-   */
-  pollCount: number;
-  /**
-   * Transaction hash of PKP being minted
-   */
-  requestId: string;
-}
-
 export interface IRelayPollStatusResponse {
   /**
    * Polling status
@@ -1467,47 +1238,6 @@ export interface WebAuthnProviderOptions {
   rpName?: string;
 }
 
-export interface SignInWithOTPParams {
-  /**
-   * otp transport (email or phone #)
-   * used as the user ID for the auth method
-   */
-  userId: string;
-
-  /**
-   * tracking for the session
-   */
-  requestId?: string;
-
-  /**
-   * Allows for specifying custom sender information
-   * Note: for most users the `from_name` is the configurable option and `from` should not be populated
-   */
-  emailCustomizationOptions: OtpEmailCustomizationOptions;
-
-  customName?: string;
-}
-
-export interface OtpProviderOptions {
-  baseUrl?: string;
-  port?: string;
-  startRoute?: string;
-  checkRoute?: string;
-}
-
-export interface OtpEmailCustomizationOptions {
-  from?: string;
-  fromName: string;
-}
-
-export interface SignInWithStytchOTPParams {
-  // JWT from an authenticated session
-  // see stych docs for more info: https://stytch.com/docs/api/session-get
-  accessToken?: string;
-  // username or phone number where OTP was delivered
-  userId: string;
-}
-
 export interface StytchOtpProviderOptions {
   /*
     Stytch application identifier
@@ -1561,33 +1291,6 @@ export interface StytchOtpAuthenticateOptions {
    Stytch user identifier for a project
   */
   userId?: string;
-}
-
-export interface BaseMintCapacityContext {
-  daysUntilUTCMidnightExpiration: number;
-}
-
-export interface MintCapacityCreditsPerDay extends BaseMintCapacityContext {
-  requestsPerDay?: number;
-}
-export interface MintCapacityCreditsPerSecond extends BaseMintCapacityContext {
-  requestsPerSecond?: number;
-}
-export interface MintCapacityCreditsPerKilosecond
-  extends BaseMintCapacityContext {
-  requestsPerKilosecond?: number;
-}
-export interface MintCapacityCreditsContext
-  extends MintCapacityCreditsPerDay,
-    MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond,
-    GasLimitParam {}
-
-export interface MintCapacityCreditsRes {
-  rliTxHash: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  capacityTokenId: any;
-  capacityTokenIdStr: string;
 }
 
 /**

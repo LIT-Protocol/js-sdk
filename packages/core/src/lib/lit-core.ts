@@ -29,9 +29,8 @@ import {
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
-  LitNodeClientBadConfigError,
   LitNodeClientNotReadyError,
-  LogLevel,
+  LOG_LEVEL,
   NetworkError,
   NodeError,
   RPC_URL_BY_NETWORK,
@@ -61,43 +60,60 @@ import {
   EpochInfo,
   EthBlockhashInfo,
   FormattedMultipleAccs,
-  HandshakeWithNode,
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
-  NodeClientErrorV0,
-  NodeClientErrorV1,
-  NodeCommandServerKeysResponse,
   NodeSet,
   RejectedNodePromises,
-  SendNodeCommand,
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
+import {
+  CoreNodeConfig,
+  EpochCache,
+  HandshakeWithNode,
+  Listener,
+  NodeCommandServerKeysResponse,
+  providerTest,
+  SendNodeCommand,
+} from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Listener = (...args: any[]) => void;
+// ==================== CONSTANTS ====================
+const MINIMUM_THRESHOLD = 3;
 
-type providerTest<T> = (
-  provider: ethers.providers.JsonRpcProvider
-) => Promise<T>;
+/**
+ * This number is primarily used for local testing. When running nodes locally,
+ * epoch 1 is the first epoch and does not contain any peers, we need to
+ * wait for the DKG process to complete.
+ */
+const EPOCH_READY_FOR_LOCAL_DEV = 3;
 
-interface CoreNodeConfig {
-  subnetPubKey: string;
-  networkPubKey: string;
-  networkPubKeySet: string;
-  hdRootPubkeys: string[];
-  latestBlockhash: string;
-  lastBlockHashRetrieved: number;
-}
+// On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
+const EPOCH_PROPAGATION_DELAY = 45_000;
+// This interval is responsible for keeping latest block hash up to date
+const BLOCKHASH_SYNC_INTERVAL = 30_000;
+// When fetching the blockhash from a provider (not lit), we use a 5 minutes old block to ensure the nodes centralized indexer has it
+const BLOCKHASH_COUNT_PROVIDER_DELAY = -30; // 30 blocks ago. Eth block are mined every 12s. 30 blocks is 6 minutes, indexer/nodes must have it by now
 
-interface EpochCache {
-  currentNumber: null | number;
-  startTime: null | number;
-}
+// Intentionally not including datil-dev here per discussion with Howard
+const NETWORKS_REQUIRING_SEV: string[] = [
+  // LIT_NETWORK.NagaTest, // CHANGE: We need to add this
+  // LIT_NETWORK.Naga, // CHANGE: We need to add this
+];
+
+/**
+ * Lowest latency, highest score & privacy enabled listed on https://chainlist.org/
+ */
+const FALLBACK_RPC_URLS = [
+  'https://ethereum-rpc.publicnode.com',
+  'https://eth.llamarpc.com',
+  'https://eth.drpc.org',
+  'https://eth.llamarpc.com',
+];
+// ==================================================
 
 export type LitNodeClientConfigWithDefaults = Required<
   Pick<
@@ -120,29 +136,6 @@ export type LitNodeClientConfigWithDefaults = Required<
     nodePrices: { url: string; prices: bigint[] }[]; // eg. <nodeAddress, price[]>
   };
 
-// On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
-const EPOCH_PROPAGATION_DELAY = 45_000;
-// This interval is responsible for keeping latest block hash up to date
-const BLOCKHASH_SYNC_INTERVAL = 30_000;
-// When fetching the blockhash from a provider (not lit), we use a 5 minutes old block to ensure the nodes centralized indexer has it
-const BLOCKHASH_COUNT_PROVIDER_DELAY = -30; // 30 blocks ago. Eth block are mined every 12s. 30 blocks is 6 minutes, indexer/nodes must have it by now
-
-// Intentionally not including datil-dev here per discussion with Howard
-const NETWORKS_REQUIRING_SEV: string[] = [
-  LIT_NETWORK.DatilTest,
-  LIT_NETWORK.Datil,
-];
-
-/**
- * Lowest latency, highest score & privacy enabled listed on https://chainlist.org/
- */
-const FALLBACK_RPC_URLS = [
-  'https://ethereum-rpc.publicnode.com',
-  'https://eth.llamarpc.com',
-  'https://eth.drpc.org',
-  'https://eth.llamarpc.com',
-];
-
 export class LitCore {
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
@@ -164,7 +157,6 @@ export class LitCore {
   hdRootPubkeys: string[] | null = null;
   latestBlockhash: string | null = null;
   lastBlockHashRetrieved: number | null = null;
-  private _networkSyncInterval: ReturnType<typeof setInterval> | null = null;
   private _stakingContract: ethers.Contract | null = null;
   private _stakingContractListener: null | Listener = null;
   private _connectingPromise: null | Promise<void> = null;
@@ -189,7 +181,7 @@ export class LitCore {
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
       // Official networks; default value for `checkNodeAttestation` according to network provided.
-      case LIT_NETWORK.DatilDev:
+      case LIT_NETWORK.NagaDev:
         this.config = {
           ...this.config,
           checkNodeAttestation: NETWORKS_REQUIRING_SEV.includes(
@@ -206,14 +198,11 @@ export class LitCore {
         };
     }
 
-    // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
-    this.setCustomBootstrapUrls();
-
     // -- set global variables
     setMiscLitConfig(this.config);
     bootstrapLogManager(
       'core',
-      this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
+      this.config.debug ? LOG_LEVEL.DEBUG : LOG_LEVEL.OFF
     );
 
     // -- configure local storage if not present
@@ -307,13 +296,14 @@ export class LitCore {
     };
   }
 
-  // ========== Scoped Class Helpers ==========
-
   /**
    * See rust/lit-node/common/lit-node-testnet/src/validator.rs > threshold for more details
    */
   protected _getThreshold = (): number => {
-    return Math.max(3, Math.floor((this.connectedNodes.size * 2) / 3));
+    return Math.max(
+      MINIMUM_THRESHOLD,
+      Math.floor((this.connectedNodes.size * 2) / 3)
+    );
   };
 
   private async _handleStakingContractStateChange(
@@ -364,10 +354,7 @@ export class LitCore {
           // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
           // But for now, our every-30-second network sync will fix things in at most 30s from now.
           // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
-          const { message = '' } = err as
-            | Error
-            | NodeClientErrorV0
-            | NodeClientErrorV1;
+          const { message = '' } = err as Error;
           logError(
             'Error while attempting to reconnect to nodes after epoch transition:',
             message
@@ -383,8 +370,6 @@ export class LitCore {
    * the client's configuration based on the new state of the network. This ensures
    * that the client's configuration is always in sync with the current state of the
    * staking contract.
-   *
-   * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
   private _listenForNewEpoch() {
     // Check if we've already set up the listener to avoid duplicates
@@ -421,7 +406,7 @@ export class LitCore {
       return {
         socketAddress: urlWithoutProtocol,
 
-        // FIXME: This is a placeholder value. Brendon said: It's not used anymore in the nodes, but leaving it as we may need it in the future.
+        // CHANGE: This is a placeholder value. Brendon said: It's not used anymore in the nodes, but leaving it as we may need it in the future.
         value: 1,
       };
     });
@@ -439,43 +424,12 @@ export class LitCore {
     setMiscLitConfig(undefined);
   }
 
-  // _stopNetworkPolling() {
-  //   if (this._networkSyncInterval) {
-  //     clearInterval(this._networkSyncInterval);
-  //     this._networkSyncInterval = null;
-  //   }
-  // }
   _stopListeningForNewEpoch() {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
       this._stakingContractListener = null;
     }
   }
-
-  /**
-   *
-   * Set bootstrapUrls to match the network litNetwork unless it's set to custom
-   *
-   * @returns { void }
-   *
-   */
-  setCustomBootstrapUrls = (): void => {
-    // -- validate
-    if (this.config.litNetwork === LIT_NETWORK.Custom) return;
-
-    // -- execute
-    const hasNetwork: boolean = this.config.litNetwork in LIT_NETWORKS;
-
-    if (!hasNetwork) {
-      // network not found, report error
-      throw new LitNodeClientBadConfigError(
-        {},
-        'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS'
-      );
-    }
-
-    this.config.bootstrapUrls = LIT_NETWORKS[this.config.litNetwork];
-  };
 
   /**
    * Return the latest blockhash from the nodes
@@ -606,9 +560,9 @@ export class LitCore {
     url: string;
     requestId: string;
   }): Promise<JsonHandshakeResponse> {
-    const challenge = this.getRandomHexString(64);
+    const challenge = this._getRandomHexString(64);
 
-    const handshakeResult = await this.handshakeWithNode(
+    const handshakeResult = await this._handshakeWithNode(
       { url, challenge },
       requestId
     );
@@ -926,50 +880,19 @@ export class LitCore {
     }
   }
 
-  /** Currently, we perform a full sync every 30s, including handshaking with every node
-   * However, we also have a state change listener that watches for staking contract state change events, which
-   * _should_ be the only time that we need to perform handshakes with every node.
-   *
-   * However, the current block hash does need to be updated regularly, and we currently update it only when we
-   * handshake with every node.
-   *
-   * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
-   * @private
-   */
-  // private _scheduleNetworkSync() {
-  //   if (this._networkSyncInterval) {
-  //     clearInterval(this._networkSyncInterval);
-  //   }
-
-  //   this._networkSyncInterval = setInterval(async () => {
-  //     if (
-  //       !this.lastBlockHashRetrieved ||
-  //       Date.now() - this.lastBlockHashRetrieved >= BLOCKHASH_SYNC_INTERVAL
-  //     ) {
-  //       await this._syncBlockhash();
-  //     }
-  //   }, BLOCKHASH_SYNC_INTERVAL);
-  // }
-
   /**
-   *
    * Get a new random request ID
-   *
    * @returns { string }
-   *
    */
   protected _getNewRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
   /**
-   *
    * Get a random hex string for use as an attestation challenge
-   *
    * @returns { string }
    */
-
-  getRandomHexString(size: number) {
+  private _getRandomHexString(size: number): string {
     return [...Array(size)]
       .map(() => Math.floor(Math.random() * 16).toString(16))
       .join('');
@@ -983,7 +906,7 @@ export class LitCore {
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithNode = async (
+  protected _handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
@@ -1003,7 +926,7 @@ export class LitCore {
       challenge: params.challenge,
     };
 
-    return await this.sendCommandToNode({
+    return await this._sendCommandToNode({
       url: urlWithPath,
       data,
       requestId,
@@ -1056,7 +979,7 @@ export class LitCore {
       Math.floor(Date.now() / 1000) <
         this._epochCache.startTime +
           Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
-      this._epochCache.currentNumber >= 3 // FIXME: Why this check?
+      this._epochCache.currentNumber >= EPOCH_READY_FOR_LOCAL_DEV
     ) {
       return this._epochCache.currentNumber - 1;
     }
@@ -1081,7 +1004,7 @@ export class LitCore {
    * @returns { Promise<any> }
    *
    */
-  sendCommandToNode = async ({
+  protected _sendCommandToNode = async ({
     url,
     data,
     requestId,
@@ -1118,16 +1041,14 @@ export class LitCore {
   };
 
   /**
-   *
    * Get and gather node promises
    *
    * @param { string[] } nodeUrls URLs of nodes to get promises for
    * @param { function } callback
    *
    * @returns { Array<Promise<any>> }
-   *
    */
-  getNodePromises = (
+  protected _getNodePromises = (
     nodeUrls: string[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callback: (url: string) => Promise<any>
@@ -1144,19 +1065,6 @@ export class LitCore {
     return nodePromises;
   };
 
-  getRandomNodePromise(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (url: string) => Promise<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any>[] {
-    const randomNodeIndex = Math.floor(
-      Math.random() * this.connectedNodes.size
-    );
-
-    const nodeUrlsArr = Array.from(this.connectedNodes);
-    return [callback(nodeUrlsArr[randomNodeIndex])];
-  }
-
   /**
    * Retrieves the session signature for a given URL from the sessionSigs map.
    * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.
@@ -1166,7 +1074,7 @@ export class LitCore {
    * @returns The session signature for the given URL.
    * @throws An error if sessionSigs is not provided or if the session signature for the URL is not found.
    */
-  getSessionSigByUrl = ({
+  protected _getSessionSigByUrl = ({
     sessionSigs,
     url,
   }: {
@@ -1194,75 +1102,6 @@ export class LitCore {
     return sigToPassToNode;
   };
 
-  validateAccessControlConditionsSchema = async (
-    params: MultipleAccessControlConditions
-  ): Promise<boolean> => {
-    // ========== Prepare Params ==========
-    const {
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-    } = params;
-
-    if (accessControlConditions) {
-      await validateAccessControlConditionsSchema(accessControlConditions);
-    } else if (evmContractConditions) {
-      await validateEVMContractConditionsSchema(evmContractConditions);
-    } else if (solRpcConditions) {
-      await validateSolRpcConditionsSchema(solRpcConditions);
-    } else if (unifiedAccessControlConditions) {
-      await validateUnifiedAccessControlConditionsSchema(
-        unifiedAccessControlConditions
-      );
-    }
-
-    return true;
-  };
-
-  /**
-   *
-   * Get hash of access control conditions
-   *
-   * @param { MultipleAccessControlConditions } params
-   *
-   * @returns { Promise<ArrayBuffer | undefined> }
-   *
-   */
-  getHashedAccessControlConditions = async (
-    params: MultipleAccessControlConditions
-  ): Promise<ArrayBuffer | undefined> => {
-    let hashOfConditions: ArrayBuffer;
-
-    // ========== Prepare Params ==========
-    const {
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-    } = params;
-
-    // ========== Hash ==========
-    if (accessControlConditions) {
-      hashOfConditions = await hashAccessControlConditions(
-        accessControlConditions
-      );
-    } else if (evmContractConditions) {
-      hashOfConditions = await hashEVMContractConditions(evmContractConditions);
-    } else if (solRpcConditions) {
-      hashOfConditions = await hashSolRpcConditions(solRpcConditions);
-    } else if (unifiedAccessControlConditions) {
-      hashOfConditions = await hashUnifiedAccessControlConditions(
-        unifiedAccessControlConditions
-      );
-    } else {
-      return;
-    }
-
-    // ========== Result ==========
-    return hashOfConditions;
-  };
-
   /**
    * Handle node promises
    *
@@ -1272,7 +1111,7 @@ export class LitCore {
    * @param { number } minNodeCount number of nodes we need valid results from in order to resolve
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    */
-  handleNodePromises = async <T>(
+  protected _handleNodePromises = async <T>(
     nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number
@@ -1373,7 +1212,10 @@ export class LitCore {
    * @returns { never }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises, requestId: string): never => {
+  protected _throwNodeError = (
+    res: RejectedNodePromises,
+    requestId: string
+  ): never => {
     if (res.error) {
       if (
         ((res.error.errorCode &&
@@ -1406,81 +1248,6 @@ export class LitCore {
         JSON.stringify(res)
       );
     }
-  };
-
-  /**
-   *
-   * Get different formats of access control conditions, eg. evm, sol, unified etc.
-   *
-   * @param { SupportedJsonRequests } params
-   *
-   * @returns { FormattedMultipleAccs }
-   *
-   */
-  getFormattedAccessControlConditions = (
-    params: SupportedJsonRequests
-  ): FormattedMultipleAccs => {
-    // -- prepare params
-    const {
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-    } = params;
-
-    // -- execute
-    let formattedAccessControlConditions;
-    let formattedEVMContractConditions;
-    let formattedSolRpcConditions;
-    let formattedUnifiedAccessControlConditions;
-    let error = false;
-
-    if (accessControlConditions) {
-      formattedAccessControlConditions = accessControlConditions.map((c) =>
-        canonicalAccessControlConditionFormatter(c)
-      );
-      log(
-        'formattedAccessControlConditions',
-        JSON.stringify(formattedAccessControlConditions)
-      );
-    } else if (evmContractConditions) {
-      formattedEVMContractConditions = evmContractConditions.map((c) =>
-        canonicalEVMContractConditionFormatter(c)
-      );
-      log(
-        'formattedEVMContractConditions',
-        JSON.stringify(formattedEVMContractConditions)
-      );
-    } else if (solRpcConditions) {
-      // FIXME: ConditionItem is too narrow, or `solRpcConditions` is too wide
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      formattedSolRpcConditions = solRpcConditions.map((c: any) =>
-        canonicalSolRpcConditionFormatter(c)
-      );
-      log(
-        'formattedSolRpcConditions',
-        JSON.stringify(formattedSolRpcConditions)
-      );
-    } else if (unifiedAccessControlConditions) {
-      formattedUnifiedAccessControlConditions =
-        unifiedAccessControlConditions.map((c) =>
-          canonicalUnifiedAccessControlConditionFormatter(c)
-        );
-      log(
-        'formattedUnifiedAccessControlConditions',
-        JSON.stringify(formattedUnifiedAccessControlConditions)
-      );
-    } else {
-      error = true;
-    }
-
-    return {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    };
   };
 
   /**

@@ -112,34 +112,6 @@ export abstract class BaseProvider {
   }
 
   /**
-   * @deprecated - Use {@link fetchPKPs} instead
-   * Fetch PKPs associated with given auth method from relay server
-   *
-   * @param {AuthMethod} authMethod - Auth method object
-   *
-   * @returns {Promise<IRelayPKP[]>} - Array of PKPs
-   */
-  public async fetchPKPsThroughRelayer(
-    authMethod: AuthMethod
-  ): Promise<IRelayPKP[]> {
-    deprecated('fetchPKPsThroughRelayer is deprecated. Use fetchPKPs instead.');
-    const data = await this.prepareRelayRequestData(authMethod);
-    const body = this.prepareFetchBody(data);
-    const fetchRes = await this.relay.fetchPKPs(body);
-    if (!fetchRes || !fetchRes.pkps) {
-      throw new ParamsMissingError(
-        {
-          info: {
-            fetchRes,
-          },
-        },
-        'Missing PKPs in fetch response from relay server'
-      );
-    }
-    return fetchRes.pkps;
-  }
-
-  /**
    * Fetch PKPs associated with given auth method type and id from pkp contract
    *
    * @param {AUTH_METHOD_TYPE} authMethodType - Auth method type

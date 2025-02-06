@@ -9,28 +9,22 @@ import {
   UnknownError,
   UnknownSignatureError,
 } from '@lit-protocol/constants';
-import { checkType, log } from '@lit-protocol/misc';
+import { log } from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
-import {
-  CombinedECDSASignature,
-  NodeAttestation,
-  SessionKeyPair,
-  SigningAccessControlConditionJWTPayload,
-  SigShare,
-} from '@lit-protocol/types';
+import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import {
-  BlsSignatureShareJsonString,
-  EcdsaVariant,
   blsCombine,
   blsDecrypt,
   blsEncrypt,
+  BlsSignatureShareJsonString,
   blsVerify,
   ecdsaCombine,
   ecdsaDeriveKey,
+  EcdsaVariant,
   ecdsaVerify,
   sevSnpGetVcekUrl,
   sevSnpVerify,
@@ -193,7 +187,12 @@ const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
  */
 export const combineEcdsaShares = async (
   sigShares: SigShare[]
-): Promise<CombinedECDSASignature> => {
+): Promise<{
+  r: string;
+  s: string;
+  recid: number;
+  signature: `0x${string}`;
+}> => {
   const validShares = sigShares.filter((share) => share.signatureShare);
 
   const anyValidShare = validShares[0];
