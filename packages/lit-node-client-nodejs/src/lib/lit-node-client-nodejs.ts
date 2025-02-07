@@ -1525,6 +1525,7 @@ export class LitNodeClientNodeJs
     // hash the access control conditions
     const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
+    log('hashOfConditions', hashOfConditions);
 
     if (!hashOfConditions) {
       return throwError({
@@ -1538,6 +1539,7 @@ export class LitNodeClientNodeJs
       new Uint8Array(hashOfConditions),
       'base16'
     );
+    log('hashOfConditionsStr', hashOfConditionsStr);
 
     // ========== Hashing Private Data ==========
     // hash the private data
@@ -1549,12 +1551,14 @@ export class LitNodeClientNodeJs
       new Uint8Array(hashOfPrivateData),
       'base16'
     );
+    log('hashOfPrivateDataStr', hashOfPrivateDataStr);
 
     // ========== Assemble identity parameter ==========
     const identityParam = this._getIdentityParamForEncryption(
       hashOfConditionsStr,
       hashOfPrivateDataStr
     );
+    log('identityParam', identityParam);
 
     // ========== Encrypt ==========
     const ciphertext = encrypt(
@@ -1613,6 +1617,7 @@ export class LitNodeClientNodeJs
     // hash the access control conditions
     const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
+    log('hashOfConditions', hashOfConditions);
 
     if (!hashOfConditions) {
       return throwError({
@@ -1626,7 +1631,7 @@ export class LitNodeClientNodeJs
       new Uint8Array(hashOfConditions),
       'base16'
     );
-
+    log('hashOfConditionsStr', hashOfConditionsStr);
     // ========== Formatting Access Control Conditions =========
     const {
       error,
@@ -1734,6 +1739,7 @@ export class LitNodeClientNodeJs
       new Uint8Array(hashOfConditions),
       'base16'
     );
+    log('hashOfConditionsStr', hashOfConditionsStr);
 
     // ========== Hashing Private Data ==========
     // hash the private data
@@ -1741,10 +1747,12 @@ export class LitNodeClientNodeJs
       'SHA-256',
       params.dataToEncrypt
     );
+    log('hashOfPrivateData', hashOfPrivateData);
     const hashOfPrivateDataStr = uint8arrayToString(
       new Uint8Array(hashOfPrivateData),
       'base16'
     );
+    log('hashOfPrivateDataStr', hashOfPrivateDataStr);
 
     return new LitAccessControlConditionResource(
       `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
