@@ -1,5 +1,3 @@
-// import * as util from 'node:util'; // For inspecting bigInt payloads for pricing data
-
 import {
   Abi,
   AbiFunction,
@@ -14,21 +12,20 @@ import {
   AUTH_METHOD_SCOPE_VALUES,
   AUTH_METHOD_TYPE_VALUES,
   HTTP,
-  HTTPS,
   HTTP_BY_NETWORK,
+  HTTPS,
   InitError,
   InvalidArgumentException,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
   METAMASK_CHAIN_INFO_BY_NETWORK,
   NETWORK_CONTEXT_BY_NETWORK,
-  PRODUCT_IDS,
   ParamsMissingError,
   RPC_URL_BY_NETWORK,
   TransactionError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
-import { LogManager, Logger } from '@lit-protocol/logger';
+import { Logger, LogManager } from '@lit-protocol/logger';
 import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
 import {
   ContractName,
@@ -47,13 +44,12 @@ import {
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
-  IPFSHash,
   getBytes32FromMultihash,
+  IPFSHash,
 } from './helpers/getBytes32FromMultihash';
 import { decToHex, hexToDec, intToIP } from './hex2dec';
-import { ValidatorStruct, type ValidatorWithPrices } from './types';
-
-const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
+import { getPriceFeedInfo } from './price-feed-info-manager';
+import { ValidatorStruct } from './types';
 
 // CHANGE: this should be dynamically set, but we only have 1 net atm.
 const REALM_ID = 1;
@@ -924,81 +920,14 @@ export class LitContracts {
     };
   };
 
-  public static getPriceFeedInfo = async ({
-    realmId,
-    litNetwork,
-    networkContext,
-    rpcUrl,
-    nodeProtocol,
-  }: {
+  public static getPriceFeedInfo = async (params: {
     realmId: number;
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   }) => {
-    const priceFeedContract = await LitContracts.getPriceFeedContract(
-      litNetwork,
-      networkContext,
-      rpcUrl
-    );
-
-    const nodesForRequest = await priceFeedContract['getNodesForRequest'](
-      realmId,
-      PRODUCT_IDS_ARRAY
-    );
-
-    const epochId: number[] = nodesForRequest[0].toNumber();
-    const minNodeCount: number[] = nodesForRequest[1].toNumber();
-    const nodesAndPrices: ValidatorWithPrices[] = nodesForRequest[2];
-
-    const networkUrls = LitContracts.generateValidatorURLs({
-      activeValidatorStructs: nodesAndPrices.map(({ validator }) => validator),
-      litNetwork,
-      nodeProtocol,
-    });
-
-    const prices = networkUrls
-      .reduce<{ url: string; prices: bigint[] }[]>((acc, network, index) => {
-        acc.push({
-          url: network,
-          prices: nodesAndPrices[index].prices.map((ethersPrice) =>
-            ethersPrice.toBigInt()
-          ),
-        });
-        return acc;
-      }, [])
-      .sort(({ prices: pricesA }, { prices: pricesB }) => {
-        // Sort by any price since the cheapest for _any_ product will be the cheapest for _all_ products
-        const diff = pricesA[0] - pricesB[0];
-        if (diff > 0n) {
-          return 1;
-        } else if (diff < 0n) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-
-    // console.log(
-    //   'getPriceFeedInfo()',
-    //   util.inspect(
-    //     {
-    //       epochId,
-    //       minNodeCount,
-    //       networkPrices: {
-    //         mapByAddress: networkPriceMap,
-    //       },
-    //     },
-    //     { depth: 4 }
-    //   )
-    // );
-
-    return {
-      epochId,
-      minNodeCount,
-      networkPrices: prices,
-    };
+    return getPriceFeedInfo(params);
   };
 
   private static _resolveContractContext(
