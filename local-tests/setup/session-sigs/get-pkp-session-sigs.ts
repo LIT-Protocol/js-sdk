@@ -12,7 +12,8 @@ export const getPkpSessionSigs = async (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[],
-  expiration?: string
+  expiration?: string,
+  domain?: string
 ) => {
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
@@ -39,6 +40,7 @@ export const getPkpSessionSigs = async (
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
     expiration,
+    domain,
     resourceAbilityRequests: _resourceAbilityRequests,
 
     ...(centralisation === 'decentralised' && {

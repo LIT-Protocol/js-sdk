@@ -114,6 +114,7 @@ export interface AuthCallbackParams extends LitActionSdkParams {
 
   uri?: string;
 
+  domain?: string;
   /**
    * Cosmos wallet type, to support mutliple popular cosmos wallets
    * Keplr & Cypher -> window.keplr
@@ -1018,9 +1019,6 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
 
   chainId?: number;
 
-  /**
-   * domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
-   */
   domain?: string;
 
   /**
@@ -1091,6 +1089,8 @@ export interface CommonGetSessionSigsProps {
    * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
    */
   capabilityAuthSigs?: AuthSig[];
+
+  domain?: string;
 }
 
 export interface BaseProviderGetSessionSigsProps
@@ -1149,6 +1149,7 @@ export interface GetWalletSigProps extends LitActionSdkParams {
   sessionKeyUri: string;
   nonce: string;
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+  domain?: string;
 }
 
 export interface SessionSigningTemplate {
