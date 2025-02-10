@@ -98,7 +98,7 @@ async function fetchPriceFeedInfo({
   };
 }
 
-async function fetchNodePricesWithLocalPromise(
+async function fetchPriceFeedInfoWithLocalPromise(
   ...params: GetPriceFeedInfoArgs
 ): Promise<PriceFeedInfo> {
   try {
@@ -129,7 +129,7 @@ export async function getPriceFeedInfo(...params: GetPriceFeedInfoArgs) {
 
   // If we get here, we've got prices that are at least 2 seconds out-of-date.
   // Fetch the new ones, update local cache values, and return them
-  return fetchNodePricesWithLocalPromise(...params);
+  return fetchPriceFeedInfoWithLocalPromise(...params);
 }
 
 export async function getNodePrices(
