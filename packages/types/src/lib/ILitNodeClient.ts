@@ -1,3 +1,5 @@
+import { PRODUCT_IDS } from '@lit-protocol/constants';
+
 import {
   AuthenticationContext,
   CapacityCreditsReq,
@@ -14,8 +16,6 @@ import {
   LitNodeClientConfig,
   SigResponse,
 } from './interfaces';
-
-import { PRODUCT_IDS } from '@lit-protocol/constants';
 import { ClaimProcessor, ClaimRequest } from './types';
 
 export interface ILitNodeClient {
@@ -58,7 +58,7 @@ export interface ILitNodeClient {
   getMaxPricesForNodeProduct(params: {
     userMaxPrice?: bigint;
     product: keyof typeof PRODUCT_IDS;
-  }): { url: string; price: bigint }[];
+  }): Promise<{ url: string; price: bigint }[]>;
 
   /**
    * Create capacity delegation authentication signature

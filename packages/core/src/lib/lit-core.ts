@@ -115,8 +115,6 @@ export type LitNodeClientConfigWithDefaults = Required<
     bootstrapUrls: string[];
   } & {
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
-  } & {
-    nodePrices: { url: string; prices: bigint[] }[]; // eg. <nodeAddress, price[]>
   };
 
 export class LitCore {
@@ -129,7 +127,6 @@ export class LitCore {
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
-    nodePrices: [],
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -504,7 +501,6 @@ export class LitCore {
     this._stakingContract = validatorData.stakingContract;
     this.config.minNodeCount = validatorData.minNodeCount;
     this.config.bootstrapUrls = validatorData.bootstrapUrls;
-    this.config.nodePrices = validatorData.nodePrices;
 
     this._epochState = await this._fetchCurrentEpochState(
       validatorData.epochInfo
