@@ -1,14 +1,15 @@
+import { ethers } from 'ethers';
+
 import { AUTH_METHOD_TYPE, WrongParamFormat } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  BaseAuthenticateOptions,
   BaseProviderOptions,
   StytchOtpAuthenticateOptions,
   StytchToken,
+  StytchOtpProviderOptions,
 } from '@lit-protocol/types';
+
 import { BaseProvider } from './BaseProvider';
-import { StytchOtpProviderOptions } from '@lit-protocol/types';
-import { ethers } from 'ethers';
 
 export class StytchOtpProvider extends BaseProvider {
   private _params: StytchOtpProviderOptions;
@@ -24,9 +25,7 @@ export class StytchOtpProvider extends BaseProvider {
    * @param options authentication option containing the authenticated token
    * @returns {AuthMethod} Authentication Method for auth method type OTP
    * */
-  override authenticate<T extends BaseAuthenticateOptions>(
-    options?: T | undefined
-  ): Promise<AuthMethod> {
+  override authenticate<T>(options?: T | undefined): Promise<AuthMethod> {
     return new Promise<AuthMethod>((resolve, reject) => {
       if (!options) {
         reject(

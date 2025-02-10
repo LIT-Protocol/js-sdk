@@ -137,7 +137,7 @@ describe('canonicalFormatter.ts', () => {
       console.log(e);
     }
 
-    expect((console.log as any).mock.calls[0][0].errorCode).toBe(
+    expect((console.log as any).mock.calls[0][0].name).toBe(
       'InvalidAccessControlConditions'
     );
   });
@@ -169,7 +169,7 @@ describe('canonicalFormatter.ts', () => {
       console.log(e);
     }
 
-    expect((console.log as any).mock.calls[0][0].errorCode).toBe(
+    expect((console.log as any).mock.calls[0][0].name).toBe(
       'InvalidAccessControlConditions'
     );
   });

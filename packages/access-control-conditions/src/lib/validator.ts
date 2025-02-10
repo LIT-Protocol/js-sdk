@@ -7,6 +7,7 @@ import {
   AccessControlConditions,
   ConditionType,
   EvmContractConditions,
+  MultipleAccessControlConditions,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
@@ -36,6 +37,37 @@ async function getSchema<T>(
     );
   }
 }
+
+/**
+ * CHANGE: This function should be removed in favor of {@link validateAccessControlConditionsSchema}.
+ * However, since `MultipleAccessControlConditions` is deeply intertwined with other types,
+ * we will revisit this later. At the moment, the `lit-core` will be using this function.
+ */
+export const validateAccessControlConditions = async (
+  params: MultipleAccessControlConditions
+): Promise<boolean> => {
+  // ========== Prepare Params ==========
+  const {
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+  } = params;
+
+  if (accessControlConditions) {
+    await validateAccessControlConditionsSchema(accessControlConditions);
+  } else if (evmContractConditions) {
+    await validateEVMContractConditionsSchema(evmContractConditions);
+  } else if (solRpcConditions) {
+    await validateSolRpcConditionsSchema(solRpcConditions);
+  } else if (unifiedAccessControlConditions) {
+    await validateUnifiedAccessControlConditionsSchema(
+      unifiedAccessControlConditions
+    );
+  }
+
+  return true;
+};
 
 /**
  * Validates EVM basic access control conditions schema

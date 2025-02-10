@@ -37,31 +37,29 @@ describe('PKPWalletConnect', () => {
       litNodeClient,
       pkpPubKey: wallet.publicKey,
       authContext: {
-        getSessionSigsProps: {
-          authNeededCallback: async function (
-            params: AuthCallbackParams
-          ): Promise<AuthSig> {
-            const toSign = await createSiweMessageWithRecaps({
-              uri: params.uri!,
-              expiration: params.expiration!,
-              resources: params.resourceAbilityRequests!,
-              walletAddress: wallet.address,
-              nonce: await litNodeClient.getLatestBlockhash(),
-              litNodeClient,
-            });
+        authNeededCallback: async function (
+          params: AuthCallbackParams
+        ): Promise<AuthSig> {
+          const toSign = await createSiweMessageWithRecaps({
+            uri: params.uri!,
+            expiration: params.expiration!,
+            resources: params.resourceAbilityRequests!,
+            walletAddress: wallet.address,
+            nonce: await litNodeClient.getLatestBlockhash(),
+            litNodeClient,
+          });
 
-            return await generateAuthSig({
-              signer: wallet,
-              toSign,
-            });
-          },
-          resourceAbilityRequests: [
-            {
-              resource: new LitPKPResource('*'),
-              ability: LIT_ABILITY.PKPSigning,
-            },
-          ],
+          return await generateAuthSig({
+            signer: wallet,
+            toSign,
+          });
         },
+        resourceAbilityRequests: [
+          {
+            resource: new LitPKPResource('*'),
+            ability: LIT_ABILITY.PKPSigning,
+          },
+        ],
       },
     });
 

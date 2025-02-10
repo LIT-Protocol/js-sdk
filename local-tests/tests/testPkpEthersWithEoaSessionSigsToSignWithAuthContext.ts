@@ -24,38 +24,35 @@ export const testPkpEthersWithEoaSessionSigsToSignWithAuthContext = async (
     pkpPubKey: alice.pkp.publicKey,
     litNodeClient: devEnv.litNodeClient,
     authContext: {
-      client: devEnv.litNodeClient,
-      getSessionSigsProps: {
-        authNeededCallback: async function (
-          params: AuthCallbackParams
-        ): Promise<AuthSig> {
-          const toSign = await createSiweMessageWithRecaps({
-            uri: params.uri,
-            expiration: params.expiration,
-            resources: params.resourceAbilityRequests,
-            walletAddress: alice.wallet.address,
-            nonce: await devEnv.litNodeClient.getLatestBlockhash(),
-            litNodeClient: devEnv.litNodeClient,
-          });
+      authNeededCallback: async function (
+        params: AuthCallbackParams
+      ): Promise<AuthSig> {
+        const toSign = await createSiweMessageWithRecaps({
+          uri: params.uri,
+          expiration: params.expiration,
+          resources: params.resourceAbilityRequests,
+          walletAddress: alice.wallet.address,
+          nonce: await devEnv.litNodeClient.getLatestBlockhash(),
+          litNodeClient: devEnv.litNodeClient,
+        });
 
-          const authSig = await generateAuthSig({
-            signer: alice.wallet,
-            toSign,
-          });
+        const authSig = await generateAuthSig({
+          signer: alice.wallet,
+          toSign,
+        });
 
-          return authSig;
-        },
-        resourceAbilityRequests: [
-          {
-            resource: new LitPKPResource('*'),
-            ability: LIT_ABILITY.PKPSigning,
-          },
-          {
-            resource: new LitActionResource('*'),
-            ability: LIT_ABILITY.LitActionExecution,
-          },
-        ],
+        return authSig;
       },
+      resourceAbilityRequests: [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LIT_ABILITY.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LIT_ABILITY.LitActionExecution,
+        },
+      ],
     },
   });
 

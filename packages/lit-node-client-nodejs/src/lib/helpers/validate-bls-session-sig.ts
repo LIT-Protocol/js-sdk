@@ -23,7 +23,7 @@ export const blsSessionSigVerify = async (
   verifier: (
     publicKeyHex: string,
     message: Uint8Array,
-    signature: Uint8Array
+    signature: string
   ) => Promise<void>,
   networkPubKey: string,
   authSig: AuthSig,
@@ -37,7 +37,7 @@ export const blsSessionSigVerify = async (
     LIT_SESSION_SIGNED_MESSAGE_PREFIX + eip191Hash.replace('0x', '');
   const prefixedEncoded = ethers.utils.toUtf8Bytes(prefixedStr);
   const shaHashed = ethers.utils.sha256(prefixedEncoded).replace('0x', '');
-  const signatureBytes = Buffer.from(sigJson.ProofOfPossession, `hex`);
+  const signatureString = sigJson.ProofOfPossession;
 
   /** Check time or now */
   const checkTime = new Date();
@@ -67,5 +67,5 @@ export const blsSessionSigVerify = async (
     );
   }
 
-  await verifier(networkPubKey, Buffer.from(shaHashed, 'hex'), signatureBytes);
+  await verifier(networkPubKey, Buffer.from(shaHashed, 'hex'), signatureString);
 };

@@ -35,19 +35,13 @@ export const VALID_IPFS_ID = 'QmRf5K7PVi5TWXiJdw7YYtcgpgRY6ufXGr9yYnxBLvLjDp';
  */
 export const INVALID_IPFS_ID = 'QmeUByesskboEkLLcE9Hd3bWFZT5Xt53RSauMNTJSVhfqm';
 
-export const getLitActionSessionSigs = async (
+export const getLitActionAuthContext = (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
-
-  if (centralisation === 'decentralised') {
-    console.warn(
-      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
-    );
-  }
 
   // Use default resourceAbilityRequests if not provided
   const _resourceAbilityRequests = resourceAbilityRequests || [
@@ -61,40 +55,31 @@ export const getLitActionSessionSigs = async (
     },
   ];
 
-  const litActionSessionSigs =
-    await devEnv.litNodeClient.getLitActionSessionSigs({
-      pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
-      authMethods: [alice.authMethod],
-      resourceAbilityRequests: _resourceAbilityRequests,
-      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
-        'base64'
-      ),
-      jsParams: {
-        publicKey: alice.authMethodOwnedPkp.publicKey,
-        sigName: 'unified-auth-sig',
-      },
+  return devEnv.litNodeClient.getPkpAuthContext({
+    pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+    authMethods: [alice.authMethod],
+    resourceAbilityRequests: _resourceAbilityRequests,
+    litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
+      'base64'
+    ),
+    jsParams: {
+      publicKey: alice.authMethodOwnedPkp.publicKey,
+      sigName: 'unified-auth-sig',
+    },
 
-      ...(centralisation === 'decentralised' && {
-        capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
-      }),
-    });
-
-  return litActionSessionSigs;
+    ...(centralisation === 'decentralised' && {
+      capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
+    }),
+  });
 };
 
-export const getLitActionSessionSigsUsingIpfsId = async (
+export const getLitActionAuthContextUsingIpfsId = (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
-
-  if (centralisation === 'decentralised') {
-    console.warn(
-      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
-    );
-  }
 
   // Use default resourceAbilityRequests if not provided
   const _resourceAbilityRequests = resourceAbilityRequests || [
@@ -108,7 +93,7 @@ export const getLitActionSessionSigsUsingIpfsId = async (
     },
   ];
 
-  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+  return devEnv.litNodeClient.getPkpAuthContext({
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
     resourceAbilityRequests: _resourceAbilityRequests,
@@ -122,15 +107,13 @@ export const getLitActionSessionSigsUsingIpfsId = async (
       capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
     }),
   });
-
-  return litActionSessionSigs;
 };
 
-export const getInvalidLitActionSessionSigs = async (
+export const getInvalidLitActionAuthContext = (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson
 ) => {
-  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+  return devEnv.litNodeClient.getPkpAuthContext({
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
     resourceAbilityRequests: [
@@ -153,15 +136,13 @@ export const getInvalidLitActionSessionSigs = async (
         ],
     },
   });
-
-  return litActionSessionSigs;
 };
 
-export const getInvalidLitActionIpfsSessionSigs = async (
+export const getInvalidLitActionIpfsAuthContext = (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson
 ) => {
-  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+  return devEnv.litNodeClient.getPkpAuthContext({
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
     resourceAbilityRequests: [
@@ -182,6 +163,4 @@ export const getInvalidLitActionIpfsSessionSigs = async (
         ],
     },
   });
-
-  return litActionSessionSigs;
 };

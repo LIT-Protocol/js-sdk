@@ -69,7 +69,7 @@ export class LitRelay implements IRelay {
    */
   constructor(config: LitRelayConfig) {
     this.relayUrl =
-      config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.DatilDev);
+      config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.NagaDev);
     this.relayApiKey = config.relayApiKey || '';
     log("Lit's relay server URL:", this.relayUrl);
   }

@@ -18,7 +18,6 @@ import {
 import {
   AcceptedFileType,
   AccessControlConditions,
-  AuthMethod,
   DecryptFromJsonProps,
   DecryptRequest,
   EncryptUint8ArrayRequest,
@@ -29,9 +28,10 @@ import {
   EncryptToJsonProps,
   EvmContractConditions,
   JsonExecutionSdkParams,
-  SessionSigsOrAuthSig,
   SolRpcConditions,
   UnifiedAccessControlConditions,
+  AuthSig,
+  AuthenticationContext,
 } from '@lit-protocol/types';
 
 import { checkIfAuthSigRequiresChainParam, checkType, is, log } from './misc';
@@ -42,6 +42,7 @@ export const safeParams = ({
   params,
 }: {
   functionName: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: any[] | any;
 }): IEither<void> => {
   if (!paramsValidators[functionName]) {
@@ -63,6 +64,7 @@ export const safeParams = ({
 
 export const paramsValidators: Record<
   string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (params: any) => ParamsValidator[]
 > = {
   // ========== NO AUTH MATERIAL NEEDED FOR CLIENT SIDE ENCRYPTION ==========
@@ -310,45 +312,6 @@ class StringValidator implements ParamsValidator {
   }
 }
 
-class AuthMethodValidator implements ParamsValidator {
-  private readonly fnName: string;
-  private authMethods?: AuthMethod[];
-
-  constructor(fnName: string, authMethods?: AuthMethod[]) {
-    this.fnName = fnName;
-    this.authMethods = authMethods;
-  }
-
-  validate(): IEither<void> {
-    const { authMethods } = this;
-
-    if (
-      authMethods &&
-      authMethods.length > 0 &&
-      !checkType({
-        value: authMethods,
-        allowedTypes: ['Array'],
-        paramName: 'authMethods',
-        functionName: this.fnName,
-      })
-    )
-      return ELeft(
-        new InvalidParamType(
-          {
-            info: {
-              param: 'authMethods',
-              value: authMethods,
-              functionName: this.fnName,
-            },
-          },
-          'authMethods is not an array'
-        )
-      );
-
-    return ERight(undefined);
-  }
-}
-
 interface ExecuteJsValidatorProps {
   code?: string;
   ipfsId?: string;
@@ -450,8 +413,10 @@ class FileValidator implements ParamsValidator {
   }
 }
 
-export interface AuthMaterialValidatorProps extends SessionSigsOrAuthSig {
+export interface AuthMaterialValidatorProps {
   chain?: string;
+  authSig?: AuthSig;
+  authContext?: AuthenticationContext;
 }
 
 class AuthMaterialValidator implements ParamsValidator {
@@ -470,7 +435,7 @@ class AuthMaterialValidator implements ParamsValidator {
   }
 
   validate(): IEither<void> {
-    const { authSig, sessionSigs } = this.authMaterial;
+    const { authSig } = this.authMaterial;
 
     if (authSig && !is(authSig, 'Object', 'authSig', this.fnName))
       return ELeft(
@@ -521,49 +486,6 @@ class AuthMaterialValidator implements ParamsValidator {
           )
         );
     }
-
-    if (sessionSigs && !is(sessionSigs, 'Object', 'sessionSigs', this.fnName))
-      return ELeft(
-        new InvalidParamType(
-          {
-            info: {
-              param: 'sessionSigs',
-              value: sessionSigs,
-              functionName: this.fnName,
-            },
-          },
-          'sessionSigs is not an object'
-        )
-      );
-
-    if (!sessionSigs && !authSig)
-      return ELeft(
-        new InvalidArgumentException(
-          {
-            info: {
-              functionName: this.fnName,
-              sessionSigs,
-              authSig,
-            },
-          },
-          'You must pass either authSig or sessionSigs'
-        )
-      );
-
-    // -- validate: if sessionSig and authSig exists
-    if (sessionSigs && authSig)
-      return ELeft(
-        new InvalidArgumentException(
-          {
-            info: {
-              functionName: this.fnName,
-              sessionSigs,
-              authSig,
-            },
-          },
-          'You cannot have both authSig and sessionSigs'
-        )
-      );
 
     return ERight(undefined);
   }

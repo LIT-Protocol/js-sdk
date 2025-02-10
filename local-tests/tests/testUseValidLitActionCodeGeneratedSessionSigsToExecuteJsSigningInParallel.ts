@@ -1,6 +1,5 @@
 import { log } from '@lit-protocol/misc';
-import { LIT_NETWORK } from '@lit-protocol/constants';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -12,13 +11,11 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInPa
   async (devEnv: TinnyEnvironment) => {
     const alice = await devEnv.createRandomPerson();
 
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
-
     const fn = async (index: number) => {
       log(`Index: ${index}`);
 
       return await devEnv.litNodeClient.executeJs({
-        sessionSigs: litActionSessionSigs,
+        authContext: getLitActionAuthContext(devEnv, alice),
         code: `(async () => {
         const sigShare = await LitActions.signEcdsa({
           toSign: dataToSign,

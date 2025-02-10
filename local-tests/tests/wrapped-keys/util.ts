@@ -51,17 +51,7 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
   chainId: number;
 } {
   switch (network) {
-    case 'datil-dev':
-      return {
-        chain: 'yellowstone',
-        chainId: LIT_CHAINS['yellowstone'].chainId,
-      };
-    case 'datil-test':
-      return {
-        chain: 'yellowstone',
-        chainId: LIT_CHAINS['yellowstone'].chainId,
-      };
-    case 'datil':
+    case 'naga-dev':
       return {
         chain: 'yellowstone',
         chainId: LIT_CHAINS['yellowstone'].chainId,
@@ -76,11 +66,9 @@ export function getGasParamsForNetwork(network: LIT_NETWORKS_KEYS): {
   gasLimit: number;
 } {
   switch (network) {
-    case 'datil-dev':
+    case 'naga-dev':
       return { gasLimit: 5000000 };
-    case 'datil-test':
-      return { gasLimit: 5000000 };
-    case 'datil':
+    case 'custom':
       return { gasLimit: 5000000 };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);

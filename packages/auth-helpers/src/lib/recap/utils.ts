@@ -32,7 +32,7 @@ export function getRecapNamespaceAndAbility(litAbility: LIT_ABILITY_VALUES): {
         recapNamespace: LIT_NAMESPACE.Threshold,
         recapAbility: LIT_RECAP_ABILITY.Signing,
       };
-    case LIT_ABILITY.RateLimitIncreaseAuth:
+    case LIT_ABILITY.PaymentDelegation:
       return {
         recapNamespace: LIT_NAMESPACE.Auth,
         recapAbility: LIT_RECAP_ABILITY.Auth,

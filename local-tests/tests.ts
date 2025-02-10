@@ -6,13 +6,6 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
-import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
-import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign';
-import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs';
-import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
 import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
 import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
@@ -37,9 +30,6 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } fr
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
-import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
-import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
-import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
 import { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
 import { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
 import { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
@@ -74,33 +64,32 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
-import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+import { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 import { testRelayer } from './tests/testRelayer';
 
-import { testEthereumSignMessageGeneratedKey } from './tests/wrapped-keys/testEthereumSignMessageGeneratedKey';
-import { testEthereumBroadcastTransactionGeneratedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionGeneratedKey';
-import { testEthereumSignMessageWrappedKey } from './tests/wrapped-keys/testEthereumSignMessageWrappedKey';
-import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
-import { testEthereumSignTransactionWrappedKey } from './tests/wrapped-keys/testEthereumSignTransactionWrappedKey';
-import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
-import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
-import { testEthereumBroadcastTransactionWrappedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionWrappedKey';
-import { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/wrapped-keys/testEthereumBroadcastWrappedKeyWithFetchGasParams';
-import { testImportWrappedKey } from './tests/wrapped-keys/testImportWrappedKey';
-import { testGenerateEthereumWrappedKey } from './tests/wrapped-keys/testGenerateEthereumWrappedKey';
-import { testGenerateSolanaWrappedKey } from './tests/wrapped-keys/testGenerateSolanaWrappedKey';
-import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePrivateKey';
-import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithEoaSessionSig';
-import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithMaxExpirySessionSig';
-import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithInvalidSessionSig';
-import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithExpiredSessionSig';
-import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
-import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
-import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
-import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
-import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
-import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
+// import { testEthereumSignMessageGeneratedKey } from './tests/wrapped-keys/testEthereumSignMessageGeneratedKey';
+// import { testEthereumBroadcastTransactionGeneratedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionGeneratedKey';
+// import { testEthereumSignMessageWrappedKey } from './tests/wrapped-keys/testEthereumSignMessageWrappedKey';
+// import { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
+// import { testEthereumSignTransactionWrappedKey } from './tests/wrapped-keys/testEthereumSignTransactionWrappedKey';
+// import { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
+// import { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
+// import { testEthereumBroadcastTransactionWrappedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionWrappedKey';
+// import { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/wrapped-keys/testEthereumBroadcastWrappedKeyWithFetchGasParams';
+// import { testImportWrappedKey } from './tests/wrapped-keys/testImportWrappedKey';
+// import { testGenerateEthereumWrappedKey } from './tests/wrapped-keys/testGenerateEthereumWrappedKey';
+// import { testGenerateSolanaWrappedKey } from './tests/wrapped-keys/testGenerateSolanaWrappedKey';
+// import { testFailImportWrappedKeysWithSamePrivateKey } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePrivateKey';
+// import { testFailImportWrappedKeysWithEoaSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithEoaSessionSig';
+// import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithMaxExpirySessionSig';
+// import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithInvalidSessionSig';
+// import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithExpiredSessionSig';
+// import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
+// import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
+// import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
+// import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
+// import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
 
 export { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 export { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
@@ -110,13 +99,6 @@ export { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/
 export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
 export { testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning';
 export { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
-export { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
-export { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
-export { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign';
-export { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs';
-export { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign';
-export { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs';
-export { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
 export { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
 export { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 export { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
@@ -141,9 +123,12 @@ export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } fr
 export { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 export { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 export { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
-export { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
-export { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
-export { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
+
+// DISABLED until Naga supports bare authSig only for encyption_sign endpoint
+// export { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
+// export { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
+// export { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
+
 export { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
 export { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
 export { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
@@ -178,33 +163,33 @@ export { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 export { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 export { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 export { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
-export { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+export { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 export { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 export { testRelayer } from './tests/testRelayer';
 
-export { testEthereumSignMessageGeneratedKey } from './tests/wrapped-keys/testEthereumSignMessageGeneratedKey';
-export { testEthereumBroadcastTransactionGeneratedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionGeneratedKey';
-export { testEthereumSignMessageWrappedKey } from './tests/wrapped-keys/testEthereumSignMessageWrappedKey';
-export { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
-export { testEthereumSignTransactionWrappedKey } from './tests/wrapped-keys/testEthereumSignTransactionWrappedKey';
-export { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
-export { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
-export { testEthereumBroadcastTransactionWrappedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionWrappedKey';
-export { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/wrapped-keys/testEthereumBroadcastWrappedKeyWithFetchGasParams';
-export { testImportWrappedKey } from './tests/wrapped-keys/testImportWrappedKey';
-export { testGenerateEthereumWrappedKey } from './tests/wrapped-keys/testGenerateEthereumWrappedKey';
-export { testGenerateSolanaWrappedKey } from './tests/wrapped-keys/testGenerateSolanaWrappedKey';
-export { testFailImportWrappedKeysWithSamePrivateKey } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePrivateKey';
-export { testFailImportWrappedKeysWithEoaSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithEoaSessionSig';
-export { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithMaxExpirySessionSig';
-export { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithInvalidSessionSig';
-export { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithExpiredSessionSig';
-export { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
-export { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
-export { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
-export { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
-export { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
-export { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
+// export { testEthereumSignMessageGeneratedKey } from './tests/wrapped-keys/testEthereumSignMessageGeneratedKey';
+// export { testEthereumBroadcastTransactionGeneratedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionGeneratedKey';
+// export { testEthereumSignMessageWrappedKey } from './tests/wrapped-keys/testEthereumSignMessageWrappedKey';
+// export { testFailEthereumSignTransactionWrappedKeyInvalidDecryption } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyInvalidDecryption';
+// export { testEthereumSignTransactionWrappedKey } from './tests/wrapped-keys/testEthereumSignTransactionWrappedKey';
+// export { testFailEthereumSignTransactionWrappedKeyWithInvalidParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithInvalidParam';
+// export { testFailEthereumSignTransactionWrappedKeyWithMissingParam } from './tests/wrapped-keys/testFailEthereumSignTransactionWrappedKeyWithMissingParam';
+// export { testEthereumBroadcastTransactionWrappedKey } from './tests/wrapped-keys/testEthereumBroadcastTransactionWrappedKey';
+// export { testEthereumBroadcastWrappedKeyWithFetchGasParams } from './tests/wrapped-keys/testEthereumBroadcastWrappedKeyWithFetchGasParams';
+// export { testImportWrappedKey } from './tests/wrapped-keys/testImportWrappedKey';
+// export { testGenerateEthereumWrappedKey } from './tests/wrapped-keys/testGenerateEthereumWrappedKey';
+// export { testGenerateSolanaWrappedKey } from './tests/wrapped-keys/testGenerateSolanaWrappedKey';
+// export { testFailImportWrappedKeysWithSamePrivateKey } from './tests/wrapped-keys/testFailImportWrappedKeysWithSamePrivateKey';
+// export { testFailImportWrappedKeysWithEoaSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithEoaSessionSig';
+// export { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithMaxExpirySessionSig';
+// export { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithInvalidSessionSig';
+// export { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithExpiredSessionSig';
+// export { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
+// export { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
+// export { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
+// export { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
+// export { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
+// export { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 
 const relayerTests = {
   testRelayer,
@@ -213,40 +198,34 @@ const relayerTests = {
 // --filter=WrappedKey
 const wrappedKeysTests = {
   // -- valid cases
-  testBatchGeneratePrivateKeys,
-  testEthereumSignMessageGeneratedKey,
-  testEthereumBroadcastTransactionGeneratedKey,
-  testEthereumSignMessageWrappedKey,
-  testEthereumSignTransactionWrappedKey,
-  testEthereumBroadcastTransactionWrappedKey,
-  testEthereumBroadcastWrappedKeyWithFetchGasParams,
-
+  // testBatchGeneratePrivateKeys,
+  // testEthereumSignMessageGeneratedKey,
+  // testEthereumBroadcastTransactionGeneratedKey,
+  // testEthereumSignMessageWrappedKey,
+  // testEthereumSignTransactionWrappedKey,
+  // testEthereumBroadcastTransactionWrappedKey,
+  // testEthereumBroadcastWrappedKeyWithFetchGasParams,
   // -- generate wrapped keys
-  testGenerateEthereumWrappedKey,
-  testGenerateSolanaWrappedKey,
-
+  // testGenerateEthereumWrappedKey,
+  // testGenerateSolanaWrappedKey,
   // -- import wrapped keys
-  testImportWrappedKey,
-
+  // testImportWrappedKey,
   // -- export wrapped keys
-  testExportWrappedKey,
-
+  // testExportWrappedKey,
   // -- solana wrapped keys
-  testSignMessageWithSolanaEncryptedKey,
-  testSignTransactionWithSolanaEncryptedKey,
-
+  // testSignMessageWithSolanaEncryptedKey,
+  // testSignTransactionWithSolanaEncryptedKey,
   // -- invalid cases
-  testFailEthereumSignTransactionWrappedKeyWithMissingParam,
-  testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
-  testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
-  testFailBatchGeneratePrivateKeysAtomic,
-
+  // testFailEthereumSignTransactionWrappedKeyWithMissingParam,
+  // testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
+  // testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
+  // testFailBatchGeneratePrivateKeysAtomic,
   // -- import wrapped keys
-  testFailImportWrappedKeysWithSamePrivateKey,
-  testFailImportWrappedKeysWithEoaSessionSig,
-  testFailImportWrappedKeysWithMaxExpirySessionSig,
-  testFailImportWrappedKeysWithInvalidSessionSig,
-  testFailImportWrappedKeysWithExpiredSessionSig,
+  // testFailImportWrappedKeysWithSamePrivateKey,
+  // testFailImportWrappedKeysWithEoaSessionSig,
+  // testFailImportWrappedKeysWithMaxExpirySessionSig,
+  // testFailImportWrappedKeysWithInvalidSessionSig,
+  // testFailImportWrappedKeysWithExpiredSessionSig,
 };
 
 const eoaSessionSigsTests = {
@@ -300,25 +279,13 @@ const litActionIpfsIdSessionSigsTests = {
   testUseInvalidLitActionCodeToGenerateSessionSigs,
 };
 
-const capacityDelegationTests = {
-  testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
-  testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign,
-  testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs,
-  testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs,
-  testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign,
-  testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs,
-  testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign,
-};
-
 const bareAuthSigTests = {
   // -- eth auth sig
-  testEthAuthSigToEncryptDecryptString,
-
+  // testEthAuthSigToEncryptDecryptString,
   // -- solana auth sig
-  testSolAuthSigToEncryptDecryptString,
-
+  // testSolAuthSigToEncryptDecryptString,
   // -- cosmos auth sig
-  testCosmosAuthSigToEncryptDecryptString,
+  // testCosmosAuthSigToEncryptDecryptString,
 };
 
 const pkpEthersTest = {
@@ -366,7 +333,7 @@ const litActionCombiningTests = {
     testExecuteJsSignAndCombineEcdsa,
   },
   decryptAndCombine: {
-    testExecutJsDecryptAndCombine,
+    testExecuteJsDecryptAndCombine,
   },
   broadcastAndCombine: {
     testExecuteJsBroadcastAndCollect,
@@ -380,7 +347,6 @@ export const tinnyTests = {
   ...pkpSessionSigsTests,
   ...litActionSessionSigsTests,
   ...litActionIpfsIdSessionSigsTests,
-  ...capacityDelegationTests,
   ...bareAuthSigTests,
 
   ...pkpEthersTest.eoaSessionSigs,

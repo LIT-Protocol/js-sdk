@@ -102,20 +102,23 @@ export class LitPKPResource extends LitResourceBase implements ILitResource {
   }
 }
 
-export class LitRLIResource extends LitResourceBase implements ILitResource {
-  public readonly resourcePrefix = LIT_RESOURCE_PREFIX.RLI;
+export class LitPaymentDelegationResource
+  extends LitResourceBase
+  implements ILitResource
+{
+  public readonly resourcePrefix = LIT_RESOURCE_PREFIX.PaymentDelegation;
 
   /**
-   * Creates a new LitRLIResource.
+   * Creates a new LitPaymentDelegationResource.
    * @param resource The identifier for the resource. This should be the
-   * RLI token ID.
+   * Payment Delegation token ID.
    */
   constructor(resource: string) {
     super(resource);
   }
 
   isValidLitAbility(litAbility: LIT_ABILITY_VALUES): boolean {
-    return litAbility === LIT_ABILITY.RateLimitIncreaseAuth;
+    return litAbility === LIT_ABILITY.PaymentDelegation;
   }
 }
 
@@ -147,9 +150,11 @@ export function parseLitResource(resourceKey: string): ILitResource {
     return new LitPKPResource(
       resourceKey.substring(`${LIT_RESOURCE_PREFIX.PKP}://`.length)
     );
-  } else if (resourceKey.startsWith(LIT_RESOURCE_PREFIX.RLI)) {
-    return new LitRLIResource(
-      resourceKey.substring(`${LIT_RESOURCE_PREFIX.RLI}://`.length)
+  } else if (resourceKey.startsWith(LIT_RESOURCE_PREFIX.PaymentDelegation)) {
+    return new LitPaymentDelegationResource(
+      resourceKey.substring(
+        `${LIT_RESOURCE_PREFIX.PaymentDelegation}://`.length
+      )
     );
   } else if (resourceKey.startsWith(LIT_RESOURCE_PREFIX.LitAction)) {
     return new LitActionResource(

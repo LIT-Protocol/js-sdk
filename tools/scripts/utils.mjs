@@ -4,16 +4,12 @@ import { exec, spawn } from 'child_process';
 import { exit } from 'process';
 import readline from 'readline';
 import { join } from 'path';
-import events from 'events';
-import util from 'util';
 
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import siwe from 'siwe';
 import { ethers } from 'ethers';
-
-const eventsEmitter = new events.EventEmitter();
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
@@ -29,36 +25,6 @@ export const fail = (message) => {
     status: 500,
     message,
   };
-};
-/**
- * replaceAutogen - Replaces the content between the specified start and end delimiters
- * with new content.
- *
- * @param {string} startDelimiter - The string that marks the start of the content to be replaced.
- * @param {string} endDelimiter - The string that marks the end of the content to be replaced.
- * @param {string} newContent - The new content that will replace the old content.
- *
- * @returns {string} The input string with the content between the start and end
- * delimiters replaced with the new content.
- */
-
-export const replaceAutogen = ({
-  oldContent,
-  startsWith = '// ----- autogen:imports:start  -----',
-  endsWith = '// ----- autogen:imports:end  -----',
-  newContent,
-}) => {
-  // Find the start and end indices of the content to be replaced.
-  const startIndex = oldContent.indexOf(startsWith) + startsWith.length;
-  const endIndex = oldContent.indexOf(endsWith);
-
-  // Extract the content to be replaced.
-  const _oldContent = oldContent.substring(startIndex, endIndex);
-
-  // Replace the old content with the new content.
-  const newStr = oldContent.replace(_oldContent, `\n${newContent}\n`);
-
-  return newStr;
 };
 
 function escapeRegExp(string) {

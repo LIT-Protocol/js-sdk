@@ -1,14 +1,17 @@
-import {
-  AuthMethod,
-  AuthenticateOptions,
-  BaseProviderOptions,
-  OAuthProviderOptions,
-} from '@lit-protocol/types';
+import { ethers } from 'ethers';
+import * as jose from 'jose';
+
 import {
   AUTH_METHOD_TYPE,
   UnauthorizedException,
   UnknownError,
 } from '@lit-protocol/constants';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  OAuthProviderOptions,
+} from '@lit-protocol/types';
+
 import {
   prepareLoginUrl,
   parseLoginParams,
@@ -17,8 +20,6 @@ import {
   LIT_LOGIN_GATEWAY,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
-import { ethers } from 'ethers';
-import * as jose from 'jose';
 
 export default class GoogleProvider extends BaseProvider {
   /**
@@ -54,7 +55,7 @@ export default class GoogleProvider extends BaseProvider {
    *
    * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
    */
-  public async authenticate<T extends AuthenticateOptions>(
+  public async authenticate<T>(
     _?: T,
     urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
   ): Promise<AuthMethod> {

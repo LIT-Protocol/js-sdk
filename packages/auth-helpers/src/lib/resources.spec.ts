@@ -1,8 +1,8 @@
 import {
   LitAccessControlConditionResource,
   LitActionResource,
+  LitPaymentDelegationResource,
   LitPKPResource,
-  LitRLIResource,
   parseLitResource,
 } from './resources';
 
@@ -16,8 +16,8 @@ const testVectors = [
     expectedLitResource: new LitPKPResource('someResource'),
   },
   {
-    resourceKey: 'lit-ratelimitincrease://someResource',
-    expectedLitResource: new LitRLIResource('someResource'),
+    resourceKey: 'lit-paymentdelegation://someResource',
+    expectedLitResource: new LitPaymentDelegationResource('someResource'),
   },
   {
     resourceKey: 'lit-litaction://someResource',

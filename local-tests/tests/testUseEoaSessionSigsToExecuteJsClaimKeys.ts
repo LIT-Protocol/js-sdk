@@ -5,7 +5,7 @@
 //   ClaimResult,
 //   ClientClaimProcessor,
 // } from '@lit-protocol/types';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
 
@@ -30,10 +30,8 @@ export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: eoaSessionSigs,
+    authContext: getEoaAuthContext(devEnv, alice),
     code: `(async () => {
       Lit.Actions.claimKey({keyId: "foo"});
     })();`,
