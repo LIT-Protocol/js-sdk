@@ -3,6 +3,11 @@ import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 
 import {
+  getFormattedAccessControlConditions,
+  getHashedAccessControlConditions,
+  validateAccessControlConditions,
+} from '@lit-protocol/access-control-conditions';
+import {
   createSiweMessage,
   createSiweMessageWithCapacityDelegation,
   createSiweMessageWithRecaps,
@@ -34,6 +39,7 @@ import {
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
+import { getNodePrices } from '@lit-protocol/contracts-sdk';
 import { composeLitUrl, LitCore } from '@lit-protocol/core';
 import {
   combineSignatureShares,
@@ -107,16 +113,17 @@ import {
   SigResponse,
   SuccessNodePromises,
 } from '@lit-protocol/types';
+import { AuthMethod } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import { AuthMethod } from '@lit-protocol/types';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
 import { getClaimsList } from './helpers/get-claims-list';
+import { getExpiration } from './helpers/get-expiration';
 import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
 import { getSignatures } from './helpers/get-signatures';
 import { normalizeArray } from './helpers/normalize-array';
@@ -126,12 +133,6 @@ import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
-import {
-  getFormattedAccessControlConditions,
-  getHashedAccessControlConditions,
-  validateAccessControlConditions,
-} from '@lit-protocol/access-control-conditions';
-import { getExpiration } from './helpers/get-expiration';
 
 export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -164,6 +165,15 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     this.defaultMaxPriceByProduct[product] = price;
   }
 
+  private _getNodePrices() {
+    return getNodePrices({
+      realmId: 1,
+      litNetwork: this.config.litNetwork,
+      networkContext: this.config.contractContext,
+      rpcUrl: this.config.rpcUrl,
+      nodeProtocol: this.config.nodeProtocol,
+    });
+  }
   // ========== Rate Limit NFT ==========
 
   // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
@@ -673,7 +683,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const requestId = this._getNewRequestId();
 
-    const userMaxPrices = this.getMaxPricesForNodeProduct({
+    const userMaxPrices = await this.getMaxPricesForNodeProduct({
       product: 'LIT_ACTION',
       userMaxPrice: params.userMaxPrice,
     });
@@ -866,7 +876,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     const requestId = this._getNewRequestId();
 
-    const targetNodePrices = this.getMaxPricesForNodeProduct({
+    const targetNodePrices = await this.getMaxPricesForNodeProduct({
       product: 'SIGN',
       userMaxPrice: params.userMaxPrice,
     });
@@ -1154,7 +1164,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     log('identityParam', identityParam);
 
     let sessionSigs: SessionSigsMap = {};
-    const userMaxPrices = this.getMaxPricesForNodeProduct({
+    const userMaxPrices = await this.getMaxPricesForNodeProduct({
       product: 'DECRYPTION',
       userMaxPrice: params.userMaxPrice,
     });
@@ -1343,7 +1353,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // This may seem a bit weird because we usually only care about prices for sessionSigs...
     // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
-    const targetNodePrices = this.getMaxPricesForNodeProduct({
+    const targetNodePrices = await this.getMaxPricesForNodeProduct({
       product: 'LIT_ACTION',
     });
 
@@ -1536,7 +1546,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     });
   };
 
-  getMaxPricesForNodeProduct = ({
+  getMaxPricesForNodeProduct = async ({
     userMaxPrice,
     product,
   }: {
@@ -1564,7 +1574,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     console.log('getMaxPricesForNodeProduct():', {});
     return getMaxPricesForNodeProduct({
-      nodePrices: this.config.nodePrices,
+      nodePrices: await this._getNodePrices(),
       userMaxPrice: getUserMaxPrice(),
       productId: PRODUCT_IDS[product],
       numRequiredNodes: this._getThreshold(),
@@ -1914,7 +1924,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // This may seem a bit weird because we usually only care about prices for sessionSigs...
     // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
-    const targetNodePrices = this.getMaxPricesForNodeProduct({
+    const targetNodePrices = await this.getMaxPricesForNodeProduct({
       product: 'LIT_ACTION',
     });
 
