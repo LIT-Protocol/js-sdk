@@ -633,6 +633,8 @@ export class LitContracts {
             environment
           );
           break;
+        default:
+          throw new Error('Wrong contract name'); // TODO improve this error
       }
 
       return address;

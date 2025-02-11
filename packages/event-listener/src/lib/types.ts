@@ -2,10 +2,11 @@ import { ethers } from 'ethers';
 
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { Hex } from '@lit-protocol/types';
 
 import { BaseTransitionParams } from './transitions';
 
-export type Address = `0x${string}`;
+export type Address = Hex;
 export type voidAsyncFunction = () => Promise<void>;
 export type onError = (error: unknown) => void;
 

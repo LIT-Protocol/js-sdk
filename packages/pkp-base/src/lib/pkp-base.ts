@@ -8,6 +8,7 @@
  * initializing the class instances.
  */
 import depd from 'depd';
+
 import {
   InitError,
   LitNodeClientNotReadyError,
@@ -20,8 +21,8 @@ import {
   JsonExecutionSdkParams,
   PKPBaseProp,
   AuthSig,
+  LitNodeSignature,
   PKPBaseDefaultParams,
-  SigResponse,
   RPCUrls,
   AuthMethod,
   SessionSigsMap,
@@ -393,13 +394,13 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   /**
    * Sign the provided data with the PKP private key.
    *
-   * @param {Uint8Array} toSign - The data to be signed.
+   * @param {Uint8Array} messageToSign - The message to be signed (will be hashed using SHA256).
    *
    * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+  async runSign(messageToSign: Uint8Array): Promise<LitNodeSignature> {
     await this.ensureLitNodeClientReady();
 
     // If no PKP public key is provided, throw error
@@ -416,18 +417,16 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     try {
       const sig = await this.litNodeClient.pkpSign({
-        toSign,
+        messageToSign,
         pubKey: this.uncompressedPubKey,
         sessionSigs: controllerSessionSigs,
+        signingScheme: 'EcdsaK256Sha256',
       });
 
       if (!sig) {
+        // TODO improve this error
         throw new UnknownError({}, 'No signature returned');
       }
-
-      // pad sigs with 0 if length is odd
-      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
-      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
 
       return sig;
     } catch (e) {
@@ -451,11 +450,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   /**
    * Logs the provided arguments to the console, but only if debugging is enabled.
    *
-   * @param {...any[]} args - The values to be logged to the console.
+   * @param {unknown[]} args - The values to be logged to the console.
    *
    * @returns {void} - This function does not return a value.
    */
-  log(...args: any[]): void {
+  log(...args: unknown[]): void {
     if (this.debug) {
       console.log(this.orange + this.PREFIX + this.reset, ...args);
     }

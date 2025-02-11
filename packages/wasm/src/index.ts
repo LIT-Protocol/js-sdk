@@ -208,7 +208,7 @@ export async function ecdsaVerify(
  * @param {Uint8Array[]} signature_shares
  * @param {Uint8Array} message_hash
  * @param {Uint8Array} public_key
- * @param {[Uint8Array, Uint8Array, number]} signature
+ * @return {[Uint8Array, Uint8Array, number]} signature
  */
 export async function ecdsaCombineAndVerify(
   variant: EcdsaVariant,
@@ -225,6 +225,25 @@ export async function ecdsaCombineAndVerify(
     message_hash,
     public_key
   );
+}
+
+/**
+ * Unified combiner and verifier for Lit supported signatures
+ * It will check for successful signature in the following order
+ *
+ * Supports:
+ * - Frost
+ * - BLS
+ * - ECDSA
+ *
+ * @param {Uint8Array[]} shares
+ * @return {Uint8Array[]} signature
+ */
+export async function unifiedCombineAndVerify(
+  shares: string[]
+): Promise<string> {
+  await loadModules();
+  return wasmInternal.combineAndVerify(shares);
 }
 
 /**

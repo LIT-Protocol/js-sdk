@@ -19,6 +19,8 @@ import {
   BaseAuthenticateOptions,
 } from './interfaces';
 
+export type Hex = `0x${string}`;
+
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
 export type AccsDefaultParams = LPACC_EVM_BASIC;

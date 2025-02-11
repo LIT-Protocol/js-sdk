@@ -9,6 +9,7 @@ import {
   AccessControlConditions,
   Chain,
   EvmContractConditions,
+  Hex,
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
@@ -19,7 +20,7 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
-import { SigType } from './EndpointResponses';
+import { EcdsaSigType, SigType } from './EndpointResponses';
 const deprecated = depd('lit-js-sdk:types:interfaces');
 
 /** ---------- Access Control Conditions Interfaces ---------- */
@@ -217,49 +218,56 @@ export interface ClaimKeyResponse {
   mintTx: string;
 }
 
-/**
- * Struct in rust
- * -----
-pub struct JsonExecutionRequest {
-  pub auth_sig: AuthSigItem,
-  #[serde(default = "default_epoch")]
-  pub epoch: u64,
+export type SigningScheme =
+  | 'Bls12381'
+  | 'Bls12381G1ProofOfPossession'
+  | 'EcdsaK256Sha256'
+  | 'EcdsaP256Sha256'
+  | 'EcdsaP384Sha384'
+  | 'SchnorrEd25519Sha512'
+  | 'SchnorrK256Sha256'
+  | 'SchnorrP256Sha256'
+  | 'SchnorrP384Sha384'
+  | 'SchnorrRistretto25519Sha512'
+  | 'SchnorrEd448Shake256'
+  | 'SchnorrRedJubjubBlake2b512'
+  | 'SchnorrK256Taproot'
+  | 'SchnorrRedDecaf377Blake2b512'
+  | 'SchnorrkelSubstrate';
 
-  pub ipfs_id: Option<String>,
-  pub code: Option<String>,
-    pub js_params: Option<Value>,
-    pub auth_methods: Option<Vec<AuthMethod>>,
+export interface Node {
+  socketAddress: string;
+  value: number;
 }
- */
 
 export interface BaseJsonPkpSignRequest {
   authMethods?: AuthMethod[];
-  toSign: ArrayLike<number>;
+  signingScheme: SigningScheme;
 }
 
 /**
  * The 'pkpSign' function param. Please note that the structure
- * is different than the payload sent to the node.
+ * is different from the payload sent to the node.
  */
 export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
+  messageToSign: Uint8Array;
   sessionSigs: SessionSigsMap;
 }
 
 /**
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
-export interface JsonPkpSignRequest<T>
+export interface JsonPkpSignRequest
   extends BaseJsonPkpSignRequest,
     NodeSetRequired {
   authSig: AuthSig;
+  toSign: ArrayLike<number>;
 
   /**
    * note that 'key' is in lower case, because this is what the node expects
    */
   pubkey: string;
-
-  signingScheme: T;
 }
 
 /**
@@ -485,9 +493,9 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
 
 export interface LitActionResponseStrategy {
   strategy: ResponseStrategy;
-  customFilter?: (
-    responses: Record<string, string>[]
-  ) => Record<string, string>;
+  customFilter?: <T>(
+    responses: T[]
+  ) => T;
 }
 
 export interface IpfsOptions {
@@ -646,11 +654,7 @@ export interface SigResponse {
 }
 
 export interface ExecuteJsResponseBase {
-  signatures:
-    | {
-        sig: SigResponse;
-      }
-    | any;
+  signatures: Record<string, LitNodeSignature> | null;
 }
 
 /**
@@ -688,7 +692,7 @@ export interface SendNodeCommand {
   requestId: string;
 }
 export interface SigShare {
-  sigType: SigType;
+  sigType: EcdsaSigType; // TODO should it be SigningScheme from above?
   signatureShare: string;
   bigR?: string;
   publicKey: string;
@@ -868,7 +872,38 @@ export interface CombinedECDSASignature {
   r: string;
   s: string;
   recid: number;
-  signature: `0x${string}`;
+  signature: Hex;
+}
+// BLS TODO
+// ECDSA
+// ================== unifiedSignature: {
+// "signature":"\"F0E7A72197D93FFF7A5A22B2A865511C6A117DE75E08519A2298061485169A2B6EE44425E45AD3A7455720C5D786EFFFBB24D94DD4E8F2143CDBF777BBCA6FE1\"",
+// "verifying_key":"\"3056301006072A8648CE3D020106052B8104000A0342000438629EBC85B2C8E06C90D8BFAAC45BAA6706E6C6F7AF318DD569FA273DBDC2D5935590F819D6B8EB23DE5B2799F4F3106F4D55F1EA873292FC282ADCC5FA7F4F\"",
+// "signed_data":"74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0",
+// "recovery_id":1}
+// FROST
+// ================== unifiedSignature: {
+// "signature":"[\"K256Sha256\",\"036e6bf0d688202166c8086b40b72306514566d314ec6209a09ddf5be62c4ff1003ce0fbc2afd715261b0d3cbba216ca2e0ccb46447f63015345194fe48101a3df\"]",
+// "verifying_key":"[\"K256Sha256\",\"0374f4c61cf60ba3a3dc31cac8d2cc502803ff83f8fe7e24d7081881e938e44ff3\"]",
+// "signed_data":"74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0",
+// "recovery_id":null}
+export interface CombinedLitNodeSignature {
+  signature: string;
+  verifying_key: string;
+  signed_data: string;
+  recovery_id: number | null;
+}
+
+export interface CleanLitNodeSignature {
+  signature: Hex;
+  verifyingKey: Hex;
+  signedData: Hex;
+  recoveryId: 0 | 1 | null;
+}
+
+export interface LitNodeSignature extends CleanLitNodeSignature {
+  publicKey: Hex;
+  sigType: SigType;
 }
 
 export interface HandshakeWithNode {

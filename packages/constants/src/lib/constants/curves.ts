@@ -1,48 +1,78 @@
-// pub enum SigningScheme {
+import { z } from 'zod';
 
-//  -- BLS
-//   Bls12381,
+import { SigningScheme } from '@lit-protocol/types';
 
-//  -- ECDSA
-//   EcdsaK256Sha256,
-//   EcdsaP256Sha256,
-//   EcdsaP384Sha384,
+import { ObjectMapFromArray } from './utils';
 
-//  -- Frost
-//   SchnorrEd25519Sha512,
-//   SchnorrK256Sha256,
-//   SchnorrP256Sha256,
-//   SchnorrP384Sha384,
-//   SchnorrRistretto25519Sha512,
-//   SchnorrEd448Shake256,
-//   SchnorrRedJubjubBlake2b512,
-//   SchnorrK256Taproot,
-//   SchnorrRedDecaf377Blake2b512,
-//   SchnorrkelSubstrate,
-// }
+// ----- Frost Variant
+export const LIT_FROST_VARIANT_VALUES = [
+  'SchnorrEd25519Sha512',
+  'SchnorrK256Sha256',
+  'SchnorrP256Sha256',
+  'SchnorrP384Sha384',
+  'SchnorrRistretto25519Sha512',
+  'SchnorrEd448Shake256',
+  'SchnorrRedJubjubBlake2b512',
+  'SchnorrK256Taproot',
+  'SchnorrRedDecaf377Blake2b512',
+  'SchnorrkelSubstrate',
+] as const satisfies readonly SigningScheme[];
+export const LIT_FROST_VARIANT = ObjectMapFromArray(LIT_FROST_VARIANT_VALUES);
+export const LIT_FROST_VARIANT_SCHEMA = z.enum(LIT_FROST_VARIANT_VALUES);
+export type LitFrostVariantType = z.infer<typeof LIT_FROST_VARIANT_SCHEMA>;
 
+// ----- BLS Variant
+export const LIT_BLS_VARIANT_VALUES = [
+  'Bls12381',
+  'Bls12381G1ProofOfPossession',
+] as const satisfies readonly SigningScheme[];
+export const LIT_BLS_VARIANT = ObjectMapFromArray(LIT_BLS_VARIANT_VALUES);
+export const LIT_BLS_VARIANT_SCHEMA = z.enum(LIT_BLS_VARIANT_VALUES);
+export type LitBlsVariantType = z.infer<typeof LIT_BLS_VARIANT_SCHEMA>;
+
+// ----- ECDSA Variant
+export const LIT_ECDSA_VARIANT_VALUES = [
+  'EcdsaK256Sha256',
+  'EcdsaP256Sha256',
+  'EcdsaP384Sha384',
+] as const satisfies readonly SigningScheme[];
+export const LIT_ECDSA_VARIANT = ObjectMapFromArray(LIT_ECDSA_VARIANT_VALUES);
+export const LIT_ECDSA_VARIANT_SCHEMA = z.enum(LIT_ECDSA_VARIANT_VALUES);
+export type LitEcdsaVariantType = z.infer<typeof LIT_ECDSA_VARIANT_SCHEMA>;
+
+// ----- All Curve Types
 export const LIT_CURVE = {
-  BLS: 'BLS',
-  EcdsaK256: 'K256',
-  EcdsaCaitSith: 'ECDSA_CAIT_SITH', // Legacy alias of K256
-  EcdsaCAITSITHP256: 'EcdsaCaitSithP256',
-  EcdsaK256Sha256: 'EcdsaK256Sha256', // same as caitsith
-} as const;
+  ...LIT_BLS_VARIANT,
+  ...LIT_FROST_VARIANT,
+  ...LIT_ECDSA_VARIANT,
+};
 
-export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
-
+export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE; // Identical to Sig
 // This should replicate SigShare.sigType in types package
 export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
 
-export const CURVE_GROUPS = ['ECDSA', 'BLS'] as const;
+export const CURVE_GROUPS = ['BLS', 'ECDSA', 'FROST'] as const;
 
 export const CURVE_GROUP_BY_CURVE_TYPE: Record<
   LIT_CURVE_VALUES,
   (typeof CURVE_GROUPS)[number]
 > = {
-  [LIT_CURVE.EcdsaK256]: CURVE_GROUPS[0],
-  [LIT_CURVE.EcdsaK256Sha256]: CURVE_GROUPS[0],
-  [LIT_CURVE.EcdsaCAITSITHP256]: CURVE_GROUPS[0],
-  [LIT_CURVE.EcdsaCaitSith]: CURVE_GROUPS[0],
-  [LIT_CURVE.BLS]: CURVE_GROUPS[1],
+  // BLS
+  [LIT_CURVE.Bls12381]: CURVE_GROUPS[0],
+  [LIT_CURVE.Bls12381G1ProofOfPossession]: CURVE_GROUPS[0],
+  // ECDSA
+  [LIT_CURVE.EcdsaK256Sha256]: CURVE_GROUPS[1],
+  [LIT_CURVE.EcdsaP256Sha256]: CURVE_GROUPS[1],
+  [LIT_CURVE.EcdsaP384Sha384]: CURVE_GROUPS[1],
+  // FROST
+  [LIT_CURVE.SchnorrEd25519Sha512]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrK256Sha256]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrP256Sha256]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrP384Sha384]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrRistretto25519Sha512]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrEd448Shake256]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrRedJubjubBlake2b512]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrK256Taproot]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrRedDecaf377Blake2b512]: CURVE_GROUPS[2],
+  [LIT_CURVE.SchnorrkelSubstrate]: CURVE_GROUPS[2],
 } as const;

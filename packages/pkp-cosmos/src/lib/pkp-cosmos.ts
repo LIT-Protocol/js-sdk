@@ -338,7 +338,7 @@ export class PKPCosmosWallet
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+  async runSign(toSign: Uint8Array): Promise<any> {
     return this.pkpBase.runSign(toSign);
   }
 }

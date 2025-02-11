@@ -1,7 +1,4 @@
-import {
-  EcdsaSignedMessageShareParsed,
-  SigResponse,
-} from '@lit-protocol/types';
+import { EcdsaSignedMessageShareParsed } from '@lit-protocol/types';
 
 import { getSignatures } from './get-signatures';
 

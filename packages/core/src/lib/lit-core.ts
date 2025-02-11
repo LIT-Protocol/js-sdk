@@ -39,6 +39,7 @@ import {
   LitNodeClientNotReadyError,
   InvalidNodeAttestation,
   LogLevel,
+  LitEcdsaVariantType,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -1475,12 +1476,12 @@ export class LitCore {
    * Calculates an HD public key from a given keyId
    * The curve type or signature type is assumed to be k256 unless provided
    * @param keyId
-   * @param {LIT_CURVE_VALUES} sigType
+   * @param {LitEcdsaVariantType} sigType
    * @returns {string} public key
    */
   computeHDPubKey = async (
     keyId: string,
-    sigType: LIT_CURVE_VALUES = LIT_CURVE.EcdsaCaitSith
+    sigType: LitEcdsaVariantType = LIT_CURVE.EcdsaK256Sha256
   ): Promise<string> => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');

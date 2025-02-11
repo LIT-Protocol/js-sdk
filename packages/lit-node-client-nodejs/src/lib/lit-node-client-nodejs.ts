@@ -15,6 +15,7 @@ import {
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
+  CURVE_GROUP_BY_CURVE_TYPE,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
@@ -23,7 +24,6 @@ import {
   InvalidSessionSigs,
   InvalidSignatureError,
   LIT_ACTION_IPFS_HASH,
-  LIT_CURVE,
   LIT_CURVE_TYPE,
   LIT_ENDPOINT,
   LIT_SESSION_KEY_URI,
@@ -41,6 +41,7 @@ import {
   combineSignatureShares,
   encrypt,
   generateSessionKeyPair,
+  hashLitMessage,
   verifyAndDecryptWithSignatureShares,
   verifySignature,
 } from '@lit-protocol/crypto';
@@ -65,7 +66,12 @@ import {
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
-import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
+import {
+  ExecuteJsValueResponse,
+  ILitResource,
+  ISessionCapabilityObject,
+  LitNodeSignature,
+} from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
@@ -73,15 +79,14 @@ import {
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
-import { getClaims } from './helpers/get-claims';
-import { getClaimsList } from './helpers/get-claims-list';
-import { getSignatures } from './helpers/get-signatures';
+import {
+  combineExecuteJSSignatures,
+  combinePKPSignSignatures,
+} from './helpers/get-signatures';
 import { normalizeArray } from './helpers/normalize-array';
 import { normalizeJsParams } from './helpers/normalize-params';
 import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
-import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 import type {
@@ -270,9 +275,10 @@ export class LitNodeClientNodeJs
    * @param obj - The object to check.
    * @returns True if the object is of type SessionKeyPair.
    */
-  isSessionKeyPair(obj: any): obj is SessionKeyPair {
+  isSessionKeyPair(obj: unknown): obj is SessionKeyPair {
     return (
       typeof obj === 'object' &&
+      obj !== null &&
       'publicKey' in obj &&
       'secretKey' in obj &&
       typeof obj.publicKey === 'string' &&
@@ -509,7 +515,7 @@ export class LitNodeClientNodeJs
     resourceAbilityRequests,
   }: {
     authSig: AuthSig;
-    sessionKeyUri: any;
+    sessionKeyUri: string;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
@@ -980,7 +986,7 @@ export class LitNodeClientNodeJs
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<NodeShare>).values;
+    const responseData = (res as SuccessNodePromises<ExecuteJsValueResponse>).values;
 
     logWithRequestId(
       requestId,
@@ -1021,10 +1027,8 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
 
-    // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map((r) => {
-      return removeDoubleQuotes(r.signedData);
-    });
+    // -- 1. combine signed data and get the signatures from it
+    const signedDataList = responseData.map((r) => r.signedData);
 
     logWithRequestId(
       requestId,
@@ -1032,19 +1036,10 @@ export class LitNodeClientNodeJs
       signedDataList
     );
 
-    // Flatten the signedDataList by moving the data within the `sig` (or any other key user may choose) object to the top level.
-    // The specific key name (`sig`) is irrelevant, as the contents of the object are always lifted directly.
-    const key = Object.keys(signedDataList[0])[0]; // Get the first key of the object
-
-    const flattenedSignedMessageShares = signedDataList.map((item) => {
-      return item[key]; // Return the value corresponding to that key
-    });
-
-    const signatures = await getSignatures({
+    const signatures = await combineExecuteJSSignatures({
+      nodesLitActionSignedData: responseData,
       requestId,
-      networkPubKeySet: this.networkPubKeySet,
-      threshold: params.useSingleNode ? 1 : this._getThreshold(),
-      signedMessageShares: flattenedSignedMessageShares,
+      threshold: this._getThreshold(),
     });
 
     // -- 2. combine responses as a string, and parse it as JSON if possible
@@ -1056,16 +1051,13 @@ export class LitNodeClientNodeJs
     );
 
     // -- 4. combine claims
-    const claimsList = getClaimsList(responseData);
-    const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
+    // const claimsList = getClaimsList(responseData);
+    // const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
 
     // ========== Result ==========
     const returnVal: ExecuteJsResponse = {
-      claims,
-      signatures: {
-        [key]: signatures,
-      },
-      // decryptions: [],
+      claims: {}, // TODO revert to previous state
+      signatures,
       response: parsedResponse,
       logs: mostCommonLogs,
     };
@@ -1099,14 +1091,15 @@ export class LitNodeClientNodeJs
    * Use PKP to sign
    *
    * @param { JsonPkpSignSdkParams } params
-   * @param params.toSign - The data to sign
+   * @param params.messageToSign - The data to sign, not hashed
+   * @param params.signingScheme - The signing scheme to use when signing the message. If hashing is needed, it will be derived from this
    * @param params.pubKey - The public key to sign with
    * @param params.sessionSigs - The session signatures to use
-   * @param params.authMethods - (optional) The auth methods to use
+   * @param [params.authMethods] - The auth methods to use
    */
-  pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
+  pkpSign = async (params: JsonPkpSignSdkParams): Promise<LitNodeSignature> => {
     // -- validate required params
-    const requiredParamKeys = ['toSign', 'pubKey'];
+    const requiredParamKeys = ['messageToSign', 'pubKey']; // TODO migrate to zod
 
     (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
       if (!params[key]) {
@@ -1143,7 +1136,7 @@ export class LitNodeClientNodeJs
     // validate session sigs
     const checkedSessionSigs = validateSessionSigs(params.sessionSigs);
 
-    if (checkedSessionSigs.isValid === false) {
+    if (!checkedSessionSigs.isValid) {
       throw new InvalidSessionSigs(
         {},
         `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
@@ -1166,8 +1159,14 @@ export class LitNodeClientNodeJs
         url,
       });
 
-      const reqBody: JsonPkpSignRequest<LIT_CURVE_TYPE> = {
-        toSign: normalizeArray(params.toSign),
+      const toSign =
+        CURVE_GROUP_BY_CURVE_TYPE[params.signingScheme] !== 'ECDSA'
+          ? params.messageToSign!
+          : hashLitMessage(params.signingScheme, params.messageToSign!);
+
+      const reqBody: JsonPkpSignRequest = {
+        toSign: normalizeArray(toSign),
+        signingScheme: params.signingScheme,
         pubkey: hexPrefixed(params.pubKey),
         authSig: sessionSig,
 
@@ -1179,7 +1178,6 @@ export class LitNodeClientNodeJs
 
         // nodeSet: thresholdNodeSet,
         nodeSet: nodeSet,
-        signingScheme: 'EcdsaK256Sha256',
       };
 
       logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -1192,20 +1190,18 @@ export class LitNodeClientNodeJs
       return this.generatePromise(urlWithPath, reqBody, requestId);
     });
 
-    const res = await this.handleNodePromises(
+    const res = await this.handleNodePromises<PKPSignEndpointResponse>(
       nodePromises,
       requestId,
-      // thresholdNodeSet.length
       nodeSet.length
     );
 
     // ========== Handle Response ==========
     if (!res.success) {
-      this._throwNodeError(res, requestId);
+      return this._throwNodeError(res, requestId);
     }
 
-    const responseData = (res as SuccessNodePromises<PKPSignEndpointResponse>)
-      .values;
+    const responseData = res.values;
 
     logWithRequestId(
       requestId,
@@ -1213,21 +1209,18 @@ export class LitNodeClientNodeJs
       JSON.stringify(responseData)
     );
 
-    // clean up the response data (as there are double quotes & snake cases in the response)
-    const signedMessageShares = parsePkpSignResponse(responseData);
-
     try {
-      const signatures = await getSignatures({
+      const signatures = await combinePKPSignSignatures({
+        nodesPkpSignResponseData: responseData,
         requestId,
-        networkPubKeySet: this.networkPubKeySet,
         threshold: this._getThreshold(),
-        signedMessageShares: signedMessageShares,
       });
 
       logWithRequestId(requestId, `signature combination`, signatures);
 
       return signatures;
     } catch (e) {
+      // TODO remove log and re throw pattern. Wrap in LitError
       console.error('Error getting signature', e);
       throw e;
     }
@@ -1630,7 +1623,7 @@ export class LitNodeClientNodeJs
       authMethods: params.authMethods,
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
       siweMessage: siweMessage,
-      curveType: LIT_CURVE.BLS,
+      curveType: 'BLS',
 
       // -- custom auths
       ...(params?.litActionIpfsId && {
@@ -1639,7 +1632,7 @@ export class LitNodeClientNodeJs
       ...(params?.litActionCode && { code: params.litActionCode }),
       ...(params?.jsParams && { jsParams: params.jsParams }),
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
-      signingScheme: LIT_CURVE.BLS,
+      // signingScheme: LIT_CURVE.BLS,
     };
 
     log(`[signSessionKey] body:`, body);
