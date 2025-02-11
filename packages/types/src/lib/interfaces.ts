@@ -59,6 +59,11 @@ export interface AuthSig {
   algo?: string;
 }
 
+// FIXME: no enum
+export enum AuthProvider {
+  Wagmi = 'wagmi',
+}
+
 export interface AuthCallbackParams extends LitActionSdkParams {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
@@ -101,6 +106,11 @@ export interface AuthCallbackParams extends LitActionSdkParams {
   walletConnectProjectId?: string;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+
+  /**
+   * The provider to use for the auth callback.  Defaults to `litConnectModal`.
+   */
+  provider?: AuthProvider;
 }
 
 /** ---------- Crypto ---------- */

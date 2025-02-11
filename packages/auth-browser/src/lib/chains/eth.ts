@@ -1,25 +1,29 @@
 import { Buffer as BufferPolyfill } from 'buffer';
-import depd from 'depd';
 
 import { hexlify } from '@ethersproject/bytes';
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
-
-// import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { verifyMessage } from '@ethersproject/wallet';
+import { injected, walletConnect } from '@wagmi/connectors';
+import {
+  connect as wagmiConnect,
+  disconnect as wagmiDisconnect,
+  getWalletClient,
+  Config,
+} from '@wagmi/core';
 import {
   EthereumProvider,
   default as WalletConnectProvider,
 } from '@walletconnect/ethereum-provider';
+import depd from 'depd';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
-
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import * as nacl from 'tweetnacl';
 import * as naclUtil from 'tweetnacl-util';
+import { http } from 'viem';
+import { createConfig } from 'wagmi';
 
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import {
   EITHER_TYPE,
   ELeft,
@@ -33,6 +37,7 @@ import {
   UnsupportedChainException,
   WrongNetworkException,
   WrongParamFormat,
+  LITEVMChain,
 } from '@lit-protocol/constants';
 import {
   isBrowser,
@@ -42,7 +47,7 @@ import {
   validateSessionSig,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
+import { AuthSig, AuthCallbackParams, AuthProvider } from '@lit-protocol/types';
 
 import LitConnectModal from '../connect-modal/modal';
 
@@ -51,6 +56,9 @@ const deprecated = depd('lit-js-sdk:auth-browser:index');
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
 }
+
+type RPCUrls = Record<string, string>;
+let litWCProvider: WalletConnectProvider | undefined;
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {
@@ -63,8 +71,6 @@ interface ConnectWeb3Result {
   account: string | any;
 }
 
-type RPCUrls = Record<string, string>;
-
 interface signAndSaveAuthParams {
   web3: Web3Provider;
   account: string;
@@ -73,6 +79,7 @@ interface signAndSaveAuthParams {
   expiration: string;
   uri?: string;
   nonce: string;
+  provider: AuthProvider;
 }
 
 interface IABI {
@@ -103,6 +110,7 @@ interface SignMessageParams {
   body: string;
   web3: Web3Provider;
   account: string;
+  provider: AuthProvider;
 }
 
 interface SignedMessage {
@@ -120,8 +128,7 @@ export type WALLET_ERROR_VALUES =
 
 /** ---------- Local Helpers ---------- */
 
-let litWCProvider: WalletConnectProvider | undefined;
-
+let wagmiConfig: Config;
 /**
  *
  * Convert chain hex id to chain name
@@ -280,6 +287,52 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
   return mustResign;
 };
 
+const getWagmiProvider = async (
+  chainId: number,
+  walletConnectProjectId?: string
+) => {
+  const chain = Object.values(LIT_CHAINS).find((c) => c.chainId === chainId);
+  if (!chain) {
+    throw new Error(`Chain ID ${chainId} not supported`);
+  }
+
+  const litChainToWagmiChain = (litChain: LITEVMChain) => ({
+    id: litChain.chainId,
+    name: litChain.name,
+    network: litChain.name.toLowerCase(),
+    nativeCurrency: {
+      name: litChain.name,
+      symbol: litChain.symbol,
+      decimals: litChain.decimals,
+    },
+    rpcUrls: {
+      default: { http: litChain.rpcUrls },
+      public: { http: litChain.rpcUrls },
+    },
+  });
+
+  const litChain = litChainToWagmiChain(chain);
+
+  const config = createConfig({
+    chains: [litChain],
+    transports: {
+      [litChain.id]: http(litChain.rpcUrls.default.http[0]),
+    },
+    connectors: [
+      injected(),
+      ...(walletConnectProjectId
+        ? [
+            walletConnect({
+              projectId: walletConnectProjectId,
+            }),
+          ]
+        : []),
+    ],
+  });
+
+  return config;
+};
+
 /**
  *
  * Get RPC Urls in the correct format
@@ -311,13 +364,64 @@ export const getRPCUrls = (): RPCUrls => {
 
 /**
  * @browserOnly
- * Connect to web 3
+ * Connect to web 3 using wagmi as provider
  *
- * @param { ConnectWeb3 }
+ * @param { connectWeb3WithWagmi }
  *
  * @return { Promise<ConnectWeb3Result> } web3, account
  */
-export const connectWeb3 = async ({
+export const connectWeb3WithWagmi = async ({
+  chainId = 1,
+  walletConnectProjectId,
+}: ConnectWeb3): Promise<ConnectWeb3Result> => {
+  // -- check if it's nodejs
+  if (isNode()) {
+    log('connectWeb3 is not supported in nodejs.');
+    return { web3: null, account: null };
+  }
+
+  log('getting provider via wagmi');
+
+  const config = await getWagmiProvider(chainId, walletConnectProjectId);
+  wagmiConfig = config;
+
+  const result = await wagmiConnect(config, {
+    connector: config.connectors[0],
+    chainId,
+  });
+
+  log('got provider');
+  if (!result) {
+    throw new Error('Failed to connect wallet');
+  }
+
+  const walletClient = await getWalletClient(config);
+
+  if (!walletClient) {
+    throw new Error('No wallet client found');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - Create Web3Provider from wallet client
+  const web3 = new Web3Provider(walletClient);
+
+  log('listing accounts');
+  const accounts = await web3.listAccounts();
+  log('accounts', accounts);
+  const account = ethers.utils.getAddress(accounts[0]);
+
+  return { web3, account };
+};
+
+/**
+ * @browserOnly
+ * Connect to web 3 using lit connect modal as provider
+ *
+ * @param { connectWeb3WithLitConnectModal }
+ *
+ * @return { Promise<ConnectWeb3Result> } web3, account
+ */
+export const connectWeb3WithLitConnectModal = async ({
   chainId = 1,
   walletConnectProjectId,
 }: ConnectWeb3): Promise<ConnectWeb3Result> => {
@@ -393,21 +497,20 @@ export const connectWeb3 = async ({
  *
  * @return { void }
  */
-export const disconnectWeb3 = (): void => {
+export const disconnectWeb3 = async (): Promise<void> => {
   if (isNode()) {
     log('disconnectWeb3 is not supported in nodejs.');
     return;
   }
-
-  // @ts-ignore
-  if (isBrowser() && litWCProvider) {
+  if (isBrowser()) {
     try {
-      litWCProvider.disconnect();
+      if (litWCProvider) {
+        litWCProvider.disconnect();
+      } else {
+        await wagmiDisconnect(wagmiConfig);
+      }
     } catch (err) {
-      log(
-        'Attempted to disconnect global WalletConnectProvider for lit-connect-modal',
-        err
-      );
+      log('Error disconnecting wallet:', err);
     }
   }
 
@@ -435,6 +538,7 @@ export const checkAndSignEVMAuthMessage = async ({
   uri,
   walletConnectProjectId,
   nonce,
+  provider = AuthProvider.Wagmi,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
@@ -469,10 +573,24 @@ export const checkAndSignEVMAuthMessage = async ({
   const selectedChain = LIT_CHAINS[chain];
   const expirationString = expiration ?? getDefaultExpiration();
 
-  const { web3, account } = await connectWeb3({
-    chainId: selectedChain.chainId,
-    walletConnectProjectId,
-  });
+  let web3: Web3Provider | undefined;
+  let account: string | undefined;
+
+  if (provider === AuthProvider.Wagmi) {
+    ({ web3, account } = await connectWeb3WithWagmi({
+      chainId: selectedChain.chainId,
+      walletConnectProjectId,
+    }));
+  } else {
+    throw new Error('Invalid provider');
+  }
+
+  if (!web3) {
+    throw new Error('Web3Provider is undefined');
+  }
+  if (!account) {
+    throw new Error('Account is undefined');
+  }
 
   log(`got web3 and account: ${account}`);
 
@@ -508,7 +626,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 4. case: (current chain id is NOT equal to selected chain) AND is set to switch chain
   if (currentChainIdOrError.result !== selectedChainId && switchChain) {
-    const provider = web3.provider as any;
+    const provider = web3?.provider as any;
 
     // -- (case) if able to switch chain id
     try {
@@ -573,6 +691,7 @@ export const checkAndSignEVMAuthMessage = async ({
         expiration: expirationString,
         uri,
         nonce,
+        provider,
       });
 
       authSigOrError = {
@@ -619,6 +738,7 @@ export const checkAndSignEVMAuthMessage = async ({
       expiration: expirationString,
       uri,
       nonce,
+      provider,
     });
     log('7. authSig:', authSig);
 
@@ -635,6 +755,7 @@ export const checkAndSignEVMAuthMessage = async ({
         expiration: expirationString,
         uri,
         nonce,
+        provider,
       });
     }
     log('8. mustResign:', mustResign);
@@ -659,6 +780,7 @@ export const checkAndSignEVMAuthMessage = async ({
       expiration: expirationString,
       uri,
       nonce,
+      provider,
     });
   }
 
@@ -677,6 +799,7 @@ const _signAndGetAuth = async ({
   expiration,
   uri,
   nonce,
+  provider,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   await signAndSaveAuthMessage({
     web3,
@@ -686,6 +809,7 @@ const _signAndGetAuth = async ({
     expiration,
     uri,
     nonce,
+    provider,
   });
 
   const authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
@@ -725,6 +849,7 @@ export const signAndSaveAuthMessage = async ({
   expiration,
   uri,
   nonce,
+  provider,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   // check if it's nodejs
   if (isNode()) {
@@ -765,6 +890,7 @@ export const signAndSaveAuthMessage = async ({
     body,
     web3,
     account: formattedAccount,
+    provider,
   });
 
   // -- 3. prepare auth message
@@ -810,6 +936,7 @@ export const signMessage = async ({
   body,
   web3,
   account,
+  provider,
 }: SignMessageParams): Promise<SignedMessage> => {
   // check if it's nodejs
   if (isNode()) {
@@ -823,7 +950,12 @@ export const signMessage = async ({
   // -- validate
   if (!web3 || !account) {
     log(`web3: ${web3} OR ${account} not found. Connecting web3..`);
-    const res = await connectWeb3({ chainId: 1 });
+    let res;
+    if (provider === AuthProvider.Wagmi) {
+      res = await connectWeb3WithWagmi({ chainId: 1 });
+    } else {
+      res = await connectWeb3WithLitConnectModal({ chainId: 1 });
+    }
     web3 = res.web3;
     account = res.account;
   }
