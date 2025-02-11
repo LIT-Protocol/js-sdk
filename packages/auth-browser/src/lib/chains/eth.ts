@@ -1,7 +1,7 @@
 import { Buffer as BufferPolyfill } from 'buffer';
 
 import { hexlify } from '@ethersproject/bytes';
-import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
+import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { verifyMessage } from '@ethersproject/wallet';
 import { injected, walletConnect } from '@wagmi/connectors';
@@ -25,19 +25,19 @@ import { http } from 'viem';
 import { createConfig } from 'wagmi';
 
 import {
+  EITHER_TYPE,
   ELeft,
   ERight,
   IEither,
-  EITHER_TYPE,
+  InvalidSignatureError,
   LIT_CHAINS,
   LOCAL_STORAGE_KEYS,
-  InvalidSignatureError,
-  WrongParamFormat,
-  UnsupportedChainException,
-  UnknownError,
-  RemovedFunctionError,
-  WrongNetworkException,
   LocalStorageItemNotFoundException,
+  UnknownError,
+  UnsupportedChainException,
+  WrongNetworkException,
+  WrongParamFormat,
+  LITEVMChain,
 } from '@lit-protocol/constants';
 import {
   isBrowser,
@@ -47,12 +47,7 @@ import {
   validateSessionSig,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import {
-  AuthSig,
-  AuthCallbackParams,
-  LITEVMChain,
-  AuthProvider,
-} from '@lit-protocol/types';
+import { AuthSig, AuthCallbackParams, AuthProvider } from '@lit-protocol/types';
 
 import LitConnectModal from '../connect-modal/modal';
 
@@ -61,16 +56,6 @@ const deprecated = depd('lit-js-sdk:auth-browser:index');
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
 }
-
-// log("naclUtil:", naclUtil);
-// log("nacl:", nacl);
-
-// -- fix import issues
-// let _nacl = nacl === undefined ? nacl['default'] : nacl;
-// let _naclUtil = naclUtil === undefined ? naclUtil['default'] : naclUtil;
-
-// log("_nacl:", _nacl);
-// log("_naclUtil:", _naclUtil);
 
 type RPCUrls = Record<string, string>;
 let litWCProvider: WalletConnectProvider | undefined;
@@ -302,39 +287,6 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
   return mustResign;
 };
 
-/** ---------- Exports ---------- */
-/**
- * @deprecated
- * encodeCallData has been removed.
- *
- * @param { IABIEncode }
- * @returns { string }
- */
-export const encodeCallData = deprecated.function(
-  ({ abi, functionName, functionParams }: IABIEncode): string => {
-    throw new RemovedFunctionError({}, 'encodeCallData has been removed.');
-  },
-  'encodeCallData has been removed.'
-);
-
-/**
- * @deprecated
- * (ABI) Decode call data
- *
- * @param { IABIDecode }
- * @returns { string }
- */
-export const decodeCallResult = deprecated.function(
-  ({ abi, functionName, data }: IABIDecode): ethers.utils.Result => {
-    const _interface = new ethers.utils.Interface(abi);
-
-    const decoded = _interface.decodeFunctionResult(functionName, data);
-
-    return decoded;
-  },
-  'decodeCallResult will be removed.'
-);
-
 const getWagmiProvider = async (
   chainId: number,
   walletConnectProjectId?: string
@@ -379,6 +331,35 @@ const getWagmiProvider = async (
   });
 
   return config;
+};
+
+/**
+ *
+ * Get RPC Urls in the correct format
+ * need to make it look like this:
+   ---
+   rpc: {
+        1: "https://mainnet.mycustomnode.com",
+        3: "https://ropsten.mycustomnode.com",
+        100: "https://dai.poa.network",
+        // ...
+    },
+   ---
+ *
+ * @returns
+ */
+export const getRPCUrls = (): RPCUrls => {
+  const rpcUrls: RPCUrls = {};
+
+  const keys: string[] = Object.keys(LIT_CHAINS);
+
+  for (const chainName of keys) {
+    const chainId = LIT_CHAINS[chainName].chainId;
+    const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
+    rpcUrls[chainId.toString()] = rpcUrl;
+  }
+
+  return rpcUrls;
 };
 
 /**
@@ -430,35 +411,6 @@ export const connectWeb3WithWagmi = async ({
   const account = ethers.utils.getAddress(accounts[0]);
 
   return { web3, account };
-};
-
-/**
- *
- * Get RPC Urls in the correct format
- * need to make it look like this:
-   ---
-   rpc: {
-        1: "https://mainnet.mycustomnode.com",
-        3: "https://ropsten.mycustomnode.com",
-        100: "https://dai.poa.network",
-        // ...
-    },
-   ---
- *
- * @returns
- */
-export const getRPCUrls = (): RPCUrls => {
-  const rpcUrls: RPCUrls = {};
-
-  const keys: string[] = Object.keys(LIT_CHAINS);
-
-  for (const chainName of keys) {
-    const chainId = LIT_CHAINS[chainName].chainId;
-    const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
-    rpcUrls[chainId.toString()] = rpcUrl;
-  }
-
-  return rpcUrls;
 };
 
 /**
@@ -586,7 +538,7 @@ export const checkAndSignEVMAuthMessage = async ({
   uri,
   walletConnectProjectId,
   nonce,
-  provider = AuthProvider.LitConnectModal,
+  provider = AuthProvider.Wagmi,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
@@ -626,11 +578,6 @@ export const checkAndSignEVMAuthMessage = async ({
 
   if (provider === AuthProvider.Wagmi) {
     ({ web3, account } = await connectWeb3WithWagmi({
-      chainId: selectedChain.chainId,
-      walletConnectProjectId,
-    }));
-  } else if (provider === AuthProvider.LitConnectModal) {
-    ({ web3, account } = await connectWeb3WithLitConnectModal({
       chainId: selectedChain.chainId,
       walletConnectProjectId,
     }));
@@ -1088,32 +1035,3 @@ export const signMessageAsync = async (
     return await signer.signMessage(messageBytes);
   }
 };
-
-/**
- *
- * Get the number of decimal places in a token
- *
- * @property { string } contractAddress The token contract address
- * @property { string } chain The chain on which the token is deployed
- *
- * @returns { number } The number of decimal places in the token
- */
-// export const decimalPlaces = async ({
-//     contractAddress,
-//     chain,
-// }: {
-//     contractAddress: string;
-//     chain: Chain;
-// }): Promise<number> => {
-//     const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
-
-//     const web3 = new JsonRpcProvider(rpcUrl);
-
-//     const contract = new Contract(
-//         contractAddress,
-//         (ABI_ERC20 as any).abi,
-//         web3
-//     );
-
-//     return await contract['decimals']();
-// };

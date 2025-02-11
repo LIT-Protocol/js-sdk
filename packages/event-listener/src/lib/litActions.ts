@@ -38,46 +38,30 @@ export async function executeLitAction({
   code,
   jsParams,
 }: ExecuteLitAction) {
-  let capacityDelegationAuthSig;
-  if (litNodeClient.config.litNetwork !== LIT_NETWORK.DatilDev) {
-    const capacityDelegationAuthSigRes =
-      await litNodeClient.createCapacityDelegationAuthSig({
-        dAppOwnerWallet: authSigner,
-        capacityTokenId,
-        delegateeAddresses: [pkpEthAddress],
-        uses: '1',
-      });
-    capacityDelegationAuthSig =
-      capacityDelegationAuthSigRes.capacityDelegationAuthSig;
-  }
-
   const expiration = new Date(Date.now() + ONE_MINUTE).toISOString();
-  const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
-    pkpPublicKey,
-    capabilityAuthSigs: capacityDelegationAuthSig
-      ? [capacityDelegationAuthSig]
-      : [],
-    authMethods: [
-      await EthWalletProvider.authenticate({
-        signer: authSigner,
-        litNodeClient: litNodeClient,
-        expiration,
-      }),
-    ],
-    resourceAbilityRequests: [
-      {
-        resource: new LitActionResource('*'),
-        ability: LIT_ABILITY.LitActionExecution,
-      },
-    ],
-    expiration,
-  });
 
   const executeJsResponse = await litNodeClient.executeJs({
     ipfsId,
     code,
     jsParams,
-    sessionSigs: pkpSessionSigs,
+    authContext: litNodeClient.getPkpAuthContext({
+      pkpPublicKey,
+      capabilityAuthSigs: [],
+      authMethods: [
+        await EthWalletProvider.authenticate({
+          signer: authSigner,
+          litNodeClient: litNodeClient,
+          expiration,
+        }),
+      ],
+      resourceAbilityRequests: [
+        {
+          resource: new LitActionResource('*'),
+          ability: LIT_ABILITY.LitActionExecution,
+        },
+      ],
+      expiration,
+    }),
   });
 
   return executeJsResponse;

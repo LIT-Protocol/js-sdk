@@ -1,13 +1,12 @@
 //@ts-ignore source map not found
 import {
-  BlsVariant,
   EcdsaVariant,
   InitOutput,
   //@ts-ignore source map not found
   getModule,
   initSync,
 } from './pkg/wasm-internal';
-export type { BlsVariant, EcdsaVariant } from './pkg/wasm-internal';
+export type { EcdsaVariant } from './pkg/wasm-internal';
 
 import * as wasmInternal from './pkg/wasm-internal';
 
@@ -18,6 +17,9 @@ let wasmSdkInstance: InitOutput | undefined;
 async function initWasm() {
   return initSync(getModule());
 }
+
+export type BlsSignatureShareJsonString =
+  `{"ProofOfPossession":{"identifier":"${string}","value":"${string}"}}`;
 
 /**
  * Initializes the wasm module and keeps the module in scope within
@@ -51,21 +53,27 @@ async function loadModules() {
 }
 
 /**
- * Combines bls signature shares to decrypt
+ * Combines BLS signature shares into a single signature.
+ * This is a raw mapping function to the WASM implementation.
  *
- * Supports:
- * - 12381G2
- * - 12381G1
- * @param {BlsVariant} variant
- * @param {(Uint8Array)[]} signature_shares
- * @returns {Uint8Array}
+ * @param {BlsSignatureShareJsonString[]} signature_shares - Array of signature shares in JSON string format
+ *
+ * Each share has format: {"ProofOfPossession":{"identifier":"xx","value":"yy"}}
+ * @returns {Promise<string>} Combined signature as hex string
+ *
+ * @example
+ * const shares = [
+ *   '{"ProofOfPossession":{"identifier":"7acf36...","value":"8b5c1c..."}}',
+ *   '{"ProofOfPossession":{"identifier":"7d734...","value":"aaa72a..."}}'
+ * ];
+ * const combinedSig = await blsCombine(shares);
+ * // Returns: "9619c87c08ed705b..."
  */
 export async function blsCombine(
-  variant: BlsVariant,
-  signature_shares: Uint8Array[]
-): Promise<Uint8Array> {
+  signature_shares: BlsSignatureShareJsonString[]
+): Promise<string> {
   await loadModules();
-  return wasmInternal.blsCombine(variant, signature_shares);
+  return wasmInternal.blsCombine(signature_shares);
 }
 
 /**
@@ -75,18 +83,16 @@ export async function blsCombine(
  * Supports:
  * - 12381G2
  * - 12381G1
- * @param {BlsVariant} variant
  * @param {Uint8Array} ciphertext
  * @param {Uint8Array} decryption_key
  * @returns {Uint8Array}
  */
 export async function blsDecrypt(
-  variant: BlsVariant,
   ciphertext: Uint8Array,
-  decryption_key: Uint8Array
+  signature_shares: BlsSignatureShareJsonString[]
 ): Promise<Uint8Array> {
   await loadModules();
-  return wasmInternal.blsDecrypt(variant, ciphertext, decryption_key);
+  return wasmInternal.blsDecrypt(ciphertext, signature_shares);
 }
 
 /**
@@ -95,20 +101,18 @@ export async function blsDecrypt(
  * Supports:
  * - 12381G2
  * - 12381G1
- * @param {BlsVariant} variant
  * @param {Uint8Array} encryption_key
  * @param {Uint8Array} message
  * @param {Uint8Array} identity
  * @returns {Uint8Array}
  */
 export async function blsEncrypt(
-  variant: BlsVariant,
   encryption_key: Uint8Array,
   message: Uint8Array,
   identity: Uint8Array
 ): Promise<Uint8Array> {
   await loadModules();
-  return wasmInternal.blsEncrypt(variant, encryption_key, message, identity);
+  return wasmInternal.blsEncrypt(encryption_key, message, identity);
 }
 
 /**
@@ -117,19 +121,17 @@ export async function blsEncrypt(
  * Supports:
  * - 12381G2
  * - 12381G1
- * @param {BlsVariant} variant
  * @param {Uint8Array} public_key
  * @param {Uint8Array} message
- * @param {Uint8Array} signature
+ * @param {string} signature
  */
 export async function blsVerify(
-  variant: BlsVariant,
   public_key: Uint8Array,
   message: Uint8Array,
-  signature: Uint8Array
+  signature: string
 ): Promise<void> {
   await loadModules();
-  return wasmInternal.blsVerify(variant, public_key, message, signature);
+  return wasmInternal.blsVerify(public_key, message, signature);
 }
 
 /**
@@ -208,7 +210,7 @@ export async function ecdsaVerify(
  * @param {Uint8Array} public_key
  * @param {[Uint8Array, Uint8Array, number]} signature
  */
-export async function ecdsaCombnieAndVerify(
+export async function ecdsaCombineAndVerify(
   variant: EcdsaVariant,
   pre_signature: Uint8Array,
   signature_shares: Uint8Array[],

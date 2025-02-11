@@ -1,4 +1,4 @@
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -20,10 +20,8 @@ export const testUseEoaSessionSigsToExecuteJsClaimMultipleKeys = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: eoaSessionSigs,
+    authContext: getEoaAuthContext(devEnv, alice),
     code: `(async () => {
       Lit.Actions.claimKey({keyId: "foo"});
       Lit.Actions.claimKey({keyId: "bar"});

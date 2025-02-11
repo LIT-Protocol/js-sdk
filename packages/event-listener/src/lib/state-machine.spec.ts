@@ -6,9 +6,20 @@ import { Listener } from './listeners';
 import { StateMachine } from './state-machine';
 import { BaseStateMachineParams } from './types';
 
+jest.mock('@lit-protocol/contracts-sdk', () => ({
+  LitContracts: jest.fn().mockImplementation(() => ({
+    connect: jest.fn(),
+  })),
+}));
+jest.mock('@lit-protocol/lit-node-client', () => ({
+  LitNodeClient: jest.fn().mockImplementation(() => ({
+    connect: jest.fn(),
+  })),
+}));
+
 const litContracts = new LitContracts();
 const litNodeClient = new LitNodeClient({
-  litNetwork: LIT_NETWORK.DatilDev,
+  litNetwork: LIT_NETWORK.NagaDev,
 });
 const stateMachineParams: BaseStateMachineParams = {
   litContracts,

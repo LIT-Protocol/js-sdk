@@ -1,20 +1,14 @@
 import {
   InvalidArgumentException,
-  RemovedFunctionError,
+  LIT_ABILITY_VALUES,
 } from '@lit-protocol/constants';
+import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
 import depd from 'depd';
 import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
-import { LIT_ABILITY_VALUES } from '@lit-protocol/constants';
-import { ILitResource, ISessionCapabilityObject } from '@lit-protocol/types';
-import {
-  AuthSig,
-  AttenuationsObject,
-  CID as CIDString,
-  PlainJSON,
-} from '../models';
-import { getRecapNamespaceAndAbility } from './utils';
+import { AttenuationsObject, CID as CIDString, PlainJSON } from '../models';
 import { sanitizeSiweMessage } from '../siwe/siwe-helper';
+import { getRecapNamespaceAndAbility } from './utils';
 
 const deprecated = depd('lit-js-sdk:auth-recap:session-capability-object');
 

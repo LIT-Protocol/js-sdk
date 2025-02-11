@@ -1,8 +1,5 @@
 // @ts-expect-error No types available for this package
-import { VError, Options } from '@openagenda/verror';
-import depd from 'depd';
-
-const deprecated = depd('lit-js-sdk:constants:errors');
+import { Options, VError } from '@openagenda/verror';
 
 export const LIT_ERROR_KIND = {
   Unknown: 'Unknown',
@@ -14,21 +11,8 @@ export const LIT_ERROR_KIND = {
   Parser: 'Parser',
   Serializer: 'Serializer',
   Timeout: 'Timeout',
+  Pricing: 'Pricing',
 } as const;
-
-/**
- * @deprecated Will be removed - Use LIT_ERROR_KIND instead
- * Alias for LIT_ERROR_KIND. Added for backwards compatibility.
- * See {@link LIT_ERROR_KIND}
- */
-export const LitErrorKind = new Proxy(LIT_ERROR_KIND, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitErrorKind is deprecated and will be removed in a future version. Use LIT_ERROR_KIND instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 interface ErrorConfig {
   name: string;
@@ -37,6 +21,11 @@ interface ErrorConfig {
 }
 
 export const LIT_ERROR: Record<string, ErrorConfig> = {
+  MAX_PRICE_TOO_LOW: {
+    name: 'MaxPriceTooLow',
+    code: 'max_price_too_low',
+    kind: LIT_ERROR_KIND.Pricing,
+  },
   INVALID_PARAM_TYPE: {
     name: 'InvalidParamType',
     code: 'invalid_param_type',
@@ -157,6 +146,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'param_null_error',
     kind: LIT_ERROR_KIND.Validation,
   },
+  CURVE_TYPE_NOT_FOUND_ERROR: {
+    name: 'CurveTypeNotFoundError',
+    code: 'curve_type_not_found_error',
+    kind: LIT_ERROR_KIND.Validation,
+  },
   UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR: {
     name: 'UnknownDecryptionAlgorithmTypeError',
     code: 'unknown_decryption_algorithm_type_error',
@@ -175,7 +169,7 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
   NODE_ERROR: {
     name: 'NodeError',
     code: 'node_error',
-    kind: LitErrorKind.Unknown,
+    kind: LIT_ERROR_KIND.Unknown,
   },
   WALLET_SIGNATURE_NOT_FOUND_ERROR: {
     name: 'WalletSignatureNotFoundError',
@@ -210,17 +204,17 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
   NETWORK_ERROR: {
     name: 'NetworkError',
     code: 'network_error',
-    kind: LitErrorKind.Unexpected,
+    kind: LIT_ERROR_KIND.Unexpected,
   },
   TRANSACTION_ERROR: {
     name: 'TransactionError',
     code: 'transaction_error',
-    kind: LitErrorKind.Unexpected,
+    kind: LIT_ERROR_KIND.Unexpected,
   },
   AUTOMATION_ERROR: {
     name: 'AutomationError',
     code: 'automation_error',
-    kind: LitErrorKind.Unexpected,
+    kind: LIT_ERROR_KIND.Unexpected,
   },
 };
 
@@ -244,15 +238,17 @@ type LitErrorConstructor = new (
   ...params: any[]
 ) => LitError;
 
+export type LitErrorClass = {
+  name: string;
+  code: string;
+  kind: string;
+};
+
 function createErrorClass({
   name,
   code,
   kind,
-}: {
-  name: string;
-  code: string;
-  kind: string;
-}): LitErrorConstructor {
+}: LitErrorClass): LitErrorConstructor {
   return class extends LitError {
     // VError has optional options parameter, but we make it required so thrower remembers to pass all the useful info
     constructor(options: Error | Options, message: string, ...params: any[]) {
@@ -313,6 +309,7 @@ export const {
   LocalStorageItemNotFoundException,
   LocalStorageItemNotRemovedException,
   LocalStorageItemNotSetException,
+  MaxPriceTooLow,
   MintingNotSupported,
   NetworkError,
   NoValidShares,
@@ -334,4 +331,5 @@ export const {
   WasmInitError,
   WrongNetworkException,
   WrongParamFormat,
+  CurveTypeNotFoundError,
 } = errorClasses;

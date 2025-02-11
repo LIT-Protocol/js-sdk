@@ -1,4 +1,4 @@
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
@@ -22,7 +22,7 @@ export const testUseEoaSessionSigsToEncryptDecryptFile = async (
   const blobArray = new Uint8Array(await blob.arrayBuffer());
 
   // set access control conditions for encrypting and decrypting
-  const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+  const accs = AccessControlConditions.getEvmBasicAccessControlConditions({
     userAddress: alice.wallet.address,
   });
 
@@ -59,20 +59,18 @@ export const testUseEoaSessionSigsToEncryptDecryptFile = async (
       encryptRes.dataToEncryptHash
     );
 
-  const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, alice, [
-    {
-      resource: new LitAccessControlConditionResource(accsResourceString),
-      ability: LIT_ABILITY.AccessControlConditionDecryption,
-    },
-  ]);
-
   // -- Decrypt the encrypted string
   const decriptedFile = await decryptToFile(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,
       dataToEncryptHash: encryptRes.dataToEncryptHash,
-      sessionSigs: eoaSessionSigs2,
+      authContext: getEoaAuthContext(devEnv, alice, [
+        {
+          resource: new LitAccessControlConditionResource(accsResourceString),
+          ability: LIT_ABILITY.AccessControlConditionDecryption,
+        },
+      ]),
       chain: 'ethereum',
     },
     devEnv.litNodeClient as unknown as ILitNodeClient

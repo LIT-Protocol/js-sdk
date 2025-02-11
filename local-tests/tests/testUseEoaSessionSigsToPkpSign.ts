@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 import { log } from '@lit-protocol/misc';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -15,12 +15,11 @@ export const testUseEoaSessionSigsToPkpSign = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
+  // const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
   const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
     toSign: alice.loveLetter,
     pubKey: alice.pkp.publicKey,
-    sessionSigs: eoaSessionSigs,
+    authContext: getEoaAuthContext(devEnv, alice),
   });
 
   devEnv.releasePrivateKeyFromUser(alice);
@@ -69,6 +68,9 @@ export const testUseEoaSessionSigsToPkpSign = async (
     alice.loveLetter,
     signature
   );
+
+  console.log('recoveredPubKey:', recoveredPubKey);
+
   if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {
     throw new Error(
       `Expected recovered public key to match runWithSessionSigs.publicKey`

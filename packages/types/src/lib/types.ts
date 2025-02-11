@@ -16,7 +16,6 @@ import {
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
-  BaseAuthenticateOptions,
 } from './interfaces';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
@@ -65,65 +64,15 @@ export type SupportedJsonRequests =
 
 export type Chain = string;
 
-/**
- *
- * The default required properties of all chains
- *
- * @typedef { Object } LITChainRequiredProps
- */
-export interface LITChainRequiredProps {
-  name: string;
-  symbol: string;
-  decimals: number;
-  rpcUrls: string[];
-  blockExplorerUrls: string[];
-  vmType: string;
-}
-
-/**
- * @typedef { Object } LITEVMChain
- * @property { string } contractAddress - The address of the token contract for the optional predeployed ERC1155 contract.  Only present on EVM chains.
- * @property { string } chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
- * @property { string } name - The human readable name of the chain
- */
-export type LITEVMChain = LITChainRequiredProps & {
-  contractAddress: string | null;
-  chainId: number;
-  type: string | null;
-};
-
-/**
- * @typedef { Object } LITSVMChain
- */
-export type LITSVMChain = LITChainRequiredProps;
-
-/**
- * @typedef { Object } LITCosmosChain
- * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
- */
-export type LITCosmosChain = LITChainRequiredProps & {
-  chainId: string;
-};
-
-/**
- * @typedef {Object} LITChain
- * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
- * @property {string} name - The human readable name of the chain
- */
-export type LITChain<T> = Record<string, T>;
-
-export type LIT_NETWORKS_KEYS = 'datil-dev' | 'datil-test' | 'datil' | 'custom';
+export type LIT_NETWORKS_KEYS = 'naga-dev' | 'custom';
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
-export type EncryptedSymmetricKey = string | Uint8Array | any;
 export type AcceptedFileType = File | Blob;
 
 /**
  * ========== Lit Auth Client ==========
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
-
-export type AuthenticateOptions = BaseAuthenticateOptions;
 
 /**
  * Type for expressing claim results being processed by a relay server
@@ -169,7 +118,7 @@ export type ClaimRequest<T = ClaimProcessor> = {
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
 /**
- * Result from network claim proccessing, used in {@link MintCallback}
+ * Result from network claim processing, used in {@link MintCallback}
  */
 export type ClaimResult<T = ClaimProcessor> = {
   signatures: Signature[];
@@ -180,14 +129,13 @@ export type ClaimResult<T = ClaimProcessor> = {
 
 export interface LitContract {
   address?: string;
-  abi?: any;
+  abi?: ethers.ContractInterface;
   name?: string;
 }
 
 /**
  * Defines a set of contract metadata for bootstrapping
- * network context and interfacing with contracts on Chroncile blockchain
- *
+ * network context and interfacing with contracts on Chronicle blockchain
  */
 export interface ExclusiveLitContractContext {
   Allowlist: LitContract;
@@ -198,13 +146,13 @@ export interface ExclusiveLitContractContext {
   PKPNFTMetadata: LitContract;
   PKPPermissions: LitContract;
   PubkeyRouter: LitContract;
-  RateLimitNFT: LitContract;
   Staking: LitContract;
-  StakingBalances: LitContract;
+  PriceFeed: LitContract;
 }
-export interface LitContractContext extends ExclusiveLitContractContext {
-  [index: string]: string | any;
-}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type LitContractContext = Record<string, string | any> &
+  ExclusiveLitContractContext;
 
 export type ContractName = keyof ExclusiveLitContractContext;
 
@@ -219,10 +167,11 @@ export interface LitContractResolverContext {
     | string
     | LitContractContext
     | ethers.providers.JsonRpcProvider
+    | ethers.ContractInterface
     | undefined
     | number;
   resolverAddress: string;
-  abi: any;
+  abi: ethers.ContractInterface;
   environment: number;
   contractContext?: LitContractContext;
   provider?: ethers.providers.JsonRpcProvider;
@@ -233,14 +182,14 @@ export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
 export type LitResourcePrefix =
   | 'lit-accesscontrolcondition'
   | 'lit-pkp'
-  | 'lit-ratelimitincrease'
+  | 'lit-paymentdelegation'
   | 'lit-litaction';
 
 export type LitAbility =
   | 'access-control-condition-decryption'
   | 'access-control-condition-signing'
   | 'pkp-signing'
-  | 'rate-limit-increase-auth'
+  | 'lit-payment-delegation'
   | 'lit-action-execution';
 
 export interface TokenInfo {
@@ -261,10 +210,10 @@ export interface TokenInfo {
   retries: _BigNumber { _hex: '0x03', _isBigNumber: true },
   timeout: _BigNumber { _hex: '0x3c', _isBigNumber: true }
  */
-export type EpochInfo = {
+export interface EpochInfo {
   epochLength: number;
   number: number;
   endTime: number;
   retries: number;
   timeout: number;
-};
+}

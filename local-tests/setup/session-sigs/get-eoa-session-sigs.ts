@@ -18,15 +18,7 @@ import {
 import { TinnyPerson } from '../tinny-person';
 import { TinnyEnvironment } from '../tinny-environment';
 
-/**
- * Retrieves the session signatures for an EOA in a given Tinny environment.
- *
- * @param devEnv - The Tinny environment object.
- * @param person - The Tinny person object representing the EOA.
- * @param resourceAbilityRequests - Optional. An array of resource ability requests. If not provided, default requests will be used.
- * @returns A promise that resolves to the session signatures.
- */
-export const getEoaSessionSigs = async (
+export const getEoaAuthContext = (
   devEnv: TinnyEnvironment,
   person: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
@@ -34,27 +26,20 @@ export const getEoaSessionSigs = async (
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
 
-  if (centralisation === 'decentralised') {
-    console.warn(
-      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
-    );
-  }
-
   // Use default resourceAbilityRequests if not provided
-  const _resourceAbilityRequests = resourceAbilityRequests || [
-    {
-      resource: new LitPKPResource('*'),
-      ability: LIT_ABILITY.PKPSigning,
-    },
-    {
-      resource: new LitActionResource('*'),
-      ability: LIT_ABILITY.LitActionExecution,
-    },
-  ];
-
-  const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
+  return {
+    pkpPublicKey: person.authMethodOwnedPkp.publicKey,
     chain: 'ethereum',
-    resourceAbilityRequests: _resourceAbilityRequests,
+    resourceAbilityRequests: resourceAbilityRequests || [
+      {
+        resource: new LitPKPResource('*'),
+        ability: LIT_ABILITY.PKPSigning,
+      },
+      {
+        resource: new LitActionResource('*'),
+        ability: LIT_ABILITY.LitActionExecution,
+      },
+    ],
     authNeededCallback: async ({
       uri,
       expiration,
@@ -94,14 +79,10 @@ export const getEoaSessionSigs = async (
     ...(centralisation === 'decentralised' && {
       capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
     }),
-  });
-
-  log('[getEoaSessionSigs]: ', getEoaSessionSigs);
-
-  return sessionSigs;
+  };
 };
 
-export const getEoaSessionSigsWithCapacityDelegations = async (
+export const getEoaAuthContextWithCapacityDelegations = (
   devEnv: TinnyEnvironment,
   fromWallet: ethers.Wallet,
   capacityDelegationAuthSig: AuthSig
@@ -109,13 +90,7 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
 
-  if (centralisation === 'decentralised') {
-    console.warn(
-      'Decentralised network detected. Adding superCapacityDelegationAuthSig to eoaSessionSigs'
-    );
-  }
-
-  const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
+  return {
     chain: 'ethereum',
     resourceAbilityRequests: [
       {
@@ -165,9 +140,5 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
         capacityDelegationAuthSig ?? devEnv.superCapacityDelegationAuthSig,
       ],
     }),
-  });
-
-  log('[getEoaSessionSigs]: ', getEoaSessionSigs);
-
-  return sessionSigs;
+  };
 };

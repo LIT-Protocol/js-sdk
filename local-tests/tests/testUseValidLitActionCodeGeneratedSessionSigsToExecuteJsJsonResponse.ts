@@ -1,4 +1,4 @@
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -9,10 +9,9 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse =
   async (devEnv: TinnyEnvironment) => {
     const alice = await devEnv.createRandomPerson();
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
     const res = await devEnv.litNodeClient.executeJs({
-      sessionSigs: litActionSessionSigs,
+      authContext: getLitActionAuthContext(devEnv, alice),
       code: `(async () => {
       console.log('hello world')
 
@@ -40,10 +39,12 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonRespons
       throw new Error(`Expected "response" in res`);
     }
 
+    // @ts-expect-error this is a string
     if (!res.response.startsWith('{')) {
       throw new Error(`Expected "response" to start with {`);
     }
 
+    // @ts-expect-error this is a string
     if (!res.response.endsWith('}')) {
       throw new Error(`Expected "response" to end with }`);
     }

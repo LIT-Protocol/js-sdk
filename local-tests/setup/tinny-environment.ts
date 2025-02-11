@@ -1,29 +1,42 @@
-import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   AuthSig,
-  CosmosAuthSig,
   LitContractContext,
   LitContractResolverContext,
-  SolanaAuthSig,
 } from '@lit-protocol/types';
+import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { TinnyPerson } from './tinny-person';
 
-import { ethers, Signer } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
-import { ShivaClient, TestnetClient } from './shiva-client';
-import { toErrorWithMessage } from './tinny-utils';
 import {
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
+  PRODUCT_IDS,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
+import { ethers, Signer } from 'ethers';
+import { ShivaClient, TestnetClient } from './shiva-client';
+import { toErrorWithMessage } from './tinny-utils';
 
 console.log('checking env', process.env['DEBUG']);
+
+const DEFAULT_ANVIL_PRIVATE_KEYS = [
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+  '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
+  '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
+  '0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a',
+  '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba',
+  '0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e',
+  '0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356',
+  '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
+  '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
+];
+
 export class TinnyEnvironment {
   public network: LIT_NETWORK_VALUES;
+  public customNetworkContext: any;
 
   /**
    * Environment variables used in the process.
@@ -42,11 +55,6 @@ export class TinnyEnvironment {
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
-    BOOTSTRAP_URLS: process.env['BOOTSTRAP_URLS']?.split(',') || [
-      'http://127.0.0.1:7470',
-      'http://127.0.0.1:7471',
-      'http://127.0.0.1:7472',
-    ],
     TIME_TO_RELEASE_KEY: parseInt(process.env['TIME_TO_RELEASE_KEY']) || 10000,
     RUN_IN_BAND: process.env['RUN_IN_BAND'] === 'true',
     RUN_IN_BAND_INTERVAL: parseInt(process.env['RUN_IN_BAND_INTERVAL']) || 5000,
@@ -62,58 +70,56 @@ export class TinnyEnvironment {
     // (7) "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955" (10000.000000000000000000 ETH)
     // (8) "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f" (10000.000000000000000000 ETH)
     // (9) "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720" (10000.000000000000000000 ETH)
-    PRIVATE_KEYS: process.env['PRIVATE_KEYS']?.split(',') || [
-      '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
-      '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
-      '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
-      '0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a',
-      '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba',
-      '0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e',
-      '0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356',
-      '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97',
-      '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
-    ],
+    PRIVATE_KEYS:
+      process.env['NETWORK'] === LIT_NETWORK.Custom
+        ? DEFAULT_ANVIL_PRIVATE_KEYS
+        : process.env['PRIVATE_KEYS']?.split(',') || DEFAULT_ANVIL_PRIVATE_KEYS,
     KEY_IN_USE: new Array(),
     NO_SETUP: process.env['NO_SETUP'] === 'true',
     USE_SHIVA: process.env['USE_SHIVA'] === 'true',
     NETWORK_CONFIG: process.env['NETWORK_CONFIG'] ?? './networkContext.json',
+    DEFAULT_MAX_PRICES:
+      process.env['DEFAULT_MAX_PRICES']?.split(',').map((v) => BigInt(v)) ??
+      null,
   };
 
   public litNodeClient: LitNodeClient;
   public contractsClient: LitContracts;
   public rpc: string;
   public superCapacityDelegationAuthSig: AuthSig;
-  public bareEthAuthSig: AuthSig;
-  public bareSolAuthSig: SolanaAuthSig = {
-    sig: '706047fcab06ada3cbfeb6990617c1705d59bafb20f5f1c8103d764fb5eaec297328d164e2b891095866b28acc1ab2df288a8729cf026228ef3c4970238b190a',
-    derivedVia: 'solana.signMessage',
-    signedMessage:
-      'I am creating an account to use Lit Protocol at 2024-05-08T16:39:44.481Z',
-    address: 'F7r6ENi6dqH8SnMYZdK3YxWAQ4cwfSNXZyMzbea5fbS1',
-  };
-
-  public bareCosmosAuthSig: CosmosAuthSig = {
-    sig: 'dE7J8oaWa8zECuMpaI/IVfJXGpLAO1paGLho+/dmtaQkN7Sh1lmJLAdYqZchDyYhQcg+nqfaoEOzLig3CPlosg==',
-    derivedVia: 'cosmos.signArbitrary',
-    signedMessage:
-      '8c857343720203e3f52606409e6818284186a614e74026998f89e7417eed4d4b',
-    address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
-  };
 
   public testnet: TestnetClient | undefined;
   //=========== PRIVATE MEMBERS ===========
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
 
-  constructor(network?: LIT_NETWORK_VALUES) {
+  constructor(
+    override?: Partial<ProcessEnvs> & { customNetworkContext?: any }
+  ) {
+    this.customNetworkContext = override?.customNetworkContext;
+
+    // Merge default processEnvs with custom overrides
+    this.processEnvs = {
+      ...this.processEnvs,
+      ...override,
+    };
+
+    // if there are only 1 private key, duplicate it to make it 10 cus we might not have enough
+    // for the setup process
+    if (this.processEnvs.PRIVATE_KEYS.length === 1) {
+      this.processEnvs.PRIVATE_KEYS = new Array(10).fill(
+        this.processEnvs.PRIVATE_KEYS[0]
+      );
+    }
+
     // -- setup network
-    this.network = network || this.processEnvs.NETWORK;
+    this.network = override?.NETWORK || this.processEnvs.NETWORK;
 
     if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
-        `Invalid network environment. Please use one of ${Object.values(
-          LIT_NETWORK
-        )}`
+        `Invalid network environment "${
+          this.network
+        }". Please use one of ${Object.values(LIT_NETWORK)}`
       );
     }
 
@@ -235,7 +241,8 @@ export class TinnyEnvironment {
 
     if (this.network === LIT_NETWORK.Custom || centralisation === 'unknown') {
       const networkContext =
-        this?.testnet?.ContractContext ?? this._contractContext;
+        this.customNetworkContext ||
+        (this?.testnet?.ContractContext ?? this._contractContext);
       this.litNodeClient = new LitNodeClient({
         litNetwork: LIT_NETWORK.Custom,
         rpcUrl: this.rpc,
@@ -258,22 +265,31 @@ export class TinnyEnvironment {
     } else {
       throw new Error(`Network not supported: "${this.network}"`);
     }
+    if (this.processEnvs.DEFAULT_MAX_PRICES) {
+      if (
+        this.processEnvs.DEFAULT_MAX_PRICES.length !==
+        Object.keys(PRODUCT_IDS).length
+      ) {
+        throw new Error(
+          `DEFAULT_MAX_PRICES must be set for all products; expected: ${
+            Object.keys(PRODUCT_IDS).length
+          }, got: ${this.processEnvs.DEFAULT_MAX_PRICES.length}`
+        );
+      }
 
-    if (globalThis.wasmExports) {
-      console.warn(
-        'WASM modules already loaded. Will override when connect is called'
+      this.litNodeClient.setDefaultMaxPrice(
+        'DECRYPTION',
+        this.processEnvs.DEFAULT_MAX_PRICES[0]
       );
-    }
 
-    if (globalThis.wasmECDSA) {
-      console.warn(
-        'WASM modules already loaded. wil override. when connect is called'
+      this.litNodeClient.setDefaultMaxPrice(
+        'SIGN',
+        this.processEnvs.DEFAULT_MAX_PRICES[1]
       );
-    }
 
-    if (globalThis.wasmSevSnpUtils) {
-      console.warn(
-        'WASM modules already loaded. wil override. when connect is called'
+      this.litNodeClient.setDefaultMaxPrice(
+        'LIT_ACTION',
+        this.processEnvs.DEFAULT_MAX_PRICES[2]
       );
     }
 
@@ -341,8 +357,8 @@ export class TinnyEnvironment {
    * Creates a random person.
    * @returns A promise that resolves to the created person.
    */
-  async createRandomPerson() {
-    return await this.createNewPerson('Alice');
+  async createRandomPerson(name?: string) {
+    return await this.createNewPerson(name || 'Alice');
   }
 
   setUnavailable = (network: LIT_NETWORK_VALUES) => {
@@ -373,13 +389,13 @@ export class TinnyEnvironment {
 
         await this.testnet.getTestnetConfig();
       } else if (this.network === LIT_NETWORK.Custom) {
-        const context = await import('./networkContext.json');
+        const context =
+          this.customNetworkContext || (await import('./networkContext.json'));
         this._contractContext = context;
       }
 
       await this.setupLitNodeClient();
       await this.setupSuperCapacityDelegationAuthSig();
-      await this.setupBareEthAuthSig();
     } catch (e) {
       const err = toErrorWithMessage(e);
       console.log(
@@ -387,34 +403,6 @@ export class TinnyEnvironment {
       );
       console.log(err.stack);
       process.exit(1);
-    }
-  }
-
-  /**
-   * Setup bare eth auth sig to test access control and decryption
-   */
-  async setupBareEthAuthSig() {
-    const privateKey = await this.getAvailablePrivateKey();
-    try {
-      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
-      const wallet = new ethers.Wallet(privateKey.privateKey, provider);
-
-      const toSign = await createSiweMessage({
-        walletAddress: wallet.address,
-        nonce: await this.litNodeClient.getLatestBlockhash(),
-        expiration: new Date(
-          Date.now() + 29 * 24 * 60 * 60 * 1000
-        ).toISOString(),
-        litNodeClient: this.litNodeClient,
-      });
-
-      this.bareEthAuthSig = await generateAuthSig({
-        signer: wallet,
-        toSign,
-      });
-    } finally {
-      // @ts-expect-error
-      this.releasePrivateKeyFromUser(privateKey);
     }
   }
 
@@ -444,7 +432,10 @@ export class TinnyEnvironment {
     const privateKey = await this.getAvailablePrivateKey();
 
     try {
-      const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+      const provider = new ethers.providers.StaticJsonRpcProvider({
+        url: this.rpc,
+        skipFetchSetup: true,
+      });
       const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
       const tx = await wallet.sendTransaction({
@@ -483,7 +474,7 @@ export class TinnyEnvironment {
         debug: this.processEnvs.DEBUG,
         rpc: this.rpc,
         customContext: networkContext,
-        network: 'custom',
+        network: LIT_NETWORK.Custom,
       });
     } else if (
       CENTRALISATION_BY_NETWORK[this.network] === 'decentralised' ||
@@ -550,18 +541,11 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
-    const capacityTokenId = (
-      await this.contractsClient.mintCapacityCreditsNFT({
-        requestsPerKilosecond: this.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
-      })
-    ).capacityTokenIdStr;
-
     try {
       this.superCapacityDelegationAuthSig = (
         await this.litNodeClient.createCapacityDelegationAuthSig({
           dAppOwnerWallet: wallet,
-          capacityTokenId: capacityTokenId,
+          // capacityTokenId: capacityTokenId,
           // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
           uses: '200',
         })

@@ -1,136 +1,118 @@
-use std::convert::TryFrom;
-
-use blsful::{
-    Bls12381G1Impl, Bls12381G2Impl, BlsSignatureImpl, PublicKey, Signature, SignatureSchemes,
-    TimeCryptCiphertext,
-};
-use elliptic_curve::group::GroupEncoding;
-use js_sys::Uint8Array;
-use serde::Deserialize;
-use tsify::Tsify;
 use wasm_bindgen::prelude::*;
+use js_sys::Uint8Array;
+use serde::{ Deserialize };
+use base64_light::{ base64_decode, base64_encode_bytes };
+use tsify::Tsify;
+use lit_bls_wasm::{
+  encrypt,
+  decrypt_with_signature_shares,
+  combine_signature_shares,
+  verify_signature,
+};
 
-use crate::abi::{from_js, from_uint8array, into_uint8array, JsResult};
+type JsResult<T> = Result<T, JsValue>;
 
-#[derive(Tsify, Deserialize)]
-#[tsify(from_wasm_abi)]
-pub enum BlsVariant {
-    Bls12381G1,
-    Bls12381G2,
-}
-
-struct Bls<C>(C);
-
-impl<C: BlsSignatureImpl> Bls<C>
-where
-    C::PublicKey: TryFrom<Vec<u8>>,
-    C::Signature: TryFrom<Vec<u8>>,
-    C::SignatureShare: TryFrom<Vec<u8>>,
-{
-    pub fn combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-        let signature_shares = signature_shares
-            .into_iter()
-            .map(from_uint8array)
-            .collect::<JsResult<Vec<_>>>()?;
-
-        let signature = C::core_combine_signature_shares(&signature_shares)?;
-
-        into_uint8array(signature.to_bytes())
-    }
-
-    pub fn verify(
-        public_key: Uint8Array,
-        message: Uint8Array,
-        signature: Uint8Array,
-    ) -> JsResult<()> {
-        let public_key = from_uint8array(public_key)?;
-        let signature = from_uint8array(signature)?;
-        let message = from_js::<Vec<u8>>(message)?;
-
-        let signature = Signature::<C>::ProofOfPossession(signature);
-
-        signature.verify(&PublicKey(public_key), message)?;
-
-        Ok(())
-    }
-
-    pub fn encrypt(
-        encryption_key: Uint8Array,
-        message: Uint8Array,
-        identity: Uint8Array,
-    ) -> JsResult<Uint8Array> {
-        let encryption_key = from_uint8array(encryption_key)?;
-        let encryption_key = PublicKey::<C>(encryption_key);
-
-        let message = from_js::<Vec<u8>>(message)?;
-        let identity = from_js::<Vec<u8>>(identity)?;
-
-        let ciphertext = encryption_key.encrypt_time_lock(
-            SignatureSchemes::ProofOfPossession,
-            message,
-            identity,
-        )?;
-        let ciphertext = serde_bare::to_vec(&ciphertext)?;
-
-        into_uint8array(ciphertext)
-    }
-
-    pub fn decrypt(ciphertext: Uint8Array, decryption_key: Uint8Array) -> JsResult<Uint8Array> {
-        let decryption_key = from_uint8array(decryption_key)?;
-
-        let ciphertext = from_js::<Vec<u8>>(ciphertext)?;
-        let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(&ciphertext)?;
-
-        let message = ciphertext.decrypt(&Signature::ProofOfPossession(decryption_key));
-        let message =
-            Option::<Vec<u8>>::from(message).ok_or_else(|| JsError::new("decryption failed"))?;
-
-        into_uint8array(message)
-    }
-}
-
+// -----------------------------------------------------------------------
+// 1. blsCombine
+// -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsCombine")]
-pub fn bls_combine(variant: BlsVariant, signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    match variant {
-        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::combine(signature_shares),
-        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::combine(signature_shares),
-    }
+pub fn bls_combine(signature_shares: JsValue) -> Result<String, String> {
+  let shares: Vec<String> = serde_wasm_bindgen
+    ::from_value(signature_shares)
+    .map_err(|e| format!("Failed to parse shares: {}", e))?;
+
+  let combined_signature = combine_signature_shares(
+    serde_wasm_bindgen::to_value(&shares).unwrap()
+  ).map_err(|e| format!("Failed to combine signature shares: {}", e))?;
+
+  Ok(combined_signature)
 }
 
+// -----------------------------------------------------------------------
+// 2. blsVerify
+// -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsVerify")]
 pub fn bls_verify(
-    variant: BlsVariant,
-    public_key: Uint8Array,
-    message: Uint8Array,
-    signature: Uint8Array,
+  public_key: Uint8Array, // buffer, but will be converted to hex string
+  message: Uint8Array, // buffer, but will be converted to hex string
+  signature: String // this is the result from bls_combine. It's a hex string
 ) -> JsResult<()> {
-    match variant {
-        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::verify(public_key, message, signature),
-        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::verify(public_key, message, signature),
-    }
+  // check if signature is a valid hex string
+  if !signature.chars().all(|c| c.is_ascii_hexdigit()) {
+    return Err(JsValue::from_str("Signature must be a hex string"));
+  }
+  // convert public_key to hex string
+  let public_key_hex = hex::encode(public_key.to_vec());
+
+  // convert message to base64 string
+  let message_base64 = base64_encode_bytes(&message.to_vec());
+
+  // Validate all inputs are hex
+  if !public_key_hex.chars().all(|c| c.is_ascii_hexdigit()) {
+    return Err(JsValue::from_str("Public key must be a hex string"));
+  }
+
+  if !signature.chars().all(|c| c.is_ascii_hexdigit()) {
+    return Err(JsValue::from_str("Signature must be a hex string"));
+  }
+
+  let signature_bytes = hex
+    ::decode(&signature)
+    .map_err(|e|
+      JsValue::from_str(&format!("Failed to decode signature hex: {}", e))
+    )?;
+
+  let signature_base64 = base64_encode_bytes(&signature_bytes);
+
+  verify_signature(&public_key_hex, &message_base64, &signature_base64).map_err(
+    |e| JsValue::from_str(&format!("Verification failed: {}", e))
+  )
 }
 
+// -----------------------------------------------------------------------
+// 3. blsEncrypt
+// -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsEncrypt")]
 pub fn bls_encrypt(
-    variant: BlsVariant,
-    encryption_key: Uint8Array,
-    message: Uint8Array,
-    identity: Uint8Array,
+  encryption_key: Uint8Array,
+  message: Uint8Array,
+  identity: Uint8Array
 ) -> JsResult<Uint8Array> {
-    match variant {
-        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::encrypt(encryption_key, message, identity),
-        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::encrypt(encryption_key, message, identity),
-    }
+  let encryption_key_hex = hex::encode(encryption_key.to_vec());
+  let message_base64 = base64_encode_bytes(&message.to_vec());
+  let identity_base64 = base64_encode_bytes(&identity.to_vec());
+
+  let ciphertext = encrypt(
+    &encryption_key_hex,
+    &message_base64,
+    &identity_base64
+  ).map_err(|e| JsValue::from_str(&format!("Encryption failed: {}", e)))?;
+
+  let decoded_ciphertext = base64_decode(&ciphertext);
+
+  Ok(Uint8Array::from(decoded_ciphertext.as_slice()))
 }
 
+// -----------------------------------------------------------------------
+// 4. blsDecrypt
+// -----------------------------------------------------------------------
 #[wasm_bindgen(js_name = "blsDecrypt")]
 pub fn bls_decrypt(
-    variant: BlsVariant,
-    ciphertext: Uint8Array,
-    decryption_key: Uint8Array,
+  ciphertext: Uint8Array,
+  signature_shares: JsValue // this is the result from bls_combine. It's a hex string
 ) -> JsResult<Uint8Array> {
-    match variant {
-        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::decrypt(ciphertext, decryption_key),
-        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::decrypt(ciphertext, decryption_key),
-    }
+  let ciphertext_base64 = base64_encode_bytes(&ciphertext.to_vec());
+
+  let shares: Vec<String> = serde_wasm_bindgen
+    ::from_value(signature_shares)
+    .map_err(|e| format!("[blsDecrypt] Failed to parse shares: {}", e))?;
+
+  let plaintext = decrypt_with_signature_shares(
+    &ciphertext_base64,
+    serde_wasm_bindgen::to_value(&shares).unwrap()
+  ).map_err(|e| JsValue::from_str(&format!("Decryption failed: {}", e)))?;
+
+  let decoded_plaintext = base64_decode(&plaintext);
+
+  Ok(Uint8Array::from(decoded_plaintext.as_slice()))
 }

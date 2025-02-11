@@ -4,22 +4,19 @@ type ContractAbis = {
   erc20: string;
   backupRecovery: string;
   staking: string;
-  stakingBalances: string;
-  rateLimitNft: string;
   pkpnft: string;
   pubkeyRouter: string;
   pkpPermissions: string;
   pkpHelper: string;
   contractResolver: string;
   paymentDelegation: string;
+  priceFeed: string;
 };
 
 type ContractAddresses = {
   litToken: string;
   backupRecovery: string;
   staking: string;
-  stakingBalances: string;
-  rateLimitNft: string;
   pkpnft: string;
   pubkeyRouter: string;
   pkpPermissions: string;
@@ -27,6 +24,7 @@ type ContractAddresses = {
   contractResolver: string;
   keyDeriver: string;
   paymentDelegation: string;
+  priceFeed: string;
 };
 
 type TestNetCreateRequest = {
@@ -38,7 +36,6 @@ type TestNetCreateRequest = {
   existingConfigPath: string | null;
   which: string | null;
   ecdsaRoundTimeout: string | null;
-  enableRateLimiting: string | null;
 };
 
 type TestNetInfo = {
