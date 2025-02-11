@@ -1,13 +1,17 @@
-import {
-  AuthMethod,
-  BaseProviderOptions,
-  OAuthProviderOptions,
-} from '@lit-protocol/types';
+import { ethers } from 'ethers';
+import * as jose from 'jose';
+
 import {
   AUTH_METHOD_TYPE,
   UnauthorizedException,
   UnknownError,
 } from '@lit-protocol/constants';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  OAuthProviderOptions,
+} from '@lit-protocol/types';
+
 import {
   prepareLoginUrl,
   parseLoginParams,
@@ -15,8 +19,6 @@ import {
   decode,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
-import { ethers } from 'ethers';
-import * as jose from 'jose';
 
 export default class AppleProvider extends BaseProvider {
   /**

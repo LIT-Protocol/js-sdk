@@ -67,6 +67,7 @@
     "pako": "^2.1.0",
     "siwe": "^2.3.2",
     "siwe-recap": "0.0.2-alpha.0",
+    "stytch": "^12.4.0",
     "tslib": "^2.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",

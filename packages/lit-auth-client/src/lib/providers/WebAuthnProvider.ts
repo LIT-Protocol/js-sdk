@@ -1,24 +1,26 @@
 import {
-  AuthMethod,
-  BaseProviderOptions,
-  MintRequestBody,
-  WebAuthnProviderOptions,
-} from '@lit-protocol/types';
+  PublicKeyCredentialCreationOptionsJSON,
+  UserVerificationRequirement,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/typescript-types';
+import base64url from 'base64url';
+import { ethers } from 'ethers';
+
 import {
   AUTH_METHOD_TYPE,
   RemovedFunctionError,
   UnknownError,
   WrongParamFormat,
 } from '@lit-protocol/constants';
-import { ethers } from 'ethers';
 import {
-  PublicKeyCredentialCreationOptionsJSON,
-  UserVerificationRequirement,
-} from '@simplewebauthn/typescript-types';
-import base64url from 'base64url';
+  AuthMethod,
+  BaseProviderOptions,
+  MintRequestBody,
+  WebAuthnProviderOptions,
+} from '@lit-protocol/types';
+
 import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 import { BaseProvider } from './BaseProvider';
-import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
 export default class WebAuthnProvider extends BaseProvider {
   /**
@@ -228,8 +230,8 @@ export default class WebAuthnProvider extends BaseProvider {
 
       // Parse the buffer to reconstruct the object
       // Buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
-      const authenticationResponse: any =
-        parseAuthenticatorData(attestationBuffer);
+      const authenticationResponse = parseAuthenticatorData(attestationBuffer);
+      assertAuthenticationResponse(authenticationResponse);
 
       // Public key in cose format to register the auth method
       const publicKeyCoseBuffer: Buffer = authenticationResponse
@@ -250,4 +252,35 @@ export default class WebAuthnProvider extends BaseProvider {
 
     return publicKey;
   }
+}
+
+function assertAuthenticationResponse(
+  authenticationResponse: unknown
+): asserts authenticationResponse is {
+  attestedCredentialData: {
+    credentialPublicKey: Buffer;
+  };
+} {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  if (
+    typeof authenticationResponse !== 'object' ||
+    authenticationResponse === null ||
+    !('attestedCredentialData' in authenticationResponse) ||
+    typeof (authenticationResponse as any).attestedCredentialData !==
+      'object' ||
+    (authenticationResponse as any).attestedCredentialData === null ||
+    !(
+      'credentialPublicKey' in
+      (authenticationResponse as any).attestedCredentialData
+    ) ||
+    !(
+      (authenticationResponse as any).attestedCredentialData
+        .credentialPublicKey instanceof Buffer
+    )
+  ) {
+    throw new Error(
+      'authenticationResponse does not match the expected structure: { attestedCredentialData: { credentialPublicKey: Buffer } }'
+    );
+  }
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }

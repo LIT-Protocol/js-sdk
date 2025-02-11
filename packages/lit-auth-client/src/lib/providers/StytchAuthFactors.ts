@@ -1,6 +1,14 @@
+import { ethers } from 'ethers';
+
 import { WrongParamFormat } from '@lit-protocol/constants';
 import { StytchToken } from '@lit-protocol/types';
-import { ethers } from 'ethers';
+
+import type {
+  AuthenticationFactor,
+  AuthenticatorAppFactor,
+  EmailFactor,
+  PhoneNumberFactor,
+} from 'stytch';
 
 export type FactorParser = 'email' | 'sms' | 'whatsApp' | 'totp';
 
@@ -9,10 +17,9 @@ export const emailOtpAuthFactorParser = (
   provider: string
 ): string => {
   const session = parsedToken[provider];
-  const authFactors: any[] = session['authentication_factors'];
-  let authFactor = authFactors.find((value, _index, _obj) => {
-    if (value.email_factor) return value;
-  });
+  const authFactors: AuthenticationFactor[] = session['authentication_factors'];
+
+  const authFactor = authFactors.find((value) => !!value.email_factor);
 
   if (!authFactor) {
     throw new WrongParamFormat(
@@ -25,6 +32,9 @@ export const emailOtpAuthFactorParser = (
       'Could not find email authentication info in session'
     );
   }
+
+  const emailFactor = authFactor.email_factor as EmailFactor;
+
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
     throw new WrongParamFormat(
@@ -38,7 +48,7 @@ export const emailOtpAuthFactorParser = (
     );
   }
 
-  const userId = authFactor.email_factor.email_address;
+  const userId = emailFactor.email_address;
   const authMethodId = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes(
       `${userId.toLowerCase()}:${audience.toLowerCase()}`
@@ -53,10 +63,8 @@ export const smsOtpAuthFactorParser = (
   provider: string
 ): string => {
   const session = parsedToken[provider];
-  const authFactors: any[] = session['authentication_factors'];
-  let authFactor = authFactors.find((value, _index, _obj) => {
-    if (value.phone_number_factor) return value;
-  });
+  const authFactors: AuthenticationFactor[] = session['authentication_factors'];
+  const authFactor = authFactors.find((value) => !!value.phone_number_factor);
 
   if (!authFactor) {
     throw new WrongParamFormat(
@@ -66,9 +74,12 @@ export const smsOtpAuthFactorParser = (
           provider,
         },
       },
-      'Could not find email authentication info in session'
+      'Could not find phone authentication info in session'
     );
   }
+
+  const phoneNumberFactor = authFactor.phone_number_factor as PhoneNumberFactor;
+
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
     throw new WrongParamFormat(
@@ -82,7 +93,7 @@ export const smsOtpAuthFactorParser = (
     );
   }
 
-  const userId = authFactor.phone_number_factor.phone_number;
+  const userId = phoneNumberFactor.phone_number;
   const authMethodId = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes(
       `${userId.toLowerCase()}:${audience.toLowerCase()}`
@@ -97,10 +108,8 @@ export const whatsAppOtpAuthFactorParser = (
   provider: string
 ): string => {
   const session = parsedToken[provider];
-  const authFactors: any[] = session['authentication_factors'];
-  let authFactor = authFactors.find((value, _index, _obj) => {
-    if (value.phone_number_factor) return value;
-  });
+  const authFactors: AuthenticationFactor[] = session['authentication_factors'];
+  const authFactor = authFactors.find((value) => !!value.phone_number_factor);
 
   if (!authFactor) {
     throw new WrongParamFormat(
@@ -110,9 +119,12 @@ export const whatsAppOtpAuthFactorParser = (
           provider,
         },
       },
-      'Could not find email authentication info in session'
+      'Could not find phone authentication info in session'
     );
   }
+
+  const phoneNumberFactor = authFactor.phone_number_factor as PhoneNumberFactor;
+
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
     throw new WrongParamFormat(
@@ -126,7 +138,7 @@ export const whatsAppOtpAuthFactorParser = (
     );
   }
 
-  const userId = authFactor.phone_number_factor.phone_number;
+  const userId = phoneNumberFactor.phone_number;
   const authMethodId = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes(
       `${userId.toLowerCase()}:${audience.toLowerCase()}`
@@ -141,10 +153,10 @@ export const totpAuthFactorParser = (
   provider: string
 ): string => {
   const session = parsedToken[provider];
-  const authFactors: any[] = session['authentication_factors'];
-  let authFactor = authFactors.find((value, _index, _obj) => {
-    if (value.phone_number_factor) return value;
-  });
+  const authFactors: AuthenticationFactor[] = session['authentication_factors'];
+  const authFactor = authFactors.find(
+    (value) => !!value.authenticator_app_factor
+  );
 
   if (!authFactor) {
     throw new WrongParamFormat(
@@ -154,9 +166,13 @@ export const totpAuthFactorParser = (
           provider,
         },
       },
-      'Could not find email authentication info in session'
+      'Could not find authenticator app authentication info in session'
     );
   }
+
+  const authenticatorAppFactor =
+    authFactor.authenticator_app_factor as AuthenticatorAppFactor;
+
   const audience = (parsedToken['aud'] as string[])[0];
   if (!audience) {
     throw new WrongParamFormat(
@@ -170,7 +186,7 @@ export const totpAuthFactorParser = (
     );
   }
 
-  const userId = authFactor.authenticator_app_factor.totp_id;
+  const userId = authenticatorAppFactor.totp_id;
   const authMethodId = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes(
       `${userId.toLowerCase()}:${audience.toLowerCase()}`

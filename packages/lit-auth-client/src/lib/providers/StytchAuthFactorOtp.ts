@@ -24,7 +24,6 @@ import {
 export default class StytchAuthFactorOtpProvider<
   T extends FactorParser
 > extends BaseProvider {
-  private _params: StytchOtpProviderOptions;
   private _factor: T;
   private static _provider: string = 'https://stytch.com/session';
 
@@ -34,7 +33,6 @@ export default class StytchAuthFactorOtpProvider<
     factor: T
   ) {
     super(params);
-    this._params = config;
     this._factor = factor;
   }
 
@@ -144,7 +142,7 @@ export default class StytchAuthFactorOtpProvider<
   }
 
   private static _resolveAuthFactor(factor: FactorParser): {
-    parser: Function;
+    parser: (parsedToken: StytchToken, provider: string) => string;
     authMethodType: AUTH_METHOD_TYPE_VALUES;
   } {
     switch (factor) {

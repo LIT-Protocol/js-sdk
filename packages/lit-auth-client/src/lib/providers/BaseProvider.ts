@@ -1,11 +1,9 @@
-import depd from 'depd';
 import { ethers } from 'ethers';
 
 import {
   AUTH_METHOD_TYPE_VALUES,
   InvalidArgumentException,
   LitNodeClientNotReadyError,
-  ParamsMissingError,
   UnknownError,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -23,8 +21,6 @@ import {
 } from '@lit-protocol/types';
 
 import { validateMintRequestBody } from '../validators';
-
-const deprecated = depd('lit-js-sdk:auth-browser:base-provider');
 
 export abstract class BaseProvider {
   /**
@@ -65,7 +61,7 @@ export abstract class BaseProvider {
    */
   abstract getAuthMethodId(
     authMethod: AuthMethod,
-    options?: any
+    options?: unknown
   ): Promise<string>;
 
   /**

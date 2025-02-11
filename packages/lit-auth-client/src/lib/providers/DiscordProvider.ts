@@ -1,13 +1,16 @@
-import {
-  AuthMethod,
-  BaseProviderOptions,
-  OAuthProviderOptions,
-} from '@lit-protocol/types';
+import { ethers } from 'ethers';
+
 import {
   AUTH_METHOD_TYPE,
   UnauthorizedException,
   UnknownError,
 } from '@lit-protocol/constants';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  OAuthProviderOptions,
+} from '@lit-protocol/types';
+
 import { BaseProvider } from './BaseProvider';
 import {
   prepareLoginUrl,
@@ -16,7 +19,6 @@ import {
   decode,
   LIT_LOGIN_GATEWAY,
 } from '../utils';
-import { ethers } from 'ethers';
 
 export default class DiscordProvider extends BaseProvider {
   /**
