@@ -75,7 +75,7 @@ In the test function, a `devEnv` variable will automatically be added as the fir
 ```ts
 export const testExample = async (devEnv: TinnyEnvironment) => {
 
-  // ========== Enviorment ==========
+  // ========== Environment ==========
   // This test will be skipped if we are testing on the DatilDev network
   devEnv.setUnavailable(LIT_NETWORK.DatilDev);
 
