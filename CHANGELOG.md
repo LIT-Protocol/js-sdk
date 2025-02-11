@@ -84,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.84] - 2023-03-16
 
-- [#47](https://github.com/LIT-Protocol/js-sdk/pull/47) Upgraded `@walletconnect/ethereum-provider` to version `2.5.1` and added `@web3modal/standalone` as a depdency to the `auth-browser` repo
+- [#47](https://github.com/LIT-Protocol/js-sdk/pull/47) Upgraded `@walletconnect/ethereum-provider` to version `2.5.1` and added `@web3modal/standalone` as a dependency to the `auth-browser` repo
 
 ## [2.1.63] - 2023-03-13
 
