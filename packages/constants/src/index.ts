@@ -16,6 +16,9 @@ export * from './lib/errors';
 // ----------- Utils -----------
 export * from './lib/utils/utils';
 
+// ----------- Types -----------
+export * from './lib/constants/types';
+
 // ----------- ABIs -----------
 import * as ABI_ERC20 from './lib/abis/ERC20.json';
 

@@ -23,7 +23,7 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     litNodeClient: devEnv.litNodeClient,
   });
 
-  const pkps = await ethWalletProvider.fetchPKPsThroughRelayer(
+  const pkps = await ethWalletProvider.fetchPKPs(
     alice.authMethod
   );
 
