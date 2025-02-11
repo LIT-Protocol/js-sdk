@@ -6,5 +6,5 @@ For detailed implementation information, see the [rust](./rust/README.md) direct
 
 ### Building
 
-This package contanis scripts for building the `rust` souce into `WebAssembly` and correctly encoding the binary artifact.
+This package contanis scripts for building the `rust` source into `WebAssembly` and correctly encoding the binary artifact.
 To perform the entire build / encoding operations you can run `rust:build`. If you wish to only produce the `WebAssembly` binding you can see the `rust` [README](./rust//README.md) for build information.
