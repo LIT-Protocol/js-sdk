@@ -3,7 +3,7 @@
 Our rust implementations for
 
 - [ECDSA Signature Combining](./src/ecdsa.rs)
-- [BLS Singature Combining](./src/bls.rs)
+- [BLS Signature Combining](./src/bls.rs)
 - [SEV SNP Verification](./src/sev_snp.rs)
 
 ### 🛠️ Build with `wasm-pack build`
