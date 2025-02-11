@@ -12,18 +12,18 @@ import {
   StytchToken,
 } from '@lit-protocol/types';
 
-import { BaseProvider } from './BaseProvider';
+import { BaseAuthenticator } from '../BaseAuthenticator';
 import {
   FactorParser,
   emailOtpAuthFactorParser,
   smsOtpAuthFactorParser,
   totpAuthFactorParser,
   whatsAppOtpAuthFactorParser,
-} from './StytchAuthFactors';
+} from './parsers';
 
-export default class StytchAuthFactorOtpProvider<
+export class StytchAuthFactorOtpAuthenticator<
   T extends FactorParser
-> extends BaseProvider {
+> extends BaseAuthenticator {
   private _factor: T;
   private static _provider: string = 'https://stytch.com/session';
 
@@ -64,13 +64,16 @@ export default class StytchAuthFactorOtpProvider<
       }
 
       const parsedToken: StytchToken =
-        StytchAuthFactorOtpProvider._parseJWT(accessToken);
-      const factorParser = StytchAuthFactorOtpProvider._resolveAuthFactor(
+        StytchAuthFactorOtpAuthenticator._parseJWT(accessToken);
+      const factorParser = StytchAuthFactorOtpAuthenticator._resolveAuthFactor(
         this._factor
       );
 
       try {
-        factorParser.parser(parsedToken, StytchAuthFactorOtpProvider._provider);
+        factorParser.parser(
+          parsedToken,
+          StytchAuthFactorOtpAuthenticator._provider
+        );
       } catch (e) {
         reject(e);
       }
@@ -91,7 +94,7 @@ export default class StytchAuthFactorOtpProvider<
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return StytchAuthFactorOtpProvider.authMethodId(authMethod);
+    return StytchAuthFactorOtpAuthenticator.authMethodId(authMethod);
   }
 
   /**
@@ -107,7 +110,7 @@ export default class StytchAuthFactorOtpProvider<
     return new Promise<string>((resolve, reject) => {
       const accessToken = authMethod.accessToken;
       const parsedToken: StytchToken =
-        StytchAuthFactorOtpProvider._parseJWT(accessToken);
+        StytchAuthFactorOtpAuthenticator._parseJWT(accessToken);
       let factor: FactorParser = 'email';
       switch (authMethod.authMethodType) {
         case AUTH_METHOD_TYPE.StytchEmailFactorOtp:

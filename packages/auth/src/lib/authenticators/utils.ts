@@ -8,12 +8,12 @@ import {
 import { getLoggerbyId } from '@lit-protocol/misc';
 import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 
-import DiscordProvider from './providers/DiscordProvider';
-import EthWalletProvider from './providers/EthWalletProvider';
-import GoogleProvider from './providers/GoogleProvider';
-import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
-import { StytchOtpProvider } from './providers/StytchOtpProvider';
-import WebAuthnProvider from './providers/WebAuthnProvider';
+import { DiscordAuthenticator } from './DiscordAuthenticator';
+import { EthWalletAuthenticator } from './EthWalletAuthenticator';
+import { GoogleAuthenticator } from './GoogleAuthenticator';
+import { StytchAuthFactorOtpAuthenticator } from './stytch/StytchAuthFactorOtpAuthenticator';
+import { StytchOtpAuthenticator } from './stytch/StytchOtpAuthenticator';
+import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
@@ -353,25 +353,25 @@ export async function getAuthIdByAuthMethod(
 
   switch (authMethod.authMethodType) {
     case AUTH_METHOD_TYPE.EthWallet:
-      authId = await EthWalletProvider.authMethodId(authMethod);
+      authId = await EthWalletAuthenticator.authMethodId(authMethod);
       break;
     case AUTH_METHOD_TYPE.Discord:
-      authId = await DiscordProvider.authMethodId(authMethod);
+      authId = await DiscordAuthenticator.authMethodId(authMethod);
       break;
     case AUTH_METHOD_TYPE.WebAuthn:
-      authId = await WebAuthnProvider.authMethodId(authMethod);
+      authId = await WebAuthnAuthenticator.authMethodId(authMethod);
       break;
     case AUTH_METHOD_TYPE.GoogleJwt:
-      authId = await GoogleProvider.authMethodId(authMethod);
+      authId = await GoogleAuthenticator.authMethodId(authMethod);
       break;
     case AUTH_METHOD_TYPE.StytchOtp:
-      authId = await StytchOtpProvider.authMethodId(authMethod);
+      authId = await StytchOtpAuthenticator.authMethodId(authMethod);
       break;
     case AUTH_METHOD_TYPE.StytchEmailFactorOtp:
     case AUTH_METHOD_TYPE.StytchSmsFactorOtp:
     case AUTH_METHOD_TYPE.StytchTotpFactorOtp:
     case AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp:
-      authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
+      authId = await StytchAuthFactorOtpAuthenticator.authMethodId(authMethod);
       break;
     default:
       log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);

@@ -20,14 +20,14 @@ import {
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
 
-import { BaseProvider } from './BaseProvider';
+import { BaseAuthenticator } from './BaseAuthenticator';
 
 interface DomainAndOrigin {
   domain?: string;
   origin?: string;
 }
 
-export default class EthWalletProvider extends BaseProvider {
+export class EthWalletAuthenticator extends BaseAuthenticator {
   /**
    * The domain from which the signing request is made
    */
@@ -40,7 +40,8 @@ export default class EthWalletProvider extends BaseProvider {
   constructor(options: EthWalletProviderOptions & BaseProviderOptions) {
     super(options);
 
-    const { domain, origin } = EthWalletProvider.getDomainAndOrigin(options);
+    const { domain, origin } =
+      EthWalletAuthenticator.getDomainAndOrigin(options);
     this.domain = domain;
     this.origin = origin;
   }
@@ -84,7 +85,7 @@ export default class EthWalletProvider extends BaseProvider {
       );
     }
 
-    return EthWalletProvider.authenticate({
+    return EthWalletAuthenticator.authenticate({
       signer: options,
       address: options.address,
       chain: options.chain,
@@ -108,7 +109,7 @@ export default class EthWalletProvider extends BaseProvider {
    * @param {string} [options.origin] - Origin from which the signing request is made
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    * @static
-   * @memberof EthWalletProvider
+   * @memberof EthWalletAuthenticator
    *
    * @example
    * ```typescript
@@ -169,7 +170,7 @@ export default class EthWalletProvider extends BaseProvider {
         expiration || new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
       const { domain: resolvedDomain, origin: resolvedOrigin } =
-        EthWalletProvider.getDomainAndOrigin({ domain, origin });
+        EthWalletAuthenticator.getDomainAndOrigin({ domain, origin });
 
       // Prepare Sign in with Ethereum message
       const preparedMessage: Partial<SiweMessage> = {
@@ -217,7 +218,7 @@ export default class EthWalletProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return EthWalletProvider.authMethodId(authMethod);
+    return EthWalletAuthenticator.authMethodId(authMethod);
   }
 
   public static async authMethodId(authMethod: AuthMethod): Promise<string> {

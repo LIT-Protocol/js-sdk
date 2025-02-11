@@ -19,8 +19,8 @@ import {
   LitRelayConfig,
 } from '@lit-protocol/types';
 
-import WebAuthnProvider from './providers/WebAuthnProvider';
-import { getAuthIdByAuthMethod, log } from './utils';
+import { getAuthIdByAuthMethod, log } from './authenticators/utils';
+import { WebAuthnAuthenticator } from './authenticators/WebAuthnAuthenticator';
 
 /**
  * Class that communicates with Lit relay server
@@ -169,7 +169,7 @@ export class LitRelay implements IRelay {
       permittedAuthMethodIds.push(id);
       if (authMethod.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
         permittedAuthMethodPubkeys.push(
-          WebAuthnProvider.getPublicKeyFromRegistration(
+          WebAuthnAuthenticator.getPublicKeyFromRegistration(
             JSON.parse(authMethod.accessToken)
           )
         );

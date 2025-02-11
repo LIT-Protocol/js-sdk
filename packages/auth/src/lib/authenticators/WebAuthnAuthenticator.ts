@@ -19,10 +19,10 @@ import {
   WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 
-import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
-import { BaseProvider } from './BaseProvider';
+import { BaseAuthenticator } from './BaseAuthenticator';
+import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
 
-export default class WebAuthnProvider extends BaseProvider {
+export class WebAuthnAuthenticator extends BaseAuthenticator {
   /**
    * Name of relying party. Defaults to "lit"
    */
@@ -70,7 +70,7 @@ export default class WebAuthnProvider extends BaseProvider {
 
     // Get auth method pub key
     const authMethodPubkey =
-      WebAuthnProvider.getPublicKeyFromRegistration(attResp);
+      WebAuthnAuthenticator.getPublicKeyFromRegistration(attResp);
 
     // Format args for relay server
     const defaultArgs = {
@@ -178,7 +178,7 @@ export default class WebAuthnProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return WebAuthnProvider.authMethodId(authMethod, this.rpName);
+    return WebAuthnAuthenticator.authMethodId(authMethod, this.rpName);
   }
 
   public static async authMethodId(

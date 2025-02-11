@@ -20,9 +20,9 @@ import {
   MintRequestBody,
 } from '@lit-protocol/types';
 
-import { validateMintRequestBody } from '../validators';
+import { validateMintRequestBody } from './validators';
 
-export abstract class BaseProvider {
+export abstract class BaseAuthenticator {
   /**
    * Relay server to subsidize minting of PKPs
    */

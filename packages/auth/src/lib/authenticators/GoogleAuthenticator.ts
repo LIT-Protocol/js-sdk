@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import * as jose from 'jose';
 
 import {
   AUTH_METHOD_TYPE,
@@ -11,41 +12,42 @@ import {
   OAuthProviderOptions,
 } from '@lit-protocol/types';
 
-import { BaseProvider } from './BaseProvider';
+import { BaseAuthenticator } from './BaseAuthenticator';
 import {
   prepareLoginUrl,
   parseLoginParams,
   getStateParam,
   decode,
   LIT_LOGIN_GATEWAY,
-} from '../utils';
+} from './utils';
 
-export default class DiscordProvider extends BaseProvider {
+export class GoogleAuthenticator extends BaseAuthenticator {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
-  /**
-   * OAuth client ID. Defaults to one used by Lit
-   */
-  private clientId?: string;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
-    this.clientId = options.clientId || '1052874239658692668';
   }
 
   /**
-   * Redirect user to the Lit's Discord login page
+   * Redirect user to the Lit's Google login page
    *
+   * @param {Function} [callback] - Optional callback to handle login URL
    * @returns {Promise<void>} - Redirects user to Lit login page
    */
-  public async signIn(): Promise<void> {
+  public async signIn(callback?: (url: string) => void): Promise<void> {
     // Get login url
-    const loginUrl = await prepareLoginUrl('discord', this.redirectUri);
-    // Redirect to login url
-    window.location.assign(loginUrl);
+    const loginUrl = await prepareLoginUrl('google', this.redirectUri);
+
+    // If callback is provided, use it. Otherwise, redirect to login url
+    if (callback) {
+      callback(loginUrl);
+    } else {
+      window.location.assign(loginUrl);
+    }
   }
 
   /**
@@ -53,9 +55,16 @@ export default class DiscordProvider extends BaseProvider {
    *
    * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
    */
-  public async authenticate(): Promise<AuthMethod> {
-    // Check if current url matches redirect uri
-    if (!window.location.href.startsWith(this.redirectUri)) {
+  public async authenticate<T>(
+    _?: T,
+    urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
+  ): Promise<AuthMethod> {
+    // Check if current url matches redirect uri using the callback if provided
+    const isUrlValid = urlCheckCallback
+      ? urlCheckCallback(window.location.href, this.redirectUri)
+      : window.location.href.startsWith(this.redirectUri);
+
+    if (!isUrlValid) {
       throw new UnauthorizedException(
         {
           info: {
@@ -68,7 +77,7 @@ export default class DiscordProvider extends BaseProvider {
     }
 
     // Check url for params
-    const { provider, accessToken, state, error } = parseLoginParams(
+    const { provider, idToken, state, error } = parseLoginParams(
       window.location.search
     );
 
@@ -85,8 +94,8 @@ export default class DiscordProvider extends BaseProvider {
       );
     }
 
-    // Check if provider is Discord
-    if (!provider || provider !== 'discord') {
+    // Check if provider is Google
+    if (!provider || provider !== 'google') {
       throw new UnauthorizedException(
         {
           info: {
@@ -94,7 +103,7 @@ export default class DiscordProvider extends BaseProvider {
             redirectUri: this.redirectUri,
           },
         },
-        'OAuth provider does not match "discord"'
+        'OAuth provider does not match "google"'
       );
     }
 
@@ -118,22 +127,22 @@ export default class DiscordProvider extends BaseProvider {
       window.location.pathname
     );
 
-    // Check if access token is present in url
-    if (!accessToken) {
+    // Check if id token is present in url
+    if (!idToken) {
       throw new UnauthorizedException(
         {
           info: {
-            accessToken,
+            idToken,
             redirectUri: this.redirectUri,
           },
         },
-        `Missing access token in callback URL`
+        'Missing ID token in callback URL'
       );
     }
 
     const authMethod = {
-      authMethodType: AUTH_METHOD_TYPE.Discord,
-      accessToken: accessToken,
+      authMethodType: AUTH_METHOD_TYPE.GoogleJwt,
+      accessToken: idToken,
     };
     return authMethod;
   }
@@ -149,7 +158,7 @@ export default class DiscordProvider extends BaseProvider {
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
-    const url = await prepareLoginUrl('discord', this.redirectUri, baseURL);
+    const url = await prepareLoginUrl('google', this.redirectUri, baseURL);
     const popup = window.open(
       `${url}&caller=${window.location.origin}`,
       'popup',
@@ -181,11 +190,11 @@ export default class DiscordProvider extends BaseProvider {
           reject(new Error(error));
         }
 
-        if (provider === 'discord' && token) {
+        if (provider === 'google' && token) {
           clearInterval(interval);
           popup.close();
           resolve({
-            authMethodType: AUTH_METHOD_TYPE.Discord,
+            authMethodType: AUTH_METHOD_TYPE.GoogleJwt,
             accessToken: token,
           });
         }
@@ -202,61 +211,16 @@ export default class DiscordProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    const userId = await this._fetchDiscordUser(authMethod.accessToken);
-    const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${this.clientId}`)
-    );
-    return authMethodId;
+    return GoogleAuthenticator.authMethodId(authMethod);
   }
 
-  public static async authMethodId(
-    authMethod: AuthMethod,
-    clientId?: string
-  ): Promise<string> {
-    const _clientId = clientId || '1052874239658692668';
-
-    // -- get user id from access token
-    let userId;
-    const meResponse = await fetch('https://discord.com/api/users/@me', {
-      method: 'GET',
-      headers: {
-        authorization: `Bearer ${authMethod.accessToken}`,
-      },
-    });
-    if (meResponse.ok) {
-      const user = await meResponse.json();
-      userId = user.id;
-    } else {
-      throw new UnknownError({}, 'Unable to verify Discord account');
-    }
-
-    // -- get auth method id
+  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
+    const tokenPayload = jose.decodeJwt(authMethod.accessToken);
+    const userId: string = tokenPayload['sub'] as string;
+    const audience: string = tokenPayload['aud'] as string;
     const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${_clientId}`)
+      ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
     );
-
     return authMethodId;
-  }
-
-  /**
-   * Fetch Discord user ID
-   *
-   * @param {string} accessToken - Discord access token
-   *
-   * @returns {Promise<string>} - Discord user ID
-   */
-  private async _fetchDiscordUser(accessToken: string): Promise<string> {
-    const meResponse = await fetch('https://discord.com/api/users/@me', {
-      method: 'GET',
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-      },
-    });
-    if (meResponse.ok) {
-      const user = await meResponse.json();
-      return user.id;
-    } else {
-      throw new UnknownError({}, 'Unable to verify Discord account');
-    }
   }
 }
