@@ -81,6 +81,8 @@ import {
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getClaims } from './helpers/get-claims';
+import { getClaimsList } from './helpers/get-claims-list';
 import { getExpiration } from './helpers/get-expiration';
 import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
 import {
@@ -799,12 +801,12 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     );
 
     // -- 4. combine claims
-    // const claimsList = getClaimsList(responseData);
-    // const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
+    const claimsList = getClaimsList(responseData);
+    const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
 
     // ========== Result ==========
     const returnVal: ExecuteJsResponse = {
-      claims: {}, // TODO revert to previous state
+      claims,
       signatures,
       response: parsedResponse,
       logs: mostCommonLogs,
