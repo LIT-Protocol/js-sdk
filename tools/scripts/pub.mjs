@@ -49,7 +49,15 @@ if (OPTION) {
 const lerna = await readJsonFile('lerna.json');
 const lernaVersion = lerna.version;
 
-let dirs = await listDirsRecursive('dist/packages', false);
+let dirs = await listDirsRecursive('dist/packages', false)
+  .filter((item) => {
+    if (item.includes('wrapped-keys')) {
+      greenLog(`Skipping ${item}`);
+      return false;
+    }
+
+    return true;
+  });
 
 console.log('Ready to publish the following packages:');
 

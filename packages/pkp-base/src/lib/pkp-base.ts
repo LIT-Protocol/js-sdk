@@ -7,27 +7,21 @@
  * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
-import depd from 'depd';
 import {
   InitError,
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { logError, publicKeyConvert } from '@lit-protocol/misc';
+import { publicKeyConvert } from '@lit-protocol/misc';
 import {
-  AuthenticationProps,
+  AuthenticationContext,
   JsonExecutionSdkParams,
   PKPBaseProp,
-  AuthSig,
   PKPBaseDefaultParams,
   SigResponse,
   RPCUrls,
-  AuthMethod,
-  SessionSigsMap,
 } from '@lit-protocol/types';
-
-const deprecated = depd('lit-js-sdk:pkp-base:pkp-base');
 
 /**
  * Compresses a given public key.
@@ -54,10 +48,7 @@ const compressPubKey = (pubKey: string): string => {
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
 
-  private _controllerAuthSig?: AuthSig;
-  controllerAuthMethods?: AuthMethod[];
-  controllerSessionSigs?: SessionSigsMap;
-  authContext?: AuthenticationProps;
+  authContext: AuthenticationContext;
 
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
@@ -80,22 +71,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     return this.litNodeClient.ready;
   }
 
-  /**
-   * @deprecated - Use a different authentication method instead.
-   */
-  get controllerAuthSig(): AuthSig | undefined {
-    deprecated('controllerAuthSig is deprecated.');
-    return this._controllerAuthSig;
-  }
-
-  /**
-   * @deprecated - Use a different authentication method instead.
-   */
-  set controllerAuthSig(value: AuthSig | undefined) {
-    deprecated('controllerAuthSig is deprecated.');
-    this._controllerAuthSig = value;
-  }
-
   // Rest of the PKPBase class...
 
   private constructor(pkpBaseProp: PKPBaseProp) {
@@ -111,9 +86,8 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.setCompressedPubKeyAndBuffer(prop);
 
     this.rpcs = prop.rpcs;
-    this.controllerAuthSig = prop.controllerAuthSig;
-    this.controllerAuthMethods = prop.controllerAuthMethods;
-    this.controllerSessionSigs = prop.controllerSessionSigs;
+
+    console.log('authContext:', prop.authContext);
     this.authContext = prop.authContext;
 
     this.validateAuthContext();
@@ -246,32 +220,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   private validateAuthContext() {
-    const providedAuthentications = [
-      this.controllerAuthSig,
-      this.controllerSessionSigs,
-      this.authContext,
-    ].filter(Boolean).length;
-
-    if (providedAuthentications !== 1) {
-      // log which authentications has the user provided
-      if (this.controllerAuthSig) {
-        logError('controllerAuthSig is provided');
-      }
-
-      if (this.controllerSessionSigs) {
-        logError('controllerSessionSigs is provided');
-      }
-
-      if (this.authContext) {
-        logError('authContext is provided');
-      }
-
+    if (!this.authContext) {
       throw new InitError(
         {
           info: {
             authContext: this.authContext,
-            controllerAuthSig: this.controllerAuthSig,
-            controllerSessionSigs: this.controllerSessionSigs,
           },
         },
         'Must specify one, and only one, authentication method '
@@ -279,30 +232,16 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     // Check if authContext is provided correctly
-    if (this.authContext && !this.authContext.getSessionSigsProps) {
+    if (!this.authContext) {
       throw new InitError(
         {
           info: {
             authContext: this.authContext,
           },
         },
-        'authContext must be an object with getSessionSigsProps'
+        'authContext must be provided'
       );
     }
-  }
-
-  private async getSessionSigs(): Promise<SessionSigsMap> {
-    const sessionSigs = this.authContext
-      ? await this.litNodeClient.getSessionSigs(
-          this.authContext.getSessionSigsProps
-        )
-      : this.controllerSessionSigs;
-
-    if (!sessionSigs) {
-      throw new UnknownError({}, 'Could not get sessionSigs');
-    }
-
-    return sessionSigs;
   }
 
   /**
@@ -315,6 +254,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
     // -- validate executeJsArgs
     if (this.litActionCode && this.litActionIPFS) {
@@ -341,12 +281,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.validateAuthContext();
 
-    const controllerSessionSigs = await this.getSessionSigs();
-
     const executeJsArgs: JsonExecutionSdkParams = {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-      sessionSigs: controllerSessionSigs,
       jsParams: {
         ...{
           toSign,
@@ -357,6 +294,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           ...this.litActionJsParams,
         },
       },
+      authContext: this.authContext,
     };
 
     // check if executeJsArgs has either code or ipfsId
@@ -412,13 +350,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.validateAuthContext();
 
-    const controllerSessionSigs = await this.getSessionSigs();
-
     try {
       const sig = await this.litNodeClient.pkpSign({
         toSign,
         pubKey: this.uncompressedPubKey,
-        sessionSigs: controllerSessionSigs,
+        authContext: this.authContext,
       });
 
       if (!sig) {
@@ -455,6 +391,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @returns {void} - This function does not return a value.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   log(...args: any[]): void {
     if (this.debug) {
       console.log(this.orange + this.PREFIX + this.reset, ...args);

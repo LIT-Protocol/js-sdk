@@ -1,9 +1,9 @@
 import { Provider } from '@ethersproject/abstract-provider';
 import depd from 'depd';
 
+import { SigType } from './EndpointResponses';
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -16,18 +16,9 @@ import {
   LitContractResolverContext,
   ResponseStrategy,
   SolRpcConditions,
-  SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
-import { SigType } from './EndpointResponses';
 const deprecated = depd('lit-js-sdk:types:interfaces');
-
-/** ---------- Access Control Conditions Interfaces ---------- */
-
-export interface ABIParams {
-  name: string;
-  type: string;
-}
 
 export interface AccsOperatorParams {
   operator: string;
@@ -68,16 +59,6 @@ export interface AuthSig {
   algo?: string;
 }
 
-export interface SolanaAuthSig extends AuthSig {
-  derivedVia: 'solana.signMessage';
-}
-
-export interface CosmosAuthSig extends AuthSig {
-  derivedVia: 'cosmos.signArbitrary';
-}
-
-export type CosmosWalletType = 'keplr' | 'leap';
-
 export interface AuthCallbackParams extends LitActionSdkParams {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
@@ -115,13 +96,6 @@ export interface AuthCallbackParams extends LitActionSdkParams {
   uri?: string;
 
   /**
-   * Cosmos wallet type, to support mutliple popular cosmos wallets
-   * Keplr & Cypher -> window.keplr
-   * Leap -> window.leap
-   */
-  cosmosWalletType?: CosmosWalletType;
-
-  /**
    * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
    */
   walletConnectProjectId?: string;
@@ -129,32 +103,7 @@ export interface AuthCallbackParams extends LitActionSdkParams {
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
-/** ---------- Web3 ---------- */
-export interface IProvider {
-  provider: any;
-  account: string;
-}
-
 /** ---------- Crypto ---------- */
-
-export interface EncryptedFile {
-  encryptedFile: Blob;
-  symmetricKey: SymmetricKey;
-}
-
-export interface DecryptFileProps {
-  file: AcceptedFileType;
-  symmetricKey: SymmetricKey;
-}
-
-export interface SigningAccessControlConditionJWTPayload
-  extends MultipleAccessControlConditions {
-  iss: string;
-  sub: string;
-  chain?: string;
-  iat: number;
-  exp: number;
-}
 
 export interface HumanizedAccsProps {
   // The array of access control conditions that you want to humanize
@@ -168,12 +117,10 @@ export interface HumanizedAccsProps {
 
   // The array of unified access control conditions that you want to humanize
   unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tokenList?: (any | string)[];
   myWalletAddress?: string;
 }
-
-/** ---------- Key Value Type ---------- */
-export type KV = Record<string, any>;
 
 /** ---------- Lit Node Client ---------- */
 export interface LitNodeClientConfig {
@@ -184,7 +131,9 @@ export interface LitNodeClientConfig {
   connectTimeout?: number;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
-  storageProvider?: StorageProvider;
+  storageProvider?: {
+    provider: Storage;
+  };
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string;
 }
@@ -200,10 +149,6 @@ export type CustomNetwork = Pick<
  * if running in NodeJs and this is implicitly
  * binded globally
  */
-export interface StorageProvider {
-  provider: Storage;
-}
-
 export interface Signature {
   r: string;
   s: string;
@@ -232,26 +177,23 @@ pub struct JsonExecutionRequest {
 }
  */
 
-export interface BaseJsonPkpSignRequest {
-  authMethods?: AuthMethod[];
-  toSign: ArrayLike<number>;
-}
-
 /**
  * The 'pkpSign' function param. Please note that the structure
  * is different than the payload sent to the node.
  */
-export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
+export interface JsonPkpSignSdkParams {
   pubKey: string;
-  sessionSigs: SessionSigsMap;
+  toSign: ArrayLike<number>;
+  authContext: AuthenticationContext;
+  userMaxPrice?: bigint;
 }
 
 /**
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
-export interface JsonPkpSignRequest<T>
-  extends BaseJsonPkpSignRequest,
-    NodeSetRequired {
+export interface JsonPkpSignRequest<T> extends NodeSetRequired {
+  toSign: ArrayLike<number>;
+  authMethods?: AuthMethod[];
   authSig: AuthSig;
 
   /**
@@ -396,6 +338,8 @@ export interface JsonSigningResourceId {
   extraData: string;
 }
 
+// CHANGE: `MultipleAccessControlConditions` is basically identical to `AccessControlConditions`,
+// but due to the way the types are deeply nested, we will revisit this later.
 export interface MultipleAccessControlConditions {
   // The access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
   accessControlConditions?: AccessControlConditions;
@@ -441,7 +385,7 @@ pub struct JsonSigningRetrieveRequest {
 export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
   iat?: number;
   exp?: number;
-  sessionSigs?: any;
+  sessionSigs?: SessionSigsMap;
 }
 
 /**
@@ -462,7 +406,7 @@ export interface JsonSigningStoreRequest {
   permanant?: 0 | 1;
   permanent?: 0 | 1;
   authSig?: AuthSig;
-  sessionSigs?: object;
+  sessionSigs?: SessionSigsMap;
 }
 
 /**
@@ -495,11 +439,6 @@ export interface IpfsOptions {
   gatewayUrl?: `https://${string}/ipfs/`;
 }
 
-export interface JsonExecutionSdkParamsTargetNode
-  extends JsonExecutionSdkParams {
-  targetNodeRange: number;
-}
-
 export interface JsonExecutionSdkParams
   extends Pick<LitActionSdkParams, 'jsParams'>,
     ExecuteJsAdvancedOptions {
@@ -513,15 +452,8 @@ export interface JsonExecutionSdkParams
    */
   ipfsId?: string;
 
-  /**
-   * the session signatures to use to authorize the user with the nodes
-   */
-  sessionSigs: SessionSigsMap;
-
-  /**
-   * auth methods to resolve
-   */
-  authMethods?: AuthMethod[];
+  authContext: AuthenticationContext;
+  userMaxPrice?: bigint;
 }
 
 export interface ExecuteJsAdvancedOptions {
@@ -542,10 +474,6 @@ export interface ExecuteJsAdvancedOptions {
   useSingleNode?: boolean;
 }
 
-export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
-  targetNodeRange: number;
-}
-
 export interface JsonExecutionRequest
   extends Pick<LitActionSdkParams, 'jsParams'>,
     NodeSetRequired {
@@ -561,29 +489,14 @@ export interface JsonExecutionRequest
   authMethods?: AuthMethod[];
 }
 
-/**
- * This interface is mainly used for access control conditions & decrypt requests.
- * For signing operations such as executeJs and pkpSign, only sessionSigs is used.
- */
-export interface SessionSigsOrAuthSig {
-  /**
-   * the session signatures to use to authorize the user with the nodes
-   */
-  sessionSigs?: SessionSigsMap;
-
-  /**
-   * This is a bare authSig generated client side by the user. It can only be used for access control conditions/encrypt/decrypt operations. It CANNOT be used for signing operation.
-   */
-  authSig?: AuthSig;
-}
-
-export interface DecryptRequestBase
-  extends SessionSigsOrAuthSig,
-    MultipleAccessControlConditions {
+export interface DecryptRequestBase extends MultipleAccessControlConditions {
   /**
    * The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
    */
   chain: Chain;
+  authSig?: AuthSig;
+  authContext: AuthenticationContext;
+  userMaxPrice?: bigint;
 }
 export interface EncryptSdkParams extends MultipleAccessControlConditions {
   dataToEncrypt: Uint8Array;
@@ -650,6 +563,7 @@ export interface ExecuteJsResponseBase {
     | {
         sig: SigResponse;
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any;
 }
 
@@ -668,25 +582,24 @@ export interface ExecuteJsResponse extends ExecuteJsResponseBase {
   claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
-    allNodeLogs: NodeLog[];
+    allNodeLogs: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      logs: any;
+    }[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rawNodeHTTPResponses: any;
   };
 }
 
 export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   claims: {};
   decryptions: [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   response: any;
   logs: string;
 }
 
-export interface LitNodePromise {}
-
-export interface SendNodeCommand {
-  url: string;
-  data: any;
-  requestId: string;
-}
 export interface SigShare {
   sigType: SigType;
   signatureShare: string;
@@ -698,21 +611,29 @@ export interface SigShare {
 }
 
 export interface NodeShare {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   claimData: any;
 
   // I think this is deprecated
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unsignedJwt: any;
   signedData: SigShare;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   decryptedData: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   response: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logs: any;
   success?: boolean | '';
 }
 
 export interface NodeBlsSigningShare {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unsignedJwt?: any;
   signatureShare: BlsSignatureShare;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   response?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logs?: any;
 }
 
@@ -733,12 +654,6 @@ export interface RejectedNodePromises {
   error: NodeErrorV1;
 }
 
-export interface NodePromiseResponse {
-  status?: string;
-  value?: any;
-  reason?: any;
-}
-
 export interface NodeErrorV1 {
   errorKind: string;
   status: number;
@@ -756,59 +671,9 @@ export interface NodeErrorV3 {
   details: string[];
 }
 
-/**
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- */
-export const NodeClientErrorV0 = new Proxy(
-  {
-    errorCode: '',
-    message: '',
-    error: '',
-    name: '',
-  },
-  {
-    get(target, prop, receiver) {
-      deprecated(
-        'NodeClientErrorV0 is deprecated and will be removed in a future version. Use NodeClientErrorV1 instead.'
-      );
-      return Reflect.get(target, prop, receiver);
-    },
-  }
-);
-
-/**
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- */
-export type NodeClientErrorV0 = typeof NodeClientErrorV0 & {
-  errorCode?: string;
-  message: string;
-  error: any;
-  name?: string;
-};
-
-export interface NodeClientErrorV1 {
-  message: string;
-  errorKind: string;
-  errorCode: string;
-  details?: string[];
-  status?: number;
-  requestId?: string;
-}
-
-export interface SignedData {
-  signedData: any;
-}
-
-export interface DecryptedData {
-  decryptedData: any;
-}
-
 export interface NodeResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   response: any;
-}
-
-export interface NodeLog {
-  logs: any;
 }
 
 export interface CallRequest {
@@ -822,58 +687,21 @@ export interface CallRequest {
   data: string;
 }
 
-export interface SignedChainDataToken {
-  // The call requests to make.  The responses will be signed and returned.
-  callRequests: CallRequest[];
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: Chain;
-}
-
 export interface NodeCommandResponse {
   url: string;
   data: JsonRequest;
 }
 
-export interface NodeCommandServerKeysResponse {
-  serverPublicKey: string;
-  subnetPublicKey: string;
-  networkPublicKey: string;
-  networkPublicKeySet: string;
-  hdRootPubkeys: string[];
-  attestation?: NodeAttestation;
-  latestBlockhash?: string;
-}
-
 export interface FormattedMultipleAccs {
   error: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formattedAccessControlConditions: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formattedEVMContractConditions: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formattedSolRpcConditions: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formattedUnifiedAccessControlConditions: any;
-}
-
-export interface SignWithECDSA {
-  // TODO: The message to be signed - note this message is not currently converted to a digest!!!!!
-  message: string;
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: Chain;
-
-  iat: number;
-  exp: number;
-}
-
-export interface CombinedECDSASignature {
-  r: string;
-  s: string;
-  recid: number;
-  signature: `0x${string}`;
-}
-
-export interface HandshakeWithNode {
-  url: string;
-  challenge: string;
 }
 
 export interface NodeAttestation {
@@ -917,6 +745,8 @@ export interface EncryptToJsonProps extends MultipleAccessControlConditions {
    * An instance of LitNodeClient that is already connected
    */
   litNodeClient: ILitNodeClient;
+
+  authContext: AuthenticationContext;
 }
 
 export type EncryptToJsonDataType = 'string' | 'file';
@@ -928,13 +758,11 @@ export interface EncryptToJsonPayload extends DecryptRequestBase {
 }
 
 export interface DecryptFromJsonProps {
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
-
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
 
   parsedJsonData: EncryptToJsonPayload;
+  authContext: AuthenticationContext;
 }
 
 /**
@@ -951,20 +779,12 @@ export interface DecryptFromJsonProps {
  */
 export interface SessionKeySignedMessage {
   sessionKey: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resources?: any[];
   capabilities: AuthSig[];
   issuedAt: string;
   expiration: string;
   nodeAddress: string;
-}
-
-export interface SessionSigsProp {
-  expiration?: any;
-  chain: Chain;
-  resources: any[];
-  sessionCapabilities?: any;
-  switchChain?: boolean;
-  litNodeClient: ILitNodeClient;
 }
 
 export interface SessionKeyPair {
@@ -974,28 +794,9 @@ export interface SessionKeyPair {
 
 /** ========== Session ========== */
 
-// pub struct AuthMethod {
-//     pub auth_method_type: u32,
-//     pub access_token: String,
-// }
 export interface AuthMethod {
   authMethodType: number;
   accessToken: string;
-}
-
-export interface CreateCustomAuthMethodRequest {
-  /**
-   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
-   */
-  authMethodId: string | Uint8Array;
-
-  authMethodType: number;
-
-  /**
-   * Permission scopes:
-   * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
-   */
-  scopes: string[] | number[];
 }
 
 // pub struct JsonSignSessionKeyRequest {
@@ -1036,6 +837,7 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
    */
   expiration?: string;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resources: any;
 
   chainId?: number;
@@ -1056,10 +858,7 @@ export interface SignSessionKeyResponse {
   authSig: AuthSig;
 }
 
-export interface GetSignSessionKeySharesProp {
-  body: SessionRequestBody;
-}
-export interface CommonGetSessionSigsProps {
+export interface AuthenticationContext extends LitActionSdkParams {
   /**
    * Session signature properties shared across all functions that generate session signatures.
    */
@@ -1068,6 +867,7 @@ export interface CommonGetSessionSigsProps {
   /**
    * When this session signature will expire. After this time is up you will need to reauthenticate, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   expiration?: any;
 
   /**
@@ -1087,7 +887,7 @@ export interface CommonGetSessionSigsProps {
    * The session capability object that you want to request for this session.
    * It is likely you will not need this, as the object will be automatically derived from the `resourceAbilityRequests`.
    * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
-   * The wildcard means that the session will be granted the ability to to perform operations with any access control condition.
+   * The wildcard means that the session will be granted the ability to perform operations with any access control condition.
    */
   sessionCapabilityObject?: ISessionCapabilityObject;
 
@@ -1102,41 +902,20 @@ export interface CommonGetSessionSigsProps {
   sessionKey?: SessionKeyPair;
 
   /**
-   * @deprecated - use capabilityAuthSigs instead
-   * Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * Capacity credits are required on the paid Lit networks (mainnets and certain testnets), and are not required on the unpaid Lit networks (certain testnets).
-   * See more [here](https://developer.litprotocol.com/sdk/capacity-credits).
-   */
-  capacityDelegationAuthSig?: AuthSig;
-
-  /**
    * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
    */
   capabilityAuthSigs?: AuthSig[];
-}
 
-export interface BaseProviderGetSessionSigsProps
-  extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
   /**
    * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
    */
   authNeededCallback?: AuthCallback;
+
+  authMethods?: AuthMethod[];
+
+  ipfsOptions?: IpfsOptions;
 }
 
-export interface GetSessionSigsProps
-  extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
-  /**
-   * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
-   */
-  authNeededCallback: AuthCallback;
-
-  /**
-   * This allow user to get new prices from the node. If not, we will just use the one we got when we first connected to the nodes.
-   */
-  getNewPrices?: boolean;
-}
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
 /**
@@ -1148,23 +927,13 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  *
  * -  `derivedVia`: Should be `litSessionSignViaNacl`, specifies that the session signature object was created via the `NaCl` library.
  *
- * -  `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`](https://v6-api-doc-lit-js-sdk.vercel.app/interfaces/types_src.GetSessionSigsProps.html#authNeededCallback) property.
+ * -  `signedMessage`: The payload signed by the session key pair. This is the signed `AuthSig` with the contents of the AuthSig's `signedMessage` property being derived from the [`authNeededCallback`] (See @link AuthenticationContext) property.
  *
  * -  `address`: When the session key signs the SIWE ReCap message, this will be the session key pair public key. If an EOA wallet signs the message, then this will be the EOA Ethereum address.
  *
  * -  `algo`: The signing algorithm used to generate the session signature.
  */
 export type SessionSigsMap = Record<string, AuthSig>;
-
-export type SessionSigs = Record<string, AuthSig>;
-
-export interface SessionRequestBody {
-  sessionKey: string;
-  authMethods: AuthMethod[];
-  pkpPublicKey?: string;
-  authSig?: AuthSig;
-  siweMessage: string;
-}
 
 export interface GetWalletSigProps extends LitActionSdkParams {
   authNeededCallback?: AuthCallback;
@@ -1181,6 +950,7 @@ export interface GetWalletSigProps extends LitActionSdkParams {
 export interface SessionSigningTemplate {
   sessionKey: string;
   resourceAbilityRequests: LitResourceAbilityRequest[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   capabilities: any[];
   issuedAt: string;
   expiration: string;
@@ -1188,73 +958,16 @@ export interface SessionSigningTemplate {
   maxPrice: string;
 }
 
-export interface WebAuthnAuthenticationVerificationParams {
-  id: string;
-  rawId: string;
-  response: {
-    authenticatorData: string;
-    clientDataJSON: string;
-    signature: string;
-    userHandle: string;
-  };
-  type: string;
-  clientExtensionResults: object;
-  authenticatorAttachment: AuthenticatorAttachment;
-}
-
-export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
-
-/**
- * ========== PKP ==========
- */
-export interface LitClientSessionManager {
-  getSessionKey: () => SessionKeyPair;
-  isSessionKeyPair(obj: any): boolean;
-  getExpiration: () => string;
-  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
-  // #authCallbackAndUpdateStorageItem: (params: {
-  //   authCallbackParams: AuthCallbackParams;
-  //   authCallback?: AuthCallback;
-  // }) => Promise<AuthSig>;
-  getPkpSessionSigs: (params: GetPkpSessionSigs) => Promise<SessionSigsMap>;
-  checkNeedToResignSessionKey: (params: {
-    authSig: AuthSig;
-    sessionKeyUri: any;
-    resourceAbilityRequests: LitResourceAbilityRequest[];
-  }) => Promise<boolean>;
-  getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
-  signSessionKey: (
-    params: SignSessionKeyProp
-  ) => Promise<SignSessionKeyResponse>;
-}
-
-export interface AuthenticationProps {
-  /**
-   * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
-   */
-  getSessionSigsProps: GetSessionSigsProps;
-}
-
 export interface PKPBaseProp {
   litNodeClient: ILitNodeClient;
   pkpPubKey: string;
   rpcs?: RPCUrls;
-  authContext?: AuthenticationProps;
+  authContext: AuthenticationContext;
   debug?: boolean;
   litActionCode?: string;
   litActionIPFS?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   litActionJsParams?: any;
-  controllerSessionSigs?: SessionSigs;
-
-  /**
-   * @deprecated - use authContext
-   */
-  controllerAuthMethods?: AuthMethod[];
-
-  /**
-   * @deprecated - use authContext
-   */
-  controllerAuthSig?: AuthSig;
 }
 
 export interface RPCUrls {
@@ -1266,6 +979,7 @@ export interface RPCUrls {
 export interface PKPWallet {
   getAddress: () => Promise<string>;
   init: () => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   runLitAction: (toSign: Uint8Array, sigName: string) => Promise<any>;
   runSign: (toSign: Uint8Array) => Promise<SigResponse>;
 }
@@ -1285,9 +999,6 @@ export interface PKPCosmosWalletProp extends PKPBaseProp {
 }
 
 // note: Omit removes the 'addressPrefix' from PKPCosmosWalletProp
-export interface PKPClientProp extends PKPBaseProp {
-  cosmosAddressPrefix?: string | 'cosmos';
-}
 
 export interface PKPBaseDefaultParams {
   toSign: Uint8Array;
@@ -1296,27 +1007,10 @@ export interface PKPBaseDefaultParams {
 }
 
 export interface PKPClientHelpers {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleRequest: (request: any) => Promise<any>;
   setRpc: (rpc: string) => void;
   getRpc: () => string;
-}
-
-/**
- * ========== Lit Auth Client ==========
- */
-export interface OtpSessionResult {
-  /**
-   * Status message of the request
-   */
-  message?: string;
-  /**
-   * jwt from successful otp check
-   */
-  token_jwt?: string;
-  /**
-   * status of the otp check
-   */
-  status?: string;
 }
 
 export interface LoginUrlParams {
@@ -1397,6 +1091,7 @@ export interface IRelay {
    *
    * @returns {Promise<any>} Registration options for the browser to pass to the authenticator
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   generateRegistrationOptions(username?: string): Promise<any>;
 
   /**
@@ -1421,6 +1116,7 @@ export interface MintRequestBody {
   permittedAuthMethodTypes?: number[];
   permittedAuthMethodIds?: string[];
   permittedAuthMethodPubkeys?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   permittedAuthMethodScopes?: any[][]; // ethers.BigNumber;
   addPkpEthAddressAsPermittedAddress?: boolean;
   sendPkpToItself?: boolean;
@@ -1461,17 +1157,6 @@ export interface IRelayFetchResponse {
    * Error from relay server
    */
   error?: string;
-}
-
-export interface IRelayPollingEvent {
-  /**
-   * Polling count
-   */
-  pollCount: number;
-  /**
-   * Transaction hash of PKP being minted
-   */
-  requestId: string;
 }
 
 export interface IRelayPollStatusResponse {
@@ -1520,6 +1205,7 @@ export interface BaseProviderOptions {
   /**
    * Lit Node Client to use
    */
+  // eslint-disable-next-line
   litNodeClient: any;
 }
 
@@ -1552,47 +1238,6 @@ export interface WebAuthnProviderOptions {
   rpName?: string;
 }
 
-export interface SignInWithOTPParams {
-  /**
-   * otp transport (email or phone #)
-   * used as the user ID for the auth method
-   */
-  userId: string;
-
-  /**
-   * tracking for the session
-   */
-  requestId?: string;
-
-  /**
-   * Allows for specifying custom sender information
-   * Note: for most users the `from_name` is the configurable option and `from` should not be populated
-   */
-  emailCustomizationOptions: OtpEmailCustomizationOptions;
-
-  customName?: string;
-}
-
-export interface OtpProviderOptions {
-  baseUrl?: string;
-  port?: string;
-  startRoute?: string;
-  checkRoute?: string;
-}
-
-export interface OtpEmailCustomizationOptions {
-  from?: string;
-  fromName: string;
-}
-
-export interface SignInWithStytchOTPParams {
-  // JWT from an authenticated session
-  // see stych docs for more info: https://stytch.com/docs/api/session-get
-  accessToken?: string;
-  // username or phone number where OTP was delivered
-  userId: string;
-}
-
 export interface StytchOtpProviderOptions {
   /*
     Stytch application identifier
@@ -1604,32 +1249,10 @@ export interface StytchOtpProviderOptions {
   userId?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StytchToken = Record<string, any>;
 
-export interface BaseProviderSessionSigsParams {
-  /**
-   * Public key of PKP to auth with
-   */
-  pkpPublicKey: string;
-  /**
-   * Auth method verifying ownership of PKP
-   */
-  authMethod: AuthMethod;
-  /**
-   * Params for getSessionSigs function
-   */
-  sessionSigsParams: BaseProviderGetSessionSigsProps;
-  /**
-   * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
-   */
-  litNodeClient?: ILitNodeClient;
-
-  resourceAbilityRequests?: LitResourceAbilityRequest[];
-}
-
-export interface BaseAuthenticateOptions {}
-
-export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
+export interface EthWalletAuthenticateOptions {
   /**
    * Ethereum wallet address
    */
@@ -1658,14 +1281,7 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   getAddress?: () => string;
 }
 
-export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
-  /**
-   * User provided authentication code
-   */
-  code: string;
-}
-
-export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
+export interface StytchOtpAuthenticateOptions {
   /*
    * JWT from an authenticated session
    * see stych docs for more info: https://stytch.com/docs/api/session-get
@@ -1675,31 +1291,6 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    Stytch user identifier for a project
   */
   userId?: string;
-}
-
-export interface BaseMintCapacityContext {
-  daysUntilUTCMidnightExpiration: number;
-}
-
-export interface MintCapacityCreditsPerDay extends BaseMintCapacityContext {
-  requestsPerDay?: number;
-}
-export interface MintCapacityCreditsPerSecond extends BaseMintCapacityContext {
-  requestsPerSecond?: number;
-}
-export interface MintCapacityCreditsPerKilosecond
-  extends BaseMintCapacityContext {
-  requestsPerKilosecond?: number;
-}
-export interface MintCapacityCreditsContext
-  extends MintCapacityCreditsPerDay,
-    MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond,
-    GasLimitParam {}
-export interface MintCapacityCreditsRes {
-  rliTxHash: string;
-  capacityTokenId: any;
-  capacityTokenIdStr: string;
 }
 
 /**
@@ -1717,7 +1308,7 @@ export interface BaseSiweMessage {
   statement?: string;
   version?: string;
   chainId?: number;
-  litNodeClient?: any;
+  litNodeClient?: ILitNodeClient;
 }
 
 export interface WithRecap extends BaseSiweMessage {
@@ -1735,7 +1326,7 @@ export interface WithCapacityDelegation extends BaseSiweMessage {
 }
 
 export interface CapacityDelegationFields extends BaseSiweMessage {
-  litNodeClient: any;
+  litNodeClient: ILitNodeClient;
   delegateeAddresses?: string[];
   uses?: string;
 }
@@ -1815,10 +1406,12 @@ export interface LitActionSdkParams {
    */
   jsParams?:
     | {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [key: string]: any;
         publicKey?: string;
         sigName?: string;
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any;
 }
 
@@ -1835,50 +1428,9 @@ export interface LitEndpoint {
  * importing external libraries directly
  */
 export interface SignerLike {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signMessage: (message: string | any) => Promise<string>;
   getAddress: () => Promise<string>;
-}
-
-export interface GetPkpSessionSigs
-  extends CommonGetSessionSigsProps,
-    LitActionSdkParams {
-  pkpPublicKey: string;
-
-  /**
-   * Lit Protocol supported auth methods: https://developer.litprotocol.com/v3/sdk/wallets/auth-methods
-   * This CANNOT be used for custom auth methods. For custom auth methods, please pass the customAuth
-   * object to jsParams, and handle the custom auth method in your Lit Action.
-   *
-   * Notes for internal dev: for the SDK, this value can be omitted, but it needs to be an empty array [] set in the SDK before
-   * sending it to the node
-   */
-  authMethods?: AuthMethod[];
-
-  ipfsOptions?: IpfsOptions;
-}
-
-/**
- * Includes common session signature properties, parameters for a Lit Action,
- * and either a required litActionCode or a required litActionIpfsId, but not both.
- */
-export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
-  Pick<GetPkpSessionSigs, 'pkpPublicKey'> &
-  Pick<GetPkpSessionSigs, 'authMethods'> &
-  Pick<Required<LitActionSdkParams>, 'jsParams'> &
-  (
-    | (Pick<Required<LitActionSdkParams>, 'litActionCode'> & {
-        litActionIpfsId?: never;
-      })
-    | (Pick<Required<LitActionSdkParams>, 'litActionIpfsId'> & {
-        litActionCode?: never;
-      })
-  ) & {
-    ipfsOptions?: IpfsOptions;
-  };
-
-export interface SessionKeyCache {
-  value: SessionKeyPair;
-  timestamp: number;
 }
 
 export interface SignatureData {

@@ -1,5 +1,5 @@
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -12,12 +12,11 @@ export const testPkpEthersWithPkpSessionSigsToSignMessage = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
     litNodeClient: devEnv.litNodeClient,
     pkpPubKey: alice.pkp.publicKey,
-    controllerSessionSigs: pkpSessionSigs,
+    authContext: getPkpAuthContext(devEnv, alice),
   });
 
   await pkpEthersWallet.init();

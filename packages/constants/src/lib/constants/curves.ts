@@ -20,7 +20,6 @@
 //   SchnorrRedDecaf377Blake2b512,
 //   SchnorrkelSubstrate,
 // }
-
 export const LIT_CURVE = {
   BLS: 'BLS',
   EcdsaK256: 'K256',
@@ -33,9 +32,14 @@ export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
 
 // This should replicate SigShare.sigType in types package
 export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
-
+/**
+ * CHANGE: This is not needed when the combiner is integrated
+ */
 export const CURVE_GROUPS = ['ECDSA', 'BLS'] as const;
 
+/**
+ * CHANGE: This is not needed when the combiner is integrated
+ */
 export const CURVE_GROUP_BY_CURVE_TYPE: Record<
   LIT_CURVE_VALUES,
   (typeof CURVE_GROUPS)[number]

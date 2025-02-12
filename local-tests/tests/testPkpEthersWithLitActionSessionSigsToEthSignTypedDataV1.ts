@@ -5,7 +5,7 @@ import {
   SignTypedDataVersion,
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * Test Commands:
@@ -17,12 +17,11 @@ export const testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1 = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
     litNodeClient: devEnv.litNodeClient,
     pkpPubKey: alice.pkp.publicKey,
-    controllerSessionSigs: litActionSessionSigs,
+    authContext: getLitActionAuthContext(devEnv, alice),
   });
 
   await pkpEthersWallet.init();

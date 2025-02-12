@@ -5,7 +5,7 @@ import {
 } from '@lit-protocol/accs-schemas';
 
 export namespace AccessControlConditions {
-  export const getEmvBasicAccessControlConditions = ({
+  export const getEvmBasicAccessControlConditions = ({
     userAddress,
   }): LPACC_EVM_BASIC[] => {
     return [

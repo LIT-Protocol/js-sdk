@@ -4,9 +4,7 @@ import {
   InvalidArgumentException,
   WrongParamFormat,
 } from '@lit-protocol/constants';
-import { BaseProvider } from './BaseProvider';
 import {
-  BaseAuthenticateOptions,
   AuthMethod,
   BaseProviderOptions,
   StytchOtpProviderOptions,
@@ -14,6 +12,7 @@ import {
   StytchToken,
 } from '@lit-protocol/types';
 
+import { BaseProvider } from './BaseProvider';
 import {
   FactorParser,
   emailOtpAuthFactorParser,
@@ -47,9 +46,7 @@ export default class StytchAuthFactorOtpProvider<
    * @returns {AuthMethod} Authentication Method for auth method type OTP
    *
    */
-  public async authenticate<T extends BaseAuthenticateOptions>(
-    options?: T | undefined
-  ): Promise<AuthMethod> {
+  public async authenticate<T>(options?: T | undefined): Promise<AuthMethod> {
     return new Promise<AuthMethod>((resolve, reject) => {
       if (!options) {
         reject(
