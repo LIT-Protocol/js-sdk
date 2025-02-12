@@ -8,18 +8,15 @@ import { schnorr as schnorrK256, secp256k1 } from '@noble/curves/secp256k1';
 import { blake2b } from '@noble/hashes/blake2b';
 import { sha256 } from '@noble/hashes/sha256';
 import { shake256 } from '@noble/hashes/sha3';
-import { sha512, sha384 } from '@noble/hashes/sha512';
-import { joinSignature, splitSignature } from 'ethers/lib/utils';
+import { sha384, sha512 } from '@noble/hashes/sha512';
 
 import {
   InvalidParamType,
   LIT_CURVE,
-  LIT_CURVE_VALUES,
   LitEcdsaVariantType,
   NetworkError,
   NoValidShares,
   UnknownError,
-  UnknownSignatureError,
   UnknownSignatureType,
 } from '@lit-protocol/constants';
 import {
@@ -33,40 +30,28 @@ import {
 } from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
 import {
-  CombinedECDSASignature,
-  CombinedLitNodeSignature,
   CleanLitNodeSignature,
-  Hex,
+  CombinedLitNodeSignature,
+  LitActionSignedData,
   NodeAttestation,
   PKPSignEndpointResponse,
   SessionKeyPair,
-  SigShare,
-  SigningScheme, LitActionSignedData,
+  SigningScheme,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import {
-  // BLS
-  BlsSignatureShareJsonString,
   blsCombine,
   blsDecrypt,
   blsEncrypt,
   BlsSignatureShareJsonString,
   blsVerify,
-  // ECDSA
-  EcdsaVariant,
-  ecdsaCombine,
   ecdsaDeriveKey,
   EcdsaVariant,
-  ecdsaVerify,
-  // FROST
-  // FrostVariant,
-  // SEV-SNP
   sevSnpGetVcekUrl,
   sevSnpVerify,
-  // Unified combiner
   unifiedCombineAndVerify,
 } from '@lit-protocol/wasm';
 
@@ -78,51 +63,6 @@ export interface BlsSignatureShare {
     identifier: string;
     value: string;
   };
-}
-
-export function joinEcdsaSignature(signature: {
-  r: string;
-  s: string;
-  recid: number;
-}): string {
-  if (signature.r.length === 98) {
-    // For P384 signatures (48 bytes/98 hex each for r and s)
-    const rBuf = Buffer.from(signature.r.replace('0x', ''), 'hex');
-    const sBuf = Buffer.from(signature.s.replace('0x', ''), 'hex');
-    const recIdBuf = Buffer.from([signature.recid]);
-    const joinedSignature =
-      '0x' + Buffer.concat([rBuf, sBuf, recIdBuf]).toString('hex');
-    return joinedSignature;
-  } else {
-    // For K256/P256 signatures
-    const joinedSignature = joinSignature({
-      r: signature.r,
-      s: signature.s,
-      recoveryParam: signature.recid,
-    });
-    return joinedSignature;
-  }
-}
-
-export function splitEcdsaSignature(signature: Buffer): CombinedECDSASignature {
-  if (signature.length === 97) {
-    // For P384 signatures (97 bytes)
-    return {
-      r: '0x' + signature.slice(0, 48).toString('hex'),
-      s: '0x' + signature.slice(48, 96).toString('hex'),
-      recid: signature[96],
-      signature: `0x${signature.toString('hex')}`,
-    };
-  } else {
-    // For K256/P256 signatures (64/65 bytes)
-    const ethersSignature = splitSignature(signature);
-    return {
-      r: ethersSignature.r,
-      s: ethersSignature.s,
-      recid: ethersSignature.recoveryParam,
-      signature: `0x${signature.toString('hex')}`,
-    };
-  }
 }
 
 /**
@@ -260,91 +200,6 @@ const ecdsaSigntureTypeMap: Record<LitEcdsaVariantType, EcdsaVariant> = {
   [LIT_CURVE.EcdsaP384Sha384]: 'P384',
 };
 
-/**
- *
- * Combine ECDSA Shares
- *
- * @param { Array<SigShare> } sigShares
- *
- * @returns { any }
- *
- */
-export const combineEcdsaShares = async (
-  sigShares: SigShare[]
-): Promise<{
-  r: string;
-  s: string;
-  recid: number;
-  signature: `0x${string}`;
-}> => {
-  const validShares = sigShares.filter((share) => share.signatureShare);
-
-  const anyValidShare = validShares[0];
-
-  if (!anyValidShare) {
-    throw new NoValidShares(
-      {
-        info: {
-          shares: sigShares,
-        },
-      },
-      'No valid shares to combine'
-    );
-  }
-
-  const variant =
-    // @ts-expect-error this will be removed TODO remove
-    ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE_VALUES];
-  const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
-  const signatureShares = validShares.map((share) =>
-    Buffer.from(share.signatureShare, 'hex')
-  );
-
-  const [r, s, recId] = await ecdsaCombine(
-    variant!,
-    presignature,
-    signatureShares
-  );
-
-  const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
-  const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
-
-  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, recId]);
-
-  const signature = splitEcdsaSignature(
-    Buffer.concat([r, s, Buffer.from([recId + 27])])
-  );
-
-  // validate r before returning
-  if (!signature.r) {
-    throw new UnknownSignatureError(
-      {
-        info: {
-          signature,
-        },
-      },
-      'signature could not be combined'
-    );
-  }
-
-  const _r = signature.r.slice('0x'.length);
-  const _s = signature.s.slice('0x'.length);
-  const _recid = signature.recid;
-
-  const encodedSig = joinSignature({
-    r: '0x' + _r,
-    s: '0x' + _s,
-    recoveryParam: _recid,
-  }) as Hex;
-
-  return {
-    r: _r,
-    s: _s,
-    recid: _recid,
-    signature: encodedSig,
-  };
-};
-
 const parseCombinedSignature = (
   combinedSignature: CombinedLitNodeSignature
 ): CleanLitNodeSignature => {
@@ -362,80 +217,75 @@ const parseCombinedSignature = (
 };
 
 /**
- * Combine and verify Lit pkp sign node shares
+ * Combine and verify Lit execute js node shares
  *
- * @param { Array<PKPSignEndpointResponse> } litActionResponseData
+ * @param { LitActionSignedData[] } litActionResponseData
  *
- * @returns { string } signature
+ * @returns { CleanLitNodeSignature } signature
  *
- * @throws { NoValidShares } // TODO que tambien tire cuando no se puede combinar por algun motivo
+ * @throws { NoValidShares }
  *
  */
 export const combineExecuteJsNodeShares = async (
   litActionResponseData: LitActionSignedData[]
 ): Promise<CleanLitNodeSignature> => {
-  if (!litActionResponseData.length) {
+  try {
+    const combinerShares = litActionResponseData.map((s) => s.signatureShare);
+    const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
+    const combinedSignature = JSON.parse(
+      unifiedSignature
+    ) as CombinedLitNodeSignature;
+
+    return parseCombinedSignature(combinedSignature);
+  } catch (e) {
     throw new NoValidShares(
       {
         info: {
           shares: litActionResponseData,
         },
+        cause: e,
       },
       'No valid lit action shares to combine'
     );
   }
-
-  const combinerShares = litActionResponseData.map((s) =>
-    s.signatureShare
-  );
-  const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
-  const combinedSignature = JSON.parse(
-    unifiedSignature
-  ) as CombinedLitNodeSignature;
-
-  const cleanedCombinedSignature = parseCombinedSignature(combinedSignature);
-
-  return cleanedCombinedSignature;
 };
 
 /**
  * Combine and verify Lit pkp sign node shares
  *
- * @param { Array<PKPSignEndpointResponse> } nodesSignResponseData
+ * @param { PKPSignEndpointResponse[] } nodesSignResponseData
  *
- * @returns { string } signature
+ * @returns { CleanLitNodeSignature } signature
  *
- * @throws { NoValidShares } // TODO que tambien tire cuando no se puede combinar por algun motivo
+ * @throws { NoValidShares }
  *
  */
 export const combinePKPSignNodeShares = async (
   nodesSignResponseData: PKPSignEndpointResponse[]
 ): Promise<CleanLitNodeSignature> => {
-  const validShares = nodesSignResponseData.filter((share) => share.success);
+  try {
+    const validShares = nodesSignResponseData.filter((share) => share.success);
 
-  if (!validShares.length) {
+    const combinerShares = validShares.map((s) =>
+      JSON.stringify(s.signatureShare)
+    );
+    const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
+    const combinedSignature = JSON.parse(
+      unifiedSignature
+    ) as CombinedLitNodeSignature;
+
+    return parseCombinedSignature(combinedSignature);
+  } catch (e) {
     throw new NoValidShares(
       {
         info: {
           shares: nodesSignResponseData,
-          validShares,
         },
+        cause: e,
       },
       'No valid pkp sign shares to combine'
     );
   }
-
-  const combinerShares = validShares.map((s) =>
-    JSON.stringify(s.signatureShare)
-  );
-  const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
-  const combinedSignature = JSON.parse(
-    unifiedSignature
-  ) as CombinedLitNodeSignature;
-
-  const cleanedCombinedSignature = parseCombinedSignature(combinedSignature);
-
-  return cleanedCombinedSignature;
 };
 
 export const computeHDPubKey = async (
@@ -730,11 +580,14 @@ export function hashLitMessage(
   const hashFn = hashFunctions[signingScheme];
 
   if (!hashFn) {
-    throw new UnknownSignatureType({
-      info: {
-        signingScheme,
+    throw new UnknownSignatureType(
+      {
+        info: {
+          signingScheme,
+        },
       },
-    }, `No known hash function for specified signing scheme ${signingScheme}`);
+      `No known hash function for specified signing scheme ${signingScheme}`
+    );
   }
 
   return hashFn(message);
@@ -748,11 +601,14 @@ export function verifyLitSignature(
 ) {
   const curve = curveFunctions[signingScheme];
   if (!curve) {
-    throw new UnknownSignatureType({
-      info: {
-        signingScheme,
+    throw new UnknownSignatureType(
+      {
+        info: {
+          signingScheme,
+        },
       },
-    }, `No known curve function for specified signing scheme ${signingScheme}`);
+      `No known curve function for specified signing scheme ${signingScheme}`
+    );
   }
 
   // @ts-expect-error TODO call correct verification on all curve functions

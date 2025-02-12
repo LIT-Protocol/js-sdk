@@ -1,133 +1,30 @@
+import { NoValidShares } from '@lit-protocol/constants';
 import {
-  CURVE_GROUP_BY_CURVE_TYPE,
-  LIT_CURVE_VALUES,
-  NoValidShares,
-  ParamNullError,
-  UnknownSignatureType,
-  CurveTypeNotFoundError,
-} from '@lit-protocol/constants';
-import { combineExecuteJsNodeShares, combinePKPSignNodeShares, combineEcdsaShares } from '@lit-protocol/crypto';
-import { applyTransformations, cleanStringValues, hexifyStringValues, logErrorWithRequestId, mostCommonString } from '@lit-protocol/misc';
+  combineExecuteJsNodeShares,
+  combinePKPSignNodeShares,
+} from '@lit-protocol/crypto';
+import {
+  applyTransformations,
+  cleanStringValues,
+  hexifyStringValues,
+  logErrorWithRequestId,
+  mostCommonString,
+} from '@lit-protocol/misc';
 import {
   ExecuteJsValueResponse,
   LitNodeSignature,
   LitActionSignedData,
   PKPSignEndpointResponse,
-  EcdsaSignedMessageShareParsed,
-  SigResponse,
 } from '@lit-protocol/types';
 
 import { parsePkpSignResponse } from './parse-pkp-sign-response';
 
-/**
- * Retrieves and combines signature shares from multiple nodes to generate the final signatures.
- *
- * @template T - The type of the final signatures. For `executeJs` endpoint, it returns as `signature`, and for `pkpSign` endpoint, it returns as `sig`.
- * @param {any} params.networkPubKeySet - The public key set of the network.
- * @param {number} params.minNodeCount - The threshold number of nodes
- * @param {any[]} params.nodeLitActionSignedData - The array of signature shares from each node.
- * @param {string} [params.requestId=''] - The optional request ID for logging purposes.
- * @returns {T | { signature: SigResponse; sig: SigResponse }} - The final signatures or an object containing the final signatures.
- *
- * @example
- *
- * executeJs: getSignatures<{ signature: SigResponse }>
- * pkpSign: getSignatures<{ sig: SigResponse }>
- */
-export const getSignatures = async (params: {
-  networkPubKeySet: string | null;
-  threshold: number;
-  signedMessageShares: EcdsaSignedMessageShareParsed[];
-  requestId: string;
-}): Promise<SigResponse> => {
-  const { networkPubKeySet, threshold, signedMessageShares, requestId } =
-    params;
-
-  if (networkPubKeySet === null) {
-    throw new ParamNullError(
-      {
-        info: {
-          requestId,
-        },
-      },
-      'networkPubKeySet cannot be null'
-    );
-  }
-
-  if (signedMessageShares.length < threshold) {
-    logErrorWithRequestId(
-      requestId,
-      `not enough nodes to get the signatures. Expected ${threshold}, got ${signedMessageShares.length}`
-    );
-
-    throw new NoValidShares(
-      {
-        info: {
-          requestId,
-          shares: signedMessageShares.length,
-          threshold,
-        },
-      },
-      `The total number of valid signatures shares "${signedMessageShares.length}" does not meet the threshold of "${threshold}"`
-    );
-  }
-
-  const curveType = signedMessageShares[0].sigType;
-
-  if (!curveType) {
-    throw new CurveTypeNotFoundError(
-      {
-        info: {
-          requestId,
-        },
-      },
-      'No curve type "%s" found',
-      curveType
-    );
-  }
-
-  const curveGroup = CURVE_GROUP_BY_CURVE_TYPE[curveType as LIT_CURVE_VALUES];
-
-  if (curveGroup !== 'ECDSA') {
-    throw new UnknownSignatureType(
-      {
-        info: {
-          requestId,
-          signatureType: curveType,
-        },
-      },
-      'signature type is %s which is invalid',
-      curveType
-    );
-  }
-
-  // -- combine
-  const combinedSignature = await combineEcdsaShares(signedMessageShares);
-
-  const _publicKey = mostCommonString(
-    signedMessageShares.map((s) => s.publicKey)
-  );
-  const _dataSigned = mostCommonString(
-    signedMessageShares.map((s) => s.dataSigned)
-  );
-
-  if (!_publicKey || !_dataSigned) {
-    throw new Error('No valid publicKey or dataSigned found');
-  }
-
-  const sigResponse: SigResponse = {
-    ...combinedSignature,
-    publicKey: _publicKey,
-    dataSigned: _dataSigned,
-  };
-
-  return sigResponse;
-};
-
-function assertThresholdShares(requestId: string, threshold: number, shares: { success: boolean }[]) {
-  const successfulShares = shares.filter(
-    (response) => response.success
-  );
+function assertThresholdShares(
+  requestId: string,
+  threshold: number,
+  shares: { success: boolean }[]
+) {
+  const successfulShares = shares.filter((response) => response.success);
 
   if (successfulShares.length < threshold) {
     logErrorWithRequestId(
@@ -167,55 +64,62 @@ export const combineExecuteJSSignatures = async (params: {
 
   const sigResponses = {} as Record<string, LitNodeSignature>;
 
-  const keyedSignedData = nodesLitActionSignedData.reduce<Record<string, LitActionSignedData[]>>((acc, nodeLitActionSignedData) => {
+  const keyedSignedData = nodesLitActionSignedData.reduce<
+    Record<string, LitActionSignedData[]>
+  >((acc, nodeLitActionSignedData) => {
     Object.keys(nodeLitActionSignedData.signedData).forEach((signedDataKey) => {
       if (!acc[signedDataKey]) {
         acc[signedDataKey] = [];
       }
 
-      acc[signedDataKey].push(nodeLitActionSignedData.signedData[signedDataKey]);
+      acc[signedDataKey].push(
+        nodeLitActionSignedData.signedData[signedDataKey]
+      );
     });
 
     return acc;
   }, {} as Record<string, LitActionSignedData[]>);
 
   const signatureKeys = Object.keys(keyedSignedData);
-  await Promise.all(signatureKeys.map(async (signatureKey) => {
-    const signatureShares = keyedSignedData[signatureKey];
-    const publicKey = mostCommonString(
-      signatureShares.map((s) => s.publicKey)
-    );
-    const sigType = mostCommonString(signatureShares.map((s) => s.sigType));
-
-    if (!publicKey || !sigType) {
-      throw new NoValidShares(
-        {
-          info: {
-            requestId,
-            publicKey,
-            shares: nodesLitActionSignedData,
-            sigType,
-          },
-        },
-        'Could not get public key or sig type from lit action shares'
+  await Promise.all(
+    signatureKeys.map(async (signatureKey) => {
+      const signatureShares = keyedSignedData[signatureKey];
+      const publicKey = mostCommonString(
+        signatureShares.map((s) => s.publicKey)
       );
-    }
+      const sigType = mostCommonString(signatureShares.map((s) => s.sigType));
 
-    // -- combine signature shares
-    const combinedSignature = await combineExecuteJsNodeShares(signatureShares);
+      if (!publicKey || !sigType) {
+        throw new NoValidShares(
+          {
+            info: {
+              requestId,
+              publicKey,
+              shares: nodesLitActionSignedData,
+              sigType,
+            },
+          },
+          'Could not get public key or sig type from lit action shares'
+        );
+      }
 
-    const sigResponse = applyTransformations({
-      ...combinedSignature,
-      publicKey,
-      sigType,
-    },
-    [
-      cleanStringValues,
-      hexifyStringValues,
-    ]) as unknown as LitNodeSignature;
+      // -- combine signature shares
+      const combinedSignature = await combineExecuteJsNodeShares(
+        signatureShares
+      );
 
-    sigResponses[signatureKey] = sigResponse;
-  }));
+      const sigResponse = applyTransformations(
+        {
+          ...combinedSignature,
+          publicKey,
+          sigType,
+        },
+        [cleanStringValues, hexifyStringValues]
+      ) as unknown as LitNodeSignature;
+
+      sigResponses[signatureKey] = sigResponse;
+    })
+  );
 
   return sigResponses;
 };
@@ -258,7 +162,9 @@ export const combinePKPSignSignatures = async (params: {
   }
 
   // -- combine signature shares
-  const combinedSignature = await combinePKPSignNodeShares(nodesPkpSignResponseData);
+  const combinedSignature = await combinePKPSignNodeShares(
+    nodesPkpSignResponseData
+  );
 
   const sigResponse = {
     ...combinedSignature,

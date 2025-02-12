@@ -1,5 +1,4 @@
 import { Provider } from '@ethersproject/abstract-provider';
-import depd from 'depd';
 
 import { EcdsaSigType, SigType } from './EndpointResponses';
 import { ILitNodeClient } from './ILitNodeClient';
@@ -19,7 +18,6 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from './types';
-const deprecated = depd('lit-js-sdk:types:interfaces');
 
 export interface AccsOperatorParams {
   operator: string;
@@ -193,7 +191,7 @@ export interface BaseJsonPkpSignRequest {
  * The 'pkpSign' function param. Please note that the structure
  * is different from the payload sent to the node.
  */
-export interface JsonPkpSignSdkParams {
+export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
   messageToSign: Uint8Array;
   authContext: AuthenticationContext;
@@ -441,9 +439,7 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
 
 export interface LitActionResponseStrategy {
   strategy: ResponseStrategy;
-  customFilter?: <T>(
-    responses: T[]
-  ) => T;
+  customFilter?: <T>(responses: T[]) => T;
 }
 
 export interface IpfsOptions {
@@ -571,7 +567,7 @@ export interface SigResponse {
 }
 
 export interface ExecuteJsResponseBase {
-  signatures: Record<string, LitNodeSignature> | null;
+  signatures: Record<string, LitNodeSignature>;
 }
 
 /**
@@ -711,23 +707,6 @@ export interface FormattedMultipleAccs {
   formattedUnifiedAccessControlConditions: any;
 }
 
-export interface SignWithECDSA {
-  // TODO: The message to be signed - note this message is not currently converted to a digest!!!!!
-  message: string;
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: Chain;
-
-  iat: number;
-  exp: number;
-}
-
-export interface CombinedECDSASignature {
-  r: string;
-  s: string;
-  recid: number;
-  signature: Hex;
-}
 // BLS TODO
 // ECDSA
 // ================== unifiedSignature: {
@@ -758,11 +737,6 @@ export interface CleanLitNodeSignature {
 export interface LitNodeSignature extends CleanLitNodeSignature {
   publicKey: Hex;
   sigType: SigType;
-}
-
-export interface HandshakeWithNode {
-  url: string;
-  challenge: string;
 }
 
 export interface NodeAttestation {

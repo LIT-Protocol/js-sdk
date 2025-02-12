@@ -1,5 +1,3 @@
-import { PRODUCT_IDS } from '@lit-protocol/constants';
-
 import {
   AuthenticationContext,
   CapacityCreditsReq,
@@ -14,9 +12,22 @@ import {
   JsonHandshakeResponse,
   JsonPkpSignSdkParams,
   LitNodeClientConfig,
-  SigResponse,
+  LitNodeSignature,
 } from './interfaces';
 import { ClaimProcessor, ClaimRequest } from './types';
+
+/**
+ * Product IDs used for price feed and node selection
+ *
+ * - DECRYPTION (0): Used for decryption operations
+ * - SIGN (1): Used for signing operations
+ * - LA (2): Used for Lit Actions execution
+ */
+export const PRODUCT_IDS = {
+  DECRYPTION: 0, // For decryption operations
+  SIGN: 1, // For signing operations
+  LIT_ACTION: 2, // For Lit Actions execution
+} as const;
 
 export interface ILitNodeClient {
   config: LitNodeClientConfig;
@@ -81,7 +92,7 @@ export interface ILitNodeClient {
    * Sign using PKP
    * @param params - PKP signing parameters
    */
-  pkpSign(params: JsonPkpSignSdkParams): Promise<SigResponse>;
+  pkpSign(params: JsonPkpSignSdkParams): Promise<LitNodeSignature>;
 
   /**
    * Execute JS on the nodes and combine and return any resulting signatures

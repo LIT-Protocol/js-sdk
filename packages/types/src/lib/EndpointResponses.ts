@@ -107,8 +107,13 @@ type SignatureShare =
  */
 export interface PKPSignEndpointResponse {
   success: boolean;
-  signedData: Uint8Array;
+  signedData: number[]; // Uint8Array
   signatureShare: SignatureShare;
+}
+
+export interface LitActionClaimData {
+  signature: string;
+  derivedKeyId: string;
 }
 
 export interface LitActionSignedData {
@@ -118,15 +123,11 @@ export interface LitActionSignedData {
   sigType: EcdsaSigType; // TODO can it be another <>SigType?
 }
 
-export interface ParsedLitActionSignedData extends Omit<LitActionSignedData, 'signatureShare'> {
-  signatureShare: SignatureShare;
-}
-
 /**
  * This is what the /web/execute/v2 endpoint returns
  */
 export interface ExecuteJsValueResponse {
-  claimData: any; // TODO check
+  claimData: Record<string, LitActionClaimData>;
   decryptedData: any; // TODO check
   logs: string;
   response: string;

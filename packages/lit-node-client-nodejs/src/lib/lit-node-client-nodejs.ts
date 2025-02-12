@@ -33,7 +33,6 @@ import {
   LOCAL_STORAGE_KEYS,
   ParamNullError,
   ParamsMissingError,
-  PRODUCT_IDS,
   SIWE_URI_PREFIX,
   UnknownError,
   UnsupportedMethodError,
@@ -70,9 +69,9 @@ import {
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
 import {
+  AuthMethod,
   ExecuteJsValueResponse,
-  ILitResource,
-  ISessionCapabilityObject,
+  PRODUCT_IDS,
   LitNodeSignature,
 } from '@lit-protocol/types';
 import {
@@ -82,6 +81,8 @@ import {
 
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getExpiration } from './helpers/get-expiration';
+import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
 import {
   combineExecuteJSSignatures,
   combinePKPSignSignatures,
@@ -95,7 +96,7 @@ import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 import type {
   AuthCallback,
   AuthCallbackParams,
-  type AuthenticationContext,
+  AuthenticationContext,
   AuthSig,
   BlsResponseData,
   CapacityCreditsReq,
@@ -126,7 +127,6 @@ import type {
   NodeCommandResponse,
   NodeSet,
   NodeShare,
-  PKPSignEndpointResponse,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -134,29 +134,8 @@ import type {
   Signature,
   SignSessionKeyProp,
   SignSessionKeyResponse,
-  SigResponse,
   SuccessNodePromises,
 } from '@lit-protocol/types';
-import { AuthMethod } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
-
-import { encodeCode } from './helpers/encode-code';
-import { getBlsSignatures } from './helpers/get-bls-signatures';
-import { getClaims } from './helpers/get-claims';
-import { getClaimsList } from './helpers/get-claims-list';
-import { getExpiration } from './helpers/get-expiration';
-import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
-import { getSignatures } from './helpers/get-signatures';
-import { normalizeArray } from './helpers/normalize-array';
-import { normalizeJsParams } from './helpers/normalize-params';
-import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
-import { removeDoubleQuotes } from './helpers/remove-double-quotes';
-import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -749,7 +728,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<ExecuteJsValueResponse>).values;
+    const responseData = (res as SuccessNodePromises<ExecuteJsValueResponse>)
+      .values;
 
     logWithRequestId(
       requestId,
@@ -781,7 +761,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     if (!hasSignedData && !hasClaimData) {
       return {
         claims: {},
-        signatures: null,
+        signatures: {},
         decryptions: [],
         response: mostCommonResponse.response,
         logs: mostCommonResponse.logs,
@@ -921,14 +901,14 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
           url,
         });
 
-      const toSign =
-        CURVE_GROUP_BY_CURVE_TYPE[params.signingScheme] !== 'ECDSA'
-          ? params.messageToSign!
-          : hashLitMessage(params.signingScheme, params.messageToSign!);
+        const toSign =
+          CURVE_GROUP_BY_CURVE_TYPE[params.signingScheme] !== 'ECDSA'
+            ? params.messageToSign!
+            : hashLitMessage(params.signingScheme, params.messageToSign!);
 
-      const reqBody: JsonPkpSignRequest = {
-        toSign: normalizeArray(toSign),
-        signingScheme: params.signingScheme,
+        const reqBody: JsonPkpSignRequest = {
+          toSign: normalizeArray(toSign),
+          signingScheme: params.signingScheme,
           pubkey: hexPrefixed(params.pubKey),
           authSig: sessionSig,
 

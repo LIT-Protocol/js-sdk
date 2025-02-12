@@ -103,7 +103,6 @@ export const testUseEoaSessionSigsToPkpSign = async (
 
   for (const signingSchemeConfig of signingSchemeConfigs) {
     try {
-
       const signingScheme = signingSchemeConfig.signingScheme;
       log(`Checking testUseEoaSessionSigsToPkpSign for ${signingSchemeConfig}`);
       // const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
@@ -187,7 +186,9 @@ export const testUseEoaSessionSigsToPkpSign = async (
         }
       }
 
-      const messageHash = signingSchemeConfig.hashesMessage ? hashLitMessage(signingScheme, alice.loveLetter) : alice.loveLetter;
+      const messageHash = signingSchemeConfig.hashesMessage
+        ? hashLitMessage(signingScheme, alice.loveLetter)
+        : alice.loveLetter;
       const messageHashHex = Buffer.from(messageHash).toString('hex');
       if (pkpSignature.signedData.replace('0x', '') !== messageHashHex) {
         throw new Error(

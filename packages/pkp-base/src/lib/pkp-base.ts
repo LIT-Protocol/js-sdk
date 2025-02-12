@@ -319,12 +319,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.log('res:', res);
     this.log('res.signatures[sigName]:', sig);
 
-    if (sig.r && sig.s) {
-      // pad sigs with 0 if length is odd
-      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
-      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
-    }
-
     return sig;
   }
 
