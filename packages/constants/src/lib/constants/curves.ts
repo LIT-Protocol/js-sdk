@@ -51,8 +51,14 @@ export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE; // Identical to Sig
 // This should replicate SigShare.sigType in types package
 export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
 
+/**
+ * CHANGE: This is not needed when the combiner is integrated
+ */
 export const CURVE_GROUPS = ['BLS', 'ECDSA', 'FROST'] as const;
 
+/**
+ * CHANGE: This is not needed when the combiner is integrated
+ */
 export const CURVE_GROUP_BY_CURVE_TYPE: Record<
   LIT_CURVE_VALUES,
   (typeof CURVE_GROUPS)[number]

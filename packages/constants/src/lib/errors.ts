@@ -1,8 +1,5 @@
 // @ts-expect-error No types available for this package
-import { VError, Options } from '@openagenda/verror';
-import depd from 'depd';
-
-const deprecated = depd('lit-js-sdk:constants:errors');
+import { Options, VError } from '@openagenda/verror';
 
 export const LIT_ERROR_KIND = {
   Unknown: 'Unknown',
@@ -14,21 +11,8 @@ export const LIT_ERROR_KIND = {
   Parser: 'Parser',
   Serializer: 'Serializer',
   Timeout: 'Timeout',
+  Pricing: 'Pricing',
 } as const;
-
-/**
- * @deprecated Will be removed - Use LIT_ERROR_KIND instead
- * Alias for LIT_ERROR_KIND. Added for backwards compatibility.
- * See {@link LIT_ERROR_KIND}
- */
-export const LitErrorKind = new Proxy(LIT_ERROR_KIND, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitErrorKind is deprecated and will be removed in a future version. Use LIT_ERROR_KIND instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
 
 interface ErrorConfig {
   name: string;
@@ -37,6 +21,11 @@ interface ErrorConfig {
 }
 
 export const LIT_ERROR: Record<string, ErrorConfig> = {
+  MAX_PRICE_TOO_LOW: {
+    name: 'MaxPriceTooLow',
+    code: 'max_price_too_low',
+    kind: LIT_ERROR_KIND.Pricing,
+  },
   INVALID_PARAM_TYPE: {
     name: 'InvalidParamType',
     code: 'invalid_param_type',
@@ -180,7 +169,7 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
   NODE_ERROR: {
     name: 'NodeError',
     code: 'node_error',
-    kind: LitErrorKind.Unknown,
+    kind: LIT_ERROR_KIND.Unknown,
   },
   WALLET_SIGNATURE_NOT_FOUND_ERROR: {
     name: 'WalletSignatureNotFoundError',
@@ -215,17 +204,17 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
   NETWORK_ERROR: {
     name: 'NetworkError',
     code: 'network_error',
-    kind: LitErrorKind.Unexpected,
+    kind: LIT_ERROR_KIND.Unexpected,
   },
   TRANSACTION_ERROR: {
     name: 'TransactionError',
     code: 'transaction_error',
-    kind: LitErrorKind.Unexpected,
+    kind: LIT_ERROR_KIND.Unexpected,
   },
   AUTOMATION_ERROR: {
     name: 'AutomationError',
     code: 'automation_error',
-    kind: LitErrorKind.Unexpected,
+    kind: LIT_ERROR_KIND.Unexpected,
   },
 };
 
@@ -320,6 +309,7 @@ export const {
   LocalStorageItemNotFoundException,
   LocalStorageItemNotRemovedException,
   LocalStorageItemNotSetException,
+  MaxPriceTooLow,
   MintingNotSupported,
   NetworkError,
   NoValidShares,

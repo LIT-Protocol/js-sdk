@@ -1,5 +1,5 @@
 import { log } from '@lit-protocol/misc';
-import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -13,10 +13,9 @@ export const testUsePkpSessionSigsToExecuteJsSigning = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
+  const pkpAuthContext = getPkpAuthContext(devEnv, alice);
 
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: pkpSessionSigs,
     code: `(async () => {
         const sigShare = await LitActions.signEcdsa({
           toSign: dataToSign,
@@ -28,6 +27,7 @@ export const testUsePkpSessionSigsToExecuteJsSigning = async (
       dataToSign: alice.loveLetter,
       publicKey: alice.authMethodOwnedPkp.publicKey,
     },
+    authContext: pkpAuthContext,
   });
 
   devEnv.releasePrivateKeyFromUser(alice);

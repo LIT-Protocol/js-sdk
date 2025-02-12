@@ -90,6 +90,12 @@ export interface ProcessEnvs {
    * this value will be ignored
    */
   NETWORK_CONFIG: string;
+
+  /**
+   * Max prices to be sent to nodes -- an array of strings that will be parsed as bigints
+   * in order of PRODUCT_ID's values -- DECRYPTION, SIGN, LIT_ACTION
+   */
+  DEFAULT_MAX_PRICES: bigint[];
 }
 
 /**

@@ -117,7 +117,9 @@ export class TestnetClient {
         },
         PKPNFTMetadata: {},
         PubkeyRouter: {},
-        PriceFeed: {},
+        PriceFeed: {
+          abi: JSON.parse(testNetConfig.contractAbis.priceFeed),
+        },
       },
     };
     return networkContext;

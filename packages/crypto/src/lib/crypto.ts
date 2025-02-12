@@ -53,11 +53,13 @@ import {
   blsCombine,
   blsDecrypt,
   blsEncrypt,
+  BlsSignatureShareJsonString,
   blsVerify,
   // ECDSA
   EcdsaVariant,
   ecdsaCombine,
   ecdsaDeriveKey,
+  EcdsaVariant,
   ecdsaVerify,
   // FROST
   // FrostVariant,
@@ -269,7 +271,12 @@ const ecdsaSigntureTypeMap: Record<LitEcdsaVariantType, EcdsaVariant> = {
  */
 export const combineEcdsaShares = async (
   sigShares: SigShare[]
-): Promise<CombinedECDSASignature> => {
+): Promise<{
+  r: string;
+  s: string;
+  recid: number;
+  signature: `0x${string}`;
+}> => {
   const validShares = sigShares.filter((share) => share.signatureShare);
 
   const anyValidShare = validShares[0];

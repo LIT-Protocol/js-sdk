@@ -39,30 +39,29 @@ export async function executeLitAction({
   jsParams,
 }: ExecuteLitAction) {
   const expiration = new Date(Date.now() + ONE_MINUTE).toISOString();
-  const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
-    pkpPublicKey,
-    capabilityAuthSigs: [],
-    authMethods: [
-      await EthWalletProvider.authenticate({
-        signer: authSigner,
-        litNodeClient: litNodeClient,
-        expiration,
-      }),
-    ],
-    resourceAbilityRequests: [
-      {
-        resource: new LitActionResource('*'),
-        ability: LIT_ABILITY.LitActionExecution,
-      },
-    ],
-    expiration,
-  });
 
   const executeJsResponse = await litNodeClient.executeJs({
     ipfsId,
     code,
     jsParams,
-    sessionSigs: pkpSessionSigs,
+    authContext: litNodeClient.getPkpAuthContext({
+      pkpPublicKey,
+      capabilityAuthSigs: [],
+      authMethods: [
+        await EthWalletProvider.authenticate({
+          signer: authSigner,
+          litNodeClient: litNodeClient,
+          expiration,
+        }),
+      ],
+      resourceAbilityRequests: [
+        {
+          resource: new LitActionResource('*'),
+          ability: LIT_ABILITY.LitActionExecution,
+        },
+      ],
+      expiration,
+    }),
   });
 
   return executeJsResponse;

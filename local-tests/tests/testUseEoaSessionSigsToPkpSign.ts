@@ -9,7 +9,7 @@ import {
 import { log } from '@lit-protocol/misc';
 import { SigningScheme } from '@lit-protocol/types';
 
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 interface SigningSchemeConfig {
@@ -106,11 +106,11 @@ export const testUseEoaSessionSigsToPkpSign = async (
 
       const signingScheme = signingSchemeConfig.signingScheme;
       log(`Checking testUseEoaSessionSigsToPkpSign for ${signingSchemeConfig}`);
-      const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
+      // const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
       const pkpSignature = await devEnv.litNodeClient.pkpSign({
         pubKey: alice.pkp.publicKey,
-        sessionSigs: eoaSessionSigs,
+        authContext: getEoaAuthContext(devEnv, alice),
         messageToSign: alice.loveLetter,
         signingScheme,
       });
