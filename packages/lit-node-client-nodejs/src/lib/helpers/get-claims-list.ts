@@ -6,9 +6,11 @@ import { ClaimsList, ExecuteJsValueResponse } from '@lit-protocol/types';
  * @param responseData The response data containing the claims.
  * @returns An array of claims.
  */
-export const getClaimsList = (responseData: ExecuteJsValueResponse[]): ClaimsList => {
+export const getClaimsList = (
+  responseData: ExecuteJsValueResponse[]
+): ClaimsList => {
   const claimsList = responseData
-    .map(rd => applyTransformations(rd.claimData, [cleanStringValues]))
+    .map((rd) => applyTransformations(rd.claimData, [cleanStringValues]))
     .filter((item) => item !== null);
 
   return claimsList as unknown as ClaimsList;

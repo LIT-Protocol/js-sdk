@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { SigningScheme } from '@lit-protocol/types';
+import { BlsSigType, EcdsaSigType, FrostSigType } from '@lit-protocol/types';
 
 import { ObjectMapFromArray } from './utils';
 
@@ -16,16 +16,15 @@ export const LIT_FROST_VARIANT_VALUES = [
   'SchnorrK256Taproot',
   'SchnorrRedDecaf377Blake2b512',
   'SchnorrkelSubstrate',
-] as const satisfies readonly SigningScheme[];
+] as const satisfies readonly FrostSigType[];
 export const LIT_FROST_VARIANT = ObjectMapFromArray(LIT_FROST_VARIANT_VALUES);
 export const LIT_FROST_VARIANT_SCHEMA = z.enum(LIT_FROST_VARIANT_VALUES);
 export type LitFrostVariantType = z.infer<typeof LIT_FROST_VARIANT_SCHEMA>;
 
 // ----- BLS Variant
 export const LIT_BLS_VARIANT_VALUES = [
-  'Bls12381',
   'Bls12381G1ProofOfPossession',
-] as const satisfies readonly SigningScheme[];
+] as const satisfies readonly BlsSigType[];
 export const LIT_BLS_VARIANT = ObjectMapFromArray(LIT_BLS_VARIANT_VALUES);
 export const LIT_BLS_VARIANT_SCHEMA = z.enum(LIT_BLS_VARIANT_VALUES);
 export type LitBlsVariantType = z.infer<typeof LIT_BLS_VARIANT_SCHEMA>;
@@ -35,7 +34,7 @@ export const LIT_ECDSA_VARIANT_VALUES = [
   'EcdsaK256Sha256',
   'EcdsaP256Sha256',
   'EcdsaP384Sha384',
-] as const satisfies readonly SigningScheme[];
+] as const satisfies readonly EcdsaSigType[];
 export const LIT_ECDSA_VARIANT = ObjectMapFromArray(LIT_ECDSA_VARIANT_VALUES);
 export const LIT_ECDSA_VARIANT_SCHEMA = z.enum(LIT_ECDSA_VARIANT_VALUES);
 export type LitEcdsaVariantType = z.infer<typeof LIT_ECDSA_VARIANT_SCHEMA>;
@@ -51,20 +50,13 @@ export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE; // Identical to Sig
 // This should replicate SigShare.sigType in types package
 export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
 
-/**
- * CHANGE: This is not needed when the combiner is integrated
- */
 export const CURVE_GROUPS = ['BLS', 'ECDSA', 'FROST'] as const;
 
-/**
- * CHANGE: This is not needed when the combiner is integrated
- */
 export const CURVE_GROUP_BY_CURVE_TYPE: Record<
   LIT_CURVE_VALUES,
   (typeof CURVE_GROUPS)[number]
 > = {
   // BLS
-  [LIT_CURVE.Bls12381]: CURVE_GROUPS[0],
   [LIT_CURVE.Bls12381G1ProofOfPossession]: CURVE_GROUPS[0],
   // ECDSA
   [LIT_CURVE.EcdsaK256Sha256]: CURVE_GROUPS[1],

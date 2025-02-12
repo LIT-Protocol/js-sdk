@@ -1368,7 +1368,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       ...(params?.litActionCode && { code: params.litActionCode }),
       ...(params?.jsParams && { jsParams: params.jsParams }),
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
-      // signingScheme: LIT_CURVE.BLS,
     };
 
     log(`[signSessionKey] body:`, body);

@@ -161,30 +161,13 @@ export interface ClaimKeyResponse {
   mintTx: string;
 }
 
-export type SigningScheme =
-  | 'Bls12381'
-  | 'Bls12381G1ProofOfPossession'
-  | 'EcdsaK256Sha256'
-  | 'EcdsaP256Sha256'
-  | 'EcdsaP384Sha384'
-  | 'SchnorrEd25519Sha512'
-  | 'SchnorrK256Sha256'
-  | 'SchnorrP256Sha256'
-  | 'SchnorrP384Sha384'
-  | 'SchnorrRistretto25519Sha512'
-  | 'SchnorrEd448Shake256'
-  | 'SchnorrRedJubjubBlake2b512'
-  | 'SchnorrK256Taproot'
-  | 'SchnorrRedDecaf377Blake2b512'
-  | 'SchnorrkelSubstrate';
-
 export interface Node {
   socketAddress: string;
   value: number;
 }
 
 export interface BaseJsonPkpSignRequest {
-  signingScheme: SigningScheme;
+  signingScheme: SigType;
 }
 
 /**
@@ -561,7 +544,7 @@ export interface SigResponse {
   r: string;
   s: string;
   recid: number;
-  signature: `0x${string}`;
+  signature: Hex;
   publicKey: string; // pkp public key (no 0x prefix)
   dataSigned: string;
 }

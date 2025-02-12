@@ -11,13 +11,13 @@ import { shake256 } from '@noble/hashes/sha3';
 import { sha384, sha512 } from '@noble/hashes/sha512';
 
 import {
+  CurveTypeNotFoundError,
   InvalidParamType,
   LIT_CURVE,
   LitEcdsaVariantType,
   NetworkError,
   NoValidShares,
   UnknownError,
-  UnknownSignatureType,
 } from '@lit-protocol/constants';
 import {
   applyTransformations,
@@ -36,7 +36,7 @@ import {
   NodeAttestation,
   PKPSignEndpointResponse,
   SessionKeyPair,
-  SigningScheme,
+  SigType,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -534,8 +534,7 @@ export const checkSevSnpAttestation = async (
 };
 
 // Map the right hash function per signing scheme
-export const hashFunctions = {
-  Bls12381: sha256, // TODO needed here? Which hash?
+export const hashFunctions: Record<SigType, any> = {
   Bls12381G1ProofOfPossession: sha256, // TODO needed here? Which hash?
   EcdsaK256Sha256: sha256,
   EcdsaP256Sha256: sha256,
@@ -554,8 +553,7 @@ export const hashFunctions = {
 } as const;
 
 // Map the right curve function per signing scheme
-export const curveFunctions = {
-  Bls12381: bls12_381,
+export const curveFunctions: Record<SigType, any> = {
   Bls12381G1ProofOfPossession: bls12_381,
   EcdsaK256Sha256: secp256k1,
   EcdsaP256Sha256: p256,
@@ -574,13 +572,13 @@ export const curveFunctions = {
 } as const;
 
 export function hashLitMessage(
-  signingScheme: SigningScheme,
+  signingScheme: SigType,
   message: Uint8Array
 ): Uint8Array {
   const hashFn = hashFunctions[signingScheme];
 
   if (!hashFn) {
-    throw new UnknownSignatureType(
+    throw new CurveTypeNotFoundError(
       {
         info: {
           signingScheme,
@@ -594,14 +592,14 @@ export function hashLitMessage(
 }
 
 export function verifyLitSignature(
-  signingScheme: SigningScheme,
+  signingScheme: SigType,
   publicKey: string,
   message: string,
   signature: string
 ) {
   const curve = curveFunctions[signingScheme];
   if (!curve) {
-    throw new UnknownSignatureType(
+    throw new CurveTypeNotFoundError(
       {
         info: {
           signingScheme,
@@ -611,6 +609,6 @@ export function verifyLitSignature(
     );
   }
 
-  // @ts-expect-error TODO call correct verification on all curve functions
+  // TODO call correct verification on all curve functions
   return curve.verify(signature, message, publicKey);
 }

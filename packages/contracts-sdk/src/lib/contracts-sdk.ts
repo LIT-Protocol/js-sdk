@@ -639,7 +639,16 @@ export class LitContracts {
           );
           break;
         default:
-          throw new Error('Wrong contract name'); // TODO improve this error
+          throw new InvalidArgumentException(
+            {
+              info: {
+                contract,
+                environment,
+                contractNames,
+              },
+            },
+            'Contract not found'
+          );
       }
 
       return address;

@@ -1,32 +1,37 @@
 import { Hex } from './types';
 
-// TODO these types are defined in @lit-protocol/constants -> curves.ts. Unify them.
-export type BlsSigType = 'BLS';
+export type BlsSigType = 'Bls12381G1ProofOfPossession';
 
 export type EcdsaSigType =
-  | 'K256'
-  | 'ECDSA_CAIT_SITH'
-  | 'EcdsaCaitSithP256'
   | 'EcdsaK256Sha256'
   | 'EcdsaP256Sha256'
   | 'EcdsaP384Sha384';
 
 export type FrostSigType =
-  | 'Ed25519Sha512'
-  | 'Ed448Shake256'
-  | 'Ristretto25519Sha512'
-  | 'K256Sha256'
-  | 'P256Sha256'
-  | 'P384Sha384'
-  | 'RedJubjubBlake2b512'
-  | 'K256Taproot';
+  | 'SchnorrEd25519Sha512'
+  | 'SchnorrK256Sha256'
+  | 'SchnorrP256Sha256'
+  | 'SchnorrP384Sha384'
+  | 'SchnorrRistretto25519Sha512'
+  | 'SchnorrEd448Shake256'
+  | 'SchnorrRedJubjubBlake2b512'
+  | 'SchnorrK256Taproot'
+  | 'SchnorrRedDecaf377Blake2b512'
+  | 'SchnorrkelSubstrate';
 
 export type SigType = BlsSigType | EcdsaSigType | FrostSigType;
 
 // See src/p2p_comms/web/models.rs > BlsSignedMessageShare
 // Example output:
 // "BlsSignedMessageShare": {
-//    TODO
+//   "message": "0102030405",
+//   "result": "success",
+//   "peer_id": "5d6549a90c835b672953dec25b20f278de72b5a47019c74a2e4e8207e01b684a",
+//   "share_id": "\"19a7c43a2b7bbedcea0a40ab17fe0f4a1acf31bdecb9ebeb96c1d3a62e4885f0\"",
+//   "signature_share": "{\"ProofOfPossession\":{\"identifier\":\"f085482ea6d3c196ebebb9ecbd31cf1a4a0ffe17ab400aeadcbe7b2b3ac4a719\",\"value\":\"8a56ee7b1f7c1eb93e1ccfa2ec02c0f344dcbb66d3cb0742ceaad2aa655da431575b70635db1aa6208061ebdc64442e108c6ae49eb996d72f590ac99d4edda180cb4ef4610bf58b00f75910fda6670bd58eb9b4397f38c8ea5886d9914cb2d24\"}}",
+//   "verifying_share": "{\"identifier\":\"f085482ea6d3c196ebebb9ecbd31cf1a4a0ffe17ab400aeadcbe7b2b3ac4a719\",\"value\":\"911725a46083ac660d283be18965f2fc3c3f817272b8499c4b46477e868a2d515d670f4fb89cb837bc1cd0dc7c00655b\"}",
+//   "public_key": "\"8fb7104e7fcfae43b77646d6ade34b116c7a69aa53cba75167e267fff36150727dd1064ca477b6cd763f8382c737a35d\"",
+//   "sig_type": "Bls12381G1ProofOfPossession"
 // }
 // Notice how some values are double quoted, and some are not. We need to clean this up.
 export interface BlsSignedMessageShareRaw {
@@ -140,7 +145,14 @@ export interface ExecuteJsValueResponse {
  *
  * @example
  * {
- *   TODO
+ *   "message": "0x0102030405",
+ *   "peerId": "0x5d6549a90c835b672953dec25b20f278de72b5a47019c74a2e4e8207e01b684a",
+ *   "shareId": "0x19a7c43a2b7bbedcea0a40ab17fe0f4a1acf31bdecb9ebeb96c1d3a62e4885f0",
+ *   "signatureShare": "{ProofOfPossession:{identifier:f085482ea6d3c196ebebb9ecbd31cf1a4a0ffe17ab400aeadcbe7b2b3ac4a719,value:8a56ee7b1f7c1eb93e1ccfa2ec02c0f344dcbb66d3cb0742ceaad2aa655da431575b70635db1aa6208061ebdc64442e108c6ae49eb996d72f590ac99d4edda180cb4ef4610bf58b00f75910fda6670bd58eb9b4397f38c8ea5886d9914cb2d24}}",
+ *   "verifyingShare": "{identifier:f085482ea6d3c196ebebb9ecbd31cf1a4a0ffe17ab400aeadcbe7b2b3ac4a719,value:911725a46083ac660d283be18965f2fc3c3f817272b8499c4b46477e868a2d515d670f4fb89cb837bc1cd0dc7c00655b}",
+ *   "publicKey": "0x8fb7104e7fcfae43b77646d6ade34b116c7a69aa53cba75167e267fff36150727dd1064ca477b6cd763f8382c737a35d",
+ *   "sigType": "Bls12381G1ProofOfPossession",
+ *   "dataSigned": "0x0102030405"
  * }
  */
 export interface BlsSignedMessageShareParsed {

@@ -7,7 +7,7 @@ import {
   verifyLitSignature,
 } from '@lit-protocol/crypto';
 import { log } from '@lit-protocol/misc';
-import { SigningScheme } from '@lit-protocol/types';
+import { SigType } from '@lit-protocol/types';
 
 import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
@@ -16,7 +16,7 @@ interface SigningSchemeConfig {
   hasRecoveryId?: boolean;
   hashesMessage: boolean;
   recoversPublicKey?: boolean;
-  signingScheme: SigningScheme;
+  signingScheme: SigType;
 }
 
 /**
@@ -31,10 +31,6 @@ export const testUseEoaSessionSigsToPkpSign = async (
   const alice = await devEnv.createRandomPerson();
   const signingSchemeConfigs: SigningSchemeConfig[] = [
     // BLS
-    // {
-    //   signingScheme: 'Bls12381', // TODO NodeErrror: Unsupported key type when for Signable. No esta en tss_state.rs::TssState::get_signing_state, puede que no sea posible firmar con esto?
-    //   hashesMessage: false,
-    // },
     // {
     //   signingScheme: 'Bls12381G1ProofOfPossession', // TODO pkpSignature.signature: '{ProofOfPossession:984ffb9ef7a0e6225dd074bade4b9494fab3487ff543f25a90d86f794cbf190ed20179df6eb6dd3eb9a285838d3cf4980e5e7028688e0461bd1cb95c075046fcafa343d3702e7edff70fb8eb8ada130f58fa45140ab2d90f24b1309b026d98d6}'
     //   hashesMessage: false,
@@ -128,7 +124,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
           !pkpSignature[hexString].startsWith('0x')
         ) {
           throw new Error(
-            `Expected "${hexString}" hex string in pkpSignature. SigningScheme: ${signingScheme}`
+            `Expected "${hexString}" hex string in pkpSignature. Signing Scheme: ${signingScheme}`
           );
         }
       }
@@ -139,7 +135,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
           : pkpSignature.recoveryId !== null
       ) {
         throw new Error(
-          `Expected "recoveryId" to be 0/1 for ECDSA and "null" for the rest of curves. SigningScheme: ${signingScheme}`
+          `Expected "recoveryId" to be 0/1 for ECDSA and "null" for the rest of curves. Signing Scheme: ${signingScheme}`
         );
       }
 
@@ -152,7 +148,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
       );
       if (!signatureVerification) {
         throw new Error(
-          `Expected pkpSignature to consistently verify its components. SigningScheme: ${signingScheme}`
+          `Expected pkpSignature to consistently verify its components. Signing Scheme: ${signingScheme}`
         );
       }
 
@@ -161,7 +157,6 @@ export const testUseEoaSessionSigsToPkpSign = async (
         const signatureBytes = hexToBytes(
           pkpSignature.signature.replace(/^0x/, '')
         );
-        // @ts-expect-error In progress. ECDSA works, not yet Frost
         const signature = curve.Signature.fromCompact(
           signatureBytes
         ).addRecoveryBit(pkpSignature.recoveryId);
@@ -181,7 +176,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
           alice.pkp.publicKey !== recoveredPubKey
         ) {
           throw new Error(
-            `Expected recovered public key to match alice.pkp.publicKey. SigningScheme: ${signingSchemeConfig}`
+            `Expected recovered public key to match alice.pkp.publicKey. Signing Scheme: ${signingSchemeConfig}`
           );
         }
       }
@@ -192,7 +187,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
       const messageHashHex = Buffer.from(messageHash).toString('hex');
       if (pkpSignature.signedData.replace('0x', '') !== messageHashHex) {
         throw new Error(
-          `Expected signed data to match hashLitMessage(signingScheme, alice.loveLetter). SigningScheme: ${signingScheme}`
+          `Expected signed data to match hashLitMessage(signingScheme, alice.loveLetter). Signing Scheme: ${signingScheme}`
         );
       }
 
