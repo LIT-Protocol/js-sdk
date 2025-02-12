@@ -128,7 +128,6 @@ import type {
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeSet,
-  NodeShare,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -740,9 +739,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     );
 
     // -- find the responseData that has the most common response
-    const mostCommonResponse = findMostCommonResponse(
-      responseData
-    ) as NodeShare;
+    const mostCommonResponse = findMostCommonResponse(responseData);
 
     const responseFromStrategy = processLitActionResponseStrategy(
       responseData,
@@ -750,18 +747,13 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     );
     mostCommonResponse.response = responseFromStrategy;
 
-    const isSuccess = mostCommonResponse.success;
     const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
     const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
-
-    // -- we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
-    if (isSuccess && !hasSignedData && !hasClaimData) {
-      return mostCommonResponse as unknown as ExecuteJsResponse;
-    }
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
     if (!hasSignedData && !hasClaimData) {
       return {
+        success: mostCommonResponse.success,
         claims: {},
         signatures: {},
         decryptions: [],

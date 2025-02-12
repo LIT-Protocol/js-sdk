@@ -586,33 +586,6 @@ export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
   logs: string;
 }
 
-export interface SigShare {
-  sigType: EcdsaSigType; // TODO should it be SigningScheme from above?
-  signatureShare: string;
-  bigR?: string;
-  publicKey: string;
-  dataSigned?: string | 'fail';
-  siweMessage?: string;
-  sigName?: string;
-}
-
-export interface NodeShare {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claimData: any;
-
-  // I think this is deprecated
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unsignedJwt: any;
-  signedData: SigShare;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  decryptedData: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  response: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logs: any;
-  success?: boolean | '';
-}
-
 export interface NodeBlsSigningShare {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unsignedJwt?: any;

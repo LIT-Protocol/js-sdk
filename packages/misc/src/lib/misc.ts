@@ -70,56 +70,60 @@ export const mostCommonString = <T>(arr: T[]): T | undefined => {
     .pop();
 };
 
-export const findMostCommonResponse = (responses: object[]): object => {
+/**
+ * Recursively finds the most common value for each key across an array of response objects.
+ *
+ * For each key found in any response object, the function aggregates all non-empty values (ignoring
+ * `undefined` and empty strings) and determines the most frequently occurring value. If the value is an object
+ * (and not an array), the function recurses into that object.
+ *
+ * @template T - The shape of the input objects in the array.
+ * @param {T[]} responses - An array of response objects.
+ * @returns {T} An object with each key set to its most common value across all responses.
+ */
+export const findMostCommonResponse = <T extends Record<string, any>>(
+  responses: T[]
+): T => {
+  if (responses.length === 0) {
+    throw new Error(
+      'findMostCommonResponse requires at least one response object'
+    );
+  }
+
   const result: Record<string, any> = {};
 
   // Aggregate all values for each key across all responses
   const keys = new Set(responses.flatMap(Object.keys));
 
   for (const key of keys) {
-    const values = responses.map(
-      (response: Record<string, any>) => response[key]
-    );
+    const values = responses.map((response) => response[key]);
 
-    // Filter out undefined values before processing
+    // Filter out undefined and empty string values before processing
     const filteredValues = values.filter(
       (value) => value !== undefined && value !== ''
     );
 
     if (filteredValues.length === 0) {
-      result[key] = undefined; // or set a default value if needed
+      result[key] = undefined;
     } else if (
       typeof filteredValues[0] === 'object' &&
       !Array.isArray(filteredValues[0])
     ) {
-      // Recursive case for objects
+      // Recursive case for nested objects
       result[key] = findMostCommonResponse(filteredValues);
     } else {
-      // Most common element from filtered values
+      // Determine the most common element from filtered values
       result[key] = mostCommonString(filteredValues);
     }
   }
 
-  return result;
+  return result as T;
 };
 
 declare global {
-  var wasmExport: any;
-  var wasmECDSA: any;
   var logger: any;
   var logManager: any;
 }
-
-export const throwRemovedFunctionError = (functionName: string) => {
-  throw new RemovedFunctionError(
-    {
-      info: {
-        functionName,
-      },
-    },
-    `This function "${functionName}" has been removed. Please use the old SDK.`
-  );
-};
 
 export const bootstrapLogManager = (
   id: string,
