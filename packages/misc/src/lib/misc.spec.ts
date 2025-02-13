@@ -77,7 +77,9 @@ describe('utils', () => {
     });
 
     it('throws when given an empty array, there is no most common response', () => {
-      expect(utilsModule.findMostCommonResponse([])).toThrow();
+      expect(() => utilsModule.findMostCommonResponse([])).toThrow(
+        'findMostCommonResponse requires at least one response object'
+      );
     });
 
     it('handles nested objects recursively', () => {

@@ -19,8 +19,8 @@ import {
 export const parsePkpSignResponse = (
   responseData: PKPSignEndpointResponse[]
 ): PKPSignEndpointSharesParsed[] => {
-  const ecdsaSignedMessageShares =
-    responseData.map<PKPSignEndpointSharesParsed>(({ signatureShare }) => {
+  const parsedSignatureShares = responseData.map<PKPSignEndpointSharesParsed>(
+    ({ signatureShare }) => {
       // Determine if the object is lifted or contains a nested structure
       // Example scenarios this logic handles:
       // 1. If `signatureShare` is nested (e.g., { EcdsaSignedMessageShare: { ... } }),
@@ -65,7 +65,8 @@ export const parsePkpSignResponse = (
       delete parsedShare['result'];
 
       return parsedShare as unknown as PKPSignEndpointSharesParsed;
-    });
+    }
+  );
 
-  return ecdsaSignedMessageShares;
+  return parsedSignatureShares;
 };

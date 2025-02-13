@@ -1,4 +1,4 @@
-import { PRODUCT_IDS } from '@lit-protocol/constants';
+import { PRODUCT_IDS } from '@lit-protocol/types';
 
 import { getMaxPricesForNodeProduct } from './get-max-prices-for-node-product';
 

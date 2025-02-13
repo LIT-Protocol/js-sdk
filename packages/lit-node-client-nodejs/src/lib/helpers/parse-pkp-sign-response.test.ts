@@ -12,11 +12,11 @@ describe('parsePkpSignResponse', () => {
     const responseData: PKPSignEndpointResponse[] = [
       {
         success: false,
-        signedData: new Uint8Array([
+        signedData: [
           125, 135, 197, 234, 117, 247, 55, 139, 183, 1, 228, 4, 197, 6, 57, 22,
           26, 243, 239, 246, 98, 147, 233, 243, 117, 181, 241, 126, 181, 4, 118,
           244,
-        ]),
+        ],
         signatureShare: {
           EcdsaSignedMessageShare: {
             digest: 'fail',
@@ -33,11 +33,11 @@ describe('parsePkpSignResponse', () => {
       },
       {
         success: true,
-        signedData: new Uint8Array([
+        signedData: [
           125, 135, 197, 234, 117, 247, 55, 139, 183, 1, 228, 4, 197, 6, 57, 22,
           26, 243, 239, 246, 98, 147, 233, 243, 117, 181, 241, 126, 181, 4, 118,
           244,
-        ]),
+        ],
         signatureShare: {
           EcdsaSignedMessageShare: {
             digest:
@@ -55,17 +55,17 @@ describe('parsePkpSignResponse', () => {
               '"0381ff5b9f673837eacd4dca7e9377084250dccfc13ebf13913e662182027d1482"',
             public_key:
               '"04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726"',
-            sig_type: 'K256',
+            sig_type: 'EcdsaK256Sha256',
           },
         },
       },
       {
         success: true,
-        signedData: new Uint8Array([
+        signedData: [
           125, 135, 197, 234, 117, 247, 55, 139, 183, 1, 228, 4, 197, 6, 57, 22,
           26, 243, 239, 246, 98, 147, 233, 243, 117, 181, 241, 126, 181, 4, 118,
           244,
-        ]),
+        ],
         signatureShare: {
           EcdsaSignedMessageShare: {
             digest:
@@ -83,7 +83,7 @@ describe('parsePkpSignResponse', () => {
               '"0381ff5b9f673837eacd4dca7e9377084250dccfc13ebf13913e662182027d1482"',
             public_key:
               '"04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726"',
-            sig_type: 'K256',
+            sig_type: 'EcdsaK256Sha256',
           },
         },
       },
@@ -93,6 +93,7 @@ describe('parsePkpSignResponse', () => {
       {
         digest: 'fail',
         shareId: '',
+        peerId: '',
         signatureShare: '',
         bigR: '',
         compressedPublicKey: '',
@@ -102,35 +103,39 @@ describe('parsePkpSignResponse', () => {
       },
       {
         digest:
-          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+          '0x7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
         shareId:
-          '1A0369823607C6EF403D86BA41534DDB1420730C696060EAD7931DE5DB603937',
+          '0x1A0369823607C6EF403D86BA41534DDB1420730C696060EAD7931DE5DB603937',
+        peerId:
+          '0x800ca9780644bb7e1908efa6bd1a0686f1095158c3ba6f1649ef9d2d67bfaf34',
         signatureShare:
-          '3ED0A844FAE40DF6210A6B2EACB9426E52E8339E243E697E33CF14E0CDE2B827',
-        bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
+          '0x3ED0A844FAE40DF6210A6B2EACB9426E52E8339E243E697E33CF14E0CDE2B827',
+        bigR: '0x0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
         compressedPublicKey:
-          '0381ff5b9f673837eacd4dca7e9377084250dccfc13ebf13913e662182027d1482',
+          '0x0381ff5b9f673837eacd4dca7e9377084250dccfc13ebf13913e662182027d1482',
         publicKey:
-          '04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
-        sigType: 'K256',
+          '0x04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
+        sigType: 'EcdsaK256Sha256',
         dataSigned:
-          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+          '0x7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
       },
       {
         digest:
-          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+          '0x7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
         shareId:
-          '1A0369823607C6EF403D86BA41534DDB1420730C696060EAD7931DE5DB603937',
+          '0x1A0369823607C6EF403D86BA41534DDB1420730C696060EAD7931DE5DB603937',
+        peerId:
+          '0x800ca9780644bb7e1908efa6bd1a0686f1095158c3ba6f1649ef9d2d67bfaf34',
         signatureShare:
-          'B1AA643E88F8937B71CE2D43DCB73E0180AC96D1E39ECC579F0EC9635F37D4CB',
-        bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
+          '0xB1AA643E88F8937B71CE2D43DCB73E0180AC96D1E39ECC579F0EC9635F37D4CB',
+        bigR: '0x0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
         compressedPublicKey:
-          '0381ff5b9f673837eacd4dca7e9377084250dccfc13ebf13913e662182027d1482',
+          '0x0381ff5b9f673837eacd4dca7e9377084250dccfc13ebf13913e662182027d1482',
         publicKey:
-          '04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
-        sigType: 'K256',
+          '0x04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
+        sigType: 'EcdsaK256Sha256',
         dataSigned:
-          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+          '0x7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
       },
     ];
 
@@ -143,11 +148,11 @@ describe('parsePkpSignResponse', () => {
     const responseData: PKPSignEndpointResponse[] = [
       {
         success: false,
-        signedData: new Uint8Array([
+        signedData: [
           116, 248, 31, 225, 103, 217, 155, 76, 180, 29, 109, 12, 205, 168, 34,
           120, 202, 238, 159, 62, 47, 37, 213, 229, 163, 147, 111, 243, 220,
           236, 96, 208,
-        ]),
+        ],
         signatureShare: {
           FrostSignedMessageShare: {
             message: 'fail',
@@ -164,11 +169,11 @@ describe('parsePkpSignResponse', () => {
       },
       {
         success: true,
-        signedData: new Uint8Array([
+        signedData: [
           116, 248, 31, 225, 103, 217, 155, 76, 180, 29, 109, 12, 205, 168, 34,
           120, 202, 238, 159, 62, 47, 37, 213, 229, 163, 147, 111, 243, 220,
           236, 96, 208,
-        ]),
+        ],
         signatureShare: {
           FrostSignedMessageShare: {
             message:
@@ -192,11 +197,11 @@ describe('parsePkpSignResponse', () => {
       },
       {
         success: true,
-        signedData: new Uint8Array([
+        signedData: [
           116, 248, 31, 225, 103, 217, 155, 76, 180, 29, 109, 12, 205, 168, 34,
           120, 202, 238, 159, 62, 47, 37, 213, 229, 163, 147, 111, 243, 220,
           236, 96, 208,
-        ]),
+        ],
         signatureShare: {
           FrostSignedMessageShare: {
             message:
@@ -230,45 +235,50 @@ describe('parsePkpSignResponse', () => {
         verifyingShare: '',
         publicKey: '',
         sigType: '',
+        dataSigned: 'fail',
       },
       {
         message:
-          '74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0',
+          '0x74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0',
         shareId: new Uint8Array([
           21, 126, 1, 81, 188, 147, 173, 138, 16, 169, 115, 205, 1, 224, 43, 54,
           73, 148, 113, 48, 206, 233, 7, 6, 217, 224, 119, 81, 249, 220, 48, 41,
         ]),
         peerId:
-          '77b2a2f061adf273b52307fb1c9960137c854382a9ae8d54d60c149e006a0d7c',
+          '0x77b2a2f061adf273b52307fb1c9960137c854382a9ae8d54d60c149e006a0d7c',
         signatureShare:
-          '12f86c0d816e98076bdf9cfc39812f7d242f7ac73aefa3638fb7cd1cf63ef7ed',
+          '0x12f86c0d816e98076bdf9cfc39812f7d242f7ac73aefa3638fb7cd1cf63ef7ed',
         signingCommitments:
-          '00eed6b1b10396989fe69ba9f582ec87e14a01dcad420ad6fd1ec0ce1a63165f30947dc86fef029f61149ebcbd87868105bebd3582577a3c4b6c6a092c621a8a842940b04d8629',
+          '0x00eed6b1b10396989fe69ba9f582ec87e14a01dcad420ad6fd1ec0ce1a63165f30947dc86fef029f61149ebcbd87868105bebd3582577a3c4b6c6a092c621a8a842940b04d8629',
         verifyingShare:
-          '022ba83de8961efba1490d9d3603a51b9d1c0eb17245ce0cbd8295d62ccd7e886c',
+          '0x022ba83de8961efba1490d9d3603a51b9d1c0eb17245ce0cbd8295d62ccd7e886c',
         publicKey:
-          '02c5f80a840bc7d00f26dfb8c2a0075aeffc620df39d2188f3e0237ec42dbe920a',
+          '0x02c5f80a840bc7d00f26dfb8c2a0075aeffc620df39d2188f3e0237ec42dbe920a',
         sigType: 'SchnorrK256Sha256',
+        dataSigned:
+          '0x74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0',
       },
       {
         message:
-          '74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0',
+          '0x74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0',
         shareId: new Uint8Array([
           226, 183, 233, 101, 218, 75, 198, 127, 202, 46, 107, 100, 150, 15,
           170, 176, 229, 25, 121, 33, 202, 13, 26, 6, 192, 49, 160, 84, 130, 11,
           169, 174,
         ]),
         peerId:
-          '8b714aa4b2b8cda1502834522c146d648b1d1eb71910b7064fa3adcb6269a575',
+          '0x8b714aa4b2b8cda1502834522c146d648b1d1eb71910b7064fa3adcb6269a575',
         signatureShare:
-          '5e6350c02c361f1ed97865ed57bd395190991c673ea55044c3c291155cc14c9b',
+          '0x5e6350c02c361f1ed97865ed57bd395190991c673ea55044c3c291155cc14c9b',
         signingCommitments:
-          '00eed6b1b102f72cf9291f23e939db9758123f155da75cf1150526b847c3c788de7e9b2f6e1f035a3db8a5664117f161e9eca110bbf515395a1c44625202aad1311d71b1b5df7a',
+          '0x00eed6b1b102f72cf9291f23e939db9758123f155da75cf1150526b847c3c788de7e9b2f6e1f035a3db8a5664117f161e9eca110bbf515395a1c44625202aad1311d71b1b5df7a',
         verifyingShare:
-          '02b680446e13263aea72c7da159393e64228110d4a4a6db36481bc55c92c616c46',
+          '0x02b680446e13263aea72c7da159393e64228110d4a4a6db36481bc55c92c616c46',
         publicKey:
-          '02c5f80a840bc7d00f26dfb8c2a0075aeffc620df39d2188f3e0237ec42dbe920a',
+          '0x02c5f80a840bc7d00f26dfb8c2a0075aeffc620df39d2188f3e0237ec42dbe920a',
         sigType: 'SchnorrK256Sha256',
+        dataSigned:
+          '0x74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0',
       },
     ];
 
