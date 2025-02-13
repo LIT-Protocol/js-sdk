@@ -936,7 +936,10 @@ export interface RPCUrls {
 export interface PKPWallet {
   getAddress: () => Promise<string>;
   init: () => Promise<void>;
-  runLitAction: (toSign: Uint8Array, sigName: string) => Promise<LitNodeSignature>;
+  runLitAction: (
+    toSign: Uint8Array,
+    sigName: string
+  ) => Promise<LitNodeSignature>;
   runSign: (toSign: Uint8Array) => Promise<LitNodeSignature>;
 }
 
