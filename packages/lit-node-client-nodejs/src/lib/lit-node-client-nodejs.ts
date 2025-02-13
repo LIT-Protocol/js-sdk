@@ -700,11 +700,14 @@ export class LitNodeClientNodeJs
     }
 
     if (!params.code) {
-      return throwError({
-        message: 'code is required',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+      throw new InvalidParamType(
+        {
+          info: {
+            params,
+          },
+        },
+        'code is required'
+      );
     }
 
     // determine which node to run on
