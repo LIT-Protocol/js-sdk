@@ -918,7 +918,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-};
+} as const;
 
 /**
  * Object containing information to submit to Metamask

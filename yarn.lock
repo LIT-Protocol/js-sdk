@@ -15538,6 +15538,11 @@ jose@^4.14.4:
   resolved "https://registry.yarnpkg.com/jose/-/jose-4.15.9.tgz#9b68eda29e9a0614c042fa29387196c7dd800100"
   integrity sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==
 
+jose@^5.6.3:
+  version "5.9.6"
+  resolved "https://registry.npmjs.org/jose/-/jose-5.9.6.tgz#77f1f901d88ebdc405e57cce08d2a91f47521883"
+  integrity sha512-AMlnetc9+CV9asI19zHmrgS/WYsWUwCn2R7RzlbJWD7F9eWYUTGyBmU9o6PxngtLGOiDGPRu+Uc4fhKzbpteZQ==
+
 js-levenshtein@^1.1.6:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/js-levenshtein/-/js-levenshtein-1.1.6.tgz#c6cee58eb3550372df8deb85fad5ce66ce01d59d"
@@ -21614,6 +21619,14 @@ strong-log-transformer@^2.1.0:
     duplexer "^0.1.1"
     minimist "^1.2.0"
     through "^2.3.4"
+
+stytch@^12.4.0:
+  version "12.4.0"
+  resolved "https://registry.npmjs.org/stytch/-/stytch-12.4.0.tgz#2a9dbac10e2a45057409ed1bd4f7743e1fc6cda9"
+  integrity sha512-jyYIfirVnhy3gAtGLEIK5c5tSp5bhi9tUE0JRzItJlwISBW/StMMOvP0hhPUb831EGjV2l1S4YRPg/NqJ+eYNg==
+  dependencies:
+    jose "^5.6.3"
+    undici "^6.19.5"
 
 superstatic@^7.1.0:
   version "7.1.0"
