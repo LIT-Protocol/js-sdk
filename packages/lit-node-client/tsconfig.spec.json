@@ -2,15 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "ES2022",
+    "module": "commonjs",
     "types": ["jest", "node"],
     "allowJs": true
   },
-  "include": [
-    "jest.config.ts",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/*.d.ts",
-    "../auth-browser/src/lib/chains/lit-connect-modal.d.ts"
-  ]
+  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
 }

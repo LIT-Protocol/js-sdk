@@ -7,7 +7,7 @@ global.jestTesting = true;
 
 import { LIT_NETWORK } from '@lit-protocol/constants';
 
-import { LitNodeClientNodeJs } from './lit-node-client-nodejs';
+import { LitNodeClientNodeJs } from './lit-node-client';
 
 const isClass = (v) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
