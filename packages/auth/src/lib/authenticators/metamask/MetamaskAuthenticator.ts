@@ -7,10 +7,7 @@ import {
   InvalidArgumentException,
   WrongParamFormat,
 } from '@lit-protocol/constants';
-import {
-  LitNodeClient,
-  checkAndSignAuthMessage,
-} from '@lit-protocol/lit-node-client';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { log } from '@lit-protocol/misc';
 import {
   AuthMethod,
@@ -20,14 +17,15 @@ import {
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
 
-import { BaseAuthenticator } from './BaseAuthenticator';
+import { BaseAuthenticator } from '../BaseAuthenticator';
+import { checkAndSignEVMAuthMessage } from './eth';
 
 interface DomainAndOrigin {
   domain?: string;
   origin?: string;
 }
 
-export class EthWalletAuthenticator extends BaseAuthenticator {
+export class MetamaskAuthenticator extends BaseAuthenticator {
   /**
    * The domain from which the signing request is made
    */
@@ -41,7 +39,7 @@ export class EthWalletAuthenticator extends BaseAuthenticator {
     super(options);
 
     const { domain, origin } =
-      EthWalletAuthenticator.getDomainAndOrigin(options);
+      MetamaskAuthenticator.getDomainAndOrigin(options);
     this.domain = domain;
     this.origin = origin;
   }
@@ -85,7 +83,7 @@ export class EthWalletAuthenticator extends BaseAuthenticator {
       );
     }
 
-    return EthWalletAuthenticator.authenticate({
+    return MetamaskAuthenticator.authenticate({
       signer: options,
       address: options.address,
       chain: options.chain,
@@ -109,7 +107,7 @@ export class EthWalletAuthenticator extends BaseAuthenticator {
    * @param {string} [options.origin] - Origin from which the signing request is made
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    * @static
-   * @memberof EthWalletAuthenticator
+   * @memberof MetamaskAuthenticator
    *
    * @example
    * ```typescript
@@ -170,7 +168,7 @@ export class EthWalletAuthenticator extends BaseAuthenticator {
         expiration || new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
       const { domain: resolvedDomain, origin: resolvedOrigin } =
-        EthWalletAuthenticator.getDomainAndOrigin({ domain, origin });
+        MetamaskAuthenticator.getDomainAndOrigin({ domain, origin });
 
       // Prepare Sign in with Ethereum message
       const preparedMessage: Partial<SiweMessage> = {
@@ -196,7 +194,7 @@ export class EthWalletAuthenticator extends BaseAuthenticator {
         address: address,
       };
     } else {
-      authSig = await checkAndSignAuthMessage({
+      authSig = await checkAndSignEVMAuthMessage({
         chain,
         nonce: await litNodeClient.getLatestBlockhash(),
       });
@@ -218,7 +216,7 @@ export class EthWalletAuthenticator extends BaseAuthenticator {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return EthWalletAuthenticator.authMethodId(authMethod);
+    return MetamaskAuthenticator.authMethodId(authMethod);
   }
 
   public static async authMethodId(authMethod: AuthMethod): Promise<string> {

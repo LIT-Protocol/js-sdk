@@ -9,7 +9,7 @@ export const testBundleSpeed = async (devEnv: TinnyEnvironment) => {
   const b = await import('@lit-protocol/contracts-sdk');
   const c = await import('@lit-protocol/auth-helpers');
   const d = await import('@lit-protocol/constants');
-  const e = await import('@lit-protocol/lit-auth-client');
+  const e = await import('@lit-protocol/auth');
 
   console.log(a, b, c, d, e);
 };

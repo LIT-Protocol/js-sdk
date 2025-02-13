@@ -1,4 +1,6 @@
 import { getAuthManager } from './lib/auth-manager';
+import * as authenticators from './lib/authenticators';
+import { LitRelay } from './lib/authenticators';
 import { localStorage } from './lib/storage';
 
 import type { LitAuthStorageProvider } from './lib/storage/types';
@@ -8,4 +10,4 @@ export type { LitAuthStorageProvider, LitAuthData };
 
 export const storagePlugins = { localStorage };
 
-export { getAuthManager };
+export { authenticators, getAuthManager, LitRelay };

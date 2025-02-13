@@ -1,25 +1,20 @@
 import { Buffer as BufferPolyfill } from 'buffer';
-import depd from 'depd';
 
 import { hexlify } from '@ethersproject/bytes';
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
-
-// import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { verifyMessage } from '@ethersproject/wallet';
 import {
   EthereumProvider,
   default as WalletConnectProvider,
 } from '@walletconnect/ethereum-provider';
+import depd from 'depd';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
-
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import * as nacl from 'tweetnacl';
 import * as naclUtil from 'tweetnacl-util';
 
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import {
   EITHER_TYPE,
   ELeft,
@@ -44,9 +39,9 @@ import {
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
-import LitConnectModal from '../connect-modal/modal';
+import LitConnectModal from './connect-modal/modal';
 
-const deprecated = depd('lit-js-sdk:auth-browser:index');
+const deprecated = depd('lit-js-sdk:auth:metamask-authenticator:index');
 
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;

@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/lit-auth",
+  "name": "@lit-protocol/auth",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -15,7 +15,7 @@
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/lit-auth"
+    "directory": "../../dist/packages/auth"
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [

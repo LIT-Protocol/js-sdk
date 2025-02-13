@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 // node_modules/micromodal/dist/micromodal.es.js
 import { NoWalletException } from '@lit-protocol/constants';

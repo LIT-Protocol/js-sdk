@@ -1,10 +1,12 @@
+import { LitRelay } from '../relay';
 import { AppleAuthenticator } from './AppleAuthenticator';
 import { DiscordAuthenticator } from './DiscordAuthenticator';
-import { EthWalletAuthenticator } from './EthWalletAuthenticator';
 import { GoogleAuthenticator } from './GoogleAuthenticator';
-import { LitRelay } from '../relay';
-import { StytchAuthFactorOtpAuthenticator } from './stytch/StytchAuthFactorOtpAuthenticator';
-import { StytchOtpAuthenticator } from './stytch/StytchOtpAuthenticator';
+import { MetamaskAuthenticator } from './metamask';
+import {
+  StytchOtpAuthenticator,
+  StytchAuthFactorOtpAuthenticator,
+} from './stytch';
 import {
   isSignInRedirect,
   getProviderFromUrl,
@@ -13,10 +15,9 @@ import {
 import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
 
 export {
-  LitRelay,
   AppleAuthenticator,
   DiscordAuthenticator,
-  EthWalletAuthenticator,
+  MetamaskAuthenticator,
   GoogleAuthenticator,
   StytchAuthFactorOtpAuthenticator,
   StytchOtpAuthenticator,
@@ -24,4 +25,5 @@ export {
   isSignInRedirect,
   getProviderFromUrl,
   getAuthIdByAuthMethod,
+  LitRelay,
 };

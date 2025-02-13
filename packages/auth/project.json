@@ -1,17 +1,17 @@
 {
-  "name": "lit-auth",
+  "name": "auth",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/lit-auth/src",
+  "sourceRoot": "packages/auth/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/lit-auth",
-        "main": "packages/lit-auth/src/index.ts",
-        "tsConfig": "packages/lit-auth/tsconfig.lib.json",
-        "assets": ["packages/lit-auth/*.md"],
+        "outputPath": "dist/packages/auth",
+        "main": "packages/auth/src/index.ts",
+        "tsConfig": "packages/auth/tsconfig.lib.json",
+        "assets": ["packages/auth/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
@@ -19,14 +19,14 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/lit-auth/**/*.ts"]
+        "lintFilePatterns": ["packages/auth/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/packages/lit-auth"],
+      "outputs": ["{workspaceRoot}/coverage/packages/auth"],
       "options": {
-        "jestConfig": "packages/lit-auth/jest.config.ts",
+        "jestConfig": "packages/auth/jest.config.ts",
         "passWithNoTests": true
       }
     }

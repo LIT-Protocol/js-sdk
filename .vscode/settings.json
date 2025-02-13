@@ -3,8 +3,8 @@
     "todo-tree.tree.scanMode": "workspace",
     "conventionalCommits.scopes": [
         "contracts-sdk",
-        "lit-node-client-nodejs",
-        "core",
+        "lit-node-client",
+        "core"
     ],
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#2f7c47",

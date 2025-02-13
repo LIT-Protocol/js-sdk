@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'lit-auth',
+  displayName: 'auth',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,7 +11,7 @@ export default {
     '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/lit-auth',
+  coverageDirectory: '../../coverage/packages/auth',
   moduleNameMapper: {
     '^ipfs-unixfs-importer':
       'node_modules/ipfs-unixfs-importer/dist/index.min.js',
