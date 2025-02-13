@@ -9,6 +9,7 @@
  */
 import {
   InitError,
+  InvalidSignatureError,
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
@@ -21,6 +22,7 @@ import {
   LitNodeSignature,
   PKPBaseDefaultParams,
   RPCUrls,
+  SigType,
 } from '@lit-protocol/types';
 
 /**
@@ -250,12 +252,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * @param {Uint8Array} toSign - The data to be signed by the Lit action.
    * @param {string} sigName - The name of the signature to be returned by the Lit action.
    *
-   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   * @returns {Promise<LitNodeSignature>} - A Promise that resolves with the signature returned by the Lit action.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+  async runLitAction(
+    toSign: Uint8Array,
+    sigName: string
+  ): Promise<LitNodeSignature> {
     // -- validate executeJsArgs
     if (this.litActionCode && this.litActionIPFS) {
       throw new InitError(
@@ -326,12 +330,16 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * Sign the provided data with the PKP private key.
    *
    * @param {Uint8Array} messageToSign - The message to be signed (will be hashed using SHA256).
+   * @param {SigType} signingScheme - The signing scheme to use for the signature. Defaults to 'EcdsaK256Sha256'.
    *
    * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(messageToSign: Uint8Array): Promise<LitNodeSignature> {
+  async runSign(
+    messageToSign: Uint8Array,
+    signingScheme: SigType = 'EcdsaK256Sha256'
+  ): Promise<LitNodeSignature> {
     await this.ensureLitNodeClientReady();
 
     // If no PKP public key is provided, throw error
@@ -344,24 +352,28 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.validateAuthContext();
 
-    try {
-      const sig = await this.litNodeClient.pkpSign({
-        messageToSign,
-        pubKey: this.uncompressedPubKey,
-        authContext: this.authContext,
-        signingScheme: 'EcdsaK256Sha256',
-      });
+    const sig = await this.litNodeClient.pkpSign({
+      messageToSign,
+      pubKey: this.uncompressedPubKey,
+      authContext: this.authContext,
+      signingScheme,
+    });
 
-      if (!sig) {
-        // TODO improve this error
-        throw new UnknownError({}, 'No signature returned');
-      }
-
-      return sig;
-    } catch (e) {
-      console.log('err: ', e);
-      throw e;
+    if (!sig) {
+      throw new InvalidSignatureError(
+        {
+          info: {
+            messageToSign,
+            signingScheme,
+            compressedPubKey: this.compressedPubKey,
+            uncompressedPubKey: this.uncompressedPubKey,
+          },
+        },
+        'No signature returned'
+      );
     }
+
+    return sig;
   }
 
   /**

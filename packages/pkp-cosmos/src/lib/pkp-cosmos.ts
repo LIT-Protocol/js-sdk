@@ -14,8 +14,8 @@ import {
   encodeSecp256k1Signature,
   rawSecp256k1PubkeyToRawAddress,
 } from '@cosmjs/amino';
-import { Secp256k1, sha256, ExtendedSecp256k1Signature } from '@cosmjs/crypto';
-import { toBech32, fromHex } from '@cosmjs/encoding';
+import { Secp256k1, sha256 } from '@cosmjs/crypto';
+import { toBech32 } from '@cosmjs/encoding';
 import {
   makeSignBytes,
   AccountData,
@@ -39,10 +39,11 @@ import {
 } from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
+  LitNodeSignature,
   PKPClientHelpers,
   PKPCosmosWalletProp,
   PKPWallet,
-  SigResponse,
+  SigType,
 } from '@lit-protocol/types';
 
 export { Long } from 'cosmjs-types/helpers';
@@ -177,30 +178,20 @@ export class PKPCosmosWallet
     const hashedMessage = sha256(signBytes);
 
     // Run the LIT action to obtain the signature.
-    let signature;
+    let litSignature;
     if (this.pkpBase.useAction) {
-      signature = await this.runLitAction(hashedMessage, this.defaultSigName);
+      litSignature = await this.runLitAction(
+        hashedMessage,
+        this.defaultSigName
+      );
     } else {
-      signature = await this.runSign(hashedMessage);
+      litSignature = await this.runSign(hashedMessage);
     }
-
-    // Create an ExtendedSecp256k1Signature from the signature components.
-    const extendedSig = new ExtendedSecp256k1Signature(
-      fromHex(signature.r),
-      fromHex(signature.s),
-      signature.recid
-    );
-
-    // Combine the R and S components of the signature into a Uint8Array.
-    const signatureBytes = new Uint8Array([
-      ...extendedSig.r(32),
-      ...extendedSig.s(32),
-    ]);
 
     // Encode the signature in the Cosmos-compatible format.
     const stdSignature = encodeSecp256k1Signature(
       this.pkpBase.compressedPubKeyBuffer,
-      signatureBytes
+      Buffer.from(litSignature.signature.replace('0x', ''), 'hex')
     );
 
     // Log the encoded signature.
@@ -321,11 +312,14 @@ export class PKPCosmosWallet
    * @param {Uint8Array} toSign - The data to be signed by the Lit action.
    * @param {string} sigName - The name of the signature to be returned by the Lit action.
    *
-   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   * @returns {Promise<LitNodeSignature>} - A Promise that resolves with the signature returned by the Lit action.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
-  async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+  async runLitAction(
+    toSign: Uint8Array,
+    sigName: string
+  ): Promise<LitNodeSignature> {
     return this.pkpBase.runLitAction(toSign, sigName);
   }
 
@@ -333,12 +327,16 @@ export class PKPCosmosWallet
    * Sign the provided data with the PKP private key.
    *
    * @param {Uint8Array} toSign - The data to be signed.
+   * @param {SigType} signingScheme - The signing scheme to use for the signature. Defaults to 'EcdsaK256Sha256'.
    *
-   * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
+   * @returns {Promise<LitNodeSignature>} - A Promise that resolves with the lit signature of the provided data.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<any> {
-    return this.pkpBase.runSign(toSign);
+  async runSign(
+    toSign: Uint8Array,
+    signingScheme: SigType = 'EcdsaK256Sha256'
+  ): Promise<LitNodeSignature> {
+    return this.pkpBase.runSign(toSign, signingScheme);
   }
 }

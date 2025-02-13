@@ -1,6 +1,6 @@
 import { Provider } from '@ethersproject/abstract-provider';
 
-import { EcdsaSigType, SigType } from './EndpointResponses';
+import { SigType } from './EndpointResponses';
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import {
@@ -384,27 +384,6 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
 /**
  * Struct in rust
  * -----
-pub struct JsonSigningStoreRequest {
-    pub key: String,
-    pub val: String,
-    pub chain: Option<String>,
-    pub permanant: Option<usize>,
-    pub auth_sig: AuthSigItem,
-}
- */
-export interface JsonSigningStoreRequest {
-  key: string;
-  val: string;
-  chain?: string;
-  permanant?: 0 | 1;
-  permanent?: 0 | 1;
-  authSig?: AuthSig;
-  sessionSigs?: SessionSigsMap;
-}
-
-/**
- * Struct in rust
- * -----
  pub struct JsonEncryptionRetrieveRequest {
     pub access_control_conditions: Option<Vec<AccessControlConditionItem>>,
     pub evm_contract_conditions: Option<Vec<EVMContractConditionItem>>,
@@ -534,19 +513,6 @@ export interface DecryptRequest extends EncryptResponse, DecryptRequestBase {}
 export interface DecryptResponse {
   // The decrypted data as a Uint8Array
   decryptedData: Uint8Array;
-}
-
-export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
-  dataToEncryptHash: string;
-}
-
-export interface SigResponse {
-  r: string;
-  s: string;
-  recid: number;
-  signature: Hex;
-  publicKey: string; // pkp public key (no 0x prefix)
-  dataSigned: string;
 }
 
 export interface ExecuteJsResponseBase {
@@ -970,9 +936,8 @@ export interface RPCUrls {
 export interface PKPWallet {
   getAddress: () => Promise<string>;
   init: () => Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  runLitAction: (toSign: Uint8Array, sigName: string) => Promise<any>;
-  runSign: (toSign: Uint8Array) => Promise<SigResponse>;
+  runLitAction: (toSign: Uint8Array, sigName: string) => Promise<LitNodeSignature>;
+  runSign: (toSign: Uint8Array) => Promise<LitNodeSignature>;
 }
 
 export type PKPEthersWalletProp = Omit<
