@@ -69,6 +69,7 @@
     "tslib": "^2.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
+    "typestub-ipfs-only-hash": "^4.0.0",
     "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
