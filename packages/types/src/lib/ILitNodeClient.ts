@@ -16,18 +16,9 @@ import {
 } from './interfaces';
 import { ClaimProcessor, ClaimRequest } from './types';
 
-/**
- * Product IDs used for price feed and node selection
- *
- * - DECRYPTION (0): Used for decryption operations
- * - SIGN (1): Used for signing operations
- * - LA (2): Used for Lit Actions execution
- */
-export const PRODUCT_IDS = {
-  DECRYPTION: 0, // For decryption operations
-  SIGN: 1, // For signing operations
-  LIT_ACTION: 2, // For Lit Actions execution
-} as const;
+// keyof typeof @lit-protocol/constants -> PRODUCT_IDS. Importing creates a circular reference
+export type PRODUCT_IDS_TYPE = 'DECRYPTION' | 'SIGN' | 'LIT_ACTION';
+export type PRODUCT_IDS_VALUES = 0 | 1 | 2;
 
 export interface ILitNodeClient {
   config: LitNodeClientConfig;
@@ -53,7 +44,7 @@ export interface ILitNodeClient {
    * @param product - The product type to set the max price for
    * @param price - The max price to set
    */
-  setDefaultMaxPrice(product: keyof typeof PRODUCT_IDS, price: bigint): void;
+  setDefaultMaxPrice(product: PRODUCT_IDS_TYPE, price: bigint): void;
 
   /**
    * Get PKP authentication context
@@ -68,7 +59,7 @@ export interface ILitNodeClient {
    */
   getMaxPricesForNodeProduct(params: {
     userMaxPrice?: bigint;
-    product: keyof typeof PRODUCT_IDS;
+    product: PRODUCT_IDS_TYPE;
   }): Promise<{ url: string; price: bigint }[]>;
 
   /**
@@ -96,7 +87,7 @@ export interface ILitNodeClient {
 
   /**
    * Execute JS on the nodes and combine and return any resulting signatures
-   * @param { ExecuteJsRequest } params
+   * @param { JsonExecutionSdkParams } params
    * @returns { ExecuteJsResponse }
    */
   executeJs(

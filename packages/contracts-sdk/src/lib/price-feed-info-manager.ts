@@ -1,11 +1,10 @@
 // import * as util from 'node:util'; // For inspecting bigInt payloads for pricing data
 
-import { HTTP, HTTPS } from '@lit-protocol/constants';
+import { HTTP, HTTPS, PRODUCT_IDS } from '@lit-protocol/constants';
 import {
   LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
-  PRODUCT_IDS,
 } from '@lit-protocol/types';
 
 import { LitContracts } from './contracts-sdk';

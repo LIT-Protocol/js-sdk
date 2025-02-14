@@ -4,13 +4,13 @@ import {
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
+  PRODUCT_IDS,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   AuthSig,
-  PRODUCT_IDS,
   LitContractContext,
   LitContractResolverContext,
 } from '@lit-protocol/types';

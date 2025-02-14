@@ -1,5 +1,4 @@
-import { MaxPriceTooLow } from '@lit-protocol/constants';
-import { PRODUCT_IDS } from '@lit-protocol/types';
+import { MaxPriceTooLow, PRODUCT_IDS } from '@lit-protocol/constants';
 
 interface MaxPricesForNodes {
   nodePrices: { url: string; prices: bigint[] }[];

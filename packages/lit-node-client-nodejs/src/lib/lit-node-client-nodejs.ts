@@ -33,6 +33,8 @@ import {
   LOCAL_STORAGE_KEYS,
   ParamNullError,
   ParamsMissingError,
+  PRODUCT_IDS,
+  PRODUCT_IDS_TYPE,
   SIWE_URI_PREFIX,
   UnknownError,
   UnsupportedMethodError,
@@ -71,7 +73,6 @@ import { nacl } from '@lit-protocol/nacl';
 import {
   AuthMethod,
   ExecuteJsValueResponse,
-  PRODUCT_IDS,
   LitNodeSignature,
 } from '@lit-protocol/types';
 import {
@@ -144,7 +145,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    *
    * If the user never sets a max price, it means 'unlimited'
    */
-  defaultMaxPriceByProduct: Record<keyof typeof PRODUCT_IDS, bigint> = {
+  defaultMaxPriceByProduct: Record<PRODUCT_IDS_TYPE, bigint> = {
     DECRYPTION: BigInt(-1),
     SIGN: BigInt(-1),
     LIT_ACTION: BigInt(-1),
@@ -1536,7 +1537,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     product,
   }: {
     userMaxPrice?: bigint;
-    product: keyof typeof PRODUCT_IDS;
+    product: PRODUCT_IDS_TYPE;
   }) => {
     log('getMaxPricesForNodeProduct()', { product });
     const getUserMaxPrice = () => {
