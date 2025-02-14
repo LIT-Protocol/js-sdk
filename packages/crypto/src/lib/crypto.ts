@@ -13,8 +13,6 @@ import { sha384, sha512 } from '@noble/hashes/sha512';
 import {
   CurveTypeNotFoundError,
   InvalidParamType,
-  LIT_CURVE,
-  LitEcdsaVariantType,
   NetworkError,
   NoValidShares,
   UnknownError,
@@ -49,7 +47,6 @@ import {
   BlsSignatureShareJsonString,
   blsVerify,
   ecdsaDeriveKey,
-  EcdsaVariant,
   sevSnpGetVcekUrl,
   sevSnpVerify,
   unifiedCombineAndVerify,
@@ -105,21 +102,6 @@ export const encrypt = async (
   return Buffer.from(await blsEncrypt(publicKey, message, identity)).toString(
     'base64'
   );
-};
-
-/**
- * Decrypt ciphertext using BLS signature shares.
- *
- * @param ciphertextBase64 base64-encoded string of the ciphertext to decrypt
- * @param shares hex-encoded array of the BLS signature shares
- * @returns Uint8Array of the decrypted data
- */
-export const decryptWithSignatureShares = async (
-  ciphertextBase64: string,
-  shares: BlsSignatureShare[]
-): Promise<Uint8Array> => {
-  const sigShares = toJSONShares(shares);
-  return doDecrypt(ciphertextBase64, sigShares);
 };
 
 /**
@@ -192,12 +174,6 @@ export const verifySignature = async (
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
   await blsVerify(publicKey, message, signature);
-};
-
-const ecdsaSigntureTypeMap: Record<LitEcdsaVariantType, EcdsaVariant> = {
-  [LIT_CURVE.EcdsaK256Sha256]: 'K256',
-  [LIT_CURVE.EcdsaP256Sha256]: 'P256',
-  [LIT_CURVE.EcdsaP384Sha384]: 'P384',
 };
 
 const parseCombinedSignature = (
@@ -290,35 +266,14 @@ export const combinePKPSignNodeShares = async (
 
 export const computeHDPubKey = async (
   pubkeys: string[],
-  keyId: string,
-  sigType: LitEcdsaVariantType
+  keyId: string
 ): Promise<string> => {
-  const variant = ecdsaSigntureTypeMap[sigType];
-
-  if (
-    ![
-      LIT_CURVE.EcdsaK256Sha256,
-      LIT_CURVE.EcdsaP256Sha256,
-      LIT_CURVE.EcdsaP384Sha384,
-    ].includes(sigType)
-  ) {
-    throw new InvalidParamType(
-      {
-        info: {
-          sigType,
-        },
-      },
-      `Non supported signature type`
-    );
-  }
-
   // a bit of preprocessing to remove characters which will cause our wasm module to reject the values.
   pubkeys = pubkeys.map((value: string) => {
     return value.replace('0x', '');
   });
   keyId = keyId.replace('0x', '');
   const preComputedPubkey = await ecdsaDeriveKey(
-    variant,
     Buffer.from(keyId, 'hex'),
     pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
   );

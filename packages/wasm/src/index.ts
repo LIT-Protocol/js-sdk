@@ -1,12 +1,10 @@
 //@ts-ignore source map not found
 import {
-  EcdsaVariant,
   InitOutput,
   //@ts-ignore source map not found
   getModule,
   initSync,
 } from './pkg/wasm-internal';
-export type { EcdsaVariant } from './pkg/wasm-internal';
 
 import * as wasmInternal from './pkg/wasm-internal';
 
@@ -84,7 +82,7 @@ export async function blsCombine(
  * - 12381G2
  * - 12381G1
  * @param {Uint8Array} ciphertext
- * @param {Uint8Array} decryption_key
+ * @param {BlsSignatureShareJsonString[]} signature_shares
  * @returns {Uint8Array}
  */
 export async function blsDecrypt(
@@ -135,96 +133,18 @@ export async function blsVerify(
 }
 
 /**
- * Combine ECDSA signatures shares
+ * K256 HD key derivation
  *
- * Supports:
- *  - K256
- *  - P256
- * @param {EcdsaVariant} variant
- * @param {Uint8Array} presignature
- * @param {(Uint8Array)[]} signature_shares
- * @returns {[Uint8Array, Uint8Array, number]}
- */
-export async function ecdsaCombine(
-  variant: EcdsaVariant,
-  presignature: Uint8Array,
-  signature_shares: Uint8Array[]
-): Promise<[Uint8Array, Uint8Array, number]> {
-  await loadModules();
-  return wasmInternal.ecdsaCombine(variant, presignature, signature_shares);
-}
-
-/**
- * HD key derivation
- *
- * Supports:
- * - k256
- * - p256
- * @param {EcdsaVariant} variant ecdsa scheme
  * @param {Uint8Array} id keyid which will be used for the key derivation
  * @param {(Uint8Array)[]} public_keys ecdsa root keys
  * @returns {Uint8Array}
  */
 export async function ecdsaDeriveKey(
-  variant: EcdsaVariant,
   id: Uint8Array,
   public_keys: Uint8Array[]
 ): Promise<Uint8Array> {
   await loadModules();
-  return wasmInternal.ecdsaDeriveKey(variant, id, public_keys);
-}
-
-/**
- * Verifier for ECDSA signatures
- *
- * Supports:
- * - k256
- * - p256
- ** Note ** Not currently supported through the lit network. Please use other ECSDSA signature verification
- * @param {EcdsaVariant} variant
- * @param {Uint8Array} message_hash
- * @param {Uint8Array} public_key
- * @param {[Uint8Array, Uint8Array, number]} signature
- */
-export async function ecdsaVerify(
-  variant: EcdsaVariant,
-  message_hash: Uint8Array,
-  public_key: Uint8Array,
-  signature: [Uint8Array, Uint8Array, number]
-): Promise<void> {
-  await loadModules();
-  return wasmInternal.ecdsaVerify(variant, message_hash, public_key, signature);
-}
-
-/**
- * Combiner and verifier for ECDSA signatures
- *
- * Supports:
- * - k256
- * - p256
- *  ** Note ** Not currently supported through the lit network. Please use other ECSDSA signature verification
- * @param {EcdsaVariant} variant
- * @param {Uint8Array} pre_signature
- * @param {Uint8Array[]} signature_shares
- * @param {Uint8Array} message_hash
- * @param {Uint8Array} public_key
- * @return {[Uint8Array, Uint8Array, number]} signature
- */
-export async function ecdsaCombineAndVerify(
-  variant: EcdsaVariant,
-  pre_signature: Uint8Array,
-  signature_shares: Uint8Array[],
-  message_hash: Uint8Array,
-  public_key: Uint8Array
-): Promise<[Uint8Array, Uint8Array, number]> {
-  await loadModules();
-  return wasmInternal.ecdsaCombineAndVerify(
-    variant,
-    pre_signature,
-    signature_shares,
-    message_hash,
-    public_key
-  );
+  return wasmInternal.ecdsaDeriveKey(id, public_keys);
 }
 
 /**
