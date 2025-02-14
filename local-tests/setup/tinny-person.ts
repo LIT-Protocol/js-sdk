@@ -27,9 +27,7 @@ export class TinnyPerson {
   public authMethodOwnedPkp: PKPInfo;
 
   // Pass this to data to sign
-  public loveLetter: Uint8Array = ethers.utils.arrayify(
-    ethers.utils.keccak256([1, 2, 3, 4, 5])
-  );
+  public loveLetter: Uint8Array = new Uint8Array([1, 2, 3, 4, 5]);
 
   public provider: ethers.providers.StaticJsonRpcProvider;
 
@@ -156,9 +154,9 @@ export class TinnyPerson {
     this.pkp = walletMintRes.pkp;
 
     /**
-     * ====================================
-     * Mint a PKP wiuth eth wallet auth method
-     * ====================================
+     * ======================================
+     * Mint a PKP with eth wallet auth method
+     * ======================================
      */
     console.log(
       '[𐬺🧪 Tinny Person𐬺] Minting a PKP with eth wallet auth method...'

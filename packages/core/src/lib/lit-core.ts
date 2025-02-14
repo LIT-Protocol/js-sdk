@@ -10,7 +10,6 @@ import {
   InvalidNodeAttestation,
   InvalidParamType,
   LIT_CURVE,
-  LIT_CURVE_VALUES,
   LIT_ENDPOINT,
   LIT_ERROR_CODE,
   LIT_NETWORK,
@@ -1230,16 +1229,12 @@ export class LitCore {
   };
 
   /**
-   * Calculates an HD public key from a given keyId
-   * The curve type or signature type is assumed to be k256 unless provided
+   * Calculates an K256 HD public key from a given keyId
+   *
    * @param keyId
-   * @param {LIT_CURVE_VALUES} sigType
    * @returns {string} public key
    */
-  computeHDPubKey = async (
-    keyId: string,
-    sigType: LIT_CURVE_VALUES = LIT_CURVE.EcdsaCaitSith
-  ): Promise<string> => {
+  computeHDPubKey = async (keyId: string): Promise<string> => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');
       throw new LitNodeClientNotReadyError(
@@ -1247,11 +1242,7 @@ export class LitCore {
         'root public keys not found, have you connected to the nodes?'
       );
     }
-    return await computeHDPubKey(
-      this.hdRootPubkeys as string[],
-      keyId,
-      sigType
-    );
+    return await computeHDPubKey(this.hdRootPubkeys as string[], keyId);
   };
 
   /**
