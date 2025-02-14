@@ -1,14 +1,5 @@
-import { bls12_381 } from '@noble/curves/bls12-381';
-import { ed25519, RistrettoPoint } from '@noble/curves/ed25519';
-import { ed448 } from '@noble/curves/ed448';
-import { jubjub } from '@noble/curves/jubjub';
-import { p256 } from '@noble/curves/p256';
-import { p384 } from '@noble/curves/p384';
-import { schnorr as schnorrK256, secp256k1 } from '@noble/curves/secp256k1';
-import { blake2b } from '@noble/hashes/blake2b';
 import { sha256 } from '@noble/hashes/sha256';
-import { shake256 } from '@noble/hashes/sha3';
-import { sha384, sha512 } from '@noble/hashes/sha512';
+import { sha384 } from '@noble/hashes/sha512';
 
 import {
   CurveTypeNotFoundError,
@@ -30,11 +21,11 @@ import { nacl } from '@lit-protocol/nacl';
 import {
   CleanLitNodeSignature,
   CombinedLitNodeSignature,
+  EcdsaSigType,
   LitActionSignedData,
   NodeAttestation,
   PKPSignEndpointResponse,
   SessionKeyPair,
-  SigType,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -489,48 +480,20 @@ export const checkSevSnpAttestation = async (
 };
 
 // Map the right hash function per signing scheme
-export const hashFunctions: Record<SigType, any> = {
-  Bls12381G1ProofOfPossession: sha256, // TODO needed here? Which hash?
+export const ecdsaHashFunctions: Record<
+  EcdsaSigType,
+  (arg0: Uint8Array) => Uint8Array
+> = {
   EcdsaK256Sha256: sha256,
   EcdsaP256Sha256: sha256,
   EcdsaP384Sha384: sha384,
-  SchnorrEd25519Sha512: sha512,
-  SchnorrK256Sha256: sha256,
-  SchnorrP256Sha256: sha256,
-  SchnorrP384Sha384: sha384,
-  SchnorrRistretto25519Sha512: sha512,
-  SchnorrEd448Shake256: (msg: Uint8Array) => shake256(msg, 114),
-  SchnorrRedJubjubBlake2b512: (msg: Uint8Array) => blake2b(msg, { dkLen: 64 }),
-  SchnorrK256Taproot: sha256,
-  SchnorrRedDecaf377Blake2b512: (msg: Uint8Array) =>
-    blake2b(msg, { dkLen: 64 }),
-  SchnorrkelSubstrate: (msg: Uint8Array) => blake2b(msg, { dkLen: 64 }),
-} as const;
-
-// Map the right curve function per signing scheme
-export const curveFunctions: Record<SigType, any> = {
-  Bls12381G1ProofOfPossession: bls12_381,
-  EcdsaK256Sha256: secp256k1,
-  EcdsaP256Sha256: p256,
-  EcdsaP384Sha384: p384,
-  SchnorrEd25519Sha512: ed25519,
-  SchnorrK256Sha256: schnorrK256,
-  SchnorrP256Sha256: p256,
-  SchnorrP384Sha384: p384,
-  SchnorrRistretto25519Sha512: (msg: Uint8Array) =>
-    RistrettoPoint.hashToCurve(sha512(msg)).toHex(),
-  SchnorrEd448Shake256: ed448,
-  SchnorrRedJubjubBlake2b512: jubjub,
-  SchnorrK256Taproot: secp256k1,
-  SchnorrRedDecaf377Blake2b512: p256, // TODO check curve function
-  SchnorrkelSubstrate: ed25519, // TODO check curve function
 } as const;
 
 export function hashLitMessage(
-  signingScheme: SigType,
+  signingScheme: EcdsaSigType,
   message: Uint8Array
 ): Uint8Array {
-  const hashFn = hashFunctions[signingScheme];
+  const hashFn = ecdsaHashFunctions[signingScheme];
 
   if (!hashFn) {
     throw new CurveTypeNotFoundError(
@@ -544,26 +507,4 @@ export function hashLitMessage(
   }
 
   return hashFn(message);
-}
-
-export function verifyLitSignature(
-  signingScheme: SigType,
-  publicKey: string,
-  message: string,
-  signature: string
-) {
-  const curve = curveFunctions[signingScheme];
-  if (!curve) {
-    throw new CurveTypeNotFoundError(
-      {
-        info: {
-          signingScheme,
-        },
-      },
-      `No known curve function for specified signing scheme ${signingScheme}`
-    );
-  }
-
-  // TODO call correct verification on all curve functions
-  return curve.verify(signature, message, publicKey);
 }

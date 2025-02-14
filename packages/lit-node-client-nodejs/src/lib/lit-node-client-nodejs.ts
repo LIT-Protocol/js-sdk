@@ -37,6 +37,7 @@ import {
   PRODUCT_IDS_TYPE,
   SIWE_URI_PREFIX,
   UnknownError,
+  UnknownSignatureError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
@@ -72,6 +73,7 @@ import {
 import { nacl } from '@lit-protocol/nacl';
 import {
   AuthMethod,
+  EcdsaSigType,
   ExecuteJsValueResponse,
   LitNodeSignature,
 } from '@lit-protocol/types';
@@ -899,7 +901,10 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
         const toSign =
           CURVE_GROUP_BY_CURVE_TYPE[params.signingScheme] !== 'ECDSA'
             ? params.messageToSign!
-            : hashLitMessage(params.signingScheme, params.messageToSign!);
+            : hashLitMessage(
+                params.signingScheme as EcdsaSigType,
+                params.messageToSign!
+              );
 
         const reqBody: JsonPkpSignRequest = {
           toSign: normalizeArray(toSign),
@@ -958,9 +963,17 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
       return signatures;
     } catch (e) {
-      // TODO remove log and re throw pattern. Wrap in LitError
-      console.error('Error getting signature', e);
-      throw e;
+      throw new UnknownSignatureError(
+        {
+          info: {
+            responseData,
+            requestId,
+            threshold: this._getThreshold(),
+          },
+          cause: e,
+        },
+        'Could not combine pkp signature shares'
+      );
     }
   };
 

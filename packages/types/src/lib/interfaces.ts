@@ -629,7 +629,12 @@ export interface FormattedMultipleAccs {
   formattedUnifiedAccessControlConditions: any;
 }
 
-// BLS TODO
+// BLS
+// ================== unifiedSignature: {
+// "signature":"{\"ProofOfPossession\":\"abff2ed7e23d0e7c01880e76fd66c84b23427842447ec5474a842ca729d5f21b675342aac3fe94386ffd02c6726b14740c4571efcf45fb86342fd806b6557bcfb32c225f006d7870eea0980810c26606779667786c1a875d563b5731c65da21f\"}",
+// "verifying_key":"\"af93eb21b135d6a95d46f03662168f34e0ea8a749d0579ac46aa7aff721c1259991997c0598aad6838678a2f17dd85e2\"",
+// "signed_data":"0102030405",
+// "recovery_id":null}
 // ECDSA
 // ================== unifiedSignature: {
 // "signature":"\"F0E7A72197D93FFF7A5A22B2A865511C6A117DE75E08519A2298061485169A2B6EE44425E45AD3A7455720C5D786EFFFBB24D94DD4E8F2143CDBF777BBCA6FE1\"",

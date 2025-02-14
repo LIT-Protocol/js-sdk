@@ -46,8 +46,7 @@ export const LIT_CURVE = {
   ...LIT_ECDSA_VARIANT,
 };
 
-export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE; // Identical to Sig
-// This should replicate SigShare.sigType in types package
+export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE; // Identical to SigType = BlsSigType | EcdsaSigType | FrostSigType;
 export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
 
 export const CURVE_GROUPS = ['BLS', 'ECDSA', 'FROST'] as const;
