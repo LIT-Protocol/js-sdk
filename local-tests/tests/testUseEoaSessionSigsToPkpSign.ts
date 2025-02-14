@@ -41,10 +41,10 @@ export const testUseEoaSessionSigsToPkpSign = async (
     //   signingScheme: 'Bls12381', // TODO nodes accept this signing scheme but they throw an unexpected error
     //   hashesMessage: false,
     // },
-    {
-      signingScheme: 'Bls12381G1ProofOfPossession',
-      hashesMessage: false,
-    },
+    // {
+    //   signingScheme: 'Bls12381G1ProofOfPossession',
+    //   hashesMessage: false,
+    // },
     // ECDSA
     {
       hasRecoveryId: true,
@@ -128,15 +128,6 @@ export const testUseEoaSessionSigsToPkpSign = async (
         'signedData',
         'publicKey',
       ]) {
-        // Bls12381G1ProofOfPossession signature is a json string with ProofOfPossession, not an hex signature
-        if (
-          signingScheme === 'Bls12381G1ProofOfPossession' &&
-          hexString === 'signature' &&
-          pkpSignature.signature.startsWith('{')
-        ) {
-          continue;
-        }
-
         if (
           !pkpSignature[hexString] ||
           !pkpSignature[hexString].startsWith('0x')

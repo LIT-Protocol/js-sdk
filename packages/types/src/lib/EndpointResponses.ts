@@ -1,6 +1,6 @@
 import { Hex } from './types';
 
-export type BlsSigType = 'Bls12381G1ProofOfPossession';
+// export type BlsSigType = 'Bls12381G1ProofOfPossession';
 
 export type EcdsaSigType =
   | 'EcdsaK256Sha256'
@@ -19,7 +19,7 @@ export type FrostSigType =
   | 'SchnorrRedDecaf377Blake2b512'
   | 'SchnorrkelSubstrate';
 
-export type SigType = BlsSigType | EcdsaSigType | FrostSigType;
+export type SigType = /* BlsSigType | */ EcdsaSigType | FrostSigType;
 
 // See src/p2p_comms/web/models.rs > BlsSignedMessageShare
 // Example output:
@@ -34,16 +34,16 @@ export type SigType = BlsSigType | EcdsaSigType | FrostSigType;
 //   "sig_type": "Bls12381G1ProofOfPossession"
 // }
 // Notice how some values are double quoted, and some are not. We need to clean this up.
-export interface BlsSignedMessageShareRaw {
-  message: string;
-  peer_id: string;
-  public_key: string;
-  result: string;
-  share_id: string;
-  sig_type: string;
-  signature_share: string;
-  verifying_share: string;
-}
+// export interface BlsSignedMessageShareRaw {
+//   message: string;
+//   peer_id: string;
+//   public_key: string;
+//   result: string;
+//   share_id: string;
+//   sig_type: string;
+//   signature_share: string;
+//   verifying_share: string;
+// }
 
 // See src/p2p_comms/web/models.rs > EcdsaSignedMessageShare
 // Example output:
@@ -98,9 +98,9 @@ export interface FrostSignedMessageShareRaw {
 }
 
 type SignatureShare =
-  | {
-      BlsSignedMessageShare: BlsSignedMessageShareRaw;
-    }
+  // | {
+  //     BlsSignedMessageShare: BlsSignedMessageShareRaw;
+  //   }
   | {
       EcdsaSignedMessageShare: EcdsaSignedMessageShareRaw;
     }
@@ -156,17 +156,17 @@ export interface ExecuteJsValueResponse {
  *   "dataSigned": "0x0102030405"
  * }
  */
-export interface BlsSignedMessageShareParsed {
-  dataSigned: Hex;
-  message: Hex;
-  peerId: Hex;
-  publicKey: Hex;
-  shareId: Uint8Array;
-  signatureShare: Hex;
-  signingCommitments: Hex;
-  sigType: BlsSigType;
-  verifyingShare: Hex;
-}
+// export interface BlsSignedMessageShareParsed {
+//   dataSigned: Hex;
+//   message: Hex;
+//   peerId: Hex;
+//   publicKey: Hex;
+//   shareId: Uint8Array;
+//   signatureShare: Hex;
+//   signingCommitments: Hex;
+//   sigType: BlsSigType;
+//   verifyingShare: Hex;
+// }
 
 /**
  * This is the cleaned up version of the EcdsaSignedMessageShareRaw
@@ -225,6 +225,5 @@ export interface FrostSignedMessageShareParsed {
 }
 
 export type PKPSignEndpointSharesParsed =
-  | BlsSignedMessageShareParsed
-  | EcdsaSignedMessageShareParsed
-  | FrostSignedMessageShareParsed;
+  // | BlsSignedMessageShareParsed
+  EcdsaSignedMessageShareParsed | FrostSignedMessageShareParsed;

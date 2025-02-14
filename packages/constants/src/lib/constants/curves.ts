@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { BlsSigType, EcdsaSigType, FrostSigType } from '@lit-protocol/types';
+import {
+  // BlsSigType
+  EcdsaSigType,
+  FrostSigType,
+} from '@lit-protocol/types';
 
 import { ObjectMapFromArray } from './utils';
 
@@ -22,12 +26,12 @@ export const LIT_FROST_VARIANT_SCHEMA = z.enum(LIT_FROST_VARIANT_VALUES);
 export type LitFrostVariantType = z.infer<typeof LIT_FROST_VARIANT_SCHEMA>;
 
 // ----- BLS Variant
-export const LIT_BLS_VARIANT_VALUES = [
-  'Bls12381G1ProofOfPossession',
-] as const satisfies readonly BlsSigType[];
-export const LIT_BLS_VARIANT = ObjectMapFromArray(LIT_BLS_VARIANT_VALUES);
-export const LIT_BLS_VARIANT_SCHEMA = z.enum(LIT_BLS_VARIANT_VALUES);
-export type LitBlsVariantType = z.infer<typeof LIT_BLS_VARIANT_SCHEMA>;
+// export const LIT_BLS_VARIANT_VALUES = [
+//   'Bls12381G1ProofOfPossession',
+// ] as const satisfies readonly BlsSigType[];
+// export const LIT_BLS_VARIANT = ObjectMapFromArray(LIT_BLS_VARIANT_VALUES);
+// export const LIT_BLS_VARIANT_SCHEMA = z.enum(LIT_BLS_VARIANT_VALUES);
+// export type LitBlsVariantType = z.infer<typeof LIT_BLS_VARIANT_SCHEMA>;
 
 // ----- ECDSA Variant
 export const LIT_ECDSA_VARIANT_VALUES = [
@@ -41,7 +45,7 @@ export type LitEcdsaVariantType = z.infer<typeof LIT_ECDSA_VARIANT_SCHEMA>;
 
 // ----- All Curve Types
 export const LIT_CURVE = {
-  ...LIT_BLS_VARIANT,
+  // ...LIT_BLS_VARIANT,
   ...LIT_FROST_VARIANT,
   ...LIT_ECDSA_VARIANT,
 };
@@ -56,7 +60,7 @@ export const CURVE_GROUP_BY_CURVE_TYPE: Record<
   (typeof CURVE_GROUPS)[number]
 > = {
   // BLS
-  [LIT_CURVE.Bls12381G1ProofOfPossession]: CURVE_GROUPS[0],
+  // [LIT_CURVE.Bls12381G1ProofOfPossession]: CURVE_GROUPS[0],
   // ECDSA
   [LIT_CURVE.EcdsaK256Sha256]: CURVE_GROUPS[1],
   [LIT_CURVE.EcdsaP256Sha256]: CURVE_GROUPS[1],
