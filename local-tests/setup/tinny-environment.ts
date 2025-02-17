@@ -1,14 +1,5 @@
-import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import {
-  AuthSig,
-  LitContractContext,
-  LitContractResolverContext,
-} from '@lit-protocol/types';
-import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
-import { TinnyPerson } from './tinny-person';
+import { ethers, Signer } from 'ethers';
 
-import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import {
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
@@ -16,8 +7,17 @@ import {
   PRODUCT_IDS,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
-import { ethers, Signer } from 'ethers';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import {
+  AuthSig,
+  LitContractContext,
+  LitContractResolverContext,
+} from '@lit-protocol/types';
+
 import { ShivaClient, TestnetClient } from './shiva-client';
+import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
+import { TinnyPerson } from './tinny-person';
 import { toErrorWithMessage } from './tinny-utils';
 
 console.log('checking env', process.env['DEBUG']);
@@ -49,7 +49,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === LIT_NETWORK.NagaDev
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],

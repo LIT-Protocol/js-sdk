@@ -1,19 +1,15 @@
-import { assert } from 'console';
-
-import { NodeShare } from '@lit-protocol/types';
+import { ExecuteJsValueResponse } from '@lit-protocol/types';
 
 import { processLitActionResponseStrategy } from './process-lit-action-response-strategy';
 
 describe('processLitActionResponseStrategy', () => {
-  const litActionResponses: any[] = [
+  const litActionResponses: ExecuteJsValueResponse[] = [
     {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned: 'fail',
+          sigType: 'EcdsaK256Sha256',
           signatureShare: '',
-          bigR: '',
           publicKey: '',
           sigName: 'sig',
         },
@@ -27,10 +23,8 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned: 'fail',
+          sigType: 'EcdsaK256Sha256',
           signatureShare: '',
-          bigR: '',
           publicKey: '',
           sigName: 'sig',
         },
@@ -44,12 +38,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"E90BAE64AFA7C571CE41BEF25FF771CA2F1BC20FC09A7762200552B30ACC0CDC"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',
@@ -64,12 +55,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"31977D4BE7F49C0CD97CC0756CCA3244A949EA7D591F79B64F324846507448CD"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',
@@ -84,12 +72,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"F21798A1A37CC86566EA0D751F37CC144774A1A8A4FCD5E6E64287690FB60119"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',
@@ -104,12 +89,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"7ECB0E020BED801905D3FE941751E4313086603BBBF21F1756832F02A6FBE567"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',
@@ -122,15 +104,13 @@ describe('processLitActionResponseStrategy', () => {
     },
   ];
 
-  const litActionResponsesNonJson: any[] = [
+  const litActionResponsesNonJson: ExecuteJsValueResponse[] = [
     {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned: 'fail',
+          sigType: 'EcdsaK256Sha256',
           signatureShare: '',
-          bigR: '',
           publicKey: '',
           sigName: 'sig',
         },
@@ -144,10 +124,8 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned: 'fail',
+          sigType: 'EcdsaK256Sha256',
           signatureShare: '',
-          bigR: '',
           publicKey: '',
           sigName: 'sig',
         },
@@ -161,12 +139,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"E90BAE64AFA7C571CE41BEF25FF771CA2F1BC20FC09A7762200552B30ACC0CDC"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',
@@ -181,12 +156,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"31977D4BE7F49C0CD97CC0756CCA3244A949EA7D591F79B64F324846507448CD"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',
@@ -201,12 +173,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"F21798A1A37CC86566EA0D751F37CC144774A1A8A4FCD5E6E64287690FB60119"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',
@@ -221,12 +190,9 @@ describe('processLitActionResponseStrategy', () => {
       success: true,
       signedData: {
         sig: {
-          sigType: 'K256',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
+          sigType: 'EcdsaK256Sha256',
           signatureShare:
             '"7ECB0E020BED801905D3FE941751E4313086603BBBF21F1756832F02A6FBE567"',
-          bigR: '"02330092EBF809B05EA0A032A42AD2FE32579D997A739D7BB4CF40EBA83B4355D3"',
           publicKey:
             '"047E3AC46588256338E62D8763592B8AA9BD13C31C9326D51CE82254A1839759A4FE7C1281AA1A9F8E810DA52B72046731CB3EE4D213799F7CE26C55A63783DB78"',
           sigName: 'sig',

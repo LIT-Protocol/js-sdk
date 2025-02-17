@@ -1,8 +1,4 @@
-import depd from 'depd';
-
 import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from './types';
-
-const deprecated = depd('lit-js-sdk:constants:constants');
 
 /**
  * Lit Protocol Network Public Key

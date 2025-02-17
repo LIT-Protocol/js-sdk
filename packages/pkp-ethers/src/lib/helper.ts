@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, BytesLike } from 'ethers';
 
 /**
  * Convert a hexadecimal value to its UTF-8 string representation.
@@ -40,7 +40,7 @@ export const getTransactionToSign = <T>(
   return formattedTx;
 };
 
-export function isSignedTransaction(tx: any): boolean {
+export function isSignedTransaction(tx: BytesLike): boolean {
   try {
     const parsedTx = ethers.utils.parseTransaction(tx);
     return !!parsedTx.v && !!parsedTx.r && !!parsedTx.s;

@@ -19,6 +19,8 @@ import {
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
+  CURVE_GROUP_BY_CURVE_TYPE,
+  EcdsaSigType,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
@@ -26,7 +28,6 @@ import {
   InvalidParamType,
   InvalidSessionSigs,
   InvalidSignatureError,
-  LIT_CURVE,
   LIT_CURVE_TYPE,
   LIT_ENDPOINT,
   LitNodeClientNotReadyError,
@@ -34,8 +35,10 @@ import {
   ParamNullError,
   ParamsMissingError,
   PRODUCT_IDS,
+  PRODUCT_IDS_TYPE,
   SIWE_URI_PREFIX,
   UnknownError,
+  UnknownSignatureError,
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
@@ -45,6 +48,7 @@ import {
   combineSignatureShares,
   encrypt,
   generateSessionKeyPair,
+  hashLitMessage,
   verifyAndDecryptWithSignatureShares,
   verifySignature,
 } from '@lit-protocol/crypto';
@@ -69,9 +73,35 @@ import {
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
 import {
+  AuthMethod,
+  ExecuteJsValueResponse,
+  LitNodeSignature,
+} from '@lit-protocol/types';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@lit-protocol/uint8arrays';
+
+import { encodeCode } from './helpers/encode-code';
+import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { getClaims } from './helpers/get-claims';
+import { getClaimsList } from './helpers/get-claims-list';
+import { getExpiration } from './helpers/get-expiration';
+import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
+import {
+  combineExecuteJSSignatures,
+  combinePKPSignSignatures,
+} from './helpers/get-signatures';
+import { normalizeArray } from './helpers/normalize-array';
+import { normalizeJsParams } from './helpers/normalize-params';
+import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
+
+import type {
   AuthCallback,
   AuthCallbackParams,
-  type AuthenticationContext,
+  AuthenticationContext,
   AuthSig,
   BlsResponseData,
   CapacityCreditsReq,
@@ -101,8 +131,6 @@ import {
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeSet,
-  NodeShare,
-  PKPSignEndpointResponse,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -110,29 +138,8 @@ import {
   Signature,
   SignSessionKeyProp,
   SignSessionKeyResponse,
-  SigResponse,
   SuccessNodePromises,
 } from '@lit-protocol/types';
-import { AuthMethod } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
-
-import { encodeCode } from './helpers/encode-code';
-import { getBlsSignatures } from './helpers/get-bls-signatures';
-import { getClaims } from './helpers/get-claims';
-import { getClaimsList } from './helpers/get-claims-list';
-import { getExpiration } from './helpers/get-expiration';
-import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
-import { getSignatures } from './helpers/get-signatures';
-import { normalizeArray } from './helpers/normalize-array';
-import { normalizeJsParams } from './helpers/normalize-params';
-import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
-import { removeDoubleQuotes } from './helpers/remove-double-quotes';
-import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -140,7 +147,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    *
    * If the user never sets a max price, it means 'unlimited'
    */
-  defaultMaxPriceByProduct: Record<keyof typeof PRODUCT_IDS, bigint> = {
+  defaultMaxPriceByProduct: Record<PRODUCT_IDS_TYPE, bigint> = {
     DECRYPTION: BigInt(-1),
     SIGN: BigInt(-1),
     LIT_ACTION: BigInt(-1),
@@ -725,7 +732,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises<NodeShare>).values;
+    const responseData = (res as SuccessNodePromises<ExecuteJsValueResponse>)
+      .values;
 
     logWithRequestId(
       requestId,
@@ -734,9 +742,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     );
 
     // -- find the responseData that has the most common response
-    const mostCommonResponse = findMostCommonResponse(
-      responseData
-    ) as NodeShare;
+    const mostCommonResponse = findMostCommonResponse(responseData);
 
     const responseFromStrategy = processLitActionResponseStrategy(
       responseData,
@@ -744,20 +750,15 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     );
     mostCommonResponse.response = responseFromStrategy;
 
-    const isSuccess = mostCommonResponse.success;
     const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
     const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
-
-    // -- we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
-    if (isSuccess && !hasSignedData && !hasClaimData) {
-      return mostCommonResponse as unknown as ExecuteJsResponse;
-    }
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
     if (!hasSignedData && !hasClaimData) {
       return {
+        success: mostCommonResponse.success,
         claims: {},
-        signatures: null,
+        signatures: {},
         decryptions: [],
         response: mostCommonResponse.response,
         logs: mostCommonResponse.logs,
@@ -766,10 +767,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // ========== Extract shares from response data ==========
 
-    // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map((r) => {
-      return removeDoubleQuotes(r.signedData);
-    });
+    // -- 1. combine signed data and get the signatures from it
+    const signedDataList = responseData.map((r) => r.signedData);
 
     logWithRequestId(
       requestId,
@@ -777,12 +776,10 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       signedDataList
     );
 
-    // Flatten the signedDataList by moving the data within the `sig` (or any other key user may choose) object to the top level.
-    // The specific key name (`sig`) is irrelevant, as the contents of the object are always lifted directly.
-    const key = Object.keys(signedDataList[0])[0]; // Get the first key of the object
-
-    const flattenedSignedMessageShares = signedDataList.map((item) => {
-      return item[key]; // Return the value corresponding to that key
+    const signatures = await combineExecuteJSSignatures({
+      nodesLitActionSignedData: responseData,
+      requestId,
+      threshold: this._getThreshold(),
     });
 
     // -- 2. combine responses as a string, and parse it as JSON if possible
@@ -805,17 +802,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // ========== Result ==========
     const returnVal: ExecuteJsResponse = {
       claims,
-      signatures: hasSignedData
-        ? {
-            [key]: await getSignatures({
-              requestId,
-              networkPubKeySet: this.networkPubKeySet,
-              threshold: params.useSingleNode ? 1 : this._getThreshold(),
-              signedMessageShares: flattenedSignedMessageShares,
-            }),
-          }
-        : {},
-      // decryptions: [],
+      signatures,
       response: parsedResponse,
       logs: mostCommonLogs,
     };
@@ -850,14 +837,15 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
    * Use PKP to sign
    *
    * @param { JsonPkpSignSdkParams } params
-   * @param params.toSign - The data to sign
+   * @param params.messageToSign - The data to sign, not hashed
+   * @param params.signingScheme - The signing scheme to use when signing the message. If hashing is needed, it will be derived from this
    * @param params.pubKey - The public key to sign with
    * @param params.sessionSigs - The session signatures to use
-   * @param params.authMethods - (optional) The auth methods to use
+   * @param [params.authMethods] - The auth methods to use
    */
-  pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
+  pkpSign = async (params: JsonPkpSignSdkParams): Promise<LitNodeSignature> => {
     // -- validate required params
-    const requiredParamKeys = ['toSign', 'pubKey', 'authContext'];
+    const requiredParamKeys = ['messageToSign', 'pubKey', 'authContext']; // TODO migrate to zod
 
     (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
       if (!params[key]) {
@@ -890,7 +878,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // validate session sigs
     const checkedSessionSigs = validateSessionSigs(sessionSigs);
 
-    if (checkedSessionSigs.isValid === false) {
+    if (!checkedSessionSigs.isValid) {
       throw new InvalidSessionSigs(
         {},
         `Invalid sessionSigs. Errors: ${checkedSessionSigs.errors}`
@@ -910,8 +898,17 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
           url,
         });
 
-        const reqBody: JsonPkpSignRequest<LIT_CURVE_TYPE> = {
-          toSign: normalizeArray(params.toSign),
+        const toSign =
+          CURVE_GROUP_BY_CURVE_TYPE[params.signingScheme] !== 'ECDSA'
+            ? params.messageToSign!
+            : hashLitMessage(
+                params.signingScheme as EcdsaSigType,
+                params.messageToSign!
+              );
+
+        const reqBody: JsonPkpSignRequest = {
+          toSign: normalizeArray(toSign),
+          signingScheme: params.signingScheme,
           pubkey: hexPrefixed(params.pubKey),
           authSig: sessionSig,
 
@@ -923,7 +920,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
           // nodeSet: thresholdNodeSet,
           nodeSet: this._getNodeSet(targetNodeUrls),
-          signingScheme: 'EcdsaK256Sha256',
         };
 
         logWithRequestId(requestId, 'reqBody:', reqBody);
@@ -945,11 +941,10 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
 
     // ========== Handle Response ==========
     if (!res.success) {
-      this._throwNodeError(res, requestId);
+      return this._throwNodeError(res, requestId);
     }
 
-    const responseData = (res as SuccessNodePromises<PKPSignEndpointResponse>)
-      .values;
+    const responseData = res.values;
 
     logWithRequestId(
       requestId,
@@ -957,23 +952,28 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       JSON.stringify(responseData)
     );
 
-    // clean up the response data (as there are double quotes & snake cases in the response)
-    const signedMessageShares = parsePkpSignResponse(responseData);
-
     try {
-      const signatures = await getSignatures({
+      const signatures = await combinePKPSignSignatures({
+        nodesPkpSignResponseData: responseData,
         requestId,
-        networkPubKeySet: this.networkPubKeySet,
         threshold: this._getThreshold(),
-        signedMessageShares: signedMessageShares,
       });
 
       logWithRequestId(requestId, `signature combination`, signatures);
 
       return signatures;
     } catch (e) {
-      console.error('Error getting signature', e);
-      throw e;
+      throw new UnknownSignatureError(
+        {
+          info: {
+            responseData,
+            requestId,
+            threshold: this._getThreshold(),
+          },
+          cause: e,
+        },
+        'Could not combine pkp signature shares'
+      );
     }
   };
 
@@ -1365,7 +1365,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       authMethods: params.authMethods,
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
       siweMessage: siweMessage,
-      curveType: LIT_CURVE.BLS,
+      curveType: 'BLS',
 
       // -- custom auths
       ...(params?.litActionIpfsId && {
@@ -1374,7 +1374,6 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       ...(params?.litActionCode && { code: params.litActionCode }),
       ...(params?.jsParams && { jsParams: params.jsParams }),
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
-      signingScheme: LIT_CURVE.BLS,
     };
 
     log(`[signSessionKey] body:`, body);
@@ -1551,7 +1550,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     product,
   }: {
     userMaxPrice?: bigint;
-    product: keyof typeof PRODUCT_IDS;
+    product: PRODUCT_IDS_TYPE;
   }) => {
     log('getMaxPricesForNodeProduct()', { product });
     const getUserMaxPrice = () => {

@@ -11,20 +11,11 @@ use elliptic_curve::{
 use hd_keys_curves_wasm::{HDDerivable, HDDeriver};
 use js_sys::Uint8Array;
 use k256::Secp256k1;
-use p256::NistP256;
-use serde::Deserialize;
 use serde_bytes::Bytes;
 use tsify::Tsify;
 use wasm_bindgen::{prelude::*, JsError};
 
 use crate::abi::{from_js, into_js, into_uint8array, JsResult};
-
-#[derive(Tsify, Deserialize)]
-#[tsify(from_wasm_abi)]
-pub enum EcdsaVariant {
-    K256,
-    P256,
-}
 
 struct Ecdsa<C>(C);
 
@@ -34,10 +25,6 @@ trait HdCtx {
 
 impl HdCtx for Secp256k1 {
     const CTX: &'static [u8] = b"LIT_HD_KEY_ID_K256_XMD:SHA-256_SSWU_RO_NUL_";
-}
-
-impl HdCtx for NistP256 {
-    const CTX: &'static [u8] = b"LIT_HD_KEY_ID_P256_XMD:SHA-256_SSWU_RO_NUL_";
 }
 
 #[wasm_bindgen]
@@ -169,11 +156,7 @@ where
         Ok((r, s, v))
     }
 
-    fn signature_into_js(
-        big_r: C::AffinePoint,
-        s: C::Scalar,
-        was_flipped: bool,
-    ) -> JsResult<EcdsaSignature> {
+    fn signature_into_js(big_r: C::AffinePoint, s: C::Scalar, was_flipped: bool) -> JsResult<EcdsaSignature> {
         let r = Self::x_coordinate(&big_r).to_repr();
         let s = s.to_repr();
         let mut v = u8::conditional_select(&0, &1, big_r.y_is_odd());
@@ -260,12 +243,8 @@ where
 
 #[wasm_bindgen(js_name = "ecdsaDeriveKey")]
 pub fn ecdsa_derive_key(
-    variant: EcdsaVariant,
     id: Uint8Array,
     public_keys: Vec<Uint8Array>,
 ) -> JsResult<Uint8Array> {
-    match variant {
-        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::derive_key(id, public_keys),
-        EcdsaVariant::P256 => Ecdsa::<NistP256>::derive_key(id, public_keys),
-    }
+    Ecdsa::<Secp256k1>::derive_key(id, public_keys)
 }
