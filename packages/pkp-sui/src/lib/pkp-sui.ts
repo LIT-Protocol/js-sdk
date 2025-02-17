@@ -25,15 +25,11 @@ import { sha256 } from '@noble/hashes/sha256';
 
 import {
   InvalidArgumentException,
+  SigType,
   UnknownError,
 } from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
-import {
-  LitNodeSignature,
-  PKPBaseProp,
-  PKPWallet,
-  SigType,
-} from '@lit-protocol/types';
+import { LitNodeSignature, PKPBaseProp, PKPWallet } from '@lit-protocol/types';
 
 import { getDigestFromBytes } from './TransactionBlockData';
 

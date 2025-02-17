@@ -3,10 +3,13 @@ import { p384 } from '@noble/curves/p384';
 import { secp256k1 } from '@noble/curves/secp256k1';
 import { hexToBytes } from '@noble/hashes/utils';
 
-import { UnknownSignatureError } from '@lit-protocol/constants';
+import {
+  UnknownSignatureError,
+  EcdsaSigType,
+  SigType,
+} from '@lit-protocol/constants';
 import { hashLitMessage } from '@lit-protocol/crypto';
 import { log } from '@lit-protocol/misc';
-import { EcdsaSigType, SigType } from '@lit-protocol/types';
 
 import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';

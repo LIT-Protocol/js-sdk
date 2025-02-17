@@ -34,6 +34,7 @@ import {
   RPC_URL_BY_NETWORK,
   InvalidParamType,
   UnknownError,
+  SigType,
   UnsupportedMethodError,
   UnsupportedChainException,
   LIT_CHAINS,
@@ -44,7 +45,6 @@ import {
   PKPClientHelpers,
   PKPEthersWalletProp,
   PKPWallet,
-  SigType,
 } from '@lit-protocol/types';
 
 import { ethRequestHandler } from './handler';

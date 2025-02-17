@@ -3,6 +3,7 @@ import { sha384 } from '@noble/hashes/sha512';
 
 import {
   CurveTypeNotFoundError,
+  EcdsaSigType,
   InvalidParamType,
   NetworkError,
   NoValidShares,
@@ -21,7 +22,6 @@ import { nacl } from '@lit-protocol/nacl';
 import {
   CleanLitNodeSignature,
   CombinedLitNodeSignature,
-  EcdsaSigType,
   LitActionSignedData,
   NodeAttestation,
   PKPSignEndpointResponse,

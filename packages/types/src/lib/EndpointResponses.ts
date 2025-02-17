@@ -1,25 +1,10 @@
+import {
+  // BlsSigType
+  EcdsaSigType,
+  FrostSigType,
+} from '@lit-protocol/constants';
+
 import { Hex } from './types';
-
-// export type BlsSigType = 'Bls12381G1ProofOfPossession';
-
-export type EcdsaSigType =
-  | 'EcdsaK256Sha256'
-  | 'EcdsaP256Sha256'
-  | 'EcdsaP384Sha384';
-
-export type FrostSigType =
-  | 'SchnorrEd25519Sha512'
-  | 'SchnorrK256Sha256'
-  | 'SchnorrP256Sha256'
-  | 'SchnorrP384Sha384'
-  | 'SchnorrRistretto25519Sha512'
-  | 'SchnorrEd448Shake256'
-  | 'SchnorrRedJubjubBlake2b512'
-  | 'SchnorrK256Taproot'
-  | 'SchnorrRedDecaf377Blake2b512'
-  | 'SchnorrkelSubstrate';
-
-export type SigType = /* BlsSigType | */ EcdsaSigType | FrostSigType;
 
 // See src/p2p_comms/web/models.rs > BlsSignedMessageShare
 // Example output:

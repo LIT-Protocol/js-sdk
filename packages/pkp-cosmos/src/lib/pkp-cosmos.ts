@@ -36,6 +36,7 @@ import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import {
   InvalidArgumentException,
   RemovedFunctionError,
+  SigType,
 } from '@lit-protocol/constants';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
@@ -43,7 +44,6 @@ import {
   PKPClientHelpers,
   PKPCosmosWalletProp,
   PKPWallet,
-  SigType,
 } from '@lit-protocol/types';
 
 export { Long } from 'cosmjs-types/helpers';

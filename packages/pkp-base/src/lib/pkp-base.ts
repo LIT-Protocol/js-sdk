@@ -11,6 +11,7 @@ import {
   InitError,
   InvalidSignatureError,
   LitNodeClientNotReadyError,
+  SigType,
   UnknownError,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -22,7 +23,6 @@ import {
   LitNodeSignature,
   PKPBaseDefaultParams,
   RPCUrls,
-  SigType,
 } from '@lit-protocol/types';
 
 /**

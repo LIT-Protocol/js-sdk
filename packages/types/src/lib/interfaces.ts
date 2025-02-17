@@ -1,6 +1,7 @@
 import { Provider } from '@ethersproject/abstract-provider';
 
-import { SigType } from './EndpointResponses';
+import { SigType } from '@lit-protocol/constants';
+
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import {

@@ -20,6 +20,7 @@ import {
 import {
   AUTH_METHOD_TYPE,
   CURVE_GROUP_BY_CURVE_TYPE,
+  EcdsaSigType,
   EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
@@ -73,7 +74,6 @@ import {
 import { nacl } from '@lit-protocol/nacl';
 import {
   AuthMethod,
-  EcdsaSigType,
   ExecuteJsValueResponse,
   LitNodeSignature,
 } from '@lit-protocol/types';
