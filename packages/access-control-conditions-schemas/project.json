@@ -1,0 +1,56 @@
+{
+  "name": "access-control-conditions-schemas",
+  "$schema": "../../node_modules/nx/access-control-conditions-schemas/project-schema.json",
+  "sourceRoot": "packages/access-control-conditions-schemas/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/access-control-conditions-schemas",
+        "main": "packages/access-control-conditions-schemas/src/index.ts",
+        "tsConfig": "packages/access-control-conditions-schemas/tsconfig.lib.json",
+        "assets": ["packages/access-control-conditions-schemas/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "generateDoc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn typedoc --entryPointStrategy expand packages/access-control-conditions-schemas/src --exclude packages/access-control-conditions-schemas/src/**/*.spec.** --tsconfig packages/access-control-conditions-schemas/tsconfig.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/access-control-conditions-schemas/**/*.ts"
+        ]
+      }
+    },
+    "testPackage": {
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/access-control-conditions-schemas"
+      ],
+      "options": {
+        "jestConfig": "packages/access-control-conditions-schemas/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/access-control-conditions-schemas"
+      ],
+      "options": {
+        "jestConfig": "packages/access-control-conditions-schemas/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}

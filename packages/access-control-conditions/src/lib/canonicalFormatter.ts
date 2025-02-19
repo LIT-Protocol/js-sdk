@@ -1,10 +1,10 @@
+import { type OperatorAcc } from '@lit-protocol/access-control-conditions-schemas';
 import { InvalidAccessControlConditions } from '@lit-protocol/constants';
 import {
   AccessControlConditions,
   AccsCOSMOSParams,
   AccsDefaultParams,
   AccsEVMParams,
-  AccsOperatorParams,
   AccsParams,
   AccsSOLV2Params,
   ConditionItem,
@@ -24,10 +24,10 @@ interface ABIParams {
  * Get operator param
  *
  * @param { ConditionItem } cond
- * @returns { AccsOperatorParams }
+ * @returns { OperatorAcc }
  */
-const getOperatorParam = (cond: ConditionItem): AccsOperatorParams => {
-  const _cond = cond as AccsOperatorParams;
+const getOperatorParam = (cond: ConditionItem): OperatorAcc => {
+  const _cond = cond as OperatorAcc;
 
   return {
     operator: _cond.operator,
@@ -53,11 +53,11 @@ const canonicalAbiParamss = (params: ABIParams[]): ABIParams[] => {
  * Canonical Unified Access Control Condition Formatter
  *
  * @param { UnifiedAccessControlConditions | ConditionItem } cond
- * @returns { any[] | AccsOperatorParams | any }
+ * @returns { any[] | OperatorAcc | any }
  */
 export const canonicalUnifiedAccessControlConditionFormatter = (
-  cond: AccsParams | AccsOperatorParams | UnifiedAccessControlConditions
-): AccsOperatorParams | any => {
+  cond: AccsParams | OperatorAcc | UnifiedAccessControlConditions
+): OperatorAcc | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {
     return cond.map((c) => canonicalUnifiedAccessControlConditionFormatter(c));
@@ -139,12 +139,12 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 * @param { object } cond
 * @param { boolean } requireV2Conditions
 *
-* @returns { any[] | AccsOperatorParams | AccsSOLV2Params | any }
+* @returns { any[] | OperatorAcc | AccsSOLV2Params | any }
 */
 export const canonicalSolRpcConditionFormatter = (
   cond: ConditionItem,
   requireV2Conditions: boolean = false
-): any[] | AccsOperatorParams | ConditionItem | AccsSOLV2Params | any => {
+): any[] | OperatorAcc | ConditionItem | AccsSOLV2Params | any => {
   // -- if is array
   if (Array.isArray(cond)) {
     return cond.map((c: ConditionItem) =>
@@ -254,13 +254,13 @@ export const canonicalSolRpcConditionFormatter = (
   }
   ---
 *
-* @param { AccsDefaultParams | AccsOperatorParams | AccessControlConditions } cond
+* @param { AccsDefaultParams | OperatorAcc | AccessControlConditions } cond
 *
-* @returns { any[] | AccsOperatorParams | AccsDefaultParams | any }
+* @returns { any[] | OperatorAcc | AccsDefaultParams | any }
 */
 export const canonicalAccessControlConditionFormatter = (
-  cond: AccsDefaultParams | AccsOperatorParams | AccessControlConditions
-): any[] | AccsOperatorParams | AccsDefaultParams | any => {
+  cond: AccsDefaultParams | OperatorAcc | AccessControlConditions
+): any[] | OperatorAcc | AccsDefaultParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {
     return cond.map((c) => canonicalAccessControlConditionFormatter(c));
@@ -315,13 +315,13 @@ export const canonicalAccessControlConditionFormatter = (
   }
   ---
 *
-* @param { AccsEVMParams | AccsOperatorParams | EvmContractConditions } cond
+* @param { AccsEVMParams | OperatorAcc | EvmContractConditions } cond
 *
 * @returns
 */
 export const canonicalEVMContractConditionFormatter = (
-  cond: AccsEVMParams | AccsOperatorParams | EvmContractConditions
-): any[] | AccsOperatorParams | AccsEVMParams | any => {
+  cond: AccsEVMParams | OperatorAcc | EvmContractConditions
+): any[] | OperatorAcc | AccsEVMParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {
     return cond.map((c) => canonicalEVMContractConditionFormatter(c));
@@ -329,7 +329,7 @@ export const canonicalEVMContractConditionFormatter = (
 
   // -- if there's a `operator` key in the object
   if ('operator' in cond) {
-    const _cond = cond as AccsOperatorParams;
+    const _cond = cond as OperatorAcc;
 
     return {
       operator: _cond.operator,
@@ -416,15 +416,15 @@ export const canonicalEVMContractConditionFormatter = (
 */
 export const canonicalCosmosConditionFormatter = (
   cond: ConditionItem
-): any[] | AccsOperatorParams | AccsCOSMOSParams | any => {
+): any[] | OperatorAcc | AccsCOSMOSParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {
-    return cond.map((c: any) => canonicalCosmosConditionFormatter(c));
+    return cond.map((c) => canonicalCosmosConditionFormatter(c));
   }
 
   // -- if there's a `operator` key in the object
   if ('operator' in cond) {
-    const _cond = cond as AccsOperatorParams;
+    const _cond = cond as OperatorAcc;
 
     return {
       operator: _cond.operator,

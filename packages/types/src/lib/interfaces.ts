@@ -1,5 +1,4 @@
 import { Provider } from '@ethersproject/abstract-provider';
-import depd from 'depd';
 
 import { SigType } from './EndpointResponses';
 import { ILitNodeClient } from './ILitNodeClient';
@@ -18,11 +17,6 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from './types';
-const deprecated = depd('lit-js-sdk:types:interfaces');
-
-export interface AccsOperatorParams {
-  operator: string;
-}
 
 /** ---------- Auth Sig ---------- */
 

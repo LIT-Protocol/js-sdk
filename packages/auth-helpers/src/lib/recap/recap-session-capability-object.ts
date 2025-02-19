@@ -75,7 +75,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   addCapabilityForResource(
     litResource: ILitResource,
     ability: LIT_ABILITY_VALUES,
-    data: any = {}
+    data = {}
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
