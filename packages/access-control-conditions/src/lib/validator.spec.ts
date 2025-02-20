@@ -312,20 +312,20 @@ describe('validator.ts', () => {
       error = e as LitErrorClass;
     }
 
-    expect(error!.kind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
-    expect(error!.code).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].code);
+    expect(error!.kind).toBe(LIT_ERROR['INVALID_ARGUMENT_EXCEPTION'].kind);
+    expect(error!.code).toBe(LIT_ERROR['INVALID_ARGUMENT_EXCEPTION'].code);
   });
 
   it('should throw when schema has invalid fields', async () => {
     // Disable TS here to test invalid fields
     const evmBasicAccessControlConditions: AccessControlConditions = [
       {
-        // @ts-ignore
+        // @ts-expect-error we are testing wrong values
         // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
         contractAddress: 0x7a250d5630b4cf539739df2c5dacb4c659f2488d,
-        // @ts-ignore
+        // @ts-expect-error we are testing wrong values
         standardContractType: 'AMM',
-        // @ts-ignore
+        // @ts-expect-error we are testing wrong values
         chain: 'bitcoin',
         method: 'eth_getBalance',
         parameters: [':userAddress', 'latest'],
@@ -346,8 +346,8 @@ describe('validator.ts', () => {
     }
 
     expect(error).toBeDefined();
-    expect(error!.kind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
-    expect(error!.code).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].code);
+    expect(error!.kind).toBe(LIT_ERROR['INVALID_ARGUMENT_EXCEPTION'].kind);
+    expect(error!.code).toBe(LIT_ERROR['INVALID_ARGUMENT_EXCEPTION'].code);
   });
 
   it('should throw when schema of a nested ACC does not validate', async () => {
@@ -405,7 +405,7 @@ describe('validator.ts', () => {
     }
 
     expect(error).toBeDefined();
-    expect(error!.kind).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].kind);
-    expect(error!.code).toBe(LIT_ERROR['INVALID_PARAM_TYPE'].code);
+    expect(error!.kind).toBe(LIT_ERROR['INVALID_ARGUMENT_EXCEPTION'].kind);
+    expect(error!.code).toBe(LIT_ERROR['INVALID_ARGUMENT_EXCEPTION'].code);
   });
 });

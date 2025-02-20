@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 
 const ALLOW_LIST = [
   'ethers',
-  '@lit-protocol/accs-schemas',
   '@lit-protocol/contracts',
   'crypto',
   'secp256k1',
