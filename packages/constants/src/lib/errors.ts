@@ -1,6 +1,8 @@
 // @ts-expect-error No types available for this package
 import { Options, VError } from '@openagenda/verror';
 
+import { ConstantValues } from './constants/constants';
+
 export const LIT_ERROR_KIND = {
   Unknown: 'Unknown',
   Unexpected: 'Unexpected',
@@ -17,7 +19,7 @@ export const LIT_ERROR_KIND = {
 interface ErrorConfig {
   name: string;
   code: string;
-  kind: (typeof LIT_ERROR_KIND)[keyof typeof LIT_ERROR_KIND];
+  kind: ConstantValues<typeof LIT_ERROR_KIND>;
 }
 
 export const LIT_ERROR: Record<string, ErrorConfig> = {
@@ -216,17 +218,17 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'automation_error',
     kind: LIT_ERROR_KIND.Unexpected,
   },
-};
+} as const;
 
 export const LIT_ERROR_CODE = {
   NODE_NOT_AUTHORIZED: 'NodeNotAuthorized',
-};
+} as const;
 
 export abstract class LitError extends VError {
   protected constructor(
     options: Error | Options,
     message: string,
-    ...params: any[]
+    ...params: unknown[]
   ) {
     super(options, message, ...params);
   }
@@ -235,14 +237,14 @@ export abstract class LitError extends VError {
 type LitErrorConstructor = new (
   options: Error | Options,
   message: string,
-  ...params: any[]
+  ...params: unknown[]
 ) => LitError;
 
-export type LitErrorClass = {
+export interface LitErrorClass {
   name: string;
   code: string;
   kind: string;
-};
+}
 
 function createErrorClass({
   name,
@@ -251,7 +253,11 @@ function createErrorClass({
 }: LitErrorClass): LitErrorConstructor {
   return class extends LitError {
     // VError has optional options parameter, but we make it required so thrower remembers to pass all the useful info
-    constructor(options: Error | Options, message: string, ...params: any[]) {
+    constructor(
+      options: Error | Options,
+      message: string,
+      ...params: unknown[]
+    ) {
       if (options instanceof Error) {
         options = {
           cause: options,

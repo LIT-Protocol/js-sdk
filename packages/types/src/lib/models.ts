@@ -1,4 +1,5 @@
 import { SiweMessage } from 'siwe';
+
 import { LitAbility, LitResourcePrefix } from './types';
 
 export type PlainJSON =
@@ -6,15 +7,13 @@ export type PlainJSON =
   | number
   | string
   | { [key: string]: PlainJSON }
-  | Array<PlainJSON>;
-export type AttenuationsObject = {
-  [key: string]: { [key: string]: Array<PlainJSON> };
-};
+  | PlainJSON[];
+export type AttenuationsObject = Record<string, Record<string, PlainJSON[]>>;
 export type CID = string;
 
 export interface ISessionCapabilityObject {
   get attenuations(): AttenuationsObject;
-  get proofs(): Array<CID>;
+  get proofs(): CID[];
   get statement(): string;
   addProof(proof: CID): void;
 
@@ -28,7 +27,7 @@ export interface ISessionCapabilityObject {
     resource: string,
     namespace?: string,
     name?: string,
-    restriction?: { [key: string]: PlainJSON }
+    restriction?: Record<string, PlainJSON>
   ): void;
   addToSiweMessage(siwe: SiweMessage): SiweMessage;
 
@@ -62,7 +61,7 @@ export interface ISessionCapabilityObject {
   addCapabilityForResource(
     litResource: ILitResource,
     ability: LitAbility,
-    data?: any
+    data?: unknown
   ): void;
 
   /**
@@ -109,8 +108,8 @@ export interface ILitResource {
  * specified LIT resource and the specified LIT ability, and will be validated by
  * the LIT-internal systems.
  */
-export type LitResourceAbilityRequest = {
+export interface LitResourceAbilityRequest {
   resource: ILitResource;
   ability: LitAbility;
-  data?: any;
-};
+  data?: unknown;
+}

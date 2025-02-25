@@ -1,5 +1,6 @@
 import { Provider } from '@ethersproject/abstract-provider';
-import depd from 'depd';
+
+import { LitEVMChainKeys } from '@lit-protocol/constants';
 
 import { SigType } from './EndpointResponses';
 import { ILitNodeClient } from './ILitNodeClient';
@@ -18,11 +19,6 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from './types';
-const deprecated = depd('lit-js-sdk:types:interfaces');
-
-export interface AccsOperatorParams {
-  operator: string;
-}
 
 /** ---------- Auth Sig ---------- */
 
@@ -68,7 +64,7 @@ export interface AuthCallbackParams extends LitActionSdkParams {
   /**
    * The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
    */
-  chain: Chain;
+  chain: LitEVMChainKeys;
 
   /**
    *   The statement that describes what the user is signing. If the auth callback is for signing a SIWE message, you MUST add this statement to the end of the SIWE statement.
@@ -937,7 +933,7 @@ export type SessionSigsMap = Record<string, AuthSig>;
 
 export interface GetWalletSigProps extends LitActionSdkParams {
   authNeededCallback?: AuthCallback;
-  chain: string;
+  chain: LitEVMChainKeys;
   sessionCapabilityObject: ISessionCapabilityObject;
   switchChain?: boolean;
   expiration: string;
@@ -1268,7 +1264,7 @@ export interface EthWalletAuthenticateOptions {
   /**
    * Name of chain to use for signature
    */
-  chain?: string;
+  chain?: LitEVMChainKeys;
   /**
    * When the auth signature expires
    */

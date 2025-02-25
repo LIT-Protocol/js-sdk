@@ -1,3 +1,5 @@
+import { ConstantKeys, ConstantValues } from './constants';
+
 // pub enum SigningScheme {
 
 //  -- BLS
@@ -28,10 +30,8 @@ export const LIT_CURVE = {
   EcdsaK256Sha256: 'EcdsaK256Sha256', // same as caitsith
 } as const;
 
-export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
-
-// This should replicate SigShare.sigType in types package
-export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
+export type LIT_CURVE_TYPE = ConstantKeys<typeof LIT_CURVE>;
+export type LIT_CURVE_VALUES = ConstantValues<typeof LIT_CURVE>;
 /**
  * CHANGE: This is not needed when the combiner is integrated
  */

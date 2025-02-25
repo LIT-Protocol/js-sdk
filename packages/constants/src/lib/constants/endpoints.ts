@@ -2,7 +2,7 @@ export const LIT_ENDPOINT_VERSION = {
   V0: '/',
   V1: '/v1',
   V2: '/v2',
-};
+} as const;
 
 export const LIT_ENDPOINT = {
   // internal
@@ -32,4 +32,4 @@ export const LIT_ENDPOINT = {
     path: '/web/encryption/sign',
     version: LIT_ENDPOINT_VERSION.V2,
   },
-};
+} as const;

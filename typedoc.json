@@ -2,6 +2,7 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": [
     "./packages/access-control-conditions/src/index.ts",
+    "./packages/access-control-conditions-schemas/src/index.ts",
     "./packages/auth-browser/src/index.ts",
     "./packages/auth-helpers/src/index.ts",
     "./packages/constants/src/index.ts",
@@ -21,6 +22,7 @@
     "./packages/pkp-ethers/src/index.ts",
     "./packages/pkp-sui/src/index.ts",
     "./packages/pkp-walletconnect/src/index.ts",
+    "./packages/schemas/src/index.ts",
     "./packages/types/src/index.ts",
     "./packages/uint8arrays/src/index.ts",
     "./packages/wasm/src/index.ts",

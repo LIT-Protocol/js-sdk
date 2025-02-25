@@ -21,6 +21,8 @@ import * as naclUtil from 'tweetnacl-util';
 
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import {
+  ConstantValues,
+  ConstantKeys,
   EITHER_TYPE,
   ELeft,
   ERight,
@@ -33,6 +35,7 @@ import {
   UnsupportedChainException,
   WrongNetworkException,
   WrongParamFormat,
+  LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
 import {
   isBrowser,
@@ -75,30 +78,6 @@ interface signAndSaveAuthParams {
   nonce: string;
 }
 
-interface IABI {
-  inputs: any[];
-  name: string;
-  outputs: {
-    internalType: string;
-    name: string;
-    type: string;
-  }[];
-  stateMutability: string;
-  type: string;
-}
-
-interface IABIEncode {
-  abi: IABI[];
-  functionName: string;
-  functionParams: [];
-}
-
-interface IABIDecode {
-  abi: IABI[];
-  functionName: string;
-  data: any;
-}
-
 interface SignMessageParams {
   body: string;
   web3: Web3Provider;
@@ -114,9 +93,8 @@ const WALLET_ERROR = {
   REQUESTED_CHAIN_HAS_NOT_BEEN_ADDED: 4902,
   NO_SUCH_METHOD: -32601,
 } as const;
-export type WALLET_ERROR_TYPE = keyof typeof WALLET_ERROR;
-export type WALLET_ERROR_VALUES =
-  (typeof WALLET_ERROR)[keyof typeof WALLET_ERROR];
+export type WALLET_ERROR_TYPE = ConstantKeys<typeof WALLET_ERROR>;
+export type WALLET_ERROR_VALUES = ConstantValues<typeof WALLET_ERROR>;
 
 /** ---------- Local Helpers ---------- */
 
@@ -298,9 +276,7 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
 export const getRPCUrls = (): RPCUrls => {
   const rpcUrls: RPCUrls = {};
 
-  const keys: string[] = Object.keys(LIT_CHAINS);
-
-  for (const chainName of keys) {
+  for (const chainName of LIT_CHAINS_KEYS) {
     const chainId = LIT_CHAINS[chainName].chainId;
     const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
     rpcUrls[chainId.toString()] = rpcUrl;

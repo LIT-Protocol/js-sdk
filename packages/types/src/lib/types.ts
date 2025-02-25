@@ -1,29 +1,41 @@
 import * as ethers from 'ethers';
+import { z } from 'zod';
 
 import {
-  LPACC_EVM_ATOM,
-  LPACC_EVM_CONTRACT,
-  LPACC_SOL,
-  LPACC_EVM_BASIC,
-} from '@lit-protocol/accs-schemas';
+  ChainSchema,
+  DerivedAddressesSchema,
+  EpochInfoSchema,
+  LitAbilitySchema,
+  LitNetworkKeysSchema,
+  LitResourcePrefixSchema,
+  TokenInfoSchema,
+} from '@lit-protocol/schemas';
 
 import {
   AuthMethod,
   LitRelayConfig,
   Signature,
-  AccsOperatorParams,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
 } from './interfaces';
 
+import type {
+  AtomAcc,
+  EvmBasicAcc,
+  EvmContractAcc,
+  OperatorAcc,
+  SolAcc,
+} from '@lit-protocol/access-control-conditions-schemas';
+
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
-export type AccsDefaultParams = LPACC_EVM_BASIC;
-export type AccsSOLV2Params = LPACC_SOL;
-export type AccsEVMParams = LPACC_EVM_CONTRACT;
-export type AccsCOSMOSParams = LPACC_EVM_ATOM;
+// Backwards compatibility with @lit-protocol/accs-schemas
+export type AccsDefaultParams = EvmBasicAcc;
+export type AccsSOLV2Params = SolAcc;
+export type AccsEVMParams = EvmContractAcc;
+export type AccsCOSMOSParams = AtomAcc;
 
 // union type for all the different types of conditions
 export type AccsParams =
@@ -33,26 +45,26 @@ export type AccsParams =
   | AccsCOSMOSParams;
 
 // union type for all the different types of conditions including operator
-export type ConditionItem = AccsParams | AccsOperatorParams;
+export type ConditionItem = AccsParams | OperatorAcc;
 
 export type AccessControlConditions = (
   | AccsDefaultParams
-  | AccsOperatorParams
+  | OperatorAcc
   | AccessControlConditions
 )[];
 export type EvmContractConditions = (
   | AccsEVMParams
-  | AccsOperatorParams
+  | OperatorAcc
   | EvmContractConditions
 )[];
 export type SolRpcConditions = (
   | AccsSOLV2Params
-  | AccsOperatorParams
+  | OperatorAcc
   | SolRpcConditions
 )[];
 export type UnifiedAccessControlConditions = (
   | AccsParams
-  | AccsOperatorParams
+  | OperatorAcc
   | UnifiedAccessControlConditions
 )[];
 
@@ -62,11 +74,10 @@ export type SupportedJsonRequests =
   | JsonSigningRetrieveRequest
   | JsonEncryptionRetrieveRequest;
 
-export type Chain = string;
+export type Chain = z.infer<typeof ChainSchema>;
 
-export type LIT_NETWORKS_KEYS = 'naga-dev' | 'custom';
+export type LIT_NETWORKS_KEYS = z.infer<typeof LitNetworkKeysSchema>;
 
-export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type AcceptedFileType = File | Blob;
 
 /**
@@ -179,28 +190,13 @@ export interface LitContractResolverContext {
 
 export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
 
-export type LitResourcePrefix =
-  | 'lit-accesscontrolcondition'
-  | 'lit-pkp'
-  | 'lit-paymentdelegation'
-  | 'lit-litaction';
+export type LitResourcePrefix = z.infer<typeof LitResourcePrefixSchema>;
 
-export type LitAbility =
-  | 'access-control-condition-decryption'
-  | 'access-control-condition-signing'
-  | 'pkp-signing'
-  | 'lit-payment-delegation'
-  | 'lit-action-execution';
+export type LitAbility = z.infer<typeof LitAbilitySchema>;
 
-export interface TokenInfo {
-  tokenId: string;
-  publicKey: string;
-  publicKeyBuffer: Buffer;
-  ethAddress: string;
-  btcAddress: string;
-  cosmosAddress: string;
-  isNewPKP: boolean;
-}
+export type DerivedAddresses = z.infer<typeof DerivedAddressesSchema>;
+
+export type TokenInfo = z.infer<typeof TokenInfoSchema>;
 
 /**
  * from the `getActiveUnkickedValidatorStructsAndCounts` Staking contract function
@@ -210,10 +206,4 @@ export interface TokenInfo {
   retries: _BigNumber { _hex: '0x03', _isBigNumber: true },
   timeout: _BigNumber { _hex: '0x3c', _isBigNumber: true }
  */
-export interface EpochInfo {
-  epochLength: number;
-  number: number;
-  endTime: number;
-  retries: number;
-  timeout: number;
-}
+export type EpochInfo = z.infer<typeof EpochInfoSchema>;
