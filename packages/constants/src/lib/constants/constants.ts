@@ -1,33 +1,33 @@
-import depd from 'depd';
+import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from './types';
 
-import {
-  LITChain,
-  LITCosmosChain,
-  LITEVMChain,
-  LITSVMChain,
-} from '@lit-protocol/types';
+export type ConstantKeys<T> = keyof T;
+export type ConstantValues<T> = T[keyof T];
 
-const deprecated = depd('lit-js-sdk:constants:constants');
+// ========== Chains ==========
+export const VMTYPE = {
+  EVM: 'EVM',
+  SVM: 'SVM',
+  CVM: 'CVM',
+} as const;
+export type VMTYPE_TYPE = ConstantKeys<typeof VMTYPE>;
+export type VMTYPE_VALUES = ConstantValues<typeof VMTYPE>;
 
 /**
  * Lit Protocol Network Public Key
  */
-export const NETWORK_PUB_KEY: string =
+export const NETWORK_PUB_KEY =
   '9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62';
 
 // you can either pass a "chain" param to lit functions, which it uses to tell which network your sig came from.
 // or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
-export const LIT_AUTH_SIG_CHAIN_KEYS: string[] = [
+export const LIT_AUTH_SIG_CHAIN_KEYS = [
   'ethereum',
   'solana',
   'cosmos',
   'kyve',
-];
+] as const;
 
-export const AUTH_SIGNATURE_BODY =
-  'I am creating an account to use Lit Protocol at {{timestamp}}';
-
-const yellowstoneChain = {
+const yellowstoneChain: LITEVMChain = {
   contractAddress: null,
   chainId: 175188,
   name: 'Chronicle Yellowstone - Lit Protocol Testnet',
@@ -36,8 +36,107 @@ const yellowstoneChain = {
   rpcUrls: ['https://yellowstone-rpc.litprotocol.com/'],
   blockExplorerUrls: ['https://yellowstone-explorer.litprotocol.com/'],
   type: null,
-  vmType: 'EVM',
-};
+  vmType: VMTYPE.EVM,
+} as const;
+
+export const LIT_CHAINS_KEYS = [
+  'ethereum',
+  'polygon',
+  'fantom',
+  'xdai',
+  'bsc',
+  'arbitrum',
+  'arbitrumSepolia',
+  'avalanche',
+  'fuji',
+  'harmony',
+  'mumbai',
+  'goerli',
+  'cronos',
+  'optimism',
+  'celo',
+  'aurora',
+  'eluvio',
+  'alfajores',
+  'xdc',
+  'evmos',
+  'evmosTestnet',
+  'bscTestnet',
+  'baseGoerli',
+  'baseSepolia',
+  'moonbeam',
+  'moonriver',
+  'moonbaseAlpha',
+  'filecoin',
+  'filecoinCalibrationTestnet',
+  'hyperspace',
+  'sepolia',
+  'scrollSepolia',
+  'scroll',
+  'zksync',
+  'base',
+  'lukso',
+  'luksoTestnet',
+  'zora',
+  'zoraGoerli',
+  'zksyncTestnet',
+  'lineaGoerli',
+  'lineaSepolia',
+  'yellowstone',
+  'chiado',
+  'zkEvm',
+  'mantleTestnet',
+  'mantle',
+  'klaytn',
+  'publicGoodsNetwork',
+  'optimismGoerli',
+  'waevEclipseTestnet',
+  'waevEclipseDevnet',
+  'verifyTestnet',
+  'fuse',
+  'campNetwork',
+  'vanar',
+  'lisk',
+  'chilizMainnet',
+  'chilizTestnet',
+  'skaleTestnet',
+  'skale',
+  'skaleCalypso',
+  'skaleCalypsoTestnet',
+  'skaleEuropaTestnet',
+  'skaleEuropa',
+  'skaleTitanTestnet',
+  'skaleTitan',
+  'fhenixHelium',
+  'hederaTestnet',
+  'bitTorrentTestnet',
+  'storyOdyssey',
+  'campTestnet',
+  'hushedNorthstar',
+  'amoy',
+  'matchain',
+  'coreDao',
+  'zkCandySepoliaTestnet',
+  'vana',
+] as const;
+export const LIT_SVM_CHAINS_KEYS = [
+  'solana',
+  'solanaDevnet',
+  'solanaTestnet',
+] as const;
+export const LIT_COSMOS_CHAINS_KEYS = [
+  'cosmos',
+  'kyve',
+  'evmosCosmos',
+  'evmosCosmosTestnet',
+  'cheqdMainnet',
+  'cheqdTestnet',
+  'juno',
+] as const;
+
+export type LitEVMChainKeys = (typeof LIT_CHAINS_KEYS)[number];
+export type LITSVMChainKeys = (typeof LIT_SVM_CHAINS_KEYS)[number];
+export type LitCosmosChainKeys = (typeof LIT_COSMOS_CHAINS_KEYS)[number];
 
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
@@ -45,7 +144,7 @@ const yellowstoneChain = {
  * @type { LITEVMChain }
  * @default
  */
-export const LIT_CHAINS: LITChain<LITEVMChain> = {
+export const LIT_CHAINS: LITChain<LitEVMChainKeys, LITEVMChain> = {
   ethereum: {
     contractAddress: '0xA54F7579fFb3F98bd8649fF02813F575f9b3d353',
     chainId: 1,
@@ -57,7 +156,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE',
     ],
     blockExplorerUrls: ['https://etherscan.io'],
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   polygon: {
     contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
@@ -68,7 +167,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://polygon-rpc.com'],
     blockExplorerUrls: ['https://explorer.matic.network'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fantom: {
     contractAddress: '0x5bD3Fe8Ab542f0AaBF7552FAAf376Fd8Aa9b3869',
@@ -79,7 +178,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpcapi.fantom.network'],
     blockExplorerUrls: ['https://ftmscan.com'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   xdai: {
     contractAddress: '0xDFc2Fd83dFfD0Dafb216F412aB3B18f2777406aF',
@@ -90,7 +189,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.gnosischain.com'],
     blockExplorerUrls: [' https://blockscout.com/xdai/mainnet'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   bsc: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -101,7 +200,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://bsc-dataseed.binance.org/'],
     blockExplorerUrls: [' https://bscscan.com/'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   arbitrum: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -112,7 +211,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: 'ERC1155',
     rpcUrls: ['https://arb1.arbitrum.io/rpc'],
     blockExplorerUrls: ['https://arbiscan.io/'],
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   arbitrumSepolia: {
     contractAddress: null,
@@ -123,7 +222,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://sepolia-rollup.arbitrum.io/rpc'],
     blockExplorerUrls: ['https://sepolia.arbiscan.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   avalanche: {
     contractAddress: '0xBB118507E802D17ECDD4343797066dDc13Cde7C6',
@@ -134,7 +233,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: 'ERC1155',
     rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
     blockExplorerUrls: ['https://snowtrace.io/'],
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fuji: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -145,7 +244,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: 'ERC1155',
     rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
     blockExplorerUrls: ['https://testnet.snowtrace.io/'],
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   harmony: {
     contractAddress: '0xBB118507E802D17ECDD4343797066dDc13Cde7C6',
@@ -156,7 +255,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: 'ERC1155',
     rpcUrls: ['https://api.harmony.one'],
     blockExplorerUrls: ['https://explorer.harmony.one/'],
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   mumbai: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -169,7 +268,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     ],
     blockExplorerUrls: ['https://mumbai.polygonscan.com'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   goerli: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -180,7 +279,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://goerli.infura.io/v3/96dffb3d8c084dec952c61bd6230af34'],
     blockExplorerUrls: ['https://goerli.etherscan.io'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   cronos: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
@@ -191,7 +290,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://evm-cronos.org'],
     blockExplorerUrls: ['https://cronos.org/explorer/'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   optimism: {
     contractAddress: '0xbF68B4c9aCbed79278465007f20a08Fa045281E0',
@@ -202,7 +301,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://mainnet.optimism.io'],
     blockExplorerUrls: ['https://optimistic.etherscan.io'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   celo: {
     contractAddress: '0xBB118507E802D17ECDD4343797066dDc13Cde7C6',
@@ -213,7 +312,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://forno.celo.org'],
     blockExplorerUrls: ['https://explorer.celo.org'],
     type: 'ERC1155',
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   aurora: {
     contractAddress: null,
@@ -224,7 +323,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://mainnet.aurora.dev'],
     blockExplorerUrls: ['https://aurorascan.dev'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   eluvio: {
     contractAddress: null,
@@ -235,7 +334,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://host-76-74-28-226.contentfabric.io/eth'],
     blockExplorerUrls: ['https://explorer.eluv.io'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   alfajores: {
     contractAddress: null,
@@ -246,7 +345,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://alfajores-forno.celo-testnet.org'],
     blockExplorerUrls: ['https://alfajores-blockscout.celo-testnet.org'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   xdc: {
     contractAddress: null,
@@ -257,7 +356,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.xinfin.network'],
     blockExplorerUrls: ['https://explorer.xinfin.network'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   evmos: {
     contractAddress: null,
@@ -268,7 +367,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://eth.bd.evmos.org:8545'],
     blockExplorerUrls: ['https://evm.evmos.org'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   evmosTestnet: {
     contractAddress: null,
@@ -279,7 +378,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://eth.bd.evmos.dev:8545'],
     blockExplorerUrls: ['https://evm.evmos.dev'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   bscTestnet: {
     contractAddress: null,
@@ -290,7 +389,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
     blockExplorerUrls: ['https://testnet.bscscan.com/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   baseGoerli: {
     contractAddress: null,
@@ -301,7 +400,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://goerli.base.org'],
     blockExplorerUrls: ['https://goerli.basescan.org'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   baseSepolia: {
     contractAddress: null,
@@ -312,7 +411,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://sepolia.base.org'],
     blockExplorerUrls: ['https://sepolia.basescan.org'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   moonbeam: {
     contractAddress: null,
@@ -323,7 +422,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.api.moonbeam.network'],
     blockExplorerUrls: ['https://moonscan.io'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   moonriver: {
     contractAddress: null,
@@ -334,7 +433,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.api.moonriver.moonbeam.network'],
     blockExplorerUrls: ['https://moonriver.moonscan.io'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   moonbaseAlpha: {
     contractAddress: null,
@@ -345,7 +444,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.api.moonbase.moonbeam.network'],
     blockExplorerUrls: ['https://moonbase.moonscan.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   filecoin: {
     contractAddress: null,
@@ -356,7 +455,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://api.node.glif.io/rpc/v1'],
     blockExplorerUrls: ['https://filfox.info/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   filecoinCalibrationTestnet: {
     contractAddress: null,
@@ -367,7 +466,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://api.calibration.node.glif.io/rpc/v1'],
     blockExplorerUrls: ['https://calibration.filscan.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   hyperspace: {
     contractAddress: null,
@@ -378,7 +477,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://api.hyperspace.node.glif.io/rpc/v1'],
     blockExplorerUrls: ['https://hyperspace.filscan.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   sepolia: {
     contractAddress: null,
@@ -389,7 +488,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
     blockExplorerUrls: ['https://sepolia.etherscan.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   scrollSepolia: {
     contractAddress: null,
@@ -400,7 +499,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://sepolia-rpc.scroll.io'],
     blockExplorerUrls: ['https://sepolia.scrollscan.com'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   scroll: {
     contractAddress: null,
@@ -411,7 +510,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.scroll.io'],
     blockExplorerUrls: ['https://scrollscan.com/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zksync: {
     contractAddress: null,
@@ -422,7 +521,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://mainnet.era.zksync.io'],
     blockExplorerUrls: ['https://explorer.zksync.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   base: {
     contractAddress: null,
@@ -433,7 +532,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://mainnet.base.org'],
     blockExplorerUrls: ['https://basescan.org'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lukso: {
     contractAddress: null,
@@ -444,7 +543,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.lukso.gateway.fm'],
     blockExplorerUrls: ['https://explorer.execution.mainnet.lukso.network/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   luksoTestnet: {
     contractAddress: null,
@@ -455,7 +554,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.testnet.lukso.network'],
     blockExplorerUrls: ['https://explorer.execution.testnet.lukso.network'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zora: {
     contractAddress: null,
@@ -466,7 +565,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.zora.energy/'],
     blockExplorerUrls: ['https://explorer.zora.energy'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zoraGoerli: {
     contractAddress: null,
@@ -477,7 +576,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://testnet.rpc.zora.energy'],
     blockExplorerUrls: ['https://testnet.explorer.zora.energy'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zksyncTestnet: {
     contractAddress: null,
@@ -488,7 +587,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://testnet.era.zksync.dev'],
     blockExplorerUrls: ['https://goerli.explorer.zksync.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lineaGoerli: {
     contractAddress: null,
@@ -499,7 +598,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.goerli.linea.build'],
     blockExplorerUrls: ['https://explorer.goerli.linea.build'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lineaSepolia: {
     contractAddress: null,
@@ -510,7 +609,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.sepolia.linea.build'],
     blockExplorerUrls: ['https://explorer.sepolia.linea.build'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
 
   /**
@@ -529,7 +628,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.chiadochain.net'],
     blockExplorerUrls: ['https://blockscout.chiadochain.net'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zkEvm: {
     contractAddress: null,
@@ -540,7 +639,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://zkevm-rpc.com'],
     blockExplorerUrls: ['https://zkevm.polygonscan.com/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   mantleTestnet: {
     contractAddress: null,
@@ -551,7 +650,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.testnet.mantle.xyz'],
     blockExplorerUrls: ['https://explorer.testnet.mantle.xyz/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   mantle: {
     contractAddress: null,
@@ -560,9 +659,9 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     symbol: 'MNT',
     decimals: 18,
     rpcUrls: ['https://rpc.mantle.xyz'],
-    blockExplorerUrls: ['http://explorer.mantle.xyz/'],
+    blockExplorerUrls: ['https://explorer.mantle.xyz/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   klaytn: {
     contractAddress: null,
@@ -573,7 +672,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://klaytn.blockpi.network/v1/rpc/public'],
     blockExplorerUrls: ['https://www.klaytnfinder.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   publicGoodsNetwork: {
     contractAddress: null,
@@ -584,7 +683,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.publicgoods.network'],
     blockExplorerUrls: ['https://explorer.publicgoods.network/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   optimismGoerli: {
     contractAddress: null,
@@ -595,7 +694,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://optimism-goerli.publicnode.com'],
     blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   waevEclipseTestnet: {
     contractAddress: null,
@@ -606,7 +705,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://api.evm.waev.eclipsenetwork.xyz'],
     blockExplorerUrls: ['http://waev.explorer.modular.cloud/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   waevEclipseDevnet: {
     contractAddress: null,
@@ -617,7 +716,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://api.evm.waev.dev.eclipsenetwork.xyz'],
     blockExplorerUrls: ['http://waev.explorer.modular.cloud/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   verifyTestnet: {
     contractAddress: null,
@@ -628,7 +727,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.verify-testnet.gelato.digital'],
     blockExplorerUrls: ['https://verify-testnet.blockscout.com/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fuse: {
     contractAddress: null,
@@ -639,7 +738,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.fuse.io/'],
     blockExplorerUrls: ['https://explorer.fuse.io/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   campNetwork: {
     contractAddress: null,
@@ -652,7 +751,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://explorer.camp-network-testnet.gelato.digital/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   vanar: {
     contractAddress: null,
@@ -663,7 +762,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc-vanguard.vanarchain.com'],
     blockExplorerUrls: ['https://explorer-vanguard.vanarchain.com'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   lisk: {
     contractAddress: null,
@@ -674,7 +773,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://lisk.drpc.org'],
     blockExplorerUrls: ['https://blockscout.lisk.com/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   chilizMainnet: {
     contractAddress: null,
@@ -685,7 +784,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.ankr.com/chiliz'],
     blockExplorerUrls: ['https://chiliscan.com/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   chilizTestnet: {
     contractAddress: null,
@@ -696,7 +795,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://spicy-rpc.chiliz.com/'],
     blockExplorerUrls: ['https://testnet.chiliscan.com/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleTestnet: {
     contractAddress: null,
@@ -709,7 +808,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://lanky-ill-funny-testnet.explorer.testnet.skalenodes.com',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skale: {
     contractAddress: null,
@@ -722,7 +821,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://green-giddy-denebola.explorer.mainnet.skalenodes.com',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleCalypso: {
     contractAddress: null,
@@ -735,7 +834,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://giant-half-dual-testnet.explorer.testnet.skalenodes.com/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleCalypsoTestnet: {
     contractAddress: null,
@@ -748,7 +847,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://giant-half-dual-testnet.explorer.testnet.skalenodes.com/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleEuropa: {
     contractAddress: null,
@@ -761,7 +860,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://elated-tan-skat.explorer.mainnet.skalenodes.com/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleEuropaTestnet: {
     contractAddress: null,
@@ -774,7 +873,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://juicy-low-small-testnet.explorer.testnet.skalenodes.com/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleTitan: {
     contractAddress: null,
@@ -787,7 +886,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://parallel-stormy-spica.explorer.mainnet.skalenodes.com/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   skaleTitanTestnet: {
     contractAddress: null,
@@ -800,7 +899,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
       'https://aware-fake-trim-testnet.explorer.testnet.skalenodes.com/',
     ],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   fhenixHelium: {
     contractAddress: null,
@@ -811,7 +910,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://api.helium.fhenix.zone'],
     blockExplorerUrls: ['https://explorer.helium.fhenix.zone'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   hederaTestnet: {
     contractAddress: null,
@@ -822,7 +921,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://testnet.hashio.io/api'],
     blockExplorerUrls: ['https://hashscan.io/testnet/dashboard'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   bitTorrentTestnet: {
     contractAddress: null,
@@ -833,7 +932,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://test-rpc.bittorrentchain.io'],
     blockExplorerUrls: ['https://testnet.bttcscan.com'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   storyOdyssey: {
     contractAddress: null,
@@ -844,7 +943,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.odyssey.storyrpc.io'],
     blockExplorerUrls: ['https://odyssey.storyscan.xyz'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   campTestnet: {
     contractAddress: null,
@@ -855,7 +954,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'],
     blockExplorerUrls: ['https://camp-network-testnet.blockscout.com'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   hushedNorthstar: {
     contractAddress: null,
@@ -866,7 +965,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.buildbear.io/yielddev'],
     blockExplorerUrls: ['https://explorer.buildbear.io/yielddev/transactions'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   amoy: {
     contractAddress: null,
@@ -877,7 +976,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc-amoy.polygon.technology'],
     blockExplorerUrls: ['https://amoy.polygonscan.com'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   matchain: {
     contractAddress: null,
@@ -888,7 +987,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.matchain.io'],
     blockExplorerUrls: ['https://matchscan.io'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   coreDao: {
     contractAddress: null,
@@ -899,7 +998,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.coredao.org'],
     blockExplorerUrls: ['https://scan.coredao.org/'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   zkCandySepoliaTestnet: {
     contractAddress: null,
@@ -910,7 +1009,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://sepolia.rpc.zkcandy.io'],
     blockExplorerUrls: ['https://sepolia.explorer.zkcandy.io'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
   vana: {
     contractAddress: null,
@@ -921,9 +1020,9 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     rpcUrls: ['https://rpc.vana.org'],
     blockExplorerUrls: ['https://vanascan.io'],
     type: null,
-    vmType: 'EVM',
+    vmType: VMTYPE.EVM,
   },
-};
+} as const;
 
 /**
  * Object containing information to submit to Metamask
@@ -944,20 +1043,7 @@ export const METAMASK_CHAIN_INFO = {
     blockExplorerUrls: LIT_CHAINS['yellowstone'].blockExplorerUrls,
     iconUrls: ['future'],
   },
-};
-/**
- * @deprecated Will be removed - Use METAMASK_CHAIN_INFO instead
- * Alias for {@link METAMASK_CHAIN_INFO}. Added for backwards compatibility.
- * See {@link METAMASK_CHAIN_INFO}
- */
-export const metamaskChainInfo = new Proxy(METAMASK_CHAIN_INFO, {
-  get(target, prop, receiver) {
-    deprecated(
-      'metamaskChainInfo is deprecated and will be removed in a future version. Use METAMASK_CHAIN_INFO instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+} as const;
 
 /**
  * Constants representing the available LIT RPC endpoints.
@@ -975,64 +1061,47 @@ export const LIT_RPC = {
   CHRONICLE_YELLOWSTONE: 'https://yellowstone-rpc.litprotocol.com',
 } as const;
 
+export type LIT_RPC_TYPE = ConstantKeys<typeof LIT_RPC>;
+export type LIT_RPC_VALUES = ConstantValues<typeof LIT_RPC>;
+
 export const LIT_EVM_CHAINS = LIT_CHAINS;
 
 /**
  * Represents the Lit Network constants.
  */
 export const LIT_NETWORK = {
-  DatilDev: 'datil-dev',
-  DatilTest: 'datil-test',
-  Datil: 'datil',
+  NagaDev: 'naga-dev',
   Custom: 'custom',
 } as const;
-/**
- * @deprecated Will be removed. - Use LIT_NETWORK instead
- * Alias for LIT_NETWORK. Added for backwards compatibility.
- * See {@link LIT_NETWORK}
- */
-export const LitNetwork = new Proxy(LIT_NETWORK, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitNetwork is deprecated and will be removed in a future version. Use LIT_NETWORK instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+
 /**
  * The type representing the keys of the LIT_NETWORK object.
  */
-export type LIT_NETWORK_TYPES = keyof typeof LIT_NETWORK;
+export type LIT_NETWORK_TYPES = ConstantKeys<typeof LIT_NETWORK>;
 
 /**
  * The type representing the values of the LIT_NETWORK object.
  * This should replicate LIT_NETWORKS_KEYS in types package
  */
-export type LIT_NETWORK_VALUES = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
+export type LIT_NETWORK_VALUES = ConstantValues<typeof LIT_NETWORK>;
 
 /**
  * RPC URL by Network
  *
  * A mapping of network names to their corresponding RPC URLs.
  */
-export const RPC_URL_BY_NETWORK: { [key in LIT_NETWORK_VALUES]: string } = {
-  'datil-dev': LIT_RPC.CHRONICLE_YELLOWSTONE,
-  'datil-test': LIT_RPC.CHRONICLE_YELLOWSTONE,
-  datil: LIT_RPC.CHRONICLE_YELLOWSTONE,
-  custom: LIT_RPC.LOCAL_ANVIL,
-};
+export const RPC_URL_BY_NETWORK: Record<LIT_NETWORK_VALUES, LIT_RPC_VALUES> = {
+  [LIT_NETWORK.NagaDev]: LIT_RPC.CHRONICLE_YELLOWSTONE,
+  [LIT_NETWORK.Custom]: LIT_RPC.LOCAL_ANVIL,
+} as const;
 
 /**
  * Mapping of network names to their corresponding relayer URLs.
  */
-export const RELAYER_URL_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: string;
-} = {
-  'datil-dev': 'https://datil-dev-relayer.getlit.dev',
-  'datil-test': 'https://datil-test-relayer.getlit.dev',
-  datil: 'https://datil-relayer.getlit.dev',
-  custom: 'http://localhost:3000',
-};
+export const RELAYER_URL_BY_NETWORK: Record<LIT_NETWORK_VALUES, string> = {
+  [LIT_NETWORK.NagaDev]: 'https://naga-dev-relayer.getlit.dev',
+  [LIT_NETWORK.Custom]: 'http://localhost:3000',
+} as const;
 
 /**
  * Mapping of network values to corresponding Metamask chain info.
@@ -1041,11 +1110,9 @@ export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   typeof METAMASK_CHAIN_INFO.yellowstone
 > = {
-  'datil-dev': METAMASK_CHAIN_INFO.yellowstone,
-  'datil-test': METAMASK_CHAIN_INFO.yellowstone,
-  datil: METAMASK_CHAIN_INFO.yellowstone,
-  custom: METAMASK_CHAIN_INFO.yellowstone,
-};
+  [LIT_NETWORK.NagaDev]: METAMASK_CHAIN_INFO.yellowstone,
+  [LIT_NETWORK.Custom]: METAMASK_CHAIN_INFO.yellowstone,
+} as const;
 
 export const HTTP = 'http://';
 export const HTTPS = 'https://';
@@ -1057,11 +1124,9 @@ export const HTTP_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   typeof HTTP | typeof HTTPS
 > = {
-  'datil-dev': HTTPS,
-  'datil-test': HTTPS,
-  datil: HTTPS,
-  custom: HTTP, // default, can be changed by config
-};
+  [LIT_NETWORK.NagaDev]: HTTPS,
+  [LIT_NETWORK.Custom]: HTTP, // default, can be changed by config
+} as const;
 
 /**
  * Mapping of network values to their corresponding centralisation status.
@@ -1070,10 +1135,8 @@ export const CENTRALISATION_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
   'centralised' | 'decentralised' | 'unknown'
 > = {
-  'datil-dev': 'centralised',
-  'datil-test': 'decentralised',
-  datil: 'decentralised',
-  custom: 'unknown',
+  [LIT_NETWORK.NagaDev]: 'centralised',
+  [LIT_NETWORK.Custom]: 'unknown',
 } as const;
 
 /**
@@ -1082,14 +1145,14 @@ export const CENTRALISATION_BY_NETWORK: Record<
  * @type { LITSVMChain }
  * @default
  */
-export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
+export const LIT_SVM_CHAINS: LITChain<LITSVMChainKeys, LITSVMChain> = {
   solana: {
     name: 'Solana',
     symbol: 'SOL',
     decimals: 9,
     rpcUrls: ['https://api.mainnet-beta.solana.com'],
     blockExplorerUrls: ['https://explorer.solana.com/'],
-    vmType: 'SVM',
+    vmType: VMTYPE.SVM,
   },
   solanaDevnet: {
     name: 'Solana Devnet',
@@ -1097,7 +1160,7 @@ export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
     decimals: 9,
     rpcUrls: ['https://api.devnet.solana.com'],
     blockExplorerUrls: ['https://explorer.solana.com/'],
-    vmType: 'SVM',
+    vmType: VMTYPE.SVM,
   },
   solanaTestnet: {
     name: 'Solana Testnet',
@@ -1105,9 +1168,9 @@ export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
     decimals: 9,
     rpcUrls: ['https://api.testnet.solana.com'],
     blockExplorerUrls: ['https://explorer.solana.com/'],
-    vmType: 'SVM',
+    vmType: VMTYPE.SVM,
   },
-};
+} as const;
 
 /**
  * Cosmos Chains supported by the LIT protocol.  Use the chain name as a key in this object.
@@ -1115,7 +1178,7 @@ export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
  * @type { LITCosmosChain }
  * @default
  */
-export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
+export const LIT_COSMOS_CHAINS: LITChain<LitCosmosChainKeys, LITCosmosChain> = {
   cosmos: {
     name: 'Cosmos',
     symbol: 'ATOM',
@@ -1123,7 +1186,7 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     chainId: 'cosmoshub-4',
     rpcUrls: ['https://lcd-cosmoshub.keplr.app'],
     blockExplorerUrls: ['https://atomscan.com/'],
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   kyve: {
     name: 'Kyve',
@@ -1132,7 +1195,7 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     chainId: 'korellia',
     rpcUrls: ['https://api.korellia.kyve.network'],
     blockExplorerUrls: ['https://explorer.kyve.network/'],
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   evmosCosmos: {
     name: 'EVMOS Cosmos',
@@ -1141,7 +1204,7 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     chainId: 'evmos_9001-2',
     rpcUrls: ['https://rest.bd.evmos.org:1317'],
     blockExplorerUrls: ['https://evmos.bigdipper.live'],
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   evmosCosmosTestnet: {
     name: 'Evmos Cosmos Testnet',
@@ -1150,7 +1213,7 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     chainId: 'evmos_9000-4',
     rpcUrls: ['https://rest.bd.evmos.dev:1317'],
     blockExplorerUrls: ['https://testnet.bigdipper.live'],
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   cheqdMainnet: {
     name: 'Cheqd Mainnet',
@@ -1159,7 +1222,7 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     chainId: 'cheqd-mainnet-1',
     rpcUrls: ['https://api.cheqd.net'],
     blockExplorerUrls: ['https://explorer.cheqd.io'],
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   cheqdTestnet: {
     name: 'Cheqd Testnet',
@@ -1168,7 +1231,7 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     chainId: 'cheqd-testnet-6',
     rpcUrls: ['https://api.cheqd.network'],
     blockExplorerUrls: ['https://testnet-explorer.cheqd.io'],
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
   juno: {
     name: 'Juno',
@@ -1177,21 +1240,18 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     chainId: 'juno-1',
     rpcUrls: ['https://rest.cosmos.directory/juno'],
     blockExplorerUrls: ['https://www.mintscan.io/juno'],
-    vmType: 'CVM',
+    vmType: VMTYPE.CVM,
   },
-};
+} as const;
 
 /**
  * All Chains supported by the LIT protocol.  Use the chain name as a key in this object.
- * @type { LITChain<LITEVMChain | LITSVMChain | LITCosmosChain> }
  */
-export const ALL_LIT_CHAINS: LITChain<
-  LITEVMChain | LITSVMChain | LITCosmosChain
-> = {
+export const ALL_LIT_CHAINS = {
   ...LIT_CHAINS,
   ...LIT_SVM_CHAINS,
   ...LIT_COSMOS_CHAINS,
-};
+} as const;
 
 /**
  * Local storage key constants
@@ -1204,100 +1264,25 @@ export const LOCAL_STORAGE_KEYS = {
   KEY_PAIR: 'lit-comms-keypair',
   SESSION_KEY: 'lit-session-key',
   WALLET_SIGNATURE: 'lit-wallet-sig',
-};
-
-/**
- * Symmetric key algorithm parameters
- */
-export const SYMM_KEY_ALGO_PARAMS = {
-  name: 'AES-CBC',
-  length: 256,
-};
+} as const;
 
 /**
  * Default node URLs for each LIT network
  * Note: Dynamic networks have no default node URLS; they are always
  * loaded from the chain during initialization
  */
-export const LIT_NETWORKS: { [key in LIT_NETWORK_VALUES]: string[] } = {
-  'datil-dev': [],
-  'datil-test': [],
-  datil: [],
-  custom: [],
-};
-
-// ========== Lit Sessions ==========
-export const LIT_SESSION_KEY_URI = 'lit:session:';
-
-// ========== Lit Auth Methods ==========
-
-export const AUTH_METHOD_TYPE_IDS = {
-  WEBAUTHN: 3,
-  DISCORD: 4,
-  GOOGLE: 5,
-  GOOGLE_JWT: 6,
-};
-
-// ========== PKP Client ==========
-export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
-
-// ========== RLI Delegation ==========
-export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
-
-// ========== Lit Actions ==========
-export const LIT_ACTION_IPFS_HASH =
-  'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
-
-// ========== Chains ==========
-export const VMTYPE = {
-  EVM: 'EVM',
-  SVM: 'SVM',
-  CVM: 'CVM',
+export const LIT_NETWORKS: Record<LIT_NETWORK_VALUES, string[]> = {
+  [LIT_NETWORK.NagaDev]: [],
+  [LIT_NETWORK.Custom]: [],
 } as const;
-export type VMTYPE_TYPE = keyof typeof VMTYPE;
-export type VMTYPE_VALUES = (typeof VMTYPE)[keyof typeof VMTYPE];
-
-// pub enum SigningScheme {
-
-//  -- BLS
-//   Bls12381,
-
-//  -- ECDSA
-//   EcdsaK256Sha256,
-//   EcdsaP256Sha256,
-//   EcdsaP384Sha384,
-
-//  -- Frost
-//   SchnorrEd25519Sha512,
-//   SchnorrK256Sha256,
-//   SchnorrP256Sha256,
-//   SchnorrP384Sha384,
-//   SchnorrRistretto25519Sha512,
-//   SchnorrEd448Shake256,
-//   SchnorrRedJubjubBlake2b512,
-//   SchnorrK256Taproot,
-//   SchnorrRedDecaf377Blake2b512,
-//   SchnorrkelSubstrate,
-// }
-export const LIT_CURVE = {
-  BLS: 'BLS',
-  EcdsaK256: 'K256',
-  EcdsaCaitSith: 'ECDSA_CAIT_SITH', // Legacy alias of K256
-  EcdsaCAITSITHP256: 'EcdsaCaitSithP256',
-  EcdsaK256Sha256: 'EcdsaK256Sha256', // same as caitsith
-} as const;
-
-export type LIT_CURVE_TYPE = keyof typeof LIT_CURVE;
-// This should replicate SigShare.sigType in types package
-export type LIT_CURVE_VALUES = (typeof LIT_CURVE)[keyof typeof LIT_CURVE];
 
 // ========== Either Types ==========
 export const EITHER_TYPE = {
   ERROR: 'ERROR',
   SUCCESS: 'SUCCESS',
 } as const;
-export type EITHER_TYPE_TYPE = keyof typeof EITHER_TYPE;
-export type EITHER_TYPE_VALUES = (typeof EITHER_TYPE)[keyof typeof EITHER_TYPE];
+export type EITHER_TYPE_TYPE = ConstantKeys<typeof EITHER_TYPE>;
+export type EITHER_TYPE_VALUES = ConstantValues<typeof EITHER_TYPE>;
 
 // ========== Supported PKP Auth Method Types ==========
 export const AUTH_METHOD_TYPE = {
@@ -1315,22 +1300,8 @@ export const AUTH_METHOD_TYPE = {
   StytchTotpFactorOtp: 13,
 } as const;
 
-export type AUTH_METHOD_TYPE_TYPE = keyof typeof AUTH_METHOD_TYPE;
-export type AUTH_METHOD_TYPE_VALUES =
-  (typeof AUTH_METHOD_TYPE)[keyof typeof AUTH_METHOD_TYPE];
-/**
- * @deprecated Will be removed - Use AUTH_METHOD_TYPE instead
- * Alias for AUTH_METHOD_TYPE. Added for backwards compatibility.
- * See {@link AUTH_METHOD_TYPE}
- */
-export const AuthMethodType = new Proxy(AUTH_METHOD_TYPE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'AuthMethodType is deprecated and will be removed in a future version. Use AUTH_METHOD_TYPE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type AUTH_METHOD_TYPE_TYPE = ConstantKeys<typeof AUTH_METHOD_TYPE>;
+export type AUTH_METHOD_TYPE_VALUES = ConstantValues<typeof AUTH_METHOD_TYPE>;
 
 // ========== Supported PKP Auth Method Scopes ==========
 export const AUTH_METHOD_SCOPE = {
@@ -1339,54 +1310,8 @@ export const AUTH_METHOD_SCOPE = {
   PersonalSign: 2,
 } as const;
 
-export type AUTH_METHOD_SCOPE_TYPE = keyof typeof AUTH_METHOD_SCOPE;
-export type AUTH_METHOD_SCOPE_VALUES =
-  (typeof AUTH_METHOD_SCOPE)[keyof typeof AUTH_METHOD_SCOPE];
-
-/**
- * @deprecated Will be removed - Use AUTH_METHOD_SCOPE instead
- * Alias for AUTH_METHOD_SCOPE. Added for backwards compatibility.
- * See {@link AUTH_METHOD_SCOPE}
- */
-export const AuthMethodScope = new Proxy(AUTH_METHOD_SCOPE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'AuthMethodScope is deprecated and will be removed in a future version. Use AUTH_METHOD_SCOPE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
-
-// ========== Supported Provider Types ==========
-export const PROVIDER_TYPE = {
-  Discord: 'discord',
-  Google: 'google',
-  EthWallet: 'ethwallet',
-  WebAuthn: 'webauthn',
-  Apple: 'apple',
-  StytchOtp: 'stytchOtp',
-  StytchEmailFactorOtp: 'stytchEmailFactorOtp',
-  StytchSmsFactorOtp: 'stytchSmsFactorOtp',
-  StytchWhatsAppFactorOtp: 'stytchWhatsAppFactorOtp',
-  StytchTotpFactor: 'stytchTotpFactor',
-} as const;
-
-export type PROVIDER_TYPE_TYPE = keyof typeof PROVIDER_TYPE;
-export type PROVIDER_TYPE_VALUES =
-  (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
-/**
- * @deprecated Will be removed - Use PROVIDER_TYPE instead
- * Alias for PROVIDER_TYPE. Added for backwards compatibility.
- * See {@link PROVIDER_TYPE}
- */
-export const ProviderType = new Proxy(PROVIDER_TYPE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'ProviderType is deprecated and will be removed in a future version. Use PROVIDER_TYPE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type AUTH_METHOD_SCOPE_TYPE = ConstantKeys<typeof AUTH_METHOD_SCOPE>;
+export type AUTH_METHOD_SCOPE_VALUES = ConstantValues<typeof AUTH_METHOD_SCOPE>;
 
 // ========== Supported Staking States ==========
 export const STAKING_STATES = {
@@ -1398,47 +1323,9 @@ export const STAKING_STATES = {
   Restore: 5,
 } as const;
 
-export type STAKING_STATES_TYPE = keyof typeof STAKING_STATES;
-export type STAKING_STATES_VALUES =
-  (typeof STAKING_STATES)[keyof typeof STAKING_STATES];
-/**
- * @deprecated Will be removed - Use STAKING_STATES instead
- * Alias for STAKING_STATES. Added for backwards compatibility.
- * See {@link STAKING_STATES}
- */
-export const StakingStates = new Proxy(STAKING_STATES, {
-  get(target, prop, receiver) {
-    deprecated(
-      'StakingStates is deprecated and will be removed in a future version. Use STAKING_STATES instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type STAKING_STATES_TYPE = ConstantKeys<typeof STAKING_STATES>;
 
-// ========== Relay Auth Status ==========
-export const RELAY_AUTH_STATUS = {
-  InProgress: 'InProgress',
-  Succeeded: 'Succeeded',
-  Failed: 'Failed',
-} as const;
-
-export type RELAY_AUTH_STATUS_TYPE = keyof typeof RELAY_AUTH_STATUS;
-export type RELAY_AUTH_STATUS_VALUES =
-  (typeof RELAY_AUTH_STATUS)[keyof typeof RELAY_AUTH_STATUS];
-/**
- * @deprecated Will be removed - Use RELAY_AUTH_STATUS instead
- * Alias for RELAY_AUTH_STATUS. Added for backwards compatibility.
- * See {@link RELAY_AUTH_STATUS}
- */
-export const RelayAuthStatus = new Proxy(RELAY_AUTH_STATUS, {
-  get(target, prop, receiver) {
-    deprecated(
-      'RelayAuthStatus is deprecated and will be removed in a future version. Use RELAY_AUTH_STATUS instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
-
+export type STAKING_STATES_VALUES = ConstantValues<typeof STAKING_STATES>;
 /**
  * Prefixes used for identifying various LIT resources.
  *
@@ -1448,25 +1335,14 @@ export const LIT_RESOURCE_PREFIX = {
   AccessControlCondition: 'lit-accesscontrolcondition',
   PKP: 'lit-pkp',
   RLI: 'lit-ratelimitincrease',
+  PaymentDelegation: 'lit-paymentdelegation',
   LitAction: 'lit-litaction',
 } as const;
-export type LIT_RESOURCE_PREFIX_TYPE = keyof typeof LIT_RESOURCE_PREFIX;
+export type LIT_RESOURCE_PREFIX_TYPE = ConstantKeys<typeof LIT_RESOURCE_PREFIX>;
 // This should mimic LitResourcePrefix in types package
-export type LIT_RESOURCE_PREFIX_VALUES =
-  (typeof LIT_RESOURCE_PREFIX)[keyof typeof LIT_RESOURCE_PREFIX];
-/**
- * @deprecated Will be removed - Use LIT_RESOURCE_PREFIX instead
- * Alias for LIT_RESOURCE_PREFIX. Added for backwards compatibility.
- * See {@link LIT_RESOURCE_PREFIX}
- */
-export const LitResourcePrefix = new Proxy(LIT_RESOURCE_PREFIX, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitResourcePrefix is deprecated and will be removed in a future version. Use LIT_RESOURCE_PREFIX instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type LIT_RESOURCE_PREFIX_VALUES = ConstantValues<
+  typeof LIT_RESOURCE_PREFIX
+>;
 
 /**
  * User-facing abilities that can be granted to a session.
@@ -1493,11 +1369,9 @@ export const LIT_ABILITY = {
   PKPSigning: 'pkp-signing',
 
   /**
-   * This is the ability to use a Rate Limit Increase (Capacity Credits NFT) token during
-   * authentication with the nodes. The resource will specify the corresponding
-   * Capacity Credits NFT token ID.
+   * This is the ability to use Payment Delegation
    */
-  RateLimitIncreaseAuth: 'rate-limit-increase-auth',
+  PaymentDelegation: 'lit-payment-delegation',
 
   /**
    * This is the ability to execute a Lit Action. The resource will specify the
@@ -1506,22 +1380,9 @@ export const LIT_ABILITY = {
   LitActionExecution: 'lit-action-execution',
 } as const;
 
-export type LIT_ABILITY_TYPE = keyof typeof LIT_ABILITY;
+export type LIT_ABILITY_TYPE = ConstantKeys<typeof LIT_ABILITY>;
 // This should replicate LitAbility in types package
-export type LIT_ABILITY_VALUES = (typeof LIT_ABILITY)[keyof typeof LIT_ABILITY];
-/**
- * @deprecated Will be removed - Use LIT_ABILITY instead
- * Alias for LIT_ABILITY. Added for backwards compatibility.
- * See {@link LIT_ABILITY}
- */
-export const LitAbility = new Proxy(LIT_ABILITY, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitAbility is deprecated and will be removed in a future version. Use LIT_ABILITY instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type LIT_ABILITY_VALUES = ConstantValues<typeof LIT_ABILITY>;
 
 /**
  * LIT specific abilities mapped into the Recap specific terminology
@@ -1534,44 +1395,16 @@ export const LIT_RECAP_ABILITY = {
   Execution: 'Execution',
 } as const;
 
-export type LIT_RECAP_ABILITY_TYPE = keyof typeof LIT_RECAP_ABILITY;
-export type LIT_RECAP_ABILITY_VALUES =
-  (typeof LIT_RECAP_ABILITY)[keyof typeof LIT_RECAP_ABILITY];
-/**
- * @deprecated Will be removed - Use LIT_RECAP_ABILITY instead
- * Alias for LIT_RECAP_ABILITY. Added for backwards compatibility.
- * See {@link LIT_RECAP_ABILITY}
- */
-export const LitRecapAbility = new Proxy(LIT_RECAP_ABILITY, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitRecapAbility is deprecated and will be removed in a future version. Use LIT_RECAP_ABILITY instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type LIT_RECAP_ABILITY_TYPE = ConstantKeys<typeof LIT_RECAP_ABILITY>;
+export type LIT_RECAP_ABILITY_VALUES = ConstantValues<typeof LIT_RECAP_ABILITY>;
 
 export const LIT_NAMESPACE = {
   Auth: 'Auth',
   Threshold: 'Threshold',
 } as const;
 
-export type LIT_NAMESPACE_TYPE = keyof typeof LIT_NAMESPACE;
-export type LIT_NAMESPACE_VALUES =
-  (typeof LIT_NAMESPACE)[keyof typeof LIT_NAMESPACE];
-/**
- * @deprecated Will be removed - Use LIT_NAMESPACE instead
- * Alias for LIT_NAMESPACE. Added for backwards compatibility.
- * See {@link LIT_NAMESPACE}
- */
-export const LitNamespace = new Proxy(LIT_NAMESPACE, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LitNamespace is deprecated and will be removed in a future version. Use LIT_NAMESPACE instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type LIT_NAMESPACE_TYPE = ConstantKeys<typeof LIT_NAMESPACE>;
+export type LIT_NAMESPACE_VALUES = ConstantValues<typeof LIT_NAMESPACE>;
 
 /**
  * SDK Logger levels
@@ -1587,23 +1420,22 @@ export const LOG_LEVEL = {
   OFF: -1,
 } as const;
 
-export type LOG_LEVEL_TYPE = keyof typeof LOG_LEVEL;
-export type LOG_LEVEL_VALUES = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
-/**
- * @deprecated Will be removed - Use LOG_LEVEL instead
- * Alias for LOG_LEVEL. Added for backwards compatibility.
- * See {@link LOG_LEVEL}
- */
-export const LogLevel = new Proxy(LOG_LEVEL, {
-  get(target, prop, receiver) {
-    deprecated(
-      'LogLevel is deprecated and will be removed in a future version. Use LOG_LEVEL instead.'
-    );
-    return Reflect.get(target, prop, receiver);
-  },
-});
+export type LOG_LEVEL_TYPE = ConstantKeys<typeof LOG_LEVEL>;
+export type LOG_LEVEL_VALUES = ConstantValues<typeof LOG_LEVEL>;
 
+/**
+ * This is useful when the node is not able to connect to the IPFS gateway,
+ * so the sdk can fall back to these gateways.
+ */
 export const FALLBACK_IPFS_GATEWAYS = [
   'https://flk-ipfs.io/ipfs/',
   'https://litprotocol.mypinata.cloud/ipfs/',
-];
+] as const;
+
+export const SIWE_URI_PREFIX = {
+  SESSION_KEY: 'lit:session:',
+  DELEGATION: 'lit:capability:delegation',
+} as const;
+
+export type SIWE_URI_PREFIX_TYPE = ConstantKeys<typeof SIWE_URI_PREFIX>;
+export type SIWE_URI_PREFIX_VALUES = ConstantValues<typeof SIWE_URI_PREFIX>;

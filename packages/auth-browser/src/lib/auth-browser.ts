@@ -1,6 +1,3 @@
-/**
- * FIXME: SessionSigs are only supported for EVM chains at the moment.  This will be expanded to other chains in the future.
- */
 import {
   ALL_LIT_CHAINS,
   UnsupportedChainException,
@@ -8,13 +5,9 @@ import {
 } from '@lit-protocol/constants';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
-import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
 import { checkAndSignEVMAuthMessage } from './chains/eth';
-import { checkAndSignSolAuthMessage } from './chains/sol';
 
 /**
- * SUPPORTED CHAINS: EVM, Solana, Cosmos
- *
  * !! NOTE !!
  * This function is purely used for crafting the authSig for access control conditions & decryption. For SessionSigs, you can pass the `authSig` as `jsParams`
  * or Eth Wallet Auth Method for `signSessionKey` and claiming, but you won't be able to use this to add resource ability requests in the SIWE message. Instead, you should provide your own signer to the authNeededCallback parameter for the getSessionSigs method.
@@ -31,7 +24,6 @@ export const checkAndSignAuthMessage = ({
   switchChain,
   expiration,
   uri,
-  cosmosWalletType,
   walletConnectProjectId,
   nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
@@ -66,13 +58,6 @@ export const checkAndSignAuthMessage = ({
       walletConnectProjectId,
       nonce,
     });
-  } else if (chainInfo.vmType === VMTYPE.SVM) {
-    return checkAndSignSolAuthMessage();
-  } else if (chainInfo.vmType === VMTYPE.CVM) {
-    return checkAndSignCosmosAuthMessage({
-      chain,
-      walletType: cosmosWalletType || 'keplr',
-    }); // Keplr is defaulted here, being the Cosmos wallet with the highest market share
   }
 
   // Else, throw an error

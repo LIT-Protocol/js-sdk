@@ -5,6 +5,7 @@ import {
   LIT_CHAINS,
   AUTH_METHOD_TYPE,
   InvalidArgumentException,
+  LitEVMChainKeys,
   WrongParamFormat,
 } from '@lit-protocol/constants';
 import {
@@ -130,7 +131,7 @@ export default class EthWalletProvider extends BaseProvider {
     signer: ethers.Signer | ethers.Wallet | EthWalletAuthenticateOptions;
     litNodeClient: LitNodeClient;
     address?: string;
-    chain?: string;
+    chain?: LitEVMChainKeys;
     expiration?: string;
     domain?: string;
     origin?: string;

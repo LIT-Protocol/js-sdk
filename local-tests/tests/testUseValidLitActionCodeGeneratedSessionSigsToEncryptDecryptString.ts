@@ -1,9 +1,8 @@
-import { LIT_NETWORK } from '@lit-protocol/constants';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
 import { encryptString, decryptToString } from '@lit-protocol/encryption';
@@ -18,11 +17,9 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
   async (devEnv: TinnyEnvironment) => {
     const alice = await devEnv.createRandomPerson();
     // set access control conditions for encrypting and decrypting
-    const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+    const accs = AccessControlConditions.getEvmBasicAccessControlConditions({
       userAddress: alice.authMethodOwnedPkp.ethAddress,
     });
-
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
     const encryptRes = await encryptString(
       {
@@ -55,20 +52,18 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
         encryptRes.dataToEncryptHash
       );
 
-    const litActionSessionSigs2 = await getLitActionSessionSigs(devEnv, alice, [
-      {
-        resource: new LitAccessControlConditionResource(accsResourceString),
-        ability: LIT_ABILITY.AccessControlConditionDecryption,
-      },
-    ]);
-
     // -- Decrypt the encrypted string
     const decryptRes = await decryptToString(
       {
         accessControlConditions: accs,
         ciphertext: encryptRes.ciphertext,
         dataToEncryptHash: encryptRes.dataToEncryptHash,
-        sessionSigs: litActionSessionSigs2,
+        authContext: getLitActionAuthContext(devEnv, alice, [
+          {
+            resource: new LitAccessControlConditionResource(accsResourceString),
+            ability: LIT_ABILITY.AccessControlConditionDecryption,
+          },
+        ]),
         chain: 'ethereum',
       },
       devEnv.litNodeClient as unknown as ILitNodeClient

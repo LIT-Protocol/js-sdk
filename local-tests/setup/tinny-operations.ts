@@ -1,6 +1,9 @@
 import { TinnyEnvironment } from './tinny-environment';
 import { withTimeout } from './tinny-utils';
 
+// @ts-ignore-error No types available for this package
+import { VError } from '@openagenda/verror';
+
 /**
  * Retrieves filter flags from the command line arguments to determine which tests to run.
  * It parses the process arguments to find flags that specify filters, typically used to limit test execution to specific tests.
@@ -50,7 +53,7 @@ export const runInBand = async ({
 
   // Initialize arrays to keep track of skipped, failed, and passed tests
   let skippedTests: string[] = [];
-  let failedTests: string[] = [];
+  let failedTests: { message: string; error: Error }[] = [];
   let passedTests: string[] = [];
 
   // Iterate over each test and run it in series
@@ -82,13 +85,21 @@ export const runInBand = async ({
         if (attempts >= maxAttempts) {
           const endTime = performance.now();
           const timeTaken = (endTime - startTime).toFixed(2);
-          console.error(
-            `${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)`
-          );
-          console.error(`Error: ${error}`);
-          failedTests.push(
-            `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`
-          );
+          console.error(`\x1b[31m❌Error:\x1b[90m ${error.message}\x1b[0m`);
+          error?.stack &&
+            console.error(`\x1b[31m❌Error:\x1b[90m ${error.stack}\x1b[0m`);
+
+          try {
+            const info = VError.info(error);
+            console.log(info);
+          } catch (e) {
+            // Wasnt a Verror. Oh well.
+          }
+
+          failedTests.push({
+            message: `${testName} (Failed in ${timeTaken} ms) - Error: ${error.message})}`,
+            error,
+          });
         }
       }
 
@@ -153,7 +164,7 @@ export const runTestsParallel = async ({
   const runTest = async (
     [testName, testFunction]: [string, any],
     testIndex: number
-  ): Promise<string> => {
+  ): Promise<string | { message: string; error: Error }> => {
     const maxAttempts = devEnv.processEnvs.MAX_ATTEMPTS;
     const testTimeout = devEnv.processEnvs.TEST_TIMEOUT;
 
@@ -181,6 +192,7 @@ export const runTestsParallel = async ({
         );
         return `${testName} (Passed in ${timeTaken} ms)`;
       } catch (error) {
+        console.log(error);
         if (error.message === 'LIT_IGNORE_TEST') {
           return `${testName} (Skipped)`;
         }
@@ -195,7 +207,10 @@ export const runTestsParallel = async ({
               testIndex + 1
             }. ${testName} - Timed out after ${testTimeout}ms (${timeTaken} ms)\x1b[0m`
           );
-          return `${testName} (Timed out in ${timeTaken} ms)`;
+          return {
+            message: `${testName} (Failed in ${timeTaken} ms) - Error: ${error.message})}`,
+            error: new Error(`${testName} timeout out after ${timeTaken} ms`),
+          };
         }
 
         if (attempts >= maxAttempts) {
@@ -204,18 +219,26 @@ export const runTestsParallel = async ({
               testIndex + 1
             }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
           );
-          console.error(
-            `\x1b[31m❌Error:\x1b[90m ${JSON.stringify(error) || error}\x1b[0m`
-          );
-          return `${testName} (Failed in ${timeTaken} ms) - Error: ${JSON.stringify(
-            error
-          )}`;
+          console.error(`\x1b[31m❌Error:\x1b[90m ${error.message}\x1b[0m`);
+          error?.stack &&
+            console.error(`\x1b[31m❌Error:\x1b[90m ${error.stack}\x1b[0m`);
+          try {
+            const info = VError.info(error);
+            console.log(info);
+          } catch (e) {
+            // Wasnt a Verror. Oh well.
+          }
+
+          return {
+            message: `${testName} (Failed in ${timeTaken} ms) - Error: ${error.message})}`,
+            error,
+          };
         }
       }
     }
   };
 
-  const results: string[] = [];
+  const results: (string | { message: string; error: Error })[] = [];
 
   for (let i = 0; i < testsToRun.length; i += CHUNK_SIZE) {
     const chunk = testsToRun.slice(i, i + CHUNK_SIZE);
@@ -229,11 +252,15 @@ export const runTestsParallel = async ({
     results.push(...chunkResults);
   }
 
-  const skippedTests = results.filter((result) => result.includes('Skipped'));
-  const failedTests = results.filter(
-    (result) => result.includes('Failed') || result.includes('Timed out')
+  const skippedTests = results.filter(
+    (result) => typeof result === 'string' && result.includes('Skipped')
   );
-  const passedTests = results.filter((result) => result.includes('Passed'));
+  const failedTests = results.filter(
+    (result) => typeof result !== 'string' && result.error!
+  );
+  const passedTests = results.filter(
+    (result) => typeof result === 'string' && result.includes('Passed')
+  );
 
   if (skippedTests.length > 0) {
     console.log(`\x1b[90mTest Report: Some tests were skipped.\x1b[0m`);
@@ -244,9 +271,20 @@ export const runTestsParallel = async ({
 
   if (failedTests.length > 0) {
     console.log(`\x1b[31mTest Report: Some tests failed.\x1b[0m`);
-    failedTests.forEach((failedTest) =>
-      console.log(`\x1b[31m- ${failedTest}\x1b[0m`)
-    );
+    failedTests.forEach((failedTest) => {
+      if (typeof failedTest === 'string') {
+        console.log(`\x1b[31m- ${failedTest}\x1b[0m`);
+      } else {
+        console.error(`\x1b[31m- ${failedTest.message}\x1b[0m`);
+        console.error(`\x1b[31m- ${failedTest.error.stack}\x1b[0m`);
+        try {
+          const info = VError.info(failedTest.error);
+          console.log(info);
+        } catch (e) {
+          // Wasnt a Verror. Oh well.
+        }
+      }
+    });
   }
 
   if (passedTests.length > 0) {

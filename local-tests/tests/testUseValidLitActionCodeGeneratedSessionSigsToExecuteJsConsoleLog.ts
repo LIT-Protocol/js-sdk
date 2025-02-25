@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LIT_NETWORK, LIT_ABILITY } from '@lit-protocol/constants';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { LIT_ABILITY } from '@lit-protocol/constants';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -12,19 +12,17 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog 
   async (devEnv: TinnyEnvironment) => {
     const alice = await devEnv.createRandomPerson();
 
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [
-      {
-        resource: new LitPKPResource('*'),
-        ability: LIT_ABILITY.PKPSigning,
-      },
-      {
-        resource: new LitActionResource('*'),
-        ability: LIT_ABILITY.LitActionExecution,
-      },
-    ]);
-
     const res = await devEnv.litNodeClient.executeJs({
-      sessionSigs: litActionSessionSigs,
+      authContext: getLitActionAuthContext(devEnv, alice, [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LIT_ABILITY.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LIT_ABILITY.LitActionExecution,
+        },
+      ]),
       code: `(async () => {
       console.log('hello world')
     })();`,

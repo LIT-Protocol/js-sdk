@@ -1,7 +1,7 @@
 import { LIT_NETWORK } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
 import { encryptString } from '@lit-protocol/encryption';
@@ -12,16 +12,14 @@ import { encryptString } from '@lit-protocol/encryption';
  * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
-export const testExecutJsDecryptAndCombine = async (
+export const testExecuteJsDecryptAndCombine = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting
-  const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+  const accs = AccessControlConditions.getEvmBasicAccessControlConditions({
     userAddress: alice.authMethodOwnedPkp.ethAddress,
   });
-
-  const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
   const encryptRes = await encryptString(
     {
@@ -49,7 +47,7 @@ export const testExecutJsDecryptAndCombine = async (
   }
 
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: litActionSessionSigs,
+    authContext: getLitActionAuthContext(devEnv, alice),
     code: `(async () => {
         const resp = await Lit.Actions.decryptAndCombine({
           accessControlConditions,

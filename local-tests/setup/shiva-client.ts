@@ -1,6 +1,5 @@
 import { LitContractResolverContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { PKPPermissions } from '../../dist/packages/contracts-sdk/src/abis/PKPPermissions.sol/PKPPermissions';
 import {
   TestNetCreateRequest,
   TestNetInfo,
@@ -104,9 +103,6 @@ export class TestnetClient {
         Staking: {
           abi: JSON.parse(testNetConfig.contractAbis.staking),
         },
-        StakingBalances: {
-          abi: JSON.parse(testNetConfig.contractAbis.stakingBalances),
-        },
         PKPNFT: {
           abi: JSON.parse(testNetConfig.contractAbis.pkpnft),
         },
@@ -120,8 +116,10 @@ export class TestnetClient {
           abi: JSON.parse(testNetConfig.contractAbis.litToken),
         },
         PKPNFTMetadata: {},
-        RateLimitNFT: {},
         PubkeyRouter: {},
+        PriceFeed: {
+          abi: JSON.parse(testNetConfig.contractAbis.priceFeed),
+        },
       },
     };
     return networkContext;

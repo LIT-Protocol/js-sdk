@@ -79,38 +79,37 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
 
-  const litActionSessionSigs =
-    await devEnv.litNodeClient.getLitActionSessionSigs({
-      pkpPublicKey: alice.pkp.publicKey,
-      resourceAbilityRequests: [
-        {
-          resource: new LitPKPResource('*'),
-          ability: LIT_ABILITY.PKPSigning,
-        },
-        {
-          resource: new LitActionResource('*'),
-          ability: LIT_ABILITY.LitActionExecution,
-        },
-      ],
-      // litActionIpfsId: IPFSID,
-      litActionCode: Buffer.from(litActionCodeString).toString('base64'),
-      jsParams: {
-        publicKey: `0x${alice.pkp.publicKey}`,
-        customAuthMethod: customAuthMethod,
-        sigName: 'custom-auth-sig',
+  const litActionAuthContext = devEnv.litNodeClient.getPkpAuthContext({
+    pkpPublicKey: alice.pkp.publicKey,
+    resourceAbilityRequests: [
+      {
+        resource: new LitPKPResource('*'),
+        ability: LIT_ABILITY.PKPSigning,
       },
+      {
+        resource: new LitActionResource('*'),
+        ability: LIT_ABILITY.LitActionExecution,
+      },
+    ],
+    // litActionIpfsId: IPFSID,
+    litActionCode: Buffer.from(litActionCodeString).toString('base64'),
+    jsParams: {
+      publicKey: `0x${alice.pkp.publicKey}`,
+      customAuthMethod: customAuthMethod,
+      sigName: 'custom-auth-sig',
+    },
 
-      ...(centralisation === 'decentralised' && {
-        capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
-      }),
-    });
+    ...(centralisation === 'decentralised' && {
+      capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
+    }),
+  });
 
   // -- pkp sign test
   try {
     const res = await devEnv.litNodeClient.pkpSign({
       toSign: alice.loveLetter,
       pubKey: alice.pkp.publicKey,
-      sessionSigs: litActionSessionSigs,
+      authContext: litActionAuthContext,
     });
 
     console.log('✅ pkpSign res:', res);
@@ -122,7 +121,7 @@ export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   // -- execute js
   try {
     const res = await devEnv.litNodeClient.executeJs({
-      sessionSigs: litActionSessionSigs,
+      authContext: litActionAuthContext,
       code: `(async () => {
         const sigShare = await LitActions.signEcdsa({
           toSign: dataToSign,

@@ -3,8 +3,11 @@ import { log } from '@lit-protocol/misc';
 import {
   AccessControlConditions,
   EvmContractConditions,
+  FormattedMultipleAccs,
   JsonSigningResourceId,
+  MultipleAccessControlConditions,
   SolRpcConditions,
+  SupportedJsonRequests,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
@@ -230,4 +233,111 @@ export const hashSolRpcConditions = (
   const data = encoder.encode(toHash);
 
   return crypto.subtle.digest('SHA-256', data);
+};
+
+/**
+ * Get hash of access control conditions
+ * @param { MultipleAccessControlConditions } params
+ * @returns { Promise<ArrayBuffer | undefined> }
+ */
+export const getHashedAccessControlConditions = async (
+  params: MultipleAccessControlConditions
+): Promise<ArrayBuffer | undefined> => {
+  let hashOfConditions: ArrayBuffer;
+
+  // ========== Prepare Params ==========
+  const {
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+  } = params;
+
+  // ========== Hash ==========
+  if (accessControlConditions) {
+    hashOfConditions = await hashAccessControlConditions(
+      accessControlConditions
+    );
+  } else if (evmContractConditions) {
+    hashOfConditions = await hashEVMContractConditions(evmContractConditions);
+  } else if (solRpcConditions) {
+    hashOfConditions = await hashSolRpcConditions(solRpcConditions);
+  } else if (unifiedAccessControlConditions) {
+    hashOfConditions = await hashUnifiedAccessControlConditions(
+      unifiedAccessControlConditions
+    );
+  } else {
+    return;
+  }
+
+  // ========== Result ==========
+  return hashOfConditions;
+};
+
+/**
+ * Get different formats of access control conditions, eg. evm, sol, unified etc.
+ * @param { SupportedJsonRequests } params
+ * @returns { FormattedMultipleAccs }
+ */
+export const getFormattedAccessControlConditions = (
+  params: SupportedJsonRequests
+): FormattedMultipleAccs => {
+  // -- prepare params
+  const {
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+  } = params;
+
+  // -- execute
+  let formattedAccessControlConditions;
+  let formattedEVMContractConditions;
+  let formattedSolRpcConditions;
+  let formattedUnifiedAccessControlConditions;
+  let error = false;
+
+  if (accessControlConditions) {
+    formattedAccessControlConditions = accessControlConditions.map((c) =>
+      canonicalAccessControlConditionFormatter(c)
+    );
+    log(
+      'formattedAccessControlConditions',
+      JSON.stringify(formattedAccessControlConditions)
+    );
+  } else if (evmContractConditions) {
+    formattedEVMContractConditions = evmContractConditions.map((c) =>
+      canonicalEVMContractConditionFormatter(c)
+    );
+    log(
+      'formattedEVMContractConditions',
+      JSON.stringify(formattedEVMContractConditions)
+    );
+  } else if (solRpcConditions) {
+    // FIXME: ConditionItem is too narrow, or `solRpcConditions` is too wide
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    formattedSolRpcConditions = solRpcConditions.map((c: any) =>
+      canonicalSolRpcConditionFormatter(c)
+    );
+    log('formattedSolRpcConditions', JSON.stringify(formattedSolRpcConditions));
+  } else if (unifiedAccessControlConditions) {
+    formattedUnifiedAccessControlConditions =
+      unifiedAccessControlConditions.map((c) =>
+        canonicalUnifiedAccessControlConditionFormatter(c)
+      );
+    log(
+      'formattedUnifiedAccessControlConditions',
+      JSON.stringify(formattedUnifiedAccessControlConditions)
+    );
+  } else {
+    error = true;
+  }
+
+  return {
+    error,
+    formattedAccessControlConditions,
+    formattedEVMContractConditions,
+    formattedSolRpcConditions,
+    formattedUnifiedAccessControlConditions,
+  };
 };

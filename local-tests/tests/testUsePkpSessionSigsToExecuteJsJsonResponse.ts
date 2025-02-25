@@ -1,4 +1,4 @@
-import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -12,10 +12,8 @@ export const testUsePkpSessionSigsToExecuteJsJsonResponse = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
-
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: pkpSessionSigs,
+    authContext: getPkpAuthContext(devEnv, alice),
     code: `(async () => {
       console.log('hello world')
 
@@ -43,10 +41,12 @@ export const testUsePkpSessionSigsToExecuteJsJsonResponse = async (
     throw new Error(`Expected "response" in res`);
   }
 
+  // @ts-expect-error Always is a string
   if (!res.response.startsWith('{')) {
     throw new Error(`Expected "response" to start with {`);
   }
 
+  // @ts-expect-error Always is a string
   if (!res.response.endsWith('}')) {
     throw new Error(`Expected "response" to end with }`);
   }

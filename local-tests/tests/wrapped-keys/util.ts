@@ -1,5 +1,5 @@
 import { LIT_NETWORKS_KEYS } from '@lit-protocol/types';
-import { LIT_CHAINS } from '@lit-protocol/constants';
+import { LIT_CHAINS, LIT_NETWORK } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import { config } from '@lit-protocol/wrapped-keys';
 import {
@@ -51,17 +51,7 @@ export function getChainForNetwork(network: LIT_NETWORKS_KEYS): {
   chainId: number;
 } {
   switch (network) {
-    case 'datil-dev':
-      return {
-        chain: 'yellowstone',
-        chainId: LIT_CHAINS['yellowstone'].chainId,
-      };
-    case 'datil-test':
-      return {
-        chain: 'yellowstone',
-        chainId: LIT_CHAINS['yellowstone'].chainId,
-      };
-    case 'datil':
+    case LIT_NETWORK.NagaDev:
       return {
         chain: 'yellowstone',
         chainId: LIT_CHAINS['yellowstone'].chainId,
@@ -76,11 +66,9 @@ export function getGasParamsForNetwork(network: LIT_NETWORKS_KEYS): {
   gasLimit: number;
 } {
   switch (network) {
-    case 'datil-dev':
+    case LIT_NETWORK.NagaDev:
       return { gasLimit: 5000000 };
-    case 'datil-test':
-      return { gasLimit: 5000000 };
-    case 'datil':
+    case LIT_NETWORK.Custom:
       return { gasLimit: 5000000 };
     default:
       throw new Error(`Cannot identify chain params for ${network}`);

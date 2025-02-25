@@ -1,7 +1,7 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { log } from '@lit-protocol/misc';
 import { LIT_ABILITY } from '@lit-protocol/constants';
-import { getLitActionSessionSigsUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContextUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -12,10 +12,9 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: TinnyEnvironment) => {
     const alice = await devEnv.createRandomPerson();
-    const litActionSessionSigs = await getLitActionSessionSigsUsingIpfsId(
-      devEnv,
-      alice,
-      [
+
+    const res = await devEnv.litNodeClient.executeJs({
+      authContext: getLitActionAuthContextUsingIpfsId(devEnv, alice, [
         {
           resource: new LitPKPResource('*'),
           ability: LIT_ABILITY.PKPSigning,
@@ -24,11 +23,7 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
           resource: new LitActionResource('*'),
           ability: LIT_ABILITY.LitActionExecution,
         },
-      ]
-    );
-
-    const res = await devEnv.litNodeClient.executeJs({
-      sessionSigs: litActionSessionSigs,
+      ]),
       code: `(async () => {
         const sigShare = await LitActions.signEcdsa({
           toSign: dataToSign,

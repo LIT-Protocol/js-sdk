@@ -1,5 +1,5 @@
 import { log } from '@lit-protocol/misc';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -13,10 +13,10 @@ export const testUseEoaSessionSigsToExecuteJsSigning = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
+  const eoaAuthContext = getEoaAuthContext(devEnv, alice);
 
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: eoaSessionSigs,
+    authContext: eoaAuthContext,
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,

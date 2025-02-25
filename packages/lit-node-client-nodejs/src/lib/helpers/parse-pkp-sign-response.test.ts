@@ -18,7 +18,6 @@ describe('parsePkpSignResponse', () => {
         signatureShare: {
           digest: 'fail',
           result: 'fail',
-          share_index: 0,
           signature_share: '',
           big_r: '',
           public_key: '',
@@ -36,7 +35,6 @@ describe('parsePkpSignResponse', () => {
           digest:
             '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
           result: 'success',
-          share_index: 0,
           signature_share:
             '"3ED0A844FAE40DF6210A6B2EACB9426E52E8339E243E697E33CF14E0CDE2B827"',
           big_r:
@@ -57,7 +55,6 @@ describe('parsePkpSignResponse', () => {
           digest:
             '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
           result: 'success',
-          share_index: 0,
           signature_share:
             '"B1AA643E88F8937B71CE2D43DCB73E0180AC96D1E39ECC579F0EC9635F37D4CB"',
           big_r:
@@ -71,49 +68,48 @@ describe('parsePkpSignResponse', () => {
 
     const expectedOutput = [
       {
-        signature: {
-          digest: 'fail',
-          shareIndex: 0,
-          signatureShare: '',
-          bigR: '',
-          publicKey: '',
-          sigType: '',
-          dataSigned: 'fail',
-        },
+        // signature: {
+        digest: 'fail',
+        signatureShare: '',
+        bigR: '',
+        publicKey: '',
+        sigType: '',
+        dataSigned: 'fail',
+        // },
       },
       {
-        signature: {
-          digest:
-            '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
-          shareIndex: 0,
-          signatureShare:
-            '3ED0A844FAE40DF6210A6B2EACB9426E52E8339E243E697E33CF14E0CDE2B827',
-          bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
-          publicKey:
-            '04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
-          sigType: 'K256',
-          dataSigned:
-            '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
-        },
+        // signature: {
+        digest:
+          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+        signatureShare:
+          '3ED0A844FAE40DF6210A6B2EACB9426E52E8339E243E697E33CF14E0CDE2B827',
+        bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
+        publicKey:
+          '04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
+        sigType: 'K256',
+        dataSigned:
+          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+
+        // },
       },
       {
-        signature: {
-          digest:
-            '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
-          shareIndex: 0,
-          signatureShare:
-            'B1AA643E88F8937B71CE2D43DCB73E0180AC96D1E39ECC579F0EC9635F37D4CB',
-          bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
-          publicKey:
-            '04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
-          sigType: 'K256',
-          dataSigned:
-            '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
-        },
+        // signature: {
+        digest:
+          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+        signatureShare:
+          'B1AA643E88F8937B71CE2D43DCB73E0180AC96D1E39ECC579F0EC9635F37D4CB',
+        bigR: '0332188F0918B7DEBB0CC846B00B0AAD9300308260C2DAD25A85FDECA671C36B1B',
+        publicKey:
+          '04156D7E068BF5ED014057B8B6365BF89053D567D38EC24030C699B94065F2D39B4D45F463464F1A138D7149D1C0EF41ACF9B8826050B9E3DCC847DE2127BDB726',
+        sigType: 'K256',
+        dataSigned:
+          '7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4',
+
+        // },
       },
     ];
 
-    const output = parsePkpSignResponse(responseData);
+    const output = parsePkpSignResponse(responseData as any);
 
     expect(output).toEqual(expectedOutput);
   });

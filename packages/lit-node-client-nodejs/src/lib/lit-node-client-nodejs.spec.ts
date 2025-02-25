@@ -27,9 +27,9 @@ describe('LitNodeClientNodeJs', () => {
     expect(litNodeClient).toBeDefined();
   });
 
-  it('should be able to instantiate a new LitNodeClientNodeJs to datil dev', async () => {
+  it('should be able to instantiate a new LitNodeClientNodeJs to naga dev', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: LIT_NETWORK.DatilDev,
+      litNetwork: LIT_NETWORK.NagaDev,
     });
     expect(litNodeClient).toBeDefined();
   });
@@ -47,11 +47,5 @@ describe('LitNodeClientNodeJs', () => {
     expect(litNodeClient).toBeDefined();
     expect(litNodeClient.config.storageProvider?.provider).toBeInstanceOf(ls);
     Object.defineProperty(globalThis, 'localStorage', { value: tmp });
-  });
-
-  it('gets expiration', () => {
-    const expiration = LitNodeClientNodeJs.getExpiration();
-
-    expect(expiration).toContain('T');
   });
 });

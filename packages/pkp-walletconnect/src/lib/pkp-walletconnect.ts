@@ -25,6 +25,7 @@ import {
 import {
   InitError,
   LIT_CHAINS,
+  LIT_CHAINS_KEYS,
   ParamsMissingError,
   UnsupportedMethodError,
 } from '@lit-protocol/constants';
@@ -604,7 +605,7 @@ export class PKPWalletConnect {
     const chainId = Number.parseInt(parsedChain.reference, 10);
     // TODO: Update this once we support more JSON RPC handlers
     if (parsedChain.namespace === 'eip155') {
-      for (const key in LIT_CHAINS) {
+      for (const key of LIT_CHAINS_KEYS) {
         const chain = LIT_CHAINS[key];
         if (chain.chainId === chainId) {
           return true;

@@ -2,9 +2,10 @@ export const LIT_ENDPOINT_VERSION = {
   V0: '/',
   V1: '/v1',
   V2: '/v2',
-};
+} as const;
 
 export const LIT_ENDPOINT = {
+  // internal
   HANDSHAKE: {
     path: '/web/handshake',
     version: LIT_ENDPOINT_VERSION.V0,
@@ -13,6 +14,8 @@ export const LIT_ENDPOINT = {
     path: '/web/sign_session_key',
     version: LIT_ENDPOINT_VERSION.V2,
   },
+
+  // public
   EXECUTE_JS: {
     path: '/web/execute',
     version: LIT_ENDPOINT_VERSION.V2,
@@ -25,12 +28,8 @@ export const LIT_ENDPOINT = {
     path: '/web/pkp/claim',
     version: LIT_ENDPOINT_VERSION.V0,
   },
-  SIGN_ACCS: {
-    path: '/web/signing/access_control_condition',
-    version: LIT_ENDPOINT_VERSION.V0,
-  },
   ENCRYPTION_SIGN: {
     path: '/web/encryption/sign',
     version: LIT_ENDPOINT_VERSION.V2,
   },
-};
+} as const;

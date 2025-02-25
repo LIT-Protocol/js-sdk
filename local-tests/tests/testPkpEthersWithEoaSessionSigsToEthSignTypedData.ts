@@ -1,6 +1,6 @@
 import { PKPEthersWallet, ethRequestHandler } from '@lit-protocol/pkp-ethers';
 import { ethers } from 'ethers';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -13,12 +13,11 @@ export const testPkpEthersWithEoaSessionSigsToEthSignTypedData = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
     litNodeClient: devEnv.litNodeClient,
     pkpPubKey: alice.pkp.publicKey,
-    controllerSessionSigs: eoaSessionSigs,
+    authContext: getEoaAuthContext(devEnv, alice),
   });
 
   await pkpEthersWallet.init();
