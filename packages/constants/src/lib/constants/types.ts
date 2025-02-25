@@ -17,7 +17,7 @@ export interface LITChainRequiredProps {
   readonly blockExplorerUrls: string[];
 }
 
-export type LITChain<T> = Record<string, T>;
+export type LITChain<K extends string, T> = Record<K, T>;
 /**
  * @typedef { Object } LITCosmosChain
  * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.

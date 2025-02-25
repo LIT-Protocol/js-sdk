@@ -11,6 +11,7 @@ import {
   LIT_NETWORK_VALUES,
   LOG_LEVEL,
   LOG_LEVEL_VALUES,
+  LitEVMChainKeys,
   NetworkError,
   RELAYER_URL_BY_NETWORK,
   RemovedFunctionError,
@@ -450,7 +451,7 @@ export const isBrowser = () => {
  * Get the number of decimal places in a token
  *
  * @property { string } contractAddress The token contract address
- * @property { string } chain The chain on which the token is deployed
+ * @property { LitEVMChainKeys } chain The chain on which the token is deployed
  *
  * @returns { number } The number of decimal places in the token
  */
@@ -459,7 +460,7 @@ export const decimalPlaces = async ({
   chain,
 }: {
   contractAddress: string;
-  chain: Chain;
+  chain: LitEVMChainKeys;
 }): Promise<number> => {
   const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
 

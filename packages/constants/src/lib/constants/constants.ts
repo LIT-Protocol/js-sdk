@@ -39,13 +39,112 @@ const yellowstoneChain: LITEVMChain = {
   vmType: VMTYPE.EVM,
 } as const;
 
+export const LIT_CHAINS_KEYS = [
+  'ethereum',
+  'polygon',
+  'fantom',
+  'xdai',
+  'bsc',
+  'arbitrum',
+  'arbitrumSepolia',
+  'avalanche',
+  'fuji',
+  'harmony',
+  'mumbai',
+  'goerli',
+  'cronos',
+  'optimism',
+  'celo',
+  'aurora',
+  'eluvio',
+  'alfajores',
+  'xdc',
+  'evmos',
+  'evmosTestnet',
+  'bscTestnet',
+  'baseGoerli',
+  'baseSepolia',
+  'moonbeam',
+  'moonriver',
+  'moonbaseAlpha',
+  'filecoin',
+  'filecoinCalibrationTestnet',
+  'hyperspace',
+  'sepolia',
+  'scrollSepolia',
+  'scroll',
+  'zksync',
+  'base',
+  'lukso',
+  'luksoTestnet',
+  'zora',
+  'zoraGoerli',
+  'zksyncTestnet',
+  'lineaGoerli',
+  'lineaSepolia',
+  'yellowstone',
+  'chiado',
+  'zkEvm',
+  'mantleTestnet',
+  'mantle',
+  'klaytn',
+  'publicGoodsNetwork',
+  'optimismGoerli',
+  'waevEclipseTestnet',
+  'waevEclipseDevnet',
+  'verifyTestnet',
+  'fuse',
+  'campNetwork',
+  'vanar',
+  'lisk',
+  'chilizMainnet',
+  'chilizTestnet',
+  'skaleTestnet',
+  'skale',
+  'skaleCalypso',
+  'skaleCalypsoTestnet',
+  'skaleEuropaTestnet',
+  'skaleEuropa',
+  'skaleTitanTestnet',
+  'skaleTitan',
+  'fhenixHelium',
+  'hederaTestnet',
+  'bitTorrentTestnet',
+  'storyOdyssey',
+  'campTestnet',
+  'hushedNorthstar',
+  'amoy',
+  'matchain',
+  'coreDao',
+  'zkCandySepoliaTestnet',
+  'vana',
+] as const;
+export const LIT_SVM_CHAINS_KEYS = [
+  'solana',
+  'solanaDevnet',
+  'solanaTestnet',
+] as const;
+export const LIT_COSMOS_CHAINS_KEYS = [
+  'cosmos',
+  'kyve',
+  'evmosCosmos',
+  'evmosCosmosTestnet',
+  'cheqdMainnet',
+  'cheqdTestnet',
+  'juno',
+] as const;
+
+export type LitEVMChainKeys = (typeof LIT_CHAINS_KEYS)[number];
+export type LITSVMChainKeys = (typeof LIT_SVM_CHAINS_KEYS)[number];
+export type LitCosmosChainKeys = (typeof LIT_COSMOS_CHAINS_KEYS)[number];
+
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
  * @constant
  * @type { LITEVMChain }
  * @default
  */
-export const LIT_CHAINS: LITChain<LITEVMChain> = {
+export const LIT_CHAINS: LITChain<LitEVMChainKeys, LITEVMChain> = {
   ethereum: {
     contractAddress: '0xA54F7579fFb3F98bd8649fF02813F575f9b3d353',
     chainId: 1,
@@ -1046,7 +1145,7 @@ export const CENTRALISATION_BY_NETWORK: Record<
  * @type { LITSVMChain }
  * @default
  */
-export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
+export const LIT_SVM_CHAINS: LITChain<LITSVMChainKeys, LITSVMChain> = {
   solana: {
     name: 'Solana',
     symbol: 'SOL',
@@ -1079,7 +1178,7 @@ export const LIT_SVM_CHAINS: LITChain<LITSVMChain> = {
  * @type { LITCosmosChain }
  * @default
  */
-export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
+export const LIT_COSMOS_CHAINS: LITChain<LitCosmosChainKeys, LITCosmosChain> = {
   cosmos: {
     name: 'Cosmos',
     symbol: 'ATOM',
@@ -1147,11 +1246,8 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
 
 /**
  * All Chains supported by the LIT protocol.  Use the chain name as a key in this object.
- * @type { LITChain<LITEVMChain | LITSVMChain | LITCosmosChain> }
  */
-export const ALL_LIT_CHAINS: LITChain<
-  LITEVMChain | LITSVMChain | LITCosmosChain
-> = {
+export const ALL_LIT_CHAINS = {
   ...LIT_CHAINS,
   ...LIT_SVM_CHAINS,
   ...LIT_COSMOS_CHAINS,

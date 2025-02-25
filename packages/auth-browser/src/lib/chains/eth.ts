@@ -35,6 +35,7 @@ import {
   UnsupportedChainException,
   WrongNetworkException,
   WrongParamFormat,
+  LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
 import {
   isBrowser,
@@ -275,9 +276,7 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
 export const getRPCUrls = (): RPCUrls => {
   const rpcUrls: RPCUrls = {};
 
-  const keys: string[] = Object.keys(LIT_CHAINS);
-
-  for (const chainName of keys) {
+  for (const chainName of LIT_CHAINS_KEYS) {
     const chainId = LIT_CHAINS[chainName].chainId;
     const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
     rpcUrls[chainId.toString()] = rpcUrl;
