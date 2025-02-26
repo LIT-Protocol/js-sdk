@@ -1,9 +1,21 @@
-# Quick Start
+# Getting Started
 
-This module is the main module of this monorepo. It sets a default authentication callback using the `checkAndSignAuthMessage` function from the auth-browser submodule, which is designed to work in both browser and Node.js environments, facilitating interaction with Lit nodes.
+This `LitNodeClient` is created solely to run on Node.js.
 
-### node.js / browser
+The usual `checkAndSignAuthMessage` is not included in this package, so you need to add it manually to the constructor if you decide to use it on a browser, or with any custom auth callback.
 
-```
-yarn add @lit-protocol/lit-node-client
+```js
+import * as LitJsSdkNodeJs from '@lit-protocol/lit-node-client';
+import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
+
+const client = new LitJsSdkNodeJs.LitNodeClient({
+  litNetwork: 'serrano',
+  defaultAuthCallback: checkAndSignAuthMessage,
+});
+
+await client.connect();
+
+const authSig = await checkAndSignAuthMessage({
+  chain: 'ethereum',
+});
 ```
