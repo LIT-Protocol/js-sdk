@@ -55,8 +55,6 @@ export function getMaxPricesForNodeProduct({
    * our request to fail if the price on some of the nodes is higher than we think it was, as long as it's not
    * drastically different than we expect it to be
    */
-  // console.log('totalBaseCost:', totalBaseCost);
-  // console.log('userMaxPrice:', userMaxPrice);
   const excessBalance = userMaxPrice - totalBaseCost;
 
   // Map matching the keys from `nodePrices`, but w/ the per-node maxPrice computed based on `userMaxPrice`

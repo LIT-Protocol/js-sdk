@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
 import {
   uint8arrayFromString,

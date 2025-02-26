@@ -4,6 +4,7 @@
  */
 
 import { isHexString } from 'ethers/lib/utils';
+import { pino } from 'pino';
 
 import {
   EITHER_TYPE,
@@ -34,8 +35,10 @@ import {
   AuthenticationContext,
 } from '@lit-protocol/types';
 
-import { checkIfAuthSigRequiresChainParam, checkType, is, log } from './misc';
+import { checkIfAuthSigRequiresChainParam, checkType, is } from './misc';
 import { isValidBooleanExpression } from './utils';
+
+const logger = pino({ level: 'info', name: 'params-validator' });
 
 export const safeParams = ({
   functionName,
@@ -46,7 +49,9 @@ export const safeParams = ({
   params: any[] | any;
 }): IEither<void> => {
   if (!paramsValidators[functionName]) {
-    log(`This function ${functionName} is skipping params safe guarding.`);
+    logger.info(
+      `This function ${functionName} is skipping params safe guarding.`
+    );
     return ERight(undefined);
   }
 

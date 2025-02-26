@@ -13,7 +13,6 @@
     "./packages/lit-auth-client/src/index.ts",
     "./packages/lit-node-client/src/index.ts",
     "./packages/lit-node-client-nodejs/src/index.ts",
-    "./packages/logger/src/index.ts",
     "./packages/misc/src/index.ts",
     "./packages/misc-browser/src/index.ts",
     "./packages/nacl/src/index.ts",

@@ -1,4 +1,4 @@
-import { joinSignature } from 'ethers/lib/utils';
+import { pino } from 'pino';
 
 import {
   CURVE_GROUP_BY_CURVE_TYPE,
@@ -10,16 +10,14 @@ import {
   CurveTypeNotFoundError,
 } from '@lit-protocol/constants';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
-import {
-  logErrorWithRequestId,
-  logWithRequestId,
-  mostCommonString,
-} from '@lit-protocol/misc';
+import { mostCommonString } from '@lit-protocol/misc';
 import {
   EcdsaSignedMessageShareParsed,
   SigResponse,
   SigShare,
 } from '@lit-protocol/types';
+
+const logger = pino({ level: 'info', name: 'get-signatures' });
 
 /**
  * Retrieves and combines signature shares from multiple nodes to generate the final signatures.
@@ -56,10 +54,10 @@ export const getSignatures = async (params: {
   }
 
   if (signedMessageShares.length < threshold) {
-    logErrorWithRequestId(
+    logger.error({
       requestId,
-      `not enough nodes to get the signatures. Expected ${threshold}, got ${signedMessageShares.length}`
-    );
+      msg: `not enough nodes to get the signatures. Expected ${threshold}, got ${signedMessageShares.length}`,
+    });
 
     throw new NoValidShares(
       {

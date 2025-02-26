@@ -21,6 +21,7 @@ import {
   Web3Wallet,
   Web3WalletTypes,
 } from '@walletconnect/web3wallet';
+import { pino, Logger } from 'pino';
 
 import {
   InitError,
@@ -46,19 +47,19 @@ export interface InitWalletConnectParams
 }
 
 export class PKPWalletConnect {
+  private readonly debug: boolean = false;
+  readonly #logger: Logger;
   // WalletConnect client
   private client: IWeb3Wallet | undefined;
   // List of PKP wallets
   private pkpEthersWallets: PKPEthersWallet[] = [];
 
-  // For logging
-  private readonly debug: boolean = false;
-  private readonly PREFIX = '[PKPWalletConnect]';
-  private readonly orange = '\x1b[33m';
-  private readonly reset = '\x1b[0m';
-
   constructor(debug?: boolean) {
     this.debug = debug || false;
+    this.#logger = pino({
+      name: 'PKPWalletConnect',
+      level: this.debug ? 'debug' : 'info',
+    });
   }
 
   /**
@@ -689,24 +690,12 @@ export class PKPWalletConnect {
     client: IWeb3Wallet | undefined
   ): IWeb3Wallet {
     if (!client) {
-      this._log('WalletConnect client has not yet been initialized.');
+      this.#logger.debug('WalletConnect client has not yet been initialized.');
       throw new InitError(
         {},
         'WalletConnect client has not yet been initialized. Please call initWalletConnect().'
       );
     }
     return client;
-  }
-
-  /**
-   * Logs the provided arguments to the console if the `debug` property is set to true.
-   *
-   * @private
-   * @param {...any[]} args - The arguments to log to the console.
-   */
-  private _log(...args: any[]): void {
-    if (this.debug) {
-      console.log(this.orange + this.PREFIX + this.reset, ...args);
-    }
   }
 }

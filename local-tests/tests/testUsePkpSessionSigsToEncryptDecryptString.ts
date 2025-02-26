@@ -1,11 +1,11 @@
 import { LIT_ABILITY } from '@lit-protocol/constants';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
 import { ILitNodeClient } from '@lit-protocol/types';
+
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
-import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 /**
  * Test Commands:
@@ -30,7 +30,7 @@ export const testUsePkpSessionSigsToEncryptDecryptString = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  console.log('encryptRes:', encryptRes);
 
   // -- Expected output:
   // {

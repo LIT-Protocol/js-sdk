@@ -1,9 +1,8 @@
-import { LIT_NETWORK } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
+
 import { encryptString } from '@lit-protocol/encryption';
 
 /**
@@ -29,7 +28,7 @@ export const testExecuteJsDecryptAndCombine = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  console.log('encryptRes:', encryptRes);
 
   // -- Expected output:
   // {

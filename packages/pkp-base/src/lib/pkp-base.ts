@@ -7,6 +7,8 @@
  * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
+import { pino, Logger } from 'pino';
+
 import {
   InitError,
   LitNodeClientNotReadyError,
@@ -46,6 +48,7 @@ const compressPubKey = (pubKey: string): string => {
  * A base class that can be shared between Ethers and Cosmos signers.
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
+  readonly #logger: Logger;
   rpcs?: RPCUrls;
 
   authContext: AuthenticationContext;
@@ -62,11 +65,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   debug: boolean;
   useAction: boolean | undefined;
 
-  // -- debug things
-  private PREFIX = '[PKPBase]';
-  private orange = '\x1b[33m';
-  private reset = '\x1b[0m';
-
   get litNodeClientReady(): boolean {
     return this.litNodeClient.ready;
   }
@@ -77,6 +75,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
 
     this.debug = prop.debug || false;
+    this.#logger = pino({
+      name: 'PKPBase',
+      level: this.debug ? 'debug' : 'info',
+    });
 
     if (prop.pkpPubKey.startsWith('0x')) {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
@@ -87,7 +89,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.rpcs = prop.rpcs;
 
-    console.log('authContext:', prop.authContext);
+    this.#logger.info('authContext:', prop.authContext);
     this.authContext = prop.authContext;
 
     this.validateAuthContext();
@@ -178,7 +180,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     if (!pkpBaseProp.litActionCode && !pkpBaseProp.litActionIPFS) {
-      this.log(
+      this.#logger.debug(
         'No lit action code or IPFS hash provided. Using default action.'
       );
       this.useAction = false;
@@ -205,7 +207,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async init(): Promise<void> {
     try {
       await this.litNodeClient.connect();
-      this.log('Connected to Lit Node');
+      this.#logger.debug('Connected to Lit Node');
     } catch (e) {
       throw new LitNodeClientNotReadyError(
         {
@@ -310,14 +312,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       );
     }
 
-    this.log('executeJsArgs:', executeJsArgs);
+    this.#logger.debug('executeJsArgs:', executeJsArgs);
 
     const res = await this.litNodeClient.executeJs(executeJsArgs);
 
     const sig = res.signatures[sigName];
 
-    this.log('res:', res);
-    this.log('res.signatures[sigName]:', sig);
+    this.#logger.debug('res:', res);
+    this.#logger.debug('res.signatures[sigName]:', sig);
 
     if (sig.r && sig.s) {
       // pad sigs with 0 if length is odd
@@ -350,26 +352,21 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.validateAuthContext();
 
-    try {
-      const sig = await this.litNodeClient.pkpSign({
-        toSign,
-        pubKey: this.uncompressedPubKey,
-        authContext: this.authContext,
-      });
+    const sig = await this.litNodeClient.pkpSign({
+      toSign,
+      pubKey: this.uncompressedPubKey,
+      authContext: this.authContext,
+    });
 
-      if (!sig) {
-        throw new UnknownError({}, 'No signature returned');
-      }
-
-      // pad sigs with 0 if length is odd
-      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
-      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
-
-      return sig;
-    } catch (e) {
-      console.log('err: ', e);
-      throw e;
+    if (!sig) {
+      throw new UnknownError({}, 'No signature returned');
     }
+
+    // pad sigs with 0 if length is odd
+    sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
+    sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
+
+    return sig;
   }
 
   /**
@@ -381,20 +378,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async ensureLitNodeClientReady(): Promise<void> {
     if (!this.litNodeClientReady) {
       await this.init();
-    }
-  }
-
-  /**
-   * Logs the provided arguments to the console, but only if debugging is enabled.
-   *
-   * @param {...any[]} args - The values to be logged to the console.
-   *
-   * @returns {void} - This function does not return a value.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log(...args: any[]): void {
-    if (this.debug) {
-      console.log(this.orange + this.PREFIX + this.reset, ...args);
     }
   }
 }

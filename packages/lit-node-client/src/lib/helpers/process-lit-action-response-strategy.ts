@@ -1,9 +1,15 @@
+import { pino } from 'pino';
+
 import {
   LitActionResponseStrategy,
   ResponseStrategy,
   NodeShare,
 } from '@lit-protocol/types';
-import { log, logError } from '@lit-protocol/misc';
+
+const logger = pino({
+  level: 'info',
+  name: 'process-lit-action-response-strategy',
+});
 
 /**
  * Finds the most and least common object within an of objects array
@@ -38,12 +44,12 @@ export const processLitActionResponseStrategy = (
           strategy?.customFilter(executionResponses);
         return customResponseFilterResult;
       } else {
-        logError(
+        logger.error(
           'Custom filter specified for response strategy but none found. using most common'
         );
       }
     } catch (e) {
-      logError(
+      logger.error(
         'Error while executing custom response filter, defaulting to most common',
         (e as Error).toString()
       );
@@ -52,17 +58,17 @@ export const processLitActionResponseStrategy = (
 
   let respFrequency = _findFrequency(copiedExecutionResponses);
   if (strategy?.strategy === 'leastCommon') {
-    log(
+    logger.info(
       'strategy found to be most common, taking most common response from execution results'
     );
     return respFrequency.min;
   } else if (strategy?.strategy === 'mostCommon') {
-    log(
+    logger.info(
       'strategy found to be most common, taking most common response from execution results'
     );
     return respFrequency.max;
   } else {
-    log(
+    logger.info(
       'no strategy found, using least common response object from execution results'
     );
     respFrequency.min;

@@ -24,7 +24,6 @@ import {
   ProgressCallback,
 } from '@ethersproject/json-wallets';
 import { keccak256 } from '@ethersproject/keccak256';
-import { Logger } from '@ethersproject/logger';
 import { defineReadOnly, resolveProperties } from '@ethersproject/properties';
 import { randomBytes } from '@ethersproject/random';
 import {
@@ -33,10 +32,12 @@ import {
   UnsignedTransaction,
 } from '@ethersproject/transactions';
 import { Wordlist } from '@ethersproject/wordlists';
-import { ethers, version, Wallet } from 'ethers';
+import { ethers, Wallet } from 'ethers';
+import { pino, Logger } from 'pino';
 
 import {
   InitError,
+  InvalidArgumentException,
   RPC_URL_BY_NETWORK,
   InvalidParamType,
   UnknownError,
@@ -60,8 +61,6 @@ import {
   ETHTxRes,
 } from './pkp-ethers-types';
 
-const logger = new Logger(version);
-
 export class PKPEthersWallet
   implements
     PKPWallet,
@@ -70,6 +69,7 @@ export class PKPEthersWallet
     TypedDataSigner,
     PKPClientHelpers
 {
+  readonly #logger: Logger;
   private readonly pkpBase: PKPBase;
 
   readonly address!: string;
@@ -90,6 +90,10 @@ export class PKPEthersWallet
 
   constructor(prop: PKPEthersWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
+    this.#logger = pino({
+      name: 'PKPEthersWallet',
+      level: prop.debug ? 'debug' : 'info',
+    });
 
     const rpcUrl =
       prop.rpc || RPC_URL_BY_NETWORK[prop.litNodeClient.config.litNetwork];
@@ -198,13 +202,13 @@ export class PKPEthersWallet
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
-    this.pkpBase.log('signTransaction => transaction:', transaction);
+    this.#logger.debug('signTransaction => transaction:', transaction);
 
     // Check if the LIT node client is connected, and connect if it's not.
     await this.pkpBase.ensureLitNodeClientReady();
 
     const addr = await this.getAddress();
-    this.pkpBase.log('signTransaction => addr:', addr);
+    this.#logger.debug('signTransaction => addr:', addr);
 
     // if manual settings are set, use them
     if (this.manualGasPrice) {
@@ -226,40 +230,51 @@ export class PKPEthersWallet
     try {
       if (!transaction['gasLimit']) {
         transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-        this.pkpBase.log('signTransaction => gasLimit:', transaction.gasLimit);
+        this.#logger.debug(
+          'signTransaction => gasLimit:',
+          transaction.gasLimit
+        );
       }
 
       if (!transaction['nonce']) {
         transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
-        this.pkpBase.log('signTransaction => nonce:', transaction.nonce);
+        this.#logger.debug('signTransaction => nonce:', transaction.nonce);
       }
 
       if (!transaction['chainId']) {
         transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
-        this.pkpBase.log('signTransaction => chainId:', transaction.chainId);
+        this.#logger.debug('signTransaction => chainId:', transaction.chainId);
       }
 
       if (!transaction['gasPrice']) {
         transaction.gasPrice = await this.getGasPrice();
-        this.pkpBase.log('signTransaction => gasPrice:', transaction.gasPrice);
+        this.#logger.debug(
+          'signTransaction => gasPrice:',
+          transaction.gasPrice
+        );
       }
     } catch (err) {
-      this.pkpBase.log(
+      this.#logger.debug(
         'signTransaction => unable to populate transaction with details:',
         err
       );
     }
 
     return resolveProperties(transaction).then(async (tx) => {
-      this.pkpBase.log('tx.from:', tx.from);
-      this.pkpBase.log('this.address:', this.address);
+      this.#logger.debug('tx.from:', tx.from);
+      this.#logger.debug('this.address:', this.address);
 
-      if (tx.from != null) {
+      if (tx.from) {
         if (getAddress(tx.from) !== this.address) {
-          logger.throwArgumentError(
-            'transaction from address mismatch',
-            'transaction.from',
-            transaction.from
+          throw new InvalidArgumentException(
+            {
+              info: {
+                transaction,
+                tx,
+                address: this.address,
+              },
+            },
+            'transaction from address mismatch'
           );
         }
         delete tx.from;
@@ -273,11 +288,11 @@ export class PKPEthersWallet
       let signature;
 
       if (this.pkpBase.useAction) {
-        this.pkpBase.log('running lit action => sigName: pkp-eth-sign-tx');
+        this.#logger.debug('running lit action => sigName: pkp-eth-sign-tx');
         signature = (await this.pkpBase.runLitAction(toSign, 'pkp-eth-sign-tx'))
           .signature;
       } else {
-        this.pkpBase.log('requesting signature from nodes');
+        this.#logger.debug('requesting signature from nodes');
         signature = (await this.pkpBase.runSign(toSign)).signature;
       }
 
@@ -295,10 +310,10 @@ export class PKPEthersWallet
     const toSign = arrayify(hashMessage(message));
     let signature;
     if (this.pkpBase.useAction) {
-      this.pkpBase.log('running lit action => sigName: pkp-eth-sign-message');
+      this.#logger.debug('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');
     } else {
-      this.pkpBase.log('requesting signature from nodes');
+      this.#logger.debug('requesting signature from nodes');
       signature = await this.runSign(toSign);
     }
 
@@ -352,10 +367,10 @@ export class PKPEthersWallet
     let signature;
 
     if (this.pkpBase.useAction) {
-      this.pkpBase.log('running lit action => sigName: pkp-eth-sign-message');
+      this.#logger.debug('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSignBuffer, 'pkp-eth-sign-message');
     } else {
-      this.pkpBase.log('requesting signature from nodes');
+      this.#logger.debug('requesting signature from nodes');
       signature = await this.runSign(toSignBuffer);
     }
 
@@ -401,7 +416,7 @@ export class PKPEthersWallet
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
     // : Promise<TransactionResponse>
-    this.pkpBase.log('sendTransaction => transaction:', transaction);
+    this.#logger.debug('sendTransaction => transaction:', transaction);
 
     let res;
     let signedTxn;
@@ -557,7 +572,7 @@ export class PKPEthersWallet
   }
 
   _checkProvider(): void {
-    this.pkpBase.log(
+    this.#logger.debug(
       'This function is not implemented yet, but will skip it for now.'
     );
   }

@@ -7,27 +7,6 @@ global.TextDecoder = TextDecoder;
 import * as utilsModule from './misc';
 
 describe('utils', () => {
-  /**
-   * Print Error
-   */
-  it('should console.log with name, message and stack', () => {
-    let err: Error;
-
-    try {
-      throw new Error('Test Error');
-    } catch (e) {
-      err = e as Error;
-    }
-
-    console.log = jest.fn();
-
-    utilsModule.printError(err);
-
-    expect((console.log as any).mock.calls[0][0]).toBe('Error Stack');
-    expect((console.log as any).mock.calls[1][0]).toBe('Error Name');
-    expect((console.log as any).mock.calls[2][0]).toBe('Error Message');
-  });
-
   it('should get the most common string in an array', () => {
     const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 8];
 

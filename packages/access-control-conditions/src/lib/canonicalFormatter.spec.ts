@@ -81,12 +81,8 @@ describe('canonicalFormatter.ts', () => {
   });
 
   it('should FAIL to format canonical unified access control if key "conditionType" doesnt exist', async () => {
-    console.log = jest.fn();
-
-    let test;
-
-    try {
-      test = canonicalUnifiedAccessControlConditionFormatter([
+    expect(() =>
+      canonicalUnifiedAccessControlConditionFormatter([
         {
           contractAddress: '',
           standardContractType: '',
@@ -98,12 +94,8 @@ describe('canonicalFormatter.ts', () => {
             value: '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A2',
           },
         },
-      ]);
-    } catch (e) {
-      console.log(e);
-    }
-
-    expect((console.log as any).mock.calls[0][0].message).toContain(
+      ])
+    ).toThrow(
       'You passed an invalid access control condition that is missing or has a wrong'
     );
   });

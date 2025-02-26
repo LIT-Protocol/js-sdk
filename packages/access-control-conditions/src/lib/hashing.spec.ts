@@ -51,7 +51,6 @@ describe('hashing.ts', () => {
         },
       },
     ]);
-    // console.log(typeof OUTPUT);
     expect(new Uint8Array(OUTPUT).length).toBe(32);
   });
 
@@ -63,7 +62,6 @@ describe('hashing.ts', () => {
       role: '',
       extraData: '',
     });
-    // console.log(typeof OUTPUT);
     expect(new Uint8Array(OUTPUT).length).toBe(32);
   });
 
@@ -75,7 +73,6 @@ describe('hashing.ts', () => {
       role: '',
       extraData: '',
     });
-    // console.log(typeof OUTPUT);
     expect(OUTPUT).toBe(
       '5b36d72f2145af3617e5da2a8a626f9f42e64ed14340622bdfe1a6f0702b9e8d'
     );
@@ -96,7 +93,6 @@ describe('hashing.ts', () => {
         },
       },
     ]);
-    // console.log(typeof OUTPUT);
     expect(typeof OUTPUT).toBe('object');
   });
 
@@ -152,7 +148,6 @@ describe('hashing.ts', () => {
         },
       },
     ]);
-    // console.log(typeof OUTPUT);
     expect(typeof OUTPUT).toBe('object');
   });
 
@@ -172,7 +167,6 @@ describe('hashing.ts', () => {
         },
       },
     ]);
-    // console.log(typeof OUTPUT);
     expect(typeof OUTPUT).toBe('object');
   });
 });

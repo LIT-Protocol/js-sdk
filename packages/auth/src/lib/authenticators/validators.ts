@@ -1,4 +1,8 @@
+import { pino } from 'pino';
+
 import { MintRequestBody } from '@lit-protocol/types';
+
+const logger = pino({ level: 'info', name: 'validators' });
 
 export const validateMintRequestBody = (
   customArgs: Partial<MintRequestBody>
@@ -17,7 +21,7 @@ export const validateMintRequestBody = (
   // Check for any extraneous keys
   for (const key of Object.keys(customArgs)) {
     if (!validKeys.includes(key)) {
-      console.error(
+      logger.error(
         `Invalid key found: ${key}. This key is not allowed. Valid keys are: ${validKeys.join(
           ', '
         )}`
@@ -30,7 +34,7 @@ export const validateMintRequestBody = (
     customArgs.keyType !== undefined &&
     typeof customArgs.keyType !== 'number'
   ) {
-    console.error('Invalid type for keyType: expected a number.');
+    logger.error('Invalid type for keyType: expected a number.');
     isValid = false;
   }
 
@@ -41,7 +45,7 @@ export const validateMintRequestBody = (
         (type) => typeof type === 'number'
       ))
   ) {
-    console.error(
+    logger.error(
       'Invalid type for permittedAuthMethodTypes: expected an array of numbers.'
     );
     isValid = false;
@@ -52,7 +56,7 @@ export const validateMintRequestBody = (
     (!Array.isArray(customArgs.permittedAuthMethodIds) ||
       !customArgs.permittedAuthMethodIds.every((id) => typeof id === 'string'))
   ) {
-    console.error(
+    logger.error(
       'Invalid type for permittedAuthMethodIds: expected an array of strings.'
     );
     isValid = false;
@@ -65,7 +69,7 @@ export const validateMintRequestBody = (
         (pubkey) => typeof pubkey === 'string'
       ))
   ) {
-    console.error(
+    logger.error(
       'Invalid type for permittedAuthMethodPubkeys: expected an array of strings.'
     );
     isValid = false;
@@ -79,7 +83,7 @@ export const validateMintRequestBody = (
           Array.isArray(scope) && scope.every((s) => typeof s === 'number')
       ))
   ) {
-    console.error(
+    logger.error(
       'Invalid type for permittedAuthMethodScopes: expected an array of arrays of numberr.'
     );
     isValid = false;
@@ -89,7 +93,7 @@ export const validateMintRequestBody = (
     customArgs.addPkpEthAddressAsPermittedAddress !== undefined &&
     typeof customArgs.addPkpEthAddressAsPermittedAddress !== 'boolean'
   ) {
-    console.error(
+    logger.error(
       'Invalid type for addPkpEthAddressAsPermittedAddress: expected a boolean.'
     );
     isValid = false;
@@ -99,7 +103,7 @@ export const validateMintRequestBody = (
     customArgs.sendPkpToItself !== undefined &&
     typeof customArgs.sendPkpToItself !== 'boolean'
   ) {
-    console.error('Invalid type for sendPkpToItself: expected a boolean.');
+    logger.error('Invalid type for sendPkpToItself: expected a boolean.');
     isValid = false;
   }
 

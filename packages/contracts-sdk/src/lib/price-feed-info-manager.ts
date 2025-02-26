@@ -77,20 +77,6 @@ async function fetchPriceFeedInfo({
       }
     });
 
-  // console.log(
-  //   'getPriceFeedInfo()',
-  //   util.inspect(
-  //     {
-  //       epochId,
-  //       minNodeCount,
-  //       networkPrices: {
-  //         mapByAddress: networkPriceMap,
-  //       },
-  //     },
-  //     { depth: 4 }
-  //   )
-  // );
-
   return {
     epochId,
     minNodeCount,

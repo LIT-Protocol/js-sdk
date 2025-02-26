@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -14,7 +13,7 @@ export const testUsePkpSessionSigsToExecuteJsSigningInParallel = async (
   const alice = await devEnv.createRandomPerson();
 
   const fn = async (index: number) => {
-    log(`Index: ${index}`);
+    console.log(`Index: ${index}`);
 
     return await devEnv.litNodeClient.executeJs({
       authContext: getPkpAuthContext(devEnv, alice),
@@ -35,7 +34,7 @@ export const testUsePkpSessionSigsToExecuteJsSigningInParallel = async (
   devEnv.releasePrivateKeyFromUser(alice);
 
   const res = await Promise.all([fn(1), fn(2), fn(3)]);
-  log('res:', res);
+  console.log('res:', res);
 
   // -- Expected output:
   // [
@@ -115,5 +114,5 @@ export const testUsePkpSessionSigsToExecuteJsSigningInParallel = async (
     }
   });
 
-  log('✅ testUsePkpSessionSigsToExecuteJsSigningInParallel');
+  console.log('✅ testUsePkpSessionSigsToExecuteJsSigningInParallel');
 };

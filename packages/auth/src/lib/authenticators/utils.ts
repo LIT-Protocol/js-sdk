@@ -5,7 +5,6 @@ import {
   InvalidArgumentException,
   UnknownError,
 } from '@lit-protocol/constants';
-import { getLoggerbyId } from '@lit-protocol/misc';
 import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 
 import { DiscordAuthenticator } from './DiscordAuthenticator';
@@ -335,11 +334,6 @@ export function unparse(buf: any) {
   );
 }
 
-export function log(...args: any) {
-  const logger = getLoggerbyId('auth-client');
-  logger.debug(...args);
-}
-
 /**
  * Retrieves the authentication ID based on the provided authentication method.
  *
@@ -374,7 +368,6 @@ export async function getAuthIdByAuthMethod(
       authId = await StytchAuthFactorOtpAuthenticator.authMethodId(authMethod);
       break;
     default:
-      log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
       throw new InvalidArgumentException(
         {
           info: {

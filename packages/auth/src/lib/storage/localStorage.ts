@@ -12,7 +12,6 @@ interface LocalStorageConfig {
 function assertLocalstorageValid(
   localStorage: unknown
 ): asserts localStorage is WindowLocalStorage['localStorage'] {
-  console.log('localStorage is...', localStorage);
   if (!localStorage) {
     throw new Error('localStorage is not available in this environment');
   }

@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { pino } from 'pino';
 
 import { bech32 } from 'bech32';
 import { Contract, ethers } from 'ethers';
@@ -12,6 +13,8 @@ import {
   ParamsMissingError,
 } from '@lit-protocol/constants';
 import { DerivedAddresses } from '@lit-protocol/types';
+
+const logger = pino({ level: 'info', name: 'addresses' });
 
 /**
  * Converts a public key between compressed and uncompressed formats.
@@ -251,7 +254,7 @@ export const derivedAddresses = async (
         publicKey = cachedPkpJSON[pkpTokenId];
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     }
 
     if (!publicKey) {
@@ -298,7 +301,7 @@ export const derivedAddresses = async (
           localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
         }
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       }
     }
   }

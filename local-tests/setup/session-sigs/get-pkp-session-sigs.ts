@@ -3,7 +3,6 @@ import {
   type AuthenticationContext,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
-import { log } from '@lit-protocol/misc';
 import {
   LIT_ABILITY,
   CENTRALISATION_BY_NETWORK,
@@ -43,7 +42,7 @@ export const getPkpAuthContext = (
     }),
   });
 
-  log('[getPkpAuthContext]: ', authContext);
+  console.log('[getPkpAuthContext]: ', authContext);
 
   return authContext;
 };

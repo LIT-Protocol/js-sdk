@@ -1,4 +1,5 @@
 import { joinSignature, splitSignature } from 'ethers/lib/utils';
+import { pino } from 'pino';
 
 import {
   InvalidParamType,
@@ -9,7 +10,6 @@ import {
   UnknownError,
   UnknownSignatureError,
 } from '@lit-protocol/constants';
-import { log } from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
 import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
 import {
@@ -29,6 +29,8 @@ import {
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
+
+const logger = pino({ level: 'info', name: 'crypto' });
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
@@ -334,7 +336,7 @@ async function doDecrypt(
 async function getAmdCert(url: string): Promise<Uint8Array> {
   const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
 
-  log(
+  logger.info(
     `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} to manage CORS restrictions and to avoid being rate limited by AMD.`
   );
 
@@ -357,16 +359,16 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   try {
     return await fetchAsUint8Array(proxyUrl);
   } catch (e) {
-    log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
+    logger.info(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
   }
 
   // Try direct fetch only if proxy fails
-  log('[getAmdCert] Attempting to fetch directly without proxy.');
+  logger.info('[getAmdCert] Attempting to fetch directly without proxy.');
 
   try {
     return await fetchAsUint8Array(url);
   } catch (e) {
-    log('[getAmdCert] Direct fetch also failed:', e);
+    logger.info('[getAmdCert] Direct fetch also failed:', e);
     throw e; // Re-throw to signal that both methods failed
   }
 }
@@ -468,7 +470,7 @@ export const checkSevSnpAttestation = async (
   const vcekUrl = await sevSnpGetVcekUrl(report);
   // use local storage if we have one available
   if (globalThis.localStorage) {
-    log('Using local storage for certificate caching');
+    logger.info('Using local storage for certificate caching');
     vcekCert = localStorage.getItem(vcekUrl);
     if (vcekCert) {
       vcekCert = uint8arrayFromString(vcekCert, 'base64');

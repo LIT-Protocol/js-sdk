@@ -1,5 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { pino } from 'pino';
 
 import {
   ABI_ERC20,
@@ -18,38 +19,16 @@ import {
   UnknownError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
-import { LogManager } from '@lit-protocol/logger';
 import {
   Chain,
   AuthSig,
   NodeErrorV3,
   ClaimResult,
-  LitNodeClientConfig,
   MintCallback,
   RelayClaimProcessor,
 } from '@lit-protocol/types';
 
-const logBuffer: any[][] = [];
-
-// Module scoped variable to store the LitNodeClientConfig passed to LitCore
-let litConfig: LitNodeClientConfig | undefined;
-
-export const setMiscLitConfig = (config: LitNodeClientConfig | undefined) => {
-  litConfig = config;
-};
-
-/**
- *
- * Print error message based on Error interface
- *
- * @param { Error } e
- * @returns { void }
- */
-export const printError = (e: Error): void => {
-  console.log('Error Stack', e.stack);
-  console.log('Error Name', e.name);
-  console.log('Error Message', e.message);
-};
+const logger = pino({ level: 'info', name: 'misc' });
 
 /**
  *
@@ -117,131 +96,6 @@ export const throwRemovedFunctionError = (functionName: string) => {
     },
     `This function "${functionName}" has been removed. Please use the old SDK.`
   );
-};
-
-export const bootstrapLogManager = (
-  id: string,
-  level: LOG_LEVEL_VALUES = LOG_LEVEL.DEBUG
-) => {
-  if (!globalThis.logManager) {
-    globalThis.logManager = LogManager.Instance;
-    globalThis.logManager.withConfig({
-      condenseLogs: true,
-    });
-    globalThis.logManager.setLevel(level);
-  }
-
-  globalThis.logger = globalThis.logManager.get(id);
-};
-
-export const getLoggerbyId = (id: string) => {
-  return globalThis.logManager.get(id);
-};
-
-/**
- *
- * console.log but prepend [Lit-JS-SDK] before the message
- *
- * @param { any } args
- *
- * @returns { void }
- */
-export const log = (...args: any): void => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger && globalThis?.logger.debug(...log);
-  }
-
-  globalThis?.logger && globalThis?.logger.debug(...args);
-};
-
-export const logWithRequestId = (id: string, ...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).debug(...log);
-  }
-
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
-};
-
-export const logErrorWithRequestId = (id: string, ...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).error(...log);
-  }
-
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).error(...args);
-};
-
-export const logError = (...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category).error(...log);
-  }
-
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category).error(...args);
 };
 
 /**
@@ -327,7 +181,7 @@ export const checkIfAuthSigRequiresChainParam = (
   chain: string,
   functionName: string
 ): boolean => {
-  log('checkIfAuthSigRequiresChainParam');
+  logger.info('checkIfAuthSigRequiresChainParam');
   for (const key of LIT_AUTH_SIG_CHAIN_KEYS) {
     if (key in authSig) {
       return true;
@@ -553,7 +407,6 @@ export const defaultMintClaimCallback: MintCallback<
     const errStmt = `An error occurred requesting "/auth/claim" endpoint ${JSON.stringify(
       errResp
     )}`;
-    console.warn(errStmt);
     throw new NetworkError(
       {
         info: {
@@ -561,7 +414,7 @@ export const defaultMintClaimCallback: MintCallback<
           errResp,
         },
       },
-      `An error occurred requesting "/auth/claim" endpoint`
+      errStmt
     );
   }
 
@@ -636,7 +489,7 @@ export function getEnv({
   return defaultValue;
 }
 
-export function sendRequest(
+export async function sendRequest(
   url: string,
   req: RequestInit,
   requestId: string
@@ -658,14 +511,14 @@ export function sendRequest(
       return data;
     })
     .catch((error: NodeErrorV3) => {
-      logErrorWithRequestId(
+      logger.error({
         requestId,
-        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+        msg: `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
           error?.message || error?.details
             ? `Error is ${error.message} - ${error.details}`
             : ''
-        }`
-      );
+        }`,
+      });
       return Promise.reject(error);
     });
 }

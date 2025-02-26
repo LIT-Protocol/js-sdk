@@ -1,7 +1,5 @@
-import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
-import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import {
   encryptUint8Array,
@@ -11,8 +9,10 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+
+import { AccessControlConditions } from 'local-tests/setup/accs/accs';
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
@@ -40,7 +40,7 @@ export const testUseEoaSessionSigsToEncryptDecryptUint8Array = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  console.log('encryptRes:', encryptRes);
 
   // await 5 seconds for the encryption to be mined
 

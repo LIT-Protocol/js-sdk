@@ -9,6 +9,8 @@
  *
  * Source: https://github.com/cosmos/cosmjs/blob/4c8b278c1d988be3de415f767ce2f65ab3d40bd9/packages/proto-signing/src/directsecp256k1wallet.ts
  */
+import { pino, Logger } from 'pino';
+
 import {
   Coin,
   encodeSecp256k1Signature,
@@ -56,6 +58,7 @@ const DEFAULT_COSMOS_RPC_URL =
 export class PKPCosmosWallet
   implements PKPWallet, OfflineDirectSigner, PKPClientHelpers
 {
+  readonly #logger: Logger;
   private readonly pkpBase: PKPBase;
 
   // Address prefix for Bech32 addresses
@@ -73,6 +76,10 @@ export class PKPCosmosWallet
 
   constructor(prop: PKPCosmosWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
+    this.#logger = pino({
+      name: 'PKPCosmosWallet',
+      level: prop.debug ? 'debug' : 'info',
+    });
 
     // Set the address prefix and RPC URL based on the provided properties
     this.addressPrefix = prop.addressPrefix ?? 'cosmos';
@@ -204,7 +211,7 @@ export class PKPCosmosWallet
     );
 
     // Log the encoded signature.
-    this.pkpBase.log('stdSignature:', stdSignature);
+    this.#logger.debug('stdSignature:', stdSignature);
 
     // Return the signed transaction and encoded signature.
     return {
