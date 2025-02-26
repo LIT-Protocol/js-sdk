@@ -169,7 +169,11 @@ where
         Ok((r, s, v))
     }
 
-    fn signature_into_js(big_r: C::AffinePoint, s: C::Scalar, was_flipped: bool) -> JsResult<EcdsaSignature> {
+    fn signature_into_js(
+        big_r: C::AffinePoint,
+        s: C::Scalar,
+        was_flipped: bool,
+    ) -> JsResult<EcdsaSignature> {
         let r = Self::x_coordinate(&big_r).to_repr();
         let s = s.to_repr();
         let mut v = u8::conditional_select(&0, &1, big_r.y_is_odd());
@@ -251,85 +255,6 @@ where
         } else {
             Err(JsError::new("invalid signature"))
         }
-    }
-}
-
-/// Perform all three functions at once
-#[wasm_bindgen(js_name = "ecdsaCombineAndVerifyWithDerivedKey")]
-pub fn ecdsa_combine_and_verify_with_derived_key(
-    variant: EcdsaVariant,
-    pre_signature: Uint8Array,
-    signature_shares: Vec<Uint8Array>,
-    message_hash: Uint8Array,
-    id: Uint8Array,
-    public_keys: Vec<Uint8Array>,
-) -> JsResult<EcdsaSignature> {
-    match variant {
-        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine_and_verify_with_derived_key(
-            pre_signature,
-            signature_shares,
-            message_hash,
-            id,
-            public_keys,
-        ),
-        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine_and_verify_with_derived_key(
-            pre_signature,
-            signature_shares,
-            message_hash,
-            id,
-            public_keys,
-        ),
-    }
-}
-
-/// Perform combine and verify with a specified public key
-#[wasm_bindgen(js_name = "ecdsaCombineAndVerify")]
-pub fn ecdsa_combine_and_verify(
-    variant: EcdsaVariant,
-    pre_signature: Uint8Array,
-    signature_shares: Vec<Uint8Array>,
-    message_hash: Uint8Array,
-    public_key: Uint8Array,
-) -> JsResult<EcdsaSignature> {
-    match variant {
-        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine_and_verify_with_specified_key(
-            pre_signature,
-            signature_shares,
-            message_hash,
-            public_key,
-        ),
-        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine_and_verify_with_specified_key(
-            pre_signature,
-            signature_shares,
-            message_hash,
-            public_key,
-        ),
-    }
-}
-
-/// Combine ECDSA signatures shares
-#[wasm_bindgen(js_name = "ecdsaCombine")]
-pub fn ecdsa_combine(
-    variant: EcdsaVariant,
-    presignature: Uint8Array,
-    signature_shares: Vec<Uint8Array>,
-) -> JsResult<EcdsaSignature> {
-    match variant {
-        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine(presignature, signature_shares),
-        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine(presignature, signature_shares),
-    }
-}
-
-#[wasm_bindgen(js_name = "ecdsaVerify")]
-pub fn ecdsa_verify(
-    variant: EcdsaVariant,
-    message_hash: Uint8Array,
-    public_key: Uint8Array,
-    signature: EcdsaSignature,
-) -> JsResult<()> {
-    match variant {
-        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::verify(message_hash, public_key, signature),
-        EcdsaVariant::P256 => Ecdsa::<NistP256>::verify(message_hash, public_key, signature),
     }
 }
 

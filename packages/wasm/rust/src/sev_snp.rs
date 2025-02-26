@@ -138,7 +138,7 @@ fn get_expected_report_data(
         hasher.update(value);
     }
 
-    if signatures.len() > 0 {
+    if !signatures.is_empty() {
         hasher.update("signatures");
 
         for idx in 0..((signatures.len() - 1) as usize) {
