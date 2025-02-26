@@ -40,7 +40,6 @@
     "@cosmjs/proto-signing": "0.30.1",
     "@cosmjs/stargate": "0.30.1",
     "@dotenvx/dotenvx": "^1.6.4",
-    "@lit-protocol/accs-schemas": "^0.0.22",
     "@lit-protocol/contracts": "^0.0.86",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
@@ -53,7 +52,6 @@
     "@walletconnect/utils": "2.9.2",
     "@walletconnect/web3wallet": "1.8.8",
     "abitype": "^1.0.8",
-    "ajv": "^8.12.0",
     "base64url": "^3.0.1",
     "bech32": "^2.0.0",
     "cbor-web": "^9.0.2",
@@ -71,7 +69,9 @@
     "tslib": "^2.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "zod": "^3.24.2",
+    "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
     "@nx/devkit": "17.3.0",

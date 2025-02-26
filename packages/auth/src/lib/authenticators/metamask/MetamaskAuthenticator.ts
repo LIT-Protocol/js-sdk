@@ -5,6 +5,7 @@ import {
   LIT_CHAINS,
   AUTH_METHOD_TYPE,
   InvalidArgumentException,
+  LitEVMChainKeys,
   WrongParamFormat,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -129,7 +130,7 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
     signer: ethers.Signer | ethers.Wallet | EthWalletAuthenticateOptions;
     litNodeClient: LitNodeClient;
     address?: string;
-    chain?: string;
+    chain?: LitEVMChainKeys;
     expiration?: string;
     domain?: string;
     origin?: string;

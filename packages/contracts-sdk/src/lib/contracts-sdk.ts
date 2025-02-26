@@ -420,7 +420,7 @@ export class LitContracts {
   public static async getLitContract(
     network: LIT_NETWORKS_KEYS,
     litContractName: ContractName,
-    rpcUrl = RPC_URL_BY_NETWORK[network],
+    rpcUrl: string = RPC_URL_BY_NETWORK[network],
     context?: LitContractContext | LitContractResolverContext,
     signer?: ethers.Signer | ethers.Wallet
   ): Promise<ethers.Contract> {
@@ -1534,19 +1534,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           ownerAddress
         );
 
-        const arr = [];
+        const arr: TokenInfo[] = [];
 
         for (const tokenId of tokenIds) {
           const pubKey = await pkpNftContract['getPubkey'](tokenId);
-          const addrs: TokenInfo = await derivedAddresses({
+          const addrs = await derivedAddresses({
             publicKey: pubKey,
           });
 
-          if (!addrs.tokenId) {
-            addrs.tokenId = tokenId;
-          }
-
-          arr.push(addrs);
+          arr.push({
+            tokenId,
+            ...addrs,
+          });
         }
 
         return arr;

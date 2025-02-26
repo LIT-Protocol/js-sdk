@@ -1,7 +1,5 @@
-import { LitNodeClientConfig } from '@lit-protocol/types';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import Ajv, { JSONSchemaType } from 'ajv';
 
 import {
   ABI_ERC20,
@@ -13,6 +11,7 @@ import {
   LIT_NETWORK_VALUES,
   LOG_LEVEL,
   LOG_LEVEL_VALUES,
+  LitEVMChainKeys,
   NetworkError,
   RELAYER_URL_BY_NETWORK,
   RemovedFunctionError,
@@ -25,12 +24,12 @@ import {
   AuthSig,
   NodeErrorV3,
   ClaimResult,
+  LitNodeClientConfig,
   MintCallback,
   RelayClaimProcessor,
 } from '@lit-protocol/types';
 
 const logBuffer: any[][] = [];
-const ajv = new Ajv();
 
 // Module scoped variable to store the LitNodeClientConfig passed to LitCore
 let litConfig: LitNodeClientConfig | undefined;
@@ -316,55 +315,6 @@ export const checkType = ({
 };
 
 /**
- * Check if the given value complies with the given schema
- * If not, throw `invalidParamType` error
- *
- * @param { any } value
- * @param { JSONSchemaType<any> } schema
- * @param { string } paramName
- * @param { string } functionName
- * @param { boolean } throwOnError
- *
- * @returns { Boolean } true/false
- */
-export const checkSchema = (
-  value: any,
-  schema: JSONSchemaType<any>,
-  paramName: string,
-  functionName: string,
-  throwOnError: boolean = true
-): boolean => {
-  let validate = schema.$id ? ajv.getSchema(schema.$id) : undefined;
-  if (!validate) {
-    validate = ajv.compile(schema);
-  }
-
-  const validates = validate(value);
-
-  const message = `FAILED schema validation for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(). Value: ${
-    value instanceof Object ? JSON.stringify(value) : value
-  }. Errors: ${JSON.stringify(validate.errors)}`;
-
-  if (!validates) {
-    if (throwOnError) {
-      throw new InvalidParamType(
-        {
-          info: {
-            value,
-            paramName,
-            functionName,
-          },
-        },
-        message
-      );
-    }
-    return false;
-  }
-
-  return true;
-};
-
-/**
  *
  * @param { AuthSig } authSig
  * @param { string } chain
@@ -501,7 +451,7 @@ export const isBrowser = () => {
  * Get the number of decimal places in a token
  *
  * @property { string } contractAddress The token contract address
- * @property { string } chain The chain on which the token is deployed
+ * @property { LitEVMChainKeys } chain The chain on which the token is deployed
  *
  * @returns { number } The number of decimal places in the token
  */
@@ -510,7 +460,7 @@ export const decimalPlaces = async ({
   chain,
 }: {
   contractAddress: string;
-  chain: Chain;
+  chain: LitEVMChainKeys;
 }): Promise<number> => {
   const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
 

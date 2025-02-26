@@ -1,13 +1,13 @@
 import {
-  LPACC_EVM_ATOM,
-  LPACC_EVM_BASIC,
-  LPACC_SOL,
-} from '@lit-protocol/accs-schemas';
+  AtomAcc,
+  EvmBasicAcc,
+  SolAcc,
+} from '@lit-protocol/access-control-conditions-schemas';
 
 export namespace AccessControlConditions {
   export const getEvmBasicAccessControlConditions = ({
     userAddress,
-  }): LPACC_EVM_BASIC[] => {
+  }): EvmBasicAcc[] => {
     return [
       {
         contractAddress: '',
@@ -25,7 +25,7 @@ export namespace AccessControlConditions {
 
   export const getSolBasicAccessControlConditions = ({
     userAddress,
-  }): LPACC_SOL[] => {
+  }): SolAcc[] => {
     return [
       {
         method: '',
@@ -45,7 +45,7 @@ export namespace AccessControlConditions {
 
   export const getCosmosBasicAccessControlConditions = ({
     userAddress,
-  }): LPACC_EVM_ATOM[] => {
+  }): AtomAcc[] => {
     return [
       {
         conditionType: 'cosmos',

@@ -1,0 +1,26 @@
+{
+  "name": "@lit-protocol/access-control-conditions-schemas",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/access-control-conditions-schemas"
+  },
+  "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
+  "tags": [
+    "universal"
+  ],
+  "version": "8.0.0-alpha.0",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}
