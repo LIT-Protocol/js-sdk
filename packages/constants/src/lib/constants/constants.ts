@@ -923,6 +923,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  moksha: {
+    contractAddress: null,
+    chainId: 1480,
+    name: 'Vana',
+    symbol: 'VANA',
+    decimals: 18,
+    rpcUrls: ['https://rpc.moksha.vana.org'],
+    blockExplorerUrls: ['https://moksha.vanascan.io'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**
