@@ -18,17 +18,6 @@ export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
 
 /**
- * Check if OAuth provider is supported
- *
- * @param provider {string} - Auth provider name
- *
- * @returns {boolean} - True if provider is supported
- */
-export function isSocialLoginSupported(provider: string): boolean {
-  return ['google', 'discord'].includes(provider);
-}
-
-/**
  * Create login url using the parameters provided as arguments when initializing the client
  *
  * @param {string} provider - Social login provider to use
@@ -78,11 +67,11 @@ function getLoginRoute(provider: string): string {
 /**
  * Create query params string from given object
  *
- * @param params {any} - Object of query params
+ * @param params {Record<string, unknown>} - Object of query params
  *
  * @returns {string} - Query string
  */
-function createQueryParams(params: any): string {
+function createQueryParams(params: Record<string, unknown>): string {
   // Strip undefined values from params
   const filteredParams = Object.keys(params)
     .filter((k) => typeof params[k] !== 'undefined')

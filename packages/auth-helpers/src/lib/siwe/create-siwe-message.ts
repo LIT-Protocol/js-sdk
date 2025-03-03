@@ -62,11 +62,12 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
         //   resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
         //   ability: LIT_ABILITY.RateLimitIncreaseAuth,
 
-        // @ts-ignore - TODO: new resource to be used
+        // @ts-expect-error - TODO: new resource to be used
         resource: null,
 
-        // @ts-ignore - TODO: new ability to be used
+        // @ts-expect-error - TODO: new ability to be used
         ability: null,
+        // @ts-expect-error Complaining because of index signature in destination
         data: capabilities,
       },
     ];

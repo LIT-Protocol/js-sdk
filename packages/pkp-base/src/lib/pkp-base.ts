@@ -14,8 +14,8 @@ import {
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
+import { publicKeyCompress } from '@lit-protocol/crypto';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { publicKeyConvert } from '@lit-protocol/misc';
 import {
   AuthenticationContext,
   JsonExecutionSdkParams,
@@ -24,25 +24,6 @@ import {
   SigResponse,
   RPCUrls,
 } from '@lit-protocol/types';
-
-/**
- * Compresses a given public key.
- * @param {string} pubKey - The public key to be compressed.
- * @returns {string} - The compressed public key.
- */
-const compressPubKey = (pubKey: string): string => {
-  const testBuffer = Buffer.from(pubKey, 'hex');
-  if (testBuffer.length === 64) {
-    pubKey = '04' + pubKey;
-  }
-
-  // const hex = Buffer.from(pubKey, 'hex');
-  const uint8array = Buffer.from(pubKey, 'hex');
-  const compressedKey = publicKeyConvert(uint8array, true);
-  const hex = Buffer.from(compressedKey).toString('hex');
-
-  return hex;
-};
 
 /**
  * A base class that can be shared between Ethers and Cosmos signers.
@@ -134,13 +115,32 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
+   * Compresses a given public key.
+   * @param {string} pubKey - The public key to be compressed.
+   * @returns {string} - The compressed public key.
+   */
+  private compressPubKey(pubKey: string): string {
+    const testBuffer = Buffer.from(pubKey, 'hex');
+    if (testBuffer.length === 64) {
+      pubKey = '04' + pubKey;
+    }
+
+    // const hex = Buffer.from(pubKey, 'hex');
+    const uint8array = Buffer.from(pubKey, 'hex');
+    const compressedKey = publicKeyCompress(uint8array);
+    const hex = Buffer.from(compressedKey).toString('hex');
+
+    return hex;
+  }
+
+  /**
    * Sets the compressed public key and its buffer representation.
    *
    * @param {PKPBaseProp} prop - The properties for the PKPBase instance.
    */
   private setCompressedPubKeyAndBuffer(prop: PKPBaseProp): void | never {
     try {
-      this.compressedPubKey = compressPubKey(prop.pkpPubKey);
+      this.compressedPubKey = this.compressPubKey(prop.pkpPubKey);
       this.compressedPubKeyBuffer = Buffer.from(this.compressedPubKey, 'hex');
     } catch (e) {
       throw new UnknownError(

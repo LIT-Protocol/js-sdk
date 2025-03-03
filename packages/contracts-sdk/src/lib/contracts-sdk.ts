@@ -1,6 +1,18 @@
 import {
+  Abi,
+  AbiFunction,
+  AbiParametersToPrimitiveTypes,
+  ExtractAbiFunction,
+  ExtractAbiFunctionNames,
+} from 'abitype';
+import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
+import { computeAddress } from 'ethers/lib/utils';
+import { Logger, pino } from 'pino';
+
+import {
   AUTH_METHOD_SCOPE_VALUES,
   AUTH_METHOD_TYPE_VALUES,
+  Environment,
   HTTP,
   HTTP_BY_NETWORK,
   HTTPS,
@@ -15,7 +27,6 @@ import {
   TransactionError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
-import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
 import {
   ContractName,
   EpochInfo,
@@ -29,18 +40,9 @@ import {
   MintWithAuthResponse,
   TokenInfo,
 } from '@lit-protocol/types';
-import {
-  Abi,
-  AbiFunction,
-  AbiParametersToPrimitiveTypes,
-  ExtractAbiFunction,
-  ExtractAbiFunctionNames,
-} from 'abitype';
-import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
-import { computeAddress } from 'ethers/lib/utils';
-import { Logger, pino } from 'pino';
 
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
+import { derivedAddresses } from './helpers/addresses';
 import {
   CIDParser,
   getBytes32FromMultihash,
@@ -159,7 +161,7 @@ export class LitContracts {
     let SETUP_DONE = false;
     if (this.provider) {
       this.#logger.info('Using provided provider');
-    } else if (isBrowser() && !this.signer) {
+    } else if (Environment.isBrowser && !this.signer) {
       this.#logger.info("----- We're in the browser! -----");
 
       const web3Provider = window.ethereum;
@@ -209,7 +211,7 @@ export class LitContracts {
     // ----------------------------------------------
     //          (Node) Setting up Provider
     // ----------------------------------------------
-    else if (isNode()) {
+    else if (Environment.isNode) {
       this.#logger.info("----- We're in node! -----");
       this.provider = new ethers.providers.StaticJsonRpcProvider({
         url: this.rpc,
@@ -288,7 +290,7 @@ export class LitContracts {
       // ----------------------------------------
       //          Ask Metamask to sign
       // ----------------------------------------
-      if (isBrowser() && wallet && !SETUP_DONE) {
+      if (Environment.isBrowser && wallet && !SETUP_DONE) {
         // this.#logger.info('HERE????');
         this.#logger.info('this.signer:', this.signer);
         this.signer = wallet.getSigner();

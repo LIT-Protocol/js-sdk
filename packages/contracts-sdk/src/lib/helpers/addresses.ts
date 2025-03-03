@@ -1,9 +1,9 @@
 import { createHash } from 'crypto';
-import { pino } from 'pino';
 
 import { bech32 } from 'bech32';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
+import { pino } from 'pino';
 import { z } from 'zod';
 import { fromError, isZodErrorLike } from 'zod-validation-error';
 
@@ -12,78 +12,10 @@ import {
   NoWalletException,
   ParamsMissingError,
 } from '@lit-protocol/constants';
+import { publicKeyCompress } from '@lit-protocol/crypto';
 import { DerivedAddresses } from '@lit-protocol/types';
 
 const logger = pino({ level: 'info', name: 'addresses' });
-
-/**
- * Converts a public key between compressed and uncompressed formats.
- *
- * @param publicKey - Public key as a Buffer (33 bytes compressed or 65 bytes uncompressed)
- * @param compressed - Boolean flag indicating whether the output should be compressed
- * @returns Converted public key as a Buffer
- */
-export function publicKeyConvert(
-  publicKey: Buffer,
-  compressed: boolean = true
-): Buffer {
-  if (compressed) {
-    // Compress the public key (if it's not already compressed)
-    if (publicKey.length === 65 && publicKey[0] === 0x04) {
-      const x = publicKey.subarray(1, 33);
-      const y = publicKey.subarray(33, 65);
-      const prefix = y[y.length - 1] % 2 === 0 ? 0x02 : 0x03;
-      return Buffer.concat([Buffer.from([prefix]), x]);
-    }
-  } else {
-    // Decompress the public key
-    if (
-      publicKey.length === 33 &&
-      (publicKey[0] === 0x02 || publicKey[0] === 0x03)
-    ) {
-      const x = publicKey.subarray(1);
-      const y = decompressY(publicKey[0], x);
-      return Buffer.concat([Buffer.from([0x04]), x, y]);
-    }
-  }
-  // Return the original if no conversion is needed
-  return publicKey;
-}
-
-/**
- * Decompresses the y-coordinate of a compressed public key.
- *
- * @param prefix - The first byte of the compressed public key (0x02 or 0x03)
- * @param x - The x-coordinate of the public key
- * @returns The decompressed y-coordinate as a Buffer
- */
-function decompressY(prefix: number, x: Buffer): Buffer {
-  const p = BigInt(
-    '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'
-  );
-  const a = BigInt('0');
-  const b = BigInt('7');
-
-  const xBigInt = BigInt('0x' + x.toString('hex'));
-  const rhs = (xBigInt ** 3n + a * xBigInt + b) % p;
-  const yBigInt = modSqrt(rhs, p);
-
-  const isEven = yBigInt % 2n === 0n;
-  const y = isEven === (prefix === 0x02) ? yBigInt : p - yBigInt;
-
-  return Buffer.from(y.toString(16).padStart(64, '0'), 'hex');
-}
-
-/**
- * Computes the modular square root of a number.
- *
- * @param a - The number to find the square root of
- * @param p - The modulus
- * @returns The square root modulo p
- */
-function modSqrt(a: bigint, p: bigint): bigint {
-  return a ** ((p + 1n) / 4n) % p;
-}
 
 /**
  * Derives a Bitcoin address (P2PKH) from a public key.
@@ -136,7 +68,7 @@ function deriveCosmosAddress(
 
   // If the Ethereum public key is uncompressed (130 characters), compress it
   if (pubKeyBuffer.length === 65 && pubKeyBuffer[0] === 0x04) {
-    pubKeyBuffer = Buffer.from(publicKeyConvert(pubKeyBuffer, true));
+    pubKeyBuffer = Buffer.from(publicKeyCompress(pubKeyBuffer));
   }
 
   // Hash the compressed public key with SHA-256

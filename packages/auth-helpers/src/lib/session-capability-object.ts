@@ -1,5 +1,7 @@
 import { SiweMessage } from 'siwe';
+
 import { ISessionCapabilityObject } from '@lit-protocol/types';
+
 import { AttenuationsObject, CID } from './models';
 import { RecapSessionCapabilityObject } from './recap/recap-session-capability-object';
 
@@ -19,7 +21,7 @@ import { RecapSessionCapabilityObject } from './recap/recap-session-capability-o
  */
 export function newSessionCapabilityObject(
   attenuations: AttenuationsObject = {},
-  proof: Array<CID> = []
+  proof: CID[] = []
 ): ISessionCapabilityObject {
   return new RecapSessionCapabilityObject(attenuations, proof);
 }

@@ -3,6 +3,7 @@ import { pino, Logger } from 'pino';
 
 import {
   CENTRALISATION_BY_NETWORK,
+  Environment,
   HTTP,
   HTTPS,
   InitError,
@@ -28,12 +29,6 @@ import {
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
-  isBrowser,
-  isNode,
-  mostCommonString,
-  sendRequest,
-} from '@lit-protocol/misc';
-import {
   AuthSig,
   BlockHashErrorResponse,
   CustomNetwork,
@@ -47,7 +42,8 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 
-import { composeLitUrl } from './endpoint-version';
+import { composeLitUrl } from './helpers/endpoint-version';
+import { mostCommonValue } from './helpers/most-common-value';
 import {
   CoreNodeConfig,
   EpochCache,
@@ -193,7 +189,7 @@ export class LitCore {
         value: this.config.storageProvider?.provider,
       });
     } else if (
-      isNode() &&
+      Environment.isNode &&
       !globalThis.localStorage &&
       !this.config.storageProvider?.provider
     ) {
@@ -514,7 +510,7 @@ export class LitCore {
     });
 
     // browser only
-    if (isBrowser()) {
+    if (Environment.isBrowser) {
       document.dispatchEvent(new Event('lit-ready'));
     }
   }
@@ -674,7 +670,7 @@ export class LitCore {
     serverKeys: Record<string, JsonHandshakeResponse>;
     requestId: string;
   }): CoreNodeConfig {
-    const latestBlockhash = mostCommonString(
+    const latestBlockhash = mostCommonValue(
       Object.values(serverKeys).map(
         (keysFromSingleNode) => keysFromSingleNode.latestBlockhash
       )
@@ -699,22 +695,22 @@ export class LitCore {
 
     // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
     return {
-      subnetPubKey: mostCommonString(
+      subnetPubKey: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.subnetPubKey
         )
       )!,
-      networkPubKey: mostCommonString(
+      networkPubKey: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKey
         )
       )!,
-      networkPubKeySet: mostCommonString(
+      networkPubKeySet: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKeySet
         )
       )!,
-      hdRootPubkeys: mostCommonString(
+      hdRootPubkeys: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.hdRootPubkeys
         )
@@ -965,6 +961,41 @@ export class LitCore {
   }
 
   // ==================== SENDING COMMAND ====================
+  private async _sendRequest(
+    url: string,
+    req: RequestInit,
+    requestId: string
+  ): Promise<Response> {
+    try {
+      const response = await fetch(url, req);
+      const isJson = response.headers
+        .get('content-type')
+        ?.includes('application/json');
+
+      const data = isJson ? await response.json() : null;
+
+      if (!response.ok) {
+        // get error message from body or default to response status
+        const error = data || response.status;
+        return Promise.reject(error);
+      }
+
+      return data;
+    } catch (e) {
+      throw new NetworkError(
+        {
+          info: {
+            url,
+            req,
+            requestId,
+          },
+          cause: e,
+        },
+        `Error sending request to ${url}`
+      );
+    }
+  }
+
   /**
    *
    * Send a command to nodes
@@ -1007,7 +1038,7 @@ export class LitCore {
       body: JSON.stringify(data),
     };
 
-    return sendRequest(url, req, requestId);
+    return this._sendRequest(url, req, requestId);
   };
 
   /**
@@ -1156,7 +1187,7 @@ export class LitCore {
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
     const mostCommonError = JSON.parse(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mostCommonString(errors.map((r: any) => JSON.stringify(r)))!
+      mostCommonValue(errors.map((r: any) => JSON.stringify(r)))!
     );
 
     this.#logger.error({

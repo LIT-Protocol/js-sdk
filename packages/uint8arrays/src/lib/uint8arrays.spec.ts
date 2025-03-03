@@ -1,9 +1,8 @@
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-  base64ToUint8Array,
-} from './uint8arrays';
-import { base64StringToBlob } from '@lit-protocol/misc-browser';
+import { uint8arrayFromString, uint8arrayToString } from './uint8arrays';
+
+const base64StringToBlob = (base64String: string): Blob => {
+  return new Blob([uint8arrayFromString(base64String, 'base64urlpad')]);
+};
 
 describe('Encoding Functions', () => {
   const testCases = [

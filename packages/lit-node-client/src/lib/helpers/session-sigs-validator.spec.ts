@@ -1,4 +1,5 @@
 import { AuthSig } from '@lit-protocol/types';
+
 import { validateSessionSigs } from './session-sigs-validator';
 
 describe('validateSessionSigs', () => {

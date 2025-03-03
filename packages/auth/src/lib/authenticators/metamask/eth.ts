@@ -19,6 +19,7 @@ import * as naclUtil from 'tweetnacl-util';
 import {
   ConstantValues,
   ConstantKeys,
+  Environment,
   EITHER_TYPE,
   ELeft,
   ERight,
@@ -33,12 +34,7 @@ import {
   WrongParamFormat,
   LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
-import {
-  isBrowser,
-  isNode,
-  numberToHex,
-  validateSessionSig,
-} from '@lit-protocol/misc';
+import { validateSessionSig } from '@lit-protocol/lit-node-client';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
@@ -221,7 +217,10 @@ export function isSignedMessageExpired(signedMessage: string) {
  *
  * @returns { boolean }
  */
-export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
+export const getMustResign = (
+  authSig: AuthSig,
+  resources: unknown
+): boolean => {
   let mustResign!: boolean;
 
   // if it's not expired, then we don't need to resign
@@ -294,7 +293,7 @@ export const connectWeb3 = async ({
   walletConnectProjectId,
 }: ConnectWeb3): Promise<ConnectWeb3Result> => {
   // -- check if it's nodejs
-  if (isNode()) {
+  if (Environment.isNode) {
     logger.info('connectWeb3 is not supported in nodejs.');
     return { web3: null, account: null };
   }
@@ -318,7 +317,7 @@ export const connectWeb3 = async ({
       },
     };
 
-    if (isBrowser()) {
+    if (Environment.isBrowser) {
       litWCProvider = wcProvider;
     }
   }
@@ -331,7 +330,7 @@ export const connectWeb3 = async ({
 
   logger.info('got provider');
 
-  // @ts-ignore
+  // @ts-expect-error provider is not typed
   const web3 = new Web3Provider(provider);
 
   // trigger metamask popup
@@ -339,7 +338,7 @@ export const connectWeb3 = async ({
     deprecated(
       '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
     );
-    // @ts-ignore
+    // @ts-expect-error provider is not typed
     await provider.enable();
   } catch (e) {
     logger.info(
@@ -366,13 +365,12 @@ export const connectWeb3 = async ({
  * @return { void }
  */
 export const disconnectWeb3 = (): void => {
-  if (isNode()) {
+  if (Environment.isNode) {
     logger.info('disconnectWeb3 is not supported in nodejs.');
     return;
   }
 
-  // @ts-ignore
-  if (isBrowser() && litWCProvider) {
+  if (Environment.isBrowser && litWCProvider) {
     try {
       litWCProvider.disconnect();
     } catch (err) {
@@ -409,7 +407,7 @@ export const checkAndSignEVMAuthMessage = async ({
   nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
-  if (isNode()) {
+  if (Environment.isNode) {
     logger.info(
       'checkAndSignEVMAuthMessage is not supported in nodejs.  You can create a SIWE on your own using the SIWE package.'
     );
@@ -422,7 +420,7 @@ export const checkAndSignEVMAuthMessage = async ({
   }
 
   // --- scoped methods ---
-  const _throwIncorrectNetworkError = (error: any) => {
+  const _throwIncorrectNetworkError = (error: any): never => {
     if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {
       throw new WrongNetworkException(
         {
@@ -451,7 +449,7 @@ export const checkAndSignEVMAuthMessage = async ({
   // -- 2. prepare all required variables
   const currentChainIdOrError = await getChainId(chain, web3);
   const selectedChainId: number = selectedChain.chainId;
-  const selectedChainIdHex: string = numberToHex(selectedChainId);
+  const selectedChainIdHex: string = `0x${selectedChainId.toString(16)}`;
   let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
   logger.info('currentChainIdOrError:', currentChainIdOrError);
@@ -518,7 +516,7 @@ export const checkAndSignEVMAuthMessage = async ({
             method: 'wallet_addEthereumChain',
             params: data,
           });
-        } catch (addError: any) {
+        } catch (addError) {
           _throwIncorrectNetworkError(addError);
         }
       } else {
@@ -551,7 +549,7 @@ export const checkAndSignEVMAuthMessage = async ({
         type: EITHER_TYPE.SUCCESS,
         result: JSON.stringify(authSig),
       };
-    } catch (e: any) {
+    } catch (e) {
       throw new UnknownError(
         {
           info: {
@@ -699,7 +697,7 @@ export const signAndSaveAuthMessage = async ({
   nonce,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   // check if it's nodejs
-  if (isNode()) {
+  if (Environment.isNode) {
     logger.info('checkAndSignEVMAuthMessage is not supported in nodejs.');
     return {
       sig: '',
@@ -748,7 +746,7 @@ export const signAndSaveAuthMessage = async ({
   };
 
   // -- 4. store auth and a keypair in localstorage for communication with sgx
-  if (isBrowser()) {
+  if (Environment.isBrowser) {
     localStorage.setItem(
       LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
       JSON.stringify(authSig)
@@ -756,7 +754,7 @@ export const signAndSaveAuthMessage = async ({
   }
   const commsKeyPair = nacl.box.keyPair();
 
-  if (isBrowser()) {
+  if (Environment.isBrowser) {
     localStorage.setItem(
       LOCAL_STORAGE_KEYS.KEY_PAIR,
       JSON.stringify({
@@ -784,7 +782,7 @@ export const signMessage = async ({
   account,
 }: SignMessageParams): Promise<SignedMessage> => {
   // check if it's nodejs
-  if (isNode()) {
+  if (Environment.isNode) {
     logger.info('signMessage is not supported in nodejs.');
     return {
       signature: '',
@@ -846,7 +844,7 @@ export const signMessageAsync = async (
   message: string
 ): Promise<any | JsonRpcSigner> => {
   // check if it's nodejs
-  if (isNode()) {
+  if (Environment.isNode) {
     logger.info('signMessageAsync is not supported in nodejs.');
     return null;
   }

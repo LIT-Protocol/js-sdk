@@ -1,5 +1,6 @@
-import { NodeAttestation } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+
+import { NodeAttestation } from '@lit-protocol/types';
 
 export interface SendNodeCommand {
   url: string;

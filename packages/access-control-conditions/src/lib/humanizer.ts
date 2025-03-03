@@ -1,8 +1,13 @@
+import { Contract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
 import { pino } from 'pino';
 
-import { InvalidUnifiedConditionType } from '@lit-protocol/constants';
-import { decimalPlaces } from '@lit-protocol/misc';
+import {
+  LIT_CHAINS,
+  LitEVMChainKeys,
+  InvalidUnifiedConditionType,
+} from '@lit-protocol/constants';
 import {
   AccessControlConditions,
   AccsCOSMOSParams,
@@ -12,7 +17,37 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
+import ABI_ERC20 from './abis/ERC20.json';
+
 const logger = pino({ level: 'info', name: 'humanizer' });
+
+/**
+ *
+ * Get the number of decimal places in a token
+ *
+ * @property { string } contractAddress The token contract address
+ * @property { LitEVMChainKeys } chain The chain on which the token is deployed
+ *
+ * @returns { number } The number of decimal places in the token
+ */
+export const decimalPlaces = async ({
+  contractAddress,
+  chain,
+}: {
+  contractAddress: string;
+  chain: LitEVMChainKeys;
+}): Promise<number> => {
+  const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
+
+  const web3 = new JsonRpcProvider({
+    url: rpcUrl,
+    skipFetchSetup: true,
+  });
+
+  const contract = new Contract(contractAddress, ABI_ERC20.abi, web3); // TODO drop the full ABI and just define "decimals"
+
+  return await contract['decimals']();
+};
 
 /**
  *
@@ -61,7 +96,7 @@ export const humanizeComparator = (comparator: string): string | undefined => {
   const selected: string | undefined = list[comparator];
 
   if (!selected) {
-    logger.info(`Unregonized comparator ${comparator}`);
+    logger.info(`Unrecognized comparator ${comparator}`);
     return;
   }
 

@@ -1,10 +1,7 @@
-import { AuthSig } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
 import { ethers } from 'ethers';
 import { SiweError, SiweErrorType, SiweMessage } from 'siwe';
+
+import { AuthSig } from '@lit-protocol/types';
 
 const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
 
@@ -28,7 +25,7 @@ export const blsSessionSigVerify = async (
   authSig: AuthSig,
   authSigSiweMessage: SiweMessage
 ): Promise<void> => {
-  let sigJson = JSON.parse(authSig.sig);
+  const sigJson = JSON.parse(authSig.sig);
   // we do not nessesarly need to use ethers here but was a quick way
   // to get verification working.
   const eip191Hash = ethers.utils.hashMessage(authSig.signedMessage);

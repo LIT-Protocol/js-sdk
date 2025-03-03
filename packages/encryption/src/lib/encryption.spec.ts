@@ -1,5 +1,8 @@
-import { isValidBooleanExpression } from '@lit-protocol/misc';
-import { AccsDefaultParams } from '@lit-protocol/types';
+import { isValidBooleanExpression } from '@lit-protocol/access-control-conditions';
+import {
+  AccsDefaultParams,
+  UnifiedAccessControlConditions,
+} from '@lit-protocol/types';
 
 const conditionA: AccsDefaultParams = {
   contractAddress: '',
@@ -25,9 +28,13 @@ const conditionB: AccsDefaultParams = {
   },
 };
 
-const groupValid: any = [conditionA, { operator: 'or' }, conditionB];
+const groupValid: UnifiedAccessControlConditions = [
+  conditionA,
+  { operator: 'or' },
+  conditionB,
+];
 
-const groupInvalid: any = [
+const groupInvalid: UnifiedAccessControlConditions = [
   conditionA,
   { operator: 'or' },
   conditionB,

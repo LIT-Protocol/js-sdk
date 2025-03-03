@@ -1,5 +1,3 @@
-import { fromError, isZodErrorLike } from 'zod-validation-error';
-
 import {
   EvmBasicConditionsSchema,
   EvmContractConditionsSchema,
@@ -7,7 +5,7 @@ import {
   SolRpcConditionsSchema,
   UnifiedConditionsSchema,
 } from '@lit-protocol/access-control-conditions-schemas';
-import { InvalidArgumentException } from '@lit-protocol/constants';
+import { applySchemaWithValidation } from '@lit-protocol/schemas';
 import {
   AccessControlConditions,
   EvmContractConditions,
@@ -16,30 +14,6 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-function formatZodError(accs: unknown, e: unknown): never {
-  throw new InvalidArgumentException(
-    {
-      info: {
-        accs,
-      },
-      cause: isZodErrorLike(e) ? fromError(e) : e,
-    },
-    'Invalid access control conditions. Check error cause for more details.'
-  );
-}
-
-async function validateSchema<T>(
-  accs: T,
-  schema: { parse: (arg: unknown) => void }
-): Promise<true> {
-  try {
-    schema.parse(accs);
-  } catch (e) {
-    formatZodError(accs, e);
-  }
-  return true;
-}
-
 /**
  * Validates Multiple access control conditions schema
  * @param { MultipleAccessControlConditions } accs
@@ -47,7 +21,13 @@ async function validateSchema<T>(
 export const validateAccessControlConditions = async (
   accs: MultipleAccessControlConditions
 ): Promise<true> => {
-  return validateSchema(accs, MultipleAccessControlConditionsSchema);
+  applySchemaWithValidation(
+    'validateAccessControlConditions',
+    accs,
+    MultipleAccessControlConditionsSchema
+  );
+
+  return true;
 };
 
 /**
@@ -57,7 +37,13 @@ export const validateAccessControlConditions = async (
 export const validateAccessControlConditionsSchema = async (
   accs: AccessControlConditions
 ): Promise<true> => {
-  return validateSchema(accs, EvmBasicConditionsSchema);
+  applySchemaWithValidation(
+    'validateAccessControlConditionsSchema',
+    accs,
+    EvmBasicConditionsSchema
+  );
+
+  return true;
 };
 
 /**
@@ -67,7 +53,13 @@ export const validateAccessControlConditionsSchema = async (
 export const validateEVMContractConditionsSchema = async (
   accs: EvmContractConditions
 ): Promise<true> => {
-  return validateSchema(accs, EvmContractConditionsSchema);
+  applySchemaWithValidation(
+    'validateEVMContractConditionsSchema',
+    accs,
+    EvmContractConditionsSchema
+  );
+
+  return true;
 };
 
 /**
@@ -77,7 +69,13 @@ export const validateEVMContractConditionsSchema = async (
 export const validateSolRpcConditionsSchema = async (
   accs: SolRpcConditions
 ): Promise<true> => {
-  return validateSchema(accs, SolRpcConditionsSchema);
+  applySchemaWithValidation(
+    'validateSolRpcConditionsSchema',
+    accs,
+    SolRpcConditionsSchema
+  );
+
+  return true;
 };
 
 /**
@@ -87,5 +85,11 @@ export const validateSolRpcConditionsSchema = async (
 export const validateUnifiedAccessControlConditionsSchema = async (
   accs: UnifiedAccessControlConditions
 ): Promise<true> => {
-  return validateSchema(accs, UnifiedConditionsSchema);
+  applySchemaWithValidation(
+    'validateUnifiedAccessControlConditionsSchema',
+    accs,
+    UnifiedConditionsSchema
+  );
+
+  return true;
 };

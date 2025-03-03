@@ -88,7 +88,6 @@
     "@solana/web3.js": "^1.95.3",
     "bech32": "^2.0.0",
     "pako": "^2.1.0",
-    "@lit-protocol/misc": "8.0.0-alpha.0",
     "@lit-protocol/lit-node-client": "8.0.0-alpha.0",
     "@lit-protocol/auth": "8.0.0-alpha.0",
     "@lit-protocol/contracts": "^0.0.71"

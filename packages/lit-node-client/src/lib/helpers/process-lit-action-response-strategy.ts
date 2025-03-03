@@ -1,10 +1,6 @@
 import { pino } from 'pino';
 
-import {
-  LitActionResponseStrategy,
-  ResponseStrategy,
-  NodeShare,
-} from '@lit-protocol/types';
+import { LitActionResponseStrategy, NodeShare } from '@lit-protocol/types';
 
 const logger = pino({
   level: 'info',
@@ -13,14 +9,14 @@ const logger = pino({
 
 /**
  * Finds the most and least common object within an of objects array
- * @param responses any[]
- * @returns an object which contains both the least and most occuring item in the array
+ * @param responses T[]
+ * @returns an object which contains both the least and most occurring T items in the array
  */
-const _findFrequency = (responses: string[]): { min: any; max: any } => {
+const _findFrequency = <T>(responses: T[]): { min: T; max: T } => {
   const sorted = responses.sort(
-    (a: any, b: any) =>
-      responses.filter((v: any) => v === a).length -
-      responses.filter((v: any) => v === b).length
+    (a, b) =>
+      responses.filter((v) => v === a).length -
+      responses.filter((v) => v === b).length
   );
 
   return { min: sorted[0], max: sorted[sorted?.length - 1] };
@@ -29,7 +25,7 @@ const _findFrequency = (responses: string[]): { min: any; max: any } => {
 export const processLitActionResponseStrategy = (
   responses: NodeShare[],
   strategy: LitActionResponseStrategy
-): any => {
+) => {
   const executionResponses = responses.map((nodeResp) => {
     return nodeResp.response;
   });
@@ -56,7 +52,7 @@ export const processLitActionResponseStrategy = (
     }
   }
 
-  let respFrequency = _findFrequency(copiedExecutionResponses);
+  const respFrequency = _findFrequency(copiedExecutionResponses);
   if (strategy?.strategy === 'leastCommon') {
     logger.info(
       'strategy found to be most common, taking most common response from execution results'
@@ -71,6 +67,6 @@ export const processLitActionResponseStrategy = (
     logger.info(
       'no strategy found, using least common response object from execution results'
     );
-    respFrequency.min;
+    return respFrequency.min;
   }
 };

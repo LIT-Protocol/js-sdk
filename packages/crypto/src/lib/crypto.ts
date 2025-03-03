@@ -312,6 +312,37 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   return sessionKeyPair;
 };
 
+/**
+ * Converts a public key between compressed and uncompressed formats.
+ *
+ * @param publicKey - Public key as a Buffer (33 bytes compressed or 65 bytes uncompressed)
+ * @returns Converted public key as a Buffer
+ */
+export function publicKeyCompress(publicKey: Buffer): Buffer {
+  // Validate the public key length is either 33 (compressed) or 65 (uncompressed)
+  if (publicKey.length !== 33 && publicKey.length !== 65) {
+    throw new Error(
+      'Invalid public key length. Expected 33 (compressed) or 65 (uncompressed) bytes.'
+    );
+  }
+
+  // If the key is already compressed (33 bytes), return it unchanged.
+  if (publicKey.length === 33) {
+    return publicKey;
+  }
+
+  if (publicKey[0] !== 0x04) {
+    throw new Error(
+      'Invalid uncompressed public key format: does not start with 0x04.'
+    );
+  }
+
+  const x = publicKey.subarray(1, 33);
+  const y = publicKey.subarray(33, 65);
+  const prefix = y[y.length - 1] % 2 === 0 ? 0x02 : 0x03;
+  return Buffer.concat([Buffer.from([prefix]), x]);
+}
+
 async function doDecrypt(
   ciphertextBase64: string,
   shares: BlsSignatureShareJsonString[]
@@ -502,8 +533,3 @@ export const checkSevSnpAttestation = async (
   // pass base64 encoded report to wasm wrapper
   return sevSnpVerify(report, data, signatures, challenge, vcekCert);
 };
-
-declare global {
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var LitNodeClient: any;
-}

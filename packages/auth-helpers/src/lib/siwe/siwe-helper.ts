@@ -8,6 +8,7 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
+
 import { RecapSessionCapabilityObject } from '../recap/recap-session-capability-object';
 
 /**
@@ -102,7 +103,7 @@ export const addRecapToSiweMessage = async ({
     recapObject.addCapabilityForResource(
       request.resource,
       request.ability,
-      request.data || null
+      request.data
     );
 
     const verified = recapObject.verifyCapabilitiesForResource(
