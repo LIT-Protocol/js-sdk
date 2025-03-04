@@ -6,7 +6,6 @@ import { SiweMessage } from 'siwe';
 import {
   getFormattedAccessControlConditions,
   getHashedAccessControlConditions,
-  validateAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
 import {
   createSiweMessage,
@@ -16,7 +15,6 @@ import {
   generateAuthSig,
   generateSessionCapabilityObjectWithWildcards,
   LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
@@ -41,7 +39,7 @@ import {
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
 import { getNodePrices } from '@lit-protocol/contracts-sdk';
-import { composeLitUrl, LitCore } from '@lit-protocol/core';
+import { composeLitUrl, mostCommonValue, LitCore } from '@lit-protocol/core';
 import {
   combineSignatureShares,
   encrypt,
@@ -50,22 +48,17 @@ import {
   verifySignature,
 } from '@lit-protocol/crypto';
 import {
-  defaultMintClaimCallback,
-  findMostCommonResponse,
-  formatSessionSigs,
-  hexPrefixed,
-  mostCommonString,
-  normalizeAndStringify,
-  removeHexPrefix,
-  safeParams,
-  validateSessionSigs,
-} from '@lit-protocol/misc';
-import {
   getStorageItem,
   removeStorageItem,
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
+import {
+  applySchemaWithValidation,
+  DecryptRequestSchema,
+  EncryptRequestSchema,
+  JsonExecutionSdkParamsBaseSchema,
+} from '@lit-protocol/schemas';
 import {
   AuthCallback,
   AuthCallbackParams,
@@ -96,6 +89,7 @@ import {
   JsonSignSessionKeyRequestV1,
   JsonSignSessionKeyRequestV2,
   LitNodeClientConfig,
+  LitResourceAbilityRequest,
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeSet,
@@ -117,6 +111,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
+import { assembleMostCommonResponse } from './helpers/assemble-most-common-response';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { getClaims } from './helpers/get-claims';
@@ -124,12 +119,17 @@ import { getClaimsList } from './helpers/get-claims-list';
 import { getExpiration } from './helpers/get-expiration';
 import { getMaxPricesForNodeProduct } from './helpers/get-max-prices-for-node-product';
 import { getSignatures } from './helpers/get-signatures';
+import { hexPrefixed, removeHexPrefix } from './helpers/hex';
+import { defaultMintClaimCallback } from './helpers/mint-claim-callback';
+import { normalizeAndStringify } from './helpers/normalize-and-stringify';
 import { normalizeArray } from './helpers/normalize-array';
 import { normalizeJsParams } from './helpers/normalize-params';
 import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 import { removeDoubleQuotes } from './helpers/remove-double-quotes';
+import { formatSessionSigs } from './helpers/session-sigs-reader';
+import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClient extends LitCore implements ILitNodeClient {
@@ -622,6 +622,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     return this.generatePromise(urlWithPath, reqBody, requestId);
   }
+
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
@@ -635,6 +636,12 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     params: JsonExecutionSdkParams
   ): Promise<ExecuteJsResponse> => {
     // ========== Validate Params ==========
+    const _params = applySchemaWithValidation(
+      'executeJs',
+      params,
+      JsonExecutionSdkParamsBaseSchema
+    );
+
     if (!this.ready) {
       const message =
         '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
@@ -642,44 +649,30 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       throw new LitNodeClientNotReadyError({}, message);
     }
 
-    const paramsIsSafe = safeParams({
-      functionName: 'executeJs',
-      params: params,
-    });
-
-    if (!paramsIsSafe) {
-      throw new InvalidParamType(
-        {
-          info: {
-            params,
-          },
-        },
-        'executeJs params are not valid'
-      );
-    }
-
     // Format the params
     let formattedParams: JsonExecutionSdkParams = {
-      ...params,
-      ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
-      ...(params.code && { code: encodeCode(params.code) }),
+      ..._params,
+      ...(_params.jsParams && {
+        jsParams: normalizeJsParams(_params.jsParams),
+      }),
+      ...(_params.code && { code: encodeCode(_params.code) }),
     };
 
     // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
     // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
     // and update the params with the fetched code, removing the ipfsId afterward.
     const overwriteCode =
-      params.ipfsOptions?.overwriteCode ||
+      _params.ipfsOptions?.overwriteCode ||
       GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
 
-    if (overwriteCode && params.ipfsId) {
+    if (overwriteCode && _params.ipfsId) {
       const code = await this._getFallbackIpfsCode(
-        params.ipfsOptions?.gatewayUrl,
-        params.ipfsId
+        _params.ipfsOptions?.gatewayUrl,
+        _params.ipfsId
       );
 
       formattedParams = {
-        ...params,
+        ..._params,
         code: code,
         ipfsId: undefined,
       };
@@ -689,15 +682,15 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     const userMaxPrices = await this.getMaxPricesForNodeProduct({
       product: 'LIT_ACTION',
-      userMaxPrice: params.userMaxPrice,
+      userMaxPrice: _params.userMaxPrice,
     });
 
-    const targetNodePrices = params.useSingleNode
+    const targetNodePrices = _params.useSingleNode
       ? userMaxPrices.slice(0, 1)
       : userMaxPrices;
 
     const sessionSigs = await this._getSessionSigs({
-      ...params.authContext,
+      ..._params.authContext,
       userMaxPrices: targetNodePrices,
     });
 
@@ -720,7 +713,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const res = await this._handleNodePromises(
       nodePromises,
       requestId,
-      params.useSingleNode ? 1 : this._getThreshold()
+      _params.useSingleNode ? 1 : this._getThreshold()
     );
 
     // -- case: promises rejected
@@ -737,13 +730,13 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     });
 
     // -- find the responseData that has the most common response
-    const mostCommonResponse = findMostCommonResponse(
+    const mostCommonResponse = assembleMostCommonResponse(
       responseData
     ) as NodeShare;
 
     const responseFromStrategy = processLitActionResponseStrategy(
       responseData,
-      params.responseStrategy ?? { strategy: 'leastCommon' }
+      _params.responseStrategy ?? { strategy: 'leastCommon' }
     );
     mostCommonResponse.response = responseFromStrategy;
 
@@ -792,7 +785,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
 
     // -- 3. combine logs
-    const mostCommonLogs: string = mostCommonString(
+    const mostCommonLogs: string = mostCommonValue(
       responseData.map(
         (r: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -813,7 +806,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
             [key]: await getSignatures({
               requestId,
               networkPubKeySet: this.networkPubKeySet,
-              threshold: params.useSingleNode ? 1 : this._getThreshold(),
+              threshold: _params.useSingleNode ? 1 : this._getThreshold(),
               signedMessageShares: flattenedSignedMessageShares,
             }),
           }
@@ -997,6 +990,12 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
    */
   encrypt = async (params: EncryptSdkParams): Promise<EncryptResponse> => {
     // ========== Validate Params ==========
+    const _params = applySchemaWithValidation(
+      'encrypt',
+      params,
+      EncryptRequestSchema
+    );
+
     // -- validate if it's ready
     if (!this.ready) {
       throw new LitNodeClientNotReadyError(
@@ -1010,29 +1009,10 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       throw new LitNodeClientNotReadyError({}, 'subnetPubKey cannot be null');
     }
 
-    const paramsIsSafe = safeParams({
-      functionName: 'encrypt',
-      params,
-    });
-
-    if (!paramsIsSafe) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            params,
-          },
-        },
-        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
-      );
-    }
-
-    // ========== Validate Access Control Conditions Schema ==========
-    await validateAccessControlConditions(params);
-
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     const hashOfConditions: ArrayBuffer | undefined =
-      await getHashedAccessControlConditions(params);
+      await getHashedAccessControlConditions(_params);
 
     if (!hashOfConditions) {
       throw new InvalidArgumentException(
@@ -1083,10 +1063,10 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { authContext, authSig, chain, ciphertext, dataToEncryptHash } =
-      params;
+    // -- validate params
+    const { authContext, chain, ciphertext, dataToEncryptHash, userMaxPrice } =
+      applySchemaWithValidation('decrypt', params, DecryptRequestSchema);
 
-    // ========== Validate Params ==========
     // -- validate if it's ready
     if (!this.ready) {
       throw new LitNodeClientNotReadyError(
@@ -1098,22 +1078,6 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     // -- validate if this.subnetPubKey is null
     if (!this.subnetPubKey) {
       throw new LitNodeClientNotReadyError({}, 'subnetPubKey cannot be null');
-    }
-
-    const paramsIsSafe = safeParams({
-      functionName: 'decrypt',
-      params,
-    });
-
-    if (!paramsIsSafe) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            params,
-          },
-        },
-        'Parameter validation failed.'
-      );
     }
 
     // ========== Hashing Access Control Conditions =========
@@ -1165,29 +1129,15 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     this.#logger.info('identityParam', identityParam);
 
-    let sessionSigs: SessionSigsMap = {};
     const userMaxPrices = await this.getMaxPricesForNodeProduct({
       product: 'DECRYPTION',
-      userMaxPrice: params.userMaxPrice,
+      userMaxPrice,
     });
 
-    if (!authSig) {
-      if (!authContext) {
-        throw new InvalidArgumentException(
-          {
-            info: {
-              params,
-            },
-          },
-          'Missing auth context; you must provide either authSig or authContext.'
-        );
-      }
-
-      sessionSigs = await this._getSessionSigs({
-        ...authContext,
-        userMaxPrices,
-      });
-    }
+    const sessionSigs = await this._getSessionSigs({
+      ...authContext,
+      userMaxPrices,
+    });
 
     // ========== Get Network Signature ==========
     const requestId = this._getNewRequestId();
@@ -1195,7 +1145,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       userMaxPrices.map(({ url }) => url),
       (url: string) => {
         // -- if session key is available, use it
-        const authSigToSend = authSig ? authSig : sessionSigs[url];
+        const authSigToSend = sessionSigs[url];
 
         if (!authSigToSend) {
           throw new InvalidArgumentException(
@@ -1479,7 +1429,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     const blsSignedData: BlsResponseData[] = validatedSignedDataList;
 
-    const sigType = mostCommonString(blsSignedData.map((s) => s.curveType));
+    const sigType = mostCommonValue(blsSignedData.map((s) => s.curveType));
     this.#logger.info(`[signSessionKey] sigType:`, sigType);
 
     const signatureShares = getBlsSignatures(blsSignedData);
@@ -1496,10 +1446,10 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const publicKey = removeHexPrefix(params.pkpPublicKey);
     this.#logger.info(`[signSessionKey] publicKey:`, publicKey);
 
-    const dataSigned = mostCommonString(blsSignedData.map((s) => s.dataSigned));
+    const dataSigned = mostCommonValue(blsSignedData.map((s) => s.dataSigned));
     this.#logger.info(`[signSessionKey] dataSigned:`, dataSigned);
 
-    const mostCommonSiweMessage = mostCommonString(
+    const mostCommonSiweMessage = mostCommonValue(
       blsSignedData.map((s) => s.siweMessage)
     );
 
