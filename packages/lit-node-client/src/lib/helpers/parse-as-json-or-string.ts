@@ -1,4 +1,6 @@
-import { log } from '@lit-protocol/misc';
+import { pino } from 'pino';
+
+const logger = pino({ level: 'info', name: 'parseAsJsonOrString' });
 
 /**
  * Parses a response string into a JS object.
@@ -12,7 +14,7 @@ export const parseAsJsonOrString = (
   try {
     return JSON.parse(responseString);
   } catch (e) {
-    log(
+    logger.info(
       '[parseResponses] Error parsing response as json.  Swallowing and returning as string.',
       responseString
     );

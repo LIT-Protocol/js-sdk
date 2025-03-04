@@ -30,12 +30,12 @@ import { secp256k1 } from '@noble/curves/secp256k1';
 import { blake2b } from '@noble/hashes/blake2b';
 import { sha256 } from '@noble/hashes/sha256';
 
-import { PKPBase } from '@lit-protocol/pkp-base';
-import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
 import {
   InvalidArgumentException,
   UnknownError,
 } from '@lit-protocol/constants';
+import { PKPBase } from '@lit-protocol/pkp-base';
+import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
 
 import { getDigestFromBytes } from './TransactionBlockData';
 

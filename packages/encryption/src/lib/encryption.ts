@@ -1,5 +1,13 @@
-import { EITHER_TYPE, InvalidParamType } from '@lit-protocol/constants';
-import { safeParams } from '@lit-protocol/misc';
+import { InvalidParamType } from '@lit-protocol/constants';
+import {
+  applySchemaWithValidation,
+  DecryptRequestSchema,
+  DecryptFromJsonPropsSchema,
+  EncryptFileRequestSchema,
+  EncryptStringRequestSchema,
+  EncryptToJsonPropsSchema,
+  EncryptRequestSchema,
+} from '@lit-protocol/schemas';
 import {
   DecryptRequest,
   EncryptFileRequest,
@@ -23,13 +31,20 @@ import {
  * Useful for encrypting/decrypting data in IPFS or other storage without compressing it in a file.
  *
  * @param params { EncryptToJsonProps } - The params required to encrypt either a file or string and serialise it to JSON
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  * @returns { Promise<string> } - JSON serialised string of the encrypted data and associated metadata necessary to decrypt it later
  *
  */
 export const encryptToJson = async (
-  params: EncryptToJsonProps
+  params: EncryptToJsonProps,
+  litNodeClient: ILitNodeClient
 ): Promise<string> => {
+  const _params = applySchemaWithValidation(
+    'encryptToJson',
+    params,
+    EncryptToJsonPropsSchema
+  );
   const {
     accessControlConditions,
     evmContractConditions,
@@ -38,26 +53,7 @@ export const encryptToJson = async (
     chain,
     string,
     file,
-    litNodeClient,
-  } = params;
-
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'encryptToJson',
-    params,
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-          function: 'encryptToJson',
-        },
-        cause: paramsIsSafe.result,
-      },
-      'Invalid params'
-    );
+  } = _params;
 
   if (string !== undefined) {
     const { ciphertext, dataToEncryptHash } = await encryptString(
@@ -99,9 +95,10 @@ export const encryptToJson = async (
       {
         info: {
           params,
+          function: 'encryptToJson',
         },
       },
-      'You must provide either "file" or "string"'
+      'You must provide either "file" or "string" param'
     );
   }
 };
@@ -112,34 +109,24 @@ export const encryptToJson = async (
  * in the parsed JSON data
  *
  * @param params { DecryptFromJsonProps } - The params required to decrypt a parsed JSON blob containing appropriate metadata
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  * @returns { Promise<string | Uint8Array> } - The decrypted `string` or file (as a `Uint8Array`) depending on `dataType` property in the parsed JSON provided
  *
  */
 export async function decryptFromJson(
-  params: DecryptFromJsonProps
+  params: DecryptFromJsonProps,
+  litNodeClient: ILitNodeClient
 ): Promise<
   ReturnType<typeof decryptToFile> | ReturnType<typeof decryptToString>
 > {
-  const { authContext, parsedJsonData, litNodeClient } = params;
-
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'decryptFromJson',
+  const _params = applySchemaWithValidation(
+    'decryptFromJson',
     params,
-  });
+    DecryptFromJsonPropsSchema
+  );
 
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-          function: 'decryptFromJson',
-        },
-        cause: paramsIsSafe.result,
-      },
-      'Invalid params'
-    );
+  const { authContext, parsedJsonData } = _params;
 
   if (parsedJsonData.dataType === 'string') {
     return decryptToString(
@@ -152,6 +139,7 @@ export async function decryptFromJson(
         ciphertext: parsedJsonData.ciphertext,
         dataToEncryptHash: parsedJsonData.dataToEncryptHash,
         chain: parsedJsonData.chain,
+        userMaxPrice: parsedJsonData.userMaxPrice,
         authContext,
       },
       litNodeClient
@@ -167,6 +155,7 @@ export async function decryptFromJson(
         ciphertext: parsedJsonData.ciphertext,
         dataToEncryptHash: parsedJsonData.dataToEncryptHash,
         chain: parsedJsonData.chain,
+        userMaxPrice: parsedJsonData.userMaxPrice,
         authContext,
       },
       litNodeClient
@@ -202,24 +191,14 @@ export const encryptUint8Array = async (
   params: EncryptUint8ArrayRequest,
   litNodeClient: ILitNodeClient
 ): Promise<EncryptResponse> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'encryptUint8Array',
+  const _params = applySchemaWithValidation(
+    'encryptUint8Array',
     params,
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-        },
-      },
-      'Invalid params'
-    );
+    EncryptRequestSchema
+  );
 
   return litNodeClient.encrypt({
-    ...params,
+    ..._params,
   });
 };
 
@@ -235,25 +214,13 @@ export const decryptToUint8Array = async (
   params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<Uint8Array> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'decrypt',
+  const _params = applySchemaWithValidation(
+    'decryptToUint8Array',
     params,
-  });
+    DecryptRequestSchema
+  );
 
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-          function: 'decryptToUint8Array',
-        },
-        cause: paramsIsSafe.result,
-      },
-      'Invalid params'
-    );
-
-  const { decryptedData } = await litNodeClient.decrypt(params);
+  const { decryptedData } = await litNodeClient.decrypt(_params);
 
   return decryptedData;
 };
@@ -276,27 +243,15 @@ export const encryptString = async (
   params: EncryptStringRequest,
   litNodeClient: ILitNodeClient
 ): Promise<EncryptResponse> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'encryptString',
+  const _params = applySchemaWithValidation(
+    'encryptString',
     params,
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-          function: 'encryptString',
-        },
-        cause: paramsIsSafe.result,
-      },
-      'Invalid params'
-    );
+    EncryptStringRequestSchema
+  );
 
   return litNodeClient.encrypt({
-    ...params,
-    dataToEncrypt: uint8arrayFromString(params.dataToEncrypt, 'utf8'),
+    ..._params,
+    dataToEncrypt: uint8arrayFromString(_params.dataToEncrypt, 'utf8'),
   });
 };
 
@@ -313,25 +268,13 @@ export const decryptToString = async (
   params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<string> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'decrypt',
+  const _params = applySchemaWithValidation(
+    'decryptToString',
     params,
-  });
+    DecryptRequestSchema
+  );
 
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-          function: 'decryptToString',
-        },
-        cause: paramsIsSafe.result,
-      },
-      'Invalid params'
-    );
-
-  const { decryptedData } = await litNodeClient.decrypt(params);
+  const { decryptedData } = await litNodeClient.decrypt(_params);
 
   return uint8arrayToString(decryptedData, 'utf8');
 };
@@ -349,29 +292,17 @@ export const encryptFile = async (
   params: EncryptFileRequest,
   litNodeClient: ILitNodeClient
 ): Promise<EncryptResponse> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'encryptFile',
+  const _params = applySchemaWithValidation(
+    'encryptFile',
     params,
-  });
-
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-          function: 'encryptFile',
-        },
-        cause: paramsIsSafe.result,
-      },
-      'Invalid params'
-    );
+    EncryptFileRequestSchema
+  );
 
   // encrypt the file
-  const fileAsArrayBuffer = await params.file.arrayBuffer();
+  const fileAsArrayBuffer = await _params.file.arrayBuffer();
 
   return litNodeClient.encrypt({
-    ...params,
+    ..._params,
     dataToEncrypt: new Uint8Array(fileAsArrayBuffer),
   });
 };
@@ -389,25 +320,13 @@ export const decryptToFile = async (
   params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<Uint8Array> => {
-  // -- validate
-  const paramsIsSafe = safeParams({
-    functionName: 'decrypt',
+  const _params = applySchemaWithValidation(
+    'decryptToFile',
     params,
-  });
+    DecryptRequestSchema
+  );
 
-  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-    throw new InvalidParamType(
-      {
-        info: {
-          params,
-          function: 'decryptToFile',
-        },
-        cause: paramsIsSafe.result,
-      },
-      'Invalid params'
-    );
-
-  const { decryptedData } = await litNodeClient.decrypt(params);
+  const { decryptedData } = await litNodeClient.decrypt(_params);
 
   return decryptedData;
 };

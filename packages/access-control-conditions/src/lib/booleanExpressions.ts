@@ -1,3 +1,4 @@
+import { OperatorAccSchema } from '@lit-protocol/access-control-conditions-schemas';
 import {
   AccessControlConditions,
   EvmContractConditions,
@@ -5,9 +6,8 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-export function isTokenOperator(token: any): boolean {
-  const OPERATORS = ['and', 'or']; // Only permissible boolean operators on the nodes
-  return token.hasOwnProperty('operator') && OPERATORS.includes(token.operator);
+export function isTokenOperator(token: unknown): boolean {
+  return OperatorAccSchema.safeParse(token).success;
 }
 
 export function isValidBooleanExpression(

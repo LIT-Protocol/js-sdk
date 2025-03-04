@@ -1,7 +1,13 @@
+import { Contract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
+import { pino } from 'pino';
 
-import { InvalidUnifiedConditionType } from '@lit-protocol/constants';
-import { decimalPlaces, log } from '@lit-protocol/misc';
+import {
+  LIT_CHAINS,
+  LitEVMChainKeys,
+  InvalidUnifiedConditionType,
+} from '@lit-protocol/constants';
 import {
   AccessControlConditions,
   AccsCOSMOSParams,
@@ -10,6 +16,38 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
+
+import ABI_ERC20 from './abis/ERC20.json';
+
+const logger = pino({ level: 'info', name: 'humanizer' });
+
+/**
+ *
+ * Get the number of decimal places in a token
+ *
+ * @property { string } contractAddress The token contract address
+ * @property { LitEVMChainKeys } chain The chain on which the token is deployed
+ *
+ * @returns { number } The number of decimal places in the token
+ */
+export const decimalPlaces = async ({
+  contractAddress,
+  chain,
+}: {
+  contractAddress: string;
+  chain: LitEVMChainKeys;
+}): Promise<number> => {
+  const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
+
+  const web3 = new JsonRpcProvider({
+    url: rpcUrl,
+    skipFetchSetup: true,
+  });
+
+  const contract = new Contract(contractAddress, ABI_ERC20.abi, web3); // TODO drop the full ABI and just define "decimals"
+
+  return await contract['decimals']();
+};
 
 /**
  *
@@ -58,7 +96,7 @@ export const humanizeComparator = (comparator: string): string | undefined => {
   const selected: string | undefined = list[comparator];
 
   if (!selected) {
-    log(`Unregonized comparator ${comparator}`);
+    logger.info(`Unrecognized comparator ${comparator}`);
     return;
   }
 
@@ -84,9 +122,9 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing evm basic access control conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('accessControlConditions', accessControlConditions);
+  logger.info('humanizing evm basic access control conditions');
+  logger.info('myWalletAddress', myWalletAddress);
+  logger.info('accessControlConditions', accessControlConditions);
 
   let fixedConditions = accessControlConditions;
 
@@ -230,10 +268,10 @@ export const humanizeEvmBasicAccessControlConditions = async ({
               chain: acc.chain,
             });
           } catch (e) {
-            console.log(`Failed to get decimals for ${acc.contractAddress}`);
+            logger.info(`Failed to get decimals for ${acc.contractAddress}`); // is this safe to fail and continue?
           }
         }
-        log('decimals', decimals);
+        logger.info('decimals', decimals);
         return `Owns ${humanizeComparator(
           acc.returnValueTest.comparator
         )} ${formatUnits(acc.returnValueTest.value, decimals)} of ${
@@ -284,9 +322,9 @@ export const humanizeEvmContractConditions = async ({
   tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing evm contract conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('evmContractConditions', evmContractConditions);
+  logger.info('humanizing evm contract conditions');
+  logger.info('myWalletAddress', myWalletAddress);
+  logger.info('evmContractConditions', evmContractConditions);
 
   const promises = await Promise.all(
     evmContractConditions.map(async (acc: any) => {
@@ -345,9 +383,9 @@ export const humanizeSolRpcConditions = async ({
   tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing sol rpc conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('solRpcConditions', solRpcConditions);
+  logger.info('humanizing sol rpc conditions');
+  logger.info('myWalletAddress', myWalletAddress);
+  logger.info('solRpcConditions', solRpcConditions);
 
   const promises = await Promise.all(
     solRpcConditions.map(async (acc: any) => {
@@ -419,9 +457,9 @@ export const humanizeCosmosConditions = async ({
   tokenList?: (any | string)[];
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing cosmos conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('cosmosConditions', cosmosConditions);
+  logger.info('humanizing cosmos conditions');
+  logger.info('myWalletAddress', myWalletAddress);
+  logger.info('cosmosConditions', cosmosConditions);
 
   const promises = await Promise.all(
     cosmosConditions.map(async (acc: any) => {

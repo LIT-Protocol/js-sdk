@@ -1,12 +1,12 @@
 // DEBUG=true LIT_RPC_URL=https://yellowstone-rpc.litprotocol.com NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
-import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
-import { LIT_ABILITY } from '@lit-protocol/constants';
-import { ILitNodeClient } from '@lit-protocol/types';
-import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
-import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { encryptString, decryptToString } from '@lit-protocol/encryption';
+import { ILitNodeClient } from '@lit-protocol/types';
+
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { AccessControlConditions } from 'local-tests/setup/accs/accs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
@@ -31,7 +31,7 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  log('encryptRes:', encryptRes);
+  console.log('encryptRes:', encryptRes);
 
   // await 5 seconds for the encryption to be mined
 

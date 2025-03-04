@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
@@ -77,7 +76,7 @@ export const testFailEthereumSignTransactionWrappedKeyWithMissingParam = async (
       }
     }
 
-    log('✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam');
+    console.log('✅ testFailEthereumSignTransactionWrappedKeyWithMissingParam');
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }

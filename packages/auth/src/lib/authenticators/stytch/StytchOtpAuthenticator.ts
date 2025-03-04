@@ -125,7 +125,6 @@ export class StytchOtpAuthenticator extends BaseAuthenticator {
     }
     const body = Buffer.from(parts[1], 'base64');
     const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));
-    console.log('JWT body: ', parsedBody);
     return parsedBody;
   }
 }

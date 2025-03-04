@@ -1,25 +1,21 @@
-import { joinSignature } from 'ethers/lib/utils';
+import { pino } from 'pino';
 
 import {
   CURVE_GROUP_BY_CURVE_TYPE,
   LIT_CURVE_VALUES,
   NoValidShares,
   ParamNullError,
-  UnknownSignatureError,
   UnknownSignatureType,
   CurveTypeNotFoundError,
 } from '@lit-protocol/constants';
+import { mostCommonValue } from '@lit-protocol/core';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
-import {
-  logErrorWithRequestId,
-  logWithRequestId,
-  mostCommonString,
-} from '@lit-protocol/misc';
 import {
   EcdsaSignedMessageShareParsed,
   SigResponse,
-  SigShare,
 } from '@lit-protocol/types';
+
+const logger = pino({ level: 'info', name: 'get-signatures' });
 
 /**
  * Retrieves and combines signature shares from multiple nodes to generate the final signatures.
@@ -42,7 +38,8 @@ export const getSignatures = async (params: {
   signedMessageShares: EcdsaSignedMessageShareParsed[];
   requestId: string;
 }): Promise<SigResponse> => {
-  let { networkPubKeySet, threshold, signedMessageShares, requestId } = params;
+  const { networkPubKeySet, threshold, signedMessageShares, requestId } =
+    params;
 
   if (networkPubKeySet === null) {
     throw new ParamNullError(
@@ -56,10 +53,10 @@ export const getSignatures = async (params: {
   }
 
   if (signedMessageShares.length < threshold) {
-    logErrorWithRequestId(
+    logger.error({
       requestId,
-      `not enough nodes to get the signatures. Expected ${threshold}, got ${signedMessageShares.length}`
-    );
+      msg: `not enough nodes to get the signatures. Expected ${threshold}, got ${signedMessageShares.length}`,
+    });
 
     throw new NoValidShares(
       {
@@ -105,10 +102,10 @@ export const getSignatures = async (params: {
   // -- combine
   const combinedSignature = await combineEcdsaShares(signedMessageShares);
 
-  const _publicKey = mostCommonString(
+  const _publicKey = mostCommonValue(
     signedMessageShares.map((s) => s.publicKey)
   );
-  const _dataSigned = mostCommonString(
+  const _dataSigned = mostCommonValue(
     signedMessageShares.map((s) => s.dataSigned)
   );
 

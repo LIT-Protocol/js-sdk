@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
+import { pino } from 'pino';
 
-import { log } from '@lit-protocol/misc';
 import {
   AccsDefaultParams,
   AuthSig,
@@ -10,6 +10,8 @@ import {
 
 import { CHAIN_ETHEREUM, NETWORK_EVM, NETWORK_SOLANA } from '../constants';
 import { KeyType, Network } from '../types';
+
+const logger = pino({ level: 'info', name: 'wrapped-keys/api/utils' });
 
 export function getKeyTypeFromNetwork(network: Network): KeyType {
   if (network === NETWORK_EVM) {
@@ -39,7 +41,7 @@ export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   }
 
   const [[, sessionSig]] = sessionSigsEntries;
-  log(`Session Sig being used: ${JSON.stringify(sessionSig)}`);
+  logger.info(`Session Sig being used: ${JSON.stringify(sessionSig)}`);
 
   return sessionSig;
 }
@@ -74,7 +76,7 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   }
 
   const pkpAddress = delegationAuthSig.address;
-  log(`pkpAddress to permit decryption: ${pkpAddress}`);
+  logger.info(`pkpAddress to permit decryption: ${pkpAddress}`);
 
   return pkpAddress;
 }

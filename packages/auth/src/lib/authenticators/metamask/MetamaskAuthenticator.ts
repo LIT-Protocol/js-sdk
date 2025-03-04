@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { pino } from 'pino';
 import { SiweMessage } from 'siwe';
 
 import {
@@ -9,7 +10,6 @@ import {
   WrongParamFormat,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { log } from '@lit-protocol/misc';
 import {
   AuthMethod,
   AuthSig,
@@ -27,6 +27,9 @@ interface DomainAndOrigin {
 }
 
 export class MetamaskAuthenticator extends BaseAuthenticator {
+  static readonly #logger = pino({
+    name: 'MetamaskAuthenticator',
+  });
   /**
    * The domain from which the signing request is made
    */
@@ -51,7 +54,7 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
       domain = options.domain || window.location.hostname;
       origin = options.origin || window.location.origin;
     } catch (e) {
-      log(
+      MetamaskAuthenticator.#logger.error(
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       domain = options.domain || 'localhost';

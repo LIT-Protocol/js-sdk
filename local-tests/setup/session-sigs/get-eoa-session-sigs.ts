@@ -9,7 +9,6 @@ import {
   AuthSig,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
-import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import {
   LIT_ABILITY,

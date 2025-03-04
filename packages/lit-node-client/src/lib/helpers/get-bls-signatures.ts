@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { BlsResponseData, BlsSignatureShare } from '@lit-protocol/types';
 
 /**
@@ -20,8 +19,6 @@ export function getBlsSignatures(
       value: s.signatureShare.ProofOfPossession.value,
     },
   }));
-
-  log(`[getBlsSignatures] signatureShares:`, signatureShares);
 
   if (!signatureShares || signatureShares.length <= 0) {
     throw new Error('[getBlsSignatures] No signature shares provided');

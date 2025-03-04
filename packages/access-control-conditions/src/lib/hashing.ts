@@ -1,5 +1,6 @@
+import { pino } from 'pino';
+
 import { InvalidAccessControlConditions } from '@lit-protocol/constants';
-import { log } from '@lit-protocol/misc';
 import {
   AccessControlConditions,
   EvmContractConditions,
@@ -19,6 +20,8 @@ import {
   canonicalSolRpcConditionFormatter,
   canonicalUnifiedAccessControlConditionFormatter,
 } from './canonicalFormatter';
+
+const logger = pino({ level: 'info', name: 'hashing' });
 
 // Same as:
 // const unifiedAccs = [
@@ -90,12 +93,15 @@ import {
 export const hashUnifiedAccessControlConditions = (
   unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
-  log('unifiedAccessControlConditions:', unifiedAccessControlConditions);
+  logger.info(
+    'unifiedAccessControlConditions:',
+    unifiedAccessControlConditions
+  );
 
   const conditions = unifiedAccessControlConditions.map((condition) => {
     return canonicalUnifiedAccessControlConditionFormatter(condition);
   });
-  log('conditions:', conditions);
+  logger.info('conditions:', conditions);
 
   // check if there's any undefined in the conditions
   const hasUndefined = conditions.some((c) => c === undefined);
@@ -122,7 +128,7 @@ export const hashUnifiedAccessControlConditions = (
   }
   const toHash = JSON.stringify(conditions);
 
-  log('Hashing unified access control conditions: ', toHash);
+  logger.info('Hashing unified access control conditions: ', toHash);
 
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
@@ -181,7 +187,7 @@ export const hashAccessControlConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing access control conditions: ', toHash);
+  logger.info('Hashing access control conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -205,7 +211,7 @@ export const hashEVMContractConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing evm contract conditions: ', toHash);
+  logger.info('Hashing evm contract conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
   return crypto.subtle.digest('SHA-256', data);
@@ -228,7 +234,7 @@ export const hashSolRpcConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing sol rpc conditions: ', toHash);
+  logger.info('Hashing sol rpc conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -301,7 +307,7 @@ export const getFormattedAccessControlConditions = (
     formattedAccessControlConditions = accessControlConditions.map((c) =>
       canonicalAccessControlConditionFormatter(c)
     );
-    log(
+    logger.info(
       'formattedAccessControlConditions',
       JSON.stringify(formattedAccessControlConditions)
     );
@@ -309,7 +315,7 @@ export const getFormattedAccessControlConditions = (
     formattedEVMContractConditions = evmContractConditions.map((c) =>
       canonicalEVMContractConditionFormatter(c)
     );
-    log(
+    logger.info(
       'formattedEVMContractConditions',
       JSON.stringify(formattedEVMContractConditions)
     );
@@ -319,13 +325,16 @@ export const getFormattedAccessControlConditions = (
     formattedSolRpcConditions = solRpcConditions.map((c: any) =>
       canonicalSolRpcConditionFormatter(c)
     );
-    log('formattedSolRpcConditions', JSON.stringify(formattedSolRpcConditions));
+    logger.info(
+      'formattedSolRpcConditions',
+      JSON.stringify(formattedSolRpcConditions)
+    );
   } else if (unifiedAccessControlConditions) {
     formattedUnifiedAccessControlConditions =
       unifiedAccessControlConditions.map((c) =>
         canonicalUnifiedAccessControlConditionFormatter(c)
       );
-    log(
+    logger.info(
       'formattedUnifiedAccessControlConditions',
       JSON.stringify(formattedUnifiedAccessControlConditions)
     );

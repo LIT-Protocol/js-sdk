@@ -5,7 +5,6 @@ import {
   InvalidArgumentException,
   UnknownError,
 } from '@lit-protocol/constants';
-import { getLoggerbyId } from '@lit-protocol/misc';
 import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 
 import { DiscordAuthenticator } from './DiscordAuthenticator';
@@ -17,17 +16,6 @@ import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
-
-/**
- * Check if OAuth provider is supported
- *
- * @param provider {string} - Auth provider name
- *
- * @returns {boolean} - True if provider is supported
- */
-export function isSocialLoginSupported(provider: string): boolean {
-  return ['google', 'discord'].includes(provider);
-}
 
 /**
  * Create login url using the parameters provided as arguments when initializing the client
@@ -79,11 +67,11 @@ function getLoginRoute(provider: string): string {
 /**
  * Create query params string from given object
  *
- * @param params {any} - Object of query params
+ * @param params {Record<string, unknown>} - Object of query params
  *
  * @returns {string} - Query string
  */
-function createQueryParams(params: any): string {
+function createQueryParams(params: Record<string, unknown>): string {
   // Strip undefined values from params
   const filteredParams = Object.keys(params)
     .filter((k) => typeof params[k] !== 'undefined')
@@ -335,11 +323,6 @@ export function unparse(buf: any) {
   );
 }
 
-export function log(...args: any) {
-  const logger = getLoggerbyId('auth-client');
-  logger.debug(...args);
-}
-
 /**
  * Retrieves the authentication ID based on the provided authentication method.
  *
@@ -374,7 +357,6 @@ export async function getAuthIdByAuthMethod(
       authId = await StytchAuthFactorOtpAuthenticator.authMethodId(authMethod);
       break;
     default:
-      log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
       throw new InvalidArgumentException(
         {
           info: {

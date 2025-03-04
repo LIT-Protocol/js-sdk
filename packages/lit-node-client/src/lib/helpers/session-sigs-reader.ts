@@ -1,4 +1,8 @@
+import { pino } from 'pino';
+
 import { parseSignedMessage } from './session-sigs-validator';
+
+const logger = pino({ level: 'info', name: 'serssion-sigs-reader' });
 
 function formatDuration(start: Date, end: Date): string {
   const diff = end.getTime() - start.getTime();
@@ -111,7 +115,10 @@ export function formatSessionSigs(
       attenuation = humanReadableAtt(jsonRecap.att, 6);
     } catch (e) {
       // swallow error
-      console.log('Error parsing attenuation::', e);
+      logger.info({
+        msg: 'Error parsing attenuation::',
+        e,
+      });
     }
 
     const capIssuedAt = new Date(parsedCapMessage['Issued At'] || '');

@@ -1,21 +1,44 @@
 import { Provider } from '@ethersproject/abstract-provider';
+import { z } from 'zod';
 
+import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
 import { LitEVMChainKeys } from '@lit-protocol/constants';
+import {
+  AuthCallbackSchema,
+  AuthenticationContextSchema,
+  AuthMethodSchema,
+  AuthSigSchema,
+  DecryptRequestBaseSchema,
+  DecryptRequestSchema,
+  EncryptDataTypeSchema,
+  EncryptFileRequestSchema,
+  EncryptResponseSchema,
+  EncryptStringRequestSchema,
+  EncryptToJsonPayloadSchema,
+  EncryptToJsonPropsSchema,
+  EncryptRequestSchema,
+  ExecuteJsAdvancedOptionsSchema,
+  IpfsOptionsSchema,
+  JsonExecutionSdkParamsBaseSchema,
+  LitActionResponseStrategySchema,
+  LitActionSdkParamsSchema,
+  SessionKeyPairSchema,
+  DecryptFromJsonPropsSchema,
+} from '@lit-protocol/schemas';
 
 import { SigType } from './EndpointResponses';
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import {
-  AcceptedFileType,
   AccessControlConditions,
   Chain,
   EvmContractConditions,
+  Hex,
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
-  ResponseStrategy,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from './types';
@@ -25,35 +48,7 @@ import {
 /**
  * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE ReCap](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
  */
-export interface AuthSig {
-  /**
-   * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
-   */
-  sig: string;
-
-  /**
-   * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
-   */
-  derivedVia: string;
-
-  /**
-   * An [ERC-5573](https://eips.ethereum.org/EIPS/eip-5573) SIWE (Sign-In with Ethereum) message. This can be prepared by using one of the `createSiweMessage` functions from the [`@auth-helpers`](https://v6-api-doc-lit-js-sdk.vercel.app/modules/auth_helpers_src.html) package:
-   * -  [`createSiweMessage`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessage.html)
-   * -  [`createSiweMessageWithRecaps](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithRecaps.html)
-   * -  [`createSiweMessageWithCapacityDelegation`](https://v6-api-doc-lit-js-sdk.vercel.app/functions/auth_helpers_src.createSiweMessageWithCapacityDelegation.html)
-   */
-  signedMessage: string;
-
-  /**
-   * The Ethereum address that was used to sign `signedMessage` and create the `sig`.
-   */
-  address: string;
-
-  /**
-   * An optional property only seen when generating session signatures, this is the signing algorithm used to generate session signatures.
-   */
-  algo?: string;
-}
+export type AuthSig = z.infer<typeof AuthSigSchema>;
 
 export interface AuthCallbackParams extends LitActionSdkParams {
   /**
@@ -236,7 +231,6 @@ export interface NodeSetRequired {
 
 export interface JsonSignSessionKeyRequestV1
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    Pick<LitActionSdkParams, 'litActionIpfsId'>,
     NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
@@ -247,11 +241,11 @@ export interface JsonSignSessionKeyRequestV1
 
   // custom auth params
   code?: string;
+  litActionIpfsId?: string;
 }
 
 export interface JsonSignSessionKeyRequestV2<T>
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    Pick<LitActionSdkParams, 'litActionIpfsId'>,
     NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
@@ -262,6 +256,7 @@ export interface JsonSignSessionKeyRequestV2<T>
 
   // custom auth params
   code?: string;
+  litActionIpfsId?: string;
 
   signingScheme: T;
 }
@@ -334,21 +329,9 @@ export interface JsonSigningResourceId {
   extraData: string;
 }
 
-// CHANGE: `MultipleAccessControlConditions` is basically identical to `AccessControlConditions`,
-// but due to the way the types are deeply nested, we will revisit this later.
-export interface MultipleAccessControlConditions {
-  // The access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  accessControlConditions?: AccessControlConditions;
-
-  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  evmContractConditions?: EvmContractConditions;
-
-  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.
-  solRpcConditions?: SolRpcConditions;
-
-  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
-}
+export type MultipleAccessControlConditions = z.infer<
+  typeof MultipleAccessControlConditionsSchema
+>;
 
 export interface JsonAccsRequest extends MultipleAccessControlConditions {
   // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
@@ -423,52 +406,19 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
-export interface LitActionResponseStrategy {
-  strategy: ResponseStrategy;
-  customFilter?: (
-    responses: Record<string, string>[]
-  ) => Record<string, string>;
-}
+export type LitActionResponseStrategy = z.infer<
+  typeof LitActionResponseStrategySchema
+>;
 
-export interface IpfsOptions {
-  overwriteCode?: boolean;
-  gatewayUrl?: `https://${string}/ipfs/`;
-}
+export type IpfsOptions = z.infer<typeof IpfsOptionsSchema>;
 
-export interface JsonExecutionSdkParams
-  extends Pick<LitActionSdkParams, 'jsParams'>,
-    ExecuteJsAdvancedOptions {
-  /**
-   *  JS code to run on the nodes
-   */
-  code?: string;
+export type ExecuteJsAdvancedOptions = z.infer<
+  typeof ExecuteJsAdvancedOptionsSchema
+>;
 
-  /**
-   * The IPFS ID of some JS code to run on the nodes
-   */
-  ipfsId?: string;
-
-  authContext: AuthenticationContext;
-  userMaxPrice?: bigint;
-}
-
-export interface ExecuteJsAdvancedOptions {
-  /**
-   * a strategy for proccessing `reponse` objects returned from the
-   * Lit Action execution context
-   */
-  responseStrategy?: LitActionResponseStrategy;
-
-  /**
-   * Allow overriding the default `code` property in the `JsonExecutionSdkParams`
-   */
-  ipfsOptions?: IpfsOptions;
-
-  /**
-   * Only run the action on a single node; this will only work if all code in your action is non-interactive
-   */
-  useSingleNode?: boolean;
-}
+export type JsonExecutionSdkParams = z.infer<
+  typeof JsonExecutionSdkParamsBaseSchema
+>;
 
 export interface JsonExecutionRequest
   extends Pick<LitActionSdkParams, 'jsParams'>,
@@ -485,61 +435,31 @@ export interface JsonExecutionRequest
   authMethods?: AuthMethod[];
 }
 
-export interface DecryptRequestBase extends MultipleAccessControlConditions {
-  /**
-   * The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-   */
-  chain: Chain;
-  authSig?: AuthSig;
-  authContext: AuthenticationContext;
-  userMaxPrice?: bigint;
-}
-export interface EncryptSdkParams extends MultipleAccessControlConditions {
-  dataToEncrypt: Uint8Array;
-}
+export type DecryptRequestBase = z.infer<typeof DecryptRequestBaseSchema>;
 
-export interface EncryptRequest extends DecryptRequestBase {
-  // The data that you wish to encrypt as a Uint8Array
-  dataToEncrypt: Uint8Array;
-}
+export type EncryptSdkParams = z.infer<typeof EncryptRequestSchema>;
+export type EncryptUint8ArrayRequest = z.infer<typeof EncryptRequestSchema>;
 
-export interface EncryptResponse {
-  /**
-   * The base64-encoded ciphertext
-   */
-  ciphertext: string;
+export type EncryptResponse = z.infer<typeof EncryptResponseSchema>;
 
-  /**
-   * The hash of the data that was encrypted
-   */
-  dataToEncryptHash: string;
-}
+export type EncryptStringRequest = z.infer<typeof EncryptStringRequestSchema>;
 
-export interface EncryptUint8ArrayRequest
-  extends MultipleAccessControlConditions {
-  /**
-   * The uint8array that you wish to encrypt
-   */
-  dataToEncrypt: Uint8Array;
-}
+export type EncryptFileRequest = z.infer<typeof EncryptFileRequestSchema>;
 
-export interface EncryptStringRequest extends MultipleAccessControlConditions {
-  /**
-   * String that you wish to encrypt
-   */
-  dataToEncrypt: string;
-}
+export type EncryptToJsonProps = z.infer<typeof EncryptToJsonPropsSchema>;
 
-export interface EncryptFileRequest extends DecryptRequestBase {
-  file: AcceptedFileType;
-}
+export type EncryptToJsonDataType = z.infer<typeof EncryptDataTypeSchema>;
 
-export interface DecryptRequest extends EncryptResponse, DecryptRequestBase {}
+export type EncryptToJsonPayload = z.infer<typeof EncryptToJsonPayloadSchema>;
+
+export type DecryptRequest = z.infer<typeof DecryptRequestSchema>;
 
 export interface DecryptResponse {
   // The decrypted data as a Uint8Array
   decryptedData: Uint8Array;
 }
+
+export type DecryptFromJsonProps = z.infer<typeof DecryptFromJsonPropsSchema>;
 
 export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
   dataToEncryptHash: string;
@@ -549,7 +469,7 @@ export interface SigResponse {
   r: string;
   s: string;
   recid: number;
-  signature: `0x${string}`;
+  signature: Hex;
   publicKey: string; // pkp public key (no 0x prefix)
   dataSigned: string;
 }
@@ -721,46 +641,6 @@ export interface JsonHandshakeResponse {
   latestBlockhash?: string;
 }
 
-export interface EncryptToJsonProps extends MultipleAccessControlConditions {
-  /**
-   * The chain
-   */
-  chain: string;
-
-  /**
-   * The string you wish to encrypt
-   */
-  string?: string;
-
-  /**
-   * The file you wish to encrypt
-   */
-  file?: AcceptedFileType;
-
-  /**
-   * An instance of LitNodeClient that is already connected
-   */
-  litNodeClient: ILitNodeClient;
-
-  authContext: AuthenticationContext;
-}
-
-export type EncryptToJsonDataType = 'string' | 'file';
-
-export interface EncryptToJsonPayload extends DecryptRequestBase {
-  ciphertext: string;
-  dataToEncryptHash: string;
-  dataType: EncryptToJsonDataType;
-}
-
-export interface DecryptFromJsonProps {
-  // An instance of LitNodeClient that is already connected
-  litNodeClient: ILitNodeClient;
-
-  parsedJsonData: EncryptToJsonPayload;
-  authContext: AuthenticationContext;
-}
-
 /**
  * Struct in rust
  * -----
@@ -783,17 +663,11 @@ export interface SessionKeySignedMessage {
   nodeAddress: string;
 }
 
-export interface SessionKeyPair {
-  publicKey: string;
-  secretKey: string;
-}
+export type SessionKeyPair = z.infer<typeof SessionKeyPairSchema>;
 
 /** ========== Session ========== */
 
-export interface AuthMethod {
-  authMethodType: number;
-  accessToken: string;
-}
+export type AuthMethod = z.infer<typeof AuthMethodSchema>;
 
 // pub struct JsonSignSessionKeyRequest {
 //     pub session_key: String,
@@ -854,65 +728,9 @@ export interface SignSessionKeyResponse {
   authSig: AuthSig;
 }
 
-export interface AuthenticationContext extends LitActionSdkParams {
-  /**
-   * Session signature properties shared across all functions that generate session signatures.
-   */
-  pkpPublicKey?: string;
+export type AuthenticationContext = z.infer<typeof AuthenticationContextSchema>;
 
-  /**
-   * When this session signature will expire. After this time is up you will need to reauthenticate, generating a new session signature. The default time until expiration is 24 hours. The formatting is an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) timestamp.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  expiration?: any;
-
-  /**
-   * The chain to use for the session signature and sign the session key. This value is almost always `ethereum`. If you're using EVM, this parameter isn't very important.
-   */
-  chain?: Chain;
-
-  /**
-   * An array of resource abilities that you want to request for this session. These will be signed with the session key.
-   * For example, an ability is added to grant a session permission to decrypt content associated with a particular Access Control Conditions (ACC) hash. When trying to decrypt, this ability is checked in the `resourceAbilityRequests` to verify if the session has the required decryption capability.
-   * @example
-   * [{ resource: new LitAccessControlConditionResource('someAccHash`), ability: LitAbility.AccessControlConditionDecryption }]
-   */
-  resourceAbilityRequests: LitResourceAbilityRequest[];
-
-  /**
-   * The session capability object that you want to request for this session.
-   * It is likely you will not need this, as the object will be automatically derived from the `resourceAbilityRequests`.
-   * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
-   * The wildcard means that the session will be granted the ability to perform operations with any access control condition.
-   */
-  sessionCapabilityObject?: ISessionCapabilityObject;
-
-  /**
-   * If you want to ask MetaMask to try and switch the user's chain, you may pass true here. This will only work if the user is using MetaMask, otherwise this will be ignored.
-   */
-  switchChain?: boolean;
-  /**
-   * The serialized session key pair to sign.
-   * If not provided, a session key pair will be fetched from localStorage or generated.
-   */
-  sessionKey?: SessionKeyPair;
-
-  /**
-   * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
-   */
-  capabilityAuthSigs?: AuthSig[];
-
-  /**
-   * This is a callback that will be used to generate an AuthSig within the session signatures. It's inclusion is required, as it defines the specific resources and abilities that will be allowed for the current session.
-   */
-  authNeededCallback?: AuthCallback;
-
-  authMethods?: AuthMethod[];
-
-  ipfsOptions?: IpfsOptions;
-}
-
-export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
+export type AuthCallback = z.infer<typeof AuthCallbackSchema>;
 
 /**
  * A map of node addresses to the session signature payload
@@ -1359,57 +1177,7 @@ export interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
-export interface LitActionSdkParams {
-  /**
-   * The litActionCode is the JavaScript code that will run on the nodes.
-   * You will need to convert the string content to base64.
-   *
-   * @example
-   * Buffer.from(litActionCodeString).toString('base64');
-   */
-  litActionCode?: string;
-
-  /**
-   * You can obtain the Lit Action IPFS CID by converting your JavaScript code using this tool:
-   * https://explorer.litprotocol.com/create-action
-   *
-   * Note: You do not need to pin your code to IPFS necessarily.
-   * You can convert a code string to an IPFS hash using the "ipfs-hash-only" or 'ipfs-unixfs-importer' library.
-   *
-   * @example
-   * async function stringToIpfsHash(input: string): Promise<string> {
-   *   // Convert the input string to a Buffer
-   *   const content = Buffer.from(input);
-   *
-   *   // Import the content to create an IPFS file
-   *   const files = importer([{ content }], {} as any, { onlyHash: true });
-   *
-   *   // Get the first (and only) file result
-   *   const result = (await files.next()).value;
-   *
-   *   const ipfsHash = (result as any).cid.toString();
-   *   if (!ipfsHash.startsWith('Qm')) {
-   *     throw new Error('Generated hash does not start with Qm');
-   *   }
-   *
-   *   return ipfsHash;
-   * }
-   */
-  litActionIpfsId?: string;
-
-  /**
-   * An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-   */
-  jsParams?:
-    | {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [key: string]: any;
-        publicKey?: string;
-        sigName?: string;
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | any;
-}
+export type LitActionSdkParams = z.infer<typeof LitActionSdkParamsSchema>;
 
 export interface LitEndpoint {
   path: string;
