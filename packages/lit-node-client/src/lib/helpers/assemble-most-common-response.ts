@@ -15,17 +15,16 @@ export const assembleMostCommonResponse = (responses: object[]): object => {
     const definedValues = values.filter(
       (value) => value !== undefined && value !== ''
     );
-    const valuesType = mostCommonValue(definedValues.map((value) => typeof value));
+    const valuesType = mostCommonValue(
+      definedValues.map((value) => typeof value)
+    );
     const filteredValues = values.filter(
       (value) => typeof value === valuesType
     );
 
     if (filteredValues.length === 0) {
       result[key] = undefined; // or set a default value if needed
-    } else if (
-      valuesType === 'object' &&
-      !Array.isArray(filteredValues[0])
-    ) {
+    } else if (valuesType === 'object' && !Array.isArray(filteredValues[0])) {
       // Recursive case for objects
       result[key] = assembleMostCommonResponse(filteredValues);
     } else {

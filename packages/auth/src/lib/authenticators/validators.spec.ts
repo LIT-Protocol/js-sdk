@@ -4,7 +4,7 @@ jest.mock('pino', () => {
   return {
     pino: jest.fn(() => ({
       error: errorMock,
-    }))
+    })),
   };
 });
 

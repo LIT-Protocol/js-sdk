@@ -1,6 +1,5 @@
 import { InvalidEthBlockhash } from '@lit-protocol/constants';
 
-
 const logMock = jest.fn();
 
 jest.mock('pino', () => {
@@ -8,7 +7,7 @@ jest.mock('pino', () => {
     pino: jest.fn(() => ({
       info: logMock,
       error: logMock,
-    }))
+    })),
   };
 });
 

@@ -42,7 +42,10 @@ describe('localStorage', () => {
   });
 
   test('writes and reads to/from localStorage correctly', async () => {
-    mockLocalStorage.setItem(`lit-auth:${appName}:${networkName}:${pkpAddress}`, JSON.stringify(authData));
+    mockLocalStorage.setItem(
+      `lit-auth:${appName}:${networkName}:${pkpAddress}`,
+      JSON.stringify(authData)
+    );
     const storage = createLocalStorage({
       appName,
       networkName,
@@ -120,7 +123,9 @@ describe('localStorage', () => {
     await expect(storageAppB.read({ pkpAddress })).resolves.toBeNull();
 
     await storageAppB.write({ pkpAddress, authData: authDataNetworkB });
-    await expect(storageAppB.read({ pkpAddress })).resolves.toEqual(authDataNetworkB);
+    await expect(storageAppB.read({ pkpAddress })).resolves.toEqual(
+      authDataNetworkB
+    );
     await expect(storageAppA.read({ pkpAddress })).resolves.toEqual(authData);
   });
 });

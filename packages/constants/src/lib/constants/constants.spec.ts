@@ -1,7 +1,4 @@
-import {
-  LIT_CHAINS,
-  NETWORK_PUB_KEY,
-} from './constants';
+import { LIT_CHAINS, NETWORK_PUB_KEY } from './constants';
 
 describe('constants', () => {
   const networkPubKey =
