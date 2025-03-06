@@ -81,7 +81,6 @@
     "synthetix-js": "^2.74.1",
     "tslib": "^2.3.0",
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1",
     "uint8arrays": "^4.0.3",
     "@openagenda/verror": "^3.1.4",
     "ipfs-unixfs-importer": "12.0.1",

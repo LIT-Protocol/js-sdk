@@ -23,13 +23,13 @@ export const ILitResourceSchema = z.object({
    * Gets the fully qualified resource key.
    * @returns The fully qualified resource key.
    */
-  getResourceKey: z.function().args(z.void()).returns(z.string()),
+  getResourceKey: z.function().args().returns(z.string()),
   /**
    * Validates that the given LIT ability is valid for this resource.
    * @param litAbility The LIT ability to validate.
    */
   isValidLitAbility: z.function().args(LitAbilitySchema).returns(z.boolean()),
-  toString: z.function().args(z.void()).returns(z.string()),
+  toString: z.function().args().returns(z.string()),
   resourcePrefix: LitResourcePrefixSchema.readonly(),
   resource: z.string().readonly(),
 });

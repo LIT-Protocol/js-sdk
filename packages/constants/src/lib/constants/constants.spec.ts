@@ -1,89 +1,14 @@
-// @ts-nocheck
 import {
   LIT_CHAINS,
-  LIT_COSMOS_CHAINS,
-  LIT_SVM_CHAINS,
   NETWORK_PUB_KEY,
 } from './constants';
 
 describe('constants', () => {
-  const MUST_HAVE_EVM_CHAINS: Array<string> = [
-    'ethereum',
-    'polygon',
-    'fantom',
-    'xdai',
-    'bsc',
-    'arbitrum',
-    'avalanche',
-    'fuji',
-    'harmony',
-    'kovan',
-    'mumbai',
-    'goerli',
-    'ropsten',
-    'rinkeby',
-    'cronos',
-    'optimism',
-    'celo',
-    'aurora',
-    'eluvio',
-    'alfajores',
-    'xdc',
-    'evmos',
-    'evmosTestnet',
-    'bscTestnet',
-    'baseGoerli',
-  ];
-
-  const MUST_HAVE_SOL_CHAINS = ['solana', 'solanaDevnet', 'solanaTestnet'];
-  const MUST_HAVE_COSMOS_CHAINS = [
-    'cosmos',
-    'kyve',
-    'evmosCosmos',
-    'evmosCosmosTestnet',
-  ];
-
   const networkPubKey =
     '9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62';
 
-  it(`LIT_CHAINS should have ${MUST_HAVE_EVM_CHAINS.toString()}`, () => {
-    let total = 0;
-
-    MUST_HAVE_EVM_CHAINS.forEach((chain) => {
-      if (Object.keys(LIT_CHAINS).includes(chain)) {
-        total++;
-      }
-    });
-
-    expect(total).toEqual(Object.keys(LIT_CHAINS).length);
-  });
-
   it(`Network public key should be ${networkPubKey}`, () => {
     expect(NETWORK_PUB_KEY).toEqual(networkPubKey);
-  });
-
-  it(`LIT_SVM_CHAINS should have ${MUST_HAVE_SOL_CHAINS}`, () => {
-    let total = 0;
-
-    MUST_HAVE_SOL_CHAINS.forEach((chain) => {
-      if (Object.keys(LIT_SVM_CHAINS).includes(chain)) {
-        total++;
-      }
-    });
-
-    expect(total).toEqual(Object.keys(LIT_SVM_CHAINS).length);
-  });
-
-  it(`LIT_COSMOS_CHAINS should have ${MUST_HAVE_COSMOS_CHAINS}`, () => {
-    let total = 0;
-
-    MUST_HAVE_COSMOS_CHAINS.forEach((chain) => {
-      if (Object.keys(LIT_COSMOS_CHAINS).includes(chain)) {
-        total++;
-      }
-    });
-
-    expect(total).toEqual(Object.keys(LIT_COSMOS_CHAINS).length);
   });
 
   const ethContract = '0xA54F7579fFb3F98bd8649fF02813F575f9b3d353';

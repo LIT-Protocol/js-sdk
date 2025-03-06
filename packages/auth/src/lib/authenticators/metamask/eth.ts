@@ -390,9 +390,6 @@ export const disconnectWeb3 = (): void => {
   const storage = LOCAL_STORAGE_KEYS;
 
   localStorage.removeItem(storage.AUTH_SIGNATURE);
-  localStorage.removeItem(storage.AUTH_SOL_SIGNATURE);
-  localStorage.removeItem(storage.AUTH_COSMOS_SIGNATURE);
-  localStorage.removeItem(storage.WEB3_PROVIDER);
   localStorage.removeItem(storage.WALLET_SIGNATURE);
 };
 
