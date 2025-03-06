@@ -1273,14 +1273,6 @@ export const LIT_NETWORKS: Record<LIT_NETWORK_VALUES, string[]> = {
   [LIT_NETWORK.Custom]: [],
 } as const;
 
-// ========== Either Types ==========
-export const EITHER_TYPE = {
-  ERROR: 'ERROR',
-  SUCCESS: 'SUCCESS',
-} as const;
-export type EITHER_TYPE_TYPE = ConstantKeys<typeof EITHER_TYPE>;
-export type EITHER_TYPE_VALUES = ConstantValues<typeof EITHER_TYPE>;
-
 // ========== Supported PKP Auth Method Types ==========
 export const AUTH_METHOD_TYPE = {
   EthWallet: 1,

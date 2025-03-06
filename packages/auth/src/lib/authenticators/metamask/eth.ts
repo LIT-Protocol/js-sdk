@@ -18,14 +18,9 @@ import {
   ConstantValues,
   ConstantKeys,
   Environment,
-  EITHER_TYPE,
-  ELeft,
-  ERight,
-  IEither,
   InvalidSignatureError,
   LIT_CHAINS,
   LOCAL_STORAGE_KEYS,
-  LocalStorageItemNotFoundException,
   UnknownError,
   UnsupportedChainException,
   WrongNetworkException,
@@ -158,35 +153,27 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
  * Get chain id of the current network
  * @param { string } chain
  * @param { Web3Provider } web3
- * @returns { Promise<IEither> }
+ * @returns { Promise<number> }
  */
 export const getChainId = async (
   chain: string,
   web3: Web3Provider
-): Promise<IEither<number>> => {
-  let resultOrError: IEither<number>;
-
+): Promise<number> => {
   try {
-    const resp = await web3.getNetwork();
-    resultOrError = ERight(resp.chainId);
+    const network = await web3.getNetwork();
+    return network.chainId;
   } catch (e) {
-    // couldn't get chainId.  throw the incorrect network error
-    logger.error('getNetwork threw an exception', e);
-
-    resultOrError = ELeft(
-      new WrongNetworkException(
-        {
-          info: {
-            chain,
-          },
+    throw new WrongNetworkException(
+      {
+        info: {
+          chain,
         },
-        `Incorrect network selected. Please switch to the %s network in your wallet and try again.`,
-        chain
-      )
+        cause: e,
+      },
+      `Incorrect network selected. Please switch to the %s network in your wallet and try again.`,
+      chain
     );
   }
-
-  return resultOrError;
 };
 
 /**
@@ -448,24 +435,9 @@ export const checkAndSignEVMAuthMessage = async ({
   logger.info(`got web3 and account: ${account}`);
 
   // -- 2. prepare all required variables
-  const currentChainIdOrError = await getChainId(chain, web3);
+  let currentChainId = await getChainId(chain, web3);
   const selectedChainId: number = selectedChain.chainId;
   const selectedChainIdHex: string = `0x${selectedChainId.toString(16)}`;
-  let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
-
-
-  // -- 3. check all variables before executing business logic
-  if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
-    throw new UnknownError(
-      {
-        info: {
-          chainId: chain,
-        },
-        cause: currentChainIdOrError.result,
-      },
-      'Unknown error when getting chain id'
-    );
-  }
 
   logger.info({ msg: 'currentChainId', currentChainId });
   logger.info({ msg: 'selectedChainId', selectedChainId });
@@ -476,7 +448,7 @@ export const checkAndSignEVMAuthMessage = async ({
   });
 
   // -- 4. case: (current chain id is NOT equal to selected chain) AND is set to switch chain
-  if (currentChainIdOrError.result !== selectedChainId && switchChain) {
+  if (currentChainId !== selectedChainId && switchChain) {
     const provider = web3.provider as any;
 
     // -- (case) if able to switch chain id
@@ -524,17 +496,27 @@ export const checkAndSignEVMAuthMessage = async ({
     }
 
     // we may have switched the chain to the selected chain.  set the chainId accordingly
-    currentChainIdOrError.result = selectedChain.chainId;
+    currentChainId = selectedChain.chainId;
   }
 
+  let authSig: AuthSig | undefined;
   // -- 5. case: Lit auth signature is NOT in the local storage
-  logger.info('checking if sig is in local storage');
+  try {
+    logger.info('checking if sig is in local storage');
+    const authSigString = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+    authSig = JSON.parse(authSigString);
+  } catch (e) {
+    logger.warn({
+      msg: 'Could not get sig from local storage',
+      error: e,
+    });
+  }
 
-  if (authSigOrError.type === EITHER_TYPE.ERROR) {
-    logger.info('signing auth message because sig is not in local storage');
-
+  if (!authSig) {
     try {
-      const authSig = await _signAndGetAuth({
+      logger.info('signing auth message because sig is not in local storage');
+
+      authSig = await _signAndGetAuth({
         web3,
         account,
         chainId: selectedChain.chainId,
@@ -543,11 +525,6 @@ export const checkAndSignEVMAuthMessage = async ({
         uri,
         nonce,
       });
-
-      authSigOrError = {
-        type: EITHER_TYPE.SUCCESS,
-        result: JSON.stringify(authSig),
-      };
     } catch (e) {
       throw new UnknownError(
         {
@@ -564,9 +541,6 @@ export const checkAndSignEVMAuthMessage = async ({
         'Could not get authenticated message'
       );
     }
-
-    // Log new authSig
-    logger.info('5. authSigOrError:', authSigOrError);
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
@@ -654,23 +628,8 @@ const _signAndGetAuth = async ({
     nonce,
   });
 
-  const authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
-
-  if (authSigOrError.type === 'ERROR') {
-    throw new LocalStorageItemNotFoundException(
-      {
-        info: {
-          storageKey: LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
-        },
-      },
-      'Failed to get authSig from local storage'
-    );
-  }
-
-  const authSig: AuthSig =
-    typeof authSigOrError.result === 'string'
-      ? JSON.parse(authSigOrError.result)
-      : authSigOrError.result;
+  const authSigString = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+  const authSig: AuthSig = JSON.parse(authSigString);
 
   return authSig;
 };

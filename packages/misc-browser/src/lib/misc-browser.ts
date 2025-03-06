@@ -1,41 +1,44 @@
 import {
-  ELeft,
-  ERight,
-  IEither,
   LocalStorageItemNotFoundException,
   LocalStorageItemNotRemovedException,
   LocalStorageItemNotSetException,
 } from '@lit-protocol/constants';
 
 /**
+ * Get the local storage item by key.
  *
- * Get the local storage item by key
- *
- * @param { string } key
+ * @param {string} key The key to retrieve.
+ * @returns {string} The stored string.
+ * @throws Will throw an error if reading from localStorage fails or the item is not found.
  */
-export const getStorageItem = (key: string): IEither<string> => {
-  let item;
+export const getStorageItem = (key: string): string => {
+  let item: string | null;
   try {
     item = localStorage.getItem(key);
   } catch (e) {
-    // swallowing
-  }
-
-  if (!item) {
-    return ELeft(
-      new LocalStorageItemNotFoundException(
-        {
-          info: {
-            storageKey: key,
-          },
+    throw new LocalStorageItemNotFoundException(
+      {
+        info: {
+          storageKey: key,
         },
-        `Failed to get %s from local storage`,
-        key
-      )
+        cause: e,
+      },
+      `Error reading localStorage for key "${key}"`
     );
   }
 
-  return ERight(item);
+  if (!item) {
+    throw new LocalStorageItemNotFoundException(
+      {
+        info: {
+          storageKey: key,
+        },
+      },
+      `Failed to find ${key} in local storage`
+    );
+  }
+
+  return item;
 };
 
 /**
@@ -45,21 +48,20 @@ export const getStorageItem = (key: string): IEither<string> => {
  * @param { string } key is the key to set
  * @param { string } value is the value to set
  */
-export const setStorageItem = (key: string, value: string): IEither<string> => {
+export const setStorageItem = (key: string, value: string): string => {
   try {
     localStorage.setItem(key, value);
-    return ERight(value);
+    return value;
   } catch (e) {
-    return ELeft(
-      new LocalStorageItemNotSetException(
-        {
-          info: {
-            storageKey: key,
-          },
+    throw new LocalStorageItemNotSetException(
+      {
+        info: {
+          storageKey: key,
         },
-        `Failed to set %s in local storage`,
-        key
-      )
+        cause: e,
+      },
+      `Failed to set %s in local storage`,
+      key
     );
   }
 };
@@ -69,23 +71,22 @@ export const setStorageItem = (key: string, value: string): IEither<string> => {
  * Remove the local storage item by key
  *
  * @param { string } key is the key to remove
- * @returns { IEither } Either the key or an error
+ * @returns { string } the key removed
  */
-export const removeStorageItem = (key: string): IEither<string> => {
+export const removeStorageItem = (key: string): string => {
   try {
     localStorage.removeItem(key);
-    return ERight(key);
+    return key;
   } catch (e) {
-    return ELeft(
-      new LocalStorageItemNotRemovedException(
-        {
-          info: {
-            storageKey: key,
-          },
+    throw new LocalStorageItemNotRemovedException(
+      {
+        info: {
+          storageKey: key,
         },
-        `Failed to remove %s from local storage`,
-        key
-      )
+        cause: e,
+      },
+      `Failed to remove %s from local storage`,
+      key
     );
   }
 };

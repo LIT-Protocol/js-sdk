@@ -19,7 +19,6 @@ import {
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
-  EITHER_TYPE,
   FALLBACK_IPFS_GATEWAYS,
   GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK,
   InvalidArgumentException,
@@ -241,33 +240,30 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
    */
   private _getSessionKey = (): SessionKeyPair => {
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
-    const storedSessionKeyOrError = getStorageItem(storageKey);
 
-    if (
-      storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
-      !storedSessionKeyOrError.result ||
-      storedSessionKeyOrError.result === ''
-    ) {
-      this.#logger.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
-      );
-
-      // Generate new one
-      const newSessionKey = generateSessionKeyPair();
-
-      // (TRY) to set to local storage
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
-      } catch (e) {
-        this.#logger.info(
-          `[getSessionKey] Localstorage not available.Not a problem. Continue...`
-        );
-      }
-
-      return newSessionKey;
-    } else {
-      return JSON.parse(storedSessionKeyOrError.result as string);
+    try {
+      const storedSessionKeyString = getStorageItem(storageKey);
+      return JSON.parse(storedSessionKeyString);
+    } catch (e) {
+      this.#logger.warn({
+        msg: `Couldn't get session key from local storage key "${storageKey}". Not a problem. Continue...`,
+        error: e,
+      });
     }
+
+    this.#logger.info('Generating new session key...');
+    // Generate new one
+    const newSessionKey = generateSessionKeyPair();
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
+    } catch (e) {
+      this.#logger.info(
+        `Localstorage not available. Not a problem. Continue...`
+      );
+    }
+
+    return newSessionKey;
   };
 
   /**
@@ -287,32 +283,27 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     jsParams,
     sessionKey,
   }: GetWalletSigProps): Promise<AuthSig> => {
-    let walletSig: AuthSig;
+    let walletSig: AuthSig | undefined;
 
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
-    const storedWalletSigOrError = getStorageItem(storageKey);
-
-    // browser: 2 > 2.1 > 3
-    // nodejs: 1. > 1.1
 
     // -- (TRY) to get it in the local storage
     // -- IF NOT: Generates one
-    this.#logger.info(`getWalletSig - flow starts
-        storageKey: ${storageKey}
-        storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
-    `);
+    this.#logger.info(`getWalletSig - fetching from storageKey: ${storageKey}`);
 
-    if (
-      storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
-      !storedWalletSigOrError.result ||
-      storedWalletSigOrError.result == ''
-    ) {
-      this.#logger.info('getWalletSig - flow 1');
-      this.#logger.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
-      );
+    try {
+      const walletSigString = getStorageItem(storageKey);
+      walletSig = JSON.parse(walletSigString);
+    } catch (e) {
+      this.#logger.warn({
+        msg: `Could not get wallet sig from storage key "${storageKey}"`,
+        error: e,
+      });
+    }
+
+    if (!walletSig) {
       if (authNeededCallback) {
-        this.#logger.info('getWalletSig - flow 1.1');
+        this.#logger.info('getWalletSig - generating with authNeededCallback');
 
         const body = {
           chain,
@@ -338,17 +329,8 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
         this.#logger.info({ msg: 'callback body', body });
 
         walletSig = await authNeededCallback(body);
-      } else {
-        this.#logger.info('getWalletSig - flow 1.2');
-        if (!this.defaultAuthCallback) {
-          this.#logger.info('getWalletSig - flow 1.2.1');
-          throw new ParamsMissingError(
-            {},
-            'No authNeededCallback nor default auth callback provided'
-          );
-        }
-
-        this.#logger.info('getWalletSig - flow 1.2.2');
+      } else if (this.defaultAuthCallback) {
+        this.#logger.info('getWalletSig - generating with defaultAuthCallback');
         walletSig = await this.defaultAuthCallback({
           chain,
           statement: sessionCapabilityObject.statement,
@@ -360,34 +342,29 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           uri: sessionKeyUri,
           nonce,
         });
-      }
-
-      this.#logger.info('getWalletSig - flow 1.3');
-
-      // (TRY) to set walletSig to local storage
-      const storeNewWalletSigOrError = setStorageItem(
-        storageKey,
-        JSON.stringify(walletSig)
-      );
-      if (storeNewWalletSigOrError.type === 'ERROR') {
-        this.#logger.info('getWalletSig - flow 1.4');
-        this.#logger.warn(
-          `Unable to store walletSig in local storage. Not a problem. Continue...`
+      } else {
+        throw new ParamsMissingError(
+          {},
+          'getWalletSig - No authNeededCallback nor default auth callback provided'
         );
       }
-    } else {
-      this.#logger.info('getWalletSig - flow 2');
+
+      // If localStorage, authNeededCallback or defaultAuthCallback didn't fail, walletSig is defined by it
+      this.#logger.info({ msg: 'getWalletSig - walletSig', walletSig });
+
+      // (TRY) to set walletSig to local storage
       try {
-        walletSig = JSON.parse(storedWalletSigOrError.result as string);
-        this.#logger.info('getWalletSig - flow 2.1');
+        setStorageItem(storageKey, JSON.stringify(walletSig));
       } catch (e) {
-        this.#logger.warn('Error parsing walletSig', e);
-        this.#logger.info('getWalletSig - flow 2.2');
+        this.#logger.info('getWalletSig - flow 1.4');
+        this.#logger.warn({
+          msg: `Unable to store walletSig in local storage. Not a problem. Continue...`,
+          error: e,
+        });
       }
     }
 
-    this.#logger.info('getWalletSig - flow 3');
-    return walletSig!;
+    return walletSig;
   };
 
   private _authCallbackAndUpdateStorageItem = async ({
@@ -412,25 +389,28 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     }
 
     // (TRY) to set walletSig to local storage
-    const storeNewWalletSigOrError = setStorageItem(
-      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE,
-      JSON.stringify(authSig)
-    );
-    if (storeNewWalletSigOrError.type === EITHER_TYPE.SUCCESS) {
+    try {
+      setStorageItem(
+        LOCAL_STORAGE_KEYS.WALLET_SIGNATURE,
+        JSON.stringify(authSig)
+      );
       return authSig;
+    } catch (e) {
+      // Setting local storage failed, try to remove the item key.
+      this.#logger.warn({
+        msg: `Unable to store walletSig in local storage. Not a problem. Continuing to remove item key...`,
+        error: e,
+      });
     }
 
-    // Setting local storage failed, try to remove the item key.
-    this.#logger.warn(
-      `Unable to store walletSig in local storage. Not a problem. Continuing to remove item key...`
-    );
-    const removeWalletSigOrError = removeStorageItem(
-      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE
-    );
-    if (removeWalletSigOrError.type === EITHER_TYPE.ERROR) {
-      this.#logger.warn(
-        `Unable to remove walletSig in local storage. Not a problem. Continuing...`
-      );
+    try {
+      removeStorageItem(LOCAL_STORAGE_KEYS.WALLET_SIGNATURE);
+    } catch (e) {
+      // Ignore error and continue
+      this.#logger.warn({
+        msg: `Unable to remove walletSig in local storage. Not a problem. Continuing...`,
+        error: e,
+      });
     }
 
     return authSig;
