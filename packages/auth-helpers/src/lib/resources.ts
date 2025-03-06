@@ -7,7 +7,6 @@ import {
   LIT_RESOURCE_PREFIX_VALUES,
 } from '@lit-protocol/constants';
 import { AccessControlConditions, ILitResource } from '@lit-protocol/types';
-import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 import { formatPKPResource } from './utils';
 
 abstract class LitResourceBase {
@@ -73,9 +72,8 @@ export class LitAccessControlConditionResource
     }
 
     const hashedAccs = await hashAccessControlConditions(accs);
-    const hashedAccsStr = uint8arrayToString(
-      new Uint8Array(hashedAccs),
-      'base16'
+    const hashedAccsStr = Buffer.from(new Uint8Array(hashedAccs)).toString(
+      'hex'
     );
 
     const resourceString = `${hashedAccsStr}/${dataToEncryptHash}`;

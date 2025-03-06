@@ -13,10 +13,6 @@ import {
 import { nacl } from '@lit-protocol/nacl';
 import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
 import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
-import {
   blsCombine,
   blsDecrypt,
   blsEncrypt,
@@ -305,8 +301,8 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   const keyPair = nacl.sign.keyPair();
 
   const sessionKeyPair: SessionKeyPair = {
-    publicKey: uint8arrayToString(keyPair.publicKey, 'base16'),
-    secretKey: uint8arrayToString(keyPair.secretKey, 'base16'),
+    publicKey: Buffer.from(publicKey).toString('hex'),
+    secretKey: Buffer.from(combinedSecretKey).toString('hex'), // TODO check if concatenated public key is needed
   };
 
   return sessionKeyPair;
@@ -507,10 +503,10 @@ export const checkSevSnpAttestation = async (
     logger.info('Using local storage for certificate caching');
     vcekCert = localStorage.getItem(vcekUrl);
     if (vcekCert) {
-      vcekCert = uint8arrayFromString(vcekCert, 'base64');
+      vcekCert = Buffer.from(vcekCert, 'base64');
     } else {
       vcekCert = await getAmdCert(vcekUrl);
-      localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
+      localStorage.setItem(vcekUrl, Buffer.from(vcekCert).toString('base64'));
     }
   } else {
     const cache = ((

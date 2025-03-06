@@ -19,10 +19,6 @@ import {
   EncryptToJsonProps,
   DecryptFromJsonProps,
 } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
 
 /**
  * Encrypt a string or file using the LIT network public key and serialise all the metadata required to decrypt
@@ -251,7 +247,7 @@ export const encryptString = async (
 
   return litNodeClient.encrypt({
     ..._params,
-    dataToEncrypt: uint8arrayFromString(_params.dataToEncrypt, 'utf8'),
+    dataToEncrypt: Buffer.from(_params.dataToEncrypt, 'utf8'),
   });
 };
 
@@ -276,7 +272,7 @@ export const decryptToString = async (
 
   const { decryptedData } = await litNodeClient.decrypt(_params);
 
-  return uint8arrayToString(decryptedData, 'utf8');
+  return Buffer.from(decryptedData).toString('utf8');
 };
 
 /**

@@ -106,10 +106,6 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 import { AuthMethod } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
 
 import { assembleMostCommonResponse } from './helpers/assemble-most-common-response';
 import { encodeCode } from './helpers/encode-code';
@@ -1026,10 +1022,9 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       );
     }
 
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
+    const hashOfConditionsStr = Buffer.from(
+      new Uint8Array(hashOfConditions)
+    ).toString('hex');
 
     // ========== Hashing Private Data ==========
     // hash the private data
@@ -1037,10 +1032,9 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       'SHA-256',
       params.dataToEncrypt
     );
-    const hashOfPrivateDataStr = uint8arrayToString(
-      new Uint8Array(hashOfPrivateData),
-      'base16'
-    );
+    const hashOfPrivateDataStr = Buffer.from(
+      new Uint8Array(hashOfPrivateData)
+    ).toString('hex');
 
     // ========== Assemble identity parameter ==========
     const identityParam = this._getIdentityParamForEncryption(
@@ -1052,7 +1046,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const ciphertext = await encrypt(
       this.subnetPubKey,
       params.dataToEncrypt,
-      uint8arrayFromString(identityParam, 'utf8')
+      Buffer.from(identityParam, 'utf8')
     );
 
     return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
@@ -1097,10 +1091,9 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       );
     }
 
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
+    const hashOfConditionsStr = Buffer.from(
+      new Uint8Array(hashOfConditions)
+    ).toString('hex');
 
     // ========== Formatting Access Control Conditions =========
     const {
@@ -1201,7 +1194,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     // ========== Result ==========
     const decryptedData = await this._decryptWithSignatureShares(
       this.subnetPubKey,
-      uint8arrayFromString(identityParam, 'utf8'),
+      Buffer.from(identityParam, 'utf8'),
       ciphertext,
       signatureShares
     );
@@ -1697,16 +1690,11 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
       const signedMessage = JSON.stringify(toSign);
 
-      const uint8arrayKey = uint8arrayFromString(
-        sessionKey.secretKey,
-        'base16'
-      );
-
-      const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
+      const uint8arrayMessage = Buffer.from(signedMessage, 'utf8');
 
       sessionSigs[nodeAddress] = {
-        sig: uint8arrayToString(signature, 'base16'),
+        sig: Buffer.from(signature).toString('hex'),
         derivedVia: 'litSessionSignViaNacl',
         signedMessage: signedMessage,
         address: sessionKey.publicKey,

@@ -5,10 +5,6 @@ import {
   encryptUint8Array,
   decryptToUint8Array,
 } from '@lit-protocol/encryption';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
 
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
@@ -30,7 +26,7 @@ export const testUseEoaSessionSigsToEncryptDecryptUint8Array = async (
   });
 
   const message = 'Hello world';
-  const messageToEncrypt = uint8arrayFromString(message, 'utf8');
+  const messageToEncrypt = Buffer.from(message, 'utf8');
 
   const encryptRes = await encryptUint8Array(
     {
@@ -81,7 +77,7 @@ export const testUseEoaSessionSigsToEncryptDecryptUint8Array = async (
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
-  const decryptResString = uint8arrayToString(decryptRes, 'utf8');
+  const decryptResString = Buffer.from(decryptRes).toString('utf8');
 
   devEnv.releasePrivateKeyFromUser(alice);
 

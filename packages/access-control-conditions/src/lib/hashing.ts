@@ -11,7 +11,6 @@ import {
   SupportedJsonRequests,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 import {
   canonicalAccessControlConditionFormatter,
@@ -80,7 +79,7 @@ const logger = pino({ level: 'info', name: 'hashing' });
 
 //   const hash = await hashUnifiedAccessControlConditions(unifiedAccs);
 
-//   return uint8arrayToString(new Uint8Array(hash), 'base16');
+//   return Buffer.from(new Uint8Array(hash), 'hex');
 // };
 
 /**
@@ -167,7 +166,7 @@ export const hashResourceIdForSigning = async (
   resourceId: JsonSigningResourceId
 ): Promise<string> => {
   const hashed = await hashResourceId(resourceId);
-  return uint8arrayToString(new Uint8Array(hashed), 'base16');
+  return Buffer.from(new Uint8Array(hashed)).toString('hex');
 };
 
 /**
