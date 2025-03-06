@@ -211,7 +211,7 @@ export class PKPCosmosWallet
     );
 
     // Log the encoded signature.
-    this.#logger.debug('stdSignature:', stdSignature);
+    this.#logger.debug({ msg: 'stdSignature', stdSignature });
 
     // Return the signed transaction and encoded signature.
     return {

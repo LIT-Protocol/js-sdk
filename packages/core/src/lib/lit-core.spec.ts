@@ -1,12 +1,23 @@
 import { InvalidEthBlockhash } from '@lit-protocol/constants';
 
+
+const logMock = jest.fn();
+
+jest.mock('pino', () => {
+  return {
+    pino: jest.fn(() => ({
+      info: logMock,
+      error: logMock,
+    }))
+  };
+});
+
 import { LitCore } from './lit-core';
 
 describe('LitCore', () => {
   let core: LitCore;
 
   describe('getLatestBlockhash', () => {
-    let originalFetch: typeof fetch;
     let originalDateNow: typeof Date.now;
     const mockBlockhashUrl =
       'https://block-indexer-url.com/get_most_recent_valid_block';
@@ -16,12 +27,11 @@ describe('LitCore', () => {
         litNetwork: 'custom',
       });
       core['_blockHashUrl'] = mockBlockhashUrl;
-      originalFetch = fetch;
       originalDateNow = Date.now;
+      Date.now = jest.fn().mockReturnValue(1000000);
     });
 
     afterEach(() => {
-      global.fetch = originalFetch;
       Date.now = originalDateNow;
       jest.clearAllMocks();
     });

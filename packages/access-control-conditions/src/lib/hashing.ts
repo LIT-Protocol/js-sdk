@@ -93,15 +93,15 @@ const logger = pino({ level: 'info', name: 'hashing' });
 export const hashUnifiedAccessControlConditions = (
   unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
-  logger.info(
-    'unifiedAccessControlConditions:',
-    unifiedAccessControlConditions
-  );
+  logger.info({
+    msg: 'unifiedAccessControlConditions',
+    unifiedAccessControlConditions,
+  });
 
   const conditions = unifiedAccessControlConditions.map((condition) => {
     return canonicalUnifiedAccessControlConditionFormatter(condition);
   });
-  logger.info('conditions:', conditions);
+  logger.info({ msg: 'conditions', conditions });
 
   // check if there's any undefined in the conditions
   const hasUndefined = conditions.some((c) => c === undefined);
@@ -128,7 +128,7 @@ export const hashUnifiedAccessControlConditions = (
   }
   const toHash = JSON.stringify(conditions);
 
-  logger.info('Hashing unified access control conditions: ', toHash);
+  logger.info({ msg: 'Hashing unified access control conditions', toHash });
 
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
@@ -187,7 +187,7 @@ export const hashAccessControlConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  logger.info('Hashing access control conditions: ', toHash);
+  logger.info({ msg: 'Hashing access control conditions', toHash });
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -211,7 +211,7 @@ export const hashEVMContractConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  logger.info('Hashing evm contract conditions: ', toHash);
+  logger.info({ msg: 'Hashing evm contract conditions', toHash });
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
   return crypto.subtle.digest('SHA-256', data);
@@ -234,7 +234,7 @@ export const hashSolRpcConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  logger.info('Hashing sol rpc conditions: ', toHash);
+  logger.info({ msg: 'Hashing sol rpc conditions', toHash });
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -307,37 +307,43 @@ export const getFormattedAccessControlConditions = (
     formattedAccessControlConditions = accessControlConditions.map((c) =>
       canonicalAccessControlConditionFormatter(c)
     );
-    logger.info(
-      'formattedAccessControlConditions',
-      JSON.stringify(formattedAccessControlConditions)
-    );
+    logger.info({
+      msg: 'formattedAccessControlConditions',
+      formattedAccessControlConditions: JSON.stringify(
+        formattedAccessControlConditions
+      ),
+    });
   } else if (evmContractConditions) {
     formattedEVMContractConditions = evmContractConditions.map((c) =>
       canonicalEVMContractConditionFormatter(c)
     );
-    logger.info(
-      'formattedEVMContractConditions',
-      JSON.stringify(formattedEVMContractConditions)
-    );
+    logger.info({
+      msg: 'formattedEVMContractConditions',
+      formattedEVMContractConditions: JSON.stringify(
+        formattedEVMContractConditions
+      ),
+    });
   } else if (solRpcConditions) {
     // FIXME: ConditionItem is too narrow, or `solRpcConditions` is too wide
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     formattedSolRpcConditions = solRpcConditions.map((c: any) =>
       canonicalSolRpcConditionFormatter(c)
     );
-    logger.info(
-      'formattedSolRpcConditions',
-      JSON.stringify(formattedSolRpcConditions)
-    );
+    logger.info({
+      msg: 'formattedSolRpcConditions',
+      formattedSolRpcConditions: JSON.stringify(formattedSolRpcConditions),
+    });
   } else if (unifiedAccessControlConditions) {
     formattedUnifiedAccessControlConditions =
       unifiedAccessControlConditions.map((c) =>
         canonicalUnifiedAccessControlConditionFormatter(c)
       );
-    logger.info(
-      'formattedUnifiedAccessControlConditions',
-      JSON.stringify(formattedUnifiedAccessControlConditions)
-    );
+    logger.info({
+      msg: 'formattedUnifiedAccessControlConditions',
+      formattedUnifiedAccessControlConditions: JSON.stringify(
+        formattedUnifiedAccessControlConditions
+      ),
+    });
   } else {
     error = true;
   }

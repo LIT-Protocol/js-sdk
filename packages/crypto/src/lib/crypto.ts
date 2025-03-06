@@ -390,7 +390,10 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   try {
     return await fetchAsUint8Array(proxyUrl);
   } catch (e) {
-    logger.info(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
+    logger.info({
+      msg: `[getAmdCert] Failed to fetch AMD cert from proxy:`,
+      e,
+    });
   }
 
   // Try direct fetch only if proxy fails
@@ -399,7 +402,7 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   try {
     return await fetchAsUint8Array(url);
   } catch (e) {
-    logger.info('[getAmdCert] Direct fetch also failed:', e);
+    logger.error({ msg: '[getAmdCert] Direct fetch also failed', e });
     throw e; // Re-throw to signal that both methods failed
   }
 }

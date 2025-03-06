@@ -230,7 +230,10 @@ export const getMustResign = (
 
   try {
     const parsedSiwe = new SiweMessage(authSig.signedMessage);
-    logger.info('parsedSiwe.resources', parsedSiwe.resources);
+    logger.info({
+      msg: 'parsedSiwe.resources',
+      resources: parsedSiwe.resources,
+    });
 
     if (JSON.stringify(parsedSiwe.resources) !== JSON.stringify(resources)) {
       logger.info(
@@ -241,12 +244,15 @@ export const getMustResign = (
 
     if (parsedSiwe.address !== getAddress(parsedSiwe.address)) {
       logger.info(
-        'signing auth message because parsedSig.address is not equal to the same address but checksummed.  This usually means the user had a non-checksummed address saved and so they need to re-sign.'
+        'signing auth message because parsedSig.address is not equal to the same address but checksummed. This usually means the user had a non-checksummed address saved and so they need to re-sign.'
       );
       mustResign = true;
     }
   } catch (e) {
-    logger.info('error parsing siwe sig.  making the user sign again: ', e);
+    logger.error({
+      msg: 'error parsing siwe sig. Making the user sign again',
+      e,
+    });
     mustResign = true;
   }
 
@@ -350,7 +356,7 @@ export const connectWeb3 = async ({
   logger.info('listing accounts');
   const accounts = await web3.listAccounts();
 
-  logger.info('accounts', accounts);
+  logger.info({ msg: 'accounts', accounts });
   const account = ethers.utils.getAddress(accounts[0]);
 
   return { web3, account };
@@ -406,7 +412,7 @@ export const checkAndSignEVMAuthMessage = async ({
   walletConnectProjectId,
   nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
-  // -- check if it's nodejs
+  // -- check if it's Node.js
   if (Environment.isNode) {
     logger.info(
       'checkAndSignEVMAuthMessage is not supported in nodejs.  You can create a SIWE on your own using the SIWE package.'
@@ -452,10 +458,6 @@ export const checkAndSignEVMAuthMessage = async ({
   const selectedChainIdHex: string = `0x${selectedChainId.toString(16)}`;
   let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
-  logger.info('currentChainIdOrError:', currentChainIdOrError);
-  logger.info('selectedChainId:', selectedChainId);
-  logger.info('selectedChainIdHex:', selectedChainIdHex);
-  logger.info('authSigOrError:', authSigOrError);
 
   // -- 3. check all variables before executing business logic
   if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
@@ -470,11 +472,13 @@ export const checkAndSignEVMAuthMessage = async ({
     );
   }
 
-  logger.info('chainId from web3', currentChainIdOrError);
-  logger.info(
-    `checkAndSignAuthMessage with chainId ${currentChainIdOrError} and chain set to ${chain} and selectedChain is `,
-    selectedChain
-  );
+  logger.info({ msg: 'currentChainId', currentChainId });
+  logger.info({ msg: 'selectedChainId', selectedChainId });
+  logger.info({ msg: 'selectedChainIdHex', selectedChainIdHex });
+  logger.info({
+    msg: `checkAndSignAuthMessage with chainId ${currentChainId} and chain set to ${chain} and selectedChain is `,
+    selectedChain,
+  });
 
   // -- 4. case: (current chain id is NOT equal to selected chain) AND is set to switch chain
   if (currentChainIdOrError.result !== selectedChainId && switchChain) {
@@ -482,7 +486,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
     // -- (case) if able to switch chain id
     try {
-      logger.info('trying to switch to chainId', selectedChainIdHex);
+      logger.info({ msg: 'trying to switch to chainId', selectedChainIdHex });
 
       await provider.request({
         method: 'wallet_switchEthereumChain',
@@ -491,7 +495,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
       // -- (case) if unable to switch chain
     } catch (switchError: any) {
-      logger.info('error switching to chainId', switchError);
+      logger.error({ msg: 'error switching to chainId', switchError });
 
       // -- (error case)
       if (
@@ -571,10 +575,7 @@ export const checkAndSignEVMAuthMessage = async ({
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
-  const authSigString: string = authSigOrError.result;
-  let authSig = JSON.parse(authSigString);
-
-  logger.info('6. authSig:', authSig);
+  logger.info({ msg: 'authSig', authSig });
 
   // -- 7. case: when we are NOT on the right wallet address
   if (account.toLowerCase() !== authSig.address.toLowerCase()) {
@@ -590,7 +591,7 @@ export const checkAndSignEVMAuthMessage = async ({
       uri,
       nonce,
     });
-    logger.info('7. authSig:', authSig);
+    logger.info({ msg: 'authSig', authSig });
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
   } else {
@@ -607,7 +608,7 @@ export const checkAndSignEVMAuthMessage = async ({
         nonce,
       });
     }
-    logger.info('8. mustResign:', mustResign);
+    logger.info({ msg: 'mustResign', mustResign });
   }
 
   // -- 9. finally, if the authSig is expired, re-sign
@@ -619,7 +620,7 @@ export const checkAndSignEVMAuthMessage = async ({
       logger.info(`Invalid AuthSig: ${checkAuthSig.errors.join(', ')}`);
     }
 
-    logger.info('9. authSig expired!, resigning..');
+    logger.info('authSig expired!, resigning..');
 
     authSig = await _signAndGetAuth({
       web3,
@@ -781,7 +782,7 @@ export const signMessage = async ({
   web3,
   account,
 }: SignMessageParams): Promise<SignedMessage> => {
-  // check if it's nodejs
+  // check if it's Node.js
   if (Environment.isNode) {
     logger.info('signMessage is not supported in nodejs.');
     return {
@@ -800,14 +801,14 @@ export const signMessage = async ({
 
   logger.info('pausing...');
   await new Promise((resolve) => setTimeout(resolve, 500));
-  logger.info('signing with ', account);
+  logger.info({ msg: 'signing with ', account });
 
   const signature = await signMessageAsync(web3.getSigner(), account, body);
 
   const address = verifyMessage(body, signature).toLowerCase();
 
-  logger.info('Signature: ', signature);
-  logger.info('recovered address: ', address);
+  logger.info({ msg: 'Signature', signature });
+  logger.info({ msg: 'recovered address', address });
 
   if (address.toLowerCase() !== account.toLowerCase()) {
     const msg = `ruh roh, the user signed with a different address (${address}) then they're using with web3 (${account}). This will lead to confusion.`;

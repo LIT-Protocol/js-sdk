@@ -242,13 +242,19 @@ export class LitCore {
       );
     }
 
-    this.#logger.info('[_getValidatorData] epochInfo: ', epochInfo);
-    this.#logger.info('[_getValidatorData] minNodeCount: ', minNodeCount);
-    this.#logger.info('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
-    this.#logger.info(
-      '[_getValidatorData] stakingContract: ',
-      stakingContract.address
-    );
+    this.#logger.info({ msg: '[_getValidatorData] epochInfo', epochInfo });
+    this.#logger.info({
+      msg: '[_getValidatorData] minNodeCount',
+      minNodeCount,
+    });
+    this.#logger.info({
+      msg: '[_getValidatorData] Bootstrap urls',
+      bootstrapUrls,
+    });
+    this.#logger.info({
+      msg: '[_getValidatorData] stakingContract',
+      address: stakingContract.address,
+    });
 
     return {
       stakingContract,
@@ -305,11 +311,10 @@ export class LitCore {
                 The sdk should be able to understand its current execution environment and wait on an active
                 network request to the previous epoch's node set before changing over.
               */
-            this.#logger.info(
-              'Active validator sets changed, new validators ',
+            this.#logger.info({
+              msg: 'Active validator sets changed, new validators. Check delta. Starting node connection',
               delta,
-              'starting node connection'
-            );
+            });
           }
 
           await this.connect();
@@ -318,10 +323,10 @@ export class LitCore {
           // But for now, our every-30-second network sync will fix things in at most 30s from now.
           // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
           const { message = '' } = err as Error;
-          this.#logger.error(
-            'Error while attempting to reconnect to nodes after epoch transition:',
-            message
-          );
+          this.#logger.error({
+            msg: 'Error while attempting to reconnect to nodes after epoch transition',
+            message,
+          });
         }
       }
     }
@@ -342,10 +347,10 @@ export class LitCore {
     }
 
     if (this._stakingContract) {
-      this.#logger.info(
-        'listening for state change on staking contract: ',
-        this._stakingContract.address
-      );
+      this.#logger.info({
+        msg: 'listening for state change on staking contract',
+        address: this._stakingContract.address,
+      });
 
       // Stash a function instance, because its identity must be consistent for '.off()' usage to work later
       this._stakingContractListener = (state: STAKING_STATES_VALUES) => {
@@ -471,7 +476,7 @@ export class LitCore {
         {}
       );
       if (this.config.litNetwork === LIT_NETWORK.Custom) {
-        this.#logger.info('using custom contracts: ', logAddresses);
+        this.#logger.info({ msg: 'using custom contracts', logAddresses });
       }
     }
 
@@ -501,7 +506,8 @@ export class LitCore {
     this.#logger.info(
       `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
     );
-    this.#logger.info('current network config', {
+    this.#logger.info({
+      msg: 'current network config',
       networkPubkey: this.networkPubKey,
       networkPubKeySet: this.networkPubKeySet,
       hdRootPubkeys: this.hdRootPubkeys,
@@ -560,7 +566,7 @@ export class LitCore {
       });
     }
 
-    this.#logger.info(`Handshake with ${url} returned keys: `, keys);
+    this.#logger.info({ msg: `Handshake with ${url} returned keys: `, keys });
     if (!keys.latestBlockhash) {
       this.#logger.error({
         requestId,
@@ -765,11 +771,10 @@ export class LitCore {
       return;
     }
 
-    this.#logger.info(
-      'Syncing state for new blockhash ',
-      'current blockhash: ',
-      this.latestBlockhash
-    );
+    this.#logger.info({
+      msg: 'Syncing state for new blockhash',
+      currentBlockhash: this.latestBlockhash,
+    });
 
     try {
       // This fetches from the lit propagation service so nodes will always have it
@@ -801,19 +806,18 @@ export class LitCore {
 
       this.latestBlockhash = blockHashBody.blockhash;
       this.lastBlockHashRetrieved = parseInt(timestamp) * 1000;
-      this.#logger.info(
-        'Done syncing state new blockhash: ',
-        this.latestBlockhash
-      );
+      this.#logger.info({
+        msg: 'Done syncing state new blockhash',
+        latestBlockhash: this.latestBlockhash,
+      });
     } catch (error: unknown) {
       const err = error as BlockHashErrorResponse | Error;
 
-      this.#logger.error(
-        'Error while attempting to fetch new latestBlockhash:',
-        err instanceof Error ? err.message : err.messages,
-        'Reason: ',
-        err instanceof Error ? err : err.reason
-      );
+      this.#logger.error({
+        msg: 'Error while attempting to fetch new latestBlockhash',
+        errorMessage: err instanceof Error ? err.message : err.messages,
+        reason: err instanceof Error ? err : err.reason,
+      });
 
       this.#logger.info(
         'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
@@ -834,10 +838,10 @@ export class LitCore {
       try {
         this.latestBlockhash = testResult.hash;
         this.lastBlockHashRetrieved = testResult.timestamp;
-        this.#logger.info(
-          'Successfully retrieved blockhash manually: ',
-          this.latestBlockhash
-        );
+        this.#logger.info({
+          msg: 'Successfully retrieved blockhash manually',
+          latestBlockhash: this.latestBlockhash,
+        });
       } catch (ethersError) {
         this.#logger.error(
           'Failed to manually retrieve blockhash using ethers'

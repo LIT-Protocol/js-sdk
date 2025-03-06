@@ -116,7 +116,7 @@ export function formatSessionSigs(
     } catch (e) {
       // swallow error
       logger.info({
-        msg: 'Error parsing attenuation::',
+        msg: 'Error parsing attenuation',
         e,
       });
     }

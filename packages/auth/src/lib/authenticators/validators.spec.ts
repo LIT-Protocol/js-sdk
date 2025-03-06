@@ -1,8 +1,16 @@
+const errorMock = jest.fn();
+
+jest.mock('pino', () => {
+  return {
+    pino: jest.fn(() => ({
+      error: errorMock,
+    }))
+  };
+});
+
 import { validateMintRequestBody } from './validators';
 
 describe('validateMintRequestBody', () => {
-  const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -22,13 +30,13 @@ describe('validateMintRequestBody', () => {
       sendPkpToItself: true,
     };
     expect(validateMintRequestBody(customArgs)).toBe(true);
-    expect(mockConsoleError).not.toHaveBeenCalled();
+    expect(errorMock).not.toHaveBeenCalled();
   });
 
   it('should pass validation when no fields are provided', () => {
     const customArgs = {};
     expect(validateMintRequestBody(customArgs)).toBe(true);
-    expect(mockConsoleError).not.toHaveBeenCalled();
+    expect(errorMock).not.toHaveBeenCalled();
   });
 
   it('should pass validation when some fields are provided and correct', () => {
@@ -37,7 +45,7 @@ describe('validateMintRequestBody', () => {
       permittedAuthMethodPubkeys: ['pubkey123'],
     };
     expect(validateMintRequestBody(customArgs)).toBe(true);
-    expect(mockConsoleError).not.toHaveBeenCalled();
+    expect(errorMock).not.toHaveBeenCalled();
   });
 
   it('should fail validation and log error for incorrect keyType', () => {
@@ -45,7 +53,7 @@ describe('validateMintRequestBody', () => {
       keyType: '2', // should be a number
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(errorMock).toHaveBeenCalledWith(
       expect.stringContaining('Invalid type for keyType')
     );
   });
@@ -55,7 +63,7 @@ describe('validateMintRequestBody', () => {
       permittedAuthMethodTypes: ['1'], // should be an array of numbers
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(errorMock).toHaveBeenCalledWith(
       expect.stringContaining('Invalid type for permittedAuthMethodTypes')
     );
   });
@@ -65,7 +73,7 @@ describe('validateMintRequestBody', () => {
       permittedAuthMethodIds: [123], // should be an array of strings
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(errorMock).toHaveBeenCalledWith(
       expect.stringContaining('Invalid type for permittedAuthMethodIds')
     );
   });
@@ -75,7 +83,7 @@ describe('validateMintRequestBody', () => {
       permittedAuthMethodPubkeys: [123], // should be an array of strings
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(errorMock).toHaveBeenCalledWith(
       expect.stringContaining('Invalid type for permittedAuthMethodPubkeys')
     );
   });
@@ -91,7 +99,7 @@ describe('validateMintRequestBody', () => {
       addPkpEthAddressAsPermittedAddress: 'true', // should be a boolean
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(errorMock).toHaveBeenCalledWith(
       expect.stringContaining(
         'Invalid type for addPkpEthAddressAsPermittedAddress'
       )
@@ -103,7 +111,7 @@ describe('validateMintRequestBody', () => {
       sendPkpToItself: 'true', // should be a boolean
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(errorMock).toHaveBeenCalledWith(
       expect.stringContaining('Invalid type for sendPkpToItself')
     );
   });
@@ -113,7 +121,7 @@ describe('validateMintRequestBody', () => {
       extraneousKey: 'unexpected', // This key is not defined in MintRequestBody
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(errorMock).toHaveBeenCalledWith(
       expect.stringContaining('Invalid key found: extraneousKey')
     );
   });

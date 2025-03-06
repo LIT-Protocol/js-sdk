@@ -75,7 +75,10 @@ export class LitRelay implements IRelay {
     this.relayUrl =
       config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.NagaDev);
     this.relayApiKey = config.relayApiKey || '';
-    this.#logger.info("Lit's relay server URL:", this.relayUrl);
+    this.#logger.info({
+      msg: "Lit's relay server URL",
+      relayUrl: this.relayUrl,
+    });
   }
 
   /**
@@ -247,17 +250,18 @@ export class LitRelay implements IRelay {
       }
 
       const resBody = await response.json();
-      this.#logger.info('Response OK', { body: resBody });
+      this.#logger.info({ msg: 'Response OK', resBody });
 
       if (resBody.error) {
         // exit loop since error
-        this.#logger.info('Something wrong with the API call', {
+        this.#logger.info({
+          msg: 'Something wrong with the API call',
           error: resBody.error,
         });
         throw new Error(resBody.error);
       } else if (resBody.status === 'Succeeded') {
         // exit loop since success
-        this.#logger.info('Successfully authed', { ...resBody });
+        this.#logger.info({ msg: 'Successfully authed', resBody });
         return resBody;
       }
 

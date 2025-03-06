@@ -202,13 +202,13 @@ export class PKPEthersWallet
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
-    this.#logger.debug('signTransaction => transaction:', transaction);
+    this.#logger.debug({ msg: 'signTransaction => transaction', transaction });
 
     // Check if the LIT node client is connected, and connect if it's not.
     await this.pkpBase.ensureLitNodeClientReady();
 
     const addr = await this.getAddress();
-    this.#logger.debug('signTransaction => addr:', addr);
+    this.#logger.debug({ msg: 'signTransaction => addr', addr });
 
     // if manual settings are set, use them
     if (this.manualGasPrice) {
@@ -230,39 +230,45 @@ export class PKPEthersWallet
     try {
       if (!transaction['gasLimit']) {
         transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-        this.#logger.debug(
-          'signTransaction => gasLimit:',
-          transaction.gasLimit
-        );
+        this.#logger.debug({
+          msg: 'signTransaction => gasLimit',
+          gasLimit: transaction.gasLimit,
+        });
       }
 
       if (!transaction['nonce']) {
         transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
-        this.#logger.debug('signTransaction => nonce:', transaction.nonce);
+        this.#logger.debug({
+          msg: 'signTransaction => nonce',
+          nonce: transaction.nonce,
+        });
       }
 
       if (!transaction['chainId']) {
         transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
-        this.#logger.debug('signTransaction => chainId:', transaction.chainId);
+        this.#logger.debug({
+          msg: 'signTransaction => chainId',
+          chainId: transaction.chainId,
+        });
       }
 
       if (!transaction['gasPrice']) {
         transaction.gasPrice = await this.getGasPrice();
-        this.#logger.debug(
-          'signTransaction => gasPrice:',
-          transaction.gasPrice
-        );
+        this.#logger.debug({
+          msg: 'signTransaction => gasPrice',
+          gasPrice: transaction.gasPrice,
+        });
       }
     } catch (err) {
-      this.#logger.debug(
-        'signTransaction => unable to populate transaction with details:',
-        err
-      );
+      this.#logger.debug({
+        msg: 'signTransaction => unable to populate transaction with details',
+        err,
+      });
     }
 
     return resolveProperties(transaction).then(async (tx) => {
-      this.#logger.debug('tx.from:', tx.from);
-      this.#logger.debug('this.address:', this.address);
+      this.#logger.debug({ msg: 'tx.from', from: tx.from });
+      this.#logger.debug({ msg: 'this.address', address: this.address });
 
       if (tx.from) {
         if (getAddress(tx.from) !== this.address) {
@@ -416,7 +422,7 @@ export class PKPEthersWallet
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
     // : Promise<TransactionResponse>
-    this.#logger.debug('sendTransaction => transaction:', transaction);
+    this.#logger.debug({ msg: 'sendTransaction => transaction', transaction });
 
     let res;
     let signedTxn;

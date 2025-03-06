@@ -70,7 +70,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.rpcs = prop.rpcs;
 
-    this.#logger.info('authContext:', prop.authContext);
+    this.#logger.info({ msg: 'authContext', authContext: prop.authContext });
     this.authContext = prop.authContext;
 
     this.validateAuthContext();
@@ -312,14 +312,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       );
     }
 
-    this.#logger.debug('executeJsArgs:', executeJsArgs);
+    this.#logger.debug({ msg: 'executeJsArgs', executeJsArgs });
 
     const res = await this.litNodeClient.executeJs(executeJsArgs);
 
     const sig = res.signatures[sigName];
 
-    this.#logger.debug('res:', res);
-    this.#logger.debug('res.signatures[sigName]:', sig);
+    this.#logger.debug({ msg: 'res', res });
+    this.#logger.debug({ msg: 'res.signatures[sigName]', sig });
 
     if (sig.r && sig.s) {
       // pad sigs with 0 if length is odd

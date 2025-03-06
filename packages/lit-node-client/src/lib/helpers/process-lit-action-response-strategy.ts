@@ -45,10 +45,10 @@ export const processLitActionResponseStrategy = (
         );
       }
     } catch (e) {
-      logger.error(
-        'Error while executing custom response filter, defaulting to most common',
-        (e as Error).toString()
-      );
+      logger.error({
+        msg: 'Error while executing custom response filter, defaulting to most common',
+        error: (e as Error).toString(),
+      });
     }
   }
 

@@ -123,8 +123,8 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   myWalletAddress?: string;
 }): Promise<string> => {
   logger.info('humanizing evm basic access control conditions');
-  logger.info('myWalletAddress', myWalletAddress);
-  logger.info('accessControlConditions', accessControlConditions);
+  logger.info({ msg: 'myWalletAddress', myWalletAddress });
+  logger.info({ msg: 'accessControlConditions', accessControlConditions });
 
   let fixedConditions = accessControlConditions;
 
@@ -271,7 +271,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
             logger.info(`Failed to get decimals for ${acc.contractAddress}`); // is this safe to fail and continue?
           }
         }
-        logger.info('decimals', decimals);
+        logger.info({ msg: 'decimals', decimals });
         return `Owns ${humanizeComparator(
           acc.returnValueTest.comparator
         )} ${formatUnits(acc.returnValueTest.value, decimals)} of ${
@@ -323,8 +323,8 @@ export const humanizeEvmContractConditions = async ({
   myWalletAddress?: string;
 }): Promise<string> => {
   logger.info('humanizing evm contract conditions');
-  logger.info('myWalletAddress', myWalletAddress);
-  logger.info('evmContractConditions', evmContractConditions);
+  logger.info({ msg: 'myWalletAddress', myWalletAddress });
+  logger.info({ msg: 'evmContractConditions', evmContractConditions });
 
   const promises = await Promise.all(
     evmContractConditions.map(async (acc: any) => {
@@ -384,8 +384,8 @@ export const humanizeSolRpcConditions = async ({
   myWalletAddress?: string;
 }): Promise<string> => {
   logger.info('humanizing sol rpc conditions');
-  logger.info('myWalletAddress', myWalletAddress);
-  logger.info('solRpcConditions', solRpcConditions);
+  logger.info({ msg: 'myWalletAddress', myWalletAddress });
+  logger.info({ msg: 'solRpcConditions', solRpcConditions });
 
   const promises = await Promise.all(
     solRpcConditions.map(async (acc: any) => {
@@ -458,8 +458,8 @@ export const humanizeCosmosConditions = async ({
   myWalletAddress?: string;
 }): Promise<string> => {
   logger.info('humanizing cosmos conditions');
-  logger.info('myWalletAddress', myWalletAddress);
-  logger.info('cosmosConditions', cosmosConditions);
+  logger.info({ msg: 'myWalletAddress', myWalletAddress });
+  logger.info({ msg: 'cosmosConditions', cosmosConditions });
 
   const promises = await Promise.all(
     cosmosConditions.map(async (acc: any) => {

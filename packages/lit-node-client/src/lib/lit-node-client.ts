@@ -339,7 +339,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           ...(jsParams && { jsParams }),
         };
 
-        this.#logger.info('callback body:', body);
+        this.#logger.info({ msg: 'callback body', body });
 
         walletSig = await authNeededCallback(body);
       } else {
@@ -468,7 +468,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           { suppressExceptions: false }
         );
       } catch (e) {
-        this.#logger.info(`Error while verifying BLS signature: `, e);
+        this.#logger.error({ msg: `Error while verifying BLS signature: `, e });
         return true;
       }
     } else if (authSig.algo === `LIT_BLS`) {
@@ -480,7 +480,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           authSigSiweMessage
         );
       } catch (e) {
-        this.#logger.info(`Error while verifying bls signature: `, e);
+        this.#logger.error({ msg: `Error while verifying bls signature: `, e });
         return true;
       }
     } else {
@@ -527,7 +527,8 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           resourceAbilityRequest.ability
         )
       ) {
-        this.#logger.info('Need retry because capabilities do not match', {
+        this.#logger.info({
+          msg: 'Need retry because capabilities do not match',
           authSigSessionCapabilityObject,
           resourceAbilityRequest,
         });
@@ -769,7 +770,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     this.#logger.info({
       requestId,
-      msg: 'signatures shares to combine: ',
+      msg: 'signatures shares to combine',
       signedDataList,
     });
 
@@ -816,7 +817,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       logs: mostCommonLogs,
     };
 
-    this.#logger.info('returnVal:', returnVal);
+    this.#logger.info({ msg: 'returnVal', returnVal });
 
     return returnVal;
   };
@@ -967,7 +968,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
       return signatures;
     } catch (e) {
-      this.#logger.error('Error getting signature', e);
+      this.#logger.error({ msg: 'Error getting signature', error: e });
       throw e;
     }
   };
@@ -1127,7 +1128,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       dataToEncryptHash
     );
 
-    this.#logger.info('identityParam', identityParam);
+    this.#logger.info({ msg: 'identityParam', identityParam });
 
     const userMaxPrices = await this.getMaxPricesForNodeProduct({
       product: 'DECRYPTION',
@@ -1226,7 +1227,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
   private _signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
-    this.#logger.info(`[signSessionKey] params:`, params);
+    this.#logger.info({ msg: `[signSessionKey] params:`, params });
 
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
@@ -1331,7 +1332,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       signingScheme: LIT_CURVE.BLS,
     };
 
-    this.#logger.info(`[signSessionKey] body:`, body);
+    this.#logger.info({ msg: `[signSessionKey] body:`, body });
 
     const requestId = this._getNewRequestId();
     this.#logger.info({ requestId, signSessionKeyBody: body });
@@ -1359,7 +1360,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
         requestId,
         this._getThreshold()
       );
-      this.#logger.info('signSessionKey node promises:', res);
+      this.#logger.info({ msg: 'signSessionKey node promises', res });
     } catch (e) {
       throw new UnknownError(
         {
@@ -1510,15 +1511,16 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     userMaxPrice?: bigint;
     product: keyof typeof PRODUCT_IDS;
   }) => {
-    this.#logger.info('getMaxPricesForNodeProduct()', { product });
+    this.#logger.info({
+      msg: 'getMaxPricesForNodeProduct(): Product',
+      product,
+    });
     const getUserMaxPrice = () => {
       if (userMaxPrice) {
-        this.#logger.info(
-          'getMaxPricesForNodeProduct(): User provided maxPrice of',
-          {
-            userMaxPrice,
-          }
-        );
+        this.#logger.info({
+          msg: 'getMaxPricesForNodeProduct(): User provided maxPrice of userMaxPrice',
+          userMaxPrice,
+        });
         return userMaxPrice;
       }
 
@@ -1532,7 +1534,6 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       return this.defaultMaxPriceByProduct[product];
     };
 
-    this.#logger.info('getMaxPricesForNodeProduct():', {});
     return getMaxPricesForNodeProduct({
       nodePrices: await this._getNodePrices(),
       userMaxPrice: getUserMaxPrice(),
@@ -1713,7 +1714,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       };
     });
 
-    this.#logger.info('sessionSigs:', sessionSigs);
+    this.#logger.info({ msg: 'sessionSigs', sessionSigs });
 
     try {
       const formattedSessionSigs = formatSessionSigs(
@@ -1722,7 +1723,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       this.#logger.info(formattedSessionSigs);
     } catch (e) {
       // swallow error
-      this.#logger.info('Error formatting session signatures: ', e);
+      this.#logger.info({ msg: 'Error formatting session signatures', e });
     }
 
     return sessionSigs;
@@ -2056,7 +2057,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       requestId,
       validatedSignedDataList,
     });
-    this.#logger.info({ requestId, msg: 'minimum threshold:', threshold });
+    this.#logger.info({ requestId, msg: 'minimum threshold', threshold });
 
     if (validatedSignedDataList.length < threshold) {
       throw new InvalidSignatureError(
