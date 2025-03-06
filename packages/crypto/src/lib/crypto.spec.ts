@@ -1,9 +1,50 @@
-import * as ethers from 'ethers';
+import { ed25519 } from '@noble/curves/ed25519';
+import { ethers } from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
 
 import { SigShare } from '@lit-protocol/types';
 
-import { combineEcdsaShares, publicKeyCompress } from './crypto';
+import {
+  combineEcdsaShares,
+  generateSessionKeyPair,
+  publicKeyCompress,
+} from './crypto';
+
+describe('generateSessionKeyPair', () => {
+  it('generates a valid key pair where secretKey contains the publicKey', () => {
+    const sessionKeyPair = generateSessionKeyPair();
+
+    const publicKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.publicKey
+    );
+    const secretKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.secretKey
+    );
+
+    expect(secretKeyBytes.length).toBe(64);
+    expect(publicKeyBytes.length).toBe(32);
+
+    const derivedPublicKeyFromSecret = secretKeyBytes.slice(32);
+    expect(derivedPublicKeyFromSecret).toEqual(publicKeyBytes);
+  });
+
+  it('derives public key from secret key', () => {
+    const sessionKeyPair = generateSessionKeyPair();
+
+    const publicKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.publicKey
+    );
+    const secretKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.secretKey
+    );
+
+    const privateKeySeed = secretKeyBytes.slice(0, 32);
+
+    const derivedPublicKey = ed25519.getPublicKey(privateKeySeed);
+
+    expect(derivedPublicKey).toEqual(publicKeyBytes);
+  });
+});
 
 describe('combine ECDSA Shares', () => {
   it('Should recombine ECDSA signature shares', async () => {

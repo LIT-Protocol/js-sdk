@@ -1,4 +1,5 @@
 import { computeAddress } from '@ethersproject/transactions';
+import { ed25519 } from '@noble/curves/ed25519';
 import { ethers } from 'ethers';
 import { pino, Logger } from 'pino';
 import { SiweMessage } from 'siwe';
@@ -52,7 +53,6 @@ import {
   removeStorageItem,
   setStorageItem,
 } from '@lit-protocol/misc-browser';
-import { nacl } from '@lit-protocol/nacl';
 import {
   applySchemaWithValidation,
   DecryptRequestSchema,
@@ -1690,8 +1690,8 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
       const signedMessage = JSON.stringify(toSign);
 
-      const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
       const uint8arrayMessage = Buffer.from(signedMessage, 'utf8');
+      const signature = ed25519.sign(uint8arrayMessage, sessionKey.secretKey);
 
       sessionSigs[nodeAddress] = {
         sig: Buffer.from(signature).toString('hex'),

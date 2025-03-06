@@ -67,7 +67,6 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 | [@lit-protocol/crypto](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/crypto)                                       | ![crypto](https://img.shields.io/badge/-universal-8A6496 'crypto')                                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/crypto"><img src="https://img.shields.io/npm/v/@lit-protocol/crypto"/></a>                                       |
 | [@lit-protocol/encryption](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/encryption)                               | ![encryption](https://img.shields.io/badge/-universal-8A6496 'encryption')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/encryption"><img src="https://img.shields.io/npm/v/@lit-protocol/encryption"/></a>                               |
 | [@lit-protocol/event-listener](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/event-listener)                       | ![event-listener](https://img.shields.io/badge/-universal-8A6496 'event-listener')                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/event-listener"><img src="https://img.shields.io/npm/v/@lit-protocol/event-listener"/></a>                       |
-| [@lit-protocol/nacl](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/nacl)                                           | ![nacl](https://img.shields.io/badge/-universal-8A6496 'nacl')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/nacl"><img src="https://img.shields.io/npm/v/@lit-protocol/nacl"/></a>                                           |
 | [@lit-protocol/networks](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/networks)                                   | ![networks](https://img.shields.io/badge/-universal-8A6496 'networks')                                   | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/networks"><img src="https://img.shields.io/npm/v/@lit-protocol/networks"/></a>                                   |
 | [@lit-protocol/pkp-base](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-base)                                   | ![pkp-base](https://img.shields.io/badge/-universal-8A6496 'pkp-base')                                   | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-base"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-base"/></a>                                   |
 | [@lit-protocol/pkp-cosmos](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-cosmos)                               | ![pkp-cosmos](https://img.shields.io/badge/-universal-8A6496 'pkp-cosmos')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-cosmos"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-cosmos"/></a>                               |
@@ -97,7 +96,7 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## Prerequisite
 
-- node (v19.x or above)
+- node (v20.x or above)
 - rust (v1.70.00 or above)
 - [wasm-pack](https://github.com/rustwasm/wasm-pack)
 

@@ -13,8 +13,6 @@ import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { pino } from 'pino';
 import { SiweMessage } from 'siwe';
-import * as nacl from 'tweetnacl';
-import * as naclUtil from 'tweetnacl-util';
 
 import {
   ConstantValues,
@@ -750,19 +748,7 @@ export const signAndSaveAuthMessage = async ({
       JSON.stringify(authSig)
     );
   }
-  const commsKeyPair = nacl.box.keyPair();
 
-  if (Environment.isBrowser) {
-    localStorage.setItem(
-      LOCAL_STORAGE_KEYS.KEY_PAIR,
-      JSON.stringify({
-        publicKey: naclUtil.encodeBase64(commsKeyPair.publicKey),
-        secretKey: naclUtil.encodeBase64(commsKeyPair.secretKey),
-      })
-    );
-  }
-
-  logger.info(`generated and saved ${LOCAL_STORAGE_KEYS.KEY_PAIR}`);
   return authSig;
 };
 

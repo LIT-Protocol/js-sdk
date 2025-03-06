@@ -1,3 +1,4 @@
+import { ed25519 } from '@noble/curves/ed25519';
 import { joinSignature, splitSignature } from 'ethers/lib/utils';
 import { pino } from 'pino';
 
@@ -10,7 +11,6 @@ import {
   UnknownError,
   UnknownSignatureError,
 } from '@lit-protocol/constants';
-import { nacl } from '@lit-protocol/nacl';
 import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
 import {
   blsCombine,
@@ -298,7 +298,13 @@ export const computeHDPubKey = async (
  * @returns { SessionKeyPair } sessionKeyPair
  */
 export const generateSessionKeyPair = (): SessionKeyPair => {
-  const keyPair = nacl.sign.keyPair();
+  const privateKey = ed25519.utils.randomPrivateKey();
+  const publicKey = ed25519.getPublicKey(privateKey);
+  const combinedSecretKey = new Uint8Array(
+    privateKey.length + publicKey.length
+  );
+  combinedSecretKey.set(privateKey, 0);
+  combinedSecretKey.set(publicKey, privateKey.length);
 
   const sessionKeyPair: SessionKeyPair = {
     publicKey: Buffer.from(publicKey).toString('hex'),
