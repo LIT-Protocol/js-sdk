@@ -27,6 +27,7 @@ import {
   TransactionError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
+import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import {
   ContractName,
   EpochInfo,
@@ -248,7 +249,7 @@ export class LitContracts {
       let storagePrivateKey;
 
       try {
-        storagePrivateKey = localStorage.getItem(STORAGE_KEY);
+        storagePrivateKey = getStorageItem(STORAGE_KEY);
       } catch (e) {
         // swallow
         // this.#logger.info('Not a problem.');
@@ -286,7 +287,7 @@ export class LitContracts {
         this.#logger.info(
           "You've set the option to store your private key in local storage."
         );
-        localStorage.setItem(STORAGE_KEY, storagePrivateKey);
+        setStorageItem(STORAGE_KEY, storagePrivateKey);
       }
     } else {
       // ----------------------------------------

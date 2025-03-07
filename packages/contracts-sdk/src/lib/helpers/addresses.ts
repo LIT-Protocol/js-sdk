@@ -13,6 +13,7 @@ import {
   ParamsMissingError,
 } from '@lit-protocol/constants';
 import { publicKeyCompress } from '@lit-protocol/crypto';
+import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { DerivedAddresses } from '@lit-protocol/types';
 
 const logger = pino({ level: 'info', name: 'addresses' });
@@ -180,13 +181,16 @@ export const derivedAddresses = async (
     const CACHE_KEY = 'lit-cached-pkps';
     let cachedPkpJSON;
     try {
-      const cachedPkp = localStorage.getItem(CACHE_KEY);
+      const cachedPkp = getStorageItem(CACHE_KEY);
       if (cachedPkp) {
         cachedPkpJSON = JSON.parse(cachedPkp);
         publicKey = cachedPkpJSON[pkpTokenId];
       }
     } catch (e) {
-      logger.error(e);
+      logger.error({
+        msg: `Could not get ${CACHE_KEY} from storage. Continuing...`,
+        error: e,
+      });
     }
 
     if (!publicKey) {
@@ -222,18 +226,18 @@ export const derivedAddresses = async (
     if (options.cacheContractCall) {
       // trying to store key value pair in local storage
       try {
-        const cachedPkp = localStorage.getItem(CACHE_KEY);
-        if (cachedPkp) {
-          const cachedPkpJSON = JSON.parse(cachedPkp);
-          cachedPkpJSON[pkpTokenId] = publicKey;
-          localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
-        } else {
-          const cachedPkpJSON: Record<string, unknown> = {};
-          cachedPkpJSON[pkpTokenId] = publicKey;
-          localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
-        }
+        const cachedPkp = getStorageItem(CACHE_KEY);
+        const cachedPkpJSON: Record<string, unknown> = cachedPkp
+          ? JSON.parse(cachedPkp)
+          : {};
+
+        cachedPkpJSON[pkpTokenId] = publicKey;
+        setStorageItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
       } catch (e) {
-        logger.error(e);
+        logger.error({
+          msg: `Could not get ${CACHE_KEY} from storage. Continuing...`,
+          error: e,
+        });
       }
     }
   }

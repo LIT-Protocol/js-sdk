@@ -11,6 +11,7 @@ import {
   UnknownError,
   UnknownSignatureError,
 } from '@lit-protocol/constants';
+import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
 import {
   blsCombine,
@@ -507,12 +508,12 @@ export const checkSevSnpAttestation = async (
   // use local storage if we have one available
   if (globalThis.localStorage) {
     logger.info('Using local storage for certificate caching');
-    vcekCert = localStorage.getItem(vcekUrl);
+    vcekCert = getStorageItem(vcekUrl);
     if (vcekCert) {
       vcekCert = Buffer.from(vcekCert, 'base64');
     } else {
       vcekCert = await getAmdCert(vcekUrl);
-      localStorage.setItem(vcekUrl, Buffer.from(vcekCert).toString('base64'));
+      setStorageItem(vcekUrl, Buffer.from(vcekCert).toString('base64'));
     }
   } else {
     const cache = ((

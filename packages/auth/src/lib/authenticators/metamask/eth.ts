@@ -28,7 +28,11 @@ import {
   LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
 import { validateSessionSig } from '@lit-protocol/lit-node-client';
-import { getStorageItem } from '@lit-protocol/misc-browser';
+import {
+  getStorageItem,
+  setStorageItem,
+  removeStorageItem,
+} from '@lit-protocol/misc-browser';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
 import LitConnectModal from './connect-modal/modal';
@@ -350,7 +354,7 @@ export const connectWeb3 = async ({
 /**
  * @browserOnly
  * Delete any saved AuthSigs from local storage. Takes no params and returns
- * nothing. This will also clear out the WalletConnect cache in local storage.
+ * nothing. This will also clear out the WalletConnect cache in localstorage.
  * We often run this function as a result of the user pressing a "Logout" button.
  *
  * @return { void }
@@ -374,8 +378,8 @@ export const disconnectWeb3 = (): void => {
 
   const storage = LOCAL_STORAGE_KEYS;
 
-  localStorage.removeItem(storage.AUTH_SIGNATURE);
-  localStorage.removeItem(storage.WALLET_SIGNATURE);
+  removeStorageItem(storage.AUTH_SIGNATURE);
+  removeStorageItem(storage.WALLET_SIGNATURE);
 };
 
 /**
@@ -702,10 +706,7 @@ export const signAndSaveAuthMessage = async ({
 
   // -- 4. store auth and a keypair in localstorage for communication with sgx
   if (Environment.isBrowser) {
-    localStorage.setItem(
-      LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
-      JSON.stringify(authSig)
-    );
+    setStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE, JSON.stringify(authSig));
   }
 
   return authSig;

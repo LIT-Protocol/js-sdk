@@ -256,7 +256,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const newSessionKey = generateSessionKeyPair();
 
     try {
-      localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
+      setStorageItem(storageKey, JSON.stringify(newSessionKey));
     } catch (e) {
       this.#logger.info(
         `Localstorage not available. Not a problem. Continue...`
@@ -356,7 +356,6 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       try {
         setStorageItem(storageKey, JSON.stringify(walletSig));
       } catch (e) {
-        this.#logger.info('getWalletSig - flow 1.4');
         this.#logger.warn({
           msg: `Unable to store walletSig in local storage. Not a problem. Continue...`,
           error: e,
