@@ -1,5 +1,7 @@
 import { pino } from 'pino';
 
+import { InvalidArgumentException } from '@lit-protocol/constants';
+
 import { parseSignedMessage } from './session-sigs-validator';
 
 const logger = pino({ level: 'info', name: 'serssion-sigs-reader' });
@@ -37,7 +39,7 @@ function formatStatus(expirationDate: Date, currentDate: Date): string {
 /**
  * Convert this format:
  * {"lit-ratelimitincrease://25364":{"Auth/Auth":[{"nft_id":["25364"]}]}}
- * to human readable format
+ * to human-readable format
  */
 function humanReadableAtt(obj: any, indentLevel: number = 0): string {
   const indent = ' '.repeat(indentLevel * 2);
@@ -77,7 +79,15 @@ export function formatSessionSigs(
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Invalid JSON format for signedMessage: ${errorMessage}`);
+    throw new InvalidArgumentException(
+      {
+        info: {
+          signedMessage,
+          firstNodeSignedMessage: firstNode.signedMessage,
+        },
+      },
+      `Invalid JSON format for signedMessage: ${errorMessage}`
+    );
   }
 
   const currentDate = new Date(currentTime);
@@ -92,7 +102,14 @@ export function formatSessionSigs(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Error parsing issuedAt or expiration: ${errorMessage}`);
+    throw new InvalidArgumentException(
+      {
+        info: {
+          signedMessage,
+        },
+      },
+      `Error parsing issuedAt or expiration: ${errorMessage}`
+    );
   }
 
   result += '* Outer expiration:\n';
@@ -117,7 +134,7 @@ export function formatSessionSigs(
       // swallow error
       logger.info({
         msg: 'Error parsing attenuation',
-        e,
+        error: e,
       });
     }
 

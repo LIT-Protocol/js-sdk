@@ -1,3 +1,5 @@
+import { InvalidArgumentException } from '@lit-protocol/constants';
+
 /**
  * Formats the resource ID to a 32-byte hex string.
  *
@@ -21,7 +23,14 @@ export function formatPKPResource(resource: string): string {
 
   // Throw an error if the resource length exceeds 64 characters
   if (fixedResource.length > 64) {
-    throw new Error('Resource ID exceeds 64 characters (32 bytes) in length.');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          resource,
+        },
+      },
+      'Resource ID exceeds 64 characters (32 bytes) in length.'
+    );
   }
 
   /**

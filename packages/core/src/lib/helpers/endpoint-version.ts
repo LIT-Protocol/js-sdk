@@ -1,3 +1,4 @@
+import { NetworkError } from '@lit-protocol/constants';
 import { LitEndpoint } from '@lit-protocol/types';
 
 /**
@@ -17,7 +18,15 @@ export const composeLitUrl = (params: {
   try {
     new URL(params.url);
   } catch (error) {
-    throw new Error(`[composeLitUrl] Invalid URL: "${params.url}"`);
+    throw new NetworkError(
+      {
+        info: {
+          url: params.url,
+          endpoint: params.endpoint,
+        },
+      },
+      `[composeLitUrl] Invalid URL: "${params.url}"`
+    );
   }
 
   const version = params.endpoint.version;

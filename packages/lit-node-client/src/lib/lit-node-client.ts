@@ -28,8 +28,10 @@ import {
   LIT_CURVE,
   LIT_CURVE_TYPE,
   LIT_ENDPOINT,
+  LitNetworkError,
   LitNodeClientNotReadyError,
   LOCAL_STORAGE_KEYS,
+  NetworkError,
   ParamNullError,
   ParamsMissingError,
   PRODUCT_IDS,
@@ -555,7 +557,15 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
         const response = await fetch(`${url}${ipfsId}`);
 
         if (!response.ok) {
-          throw new Error(
+          throw new NetworkError(
+            {
+              info: {
+                ipfsId,
+                gatewayUrl: url,
+                responseStatus: response.status,
+                responseStatusText: response.statusText,
+              },
+            },
             `Failed to fetch code from IPFS gateway ${url}: ${response.status} ${response.statusText}`
           );
         }
@@ -570,7 +580,15 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       }
     }
 
-    throw new Error('All IPFS gateways failed to fetch the code.');
+    throw new NetworkError(
+      {
+        info: {
+          ipfsId,
+          gatewayUrl,
+        },
+      },
+      'All IPFS gateways failed to fetch the code.'
+    );
   }
 
   private async executeJsNodeRequest(
@@ -1364,8 +1382,14 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const curveType = responseData[0]?.curveType;
 
     if (curveType === 'ECDSA') {
-      throw new Error(
-        'The ECDSA curve type is not supported in this version. Please use version 6.x.x instead.'
+      throw new LitNetworkError(
+        {
+          info: {
+            requestId,
+            responseData,
+          },
+        },
+        'The ECDSA curve type is not supported in this version.'
       );
     }
 

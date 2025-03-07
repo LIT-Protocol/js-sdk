@@ -3,6 +3,7 @@ import { pino } from 'pino';
 import {
   CURVE_GROUP_BY_CURVE_TYPE,
   LIT_CURVE_VALUES,
+  InvalidArgumentException,
   NoValidShares,
   ParamNullError,
   UnknownSignatureType,
@@ -110,7 +111,16 @@ export const getSignatures = async (params: {
   );
 
   if (!_publicKey || !_dataSigned) {
-    throw new Error('No valid publicKey or dataSigned found');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          requestId,
+          publicKey: _publicKey,
+          dataSigned: _dataSigned,
+        },
+      },
+      'No valid publicKey or dataSigned found'
+    );
   }
 
   const sigResponse: SigResponse = {

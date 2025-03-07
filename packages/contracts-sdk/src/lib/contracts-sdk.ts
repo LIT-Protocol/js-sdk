@@ -18,6 +18,7 @@ import {
   HTTPS,
   InitError,
   InvalidArgumentException,
+  LitNetworkError,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
   METAMASK_CHAIN_INFO_BY_NETWORK,
@@ -25,6 +26,7 @@ import {
   ParamsMissingError,
   RPC_URL_BY_NETWORK,
   TransactionError,
+  UnsupportedMethodError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
 import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
@@ -875,11 +877,27 @@ export class LitContracts {
     const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
 
     if (!minNodeCountInt) {
-      throw new Error('❌ Minimum validator count is not set');
+      throw new LitNetworkError(
+        {
+          info: {
+            epochInfo,
+            activeValidators: activeUnkickedValidatorStructs.length,
+            minNodeCount: minNodeCountInt,
+          },
+        },
+        '❌ Minimum validator count is not set'
+      );
     }
 
     if (activeUnkickedValidatorStructs.length < minNodeCountInt) {
-      throw new Error(
+      throw new LitNetworkError(
+        {
+          info: {
+            epochInfo,
+            activeValidators: activeUnkickedValidatorStructs.length,
+            minNodeCount: minNodeCountInt,
+          },
+        },
         `❌ Active validator set does not meet the consensus. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
       );
     }
@@ -2274,7 +2292,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   ): Promise<ReturnType<T['functions'][K]>> {
     // Check if the method exists on the contract
     if (!(method in contract.functions)) {
-      throw new Error(
+      throw new UnsupportedMethodError(
+        {
+          info: {
+            network: this.network,
+            contract,
+            method,
+          },
+        },
         `Method ${String(method)} does not exist on the contract`
       );
     }

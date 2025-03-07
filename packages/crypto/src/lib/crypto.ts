@@ -4,6 +4,7 @@ import { pino } from 'pino';
 
 import {
   InvalidParamType,
+  InvalidSignatureError,
   LIT_CURVE,
   LIT_CURVE_VALUES,
   NetworkError,
@@ -143,7 +144,13 @@ export const combineSignatureShares = async (
   const signature = await blsCombine(sigShares);
 
   if (signature.length !== 192) {
-    throw new Error(
+    throw new InvalidSignatureError(
+      {
+        info: {
+          signature,
+          shares,
+        },
+      },
       `Signature length is not 192. Got ${signature.length} instead.`
     );
   }
@@ -324,7 +331,12 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 export function publicKeyCompress(publicKey: Buffer): Buffer {
   // Validate the public key length is either 33 (compressed) or 65 (uncompressed)
   if (publicKey.length !== 33 && publicKey.length !== 65) {
-    throw new Error(
+    throw new InvalidSignatureError(
+      {
+        info: {
+          publicKey,
+        },
+      },
       'Invalid public key length. Expected 33 (compressed) or 65 (uncompressed) bytes.'
     );
   }
@@ -335,7 +347,12 @@ export function publicKeyCompress(publicKey: Buffer): Buffer {
   }
 
   if (publicKey[0] !== 0x04) {
-    throw new Error(
+    throw new InvalidSignatureError(
+      {
+        info: {
+          publicKey,
+        },
+      },
       'Invalid uncompressed public key format: does not start with 0x04.'
     );
   }
