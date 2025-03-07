@@ -17,9 +17,24 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-import ABI_ERC20 from './abis/ERC20.json';
-
 const logger = pino({ level: 'info', name: 'humanizer' });
+
+export const ERC20ABI = [
+  {
+    constant: true,
+    inputs: [],
+    name: 'decimals',
+    outputs: [
+      {
+        name: '',
+        type: 'uint8',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
 
 /**
  *
@@ -44,7 +59,7 @@ export const decimalPlaces = async ({
     skipFetchSetup: true,
   });
 
-  const contract = new Contract(contractAddress, ABI_ERC20.abi, web3); // TODO drop the full ABI and just define "decimals"
+  const contract = new Contract(contractAddress, ERC20ABI, web3);
 
   return await contract['decimals']();
 };
