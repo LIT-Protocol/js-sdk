@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
-import { encryptString } from '@lit-protocol/encryption';
 import { LIT_PREFIX } from 'packages/wrapped-keys/src/lib/constants';
 import { LIT_ACTION_CID_REPOSITORY } from '../../../packages/wrapped-keys/src/lib/lit-actions-client/constants';
 import { getBaseTransactionForNetwork } from './util';
@@ -24,13 +23,11 @@ export const testFailEthereumSignTransactionWrappedKeyInvalidDecryption =
       const alicePkpAddress = alice.authMethodOwnedPkp.ethAddress;
       const decryptionAccessControlCondition =
         getPkpAccessControlCondition(alicePkpAddress);
-      const { ciphertext, dataToEncryptHash } = await encryptString(
-        {
+      const { ciphertext, dataToEncryptHash } =
+        await devEnv.litNodeClient.encrypt({
           accessControlConditions: [decryptionAccessControlCondition],
-          dataToEncrypt: LIT_PREFIX + privateKey,
-        },
-        devEnv.litNodeClient
-      );
+          dataToEncrypt: Buffer.from(LIT_PREFIX + privateKey, 'utf8'),
+        });
 
       const pkpSessionSigsSigning = await getPkpSessionSigs(
         devEnv,

@@ -8,14 +8,8 @@ import {
   AuthenticationContextSchema,
   AuthMethodSchema,
   AuthSigSchema,
-  DecryptRequestBaseSchema,
   DecryptRequestSchema,
-  EncryptDataTypeSchema,
-  EncryptFileRequestSchema,
   EncryptResponseSchema,
-  EncryptStringRequestSchema,
-  EncryptToJsonPayloadSchema,
-  EncryptToJsonPropsSchema,
   EncryptRequestSchema,
   ExecuteJsAdvancedOptionsSchema,
   IpfsOptionsSchema,
@@ -23,7 +17,6 @@ import {
   LitActionResponseStrategySchema,
   LitActionSdkParamsSchema,
   SessionKeyPairSchema,
-  DecryptFromJsonPropsSchema,
 } from '@lit-protocol/schemas';
 
 import { SigType } from './EndpointResponses';
@@ -435,22 +428,9 @@ export interface JsonExecutionRequest
   authMethods?: AuthMethod[];
 }
 
-export type DecryptRequestBase = z.infer<typeof DecryptRequestBaseSchema>;
-
 export type EncryptSdkParams = z.infer<typeof EncryptRequestSchema>;
-export type EncryptUint8ArrayRequest = z.infer<typeof EncryptRequestSchema>;
 
 export type EncryptResponse = z.infer<typeof EncryptResponseSchema>;
-
-export type EncryptStringRequest = z.infer<typeof EncryptStringRequestSchema>;
-
-export type EncryptFileRequest = z.infer<typeof EncryptFileRequestSchema>;
-
-export type EncryptToJsonProps = z.infer<typeof EncryptToJsonPropsSchema>;
-
-export type EncryptToJsonDataType = z.infer<typeof EncryptDataTypeSchema>;
-
-export type EncryptToJsonPayload = z.infer<typeof EncryptToJsonPayloadSchema>;
 
 export type DecryptRequest = z.infer<typeof DecryptRequestSchema>;
 
@@ -458,8 +438,6 @@ export interface DecryptResponse {
   // The decrypted data as a Uint8Array
   decryptedData: Uint8Array;
 }
-
-export type DecryptFromJsonProps = z.infer<typeof DecryptFromJsonPropsSchema>;
 
 export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
   dataToEncryptHash: string;
