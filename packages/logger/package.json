@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/logger",
-  "version": "7.0.7",
+  "version": "7.0.8",
   "type": "commonjs",
   "tags": [
     "universal"
