@@ -638,6 +638,17 @@ export class LitContracts {
             environment
           );
           break;
+        default:
+          throw new InvalidArgumentException(
+            {
+              info: {
+                contract,
+                environment,
+                contractNames,
+              },
+            },
+            'Contract not found'
+          );
       }
 
       return address;

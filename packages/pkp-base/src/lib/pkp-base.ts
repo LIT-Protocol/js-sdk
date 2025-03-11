@@ -9,7 +9,9 @@
  */
 import {
   InitError,
+  InvalidSignatureError,
   LitNodeClientNotReadyError,
+  SigType,
   UnknownError,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -18,8 +20,8 @@ import {
   AuthenticationContext,
   JsonExecutionSdkParams,
   PKPBaseProp,
+  LitNodeSignature,
   PKPBaseDefaultParams,
-  SigResponse,
   RPCUrls,
 } from '@lit-protocol/types';
 
@@ -250,12 +252,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * @param {Uint8Array} toSign - The data to be signed by the Lit action.
    * @param {string} sigName - The name of the signature to be returned by the Lit action.
    *
-   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   * @returns {Promise<LitNodeSignature>} - A Promise that resolves with the signature returned by the Lit action.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+  async runLitAction(
+    toSign: Uint8Array,
+    sigName: string
+  ): Promise<LitNodeSignature> {
     // -- validate executeJsArgs
     if (this.litActionCode && this.litActionIPFS) {
       throw new InitError(
@@ -319,25 +323,23 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.log('res:', res);
     this.log('res.signatures[sigName]:', sig);
 
-    if (sig.r && sig.s) {
-      // pad sigs with 0 if length is odd
-      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
-      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
-    }
-
     return sig;
   }
 
   /**
    * Sign the provided data with the PKP private key.
    *
-   * @param {Uint8Array} toSign - The data to be signed.
+   * @param {Uint8Array} messageToSign - The message to be signed (will be hashed using SHA256).
+   * @param {SigType} signingScheme - The signing scheme to use for the signature. Defaults to 'EcdsaK256Sha256'.
    *
    * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<SigResponse> {
+  async runSign(
+    messageToSign: Uint8Array,
+    signingScheme: SigType = 'EcdsaK256Sha256'
+  ): Promise<LitNodeSignature> {
     await this.ensureLitNodeClientReady();
 
     // If no PKP public key is provided, throw error
@@ -350,26 +352,28 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.validateAuthContext();
 
-    try {
-      const sig = await this.litNodeClient.pkpSign({
-        toSign,
-        pubKey: this.uncompressedPubKey,
-        authContext: this.authContext,
-      });
+    const sig = await this.litNodeClient.pkpSign({
+      messageToSign,
+      pubKey: this.uncompressedPubKey,
+      authContext: this.authContext,
+      signingScheme,
+    });
 
-      if (!sig) {
-        throw new UnknownError({}, 'No signature returned');
-      }
-
-      // pad sigs with 0 if length is odd
-      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
-      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
-
-      return sig;
-    } catch (e) {
-      console.log('err: ', e);
-      throw e;
+    if (!sig) {
+      throw new InvalidSignatureError(
+        {
+          info: {
+            messageToSign,
+            signingScheme,
+            compressedPubKey: this.compressedPubKey,
+            uncompressedPubKey: this.uncompressedPubKey,
+          },
+        },
+        'No signature returned'
+      );
     }
+
+    return sig;
   }
 
   /**
@@ -387,12 +391,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   /**
    * Logs the provided arguments to the console, but only if debugging is enabled.
    *
-   * @param {...any[]} args - The values to be logged to the console.
+   * @param {unknown[]} args - The values to be logged to the console.
    *
    * @returns {void} - This function does not return a value.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log(...args: any[]): void {
+  log(...args: unknown[]): void {
     if (this.debug) {
       console.log(this.orange + this.PREFIX + this.reset, ...args);
     }

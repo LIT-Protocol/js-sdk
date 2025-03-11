@@ -28,20 +28,85 @@ describe('utils', () => {
     expect((console.log as any).mock.calls[2][0]).toBe('Error Message');
   });
 
-  it('should get the most common string in an array', () => {
-    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 8];
+  describe('mostCommonString', () => {
+    it('should get the most common string in an array', () => {
+      const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 8];
 
-    const mostOccured = utilsModule.mostCommonString(arr);
+      const mostOccured = utilsModule.mostCommonString(arr);
 
-    expect(mostOccured).toBe(8);
+      expect(mostOccured).toBe(8);
+    });
+
+    it('should get the last element of the array if every element only appears once', () => {
+      const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+
+      const mostOccured = utilsModule.mostCommonString(arr);
+
+      expect(mostOccured).toBe(0);
+    });
+
+    it('returns the most common element in an array of strings', () => {
+      const arr = ['apple', 'banana', 'apple', 'orange'];
+      expect(utilsModule.mostCommonString(arr)).toBe('apple');
+    });
+
+    it('returns the most common element in an array of numbers', () => {
+      const arr = [1, 2, 2, 3, 2];
+      expect(utilsModule.mostCommonString(arr)).toBe(2);
+    });
+
+    it('returns undefined for an empty array', () => {
+      expect(utilsModule.mostCommonString([])).toBeUndefined();
+    });
+
+    it('handles tie scenarios by returning one of the tied elements', () => {
+      const result = utilsModule.mostCommonString(['x', 'y']);
+      expect(['x', 'y']).toContain(result);
+    });
   });
 
-  it('should get the last element of the array if every element only appears once', () => {
-    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+  describe('findMostCommonResponse', () => {
+    it('returns the most common responses for flat objects', () => {
+      const responses = [
+        { a: 'x', b: 'y' },
+        { a: 'x', b: 'z' },
+        { a: 'w', b: 'y' },
+      ];
+      const expected = { a: 'x', b: 'y' };
+      expect(utilsModule.findMostCommonResponse(responses)).toEqual(expected);
+    });
 
-    const mostOccured = utilsModule.mostCommonString(arr);
+    it('throws when given an empty array, there is no most common response', () => {
+      expect(() => utilsModule.findMostCommonResponse([])).toThrow(
+        'findMostCommonResponse requires at least one response object'
+      );
+    });
 
-    expect(mostOccured).toBe(0);
+    it('handles nested objects recursively', () => {
+      const responses = [
+        { a: { x: 1, y: 2 } },
+        { a: { x: 1, y: 3 } },
+        { a: { x: 2, y: 2 } },
+      ];
+      const expected = { a: { x: 1, y: 2 } };
+      expect(utilsModule.findMostCommonResponse(responses)).toEqual(expected);
+    });
+
+    it('filters out undefined and empty string values', () => {
+      const responses = [
+        { a: '', b: 10 },
+        { a: 5, b: 10 },
+        { a: 5, b: undefined },
+      ];
+      const expected = { a: 5, b: 10 };
+      expect(utilsModule.findMostCommonResponse(responses)).toEqual(expected);
+    });
+
+    it('assigns undefined when all values for a key are filtered out', () => {
+      const responses = [{ a: '' }, { a: undefined }];
+      const expected = { a: undefined };
+      expect(utilsModule.findMostCommonResponse(responses)).toEqual(expected);
+    });
   });
 
   it('should get value type by a given value', () => {

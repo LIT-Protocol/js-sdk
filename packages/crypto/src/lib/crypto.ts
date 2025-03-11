@@ -1,17 +1,32 @@
-import { joinSignature, splitSignature } from 'ethers/lib/utils';
+import { sha256 } from '@noble/hashes/sha256';
+import { sha384 } from '@noble/hashes/sha512';
 
 import {
+  CurveTypeNotFoundError,
+  EcdsaSigType,
   InvalidParamType,
-  LIT_CURVE,
-  LIT_CURVE_VALUES,
   NetworkError,
   NoValidShares,
   UnknownError,
-  UnknownSignatureError,
 } from '@lit-protocol/constants';
-import { log } from '@lit-protocol/misc';
+import {
+  applyTransformations,
+  cleanArrayValues,
+  cleanStringValues,
+  convertKeysToCamelCase,
+  convertNumberArraysToUint8Arrays,
+  hexifyStringValues,
+  log,
+} from '@lit-protocol/misc';
 import { nacl } from '@lit-protocol/nacl';
-import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
+import {
+  CleanLitNodeSignature,
+  CombinedLitNodeSignature,
+  LitActionSignedData,
+  NodeAttestation,
+  PKPSignEndpointResponse,
+  SessionKeyPair,
+} from '@lit-protocol/types';
 import {
   uint8arrayFromString,
   uint8arrayToString,
@@ -22,12 +37,10 @@ import {
   blsEncrypt,
   BlsSignatureShareJsonString,
   blsVerify,
-  ecdsaCombine,
   ecdsaDeriveKey,
-  EcdsaVariant,
-  ecdsaVerify,
   sevSnpGetVcekUrl,
   sevSnpVerify,
+  unifiedCombineAndVerify,
 } from '@lit-protocol/wasm';
 
 /** ---------- Exports ---------- */
@@ -80,21 +93,6 @@ export const encrypt = async (
   return Buffer.from(await blsEncrypt(publicKey, message, identity)).toString(
     'base64'
   );
-};
-
-/**
- * Decrypt ciphertext using BLS signature shares.
- *
- * @param ciphertextBase64 base64-encoded string of the ciphertext to decrypt
- * @param shares hex-encoded array of the BLS signature shares
- * @returns Uint8Array of the decrypted data
- */
-export const decryptWithSignatureShares = async (
-  ciphertextBase64: string,
-  shares: BlsSignatureShare[]
-): Promise<Uint8Array> => {
-  const sigShares = toJSONShares(shares);
-  return doDecrypt(ciphertextBase64, sigShares);
 };
 
 /**
@@ -169,128 +167,108 @@ export const verifySignature = async (
   await blsVerify(publicKey, message, signature);
 };
 
-const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
-  [LIT_CURVE.EcdsaCaitSith]: 'K256',
-  [LIT_CURVE.EcdsaK256]: 'K256',
-  [LIT_CURVE.EcdsaCAITSITHP256]: 'P256',
-  [LIT_CURVE.EcdsaK256Sha256]: 'K256',
+const parseCombinedSignature = (
+  combinedSignature: CombinedLitNodeSignature
+): CleanLitNodeSignature => {
+  const transformations = [
+    convertKeysToCamelCase,
+    cleanArrayValues,
+    convertNumberArraysToUint8Arrays,
+    cleanStringValues,
+    hexifyStringValues,
+  ];
+  return applyTransformations(
+    combinedSignature as unknown as Record<string, unknown>,
+    transformations
+  ) as unknown as CleanLitNodeSignature;
 };
 
 /**
+ * Combine and verify Lit execute js node shares
  *
- * Combine ECDSA Shares
+ * @param { LitActionSignedData[] } litActionResponseData
  *
- * @param { Array<SigShare> } sigShares
+ * @returns { CleanLitNodeSignature } signature
  *
- * @returns { any }
+ * @throws { NoValidShares }
  *
  */
-export const combineEcdsaShares = async (
-  sigShares: SigShare[]
-): Promise<{
-  r: string;
-  s: string;
-  recid: number;
-  signature: `0x${string}`;
-}> => {
-  const validShares = sigShares.filter((share) => share.signatureShare);
+export const combineExecuteJsNodeShares = async (
+  litActionResponseData: LitActionSignedData[]
+): Promise<CleanLitNodeSignature> => {
+  try {
+    const combinerShares = litActionResponseData.map((s) => s.signatureShare);
+    const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
+    const combinedSignature = JSON.parse(
+      unifiedSignature
+    ) as CombinedLitNodeSignature;
 
-  const anyValidShare = validShares[0];
-
-  if (!anyValidShare) {
+    return parseCombinedSignature(combinedSignature);
+  } catch (e) {
     throw new NoValidShares(
       {
         info: {
-          shares: sigShares,
+          shares: litActionResponseData,
         },
+        cause: e,
       },
-      'No valid shares to combine'
+      'No valid lit action shares to combine'
     );
   }
+};
 
-  const variant =
-    ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE_VALUES];
-  const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
-  const signatureShares = validShares.map((share) =>
-    Buffer.from(share.signatureShare, 'hex')
-  );
+/**
+ * Combine and verify Lit pkp sign node shares
+ *
+ * @param { PKPSignEndpointResponse[] } nodesSignResponseData
+ *
+ * @returns { CleanLitNodeSignature } signature
+ *
+ * @throws { NoValidShares }
+ *
+ */
+export const combinePKPSignNodeShares = async (
+  nodesSignResponseData: PKPSignEndpointResponse[]
+): Promise<CleanLitNodeSignature> => {
+  try {
+    const validShares = nodesSignResponseData.filter((share) => share.success);
 
-  const [r, s, recId] = await ecdsaCombine(
-    variant!,
-    presignature,
-    signatureShares
-  );
+    const combinerShares = validShares.map((s) =>
+      JSON.stringify(s.signatureShare)
+    );
+    const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
+    const combinedSignature = JSON.parse(
+      unifiedSignature
+    ) as CombinedLitNodeSignature;
 
-  const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
-  const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
-
-  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, recId]);
-
-  const signature = splitSignature(
-    Buffer.concat([r, s, Buffer.from([recId + 27])])
-  );
-
-  // validate r before returning
-  if (!signature.r) {
-    throw new UnknownSignatureError(
+    return parseCombinedSignature(combinedSignature);
+  } catch (e) {
+    throw new NoValidShares(
       {
         info: {
-          signature,
+          shares: nodesSignResponseData,
         },
+        cause: e,
       },
-      'signature could not be combined'
+      'No valid pkp sign shares to combine'
     );
   }
-
-  const _r = signature.r.slice('0x'.length);
-  const _s = signature.s.slice('0x'.length);
-  const _recid = signature.recoveryParam;
-
-  const encodedSig = joinSignature({
-    r: '0x' + _r,
-    s: '0x' + _s,
-    recoveryParam: _recid,
-  }) as `0x${string}`;
-
-  return {
-    r: _r,
-    s: _s,
-    recid: _recid,
-    signature: encodedSig,
-  };
 };
 
 export const computeHDPubKey = async (
   pubkeys: string[],
-  keyId: string,
-  sigType: LIT_CURVE_VALUES
+  keyId: string
 ): Promise<string> => {
-  const variant = ecdsaSigntureTypeMap[sigType];
-
-  switch (sigType) {
-    case LIT_CURVE.EcdsaCaitSith:
-    case LIT_CURVE.EcdsaK256:
-      // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
-      pubkeys = pubkeys.map((value: string) => {
-        return value.replace('0x', '');
-      });
-      keyId = keyId.replace('0x', '');
-      const preComputedPubkey = await ecdsaDeriveKey(
-        variant!,
-        Buffer.from(keyId, 'hex'),
-        pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
-      );
-      return Buffer.from(preComputedPubkey).toString('hex');
-    default:
-      throw new InvalidParamType(
-        {
-          info: {
-            sigType,
-          },
-        },
-        `Non supported signature type`
-      );
-  }
+  // a bit of preprocessing to remove characters which will cause our wasm module to reject the values.
+  pubkeys = pubkeys.map((value: string) => {
+    return value.replace('0x', '');
+  });
+  keyId = keyId.replace('0x', '');
+  const preComputedPubkey = await ecdsaDeriveKey(
+    Buffer.from(keyId, 'hex'),
+    pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
+  );
+  return Buffer.from(preComputedPubkey).toString('hex');
 };
 
 /**
@@ -379,13 +357,13 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
  * @param { string } challengeHex The challenge we sent
  * @param { string } url The URL we talked to
  *
- * @returns { Promise<undefined> } A promise that throws if the attestation is invalid
+ * @returns { Promise<void> } A promise that throws if the attestation is invalid
  */
 export const checkSevSnpAttestation = async (
   attestation: NodeAttestation,
   challengeHex: string,
   url: string
-) => {
+): Promise<void> => {
   const noonce = Buffer.from(attestation.noonce, 'base64');
   const challenge = Buffer.from(challengeHex, 'hex');
   const data = Object.fromEntries(
@@ -501,7 +479,32 @@ export const checkSevSnpAttestation = async (
   return sevSnpVerify(report, data, signatures, challenge, vcekCert);
 };
 
-declare global {
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var LitNodeClient: any;
+// Map the right hash function per signing scheme
+export const ecdsaHashFunctions: Record<
+  EcdsaSigType,
+  (arg0: Uint8Array) => Uint8Array
+> = {
+  EcdsaK256Sha256: sha256,
+  EcdsaP256Sha256: sha256,
+  EcdsaP384Sha384: sha384,
+} as const;
+
+export function hashLitMessage(
+  signingScheme: EcdsaSigType,
+  message: Uint8Array
+): Uint8Array {
+  const hashFn = ecdsaHashFunctions[signingScheme];
+
+  if (!hashFn) {
+    throw new CurveTypeNotFoundError(
+      {
+        info: {
+          signingScheme,
+        },
+      },
+      `No known hash function for specified signing scheme ${signingScheme}`
+    );
+  }
+
+  return hashFn(message);
 }

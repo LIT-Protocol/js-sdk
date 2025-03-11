@@ -44,6 +44,7 @@
     "@lit-protocol/contracts": "^0.0.86",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
+    "@noble/curves": "^1.8.1",
     "@openagenda/verror": "^3.1.4",
     "@simplewebauthn/browser": "^7.2.0",
     "@simplewebauthn/typescript-types": "^7.0.0",
@@ -60,6 +61,7 @@
     "cross-fetch": "3.1.8",
     "date-and-time": "^2.4.1",
     "depd": "^2.0.0",
+    "elliptic": "^6.6.1",
     "ethers": "^5.7.1",
     "jose": "^4.14.4",
     "micromodal": "^0.4.10",
@@ -70,7 +72,8 @@
     "tslib": "^2.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@nx/devkit": "17.3.0",
@@ -86,6 +89,7 @@
     "@nx/web": "17.3.0",
     "@solana/web3.js": "1.95.3",
     "@types/depd": "^1.1.36",
+    "@types/elliptic": "^6.4.18",
     "@types/events": "^3.0.3",
     "@types/jest": "27.4.1",
     "@types/node": "18.19.18",

@@ -36,3 +36,5 @@ export const PRODUCT_IDS = {
   SIGN: 1, // For signing operations
   LIT_ACTION: 2, // For Lit Actions execution
 } as const;
+export type PRODUCT_IDS_TYPE = keyof typeof PRODUCT_IDS;
+export type PRODUCT_IDS_VALUES = (typeof PRODUCT_IDS)[keyof typeof PRODUCT_IDS];

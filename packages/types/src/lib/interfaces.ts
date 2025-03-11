@@ -1,7 +1,7 @@
 import { Provider } from '@ethersproject/abstract-provider';
-import depd from 'depd';
 
-import { SigType } from './EndpointResponses';
+import { SigType } from '@lit-protocol/constants';
+
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import {
@@ -9,6 +9,7 @@ import {
   AccessControlConditions,
   Chain,
   EvmContractConditions,
+  Hex,
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
@@ -18,7 +19,6 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from './types';
-const deprecated = depd('lit-js-sdk:types:interfaces');
 
 export interface AccsOperatorParams {
   operator: string;
@@ -162,28 +162,22 @@ export interface ClaimKeyResponse {
   mintTx: string;
 }
 
-/**
- * Struct in rust
- * -----
-pub struct JsonExecutionRequest {
-  pub auth_sig: AuthSigItem,
-  #[serde(default = "default_epoch")]
-  pub epoch: u64,
-
-  pub ipfs_id: Option<String>,
-  pub code: Option<String>,
-    pub js_params: Option<Value>,
-    pub auth_methods: Option<Vec<AuthMethod>>,
+export interface Node {
+  socketAddress: string;
+  value: number;
 }
- */
+
+export interface BaseJsonPkpSignRequest {
+  signingScheme: SigType;
+}
 
 /**
  * The 'pkpSign' function param. Please note that the structure
- * is different than the payload sent to the node.
+ * is different from the payload sent to the node.
  */
-export interface JsonPkpSignSdkParams {
+export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
-  toSign: ArrayLike<number>;
+  messageToSign: Uint8Array;
   authContext: AuthenticationContext;
   userMaxPrice?: bigint;
 }
@@ -191,17 +185,17 @@ export interface JsonPkpSignSdkParams {
 /**
  * The actual payload structure sent to the node /pkp/sign endpoint.
  */
-export interface JsonPkpSignRequest<T> extends NodeSetRequired {
-  toSign: ArrayLike<number>;
-  authMethods?: AuthMethod[];
+export interface JsonPkpSignRequest
+  extends BaseJsonPkpSignRequest,
+    NodeSetRequired {
   authSig: AuthSig;
+  authMethods?: AuthMethod[];
+  toSign: ArrayLike<number>;
 
   /**
    * note that 'key' is in lower case, because this is what the node expects
    */
   pubkey: string;
-
-  signingScheme: T;
 }
 
 /**
@@ -391,27 +385,6 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
 /**
  * Struct in rust
  * -----
-pub struct JsonSigningStoreRequest {
-    pub key: String,
-    pub val: String,
-    pub chain: Option<String>,
-    pub permanant: Option<usize>,
-    pub auth_sig: AuthSigItem,
-}
- */
-export interface JsonSigningStoreRequest {
-  key: string;
-  val: string;
-  chain?: string;
-  permanant?: 0 | 1;
-  permanent?: 0 | 1;
-  authSig?: AuthSig;
-  sessionSigs?: SessionSigsMap;
-}
-
-/**
- * Struct in rust
- * -----
  pub struct JsonEncryptionRetrieveRequest {
     pub access_control_conditions: Option<Vec<AccessControlConditionItem>>,
     pub evm_contract_conditions: Option<Vec<EVMContractConditionItem>>,
@@ -429,9 +402,7 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
 
 export interface LitActionResponseStrategy {
   strategy: ResponseStrategy;
-  customFilter?: (
-    responses: Record<string, string>[]
-  ) => Record<string, string>;
+  customFilter?: <T>(responses: T[]) => T;
 }
 
 export interface IpfsOptions {
@@ -545,26 +516,8 @@ export interface DecryptResponse {
   decryptedData: Uint8Array;
 }
 
-export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
-  dataToEncryptHash: string;
-}
-
-export interface SigResponse {
-  r: string;
-  s: string;
-  recid: number;
-  signature: `0x${string}`;
-  publicKey: string; // pkp public key (no 0x prefix)
-  dataSigned: string;
-}
-
 export interface ExecuteJsResponseBase {
-  signatures:
-    | {
-        sig: SigResponse;
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | any;
+  signatures: Record<string, LitNodeSignature>;
 }
 
 /**
@@ -598,33 +551,6 @@ export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   response: any;
   logs: string;
-}
-
-export interface SigShare {
-  sigType: SigType;
-  signatureShare: string;
-  bigR?: string;
-  publicKey: string;
-  dataSigned?: string | 'fail';
-  siweMessage?: string;
-  sigName?: string;
-}
-
-export interface NodeShare {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claimData: any;
-
-  // I think this is deprecated
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unsignedJwt: any;
-  signedData: SigShare;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  decryptedData: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  response: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logs: any;
-  success?: boolean | '';
 }
 
 export interface NodeBlsSigningShare {
@@ -702,6 +628,43 @@ export interface FormattedMultipleAccs {
   formattedSolRpcConditions: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formattedUnifiedAccessControlConditions: any;
+}
+
+// BLS
+// ================== unifiedSignature: {
+// "signature":"{\"ProofOfPossession\":\"abff2ed7e23d0e7c01880e76fd66c84b23427842447ec5474a842ca729d5f21b675342aac3fe94386ffd02c6726b14740c4571efcf45fb86342fd806b6557bcfb32c225f006d7870eea0980810c26606779667786c1a875d563b5731c65da21f\"}",
+// "verifying_key":"\"af93eb21b135d6a95d46f03662168f34e0ea8a749d0579ac46aa7aff721c1259991997c0598aad6838678a2f17dd85e2\"",
+// "signed_data":"0102030405",
+// "recovery_id":null}
+// ECDSA
+// ================== unifiedSignature: {
+// "signature":"\"F0E7A72197D93FFF7A5A22B2A865511C6A117DE75E08519A2298061485169A2B6EE44425E45AD3A7455720C5D786EFFFBB24D94DD4E8F2143CDBF777BBCA6FE1\"",
+// "verifying_key":"\"3056301006072A8648CE3D020106052B8104000A0342000438629EBC85B2C8E06C90D8BFAAC45BAA6706E6C6F7AF318DD569FA273DBDC2D5935590F819D6B8EB23DE5B2799F4F3106F4D55F1EA873292FC282ADCC5FA7F4F\"",
+// "signed_data":"74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0",
+// "recovery_id":1}
+// FROST
+// ================== unifiedSignature: {
+// "signature":"[\"K256Sha256\",\"036e6bf0d688202166c8086b40b72306514566d314ec6209a09ddf5be62c4ff1003ce0fbc2afd715261b0d3cbba216ca2e0ccb46447f63015345194fe48101a3df\"]",
+// "verifying_key":"[\"K256Sha256\",\"0374f4c61cf60ba3a3dc31cac8d2cc502803ff83f8fe7e24d7081881e938e44ff3\"]",
+// "signed_data":"74f81fe167d99b4cb41d6d0ccda82278caee9f3e2f25d5e5a3936ff3dcec60d0",
+// "recovery_id":null}
+export interface CombinedLitNodeSignature {
+  signature: string;
+  verifying_key: string;
+  signed_data: string;
+  recovery_id: number | null;
+}
+
+export interface CleanLitNodeSignature {
+  signature: Hex;
+  verifyingKey: Hex;
+  signedData: Hex;
+  recoveryId: 0 | 1 | null;
+}
+
+export interface LitNodeSignature extends CleanLitNodeSignature {
+  publicKey: Hex;
+  sigType: SigType;
 }
 
 export interface NodeAttestation {
@@ -979,9 +942,11 @@ export interface RPCUrls {
 export interface PKPWallet {
   getAddress: () => Promise<string>;
   init: () => Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  runLitAction: (toSign: Uint8Array, sigName: string) => Promise<any>;
-  runSign: (toSign: Uint8Array) => Promise<SigResponse>;
+  runLitAction: (
+    toSign: Uint8Array,
+    sigName: string
+  ) => Promise<LitNodeSignature>;
+  runSign: (toSign: Uint8Array) => Promise<LitNodeSignature>;
 }
 
 export type PKPEthersWalletProp = Omit<
