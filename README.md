@@ -432,3 +432,33 @@ Object.defineProperty(globalThis, 'crypto', {
 
 **Solution:**
 Make sure your node version is above v18.0.0
+
+# Commit Message Enforcement
+
+We have implemented a git hook to enforce conventional commit message format. This helps in maintaining a consistent commit history and generating changelog documentation based on those messages.
+
+## Commit Message Format
+
+Each commit message should follow this format:
+
+```
+<type>(<scope>): <subject>
+```
+
+Where:
+
+- `type` is the type of change (e.g., feat, fix, docs, style, refactor, test, chore)
+- `scope` is the scope of the change (e.g., module or file name)
+- `subject` is a brief description of the change
+
+Example:
+
+```
+feat(auth): add login functionality
+```
+
+## Using Commitlint and Husky
+
+We use `commitlint` to enforce the commit message format and `husky` to run `commitlint` on commit messages.
+
+To make a commit, simply follow the format above. If the commit message does not follow the format, the commit will be rejected.

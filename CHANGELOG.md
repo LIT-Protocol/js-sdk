@@ -114,3 +114,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update `SIGTYPE` to include new ecdsa types
 - [#107](https://github.com/LIT-Protocol/js-sdk/pull/107) Adds support for new ECDSA implementations for signature recombine
+
+## [Unreleased]
+
+### Added
+
+- Enforced conventional commit message format using commitlint and husky
