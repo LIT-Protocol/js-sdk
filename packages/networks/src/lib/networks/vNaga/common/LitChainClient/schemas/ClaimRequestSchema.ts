@@ -1,7 +1,7 @@
-import { t } from "elysia";
-import { toBigInt, toHexString } from "services/lit/utils/z-transformers";
-import { z } from "zod";
-import { SignatureDataSchema } from "./shared/SignatureDataSchema";
+import { t } from 'elysia';
+import { z } from 'zod';
+import { toBigInt, toHexString } from '../../../../shared/utils/z-transformers';
+import { SignatureDataSchema } from './shared/SignatureDataSchema';
 
 export const ClaimRequestSchema = z.object({
   derivedKeyId: toHexString,

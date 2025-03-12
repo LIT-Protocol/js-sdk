@@ -1,12 +1,12 @@
-import { t } from "elysia";
+import { t } from 'elysia';
+import { z } from 'zod';
 import {
   toBigInt,
   toBigIntArray,
   toBigIntMatrix,
   toBoolean,
   toHexStringArray,
-} from "services/lit/utils/z-transformers";
-import { z } from "zod";
+} from '../../../../shared/utils/z-transformers';
 
 export const MintRequestSchema = z.object({
   keyType: toBigInt,

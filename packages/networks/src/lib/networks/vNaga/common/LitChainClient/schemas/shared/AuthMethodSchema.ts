@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 const AUTH_METHOD_TYPE = {
   EthWallet: 1,

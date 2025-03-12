@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Defines schemas for PKP permission scopes.
@@ -7,17 +7,17 @@ import { z } from "zod";
 
 // Valid scope values
 export const SCOPE_VALUES = [
-  "no-permissions",
-  "sign-anything",
-  "personal-sign",
+  'no-permissions',
+  'sign-anything',
+  'personal-sign',
 ] as const;
 export type ScopeString = (typeof SCOPE_VALUES)[number];
 
 // Mapping from string scopes to their bigint representation
 export const SCOPE_MAPPING = {
-  "no-permissions": 0n,
-  "sign-anything": 1n,
-  "personal-sign": 2n,
+  'no-permissions': 0n,
+  'sign-anything': 1n,
+  'personal-sign': 2n,
 } as const;
 export type ScopeBigInt = (typeof SCOPE_MAPPING)[ScopeString];
 

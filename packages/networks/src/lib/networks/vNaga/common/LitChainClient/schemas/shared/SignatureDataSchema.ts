@@ -1,5 +1,5 @@
-import { toHexString } from "services/lit/utils/z-transformers";
-import { z } from "zod";
+import { z } from 'zod';
+import { toHexString } from '../../../../../shared/utils/z-transformers';
 
 export const SignatureDataSchema = z.object({
   r: toHexString,

@@ -1,6 +1,6 @@
-import { generateValidatorURLs } from "services/lit/utils/transformers";
-import { toNumber } from "services/lit/utils/z-transformers";
-import { z } from "zod";
+import { z } from 'zod';
+import { generateValidatorURLs } from '../../../../shared/utils/transformers';
+import { toNumber } from '../../../../shared/utils/z-transformers';
 
 const EpochInfoSchema = z.object({
   epochLength: toNumber,
@@ -34,7 +34,7 @@ export const GetActiveUnkickedValidatorStructsAndCountsSchema = z
     const validatorURLs = generateValidatorURLs(activeUnkickedValidatorStructs);
 
     if (!minNodeCount) {
-      throw new Error("❌ Minimum validator count is not set");
+      throw new Error('❌ Minimum validator count is not set');
     }
 
     if (validatorURLs.length < Number(minNodeCount)) {
