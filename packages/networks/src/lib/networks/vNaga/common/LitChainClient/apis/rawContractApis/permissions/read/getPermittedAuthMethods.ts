@@ -1,10 +1,9 @@
 // import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { toBigInt } from "services/lit/utils/z-transformers";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { networkContext } from "../../../../_config";
-import { createLitContracts } from "../../../utils/createLitContracts";
+import { z } from 'zod';
+import { logger } from '../../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { NagaContext } from '../../../../../../types';
+import { createLitContracts } from '../../../utils/createLitContracts';
 
 const getPermittedAuthMethodsSchema = z.object({
   tokenId: toBigInt,
@@ -43,15 +42,15 @@ export async function getPermittedAuthMethods(
 }
 
 // Example usage when running as main
-if (import.meta.main) {
-  const networkCtx = networkContext;
+// if (import.meta.main) {
+//   const networkCtx = networkContext;
 
-  const res = await getPermittedAuthMethods(
-    {
-      tokenId:
-        "76136736151863037541847315168980811654782785653773679312890341037699996601290",
-    },
-    networkCtx
-  );
-  console.log("permittedAuthMethods", res);
-}
+//   const res = await getPermittedAuthMethods(
+//     {
+//       tokenId:
+//         "76136736151863037541847315168980811654782785653773679312890341037699996601290",
+//     },
+//     networkCtx
+//   );
+//   console.log("permittedAuthMethods", res);
+// }

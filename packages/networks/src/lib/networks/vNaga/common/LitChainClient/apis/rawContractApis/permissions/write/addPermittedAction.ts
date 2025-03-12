@@ -1,15 +1,15 @@
 // import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { ipfsCidV0ToHex } from "services/lit/utils/transformers/ipfsCidV0ToHex";
-import { toBigInt } from "services/lit/utils/z-transformers";
-import { isIpfsCidV0 } from "services/lit/utils/z-validate";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { ScopeSchemaRaw } from "../../../../schemas/shared/ScopeSchema";
-import { LitTxVoid } from "../../../types";
-import { callWithAdjustedOverrides } from "../../../utils/callWithAdjustedOverrides";
-import { createLitContracts } from "../../../utils/createLitContracts";
-import { decodeLogs } from "../../../utils/decodeLogs";
+import { z } from 'zod';
+import { logger } from '../../../../../../../shared/logger';
+import { ipfsCidV0ToHex } from '../../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { NagaContext } from '../../../../../../types';
+import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
+import { LitTxVoid } from '../../../types';
+import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
+import { createLitContracts } from '../../../utils/createLitContracts';
+import { decodeLogs } from '../../../utils/decodeLogs';
 
 const addPermittedActionSchema = z
   .object({

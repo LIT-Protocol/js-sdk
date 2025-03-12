@@ -1,12 +1,12 @@
 // import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { toBigInt } from "services/lit/utils/z-transformers";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { LitTxVoid } from "../../../types";
-import { callWithAdjustedOverrides } from "../../../utils/callWithAdjustedOverrides";
-import { createLitContracts } from "../../../utils/createLitContracts";
-import { decodeLogs } from "../../../utils/decodeLogs";
+import { z } from 'zod';
+import { logger } from '../../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { NagaContext } from '../../../../../../types';
+import { LitTxVoid } from '../../../types';
+import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
+import { createLitContracts } from '../../../utils/createLitContracts';
+import { decodeLogs } from '../../../utils/decodeLogs';
 
 const removePermittedAddressSchema = z.object({
   tokenId: toBigInt,
@@ -38,7 +38,7 @@ export async function removePermittedAddress(
 
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
-    "removePermittedAddress",
+    'removePermittedAddress',
     [validatedRequest.tokenId, validatedRequest.address]
   );
 

@@ -1,4 +1,4 @@
-import { hexToBigInt, keccak256, toBytes } from "viem";
+import { hexToBigInt, keccak256, toBytes } from 'viem';
 
 /**
  * Convert a public key to a token ID

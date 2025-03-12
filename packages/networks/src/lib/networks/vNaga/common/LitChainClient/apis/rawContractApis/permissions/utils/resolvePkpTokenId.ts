@@ -3,31 +3,31 @@
  * This module provides a consistent way to obtain PKP token IDs regardless of the input format.
  */
 
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { toBigInt } from "services/lit/utils/z-transformers";
-import { isEthAddress } from "services/lit/utils/z-validate";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { createLitContracts } from "../../../utils/createLitContracts";
-import { pubkeyToTokenId } from "./pubkeyToTokenId";
+import { z } from 'zod';
+import { logger } from '../../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { isEthAddress } from '../../../../../../../shared/utils/z-validate';
+import { NagaContext } from '../../../../../../types';
+import { createLitContracts } from '../../../utils/createLitContracts';
+import { pubkeyToTokenId } from './pubkeyToTokenId';
 
 // Input validation schema
-export const PkpIdentifierSchema = z.discriminatedUnion("field", [
+export const PkpIdentifierSchema = z.discriminatedUnion('field', [
   z
     .object({
-      field: z.literal("tokenId"),
+      field: z.literal('tokenId'),
       tokenId: toBigInt,
     })
     .strict(),
   z
     .object({
-      field: z.literal("address"),
+      field: z.literal('address'),
       address: isEthAddress,
     })
     .strict(),
   z
     .object({
-      field: z.literal("pubkey"),
+      field: z.literal('pubkey'),
       pubkey: z.string(),
     })
     .strict(),
@@ -61,7 +61,7 @@ export async function resolvePkpTokenId(
   if (providedFields.length !== 1) {
     throw new Error(
       `Invalid identifier: exactly one of tokenId, address, or pubkey must be provided. Found: ${providedFields.join(
-        ", "
+        ', '
       )}`
     );
   }
@@ -69,15 +69,15 @@ export async function resolvePkpTokenId(
   // Determine the field type and validate input
   const validatedInput = PkpIdentifierSchema.parse({
     field:
-      "tokenId" in identifier
-        ? "tokenId"
-        : "address" in identifier
-        ? "address"
-        : "pubkey" in identifier
-        ? "pubkey"
+      'tokenId' in identifier
+        ? 'tokenId'
+        : 'address' in identifier
+        ? 'address'
+        : 'pubkey' in identifier
+        ? 'pubkey'
         : (() => {
             throw new Error(
-              "Invalid identifier: must provide tokenId, address, or pubkey"
+              'Invalid identifier: must provide tokenId, address, or pubkey'
             );
           })(),
     ...identifier,
@@ -86,19 +86,19 @@ export async function resolvePkpTokenId(
   logger.debug({ validatedInput });
 
   // Handle direct token ID
-  if (validatedInput.field === "tokenId") {
+  if (validatedInput.field === 'tokenId') {
     return validatedInput.tokenId;
   }
 
   // Handle pubkey
-  if (validatedInput.field === "pubkey") {
+  if (validatedInput.field === 'pubkey') {
     return pubkeyToTokenId(validatedInput.pubkey);
   }
 
   // Handle address (requires network context)
-  if (validatedInput.field === "address") {
+  if (validatedInput.field === 'address') {
     if (!networkCtx) {
-      throw new Error("Network context required for address resolution");
+      throw new Error('Network context required for address resolution');
     }
 
     const { pubkeyRouterContract } = createLitContracts(networkCtx);
@@ -107,11 +107,11 @@ export async function resolvePkpTokenId(
     ]);
 
     if (!pkpTokenId) {
-      throw new Error("PKP token ID not found for address");
+      throw new Error('PKP token ID not found for address');
     }
 
     return pkpTokenId;
   }
 
-  throw new Error("Unable to resolve PKP token ID");
+  throw new Error('Unable to resolve PKP token ID');
 }

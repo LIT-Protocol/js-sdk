@@ -1,10 +1,9 @@
 // import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { toBigInt } from "services/lit/utils/z-transformers";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { networkContext } from "../../../../_config";
-import { createLitContracts } from "../../../utils/createLitContracts";
+import { z } from 'zod';
+import { logger } from '../../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { NagaContext } from '../../../../../../types';
+import { createLitContracts } from '../../../utils/createLitContracts';
 
 const getPermittedAuthMethodScopesSchema = z.object({
   tokenId: toBigInt,
@@ -44,18 +43,18 @@ export async function getPermittedAuthMethodScopes(
 }
 
 // Example usage when running as main
-if (import.meta.main) {
-  const networkCtx = networkContext;
+// if (import.meta.main) {
+//   const networkCtx = networkContext;
 
-  const res = await getPermittedAuthMethodScopes(
-    {
-      tokenId:
-        "76136736151863037541847315168980811654782785653773679312890341037699996601290",
-      authMethodType: 1,
-      authMethodId: "0x1234567890abcdef1234567890abcdef12345678",
-      // scopeId: 0,
-    },
-    networkCtx
-  );
-  console.log("permittedAuthMethodScopes", res);
-}
+//   const res = await getPermittedAuthMethodScopes(
+//     {
+//       tokenId:
+//         "76136736151863037541847315168980811654782785653773679312890341037699996601290",
+//       authMethodType: 1,
+//       authMethodId: "0x1234567890abcdef1234567890abcdef12345678",
+//       // scopeId: 0,
+//     },
+//     networkCtx
+//   );
+//   console.log("permittedAuthMethodScopes", res);
+// }

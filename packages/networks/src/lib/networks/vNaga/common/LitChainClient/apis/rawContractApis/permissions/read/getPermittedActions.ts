@@ -1,9 +1,9 @@
 // import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { toBigInt } from "services/lit/utils/z-transformers";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { createLitContracts } from "../../../utils/createLitContracts";
+import { NagaContext } from '../../../../../../types';
+import { z } from 'zod';
+import { logger } from '../../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { createLitContracts } from '../../../utils/createLitContracts';
 
 const getPermittedActionsSchema = z.object({
   tokenId: toBigInt,
