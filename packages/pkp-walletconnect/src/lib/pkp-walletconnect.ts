@@ -21,7 +21,6 @@ import {
   Web3Wallet,
   Web3WalletTypes,
 } from '@walletconnect/web3wallet';
-import { pino, Logger } from 'pino';
 
 import {
   InitError,
@@ -30,6 +29,7 @@ import {
   ParamsMissingError,
   UnsupportedMethodError,
 } from '@lit-protocol/constants';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   PKPEthersWallet,
   SupportedETHSigningMethods,
@@ -56,9 +56,9 @@ export class PKPWalletConnect {
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
-    this.#logger = pino({
-      name: 'PKPWalletConnect',
-      level: this.debug ? 'debug' : 'info',
+    this.#logger = getChildLogger({
+      module: 'PKPWalletConnect',
+      ...(debug ? { level: 'debug' } : {}),
     });
   }
 

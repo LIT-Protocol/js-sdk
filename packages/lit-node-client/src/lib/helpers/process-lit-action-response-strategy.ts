@@ -1,10 +1,8 @@
-import { pino } from 'pino';
-
+import { getChildLogger } from '@lit-protocol/logger';
 import { LitActionResponseStrategy, NodeShare } from '@lit-protocol/types';
 
-const logger = pino({
-  level: 'info',
-  name: 'process-lit-action-response-strategy',
+const logger = getChildLogger({
+  module: 'process-lit-action-response-strategy',
 });
 
 /**

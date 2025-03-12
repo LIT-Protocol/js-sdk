@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { pino } from 'pino';
 
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AccsDefaultParams,
   AuthSig,
@@ -11,7 +11,7 @@ import {
 import { CHAIN_ETHEREUM, NETWORK_EVM, NETWORK_SOLANA } from '../constants';
 import { KeyType, Network } from '../types';
 
-const logger = pino({ level: 'info', name: 'wrapped-keys/api/utils' });
+const logger = getChildLogger({ module: 'wrapped-keys/api/utils' });
 
 export function getKeyTypeFromNetwork(network: Network): KeyType {
   if (network === NETWORK_EVM) {

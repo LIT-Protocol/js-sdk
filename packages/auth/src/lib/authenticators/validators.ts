@@ -1,8 +1,7 @@
-import { pino } from 'pino';
-
+import { getChildLogger } from '@lit-protocol/logger';
 import { MintRequestBody } from '@lit-protocol/types';
 
-const logger = pino({ level: 'info', name: 'validators' });
+const logger = getChildLogger({ module: 'validators' });
 
 export const validateMintRequestBody = (
   customArgs: Partial<MintRequestBody>

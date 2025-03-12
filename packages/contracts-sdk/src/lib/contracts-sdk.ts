@@ -7,7 +7,6 @@ import {
 } from 'abitype';
 import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import { Logger, pino } from 'pino';
 
 import {
   AUTH_METHOD_SCOPE_VALUES,
@@ -29,6 +28,7 @@ import {
   UnsupportedMethodError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import {
   ContractName,
@@ -127,9 +127,9 @@ export class LitContracts {
     debug?: boolean;
     network?: LIT_NETWORKS_KEYS;
   }) {
-    this.#logger = pino({
-      name: 'LitContracts',
-      level: args?.debug ? 'debug' : 'info',
+    this.#logger = getChildLogger({
+      module: 'LitContracts',
+      ...(args?.debug ? { level: 'debug' } : {}),
     });
     // this.provider = args?.provider;
     this.customContext = args?.customContext;

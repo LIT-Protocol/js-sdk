@@ -7,8 +7,6 @@
  * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
-import { pino, Logger } from 'pino';
-
 import {
   InitError,
   LitNodeClientNotReadyError,
@@ -16,6 +14,7 @@ import {
 } from '@lit-protocol/constants';
 import { publicKeyCompress } from '@lit-protocol/crypto';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   AuthenticationContext,
   JsonExecutionSdkParams,
@@ -56,9 +55,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
 
     this.debug = prop.debug || false;
-    this.#logger = pino({
-      name: 'PKPBase',
-      level: this.debug ? 'debug' : 'info',
+    this.#logger = getChildLogger({
+      module: 'PKPBase',
+      ...(prop.debug ? { level: 'debug' } : {}),
     });
 
     if (prop.pkpPubKey.startsWith('0x')) {

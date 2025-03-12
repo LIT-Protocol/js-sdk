@@ -1,6 +1,5 @@
-import { pino } from 'pino';
-
 import { InvalidAccessControlConditions } from '@lit-protocol/constants';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AccessControlConditions,
   EvmContractConditions,
@@ -20,7 +19,7 @@ import {
   canonicalUnifiedAccessControlConditionFormatter,
 } from './canonicalFormatter';
 
-const logger = pino({ level: 'info', name: 'hashing' });
+const logger = getChildLogger({ module: 'hashing' });
 
 // Same as:
 // const unifiedAccs = [

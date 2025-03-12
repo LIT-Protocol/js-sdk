@@ -1,6 +1,5 @@
 import { ed25519 } from '@noble/curves/ed25519';
 import { joinSignature, splitSignature } from 'ethers/lib/utils';
-import { pino } from 'pino';
 
 import {
   InvalidParamType,
@@ -12,6 +11,7 @@ import {
   UnknownError,
   UnknownSignatureError,
 } from '@lit-protocol/constants';
+import { getChildLogger } from '@lit-protocol/logger';
 import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
 import {
@@ -28,7 +28,7 @@ import {
   sevSnpVerify,
 } from '@lit-protocol/wasm';
 
-const logger = pino({ level: 'info', name: 'crypto' });
+const logger = getChildLogger({ module: 'crypto' });
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;

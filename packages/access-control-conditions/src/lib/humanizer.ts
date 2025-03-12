@@ -1,13 +1,13 @@
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
-import { pino } from 'pino';
 
 import {
   LIT_CHAINS,
   LitEVMChainKeys,
   InvalidUnifiedConditionType,
 } from '@lit-protocol/constants';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AccessControlConditions,
   AccsCOSMOSParams,
@@ -17,7 +17,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-const logger = pino({ level: 'info', name: 'humanizer' });
+const logger = getChildLogger({ module: 'humanizer' });
 
 export const ERC20ABI = [
   {

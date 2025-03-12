@@ -1,7 +1,6 @@
 import { computeAddress } from '@ethersproject/transactions';
 import { ed25519 } from '@noble/curves/ed25519';
 import { ethers } from 'ethers';
-import { pino, Logger } from 'pino';
 import { SiweMessage } from 'siwe';
 
 import {
@@ -49,6 +48,7 @@ import {
   verifyAndDecryptWithSignatureShares,
   verifySignature,
 } from '@lit-protocol/crypto';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   getStorageItem,
   removeStorageItem,
@@ -152,9 +152,9 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     super(args);
 
-    this.#logger = pino({
-      name: 'LitNodeClient',
-      level: this.config.debug ? 'debug' : 'info',
+    this.#logger = getChildLogger({
+      module: 'LitNodeClient',
+      ...(this.config.debug ? { level: 'debug' } : {}),
     });
 
     if (args !== undefined && args !== null && 'defaultAuthCallback' in args) {

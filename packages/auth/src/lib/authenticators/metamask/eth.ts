@@ -11,7 +11,6 @@ import {
 import depd from 'depd';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { pino } from 'pino';
 import { SiweMessage } from 'siwe';
 
 import {
@@ -28,6 +27,7 @@ import {
   LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
 import { validateSessionSig } from '@lit-protocol/lit-node-client';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   getStorageItem,
   setStorageItem,
@@ -38,7 +38,7 @@ import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 import LitConnectModal from './connect-modal/modal';
 
 const deprecated = depd('lit-js-sdk:auth:metamask-authenticator:index');
-const logger = pino({ level: 'info', name: 'eth' });
+const logger = getChildLogger({ module: 'eth' });
 
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;

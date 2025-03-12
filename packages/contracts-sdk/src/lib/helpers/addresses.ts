@@ -3,7 +3,6 @@ import { createHash } from 'crypto';
 import { bech32 } from 'bech32';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import { pino } from 'pino';
 import { z } from 'zod';
 import { fromError, isZodErrorLike } from 'zod-validation-error';
 
@@ -13,10 +12,11 @@ import {
   ParamsMissingError,
 } from '@lit-protocol/constants';
 import { publicKeyCompress } from '@lit-protocol/crypto';
+import { getChildLogger } from '@lit-protocol/logger';
 import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { DerivedAddresses } from '@lit-protocol/types';
 
-const logger = pino({ level: 'info', name: 'addresses' });
+const logger = getChildLogger({ module: 'addresses' });
 
 /**
  * Derives a Bitcoin address (P2PKH) from a public key.

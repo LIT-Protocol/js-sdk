@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { pino, Logger } from 'pino';
 
 import {
   CENTRALISATION_BY_NETWORK,
@@ -28,6 +27,7 @@ import {
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   AuthSig,
   BlockHashErrorResponse,
@@ -169,9 +169,9 @@ export class LitCore {
         };
     }
 
-    this.#logger = pino({
-      name: 'LitCore',
-      level: this.config.debug ? 'debug' : 'info',
+    this.#logger = getChildLogger({
+      module: 'LitCore',
+      ...(this.config.debug ? { level: 'debug' } : {}),
     });
 
     // -- configure local storage if not present

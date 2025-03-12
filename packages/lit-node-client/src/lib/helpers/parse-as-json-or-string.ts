@@ -1,6 +1,6 @@
-import { pino } from 'pino';
+import { getChildLogger } from '@lit-protocol/logger';
 
-const logger = pino({ level: 'info', name: 'parseAsJsonOrString' });
+const logger = getChildLogger({ module: 'parseAsJsonOrString' });
 
 /**
  * Parses a response string into a JS object.

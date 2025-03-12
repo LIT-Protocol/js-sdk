@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { pino } from 'pino';
 import { SiweMessage } from 'siwe';
 
 import {
@@ -10,6 +9,7 @@ import {
   WrongParamFormat,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthMethod,
   AuthSig,
@@ -27,8 +27,8 @@ interface DomainAndOrigin {
 }
 
 export class MetamaskAuthenticator extends BaseAuthenticator {
-  static readonly #logger = pino({
-    name: 'MetamaskAuthenticator',
+  static readonly #logger = getChildLogger({
+    module: 'MetamaskAuthenticator',
   });
   /**
    * The domain from which the signing request is made

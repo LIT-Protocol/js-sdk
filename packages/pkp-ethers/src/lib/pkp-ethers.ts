@@ -33,7 +33,6 @@ import {
 } from '@ethersproject/transactions';
 import { Wordlist } from '@ethersproject/wordlists';
 import { ethers, Wallet } from 'ethers';
-import { pino, Logger } from 'pino';
 
 import {
   InitError,
@@ -45,6 +44,7 @@ import {
   UnsupportedChainException,
   LIT_CHAINS,
 } from '@lit-protocol/constants';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
@@ -90,9 +90,9 @@ export class PKPEthersWallet
 
   constructor(prop: PKPEthersWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
-    this.#logger = pino({
-      name: 'PKPEthersWallet',
-      level: prop.debug ? 'debug' : 'info',
+    this.#logger = getChildLogger({
+      module: 'PKPEthersWallet',
+      ...(prop.debug ? { level: 'debug' } : {}),
     });
 
     const rpcUrl =

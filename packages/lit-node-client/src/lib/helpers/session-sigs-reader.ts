@@ -1,10 +1,9 @@
-import { pino } from 'pino';
-
 import { InvalidArgumentException } from '@lit-protocol/constants';
+import { getChildLogger } from '@lit-protocol/logger';
 
 import { parseSignedMessage } from './session-sigs-validator';
 
-const logger = pino({ level: 'info', name: 'serssion-sigs-reader' });
+const logger = getChildLogger({ module: 'serssion-sigs-reader' });
 
 function formatDuration(start: Date, end: Date): string {
   const diff = end.getTime() - start.getTime();

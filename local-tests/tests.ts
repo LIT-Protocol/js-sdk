@@ -1,3 +1,4 @@
+import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
@@ -197,7 +198,7 @@ const relayerTests = {
 
 // --filter=WrappedKey
 const wrappedKeysTests = {
-  // -- valid cases
+  // // -- valid cases
   // testBatchGeneratePrivateKeys,
   // testEthereumSignMessageGeneratedKey,
   // testEthereumBroadcastTransactionGeneratedKey,
@@ -205,22 +206,22 @@ const wrappedKeysTests = {
   // testEthereumSignTransactionWrappedKey,
   // testEthereumBroadcastTransactionWrappedKey,
   // testEthereumBroadcastWrappedKeyWithFetchGasParams,
-  // -- generate wrapped keys
+  // // -- generate wrapped keys
   // testGenerateEthereumWrappedKey,
   // testGenerateSolanaWrappedKey,
-  // -- import wrapped keys
+  // // -- import wrapped keys
   // testImportWrappedKey,
-  // -- export wrapped keys
+  // // -- export wrapped keys
   // testExportWrappedKey,
-  // -- solana wrapped keys
+  // // -- solana wrapped keys
   // testSignMessageWithSolanaEncryptedKey,
   // testSignTransactionWithSolanaEncryptedKey,
-  // -- invalid cases
+  // // -- invalid cases
   // testFailEthereumSignTransactionWrappedKeyWithMissingParam,
   // testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
   // testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
   // testFailBatchGeneratePrivateKeysAtomic,
-  // -- import wrapped keys
+  // // -- import wrapped keys
   // testFailImportWrappedKeysWithSamePrivateKey,
   // testFailImportWrappedKeysWithEoaSessionSig,
   // testFailImportWrappedKeysWithMaxExpirySessionSig,
@@ -230,6 +231,7 @@ const wrappedKeysTests = {
 
 const eoaSessionSigsTests = {
   testUseEoaSessionSigsToExecuteJsSigning,
+  testUseEoaSessionSigsToRequestSingleResponse,
   testUseEoaSessionSigsToPkpSign,
   testUseEoaSessionSigsToExecuteJsSigningInParallel,
   testUseEoaSessionSigsToExecuteJsClaimKeys,
@@ -286,6 +288,11 @@ const bareAuthSigTests = {
   // testSolAuthSigToEncryptDecryptString,
   // -- cosmos auth sig
   // testCosmosAuthSigToEncryptDecryptString,
+};
+
+const eip1271AuthSigTests = {
+  // testKeccakEip1271AuthSigToEncryptDecryptString,
+  // testShaEip1271AuthSigToEncryptDecryptString,
 };
 
 const pkpEthersTest = {
@@ -347,6 +354,7 @@ export const tinnyTests = {
   ...pkpSessionSigsTests,
   ...litActionSessionSigsTests,
   ...litActionIpfsIdSessionSigsTests,
+  ...eip1271AuthSigTests,
   ...bareAuthSigTests,
 
   ...pkpEthersTest.eoaSessionSigs,

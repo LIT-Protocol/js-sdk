@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { pino } from 'pino';
 
 import {
   AUTH_METHOD_TYPE,
@@ -10,6 +9,7 @@ import {
   InvalidParamType,
   NetworkError,
 } from '@lit-protocol/constants';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthMethod,
   MintRequestBody,
@@ -27,8 +27,8 @@ import { WebAuthnAuthenticator } from './authenticators/WebAuthnAuthenticator';
  * Class that communicates with Lit relay server
  */
 export class LitRelay implements IRelay {
-  #logger = pino({
-    name: 'LitRelay',
+  #logger = getChildLogger({
+    module: 'LitRelay',
   });
   /** URL for Lit's relay server */
   static getRelayUrl(litNetwork: LIT_NETWORK_VALUES): string {
