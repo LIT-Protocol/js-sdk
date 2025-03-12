@@ -1,5 +1,3 @@
-import { chronicleYellowstone } from "../../../../../shared/chains/yellowstone.ts";
-import { NagaContext } from "../../../../../vNaga/types";
 import {
   createPublicClient,
   createWalletClient,
@@ -7,17 +5,29 @@ import {
   http,
   PublicClient,
   WalletClient,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { NagaContext } from '../../../../../vNaga/types';
 
 interface CreateLitContractsOptions {
   publicClient?: PublicClient;
 }
 
+interface LitContracts {
+  pkpNftContract: ReturnType<typeof getContract>;
+  pkpHelperContract: ReturnType<typeof getContract>;
+  stakingContract: ReturnType<typeof getContract>;
+  priceFeed: ReturnType<typeof getContract>;
+  pkpPermissionsContract: ReturnType<typeof getContract>;
+  pubkeyRouterContract: ReturnType<typeof getContract>;
+  publicClient: PublicClient;
+  walletClient: WalletClient;
+}
+
 export const createLitContracts = (
   networkCtx: NagaContext,
   opts?: CreateLitContractsOptions
-) => {
+): LitContracts => {
   // 1. Fallback to env-based private key if user doesn't supply a wagmi walletClient
   const fallbackTransport = http(networkCtx.rpcUrl);
   const fallbackAccount = privateKeyToAccount(
@@ -127,8 +137,8 @@ export const createLitContracts = (
     stakingContract,
     priceFeed,
     pkpPermissionsContract,
+    pubkeyRouterContract,
     publicClient,
     walletClient,
-    pubkeyRouterContract,
   };
 };

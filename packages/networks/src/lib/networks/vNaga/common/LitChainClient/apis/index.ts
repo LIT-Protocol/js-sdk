@@ -1,28 +1,27 @@
 // ==================== Imports ====================
-import { getPermittedActions } from "./rawContractApis/permissions/read/getPermittedActions";
-import { getPermittedAddresses } from "./rawContractApis/permissions/read/getPermittedAddresses";
-import { isPermittedAction } from "./rawContractApis/permissions/read/isPermittedAction";
-import { isPermittedAddress } from "./rawContractApis/permissions/read/isPermittedAddress";
-import { addPermittedAction } from "./rawContractApis/permissions/write/addPermittedAction";
-import { addPermittedAddress } from "./rawContractApis/permissions/write/addPermittedAddress";
-import { removePermittedAction } from "./rawContractApis/permissions/write/removePermittedAction";
-import { removePermittedAddress } from "./rawContractApis/permissions/write/removePermittedAddress";
-import { tokenOfOwnerByIndex } from "./rawContractApis/pkp/read/tokenOfOwnerByIndex";
-import { claimAndMintNextAndAddAuthMethodsWithTypes } from "./rawContractApis/pkp/write/claimAndMintNextAndAddAuthMethodsWithTypes";
-import { mintNextAndAddAuthMethods } from "./rawContractApis/pkp/write/mintNextAndAddAuthMethods";
+import { getPermittedActions } from './rawContractApis/permissions/read/getPermittedActions';
+import { getPermittedAddresses } from './rawContractApis/permissions/read/getPermittedAddresses';
+import { isPermittedAction } from './rawContractApis/permissions/read/isPermittedAction';
+import { isPermittedAddress } from './rawContractApis/permissions/read/isPermittedAddress';
+import { addPermittedAction } from './rawContractApis/permissions/write/addPermittedAction';
+import { addPermittedAddress } from './rawContractApis/permissions/write/addPermittedAddress';
+import { removePermittedAction } from './rawContractApis/permissions/write/removePermittedAction';
+import { removePermittedAddress } from './rawContractApis/permissions/write/removePermittedAddress';
+import { tokenOfOwnerByIndex } from './rawContractApis/pkp/read/tokenOfOwnerByIndex';
+import { claimAndMintNextAndAddAuthMethodsWithTypes } from './rawContractApis/pkp/write/claimAndMintNextAndAddAuthMethodsWithTypes';
+import { mintNextAndAddAuthMethods } from './rawContractApis/pkp/write/mintNextAndAddAuthMethods';
 import {
   getNodesForRequest,
   PRODUCT_IDS,
-} from "./rawContractApis/pricing/getNodesForRequest";
-import { createLitContracts } from "./utils/createLitContracts";
+} from './rawContractApis/pricing/getNodesForRequest';
 
 // High-level APIs
-import { mintPKP } from "./highLevelApis/mintPKP/mintPKP";
-import { PKPPermissionsManager } from "./highLevelApis/PKPPermissionsManager";
+import { mintPKP } from './highLevelApis/mintPKP/mintPKP';
+import { PKPPermissionsManager } from './highLevelApis/PKPPermissionsManager';
 import {
   getNodePrices,
   getPriceFeedInfo,
-} from "./highLevelApis/priceFeed/priceFeedApi";
+} from './highLevelApis/priceFeed/priceFeedApi';
 
 // ==================== Exports ====================
 // ========== Treeshakable ==========
@@ -89,7 +88,5 @@ export const api = {
     getNodePrices,
   },
 };
-
-export const utils = {
-  createLitContracts,
-};
+// Export utils from separate file
+export * as utils from './utils';
