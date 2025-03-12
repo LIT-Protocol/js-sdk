@@ -1,5 +1,5 @@
-import { Hash } from "viem";
-import { GAS_LIMIT_ADJUSTMENT } from "../../_config";
+import { Hash } from 'viem';
+import { GAS_LIMIT_ADJUSTMENT } from '../../_config';
 
 /**
  * Strongly-typed wrapper around viem's `writeContract` that adjusts gas overrides for Arbitrum Stylus contracts
@@ -15,8 +15,8 @@ export async function callWithAdjustedOverrides<
     write: Record<string, (...args: any[]) => Promise<Hash>>;
     estimateGas: Record<string, (...args: any[]) => Promise<bigint>>;
   },
-  TMethodName extends keyof TContract["write"],
-  TFunction extends TContract["write"][TMethodName],
+  TMethodName extends keyof TContract['write'],
+  TFunction extends TContract['write'][TMethodName],
   TArgs extends Parameters<TFunction>[0]
 >(
   contract: TContract,

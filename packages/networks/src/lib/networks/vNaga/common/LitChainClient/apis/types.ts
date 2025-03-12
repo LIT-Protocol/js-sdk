@@ -1,5 +1,5 @@
-import { Hex, TransactionReceipt } from "viem";
-import { DecodedLog } from "./utils/decodeLogs";
+import { Hex, TransactionReceipt } from 'viem';
+import { DecodedLog } from './utils/decodeLogs';
 
 export type LitTxRes<T> = {
   hash: Hex;
