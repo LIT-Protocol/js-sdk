@@ -57,7 +57,7 @@ const DEFAULT_COSMOS_RPC_URL =
 export class PKPCosmosWallet
   implements PKPWallet, OfflineDirectSigner, PKPClientHelpers
 {
-  readonly #logger: Logger;
+  private readonly _logger: Logger;
   private readonly pkpBase: PKPBase;
 
   // Address prefix for Bech32 addresses
@@ -75,7 +75,7 @@ export class PKPCosmosWallet
 
   constructor(prop: PKPCosmosWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
-    this.#logger = getChildLogger({
+    this._logger = getChildLogger({
       module: 'PKPCosmosWallet',
       ...(prop.debug ? { level: 'debug' } : {}),
     });
@@ -210,7 +210,7 @@ export class PKPCosmosWallet
     );
 
     // Log the encoded signature.
-    this.#logger.debug({ msg: 'stdSignature', stdSignature });
+    this._logger.debug({ msg: 'stdSignature', stdSignature });
 
     // Return the signed transaction and encoded signature.
     return {

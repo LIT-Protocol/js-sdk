@@ -108,7 +108,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   };
 
 export class LitCore {
-  readonly #logger: Logger;
+  private readonly _coreLogger: Logger;
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
@@ -169,7 +169,7 @@ export class LitCore {
         };
     }
 
-    this.#logger = getChildLogger({
+    this._coreLogger = getChildLogger({
       module: 'LitCore',
       ...(this.config.debug ? { level: 'debug' } : {}),
     });
@@ -180,7 +180,7 @@ export class LitCore {
     // If the user sets a new storage provider we respect it over our default storage
     // If the user sets a new file path, we respect it over the default path.
     if (this.config.storageProvider?.provider) {
-      this.#logger.info(
+      this._coreLogger.info(
         'localstorage api not found, injecting persistence instance found in config'
       );
       // using Object defineProperty in order to set a property previously defined as readonly.
@@ -193,7 +193,7 @@ export class LitCore {
       !globalThis.localStorage &&
       !this.config.storageProvider?.provider
     ) {
-      this.#logger.info(
+      this._coreLogger.info(
         'Looks like you are running in NodeJS and did not provide a storage provider, your sessions will not be cached'
       );
     }
@@ -242,16 +242,16 @@ export class LitCore {
       );
     }
 
-    this.#logger.info({ msg: '[_getValidatorData] epochInfo', epochInfo });
-    this.#logger.info({
+    this._coreLogger.info({ msg: '[_getValidatorData] epochInfo', epochInfo });
+    this._coreLogger.info({
       msg: '[_getValidatorData] minNodeCount',
       minNodeCount,
     });
-    this.#logger.info({
+    this._coreLogger.info({
       msg: '[_getValidatorData] Bootstrap urls',
       bootstrapUrls,
     });
-    this.#logger.info({
+    this._coreLogger.info({
       msg: '[_getValidatorData] stakingContract',
       address: stakingContract.address,
     });
@@ -278,7 +278,7 @@ export class LitCore {
   private async _handleStakingContractStateChange(
     state: STAKING_STATES_VALUES
   ) {
-    this.#logger.info(`New state detected: "${state}"`);
+    this._coreLogger.info(`New state detected: "${state}"`);
 
     const validatorData = await this._getValidatorData();
 
@@ -292,7 +292,7 @@ export class LitCore {
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
         try {
-          this.#logger.info(
+          this._coreLogger.info(
             'State found to be new validator set locked, checking validator set'
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
@@ -311,7 +311,7 @@ export class LitCore {
                 The sdk should be able to understand its current execution environment and wait on an active
                 network request to the previous epoch's node set before changing over.
               */
-            this.#logger.info({
+            this._coreLogger.info({
               msg: 'Active validator sets changed, new validators. Check delta. Starting node connection',
               delta,
             });
@@ -323,7 +323,7 @@ export class LitCore {
           // But for now, our every-30-second network sync will fix things in at most 30s from now.
           // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
           const { message = '' } = err as Error;
-          this.#logger.error({
+          this._coreLogger.error({
             msg: 'Error while attempting to reconnect to nodes after epoch transition',
             message,
           });
@@ -347,7 +347,7 @@ export class LitCore {
     }
 
     if (this._stakingContract) {
-      this.#logger.info({
+      this._coreLogger.info({
         msg: 'listening for state change on staking contract',
         address: this._stakingContract.address,
       });
@@ -476,7 +476,7 @@ export class LitCore {
         {}
       );
       if (this.config.litNetwork === LIT_NETWORK.Custom) {
-        this.#logger.info({ msg: 'using custom contracts', logAddresses });
+        this._coreLogger.info({ msg: 'using custom contracts', logAddresses });
       }
     }
 
@@ -503,10 +503,10 @@ export class LitCore {
 
     this.ready = true;
 
-    this.#logger.info(
+    this._coreLogger.info(
       `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
     );
-    this.#logger.info({
+    this._coreLogger.info({
       msg: 'current network config',
       networkPubkey: this.networkPubKey,
       networkPubKeySet: this.networkPubKeySet,
@@ -558,7 +558,7 @@ export class LitCore {
         keys.networkPubKeySet,
       ].includes('ERR')
     ) {
-      this.#logger.error({
+      this._coreLogger.error({
         requestId,
         msg: 'Error connecting to node. Detected "ERR" in keys',
         url,
@@ -566,9 +566,12 @@ export class LitCore {
       });
     }
 
-    this.#logger.info({ msg: `Handshake with ${url} returned keys: `, keys });
+    this._coreLogger.info({
+      msg: `Handshake with ${url} returned keys: `,
+      keys,
+    });
     if (!keys.latestBlockhash) {
-      this.#logger.error({
+      this._coreLogger.error({
         requestId,
         msg: `Error getting latest blockhash from the node ${url}.`,
       });
@@ -590,12 +593,12 @@ export class LitCore {
       }
 
       // actually verify the attestation by checking the signature against AMD certs
-      this.#logger.info('Checking attestation against amd certs...');
+      this._coreLogger.info('Checking attestation against amd certs...');
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
         await checkSevSnpAttestation(attestation, challenge, url);
-        this.#logger.info(`Lit Node Attestation verified for ${url}`);
+        this._coreLogger.info(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         throw new InvalidNodeAttestation(
@@ -608,7 +611,7 @@ export class LitCore {
         );
       }
     } else if (this.config.litNetwork === LIT_NETWORK.Custom) {
-      this.#logger.info(
+      this._coreLogger.info(
         `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
       );
     }
@@ -683,7 +686,7 @@ export class LitCore {
     );
 
     if (!latestBlockhash) {
-      this.#logger.error({
+      this._coreLogger.error({
         requestId,
         msg: 'Error getting latest blockhash from the nodes.',
       });
@@ -746,7 +749,7 @@ export class LitCore {
           testResult,
         };
       } catch (error) {
-        this.#logger.error(`RPC URL failed: ${url}`);
+        this._coreLogger.error(`RPC URL failed: ${url}`);
       }
     }
     return null;
@@ -767,11 +770,11 @@ export class LitCore {
       this.lastBlockHashRetrieved &&
       currentTime - this.lastBlockHashRetrieved < blockHashValidityDuration
     ) {
-      this.#logger.info('Blockhash is still valid. No need to sync.');
+      this._coreLogger.info('Blockhash is still valid. No need to sync.');
       return;
     }
 
-    this.#logger.info({
+    this._coreLogger.info({
       msg: 'Syncing state for new blockhash',
       currentBlockhash: this.latestBlockhash,
     });
@@ -806,20 +809,20 @@ export class LitCore {
 
       this.latestBlockhash = blockHashBody.blockhash;
       this.lastBlockHashRetrieved = parseInt(timestamp) * 1000;
-      this.#logger.info({
+      this._coreLogger.info({
         msg: 'Done syncing state new blockhash',
         latestBlockhash: this.latestBlockhash,
       });
     } catch (error: unknown) {
       const err = error as BlockHashErrorResponse | Error;
 
-      this.#logger.error({
+      this._coreLogger.error({
         msg: 'Error while attempting to fetch new latestBlockhash',
         errorMessage: err instanceof Error ? err.message : err.messages,
         reason: err instanceof Error ? err : err.reason,
       });
 
-      this.#logger.info(
+      this._coreLogger.info(
         'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
       );
       const { testResult } =
@@ -829,7 +832,7 @@ export class LitCore {
         )) || {};
 
       if (!testResult || !testResult.hash) {
-        this.#logger.error(
+        this._coreLogger.error(
           'All fallback RPC URLs failed. Unable to retrieve blockhash.'
         );
         return;
@@ -838,12 +841,12 @@ export class LitCore {
       try {
         this.latestBlockhash = testResult.hash;
         this.lastBlockHashRetrieved = testResult.timestamp;
-        this.#logger.info({
+        this._coreLogger.info({
           msg: 'Successfully retrieved blockhash manually',
           latestBlockhash: this.latestBlockhash,
         });
       } catch (ethersError) {
-        this.#logger.error(
+        this._coreLogger.error(
           'Failed to manually retrieve blockhash using ethers'
         );
       }
@@ -889,7 +892,7 @@ export class LitCore {
       endpoint: LIT_ENDPOINT.HANDSHAKE,
     });
 
-    this.#logger.info(`handshakeWithNode ${urlWithPath}`);
+    this._coreLogger.info(`handshakeWithNode ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
@@ -914,7 +917,7 @@ export class LitCore {
     }
 
     if (!epochInfo) {
-      this.#logger.info(
+      this._coreLogger.info(
         'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
       );
       try {
@@ -1024,7 +1027,7 @@ export class LitCore {
       delete data.sessionSigs;
     }
 
-    this.#logger.info({
+    this._coreLogger.info({
       requestId,
       msg: `sendCommandToNode with url ${url} and data`,
       data,
@@ -1194,7 +1197,7 @@ export class LitCore {
       mostCommonValue(errors.map((r: any) => JSON.stringify(r)))!
     );
 
-    this.#logger.error({
+    this._coreLogger.error({
       requestId,
       msg: `most common error: ${JSON.stringify(mostCommonError)}`,
     });
@@ -1225,7 +1228,7 @@ export class LitCore {
           res.error.errorCode === 'not_authorized') &&
         this.config.alertWhenUnauthorized
       ) {
-        this.#logger.info('You are not authorized to access this content');
+        this._coreLogger.info('You are not authorized to access this content');
       }
 
       throw new NodeError(
@@ -1264,7 +1267,7 @@ export class LitCore {
     sigType: LIT_CURVE_VALUES = LIT_CURVE.EcdsaCaitSith
   ): Promise<string> => {
     if (!this.hdRootPubkeys) {
-      this.#logger.error(
+      this._coreLogger.error(
         'root public keys not found, have you connected to the nodes?'
       );
       throw new LitNodeClientNotReadyError(

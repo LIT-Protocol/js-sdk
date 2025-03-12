@@ -27,7 +27,7 @@ import { WebAuthnAuthenticator } from './authenticators/WebAuthnAuthenticator';
  * Class that communicates with Lit relay server
  */
 export class LitRelay implements IRelay {
-  #logger = getChildLogger({
+  private _logger = getChildLogger({
     module: 'LitRelay',
   });
   /** URL for Lit's relay server */
@@ -75,7 +75,7 @@ export class LitRelay implements IRelay {
     this.relayUrl =
       config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.NagaDev);
     this.relayApiKey = config.relayApiKey || '';
-    this.#logger.info({
+    this._logger.info({
       msg: "Lit's relay server URL",
       relayUrl: this.relayUrl,
     });
@@ -100,7 +100,7 @@ export class LitRelay implements IRelay {
 
     if (response.status < 200 || response.status >= 400) {
       const responseBody = await response.json();
-      this.#logger.info({
+      this._logger.info({
         msg: 'Something wrong with the API call',
         responseBody,
       });
@@ -117,7 +117,7 @@ export class LitRelay implements IRelay {
       );
     } else {
       const resBody = await response.json();
-      this.#logger.info('Successfully initiated minting PKP with relayer');
+      this._logger.info('Successfully initiated minting PKP with relayer');
       return resBody;
     }
   }
@@ -252,7 +252,7 @@ export class LitRelay implements IRelay {
 
       if (response.status < 200 || response.status >= 400) {
         const responseBody = await response.json();
-        this.#logger.info({
+        this._logger.info({
           msg: 'Something wrong with the API call',
           responseBody,
         });
@@ -270,11 +270,11 @@ export class LitRelay implements IRelay {
       }
 
       const resBody = await response.json();
-      this.#logger.info({ msg: 'Response OK', resBody });
+      this._logger.info({ msg: 'Response OK', resBody });
 
       if (resBody.error) {
         // exit loop since error
-        this.#logger.info({
+        this._logger.info({
           msg: 'Something wrong with the API call',
           error: resBody.error,
         });
@@ -291,7 +291,7 @@ export class LitRelay implements IRelay {
         );
       } else if (resBody.status === 'Succeeded') {
         // exit loop since success
-        this.#logger.info({ msg: 'Successfully authed', resBody });
+        this._logger.info({ msg: 'Successfully authed', resBody });
         return resBody;
       }
 
@@ -329,7 +329,7 @@ export class LitRelay implements IRelay {
 
     if (response.status < 200 || response.status >= 400) {
       const resBody = await response.json();
-      this.#logger.warn({
+      this._logger.warn({
         msg: 'Something wrong with the API call',
         resBody,
       });
@@ -346,7 +346,7 @@ export class LitRelay implements IRelay {
       );
     } else {
       const resBody = await response.json();
-      this.#logger.info('Successfully fetched PKPs with relayer');
+      this._logger.info('Successfully fetched PKPs with relayer');
       return resBody;
     }
   }

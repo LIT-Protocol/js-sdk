@@ -48,7 +48,7 @@ export interface InitWalletConnectParams
 
 export class PKPWalletConnect {
   private readonly debug: boolean = false;
-  readonly #logger: Logger;
+  private readonly _logger: Logger;
   // WalletConnect client
   private client: IWeb3Wallet | undefined;
   // List of PKP wallets
@@ -56,7 +56,7 @@ export class PKPWalletConnect {
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
-    this.#logger = getChildLogger({
+    this._logger = getChildLogger({
       module: 'PKPWalletConnect',
       ...(debug ? { level: 'debug' } : {}),
     });
@@ -690,7 +690,7 @@ export class PKPWalletConnect {
     client: IWeb3Wallet | undefined
   ): IWeb3Wallet {
     if (!client) {
-      this.#logger.debug('WalletConnect client has not yet been initialized.');
+      this._logger.debug('WalletConnect client has not yet been initialized.');
       throw new InitError(
         {},
         'WalletConnect client has not yet been initialized. Please call initWalletConnect().'

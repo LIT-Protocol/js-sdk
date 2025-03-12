@@ -27,7 +27,7 @@ interface DomainAndOrigin {
 }
 
 export class MetamaskAuthenticator extends BaseAuthenticator {
-  static readonly #logger = getChildLogger({
+  private static readonly _logger = getChildLogger({
     module: 'MetamaskAuthenticator',
   });
   /**
@@ -54,7 +54,7 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
       domain = options.domain || window.location.hostname;
       origin = options.origin || window.location.origin;
     } catch (e) {
-      MetamaskAuthenticator.#logger.error(
+      MetamaskAuthenticator._logger.error(
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       domain = options.domain || 'localhost';

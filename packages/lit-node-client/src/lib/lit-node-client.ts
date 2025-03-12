@@ -130,7 +130,7 @@ import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 export class LitNodeClient extends LitCore implements ILitNodeClient {
-  readonly #logger: Logger;
+  private readonly _litNodeLogger: Logger;
   /** Tracks the total max price a user is willing to pay for each supported product type
    * This must be distributed across all nodes; each node will get a percentage of this price
    *
@@ -152,7 +152,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     super(args);
 
-    this.#logger = getChildLogger({
+    this._litNodeLogger = getChildLogger({
       module: 'LitNodeClient',
       ...(this.config.debug ? { level: 'debug' } : {}),
     });
@@ -195,7 +195,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     // Useful log for debugging
     if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
-      this.#logger.info(
+      this._litNodeLogger.info(
         `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
       );
     }
@@ -247,20 +247,20 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       const storedSessionKeyString = getStorageItem(storageKey);
       return JSON.parse(storedSessionKeyString);
     } catch (e) {
-      this.#logger.warn({
+      this._litNodeLogger.warn({
         msg: `Couldn't get session key from local storage key "${storageKey}". Not a problem. Continue...`,
         error: e,
       });
     }
 
-    this.#logger.info('Generating new session key...');
+    this._litNodeLogger.info('Generating new session key...');
     // Generate new one
     const newSessionKey = generateSessionKeyPair();
 
     try {
       setStorageItem(storageKey, JSON.stringify(newSessionKey));
     } catch (e) {
-      this.#logger.info(
+      this._litNodeLogger.info(
         `Localstorage not available. Not a problem. Continue...`
       );
     }
@@ -291,13 +291,15 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     // -- (TRY) to get it in the local storage
     // -- IF NOT: Generates one
-    this.#logger.info(`getWalletSig - fetching from storageKey: ${storageKey}`);
+    this._litNodeLogger.info(
+      `getWalletSig - fetching from storageKey: ${storageKey}`
+    );
 
     try {
       const walletSigString = getStorageItem(storageKey);
       walletSig = JSON.parse(walletSigString);
     } catch (e) {
-      this.#logger.warn({
+      this._litNodeLogger.warn({
         msg: `Could not get wallet sig from storage key "${storageKey}"`,
         error: e,
       });
@@ -305,7 +307,9 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     if (!walletSig) {
       if (authNeededCallback) {
-        this.#logger.info('getWalletSig - generating with authNeededCallback');
+        this._litNodeLogger.info(
+          'getWalletSig - generating with authNeededCallback'
+        );
 
         const body = {
           chain,
@@ -328,11 +332,13 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           ...(jsParams && { jsParams }),
         };
 
-        this.#logger.info({ msg: 'callback body', body });
+        this._litNodeLogger.info({ msg: 'callback body', body });
 
         walletSig = await authNeededCallback(body);
       } else if (this.defaultAuthCallback) {
-        this.#logger.info('getWalletSig - generating with defaultAuthCallback');
+        this._litNodeLogger.info(
+          'getWalletSig - generating with defaultAuthCallback'
+        );
         walletSig = await this.defaultAuthCallback({
           chain,
           statement: sessionCapabilityObject.statement,
@@ -352,13 +358,13 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       }
 
       // If localStorage, authNeededCallback or defaultAuthCallback didn't fail, walletSig is defined by it
-      this.#logger.info({ msg: 'getWalletSig - walletSig', walletSig });
+      this._litNodeLogger.info({ msg: 'getWalletSig - walletSig', walletSig });
 
       // (TRY) to set walletSig to local storage
       try {
         setStorageItem(storageKey, JSON.stringify(walletSig));
       } catch (e) {
-        this.#logger.warn({
+        this._litNodeLogger.warn({
           msg: `Unable to store walletSig in local storage. Not a problem. Continue...`,
           error: e,
         });
@@ -398,7 +404,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       return authSig;
     } catch (e) {
       // Setting local storage failed, try to remove the item key.
-      this.#logger.warn({
+      this._litNodeLogger.warn({
         msg: `Unable to store walletSig in local storage. Not a problem. Continuing to remove item key...`,
         error: e,
       });
@@ -408,7 +414,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       removeStorageItem(LOCAL_STORAGE_KEYS.WALLET_SIGNATURE);
     } catch (e) {
       // Ignore error and continue
-      this.#logger.warn({
+      this._litNodeLogger.warn({
         msg: `Unable to remove walletSig in local storage. Not a problem. Continuing...`,
         error: e,
       });
@@ -445,7 +451,10 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           { suppressExceptions: false }
         );
       } catch (e) {
-        this.#logger.error({ msg: `Error while verifying BLS signature: `, e });
+        this._litNodeLogger.error({
+          msg: `Error while verifying BLS signature: `,
+          e,
+        });
         return true;
       }
     } else if (authSig.algo === `LIT_BLS`) {
@@ -457,7 +466,10 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           authSigSiweMessage
         );
       } catch (e) {
-        this.#logger.error({ msg: `Error while verifying bls signature: `, e });
+        this._litNodeLogger.error({
+          msg: `Error while verifying bls signature: `,
+          e,
+        });
         return true;
       }
     } else {
@@ -476,7 +488,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     // make sure the sig is for the correct session key
     if (authSigSiweMessage.uri !== sessionKeyUri) {
-      this.#logger.info('Need retry because uri does not match');
+      this._litNodeLogger.info('Need retry because uri does not match');
       return true;
     }
 
@@ -485,7 +497,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       !authSigSiweMessage.resources ||
       authSigSiweMessage.resources.length === 0
     ) {
-      this.#logger.info('Need retry because empty resources');
+      this._litNodeLogger.info('Need retry because empty resources');
       return true;
     }
 
@@ -504,7 +516,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           resourceAbilityRequest.ability
         )
       ) {
-        this.#logger.info({
+        this._litNodeLogger.info({
           msg: 'Need retry because capabilities do not match',
           authSigSessionCapabilityObject,
           resourceAbilityRequest,
@@ -548,7 +560,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       ? [gatewayUrl, ...FALLBACK_IPFS_GATEWAYS]
       : FALLBACK_IPFS_GATEWAYS;
 
-    this.#logger.info(
+    this._litNodeLogger.info(
       `Attempting to fetch code for IPFS ID: ${ipfsId} using fallback IPFS gateways`
     );
 
@@ -575,7 +587,9 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
         return codeBase64;
       } catch (error) {
-        this.#logger.error(`Error fetching code from IPFS gateway ${url}`);
+        this._litNodeLogger.error(
+          `Error fetching code from IPFS gateway ${url}`
+        );
         // Continue to the next gateway in the array
       }
     }
@@ -718,7 +732,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
 
-    this.#logger.info({
+    this._litNodeLogger.info({
       requestId,
       responseData,
     });
@@ -761,7 +775,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       return removeDoubleQuotes(r.signedData);
     });
 
-    this.#logger.info({
+    this._litNodeLogger.info({
       requestId,
       msg: 'signatures shares to combine',
       signedDataList,
@@ -810,7 +824,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       logs: mostCommonLogs,
     };
 
-    this.#logger.info({ msg: 'returnVal', returnVal });
+    this._litNodeLogger.info({ msg: 'returnVal', returnVal });
 
     return returnVal;
   };
@@ -916,7 +930,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           signingScheme: 'EcdsaK256Sha256',
         };
 
-        this.#logger.info({ requestId, reqBody });
+        this._litNodeLogger.info({ requestId, reqBody });
 
         const urlWithPath = composeLitUrl({
           url,
@@ -941,7 +955,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const responseData = (res as SuccessNodePromises<PKPSignEndpointResponse>)
       .values;
 
-    this.#logger.info({
+    this._litNodeLogger.info({
       requestId,
       responseData,
     });
@@ -957,11 +971,11 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
         signedMessageShares: signedMessageShares,
       });
 
-      this.#logger.info({ requestId, signatures });
+      this._litNodeLogger.info({ requestId, signatures });
 
       return signatures;
     } catch (e) {
-      this.#logger.error({ msg: 'Error getting signature', error: e });
+      this._litNodeLogger.error({ msg: 'Error getting signature', error: e });
       throw e;
     }
   };
@@ -1118,7 +1132,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       dataToEncryptHash
     );
 
-    this.#logger.info({ msg: 'identityParam', identityParam });
+    this._litNodeLogger.info({ msg: 'identityParam', identityParam });
 
     const userMaxPrices = await this.getMaxPricesForNodeProduct({
       product: 'DECRYPTION',
@@ -1186,7 +1200,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
-    this.#logger.info({ requestId, signatureShares });
+    this._litNodeLogger.info({ requestId, signatureShares });
 
     // ========== Result ==========
     const decryptedData = await this._decryptWithSignatureShares(
@@ -1217,7 +1231,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
   private _signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
-    this.#logger.info({ msg: `[signSessionKey] params:`, params });
+    this._litNodeLogger.info({ msg: `[signSessionKey] params:`, params });
 
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
@@ -1238,7 +1252,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       params.sessionKey ?? this._getSessionKey();
     const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
-    this.#logger.info(
+    this._litNodeLogger.info(
       `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
       sessionKeyUri
     );
@@ -1268,7 +1282,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     let siwe_statement = 'Lit Protocol PKP session signature';
     if (params.statement) {
       siwe_statement += ' ' + params.statement;
-      this.#logger.info(
+      this._litNodeLogger.info(
         `[signSessionKey] statement found in params: "${params.statement}"`
       );
     }
@@ -1322,10 +1336,10 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       signingScheme: LIT_CURVE.BLS,
     };
 
-    this.#logger.info({ msg: `[signSessionKey] body:`, body });
+    this._litNodeLogger.info({ msg: `[signSessionKey] body:`, body });
 
     const requestId = this._getNewRequestId();
-    this.#logger.info({ requestId, signSessionKeyBody: body });
+    this._litNodeLogger.info({ requestId, signSessionKeyBody: body });
 
     const targetNodeUrls = targetNodePrices.map(({ url }) => url);
     const nodePromises = this._getNodePromises(
@@ -1350,7 +1364,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
         requestId,
         this._getThreshold()
       );
-      this.#logger.info({ msg: 'signSessionKey node promises', res });
+      this._litNodeLogger.info({ msg: 'signSessionKey node promises', res });
     } catch (e) {
       throw new UnknownError(
         {
@@ -1363,7 +1377,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       );
     }
 
-    this.#logger.info({ requestId, handleNodePromisesRes: res });
+    this._litNodeLogger.info({ requestId, handleNodePromisesRes: res });
 
     // -- case: promises rejected
     if (!res.success) {
@@ -1372,7 +1386,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     }
 
     const responseData: BlsResponseData[] = res.values as BlsResponseData[];
-    this.#logger.info({
+    this._litNodeLogger.info({
       requestId,
       responseData,
     });
@@ -1393,13 +1407,13 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       );
     }
 
-    this.#logger.info(`[signSessionKey] curveType is "${curveType}"`);
+    this._litNodeLogger.info(`[signSessionKey] curveType is "${curveType}"`);
 
     const signedDataList = responseData.map((s) => s.dataSigned);
 
     if (signedDataList.length <= 0) {
       const err = `[signSessionKey] signedDataList is empty.`;
-      this.#logger.info(err);
+      this._litNodeLogger.info(err);
       throw new InvalidSignatureError(
         {
           info: {
@@ -1412,7 +1426,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       );
     }
 
-    this.#logger.info({
+    this._litNodeLogger.info({
       requestId,
       signedDataList,
     });
@@ -1427,37 +1441,40 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const blsSignedData: BlsResponseData[] = validatedSignedDataList;
 
     const sigType = mostCommonValue(blsSignedData.map((s) => s.curveType));
-    this.#logger.info(`[signSessionKey] sigType:`, sigType);
+    this._litNodeLogger.info(`[signSessionKey] sigType:`, sigType);
 
     const signatureShares = getBlsSignatures(blsSignedData);
 
-    this.#logger.info(`[signSessionKey] signatureShares:`, signatureShares);
+    this._litNodeLogger.info(
+      `[signSessionKey] signatureShares:`,
+      signatureShares
+    );
 
     const blsCombinedSignature = await combineSignatureShares(signatureShares);
 
-    this.#logger.info(
+    this._litNodeLogger.info(
       `[signSessionKey] blsCombinedSignature:`,
       blsCombinedSignature
     );
 
     const publicKey = removeHexPrefix(params.pkpPublicKey);
-    this.#logger.info(`[signSessionKey] publicKey:`, publicKey);
+    this._litNodeLogger.info(`[signSessionKey] publicKey:`, publicKey);
 
     const dataSigned = mostCommonValue(blsSignedData.map((s) => s.dataSigned));
-    this.#logger.info(`[signSessionKey] dataSigned:`, dataSigned);
+    this._litNodeLogger.info(`[signSessionKey] dataSigned:`, dataSigned);
 
     const mostCommonSiweMessage = mostCommonValue(
       blsSignedData.map((s) => s.siweMessage)
     );
 
-    this.#logger.info(
+    this._litNodeLogger.info(
       `[signSessionKey] mostCommonSiweMessage:`,
       mostCommonSiweMessage
     );
 
     const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
 
-    this.#logger.info(`[signSessionKey] signedMessage:`, signedMessage);
+    this._litNodeLogger.info(`[signSessionKey] signedMessage:`, signedMessage);
 
     const signSessionKeyRes: SignSessionKeyResponse = {
       authSig: {
@@ -1488,7 +1505,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     },
     requestId: string
   ) => {
-    this.#logger.info('getSignSessionKeyShares');
+    this._litNodeLogger.info('getSignSessionKeyShares');
     const urlWithPath = composeLitUrl({
       url,
       endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
@@ -1507,13 +1524,13 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     userMaxPrice?: bigint;
     product: keyof typeof PRODUCT_IDS;
   }) => {
-    this.#logger.info({
+    this._litNodeLogger.info({
       msg: 'getMaxPricesForNodeProduct(): Product',
       product,
     });
     const getUserMaxPrice = () => {
       if (userMaxPrice) {
-        this.#logger.info({
+        this._litNodeLogger.info({
           msg: 'getMaxPricesForNodeProduct(): User provided maxPrice of userMaxPrice',
           userMaxPrice,
         });
@@ -1521,7 +1538,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       }
 
       if (this.defaultMaxPriceByProduct[product] === -1n) {
-        this.#logger.info(
+        this._litNodeLogger.info(
           `getMaxPricesForNodeProduct(): No user-provided maxPrice and no defaultMaxPrice set for ${product}; setting to max value`
         );
 
@@ -1612,7 +1629,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
-      this.#logger.info('need to re-sign session key. Signing...');
+      this._litNodeLogger.info('need to re-sign session key. Signing...');
       authSig = await this._authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
@@ -1686,7 +1703,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
         maxPrice: price.toString(),
       };
 
-      this.#logger.info(
+      this._litNodeLogger.info(
         `Setting maxprice for ${nodeAddress} to `,
         price.toString()
       );
@@ -1705,16 +1722,19 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       };
     });
 
-    this.#logger.info({ msg: 'sessionSigs', sessionSigs });
+    this._litNodeLogger.info({ msg: 'sessionSigs', sessionSigs });
 
     try {
       const formattedSessionSigs = formatSessionSigs(
         JSON.stringify(sessionSigs)
       );
-      this.#logger.info(formattedSessionSigs);
+      this._litNodeLogger.info(formattedSessionSigs);
     } catch (e) {
       // swallow error
-      this.#logger.info({ msg: 'Error formatting session signatures', e });
+      this._litNodeLogger.info({
+        msg: 'Error formatting session signatures',
+        e,
+      });
     }
 
     return sessionSigs;
@@ -1918,7 +1938,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
         };
       });
 
-      this.#logger.info({
+      this._litNodeLogger.info({
         requestId,
         responseData,
       });
@@ -1926,7 +1946,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       const derivedKeyId = responseData.values[0].derivedKeyId;
 
       const pubkey = await this.computeHDPubKey(derivedKeyId);
-      this.#logger.info({
+      this._litNodeLogger.info({
         requestId,
         msg: `pubkey ${pubkey} derived from key id ${derivedKeyId}`,
       });
@@ -2018,7 +2038,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
             data[key] === null ||
             data[key] === ''
           ) {
-            this.#logger.info(
+            this._litNodeLogger.info(
               `Invalid signed data. "${field}" is missing. Not a problem, we only need ${threshold} nodes to sign the session key.`
             );
             return null;
@@ -2027,7 +2047,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
         if (!data.signatureShare.ProofOfPossession) {
           const err = `Invalid signed data. "ProofOfPossession" is missing.`;
-          this.#logger.info(err);
+          this._litNodeLogger.info(err);
           throw new InvalidSignatureError(
             {
               info: {
@@ -2044,11 +2064,15 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       })
       .filter((item) => item !== null);
 
-    this.#logger.info({
+    this._litNodeLogger.info({
       requestId,
       validatedSignedDataList,
     });
-    this.#logger.info({ requestId, msg: 'minimum threshold', threshold });
+    this._litNodeLogger.info({
+      requestId,
+      msg: 'minimum threshold',
+      threshold,
+    });
 
     if (validatedSignedDataList.length < threshold) {
       throw new InvalidSignatureError(

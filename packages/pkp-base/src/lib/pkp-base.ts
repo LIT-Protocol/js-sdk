@@ -28,7 +28,7 @@ import {
  * A base class that can be shared between Ethers and Cosmos signers.
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
-  readonly #logger: Logger;
+  private readonly _logger: Logger;
   rpcs?: RPCUrls;
 
   authContext: AuthenticationContext;
@@ -55,7 +55,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
 
     this.debug = prop.debug || false;
-    this.#logger = getChildLogger({
+    this._logger = getChildLogger({
       module: 'PKPBase',
       ...(prop.debug ? { level: 'debug' } : {}),
     });
@@ -69,7 +69,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.rpcs = prop.rpcs;
 
-    this.#logger.info({ msg: 'authContext', authContext: prop.authContext });
+    this._logger.info({ msg: 'authContext', authContext: prop.authContext });
     this.authContext = prop.authContext;
 
     this.validateAuthContext();
@@ -179,7 +179,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     if (!pkpBaseProp.litActionCode && !pkpBaseProp.litActionIPFS) {
-      this.#logger.debug(
+      this._logger.debug(
         'No lit action code or IPFS hash provided. Using default action.'
       );
       this.useAction = false;
@@ -206,7 +206,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async init(): Promise<void> {
     try {
       await this.litNodeClient.connect();
-      this.#logger.debug('Connected to Lit Node');
+      this._logger.debug('Connected to Lit Node');
     } catch (e) {
       throw new LitNodeClientNotReadyError(
         {
@@ -311,14 +311,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       );
     }
 
-    this.#logger.debug({ msg: 'executeJsArgs', executeJsArgs });
+    this._logger.debug({ msg: 'executeJsArgs', executeJsArgs });
 
     const res = await this.litNodeClient.executeJs(executeJsArgs);
 
     const sig = res.signatures[sigName];
 
-    this.#logger.debug({ msg: 'res', res });
-    this.#logger.debug({ msg: 'res.signatures[sigName]', sig });
+    this._logger.debug({ msg: 'res', res });
+    this._logger.debug({ msg: 'res.signatures[sigName]', sig });
 
     if (sig.r && sig.s) {
       // pad sigs with 0 if length is odd
