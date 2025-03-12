@@ -1,24 +1,24 @@
-import { createWalletClient, http } from "viem";
+import { createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import {
   anvilConfig,
   anvilFirstPrivateKey,
   anvilRpcUrl,
-} from "../../shared/chains/anvil";
-import { NetworkContext } from "../../shared/types";
-import { signatures as localDevelopSignatures } from "./naga-develop-signatures/naga-develop";
-import { privateKeyToAccount } from "viem/accounts";
+} from '../../shared/chains/anvil';
+import { NetworkContext } from '../../shared/types';
+import { signatures as localDevelopSignatures } from './naga-develop-signatures/naga-develop';
 
 export const nagaLocalDevelopNetworkContext: NetworkContext<
   typeof localDevelopSignatures
 > = {
-  network: "custom",
+  network: 'custom',
   rpcUrl: anvilRpcUrl,
   privateKey: anvilFirstPrivateKey,
   chainConfig: {
     chain: anvilConfig,
     contractData: localDevelopSignatures,
   },
-  httpProtocol: "http://",
+  httpProtocol: 'http://',
   walletClient: createWalletClient({
     chain: anvilConfig,
     transport: http(anvilRpcUrl),

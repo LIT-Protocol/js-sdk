@@ -1,1 +1,1 @@
-export * from "./apis/index";
+export * from './apis/index';

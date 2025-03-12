@@ -1,7 +1,6 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { decodeEventLog, Log } from "viem";
-import { LIT_CONTRACT_NAME } from "../../_config";
-import { createLitContracts } from "./createLitContracts";
+import { decodeEventLog, Log } from 'viem';
+import { NagaContext } from '../../../../types';
+import { createLitContracts } from './createLitContracts';
 
 export type DecodedLog = {
   eventName: string;
@@ -59,7 +58,7 @@ export const decodeLogs = async (
         return {
           ...log,
           decoded: null,
-          error: "No matching ABI found for address",
+          error: 'No matching ABI found for address',
         };
       }
 
@@ -74,7 +73,7 @@ export const decodeLogs = async (
       return {
         ...log,
         decoded: null,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   });
