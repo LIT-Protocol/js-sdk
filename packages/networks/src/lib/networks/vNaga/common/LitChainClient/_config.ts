@@ -1,7 +1,7 @@
 import {
   NagaLocalDevelopNetworkContext,
   nagaLocalDevelopNetworkContext,
-} from "../../local-develop/networkContext";
+} from '../../local-develop/networkContext';
 
 /**
  * Due to the usage of arbitrum stylus contracts,
@@ -9,14 +9,6 @@ import {
  */
 const GAS_LIMIT_INCREASE_PERCENTAGE = 10;
 export const GAS_LIMIT_ADJUSTMENT = BigInt(100 + GAS_LIMIT_INCREASE_PERCENTAGE);
-
-export const LIT_CONTRACT_NAME = {
-  PubkeyRouter: "PubkeyRouter",
-  PKPNFT: "PKPNFT",
-  PKPHelper: "PKPHelper",
-  PKPPermissions: "PKPPermissions",
-  Staking: "Staking",
-} as const;
 
 export const networkContext = nagaLocalDevelopNetworkContext; // we shall change this later
 export type NetworkContext = NagaLocalDevelopNetworkContext;
