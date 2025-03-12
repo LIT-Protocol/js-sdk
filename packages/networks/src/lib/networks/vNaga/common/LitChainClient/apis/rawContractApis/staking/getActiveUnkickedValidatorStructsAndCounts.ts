@@ -1,7 +1,6 @@
-import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { GetActiveUnkickedValidatorStructsAndCountsSchema } from "../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema";
-import { createLitContracts } from "../../utils/createLitContracts";
+import { NagaContext } from '../../../../../types';
+import { GetActiveUnkickedValidatorStructsAndCountsSchema } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
+import { createLitContracts } from '../../utils/createLitContracts';
 
 // const REALM_ID = 1n;
 
@@ -40,8 +39,8 @@ export async function getActiveUnkickedValidatorStructsAndCounts(
 //   minNodeCount: 2,
 //   validatorURLs: [ "https://15.235.83.220:7470", "https://15.235.83.220:7472", "https://15.235.83.220:7471" ],
 // }
-if (import.meta.main) {
-  const networkCtx = networkContext;
-  const res = await getActiveUnkickedValidatorStructsAndCounts(networkCtx);
-  console.log(res);
-}
+// if (import.meta.main) {
+//   const networkCtx = networkContext;
+//   const res = await getActiveUnkickedValidatorStructsAndCounts(networkCtx);
+//   console.log(res);
+// }

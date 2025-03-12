@@ -1,7 +1,7 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { createLitContracts } from "../../../utils/createLitContracts";
+import { NagaContext } from '../../../../../../types';
+import { z } from 'zod';
+import { createLitContracts } from '../../../utils/createLitContracts';
+import { logger } from '../../../../../../../shared/logger';
 
 // Schema for the request
 const getPubkeyByTokenIdSchema = z.object({
@@ -22,7 +22,7 @@ export async function getPubkeyByTokenId(
 ): Promise<string> {
   const { tokenId } = getPubkeyByTokenIdSchema.parse(request);
 
-  logger.debug({ tokenId }, "Fetching public key by token ID");
+  logger.debug({ tokenId }, 'Fetching public key by token ID');
 
   // Create contract instances
   const { pubkeyRouterContract } = createLitContracts(networkCtx);
@@ -36,7 +36,7 @@ export async function getPubkeyByTokenId(
   // Ensure the result is a string
   const publicKey = result.toString();
 
-  logger.debug({ tokenId, publicKey }, "Public key fetched");
+  logger.debug({ tokenId, publicKey }, 'Public key fetched');
 
   return publicKey;
 }

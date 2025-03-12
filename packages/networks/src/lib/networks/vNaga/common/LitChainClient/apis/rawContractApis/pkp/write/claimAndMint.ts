@@ -1,17 +1,16 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
+import { NagaContext } from '../../../../../../types';
 import {
   ClaimAndMintRaw,
   ClaimAndMintSchema,
-} from "../../../../schemas/ClaimAndMintSchema";
+} from '../../../../schemas/ClaimAndMintSchema';
 import {
   PKPData,
   PKPDataSchema,
-} from "../../../../schemas/shared/PKPDataSchema";
-import { LitTxRes } from "../../../types";
-import { callWithAdjustedOverrides } from "../../../utils/callWithAdjustedOverrides";
-import { createLitContracts } from "../../../utils/createLitContracts";
-import { decodeLogs } from "../../../utils/decodeLogs";
-
+} from '../../../../schemas/shared/PKPDataSchema';
+import { LitTxRes } from '../../../types';
+import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
+import { createLitContracts } from '../../../utils/createLitContracts';
+import { decodeLogs } from '../../../utils/decodeLogs';
 export async function claimAndMint(
   request: ClaimAndMintRaw,
   networkCtx: NagaContext
@@ -29,10 +28,18 @@ export async function claimAndMint(
 
   const hash = await callWithAdjustedOverrides(
     pkpNftContract,
-    "claimAndMint",
-    [ECDSA_SECP256K1, derivedKeyId, signatures, stakingContract.address],
+    'claimAndMint',
+    [
+      networkCtx.realmId,
+      ECDSA_SECP256K1,
+      derivedKeyId,
+      signatures,
+      stakingContract.address,
+    ],
     {
       value: mintCost,
+      account: null,
+      chain: null,
     }
   );
 
@@ -40,7 +47,7 @@ export async function claimAndMint(
 
   const decodedLogs = await decodeLogs(receipt.logs, networkCtx);
 
-  const args = decodedLogs.find((log) => log.eventName === "PKPMinted")?.args;
+  const args = decodedLogs.find((log) => log.eventName === 'PKPMinted')?.args;
 
   const data = PKPDataSchema.parse(args);
 

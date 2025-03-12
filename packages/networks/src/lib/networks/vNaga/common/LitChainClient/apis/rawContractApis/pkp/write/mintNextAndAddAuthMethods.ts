@@ -1,16 +1,16 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
+import { NagaContext } from '../../../../../../types';
 import {
   MintRequestRaw,
   MintRequestSchema,
-} from "../../../../schemas/MintRequestSchema";
+} from '../../../../schemas/MintRequestSchema';
 import {
   PKPData,
   PKPDataSchema,
-} from "../../../../schemas/shared/PKPDataSchema";
-import { LitTxRes } from "../../../types";
-import { callWithAdjustedOverrides } from "../../../utils/callWithAdjustedOverrides";
-import { createLitContracts } from "../../../utils/createLitContracts";
-import { decodeLogs } from "../../../utils/decodeLogs";
+} from '../../../../schemas/shared/PKPDataSchema';
+import { LitTxRes } from '../../../types';
+import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
+import { createLitContracts } from '../../../utils/createLitContracts';
+import { decodeLogs } from '../../../utils/decodeLogs';
 
 /**
  * Mints a new Programmable Key Pair (PKP) with specified authentication methods.
@@ -39,7 +39,7 @@ export async function mintNextAndAddAuthMethods(
 
   const hash = await callWithAdjustedOverrides(
     pkpHelperContract,
-    "mintNextAndAddAuthMethods",
+    'mintNextAndAddAuthMethods',
     [
       validatedRequest.keyType,
       validatedRequest.permittedAuthMethodTypes,
@@ -51,6 +51,8 @@ export async function mintNextAndAddAuthMethods(
     ],
     {
       value: mintCost,
+      account: null,
+      chain: null,
     }
   );
 
@@ -65,7 +67,7 @@ export async function mintNextAndAddAuthMethods(
   //     pubkey: "0x045fb12df3d5c8482ab64f7cef10b7c44f9a55256e14ffe8bebe0c526279daa8379fd576b5ea5d26bc0b0973a1260138dfce3951b83378414acf8fe02fea299ccf",
   //   },
   // },
-  const args = decodedLogs.find((log) => log.eventName === "PKPMinted")?.args;
+  const args = decodedLogs.find((log) => log.eventName === 'PKPMinted')?.args;
 
   const data = PKPDataSchema.parse(args);
 

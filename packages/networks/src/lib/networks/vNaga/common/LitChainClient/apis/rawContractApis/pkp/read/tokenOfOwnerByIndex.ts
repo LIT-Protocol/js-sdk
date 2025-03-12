@@ -1,12 +1,11 @@
-// import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { createLitContracts } from "../../../utils/createLitContracts";
+import { logger } from '../../../../../../../shared/logger';
+import { NagaContext } from '../../../../../../types';
+import { z } from 'zod';
+import { createLitContracts } from '../../../utils/createLitContracts';
 
 // Schema for the request
 const tokenOfOwnerByIndexSchema = z.object({
-  ownerAddress: z.string().startsWith("0x"),
+  ownerAddress: z.string().startsWith('0x'),
   index: z.number().int().nonnegative(),
 });
 
@@ -24,7 +23,7 @@ export async function tokenOfOwnerByIndex(
 ): Promise<string> {
   const { ownerAddress, index } = tokenOfOwnerByIndexSchema.parse(request);
 
-  logger.debug({ ownerAddress, index }, "Fetching token of owner by index");
+  logger.debug({ ownerAddress, index }, 'Fetching token of owner by index');
 
   // Create contract instances
   const { pkpNftContract } = createLitContracts(networkCtx);
@@ -44,12 +43,12 @@ export async function tokenOfOwnerByIndex(
 
     logger.debug(
       { ownerAddress, index, tokenId },
-      "Token of owner by index fetched"
+      'Token of owner by index fetched'
     );
 
     return tokenId;
   } catch (e) {
-    throw new Error("Error fetching token of owner by index");
+    throw new Error('Error fetching token of owner by index');
   }
 }
 

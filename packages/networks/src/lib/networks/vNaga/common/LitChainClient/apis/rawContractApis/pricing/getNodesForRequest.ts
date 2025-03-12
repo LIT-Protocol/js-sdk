@@ -1,8 +1,7 @@
-import { z } from "zod";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { createLitContracts } from "../../utils/createLitContracts";
-import { networkContext } from "../../../_config";
-import { generateValidatorURLs } from "services/lit/utils/transformers";
+import { z } from 'zod';
+import { generateValidatorURLs } from '../../../../../../shared/utils/transformers';
+import { NagaContext } from '../../../../../types';
+import { createLitContracts } from '../../utils/createLitContracts';
 
 /**
  * Product IDs used for price feed and node selection
@@ -68,11 +67,11 @@ export async function getNodesForRequest(
   };
 }
 
-if (import.meta.main) {
-  const networkCtx = networkContext;
-  const res = await getNodesForRequest(
-    { productIds: Object.values(PRODUCT_IDS) },
-    networkCtx
-  );
-  console.log(res);
-}
+// if (import.meta.main) {
+//   const networkCtx = networkContext;
+//   const res = await getNodesForRequest(
+//     { productIds: Object.values(PRODUCT_IDS) },
+//     networkCtx
+//   );
+//   console.log(res);
+// }

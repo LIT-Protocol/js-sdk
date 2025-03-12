@@ -1,4 +1,4 @@
-import { _nagaDev } from '@lit-protocol/contracts';
+import { nagaDev } from '@lit-protocol/contracts';
 
 import {
   LIT_NETWORK,
@@ -12,9 +12,9 @@ import {
  */
 export const NETWORK_CONTEXT_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
-  typeof _nagaDev | undefined
+  typeof nagaDev | undefined
 > = {
-  [LIT_NETWORK.NagaDev]: _nagaDev,
+  [LIT_NETWORK.NagaDev]: nagaDev,
   [LIT_NETWORK.Custom]: undefined,
 } as const;
 
