@@ -1,6 +1,4 @@
-import { getChildLogger } from '@lit-protocol/logger';
-
-const logger = getChildLogger({ module: 'parseAsJsonOrString' });
+import { logger } from '@lit-protocol/logger';
 
 /**
  * Parses a response string into a JS object.
@@ -14,10 +12,11 @@ export const parseAsJsonOrString = (
   try {
     return JSON.parse(responseString);
   } catch (e) {
-    logger.info(
-      '[parseResponses] Error parsing response as json.  Swallowing and returning as string.',
-      responseString
-    );
+    logger.warn({
+      function: 'parseAsJsonOrString',
+      msg: 'Error parsing response as json. Swallowing and returning as string.',
+      responseString,
+    });
     return responseString;
   }
 };

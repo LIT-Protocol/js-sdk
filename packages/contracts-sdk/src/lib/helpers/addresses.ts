@@ -12,11 +12,9 @@ import {
   ParamsMissingError,
 } from '@lit-protocol/constants';
 import { publicKeyCompress } from '@lit-protocol/crypto';
-import { getChildLogger } from '@lit-protocol/logger';
+import { logger } from '@lit-protocol/logger';
 import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { DerivedAddresses } from '@lit-protocol/types';
-
-const logger = getChildLogger({ module: 'addresses' });
 
 /**
  * Derives a Bitcoin address (P2PKH) from a public key.
@@ -188,6 +186,7 @@ export const derivedAddresses = async (
       }
     } catch (e) {
       logger.error({
+        function: 'derivedAddresses',
         msg: `Could not get ${CACHE_KEY} from storage. Continuing...`,
         error: e,
       });
@@ -235,6 +234,7 @@ export const derivedAddresses = async (
         setStorageItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
       } catch (e) {
         logger.error({
+          function: 'derivedAddresses',
           msg: `Could not get ${CACHE_KEY} from storage. Continuing...`,
           error: e,
         });

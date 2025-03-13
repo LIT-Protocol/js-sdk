@@ -27,7 +27,7 @@ import {
   LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
 import { validateSessionSig } from '@lit-protocol/lit-node-client';
-import { getChildLogger } from '@lit-protocol/logger';
+import { getChildLogger, logger } from '@lit-protocol/logger';
 import {
   getStorageItem,
   setStorageItem,
@@ -38,7 +38,6 @@ import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 import LitConnectModal from './connect-modal/modal';
 
 const deprecated = depd('lit-js-sdk:auth:metamask-authenticator:index');
-const logger = getChildLogger({ module: 'eth' });
 
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
@@ -237,10 +236,11 @@ export const getMustResign = (
       );
       mustResign = true;
     }
-  } catch (e) {
+  } catch (error) {
     logger.error({
+      function: 'getMustResign',
       msg: 'error parsing siwe sig. Making the user sign again',
-      e,
+      error,
     });
     mustResign = true;
   }
@@ -335,11 +335,11 @@ export const connectWeb3 = async ({
     );
     // @ts-expect-error provider is not typed
     await provider.enable();
-  } catch (e) {
-    logger.info(
-      "error enabling provider but swallowed it because it's not important.  most wallets use a different function now to enable the wallet so you can ignore this error, because those other methods will be tried.",
-      e
-    );
+  } catch (error) {
+    logger.info({
+      msg: "error enabling provider but swallowed it because it's not important. Most wallets use a different function now to enable the wallet so you can ignore this error, those other methods will be tried.",
+      error,
+    });
   }
 
   logger.info('listing accounts');
@@ -398,10 +398,11 @@ export const checkAndSignEVMAuthMessage = async ({
   walletConnectProjectId,
   nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
+  const logger = getChildLogger({ function: 'checkAndSignEVMAuthMessage' });
   // -- check if it's Node.js
   if (Environment.isNode) {
     logger.info(
-      'checkAndSignEVMAuthMessage is not supported in nodejs.  You can create a SIWE on your own using the SIWE package.'
+      'checkAndSignEVMAuthMessage is not supported in nodejs. You can create a SIWE on your own using the SIWE package.'
     );
     return {
       sig: '',
@@ -509,10 +510,10 @@ export const checkAndSignEVMAuthMessage = async ({
     logger.info('checking if sig is in local storage');
     const authSigString = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
     authSig = JSON.parse(authSigString);
-  } catch (e) {
+  } catch (error) {
     logger.warn({
       msg: 'Could not get sig from local storage',
-      error: e,
+      error,
     });
   }
 
@@ -789,7 +790,7 @@ export const signMessageAsync = async (
 ): Promise<any | JsonRpcSigner> => {
   // check if it's nodejs
   if (Environment.isNode) {
-    logger.info('signMessageAsync is not supported in nodejs.');
+    logger.warn('signMessageAsync is not supported in nodejs.');
     return null;
   }
 
@@ -803,14 +804,16 @@ export const signMessageAsync = async (
         address.toLowerCase(),
       ]);
       return signature;
-    } catch (e: any) {
-      logger.info(
-        'Signing with personal_sign failed, trying signMessage as a fallback'
-      );
-      if (e.message.includes('personal_sign')) {
+    } catch (error: any) {
+      logger.warn({
+        function: 'signMessageAsync',
+        msg: 'Signing with personal_sign failed, trying signMessage as a fallback',
+        error,
+      });
+      if (error.message.includes('personal_sign')) {
         return await signer.signMessage(messageBytes);
       }
-      throw e;
+      throw error;
     }
   } else {
     logger.info('signing with signMessage');

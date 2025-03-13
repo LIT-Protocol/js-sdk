@@ -1,11 +1,10 @@
 import { getChildLogger } from '@lit-protocol/logger';
 import { MintRequestBody } from '@lit-protocol/types';
 
-const logger = getChildLogger({ module: 'validators' });
-
 export const validateMintRequestBody = (
   customArgs: Partial<MintRequestBody>
 ): boolean => {
+  const logger = getChildLogger({ function: 'validateMintRequestBody' });
   let isValid = true;
   const validKeys = [
     'keyType',
@@ -83,7 +82,7 @@ export const validateMintRequestBody = (
       ))
   ) {
     logger.error(
-      'Invalid type for permittedAuthMethodScopes: expected an array of arrays of numberr.'
+      'Invalid type for permittedAuthMethodScopes: expected an array of arrays of number.'
     );
     isValid = false;
   }

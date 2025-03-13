@@ -1,9 +1,5 @@
-import { getChildLogger } from '@lit-protocol/logger';
+import { logger } from '@lit-protocol/logger';
 import { LitActionResponseStrategy, NodeShare } from '@lit-protocol/types';
-
-const logger = getChildLogger({
-  module: 'process-lit-action-response-strategy',
-});
 
 /**
  * Finds the most and least common object within an of objects array
@@ -44,6 +40,7 @@ export const processLitActionResponseStrategy = (
       }
     } catch (e) {
       logger.error({
+        function: 'processLitActionResponseStrategy',
         msg: 'Error while executing custom response filter, defaulting to most common',
         error: (e as Error).toString(),
       });

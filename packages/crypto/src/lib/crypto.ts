@@ -11,7 +11,7 @@ import {
   UnknownError,
   UnknownSignatureError,
 } from '@lit-protocol/constants';
-import { getChildLogger } from '@lit-protocol/logger';
+import { logger } from '@lit-protocol/logger';
 import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
 import {
@@ -27,8 +27,6 @@ import {
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
-
-const logger = getChildLogger({ module: 'crypto' });
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
@@ -409,21 +407,26 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
 
   try {
     return await fetchAsUint8Array(proxyUrl);
-  } catch (e) {
-    logger.info({
-      msg: `[getAmdCert] Failed to fetch AMD cert from proxy:`,
-      e,
+  } catch (error) {
+    logger.error({
+      function: 'getAmdCert',
+      msg: `Failed to fetch AMD cert from proxy`,
+      error,
     });
   }
 
   // Try direct fetch only if proxy fails
-  logger.info('[getAmdCert] Attempting to fetch directly without proxy.');
+  logger.info('Attempting to fetch directly without proxy.');
 
   try {
     return await fetchAsUint8Array(url);
-  } catch (e) {
-    logger.error({ msg: '[getAmdCert] Direct fetch also failed', e });
-    throw e; // Re-throw to signal that both methods failed
+  } catch (error) {
+    logger.error({
+      function: 'getAmdCert',
+      msg: 'Direct fetch also failed',
+      error,
+    });
+    throw error; // Re-throw to signal that both methods failed
   }
 }
 

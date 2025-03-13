@@ -7,7 +7,7 @@ import {
   LitEVMChainKeys,
   InvalidUnifiedConditionType,
 } from '@lit-protocol/constants';
-import { getChildLogger } from '@lit-protocol/logger';
+import { logger } from '@lit-protocol/logger';
 import {
   AccessControlConditions,
   AccsCOSMOSParams,
@@ -16,8 +16,6 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-
-const logger = getChildLogger({ module: 'humanizer' });
 
 export const ERC20ABI = [
   {

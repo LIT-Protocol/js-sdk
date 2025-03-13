@@ -1,9 +1,7 @@
 import { InvalidArgumentException } from '@lit-protocol/constants';
-import { getChildLogger } from '@lit-protocol/logger';
+import { logger } from '@lit-protocol/logger';
 
 import { parseSignedMessage } from './session-sigs-validator';
-
-const logger = getChildLogger({ module: 'serssion-sigs-reader' });
 
 function formatDuration(start: Date, end: Date): string {
   const diff = end.getTime() - start.getTime();
@@ -132,6 +130,7 @@ export function formatSessionSigs(
     } catch (e) {
       // swallow error
       logger.info({
+        function: 'formatSessionSigs',
         msg: 'Error parsing attenuation',
         error: e,
       });

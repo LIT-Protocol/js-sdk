@@ -47,7 +47,7 @@ describe('logger', () => {
     }, 50);
   });
 
-  it('should log messages correctly on a child logger', (done) => {
+  it('should log messages on a child logger using the parent transport but adding its bindings', (done) => {
     // Override the global logger for consistency in our test:
     const testStream = new TestStream();
     setLoggerOptions({ level: 'info', name: 'ParentTestLogger' }, testStream);
@@ -55,9 +55,14 @@ describe('logger', () => {
     childLogger.info('Child message');
 
     setTimeout(() => {
-      expect(testStream.data).toMatch(/Child message/);
-      expect(testStream.data).toMatch(/ChildModule/);
-      done();
+      try {
+        expect(testStream.data).toMatch('"name":"ParentTestLogger"');
+        expect(testStream.data).toMatch('"msg":"Child message"');
+        expect(testStream.data).toMatch('"module":"ChildModule"');
+        done();
+      } catch (error) {
+        done(error);
+      }
     }, 50);
   });
 });

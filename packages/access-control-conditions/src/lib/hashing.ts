@@ -1,5 +1,5 @@
 import { InvalidAccessControlConditions } from '@lit-protocol/constants';
-import { getChildLogger } from '@lit-protocol/logger';
+import { logger } from '@lit-protocol/logger';
 import {
   AccessControlConditions,
   EvmContractConditions,
@@ -18,8 +18,6 @@ import {
   canonicalSolRpcConditionFormatter,
   canonicalUnifiedAccessControlConditionFormatter,
 } from './canonicalFormatter';
-
-const logger = getChildLogger({ module: 'hashing' });
 
 // Same as:
 // const unifiedAccs = [
