@@ -1,3 +1,5 @@
+import { logger } from '@lit-protocol/logger';
+
 import { Listener } from './listener';
 
 interface FetchListenerConfig {
@@ -32,7 +34,7 @@ export class FetchListener extends Listener<any> {
               this.emit(value);
             }
           } catch (error) {
-            console.error('FetchListener error:', error);
+            logger.error({ msg: 'FetchListener error:', error });
           }
         }, pollInterval);
       },

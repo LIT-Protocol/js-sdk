@@ -7,6 +7,7 @@ import {
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { logger } from '@lit-protocol/logger';
 
 import {
   Action,
@@ -382,17 +383,17 @@ export class StateMachine {
     // Aggregate (AND) all listener checks to a single function result
     transitionConfig.check = async (values) => {
       this.debug &&
-        console.log(
-          `${transitionDefinition.fromState} -> ${transitionDefinition.toState} values`,
-          values
-        );
+        logger.info({
+          msg: `${transitionDefinition.fromState} -> ${transitionDefinition.toState} values`,
+          values,
+        });
       return Promise.all(checks.map((check) => check(values))).then(
         (results) => {
           this.debug &&
-            console.log(
-              `${transitionDefinition.fromState} -> ${transitionDefinition.toState} results`,
-              results
-            );
+            logger.info({
+              msg: `${transitionDefinition.fromState} -> ${transitionDefinition.toState} results`,
+              results,
+            });
           return results.every((result) => result);
         }
       );
@@ -410,7 +411,7 @@ export class StateMachine {
     initialState: string,
     onStop?: voidAsyncFunction
   ): Promise<void> {
-    this.debug && console.log('Starting state machine...');
+    this.debug && logger.info('Starting state machine...');
 
     await Promise.all([
       this.litContracts.connect(),
@@ -421,7 +422,7 @@ export class StateMachine {
     await this.enterState(initialState);
     this.status = 'running';
 
-    this.debug && console.log('State machine started');
+    this.debug && logger.info('State machine started');
   }
 
   /**
@@ -470,20 +471,21 @@ export class StateMachine {
    * Stops the state machine by exiting the current state and not moving to another one.
    */
   public async stopMachine(): Promise<void> {
-    this.debug && console.log('Stopping state machine...');
+    this.debug && logger.info('Stopping state machine...');
 
     this.status = 'stopped';
     await this.exitCurrentState();
     await this.onStopCallback?.();
 
-    this.debug && console.log('State machine stopped');
+    this.debug && logger.info('State machine stopped');
   }
 
   /**
    * Stops listening on the current state's transitions and exits the current state.
    */
   private async exitCurrentState(): Promise<void> {
-    this.debug && console.log('exitCurrentState', this.currentState?.key);
+    this.debug &&
+      logger.info({ msg: 'exitCurrentState', state: this.currentState?.key });
 
     const currentTransitions =
       this.transitions.get(this.currentState?.key ?? '') ??
@@ -514,7 +516,7 @@ export class StateMachine {
         `State ${stateKey} not found`
       );
     }
-    this.debug && console.log('enterState', state.key);
+    this.debug && logger.info({ msg: 'enterState', state: state.key });
     await state.enter();
     const nextTransitions =
       this.transitions.get(state.key) ?? new Map<string, Transition>();
@@ -542,7 +544,7 @@ export class StateMachine {
       );
     }
     if (this.currentState === nextState) {
-      console.warn(
+      logger.warn(
         `State ${stateKey} is already active. Skipping state change.`
       );
       return;
@@ -615,7 +617,7 @@ export class StateMachine {
           }
           if (this.debug) {
             const activePkp = this.context.get('activePkp');
-            console.log(`Machine configured to use pkp ${activePkp}`);
+            logger.info(`Machine configured to use pkp ${activePkp}`);
           }
           break;
         default:
@@ -665,7 +667,7 @@ export class StateMachine {
       }
 
       // Throwing when stopping could hide above error
-      this.stopMachine().catch(console.error);
+      this.stopMachine().catch((error) => logger.error({ error }));
     }
   }
 

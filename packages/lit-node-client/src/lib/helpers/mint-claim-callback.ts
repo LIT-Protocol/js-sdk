@@ -6,6 +6,7 @@ import {
   RELAYER_URL_BY_NETWORK,
   WrongNetworkException,
 } from '@lit-protocol/constants';
+import { logger } from '@lit-protocol/logger';
 import {
   ClaimResult,
   MintCallback,
@@ -77,7 +78,7 @@ export const defaultMintClaimCallback: MintCallback<
     const errStmt = `An error occurred requesting "/auth/claim" endpoint ${JSON.stringify(
       errResp
     )}`;
-    console.warn(errStmt);
+    logger.warn(errStmt);
     throw new NetworkError(
       {
         info: {
