@@ -2,16 +2,108 @@ import {
   createPublicClient,
   createWalletClient,
   getContract,
+  Hex,
   http,
   PublicClient,
   WalletClient,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { NagaContext } from '../../../../../vNaga/types';
-
+import { networkContext as defaultNetworkContext } from '../../_config';
 interface CreateLitContractsOptions {
   publicClient?: PublicClient;
 }
+
+// =============================================================================================================================================
+// ❗️ These types are required to fix the following error
+// ERROR: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.ts(7056)
+// If you could fix this WITHOUT breaking this code apart, or without setting the tsconfig's "declaration" to false, please do fix this. 🙏
+// =============================================================================================================================================
+
+// Extract just the ContractData type, and you can use this type for variables that will eventually hold contract data
+let futureContractData = defaultNetworkContext.chainConfig.contractData;
+
+const pkpNftContractType = getContract({
+  address: undefined as unknown as Hex,
+  abi: [
+    futureContractData.PKPNFT.methods.claimAndMint,
+    futureContractData.PKPNFT.methods.mintCost,
+    futureContractData.PKPNFT.methods.tokenOfOwnerByIndex,
+  ],
+  client: {
+    public: undefined as unknown as PublicClient,
+    wallet: undefined as unknown as WalletClient,
+  },
+});
+
+const pkpHelperContractType = getContract({
+  address: undefined as unknown as Hex,
+  abi: [
+    futureContractData.PKPHelper.methods
+      .claimAndMintNextAndAddAuthMethodsWithTypes,
+    futureContractData.PKPHelper.methods.mintNextAndAddAuthMethods,
+  ],
+  client: {
+    public: undefined as unknown as PublicClient,
+    wallet: undefined as unknown as WalletClient,
+  },
+});
+
+const stakingContractType = getContract({
+  address: undefined as unknown as Hex,
+  abi: [
+    futureContractData.Staking.methods
+      .getActiveUnkickedValidatorStructsAndCounts,
+  ],
+  client: {
+    public: undefined as unknown as PublicClient,
+    wallet: undefined as unknown as WalletClient,
+  },
+});
+
+const priceFeedContractType = getContract({
+  address: undefined as unknown as Hex,
+  abi: [futureContractData.PriceFeed.methods.getNodesForRequest],
+  client: {
+    public: undefined as unknown as PublicClient,
+    wallet: undefined as unknown as WalletClient,
+  },
+});
+
+const pkpPermissionsContractType = getContract({
+  address: undefined as unknown as Hex,
+  abi: [
+    futureContractData.PKPPermissions.methods.addPermittedAction,
+    futureContractData.PKPPermissions.methods.addPermittedAddress,
+    futureContractData.PKPPermissions.methods.getPermittedActions,
+    futureContractData.PKPPermissions.methods.getPermittedAddresses,
+    futureContractData.PKPPermissions.methods.getPermittedAuthMethods,
+    futureContractData.PKPPermissions.methods.getPermittedAuthMethodScopes,
+    futureContractData.PKPPermissions.methods.removePermittedAction,
+    futureContractData.PKPPermissions.methods.removePermittedAddress,
+    futureContractData.PKPPermissions.methods.isPermittedAction,
+    futureContractData.PKPPermissions.methods.isPermittedAddress,
+  ],
+  client: {
+    public: undefined as unknown as PublicClient,
+    wallet: undefined as unknown as WalletClient,
+  },
+});
+
+const pubkeyRouterContractType = getContract({
+  address: undefined as unknown as Hex,
+  abi: [
+    futureContractData.PubkeyRouter.methods.deriveEthAddressFromPubkey,
+    futureContractData.PubkeyRouter.methods.ethAddressToPkpId,
+    futureContractData.PubkeyRouter.methods.getEthAddress,
+    futureContractData.PubkeyRouter.methods.getPubkey,
+  ],
+  client: {
+    public: undefined as unknown as PublicClient,
+    wallet: undefined as unknown as WalletClient,
+  },
+});
+// Hacky fix ends
 
 export const createLitContracts = (
   networkCtx: NagaContext,
@@ -121,13 +213,16 @@ export const createLitContracts = (
 
   // ---------- End of all your contracts ----------
   return {
-    pkpNftContract,
-    pkpHelperContract,
-    stakingContract,
-    priceFeed,
-    pkpPermissionsContract,
-    pubkeyRouterContract,
+    pkpNftContract: pkpNftContract as unknown as typeof pkpNftContractType,
+    pkpHelperContract:
+      pkpHelperContract as unknown as typeof pkpHelperContractType,
+    stakingContract: stakingContract as unknown as typeof stakingContractType,
+    priceFeed: priceFeed as unknown as typeof priceFeedContractType,
+    pkpPermissionsContract:
+      pkpPermissionsContract as unknown as typeof pkpPermissionsContractType,
+    pubkeyRouterContract:
+      pubkeyRouterContract as unknown as typeof pubkeyRouterContractType,
     publicClient,
     walletClient,
-  } as const;
+  };
 };
