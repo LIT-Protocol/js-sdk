@@ -48,8 +48,8 @@ import { removePermittedAddressByIdentifier } from './handlers/removePermittedAd
 
 import { logger } from '../../../../../../shared/logger';
 import { ScopeString } from '../../../schemas/shared/ScopeSchema';
-import { LitTxVoid } from '../../types';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
+import { LitTxVoid } from '../../types';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action

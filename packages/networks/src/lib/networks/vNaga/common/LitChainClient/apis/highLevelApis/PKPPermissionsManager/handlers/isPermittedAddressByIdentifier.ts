@@ -1,11 +1,11 @@
+import { z } from 'zod';
 import { logger } from '../../../../../../../shared/logger';
 import { NagaContext } from '../../../../../../types';
-import { z } from 'zod';
 import { isPermittedAddress } from '../../../rawContractApis/permissions/read/isPermittedAddress';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
 
 // Schema for validating the request parameters
 const isPermittedAddressByIdentifierSchema = z.intersection(

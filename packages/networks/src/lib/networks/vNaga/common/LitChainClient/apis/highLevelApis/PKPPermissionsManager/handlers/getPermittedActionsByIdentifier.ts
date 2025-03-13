@@ -1,10 +1,10 @@
-import { NagaContext } from '../../../../../../types';
 import { logger } from '../../../../../../../shared/logger';
+import { NagaContext } from '../../../../../../types';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
 
 /**
  * Get permitted actions for a PKP token using various identifier types
