@@ -9,13 +9,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { logger } from '@lit-protocol/logger';
 
-import {
-  Action,
-  LitActionAction,
-  LogContextAction,
-  MintPkpAction,
-  TransactionAction,
-} from './actions';
+import { Action, ACTION_REPOSITORY } from './actions';
 import { MachineContext } from './context/machine-context';
 import {
   ContractEventData,
@@ -27,6 +21,7 @@ import {
 import { State, StateParams } from './states';
 import { CheckFn, Transition } from './transitions';
 import {
+  ActionConstructor,
   ActionDefinition,
   BaseStateMachineParams,
   ContextOrLiteral,
@@ -60,6 +55,7 @@ export class StateMachine {
 
   public id: string;
   public status: MachineStatus = 'stopped';
+  private readonly actionsRepository: Record<string, ActionConstructor>;
   private states = new Map<string, State>();
   private transitions = new Map<string, Map<string, Transition>>();
   private currentState?: State;
@@ -74,6 +70,10 @@ export class StateMachine {
       ...params.context,
     });
 
+    this.actionsRepository = {
+      ...ACTION_REPOSITORY,
+      ...params.actionRepository,
+    };
     this.litNodeClient = params.litNodeClient;
     this.litContracts = params.litContracts;
     this.privateKey = params.privateKey;
@@ -125,6 +125,10 @@ export class StateMachine {
       litContracts: litContractsInstance,
       privateKey,
       onError,
+      actionRepository: {
+        ...ACTION_REPOSITORY,
+        ...machineConfig.actionRepository,
+      },
     });
 
     const stateTransitions = [] as TransitionDefinition[];
@@ -571,66 +575,18 @@ export class StateMachine {
   ): voidAsyncFunction {
     const actions = [] as Action[];
 
-    actionDefinitions.forEach((action) => {
-      switch (action.key) {
-        case 'context':
-          if (typeof action.log?.path === 'string') {
-            actions.push(
-              new LogContextAction({
-                debug: this.debug,
-                stateMachine: this,
-                path: action.log.path,
-              })
-            );
-          }
-          break;
-        case 'litAction':
-          actions.push(
-            new LitActionAction({
-              debug: this.debug,
-              stateMachine: this,
-              ...action,
-            })
-          );
-          break;
-        case 'transaction':
-          actions.push(
-            new TransactionAction({
-              debug: this.debug,
-              stateMachine: this,
-              ...action,
-            })
-          );
-          break;
-        case 'usePkp':
-          if ('pkp' in action) {
-            this.context.set(
-              'activePkp',
-              this.resolveContextPathOrLiteral(action.pkp)
-            );
-          } else if ('mint' in action) {
-            const mintPkpAction = new MintPkpAction({
-              debug: this.debug,
-              stateMachine: this,
-            });
-            actions.push(mintPkpAction);
-          }
-          if (this.debug) {
-            const activePkp = this.context.get('activePkp');
-            logger.info(`Machine configured to use pkp ${activePkp}`);
-          }
-          break;
-        default:
-          throw new AutomationError(
-            {
-              info: {
-                action,
-              },
-            },
-            `Unknown action. Check error info.`
-          );
+    for (const action of actionDefinitions) {
+      const ActionCtor = this.actionsRepository[action.key];
+      if (!ActionCtor) {
+        throw new AutomationError(
+          { info: { action } },
+          `Action key "${action.key}" not found in action repository`
+        );
       }
-    });
+      actions.push(
+        new ActionCtor({ debug: this.debug, stateMachine: this, ...action })
+      );
+    }
 
     return async () => {
       await Promise.all(actions.map((action) => action.run())).catch((err) => {
