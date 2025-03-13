@@ -42,7 +42,7 @@ export async function removePermittedAction(
 
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
-    "removePermittedAction",
+    'removePermittedAction',
     [validatedRequest.tokenId, validatedRequest.ipfsId]
   );
 

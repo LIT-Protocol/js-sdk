@@ -51,16 +51,17 @@ export async function removePermittedAddress(
 
 // Example usage when running as main
 // if (import.meta.main) {
-//   const networkCtx = networkContext;
+//   const networkCtx = await import('../../../../_config');
+//   const { networkContext } = networkCtx;
 
 //   const res = await removePermittedAddress(
 //     {
 //       tokenId:
-//         "76136736151863037541847315168980811654782785653773679312890341037699996601290",
-//       address: "0x1234567890123456789012345678901234567890",
+//         '76136736151863037541847315168980811654782785653773679312890341037699996601290',
+//       address: '0x1234567890123456789012345678901234567890',
 //     },
-//     networkCtx
+//     networkContext
 //   );
 
-//   console.log("res", res);
+//   console.log('res', res);
 // }

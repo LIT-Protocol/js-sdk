@@ -40,7 +40,7 @@ export async function addPermittedAddress(
 
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
-    "addPermittedAddress",
+    'addPermittedAddress',
     [
       validatedRequest.tokenId,
       validatedRequest.address,

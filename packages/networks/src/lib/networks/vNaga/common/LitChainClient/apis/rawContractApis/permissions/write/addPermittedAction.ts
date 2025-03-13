@@ -38,7 +38,7 @@ export async function addPermittedAction(
 
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
-    "addPermittedAction",
+    'addPermittedAction',
     [validatedRequest.tokenId, validatedRequest.ipfsId, validatedRequest.scopes]
   );
 
