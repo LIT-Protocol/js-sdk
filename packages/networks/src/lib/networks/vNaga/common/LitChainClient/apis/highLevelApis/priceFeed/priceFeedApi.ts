@@ -23,12 +23,11 @@
  * ```
  */
 
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
+import { NagaContext } from '../../../../../types';
 import {
   getNodesForRequest,
   PRODUCT_IDS,
-} from "../../../apis/rawContractApis/pricing/getNodesForRequest";
-import { networkContext } from "../../../_config";
+} from '../../../apis/rawContractApis/pricing/getNodesForRequest';
 
 // Configuration constants
 const STALE_PRICES_SECONDS = 3 * 1000; // Update prices if > X seconds old
@@ -177,24 +176,24 @@ export async function getPriceFeedInfo(
  */
 export async function getNodePrices(
   params: GetPriceFeedInfoParams
-): Promise<PriceFeedInfo["networkPrices"]> {
+): Promise<PriceFeedInfo['networkPrices']> {
   const priceInfo = await getPriceFeedInfo(params);
   return priceInfo.networkPrices;
 }
 
-if (import.meta.main) {
-  // Get complete price feed information
-  const priceInfo = await getPriceFeedInfo({
-    realmId: 1,
-    networkCtx: networkContext,
-  });
+// if (import.meta.main) {
+//   // Get complete price feed information
+//   const priceInfo = await getPriceFeedInfo({
+//     realmId: 1,
+//     networkCtx: networkContext,
+//   });
 
-  // Get just the node prices sorted by cheapest first
-  const prices = await getNodePrices({
-    realmId: 1,
-    networkCtx: networkContext,
-  });
+//   // Get just the node prices sorted by cheapest first
+//   const prices = await getNodePrices({
+//     realmId: 1,
+//     networkCtx: networkContext,
+//   });
 
-  console.log("priceInfo", priceInfo);
-  console.log("prices", prices);
-}
+//   console.log('priceInfo', priceInfo);
+//   console.log('prices', prices);
+// }

@@ -1,12 +1,12 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
+import { z } from 'zod';
+import { NagaContext } from '../../../../../../types';
+import { ScopeStringSchema } from '../../../../schemas/shared/ScopeSchema';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
-import { addPermittedAddress } from "../../../rawContractApis/permissions/write/addPermittedAddress";
-import { z } from "zod";
-import { LitTxVoid } from "../../../types";
-import { ScopeStringSchema } from "../../../../schemas/shared/ScopeSchema";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+import { addPermittedAddress } from '../../../rawContractApis/permissions/write/addPermittedAddress';
+import { LitTxVoid } from '../../../types';
 
 // Schema for the request
 const addPermittedAddressByIdentifierSchema = z.intersection(

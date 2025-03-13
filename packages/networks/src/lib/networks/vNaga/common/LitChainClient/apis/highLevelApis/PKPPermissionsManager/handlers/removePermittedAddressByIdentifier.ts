@@ -1,12 +1,11 @@
-// import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
+import { z } from 'zod';
+import { NagaContext } from '../../../../../../types';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
-import { removePermittedAddress } from "../../../rawContractApis/permissions/write/removePermittedAddress";
-import { z } from "zod";
-import { LitTxVoid } from "../../../types";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+import { removePermittedAddress } from '../../../rawContractApis/permissions/write/removePermittedAddress';
+import { LitTxVoid } from '../../../types';
 
 // Schema for the request
 const removePermittedAddressByIdentifierSchema = z.intersection(

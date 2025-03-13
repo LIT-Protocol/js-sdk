@@ -1,15 +1,14 @@
-// import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { logger } from "utils/logger";
-import { getAddress } from "viem";
-import { z } from "zod";
-import { getPubkeyByTokenId } from "../../../rawContractApis/pkp/read/getPubkeyByTokenId";
-import { tokenOfOwnerByIndex } from "../../../rawContractApis/pkp/read/tokenOfOwnerByIndex";
-import { createLitContracts } from "../../../utils/createLitContracts";
+import { getAddress } from 'viem';
+import { z } from 'zod';
+import { logger } from '../../../../../../../shared/logger';
+import { NagaContext } from '../../../../../../types';
+import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
+import { tokenOfOwnerByIndex } from '../../../rawContractApis/pkp/read/tokenOfOwnerByIndex';
+import { createLitContracts } from '../../../utils/createLitContracts';
 
 // Schema for the request
 const getPKPsByAddressSchema = z.object({
-  ownerAddress: z.string().startsWith("0x"),
+  ownerAddress: z.string().startsWith('0x'),
 });
 
 type GetPKPsByAddressRequest = z.infer<typeof getPKPsByAddressSchema>;
@@ -118,7 +117,7 @@ async function fetchSinglePKP(
     const { pubkeyRouterContract } = createLitContracts(networkCtx);
 
     // Remove '0x' prefix if present for the contract call
-    const publicKeyBytes = publicKey.startsWith("0x")
+    const publicKeyBytes = publicKey.startsWith('0x')
       ? publicKey.slice(2)
       : publicKey;
     const ethAddressRaw =
@@ -157,7 +156,7 @@ export async function getPKPsByAddress(
 ): Promise<PKPInfo[]> {
   const { ownerAddress } = getPKPsByAddressSchema.parse(request);
 
-  logger.debug({ ownerAddress }, "Fetching PKPs by address");
+  logger.debug({ ownerAddress }, 'Fetching PKPs by address');
 
   // Ensure ownerAddress is properly typed as a hex string
   const typedOwnerAddress = ownerAddress as `0x${string}`;
@@ -177,7 +176,7 @@ export async function getPKPsByAddress(
 
       logger.debug(
         { batchIndex, startIndex, endIndex },
-        "Fetching batch of PKPs"
+        'Fetching batch of PKPs'
       );
 
       // Create an array of promises for the current batch
@@ -193,7 +192,7 @@ export async function getPKPsByAddress(
       let validPKPsInBatch = 0;
 
       for (const result of batchResults) {
-        if (result.status === "fulfilled" && result.value !== null) {
+        if (result.status === 'fulfilled' && result.value !== null) {
           pkps.push(result.value);
           validPKPsInBatch++;
         }
@@ -204,7 +203,7 @@ export async function getPKPsByAddress(
         hasMorePKPs = false;
         logger.debug(
           { batchIndex },
-          "No valid PKPs found in batch, stopping enumeration"
+          'No valid PKPs found in batch, stopping enumeration'
         );
       }
 
@@ -215,17 +214,17 @@ export async function getPKPsByAddress(
     if (batchIndex >= MAX_BATCHES) {
       logger.warn(
         { ownerAddress, maxPkps: MAX_BATCHES * BATCH_SIZE },
-        "Reached maximum number of PKPs to fetch"
+        'Reached maximum number of PKPs to fetch'
       );
     }
 
     logger.debug(
       { ownerAddress, count: pkps.length },
-      "PKPs fetched successfully"
+      'PKPs fetched successfully'
     );
     return pkps;
   } catch (error) {
-    logger.error({ ownerAddress, error }, "Error in getPKPsByAddress");
+    logger.error({ ownerAddress, error }, 'Error in getPKPsByAddress');
     return [];
   }
 }

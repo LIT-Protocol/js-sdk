@@ -1,11 +1,11 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { logger } from "utils/logger";
-import { networkContext } from "../../../../_config";
-import { getPermittedAuthMethodScopes } from "../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes";
+import { logger } from '../../../../../../../shared/logger';
+import { NagaContext } from '../../../../../../types';
+import { networkContext } from '../../../../_config';
+import { getPermittedAuthMethodScopes } from '../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 /**
  * Get permitted scopes for a specific authentication method of a PKP token using various identifier types
@@ -42,21 +42,21 @@ export async function getPermittedAuthMethodScopesByIdentifier(
 }
 
 // Example usage when running as main
-if (import.meta.main) {
-  const networkCtx = networkContext;
+// if (import.meta.main) {
+//   const networkCtx = networkContext;
 
-  const res = await getPermittedAuthMethodScopesByIdentifier(
-    {
-      identifier: {
-        // tokenId: "76136736151863037541847315168980811654782785653773679312890341037699996601290",
-        // pubkey: "0x000",
-        address: "0xef3eE1bD838aF5B36482FAe8a6Fc394C68d5Fa9F",
-      },
-      authMethodType: 1,
-      authMethodId: "0x1234567890abcdef1234567890abcdef12345678",
-      scopeId: 0,
-    },
-    networkCtx
-  );
-  console.log("permittedAuthMethodScopes", res);
-}
+//   const res = await getPermittedAuthMethodScopesByIdentifier(
+//     {
+//       identifier: {
+//         // tokenId: "76136736151863037541847315168980811654782785653773679312890341037699996601290",
+//         // pubkey: "0x000",
+//         address: '0xef3eE1bD838aF5B36482FAe8a6Fc394C68d5Fa9F',
+//       },
+//       authMethodType: 1,
+//       authMethodId: '0x1234567890abcdef1234567890abcdef12345678',
+//       scopeId: 0,
+//     },
+//     networkCtx
+//   );
+//   console.log('permittedAuthMethodScopes', res);
+// }

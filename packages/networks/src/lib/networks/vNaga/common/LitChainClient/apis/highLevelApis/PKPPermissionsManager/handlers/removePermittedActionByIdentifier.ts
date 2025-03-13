@@ -1,7 +1,6 @@
-// import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { isIpfsCidV0 } from "services/lit/utils/z-validate";
-import { z } from "zod";
+import { z } from 'zod';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { NagaContext } from '../../../../../../types';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,

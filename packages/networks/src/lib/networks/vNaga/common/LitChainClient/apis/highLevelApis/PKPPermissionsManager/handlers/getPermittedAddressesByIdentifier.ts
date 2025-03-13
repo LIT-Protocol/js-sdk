@@ -1,6 +1,6 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { logger } from "utils/logger";
-import { getPermittedAddresses } from "../../../rawContractApis/permissions/read/getPermittedAddresses";
+import { logger } from '../../../../../../../shared/logger';
+import { NagaContext } from '../../../../../../types';
+import { getPermittedAddresses } from '../../../rawContractApis/permissions/read/getPermittedAddresses';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,

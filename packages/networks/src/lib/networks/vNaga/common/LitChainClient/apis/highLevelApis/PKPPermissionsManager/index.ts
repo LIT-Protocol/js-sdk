@@ -1,4 +1,4 @@
-export { PKPPermissionsManager } from "./PKPPermissionsManager";
+export { PKPPermissionsManager } from './PKPPermissionsManager';
 
 // export { addPermittedActionByIdentifier } from "./handlers/addPermittedActionByIdentifier";
 // export { addPermittedAddressByIdentifier } from "./handlers/addPermittedAddressByIdentifier";

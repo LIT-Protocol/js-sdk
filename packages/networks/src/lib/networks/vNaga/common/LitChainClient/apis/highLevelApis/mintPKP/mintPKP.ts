@@ -1,11 +1,11 @@
-import { Hex } from "viem";
-import { logger } from "../../../../../../../../../utils/logger";
-import { getAuthIdByAuthMethod } from "../../../../../../../LitAuthManager/authUtils";
-import { NagaContext } from "../../../../../types";
-import { PKPData } from "../../../schemas/shared/PKPDataSchema";
-import { mintNextAndAddAuthMethods } from "../../rawContractApis/pkp/write/mintNextAndAddAuthMethods";
-import { LitTxRes } from "../../types";
-import { MintPKPRequest, MintPKPSchema } from "./MintPKPSchema";
+import { Hex } from 'viem';
+import { logger } from '../../../../../../shared/logger';
+import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
+import { NagaContext } from '../../../../../types';
+import { PKPData } from '../../../schemas/shared/PKPDataSchema';
+import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';
+import { LitTxRes } from '../../types';
+import { MintPKPRequest, MintPKPSchema } from './MintPKPSchema';
 
 /**
  * authMethod
@@ -57,7 +57,7 @@ export const mintPKP = async (
       keyType: 2,
       permittedAuthMethodTypes: [validatedRequest.authMethod.authMethodType],
       permittedAuthMethodIds: [_authMethodId],
-      permittedAuthMethodPubkeys: [validatedRequest.pubkey || "0x"],
+      permittedAuthMethodPubkeys: [validatedRequest.pubkey || '0x'],
       permittedAuthMethodScopes: [validatedRequest.scopes],
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,

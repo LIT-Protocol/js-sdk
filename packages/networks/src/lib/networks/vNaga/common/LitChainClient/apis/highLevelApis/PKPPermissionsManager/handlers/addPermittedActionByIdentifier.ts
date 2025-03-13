@@ -1,13 +1,13 @@
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
+import { NagaContext } from '../../../../../../types';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { z } from 'zod';
+import { ScopeStringSchema } from '../../../../schemas/shared/ScopeSchema';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
-import { addPermittedAction } from "../../../rawContractApis/permissions/write/addPermittedAction";
-import { isIpfsCidV0 } from "services/lit/utils/z-validate";
-import { z } from "zod";
-import { LitTxVoid } from "../../../types";
-import { ScopeStringSchema } from "../../../../schemas/shared/ScopeSchema";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+import { addPermittedAction } from '../../../rawContractApis/permissions/write/addPermittedAction';
+import { LitTxVoid } from '../../../types';
 
 // Schema for the request
 const addPermittedActionByIdentifierSchema = z.intersection(

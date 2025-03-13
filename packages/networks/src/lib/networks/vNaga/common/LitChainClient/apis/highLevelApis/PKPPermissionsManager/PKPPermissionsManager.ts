@@ -26,34 +26,34 @@
  * ```
  */
 
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { PkpIdentifierRaw } from "../../rawContractApis/permissions/utils/resolvePkpTokenId";
+import { NagaContext } from '../../../../../types';
+import { PkpIdentifierRaw } from '../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 // Import all handler functions
-import { addPermittedActionByIdentifier } from "./handlers/addPermittedActionByIdentifier";
-import { addPermittedAddressByIdentifier } from "./handlers/addPermittedAddressByIdentifier";
+import { addPermittedActionByIdentifier } from './handlers/addPermittedActionByIdentifier';
+import { addPermittedAddressByIdentifier } from './handlers/addPermittedAddressByIdentifier';
 import {
   getPermissionsContext,
   PermissionsContext,
-} from "./handlers/getPermissionsContext";
-import { getPermittedActionsByIdentifier } from "./handlers/getPermittedActionsByIdentifier";
-import { getPermittedAddressesByIdentifier } from "./handlers/getPermittedAddressesByIdentifier";
-import { getPermittedAuthMethodsByIdentifier } from "./handlers/getPermittedAuthMethodsByIdentifier";
-import { getPermittedAuthMethodScopesByIdentifier } from "./handlers/getPermittedAuthMethodScopesByIdentifier";
-import { getPKPsByAddress } from "./handlers/getPKPsByAddress";
-import { isPermittedActionByIdentifier } from "./handlers/isPermittedActionByIdentifier";
-import { isPermittedAddressByIdentifier } from "./handlers/isPermittedAddressByIdentifier";
-import { removePermittedActionByIdentifier } from "./handlers/removePermittedActionByIdentifier";
-import { removePermittedAddressByIdentifier } from "./handlers/removePermittedAddressByIdentifier";
+} from './handlers/getPermissionsContext';
+import { getPermittedActionsByIdentifier } from './handlers/getPermittedActionsByIdentifier';
+import { getPermittedAddressesByIdentifier } from './handlers/getPermittedAddressesByIdentifier';
+import { getPermittedAuthMethodsByIdentifier } from './handlers/getPermittedAuthMethodsByIdentifier';
+import { getPermittedAuthMethodScopesByIdentifier } from './handlers/getPermittedAuthMethodScopesByIdentifier';
+import { getPKPsByAddress } from './handlers/getPKPsByAddress';
+import { isPermittedActionByIdentifier } from './handlers/isPermittedActionByIdentifier';
+import { isPermittedAddressByIdentifier } from './handlers/isPermittedAddressByIdentifier';
+import { removePermittedActionByIdentifier } from './handlers/removePermittedActionByIdentifier';
+import { removePermittedAddressByIdentifier } from './handlers/removePermittedAddressByIdentifier';
 
-import { logger } from "utils/logger";
-import { ScopeString } from "../../../schemas/shared/ScopeSchema";
-import { LitTxVoid } from "../../types";
-import { AuthMethod } from "../../rawContractApis/permissions/read/getPermittedAuthMethods";
+import { logger } from '../../../../../../shared/logger';
+import { ScopeString } from '../../../schemas/shared/ScopeSchema';
+import { LitTxVoid } from '../../types';
+import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action
-const COMMON_TEST_IPFS_IDS = ["QmPK1s3pNYLi9ERiq3BDxKa4XosgWwFRQUydHUtz4YgpqB"];
+const COMMON_TEST_IPFS_IDS = ['QmPK1s3pNYLi9ERiq3BDxKa4XosgWwFRQUydHUtz4YgpqB'];
 
 export class PKPPermissionsManager {
   private identifier: PkpIdentifierRaw;
@@ -214,7 +214,7 @@ export class PKPPermissionsManager {
 
   /**
    * Gets all permitted authentication methods for the PKP
-   * 
+   *
    * @returns Promise resolving to array of permitted authentication methods
    */
   async getPermittedAuthMethods(): Promise<readonly AuthMethod[]> {
@@ -226,7 +226,7 @@ export class PKPPermissionsManager {
 
   /**
    * Gets permitted scopes for a specific authentication method of the PKP
-   * 
+   *
    * @param params - Parameters for the request
    * @param params.authMethodType - Type of authentication method
    * @param params.authMethodId - ID of authentication method
@@ -241,7 +241,7 @@ export class PKPPermissionsManager {
     return getPermittedAuthMethodScopesByIdentifier(
       {
         identifier: this.getIdentifierParams(),
-        ...params
+        ...params,
       },
       this.networkContext
     );
@@ -277,33 +277,33 @@ export class PKPPermissionsManager {
    */
   async batchUpdatePermissions(
     operations: Array<
-      | { type: "addAction"; ipfsId: string; scopes: ScopeString[] }
-      | { type: "addAddress"; address: string; scopes: ScopeString[] }
-      | { type: "removeAction"; ipfsId: string }
-      | { type: "removeAddress"; address: string }
+      | { type: 'addAction'; ipfsId: string; scopes: ScopeString[] }
+      | { type: 'addAddress'; address: string; scopes: ScopeString[] }
+      | { type: 'removeAction'; ipfsId: string }
+      | { type: 'removeAddress'; address: string }
     >
   ): Promise<void> {
     // Process operations sequentially to avoid transaction conflicts
     for (const op of operations) {
       switch (op.type) {
-        case "addAction":
+        case 'addAction':
           await this.addPermittedAction({
             ipfsId: op.ipfsId,
             scopes: op.scopes,
           });
           break;
-        case "addAddress":
+        case 'addAddress':
           await this.addPermittedAddress({
             address: op.address,
             scopes: op.scopes,
           });
           break;
-        case "removeAction":
+        case 'removeAction':
           await this.removePermittedAction({
             ipfsId: op.ipfsId,
           });
           break;
-        case "removeAddress":
+        case 'removeAddress':
           await this.removePermittedAddress({
             address: op.address,
           });
@@ -356,7 +356,7 @@ export class PKPPermissionsManager {
             });
           } catch (error) {
             // Ignore error - the action might not be in the list
-            logger.error({ error }, "Error removing action");
+            logger.error({ error }, 'Error removing action');
           }
         }
       } catch (error) {

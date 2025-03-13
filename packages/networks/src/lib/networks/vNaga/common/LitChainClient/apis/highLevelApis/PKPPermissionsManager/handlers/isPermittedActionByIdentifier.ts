@@ -1,13 +1,12 @@
-// import { networkContext } from "../../../_config";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { isIpfsCidV0 } from "services/lit/utils/z-validate";
-import { logger } from "utils/logger";
-import { z } from "zod";
-import { isPermittedAction } from "../../../rawContractApis/permissions/read/isPermittedAction";
+import { logger } from '../../../../../../../shared/logger';
+import { NagaContext } from '../../../../../../types';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { z } from 'zod';
+import { isPermittedAction } from '../../../rawContractApis/permissions/read/isPermittedAction';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 // Schema for validating the request parameters
 const isPermittedActionByIdentifierSchema = z.intersection(

@@ -1,7 +1,7 @@
-import { getActiveUnkickedValidatorStructsAndCounts } from "services/lit/LitNetwork/vNaga/common/LitChainClient/apis/rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts";
-import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from "services/lit/LitNetwork/vNaga/common/LitChainClient/schemas/GetActiveUnkickedValidatorStructsAndCountsSchema";
-import { NagaContext } from "services/lit/LitNetwork/vNaga/types";
-import { networkContext } from "../../../_config";
+import { getActiveUnkickedValidatorStructsAndCounts } from '../../../../../common/LitChainClient/apis/rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
+import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../../../common/LitChainClient/schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
+import { NagaContext } from '../../../../../types';
+import { networkContext } from '../../../_config';
 
 /**
  * Interface representing the structure of connection information
@@ -55,7 +55,7 @@ export async function getConnectionInfo({
 
   // Verify minimum node count
   if (!minNodeCount) {
-    throw new Error("❌ Minimum validator count is not set");
+    throw new Error('❌ Minimum validator count is not set');
   }
 
   // Verify validator set meets the minimum threshold
@@ -71,7 +71,7 @@ export async function getConnectionInfo({
   const bootstrapUrls = nodeProtocol
     ? validatorURLs.map((url: string) => {
         // Extract the hostname and port from the URL (remove any existing protocol)
-        const urlWithoutProtocol = url.replace(/^https?:\/\//, "");
+        const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
         return `${nodeProtocol}${urlWithoutProtocol}`;
       })
     : validatorURLs;
@@ -88,12 +88,12 @@ export async function getConnectionInfo({
  *
  * Usage: bun run src/services/lit/LitNetwork/vNaga/common/LitChainClient/apis/highLevelApis/connection/getConnectionInfo.ts
  */
-if (import.meta.main) {
-  // Use the development network context for testing
-  const results = await getConnectionInfo({
-    networkCtx: networkContext,
-  });
+// if (import.meta.main) {
+//   // Use the development network context for testing
+//   const results = await getConnectionInfo({
+//     networkCtx: networkContext,
+//   });
 
-  console.log("Connection Info Results:");
-  console.log(JSON.stringify(results, null, 2));
-}
+//   console.log('Connection Info Results:');
+//   console.log(JSON.stringify(results, null, 2));
+// }
