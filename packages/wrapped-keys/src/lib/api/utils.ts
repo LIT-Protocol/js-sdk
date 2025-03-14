@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-import { log } from '@lit-protocol/misc';
+import { logger } from '@lit-protocol/logger';
 import {
   AccsDefaultParams,
   AuthSig,
@@ -39,7 +39,7 @@ export function getFirstSessionSig(pkpSessionSigs: SessionSigsMap): AuthSig {
   }
 
   const [[, sessionSig]] = sessionSigsEntries;
-  log(`Session Sig being used: ${JSON.stringify(sessionSig)}`);
+  logger.info(`Session Sig being used: ${JSON.stringify(sessionSig)}`);
 
   return sessionSig;
 }
@@ -74,7 +74,7 @@ export function getPkpAddressFromSessionSig(pkpSessionSig: AuthSig): string {
   }
 
   const pkpAddress = delegationAuthSig.address;
-  log(`pkpAddress to permit decryption: ${pkpAddress}`);
+  logger.info(`pkpAddress to permit decryption: ${pkpAddress}`);
 
   return pkpAddress;
 }

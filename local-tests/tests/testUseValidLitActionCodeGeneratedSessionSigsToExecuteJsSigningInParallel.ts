@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -12,7 +11,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInPa
     const alice = await devEnv.createRandomPerson();
 
     const fn = async (index: number) => {
-      log(`Index: ${index}`);
+      console.log(`Index: ${index}`);
 
       return await devEnv.litNodeClient.executeJs({
         authContext: getLitActionAuthContext(devEnv, alice),
@@ -33,7 +32,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInPa
     devEnv.releasePrivateKeyFromUser(alice);
 
     const res = await Promise.all([fn(1), fn(2), fn(3)]);
-    log('res:', res);
+    console.log('res:', res);
 
     // -- Expected output:
     // [
@@ -113,5 +112,5 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInPa
       }
     });
 
-    log('✅ testUsePkpSessionSigsToExecuteJsSigningInParallel');
+    console.log('✅ testUsePkpSessionSigsToExecuteJsSigningInParallel');
   };

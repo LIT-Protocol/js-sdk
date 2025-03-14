@@ -142,7 +142,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 * @returns { any[] | OperatorAcc | AccsSOLV2Params | any }
 */
 export const canonicalSolRpcConditionFormatter = (
-  cond: ConditionItem,
+  cond: ConditionItem | ConditionItem[],
   requireV2Conditions: boolean = false
 ): any[] | OperatorAcc | ConditionItem | AccsSOLV2Params | any => {
   // -- if is array
@@ -186,7 +186,7 @@ export const canonicalSolRpcConditionFormatter = (
               cond,
             },
           },
-          'Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions'
+          'Solana RPC Conditions have changed and there are some new fields you must include in your condition. Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions'
         );
       }
 
@@ -415,7 +415,7 @@ export const canonicalEVMContractConditionFormatter = (
 * @returns
 */
 export const canonicalCosmosConditionFormatter = (
-  cond: ConditionItem
+  cond: ConditionItem | ConditionItem[]
 ): any[] | OperatorAcc | AccsCOSMOSParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {

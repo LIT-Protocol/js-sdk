@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { SerializedTransaction, api } from '@lit-protocol/wrapped-keys';
 import {
@@ -135,7 +134,7 @@ export const testSignTransactionWithSolanaEncryptedKey = async (
       );
     }
 
-    log('✅ testSignMessageWithSolanaEncryptedKey');
+    console.log('✅ testSignMessageWithSolanaEncryptedKey');
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }

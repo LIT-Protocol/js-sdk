@@ -1,7 +1,4 @@
-import {
-  EcdsaSignedMessageShareParsed,
-  SigResponse,
-} from '@lit-protocol/types';
+import { EcdsaSignedMessageShareParsed } from '@lit-protocol/types';
 
 import { getSignatures } from './get-signatures';
 
@@ -50,8 +47,6 @@ describe('getSignatures', () => {
         signedData as unknown as EcdsaSignedMessageShareParsed[],
       requestId,
     });
-
-    console.log('signatures:', signatures);
 
     expect(signatures).toHaveProperty('publicKey');
     expect(signatures).toHaveProperty('r');

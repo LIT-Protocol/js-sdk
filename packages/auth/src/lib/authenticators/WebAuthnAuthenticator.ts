@@ -8,6 +8,7 @@ import { ethers } from 'ethers';
 
 import {
   AUTH_METHOD_TYPE,
+  InvalidArgumentException,
   RemovedFunctionError,
   UnknownError,
   WrongParamFormat,
@@ -278,7 +279,12 @@ function assertAuthenticationResponse(
         .credentialPublicKey instanceof Buffer
     )
   ) {
-    throw new Error(
+    throw new InvalidArgumentException(
+      {
+        info: {
+          authenticationResponse,
+        },
+      },
       'authenticationResponse does not match the expected structure: { attestedCredentialData: { credentialPublicKey: Buffer } }'
     );
   }

@@ -1,11 +1,8 @@
-import {
-  AuthSig,
-  generateAuthSig,
-  createSiweMessage,
-} from '@lit-protocol/auth-helpers';
+import { generateAuthSig, createSiweMessage } from '@lit-protocol/auth-helpers';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
   AuthMethod,
+  AuthSig,
   BaseSiweMessage,
   LitContractContext,
 } from '@lit-protocol/types';

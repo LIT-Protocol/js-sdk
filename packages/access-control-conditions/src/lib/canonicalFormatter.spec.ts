@@ -1,4 +1,6 @@
+import { InvalidAccessControlConditions } from '@lit-protocol/constants';
 import { ConditionItem } from '@lit-protocol/types';
+
 import {
   canonicalUnifiedAccessControlConditionFormatter,
   canonicalSolRpcConditionFormatter,
@@ -11,7 +13,7 @@ import {
 // ---------- Test Cases ----------
 describe('canonicalFormatter.ts', () => {
   it('should format canonical unified access control (ETH + SOLANA Wallet Addresses with "AND" operator)', async () => {
-    const EXPECTED_INPUT: Array<ConditionItem> = [
+    const EXPECTED_INPUT: ConditionItem[] = [
       {
         conditionType: 'evmBasic',
         contractAddress: '',
@@ -74,19 +76,14 @@ describe('canonicalFormatter.ts', () => {
       },
     ];
 
-    const test =
-      canonicalUnifiedAccessControlConditionFormatter(EXPECTED_INPUT);
-
-    expect(test).toStrictEqual(EXPECTED_OUTPUT);
+    expect(
+      canonicalUnifiedAccessControlConditionFormatter(EXPECTED_INPUT)
+    ).toStrictEqual(EXPECTED_OUTPUT);
   });
 
   it('should FAIL to format canonical unified access control if key "conditionType" doesnt exist', async () => {
-    console.log = jest.fn();
-
-    let test;
-
-    try {
-      test = canonicalUnifiedAccessControlConditionFormatter([
+    expect(() =>
+      canonicalUnifiedAccessControlConditionFormatter([
         {
           contractAddress: '',
           standardContractType: '',
@@ -98,84 +95,60 @@ describe('canonicalFormatter.ts', () => {
             value: '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A2',
           },
         },
-      ]);
-    } catch (e) {
-      console.log(e);
-    }
-
-    expect((console.log as any).mock.calls[0][0].message).toContain(
+      ])
+    ).toThrow(
       'You passed an invalid access control condition that is missing or has a wrong'
     );
   });
 
   it('should FAIL to format canonical unified access control (key: foo, value: bar)', async () => {
-    console.log = jest.fn();
-
-    const MOCK_ACCS_UNKNOWN_KEY: any = [
-      {
-        foo: 'bar',
-      },
-      {
-        conditionType: 'evmBasic',
-        contractAddress: '',
-        standardContractType: '',
-        chain: 'ethereum',
-        method: '',
-        parameters: [':userAddress'],
-        returnValueTest: {
-          comparator: '=',
-          value: '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A2',
+    expect(() =>
+      canonicalUnifiedAccessControlConditionFormatter([
+        {
+          // @ts-expect-error we are testing
+          foo: 'bar',
         },
-      },
-    ];
-
-    try {
-      test = canonicalUnifiedAccessControlConditionFormatter(
-        MOCK_ACCS_UNKNOWN_KEY
-      );
-    } catch (e) {
-      console.log(e);
-    }
-
-    expect((console.log as any).mock.calls[0][0].name).toBe(
-      'InvalidAccessControlConditions'
-    );
+        {
+          conditionType: 'evmBasic',
+          contractAddress: '',
+          standardContractType: '',
+          chain: 'ethereum',
+          method: '',
+          parameters: [':userAddress'],
+          returnValueTest: {
+            comparator: '=',
+            value: '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A2',
+          },
+        },
+      ])
+    ).toThrow(InvalidAccessControlConditions);
   });
 
   it('should throw error when format canonical sol rpc condition', async () => {
-    console.log = jest.fn();
-
-    const MOCK_ACCS_UNKNOWN_KEY: any = [
-      {
-        foo: 'bar',
-      },
-      {
-        conditionType: 'evmBasic',
-        contractAddress: '',
-        standardContractType: '',
-        chain: 'ethereum',
-        method: '',
-        parameters: [':userAddress'],
-        returnValueTest: {
-          comparator: '=',
-          value: '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A2',
+    expect(() =>
+      canonicalSolRpcConditionFormatter([
+        {
+          // @ts-expect-error we are testing
+          foo: 'bar',
         },
-      },
-    ];
-
-    try {
-      test = canonicalSolRpcConditionFormatter(MOCK_ACCS_UNKNOWN_KEY);
-    } catch (e) {
-      console.log(e);
-    }
-
-    expect((console.log as any).mock.calls[0][0].name).toBe(
-      'InvalidAccessControlConditions'
-    );
+        {
+          conditionType: 'evmBasic',
+          contractAddress: '',
+          standardContractType: '',
+          chain: 'ethereum',
+          method: '',
+          parameters: [':userAddress'],
+          returnValueTest: {
+            comparator: '=',
+            value: '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A2',
+          },
+        },
+      ])
+    ).toThrow(InvalidAccessControlConditions);
   });
 
   it('should call "canonicalAccessControlConditionFormatter" in node.js', () => {
-    const params: any = [];
+    const params = [] as never[];
 
     const OUTPUT = canonicalAccessControlConditionFormatter(params);
 
@@ -183,7 +156,7 @@ describe('canonicalFormatter.ts', () => {
   });
 
   it('should call canonicalEVMContractConditionFormatter in node.js', () => {
-    const params: any = [];
+    const params = [] as never[];
 
     const OUTPUT = canonicalEVMContractConditionFormatter(params);
 
@@ -191,7 +164,7 @@ describe('canonicalFormatter.ts', () => {
   });
 
   it('should call canonicalCosmosConditionFormatter in node.js', () => {
-    const params: any = [];
+    const params = [] as never[];
 
     const OUTPUT = canonicalCosmosConditionFormatter(params);
 
@@ -199,11 +172,8 @@ describe('canonicalFormatter.ts', () => {
   });
 
   it('should call canonicalResourceIdFormatter in node.js', () => {
-    const params: any = [];
-
-    const OUTPUT = canonicalResourceIdFormatter(params);
-
-    // const res = (console.log as any).mock.calls[0][0];
+    // @ts-expect-error we are testing
+    const OUTPUT = canonicalResourceIdFormatter({});
 
     expect(OUTPUT.baseUrl).toBe(undefined);
   });

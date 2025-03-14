@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
@@ -129,7 +128,7 @@ export const testBatchGeneratePrivateKeys = async (
     await verifyEvmSignature(results[0], evmMessageToSign);
     console.log('results', results);
 
-    log('✅ testBatchGenerateEncryptedKeys');
+    console.log('✅ testBatchGenerateEncryptedKeys');
   } catch (err) {
     console.log(err.message, err, err.stack);
     throw err;

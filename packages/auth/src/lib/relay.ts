@@ -9,6 +9,7 @@ import {
   InvalidParamType,
   NetworkError,
 } from '@lit-protocol/constants';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthMethod,
   MintRequestBody,
@@ -19,13 +20,16 @@ import {
   LitRelayConfig,
 } from '@lit-protocol/types';
 
-import { getAuthIdByAuthMethod, log } from './authenticators/utils';
+import { getAuthIdByAuthMethod } from './authenticators/utils';
 import { WebAuthnAuthenticator } from './authenticators/WebAuthnAuthenticator';
 
 /**
  * Class that communicates with Lit relay server
  */
 export class LitRelay implements IRelay {
+  private _logger = getChildLogger({
+    module: 'LitRelay',
+  });
   /** URL for Lit's relay server */
   static getRelayUrl(litNetwork: LIT_NETWORK_VALUES): string {
     const relayerUrl = RELAYER_URL_BY_NETWORK[litNetwork];
@@ -71,7 +75,10 @@ export class LitRelay implements IRelay {
     this.relayUrl =
       config.relayUrl || LitRelay.getRelayUrl(LIT_NETWORK.NagaDev);
     this.relayApiKey = config.relayApiKey || '';
-    log("Lit's relay server URL:", this.relayUrl);
+    this._logger.info({
+      msg: "Lit's relay server URL",
+      relayUrl: this.relayUrl,
+    });
   }
 
   /**
@@ -92,12 +99,25 @@ export class LitRelay implements IRelay {
     });
 
     if (response.status < 200 || response.status >= 400) {
-      log('Something wrong with the API call', await response.json());
-      const err = new Error('Unable to mint PKP through relay server');
-      throw err;
+      const responseBody = await response.json();
+      this._logger.info({
+        msg: 'Something wrong with the API call',
+        responseBody,
+      });
+      throw new NetworkError(
+        {
+          info: {
+            route: `${this.relayUrl}${this.mintRoute}`,
+            responseStatus: response.status,
+            responseStatusText: response.statusText,
+            responseBody,
+          },
+        },
+        'Unable to mint PKP through relay server'
+      );
     } else {
       const resBody = await response.json();
-      log('Successfully initiated minting PKP with relayer');
+      this._logger.info('Successfully initiated minting PKP with relayer');
       return resBody;
     }
   }
@@ -231,26 +251,47 @@ export class LitRelay implements IRelay {
       );
 
       if (response.status < 200 || response.status >= 400) {
-        log('Something wrong with the API call', await response.json());
-        const err = new Error(
+        const responseBody = await response.json();
+        this._logger.info({
+          msg: 'Something wrong with the API call',
+          responseBody,
+        });
+        throw new NetworkError(
+          {
+            info: {
+              route: `${this.relayUrl}/auth/status/${requestId}`,
+              responseStatus: response.status,
+              responseStatusText: response.statusText,
+              responseBody,
+            },
+          },
           `Unable to poll the status of this mint PKP transaction: ${requestId}`
         );
-        throw err;
       }
 
       const resBody = await response.json();
-      log('Response OK', { body: resBody });
+      this._logger.info({ msg: 'Response OK', resBody });
 
       if (resBody.error) {
         // exit loop since error
-        log('Something wrong with the API call', {
+        this._logger.info({
+          msg: 'Something wrong with the API call',
           error: resBody.error,
         });
-        const err = new Error(resBody.error);
-        throw err;
+        throw new NetworkError(
+          {
+            info: {
+              route: `${this.relayUrl}/auth/status/${requestId}`,
+              responseStatus: response.status,
+              responseStatusText: response.statusText,
+              resBody,
+            },
+          },
+          resBody.error
+        );
       } else if (resBody.status === 'Succeeded') {
         // exit loop since success
-        log('Successfully authed', { ...resBody });
+        this._logger.info({ msg: 'Successfully authed', resBody });
         return resBody;
       }
 
@@ -259,9 +300,14 @@ export class LitRelay implements IRelay {
     }
 
     // at this point, polling ended and still no success, set failure status
-    // console.error(`Hmm this is taking longer than expected...`);
-    const err = new Error('Polling for mint PKP transaction status timed out');
-    throw err;
+    throw new NetworkError(
+      {
+        info: {
+          route: `${this.relayUrl}/auth/status/${requestId}`,
+        },
+      },
+      'Polling for mint PKP transaction status timed out'
+    );
   }
 
   /**
@@ -282,13 +328,25 @@ export class LitRelay implements IRelay {
     });
 
     if (response.status < 200 || response.status >= 400) {
-      console.warn('Something wrong with the API call', await response.json());
-      // console.log("Uh oh, something's not quite right.");
-      const err = new Error('Unable to fetch PKPs through relay server');
-      throw err;
+      const resBody = await response.json();
+      this._logger.warn({
+        msg: 'Something wrong with the API call',
+        resBody,
+      });
+      throw new NetworkError(
+        {
+          info: {
+            route: `${this.relayUrl}${this.fetchRoute}`,
+            responseStatus: response.status,
+            responseStatusText: response.statusText,
+            resBody,
+          },
+        },
+        'Unable to fetch PKPs through relay server'
+      );
     } else {
       const resBody = await response.json();
-      console.log('Successfully fetched PKPs with relayer');
+      this._logger.info('Successfully fetched PKPs with relayer');
       return resBody;
     }
   }
@@ -312,10 +370,16 @@ export class LitRelay implements IRelay {
       },
     });
     if (response.status < 200 || response.status >= 400) {
-      const err = new Error(
+      throw new NetworkError(
+        {
+          info: {
+            route: `${this.relayUrl}${this.fetchRoute}`,
+            responseStatus: response.status,
+            responseStatusText: response.statusText,
+          },
+        },
         `Unable to generate registration options: ${response}`
       );
-      throw err;
     }
     const registrationOptions = await response.json();
     return registrationOptions;

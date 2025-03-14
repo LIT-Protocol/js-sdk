@@ -1,3 +1,4 @@
+import { InvalidArgumentException } from '@lit-protocol/constants';
 import {
   EcdsaSignedMessageShareParsed,
   PKPSignEndpointResponse,
@@ -76,7 +77,14 @@ export const parsePkpSignResponse = (
         : signatureShare;
 
     if (!resolvedShare || typeof resolvedShare !== 'object') {
-      throw new Error('Invalid signatureShare structure.');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            signatureShare,
+          },
+        },
+        'Invalid signatureShare structure.'
+      );
     }
 
     const camelCaseShare = convertKeysToCamelCase(resolvedShare);

@@ -9,7 +9,7 @@ import {
   WrongParamFormat,
 } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { log } from '@lit-protocol/misc';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthMethod,
   AuthSig,
@@ -27,6 +27,9 @@ interface DomainAndOrigin {
 }
 
 export class MetamaskAuthenticator extends BaseAuthenticator {
+  private static readonly _logger = getChildLogger({
+    module: 'MetamaskAuthenticator',
+  });
   /**
    * The domain from which the signing request is made
    */
@@ -51,7 +54,7 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
       domain = options.domain || window.location.hostname;
       origin = options.origin || window.location.origin;
     } catch (e) {
-      log(
+      MetamaskAuthenticator._logger.error(
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       domain = options.domain || 'localhost';

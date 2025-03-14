@@ -1,5 +1,6 @@
-import { Signature } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+
+import { Signature } from '@lit-protocol/types';
 
 /**
  * Retrieves the claims from an array of objects and organizes them into a record.

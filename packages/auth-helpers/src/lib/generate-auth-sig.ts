@@ -1,5 +1,7 @@
-import { AuthSig, SignerLike } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+
+import { InvalidArgumentException } from '@lit-protocol/constants';
+import { AuthSig, SignerLike } from '@lit-protocol/types';
 
 /**
  * Generate an AuthSig object using the signer.
@@ -26,7 +28,16 @@ export const generateAuthSig = async ({
   algo?: 'ed25519';
 }): Promise<AuthSig> => {
   if (!signer?.signMessage) {
-    throw new Error('signer does not have a signMessage method');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          signer,
+          address,
+          algo,
+        },
+      },
+      'signer does not have a signMessage method'
+    );
   }
 
   const signature = await signer.signMessage(toSign);
@@ -41,7 +52,16 @@ export const generateAuthSig = async ({
 
   // If address is still not available, throw an error
   if (!address) {
-    throw new Error('address is required');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          signer,
+          address,
+          algo,
+        },
+      },
+      'address is required'
+    );
   }
 
   return {

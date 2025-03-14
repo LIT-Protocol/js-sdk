@@ -1,3 +1,5 @@
+import { logger } from '@lit-protocol/logger';
+
 import { Listener } from '../listeners';
 import { onError } from '../types';
 
@@ -75,13 +77,13 @@ export class Transition {
    */
   async startListening() {
     try {
-      this.debug && console.log('startListening');
+      this.debug && logger.info('startListening');
       await Promise.all(this.listeners.map((listener) => listener.start()));
 
       if (!this.listeners.length) {
         // If the transition does not have any listeners it will never emit. Therefore, we "match" automatically on next event loop
         setTimeout(() => {
-          this.debug && console.log('Transition without listeners: auto match');
+          this.debug && logger.info('Transition without listeners: auto match');
           this.onMatch([]);
         }, 0);
       }
@@ -99,7 +101,7 @@ export class Transition {
    */
   async stopListening() {
     try {
-      this.debug && console.log('stopListening');
+      this.debug && logger.info('stopListening');
       this.queue.length = 0; // Flush the queue as there might be more value arrays to check
       await Promise.all(this.listeners.map((listener) => listener.stop()));
     } catch (e) {
@@ -129,10 +131,10 @@ export class Transition {
         const isMatch = this.check ? await this.check(currentValues) : true;
 
         if (isMatch) {
-          this.debug && console.log('match', currentValues);
+          this.debug && logger.info({ msg: 'match', values: currentValues });
           await this.onMatch?.(currentValues);
         } else {
-          this.debug && console.log('mismatch', currentValues);
+          this.debug && logger.info({ msg: 'mismatch', values: currentValues });
           await this.onMismatch?.(currentValues);
         }
       }

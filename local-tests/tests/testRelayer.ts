@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { ClaimRequest, ClientClaimProcessor } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { authenticators, LitRelay } from '@lit-protocol/auth';
@@ -90,5 +89,5 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     }
   });
 
-  log('✅ 2. [testRelayer] Claim works');
+  console.log('✅ 2. [testRelayer] Claim works');
 };

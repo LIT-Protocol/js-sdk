@@ -1,5 +1,6 @@
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthSig,
   LitContractContext,
@@ -8,7 +9,6 @@ import {
 import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { TinnyPerson } from './tinny-person';
 
-import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import {
   CENTRALISATION_BY_NETWORK,
   LIT_NETWORK,
@@ -20,7 +20,9 @@ import { ethers, Signer } from 'ethers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 import { toErrorWithMessage } from './tinny-utils';
 
-console.log('checking env', process.env['DEBUG']);
+const logger = getChildLogger({ module: 'tinny-environment' });
+
+logger.info({ msg: 'checking env', env: process.env['DEBUG'] });
 
 const DEFAULT_ANVIL_PRIVATE_KEYS = [
   '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
@@ -49,7 +51,7 @@ export class TinnyEnvironment {
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === LIT_NETWORK.NagaDev
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -147,10 +149,10 @@ export class TinnyEnvironment {
       );
     }
 
-    console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Done configuring environment current config: ',
-      this.processEnvs
-    );
+    logger.info({
+      msg: '[𐬺🧪 Tinny Environment𐬺] Done configuring environment current config: ',
+      processEnvs: this.processEnvs,
+    });
   }
 
   world: Map<string, TinnyPerson> = new Map();
@@ -183,11 +185,12 @@ export class TinnyEnvironment {
       if (index !== -1) {
         // If an available key is found
         this.processEnvs.KEY_IN_USE[index] = true; // Mark the key as in use
-        // console.log('[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index); // Log a message indicating that we have selected a key
+        // logger.info({ msg: '[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index }); // Log a message indicating that we have selected a key
 
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
-        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...', {
+        logger.info({
+          msg: '[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...',
           keysInUse: this.processEnvs.KEY_IN_USE,
         }); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
@@ -205,9 +208,9 @@ export class TinnyEnvironment {
   releasePrivateKeyFromUser(user: TinnyPerson) {
     const index = this.processEnvs.PRIVATE_KEYS.indexOf(user.privateKey);
     this.processEnvs.KEY_IN_USE[index] = false;
-    // console.log(
-    //   `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
-    // );
+    // logger.info({
+    //   msg: `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
+    // });
   }
 
   /**
@@ -216,9 +219,9 @@ export class TinnyEnvironment {
    */
   releasePrivateKey(index: number) {
     this.processEnvs.KEY_IN_USE[index] = false;
-    // console.log(
-    //   `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
-    // );
+    // logger.info({
+    //   msg: `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
+    // });
   }
 
   /**
@@ -234,9 +237,9 @@ export class TinnyEnvironment {
    */
 
   async setupLitNodeClient() {
-    console.log('[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient');
+    logger.info({ msg: '[𐬺🧪 Tinny Environment𐬺] Setting up LitNodeClient' });
 
-    console.log('this.network:', this.network);
+    logger.info({ msg: 'network', network: this.network });
     const centralisation = CENTRALISATION_BY_NETWORK[this.network];
 
     if (this.network === LIT_NETWORK.Custom || centralisation === 'unknown') {
@@ -324,7 +327,7 @@ export class TinnyEnvironment {
    * @throws Error if the name is not provided.
    */
   async createNewPerson(name: string) {
-    console.log('[𐬺🧪 Tinny Environment𐬺] Creating new person:', name);
+    logger.info({ msg: '[𐬺🧪 Tinny Environment𐬺] Creating new person', name });
     if (!name) {
       throw new Error('Name is required');
     }
@@ -373,7 +376,7 @@ export class TinnyEnvironment {
   async init() {
     try {
       if (this.processEnvs.NO_SETUP) {
-        console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
+        logger.info({ msg: '[𐬺🧪 Tinny Environment𐬺] Skipping setup' });
         return;
       }
       if (this.network === LIT_NETWORK.Custom && this.processEnvs.USE_SHIVA) {
@@ -381,9 +384,9 @@ export class TinnyEnvironment {
         // wait for the testnet to be active before we start the tests.
         let state = await this.testnet.pollTestnetForActive();
         if (state === `UNKNOWN`) {
-          console.log(
-            'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down'
-          );
+          logger.info({
+            msg: 'Testnet state found to be Unknown meaning there was an error with testnet creation. shutting down',
+          });
           throw new Error(`Error while creating testnet, aborting test run`);
         }
 
@@ -398,10 +401,10 @@ export class TinnyEnvironment {
       await this.setupSuperCapacityDelegationAuthSig();
     } catch (e) {
       const err = toErrorWithMessage(e);
-      console.log(
-        `[𐬺🧪 Tinny Environment𐬺] Failed to init() tinny ${err.message}`
-      );
-      console.log(err.stack);
+      logger.error({
+        msg: `[𐬺🧪 Tinny Environment𐬺] Failed to init() tinny ${err.message}`,
+        stack: err.stack,
+      });
       process.exit(1);
     }
   }
@@ -417,7 +420,7 @@ export class TinnyEnvironment {
     ) {
       await this.testnet.stopTestnet();
     } else {
-      console.log('skipping testnet shutdown.');
+      logger.info('skipping testnet shutdown.');
     }
   }
   //============= END SHIVA ENDPOINTS =============
@@ -498,9 +501,9 @@ export class TinnyEnvironment {
 
         // get wallet balance
         const balance = await wallet.getBalance();
-        console.log('this.rpc:', rpc);
-        console.log('this.wallet.address', wallet.address);
-        console.log('Balance:', balance.toString());
+        logger.info({ msg: 'this.rpc:', rpc });
+        logger.info({ msg: 'this.wallet.address', address: wallet.address });
+        logger.info({ msg: 'Balance:', balance: balance.toString() });
 
         const transferTx = await wallet.sendTransaction({
           to: capacityCreditWallet.address,
@@ -520,7 +523,7 @@ export class TinnyEnvironment {
     }
 
     if (!this.contractsClient) {
-      console.log('❗️Contracts client not initialized');
+      logger.info('❗️Contracts client not initialized');
       process.exit();
     }
 
@@ -537,7 +540,7 @@ export class TinnyEnvironment {
   };
 
   async mintSuperCapacityDelegationAuthSig(wallet: Signer) {
-    console.log(
+    logger.info(
       '[𐬺🧪 Tinny Environment𐬺] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
     );
 
@@ -552,9 +555,9 @@ export class TinnyEnvironment {
       ).capacityDelegationAuthSig;
     } catch (e: any) {
       if (e.message.includes(`Can't allocate capacity beyond the global max`)) {
-        console.log('❗️Skipping capacity delegation auth sig setup.', e);
+        logger.info('❗️Skipping capacity delegation auth sig setup.', e);
       } else {
-        console.log(
+        logger.info(
           '❗️Error while setting up capacity delegation auth sig',
           e
         );
