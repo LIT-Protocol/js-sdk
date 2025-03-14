@@ -1,3 +1,5 @@
+// Jest is automatically imported in the global scope
+// No need to import describe, test, expect, beforeAll
 import { networkContext, NetworkContext } from '../../../_config';
 import { getActiveUnkickedValidatorStructsAndCounts } from './getActiveUnkickedValidatorStructsAndCounts';
 

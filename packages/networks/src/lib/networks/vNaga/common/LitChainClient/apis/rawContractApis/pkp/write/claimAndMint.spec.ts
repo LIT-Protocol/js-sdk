@@ -1,40 +1,36 @@
-import { beforeAll, describe, expect, test } from "bun:test";
-import {
-  networkContext,
-  NetworkContext,
-} from "../../../_config";
-import { CallExecutionError, ContractFunctionRevertedError } from "viem";
-import { claimAndMint } from "./claimAndMint";
-import { createLitContracts } from "../../../utils/createLitContracts";
-import { ClaimAndMintSchema } from "../../../../schemas/ClaimAndMintSchema";
+import { CallExecutionError, ContractFunctionRevertedError } from 'viem';
+import { networkContext, NetworkContext } from '../../../../_config';
+import { ClaimAndMintSchema } from '../../../../schemas/ClaimAndMintSchema';
+import { createLitContracts } from '../../../utils/createLitContracts';
+import { claimAndMint } from './claimAndMint';
 
-describe("LitChainClient", () => {
+describe('LitChainClient', () => {
   let networkCtx: NetworkContext;
 
   beforeAll(async () => {
     networkCtx = networkContext;
   });
 
-  test("claimAndMint", async () => {
+  test('claimAndMint', async () => {
     try {
       const tx = await claimAndMint(
         {
           derivedKeyId:
-            "4d90d864b5f6adb1dd8ef5fbfc3d7ca74f6dd973f8c52ce12f8ce61aa6a1dfa4",
+            '4d90d864b5f6adb1dd8ef5fbfc3d7ca74f6dd973f8c52ce12f8ce61aa6a1dfa4',
           signatures: [
             {
-              r: "0xcc544fa05678fddff726ec2070bf0c4d2862e35f26ab74baede84dfdf117c841",
-              s: "0x2286aef0cd151175c63116cd622df3ea7bb8113982525ac07c0bd50d33ee7136",
+              r: '0xcc544fa05678fddff726ec2070bf0c4d2862e35f26ab74baede84dfdf117c841',
+              s: '0x2286aef0cd151175c63116cd622df3ea7bb8113982525ac07c0bd50d33ee7136',
               v: 27,
             },
             {
-              r: "0x7b2bbef14e4e277abe1ebb16e6803a4192c7157f2a7e190c6651b27d2b8eb98b",
-              s: "0x149d547cc36f1b996afa799c854fbe8776290864d22677e57f4fbbfac952f728",
+              r: '0x7b2bbef14e4e277abe1ebb16e6803a4192c7157f2a7e190c6651b27d2b8eb98b',
+              s: '0x149d547cc36f1b996afa799c854fbe8776290864d22677e57f4fbbfac952f728',
               v: 28,
             },
             {
-              r: "0x59459b3830a4f5b365270a7cf559a8a4a8c90f348a68544e64fac3ed22190ad3",
-              s: "0x4d2bf3d3a9520fa205a60b6031aea84c5fe788fb5198a4a453fb9e20acb05488",
+              r: '0x59459b3830a4f5b365270a7cf559a8a4a8c90f348a68544e64fac3ed22190ad3',
+              s: '0x4d2bf3d3a9520fa205a60b6031aea84c5fe788fb5198a4a453fb9e20acb05488',
               v: 28,
             },
           ],
@@ -62,28 +58,28 @@ describe("LitChainClient", () => {
       const reason = (
         (error as CallExecutionError).cause as ContractFunctionRevertedError
       ).reason;
-      expect(reason).toBe("PubkeyRouter: pubkey already has routing data");
+      expect(reason).toBe('PubkeyRouter: pubkey already has routing data');
     }
   });
 
-  test("simulate claimAndMint", async () => {
+  test('simulate claimAndMint', async () => {
     const validatedRequest = ClaimAndMintSchema.parse({
       derivedKeyId:
-        "fa9c79fc322d407c2b1f9e1589edd444c95bbadf4baf1f3a2863d33ee1ff7ab4",
+        'fa9c79fc322d407c2b1f9e1589edd444c95bbadf4baf1f3a2863d33ee1ff7ab4',
       signatures: [
         {
-          r: "0x87446889e5e551d88e968788d4f9651adcff0d2f4188ea9a27fe5d2436ddea9b",
-          s: "0x132ff3bdb078365c83bb5d24ee2c05408155b24234b39b962c8321a82d0c1f7f",
+          r: '0x87446889e5e551d88e968788d4f9651adcff0d2f4188ea9a27fe5d2436ddea9b',
+          s: '0x132ff3bdb078365c83bb5d24ee2c05408155b24234b39b962c8321a82d0c1f7f',
           v: 27,
         },
         {
-          r: "0xb15a8ed3a10f919301307ef463a72d40079c163107f43393cbf65701c73902de",
-          s: "0x20a4f1469c935363ac9cea5a7c5b65ffbd8f37c5d48be5c2e15966c9bbddde06",
+          r: '0xb15a8ed3a10f919301307ef463a72d40079c163107f43393cbf65701c73902de',
+          s: '0x20a4f1469c935363ac9cea5a7c5b65ffbd8f37c5d48be5c2e15966c9bbddde06',
           v: 27,
         },
         {
-          r: "0x97dee43dfbf3be22bc530e5322b33bf6a571d15c234e3d2251207d6c888bf140",
-          s: "0x7cfab33b2d4a9140089d2f0a4178b5fad0725fef4b6335741684f99715539bd1",
+          r: '0x97dee43dfbf3be22bc530e5322b33bf6a571d15c234e3d2251207d6c888bf140',
+          s: '0x7cfab33b2d4a9140089d2f0a4178b5fad0725fef4b6335741684f99715539bd1',
           v: 27,
         },
       ],
@@ -94,20 +90,18 @@ describe("LitChainClient", () => {
 
     const mintCost = await pkpNftContract.read.mintCost();
 
+    const REALM_ID = 1n;
     const result = await publicClient.simulateContract({
       address: pkpNftContract.address,
       abi: pkpNftContract.abi,
-      functionName: "claimAndMint",
-      args: [
-        2n,
-        derivedKeyId,
-        signatures,
-        stakingContract.address,
-      ],
+      functionName: 'claimAndMint',
+      args: [REALM_ID, 2n, derivedKeyId, signatures, stakingContract.address],
       value: mintCost,
       account: walletClient.account!,
     });
 
-    expect(result.result).toBe(39540774701362869188416741706549054806716702330527798538695592469657559009284n);
+    expect(result.result).toBe(
+      39540774701362869188416741706549054806716702330527798538695592469657559009284n
+    );
   });
 });
