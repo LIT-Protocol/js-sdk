@@ -38,8 +38,9 @@ export interface UpdatesContext {
 // Action Types
 export type ActionConstructor = new (params: any) => Action;
 
-export interface RawActionDefinition extends ActionParams {
+export interface RawActionDefinition {
   key: string;
+  [actionProperty: string]: unknown;
 }
 
 export interface LitActionActionDefinition {

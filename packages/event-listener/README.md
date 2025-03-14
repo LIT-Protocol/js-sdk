@@ -254,6 +254,27 @@ async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
   const ethPrivateKey = '0xTHE_PKP_AUTHORIZED_SIGNER_PRIVATE_KEY';
 
   const stateMachine = StateMachine.fromDefinition({
+    // Extend the action respository with a custom action we will define later. For example to send notification to the machine owner on transactions
+    actionRepository: {
+      notify: class NotificationAction extends Action {
+        constructor({
+          stateMachine,
+          customParam,
+        }: {
+          stateMachine: StateMachine;
+          customParam: string;
+        }) {
+          super({
+            debug,
+            function: async () => {
+              const transferData = stateMachine.getFromContext('transfer');
+              console.log('customParam', customParam);
+              console.log('transferData', transferData);
+            },
+          });
+        }
+      },
+    },
     privateKey: ethPrivateKey, // Used only for authorization here, minting was done previously
     context: {
       // We can prepopulate the context, for example setting the pkp here instead of using state.usePkp later
@@ -370,6 +391,11 @@ async function bridgeBaseSepoliaUSDCToEthereumSepolia() {
                 contextPath: 'transfer.amount',
               },
             ],
+          },
+          {
+            // Our custom action to notify about the just executed transfer transaction
+            key: 'notify',
+            customParam: 'OUR_CUSTOM_PARAM',
           },
         ],
         // Going back to waitForFunds to suspend machine if we need more sepolia eth or sepolia USDC
