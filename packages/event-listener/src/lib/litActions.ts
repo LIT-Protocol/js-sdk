@@ -1,9 +1,11 @@
 import { ethers } from 'ethers';
 
+import { authenticators } from '@lit-protocol/auth';
 import { LitActionResource } from '@lit-protocol/auth-helpers';
-import { LIT_ABILITY, LIT_NETWORK } from '@lit-protocol/constants';
-import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+
+const { MetamaskAuthenticator } = authenticators;
 
 export const signWithLitActionCode = `(async () =>  {
             const signature = await Lit.Actions.signAndCombineEcdsa({
@@ -48,7 +50,7 @@ export async function executeLitAction({
       pkpPublicKey,
       capabilityAuthSigs: [],
       authMethods: [
-        await EthWalletProvider.authenticate({
+        await MetamaskAuthenticator.authenticate({
           signer: authSigner,
           litNodeClient: litNodeClient,
           expiration,

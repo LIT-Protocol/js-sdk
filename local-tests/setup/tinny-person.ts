@@ -11,8 +11,11 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { PKPInfo, TinnyEnvConfig } from './tinny-config';
-import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 import { AUTH_METHOD_SCOPE, LIT_NETWORK } from '@lit-protocol/constants';
+
+import { authenticators } from '@lit-protocol/auth';
+
+const { MetamaskAuthenticator } = authenticators;
 
 export class TinnyPerson {
   public privateKey: string;
@@ -53,7 +56,7 @@ export class TinnyPerson {
   }
 
   async getAuthMethodId(): Promise<string> {
-    return EthWalletProvider.authMethodId(this.authMethod);
+    return MetamaskAuthenticator.authMethodId(this.authMethod);
   }
 
   /**
@@ -116,7 +119,7 @@ export class TinnyPerson {
     console.log(
       '[𐬺🧪 Tinny Person𐬺] Crafting an authMethod from the authSig for the eth wallet auth method...'
     );
-    this.authMethod = await EthWalletProvider.authenticate({
+    this.authMethod = await MetamaskAuthenticator.authenticate({
       signer: this.wallet,
       litNodeClient: this.envConfig.litNodeClient,
     });
