@@ -4,7 +4,7 @@ import { getPermittedAddresses } from '../../../rawContractApis/permissions/read
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 /**
  * Get permitted addresses for a PKP token using various identifier types

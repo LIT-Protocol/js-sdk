@@ -4,9 +4,9 @@ import { NagaContext } from '../../../../../../types';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
-import { removePermittedAction } from "../../../rawContractApis/permissions/write/removePermittedAction";
-import { LitTxVoid } from "../../../types";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+import { removePermittedAction } from '../../../rawContractApis/permissions/write/removePermittedAction';
+import { LitTxVoid } from '../../../types';
 
 // Schema for the request
 const removePermittedActionByIdentifierSchema = z.intersection(

@@ -4,7 +4,7 @@ import { getPermittedActions } from '../../../rawContractApis/permissions/read/g
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 /**
  * Get permitted actions for a PKP token using various identifier types

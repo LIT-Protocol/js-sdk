@@ -11,4 +11,5 @@ const GAS_LIMIT_INCREASE_PERCENTAGE = 10;
 export const GAS_LIMIT_ADJUSTMENT = BigInt(100 + GAS_LIMIT_INCREASE_PERCENTAGE);
 
 export const networkContext = nagaLocalDevelopNetworkContext; // we shall change this later
+
 export type NetworkContext = NagaLocalDevelopNetworkContext;

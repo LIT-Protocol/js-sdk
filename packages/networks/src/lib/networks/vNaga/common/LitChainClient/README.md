@@ -51,15 +51,15 @@ The client provides three main API objects:
 ### Using High-Level API
 
 ```typescript
-import { LitChainClientAPI } from "../LitChainClient/apis";
+import { LitChainClientAPI } from '../LitChainClient/apis';
 
 // Minting a PKP with simplified API
 const result = await LitChainClientAPI.mintPKP(
   {
     authMethod: {
       authMethodType: 1,
-      id: "example-id",
-      pubkey: "0x...", // webAuthn only
+      id: 'example-id',
+      pubkey: '0x...', // webAuthn only
     },
   },
   networkContext
@@ -75,15 +75,15 @@ await permissionsManager.addPermittedAction(tokenId, actionId);
 ### Using Raw API
 
 ```typescript
-import { LitChainClientRawAPI } from "../LitChainClient/apis";
+import { LitChainClientRawAPI } from '../LitChainClient/apis';
 
 // Using the raw API
 const result = await LitChainClientRawAPI.pkp.write.mintNextAndAddAuthMethods(
   {
     keyType: 2,
     permittedAuthMethodTypes: [1],
-    permittedAuthMethodIds: ["example-id"],
-    permittedAuthMethodPubkeys: ["0x..."],
+    permittedAuthMethodIds: ['example-id'],
+    permittedAuthMethodPubkeys: ['0x...'],
     permittedAuthMethodScopes: [[1, 2, 3]],
     addPkpEthAddressAsPermittedAddress: true,
     sendPkpToItself: false,
@@ -102,7 +102,7 @@ const isPermitted =
 ### Using Utilities
 
 ```typescript
-import { LitChainClientUtils } from "../LitChainClient/apis";
+import { LitChainClientUtils } from '../LitChainClient/apis';
 
 // Create contract instances
 const contracts = LitChainClientUtils.createLitContracts(networkContext);

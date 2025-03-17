@@ -23,7 +23,7 @@ import { nagaDevNetworkContext } from 'services/lit/LitNetwork/vNaga/datil-dev/n
 
 // Create the permissions manager with a PKP identifier
 const manager = new PKPPermissionsManager(
-  { tokenId: "YOUR_TOKEN_ID" },  // Can also use { pubkey: "0x..." } or { address: "0x..." }
+  { tokenId: 'YOUR_TOKEN_ID' }, // Can also use { pubkey: "0x..." } or { address: "0x..." }
   nagaDevNetworkContext
 );
 ```
@@ -33,13 +33,13 @@ const manager = new PKPPermissionsManager(
 ```typescript
 // Add a permitted LitAction
 await manager.addPermittedAction({
-  ipfsId: "QmYourIpfsId", 
-  scopes: ["sign-anything"]
+  ipfsId: 'QmYourIpfsId',
+  scopes: ['sign-anything'],
 });
 
 // Check if a LitAction is permitted
 const isPermitted = await manager.isPermittedAction({
-  ipfsId: "QmYourIpfsId"
+  ipfsId: 'QmYourIpfsId',
 });
 
 // Get all permitted LitActions
@@ -47,7 +47,7 @@ const litActions = await manager.getPermittedActions();
 
 // Remove a permitted LitAction
 await manager.removePermittedAction({
-  ipfsId: "QmYourIpfsId"
+  ipfsId: 'QmYourIpfsId',
 });
 ```
 
@@ -56,13 +56,13 @@ await manager.removePermittedAction({
 ```typescript
 // Add a permitted address
 await manager.addPermittedAddress({
-  address: "0xYourAddress", 
-  scopes: ["sign-anything"]
+  address: '0xYourAddress',
+  scopes: ['sign-anything'],
 });
 
 // Check if an address is permitted
 const isAddressPermitted = await manager.isPermittedAddress({
-  address: "0xYourAddress"
+  address: '0xYourAddress',
 });
 
 // Get all permitted addresses
@@ -70,7 +70,7 @@ const addresses = await manager.getPermittedAddresses();
 
 // Remove a permitted address
 await manager.removePermittedAddress({
-  address: "0xYourAddress"
+  address: '0xYourAddress',
 });
 ```
 
@@ -81,17 +81,17 @@ await manager.removePermittedAddress({
 const context = await manager.getPermissionsContext();
 
 // Use context for efficient permission checks
-if (context.isActionPermitted("0xActionHash")) {
+if (context.isActionPermitted('0xActionHash')) {
   // Action is permitted
 }
 
-if (context.isAddressPermitted("0xAddress")) {
+if (context.isAddressPermitted('0xAddress')) {
   // Address is permitted
 }
 
 // Access all permissions
-console.log(context.actions);    // All permitted LitActions
-console.log(context.addresses);  // All permitted addresses
+console.log(context.actions); // All permitted LitActions
+console.log(context.addresses); // All permitted addresses
 ```
 
 ### Batch Operations
@@ -99,24 +99,24 @@ console.log(context.addresses);  // All permitted addresses
 ```typescript
 // Perform multiple operations in a single call
 await manager.batchUpdatePermissions([
-  { 
-    type: 'addAction', 
-    ipfsId: 'QmNewLitAction', 
-    scopes: ['sign-anything'] 
+  {
+    type: 'addAction',
+    ipfsId: 'QmNewLitAction',
+    scopes: ['sign-anything'],
   },
-  { 
-    type: 'addAddress', 
-    address: '0xNewAddress', 
-    scopes: ['sign-anything'] 
+  {
+    type: 'addAddress',
+    address: '0xNewAddress',
+    scopes: ['sign-anything'],
   },
-  { 
-    type: 'removeAction', 
-    ipfsId: 'QmOldLitAction' 
+  {
+    type: 'removeAction',
+    ipfsId: 'QmOldLitAction',
   },
-  { 
-    type: 'removeAddress', 
-    address: '0xOldAddress' 
-  }
+  {
+    type: 'removeAddress',
+    address: '0xOldAddress',
+  },
 ]);
 ```
 
@@ -132,7 +132,7 @@ await manager.revokeAllPermissions();
 ```typescript
 // Static method to get all PKPs associated with an address
 const pkps = await PKPPermissionsManager.getPKPsByAddress(
-  "0xYourAddress",
+  '0xYourAddress',
   nagaDevNetworkContext
 );
 ```
@@ -179,10 +179,11 @@ constructor(identifier: PkpIdentifierRaw, networkContext: DatilContext)
 ### ScopeString
 
 Available permission scopes:
+
 - `"no-permissions"`: No permissions granted
 - `"sign-anything"`: Permission to sign any message
 - `"personal-sign"`: Permission for personal signatures only
 
 ## License
 
-This code is part of the PKP Auth Service and is subject to its license terms. 
+This code is part of the PKP Auth Service and is subject to its license terms.

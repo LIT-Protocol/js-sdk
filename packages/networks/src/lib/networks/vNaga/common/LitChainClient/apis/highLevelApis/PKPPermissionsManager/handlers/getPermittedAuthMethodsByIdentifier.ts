@@ -4,11 +4,11 @@ import { networkContext } from '../../../../_config';
 import {
   AuthMethod,
   getPermittedAuthMethods,
-} from "../../../rawContractApis/permissions/read/getPermittedAuthMethods";
+} from '../../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 /**
  * Get permitted authentication methods for a PKP token using various identifier types

@@ -5,7 +5,7 @@ import { isPermittedAddress } from '../../../rawContractApis/permissions/read/is
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
-} from "../../../rawContractApis/permissions/utils/resolvePkpTokenId";
+} from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 // Schema for validating the request parameters
 const isPermittedAddressByIdentifierSchema = z.intersection(

@@ -6,6 +6,6 @@
  */
 
 // Export existing high-level APIs
-export * from "./mintPKP/mintPKP";
-export * from "./PKPPermissionsManager";
-export * from "./priceFeed";
+export * from './mintPKP/mintPKP';
+export * from './PKPPermissionsManager';
+export * from './priceFeed';

@@ -5,10 +5,10 @@ import {
   anvilFirstPrivateKey,
   anvilRpcUrl,
 } from '../../shared/chains/anvil';
-import { NetworkContext } from '../../shared/types';
+import { INetworkContext } from '../common/NetworkContext';
 import { signatures as localDevelopSignatures } from './naga-develop-signatures/naga-develop';
 
-export const nagaLocalDevelopNetworkContext: NetworkContext<
+export const nagaLocalDevelopNetworkContext: INetworkContext<
   typeof localDevelopSignatures
 > = {
   network: 'custom',

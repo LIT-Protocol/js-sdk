@@ -40,7 +40,7 @@ export async function getActiveUnkickedValidatorStructsAndCounts(
 //   validatorURLs: [ "https://15.235.83.220:7470", "https://15.235.83.220:7472", "https://15.235.83.220:7471" ],
 // }
 // if (import.meta.main) {
-//   const networkCtx = networkContext;
-//   const res = await getActiveUnkickedValidatorStructsAndCounts(networkCtx);
+//   const { networkContext } = await import('../../../_config');
+//   const res = await getActiveUnkickedValidatorStructsAndCounts(networkContext);
 //   console.log(res);
 // }

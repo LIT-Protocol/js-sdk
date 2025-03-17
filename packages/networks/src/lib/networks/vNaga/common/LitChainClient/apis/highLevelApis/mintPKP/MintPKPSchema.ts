@@ -1,7 +1,7 @@
-import { isHex, toBytes, toHex } from "viem";
-import { z } from "zod";
-import { AuthMethodSchema } from "../../../schemas/shared/AuthMethodSchema";
-import { ScopeSchemaRaw } from "../../../schemas/shared/ScopeSchema";
+import { isHex, toBytes, toHex } from 'viem';
+import { z } from 'zod';
+import { AuthMethodSchema } from '../../../schemas/shared/AuthMethodSchema';
+import { ScopeSchemaRaw } from '../../../schemas/shared/ScopeSchema';
 
 export const MintPKPSchema = z
   .object({
