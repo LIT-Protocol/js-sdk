@@ -1,20 +1,29 @@
-// this will cause error on the browser, it's just a stub for now
 import { datilSignatures } from '@lit-protocol/contracts';
-import { env } from 'config/env';
-import { chronicleYellowstone } from '../../shared/chains/yellowstone.ts';
-import { NetworkContext } from '../../shared/types';
+import { createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import {
+  anvilConfig,
+  anvilFirstPrivateKey,
+  anvilRpcUrl,
+} from '../../shared/chains/anvil';
+import { INetworkContext } from '../common/NetworkContext';
 
-export const datilMainnetNetworkContext: NetworkContext<
+export const datilMainnetNetworkContext: INetworkContext<
   typeof datilSignatures
 > = {
   network: 'datil',
-  rpcUrl: env.LIT_TXSENDER_RPC_URL,
-  privateKey: env.LIT_TXSENDER_PRIVATE_KEY,
+  rpcUrl: anvilRpcUrl,
+  privateKey: anvilFirstPrivateKey,
   chainConfig: {
-    chain: chronicleYellowstone,
+    chain: anvilConfig,
     contractData: datilSignatures,
   },
   httpProtocol: 'https://',
+  walletClient: createWalletClient({
+    chain: anvilConfig,
+    transport: http(anvilRpcUrl),
+    account: privateKeyToAccount(anvilFirstPrivateKey),
+  }),
 };
 
 export type DatilMainnetNetworkContext = typeof datilMainnetNetworkContext;
