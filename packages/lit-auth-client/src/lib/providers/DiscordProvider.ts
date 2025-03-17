@@ -37,13 +37,19 @@ export default class DiscordProvider extends BaseProvider {
   /**
    * Redirect user to the Lit's Discord login page
    *
+   * @param {Function} [callback] - Optional callback to handle login URL
    * @returns {Promise<void>} - Redirects user to Lit login page
    */
-  public async signIn(): Promise<void> {
+  public async signIn(callback?: (url: string) => void): Promise<void> {
     // Get login url
     const loginUrl = await prepareLoginUrl('discord', this.redirectUri);
-    // Redirect to login url
-    window.location.assign(loginUrl);
+
+    // If callback is provided, use it. Otherwise, redirect to login url
+    if (callback) {
+      callback(loginUrl);
+    } else {
+      window.location.assign(loginUrl);
+    }
   }
 
   /**
