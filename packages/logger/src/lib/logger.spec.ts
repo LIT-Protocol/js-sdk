@@ -129,13 +129,22 @@ describe('logger', () => {
 
   it('should allow custom log prefix', () => {
     const customPrefix = '[CustomApp]';
-    lm.withConfig({
-      logPrefix: customPrefix,
-    });
+    lm.setPrefix(customPrefix);
     const logger = lm.get('custom-prefix-category', 'custom-prefix-id');
     logger.setLevel(LOG_LEVEL.INFO);
     logger.info('test message');
     const logs = lm.getLogsForId('custom-prefix-id');
+    expect(logs.length).toEqual(1);
+    expect(logs[0].startsWith(customPrefix)).toBeTruthy();
+  });
+
+  it('should apply prefix to individual logger', () => {
+    const customPrefix = '[IndividualLogger]';
+    const logger = lm.get('individual-logger', 'individual-id');
+    logger.setPrefix(customPrefix);
+    logger.setLevel(LOG_LEVEL.INFO);
+    logger.info('test message');
+    const logs = lm.getLogsForId('individual-id');
     expect(logs.length).toEqual(1);
     expect(logs[0].startsWith(customPrefix)).toBeTruthy();
   });

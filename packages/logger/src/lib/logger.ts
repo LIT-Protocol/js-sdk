@@ -135,6 +135,7 @@ class Log implements ILog {
   level: LOG_LEVEL_VALUES;
   error?: any;
   private _config?: Record<string, any>;
+  private _customPrefix: string;
 
   constructor(
     timestamp: string,
@@ -143,7 +144,8 @@ class Log implements ILog {
     id: string,
     category: string,
     level: LOG_LEVEL_VALUES,
-    config?: Record<string, any>
+    config?: Record<string, any>,
+    customPrefix?: string
   ) {
     this.timestamp = timestamp;
     this.message = message;
@@ -152,15 +154,11 @@ class Log implements ILog {
     this.category = category;
     this.level = level;
     this._config = config;
-  }
-
-  private get _prefix(): string {
-    // Default to the original prefix for backward compatibility
-    return this._config?.['logPrefix'] ?? `[Lit-JS-SDK v${version}]`;
+    this._customPrefix = customPrefix || `[Lit-JS-SDK v${version}]`;
   }
 
   toString(): string {
-    let fmtStr: string = `${this._prefix}${_convertLoggingLevel(
+    let fmtStr: string = `${this._customPrefix}${_convertLoggingLevel(
       this.level
     )} [${this.category}] [id: ${this.id}] ${this.message}`;
     for (let i = 0; i < this.args.length; i++) {
@@ -175,7 +173,7 @@ class Log implements ILog {
 
   toArray(): string[] {
     const args = [];
-    args.push(this._prefix);
+    args.push(this._customPrefix);
     args.push(`[${this.timestamp}]`);
     args.push(_convertLoggingLevel(this.level));
     args.push(`[${this.category}]`);
@@ -216,6 +214,7 @@ export class Logger {
   private _isParent: boolean;
   private _children: Map<string, Logger>;
   private _timestamp: number;
+  private _prefix: string = `[Lit-JS-SDK v${version}]`; // Default prefix
 
   public static createLogger(
     category: string,
@@ -313,6 +312,21 @@ export class Logger {
       this._log(LOG_LEVEL.TIMING_END, message, ...args);
   }
 
+  /**
+   * Sets a custom prefix for log messages
+   * @param prefix The custom prefix to use instead of default "[Lit-JS-SDK v{version}]"
+   */
+  public setPrefix(prefix: string): void {
+    this._prefix = prefix;
+    
+    // Propagate to children
+    if (this._children) {
+      for (const child of this._children.values()) {
+        child.setPrefix(prefix);
+      }
+    }
+  }
+
   private _log(
     level: LOG_LEVEL_VALUES,
     message: string = '',
@@ -325,7 +339,8 @@ export class Logger {
       this._id,
       this._category,
       level,
-      this._config
+      this._config,
+      this._prefix
     );
 
     const arrayLog = log.toArray();
@@ -431,7 +446,6 @@ export class LogManager {
    * Configure the LogManager with additional options
    * @param config Configuration options:
    * - condenseLogs: When true, identical log messages will be filtered out to reduce noise
-   * - logPrefix: Custom prefix for all log messages (defaults to "[Lit-JS-SDK v{version}]")
    */
   public withConfig(config: Record<string, any>) {
     this._config = config;
@@ -562,5 +576,15 @@ export class LogManager {
     }
 
     return logsForRequest;
+  }
+
+  /**
+   * Sets a custom prefix for all loggers
+   * @param prefix The custom prefix to use instead of default "[Lit-JS-SDK v{version}]"
+   */
+  public setPrefix(prefix: string): void {
+    for (const logger of this._loggers.values()) {
+      logger.setPrefix(prefix);
+    }
   }
 }
