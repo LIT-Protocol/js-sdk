@@ -126,4 +126,17 @@ describe('logger', () => {
     expect(requestIds[0]).toBe('1');
     expect(requestIds[1]).toBe('2');
   });
+
+  it('should allow custom log prefix', () => {
+    const customPrefix = '[CustomApp]';
+    lm.withConfig({
+      logPrefix: customPrefix,
+    });
+    const logger = lm.get('custom-prefix-category', 'custom-prefix-id');
+    logger.setLevel(LOG_LEVEL.INFO);
+    logger.info('test message');
+    const logs = lm.getLogsForId('custom-prefix-id');
+    expect(logs.length).toEqual(1);
+    expect(logs[0].startsWith(customPrefix)).toBeTruthy();
+  });
 });

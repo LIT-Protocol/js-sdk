@@ -134,6 +134,7 @@ class Log implements ILog {
   category: string;
   level: LOG_LEVEL_VALUES;
   error?: any;
+  private _config?: Record<string, any>;
 
   constructor(
     timestamp: string,
@@ -141,7 +142,8 @@ class Log implements ILog {
     args: any[],
     id: string,
     category: string,
-    level: LOG_LEVEL_VALUES
+    level: LOG_LEVEL_VALUES,
+    config?: Record<string, any>
   ) {
     this.timestamp = timestamp;
     this.message = message;
@@ -149,10 +151,16 @@ class Log implements ILog {
     this.id = id;
     this.category = category;
     this.level = level;
+    this._config = config;
+  }
+
+  private get _prefix(): string {
+    // Default to the original prefix for backward compatibility
+    return this._config?.['logPrefix'] ?? `[Lit-JS-SDK v${version}]`;
   }
 
   toString(): string {
-    let fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(
+    let fmtStr: string = `${this._prefix}${_convertLoggingLevel(
       this.level
     )} [${this.category}] [id: ${this.id}] ${this.message}`;
     for (let i = 0; i < this.args.length; i++) {
@@ -167,7 +175,7 @@ class Log implements ILog {
 
   toArray(): string[] {
     const args = [];
-    args.push(`[Lit-JS-SDK v${version}]`);
+    args.push(this._prefix);
     args.push(`[${this.timestamp}]`);
     args.push(_convertLoggingLevel(this.level));
     args.push(`[${this.category}]`);
@@ -316,7 +324,8 @@ export class Logger {
       args,
       this._id,
       this._category,
-      level
+      level,
+      this._config
     );
 
     const arrayLog = log.toArray();
@@ -418,6 +427,12 @@ export class LogManager {
     this._loggers = new Map();
   }
 
+  /**
+   * Configure the LogManager with additional options
+   * @param config Configuration options:
+   * - condenseLogs: When true, identical log messages will be filtered out to reduce noise
+   * - logPrefix: Custom prefix for all log messages (defaults to "[Lit-JS-SDK v{version}]")
+   */
   public withConfig(config: Record<string, any>) {
     this._config = config;
     for (const logger of this._loggers) {
