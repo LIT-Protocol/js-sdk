@@ -126,26 +126,171 @@ describe('logger', () => {
     expect(requestIds[0]).toBe('1');
     expect(requestIds[1]).toBe('2');
   });
+});
 
-  it('should allow custom log prefix', () => {
-    const customPrefix = '[CustomApp]';
-    lm.setPrefix(customPrefix);
-    const logger = lm.get('custom-prefix-category', 'custom-prefix-id');
-    logger.setLevel(LOG_LEVEL.INFO);
-    logger.info('test message');
-    const logs = lm.getLogsForId('custom-prefix-id');
-    expect(logs.length).toEqual(1);
-    expect(logs[0].startsWith(customPrefix)).toBeTruthy();
+describe('Logger Prefix Tests', () => {
+  beforeEach(() => {
+    // Clear the LogManager instance before each test
+    LogManager.clearInstance();
+    // Spy on console.log to verify output
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'debug').mockImplementation(() => {});
+    jest.spyOn(console, 'info').mockImplementation(() => {});
   });
 
-  it('should apply prefix to individual logger', () => {
-    const customPrefix = '[IndividualLogger]';
-    const logger = lm.get('individual-logger', 'individual-id');
-    logger.setPrefix(customPrefix);
-    logger.setLevel(LOG_LEVEL.INFO);
-    logger.info('test message');
-    const logs = lm.getLogsForId('individual-id');
-    expect(logs.length).toEqual(1);
-    expect(logs[0].startsWith(customPrefix)).toBeTruthy();
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should use default prefix when no custom prefix is set', () => {
+    // Get a logger without setting a custom prefix
+    const logger = LogManager.Instance.get('test-category');
+
+    // Call a logging method
+    logger.debug('Test message');
+
+    // Verify the first argument to console.debug contains the default prefix
+    expect(console.debug).toHaveBeenCalled();
+    const firstArg = (console.debug as jest.Mock).mock.calls[0][0];
+    expect(firstArg).toMatch(/\[Lit-JS-SDK v[0-9.]+\]/);
+  });
+
+  it('should apply custom prefix to existing loggers', () => {
+    // Create a logger first
+    const logger = LogManager.Instance.get('test-category');
+
+    // Then set a custom prefix
+    LogManager.Instance.setPrefix('[MyApp]');
+
+    // Verify the prefix was set
+    expect(logger.getPrefix()).toBe('[MyApp]');
+
+    // Verify log output has the custom prefix
+    logger.debug('Test message');
+    expect(console.debug).toHaveBeenCalled();
+    const firstArg = (console.debug as jest.Mock).mock.calls[0][0];
+    expect(firstArg).toBe('[MyApp]');
+  });
+
+  it('should apply custom prefix to new loggers', () => {
+    // Set a custom prefix first
+    LogManager.Instance.setPrefix('[MyApp]');
+
+    // Then create a logger
+    const logger = LogManager.Instance.get('test-category');
+
+    // Verify the prefix was applied
+    expect(logger.getPrefix()).toBe('[MyApp]');
+
+    // Verify log output has the custom prefix
+    logger.debug('Test message');
+    expect(console.debug).toHaveBeenCalled();
+    const firstArg = (console.debug as jest.Mock).mock.calls[0][0];
+    expect(firstArg).toBe('[MyApp]');
+  });
+
+  it('should apply custom prefix to child loggers', () => {
+    // Set a custom prefix
+    LogManager.Instance.setPrefix('[MyApp]');
+
+    // Create a parent logger
+    const parentLogger = LogManager.Instance.get('parent-category');
+
+    // Create a child logger
+    const childLogger = LogManager.Instance.get('parent-category', 'child-id');
+
+    // Verify both loggers have the custom prefix
+    expect(parentLogger.getPrefix()).toBe('[MyApp]');
+    expect(childLogger.getPrefix()).toBe('[MyApp]');
+
+    // Verify log output from child has the custom prefix
+    childLogger.debug('Test message');
+    expect(console.debug).toHaveBeenCalled();
+    const firstArg = (console.debug as jest.Mock).mock.calls[0][0];
+    expect(firstArg).toBe('[MyApp]');
+  });
+
+  it('should update all loggers when prefix is changed', () => {
+    // Create multiple loggers
+    const logger1 = LogManager.Instance.get('category1');
+    const logger2 = LogManager.Instance.get('category2');
+    const childLogger = LogManager.Instance.get('category1', 'child-id');
+
+    // Set a custom prefix
+    LogManager.Instance.setPrefix('[FirstPrefix]');
+
+    // Verify all loggers have the first prefix
+    expect(logger1.getPrefix()).toBe('[FirstPrefix]');
+    expect(logger2.getPrefix()).toBe('[FirstPrefix]');
+    expect(childLogger.getPrefix()).toBe('[FirstPrefix]');
+
+    // Change the prefix
+    LogManager.Instance.setPrefix('[SecondPrefix]');
+
+    // Verify all loggers have the updated prefix
+    expect(logger1.getPrefix()).toBe('[SecondPrefix]');
+    expect(logger2.getPrefix()).toBe('[SecondPrefix]');
+    expect(childLogger.getPrefix()).toBe('[SecondPrefix]');
+
+    // Create a new logger after changing prefix
+    const logger3 = LogManager.Instance.get('category3');
+
+    // Verify new logger has the updated prefix
+    expect(logger3.getPrefix()).toBe('[SecondPrefix]');
+  });
+
+  it('should correctly format logs with the custom prefix', () => {
+    // Set a custom prefix
+    LogManager.Instance.setPrefix('[TestPrefix]');
+
+    // Create a logger
+    const logger = LogManager.Instance.get('test-category');
+
+    // Log a message
+    logger.info('Test message with custom prefix');
+
+    // Verify console.info was called with the correct prefix
+    expect(console.info).toHaveBeenCalled();
+    const args = (console.info as jest.Mock).mock.calls[0];
+    expect(args[0]).toBe('[TestPrefix]');
+  });
+
+  it('should handle empty prefix correctly', () => {
+    // Set an empty prefix
+    LogManager.Instance.setPrefix('');
+
+    // Create a logger
+    const logger = LogManager.Instance.get('test-category');
+
+    // Verify the prefix is empty
+    expect(logger.getPrefix()).toBe('');
+
+    // Log a message
+    logger.info('Test message with empty prefix');
+
+    // Verify console.info was called with empty prefix
+    expect(console.info).toHaveBeenCalled();
+    const args = (console.info as jest.Mock).mock.calls[0];
+    expect(args[0]).toBe('');
+  });
+
+  it('should handle special characters in prefix', () => {
+    // Set a prefix with special characters
+    const specialPrefix = '[🔥 Special-Prefix! 🔥]';
+    LogManager.Instance.setPrefix(specialPrefix);
+
+    // Create a logger
+    const logger = LogManager.Instance.get('test-category');
+
+    // Verify the prefix contains the special characters
+    expect(logger.getPrefix()).toBe(specialPrefix);
+
+    // Log a message
+    logger.info('Test message with special prefix');
+
+    // Verify console.info was called with the special prefix
+    expect(console.info).toHaveBeenCalled();
+    const args = (console.info as jest.Mock).mock.calls[0];
+    expect(args[0]).toBe(specialPrefix);
   });
 });

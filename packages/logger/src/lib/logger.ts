@@ -48,25 +48,52 @@ const colours = {
   },
 };
 
-function _convertLoggingLevel(level: LOG_LEVEL_VALUES): string {
-  switch (level) {
-    case LOG_LEVEL.INFO:
-      return `${colours.fg.green}[INFO]${colours.reset}`;
-    case LOG_LEVEL.DEBUG:
-      return `${colours.fg.cyan}[DEBUG]${colours.reset}`;
-    case LOG_LEVEL.WARN:
-      return `${colours.fg.yellow}[WARN]${colours.reset}`;
-    case LOG_LEVEL.ERROR:
-      return `${colours.fg.red}[ERROR]${colours.reset}`;
-    case LOG_LEVEL.FATAL:
-      return `${colours.fg.red}[FATAL]${colours.reset}`;
-    case LOG_LEVEL.TIMING_START:
-      return `${colours.fg.green}[TIME_START]${colours.reset}`;
-    case LOG_LEVEL.TIMING_END:
-      return `${colours.fg.green}[TIME_END]${colours.reset}`;
-  }
+function isBrowser(): boolean {
+  return typeof window !== 'undefined';
+}
 
-  return '[UNKNOWN]';
+function _convertLoggingLevel(level: LOG_LEVEL_VALUES): string {
+  if (isBrowser()) {
+    // For browsers, return plain text (styling applied separately)
+    switch (level) {
+      case LOG_LEVEL.INFO:
+        return '[INFO]';
+      case LOG_LEVEL.DEBUG:
+        return '[DEBUG]';
+      case LOG_LEVEL.WARN:
+        return '[WARN]';
+      case LOG_LEVEL.ERROR:
+        return '[ERROR]';
+      case LOG_LEVEL.FATAL:
+        return '[FATAL]';
+      case LOG_LEVEL.TIMING_START:
+        return '[TIME_START]';
+      case LOG_LEVEL.TIMING_END:
+        return '[TIME_END]';
+      default:
+        return '[UNKNOWN]';
+    }
+  } else {
+    // For terminals, use ANSI codes
+    switch (level) {
+      case LOG_LEVEL.INFO:
+        return `${colours.fg.green}[INFO]${colours.reset}`;
+      case LOG_LEVEL.DEBUG:
+        return `${colours.fg.cyan}[DEBUG]${colours.reset}`;
+      case LOG_LEVEL.WARN:
+        return `${colours.fg.yellow}[WARN]${colours.reset}`;
+      case LOG_LEVEL.ERROR:
+        return `${colours.fg.red}[ERROR]${colours.reset}`;
+      case LOG_LEVEL.FATAL:
+        return `${colours.fg.red}[FATAL]${colours.reset}`;
+      case LOG_LEVEL.TIMING_START:
+        return `${colours.fg.green}[TIME_START]${colours.reset}`;
+      case LOG_LEVEL.TIMING_END:
+        return `${colours.fg.green}[TIME_END]${colours.reset}`;
+      default:
+        return '[UNKNOWN]';
+    }
+  }
 }
 
 function _resolveLoggingHandler(level: LOG_LEVEL_VALUES): any {
@@ -154,13 +181,31 @@ class Log implements ILog {
     this.category = category;
     this.level = level;
     this._config = config;
-    this._customPrefix = customPrefix || `[Lit-JS-SDK v${version}]`;
+
+    // Use the provided prefix exactly as is, only fall back to default if undefined/null
+    this._customPrefix =
+      customPrefix === undefined || customPrefix === null
+        ? `[Lit-JS-SDK v${version}]`
+        : customPrefix;
+
+    // // For debugging in browser
+    // if (typeof window !== 'undefined' && customPrefix) {
+    //   console.log('Debug - Custom prefix set to:', this._customPrefix);
+    // }
   }
 
   toString(): string {
-    let fmtStr: string = `${this._customPrefix}${_convertLoggingLevel(
-      this.level
-    )} [${this.category}] [id: ${this.id}] ${this.message}`;
+    let fmtStr: string = `${this._customPrefix}`;
+
+    // Add timestamp if configured
+    if (this._config?.['includeTimestamp']) {
+      fmtStr += `[${this.timestamp}]`;
+    }
+
+    fmtStr += `${_convertLoggingLevel(this.level)} [${this.category}] [id: ${
+      this.id
+    }] ${this.message}`;
+
     for (let i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
         fmtStr = `${fmtStr} ${_safeStringify(this.args[i])}`;
@@ -173,14 +218,39 @@ class Log implements ILog {
 
   toArray(): string[] {
     const args = [];
+
+    // Always add the prefix first
     args.push(this._customPrefix);
-    args.push(`[${this.timestamp}]`);
-    args.push(_convertLoggingLevel(this.level));
+
+    if (this._config?.['includeTimestamp']) {
+      args.push(`[${this.timestamp}]`);
+    }
+
+    // Handle level formatting differently for browsers
+    if (isBrowser()) {
+      // For browsers, use %c formatting
+      args.push(
+        '%c' + _convertLoggingLevel(this.level),
+        getLevelStyle(this.level)
+      );
+    } else {
+      // For terminals, use ANSI codes
+      args.push(_convertLoggingLevel(this.level));
+    }
+
     args.push(`[${this.category}]`);
 
-    this.id && args.push(`${colours.fg.cyan}[id: ${this.id}]${colours.reset}`);
-    this.message && args.push(this.message);
+    // Add ID if present
+    if (this.id) {
+      if (isBrowser()) {
+        args.push('%c[id: ' + this.id + ']', 'color: cyan;');
+      } else {
+        args.push(`${colours.fg.cyan}[id: ${this.id}]${colours.reset}`);
+      }
+    }
 
+    // Add message and args
+    this.message && args.push(this.message);
     for (let i = 0; i < this.args.length; i++) {
       args.push(this.args[i]);
     }
@@ -315,16 +385,37 @@ export class Logger {
   /**
    * Sets a custom prefix for log messages
    * @param prefix The custom prefix to use instead of default "[Lit-JS-SDK v{version}]"
+   * @param options Optional configuration for prefix behavior
    */
-  public setPrefix(prefix: string): void {
+  public setPrefix(
+    prefix: string,
+    options?: { includeTimestamp?: boolean }
+  ): void {
+    // console.log('Logger.setPrefix called with:', prefix);
     this._prefix = prefix;
-    
+
+    // Update configuration if options provided
+    if (options && typeof options.includeTimestamp !== 'undefined') {
+      if (!this._config) {
+        this._config = {};
+      }
+      this._config['includeTimestamp'] = options.includeTimestamp;
+    }
+
     // Propagate to children
     if (this._children) {
       for (const child of this._children.values()) {
-        child.setPrefix(prefix);
+        child.setPrefix(prefix, options);
       }
     }
+  }
+
+  /**
+   * Returns the current prefix for debugging purposes
+   * @returns The current prefix
+   */
+  public getPrefix(): string {
+    return this._prefix;
   }
 
   private _log(
@@ -343,24 +434,48 @@ export class Logger {
       this._prefix
     );
 
-    const arrayLog = log.toArray();
-    if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
-      (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler &&
-        this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LOG_LEVEL.ERROR) &&
-        this._handler &&
-        this._handler(log);
+    if (this._level >= level || level === LogLevel.ERROR) {
+      // Skip if condensing logs and this is a duplicate
+      if (this._config?.['condenseLogs'] && this._checkHash(log)) {
+        return;
+      }
 
-      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
-    } else if (!this._config?.['condenseLogs']) {
-      (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler &&
+      // Special handling for browser environments
+      if (isBrowser() && this._consoleHandler) {
+        // Format for browser with consistent styling
+        const prefix = this._prefix;
+        const timestamp = this._config?.['includeTimestamp']
+          ? `[${log.timestamp}] `
+          : '';
+        const category =
+          this._category !== 'default' ? `[${this._category}] ` : '';
+        const idStr = this._id ? `[id: ${this._id}] ` : '';
+
+        // Choose color based on level
+        const style = getLevelStyle(level);
+
+        // Call with explicit styling - keep message separate for proper object handling
+        this._consoleHandler(
+          `${prefix} ${timestamp}%c${_convertLoggingLevel(
+            level
+          )}%c ${category}${idStr}`,
+          style, // Style for the level
+          '', // Reset style
+          message,
+          ...args
+        );
+      } else if (this._consoleHandler) {
+        // Terminal environment - use existing array method
+        const arrayLog = log.toArray();
         this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LOG_LEVEL.ERROR) &&
-        this._handler &&
+      }
+
+      // Handle additional logging actions
+      if (this._handler) {
         this._handler(log);
-      (this._level >= level || level === LOG_LEVEL.ERROR) && this._addLog(log);
+      }
+
+      this._addLog(log);
     }
   }
 
@@ -426,6 +541,7 @@ export class LogManager {
   private _loggers: Map<string, Logger>;
   private _level: LOG_LEVEL_VALUES | undefined = LOG_LEVEL.DEBUG;
   private _config: Record<string, any> | undefined;
+  private _defaultPrefix: string = `[Lit-JS-SDK v${version}]`; // Store the default prefix
 
   static get Instance(): LogManager {
     if (!LogManager._instance) {
@@ -484,61 +600,132 @@ export class LogManager {
       });
   }
 
-  // if a logger is given an id it will persist logs under its logger instance
-  public get(category: string, id?: string): Logger {
-    let instance = this._loggers.get(category);
+  /**
+   * Sets a custom prefix for all loggers
+   * @param prefix The custom prefix to use instead of default "[Lit-JS-SDK v{version}]"
+   * @param options Optional configuration for prefix behavior
+   */
+  public setPrefix(
+    prefix: string,
+    options?: { includeTimestamp?: boolean }
+  ): void {
+    // Store the custom prefix for new loggers
+    this._defaultPrefix = prefix;
+
+    // Update config if options are provided
+    if (options) {
+      if (!this._config) {
+        this._config = {};
+      }
+      this._config['includeTimestamp'] = options.includeTimestamp ?? false;
+    }
+
+    // Update existing loggers with the new prefix
+    for (const logger of this._loggers.values()) {
+      // Update the logger's prefix
+      logger.setPrefix(prefix, options);
+
+      // Also update all child loggers
+      for (const childLogger of logger.Children.values()) {
+        childLogger.setPrefix(prefix, options);
+      }
+    }
+  }
+
+  /**
+   * Returns the current prefix set on the first logger (for debugging)
+   * @returns The current prefix or undefined if no loggers exist
+   */
+  public getPrefix(): string | undefined {
+    if (this._loggers.size === 0) {
+      return undefined;
+    }
+
+    // Get the first logger
+    const firstLogger = this._loggers.values().next().value;
+    return firstLogger?.getPrefix();
+  }
+
+  public get(category?: string, id?: string): Logger {
+    // Use a default category if none provided
+    const actualCategory = category || 'default';
+
+    let instance = this._loggers.get(actualCategory);
     if (!instance && !id) {
-      this._loggers.set(
-        category,
-        Logger.createLogger(category, this._level ?? LOG_LEVEL.INFO, '', true)
+      // Create a new parent logger
+      const logger = Logger.createLogger(
+        actualCategory,
+        this._level ?? LOG_LEVEL.INFO,
+        '',
+        true,
+        this._config
       );
 
-      instance = this._loggers.get(category) as Logger;
-      instance.Config = this._config;
+      // Set the custom prefix on the new logger
+      logger.setPrefix(this._defaultPrefix);
+
+      this._loggers.set(actualCategory, logger);
+      instance = logger;
       return instance;
     }
 
     if (id) {
       if (!instance) {
-        this._loggers.set(
-          category,
-          Logger.createLogger(category, this._level ?? LOG_LEVEL.INFO, '', true)
+        // Create a new parent logger if it doesn't exist
+        const logger = Logger.createLogger(
+          actualCategory,
+          this._level ?? LOG_LEVEL.INFO,
+          '',
+          true,
+          this._config
         );
 
-        instance = this._loggers.get(category) as Logger;
-        instance.Config = this._config;
+        // Set the custom prefix on the new logger
+        logger.setPrefix(this._defaultPrefix);
+
+        this._loggers.set(actualCategory, logger);
+        instance = logger;
       }
-      const children = instance?.Children;
-      let child = children?.get(id);
+
+      const children = instance.Children;
+      let child = children.get(id);
+
       if (child) {
         return child;
       }
-      children?.set(
-        id,
-        Logger.createLogger(
-          category,
-          this._level ?? LOG_LEVEL.INFO,
-          id ?? '',
-          true
-        )
+
+      // Create a new child logger
+      child = Logger.createLogger(
+        actualCategory,
+        this._level ?? LOG_LEVEL.INFO,
+        id ?? '',
+        true,
+        this._config
       );
 
-      child = children?.get(id) as Logger;
-      child.Config = this._config;
-      return children?.get(id) as Logger;
-      // fall through condition for if there is no id for the logger and the category is not yet created.
-      // ex: LogManager.Instance.get('foo');
-    } else if (!instance) {
-      this._loggers.set(
-        category,
-        Logger.createLogger(category, this._level ?? LOG_LEVEL.INFO, '', true)
-      );
+      // Set the custom prefix on the new child logger
+      child.setPrefix(this._defaultPrefix);
 
-      instance = this._loggers.get(category) as Logger;
-      instance.Config = this._config;
+      children.set(id, child);
+      return child;
     }
 
-    return instance as Logger;
+    // Fix here - ensure we never return undefined
+    if (!instance) {
+      // Create a default logger if somehow we get here without an instance
+      const logger = Logger.createLogger(
+        actualCategory,
+        this._level ?? LOG_LEVEL.INFO,
+        '',
+        true,
+        this._config
+      );
+      logger.setPrefix(this._defaultPrefix);
+      this._loggers.set(actualCategory, logger);
+      return logger;
+    }
+
+    return instance;
   }
 
   getById(id: string): string[] {
@@ -577,14 +764,25 @@ export class LogManager {
 
     return logsForRequest;
   }
+}
 
-  /**
-   * Sets a custom prefix for all loggers
-   * @param prefix The custom prefix to use instead of default "[Lit-JS-SDK v{version}]"
-   */
-  public setPrefix(prefix: string): void {
-    for (const logger of this._loggers.values()) {
-      logger.setPrefix(prefix);
-    }
+function getLevelStyle(level: LOG_LEVEL_VALUES): string {
+  switch (level) {
+    case LOG_LEVEL.INFO:
+      return 'color: green;';
+    case LOG_LEVEL.DEBUG:
+      return 'color: cyan;';
+    case LOG_LEVEL.WARN:
+      return 'color: orange;';
+    case LOG_LEVEL.ERROR:
+      return 'color: red;';
+    case LOG_LEVEL.FATAL:
+      return 'color: red; font-weight: bold;';
+    case LOG_LEVEL.TIMING_START:
+      return 'color: blue;';
+    case LOG_LEVEL.TIMING_END:
+      return 'color: blue; font-style: italic;';
+    default:
+      return 'color: inherit;';
   }
 }
