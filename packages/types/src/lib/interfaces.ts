@@ -482,6 +482,11 @@ export interface JsonExecutionSdkParams
    * auth methods to resolve
    */
   authMethods?: AuthMethod[];
+
+  /**
+   * Whether or not the the action is a js "module" with import statements
+   */
+  module?: boolean;
 }
 
 export interface ExecuteJsAdvancedOptions {
