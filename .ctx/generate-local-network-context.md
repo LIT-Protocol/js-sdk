@@ -22,13 +22,13 @@ To generate the proper context:
 Here's an example of how to use this function:
 
 ```ts
-import { generateSignaturesFromContext } from "@lit-protocol/contracts/custom-network-signatures";
+import { generateSignaturesFromContext } from '@lit-protocol/contracts/custom-network-signatures';
 
 await generateSignaturesFromContext({
   jsonFilePath:
-    "/Users/anson/Projects/lit-assets/blockchain/contracts/networkContext.json", // in lit assets repo
-  networkName: "naga-develop",
-  outputDir: "./naga-develop-signatures",
+    '/Users/anson/Projects/lit-assets/blockchain/contracts/networkContext.json', // in lit assets repo
+  networkName: 'naga-develop',
+  outputDir: './naga-develop-signatures',
   useScriptDirectory: true,
   callerPath: import.meta.url,
 });
