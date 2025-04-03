@@ -11,3 +11,5 @@ export type { LitAuthStorageProvider, LitAuthData };
 export const storagePlugins = { localStorage };
 
 export { authenticators, getAuthManager, LitRelay };
+
+export { getAuthIdByAuthMethod } from './lib/authenticators/utils';

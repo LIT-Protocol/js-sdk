@@ -1,5 +1,5 @@
 import { HTTPS, LIT_CHAINS, LIT_ENDPOINT } from '@lit-protocol/constants';
-import { _nagaDev } from '@lit-protocol/contracts';
+import { nagaDev } from '@lit-protocol/contracts';
 
 import { LitNetwork } from '../../../LitNetwork';
 
@@ -15,7 +15,7 @@ export class NagaDev extends LitNetwork {
       httpProtocol: HTTPS,
       chainConfig: {
         chain: LIT_CHAINS['yellowstone'],
-        contractData: _nagaDev.data.map((c) => ({
+        contractData: nagaDev.data.map((c) => ({
           address: c.contracts[0].address_hash,
           abi: c.contracts[0].ABI,
           name: c.name,
