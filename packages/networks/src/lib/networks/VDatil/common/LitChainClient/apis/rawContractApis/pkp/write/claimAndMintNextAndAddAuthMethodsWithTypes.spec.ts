@@ -1,8 +1,7 @@
-import { beforeAll, describe, expect, test } from 'bun:test';
 import {
   datilDevNetworkContext,
   DatilDevNetworkContext,
-} from 'services/lit/LitNetwork/vDatil/datil-dev/networkContext';
+} from '../../../../../../../vDatil/datil-dev/networkContext';
 import { CallExecutionError, ContractFunctionRevertedError } from 'viem';
 import { claimAndMintNextAndAddAuthMethodsWithTypes } from './claimAndMintNextAndAddAuthMethodsWithTypes';
 

@@ -1,10 +1,8 @@
-import { beforeAll, describe, expect, test } from 'bun:test';
 import {
   datilDevNetworkContext,
   DatilDevNetworkContext,
-} from 'services/lit/LitNetwork/vDatil/datil-dev/networkContext';
+} from '../../../../../../vDatil/datil-dev/networkContext';
 import { getActiveUnkickedValidatorStructsAndCounts } from './getActiveUnkickedValidatorStructsAndCounts';
-import { JSONStringify } from 'json-with-bigint';
 
 describe('LitChainClient', () => {
   let networkCtx: DatilDevNetworkContext;

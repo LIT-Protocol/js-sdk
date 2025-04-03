@@ -1,5 +1,4 @@
-import { beforeAll, describe, expect, test } from 'bun:test';
-import { datilDevNetworkContext } from 'services/lit/LitNetwork/vDatil/datil-dev/networkContext';
+import { datilDevNetworkContext } from '../../../../../../vDatil/datil-dev/networkContext';
 import { PKPPermissionsManager } from './PKPPermissionsManager';
 
 // Configuration constants
