@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { computeAddress } from 'ethers/lib/utils';
+import { z } from 'zod';
 
 export const PKPDataSchema = z
   .object({

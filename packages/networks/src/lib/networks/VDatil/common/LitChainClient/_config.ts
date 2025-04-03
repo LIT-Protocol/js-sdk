@@ -2,14 +2,8 @@ import {
   DatilDevNetworkContext,
   datilDevNetworkContext,
 } from '../../datil-dev/networkContext';
-import {
-  DatilMainnetNetworkContext,
-  datilMainnetNetworkContext,
-} from '../../datil-mainnet/networkContext';
-import {
-  DatilTestNetworkContext,
-  datilTestNetworkContext,
-} from '../../datil-test/networkContext';
+import { DatilMainnetNetworkContext } from '../../datil-mainnet/networkContext';
+import { DatilTestNetworkContext } from '../../datil-test/networkContext';
 
 /**
  * Due to the usage of arbitrum stylus contracts,

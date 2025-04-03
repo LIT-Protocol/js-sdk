@@ -1,5 +1,4 @@
-import { datilDevNetworkContext } from 'services/lit/LitNetwork/vDatil/datil-dev/networkContext';
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../types';
 import { GetActiveUnkickedValidatorStructsAndCountsSchema } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
 import { createLitContracts } from '../../utils/createLitContracts';
 
@@ -36,8 +35,8 @@ export async function getActiveUnkickedValidatorStructsAndCounts(
 //   minNodeCount: 2,
 //   validatorURLs: [ "https://15.235.83.220:7470", "https://15.235.83.220:7472", "https://15.235.83.220:7471" ],
 // }
-if (import.meta.main) {
-  const networkCtx = datilDevNetworkContext;
-  const res = await getActiveUnkickedValidatorStructsAndCounts(networkCtx);
-  console.log(res);
-}
+// if (import.meta.main) {
+//   const networkCtx = datilDevNetworkContext;
+//   const res = await getActiveUnkickedValidatorStructsAndCounts(networkCtx);
+//   console.log(res);
+// }
