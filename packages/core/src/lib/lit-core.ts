@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 
 import {
   CENTRALISATION_BY_NETWORK,
+  Environment,
   HTTP,
   HTTPS,
   InitError,
@@ -16,7 +17,6 @@ import {
   LIT_NETWORK,
   LIT_NETWORKS,
   LitNodeClientNotReadyError,
-  LOG_LEVEL,
   NetworkError,
   NodeError,
   RPC_URL_BY_NETWORK,
@@ -27,18 +27,7 @@ import {
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
-import {
-  bootstrapLogManager,
-  isBrowser,
-  isNode,
-  log,
-  logError,
-  logErrorWithRequestId,
-  logWithRequestId,
-  mostCommonString,
-  sendRequest,
-  setMiscLitConfig,
-} from '@lit-protocol/misc';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   AuthSig,
   BlockHashErrorResponse,
@@ -53,7 +42,8 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 
-import { composeLitUrl } from './endpoint-version';
+import { composeLitUrl } from './helpers/endpoint-version';
+import { mostCommonValue } from './helpers/most-common-value';
 import {
   CoreNodeConfig,
   EpochCache,
@@ -118,6 +108,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   };
 
 export class LitCore {
+  private readonly _coreLogger: Logger;
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
@@ -178,12 +169,10 @@ export class LitCore {
         };
     }
 
-    // -- set global variables
-    setMiscLitConfig(this.config);
-    bootstrapLogManager(
-      'core',
-      this.config.debug ? LOG_LEVEL.DEBUG : LOG_LEVEL.OFF
-    );
+    this._coreLogger = getChildLogger({
+      module: 'LitCore',
+      ...(this.config.debug ? { level: 'debug' } : {}),
+    });
 
     // -- configure local storage if not present
     // LitNodeClientNodejs is a base for LitNodeClient
@@ -191,7 +180,7 @@ export class LitCore {
     // If the user sets a new storage provider we respect it over our default storage
     // If the user sets a new file path, we respect it over the default path.
     if (this.config.storageProvider?.provider) {
-      log(
+      this._coreLogger.info(
         'localstorage api not found, injecting persistence instance found in config'
       );
       // using Object defineProperty in order to set a property previously defined as readonly.
@@ -200,24 +189,15 @@ export class LitCore {
         value: this.config.storageProvider?.provider,
       });
     } else if (
-      isNode() &&
+      Environment.isNode &&
       !globalThis.localStorage &&
       !this.config.storageProvider?.provider
     ) {
-      log(
+      this._coreLogger.info(
         'Looks like you are running in NodeJS and did not provide a storage provider, your sessions will not be cached'
       );
     }
   }
-
-  // ========== Logger utilities ==========
-  getLogsForRequestId = (id: string): string[] => {
-    return globalThis.logManager.getLogsForId(id);
-  };
-
-  getRequestIds = (): Set<string> => {
-    return globalThis.logManager.LoggerIds;
-  };
 
   /**
    * Retrieves the validator data including staking contract, epoch, minNodeCount, and bootstrapUrls.
@@ -262,10 +242,19 @@ export class LitCore {
       );
     }
 
-    log('[_getValidatorData] epochInfo: ', epochInfo);
-    log('[_getValidatorData] minNodeCount: ', minNodeCount);
-    log('[_getValidatorData] Bootstrap urls: ', bootstrapUrls);
-    log('[_getValidatorData] stakingContract: ', stakingContract.address);
+    this._coreLogger.info({ msg: '[_getValidatorData] epochInfo', epochInfo });
+    this._coreLogger.info({
+      msg: '[_getValidatorData] minNodeCount',
+      minNodeCount,
+    });
+    this._coreLogger.info({
+      msg: '[_getValidatorData] Bootstrap urls',
+      bootstrapUrls,
+    });
+    this._coreLogger.info({
+      msg: '[_getValidatorData] stakingContract',
+      address: stakingContract.address,
+    });
 
     return {
       stakingContract,
@@ -289,7 +278,7 @@ export class LitCore {
   private async _handleStakingContractStateChange(
     state: STAKING_STATES_VALUES
   ) {
-    log(`New state detected: "${state}"`);
+    this._coreLogger.info(`New state detected: "${state}"`);
 
     const validatorData = await this._getValidatorData();
 
@@ -303,7 +292,7 @@ export class LitCore {
       if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
         try {
-          log(
+          this._coreLogger.info(
             'State found to be new validator set locked, checking validator set'
           );
           const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
@@ -322,11 +311,10 @@ export class LitCore {
                 The sdk should be able to understand its current execution environment and wait on an active
                 network request to the previous epoch's node set before changing over.
               */
-            log(
-              'Active validator sets changed, new validators ',
+            this._coreLogger.info({
+              msg: 'Active validator sets changed, new validators. Check delta. Starting node connection',
               delta,
-              'starting node connection'
-            );
+            });
           }
 
           await this.connect();
@@ -335,10 +323,10 @@ export class LitCore {
           // But for now, our every-30-second network sync will fix things in at most 30s from now.
           // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
           const { message = '' } = err as Error;
-          logError(
-            'Error while attempting to reconnect to nodes after epoch transition:',
-            message
-          );
+          this._coreLogger.error({
+            msg: 'Error while attempting to reconnect to nodes after epoch transition',
+            message,
+          });
         }
       }
     }
@@ -359,10 +347,10 @@ export class LitCore {
     }
 
     if (this._stakingContract) {
-      log(
-        'listening for state change on staking contract: ',
-        this._stakingContract.address
-      );
+      this._coreLogger.info({
+        msg: 'listening for state change on staking contract',
+        address: this._stakingContract.address,
+      });
 
       // Stash a function instance, because its identity must be consistent for '.off()' usage to work later
       this._stakingContractListener = (state: STAKING_STATES_VALUES) => {
@@ -400,8 +388,6 @@ export class LitCore {
     this.ready = false;
 
     this._stopListeningForNewEpoch();
-    // this._stopNetworkPolling();
-    setMiscLitConfig(undefined);
   }
 
   _stopListeningForNewEpoch() {
@@ -490,7 +476,7 @@ export class LitCore {
         {}
       );
       if (this.config.litNetwork === LIT_NETWORK.Custom) {
-        log('using custom contracts: ', logAddresses);
+        this._coreLogger.info({ msg: 'using custom contracts', logAddresses });
       }
     }
 
@@ -517,8 +503,11 @@ export class LitCore {
 
     this.ready = true;
 
-    log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
-    log('current network config', {
+    this._coreLogger.info(
+      `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
+    );
+    this._coreLogger.info({
+      msg: 'current network config',
       networkPubkey: this.networkPubKey,
       networkPubKeySet: this.networkPubKeySet,
       hdRootPubkeys: this.hdRootPubkeys,
@@ -527,7 +516,7 @@ export class LitCore {
     });
 
     // browser only
-    if (isBrowser()) {
+    if (Environment.isBrowser) {
       document.dispatchEvent(new Event('lit-ready'));
     }
   }
@@ -562,25 +551,30 @@ export class LitCore {
     // node, even though its keys may be "ERR".
     // Should we really track servers with ERR as keys?
     if (
-      keys.serverPubKey === 'ERR' ||
-      keys.subnetPubKey === 'ERR' ||
-      keys.networkPubKey === 'ERR' ||
-      keys.networkPubKeySet === 'ERR'
+      [
+        keys.serverPubKey,
+        keys.subnetPubKey,
+        keys.networkPubKey,
+        keys.networkPubKeySet,
+      ].includes('ERR')
     ) {
-      logErrorWithRequestId(
+      this._coreLogger.error({
         requestId,
-        'Error connecting to node. Detected "ERR" in keys',
+        msg: 'Error connecting to node. Detected "ERR" in keys',
         url,
-        keys
-      );
+        keys,
+      });
     }
 
-    log(`Handshake with ${url} returned keys: `, keys);
+    this._coreLogger.info({
+      msg: `Handshake with ${url} returned keys: `,
+      keys,
+    });
     if (!keys.latestBlockhash) {
-      logErrorWithRequestId(
+      this._coreLogger.error({
         requestId,
-        `Error getting latest blockhash from the node ${url}.`
-      );
+        msg: `Error getting latest blockhash from the node ${url}.`,
+      });
     }
 
     // We force SEV checks on some networks even if the caller attempts to construct the client with them disabled
@@ -599,12 +593,12 @@ export class LitCore {
       }
 
       // actually verify the attestation by checking the signature against AMD certs
-      log('Checking attestation against amd certs...');
+      this._coreLogger.info('Checking attestation against amd certs...');
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
         await checkSevSnpAttestation(attestation, challenge, url);
-        log(`Lit Node Attestation verified for ${url}`);
+        this._coreLogger.info(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         throw new InvalidNodeAttestation(
@@ -617,7 +611,7 @@ export class LitCore {
         );
       }
     } else if (this.config.litNetwork === LIT_NETWORK.Custom) {
-      log(
+      this._coreLogger.info(
         `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
       );
     }
@@ -654,12 +648,7 @@ export class LitCore {
             this.config.bootstrapUrls.length
           } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
-          try {
-            throw new InitError({}, msg);
-          } catch (e) {
-            logErrorWithRequestId(requestId, e);
-            reject(e);
-          }
+          reject(new InitError({ info: { requestId } }, msg));
         }, this.config.connectTimeout);
       }),
       Promise.all(
@@ -690,17 +679,17 @@ export class LitCore {
     serverKeys: Record<string, JsonHandshakeResponse>;
     requestId: string;
   }): CoreNodeConfig {
-    const latestBlockhash = mostCommonString(
+    const latestBlockhash = mostCommonValue(
       Object.values(serverKeys).map(
         (keysFromSingleNode) => keysFromSingleNode.latestBlockhash
       )
     );
 
     if (!latestBlockhash) {
-      logErrorWithRequestId(
+      this._coreLogger.error({
         requestId,
-        'Error getting latest blockhash from the nodes.'
-      );
+        msg: 'Error getting latest blockhash from the nodes.',
+      });
 
       throw new InvalidEthBlockhash(
         {
@@ -715,22 +704,22 @@ export class LitCore {
 
     // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
     return {
-      subnetPubKey: mostCommonString(
+      subnetPubKey: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.subnetPubKey
         )
       )!,
-      networkPubKey: mostCommonString(
+      networkPubKey: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKey
         )
       )!,
-      networkPubKeySet: mostCommonString(
+      networkPubKeySet: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKeySet
         )
       )!,
-      hdRootPubkeys: mostCommonString(
+      hdRootPubkeys: mostCommonValue(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.hdRootPubkeys
         )
@@ -760,7 +749,7 @@ export class LitCore {
           testResult,
         };
       } catch (error) {
-        logError(`RPC URL failed: ${url}`);
+        this._coreLogger.error(`RPC URL failed: ${url}`);
       }
     }
     return null;
@@ -781,15 +770,14 @@ export class LitCore {
       this.lastBlockHashRetrieved &&
       currentTime - this.lastBlockHashRetrieved < blockHashValidityDuration
     ) {
-      log('Blockhash is still valid. No need to sync.');
+      this._coreLogger.info('Blockhash is still valid. No need to sync.');
       return;
     }
 
-    log(
-      'Syncing state for new blockhash ',
-      'current blockhash: ',
-      this.latestBlockhash
-    );
+    this._coreLogger.info({
+      msg: 'Syncing state for new blockhash',
+      currentBlockhash: this.latestBlockhash,
+    });
 
     try {
       // This fetches from the lit propagation service so nodes will always have it
@@ -821,18 +809,20 @@ export class LitCore {
 
       this.latestBlockhash = blockHashBody.blockhash;
       this.lastBlockHashRetrieved = parseInt(timestamp) * 1000;
-      log('Done syncing state new blockhash: ', this.latestBlockhash);
+      this._coreLogger.info({
+        msg: 'Done syncing state new blockhash',
+        latestBlockhash: this.latestBlockhash,
+      });
     } catch (error: unknown) {
       const err = error as BlockHashErrorResponse | Error;
 
-      logError(
-        'Error while attempting to fetch new latestBlockhash:',
-        err instanceof Error ? err.message : err.messages,
-        'Reason: ',
-        err instanceof Error ? err : err.reason
-      );
+      this._coreLogger.error({
+        msg: 'Error while attempting to fetch new latestBlockhash',
+        errorMessage: err instanceof Error ? err.message : err.messages,
+        reason: err instanceof Error ? err : err.reason,
+      });
 
-      log(
+      this._coreLogger.info(
         'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
       );
       const { testResult } =
@@ -842,19 +832,23 @@ export class LitCore {
         )) || {};
 
       if (!testResult || !testResult.hash) {
-        logError('All fallback RPC URLs failed. Unable to retrieve blockhash.');
+        this._coreLogger.error(
+          'All fallback RPC URLs failed. Unable to retrieve blockhash.'
+        );
         return;
       }
 
       try {
         this.latestBlockhash = testResult.hash;
         this.lastBlockHashRetrieved = testResult.timestamp;
-        log(
-          'Successfully retrieved blockhash manually: ',
-          this.latestBlockhash
-        );
+        this._coreLogger.info({
+          msg: 'Successfully retrieved blockhash manually',
+          latestBlockhash: this.latestBlockhash,
+        });
       } catch (ethersError) {
-        logError('Failed to manually retrieve blockhash using ethers');
+        this._coreLogger.error(
+          'Failed to manually retrieve blockhash using ethers'
+        );
       }
     }
   }
@@ -898,7 +892,7 @@ export class LitCore {
       endpoint: LIT_ENDPOINT.HANDSHAKE,
     });
 
-    log(`handshakeWithNode ${urlWithPath}`);
+    this._coreLogger.info(`handshakeWithNode ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
@@ -923,7 +917,7 @@ export class LitCore {
     }
 
     if (!epochInfo) {
-      log(
+      this._coreLogger.info(
         'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
       );
       try {
@@ -974,6 +968,41 @@ export class LitCore {
   }
 
   // ==================== SENDING COMMAND ====================
+  private async _sendRequest(
+    url: string,
+    req: RequestInit,
+    requestId: string
+  ): Promise<Response> {
+    try {
+      const response = await fetch(url, req);
+      const isJson = response.headers
+        .get('content-type')
+        ?.includes('application/json');
+
+      const data = isJson ? await response.json() : null;
+
+      if (!response.ok) {
+        // get error message from body or default to response status
+        const error = data || response.status;
+        return Promise.reject(error);
+      }
+
+      return data;
+    } catch (e) {
+      throw new NetworkError(
+        {
+          info: {
+            url,
+            req,
+            requestId,
+          },
+          cause: e,
+        },
+        `Error sending request to ${url}`
+      );
+    }
+  }
+
   /**
    *
    * Send a command to nodes
@@ -998,11 +1027,11 @@ export class LitCore {
       delete data.sessionSigs;
     }
 
-    logWithRequestId(
+    this._coreLogger.info({
       requestId,
-      `sendCommandToNode with url ${url} and data`,
-      data
-    );
+      msg: `sendCommandToNode with url ${url} and data`,
+      data,
+    });
 
     const req: RequestInit = {
       method: 'POST',
@@ -1016,7 +1045,7 @@ export class LitCore {
       body: JSON.stringify(data),
     };
 
-    return sendRequest(url, req, requestId);
+    return this._sendRequest(url, req, requestId);
   };
 
   /**
@@ -1137,9 +1166,6 @@ export class LitCore {
       minNodeCount
     );
 
-    // console.log(`successes: ${JSON.stringify(successes, null, 2)}`)
-    // console.log(`errors: ${JSON.stringify(errors, null, 2)}`)
-
     // -- case: success (when success responses are more than minNodeCount)
     if (successes.length >= minNodeCount) {
       return {
@@ -1168,13 +1194,13 @@ export class LitCore {
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
     const mostCommonError = JSON.parse(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mostCommonString(errors.map((r: any) => JSON.stringify(r)))!
+      mostCommonValue(errors.map((r: any) => JSON.stringify(r)))!
     );
 
-    logErrorWithRequestId(
-      requestId || '',
-      `most common error: ${JSON.stringify(mostCommonError)}`
-    );
+    this._coreLogger.error({
+      requestId,
+      msg: `most common error: ${JSON.stringify(mostCommonError)}`,
+    });
 
     return {
       success: false,
@@ -1202,7 +1228,7 @@ export class LitCore {
           res.error.errorCode === 'not_authorized') &&
         this.config.alertWhenUnauthorized
       ) {
-        log('You are not authorized to access this content');
+        this._coreLogger.info('You are not authorized to access this content');
       }
 
       throw new NodeError(
@@ -1241,7 +1267,9 @@ export class LitCore {
     sigType: LIT_CURVE_VALUES = LIT_CURVE.EcdsaCaitSith
   ): Promise<string> => {
     if (!this.hdRootPubkeys) {
-      logError('root public keys not found, have you connected to the nodes?');
+      this._coreLogger.error(
+        'root public keys not found, have you connected to the nodes?'
+      );
       throw new LitNodeClientNotReadyError(
         {},
         'root public keys not found, have you connected to the nodes?'

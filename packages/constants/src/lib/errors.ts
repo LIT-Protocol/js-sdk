@@ -208,6 +208,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'network_error',
     kind: LIT_ERROR_KIND.Unexpected,
   },
+  LIT_NETWORK_ERROR: {
+    name: 'LitNetworkError',
+    code: 'lit_network_error',
+    kind: LIT_ERROR_KIND.Unexpected,
+  },
   TRANSACTION_ERROR: {
     name: 'TransactionError',
     code: 'transaction_error',
@@ -300,6 +305,7 @@ export { MultiError };
 
 export const {
   AutomationError,
+  CurveTypeNotFoundError,
   InitError,
   InvalidAccessControlConditions,
   InvalidArgumentException,
@@ -310,6 +316,7 @@ export const {
   InvalidParamType,
   InvalidSignatureError,
   InvalidUnifiedConditionType,
+  LitNetworkError,
   LitNodeClientBadConfigError,
   LitNodeClientNotReadyError,
   LocalStorageItemNotFoundException,
@@ -337,5 +344,4 @@ export const {
   WasmInitError,
   WrongNetworkException,
   WrongParamFormat,
-  CurveTypeNotFoundError,
 } = errorClasses;

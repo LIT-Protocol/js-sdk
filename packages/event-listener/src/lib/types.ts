@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
+import { Action, ActionParams } from './actions/action';
 import { BaseTransitionParams } from './transitions';
 
 export type Address = `0x${string}`;
@@ -35,6 +36,13 @@ export interface UpdatesContext {
 }
 
 // Action Types
+export type ActionConstructor = new (params: any) => Action;
+
+export interface RawActionDefinition {
+  key: string;
+  [actionProperty: string]: unknown;
+}
+
 export interface LitActionActionDefinition {
   key: 'litAction';
   code?: ContextOrLiteral<string>;
@@ -96,6 +104,7 @@ export interface UseCapacityNFTActionDefinition {
 }
 
 export type ActionDefinition =
+  | RawActionDefinition
   | ContextActionDefinition
   | LitActionActionDefinition
   | MintCapacityNFTActionDefinition
@@ -176,6 +185,7 @@ export interface TransitionParams
 
 // Machine Types
 export interface BaseStateMachineParams {
+  actionRepository?: Record<string, ActionConstructor>;
   context?: Record<string, unknown>;
   debug?: boolean;
   litContracts: LitContracts;

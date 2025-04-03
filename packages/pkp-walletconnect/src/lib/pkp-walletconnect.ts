@@ -29,6 +29,7 @@ import {
   ParamsMissingError,
   UnsupportedMethodError,
 } from '@lit-protocol/constants';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   PKPEthersWallet,
   SupportedETHSigningMethods,
@@ -46,19 +47,19 @@ export interface InitWalletConnectParams
 }
 
 export class PKPWalletConnect {
+  private readonly debug: boolean = false;
+  private readonly _logger: Logger;
   // WalletConnect client
   private client: IWeb3Wallet | undefined;
   // List of PKP wallets
   private pkpEthersWallets: PKPEthersWallet[] = [];
 
-  // For logging
-  private readonly debug: boolean = false;
-  private readonly PREFIX = '[PKPWalletConnect]';
-  private readonly orange = '\x1b[33m';
-  private readonly reset = '\x1b[0m';
-
   constructor(debug?: boolean) {
     this.debug = debug || false;
+    this._logger = getChildLogger({
+      module: 'PKPWalletConnect',
+      ...(debug ? { level: 'debug' } : {}),
+    });
   }
 
   /**
@@ -689,24 +690,12 @@ export class PKPWalletConnect {
     client: IWeb3Wallet | undefined
   ): IWeb3Wallet {
     if (!client) {
-      this._log('WalletConnect client has not yet been initialized.');
+      this._logger.debug('WalletConnect client has not yet been initialized.');
       throw new InitError(
         {},
         'WalletConnect client has not yet been initialized. Please call initWalletConnect().'
       );
     }
     return client;
-  }
-
-  /**
-   * Logs the provided arguments to the console if the `debug` property is set to true.
-   *
-   * @private
-   * @param {...any[]} args - The arguments to log to the console.
-   */
-  private _log(...args: any[]): void {
-    if (this.debug) {
-      console.log(this.orange + this.PREFIX + this.reset, ...args);
-    }
   }
 }

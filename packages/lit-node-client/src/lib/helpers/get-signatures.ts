@@ -1,24 +1,18 @@
-import { joinSignature } from 'ethers/lib/utils';
-
 import {
   CURVE_GROUP_BY_CURVE_TYPE,
   LIT_CURVE_VALUES,
+  InvalidArgumentException,
   NoValidShares,
   ParamNullError,
-  UnknownSignatureError,
   UnknownSignatureType,
   CurveTypeNotFoundError,
 } from '@lit-protocol/constants';
+import { mostCommonValue } from '@lit-protocol/core';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
-import {
-  logErrorWithRequestId,
-  logWithRequestId,
-  mostCommonString,
-} from '@lit-protocol/misc';
+import { logger } from '@lit-protocol/logger';
 import {
   EcdsaSignedMessageShareParsed,
   SigResponse,
-  SigShare,
 } from '@lit-protocol/types';
 
 /**
@@ -42,7 +36,8 @@ export const getSignatures = async (params: {
   signedMessageShares: EcdsaSignedMessageShareParsed[];
   requestId: string;
 }): Promise<SigResponse> => {
-  let { networkPubKeySet, threshold, signedMessageShares, requestId } = params;
+  const { networkPubKeySet, threshold, signedMessageShares, requestId } =
+    params;
 
   if (networkPubKeySet === null) {
     throw new ParamNullError(
@@ -56,10 +51,11 @@ export const getSignatures = async (params: {
   }
 
   if (signedMessageShares.length < threshold) {
-    logErrorWithRequestId(
+    logger.error({
+      function: 'getSignatures',
       requestId,
-      `not enough nodes to get the signatures. Expected ${threshold}, got ${signedMessageShares.length}`
-    );
+      msg: `not enough nodes to get the signatures. Expected ${threshold}, got ${signedMessageShares.length}`,
+    });
 
     throw new NoValidShares(
       {
@@ -105,15 +101,24 @@ export const getSignatures = async (params: {
   // -- combine
   const combinedSignature = await combineEcdsaShares(signedMessageShares);
 
-  const _publicKey = mostCommonString(
+  const _publicKey = mostCommonValue(
     signedMessageShares.map((s) => s.publicKey)
   );
-  const _dataSigned = mostCommonString(
+  const _dataSigned = mostCommonValue(
     signedMessageShares.map((s) => s.dataSigned)
   );
 
   if (!_publicKey || !_dataSigned) {
-    throw new Error('No valid publicKey or dataSigned found');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          requestId,
+          publicKey: _publicKey,
+          dataSigned: _dataSigned,
+        },
+      },
+      'No valid publicKey or dataSigned found'
+    );
   }
 
   const sigResponse: SigResponse = {

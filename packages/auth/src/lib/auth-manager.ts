@@ -1,21 +1,10 @@
-import { nacl } from '@lit-protocol/nacl';
-import { SessionKeyPair } from '@lit-protocol/types';
-import { uint8arrayToString } from '@lit-protocol/uint8arrays';
+import { generateSessionKeyPair } from '@lit-protocol/crypto';
 
 import type { LitAuthStorageProvider } from './storage/types';
-import type { LitAuthData } from '@lit-protocol/auth';
+import type { LitAuthData } from './types';
 
 interface LitAuthManagerConfig {
   storage: LitAuthStorageProvider;
-}
-
-function generateSessionKeyPair(): SessionKeyPair {
-  const keyPair = nacl.sign.keyPair();
-
-  return {
-    publicKey: uint8arrayToString(keyPair.publicKey, 'base16'),
-    secretKey: uint8arrayToString(keyPair.secretKey, 'base16'),
-  };
 }
 
 async function tryGetCachedAuthData() {

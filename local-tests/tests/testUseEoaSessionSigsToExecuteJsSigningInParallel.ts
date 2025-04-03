@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -14,7 +13,7 @@ export const testUseEoaSessionSigsToExecuteJsSigningInParallel = async (
   const alice = await devEnv.createRandomPerson();
 
   const fn = async (index: number) => {
-    log(`Index: ${index}`);
+    console.log(`Index: ${index}`);
 
     return await devEnv.litNodeClient.executeJs({
       authContext: getEoaAuthContext(devEnv, alice),
@@ -34,7 +33,7 @@ export const testUseEoaSessionSigsToExecuteJsSigningInParallel = async (
 
   const res = await Promise.all([fn(1), fn(2), fn(3)]);
   devEnv.releasePrivateKeyFromUser(alice);
-  log('res:', res);
+  console.log('res:', res);
 
   // -- Expected output:
   // [
@@ -114,5 +113,5 @@ export const testUseEoaSessionSigsToExecuteJsSigningInParallel = async (
     }
   });
 
-  log('✅ testUseEoaSessionSigsToExecuteJsSigningInParallel');
+  console.log('✅ testUseEoaSessionSigsToExecuteJsSigningInParallel');
 };

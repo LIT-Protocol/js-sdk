@@ -1,5 +1,7 @@
 import { ethers } from 'ethers';
 
+import { InvalidArgumentException } from '@lit-protocol/constants';
+
 import { Address, BalanceTransitionDefinition } from '../types';
 
 export const ERC20ABI = [
@@ -69,7 +71,15 @@ export function getBalanceTransitionCheck(
       case '>':
         return addressBalance.gt(targetAmount);
       default:
-        throw new Error(`Unrecognized comparator ${comparator}`);
+        throw new InvalidArgumentException(
+          {
+            info: {
+              comparator,
+              balance,
+            },
+          },
+          `Unrecognized comparator ${comparator}`
+        );
     }
   };
 

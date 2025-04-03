@@ -7,14 +7,9 @@ import {
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { logger } from '@lit-protocol/logger';
 
-import {
-  Action,
-  LitActionAction,
-  LogContextAction,
-  MintPkpAction,
-  TransactionAction,
-} from './actions';
+import { Action, ACTION_REPOSITORY } from './actions';
 import { MachineContext } from './context/machine-context';
 import {
   ContractEventData,
@@ -26,6 +21,7 @@ import {
 import { State, StateParams } from './states';
 import { CheckFn, Transition } from './transitions';
 import {
+  ActionConstructor,
   ActionDefinition,
   BaseStateMachineParams,
   ContextOrLiteral,
@@ -59,6 +55,7 @@ export class StateMachine {
 
   public id: string;
   public status: MachineStatus = 'stopped';
+  private readonly actionsRepository: Record<string, ActionConstructor>;
   private states = new Map<string, State>();
   private transitions = new Map<string, Map<string, Transition>>();
   private currentState?: State;
@@ -73,6 +70,10 @@ export class StateMachine {
       ...params.context,
     });
 
+    this.actionsRepository = {
+      ...ACTION_REPOSITORY,
+      ...params.actionRepository,
+    };
     this.litNodeClient = params.litNodeClient;
     this.litContracts = params.litContracts;
     this.privateKey = params.privateKey;
@@ -124,6 +125,10 @@ export class StateMachine {
       litContracts: litContractsInstance,
       privateKey,
       onError,
+      actionRepository: {
+        ...ACTION_REPOSITORY,
+        ...machineConfig.actionRepository,
+      },
     });
 
     const stateTransitions = [] as TransitionDefinition[];
@@ -382,17 +387,17 @@ export class StateMachine {
     // Aggregate (AND) all listener checks to a single function result
     transitionConfig.check = async (values) => {
       this.debug &&
-        console.log(
-          `${transitionDefinition.fromState} -> ${transitionDefinition.toState} values`,
-          values
-        );
+        logger.info({
+          msg: `${transitionDefinition.fromState} -> ${transitionDefinition.toState} values`,
+          values,
+        });
       return Promise.all(checks.map((check) => check(values))).then(
         (results) => {
           this.debug &&
-            console.log(
-              `${transitionDefinition.fromState} -> ${transitionDefinition.toState} results`,
-              results
-            );
+            logger.info({
+              msg: `${transitionDefinition.fromState} -> ${transitionDefinition.toState} results`,
+              results,
+            });
           return results.every((result) => result);
         }
       );
@@ -410,7 +415,7 @@ export class StateMachine {
     initialState: string,
     onStop?: voidAsyncFunction
   ): Promise<void> {
-    this.debug && console.log('Starting state machine...');
+    this.debug && logger.info('Starting state machine...');
 
     await Promise.all([
       this.litContracts.connect(),
@@ -421,7 +426,7 @@ export class StateMachine {
     await this.enterState(initialState);
     this.status = 'running';
 
-    this.debug && console.log('State machine started');
+    this.debug && logger.info('State machine started');
   }
 
   /**
@@ -470,20 +475,21 @@ export class StateMachine {
    * Stops the state machine by exiting the current state and not moving to another one.
    */
   public async stopMachine(): Promise<void> {
-    this.debug && console.log('Stopping state machine...');
+    this.debug && logger.info('Stopping state machine...');
 
     this.status = 'stopped';
     await this.exitCurrentState();
     await this.onStopCallback?.();
 
-    this.debug && console.log('State machine stopped');
+    this.debug && logger.info('State machine stopped');
   }
 
   /**
    * Stops listening on the current state's transitions and exits the current state.
    */
   private async exitCurrentState(): Promise<void> {
-    this.debug && console.log('exitCurrentState', this.currentState?.key);
+    this.debug &&
+      logger.info({ msg: 'exitCurrentState', state: this.currentState?.key });
 
     const currentTransitions =
       this.transitions.get(this.currentState?.key ?? '') ??
@@ -514,7 +520,7 @@ export class StateMachine {
         `State ${stateKey} not found`
       );
     }
-    this.debug && console.log('enterState', state.key);
+    this.debug && logger.info({ msg: 'enterState', state: state.key });
     await state.enter();
     const nextTransitions =
       this.transitions.get(state.key) ?? new Map<string, Transition>();
@@ -542,7 +548,7 @@ export class StateMachine {
       );
     }
     if (this.currentState === nextState) {
-      console.warn(
+      logger.warn(
         `State ${stateKey} is already active. Skipping state change.`
       );
       return;
@@ -569,66 +575,18 @@ export class StateMachine {
   ): voidAsyncFunction {
     const actions = [] as Action[];
 
-    actionDefinitions.forEach((action) => {
-      switch (action.key) {
-        case 'context':
-          if (typeof action.log?.path === 'string') {
-            actions.push(
-              new LogContextAction({
-                debug: this.debug,
-                stateMachine: this,
-                path: action.log.path,
-              })
-            );
-          }
-          break;
-        case 'litAction':
-          actions.push(
-            new LitActionAction({
-              debug: this.debug,
-              stateMachine: this,
-              ...action,
-            })
-          );
-          break;
-        case 'transaction':
-          actions.push(
-            new TransactionAction({
-              debug: this.debug,
-              stateMachine: this,
-              ...action,
-            })
-          );
-          break;
-        case 'usePkp':
-          if ('pkp' in action) {
-            this.context.set(
-              'activePkp',
-              this.resolveContextPathOrLiteral(action.pkp)
-            );
-          } else if ('mint' in action) {
-            const mintPkpAction = new MintPkpAction({
-              debug: this.debug,
-              stateMachine: this,
-            });
-            actions.push(mintPkpAction);
-          }
-          if (this.debug) {
-            const activePkp = this.context.get('activePkp');
-            console.log(`Machine configured to use pkp ${activePkp}`);
-          }
-          break;
-        default:
-          throw new AutomationError(
-            {
-              info: {
-                action,
-              },
-            },
-            `Unknown action. Check error info.`
-          );
+    for (const action of actionDefinitions) {
+      const ActionCtor = this.actionsRepository[action.key];
+      if (!ActionCtor) {
+        throw new AutomationError(
+          { info: { action } },
+          `Action key "${action.key}" not found in action repository`
+        );
       }
-    });
+      actions.push(
+        new ActionCtor({ debug: this.debug, stateMachine: this, ...action })
+      );
+    }
 
     return async () => {
       await Promise.all(actions.map((action) => action.run())).catch((err) => {
@@ -665,7 +623,7 @@ export class StateMachine {
       }
 
       // Throwing when stopping could hide above error
-      this.stopMachine().catch(console.error);
+      this.stopMachine().catch((error) => logger.error({ error }));
     }
   }
 

@@ -8,6 +8,7 @@ import {
   LitAbilitySchema,
   LitNetworkKeysSchema,
   LitResourcePrefixSchema,
+  ResponseStrategySchema,
   TokenInfoSchema,
 } from '@lit-protocol/schemas';
 
@@ -29,7 +30,15 @@ import type {
   SolAcc,
 } from '@lit-protocol/access-control-conditions-schemas';
 
-export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
+export {
+  DefinedJson,
+  DefinedLiteral,
+  Json,
+  Literal,
+} from '@lit-protocol/schemas';
+
+// Zod only derives string, not giving real type safety over it
+export type Hex = `0x${string}`; // z.infer<typeof HexSchema>;
 
 // Backwards compatibility with @lit-protocol/accs-schemas
 export type AccsDefaultParams = EvmBasicAcc;
@@ -188,7 +197,7 @@ export interface LitContractResolverContext {
   provider?: ethers.providers.JsonRpcProvider;
 }
 
-export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
+export type ResponseStrategy = z.infer<typeof ResponseStrategySchema>;
 
 export type LitResourcePrefix = z.infer<typeof LitResourcePrefixSchema>;
 

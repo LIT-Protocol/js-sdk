@@ -11,11 +11,13 @@ import { computeAddress } from 'ethers/lib/utils';
 import {
   AUTH_METHOD_SCOPE_VALUES,
   AUTH_METHOD_TYPE_VALUES,
+  Environment,
   HTTP,
   HTTP_BY_NETWORK,
   HTTPS,
   InitError,
   InvalidArgumentException,
+  LitNetworkError,
   LIT_NETWORK,
   LIT_NETWORK_VALUES,
   METAMASK_CHAIN_INFO_BY_NETWORK,
@@ -23,10 +25,11 @@ import {
   ParamsMissingError,
   RPC_URL_BY_NETWORK,
   TransactionError,
+  UnsupportedMethodError,
   WrongNetworkException,
 } from '@lit-protocol/constants';
-import { Logger, LogManager } from '@lit-protocol/logger';
-import { derivedAddresses, isBrowser, isNode } from '@lit-protocol/misc';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
+import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import {
   ContractName,
   EpochInfo,
@@ -42,6 +45,7 @@ import {
 } from '@lit-protocol/types';
 
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
+import { derivedAddresses } from './helpers/addresses';
 import {
   CIDParser,
   getBytes32FromMultihash,
@@ -75,6 +79,7 @@ const GAS_LIMIT_ADJUSTMENT = ethers.BigNumber.from(100).add(
 // The class has a number of properties that represent the smart contract instances, such as accessControlConditionsContract, litTokenContract, pkpNftContract, etc. These smart contract instances are created by passing the contract address, ABI, and provider to the ethers.Contract constructor.
 // The class also has a utils object with helper functions for converting between hexadecimal and decimal representation of numbers, as well as functions for working with multihashes and timestamps.
 export class LitContracts {
+  private readonly _logger: Logger;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   provider: ethers.providers.StaticJsonRpcProvider | any;
   rpc: string;
@@ -103,8 +108,6 @@ export class LitContracts {
     'PriceFeed',
   ];
 
-  static logger: Logger = LogManager.Instance.get('contract-sdk');
-
   // make the constructor args optional
   constructor(args?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,6 +127,10 @@ export class LitContracts {
     debug?: boolean;
     network?: LIT_NETWORKS_KEYS;
   }) {
+    this._logger = getChildLogger({
+      module: 'LitContracts',
+      ...(args?.debug ? { level: 'debug' } : {}),
+    });
     // this.provider = args?.provider;
     this.customContext = args?.customContext;
     this.rpc = args?.rpc;
@@ -145,18 +152,6 @@ export class LitContracts {
     }
   }
 
-  /**
-   * Logs a message to the console.
-   *
-   * @param {any} [args] An optional value to log with the message.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log = (...args: any[]) => {
-    if (this.debug) {
-      LitContracts.logger.debug(...args);
-    }
-  };
-
   connect = async () => {
     // =======================================
     //          SETTING UP PROVIDER
@@ -168,9 +163,9 @@ export class LitContracts {
     let wallet;
     let SETUP_DONE = false;
     if (this.provider) {
-      this.log('Using provided provider');
-    } else if (isBrowser() && !this.signer) {
-      this.log("----- We're in the browser! -----");
+      this._logger.info('Using provided provider');
+    } else if (Environment.isBrowser && !this.signer) {
+      this._logger.info("----- We're in the browser! -----");
 
       const web3Provider = window.ethereum;
 
@@ -219,8 +214,8 @@ export class LitContracts {
     // ----------------------------------------------
     //          (Node) Setting up Provider
     // ----------------------------------------------
-    else if (isNode()) {
-      this.log("----- We're in node! -----");
+    else if (Environment.isNode) {
+      this._logger.info("----- We're in node! -----");
       this.provider = new ethers.providers.StaticJsonRpcProvider({
         url: this.rpc,
         skipFetchSetup: true,
@@ -231,7 +226,7 @@ export class LitContracts {
     //          CUSTOM PRIVATE KEY
     // ======================================
     if (this.privateKey) {
-      this.log('Using your own private key');
+      this._logger.info('Using your own private key');
       this.signer = new ethers.Wallet(this.privateKey, this.provider);
       this.provider = this.signer.provider;
       SETUP_DONE = true;
@@ -244,61 +239,72 @@ export class LitContracts {
       (!this.privateKey && this.randomPrivateKey) ||
       this.options?.storeOrUseStorageKey
     ) {
-      this.log('THIS.SIGNER:', this.signer);
+      this._logger.info({ msg: 'THIS.SIGNER', signer: this.signer });
 
       const STORAGE_KEY = 'lit-contracts-sdk-private-key';
 
-      this.log("Let's see if you have a private key in your local storage!");
+      this._logger.info(
+        "Let's see if you have a private key in your local storage!"
+      );
 
       // -- find private key in local storage
       let storagePrivateKey;
 
       try {
-        storagePrivateKey = localStorage.getItem(STORAGE_KEY);
+        storagePrivateKey = getStorageItem(STORAGE_KEY);
       } catch (e) {
         // swallow
-        // this.log('Not a problem.');
+        // this.#logger.info('Not a problem.');
       }
 
       // -- (NOT FOUND) no private key found
       if (!storagePrivateKey) {
-        this.log('Not a problem, we will generate a random private key');
+        this._logger.info(
+          'Not a problem, we will generate a random private key'
+        );
         storagePrivateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
       }
 
       // -- (FOUND) private key found
       else {
-        this.log("Found your private key in local storage. Let's use it!");
+        this._logger.info(
+          "Found your private key in local storage. Let's use it!"
+        );
       }
 
       this.signer = new ethers.Wallet(storagePrivateKey, this.provider);
 
-      this.log('- Your private key:', storagePrivateKey);
-      this.log('- Your address:', await this.signer.getAddress());
-      this.log('- this.signer:', this.signer);
-      this.log('- this.provider.getSigner():', this.provider.getSigner());
+      this._logger.info({
+        msg: '- Your address',
+        address: await this.signer.getAddress(),
+      });
+      this._logger.info({ msg: '- this.signer', signer: this.signer });
+      this._logger.info({
+        msg: '- this.provider.getSigner()',
+        signer: this.provider.getSigner(),
+      });
 
       // -- (OPTION) store private key in local storage
       if (this.options?.storeOrUseStorageKey) {
-        this.log(
+        this._logger.info(
           "You've set the option to store your private key in local storage."
         );
-        localStorage.setItem(STORAGE_KEY, storagePrivateKey);
+        setStorageItem(STORAGE_KEY, storagePrivateKey);
       }
     } else {
       // ----------------------------------------
       //          Ask Metamask to sign
       // ----------------------------------------
-      if (isBrowser() && wallet && !SETUP_DONE) {
-        // this.log('HERE????');
-        this.log('this.signer:', this.signer);
+      if (Environment.isBrowser && wallet && !SETUP_DONE) {
+        // this.#logger.info('HERE????');
+        this._logger.info({ msg: 'this.signer', signer: this.signer });
         this.signer = wallet.getSigner();
       }
     }
 
     if (this.signer !== undefined && this.signer !== null) {
       if ('litNodeClient' in this.signer && 'rpcProvider' in this.signer) {
-        this.log(`
+        this._logger.info(`
   // ***********************************************************************************************
   //          THIS IS A PKP WALLET, USING IT AS A SIGNER AND ITS RPC PROVIDER AS PROVIDER
   // ***********************************************************************************************
@@ -309,13 +315,21 @@ export class LitContracts {
       }
     }
 
-    this.log('Your Signer:', this.signer);
-    this.log('Your Provider:', this.provider?.connection);
+    this._logger.info({ msg: 'Your Signer', signer: this.signer });
+    this._logger.info({
+      msg: 'Your Provider',
+      provider: this.provider?.connection,
+    });
 
     if (!this.provider) {
-      this.log('No provider found. Will try to use the one from the signer.');
+      this._logger.info(
+        'No provider found. Will try to use the one from the signer.'
+      );
       this.provider = this.signer.provider;
-      this.log('Your Provider(from signer):', this.provider?.connection);
+      this._logger.info({
+        msg: 'Your Provider(from signer)',
+        provider: this.provider?.connection,
+      });
     }
 
     this.connected = true;
@@ -807,12 +821,7 @@ export class LitContracts {
         HTTP; // Fallback to HTTP
 
       // Construct the URL
-      const url = `${protocol}${ip}:${port}`;
-
-      // Log the constructed URL for debugging
-      LitContracts.logger.debug("Validator's URL:", url);
-
-      return url;
+      return `${protocol}${ip}:${port}`;
     });
   }
 
@@ -868,11 +877,27 @@ export class LitContracts {
     const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
 
     if (!minNodeCountInt) {
-      throw new Error('❌ Minimum validator count is not set');
+      throw new LitNetworkError(
+        {
+          info: {
+            epochInfo,
+            activeValidators: activeUnkickedValidatorStructs.length,
+            minNodeCount: minNodeCountInt,
+          },
+        },
+        '❌ Minimum validator count is not set'
+      );
     }
 
     if (activeUnkickedValidatorStructs.length < minNodeCountInt) {
-      throw new Error(
+      throw new LitNetworkError(
+        {
+          info: {
+            epochInfo,
+            activeValidators: activeUnkickedValidatorStructs.length,
+            minNodeCount: minNodeCountInt,
+          },
+        },
         `❌ Active validator set does not meet the consensus. Required: ${minNodeCountInt} but got: ${activeUnkickedValidatorStructs.length}`
       );
     }
@@ -1136,13 +1161,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     }
 
     const tokenId = events[0].topics[1];
-    this.log('tokenId:', tokenId);
+    this._logger.info({ msg: 'tokenId', tokenId });
     let tries = 0;
     const maxAttempts = 10;
     let publicKey = '';
     while (tries < maxAttempts) {
       publicKey = await pkpNftContract['getPubkey'](tokenId);
-      this.log('pkp pub key: ', publicKey);
+      this._logger.info({ msg: 'pkp pub key', publicKey });
       if (publicKey !== '0x') {
         break;
       }
@@ -1377,7 +1402,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * const CID = require('multiformats/cid')
      * const ipfsId = 'QmZKLGf3vgYsboM7WVUS9X56cJSdLzQVacNp841wmEDRkW'
      * const bytes32 = getBytes32FromMultihash(ipfsId, CID)
-     * console.log(bytes32)
      *
      * @returns {IPFSHash}
      */
@@ -1451,7 +1475,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
             tokens.push(token);
           } catch (e) {
-            this.log(`[getTokensByAddress] Ended search on index: ${i}`);
+            this._logger.info(
+              `[getTokensByAddress] Ended search on index: ${i}`
+            );
             break;
           }
         }
@@ -1512,7 +1538,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
             tokens.push(token);
           } catch (e) {
-            this.log(`[getTokensByAddress] Ended search on index: ${i}`);
+            this._logger.info(
+              `[getTokensByAddress] Ended search on index: ${i}`
+            );
             break;
           }
         }
@@ -1599,12 +1627,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         }
 
         if (this.isPKP) {
-          this.log(
+          this._logger.info(
             "This is a PKP wallet, so we'll use the PKP wallet to sign the tx"
           );
         }
 
-        this.log('...signing and sending tx');
+        this._logger.info('...signing and sending tx');
 
         const sentTx = await this._callWithAdjustedOverrides(
           pkpNftContract,
@@ -1613,22 +1641,22 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           { value: mintCost, ...param }
         );
 
-        this.log('sentTx:', sentTx);
+        this._logger.info({ msg: 'sentTx', sentTx });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res: any = await sentTx.wait();
-        this.log('res:', res);
+        this._logger.info({ msg: 'res', res });
 
         const events = 'events' in res ? res.events : res.logs;
 
         const tokenIdFromEvent = events[0].topics[1];
-        this.log('tokenIdFromEvent:', tokenIdFromEvent);
+        this._logger.info({ msg: 'tokenIdFromEvent', tokenIdFromEvent });
         let tries = 0;
         const maxAttempts = 10;
         let publicKey = '';
         while (tries < maxAttempts) {
           publicKey = await pkpNftContract['getPubkey'](tokenIdFromEvent);
-          this.log('pkp pub key: ', publicKey);
+          this._logger.info({ msg: 'pkp pub key', publicKey });
           if (publicKey !== '0x') {
             break;
           }
@@ -1638,7 +1666,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           });
         }
 
-        this.log('public key from token id', publicKey);
+        this._logger.info({ msg: 'public key from token id', publicKey });
         if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
         }
@@ -1686,7 +1714,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           const tokenId = events[1].topics[1];
           return { tx, res: txRec, tokenId };
         } catch (e: unknown) {
-          this.log(`[claimAndMint] error: ${(e as Error).message}`);
+          this._logger.info(`[claimAndMint] error: ${(e as Error).message}`);
           throw new TransactionError(
             {
               info: {
@@ -1791,7 +1819,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        this.log('[getPermittedAddresses] input<tokenId>:', tokenId);
+        this._logger.info({
+          msg: '[getPermittedAddresses] input<tokenId>',
+          tokenId,
+        });
 
         let addresses: string[] = [];
 
@@ -1811,7 +1842,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
               break;
             }
           } catch (e: unknown) {
-            this.log(
+            this._logger.info(
               `[getPermittedAddresses] error<e.message | ${tries}>:`,
               (e as Error).message
             );
@@ -1878,10 +1909,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
               break;
             }
           } catch (e: unknown) {
-            this.log(
-              `[getPermittedActions] error<e.message | ${tries}>:`,
-              (e as Error).message
-            );
+            this._logger.info({
+              msg: `[getPermittedActions] error<e.message | ${tries}>:`,
+              message: (e as Error).message,
+            });
             tries++;
           }
         }
@@ -1929,11 +1960,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        this.log('[isPermittedAction] input<pkpId>:', pkpId);
-        this.log('[isPermittedAction] input<ipfsId>:', ipfsId);
+        this._logger.info({ msg: '[isPermittedAction] input<pkpId>', pkpId });
+        this._logger.info({ msg: '[isPermittedAction] input<ipfsId>', ipfsId });
 
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
-        this.log('[isPermittedAction] converted<ipfsHash>:', ipfsHash);
+        this._logger.info({
+          msg: '[isPermittedAction] converted<ipfsHash>',
+          ipfsHash,
+        });
 
         const bool = await pkpPermissionsContract['isPermittedAction'](
           pkpId,
@@ -1990,21 +2024,36 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        this.log('[addPermittedAction] input<pkpId>:', pkpId);
+        this._logger.info({ msg: '[addPermittedAction] input<pkpId>', pkpId });
 
         const pubKey = await pubkeyRouterContract['getPubkey'](pkpId);
-        this.log('[addPermittedAction] converted<pubKey>:', pubKey);
+        this._logger.info({
+          msg: '[addPermittedAction] converted<pubKey>',
+          pubKey,
+        });
 
         const pubKeyHash = ethers.utils.keccak256(pubKey);
-        this.log('[addPermittedAction] converted<pubKeyHash>:', pubKeyHash);
+        this._logger.info({
+          msg: '[addPermittedAction] converted<pubKeyHash>',
+          pubKeyHash,
+        });
 
         const tokenId = ethers.BigNumber.from(pubKeyHash);
-        this.log('[addPermittedAction] converted<tokenId>:', tokenId);
+        this._logger.info({
+          msg: '[addPermittedAction] converted<tokenId>',
+          tokenId,
+        });
 
-        this.log('[addPermittedAction] input<ipfsId>:', ipfsId);
+        this._logger.info({
+          msg: '[addPermittedAction] input<ipfsId>',
+          ipfsId,
+        });
 
         const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
-        this.log('[addPermittedAction] converted<ipfsIdBytes>:', ipfsIdBytes);
+        this._logger.info({
+          msg: '[addPermittedAction] converted<ipfsIdBytes>',
+          ipfsIdBytes,
+        });
 
         const tx = await this._callWithAdjustedOverrides(
           pkpPermissionsContract,
@@ -2012,7 +2061,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           [tokenId, ipfsIdBytes, [1]]
         );
 
-        this.log('[addPermittedAction] output<tx>:', tx);
+        this._logger.info({ msg: '[addPermittedAction] output<tx>', tx });
 
         return tx;
       },
@@ -2057,10 +2106,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        this.log('[addPermittedAddress] input<pkpId>:', pkpId);
-        this.log('[addPermittedAddress] input<ownerAddress>:', ownerAddress);
-
-        this.log('[addPermittedAddress] input<pkpId>:', pkpId);
+        this._logger.info({
+          msg: '[addPermittedAddress] input<pkpId>',
+          pkpId,
+        });
+        this._logger.info({
+          msg: '[addPermittedAddress] input<ownerAddress>',
+          ownerAddress,
+        });
 
         const tx = await this._callWithAdjustedOverrides(
           pkpPermissionsContract,
@@ -2068,7 +2121,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           [pkpId, ownerAddress, [1]]
         );
 
-        this.log('[addPermittedAddress] output<tx>:', tx);
+        this._logger.info({ msg: '[addPermittedAddress] output<tx>', tx });
 
         return tx;
       },
@@ -2112,11 +2165,20 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        this.log('[revokePermittedAction] input<pkpId>:', pkpId);
-        this.log('[revokePermittedAction] input<ipfsId>:', ipfsId);
+        this._logger.info({
+          msg: '[revokePermittedAction] input<pkpId>',
+          pkpId,
+        });
+        this._logger.info({
+          msg: '[revokePermittedAction] input<ipfsId>',
+          ipfsId,
+        });
 
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
-        this.log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
+        this._logger.info({
+          msg: '[revokePermittedAction] converted<ipfsHash>',
+          ipfsHash,
+        });
 
         const tx = await this._callWithAdjustedOverrides(
           pkpPermissionsContract,
@@ -2124,7 +2186,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           [pkpId, ipfsHash]
         );
 
-        this.log('[revokePermittedAction] output<tx>:', tx);
+        this._logger.info({ msg: '[revokePermittedAction] output<tx>', tx });
 
         return tx;
       },
@@ -2144,9 +2206,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        * @return { Promise<string> }
        */
       // getIpfsIds: async (solidityIpfsId: string): Promise<string> => {
-      //   this.log('[getIpfsIds] input<solidityIpfsId>:', solidityIpfsId);
+      //   this.#logger.info({ msg: '[getIpfsIds] input<solidityIpfsId>', solidityIpfsId });
       //   const ipfsId = this.utils.getMultihashFromBytes(solidityIpfsId);
-      //   this.log('[getIpfsIds] output<ipfsId>:', ipfsId);
+      //   this.#logger.info({ msg: '[getIpfsIds] output<ipfsId>', ipfsId });
       //   return ipfsId;
       // },
     },
@@ -2230,7 +2292,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   ): Promise<ReturnType<T['functions'][K]>> {
     // Check if the method exists on the contract
     if (!(method in contract.functions)) {
-      throw new Error(
+      throw new UnsupportedMethodError(
+        {
+          info: {
+            network: this.network,
+            contract,
+            method,
+          },
+        },
         `Method ${String(method)} does not exist on the contract`
       );
     }

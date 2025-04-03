@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 
-import { log } from '@lit-protocol/misc';
 import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -88,5 +87,5 @@ export const testUsePkpSessionSigsToPkpSign = async (
     // );
   }
 
-  log('✅ res:', res);
+  console.log('✅ res:', res);
 };

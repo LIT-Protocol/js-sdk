@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from '../../setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { getPkpSessionSigs } from '../../setup/session-sigs/get-pkp-session-sigs';
@@ -64,7 +63,7 @@ export const testExportWrappedKey = async (devEnv: TinnyEnvironment) => {
       );
     }
 
-    log('✅ testExportWrappedKey');
+    console.log('✅ testExportWrappedKey');
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }

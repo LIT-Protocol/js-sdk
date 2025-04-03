@@ -12,8 +12,9 @@ import {
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
+import { publicKeyCompress } from '@lit-protocol/crypto';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { publicKeyConvert } from '@lit-protocol/misc';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   AuthenticationContext,
   JsonExecutionSdkParams,
@@ -24,28 +25,10 @@ import {
 } from '@lit-protocol/types';
 
 /**
- * Compresses a given public key.
- * @param {string} pubKey - The public key to be compressed.
- * @returns {string} - The compressed public key.
- */
-const compressPubKey = (pubKey: string): string => {
-  const testBuffer = Buffer.from(pubKey, 'hex');
-  if (testBuffer.length === 64) {
-    pubKey = '04' + pubKey;
-  }
-
-  // const hex = Buffer.from(pubKey, 'hex');
-  const uint8array = Buffer.from(pubKey, 'hex');
-  const compressedKey = publicKeyConvert(uint8array, true);
-  const hex = Buffer.from(compressedKey).toString('hex');
-
-  return hex;
-};
-
-/**
  * A base class that can be shared between Ethers and Cosmos signers.
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
+  private readonly _logger: Logger;
   rpcs?: RPCUrls;
 
   authContext: AuthenticationContext;
@@ -62,11 +45,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   debug: boolean;
   useAction: boolean | undefined;
 
-  // -- debug things
-  private PREFIX = '[PKPBase]';
-  private orange = '\x1b[33m';
-  private reset = '\x1b[0m';
-
   get litNodeClientReady(): boolean {
     return this.litNodeClient.ready;
   }
@@ -77,6 +55,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const prop = { ...pkpBaseProp }; // Avoid modifications to the received object
 
     this.debug = prop.debug || false;
+    this._logger = getChildLogger({
+      module: 'PKPBase',
+      ...(prop.debug ? { level: 'debug' } : {}),
+    });
 
     if (prop.pkpPubKey.startsWith('0x')) {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
@@ -87,7 +69,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.rpcs = prop.rpcs;
 
-    console.log('authContext:', prop.authContext);
+    this._logger.info({ msg: 'authContext', authContext: prop.authContext });
     this.authContext = prop.authContext;
 
     this.validateAuthContext();
@@ -132,13 +114,32 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
+   * Compresses a given public key.
+   * @param {string} pubKey - The public key to be compressed.
+   * @returns {string} - The compressed public key.
+   */
+  private compressPubKey(pubKey: string): string {
+    const testBuffer = Buffer.from(pubKey, 'hex');
+    if (testBuffer.length === 64) {
+      pubKey = '04' + pubKey;
+    }
+
+    // const hex = Buffer.from(pubKey, 'hex');
+    const uint8array = Buffer.from(pubKey, 'hex');
+    const compressedKey = publicKeyCompress(uint8array);
+    const hex = Buffer.from(compressedKey).toString('hex');
+
+    return hex;
+  }
+
+  /**
    * Sets the compressed public key and its buffer representation.
    *
    * @param {PKPBaseProp} prop - The properties for the PKPBase instance.
    */
   private setCompressedPubKeyAndBuffer(prop: PKPBaseProp): void | never {
     try {
-      this.compressedPubKey = compressPubKey(prop.pkpPubKey);
+      this.compressedPubKey = this.compressPubKey(prop.pkpPubKey);
       this.compressedPubKeyBuffer = Buffer.from(this.compressedPubKey, 'hex');
     } catch (e) {
       throw new UnknownError(
@@ -178,7 +179,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     if (!pkpBaseProp.litActionCode && !pkpBaseProp.litActionIPFS) {
-      this.log(
+      this._logger.debug(
         'No lit action code or IPFS hash provided. Using default action.'
       );
       this.useAction = false;
@@ -205,7 +206,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async init(): Promise<void> {
     try {
       await this.litNodeClient.connect();
-      this.log('Connected to Lit Node');
+      this._logger.debug('Connected to Lit Node');
     } catch (e) {
       throw new LitNodeClientNotReadyError(
         {
@@ -310,14 +311,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       );
     }
 
-    this.log('executeJsArgs:', executeJsArgs);
+    this._logger.debug({ msg: 'executeJsArgs', executeJsArgs });
 
     const res = await this.litNodeClient.executeJs(executeJsArgs);
 
     const sig = res.signatures[sigName];
 
-    this.log('res:', res);
-    this.log('res.signatures[sigName]:', sig);
+    this._logger.debug({ msg: 'res', res });
+    this._logger.debug({ msg: 'res.signatures[sigName]', sig });
 
     if (sig.r && sig.s) {
       // pad sigs with 0 if length is odd
@@ -350,26 +351,21 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.validateAuthContext();
 
-    try {
-      const sig = await this.litNodeClient.pkpSign({
-        toSign,
-        pubKey: this.uncompressedPubKey,
-        authContext: this.authContext,
-      });
+    const sig = await this.litNodeClient.pkpSign({
+      toSign,
+      pubKey: this.uncompressedPubKey,
+      authContext: this.authContext,
+    });
 
-      if (!sig) {
-        throw new UnknownError({}, 'No signature returned');
-      }
-
-      // pad sigs with 0 if length is odd
-      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
-      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
-
-      return sig;
-    } catch (e) {
-      console.log('err: ', e);
-      throw e;
+    if (!sig) {
+      throw new UnknownError({}, 'No signature returned');
     }
+
+    // pad sigs with 0 if length is odd
+    sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
+    sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
+
+    return sig;
   }
 
   /**
@@ -381,20 +377,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   async ensureLitNodeClientReady(): Promise<void> {
     if (!this.litNodeClientReady) {
       await this.init();
-    }
-  }
-
-  /**
-   * Logs the provided arguments to the console, but only if debugging is enabled.
-   *
-   * @param {...any[]} args - The values to be logged to the console.
-   *
-   * @returns {void} - This function does not return a value.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log(...args: any[]): void {
-    if (this.debug) {
-      console.log(this.orange + this.PREFIX + this.reset, ...args);
     }
   }
 }

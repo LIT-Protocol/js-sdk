@@ -1,5 +1,3 @@
-import { encryptString } from '@lit-protocol/encryption';
-
 import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
@@ -36,13 +34,10 @@ export async function importPrivateKey(
 
   const saltedPrivateKey = LIT_PREFIX + privateKey;
 
-  const { ciphertext, dataToEncryptHash } = await encryptString(
-    {
-      accessControlConditions: [allowPkpAddressToDecrypt],
-      dataToEncrypt: saltedPrivateKey,
-    },
-    litNodeClient
-  );
+  const { ciphertext, dataToEncryptHash } = await litNodeClient.encrypt({
+    accessControlConditions: [allowPkpAddressToDecrypt],
+    dataToEncrypt: Buffer.from(saltedPrivateKey, 'utf8'),
+  });
 
   const { id } = await storePrivateKey({
     sessionSig: firstSessionSig,

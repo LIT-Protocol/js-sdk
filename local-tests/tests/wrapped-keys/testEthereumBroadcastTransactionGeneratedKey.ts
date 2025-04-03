@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api, EthereumLitTransaction } from '@lit-protocol/wrapped-keys';
@@ -75,7 +74,7 @@ export const testEthereumBroadcastTransactionGeneratedKey = async (
       throw new Error(`signedTx isn't hex: ${signedTx}`);
     }
 
-    log('✅ testEthereumBroadcastTransactionGeneratedKey');
+    console.log('✅ testEthereumBroadcastTransactionGeneratedKey');
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }

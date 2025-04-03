@@ -1,9 +1,50 @@
-import * as ethers from 'ethers';
+import { ed25519 } from '@noble/curves/ed25519';
+import { ethers } from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
 
 import { SigShare } from '@lit-protocol/types';
 
-import { combineEcdsaShares } from './crypto';
+import {
+  combineEcdsaShares,
+  generateSessionKeyPair,
+  publicKeyCompress,
+} from './crypto';
+
+describe('generateSessionKeyPair', () => {
+  it('generates a valid key pair where secretKey contains the publicKey', () => {
+    const sessionKeyPair = generateSessionKeyPair();
+
+    const publicKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.publicKey
+    );
+    const secretKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.secretKey
+    );
+
+    expect(secretKeyBytes.length).toBe(64);
+    expect(publicKeyBytes.length).toBe(32);
+
+    const derivedPublicKeyFromSecret = secretKeyBytes.slice(32);
+    expect(derivedPublicKeyFromSecret).toEqual(publicKeyBytes);
+  });
+
+  it('derives public key from secret key', () => {
+    const sessionKeyPair = generateSessionKeyPair();
+
+    const publicKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.publicKey
+    );
+    const secretKeyBytes = ethers.utils.arrayify(
+      '0x' + sessionKeyPair.secretKey
+    );
+
+    const privateKeySeed = secretKeyBytes.slice(0, 32);
+
+    const derivedPublicKey = ed25519.getPublicKey(privateKeySeed);
+
+    expect(derivedPublicKey).toEqual(publicKeyBytes);
+  });
+});
 
 describe('combine ECDSA Shares', () => {
   it('Should recombine ECDSA signature shares', async () => {
@@ -65,5 +106,44 @@ describe('combine ECDSA Shares', () => {
       ethers.utils.arrayify(recoveredPk)
     );
     expect(recoveredAddr).toEqual(addr);
+  });
+});
+
+describe('publicKeyCompress', () => {
+  const COMPRESSED_PUBLIC_KEY_HEX =
+    '03bc0a563a9ddaf097ef31c3e936dda312acdbe2504953f0ea4ecb94ee737237df';
+  const COMPRESSED_PUBLIC_KEY = Buffer.from(COMPRESSED_PUBLIC_KEY_HEX, 'hex');
+
+  const UNCOMPRESSED_PUBLIC_KEY_HEX =
+    '04bc0a563a9ddaf097ef31c3e936dda312acdbe2504953f0ea4ecb94ee737237dfa2be4f2e38de7540ae64cf362b897d0f93567adc23ce0abc997c18edd269d73b';
+  const UNCOMPRESSED_PUBLIC_KEY = Buffer.from(
+    UNCOMPRESSED_PUBLIC_KEY_HEX,
+    'hex'
+  );
+
+  it('should return the same compressed key when already compressed', () => {
+    const result = publicKeyCompress(COMPRESSED_PUBLIC_KEY);
+    expect(result).toEqual(COMPRESSED_PUBLIC_KEY);
+  });
+
+  it('should compress an uncompressed public key correctly', () => {
+    const result = publicKeyCompress(UNCOMPRESSED_PUBLIC_KEY);
+    expect(result).toEqual(COMPRESSED_PUBLIC_KEY);
+  });
+
+  it('should throw an error for invalid key length', () => {
+    const invalidKey = Buffer.from('1234567890abcdef', 'hex'); // 8 bytes only
+    expect(() => publicKeyCompress(invalidKey)).toThrow(
+      'Invalid public key length. Expected 33 (compressed) or 65 (uncompressed) bytes.'
+    );
+  });
+
+  it('should throw an error if uncompressed key does not start with 0x04', () => {
+    // Create a 65-byte buffer with an invalid prefix (not 0x04)
+    const invalidUncompressed = Buffer.alloc(65, 0);
+    invalidUncompressed[0] = 0x05;
+    expect(() => publicKeyCompress(invalidUncompressed)).toThrow(
+      'Invalid uncompressed public key format: does not start with 0x04.'
+    );
   });
 });

@@ -1,4 +1,4 @@
-import { log } from '@lit-protocol/misc';
+import { InvalidArgumentException } from '@lit-protocol/constants';
 import { BlsResponseData, BlsSignatureShare } from '@lit-protocol/types';
 
 /**
@@ -11,7 +11,14 @@ export function getBlsSignatures(
   responseData: BlsResponseData[]
 ): BlsSignatureShare[] {
   if (!responseData) {
-    throw new Error('[getBlsSignatures] No data provided');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          responseData,
+        },
+      },
+      '[getBlsSignatures] No data provided'
+    );
   }
 
   const signatureShares = responseData.map((s) => ({
@@ -21,10 +28,15 @@ export function getBlsSignatures(
     },
   }));
 
-  log(`[getBlsSignatures] signatureShares:`, signatureShares);
-
   if (!signatureShares || signatureShares.length <= 0) {
-    throw new Error('[getBlsSignatures] No signature shares provided');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          signatureShares,
+        },
+      },
+      '[getBlsSignatures] No signature shares provided'
+    );
   }
 
   return signatureShares;

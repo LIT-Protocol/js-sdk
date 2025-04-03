@@ -1,13 +1,5 @@
-// import { LitContracts } from '@lit-protocol/contracts-sdk';
-// import { log } from '@lit-protocol/misc';
-// import {
-//   ClaimRequest,
-//   ClaimResult,
-//   ClientClaimProcessor,
-// } from '@lit-protocol/types';
 import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { log } from '@lit-protocol/misc';
 
 /**
  * ## Scenario:
@@ -174,5 +166,5 @@ export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
   //   }
   // });
 
-  log('✅ testUseEoaSessionSigsToExecuteJsClaimKeys');
+  console.log('✅ testUseEoaSessionSigsToExecuteJsClaimKeys');
 };

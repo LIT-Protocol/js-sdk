@@ -1257,11 +1257,8 @@ export const ALL_LIT_CHAINS = {
  * Local storage key constants
  */
 export const LOCAL_STORAGE_KEYS = {
-  AUTH_COSMOS_SIGNATURE: 'lit-auth-cosmos-signature',
   AUTH_SIGNATURE: 'lit-auth-signature',
-  AUTH_SOL_SIGNATURE: 'lit-auth-sol-signature',
   WEB3_PROVIDER: 'lit-web3-provider',
-  KEY_PAIR: 'lit-comms-keypair',
   SESSION_KEY: 'lit-session-key',
   WALLET_SIGNATURE: 'lit-wallet-sig',
 } as const;
@@ -1275,14 +1272,6 @@ export const LIT_NETWORKS: Record<LIT_NETWORK_VALUES, string[]> = {
   [LIT_NETWORK.NagaDev]: [],
   [LIT_NETWORK.Custom]: [],
 } as const;
-
-// ========== Either Types ==========
-export const EITHER_TYPE = {
-  ERROR: 'ERROR',
-  SUCCESS: 'SUCCESS',
-} as const;
-export type EITHER_TYPE_TYPE = ConstantKeys<typeof EITHER_TYPE>;
-export type EITHER_TYPE_VALUES = ConstantValues<typeof EITHER_TYPE>;
 
 // ========== Supported PKP Auth Method Types ==========
 export const AUTH_METHOD_TYPE = {

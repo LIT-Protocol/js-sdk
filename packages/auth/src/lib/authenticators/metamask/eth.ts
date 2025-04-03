@@ -12,34 +12,27 @@ import depd from 'depd';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
-import * as nacl from 'tweetnacl';
-import * as naclUtil from 'tweetnacl-util';
 
 import {
   ConstantValues,
   ConstantKeys,
-  EITHER_TYPE,
-  ELeft,
-  ERight,
-  IEither,
+  Environment,
   InvalidSignatureError,
   LIT_CHAINS,
   LOCAL_STORAGE_KEYS,
-  LocalStorageItemNotFoundException,
   UnknownError,
   UnsupportedChainException,
   WrongNetworkException,
   WrongParamFormat,
   LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
+import { validateSessionSig } from '@lit-protocol/lit-node-client';
+import { getChildLogger, logger } from '@lit-protocol/logger';
 import {
-  isBrowser,
-  isNode,
-  log,
-  numberToHex,
-  validateSessionSig,
-} from '@lit-protocol/misc';
-import { getStorageItem } from '@lit-protocol/misc-browser';
+  getStorageItem,
+  setStorageItem,
+  removeStorageItem,
+} from '@lit-protocol/misc-browser';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
 import LitConnectModal from './connect-modal/modal';
@@ -163,35 +156,27 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
  * Get chain id of the current network
  * @param { string } chain
  * @param { Web3Provider } web3
- * @returns { Promise<IEither> }
+ * @returns { Promise<number> }
  */
 export const getChainId = async (
   chain: string,
   web3: Web3Provider
-): Promise<IEither<number>> => {
-  let resultOrError: IEither<number>;
-
+): Promise<number> => {
   try {
-    const resp = await web3.getNetwork();
-    resultOrError = ERight(resp.chainId);
+    const network = await web3.getNetwork();
+    return network.chainId;
   } catch (e) {
-    // couldn't get chainId.  throw the incorrect network error
-    log('getNetwork threw an exception', e);
-
-    resultOrError = ELeft(
-      new WrongNetworkException(
-        {
-          info: {
-            chain,
-          },
+    throw new WrongNetworkException(
+      {
+        info: {
+          chain,
         },
-        `Incorrect network selected. Please switch to the %s network in your wallet and try again.`,
-        chain
-      )
+        cause: e,
+      },
+      `Incorrect network selected. Please switch to the %s network in your wallet and try again.`,
+      chain
     );
   }
-
-  return resultOrError;
 };
 
 /**
@@ -220,7 +205,10 @@ export function isSignedMessageExpired(signedMessage: string) {
  *
  * @returns { boolean }
  */
-export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
+export const getMustResign = (
+  authSig: AuthSig,
+  resources: unknown
+): boolean => {
   let mustResign!: boolean;
 
   // if it's not expired, then we don't need to resign
@@ -230,23 +218,30 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
 
   try {
     const parsedSiwe = new SiweMessage(authSig.signedMessage);
-    log('parsedSiwe.resources', parsedSiwe.resources);
+    logger.info({
+      msg: 'parsedSiwe.resources',
+      resources: parsedSiwe.resources,
+    });
 
     if (JSON.stringify(parsedSiwe.resources) !== JSON.stringify(resources)) {
-      log(
+      logger.info(
         'signing auth message because resources differ from the resources in the auth sig'
       );
       mustResign = true;
     }
 
     if (parsedSiwe.address !== getAddress(parsedSiwe.address)) {
-      log(
-        'signing auth message because parsedSig.address is not equal to the same address but checksummed.  This usually means the user had a non-checksummed address saved and so they need to re-sign.'
+      logger.info(
+        'signing auth message because parsedSig.address is not equal to the same address but checksummed. This usually means the user had a non-checksummed address saved and so they need to re-sign.'
       );
       mustResign = true;
     }
-  } catch (e) {
-    log('error parsing siwe sig.  making the user sign again: ', e);
+  } catch (error) {
+    logger.error({
+      function: 'getMustResign',
+      msg: 'error parsing siwe sig. Making the user sign again',
+      error,
+    });
     mustResign = true;
   }
 
@@ -293,8 +288,8 @@ export const connectWeb3 = async ({
   walletConnectProjectId,
 }: ConnectWeb3): Promise<ConnectWeb3Result> => {
   // -- check if it's nodejs
-  if (isNode()) {
-    log('connectWeb3 is not supported in nodejs.');
+  if (Environment.isNode) {
+    logger.info('connectWeb3 is not supported in nodejs.');
     return { web3: null, account: null };
   }
 
@@ -317,20 +312,20 @@ export const connectWeb3 = async ({
       },
     };
 
-    if (isBrowser()) {
+    if (Environment.isBrowser) {
       litWCProvider = wcProvider;
     }
   }
 
-  log('getting provider via lit connect modal');
+  logger.info('getting provider via lit connect modal');
 
   const dialog = new LitConnectModal({ providerOptions });
 
   const provider = await dialog.getWalletProvider();
 
-  log('got provider');
+  logger.info('got provider');
 
-  // @ts-ignore
+  // @ts-expect-error provider is not typed
   const web3 = new Web3Provider(provider);
 
   // trigger metamask popup
@@ -338,19 +333,19 @@ export const connectWeb3 = async ({
     deprecated(
       '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
     );
-    // @ts-ignore
+    // @ts-expect-error provider is not typed
     await provider.enable();
-  } catch (e) {
-    log(
-      "error enabling provider but swallowed it because it's not important.  most wallets use a different function now to enable the wallet so you can ignore this error, because those other methods will be tried.",
-      e
-    );
+  } catch (error) {
+    logger.info({
+      msg: "error enabling provider but swallowed it because it's not important. Most wallets use a different function now to enable the wallet so you can ignore this error, those other methods will be tried.",
+      error,
+    });
   }
 
-  log('listing accounts');
+  logger.info('listing accounts');
   const accounts = await web3.listAccounts();
 
-  log('accounts', accounts);
+  logger.info({ msg: 'accounts', accounts });
   const account = ethers.utils.getAddress(accounts[0]);
 
   return { web3, account };
@@ -359,23 +354,22 @@ export const connectWeb3 = async ({
 /**
  * @browserOnly
  * Delete any saved AuthSigs from local storage. Takes no params and returns
- * nothing. This will also clear out the WalletConnect cache in local storage.
+ * nothing. This will also clear out the WalletConnect cache in localstorage.
  * We often run this function as a result of the user pressing a "Logout" button.
  *
  * @return { void }
  */
 export const disconnectWeb3 = (): void => {
-  if (isNode()) {
-    log('disconnectWeb3 is not supported in nodejs.');
+  if (Environment.isNode) {
+    logger.info('disconnectWeb3 is not supported in nodejs.');
     return;
   }
 
-  // @ts-ignore
-  if (isBrowser() && litWCProvider) {
+  if (Environment.isBrowser && litWCProvider) {
     try {
       litWCProvider.disconnect();
     } catch (err) {
-      log(
+      logger.info(
         'Attempted to disconnect global WalletConnectProvider for lit-connect-modal',
         err
       );
@@ -384,11 +378,8 @@ export const disconnectWeb3 = (): void => {
 
   const storage = LOCAL_STORAGE_KEYS;
 
-  localStorage.removeItem(storage.AUTH_SIGNATURE);
-  localStorage.removeItem(storage.AUTH_SOL_SIGNATURE);
-  localStorage.removeItem(storage.AUTH_COSMOS_SIGNATURE);
-  localStorage.removeItem(storage.WEB3_PROVIDER);
-  localStorage.removeItem(storage.WALLET_SIGNATURE);
+  removeStorageItem(storage.AUTH_SIGNATURE);
+  removeStorageItem(storage.WALLET_SIGNATURE);
 };
 
 /**
@@ -407,10 +398,11 @@ export const checkAndSignEVMAuthMessage = async ({
   walletConnectProjectId,
   nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
-  // -- check if it's nodejs
-  if (isNode()) {
-    log(
-      'checkAndSignEVMAuthMessage is not supported in nodejs.  You can create a SIWE on your own using the SIWE package.'
+  const logger = getChildLogger({ function: 'checkAndSignEVMAuthMessage' });
+  // -- check if it's Node.js
+  if (Environment.isNode) {
+    logger.info(
+      'checkAndSignEVMAuthMessage is not supported in nodejs. You can create a SIWE on your own using the SIWE package.'
     );
     return {
       sig: '',
@@ -421,7 +413,7 @@ export const checkAndSignEVMAuthMessage = async ({
   }
 
   // --- scoped methods ---
-  const _throwIncorrectNetworkError = (error: any) => {
+  const _throwIncorrectNetworkError = (error: any): never => {
     if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {
       throw new WrongNetworkException(
         {
@@ -445,45 +437,28 @@ export const checkAndSignEVMAuthMessage = async ({
     walletConnectProjectId,
   });
 
-  log(`got web3 and account: ${account}`);
+  logger.info(`got web3 and account: ${account}`);
 
   // -- 2. prepare all required variables
-  const currentChainIdOrError = await getChainId(chain, web3);
+  let currentChainId = await getChainId(chain, web3);
   const selectedChainId: number = selectedChain.chainId;
-  const selectedChainIdHex: string = numberToHex(selectedChainId);
-  let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+  const selectedChainIdHex: string = `0x${selectedChainId.toString(16)}`;
 
-  log('currentChainIdOrError:', currentChainIdOrError);
-  log('selectedChainId:', selectedChainId);
-  log('selectedChainIdHex:', selectedChainIdHex);
-  log('authSigOrError:', authSigOrError);
-
-  // -- 3. check all variables before executing business logic
-  if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
-    throw new UnknownError(
-      {
-        info: {
-          chainId: chain,
-        },
-        cause: currentChainIdOrError.result,
-      },
-      'Unknown error when getting chain id'
-    );
-  }
-
-  log('chainId from web3', currentChainIdOrError);
-  log(
-    `checkAndSignAuthMessage with chainId ${currentChainIdOrError} and chain set to ${chain} and selectedChain is `,
-    selectedChain
-  );
+  logger.info({ msg: 'currentChainId', currentChainId });
+  logger.info({ msg: 'selectedChainId', selectedChainId });
+  logger.info({ msg: 'selectedChainIdHex', selectedChainIdHex });
+  logger.info({
+    msg: `checkAndSignAuthMessage with chainId ${currentChainId} and chain set to ${chain} and selectedChain is `,
+    selectedChain,
+  });
 
   // -- 4. case: (current chain id is NOT equal to selected chain) AND is set to switch chain
-  if (currentChainIdOrError.result !== selectedChainId && switchChain) {
+  if (currentChainId !== selectedChainId && switchChain) {
     const provider = web3.provider as any;
 
     // -- (case) if able to switch chain id
     try {
-      log('trying to switch to chainId', selectedChainIdHex);
+      logger.info({ msg: 'trying to switch to chainId', selectedChainIdHex });
 
       await provider.request({
         method: 'wallet_switchEthereumChain',
@@ -492,7 +467,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
       // -- (case) if unable to switch chain
     } catch (switchError: any) {
-      log('error switching to chainId', switchError);
+      logger.error({ msg: 'error switching to chainId', switchError });
 
       // -- (error case)
       if (
@@ -517,7 +492,7 @@ export const checkAndSignEVMAuthMessage = async ({
             method: 'wallet_addEthereumChain',
             params: data,
           });
-        } catch (addError: any) {
+        } catch (addError) {
           _throwIncorrectNetworkError(addError);
         }
       } else {
@@ -526,17 +501,27 @@ export const checkAndSignEVMAuthMessage = async ({
     }
 
     // we may have switched the chain to the selected chain.  set the chainId accordingly
-    currentChainIdOrError.result = selectedChain.chainId;
+    currentChainId = selectedChain.chainId;
   }
 
+  let authSig: AuthSig | undefined;
   // -- 5. case: Lit auth signature is NOT in the local storage
-  log('checking if sig is in local storage');
+  try {
+    logger.info('checking if sig is in local storage');
+    const authSigString = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+    authSig = JSON.parse(authSigString);
+  } catch (error) {
+    logger.warn({
+      msg: 'Could not get sig from local storage',
+      error,
+    });
+  }
 
-  if (authSigOrError.type === EITHER_TYPE.ERROR) {
-    log('signing auth message because sig is not in local storage');
-
+  if (!authSig) {
     try {
-      const authSig = await _signAndGetAuth({
+      logger.info('signing auth message because sig is not in local storage');
+
+      authSig = await _signAndGetAuth({
         web3,
         account,
         chainId: selectedChain.chainId,
@@ -545,12 +530,7 @@ export const checkAndSignEVMAuthMessage = async ({
         uri,
         nonce,
       });
-
-      authSigOrError = {
-        type: EITHER_TYPE.SUCCESS,
-        result: JSON.stringify(authSig),
-      };
-    } catch (e: any) {
+    } catch (e) {
       throw new UnknownError(
         {
           info: {
@@ -566,20 +546,14 @@ export const checkAndSignEVMAuthMessage = async ({
         'Could not get authenticated message'
       );
     }
-
-    // Log new authSig
-    log('5. authSigOrError:', authSigOrError);
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
-  const authSigString: string = authSigOrError.result;
-  let authSig = JSON.parse(authSigString);
-
-  log('6. authSig:', authSig);
+  logger.info({ msg: 'authSig', authSig });
 
   // -- 7. case: when we are NOT on the right wallet address
   if (account.toLowerCase() !== authSig.address.toLowerCase()) {
-    log(
+    logger.info(
       'signing auth message because account is not the same as the address in the auth sig'
     );
     authSig = await _signAndGetAuth({
@@ -591,7 +565,7 @@ export const checkAndSignEVMAuthMessage = async ({
       uri,
       nonce,
     });
-    log('7. authSig:', authSig);
+    logger.info({ msg: 'authSig', authSig });
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
   } else {
@@ -608,7 +582,7 @@ export const checkAndSignEVMAuthMessage = async ({
         nonce,
       });
     }
-    log('8. mustResign:', mustResign);
+    logger.info({ msg: 'mustResign', mustResign });
   }
 
   // -- 9. finally, if the authSig is expired, re-sign
@@ -617,10 +591,10 @@ export const checkAndSignEVMAuthMessage = async ({
 
   if (isSignedMessageExpired(authSig.signedMessage) || !checkAuthSig.isValid) {
     if (!checkAuthSig.isValid) {
-      log(`Invalid AuthSig: ${checkAuthSig.errors.join(', ')}`);
+      logger.info(`Invalid AuthSig: ${checkAuthSig.errors.join(', ')}`);
     }
 
-    log('9. authSig expired!, resigning..');
+    logger.info('authSig expired!, resigning..');
 
     authSig = await _signAndGetAuth({
       web3,
@@ -659,23 +633,8 @@ const _signAndGetAuth = async ({
     nonce,
   });
 
-  const authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
-
-  if (authSigOrError.type === 'ERROR') {
-    throw new LocalStorageItemNotFoundException(
-      {
-        info: {
-          storageKey: LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
-        },
-      },
-      'Failed to get authSig from local storage'
-    );
-  }
-
-  const authSig: AuthSig =
-    typeof authSigOrError.result === 'string'
-      ? JSON.parse(authSigOrError.result)
-      : authSigOrError.result;
+  const authSigString = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+  const authSig: AuthSig = JSON.parse(authSigString);
 
   return authSig;
 };
@@ -698,8 +657,8 @@ export const signAndSaveAuthMessage = async ({
   nonce,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   // check if it's nodejs
-  if (isNode()) {
-    log('checkAndSignEVMAuthMessage is not supported in nodejs.');
+  if (Environment.isNode) {
+    logger.info('checkAndSignEVMAuthMessage is not supported in nodejs.');
     return {
       sig: '',
       derivedVia: '',
@@ -747,25 +706,10 @@ export const signAndSaveAuthMessage = async ({
   };
 
   // -- 4. store auth and a keypair in localstorage for communication with sgx
-  if (isBrowser()) {
-    localStorage.setItem(
-      LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
-      JSON.stringify(authSig)
-    );
-  }
-  const commsKeyPair = nacl.box.keyPair();
-
-  if (isBrowser()) {
-    localStorage.setItem(
-      LOCAL_STORAGE_KEYS.KEY_PAIR,
-      JSON.stringify({
-        publicKey: naclUtil.encodeBase64(commsKeyPair.publicKey),
-        secretKey: naclUtil.encodeBase64(commsKeyPair.secretKey),
-      })
-    );
+  if (Environment.isBrowser) {
+    setStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE, JSON.stringify(authSig));
   }
 
-  log(`generated and saved ${LOCAL_STORAGE_KEYS.KEY_PAIR}`);
   return authSig;
 };
 
@@ -782,9 +726,9 @@ export const signMessage = async ({
   web3,
   account,
 }: SignMessageParams): Promise<SignedMessage> => {
-  // check if it's nodejs
-  if (isNode()) {
-    log('signMessage is not supported in nodejs.');
+  // check if it's Node.js
+  if (Environment.isNode) {
+    logger.info('signMessage is not supported in nodejs.');
     return {
       signature: '',
       address: '',
@@ -793,22 +737,22 @@ export const signMessage = async ({
 
   // -- validate
   if (!web3 || !account) {
-    log(`web3: ${web3} OR ${account} not found. Connecting web3..`);
+    logger.info(`web3: ${web3} OR ${account} not found. Connecting web3..`);
     const res = await connectWeb3({ chainId: 1 });
     web3 = res.web3;
     account = res.account;
   }
 
-  log('pausing...');
+  logger.info('pausing...');
   await new Promise((resolve) => setTimeout(resolve, 500));
-  log('signing with ', account);
+  logger.info({ msg: 'signing with ', account });
 
   const signature = await signMessageAsync(web3.getSigner(), account, body);
 
   const address = verifyMessage(body, signature).toLowerCase();
 
-  log('Signature: ', signature);
-  log('recovered address: ', address);
+  logger.info({ msg: 'Signature', signature });
+  logger.info({ msg: 'recovered address', address });
 
   if (address.toLowerCase() !== account.toLowerCase()) {
     const msg = `ruh roh, the user signed with a different address (${address}) then they're using with web3 (${account}). This will lead to confusion.`;
@@ -845,8 +789,8 @@ export const signMessageAsync = async (
   message: string
 ): Promise<any | JsonRpcSigner> => {
   // check if it's nodejs
-  if (isNode()) {
-    log('signMessageAsync is not supported in nodejs.');
+  if (Environment.isNode) {
+    logger.warn('signMessageAsync is not supported in nodejs.');
     return null;
   }
 
@@ -854,23 +798,25 @@ export const signMessageAsync = async (
 
   if (signer instanceof JsonRpcSigner) {
     try {
-      log('Signing with personal_sign');
+      logger.info('Signing with personal_sign');
       const signature = await signer.provider.send('personal_sign', [
         hexlify(messageBytes),
         address.toLowerCase(),
       ]);
       return signature;
-    } catch (e: any) {
-      log(
-        'Signing with personal_sign failed, trying signMessage as a fallback'
-      );
-      if (e.message.includes('personal_sign')) {
+    } catch (error: any) {
+      logger.warn({
+        function: 'signMessageAsync',
+        msg: 'Signing with personal_sign failed, trying signMessage as a fallback',
+        error,
+      });
+      if (error.message.includes('personal_sign')) {
         return await signer.signMessage(messageBytes);
       }
-      throw e;
+      throw error;
     }
   } else {
-    log('signing with signMessage');
+    logger.info('signing with signMessage');
     return await signer.signMessage(messageBytes);
   }
 };

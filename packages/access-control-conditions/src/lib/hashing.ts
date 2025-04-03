@@ -1,5 +1,5 @@
 import { InvalidAccessControlConditions } from '@lit-protocol/constants';
-import { log } from '@lit-protocol/misc';
+import { logger } from '@lit-protocol/logger';
 import {
   AccessControlConditions,
   EvmContractConditions,
@@ -10,7 +10,6 @@ import {
   SupportedJsonRequests,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 import {
   canonicalAccessControlConditionFormatter,
@@ -77,7 +76,7 @@ import {
 
 //   const hash = await hashUnifiedAccessControlConditions(unifiedAccs);
 
-//   return uint8arrayToString(new Uint8Array(hash), 'base16');
+//   return Buffer.from(new Uint8Array(hash), 'hex');
 // };
 
 /**
@@ -90,12 +89,15 @@ import {
 export const hashUnifiedAccessControlConditions = (
   unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
-  log('unifiedAccessControlConditions:', unifiedAccessControlConditions);
+  logger.info({
+    msg: 'unifiedAccessControlConditions',
+    unifiedAccessControlConditions,
+  });
 
   const conditions = unifiedAccessControlConditions.map((condition) => {
     return canonicalUnifiedAccessControlConditionFormatter(condition);
   });
-  log('conditions:', conditions);
+  logger.info({ msg: 'conditions', conditions });
 
   // check if there's any undefined in the conditions
   const hasUndefined = conditions.some((c) => c === undefined);
@@ -122,7 +124,7 @@ export const hashUnifiedAccessControlConditions = (
   }
   const toHash = JSON.stringify(conditions);
 
-  log('Hashing unified access control conditions: ', toHash);
+  logger.info({ msg: 'Hashing unified access control conditions', toHash });
 
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
@@ -161,7 +163,7 @@ export const hashResourceIdForSigning = async (
   resourceId: JsonSigningResourceId
 ): Promise<string> => {
   const hashed = await hashResourceId(resourceId);
-  return uint8arrayToString(new Uint8Array(hashed), 'base16');
+  return Buffer.from(new Uint8Array(hashed)).toString('hex');
 };
 
 /**
@@ -181,7 +183,7 @@ export const hashAccessControlConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing access control conditions: ', toHash);
+  logger.info({ msg: 'Hashing access control conditions', toHash });
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -205,7 +207,7 @@ export const hashEVMContractConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing evm contract conditions: ', toHash);
+  logger.info({ msg: 'Hashing evm contract conditions', toHash });
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
   return crypto.subtle.digest('SHA-256', data);
@@ -228,7 +230,7 @@ export const hashSolRpcConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  log('Hashing sol rpc conditions: ', toHash);
+  logger.info({ msg: 'Hashing sol rpc conditions', toHash });
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -301,34 +303,43 @@ export const getFormattedAccessControlConditions = (
     formattedAccessControlConditions = accessControlConditions.map((c) =>
       canonicalAccessControlConditionFormatter(c)
     );
-    log(
-      'formattedAccessControlConditions',
-      JSON.stringify(formattedAccessControlConditions)
-    );
+    logger.info({
+      msg: 'formattedAccessControlConditions',
+      formattedAccessControlConditions: JSON.stringify(
+        formattedAccessControlConditions
+      ),
+    });
   } else if (evmContractConditions) {
     formattedEVMContractConditions = evmContractConditions.map((c) =>
       canonicalEVMContractConditionFormatter(c)
     );
-    log(
-      'formattedEVMContractConditions',
-      JSON.stringify(formattedEVMContractConditions)
-    );
+    logger.info({
+      msg: 'formattedEVMContractConditions',
+      formattedEVMContractConditions: JSON.stringify(
+        formattedEVMContractConditions
+      ),
+    });
   } else if (solRpcConditions) {
     // FIXME: ConditionItem is too narrow, or `solRpcConditions` is too wide
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     formattedSolRpcConditions = solRpcConditions.map((c: any) =>
       canonicalSolRpcConditionFormatter(c)
     );
-    log('formattedSolRpcConditions', JSON.stringify(formattedSolRpcConditions));
+    logger.info({
+      msg: 'formattedSolRpcConditions',
+      formattedSolRpcConditions: JSON.stringify(formattedSolRpcConditions),
+    });
   } else if (unifiedAccessControlConditions) {
     formattedUnifiedAccessControlConditions =
       unifiedAccessControlConditions.map((c) =>
         canonicalUnifiedAccessControlConditionFormatter(c)
       );
-    log(
-      'formattedUnifiedAccessControlConditions',
-      JSON.stringify(formattedUnifiedAccessControlConditions)
-    );
+    logger.info({
+      msg: 'formattedUnifiedAccessControlConditions',
+      formattedUnifiedAccessControlConditions: JSON.stringify(
+        formattedUnifiedAccessControlConditions
+      ),
+    });
   } else {
     error = true;
   }

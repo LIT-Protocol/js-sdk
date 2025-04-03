@@ -1,6 +1,10 @@
 import { SiweMessage } from 'siwe';
 
 import {
+  InvalidArgumentException,
+  UnknownError,
+} from '@lit-protocol/constants';
+import {
   CapacityDelegationFields,
   CapacityDelegationRequest,
   ILitNodeClient,
@@ -8,6 +12,7 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
+
 import { RecapSessionCapabilityObject } from '../recap/recap-session-capability-object';
 
 /**
@@ -87,11 +92,27 @@ export const addRecapToSiweMessage = async ({
   litNodeClient: ILitNodeClient;
 }) => {
   if (!resources || resources.length < 1) {
-    throw new Error('resources is required');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          resources,
+          siweMessage,
+        },
+      },
+      'resources is required'
+    );
   }
 
   if (!litNodeClient) {
-    throw new Error('litNodeClient is required');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          resources,
+          siweMessage,
+        },
+      },
+      'litNodeClient is required'
+    );
   }
 
   for (const request of resources) {
@@ -102,7 +123,7 @@ export const addRecapToSiweMessage = async ({
     recapObject.addCapabilityForResource(
       request.resource,
       request.ability,
-      request.data || null
+      request.data
     );
 
     const verified = recapObject.verifyCapabilitiesForResource(
@@ -111,7 +132,13 @@ export const addRecapToSiweMessage = async ({
     );
 
     if (!verified) {
-      throw new Error(
+      throw new UnknownError(
+        {
+          info: {
+            recapObject,
+            request,
+          },
+        },
         `Failed to verify capabilities for resource: "${request.resource}" and ability: "${request.ability}`
       );
     }

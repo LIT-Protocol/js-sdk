@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -62,5 +61,5 @@ export const testUseEoaSessionSigsToExecuteJsSigning = async (
     throw new Error(`Expected "publicKey" in res.signatures.sig`);
   }
 
-  log('✅ testUseEoaSessionSigsToExecuteJsSigning');
+  console.log('✅ testUseEoaSessionSigsToExecuteJsSigning');
 };

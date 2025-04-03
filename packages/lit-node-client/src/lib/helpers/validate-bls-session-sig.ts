@@ -1,11 +1,8 @@
-import { log } from '@lit-protocol/misc';
-import { AuthSig } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
 import { ethers } from 'ethers';
 import { SiweError, SiweErrorType, SiweMessage } from 'siwe';
+
+import { InvalidArgumentException } from '@lit-protocol/constants';
+import { AuthSig } from '@lit-protocol/types';
 
 const LIT_SESSION_SIGNED_MESSAGE_PREFIX = 'lit_session:';
 
@@ -29,8 +26,8 @@ export const blsSessionSigVerify = async (
   authSig: AuthSig,
   authSigSiweMessage: SiweMessage
 ): Promise<void> => {
-  let sigJson = JSON.parse(authSig.sig);
-  // we do not nessesarly need to use ethers here but was a quick way
+  const sigJson = JSON.parse(authSig.sig);
+  // we do not necessarily need to use ethers here but was a quick way
   // to get verification working.
   const eip191Hash = ethers.utils.hashMessage(authSig.signedMessage);
   const prefixedStr =
@@ -43,7 +40,12 @@ export const blsSessionSigVerify = async (
   const checkTime = new Date();
 
   if (!authSigSiweMessage.expirationTime || !authSigSiweMessage.issuedAt) {
-    throw new Error(
+    throw new InvalidArgumentException(
+      {
+        info: {
+          authSigSiweMessage,
+        },
+      },
       'Invalid SIWE message. Missing expirationTime or issuedAt.'
     );
   }

@@ -42,14 +42,17 @@ describe('localStorage', () => {
   });
 
   test('writes and reads to/from localStorage correctly', async () => {
-    mockLocalStorage.setItem(expect.any(String), JSON.stringify(authData));
+    mockLocalStorage.setItem(
+      `lit-auth:${appName}:${networkName}:${pkpAddress}`,
+      JSON.stringify(authData)
+    );
     const storage = createLocalStorage({
       appName,
       networkName,
       localStorage: mockLocalStorage,
     });
 
-    expect(storage.read({ pkpAddress })).resolves.toEqual(authData);
+    await expect(storage.read({ pkpAddress })).resolves.toEqual(authData);
   });
 
   test('returns null when reading nonexistent data', async () => {
@@ -83,20 +86,20 @@ describe('localStorage', () => {
       authData: authDataNetworkA,
     });
 
-    expect(storageNetworkA.read({ pkpAddress })).resolves.toEqual(
+    await expect(storageNetworkA.read({ pkpAddress })).resolves.toEqual(
       authDataNetworkA
     );
-    expect(storageNetworkB.read({ pkpAddress })).resolves.toBeNull();
+    await expect(storageNetworkB.read({ pkpAddress })).resolves.toBeNull();
 
     await storageNetworkB.write({
       pkpAddress,
       authData: authDataNetworkB,
     });
 
-    expect(storageNetworkA.read({ pkpAddress })).resolves.toEqual(
+    await expect(storageNetworkA.read({ pkpAddress })).resolves.toEqual(
       authDataNetworkA
     );
-    expect(storageNetworkB.read({ pkpAddress })).resolves.toEqual(
+    await expect(storageNetworkB.read({ pkpAddress })).resolves.toEqual(
       authDataNetworkB
     );
   });
@@ -116,11 +119,13 @@ describe('localStorage', () => {
     const authDataNetworkB = { ...authData, credential: 'networkB' };
 
     await storageAppA.write({ pkpAddress, authData });
-    expect(storageAppA.read({ pkpAddress })).resolves.toEqual(authData);
-    expect(storageAppB.read({ pkpAddress })).resolves.toBeNull();
+    await expect(storageAppA.read({ pkpAddress })).resolves.toEqual(authData);
+    await expect(storageAppB.read({ pkpAddress })).resolves.toBeNull();
 
     await storageAppB.write({ pkpAddress, authData: authDataNetworkB });
-    expect(storageAppB.read({ pkpAddress })).resolves.toEqual(authDataNetworkB);
-    expect(storageAppA.read({ pkpAddress })).resolves.toEqual(authData);
+    await expect(storageAppB.read({ pkpAddress })).resolves.toEqual(
+      authDataNetworkB
+    );
+    await expect(storageAppA.read({ pkpAddress })).resolves.toEqual(authData);
   });
 });

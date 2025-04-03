@@ -1,3 +1,5 @@
+import { logger } from '@lit-protocol/logger';
+
 import { voidAsyncFunction } from '../types';
 
 export interface BaseStateParams {
@@ -29,7 +31,7 @@ export class State {
    * Executes the onEnter action for the state.
    */
   async enter() {
-    this.debug && console.log(`enter ${this.key}`);
+    this.debug && logger.info(`enter ${this.key}`);
     await this.onEnter?.();
   }
 
@@ -37,7 +39,7 @@ export class State {
    * Executes the onExit action for the state.
    */
   async exit() {
-    this.debug && console.log(`exit ${this.key}`);
+    this.debug && logger.info(`exit ${this.key}`);
     await this.onExit?.();
   }
 }

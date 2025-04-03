@@ -37,6 +37,7 @@ import {
   InvalidArgumentException,
   RemovedFunctionError,
 } from '@lit-protocol/constants';
+import { Logger, getChildLogger } from '@lit-protocol/logger';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import {
   PKPClientHelpers,
@@ -56,6 +57,7 @@ const DEFAULT_COSMOS_RPC_URL =
 export class PKPCosmosWallet
   implements PKPWallet, OfflineDirectSigner, PKPClientHelpers
 {
+  private readonly _logger: Logger;
   private readonly pkpBase: PKPBase;
 
   // Address prefix for Bech32 addresses
@@ -73,6 +75,10 @@ export class PKPCosmosWallet
 
   constructor(prop: PKPCosmosWalletProp) {
     this.pkpBase = PKPBase.createInstance(prop);
+    this._logger = getChildLogger({
+      module: 'PKPCosmosWallet',
+      ...(prop.debug ? { level: 'debug' } : {}),
+    });
 
     // Set the address prefix and RPC URL based on the provided properties
     this.addressPrefix = prop.addressPrefix ?? 'cosmos';
@@ -204,7 +210,7 @@ export class PKPCosmosWallet
     );
 
     // Log the encoded signature.
-    this.pkpBase.log('stdSignature:', stdSignature);
+    this._logger.debug({ msg: 'stdSignature', stdSignature });
 
     // Return the signed transaction and encoded signature.
     return {
