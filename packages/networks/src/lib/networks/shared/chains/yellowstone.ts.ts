@@ -1,28 +1,28 @@
-import { Chain, http } from "viem";
-import { createConfig } from "wagmi";
+import { Chain, http } from 'viem';
+import { createConfig } from 'wagmi';
 
 export const chronicleYellowstone: Chain = {
   id: 175188,
-  name: "Chronicle Yellowstone - Lit Protocol Testnet",
+  name: 'Chronicle Yellowstone - Lit Protocol Testnet',
   nativeCurrency: {
-    name: "Test LPX",
-    symbol: "tstLPX",
+    name: 'Test LPX',
+    symbol: 'tstLPX',
     decimals: 18,
   },
   rpcUrls: {
     default: {
-      http: ["https://yellowstone-rpc.litprotocol.com/"],
+      http: ['https://yellowstone-rpc.litprotocol.com/'],
       webSocket: [],
     },
     public: {
-      http: ["https://yellowstone-rpc.litprotocol.com/"],
+      http: ['https://yellowstone-rpc.litprotocol.com/'],
       webSocket: [],
     },
   },
   blockExplorers: {
     default: {
-      name: "Yellowstone Explorer",
-      url: "https://yellowstone-explorer.litprotocol.com/",
+      name: 'Yellowstone Explorer',
+      url: 'https://yellowstone-explorer.litprotocol.com/',
     },
   },
 };

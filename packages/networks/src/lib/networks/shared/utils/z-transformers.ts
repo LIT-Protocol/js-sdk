@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { hexPrefixed, safeBigInt } from "./transformers";
+import { z } from 'zod';
+import { hexPrefixed, safeBigInt } from './transformers';
 
 // Transform a number or string to a BigInt
 // eg. "2" or 2 -> 2n
@@ -30,7 +30,7 @@ export const toHexString = z.string().transform((s) => hexPrefixed(s));
 export const toHexStringArray = z
   .union([z.string(), z.array(z.string()), z.undefined()])
   .transform((val) => {
-    if (!val) return [hexPrefixed("")];
+    if (!val) return [hexPrefixed('')];
     if (Array.isArray(val)) {
       return val.map(hexPrefixed);
     }
@@ -48,7 +48,7 @@ export const toBigIntMatrix = z
   .transform((val) => {
     if (!val) return [[]];
     return val.map((inner) =>
-      inner.map((v) => (typeof v === "bigint" ? v : safeBigInt(v)))
+      inner.map((v) => (typeof v === 'bigint' ? v : safeBigInt(v)))
     );
   });
 
