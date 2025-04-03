@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -76,5 +75,5 @@ export const testUsePkpSessionSigsToExecuteJsSigning = async (
     throw new Error(`Expected "recid" to be parseable as a number`);
   }
 
-  log('✅ res:', res);
+  console.log('✅ res:', res);
 };

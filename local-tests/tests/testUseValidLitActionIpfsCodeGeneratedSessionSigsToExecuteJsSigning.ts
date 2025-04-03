@@ -1,6 +1,6 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { log } from '@lit-protocol/misc';
 import { LIT_ABILITY } from '@lit-protocol/constants';
+
 import { getLitActionAuthContextUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -73,5 +73,5 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
       throw new Error(`Expected "publicKey" in res.signatures.sig`);
     }
 
-    log('✅ res:', res);
+    console.log('✅ res:', res);
   };

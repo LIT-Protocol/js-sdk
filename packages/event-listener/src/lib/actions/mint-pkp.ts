@@ -1,3 +1,5 @@
+import { logger } from '@lit-protocol/logger';
+
 import { Action } from './action';
 import { StateMachine } from '../state-machine';
 
@@ -12,7 +14,7 @@ export class MintPkpAction extends Action {
       const mintingReceipt =
         await params.stateMachine.litContracts.pkpNftContractUtils.write.mint();
       const pkp = mintingReceipt.pkp;
-      params.debug && console.log(`Minted PKP: ${pkp}`);
+      params.debug && logger.info(`Minted PKP: ${pkp}`);
       params.stateMachine.setToContext('activePkp', pkp);
     };
 

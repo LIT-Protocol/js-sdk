@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
 import { Keypair } from '@solana/web3.js';
@@ -77,7 +76,7 @@ export const testSignMessageWithSolanaEncryptedKey = async (
         `signature: ${signature} doesn't validate for the Solana public key: ${solanaKeypair.publicKey.toString()}`
       );
 
-    log('✅ testSignMessageWithSolanaEncryptedKey');
+    console.log('✅ testSignMessageWithSolanaEncryptedKey');
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }

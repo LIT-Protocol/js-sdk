@@ -30,7 +30,7 @@
         ]
       }
     },
-    "testPackage": {
+    "test": {
       "executor": "@nx/jest:jest",
       "outputs": [
         "{workspaceRoot}/coverage/packages/access-control-conditions-schemas"

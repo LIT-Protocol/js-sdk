@@ -1,3 +1,5 @@
+import { logger } from '@lit-protocol/logger';
+
 import { Action } from './action';
 import { StateMachine } from '../state-machine';
 
@@ -10,10 +12,10 @@ interface LogContextActionParams {
 export class LogContextAction extends Action {
   constructor(params: LogContextActionParams) {
     const logContextFunction = async () => {
-      console.log(
-        `State Machine context: `,
-        params.stateMachine.getFromContext(params.path)
-      );
+      logger.info({
+        msg: `State Machine context`,
+        context: params.stateMachine.getFromContext(params.path),
+      });
     };
 
     super({

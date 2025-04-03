@@ -28,7 +28,7 @@
         "lintFilePatterns": ["packages/schemas/**/*.ts"]
       }
     },
-    "testPackage": {
+    "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/schemas"],
       "options": {

@@ -1,5 +1,6 @@
 import { SiweMessage } from 'siwe';
 
+import { InvalidArgumentException } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
   CapacityDelegationFields,
@@ -23,7 +24,14 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 ): Promise<string> => {
   // -- validations
   if (!params.walletAddress) {
-    throw new Error('walletAddress is required');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          params,
+        },
+      },
+      'walletAddress is required'
+    );
   }
 
   const ONE_WEEK_FROM_NOW = new Date(
@@ -62,11 +70,12 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
         //   resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
         //   ability: LIT_ABILITY.RateLimitIncreaseAuth,
 
-        // @ts-ignore - TODO: new resource to be used
+        // @ts-expect-error - TODO: new resource to be used
         resource: null,
 
-        // @ts-ignore - TODO: new ability to be used
+        // @ts-expect-error - TODO: new ability to be used
         ability: null,
+        // @ts-expect-error Complaining because of index signature in destination
         data: capabilities,
       },
     ];
@@ -75,7 +84,14 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
   // -- add recap resources if needed
   if (params.resources) {
     if (!params.litNodeClient) {
-      throw new Error('litNodeClient is required');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            params,
+          },
+        },
+        'litNodeClient is required'
+      );
     }
 
     siweMessage = await addRecapToSiweMessage({
@@ -112,7 +128,14 @@ export const createSiweMessageWithCapacityDelegation = async (
   params: WithCapacityDelegation
 ) => {
   if (!params.litNodeClient) {
-    throw new Error('litNodeClient is required');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          params,
+        },
+      },
+      'litNodeClient is required'
+    );
   }
 
   return createSiweMessage({
