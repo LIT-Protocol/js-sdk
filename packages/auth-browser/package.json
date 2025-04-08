@@ -25,12 +25,13 @@
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.13.3",
     "util": "^0.12.4",
-    "web-vitals": "^3.0.4"
+    "web-vitals": "^3.0.4",
+    "@lit-protocol/contracts": "^0.0.74"
   },
   "tags": [
     "browser"
   ],
-  "version": "6.11.0",
+  "version": "7.0.9",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

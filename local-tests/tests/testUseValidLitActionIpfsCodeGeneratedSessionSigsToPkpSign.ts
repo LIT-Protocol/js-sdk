@@ -1,12 +1,13 @@
+import { ethers } from 'ethers';
+
 import { log } from '@lit-protocol/misc';
 import { getLitActionSessionSigsUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign
- * ❌ NOT AVAILABLE IN HABANERO
- * ❌ NETWORK=localchain yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign
+ * ❌ NETWORK=custom yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign
  *
  **/
 export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign =
@@ -65,6 +66,27 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign =
     // recid must be parseable as a number
     if (isNaN(res.recid)) {
       throw new Error(`Expected "recid" to be parseable as a number`);
+    }
+
+    const signature = ethers.utils.joinSignature({
+      r: '0x' + res.r,
+      s: '0x' + res.s,
+      recoveryParam: res.recid,
+    });
+    const recoveredPubKey = ethers.utils.recoverPublicKey(
+      alice.loveLetter,
+      signature
+    );
+    if (recoveredPubKey !== `0x${res.publicKey.toLowerCase()}`) {
+      throw new Error(`Expected recovered public key to match res.publicKey`);
+    }
+    if (
+      recoveredPubKey !==
+      `0x${alice.authMethodOwnedPkp.publicKey.toLowerCase()}`
+    ) {
+      throw new Error(
+        `Expected recovered public key to match alice.authMethodOwnedPkp.publicKey`
+      );
     }
 
     log('✅ res:', res);

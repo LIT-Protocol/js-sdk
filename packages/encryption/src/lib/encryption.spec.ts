@@ -1,4 +1,4 @@
-import { isValidBooleanExpression } from './utils';
+import { isValidBooleanExpression } from '@lit-protocol/misc';
 import { AccsDefaultParams } from '@lit-protocol/types';
 
 const conditionA: AccsDefaultParams = {

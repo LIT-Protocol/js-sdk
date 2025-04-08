@@ -14,7 +14,6 @@ import {
   MintWithAuthParams,
   MintWithAuthResponse,
 } from '@lit-protocol/types';
-import bs58 from 'bs58';
 import { BigNumberish, BytesLike, ContractReceipt, ethers } from 'ethers';
 import { decToHex, hexToDec, intToIP } from './hex2dec';
 
@@ -49,8 +48,8 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 // ----- autogen:imports:end  -----
 
 import {
-  AuthMethodScope,
-  AuthMethodType,
+  AUTH_METHOD_TYPE_VALUES,
+  AUTH_METHOD_SCOPE_VALUES,
   METAMASK_CHAIN_INFO_BY_NETWORK,
   NETWORK_CONTEXT_BY_NETWORK,
   LIT_NETWORK_VALUES,
@@ -60,11 +59,18 @@ import {
   LIT_NETWORK,
   HTTP,
   HTTPS,
+  InitError,
+  NetworkError,
+  WrongNetworkException,
+  ParamsMissingError,
+  InvalidArgumentException,
+  TransactionError,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
+import { TokenInfo } from '@lit-protocol/types';
 import { computeAddress } from 'ethers/lib/utils';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
-import { TokenInfo, derivedAddresses } from './addresses';
+import { derivedAddresses } from '@lit-protocol/misc';
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
@@ -227,7 +233,7 @@ export class LitContracts {
     this.randomPrivateKey = args?.randomPrivatekey ?? false;
     this.options = args?.options;
     this.debug = args?.debug ?? false;
-    this.network = args?.network || 'cayenne';
+    this.network = args?.network || LIT_NETWORK.DatilDev;
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = RPC_URL_BY_NETWORK[this.network];
@@ -285,7 +291,14 @@ export class LitContracts {
         const msg =
           'No web3 provider found. Please install Brave, MetaMask or another web3 provider.';
         alert(msg);
-        throw new Error(msg);
+        throw new InitError(
+          {
+            info: {
+              web3Provider,
+            },
+          },
+          msg
+        );
       }
 
       function _decimalToHex(decimal: number): string {
@@ -650,7 +663,16 @@ export class LitContracts {
 
       // Validate the required data
       if (!address || !abi) {
-        throw new Error('❌ Required contract data is missing');
+        throw new InitError(
+          {
+            info: {
+              address,
+              abi,
+              network,
+            },
+          },
+          '❌ Required contract data is missing'
+        );
       }
 
       return new ethers.Contract(address, abi, provider);
@@ -661,7 +683,13 @@ export class LitContracts {
         const stakingContract = (context as LitContractContext).Staking;
 
         if (!stakingContract.address) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                stakingContract,
+                context,
+              },
+            },
             '❌ Could not get staking contract address from contract context'
           );
         }
@@ -677,7 +705,13 @@ export class LitContracts {
           ['Staking']
         );
         if (!contractContext.Staking.address) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                contractContext,
+                context,
+              },
+            },
             '❌ Could not get Staking Contract from contract resolver instance'
           );
         }
@@ -894,7 +928,16 @@ export class LitContracts {
 
     // Validate the required data
     if (Object.keys(addresses).length < 5) {
-      throw new Error('❌ Required contract data is missing');
+      throw new InitError(
+        {
+          info: {
+            network,
+            addresses,
+            context,
+          },
+        },
+        '❌ Required contract data is missing'
+      );
     }
 
     return addresses;
@@ -917,7 +960,14 @@ export class LitContracts {
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
 
     if (!minNodeCount) {
-      throw new Error('❌ Minimum validator count is not set');
+      throw new InitError(
+        {
+          info: {
+            minNodeCount,
+          },
+        },
+        '❌ Minimum validator count is not set'
+      );
     }
     return minNodeCount;
   };
@@ -996,19 +1046,6 @@ export class LitContracts {
         (port === 443 ? HTTPS : HTTP_BY_NETWORK[network]) ||
         // Fallback to HTTP if no other conditions are met
         HTTP;
-
-      // Check for specific conditions in centralised networks
-      if (centralisation === 'centralised') {
-        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
-        if (
-          network === LIT_NETWORK.Cayenne &&
-          !port.toString().startsWith('8')
-        ) {
-          throw new Error(
-            `Invalid port: ${port} for the ${centralisation} ${network} network. Expected range: 8470 - 8479`
-          );
-        }
-      }
 
       const url = `${protocol}${ip}:${port}`;
 
@@ -1107,19 +1144,6 @@ export class LitContracts {
         // Fallback to HTTP if no other conditions are met
         HTTP;
 
-      // Check for specific conditions in centralised networks
-      if (centralisation === 'centralised') {
-        // Validate if it's cayenne AND port range is 8470 - 8479, if not, throw error
-        if (
-          litNetwork === LIT_NETWORK.Cayenne &&
-          !(port >= 8470 && port <= 8479)
-        ) {
-          throw new Error(
-            `Invalid port: ${port} for the ${centralisation} ${litNetwork} network. Expected range: 8470 - 8479`
-          );
-        }
-      }
-
       const url = `${protocol}${ip}:${port}`;
 
       LitContracts.logger.debug("Validator's URL:", url);
@@ -1141,7 +1165,12 @@ export class LitContracts {
   ) {
     // -- check if it's supported network
     if (!NETWORK_CONTEXT_BY_NETWORK[network]) {
-      throw new Error(
+      throw new WrongNetworkException(
+        {
+          info: {
+            network,
+          },
+        },
         `[_resolveContractContext] Unsupported network: ${network}`
       );
     }
@@ -1149,7 +1178,14 @@ export class LitContracts {
     const data = NETWORK_CONTEXT_BY_NETWORK[network];
 
     if (!data) {
-      throw new Error('[_resolveContractContext] No data found');
+      throw new WrongNetworkException(
+        {
+          info: {
+            network,
+          },
+        },
+        '[_resolveContractContext] No data found'
+      );
     }
 
     // Normalize the data to the LitContractContext type
@@ -1180,17 +1216,36 @@ export class LitContracts {
   }: MintWithAuthParams): Promise<MintWithAuthResponse<ContractReceipt>> => {
     // -- validate
     if (!this.connected) {
-      throw new Error(
+      throw new InitError(
+        {
+          info: {
+            connected: this.connected,
+          },
+        },
         'Contracts are not connected. Please call connect() first'
       );
     }
 
     if (!this.pkpNftContract) {
-      throw new Error('Contract is not available');
+      throw new InitError(
+        {
+          info: {
+            pkpNftContract: this.pkpNftContract,
+          },
+        },
+        'Contract is not available'
+      );
     }
 
     if (authMethod && !authMethod?.authMethodType) {
-      throw new Error('authMethodType is required');
+      throw new ParamsMissingError(
+        {
+          info: {
+            authMethod,
+          },
+        },
+        'authMethodType is required'
+      );
     }
 
     if (
@@ -1198,17 +1253,31 @@ export class LitContracts {
       !authMethod?.accessToken &&
       authMethod?.accessToken !== 'custom-auth'
     ) {
-      throw new Error('accessToken is required');
+      throw new ParamsMissingError(
+        {
+          info: {
+            authMethod,
+          },
+        },
+        'accessToken is required'
+      );
     }
 
     if (scopes.length <= 0) {
-      throw new Error(`❌ Permission scopes are required!
+      throw new InvalidArgumentException(
+        {
+          info: {
+            scopes,
+          },
+        },
+        `❌ Permission scopes are required!
 [0] No Permissions
 [1] Sign Anything
 [2] Only Sign Messages
 Read more here:
 https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
-      `);
+      `
+      );
     }
 
     // -- prepare
@@ -1251,11 +1320,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const events = 'events' in receipt ? receipt.events : receipt.logs;
 
     if (!events || events.length <= 0) {
-      throw new Error('No events found in receipt');
+      throw new TransactionError(
+        {
+          info: {
+            events,
+            receipt,
+          },
+        },
+        'No events found in receipt'
+      );
     }
 
     if (!events[0].topics || events[0].topics.length < 1) {
-      throw new Error(
+      throw new TransactionError(
+        {
+          info: {
+            events,
+            receipt,
+          },
+        },
         `No topics found in events, cannot derive pkp information. Transaction hash: ${receipt.transactionHash} If you are using your own contracts please use ethers directly`
       );
     }
@@ -1329,7 +1412,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    *
    * @param {Object} params - The parameters for adding the permitted authentication method.
    * @param {string} params.pkpTokenId - The ID of the PKP token.
-   * @param {AuthMethodType | number} params.authMethodType - The type of the authentication method.
+   * @param {AUTH_METHOD_TYPE_VALUES | number} params.authMethodType - The type of the authentication method.
    * @param {string | Uint8Array} params.authMethodId - The ID of the authentication method.
    * @param {AuthMethodScope[]} params.authMethodScopes - The scopes of the authentication method.
    * @param {string} [params.webAuthnPubkey] - The public key for WebAuthn.
@@ -1344,9 +1427,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     webAuthnPubkey,
   }: {
     pkpTokenId: string;
-    authMethodType: AuthMethodType | number;
+    authMethodType: AUTH_METHOD_TYPE_VALUES | number;
     authMethodId: string | Uint8Array;
-    authMethodScopes: AuthMethodScope[];
+    authMethodScopes: AUTH_METHOD_SCOPE_VALUES[];
     webAuthnPubkey?: string;
   }): Promise<ethers.ContractReceipt> => {
     const _authMethodId =
@@ -1374,8 +1457,20 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       const receipt = await res.wait();
 
       return receipt;
-    } catch (e: any) {
-      throw new Error(e);
+    } catch (e) {
+      throw new TransactionError(
+        {
+          info: {
+            pkpTokenId,
+            authMethodType,
+            authMethodId,
+            authMethodScopes,
+            webAuthnPubkey,
+          },
+          cause: e,
+        },
+        'Adding permitted action failed'
+      );
     }
   };
 
@@ -1395,7 +1490,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   }: {
     ipfsId: string;
     pkpTokenId: string;
-    authMethodScopes: AuthMethodScope[];
+    authMethodScopes: AUTH_METHOD_SCOPE_VALUES[];
   }) => {
     const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
     const scopes = authMethodScopes ?? [];
@@ -1410,8 +1505,18 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       const receipt = await res.wait();
 
       return receipt;
-    } catch (e: any) {
-      throw new Error(e);
+    } catch (e) {
+      throw new TransactionError(
+        {
+          info: {
+            pkpTokenId,
+            ipfsIdBytes,
+            scopes,
+          },
+          cause: e,
+        },
+        'Adding permitted action failed'
+      );
     }
   };
 
@@ -1443,8 +1548,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         requestsPerKilosecond === undefined ||
         requestsPerKilosecond <= 0)
     ) {
-      throw new Error(
-        'At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required and must be more than 0'
+      throw new InvalidArgumentException(
+        {
+          info: {
+            requestsPerDay,
+            requestsPerSecond,
+            requestsPerKilosecond,
+          },
+        },
+        `At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required and must be more than 0`
       );
     }
 
@@ -1477,8 +1589,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       effectiveRequestsPerKilosecond === undefined ||
       effectiveRequestsPerKilosecond <= 0
     ) {
-      throw new Error(
-        'Effective requests per kilosecond is required and must be more than 0'
+      throw new InvalidArgumentException(
+        {
+          info: {
+            effectiveRequestsPerKilosecond,
+          },
+        },
+        `Effective requests per kilosecond is required and must be more than 0`
       );
     }
 
@@ -1530,8 +1647,19 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         capacityTokenId: tokenId,
         capacityTokenIdStr: tokenId.toString(),
       };
-    } catch (e: any) {
-      throw new Error(e);
+    } catch (e) {
+      throw new TransactionError(
+        {
+          info: {
+            requestsPerDay,
+            requestsPerSecond,
+            requestsPerKilosecond,
+            expiresAt,
+          },
+          cause: e,
+        },
+        'Minting capacity credits NFT failed'
+      );
     }
   };
 
@@ -1579,7 +1707,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * @returns {string}
      */
     getBytesFromMultihash: (multihash: string) => {
-      const decoded = bs58.decode(multihash);
+      const decoded = ethers.utils.base58.decode(multihash);
 
       return `0x${Buffer.from(decoded).toString('hex')}`;
     },
@@ -1597,7 +1725,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       const digestSize = parseInt(text.slice(2, 4), 16);
       const digest = text.slice(4, 4 + digestSize * 2);
 
-      const multihash = bs58.encode(Buffer.from(`1220${digest}`, 'hex'));
+      const multihash = ethers.utils.base58.encode(
+        Buffer.from(`1220${digest}`, 'hex')
+      );
 
       return multihash;
     },
@@ -1646,17 +1776,34 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
       getTokensByAddress: async (ownerAddress: string): Promise<string[]> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
         if (!this.pkpNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpNftContract: this.pkpNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         // -- validate
         if (!ethers.utils.isAddress(ownerAddress)) {
-          throw new Error(
+          throw new InvalidArgumentException(
+            {
+              info: {
+                ownerAddress,
+              },
+            },
             `Given string is not a valid address "${ownerAddress}"`
           );
         }
@@ -1696,12 +1843,24 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getTokens: async (latestNumberOfTokens: number): Promise<string[]> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
         if (!this.pkpNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpNftContract: this.pkpNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         const tokens = [];
@@ -1744,11 +1903,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         for (let i = 0; i < tokenIds.length; i++) {
           const tokenId = tokenIds[i];
           const pubKey = await this.pkpNftContract.read.getPubkey(tokenId);
-          const addrs = await derivedAddresses({
-            pkpTokenId: tokenId,
+          const addrs: TokenInfo = await derivedAddresses({
             publicKey: pubKey,
-            defaultRPCUrl: this.rpc,
           });
+
+          if (!addrs.tokenId) {
+            addrs.tokenId = tokenId;
+          }
 
           arr.push(addrs);
         }
@@ -1759,13 +1920,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     write: {
       mint: async (param?: GasLimitParam) => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.pkpNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpNftContract: this.pkpNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         let mintCost;
@@ -1773,7 +1946,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         try {
           mintCost = await this.pkpNftContract.read.mintCost();
         } catch (e) {
-          throw new Error('Could not get mint cost');
+          throw new TransactionError(
+            {
+              info: {
+                mintCost,
+              },
+              cause: e,
+            },
+            'Could not get mint cost'
+          );
         }
 
         if (this.isPKP) {
@@ -1861,7 +2042,17 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           return { tx, res: txRec, tokenId };
         } catch (e: any) {
           this.log(`[claimAndMint] error: ${e.message}`);
-          throw new Error(e);
+          throw new TransactionError(
+            {
+              info: {
+                derivedKeyId,
+                signatures,
+                txOpts,
+              },
+              cause: e,
+            },
+            'claimAndMint failed'
+          );
         }
       },
     },
@@ -1883,13 +2074,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         address: string
       ): Promise<boolean> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.pkpPermissionsContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpPermissionsContract: this.pkpPermissionsContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         const pkpIdHex = this.utils.decToHex(tokenId, null) as string;
@@ -1912,12 +2115,24 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getPermittedAddresses: async (tokenId: string): Promise<string[]> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
         if (!this.pkpPermissionsContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpPermissionsContract: this.pkpPermissionsContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         this.log('[getPermittedAddresses] input<tokenId>:', tokenId);
@@ -1963,13 +2178,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getPermittedActions: async (tokenId: BigNumberish): Promise<string[]> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.pkpPermissionsContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpPermissionsContract: this.pkpPermissionsContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         let actions: string[] = [];
@@ -2017,13 +2244,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         ipfsId: string
       ): Promise<boolean> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.pkpPermissionsContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpPermissionsContract: this.pkpPermissionsContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         this.log('[isPermittedAction] input<pkpId>:', pkpId);
@@ -2056,13 +2295,26 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         ipfsId: string
       ): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.pkpPermissionsContract || !this.pubkeyRouterContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpPermissionsContract: this.pkpPermissionsContract,
+                pubkeyRouterContract: this.pubkeyRouterContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         this.log('[addPermittedAction] input<pkpId>:', pkpId);
@@ -2106,13 +2358,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         ownerAddress: string
       ): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.pkpPermissionsContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpPermissionsContract: this.pkpPermissionsContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         this.log('[addPermittedAddress] input<pkpId>:', pkpId);
@@ -2144,13 +2408,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         ipfsId: string
       ): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.pkpPermissionsContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                pkpPermissionsContract: this.pkpPermissionsContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         this.log('[revokePermittedAction] input<pkpId>:', pkpId);
@@ -2201,13 +2477,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getCapacityByIndex: async (index: number): Promise<any> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.rateLimitNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                rateLimitNftContract: this.rateLimitNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         const capacity = await this.rateLimitNftContract.read.capacity(index);
@@ -2240,13 +2528,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getTokenURIByIndex: async (index: number): Promise<string> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.rateLimitNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                rateLimitNftContract: this.rateLimitNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         const base64 = await this.rateLimitNftContract.read.tokenURI(index);
@@ -2291,13 +2591,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getTokensByOwnerAddress: async (ownerAddress: string): Promise<any> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.rateLimitNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                rateLimitNftContract: this.rateLimitNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         // -- validate
@@ -2314,7 +2626,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           [...new Array(total)],
           async (_: undefined, i: number) => {
             if (!this.rateLimitNftContract) {
-              throw new Error('Contract is not available');
+              throw new InitError(
+                {
+                  info: {
+                    rateLimitNftContract: this.rateLimitNftContract,
+                  },
+                },
+                'Contract is not available'
+              );
             }
 
             const token =
@@ -2382,13 +2701,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getTokens: async (): Promise<any> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.rateLimitNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                rateLimitNftContract: this.rateLimitNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         const bigTotal: ethers.BigNumber =
@@ -2399,7 +2730,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           [...new Array(total)],
           async (_: any, i: number) => {
             if (!this.rateLimitNftContract) {
-              throw new Error('Contract is not available');
+              throw new InitError(
+                {
+                  info: {
+                    rateLimitNftContract: this.rateLimitNftContract,
+                  },
+                },
+                'Contract is not available'
+              );
             }
 
             const token = await this.rateLimitNftContract.read.tokenByIndex(i);
@@ -2441,13 +2779,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         timestamp: number;
       }) => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.rateLimitNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                rateLimitNftContract: this.rateLimitNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         const tx = await this._callWithAdjustedOverrides(
@@ -2482,13 +2832,25 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         RLITokenAddress: string;
       }): Promise<ethers.ContractTransaction> => {
         if (!this.connected) {
-          throw new Error(
+          throw new InitError(
+            {
+              info: {
+                connected: this.connected,
+              },
+            },
             'Contracts are not connected. Please call connect() first'
           );
         }
 
         if (!this.rateLimitNftContract) {
-          throw new Error('Contract is not available');
+          throw new InitError(
+            {
+              info: {
+                rateLimitNftContract: this.rateLimitNftContract,
+              },
+            },
+            'Contract is not available'
+          );
         }
 
         const tx = await this._callWithAdjustedOverrides(

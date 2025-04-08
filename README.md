@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V6.5.x</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V7.x.x</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -61,25 +61,23 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [@lit-protocol/access-control-conditions](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/access-control-conditions) | ![access-control-conditions](https://img.shields.io/badge/-universal-8A6496 'access-control-conditions') | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/access-control-conditions"><img src="https://img.shields.io/npm/v/@lit-protocol/access-control-conditions"/></a> |
 | [@lit-protocol/auth-helpers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-helpers)                           | ![auth-helpers](https://img.shields.io/badge/-universal-8A6496 'auth-helpers')                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-helpers"><img src="https://img.shields.io/npm/v/@lit-protocol/auth-helpers"/></a>                           |
-| [@lit-protocol/bls-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/bls-sdk)                                     | ![bls-sdk](https://img.shields.io/badge/-universal-8A6496 'bls-sdk')                                     | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/bls-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/bls-sdk"/></a>                                     |
 | [@lit-protocol/constants](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/constants)                                 | ![constants](https://img.shields.io/badge/-universal-8A6496 'constants')                                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/constants"><img src="https://img.shields.io/npm/v/@lit-protocol/constants"/></a>                                 |
 | [@lit-protocol/contracts-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk)                         | ![contracts-sdk](https://img.shields.io/badge/-universal-8A6496 'contracts-sdk')                         | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/contracts-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/contracts-sdk"/></a>                         |
 | [@lit-protocol/core](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/core)                                           | ![core](https://img.shields.io/badge/-universal-8A6496 'core')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/core"><img src="https://img.shields.io/npm/v/@lit-protocol/core"/></a>                                           |
 | [@lit-protocol/crypto](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/crypto)                                       | ![crypto](https://img.shields.io/badge/-universal-8A6496 'crypto')                                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/crypto"><img src="https://img.shields.io/npm/v/@lit-protocol/crypto"/></a>                                       |
-| [@lit-protocol/ecdsa-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/ecdsa-sdk)                                 | ![ecdsa-sdk](https://img.shields.io/badge/-universal-8A6496 'ecdsa-sdk')                                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/ecdsa-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/ecdsa-sdk"/></a>                                 |
 | [@lit-protocol/encryption](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/encryption)                               | ![encryption](https://img.shields.io/badge/-universal-8A6496 'encryption')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/encryption"><img src="https://img.shields.io/npm/v/@lit-protocol/encryption"/></a>                               |
+| [@lit-protocol/event-listener](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/event-listener)                       | ![event-listener](https://img.shields.io/badge/-universal-8A6496 'event-listener')                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/event-listener"><img src="https://img.shields.io/npm/v/@lit-protocol/event-listener"/></a>                       |
 | [@lit-protocol/logger](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/logger)                                       | ![logger](https://img.shields.io/badge/-universal-8A6496 'logger')                                       | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/logger"><img src="https://img.shields.io/npm/v/@lit-protocol/logger"/></a>                                       |
 | [@lit-protocol/misc](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc)                                           | ![misc](https://img.shields.io/badge/-universal-8A6496 'misc')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc"><img src="https://img.shields.io/npm/v/@lit-protocol/misc"/></a>                                           |
 | [@lit-protocol/nacl](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/nacl)                                           | ![nacl](https://img.shields.io/badge/-universal-8A6496 'nacl')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/nacl"><img src="https://img.shields.io/npm/v/@lit-protocol/nacl"/></a>                                           |
 | [@lit-protocol/pkp-base](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-base)                                   | ![pkp-base](https://img.shields.io/badge/-universal-8A6496 'pkp-base')                                   | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-base"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-base"/></a>                                   |
-| [@lit-protocol/pkp-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-client)                               | ![pkp-client](https://img.shields.io/badge/-universal-8A6496 'pkp-client')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-client"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-client"/></a>                               |
 | [@lit-protocol/pkp-cosmos](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-cosmos)                               | ![pkp-cosmos](https://img.shields.io/badge/-universal-8A6496 'pkp-cosmos')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-cosmos"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-cosmos"/></a>                               |
 | [@lit-protocol/pkp-ethers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-ethers)                               | ![pkp-ethers](https://img.shields.io/badge/-universal-8A6496 'pkp-ethers')                               | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-ethers"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-ethers"/></a>                               |
 | [@lit-protocol/pkp-sui](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-sui)                                     | ![pkp-sui](https://img.shields.io/badge/-universal-8A6496 'pkp-sui')                                     | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-sui"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-sui"/></a>                                     |
 | [@lit-protocol/pkp-walletconnect](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-walletconnect)                 | ![pkp-walletconnect](https://img.shields.io/badge/-universal-8A6496 'pkp-walletconnect')                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-walletconnect"><img src="https://img.shields.io/npm/v/@lit-protocol/pkp-walletconnect"/></a>                 |
-| [@lit-protocol/sev-snp-utils-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/sev-snp-utils-sdk)                 | ![sev-snp-utils-sdk](https://img.shields.io/badge/-universal-8A6496 'sev-snp-utils-sdk')                 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/sev-snp-utils-sdk"><img src="https://img.shields.io/npm/v/@lit-protocol/sev-snp-utils-sdk"/></a>                 |
 | [@lit-protocol/types](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/types)                                         | ![types](https://img.shields.io/badge/-universal-8A6496 'types')                                         | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/types"><img src="https://img.shields.io/npm/v/@lit-protocol/types"/></a>                                         |
 | [@lit-protocol/uint8arrays](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/uint8arrays)                             | ![uint8arrays](https://img.shields.io/badge/-universal-8A6496 'uint8arrays')                             | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/uint8arrays"><img src="https://img.shields.io/npm/v/@lit-protocol/uint8arrays"/></a>                             |
+| [@lit-protocol/wasm](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/wasm)                                           | ![wasm](https://img.shields.io/badge/-universal-8A6496 'wasm')                                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/wasm"><img src="https://img.shields.io/npm/v/@lit-protocol/wasm"/></a>                                           |
 | [@lit-protocol/wrapped-keys](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/wrapped-keys)                           | ![wrapped-keys](https://img.shields.io/badge/-universal-8A6496 'wrapped-keys')                           | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/wrapped-keys"><img src="https://img.shields.io/npm/v/@lit-protocol/wrapped-keys"/></a>                           |
 | [@lit-protocol/wrapped-keys-lit-actions](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/wrapped-keys-lit-actions)   | ![wrapped-keys-lit-actions](https://img.shields.io/badge/-universal-8A6496 'wrapped-keys-lit-actions')   | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/wrapped-keys-lit-actions"><img src="https://img.shields.io/npm/v/@lit-protocol/wrapped-keys-lit-actions"/></a>   |
 | [@lit-protocol/auth-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-browser)                           | ![auth-browser](https://img.shields.io/badge/-browser-E98869 'auth-browser')                             | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-browser"><img src="https://img.shields.io/npm/v/@lit-protocol/auth-browser"/></a>                           |
@@ -89,43 +87,56 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## API Doc
 
-| Version          | Link                                                     |
-| ---------------- | -------------------------------------------------------- |
-| V6 (Beta)        | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
-| V5 (**Current**) | [5.x.x docs](https://v3.api-docs.getlit.dev/)            |
-| V2               | [2.x.x docs](http://docs.lit-js-sdk-v2.litprotocol.com/) |
+| Version      | Link                                                     |
+| ------------ | -------------------------------------------------------- |
+| V7 (Current) | [7.x.x docs](https://v7-api-doc-lit-js-sdk.vercel.app/)  |
+| V6           | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
+| V5           | [5.x.x docs](https://v3.api-docs.getlit.dev/)            |
+| V2           | [2.x.x docs](http://docs.lit-js-sdk-v2.litprotocol.com/) |
 
 </div>
 
 # Contributing and developing to this SDK
 
-## Prerequisite
+## Prerequisites
 
-- node (v19.x or above)
+Before you begin, ensure you have the following installed:
 
-## Recommended
+- Node.js v19.0.0 or later
+- Rust v1.70.0 or later
+- [wasm-pack](https://github.com/rustwasm/wasm-pack) for WebAssembly compilation
 
-- NX Console: https://nx.dev/core-features/integrate-with-editors
+## Development Tools
+
+Recommended for better development experience:
+
+- [NX Console](https://nx.dev/core-features/integrate-with-editors) - Visual Studio Code extension for NX workspace management
 
 # Quick Start
 
-The following commands will help you start developing with this repository.
+To start developing with this repository:
 
-First, install the dependencies via yarn:
+1. Install dependencies:
 
 ```
 yarn
 ```
 
-## Building
-
-You can build the project with the following commands:
+2. Build the packages:
 
 ```
-// for local development - It stripped away operations that don't matter for local dev
+yarn build:dev
+```
+
+## Building
+
+Build the project using one of these commands:
+
+```
+// For local development (optimized, excludes production-only operations)
 yarn build:dev
 
-// you should never need to use yarn build unless you want to test or publish it
+// For testing and publishing (full build with all operations)
 yarn build
 ```
 
@@ -147,31 +158,15 @@ yarn test:local
 
 `nx generate @nx/js:library`
 
-## Create a new react demo app using the Lit JS SDK
-
-```js
-yarn tools --create --react contracts-sdk --demo
-```
-
-## Deleting a package or app
-
-```
-// delete an app from ./app/<app-name>
-yarn delete:app <app-name>
-
-// delete a package from ./packages/<package-name>
-yarn delete:package <package-name>
-```
-
 ## Building
 
-```jsx
+```sh
 yarn build
 ```
 
 ### Building target package
 
-```jsx
+```sh
 yarn nx run <project-name>:build
 ```
 
@@ -209,79 +204,163 @@ Having done this setup, this is what the development cycle looks like moving for
 2. Rebuild specific package
 3. Rebuild client application.
 
-## Publishing
+### Building Rust Components
 
-You must have at least nodejs v18 to do this.
+For changes to WebAssembly components in `packages/wasm`, refer to the [WebAssembly build guide](./packages/wasm/README.md).
 
-1. Install the latest packages with `yarn install`
+## Publishing New Versions
 
-2. Run `yarn bump` to bump the version
+Prerequisites:
 
-3. Build all the packages with `yarn build`
+- Node.js v18.0.0 or later
 
-4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally & ensure that they pass
+Publishing steps:
 
-5. Update the docs with `yarn gen:docs --push`
+1. Create a release PR:
 
-6. Finally, publish with the `@cayenne` tag: `yarn publish:cayenne`
+   - Create a new branch from master with format `vX.X.X-Publish`
+   - Add changelog as PR description
+   - Add "Release" label to the PR
+   - Reference example: https://github.com/LIT-Protocol/js-sdk/pull/753
 
-7. Commit these changes "Published version X.X.X"
+2. After PR approval, proceed with publishing:
+   - Update dependencies: `yarn install`
+   - Increment version: `yarn bump`
+   - Build packages: `yarn build`
+   - Run tests:
+     - Unit tests: `yarn test:unit`
+     - E2E tests: `yarn test:local`
+   - Generate documentation: `yarn gen:docs --push`
+   - Publish packages: `yarn publish:packages`
+   - Commit with message: "Published version X.X.X"
 
-### Publishing to Serrano / Jalapno
+## Testing Guide
+
+### Available Test Commands
+
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `yarn test:unit`  | Run unit tests for all packages      |
+| `yarn test:local` | Run E2E tests in Node.js environment |
+
+### Running Tests
+
+1. Unit Tests:
+
+   ```sh
+   yarn test:unit
+   ```
+
+2. End-to-End Tests:
+
+   ```sh
+   yarn test:local
+   ```
+
+   Optional Environment Variables:
+
+   - NETWORK=<network_name> (datil, datil-test, datil-dev, etc.)
+   - DEBUG=true/false
+
+   Optional Flags:
+
+   - --filter=<test-name>
+
+   See more in `local-tests/README.md`
+
+## Local Development with Lit Node
+
+### Setup Local Environment
+
+1. Deploy Lit Node Contracts (addresses will be read from `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json`)
+
+2. Configure environment variables:
 
 ```sh
-git checkout serrano
-yarn bump
-yarn build
-yarn node ./tools/scripts/pub.mjs --tag serrano-jalapeno
-```
-
-## Testing
-
-### Quick Start on E2E Testing
-
-The following will serve the react testing app and launch the cypress e2e testing after
-
-```sh
-yarn test:local
-```
-
-### Unit Tests
-
-```jsx
-yarn test:unit
-```
-
-## Testing with a Local Lit Node
-
-First, deploy your Lit Node Contracts, since the correct addresses will be pulled from the `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json` file.
-
-Set these two env vars:
-
-```sh
+# Enable local node development
 export LIT_JS_SDK_LOCAL_NODE_DEV="true"
-export LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY="putAFundedPrivateKeyOnChronicleHere"
+
+# Set funded wallet for Chronicle testnet
+export LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY="your-funded-private-key"
 ```
 
-Run:
+## Environment Variables
 
-```sh
-yarn update:contracts-sdk --fetch
-yarn update:contracts-sdk --gen
-yarn build:packages
+| Variable                               | Description                 | Usage                                                        |
+| -------------------------------------- | --------------------------- | ------------------------------------------------------------ |
+| `LIT_JS_SDK_GITHUB_ACCESS_TOKEN`       | GitHub access token         | Required for accessing contract ABIs from private repository |
+| `LIT_JS_SDK_LOCAL_NODE_DEV`            | Local node development flag | Set to `true` to use a local Lit node                        |
+| `LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY` | Funded wallet private key   | Required for Chronicle Testnet transactions                  |
+
+# Error Handling Guide
+
+## Overview
+
+The SDK implements a robust error handling system using [@openagenda/verror](https://github.com/OpenAgenda/verror). This system provides:
+
+- Detailed error information with cause tracking
+- Error composition and chaining
+- Additional context through metadata
+- Compatibility with native JavaScript Error handling
+
+## Using Error Handling
+
+### Basic Example
+
+```ts
+import { VError } from '@openagenda/verror';
+import { LitNodeClientBadConfigError } from '@lit-protocol/constants';
+
+try {
+  // Simulate an error condition
+  const someNativeError = new Error('some native error');
+
+  // Throw a Lit-specific error with context
+  throw new LitNodeClientBadConfigError(
+    {
+      cause: someNativeError,
+      info: { foo: 'bar' },
+      meta: { baz: 'qux' },
+    },
+    'some useful message'
+  );
+} catch (e) {
+  // Access error details
+  console.log(e.name); // LitNodeClientBadConfigError
+  console.log(e.message); // some useful message: some native error
+  console.log(e.info); // { foo: 'bar' }
+  console.log(e.baz); // qux
+
+  // Additional error information
+  // - VError.cause(e): Original error (someNativeError)
+  // - VError.info(e): Additional context ({ foo: 'bar' })
+  // - VError.meta(e): Metadata ({ baz: 'qux', code: 'lit_node_client_bad_config_error', kind: 'Config' })
+  // - VError.fullStack(e): Complete error chain stack trace
+}
 ```
 
-To run manual tests:
+## Creating Custom Errors
 
-```sh
- yarn nx run nodejs:serve
-```
+To add new error types:
 
-## ENV Vars
-
-- LIT_JS_SDK_GITHUB_ACCESS_TOKEN - a github access token to get the contract ABIs from a private repo
-- LIT_JS_SDK_LOCAL_NODE_DEV - set to true to use a local node
-- LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY - set to a funded wallet on Chronicle Testnet
+1. Locate `packages/constants/src/lib/errors.ts`
+2. Add your error definition to the `LIT_ERROR` object
+3. Export the new error class
+4. Import and use in your code with relevant context:
+   ```ts
+   throw new YourCustomError(
+     {
+       cause: originalError,
+       info: {
+         /* context */
+       },
+       meta: {
+         /* metadata */
+       },
+     },
+     'Error message'
+   );
+   ```
 
 # Dockerfile
 
@@ -289,73 +368,52 @@ To run manual tests:
 
 ## Other Commands
 
-### Interactive graph dependencies using NX
+# Core Systems and Services
 
-```
-yarn graph
-```
+The Lit Protocol SDK provides the following core systems:
 
-![](https://i.ibb.co/2dLyMTW/Screenshot-2022-11-15-at-15-18-46.png)
+- Cryptographic key management (PKP - Programmable Key Pair)
+- Blockchain wallet interactions (Ethereum, Solana, Cosmos)
+- Decentralized authentication and authorization
+- Distributed computing and signing
+- Smart contract management
+- Access control and encryption services
 
-# FAQs & Common Errors
+# Main Functions and Classes
 
-<details>
-<summary>(React) Failed to parse source map from</summary>
+Key components available across packages:
 
-In your React package.json, add `GENERATE_SOURCEMAP=false` to your start script
+- `PKPEthersWallet`: Ethereum wallet management for PKP
+- `LitNodeClient`: Network interaction client
+- `executeJs()`: Decentralized JavaScript execution
+- `signMessageWithEncryptedKey()`: Cryptographic signing
+- `generatePrivateKey()`: Key generation utilities
+- `TinnyEnvironment`: Testing environment setup
 
-eg.
+# Troubleshooting Guide
 
-```
-  "scripts": {
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-```
+## Common Issues and Solutions
 
-</details>
+### Crypto API Error
 
-<details>
-<summary>Web bundling using esbuild</summary>
+**Problem:** "Reference Error: crypto is not defined"
 
-It’s currently using a custom plugin [@websaam/nx-esbuild](https://www.npmjs.com/package/@websaam/nx-esbuild) which is a fork from [@wanews/nx-esbuild](https://www.npmjs.com/package/@wanews/nx-esbuild)
-
-```json
-"_buildWeb": {
-    "executor": "@websaam/nx-esbuild:package",
-    "options": {
-      "banner": {
-        "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
-      },
-      "globalName": "LitJsSdk_CoreBrowser",
-      "outfile":"dist/packages/core-browser-vanilla/core-browser.js",
-      "entryPoints": ["./packages/core-browser/src/index.ts"],
-      "define": { "global": "window" },
-      "plugins":[
-        {
-          "package": "esbuild-node-builtins",
-          "function": "nodeBuiltIns"
-        }
-      ]
-    }
-  }
-```
-
-</details>
-
-<details>
-<summary>Reference Error: crypto is not defined</summary>
+**Solution:**
+Add the following polyfill for environments without native crypto:
 
 ```js
 import crypto, { createHash } from 'crypto';
+
+// Add crypto to global scope
 Object.defineProperty(globalThis, 'crypto', {
   value: {
+    // Implement getRandomValues
     getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
+
+    // Implement subtle crypto
     subtle: {
       digest: (algorithm: string, data: Uint8Array) => {
-        return new Promise((resolve, reject) =>
+        return new Promise((resolve) =>
           resolve(
             createHash(algorithm.toLowerCase().replace('-', ''))
               .update(data)
@@ -368,10 +426,9 @@ Object.defineProperty(globalThis, 'crypto', {
 });
 ```
 
-</details>
-<details>
-<summary>error Command failed with exit code 13.</summary>
+### Unexpected Error on Node
 
+**Problem:** Exit code 13
+
+**Solution:**
 Make sure your node version is above v18.0.0
-
-</details>

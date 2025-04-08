@@ -1,14 +1,14 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { ethers } from 'ethers';
+
 import { log } from '@lit-protocol/misc';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToPkpSign
- * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToPkpSign
- * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToPkpSign
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToPkpSign
+ * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToPkpSign
+ * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToPkpSign
  */
 export const testUseEoaSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment
@@ -58,6 +58,26 @@ export const testUseEoaSessionSigsToPkpSign = async (
   // recid must be parseable as a number
   if (isNaN(runWithSessionSigs.recid)) {
     throw new Error(`Expected "recid" to be parseable as a number`);
+  }
+
+  const signature = ethers.utils.joinSignature({
+    r: '0x' + runWithSessionSigs.r,
+    s: '0x' + runWithSessionSigs.s,
+    recoveryParam: runWithSessionSigs.recid,
+  });
+  const recoveredPubKey = ethers.utils.recoverPublicKey(
+    alice.loveLetter,
+    signature
+  );
+  if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {
+    throw new Error(
+      `Expected recovered public key to match runWithSessionSigs.publicKey`
+    );
+  }
+  if (recoveredPubKey !== `0x${alice.pkp.publicKey.toLowerCase()}`) {
+    throw new Error(
+      `Expected recovered public key to match alice.pkp.publicKey`
+    );
   }
 
   log('✅ testUseEoaSessionSigsToPkpSign');

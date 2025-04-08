@@ -1,19 +1,19 @@
 import {
-  LitAbility,
   LitActionResource,
   LitPKPResource,
   createSiweMessageWithRecaps,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
+import { LIT_ABILITY } from '@lit-protocol/constants';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
- * ✅ NETWORK=manzano yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
- * ✅ NETWORK=localchain yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
+ * ✅ NETWORK=datil-test yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
+ * ✅ NETWORK=custom yarn test:local --filter=testPkpEthersWithEoaSessionSigsToSignWithAuthContext
  */
 export const testPkpEthersWithEoaSessionSigsToSignWithAuthContext = async (
   devEnv: TinnyEnvironment
@@ -48,11 +48,11 @@ export const testPkpEthersWithEoaSessionSigsToSignWithAuthContext = async (
         resourceAbilityRequests: [
           {
             resource: new LitPKPResource('*'),
-            ability: LitAbility.PKPSigning,
+            ability: LIT_ABILITY.PKPSigning,
           },
           {
             resource: new LitActionResource('*'),
-            ability: LitAbility.LitActionExecution,
+            ability: LIT_ABILITY.LitActionExecution,
           },
         ],
       },

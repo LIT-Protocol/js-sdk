@@ -1,5 +1,5 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { ethers } from 'ethers';
+
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -13,9 +13,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  *
  *
  * ## Test Commands:
- * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
- * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
+ * - ✅ NETWORK=datil-test yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
+ * - ✅ NETWORK=custom yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (
   devEnv: TinnyEnvironment
@@ -93,6 +92,22 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (
   // -- recid must be parseable as a number
   if (isNaN(res.recid)) {
     throw new Error(`Expected "recid" to be parseable as a number`);
+  }
+
+  const signature = ethers.utils.joinSignature({
+    r: '0x' + res.r,
+    s: '0x' + res.s,
+    recoveryParam: res.recid,
+  });
+  const recoveredPubKey = ethers.utils.recoverPublicKey(
+    alice.loveLetter,
+    signature
+  );
+  if (recoveredPubKey !== `0x${res.publicKey.toLowerCase()}`) {
+    throw new Error(`Expected recovered public key to match res.publicKey`);
+  }
+  if (recoveredPubKey !== `0x${bob.pkp.publicKey.toLowerCase()}`) {
+    throw new Error(`Expected recovered public key to match bob.pkp.publicKey`);
   }
 
   console.log('✅ res:', res);

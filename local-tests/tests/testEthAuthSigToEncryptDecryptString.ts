@@ -1,15 +1,15 @@
-import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
 import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthAuthSigToEncryptDecryptString
- * ✅ NETWORK=manzano yarn test:local --filter=testEthAuthSigToEncryptDecryptString
- * ✅ NETWORK=localchain yarn test:local --filter=testEthAuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testEthAuthSigToEncryptDecryptString
+ * ✅ NETWORK=datil-test yarn test:local --filter=testEthAuthSigToEncryptDecryptString
+ * ✅ NETWORK=custom yarn test:local --filter=testEthAuthSigToEncryptDecryptString
  */
 export const testEthAuthSigToEncryptDecryptString = async (
   devEnv: TinnyEnvironment
@@ -26,7 +26,7 @@ export const testEthAuthSigToEncryptDecryptString = async (
     userAddress: alice.authSig.address,
   });
 
-  const encryptRes = await LitJsSdk.encryptString(
+  const encryptRes = await encryptString(
     {
       accessControlConditions: accs,
       dataToEncrypt: 'Hello world',
@@ -54,7 +54,7 @@ export const testEthAuthSigToEncryptDecryptString = async (
   }
 
   // -- Decrypt the encrypted string
-  const decryptRes = await LitJsSdk.decryptToString(
+  const decryptRes = await decryptToString(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,

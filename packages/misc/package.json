@@ -13,9 +13,6 @@
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
   "type": "commonjs",
-  "dependencies": {
-    "ethers": "^5.7.1"
-  },
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/misc"
@@ -24,7 +21,7 @@
   "tags": [
     "universal"
   ],
-  "version": "6.11.0",
+  "version": "7.0.9",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

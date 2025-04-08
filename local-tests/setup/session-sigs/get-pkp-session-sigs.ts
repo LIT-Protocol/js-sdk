@@ -1,7 +1,10 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
+import { LitResourceAbilityRequest } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
-import { CENTRALISATION_BY_NETWORK, LitNetwork } from '@lit-protocol/constants';
+import {
+  LIT_ABILITY,
+  CENTRALISATION_BY_NETWORK,
+} from '@lit-protocol/constants';
 import { TinnyEnvironment } from '../tinny-environment';
 import { TinnyPerson } from '../tinny-person';
 
@@ -9,7 +12,8 @@ export const getPkpSessionSigs = async (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
   resourceAbilityRequests?: LitResourceAbilityRequest[],
-  expiration?: string
+  expiration?: string,
+  domain?: string
 ) => {
   const centralisation =
     CENTRALISATION_BY_NETWORK[devEnv.litNodeClient.config.litNetwork];
@@ -24,11 +28,11 @@ export const getPkpSessionSigs = async (
   const _resourceAbilityRequests = resourceAbilityRequests || [
     {
       resource: new LitPKPResource('*'),
-      ability: LitAbility.PKPSigning,
+      ability: LIT_ABILITY.PKPSigning,
     },
     {
       resource: new LitActionResource('*'),
-      ability: LitAbility.LitActionExecution,
+      ability: LIT_ABILITY.LitActionExecution,
     },
   ];
 
@@ -36,6 +40,7 @@ export const getPkpSessionSigs = async (
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
     authMethods: [alice.authMethod],
     expiration,
+    domain,
     resourceAbilityRequests: _resourceAbilityRequests,
 
     ...(centralisation === 'decentralised' && {

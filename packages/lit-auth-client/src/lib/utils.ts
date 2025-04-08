@@ -1,6 +1,19 @@
-import { getLoggerbyId } from '@lit-protocol/misc';
-import { LoginUrlParams } from '@lit-protocol/types';
 import * as cbor from 'cbor-web';
+
+import {
+  AUTH_METHOD_TYPE,
+  InvalidArgumentException,
+  UnknownError,
+} from '@lit-protocol/constants';
+import { getLoggerbyId } from '@lit-protocol/misc';
+import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
+
+import DiscordProvider from './providers/DiscordProvider';
+import EthWalletProvider from './providers/EthWalletProvider';
+import GoogleProvider from './providers/GoogleProvider';
+import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
+import { StytchOtpProvider } from './providers/StytchOtpProvider';
+import WebAuthnProvider from './providers/WebAuthnProvider';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
@@ -52,7 +65,12 @@ function getLoginRoute(provider: string): string {
     case 'discord':
       return '/auth/discord';
     default:
-      throw new Error(
+      throw new InvalidArgumentException(
+        {
+          info: {
+            provider,
+          },
+        },
         `No login route available for the given provider "${provider}".`
       );
   }
@@ -204,9 +222,9 @@ export function parseAuthenticatorData(
 ): Record<string, unknown> {
   try {
     // deocde the buffer from cbor, will return an object.
-    let authDataBufferDecoded: any = cbor.decode(authDataBuffer);
+    const authDataBufferDecoded = cbor.decode(authDataBuffer);
     const authenticatorData: any = {};
-    let authData: Buffer = authDataBufferDecoded.authData;
+    const authData: Buffer = authDataBufferDecoded.authData;
 
     authenticatorData.rpIdHash = authData.slice(0, 32);
     authenticatorData.flags = authData[32];
@@ -219,7 +237,7 @@ export function parseAuthenticatorData(
     // Check if the client sent attestedCredentialdata, which is necessary for every new public key scheduled. This is indicated by the 6th bit of the flag byte being 1 (See specification at function start for reference)
     if (authenticatorData.flags & 64) {
       // Extract the data from the Buffer. Reference of the structure can be found here: https://w3c.github.io/webauthn/#sctn-attested-credential-data
-      const attestedCredentialData: { [key: string]: any } = {};
+      const attestedCredentialData: Record<string, any> = {};
       attestedCredentialData['aaguid'] = unparse(authData.slice(37, 53)); ///.toUpperCase()
       attestedCredentialData['credentialIdLength'] =
         (authData[53] << 8) | authData[54];
@@ -233,7 +251,7 @@ export function parseAuthenticatorData(
         authData.length
       );
 
-      const publicKey: any = cbor.decode(publicKeyCoseBufferCbor);
+      const publicKey = cbor.decode(publicKeyCoseBufferCbor);
       publicKeyCoseBufferCbor = cbor.encode(publicKey);
 
       attestedCredentialData['credentialPublicKey'] = publicKeyCoseBufferCbor;
@@ -270,21 +288,29 @@ export function parseAuthenticatorData(
 
     return authenticatorData;
   } catch (e) {
-    throw new Error('Authenticator Data could not be parsed');
+    throw new UnknownError(
+      {
+        info: {
+          authDataBuffer,
+        },
+        cause: e,
+      },
+      'Authenticator Data could not be parsed'
+    );
   }
 }
 
 // **`unparse()` - Convert UUID byte array (ala parse()) into a string**
 export function unparse(buf: any) {
   // Maps for number <-> hex string conversion
-  var _byteToHex = [];
-  var _hexToByte: any = {};
-  for (var i = 0; i < 256; i++) {
-    _byteToHex[i] = (i + 0x100).toString(16).substr(1);
-    _hexToByte[_byteToHex[i]] = i;
+  const _byteToHex = [];
+  const _hexToByte: any = {};
+  for (let it = 0; it < 256; it++) {
+    _byteToHex[it] = (it + 0x100).toString(16).substr(1);
+    _hexToByte[_byteToHex[it]] = it;
   }
-  var i: number = 0;
-  var bth = _byteToHex;
+  let i: number = 0;
+  const bth = _byteToHex;
   return (
     bth[buf[i++]] +
     bth[buf[i++]] +
@@ -312,4 +338,52 @@ export function unparse(buf: any) {
 export function log(...args: any) {
   const logger = getLoggerbyId('auth-client');
   logger.debug(...args);
+}
+
+/**
+ * Retrieves the authentication ID based on the provided authentication method.
+ *
+ * @param {AuthMethod} authMethod - The authentication method
+ * @returns {Promise<string>} - The authentication ID
+ */
+export async function getAuthIdByAuthMethod(
+  authMethod: AuthMethod
+): Promise<string> {
+  let authId;
+
+  switch (authMethod.authMethodType) {
+    case AUTH_METHOD_TYPE.EthWallet:
+      authId = await EthWalletProvider.authMethodId(authMethod);
+      break;
+    case AUTH_METHOD_TYPE.Discord:
+      authId = await DiscordProvider.authMethodId(authMethod);
+      break;
+    case AUTH_METHOD_TYPE.WebAuthn:
+      authId = await WebAuthnProvider.authMethodId(authMethod);
+      break;
+    case AUTH_METHOD_TYPE.GoogleJwt:
+      authId = await GoogleProvider.authMethodId(authMethod);
+      break;
+    case AUTH_METHOD_TYPE.StytchOtp:
+      authId = await StytchOtpProvider.authMethodId(authMethod);
+      break;
+    case AUTH_METHOD_TYPE.StytchEmailFactorOtp:
+    case AUTH_METHOD_TYPE.StytchSmsFactorOtp:
+    case AUTH_METHOD_TYPE.StytchTotpFactorOtp:
+    case AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp:
+      authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
+      break;
+    default:
+      log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
+      throw new InvalidArgumentException(
+        {
+          info: {
+            authMethod,
+          },
+        },
+        `Unsupported auth method type: ${authMethod.authMethodType}`
+      );
+  }
+
+  return authId;
 }

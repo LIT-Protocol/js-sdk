@@ -7,9 +7,9 @@ const { importPrivateKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
- * ✅ NETWORK=manzano yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
- * ✅ NETWORK=localchain yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
+ * ✅ NETWORK=datil-test yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
+ * ✅ NETWORK=custom yarn test:local --filter=testFailImportWrappedKeysWithEoaSessionSig
  */
 export const testFailImportWrappedKeysWithEoaSessionSig = async (
   devEnv: TinnyEnvironment
