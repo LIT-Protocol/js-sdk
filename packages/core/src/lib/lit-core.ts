@@ -359,17 +359,16 @@ export class LitCore extends EventEmitter {
         message
       );
 
-      // Signal to any listeners that we've encountered a fatal error
-      this.emit(
-        'error',
-        new Error(
-          'Error while attempting to reconnect to nodes after epoch transition:' +
+      const handshakeError = new Error(
+        'Error while attempting to reconnect to nodes after epoch transition:' +
           message
-        )
       );
 
+      // Signal to any listeners that we've encountered a fatal error
+      this.emit('error', handshakeError);
+
       // Signal to any listeners that we're 'disconnected' from LIT network
-      this.emit('disconnected', true);
+      this.emit('disconnected', { reason: 'error', error: handshakeError });
     }
   }
 
@@ -414,7 +413,7 @@ export class LitCore extends EventEmitter {
     this._stopListeningForNewEpoch();
     // this._stopNetworkPolling();
     setMiscLitConfig(undefined);
-    this.emit('disconnected', true);
+    this.emit('disconnected', { reason: 'disconnect' });
   }
 
   // _stopNetworkPolling() {
