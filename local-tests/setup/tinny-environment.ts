@@ -277,6 +277,12 @@ export class TinnyEnvironment {
       );
     }
 
+    this.litNodeClient.on('connected', () => {
+      console.log(
+        'Received `connected` event from `litNodeClient. Ready to go!'
+      );
+    });
+
     await this.litNodeClient.connect();
 
     if (!this.litNodeClient.ready) {
