@@ -874,7 +874,7 @@ export class LitNodeClientNodeJs
     // ========== Validate Params ==========
     if (!this.ready) {
       const message =
-        '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '[executeJs] LitNodeClient is not ready. Please call await litNodeClient.connect() first.';
 
       throw new LitNodeClientNotReadyError({}, message);
     }
@@ -1991,13 +1991,9 @@ export class LitNodeClientNodeJs
     if (!this.ready) {
       // If the client isn't ready, `connectedNodes` may be out-of-date, and we should throw an error immediately
       const message =
-        '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '[executeJs] LitNodeClient is not ready. Please call await litNodeClient.connect() first.';
 
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
+      throw new LitNodeClientNotReadyError({}, message);
     }
 
     this.connectedNodes.forEach((nodeAddress: string) => {
