@@ -899,6 +899,10 @@ export class LitContracts {
           reward: item[4],
           seconderPubkey: item[5],
           receiverPubkey: item[6],
+          lastActiveEpoch: item[7],
+          commission: item[8],
+          commissionRate: item[9],
+          lastRewardEpoch: item[10],
         };
       });
 
