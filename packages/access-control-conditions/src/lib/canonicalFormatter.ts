@@ -1,6 +1,5 @@
 import { InvalidAccessControlConditions } from '@lit-protocol/constants';
 import {
-  ABIParams,
   AccessControlConditions,
   AccsCOSMOSParams,
   AccsDefaultParams,
@@ -13,6 +12,11 @@ import {
   JsonSigningResourceId,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
+
+interface ABIParams {
+  name: string;
+  type: string;
+}
 
 /** ---------- Local Functions ---------- */
 /**

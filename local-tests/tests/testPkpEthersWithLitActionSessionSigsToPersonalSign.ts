@@ -1,6 +1,6 @@
 import { PKPEthersWallet, ethRequestHandler } from '@lit-protocol/pkp-ethers';
 import { ethers } from 'ethers';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -13,12 +13,11 @@ export const testPkpEthersWithLitActionSessionSigsToPersonalSign = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
   const pkpEthersWallet = new PKPEthersWallet({
     litNodeClient: devEnv.litNodeClient,
     pkpPubKey: alice.pkp.publicKey,
-    controllerSessionSigs: litActionSessionSigs,
+    authContext: getLitActionAuthContext(devEnv, alice),
   });
 
   await pkpEthersWallet.init();
@@ -55,8 +54,6 @@ export const testPkpEthersWithLitActionSessionSigsToPersonalSign = async (
     }
 
     console.log('✅ personal_sign recoveredAddr:', recoveredAddr);
-  } catch (e) {
-    throw new Error('❌ Error: ' + e.message);
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }

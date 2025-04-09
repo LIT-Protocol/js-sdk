@@ -18,24 +18,18 @@ import {
   fromB64,
   messageWithIntent,
   toB64,
-  toSerializedSignature,
   getTotalGasUsedUpperBound,
 } from '@mysten/sui.js';
-import {
-  hexToBytes,
-  numberToBytesBE,
-  bytesToHex,
-} from '@noble/curves/abstract/utils';
-import { secp256k1 } from '@noble/curves/secp256k1';
 import { blake2b } from '@noble/hashes/blake2b';
 import { sha256 } from '@noble/hashes/sha256';
 
-import { PKPBase } from '@lit-protocol/pkp-base';
-import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
 import {
   InvalidArgumentException,
+  SigType,
   UnknownError,
 } from '@lit-protocol/constants';
+import { PKPBase } from '@lit-protocol/pkp-base';
+import { LitNodeSignature, PKPBaseProp, PKPWallet } from '@lit-protocol/types';
 
 import { getDigestFromBytes } from './TransactionBlockData';
 
@@ -45,9 +39,6 @@ export class PKPSuiWallet implements PKPWallet, Signer {
   readonly provider: JsonRpcProvider;
   readonly prop: PKPBaseProp;
   readonly publicKey: Secp256k1PublicKey;
-
-  // Default Lit Action signature name
-  defaultSigName: string = 'pkp-sui-sign-tx';
 
   constructor(prop: PKPBaseProp, provider: JsonRpcProvider) {
     this.pkpBase = PKPBase.createInstance(prop);
@@ -77,25 +68,7 @@ export class PKPSuiWallet implements PKPWallet, Signer {
     const digest = blake2b(data, { dkLen: 32 });
     const msgHash = sha256(digest);
     const signature = await this.runSign(msgHash);
-    const numToNByteStr = (num: number | bigint): string =>
-      bytesToHex(numberToBytesBE(num, secp256k1.CURVE.nByteLength));
-
-    // TODO response from PKPBase.runSign has this values defined as strings
-    const compactHex =
-      (typeof signature.r === 'string'
-        ? signature.r
-        : numToNByteStr(signature.r)) +
-      (typeof signature.s === 'string'
-        ? signature.s
-        : numToNByteStr(signature.s));
-    const compactRawBytes = hexToBytes(compactHex);
-
-    const result = toSerializedSignature({
-      signature: compactRawBytes,
-      signatureScheme: 'Secp256k1',
-      pubKey: this.publicKey,
-    });
-    return result;
+    return signature.signature;
   }
 
   connect(provider: JsonRpcProvider): PKPSuiWallet {
@@ -314,11 +287,14 @@ export class PKPSuiWallet implements PKPWallet, Signer {
    * @param {Uint8Array} toSign - The data to be signed by the Lit action.
    * @param {string} sigName - The name of the signature to be returned by the Lit action.
    *
-   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   * @returns {Promise<LitNodeSignature>} - A Promise that resolves with the signature returned by the Lit action.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
-  async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+  async runLitAction(
+    toSign: Uint8Array,
+    sigName: string
+  ): Promise<LitNodeSignature> {
     return this.pkpBase.runLitAction(toSign, sigName);
   }
 
@@ -326,12 +302,16 @@ export class PKPSuiWallet implements PKPWallet, Signer {
    * Sign the provided data with the PKP private key.
    *
    * @param {Uint8Array} toSign - The data to be signed.
+   * @param {SigType} signingScheme - The signing scheme to use for the signature. Defaults to 'EcdsaK256Sha256'.
    *
-   * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
+   * @returns {Promise<LitNodeSignature>} - A Promise that resolves with the lit signature of the provided data.
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
    */
-  async runSign(toSign: Uint8Array): Promise<SigResponse> {
-    return this.pkpBase.runSign(toSign);
+  async runSign(
+    toSign: Uint8Array,
+    signingScheme: SigType = 'EcdsaK256Sha256'
+  ): Promise<LitNodeSignature> {
+    return this.pkpBase.runSign(toSign, signingScheme);
   }
 }

@@ -1,5 +1,4 @@
-import { LIT_NETWORK } from '@lit-protocol/constants';
-import { getInvalidLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getInvalidLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -13,13 +12,16 @@ export const testUseInvalidLitActionCodeToGenerateSessionSigs = async (
   const alice = await devEnv.createRandomPerson();
 
   try {
-    await getInvalidLitActionSessionSigs(devEnv, alice);
+    const authContext = getInvalidLitActionAuthContext(devEnv, alice);
+    // @ts-expect-error Testing internal method
+    await devEnv.litNodeClient._getSessionSigs(authContext);
   } catch (e: any) {
-    console.log('❌ This error is expected', e);
     if (
-      e.message ===
-      'There was an error getting the signing shares from the nodes'
+      e.message.includes(
+        'There was an error getting the signing shares from the nodes'
+      )
     ) {
+      console.log('❌ This error is expected', e);
       console.log('✅ testUseInvalidLitActionCodeToGenerateSessionSigs passed');
     } else {
       throw e;

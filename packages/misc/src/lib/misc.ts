@@ -1,4 +1,3 @@
-import { LitNodeClientConfig } from '@lit-protocol/types';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import Ajv, { JSONSchemaType } from 'ajv';
@@ -25,6 +24,8 @@ import {
   AuthSig,
   NodeErrorV3,
   ClaimResult,
+  Hex,
+  LitNodeClientConfig,
   MintCallback,
   RelayClaimProcessor,
 } from '@lit-protocol/types';
@@ -69,56 +70,60 @@ export const mostCommonString = <T>(arr: T[]): T | undefined => {
     .pop();
 };
 
-export const findMostCommonResponse = (responses: object[]): object => {
+/**
+ * Recursively finds the most common value for each key across an array of response objects.
+ *
+ * For each key found in any response object, the function aggregates all non-empty values (ignoring
+ * `undefined` and empty strings) and determines the most frequently occurring value. If the value is an object
+ * (and not an array), the function recurses into that object.
+ *
+ * @template T - The shape of the input objects in the array.
+ * @param {T[]} responses - An array of response objects.
+ * @returns {T} An object with each key set to its most common value across all responses.
+ */
+export const findMostCommonResponse = <T extends Record<string, any>>(
+  responses: T[]
+): T => {
+  if (responses.length === 0) {
+    throw new Error(
+      'findMostCommonResponse requires at least one response object'
+    );
+  }
+
   const result: Record<string, any> = {};
 
   // Aggregate all values for each key across all responses
   const keys = new Set(responses.flatMap(Object.keys));
 
   for (const key of keys) {
-    const values = responses.map(
-      (response: Record<string, any>) => response[key]
-    );
+    const values = responses.map((response) => response[key]);
 
-    // Filter out undefined values before processing
+    // Filter out undefined and empty string values before processing
     const filteredValues = values.filter(
       (value) => value !== undefined && value !== ''
     );
 
     if (filteredValues.length === 0) {
-      result[key] = undefined; // or set a default value if needed
+      result[key] = undefined;
     } else if (
       typeof filteredValues[0] === 'object' &&
       !Array.isArray(filteredValues[0])
     ) {
-      // Recursive case for objects
+      // Recursive case for nested objects
       result[key] = findMostCommonResponse(filteredValues);
     } else {
-      // Most common element from filtered values
+      // Determine the most common element from filtered values
       result[key] = mostCommonString(filteredValues);
     }
   }
 
-  return result;
+  return result as T;
 };
 
 declare global {
-  var wasmExport: any;
-  var wasmECDSA: any;
   var logger: any;
   var logManager: any;
 }
-
-export const throwRemovedFunctionError = (functionName: string) => {
-  throw new RemovedFunctionError(
-    {
-      info: {
-        functionName,
-      },
-    },
-    `This function "${functionName}" has been removed. Please use the old SDK.`
-  );
-};
 
 export const bootstrapLogManager = (
   id: string,
@@ -161,7 +166,7 @@ export const log = (...args: any): void => {
     return;
   }
 
-  // if there are there are logs in buffer, print them first and empty the buffer.
+  // if there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
     globalThis?.logger && globalThis?.logger.debug(...log);
@@ -565,7 +570,7 @@ export const defaultMintClaimCallback: MintCallback<
   RelayClaimProcessor
 > = async (
   params: ClaimResult<RelayClaimProcessor>,
-  network: LIT_NETWORK_VALUES = LIT_NETWORK.DatilDev
+  network: LIT_NETWORK_VALUES = LIT_NETWORK.NagaDev
 ): Promise<string> => {
   isSupportedLitNetwork(network);
 
@@ -619,17 +624,21 @@ export const defaultMintClaimCallback: MintCallback<
   return body.requestId;
 };
 
+export const isHexableString = (str: string): boolean => {
+  return /^(0x|0X)?[0-9a-fA-F]+$/.test(str);
+};
+
 /**
  * Adds a '0x' prefix to a string if it doesn't already have one.
  * @param str - The input string.
  * @returns The input string with a '0x' prefix.
  */
-export const hexPrefixed = (str: string): `0x${string}` => {
+export const hexPrefixed = (str: string): Hex => {
   if (str.startsWith('0x')) {
-    return str as `0x${string}`;
+    return str as Hex;
   }
 
-  return ('0x' + str) as `0x${string}`;
+  return ('0x' + str) as Hex;
 };
 
 /**
@@ -719,6 +728,123 @@ export function sendRequest(
       return Promise.reject(error);
     });
 }
+
+/**
+ * Converts a snake_case string to camelCase.
+ * @param s The snake_case string to convert.
+ * @returns The camelCase version of the input string.
+ *
+ * @example
+ * snakeToCamel('hello_world') // 'helloWorld'
+ */
+export const snakeToCamel = (s: string): string =>
+  s.replace(/(_\w)/g, (m) => m[1].toUpperCase());
+
+export type Transformation = (
+  target: Record<string, unknown>
+) => Record<string, unknown>;
+
+/**
+ * Converts the keys of an object from snake_case to camelCase.
+ *
+ * @param obj - The object whose keys need to be converted.
+ * @returns The object with keys converted to camelCase.
+ */
+export const convertKeysToCamelCase: Transformation = (
+  obj: Record<string, unknown>
+): Record<string, unknown> =>
+  Object.keys(obj).reduce(
+    (acc, key) => ({
+      ...acc,
+      [snakeToCamel(key)]: obj[key],
+    }),
+    {}
+  );
+
+/**
+ * Removes values that are received as a two element array (tuple) by just leaving the second one
+ *
+ * @param obj - The object that can have tupled elements
+ * @returns The object with tupled elements removed, keeping only the second element
+ */
+export const cleanArrayValues: Transformation = (
+  obj: Record<string, unknown>
+): Record<string, unknown> =>
+  Object.keys(obj).reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]:
+        typeof obj[key] === 'string' && obj[key].charAt(0) === '['
+          ? JSON.parse(obj[key])[1]
+          : obj[key],
+    }),
+    {}
+  );
+
+/**
+ * Converts number arrays to Uint8Arrays in an object.
+ *
+ * @param obj - The object that can have number arrays.
+ * @returns A new object with number arrays converted to Uint8Arrays.
+ */
+export const convertNumberArraysToUint8Arrays: Transformation = (
+  obj: Record<string, unknown>
+): Record<string, unknown> =>
+  Object.keys(obj).reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]:
+        Array.isArray(obj[key]) && typeof obj[key][0] === 'number'
+          ? new Uint8Array(obj[key])
+          : obj[key],
+    }),
+    {}
+  );
+
+/**
+ * Removes double quotes from string values in an object.
+ *
+ * @param obj - The object to clean string values from.
+ * @returns A new object with string values cleaned.
+ */
+export const cleanStringValues: Transformation = (
+  obj: Record<string, unknown>
+): Record<string, unknown> =>
+  Object.keys(obj).reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]:
+        typeof obj[key] === 'string' ? obj[key].replace(/"/g, '') : obj[key],
+    }),
+    {}
+  );
+
+/**
+ * Asserts hex values have a prefix of 0x.
+ *
+ * @param obj - The object to hex string values from.
+ * @returns A new object with string values hexed.
+ */
+export const hexifyStringValues: Transformation = (
+  obj: Record<string, unknown>
+): Record<string, unknown> =>
+  Object.keys(obj).reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]:
+        typeof obj[key] === 'string' && isHexableString(obj[key])
+          ? hexPrefixed(obj[key])
+          : obj[key],
+    }),
+    {}
+  );
+
+export const applyTransformations = (
+  target: Record<string, unknown>,
+  transformations: Transformation[]
+): Record<string, unknown> => {
+  return transformations.reduce((acc, transform) => transform(acc), target);
+};
 
 /**
  * Attempts to normalize a string by unescaping it until it can be parsed as a JSON object,

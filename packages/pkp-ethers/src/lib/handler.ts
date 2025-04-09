@@ -2,8 +2,9 @@
 // Integrated from https://github.com/LIT-Protocol/lit-pkp-sdk/blob/main/examples/signTypedData.mjs
 //
 
-import { joinSignature } from '@ethersproject/bytes';
 import { typedSignatureHash } from '@metamask/eth-sig-util';
+import { ethers } from 'ethers';
+
 import {
   InvalidArgumentException,
   InvalidParamType,
@@ -13,6 +14,7 @@ import {
   UnsupportedMethodError,
 } from '@lit-protocol/constants';
 
+import { convertHexToUtf8, getTransactionToSign } from './helper';
 import { PKPEthersWallet } from './pkp-ethers';
 import {
   EIP712TypedData,
@@ -22,11 +24,8 @@ import {
   ETHSignature,
   LitTypeDataSigner,
   UnknownETHMethod,
-  ETHRequestSigningPayload,
   ETHTxRes,
 } from './pkp-ethers-types';
-import { ethers } from 'ethers';
-import { convertHexToUtf8, getTransactionToSign } from './helper';
 
 /**
  * Signs an EIP-712 typed data object or a JSON string representation of the typed data object.
@@ -50,7 +49,7 @@ export const signTypedData = async <T extends EIP712TypedData>(
     msgParams = JSON.parse(msgParams);
   }
 
-  const { types, domain, primaryType, message } = msgParams as T;
+  const { types, domain, message } = msgParams as T;
 
   if (types['EIP712Domain']) {
     delete types['EIP712Domain'];
@@ -95,13 +94,7 @@ export const signTypedDataLegacy = async <T>(
     // sig = await _signer.signMessage(messageHash);
   }
 
-  const encodedSig = joinSignature({
-    r: '0x' + sig.r,
-    s: '0x' + sig.s,
-    v: sig.recid,
-  });
-
-  return encodedSig;
+  return sig.signature;
 };
 
 /**
@@ -116,7 +109,7 @@ export const signTypedDataLegacy = async <T>(
 export const validateAddressesMatch = (
   signerAddress: string,
   requestAddress: string
-) => {
+): void => {
   if (signerAddress.toLowerCase() !== requestAddress.toLowerCase()) {
     throw new UnauthorizedException(
       {
@@ -188,9 +181,9 @@ export function getTypedDataVersionInfo({ signer, payload }: ETHHandlerReq) {
     };
   }
 
-  let addressRequested: string = payload.params[info.addressIndex];
+  const addressRequested: string = payload.params[info.addressIndex];
   validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
-  let msgParams = payload.params[info.msgParamsIndex];
+  const msgParams = payload.params[info.msgParamsIndex];
 
   return { addressRequested, msgParams, info };
 }
@@ -354,17 +347,12 @@ export const signHandler = async ({
 export const personalSignHandler = async ({
   signer,
   payload,
-  capability,
 }: ETHHandlerReq): Promise<ETHHandlerRes> => {
   const addressRequested = payload.params[1];
 
   validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
 
   const msg = convertHexToUtf8(payload.params[0]);
-
-  // -- we will add capability to for resource
-  if (capability) {
-  }
 
   const signature = await (signer as PKPEthersWallet).signMessage(msg);
 
@@ -445,7 +433,7 @@ export const ethRequestHandler = async <T = ETHSignature>({
     }
 
     return data;
-  } catch (e: any) {
+  } catch (e: unknown) {
     throw new UnknownError(
       {
         info: {

@@ -1,6 +1,5 @@
-import { LIT_NETWORK } from '@lit-protocol/constants';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionAuthContext } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
@@ -14,14 +13,13 @@ export const testExecuteJsBroadcastAndCollect = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting
-  const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+  const accs = AccessControlConditions.getEvmBasicAccessControlConditions({
     userAddress: alice.authMethodOwnedPkp.ethAddress,
   });
 
-  const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
-
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: litActionSessionSigs,
+    authContext: getLitActionAuthContext(devEnv, alice),
+
     code: `(async () => {
         let rand = Math.floor(Math.random() * 100);
         const resp = await Lit.Actions.broadcastAndCollect({

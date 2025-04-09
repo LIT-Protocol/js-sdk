@@ -1,5 +1,6 @@
-import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getEoaAuthContextWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+import { getLitActionAuthContext } from '../setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * ## Scenario:
@@ -26,33 +27,12 @@ export const testExecuteJsSignAndCombineEcdsa = async (
     })
   ).capacityDelegationAuthSig;
 
-  // 3. Bob gets the capacity delegation authSig from somewhere and uses it to get session sigs
-  const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
-    devEnv,
-    bob.wallet,
-    appOwnersCapacityDelegationAuthSig
-  );
-
-  // -- printing out the recaps from the session sigs
-  const bobsSingleSessionSig =
-    bobsSessionSigs[devEnv.litNodeClient.config.bootstrapUrls[0]];
-
-  console.log('bobsSingleSessionSig:', bobsSingleSessionSig);
-
-  const regex = /urn:recap:[\w+\/=]+/g;
-
-  const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
-
-  recaps.forEach((r) => {
-    const encodedRecap = r.split(':')[2];
-    const decodedRecap = Buffer.from(encodedRecap, 'base64').toString();
-    console.log(decodedRecap);
-  });
-
-  // 4. Bob can now execute JS code using the capacity credits NFT
-  // 5. Bob can now execute JS code using the capacity credits NFT
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: bobsSessionSigs,
+    authContext: getEoaAuthContextWithCapacityDelegations(
+      devEnv,
+      bob.wallet,
+      appOwnersCapacityDelegationAuthSig
+    ),
     code: `(async () => {
         const sigShare = await LitActions.signAndCombineEcdsa({
           toSign: dataToSign,

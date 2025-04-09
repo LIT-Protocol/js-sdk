@@ -1,86 +1,210 @@
-import { ethers } from 'ethers';
+import { p256 } from '@noble/curves/p256';
+import { p384 } from '@noble/curves/p384';
+import { secp256k1 } from '@noble/curves/secp256k1';
+import { hexToBytes } from '@noble/hashes/utils';
 
+import {
+  UnknownSignatureError,
+  EcdsaSigType,
+  SigType,
+} from '@lit-protocol/constants';
+import { hashLitMessage } from '@lit-protocol/crypto';
 import { log } from '@lit-protocol/misc';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+
+import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+
+interface SigningSchemeConfig {
+  hasRecoveryId?: boolean;
+  hashesMessage: boolean;
+  recoversPublicKey?: boolean;
+  signingScheme: SigType;
+}
+
+// Map the right curve function per signing scheme
+export const ecdsaCurveFunctions: Record<EcdsaSigType, any> = {
+  EcdsaK256Sha256: secp256k1,
+  EcdsaP256Sha256: p256,
+  EcdsaP384Sha384: p384,
+} as const;
 
 /**
  * Test Commands:
- * ✅ NETWORK=datil-dev yarn test:local --filter=testUseEoaSessionSigsToPkpSign
- * ✅ NETWORK=datil-test yarn test:local --filter=testUseEoaSessionSigsToPkpSign
+ * ✅ NETWORK=naga-dev yarn test:local --filter=testUseEoaSessionSigsToPkpSign
+ * ✅ NETWORK=naga-test yarn test:local --filter=testUseEoaSessionSigsToPkpSign
  * ✅ NETWORK=custom yarn test:local --filter=testUseEoaSessionSigsToPkpSign
  */
 export const testUseEoaSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
+  const signingSchemeConfigs: SigningSchemeConfig[] = [
+    // BLS
+    // {
+    //   signingScheme: 'Bls12381', // TODO nodes accept this signing scheme but they throw an unexpected error
+    //   hashesMessage: false,
+    // },
+    // {
+    //   signingScheme: 'Bls12381G1ProofOfPossession',
+    //   hashesMessage: false,
+    // },
+    // ECDSA
+    {
+      hasRecoveryId: true,
+      hashesMessage: true,
+      recoversPublicKey: true,
+      signingScheme: 'EcdsaK256Sha256',
+    },
+    {
+      hasRecoveryId: true,
+      hashesMessage: true,
+      recoversPublicKey: true,
+      signingScheme: 'EcdsaP256Sha256',
+    },
+    {
+      hasRecoveryId: true,
+      hashesMessage: true,
+      recoversPublicKey: true,
+      signingScheme: 'EcdsaP384Sha384',
+    },
+    // FROST
+    {
+      signingScheme: 'SchnorrEd25519Sha512',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrK256Sha256',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrP256Sha256',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrP384Sha384',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrRistretto25519Sha512',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrEd448Shake256',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrRedJubjubBlake2b512',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrK256Taproot',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrRedDecaf377Blake2b512',
+      hashesMessage: false,
+    },
+    {
+      signingScheme: 'SchnorrkelSubstrate',
+      hashesMessage: false,
+    },
+  ];
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-  const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
-    toSign: alice.loveLetter,
-    pubKey: alice.pkp.publicKey,
-    sessionSigs: eoaSessionSigs,
-  });
+  for (const signingSchemeConfig of signingSchemeConfigs) {
+    try {
+      const signingScheme = signingSchemeConfig.signingScheme;
+      log(`Checking testUseEoaSessionSigsToPkpSign for ${signingSchemeConfig}`);
 
-  devEnv.releasePrivateKeyFromUser(alice);
+      const pkpSignature = await devEnv.litNodeClient.pkpSign({
+        pubKey: alice.pkp.publicKey,
+        authContext: getEoaAuthContext(devEnv, alice),
+        messageToSign: alice.loveLetter,
+        signingScheme,
+      });
 
-  // Expected output:
-  // {
-  //   r: "25fc0d2fecde8ed801e9fee5ad26f2cf61d82e6f45c8ad1ad1e4798d3b747fd9",
-  //   s: "549fe745b4a09536e6e7108d814cf7e44b93f1d73c41931b8d57d1b101833214",
-  //   recid: 1,
-  //   signature: "0x25fc0d2fecde8ed801e9fee5ad26f2cf61d82e6f45c8ad1ad1e4798d3b747fd9549fe745b4a09536e6e7108d814cf7e44b93f1d73c41931b8d57d1b1018332141c",
-  //   publicKey: "04A3CD53CCF63597D3FFCD1DF1E8236F642C7DF8196F532C8104625635DC55A1EE59ABD2959077432FF635DF2CED36CC153050902B71291C4D4867E7DAAF964049",
-  //   dataSigned: "7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4",
-  // }
+      devEnv.releasePrivateKeyFromUser(alice);
 
-  // -- assertions
-  // r, s, dataSigned, and public key should be present
-  if (!runWithSessionSigs.r) {
-    throw new Error(`Expected "r" in runWithSessionSigs`);
+      // -- Combined signature format assertions
+      for (const hexString of [
+        'signature',
+        'verifyingKey',
+        'signedData',
+        'publicKey',
+      ]) {
+        if (
+          !pkpSignature[hexString] ||
+          !pkpSignature[hexString].startsWith('0x')
+        ) {
+          throw new Error(
+            `Expected "${hexString}" hex string in pkpSignature. Signing Scheme: ${signingScheme}`
+          );
+        }
+      }
+      // Verify correct recoveryId
+      if (
+        signingSchemeConfig.hasRecoveryId
+          ? ![0, 1].includes(pkpSignature.recoveryId)
+          : pkpSignature.recoveryId !== null
+      ) {
+        throw new Error(
+          `Expected "recoveryId" to be 0/1 for ECDSA and "null" for the rest of curves. Signing Scheme: ${signingScheme}`
+        );
+      }
+
+      if (signingSchemeConfig.recoversPublicKey) {
+        const curve = ecdsaCurveFunctions[signingScheme];
+        const signatureBytes = hexToBytes(
+          pkpSignature.signature.replace(/^0x/, '')
+        );
+        const signature = curve.Signature.fromCompact(
+          signatureBytes
+        ).addRecoveryBit(pkpSignature.recoveryId);
+
+        const msgHash = hexToBytes(pkpSignature.signedData.replace(/^0x/, ''));
+        const recoveredPubKeyBytes = signature.recoverPublicKey(msgHash);
+        const recoveredPubKey = recoveredPubKeyBytes.toHex(false);
+
+        if (pkpSignature.publicKey.replace('0x', '') !== recoveredPubKey) {
+          throw new Error(
+            `Expected recovered public key to match nodesPublicKey`
+          );
+        }
+        // PKP public key lives in k256, it cannot be directly compared in any other curve
+        if (
+          signingScheme === 'EcdsaK256Sha256' &&
+          alice.pkp.publicKey !== recoveredPubKey
+        ) {
+          throw new Error(
+            `Expected recovered public key to match alice.pkp.publicKey. Signing Scheme: ${signingSchemeConfig}`
+          );
+        }
+      }
+
+      const messageHash = signingSchemeConfig.hashesMessage
+        ? hashLitMessage(signingScheme as EcdsaSigType, alice.loveLetter)
+        : alice.loveLetter;
+      const messageHashHex = Buffer.from(messageHash).toString('hex');
+      if (pkpSignature.signedData.replace('0x', '') !== messageHashHex) {
+        throw new Error(
+          `Expected signed data to match hashLitMessage(signingScheme, alice.loveLetter). Signing Scheme: ${signingScheme}`
+        );
+      }
+
+      log(`✅ testUseEoaSessionSigsToPkpSign - ${signingScheme}`);
+    } catch (e) {
+      throw new UnknownSignatureError(
+        {
+          info: {
+            signingSchemeConfig,
+            message: alice.loveLetter,
+            pkp: alice.pkp,
+          },
+          cause: e,
+        },
+        `Signature failed with signing scheme ${signingSchemeConfig.signingScheme}`
+      );
+    }
   }
-  if (!runWithSessionSigs.s) {
-    throw new Error(`Expected "s" in runWithSessionSigs`);
-  }
-  if (!runWithSessionSigs.dataSigned) {
-    throw new Error(`Expected "dataSigned" in runWithSessionSigs`);
-  }
-  if (!runWithSessionSigs.publicKey) {
-    throw new Error(`Expected "publicKey" in runWithSessionSigs`);
-  }
 
-  // signature must start with 0x
-  if (!runWithSessionSigs.signature.startsWith('0x')) {
-    throw new Error(`Expected "signature" to start with 0x`);
-  }
-
-  // recid must be parseable as a number
-  if (isNaN(runWithSessionSigs.recid)) {
-    throw new Error(`Expected "recid" to be parseable as a number`);
-  }
-
-  const signature = ethers.utils.joinSignature({
-    r: '0x' + runWithSessionSigs.r,
-    s: '0x' + runWithSessionSigs.s,
-    recoveryParam: runWithSessionSigs.recid,
-  });
-  const recoveredPubKey = ethers.utils.recoverPublicKey(
-    alice.loveLetter,
-    signature
-  );
-
-  console.log('recoveredPubKey:', recoveredPubKey);
-
-  if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {
-    throw new Error(
-      `Expected recovered public key to match runWithSessionSigs.publicKey`
-    );
-  }
-  if (recoveredPubKey !== `0x${alice.pkp.publicKey.toLowerCase()}`) {
-    throw new Error(
-      `Expected recovered public key to match alice.pkp.publicKey`
-    );
-  }
-
-  log('✅ testUseEoaSessionSigsToPkpSign');
+  log('✅ testUseEoaSessionSigsToPkpSign all signing schemes');
 };

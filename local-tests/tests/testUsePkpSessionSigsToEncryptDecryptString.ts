@@ -2,7 +2,7 @@ import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
-import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { getPkpAuthContext } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
 import { encryptString, decryptToString } from '@lit-protocol/encryption';
@@ -18,7 +18,7 @@ export const testUsePkpSessionSigsToEncryptDecryptString = async (
 ) => {
   const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting
-  const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+  const accs = AccessControlConditions.getEvmBasicAccessControlConditions({
     userAddress: alice.authMethodOwnedPkp.ethAddress,
   });
 
@@ -53,20 +53,18 @@ export const testUsePkpSessionSigsToEncryptDecryptString = async (
       encryptRes.dataToEncryptHash
     );
 
-  const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, alice, [
-    {
-      resource: new LitAccessControlConditionResource(accsResourceString),
-      ability: LIT_ABILITY.AccessControlConditionDecryption,
-    },
-  ]);
-
   // -- Decrypt the encrypted string
   const decryptRes = await decryptToString(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,
       dataToEncryptHash: encryptRes.dataToEncryptHash,
-      sessionSigs: pkpSessionSigs2,
+      authContext: getPkpAuthContext(devEnv, alice, [
+        {
+          resource: new LitAccessControlConditionResource(accsResourceString),
+          ability: LIT_ABILITY.AccessControlConditionDecryption,
+        },
+      ]),
       chain: 'ethereum',
     },
     devEnv.litNodeClient as unknown as ILitNodeClient

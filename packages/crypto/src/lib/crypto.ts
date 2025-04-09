@@ -1,22 +1,34 @@
-import { joinSignature, splitSignature } from 'ethers/lib/utils';
+import { sha256 } from '@noble/hashes/sha256';
+import { sha384 } from '@noble/hashes/sha512';
+import { x25519 } from '@noble/curves/ed25519';
+import { sha512 } from '@noble/hashes/sha512';
+import { nacl } from '@lit-protocol/nacl';
 
 import {
+  CurveTypeNotFoundError,
+  EcdsaSigType,
   InvalidParamType,
-  LIT_CURVE,
-  LIT_CURVE_VALUES,
   NetworkError,
   NoValidShares,
   UnknownError,
-  UnknownSignatureError,
 } from '@lit-protocol/constants';
-import { checkType, log } from '@lit-protocol/misc';
-import { nacl } from '@lit-protocol/nacl';
 import {
-  CombinedECDSASignature,
+  applyTransformations,
+  cleanArrayValues,
+  cleanStringValues,
+  convertKeysToCamelCase,
+  convertNumberArraysToUint8Arrays,
+  hexifyStringValues,
+  log,
+} from '@lit-protocol/misc';
+import {
+  AuthSig,
+  CleanLitNodeSignature,
+  CombinedLitNodeSignature,
+  LitActionSignedData,
   NodeAttestation,
+  PKPSignEndpointResponse,
   SessionKeyPair,
-  SigningAccessControlConditionJWTPayload,
-  SigShare,
   WalletEncryptedPayload,
 } from '@lit-protocol/types';
 import {
@@ -24,17 +36,15 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import {
-  BlsSignatureShareJsonString,
-  EcdsaVariant,
   blsCombine,
   blsDecrypt,
   blsEncrypt,
+  BlsSignatureShareJsonString,
   blsVerify,
-  ecdsaCombine,
   ecdsaDeriveKey,
-  ecdsaVerify,
   sevSnpGetVcekUrl,
   sevSnpVerify,
+  unifiedCombineAndVerify,
 } from '@lit-protocol/wasm';
 
 /** ---------- Exports ---------- */
@@ -87,21 +97,6 @@ export const encrypt = async (
   return Buffer.from(await blsEncrypt(publicKey, message, identity)).toString(
     'base64'
   );
-};
-
-/**
- * Decrypt ciphertext using BLS signature shares.
- *
- * @param ciphertextBase64 base64-encoded string of the ciphertext to decrypt
- * @param shares hex-encoded array of the BLS signature shares
- * @returns Uint8Array of the decrypted data
- */
-export const decryptWithSignatureShares = async (
-  ciphertextBase64: string,
-  shares: BlsSignatureShare[]
-): Promise<Uint8Array> => {
-  const sigShares = toJSONShares(shares);
-  return doDecrypt(ciphertextBase64, sigShares);
 };
 
 /**
@@ -176,123 +171,108 @@ export const verifySignature = async (
   await blsVerify(publicKey, message, signature);
 };
 
-const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
-  [LIT_CURVE.EcdsaCaitSith]: 'K256',
-  [LIT_CURVE.EcdsaK256]: 'K256',
-  [LIT_CURVE.EcdsaCAITSITHP256]: 'P256',
-  [LIT_CURVE.EcdsaK256Sha256]: 'K256',
+const parseCombinedSignature = (
+  combinedSignature: CombinedLitNodeSignature
+): CleanLitNodeSignature => {
+  const transformations = [
+    convertKeysToCamelCase,
+    cleanArrayValues,
+    convertNumberArraysToUint8Arrays,
+    cleanStringValues,
+    hexifyStringValues,
+  ];
+  return applyTransformations(
+    combinedSignature as unknown as Record<string, unknown>,
+    transformations
+  ) as unknown as CleanLitNodeSignature;
 };
 
 /**
+ * Combine and verify Lit execute js node shares
  *
- * Combine ECDSA Shares
+ * @param { LitActionSignedData[] } litActionResponseData
  *
- * @param { Array<SigShare> } sigShares
+ * @returns { CleanLitNodeSignature } signature
  *
- * @returns { any }
+ * @throws { NoValidShares }
  *
  */
-export const combineEcdsaShares = async (
-  sigShares: SigShare[]
-): Promise<CombinedECDSASignature> => {
-  const validShares = sigShares.filter((share) => share.signatureShare);
+export const combineExecuteJsNodeShares = async (
+  litActionResponseData: LitActionSignedData[]
+): Promise<CleanLitNodeSignature> => {
+  try {
+    const combinerShares = litActionResponseData.map((s) => s.signatureShare);
+    const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
+    const combinedSignature = JSON.parse(
+      unifiedSignature
+    ) as CombinedLitNodeSignature;
 
-  const anyValidShare = validShares[0];
-
-  if (!anyValidShare) {
+    return parseCombinedSignature(combinedSignature);
+  } catch (e) {
     throw new NoValidShares(
       {
         info: {
-          shares: sigShares,
+          shares: litActionResponseData,
         },
+        cause: e,
       },
-      'No valid shares to combine'
+      'No valid lit action shares to combine'
     );
   }
+};
 
-  const variant =
-    ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE_VALUES];
-  const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
-  const signatureShares = validShares.map((share) =>
-    Buffer.from(share.signatureShare, 'hex')
-  );
+/**
+ * Combine and verify Lit pkp sign node shares
+ *
+ * @param { PKPSignEndpointResponse[] } nodesSignResponseData
+ *
+ * @returns { CleanLitNodeSignature } signature
+ *
+ * @throws { NoValidShares }
+ *
+ */
+export const combinePKPSignNodeShares = async (
+  nodesSignResponseData: PKPSignEndpointResponse[]
+): Promise<CleanLitNodeSignature> => {
+  try {
+    const validShares = nodesSignResponseData.filter((share) => share.success);
 
-  const [r, s, recId] = await ecdsaCombine(
-    variant!,
-    presignature,
-    signatureShares
-  );
+    const combinerShares = validShares.map((s) =>
+      JSON.stringify(s.signatureShare)
+    );
+    const unifiedSignature = await unifiedCombineAndVerify(combinerShares);
+    const combinedSignature = JSON.parse(
+      unifiedSignature
+    ) as CombinedLitNodeSignature;
 
-  const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
-  const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
-
-  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, recId]);
-
-  const signature = splitSignature(
-    Buffer.concat([r, s, Buffer.from([recId + 27])])
-  );
-
-  // validate r before returning
-  if (!signature.r) {
-    throw new UnknownSignatureError(
+    return parseCombinedSignature(combinedSignature);
+  } catch (e) {
+    throw new NoValidShares(
       {
         info: {
-          signature,
+          shares: nodesSignResponseData,
         },
+        cause: e,
       },
-      'signature could not be combined'
+      'No valid pkp sign shares to combine'
     );
   }
-
-  const _r = signature.r.slice('0x'.length);
-  const _s = signature.s.slice('0x'.length);
-  const _recid = signature.recoveryParam;
-
-  const encodedSig = joinSignature({
-    r: '0x' + _r,
-    s: '0x' + _s,
-    recoveryParam: _recid,
-  }) as `0x${string}`;
-
-  return {
-    r: _r,
-    s: _s,
-    recid: _recid,
-    signature: encodedSig,
-  };
 };
 
 export const computeHDPubKey = async (
   pubkeys: string[],
-  keyId: string,
-  sigType: LIT_CURVE_VALUES
+  keyId: string
 ): Promise<string> => {
-  const variant = ecdsaSigntureTypeMap[sigType];
-
-  switch (sigType) {
-    case LIT_CURVE.EcdsaCaitSith:
-    case LIT_CURVE.EcdsaK256:
-      // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
-      pubkeys = pubkeys.map((value: string) => {
-        return value.replace('0x', '');
-      });
-      keyId = keyId.replace('0x', '');
-      const preComputedPubkey = await ecdsaDeriveKey(
-        variant!,
-        Buffer.from(keyId, 'hex'),
-        pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
-      );
-      return Buffer.from(preComputedPubkey).toString('hex');
-    default:
-      throw new InvalidParamType(
-        {
-          info: {
-            sigType,
-          },
-        },
-        `Non supported signature type`
-      );
-  }
+  // a bit of preprocessing to remove characters which will cause our wasm module to reject the values.
+  pubkeys = pubkeys.map((value: string) => {
+    return value.replace('0x', '');
+  });
+  keyId = keyId.replace('0x', '');
+  const preComputedPubkey = await ecdsaDeriveKey(
+    Buffer.from(keyId, 'hex'),
+    pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
+  );
+  return Buffer.from(preComputedPubkey).toString('hex');
 };
 
 /**
@@ -373,27 +353,29 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   }
 }
 
-export const walletEncrypt = async(
-  myWalletSecretKey: Uint8Array, 
+export const walletEncrypt = async (
+  myWalletSecretKey: Uint8Array,
   theirWalletPublicKey: Uint8Array,
-  sessionSig: Uint8Array,
+  sessionSig: AuthSig,
   message: Uint8Array
 ): Promise<WalletEncryptedPayload> => {
+  const uint8SessionSig = Buffer.from(JSON.stringify(sessionSig));
+
   const random = new Uint8Array(16);
-  window.crypto.getRandomValues(random);
+  crypto.getRandomValues(random);
   const dateNow = Date.now();
   const createdAt = Math.floor(dateNow / 1000);
   const timestamp = Buffer.alloc(8);
   timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
 
   const myWalletPublicKey = new Uint8Array(32);
-  nacl.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
+  nacl.lowlevel.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
 
-  // Construct AAD
-  const sessionSignature = Buffer.from(sessionSig); // Replace with actual session signature
+  // Construct AAD (Additional Authenticated Data) - data that is authenticated but not encrypted
+  const sessionSignature = uint8SessionSig; // Replace with actual session signature
   const theirPublicKey = Buffer.from(theirWalletPublicKey); // Replace with their public key
   const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
-  
+
   const aad = Buffer.concat([
     sessionSignature,
     random,
@@ -401,42 +383,49 @@ export const walletEncrypt = async(
     theirPublicKey,
     myPublicKey,
   ]);
-  
+
   const hash = new Uint8Array(64);
-  nacl.crypto_hash(hash, aad);
+  nacl.lowlevel.crypto_hash(hash, aad);
 
   const nonce = hash.slice(0, 24);
-  const ciphertext = nacl.box(message, nonce, theirPublicKey, myWalletSecretKey);
+  const ciphertext = nacl.box(
+    message,
+    nonce,
+    theirPublicKey,
+    myWalletSecretKey
+  );
   return {
     V1: {
       verification_key: uint8ArrayToHex(myWalletPublicKey),
       ciphertext_and_tag: uint8ArrayToHex(ciphertext),
       session_signature: uint8ArrayToHex(sessionSignature),
       random: uint8ArrayToHex(random),
-      created_at: dateNow.toISOString(),
-    } 
+      created_at: new Date(dateNow).toISOString(),
+    },
   };
-}
+};
 
-export const walletDecrypt = async(
+export const walletDecrypt = async (
   myWalletSecretKey: Uint8Array,
   payload: WalletEncryptedPayload
 ): Promise<Uint8Array> => {
-  const dateSent = new Date(payload.V1.created_at)
-  const createdAt = Math.floor(dateSent / 1000);
+  const dateSent = new Date(payload.V1.created_at);
+  const createdAt = Math.floor(dateSent.getTime() / 1000);
   const timestamp = Buffer.alloc(8);
   timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
 
   const myWalletPublicKey = new Uint8Array(32);
-  nacl.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
+  nacl.lowlevel.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
 
   // Construct AAD
   const random = Buffer.from(hexToUint8Array(payload.V1.random));
-  const sessionSignature = Buffer.from(hexToUint8Array(payload.V1.session_signature)); // Replace with actual session signature
+  const sessionSignature = Buffer.from(
+    hexToUint8Array(payload.V1.session_signature)
+  ); // Replace with actual session signature
   const theirPublicKey = hexToUint8Array(payload.V1.verification_key);
   const theirPublicKeyBuffer = Buffer.from(theirPublicKey); // Replace with their public key
   const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
-  
+
   const aad = Buffer.concat([
     sessionSignature,
     random,
@@ -444,28 +433,37 @@ export const walletDecrypt = async(
     theirPublicKeyBuffer,
     myPublicKey,
   ]);
-  
+
   const hash = new Uint8Array(64);
-  nacl.crypto_hash(hash, aad);
+  nacl.lowlevel.crypto_hash(hash, aad);
 
   const nonce = hash.slice(0, 24);
-  const message = nacl.box.open(payload.V1.ciphertext_and_tag, nonce, theirPublicKey, myWalletSecretKey);
+
+  // Convert hex ciphertext back to Uint8Array
+  const ciphertext = hexToUint8Array(payload.V1.ciphertext_and_tag);
+
+  const message = nacl.box.open(
+    ciphertext,
+    nonce,
+    theirPublicKey,
+    myWalletSecretKey
+  );
   return message;
-}
+};
 
 function uint8ArrayToHex(array: Uint8Array) {
   return Array.from(array)
-      .map(byte => byte.toString(16).padStart(2, '0'))
-      .join('');
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 function hexToUint8Array(hexString: string): Uint8Array {
   if (hexString.length % 2 !== 0) {
-      throw new Error("Hex string must have an even length");
+    throw new Error('Hex string must have an even length');
   }
   const bytes = new Uint8Array(hexString.length / 2);
   for (let i = 0; i < bytes.length; i++) {
-      bytes[i] = parseInt(hexString.slice(i * 2, i * 2 + 2), 16);
+    bytes[i] = parseInt(hexString.slice(i * 2, i * 2 + 2), 16);
   }
   return bytes;
 }
@@ -478,13 +476,13 @@ function hexToUint8Array(hexString: string): Uint8Array {
  * @param { string } challengeHex The challenge we sent
  * @param { string } url The URL we talked to
  *
- * @returns { Promise<undefined> } A promise that throws if the attestation is invalid
+ * @returns { Promise<void> } A promise that throws if the attestation is invalid
  */
 export const checkSevSnpAttestation = async (
   attestation: NodeAttestation,
   challengeHex: string,
   url: string
-) => {
+): Promise<void> => {
   const noonce = Buffer.from(attestation.noonce, 'base64');
   const challenge = Buffer.from(challengeHex, 'hex');
   const data = Object.fromEntries(
@@ -600,7 +598,32 @@ export const checkSevSnpAttestation = async (
   return sevSnpVerify(report, data, signatures, challenge, vcekCert);
 };
 
-declare global {
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var LitNodeClient: any;
+// Map the right hash function per signing scheme
+export const ecdsaHashFunctions: Record<
+  EcdsaSigType,
+  (arg0: Uint8Array) => Uint8Array
+> = {
+  EcdsaK256Sha256: sha256,
+  EcdsaP256Sha256: sha256,
+  EcdsaP384Sha384: sha384,
+} as const;
+
+export function hashLitMessage(
+  signingScheme: EcdsaSigType,
+  message: Uint8Array
+): Uint8Array {
+  const hashFn = ecdsaHashFunctions[signingScheme];
+
+  if (!hashFn) {
+    throw new CurveTypeNotFoundError(
+      {
+        info: {
+          signingScheme,
+        },
+      },
+      `No known hash function for specified signing scheme ${signingScheme}`
+    );
+  }
+
+  return hashFn(message);
 }
