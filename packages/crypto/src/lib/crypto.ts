@@ -1,5 +1,8 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { sha384 } from '@noble/hashes/sha512';
+import { x25519 } from '@noble/curves/ed25519';
+import { sha512 } from '@noble/hashes/sha512';
+import { nacl } from '@lit-protocol/nacl';
 
 import {
   CurveTypeNotFoundError,
@@ -18,8 +21,8 @@ import {
   hexifyStringValues,
   log,
 } from '@lit-protocol/misc';
-import { nacl } from '@lit-protocol/nacl';
 import {
+  AuthSig,
   CleanLitNodeSignature,
   CombinedLitNodeSignature,
   LitActionSignedData,
@@ -353,21 +356,23 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
 export const walletEncrypt = async (
   myWalletSecretKey: Uint8Array,
   theirWalletPublicKey: Uint8Array,
-  sessionSig: Uint8Array,
+  sessionSig: AuthSig,
   message: Uint8Array
 ): Promise<WalletEncryptedPayload> => {
+  const uint8SessionSig = Buffer.from(JSON.stringify(sessionSig));
+
   const random = new Uint8Array(16);
-  window.crypto.getRandomValues(random);
+  crypto.getRandomValues(random);
   const dateNow = Date.now();
   const createdAt = Math.floor(dateNow / 1000);
   const timestamp = Buffer.alloc(8);
   timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
 
   const myWalletPublicKey = new Uint8Array(32);
-  nacl.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
+  nacl.lowlevel.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
 
-  // Construct AAD
-  const sessionSignature = Buffer.from(sessionSig); // Replace with actual session signature
+  // Construct AAD (Additional Authenticated Data) - data that is authenticated but not encrypted
+  const sessionSignature = uint8SessionSig; // Replace with actual session signature
   const theirPublicKey = Buffer.from(theirWalletPublicKey); // Replace with their public key
   const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
 
@@ -380,7 +385,7 @@ export const walletEncrypt = async (
   ]);
 
   const hash = new Uint8Array(64);
-  nacl.crypto_hash(hash, aad);
+  nacl.lowlevel.crypto_hash(hash, aad);
 
   const nonce = hash.slice(0, 24);
   const ciphertext = nacl.box(
@@ -410,7 +415,7 @@ export const walletDecrypt = async (
   timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
 
   const myWalletPublicKey = new Uint8Array(32);
-  nacl.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
+  nacl.lowlevel.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
 
   // Construct AAD
   const random = Buffer.from(hexToUint8Array(payload.V1.random));
@@ -430,11 +435,15 @@ export const walletDecrypt = async (
   ]);
 
   const hash = new Uint8Array(64);
-  nacl.crypto_hash(hash, aad);
+  nacl.lowlevel.crypto_hash(hash, aad);
 
   const nonce = hash.slice(0, 24);
+
+  // Convert hex ciphertext back to Uint8Array
+  const ciphertext = hexToUint8Array(payload.V1.ciphertext_and_tag);
+
   const message = nacl.box.open(
-    payload.V1.ciphertext_and_tag,
+    ciphertext,
     nonce,
     theirPublicKey,
     myWalletSecretKey
