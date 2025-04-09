@@ -120,8 +120,8 @@ export abstract class BaseProvider {
   }
 
   /**
-   * @deprecated - Use {@link fetchPKPs} instead
-   * Fetch PKPs associated with given auth method from relay server
+   * Fetch PKPs associated with given auth method from relay server.
+   * This is the preferred method for browser environments to avoid wallet popups.
    *
    * @param {AuthMethod} authMethod - Auth method object
    *
@@ -130,7 +130,6 @@ export abstract class BaseProvider {
   public async fetchPKPsThroughRelayer(
     authMethod: AuthMethod
   ): Promise<IRelayPKP[]> {
-    deprecated('fetchPKPsThroughRelayer is deprecated. Use fetchPKPs instead.');
     const data = await this.prepareRelayRequestData(authMethod);
     const body = this.prepareFetchBody(data);
     const fetchRes = await this.relay.fetchPKPs(body);
@@ -219,7 +218,9 @@ export abstract class BaseProvider {
   }
 
   /**
-   * Fetch PKPs associated with given auth method from pkp contract
+   * Fetch PKPs associated with given auth method from pkp contract.
+   * Note: Not recommended for browser environments as it may trigger wallet popups.
+   * Use {@link fetchPKPsThroughRelayer} instead for browser environments.
    *
    * @param {AuthMethod} authMethod - Auth method object
    *
