@@ -395,7 +395,7 @@ export const walletEncrypt = async (
       ciphertext_and_tag: uint8ArrayToHex(ciphertext),
       session_signature: uint8ArrayToHex(sessionSignature),
       random: uint8ArrayToHex(random),
-      created_at: dateNow.toISOString(),
+      created_at: new Date(dateNow).toISOString(),
     },
   };
 };
@@ -405,7 +405,7 @@ export const walletDecrypt = async (
   payload: WalletEncryptedPayload
 ): Promise<Uint8Array> => {
   const dateSent = new Date(payload.V1.created_at);
-  const createdAt = Math.floor(dateSent / 1000);
+  const createdAt = Math.floor(dateSent.getTime() / 1000);
   const timestamp = Buffer.alloc(8);
   timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
 
