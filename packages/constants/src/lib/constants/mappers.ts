@@ -1,4 +1,4 @@
-import { _nagaDev } from '@lit-protocol/contracts';
+import { nagaDev } from '@lit-protocol/contracts';
 
 import { LIT_NETWORK_VALUES } from './constants';
 
@@ -6,9 +6,9 @@ import { LIT_NETWORK_VALUES } from './constants';
  * Mapping of network context by network value.
  */
 export const NETWORK_CONTEXT_BY_NETWORK: {
-  [key in LIT_NETWORK_VALUES]: typeof _nagaDev | undefined;
+  [key in LIT_NETWORK_VALUES]: typeof nagaDev | undefined;
 } = {
-  'naga-dev': _nagaDev,
+  'naga-dev': nagaDev,
   custom: undefined,
 } as const;
 
