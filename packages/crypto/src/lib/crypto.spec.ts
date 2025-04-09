@@ -523,3 +523,112 @@ describe('walletEncrypt and walletDecrypt', () => {
     expect(decryptedTamperedMessage).toBeNull();
   });
 });
+
+describe('walletEncrypt and walletDecrypt', () => {
+  it('should encrypt and decrypt a message successfully', async () => {
+    // Generate key pairs using the box functionality
+    const aliceKeyPair = nacl.box.keyPair();
+    const bobKeyPair = nacl.box.keyPair();
+
+    console.log('aliceKeyPair', aliceKeyPair);
+    console.log('bobKeyPair', bobKeyPair);
+
+    // Message to encrypt
+    const message = new TextEncoder().encode('This is a secret message');
+
+    // Alice encrypts a message for Bob
+    const encryptedPayload = await walletEncrypt(
+      aliceKeyPair.secretKey,
+      bobKeyPair.publicKey,
+      MOCK_SESSION_SIGS['http://127.0.0.1:7470'],
+      message
+    );
+
+    console.log('encryptedPayload', encryptedPayload);
+
+    // Verify payload structure
+    expect(encryptedPayload).toHaveProperty('V1');
+    expect(encryptedPayload.V1).toHaveProperty('verification_key');
+    expect(encryptedPayload.V1).toHaveProperty('ciphertext_and_tag');
+    expect(encryptedPayload.V1).toHaveProperty('session_signature');
+    expect(encryptedPayload.V1).toHaveProperty('random');
+    expect(encryptedPayload.V1).toHaveProperty('created_at');
+
+    // Bob decrypts the message from Alice
+    const decryptedMessage = await walletDecrypt(
+      bobKeyPair.secretKey,
+      encryptedPayload
+    );
+
+    // Verify decryption was successful
+    expect(decryptedMessage).not.toBeNull();
+    expect(new TextDecoder().decode(decryptedMessage as Uint8Array)).toBe(
+      'This is a secret message'
+    );
+  });
+
+  it('should return null when decryption fails', async () => {
+    // Generate key pairs
+    const aliceKeyPair = nacl.box.keyPair();
+    const bobKeyPair = nacl.box.keyPair();
+    const eveKeyPair = nacl.box.keyPair(); // Eve is an eavesdropper
+
+    // Message to encrypt
+    const message = new TextEncoder().encode('This is a secret message');
+
+    // Alice encrypts a message for Bob
+    const encryptedPayload = await walletEncrypt(
+      aliceKeyPair.secretKey,
+      bobKeyPair.publicKey,
+      MOCK_SESSION_SIGS['http://127.0.0.1:7470'],
+      message
+    );
+
+    // Eve tries to decrypt the message with her key (should fail)
+    const decryptedByEve = await walletDecrypt(
+      eveKeyPair.secretKey,
+      encryptedPayload
+    );
+
+    // Verify decryption failed
+    expect(decryptedByEve).toBeNull();
+  });
+
+  it('should handle tampering with the encrypted payload', async () => {
+    // Generate key pairs
+    const aliceKeyPair = nacl.box.keyPair();
+    const bobKeyPair = nacl.box.keyPair();
+
+    // Message to encrypt
+    const message = new TextEncoder().encode('This is a secret message');
+
+    // Alice encrypts a message for Bob
+    const encryptedPayload = await walletEncrypt(
+      aliceKeyPair.secretKey,
+      bobKeyPair.publicKey,
+      MOCK_SESSION_SIGS['http://127.0.0.1:7470'],
+      message
+    );
+
+    // Tamper with the ciphertext
+    const tamperedPayload = {
+      ...encryptedPayload,
+      V1: {
+        ...encryptedPayload.V1,
+        ciphertext_and_tag:
+          encryptedPayload.V1.ciphertext_and_tag.substring(0, 10) +
+          'ff' +
+          encryptedPayload.V1.ciphertext_and_tag.substring(12),
+      },
+    };
+
+    // Bob tries to decrypt the tampered message
+    const decryptedTamperedMessage = await walletDecrypt(
+      bobKeyPair.secretKey,
+      tamperedPayload
+    );
+
+    // Verify decryption failed due to tampering
+    expect(decryptedTamperedMessage).toBeNull();
+  });
+});
