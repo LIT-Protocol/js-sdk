@@ -3012,10 +3012,10 @@
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.1.8.tgz#08cc8410c78eddf51e40ba6ab75b746c73228a65"
-  integrity sha512-9z4HHoNfETIFY8zO/GIQg9dTMqHNpgtfLeK2FlXFTqekEDIj8fWBY47nvfDrJA9dIezLEu04mDxgQ0Nj7P0GoQ==
+"@lit-protocol/contracts@^0.1.10":
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.1.10.tgz#0b8f5d039a9d19b4212046a8daa9d70f4a811f06"
+  integrity sha512-jNy9uZ2E2BH7EXUUUtxmjEnWJi/lud/qM/3o7DvTcd8mIKBaVIzR8142IJaRBqd7qCkbSmpts/FK+D1nYaUmLA==
   dependencies:
     "@t3-oss/env-core" "^0.12.0"
     "@typechain/ethers-v6" "^0.5.1"

@@ -41,7 +41,7 @@
     "@cosmjs/stargate": "0.30.1",
     "@dotenvx/dotenvx": "^1.6.4",
     "@lit-protocol/accs-schemas": "^0.0.22",
-    "@lit-protocol/contracts": "^0.1.8",
+    "@lit-protocol/contracts": "^0.1.10",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
     "@noble/curves": "^1.8.1",
