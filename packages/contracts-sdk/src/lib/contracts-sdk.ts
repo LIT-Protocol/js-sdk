@@ -51,9 +51,6 @@ import { decToHex, hexToDec, intToIP } from './hex2dec';
 import { getPriceFeedInfo } from './price-feed-info-manager';
 import { ValidatorStruct } from './types';
 
-// CHANGE: this should be dynamically set, but we only have 1 net atm.
-const REALM_ID = 1;
-
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -869,11 +866,13 @@ export class LitContracts {
     networkContext,
     rpcUrl,
     nodeProtocol,
+    realmId,
   }: {
     litNetwork: LIT_NETWORKS_KEYS;
     networkContext?: LitContractContext | LitContractResolverContext;
     rpcUrl?: string;
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
+    realmId: number;
   }): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
@@ -887,16 +886,9 @@ export class LitContracts {
       rpcUrl
     );
 
-    // const test =  await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
-    //   REALM_ID
-    // );;
-
-    // console.log("test:", test);
-    // process.exit(0);
-
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
-        REALM_ID
+        realmId
       );
 
     const typedEpochInfo: EpochInfo = {
@@ -908,12 +900,6 @@ export class LitContracts {
     };
 
     const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
-    console.log('epochInfo:', epochInfo);
-    console.log('minNodeCountInt', minNodeCountInt);
-    console.log(
-      'activeUnkickedValidatorStructs',
-      activeUnkickedValidatorStructs
-    );
 
     if (!minNodeCountInt) {
       throw new Error('❌ Minimum validator count is not set');
@@ -964,7 +950,7 @@ export class LitContracts {
     // networks are all the nodes we know from the `getActiveUnkickedValidatorStructsAndCounts` function, but we also want to sort it by price feed
     // which we need to call the price feed contract
     const priceFeedInfo = await LitContracts.getPriceFeedInfo({
-      realmId: REALM_ID,
+      realmId,
       litNetwork,
       networkContext,
       rpcUrl,

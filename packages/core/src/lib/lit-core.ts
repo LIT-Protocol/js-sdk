@@ -9,7 +9,6 @@ import {
   InvalidEthBlockhash,
   InvalidNodeAttestation,
   InvalidParamType,
-  LIT_CURVE,
   LIT_ENDPOINT,
   LIT_ERROR_CODE,
   LIT_NETWORK,
@@ -117,6 +116,7 @@ export type LitNodeClientConfigWithDefaults = Required<
   };
 
 export class LitCore {
+  private _realmId: number = 1;
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
@@ -138,6 +138,7 @@ export class LitCore {
   lastBlockHashRetrieved: number | null = null;
   private _stakingContract: ethers.Contract | null = null;
   private _stakingContractListener: null | Listener = null;
+  private _advancedEpochListener: null | Listener = null;
   private _connectingPromise: null | Promise<void> = null;
   private _epochCache: EpochCache = {
     currentNumber: null,
@@ -145,6 +146,14 @@ export class LitCore {
   };
   private _blockHashUrl =
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
+
+  /**
+   * Get the current realm ID.
+   * @returns The current realm ID
+   */
+  get realmId(): number {
+    return this._realmId;
+  }
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
@@ -241,6 +250,7 @@ export class LitCore {
       networkContext: this.config.contractContext,
       rpcUrl: this.config.rpcUrl,
       nodeProtocol: this.config.nodeProtocol,
+      realmId: this._realmId,
     });
 
     // Validate minNodeCount
@@ -343,6 +353,42 @@ export class LitCore {
     }
   }
 
+  private async _handleAdvancedEpoch(realmId: number, epochNumber: number) {
+    log(
+      `AdvancedEpoch detected: realmId=${realmId}, epochNumber=${epochNumber}`
+    );
+
+    // Update the realmId
+    this._realmId = realmId;
+
+    // Get updated validator data for the new realm
+    const validatorData = await this._getValidatorData();
+
+    // Update epoch state
+    this._epochState = await this._fetchCurrentEpochState(
+      validatorData.epochInfo
+    );
+
+    // Reconnect if not on a centralized network
+    if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
+      try {
+        log(
+          'Realm ID changed, reconnecting to get correct validator set for new realm'
+        );
+
+        // We always reconnect on realm change
+        log('Reconnecting for new realm ID:', realmId);
+        await this.connect();
+      } catch (err: unknown) {
+        const { message = '' } = err as Error;
+        logError(
+          'Error while attempting to reconnect to nodes after realm change:',
+          message
+        );
+      }
+    }
+  }
+
   /**
    * Sets up a listener to detect state changes (new epochs) in the staking contract.
    * When a new epoch is detected, it triggers the `setNewConfig` function to update
@@ -369,6 +415,28 @@ export class LitCore {
         this._handleStakingContractStateChange(state);
       };
       this._stakingContract.on('StateChanged', this._stakingContractListener);
+    }
+  }
+
+  private _listenForAdvancedEpoch() {
+    // Check if we've already set up the listener to avoid duplicates
+    if (this._advancedEpochListener) {
+      return;
+    }
+
+    if (this._stakingContract) {
+      log(
+        'listening for AdvancedEpoch event on staking contract: ',
+        this._stakingContract.address
+      );
+
+      // Create a function instance for the listener
+      this._advancedEpochListener = (realmId: number, epochNumber: number) => {
+        // Handle the AdvancedEpoch event
+        this._handleAdvancedEpoch(realmId, epochNumber);
+      };
+
+      this._stakingContract.on('AdvancedEpoch', this._advancedEpochListener);
     }
   }
 
@@ -407,6 +475,11 @@ export class LitCore {
     if (this._stakingContract && this._stakingContractListener) {
       this._stakingContract.off('StateChanged', this._stakingContractListener);
       this._stakingContractListener = null;
+    }
+
+    if (this._stakingContract && this._advancedEpochListener) {
+      this._stakingContract.off('AdvancedEpoch', this._advancedEpochListener);
+      this._advancedEpochListener = null;
     }
   }
 
@@ -513,6 +586,7 @@ export class LitCore {
 
     // this._scheduleNetworkSync();
     this._listenForNewEpoch();
+    this._listenForAdvancedEpoch();
 
     this.ready = true;
 
