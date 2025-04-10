@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/tinny",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "A package to run the test script for Lit Protocol with custom commands",
   "type": "module",
   "main": "./index.js",
@@ -89,9 +89,9 @@
     "@solana/web3.js": "^1.95.3",
     "bech32": "^2.0.0",
     "pako": "^2.1.0",
-    "@lit-protocol/misc": "^7.0.0",
-    "@lit-protocol/lit-node-client": "^7.0.0",
-    "@lit-protocol/lit-auth-client": "^7.0.0",
-    "@lit-protocol/contracts": "^0.0.71"
+    "@lit-protocol/misc": "^8.0.0-alpha.0",
+    "@lit-protocol/lit-node-client": "^8.0.0-alpha.0",
+    "@lit-protocol/lit-auth-client": "^8.0.0-alpha.0",
+    "@lit-protocol/contracts": "^0.1.10"
   }
 }
