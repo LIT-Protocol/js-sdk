@@ -394,11 +394,19 @@ export class LitContracts {
     network: LIT_NETWORKS_KEYS,
     litContractName: ContractName
   ) {
+    let networkContext = NETWORK_CONTEXT_BY_NETWORK[
+      network
+    ] as unknown as LitContractContext;
+
+    if (!networkContext && network === 'custom') {
+      networkContext = this.customContext as unknown as LitContractContext;
+    }
+
     return LitContracts.getLitContract(
       network,
       litContractName,
       ...(this.rpc ? [this.rpc] : []),
-      ...(this.customContext ? [this.customContext] : []),
+      ...(networkContext ? [networkContext] : []),
       ...(this.signer ? [this.signer] : [])
     );
   }
@@ -901,8 +909,21 @@ export class LitContracts {
           receiverPubkey: item[6],
           lastActiveEpoch: item[7],
           commission: item[8],
-          commissionRate: item[9],
-          lastRewardEpoch: item[10],
+          lastRewardEpoch: item[9],
+
+          // -- new params for naga
+          // lastRealmId: BigNumber { _hex: '0x01', _isBigNumber: true },
+          // delegatedStakeAmount: BigNumber { _hex: '0x00', _isBigNumber: true },
+          // delegatedStakeWeight: BigNumber { _hex: '0x00', _isBigNumber: true },
+          // lastRewardEpochClaimedFixedCostRewards: BigNumber { _hex: '0x00', _isBigNumber: true },
+          // lastRewardEpochClaimedCommission: BigNumber { _hex: '0x00', _isBigNumber: true },
+          // operatorAddress: '0x4542d87b0ceC8C9EFEC642452e82059Fc8346581'
+          lastRealmId: item[10],
+          delegatedStakeAmount: item[11],
+          delegatedStakeWeight: item[12],
+          lastRewardEpochClaimedFixedCostRewards: item[13],
+          lastRewardEpochClaimedCommission: item[14],
+          operatorAddress: item[15],
         };
       });
 
@@ -1028,6 +1049,7 @@ export class LitContracts {
       this.network,
       'PKPNFT'
     );
+
     if (!pkpNftContract) {
       throw new InitError(
         {
