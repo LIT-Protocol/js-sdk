@@ -394,19 +394,35 @@ export class LitContracts {
     network: LIT_NETWORKS_KEYS,
     litContractName: ContractName
   ) {
-    let networkContext = NETWORK_CONTEXT_BY_NETWORK[
-      network
-    ] as unknown as LitContractContext;
+    let contractContext: LitContractContext | undefined;
 
-    if (!networkContext && network === 'custom') {
-      networkContext = this.customContext as unknown as LitContractContext;
+    if (!contractContext && network === 'custom') {
+      contractContext = this.customContext as unknown as LitContractContext;
+    } else {
+      const networkContext = NETWORK_CONTEXT_BY_NETWORK[
+        network
+      ] as unknown as LitContractContext;
+
+      // Find the contract data from the network context
+      const contractData = networkContext['data'].find((data: any) => {
+        return data.name === litContractName;
+      });
+
+      // If found, transform it to the expected format
+      if (contractData) {
+        contractContext = {} as LitContractContext;
+        contractContext[litContractName] = {
+          address: contractData.contracts[0].address_hash,
+          abi: contractData.contracts[0].ABI,
+        };
+      }
     }
 
     return LitContracts.getLitContract(
       network,
       litContractName,
       ...(this.rpc ? [this.rpc] : []),
-      ...(networkContext ? [networkContext] : []),
+      ...(contractContext ? [contractContext] : []),
       ...(this.signer ? [this.signer] : [])
     );
   }
@@ -871,6 +887,13 @@ export class LitContracts {
       rpcUrl
     );
 
+    // const test =  await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
+    //   REALM_ID
+    // );;
+
+    // console.log("test:", test);
+    // process.exit(0);
+
     const [epochInfo, minNodeCount, activeUnkickedValidatorStructs] =
       await stakingContract['getActiveUnkickedValidatorStructsAndCounts'](
         REALM_ID
@@ -885,6 +908,12 @@ export class LitContracts {
     };
 
     const minNodeCountInt = ethers.BigNumber.from(minNodeCount).toNumber();
+    console.log('epochInfo:', epochInfo);
+    console.log('minNodeCountInt', minNodeCountInt);
+    console.log(
+      'activeUnkickedValidatorStructs',
+      activeUnkickedValidatorStructs
+    );
 
     if (!minNodeCountInt) {
       throw new Error('❌ Minimum validator count is not set');
