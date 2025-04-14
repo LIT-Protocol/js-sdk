@@ -28,6 +28,9 @@ export class TinnyPerson {
 
   // Pass this to data to sign
   public loveLetter: Uint8Array = new Uint8Array([1, 2, 3, 4, 5]);
+  public hashedLoveLetter = ethers.utils.arrayify(
+    ethers.utils.keccak256(this.loveLetter)
+  );
 
   public provider: ethers.providers.StaticJsonRpcProvider;
 
@@ -150,7 +153,6 @@ export class TinnyPerson {
     console.log('[𐬺🧪 Tinny Person𐬺] Minting a PKP...');
     const walletMintRes =
       await this.contractsClient.pkpNftContractUtils.write.mint();
-
     this.pkp = walletMintRes.pkp;
 
     /**
