@@ -684,7 +684,7 @@ export interface WalletEncryptedPayload {
     session_signature: string;
     random: string;
     created_at: string;
-  }
+  };
 }
 
 export interface HandshakeWithNode {
