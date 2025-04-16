@@ -28,7 +28,7 @@
     "generate-lit-actions": "yarn node ./esbuild.config.js",
     "publish-lit-actions": "yarn node ./sync-actions-to-ipfs"
   },
-  "version": "7.1.0",
+  "version": "7.1.1",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
