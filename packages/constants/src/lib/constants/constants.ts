@@ -813,7 +813,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  fhenixFhenix: {
+  fhenixNitrogen: {
     contractAddress: null,
     chainId: 8008148,
     name: 'Fhenix Nitrogen',
