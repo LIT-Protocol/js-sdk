@@ -2,7 +2,7 @@ import * as GENERATED_LIT_ACTION_CID_REPOSITORY_COMMON from './lit-action-cid-re
 import * as GENERATED_LIT_ACTION_CID_REPOSITORY from './lit-action-cid-repository.json';
 import { LitCidRepository, LitCidRepositoryCommon } from './types';
 
-function deepFreeze<T>(obj: T): T {
+function deepFreeze<T extends Record<string, any>>(obj: T): T {
   Object.freeze(obj);
   for (const key in obj) {
     if (key in obj && typeof obj[key] === 'object') {
