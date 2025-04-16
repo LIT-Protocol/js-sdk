@@ -1,13 +1,49 @@
-# PKPCosmos
+# PKP Cosmos
 
-The `PKPCosmosWallet` class is a specialized wallet for the Cosmos blockchain, based on the `DirectSecp256k1HdWallet` class from the `@cosmjs/proto-signing` library. This class wraps the `PKPBase` class and implements the `OfflineDirectSigner` and `PKPClientHelpers` interfaces. The wallet can generate its own Bech32 address (address), manage account data (`getAccounts`), and sign transactions (`signDirect`) with the private key using a LIT node client. It can also create a SigningStargateClient instance (`getClient`), prepare transaction data (formSendTx), and sign a transaction following the SigningStargateClient.sign method (`sign`). The class supports the customization of the Cosmos RPC URL (`rpc`) and the Bech32 address prefix (`addressPrefix`).
+A specialized wallet implementation for the Cosmos blockchain ecosystem using Lit Protocol's PKP (Programmable Key Pair) technology. Built on top of `@cosmjs/proto-signing`, this package enables secure transaction signing and account management through Lit nodes.
 
-# Getting Started
+## Installation
 
-```
+```bash
 yarn add @lit-protocol/pkp-cosmos
 ```
 
-# Examples
+## Quick Start
 
-https://github.com/LIT-Protocol/js-sdk/blob/master/packages/pkp-cosmos/src/lib/pkp-cosmos.spec.ts
+```typescript
+import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
+
+// Initialize wallet
+const wallet = new PKPCosmosWallet({
+  controllerAuthSig: authSig,
+  pkpPubKey: publicKey,
+  addressPrefix: 'cosmos',
+});
+
+// Get wallet address
+const address = await wallet.getAddress();
+
+// Sign transaction
+const signedTx = await wallet.signDirect(address, {
+  bodyBytes: tx.bodyBytes,
+  authInfoBytes: tx.authInfoBytes,
+  chainId: chainId,
+});
+```
+
+## Key Features
+
+- Bech32 address generation
+- Account data management
+- Transaction signing via LIT nodes
+- SigningStargateClient integration
+- Customizable RPC endpoints
+- Flexible address prefix support
+
+## Core Functionality
+
+- Address Generation: Create Cosmos blockchain addresses
+- Transaction Management: Sign and prepare transactions
+- Client Integration: Create SigningStargateClient instances
+- Account Operations: Manage account data and balances
+- Network Configuration: Customize RPC URLs and prefixes

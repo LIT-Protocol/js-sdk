@@ -9,9 +9,9 @@ const { generatePrivateKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testGenerateEthereumWrappedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testGenerateEthereumWrappedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testGenerateEthereumWrappedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testGenerateEthereumWrappedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testGenerateEthereumWrappedKey
+ * ✅ NETWORK=custom yarn test:local --filter=testGenerateEthereumWrappedKey
  */
 export const testGenerateEthereumWrappedKey = async (
   devEnv: TinnyEnvironment
@@ -24,7 +24,7 @@ export const testGenerateEthereumWrappedKey = async (
       alice,
       null,
       new Date(Date.now() + 1000 * 60 * 10).toISOString()
-    ); // 10 mins expiry
+    );
 
     const { pkpAddress, generatedPublicKey, id } = await generatePrivateKey({
       pkpSessionSigs,

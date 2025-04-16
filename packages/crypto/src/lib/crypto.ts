@@ -1,25 +1,40 @@
-// @ts-nocheck
-
-import * as blsSdk from '@lit-protocol/bls-sdk';
-
-import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
-
-import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
-
-import * as sevSnpUtilsSdk from '@lit-protocol/sev-snp-utils-sdk';
-
-import { isBrowser, log, logError, throwError } from '@lit-protocol/misc';
+import { splitSignature } from 'ethers/lib/utils';
 
 import {
+  InvalidParamType,
+  LIT_CURVE,
+  LIT_CURVE_VALUES,
+  NetworkError,
+  NoValidShares,
+  UnknownError,
+} from '@lit-protocol/constants';
+import { checkType, log } from '@lit-protocol/misc';
+import { nacl } from '@lit-protocol/nacl';
+import {
+  CombinedECDSASignature,
+  NodeAttestation,
+  SessionKeyPair,
+  SigningAccessControlConditionJWTPayload,
+  SigShare,
+} from '@lit-protocol/types';
+import {
   uint8arrayFromString,
-  uint8ArrayToBase64,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+import {
+  EcdsaVariant,
+  blsCombine,
+  blsDecrypt,
+  blsEncrypt,
+  blsVerify,
+  ecdsaCombine,
+  ecdsaDeriveKey,
+  ecdsaVerify,
+  sevSnpGetVcekUrl,
+  sevSnpVerify,
+} from '@lit-protocol/wasm';
 
-import { nacl } from '@lit-protocol/nacl';
-import { LIT_CURVE } from '@lit-protocol/constants';
-import { CombinedECDSASignature } from '@lit-protocol/types';
-
+/** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
 
 export interface BlsSignatureShare {
@@ -27,155 +42,83 @@ export interface BlsSignatureShare {
 }
 
 /**
-  Loads all wasm modules into the global scope
-
-  - ECDSA utilities - wasmECDSA
-  - BLS utilities - wasmExports
-  - SEV-SNP utilities - wasmSevSnpUtilities
-
-  @returns {Promise<void>}
-*/
-export const loadModules = (): Promise<void> => {
-  // if 'wasmExports' is not available, we need to initialize the BLS SDK
-  if (!globalThis.wasmExports) {
-    blsSdk.initWasmBlsSdk().then((exports) => {
-      globalThis.wasmExports = exports;
-
-      if (!globalThis.jestTesting) {
-        log(
-          `✅ [BLS SDK] wasmExports loaded. ${
-            Object.keys(exports).length
-          } functions available. Run 'wasmExports' in the console to see them.`
-        );
-      }
-    });
-  }
-
-  if (!globalThis.wasmECDSA) {
-    let init = ecdsaSdk.initWasmEcdsaSdk;
-    let env;
-
-    if (isBrowser()) {
-      env = 'Browser';
-    } else {
-      env = 'NodeJS';
-    }
-
-    init().then((sdk: any) => {
-      globalThis.wasmECDSA = sdk;
-
-      if (!globalThis.jestTesting) {
-        log(
-          `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-            Object.keys(wasmECDSA).length
-          } functions available. Run 'wasmECDSA' in the console to see them.`
-        );
-      }
-    });
-  }
-
-  if (!globalThis.wasmSevSnpUtils) {
-    sevSnpUtilsSdk.initWasmSevSnpUtilsSdk().then((exports) => {
-      globalThis.wasmSevSnpUtils = exports;
-
-      if (!globalThis.jestTesting) {
-        log(
-          `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-            Object.keys(exports).length
-          } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
-        );
-      }
-    });
-  }
-};
-
-/*
-  Removes wasm modules from global scope
-  if found to be defined. Can be called multiple times safely.
-*/
-export const unloadModules = () => {
-  log('running cleanup for global modules');
-  if (globalThis.wasmExports) delete globalThis.wasmExports;
-
-  if (globalThis.wasmECDSA) delete globalThis.wasmECDSA;
-
-  if (globalThis.wasmSevSnpUtilsSdk) delete globalThis.initWasmSevSnpUtilsSdk;
-};
-
-/**
  * Encrypt data with a BLS public key.
+ * We are using G1 for encryption and G2 for signatures
  *
- * @param publicKey hex-encoded string of the BLS public key to encrypt with
- * @param data Uint8Array of the data to encrypt
+ * @param publicKeyHex hex-encoded string of the BLS public key to encrypt with
+ * @param message Uint8Array of the data to encrypt
  * @param identity Uint8Array of the identity parameter used during encryption
  * @returns base64 encoded string of the ciphertext
  */
-export const encrypt = (
-  publicKey: string,
-  data: Uint8Array,
+export const encrypt = async (
+  publicKeyHex: string,
+  message: Uint8Array,
   identity: Uint8Array
-): string => {
-  return blsSdk.encrypt(
-    publicKey,
-    uint8arrayToString(data, 'base64'),
-    uint8arrayToString(identity, 'base64')
-  );
+): Promise<string> => {
+  const publicKey = Buffer.from(publicKeyHex, 'hex');
+
+  /**
+   * Our system uses BLS12-381 on the G1 curve for encryption.
+   * However, on the SDK side (this function), we expect the public key
+   * to use the G2 curve for signature purposes, hence the switch on public key length.
+   *
+   * The G2 curve, `Bls12381G2`, is typically associated with signature generation/verification,
+   * while G1 is associated with encryption. Here, the length of the public key determines how
+   * we handle the encryption and the format of the returned encrypted message.
+   */
+  if (publicKeyHex.replace('0x', '').length !== 96) {
+    throw new InvalidParamType(
+      {
+        info: {
+          publicKeyHex,
+        },
+      },
+      `Invalid public key length. Expecting 96 characters, got ${
+        publicKeyHex.replace('0x', '').length
+      } instead.`
+    );
+  }
+  return Buffer.from(
+    await blsEncrypt('Bls12381G2', publicKey, message, identity)
+  ).toString('base64');
 };
 
 /**
  * Decrypt ciphertext using BLS signature shares.
  *
- * @param ciphertext base64-encoded string of the ciphertext to decrypt
+ * @param ciphertextBase64 base64-encoded string of the ciphertext to decrypt
  * @param shares hex-encoded array of the BLS signature shares
  * @returns Uint8Array of the decrypted data
  */
-export const decryptWithSignatureShares = (
-  ciphertext: string,
+export const decryptWithSignatureShares = async (
+  ciphertextBase64: string,
   shares: BlsSignatureShare[]
-): Uint8Array => {
-  // Format the signature shares
-  const sigShares = shares.map((s) => JSON.stringify(s));
+): Promise<Uint8Array> => {
+  const signature = await doCombineSignatureShares(shares);
 
-  // Decrypt
-  const privateData = blsSdk.decrypt_with_signature_shares(
-    ciphertext,
-    sigShares
-  );
-
-  // Format
-  return uint8arrayFromString(privateData, 'base64');
+  return doDecrypt(ciphertextBase64, signature);
 };
 
 /**
  * Verify and decrypt ciphertext using BLS signature shares.
  *
- * @param publicKey hex-encoded string of the BLS public key to verify with
+ * @param publicKeyHex hex-encoded string of the BLS public key to verify with
  * @param identity Uint8Array of the identity parameter used during encryption
- * @param ciphertext base64-encoded string of the ciphertext to decrypt
+ * @param ciphertextBase64 base64-encoded string of the ciphertext to decrypt
  * @param shares hex-encoded array of the BLS signature shares
  * @returns base64-encoded string of the decrypted data
  */
-export const verifyAndDecryptWithSignatureShares = (
-  publicKey: string,
+export const verifyAndDecryptWithSignatureShares = async (
+  publicKeyHex: string,
   identity: Uint8Array,
-  ciphertext: string,
+  ciphertextBase64: string,
   shares: BlsSignatureShare[]
-): Uint8Array => {
-  // Format the signature shares
-  const sigShares = shares.map((s) => JSON.stringify(s));
+): Promise<Uint8Array> => {
+  const publicKey = Buffer.from(publicKeyHex, 'hex');
+  const signature = await doCombineSignatureShares(shares);
+  await blsVerify('Bls12381G2', publicKey, identity, signature);
 
-  const base64Identity = uint8ArrayToBase64(identity);
-
-  // Decrypt
-  const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
-    publicKey,
-    base64Identity,
-    ciphertext,
-    sigShares
-  );
-
-  // Format
-  return uint8arrayFromString(privateData, 'base64');
+  return doDecrypt(ciphertextBase64, signature);
 };
 
 /**
@@ -184,157 +127,133 @@ export const verifyAndDecryptWithSignatureShares = (
  * @param shares hex-encoded array of the BLS signature shares
  * @returns hex-encoded string of the combined signature
  */
-export const combineSignatureShares = (shares: BlsSignatureShare[]): string => {
-  // Format the signature shares
-  const sigShares = shares.map((s) => JSON.stringify(s));
+export const combineSignatureShares = async (
+  shares: BlsSignatureShare[]
+): Promise<string> => {
+  const signature = await doCombineSignatureShares(shares);
 
-  return blsSdk.combine_signature_shares(sigShares);
+  return Buffer.from(signature).toString('hex');
 };
 
 /**
  * Verify the BLS network signature.
  *
- * @param publicKey hex-encoded string of the BLS public key to verify with.
+ * @param publicKeyHex hex-encoded string of the BLS public key to verify with.
  * @param message Uint8Array of the message to verify.
  * @param signature Uint8Array of the signature to verify.
  */
-export const verifySignature = (
-  publicKey: string,
+export const verifySignature = async (
+  publicKeyHex: string,
   message: Uint8Array,
   signature: Uint8Array
-): void => {
-  blsSdk.verify_signature(
-    publicKey,
-    uint8arrayToString(message, 'base64'),
-    uint8arrayToString(signature, 'base64')
-  );
+): Promise<void> => {
+  const publicKey = Buffer.from(publicKeyHex, 'hex');
+
+  await blsVerify('Bls12381G2', publicKey, message, signature);
+};
+
+// export interface EcdsaSignatureShare {
+//   sigType: SIGTYPE;
+//   signatureShare: string;
+//   shareIndex: number; // ignored
+//   publicKey: string;
+//   dataSigned: string;
+//   bigR: string;
+//   sigName: string; // ignored
+// }
+
+const ecdsaSigntureTypeMap: Partial<Record<LIT_CURVE_VALUES, EcdsaVariant>> = {
+  [LIT_CURVE.EcdsaCaitSith]: 'K256',
+  [LIT_CURVE.EcdsaK256]: 'K256',
+  [LIT_CURVE.EcdsaCAITSITHP256]: 'P256',
 };
 
 /**
  *
  * Combine ECDSA Shares
  *
- * @param { SigShares | Array<SigShare> } sigShares
+ * @param { Array<SigShare> } sigShares
  *
  * @returns { any }
  *
  */
-export const combineEcdsaShares = (
-  sigShares: Array<SigShare>
-): CombinedECDSASignature => {
-  const type = sigShares[0].sigType;
+export const combineEcdsaShares = async (
+  sigShares: SigShare[]
+): Promise<CombinedECDSASignature> => {
+  const validShares = sigShares.filter((share) => share.signatureShare);
 
-  if (!type) {
-    throw new Error(
-      "Sig type is not defined! Here's your sigShares:",
-      sigShares
+  const anyValidShare = validShares[0];
+
+  if (!anyValidShare) {
+    throw new NoValidShares(
+      {
+        info: {
+          shares: sigShares,
+        },
+      },
+      'No valid shares to combine'
     );
   }
 
-  // the public key can come from any node - it obviously will be identical from each node
-  // const publicKey = sigShares[0].publicKey;
-  // const dataSigned = '0x' + sigShares[0].dataSigned;
-  // filter out empty shares
-  const validShares = sigShares.reduce((acc, val) => {
-    if (val.signatureShare !== '') {
-      const newVal = _remapKeyShareForEcdsa(val);
+  const variant =
+    ecdsaSigntureTypeMap[anyValidShare.sigType as LIT_CURVE_VALUES];
+  const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
+  const signatureShares = validShares.map((share) =>
+    Buffer.from(share.signatureShare, 'hex')
+  );
 
-      if (!newVal.sig_name) {
-        newVal.sig_name = 'sig-created-by-lit-sdk';
-      }
+  const [r, s, recId] = await ecdsaCombine(
+    variant!,
+    presignature,
+    signatureShares
+  );
 
-      acc.push(JSON.stringify(newVal));
-    }
-    return acc;
-  }, []);
+  const publicKey = Buffer.from(anyValidShare.publicKey, 'hex');
+  const messageHash = Buffer.from(anyValidShare.dataSigned!, 'hex');
 
-  log('Valid Shares:', validShares);
+  await ecdsaVerify(variant!, messageHash, publicKey, [r, s, recId]);
 
-  // if there are no valid shares, throw an error
-  if (validShares.length === 0) {
-    return throwError({
-      message: 'No valid shares to combine',
-      errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
-      errorCode: LIT_ERROR.NO_VALID_SHARES.name,
-    });
-  }
+  const signature = splitSignature(
+    Buffer.concat([r, s, Buffer.from([recId + 27])])
+  );
 
-  let sig: CombinedECDSASignature | undefined;
-
-  try {
-    let res: string = '';
-    switch (type) {
-      case LIT_CURVE.EcdsaCaitSith:
-      case LIT_CURVE.EcdsaK256:
-        res = ecdsaSdk.combine_signature(validShares, 2);
-
-        try {
-          sig = JSON.parse(res) as CombinedECDSASignature;
-        } catch (e) {
-          logError('Error while combining signatures shares', validShares);
-          throwError({
-            message: (e as Error).message,
-            name: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.name,
-            kind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
-          });
-        }
-
-        /*
-          r and s values of the signature should be maximum of 64 bytes
-          r and s values can have polarity as the first two bits, here we remove
-        */
-        if (sig && sig.r && sig.r.length > 64) {
-          while (sig.r.length > 64) {
-            sig.r = sig.r.slice(1);
-          }
-        }
-        if (sig && sig.s && sig.s.length > 64) {
-          while (sig.s.length > 64) {
-            sig.s = sig.s.slice(1);
-          }
-        }
-        break;
-      case LIT_CURVE.ECDSCAITSITHP256:
-        res = ecdsaSdk.combine_signature(validShares, 3);
-        log('response from combine_signature', res);
-        sig = JSON.parse(res);
-        break;
-      // if its another sig type, it shouldnt be resolving to this method
-      default:
-        throw new Error(
-          'Unsupported signature type present in signature shares. Please report this issue'
-        );
-    }
-  } catch (e) {
-    log('Failed to combine signatures:', e);
-  }
-
-  log('signature', sig);
-
-  return sig;
+  return {
+    r: signature.r.slice('0x'.length),
+    s: signature.s.slice('0x'.length),
+    recid: signature.recoveryParam,
+  };
 };
 
-export const computeHDPubKey = (
+export const computeHDPubKey = async (
   pubkeys: string[],
   keyId: string,
-  sigType: LIT_CURVE
-): string => {
-  // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
-  try {
-    switch (sigType) {
-      case LIT_CURVE.EcdsaCaitSith:
-      case LIT_CURVE.EcdsaK256:
-        // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
-        pubkeys = pubkeys.map((value: string) => {
-          return value.replace('0x', '');
-        });
-        keyId = keyId.replace('0x', '');
-        return ecdsaSdk.compute_public_key(keyId, pubkeys, 2);
-      default:
-        throw new Error('Non supported signature type');
-    }
-  } catch (e) {
-    log('Failed to derive public key', e);
+  sigType: LIT_CURVE_VALUES
+): Promise<string> => {
+  const variant = ecdsaSigntureTypeMap[sigType];
+
+  switch (sigType) {
+    case LIT_CURVE.EcdsaCaitSith:
+    case LIT_CURVE.EcdsaK256:
+      // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
+      pubkeys = pubkeys.map((value: string) => {
+        return value.replace('0x', '');
+      });
+      keyId = keyId.replace('0x', '');
+      const preComputedPubkey = await ecdsaDeriveKey(
+        variant!,
+        Buffer.from(keyId, 'hex'),
+        pubkeys.map((hex: string) => Buffer.from(hex, 'hex'))
+      );
+      return Buffer.from(preComputedPubkey).toString('hex');
+    default:
+      throw new InvalidParamType(
+        {
+          info: {
+            sigType,
+          },
+        },
+        `Non supported signature type`
+      );
   }
 };
 
@@ -355,32 +274,21 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   return sessionKeyPair;
 };
 
-const _remapKeyShareForEcdsa = (share: SigShare): any[] => {
-  const keys = Object.keys(share);
-  let newShare = {};
-  for (const key of keys) {
-    const new_key = key.replace(
-      /[A-Z]/g,
-      (letter) => `_${letter.toLowerCase()}`
-    );
-    newShare = Object.defineProperty(
-      newShare,
-      new_key,
-      Object.getOwnPropertyDescriptor(share, key)
-    );
-  }
+function doDecrypt(
+  ciphertextBase64: string,
+  signature: Uint8Array
+): Promise<Uint8Array> {
+  console.log('signature from encrypt op: ', signature);
+  const ciphertext = Buffer.from(ciphertextBase64, 'base64');
+  return blsDecrypt('Bls12381G2', ciphertext, signature);
+}
 
-  return newShare;
-};
-
-function base64ToBufferAsync(base64) {
-  var dataUrl = 'data:application/octet-binary;base64,' + base64;
-
-  return fetch(dataUrl)
-    .then((res) => res.arrayBuffer())
-    .then((buffer) => {
-      return new Uint8Array(buffer);
-    });
+function doCombineSignatureShares(
+  shares: BlsSignatureShare[]
+): Promise<Uint8Array> {
+  const sigShares = shares.map((s) => Buffer.from(s.ProofOfPossession, 'hex'));
+  const signature = blsCombine('Bls12381G2', sigShares);
+  return signature;
 }
 
 /**
@@ -402,10 +310,17 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
     `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} to manage CORS restrictions and to avoid being rate limited by AMD.`
   );
 
-  async function fetchAsUint8Array(targetUrl) {
+  async function fetchAsUint8Array(targetUrl: string) {
     const res = await fetch(targetUrl);
     if (!res.ok) {
-      throw new Error(`[getAmdCert] HTTP error! status: ${response.status}`);
+      throw new NetworkError(
+        {
+          info: {
+            targetUrl,
+          },
+        },
+        `[getAmdCert] HTTP error! status: ${res.status}`
+      );
     }
     const arrayBuffer = await res.arrayBuffer();
     return new Uint8Array(arrayBuffer);
@@ -433,43 +348,45 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
  * Check the attestation against AMD certs
  *
  * @param { NodeAttestation } attestation The actual attestation object, which includes the signature and report
- * @param { string } challenge The challenge we sent
+ * @param { string } challengeHex The challenge we sent
  * @param { string } url The URL we talked to
  *
  * @returns { Promise<undefined> } A promise that throws if the attestation is invalid
  */
 export const checkSevSnpAttestation = async (
   attestation: NodeAttestation,
-  challenge: string,
+  challengeHex: string,
   url: string
 ) => {
-  /* attestation object looks like this:
-   "attestation": {
-      "type": "AMD_SEV_SNP",
-      "noonce": "RPFFYVWtSV37r9/VExEvma5xAjmPazJ4+AG51lT3cD0=",
-      "data": {
-          "INSTANCE_ID": "YzJjNmI3NjE=",
-          "RELEASE_ID": "ZmM1YzkyNTBjY2MxNTllNGEwM2QzOGZiNGRmMDdhNTM1OGE0NGEyN2NjNDkxYjBk",
-          "UNIX_TIME": "gqNFZQAAAAA="
-      },
-      "signatures": [
-          "MEQCIH4A2AhIi6GgedbNnmXVQFn+qx1tBppcsrEhmv4fK2vTAiAWhfHnJHPepkSoKzoxMc9Sc3wNtKyzEt1IJXdfqd0RgQEEouNBbEJ/Y5ZQNxtsJ1EfM+xOKzCnc1dSxSMXdCVTun8KDChld60axa7i6kCkUjDG7XrIRzaqjO3pHwbKOYSatQ=="
-      ],
-      "report": "AgAAAAAAAAAAAAMAAAAAAAEAAAAFEAABCwyQBQajBzX8XJJQzMFZ5KA9OPtN8HpTAAAAAAEAAAADAAAAAAAKqQEAAAAAAAAAAQAAAAAAAAD="
-  }
-  */
+  const noonce = Buffer.from(attestation.noonce, 'base64');
+  const challenge = Buffer.from(challengeHex, 'hex');
+  const data = Object.fromEntries(
+    Object.entries(attestation.data).map(([k, v]) => [
+      k,
+      Buffer.from(v, 'base64'),
+    ])
+  );
+  const signatures = attestation.signatures.map((s) =>
+    Buffer.from(s, 'base64')
+  );
+  const report = Buffer.from(attestation.report, 'base64');
 
-  const { noonce, data, signatures, report, type } = attestation;
-  // base64 decode the noonce and compare it to the challenge
-  const decodedNoonce = Buffer.from(noonce, 'base64').toString('hex');
-  if (decodedNoonce !== challenge) {
-    throw new Error(
-      `Attestation noonce ${decodedNoonce} does not match challenge ${challenge}`
+  if (!noonce.equals(challenge)) {
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          challengeHex,
+          noonce,
+          challenge,
+        },
+      },
+      `Attestation noonce ${noonce} does not match challenge ${challenge}`
     );
   }
 
   const parsedUrl = new URL(url);
-  let ipWeTalkedTo = parsedUrl.hostname;
+  const ipWeTalkedTo = parsedUrl.hostname;
   let portWeTalkedTo = parsedUrl.port;
   if (portWeTalkedTo === '') {
     // if we're on HTTP or HTTPS, the port will be empty
@@ -478,31 +395,49 @@ export const checkSevSnpAttestation = async (
     } else if (url.startsWith('http://')) {
       portWeTalkedTo = '80';
     } else {
-      throw new Error(`Unknown port in URL ${url}`);
+      throw new NetworkError(
+        {
+          info: {
+            url,
+          },
+        },
+        `Unknown port in URL ${url}`
+      );
     }
   }
 
-  let ipAndAddrFromReport = Buffer.from(
-    data['EXTERNAL_ADDR'],
-    'base64'
-  ).toString('utf8');
-  let ipFromReport = ipAndAddrFromReport.split(':')[0];
-  let portFromReport = ipAndAddrFromReport.split(':')[1];
+  const ipAndAddrFromReport = data['EXTERNAL_ADDR'].toString('utf8');
+  const ipFromReport = ipAndAddrFromReport.split(':')[0];
+  const portFromReport = ipAndAddrFromReport.split(':')[1];
 
   if (ipWeTalkedTo !== ipFromReport) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          ipWeTalkedTo,
+          ipFromReport,
+        },
+      },
       `Attestation external address ${ipFromReport} does not match IP we talked to ${ipWeTalkedTo}`
     );
   }
   if (portWeTalkedTo !== portFromReport) {
-    throw new Error(
+    throw new NetworkError(
+      {
+        info: {
+          attestation,
+          portWeTalkedTo,
+          portFromReport,
+        },
+      },
       `Attestation external port ${portFromReport} does not match port we talked to ${portWeTalkedTo}`
     );
   }
 
   // get the VCEK certificate
   let vcekCert;
-  const vcekUrl = sevSnpUtilsSdk.get_vcek_url(report);
+  const vcekUrl = await sevSnpGetVcekUrl(report);
   // use local storage if we have one available
   if (globalThis.localStorage) {
     log('Using local storage for certificate caching');
@@ -514,27 +449,31 @@ export const checkSevSnpAttestation = async (
       localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
     }
   } else {
-    // if nodejs, store in memory
-    if (!globalThis.amdCertStore) {
-      globalThis.amdCertStore = {};
-    }
-    vcekCert = globalThis.amdCertStore[vcekUrl];
-    if (!vcekCert) {
-      vcekCert = await getAmdCert(vcekUrl);
-      globalThis.amdCertStore[vcekUrl] = vcekCert;
-    }
+    const cache = ((
+      globalThis as unknown as { amdCertStore: Record<string, Uint8Array> }
+    ).amdCertStore ??= {});
+    cache[vcekUrl] ??= await getAmdCert(vcekUrl);
+    vcekCert = cache[vcekUrl];
   }
 
   if (!vcekCert || vcekCert.length === 0 || vcekCert.length < 256) {
-    throw new Error('Unable to retrieve VCEK certificate from AMD');
+    throw new UnknownError(
+      {
+        info: {
+          attestation,
+          report,
+          vcekUrl,
+        },
+      },
+      'Unable to retrieve VCEK certificate from AMD'
+    );
   }
 
   // pass base64 encoded report to wasm wrapper
-  return sevSnpUtilsSdk.verify_attestation_report_and_check_challenge(
-    report,
-    data,
-    signatures,
-    challenge,
-    vcekCert
-  );
+  return sevSnpVerify(report, data, signatures, challenge, vcekCert);
 };
+
+declare global {
+  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
+  var LitNodeClient: any;
+}

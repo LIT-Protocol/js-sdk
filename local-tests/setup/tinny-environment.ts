@@ -1,9 +1,4 @@
-import {
-  LIT_TESTNET,
-  ProcessEnvs,
-  RPC_MAP,
-  TinnyEnvConfig,
-} from './tinny-config';
+import { ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
@@ -19,11 +14,16 @@ import { ethers, Signer } from 'ethers';
 import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 import { ShivaClient, TestnetClient } from './shiva-client';
 import { toErrorWithMessage } from './tinny-utils';
-import { CENTRALISATION_BY_NETWORK } from '@lit-protocol/constants';
+import {
+  CENTRALISATION_BY_NETWORK,
+  LIT_NETWORK,
+  LIT_NETWORK_VALUES,
+  RPC_URL_BY_NETWORK,
+} from '@lit-protocol/constants';
 
 console.log('checking env', process.env['DEBUG']);
 export class TinnyEnvironment {
-  public network: LIT_TESTNET;
+  public network: LIT_NETWORK_VALUES;
 
   /**
    * Environment variables used in the process.
@@ -31,11 +31,12 @@ export class TinnyEnvironment {
   public processEnvs: ProcessEnvs = {
     MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     TEST_TIMEOUT: parseInt(process.env['TEST_TIMEOUT']) || 45000,
-    NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
+    NETWORK:
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) || LIT_NETWORK.Custom,
     DEBUG: process.env['DEBUG'] === 'true',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
-      (process.env['NETWORK'] as LIT_TESTNET) === 'datil-dev'
+      (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
         ? 1
         : 200,
     LIT_RPC_URL: process.env['LIT_RPC_URL'],
@@ -104,14 +105,14 @@ export class TinnyEnvironment {
   private _shivaClient: ShivaClient = new ShivaClient();
   private _contractContext: LitContractContext | LitContractResolverContext;
 
-  constructor(network?: LIT_TESTNET) {
-    // -- setup networkj
+  constructor(network?: LIT_NETWORK_VALUES) {
+    // -- setup network
     this.network = network || this.processEnvs.NETWORK;
 
-    if (Object.values(LIT_TESTNET).indexOf(this.network) === -1) {
+    if (Object.values(LIT_NETWORK).indexOf(this.network) === -1) {
       throw new Error(
         `Invalid network environment. Please use one of ${Object.values(
-          LIT_TESTNET
+          LIT_NETWORK
         )}`
       );
     }
@@ -124,24 +125,24 @@ export class TinnyEnvironment {
     // -- setup rpc
     // Priority:
     // 1. Use environment variable if set
-    // 2. Use RPC_MAP if network is recognized
+    // 2. Use RPC_URL_BY_NETWORK if network is recognized
     // 3. Throw error if neither condition is met
     if (this.processEnvs.LIT_RPC_URL) {
       // If LIT_RPC_URL is set in the environment, use it
       this.rpc = this.processEnvs.LIT_RPC_URL;
-    } else if (this.network in RPC_MAP) {
-      // If the network is recognized in RPC_MAP, use the corresponding RPC URL
-      this.rpc = RPC_MAP[this.network];
+    } else if (this.network in RPC_URL_BY_NETWORK) {
+      // If the network is recognized in RPC_URL_BY_NETWORK, use the corresponding RPC URL
+      this.rpc = RPC_URL_BY_NETWORK[this.network];
     } else {
       // If neither condition is met, throw an error with available options
-      const availableNetworks = Object.keys(RPC_MAP).join(', ');
+      const availableNetworks = Object.keys(RPC_URL_BY_NETWORK).join(', ');
       throw new Error(
         `No RPC URL found for network "${this.network}". Available networks are: ${availableNetworks}`
       );
     }
 
     console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Done configuring enviorment current config: ',
+      '[𐬺🧪 Tinny Environment𐬺] Done configuring environment current config: ',
       this.processEnvs
     );
   }
@@ -220,8 +221,8 @@ export class TinnyEnvironment {
    * and sets network-specific parameters. The function ensures the client is connected and ready before proceeding.
    *
    * The LitNodeClient is configured differently based on the network:
-   * - LOCALCHAIN: Uses custom settings for local testing, with node attestation disabled.
-   * - MANZANO (or other specified testnets): Configures for specific network environments with node attestation enabled.
+   * - Custom: Uses custom settings for local testing, with node attestation disabled.
+   * - DatilTest (or other specified testnets): Configures for specific network environments with node attestation enabled.
    *
    * Logs the process and exits if the client is not ready after attempting to connect.
    */
@@ -232,14 +233,11 @@ export class TinnyEnvironment {
     console.log('this.network:', this.network);
     const centralisation = CENTRALISATION_BY_NETWORK[this.network];
 
-    if (
-      this.network === LIT_TESTNET.LOCALCHAIN ||
-      centralisation === 'unknown'
-    ) {
+    if (this.network === LIT_NETWORK.Custom || centralisation === 'unknown') {
       const networkContext =
         this?.testnet?.ContractContext ?? this._contractContext;
       this.litNodeClient = new LitNodeClient({
-        litNetwork: 'custom',
+        litNetwork: LIT_NETWORK.Custom,
         rpcUrl: this.rpc,
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
@@ -263,21 +261,27 @@ export class TinnyEnvironment {
 
     if (globalThis.wasmExports) {
       console.warn(
-        'WASM modules already loaded. Will overide when connect is called'
+        'WASM modules already loaded. Will override when connect is called'
       );
     }
 
     if (globalThis.wasmECDSA) {
       console.warn(
-        'WASM modules already loaded. wil overide. when connect is called'
+        'WASM modules already loaded. wil override. when connect is called'
       );
     }
 
     if (globalThis.wasmSevSnpUtils) {
       console.warn(
-        'WASM modules already loaded. wil overide. when connect is called'
+        'WASM modules already loaded. wil override. when connect is called'
       );
     }
+
+    this.litNodeClient.on('connected', () => {
+      console.log(
+        'Received `connected` event from `litNodeClient. Ready to go!'
+      );
+    });
 
     await this.litNodeClient.connect();
 
@@ -347,7 +351,7 @@ export class TinnyEnvironment {
     return await this.createNewPerson('Alice');
   }
 
-  setUnavailable = (network: LIT_TESTNET) => {
+  setUnavailable = (network: LIT_NETWORK_VALUES) => {
     if (this.processEnvs.NETWORK === network) {
       throw new Error('LIT_IGNORE_TEST');
     }
@@ -362,10 +366,7 @@ export class TinnyEnvironment {
         console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
         return;
       }
-      if (
-        this.network === LIT_TESTNET.LOCALCHAIN &&
-        this.processEnvs.USE_SHIVA
-      ) {
+      if (this.network === LIT_NETWORK.Custom && this.processEnvs.USE_SHIVA) {
         this.testnet = await this._shivaClient.startTestnetManager();
         // wait for the testnet to be active before we start the tests.
         let state = await this.testnet.pollTestnetForActive();
@@ -377,7 +378,7 @@ export class TinnyEnvironment {
         }
 
         await this.testnet.getTestnetConfig();
-      } else if (this.network === LIT_TESTNET.LOCALCHAIN) {
+      } else if (this.network === LIT_NETWORK.Custom) {
         const context = await import('./networkContext.json');
         this._contractContext = context;
       }
@@ -429,7 +430,7 @@ export class TinnyEnvironment {
    */
   async stopTestnet() {
     if (
-      this.network === LIT_TESTNET.LOCALCHAIN &&
+      this.network === LIT_NETWORK.Custom &&
       this._shivaClient.processEnvs.STOP_TESTNET
     ) {
       await this.testnet.stopTestnet();
@@ -480,7 +481,7 @@ export class TinnyEnvironment {
      * Setup contracts-sdk client
      * ====================================
      */
-    if (this.network === LIT_TESTNET.LOCALCHAIN) {
+    if (this.network === LIT_NETWORK.Custom) {
       const networkContext =
         this?.testnet?.ContractContext ?? this._contractContext;
       this.contractsClient = new LitContracts({
@@ -503,15 +504,16 @@ export class TinnyEnvironment {
 
     // THE FOLLOWING WILL TECHNICALLY NEVER BE CALLED, BUT IT'S HERE FOR FUTURE REFERENCE FOR SWITCHING WALLETS
     else {
+      const rpc = this.rpc;
       async function _switchWallet() {
-        // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
+        // TODO: This wallet should be cached somewhere and reused to create delegation signatures.
         // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
         const capacityCreditWallet =
           ethers.Wallet.createRandom().connect(provider);
 
         // get wallet balance
         const balance = await wallet.getBalance();
-        console.log('this.rpc:', this.rpc);
+        console.log('this.rpc:', rpc);
         console.log('this.wallet.address', wallet.address);
         console.log('Balance:', balance.toString());
 

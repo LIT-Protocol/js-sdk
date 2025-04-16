@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { EventEmitter } from 'eventemitter3';
 
 import {
   canonicalAccessControlConditionFormatter,
@@ -19,24 +20,29 @@ import {
   HTTP,
   HTTPS,
   LIT_CURVE,
+  LIT_CURVE_VALUES,
   LIT_ENDPOINT,
-  LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORK,
   LIT_NETWORKS,
-  LitNetwork,
   RPC_URL_BY_NETWORK,
-  StakingStates,
+  STAKING_STATES,
+  STAKING_STATES_VALUES,
   version,
+  InitError,
+  InvalidParamType,
+  NetworkError,
+  NodeError,
+  UnknownError,
+  InvalidArgumentException,
+  LitNodeClientBadConfigError,
+  InvalidEthBlockhash,
+  LitNodeClientNotReadyError,
+  InvalidNodeAttestation,
+  LogLevel,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import {
-  checkSevSnpAttestation,
-  computeHDPubKey,
-  loadModules,
-  unloadModules,
-} from '@lit-protocol/crypto';
-import { LogLevel } from '@lit-protocol/logger';
+import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   isBrowser,
@@ -47,7 +53,7 @@ import {
   logWithRequestId,
   mostCommonString,
   sendRequest,
-  throwError,
+  setMiscLitConfig,
 } from '@lit-protocol/misc';
 import {
   AuthSig,
@@ -63,7 +69,6 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
-  NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSigsMap,
@@ -75,6 +80,10 @@ import { composeLitUrl } from './endpoint-version';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
+
+type providerTest<T> = (
+  provider: ethers.providers.JsonRpcProvider
+) => Promise<T>;
 
 interface CoreNodeConfig {
   subnetPubKey: string;
@@ -113,13 +122,13 @@ export type LitNodeClientConfigWithDefaults = Required<
 const EPOCH_PROPAGATION_DELAY = 45_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
+// When fetching the blockhash from a provider (not lit), we use a 5 minutes old block to ensure the nodes centralized indexer has it
+const BLOCKHASH_COUNT_PROVIDER_DELAY = -30; // 30 blocks ago. Eth block are mined every 12s. 30 blocks is 6 minutes, indexer/nodes must have it by now
 
 // Intentionally not including datil-dev here per discussion with Howard
 const NETWORKS_REQUIRING_SEV: string[] = [
-  LitNetwork.Habanero,
-  LitNetwork.Manzano,
-  LitNetwork.DatilTest,
-  LitNetwork.Datil,
+  LIT_NETWORK.DatilTest,
+  LIT_NETWORK.Datil,
 ];
 
 /**
@@ -132,13 +141,13 @@ const FALLBACK_RPC_URLS = [
   'https://eth.llamarpc.com',
 ];
 
-export class LitCore {
+export class LitCore extends EventEmitter {
   config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
     connectTimeout: 20000,
     checkNodeAttestation: false,
-    litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
+    litNetwork: LIT_NETWORK.Custom,
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
     nodeProtocol: null,
@@ -165,23 +174,21 @@ export class LitCore {
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
-    if (!(config.litNetwork in LIT_NETWORKS)) {
-      const supportedNetwork = Object.values(LIT_NETWORK).join(', ');
+    super();
 
-      return throwError({
-        message: `Unsupported network has been provided please use a "litNetwork" option which is supported (${supportedNetwork})`,
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
-      });
+    if (!(config.litNetwork in LIT_NETWORKS)) {
+      const validNetworks = Object.keys(LIT_NETWORKS).join(', ');
+      throw new InvalidParamType(
+        {},
+        'Unsupported network has been provided please use a "litNetwork" option which is supported (%s)',
+        validNetworks
+      );
     }
 
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
       // Official networks; default value for `checkNodeAttestation` according to network provided.
-      case LitNetwork.Cayenne:
-      case LitNetwork.DatilDev:
-      case LitNetwork.Manzano:
-      case LitNetwork.Habanero:
+      case LIT_NETWORK.DatilDev:
         this.config = {
           ...this.config,
           checkNodeAttestation: NETWORKS_REQUIRING_SEV.includes(
@@ -191,7 +198,7 @@ export class LitCore {
         };
         break;
       default:
-        // `custom` or `localhost`; no opinion about checkNodeAttestation
+        // `custom`; no opinion about checkNodeAttestation
         this.config = {
           ...this.config,
           ...config,
@@ -202,7 +209,7 @@ export class LitCore {
     this.setCustomBootstrapUrls();
 
     // -- set global variables
-    globalThis.litConfig = this.config;
+    setMiscLitConfig(this.config);
     bootstrapLogManager(
       'core',
       this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
@@ -263,34 +270,20 @@ export class LitCore {
 
     // Validate minNodeCount
     if (!minNodeCount) {
-      throw new Error('minNodeCount is required');
+      throw new InvalidArgumentException(
+        {},
+        `minNodeCount is %s, which is invalid. Please check your network connection and try again.`,
+        minNodeCount
+      );
     }
 
     // Validate bootstrapUrls
     if (!Array.isArray(bootstrapUrls) || bootstrapUrls.length <= 0) {
-      throwError({
-        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
-
-    // Validate stakingContract
-    if (!stakingContract) {
-      throwError({
-        message: 'stakingContract is required',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
-
-    // Validate epoch
-    if (!epochInfo.number) {
-      throwError({
-        message: 'epoch is required',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
+      throw new InitError(
+        {},
+        `Failed to get bootstrapUrls for network %s`,
+        this.config.litNetwork
+      );
     }
 
     log('[_getValidatorData] epochInfo: ', epochInfo);
@@ -307,21 +300,19 @@ export class LitCore {
   }
 
   // ========== Scoped Class Helpers ==========
-  private async _handleStakingContractStateChange(state: StakingStates) {
-    log(`New state detected: "${state}"`);
+  private async _handleStakingContractStateChange(
+    state: STAKING_STATES_VALUES
+  ) {
+    try {
+      log(`New state detected: "${state}"`);
 
-    const validatorData = await this._getValidatorData();
+      if (state === STAKING_STATES.Active) {
+        const validatorData = await this._getValidatorData();
 
-    if (state === StakingStates.Active) {
-      // We always want to track the most recent epoch number on _all_ networks
-
-      this._epochState = await this._fetchCurrentEpochState(
-        validatorData.epochInfo
-      );
-
-      if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
         // We don't need to handle node urls changing on centralised networks, since their validator sets are static
-        try {
+        if (
+          CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised'
+        ) {
           log(
             'State found to be new validator set locked, checking validator set'
           );
@@ -330,39 +321,54 @@ export class LitCore {
           const delta: string[] = validatorData.bootstrapUrls.filter((item) =>
             existingNodeUrls.includes(item)
           );
-          // if the sets differ we reconnect.
+
+          // check if the node sets are non-matching and re-connect if they do not.
           if (delta.length > 1) {
-            // check if the node sets are non-matching and re-connect if they do not.
             /*
-                TODO: This covers *most* cases where a node may come in or out of the active
-                set which we will need to re attest to the execution environments.
-                However, the sdk currently does not know if there is an active network operation pending.
-                Such that the state when the request was sent will now mutate when the response is sent back.
-                The sdk should be able to understand its current execution environment and wait on an active
-                network request to the previous epoch's node set before changing over.
-              */
+                  TODO: This covers *most* cases where a node may come in or out of the active
+                  set which we will need to re attest to the execution environments.
+                  However, the sdk currently does not know if there is an active network operation pending.
+                  Such that the state when the request was sent will now mutate when the response is sent back.
+                  The sdk should be able to understand its current execution environment and wait on an active
+                  network request to the previous epoch's node set before changing over.
+                */
             log(
               'Active validator sets changed, new validators ',
               delta,
               'starting node connection'
             );
+            await this.connect(); // Will update `epochInfo`
           }
-
-          await this.connect();
-        } catch (err: unknown) {
-          // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
-          // But for now, our every-30-second network sync will fix things in at most 30s from now.
-          // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
-          const { message = '' } = err as
-            | Error
-            | NodeClientErrorV0
-            | NodeClientErrorV1;
-          logError(
-            'Error while attempting to reconnect to nodes after epoch transition:',
-            message
+        } else {
+          // In case of centralised networks, we don't run `connect()` flow, so we will manually update epochInfo here
+          this._epochState = await this._fetchCurrentEpochState(
+            validatorData.epochInfo
           );
         }
       }
+    } catch (err: unknown) {
+      // Ensure that any methods that check `this.ready` throw errors to the caller, and any consumers can check appropriately
+      this.ready = false;
+
+      const { message = '' } = err as
+        | Error
+        | NodeClientErrorV0
+        | NodeClientErrorV1;
+      logError(
+        'Error while attempting to reconnect to nodes after epoch transition:',
+        message
+      );
+
+      const handshakeError = new Error(
+        'Error while attempting to reconnect to nodes after epoch transition:' +
+          message
+      );
+
+      // Signal to any listeners that we've encountered a fatal error
+      this.emit('error', handshakeError);
+
+      // Signal to any listeners that we're 'disconnected' from LIT network
+      this.emit('disconnected', { reason: 'error', error: handshakeError });
     }
   }
 
@@ -389,7 +395,7 @@ export class LitCore {
       );
 
       // Stash a function instance, because its identity must be consistent for '.off()' usage to work later
-      this._stakingContractListener = (state: StakingStates) => {
+      this._stakingContractListener = (state: STAKING_STATES_VALUES) => {
         // Intentionally not return or await; Listeners are _not async_
         this._handleStakingContractStateChange(state);
       };
@@ -403,11 +409,11 @@ export class LitCore {
    */
   async disconnect() {
     this.ready = false;
-    unloadModules();
 
     this._stopListeningForNewEpoch();
     // this._stopNetworkPolling();
-    if (globalThis.litConfig) delete globalThis.litConfig;
+    setMiscLitConfig(undefined);
+    this.emit('disconnected', { reason: 'disconnect' });
   }
 
   // _stopNetworkPolling() {
@@ -432,20 +438,17 @@ export class LitCore {
    */
   setCustomBootstrapUrls = (): void => {
     // -- validate
-    if (this.config.litNetwork === 'custom') return;
+    if (this.config.litNetwork === LIT_NETWORK.Custom) return;
 
     // -- execute
     const hasNetwork: boolean = this.config.litNetwork in LIT_NETWORKS;
 
     if (!hasNetwork) {
       // network not found, report error
-      throwError({
-        message:
-          'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.name,
-      });
-      return;
+      throw new LitNodeClientBadConfigError(
+        {},
+        'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS'
+      );
     }
 
     this.config.bootstrapUrls = LIT_NETWORKS[this.config.litNetwork];
@@ -458,8 +461,10 @@ export class LitCore {
   getLatestBlockhash = async (): Promise<string> => {
     await this._syncBlockhash();
     if (!this.latestBlockhash) {
-      throw new Error(
-        `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
+      throw new InvalidEthBlockhash(
+        {},
+        `latestBlockhash is not available. Received: "%s"`,
+        this.latestBlockhash
       );
     }
 
@@ -474,11 +479,6 @@ export class LitCore {
    *
    */
   async connect(): Promise<void> {
-    // If we have never connected on this client instance first load WASM modules.
-    if (!this.ready) {
-      await loadModules();
-    }
-
     // Ensure that multiple closely timed calls to `connect()` don't result in concurrent connect() operations being run
     if (this._connectingPromise) {
       return this._connectingPromise;
@@ -492,11 +492,6 @@ export class LitCore {
   }
 
   private async _connect() {
-    // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
-    this._stopListeningForNewEpoch();
-    // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
-    // this._stopNetworkPolling();
-
     // Initialize a contractContext if we were not given one; this allows interaction against the staking contract
     // to be handled locally from then on
     if (!this.config.contractContext) {
@@ -511,8 +506,15 @@ export class LitCore {
       !this.config.contractContext.Staking &&
       !this.config.contractContext.resolverAddress
     ) {
-      throw new Error(
-        'The provided contractContext was missing the "Staking" contract`'
+      throw new InitError(
+        {
+          info: {
+            contractContext: this.config.contractContext,
+            litNetwork: this.config.litNetwork,
+            rpcUrl: this.config.rpcUrl,
+          },
+        },
+        'The provided contractContext was missing the "Staking" contract'
       );
     }
 
@@ -525,13 +527,12 @@ export class LitCore {
         },
         {}
       );
-      if (this.config.litNetwork === LitNetwork.Custom) {
+      if (this.config.litNetwork === LIT_NETWORK.Custom) {
         log('using custom contracts: ', logAddresses);
       }
     }
 
     // Re-use staking contract instance from previous connect() executions that succeeded to improve performance
-    // noinspection ES6MissingAwait - intentionally not `awaiting` so we can run this in parallel below
     const validatorData = await this._getValidatorData();
 
     this._stakingContract = validatorData.stakingContract;
@@ -551,9 +552,6 @@ export class LitCore {
     // this._scheduleNetworkSync();
     this._listenForNewEpoch();
 
-    // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
-    // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
-    globalThis.litNodeClient = this;
     this.ready = true;
 
     log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
@@ -564,6 +562,8 @@ export class LitCore {
       subnetPubkey: this.subnetPubKey,
       latestBlockhash: this.latestBlockhash,
     });
+
+    this.emit('connected', true);
 
     // browser only
     if (isBrowser()) {
@@ -630,11 +630,11 @@ export class LitCore {
       const attestation = handshakeResult.attestation;
 
       if (!attestation) {
-        throwError({
-          message: `Missing attestation in handshake response from ${url}`,
-          errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-          errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-        });
+        throw new InvalidNodeAttestation(
+          {},
+          `Missing attestation in handshake response from %s`,
+          url
+        );
       }
 
       // actually verify the attestation by checking the signature against AMD certs
@@ -646,13 +646,16 @@ export class LitCore {
         log(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        throwError({
-          message: `Lit Node Attestation failed verification for ${url} - ${e.message}`,
-          errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-          errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-        });
+        throw new InvalidNodeAttestation(
+          {
+            cause: e,
+          },
+          `Lit Node Attestation failed verification for %s - %s`,
+          url,
+          e.message
+        );
       }
-    } else if (this.config.litNetwork === 'custom') {
+    } else if (this.config.litNetwork === LIT_NETWORK.Custom) {
       log(
         `Node attestation SEV verification is disabled. You must explicitly set "checkNodeAttestation" to true when using 'custom' network`
       );
@@ -674,7 +677,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.getRequestId();
+    const requestId: string = this._getNewRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -691,12 +694,7 @@ export class LitCore {
           } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
-            // TODO: Kludge, replace with standard error construction
-            throwError({
-              message: msg,
-              errorKind: LIT_ERROR.INIT_ERROR.kind,
-              errorCode: LIT_ERROR.INIT_ERROR.name,
-            });
+            throw new InitError({}, msg);
           } catch (e) {
             logErrorWithRequestId(requestId, e);
             reject(e);
@@ -743,11 +741,15 @@ export class LitCore {
         'Error getting latest blockhash from the nodes.'
       );
 
-      throwError({
-        message: 'Error getting latest blockhash from the nodes.',
-        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-      });
+      throw new InvalidEthBlockhash(
+        {
+          info: {
+            requestId,
+          },
+        },
+        `latestBlockhash is not available. Received: "%s"`,
+        latestBlockhash
+      );
     }
 
     // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
@@ -756,48 +758,57 @@ export class LitCore {
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.subnetPubKey
         )
-      ),
+      )!,
       networkPubKey: mostCommonString(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKey
         )
-      ),
+      )!,
       networkPubKeySet: mostCommonString(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.networkPubKeySet
         )
-      ),
+      )!,
       hdRootPubkeys: mostCommonString(
         Object.values(serverKeys).map(
           (keysFromSingleNode) => keysFromSingleNode.hdRootPubkeys
         )
-      ),
+      )!,
       latestBlockhash,
       lastBlockHashRetrieved: Date.now(),
     };
   }
 
-  private _getProviderWithFallback =
-    async (): Promise<ethers.providers.JsonRpcProvider | null> => {
-      for (const url of FALLBACK_RPC_URLS) {
-        try {
-          const provider = new ethers.providers.JsonRpcProvider({
-            url: url,
+  private _getProviderWithFallback = async <T>(
+    providerTest: providerTest<T>
+  ): Promise<{
+    provider: ethers.providers.JsonRpcProvider;
+    testResult: T;
+  } | null> => {
+    for (const url of FALLBACK_RPC_URLS) {
+      try {
+        const provider = new ethers.providers.JsonRpcProvider({
+          url: url,
 
-            // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
-            timeout: 60000,
-          });
-          await provider.getBlockNumber(); // Simple check to see if the provider is working
-          return provider;
-        } catch (error) {
-          logError(`RPC URL failed: ${url}`);
-        }
+          // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
+          timeout: 60000,
+        });
+        const testResult = await providerTest(provider); // Check to see if the provider is working
+        return {
+          provider,
+          testResult,
+        };
+      } catch (error) {
+        logError(`RPC URL failed: ${url}`);
       }
-      return null;
-    };
+    }
+    return null;
+  };
 
   /**
    * Fetches the latest block hash and log any errors that are returned
+   * Nodes will accept any blockhash in the last 30 days but use the latest 10 as challenges for webauthn
+   * Note: last blockhash from providers might not be propagated to the nodes yet, so we need to use a slightly older one
    * @returns void
    */
   private async _syncBlockhash() {
@@ -819,52 +830,72 @@ export class LitCore {
       this.latestBlockhash
     );
 
-    return fetch(this._blockHashUrl)
-      .then(async (resp: Response) => {
-        const blockHashBody: EthBlockhashInfo = await resp.json();
-        this.latestBlockhash = blockHashBody.blockhash;
-        this.lastBlockHashRetrieved = Date.now();
-        log('Done syncing state new blockhash: ', this.latestBlockhash);
-
-        // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
-        if (!this.latestBlockhash) {
-          throw new Error(
-            `Error getting latest blockhash. Received: "${this.latestBlockhash}"`
-          );
-        }
-      })
-      .catch(async (err: BlockHashErrorResponse | Error) => {
-        logError(
-          'Error while attempting to fetch new latestBlockhash:',
-          err instanceof Error ? err.message : err.messages,
-          'Reason: ',
-          err instanceof Error ? err : err.reason
+    try {
+      // This fetches from the lit propagation service so nodes will always have it
+      const resp = await fetch(this._blockHashUrl);
+      // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
+      if (!resp.ok) {
+        throw new NetworkError(
+          {
+            responseResult: resp.ok,
+            responseStatus: resp.status,
+          },
+          `Error getting latest blockhash from ${this._blockHashUrl}. Received: "${resp.status}"`
         );
+      }
 
+      const blockHashBody: EthBlockhashInfo = await resp.json();
+      const { blockhash, timestamp } = blockHashBody;
+
+      // If the blockhash retrieval does not have the required fields, throw an error to trigger fallback in catch block
+      if (!blockhash || !timestamp) {
+        throw new NetworkError(
+          {
+            responseResult: resp.ok,
+            blockHashBody,
+          },
+          `Error getting latest blockhash from block indexer. Received: "${blockHashBody}"`
+        );
+      }
+
+      this.latestBlockhash = blockHashBody.blockhash;
+      this.lastBlockHashRetrieved = parseInt(timestamp) * 1000;
+      log('Done syncing state new blockhash: ', this.latestBlockhash);
+    } catch (error: unknown) {
+      const err = error as BlockHashErrorResponse | Error;
+
+      logError(
+        'Error while attempting to fetch new latestBlockhash:',
+        err instanceof Error ? err.message : err.messages,
+        'Reason: ',
+        err instanceof Error ? err : err.reason
+      );
+
+      log(
+        'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
+      );
+      const { testResult } =
+        (await this._getProviderWithFallback<ethers.providers.Block>(
+          // We use a previous block to avoid nodes not having received the latest block yet
+          (provider) => provider.getBlock(BLOCKHASH_COUNT_PROVIDER_DELAY)
+        )) || {};
+
+      if (!testResult || !testResult.hash) {
+        logError('All fallback RPC URLs failed. Unable to retrieve blockhash.');
+        return;
+      }
+
+      try {
+        this.latestBlockhash = testResult.hash;
+        this.lastBlockHashRetrieved = testResult.timestamp;
         log(
-          'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
+          'Successfully retrieved blockhash manually: ',
+          this.latestBlockhash
         );
-        const provider = await this._getProviderWithFallback();
-
-        if (!provider) {
-          logError(
-            'All fallback RPC URLs failed. Unable to retrieve blockhash.'
-          );
-          return;
-        }
-
-        try {
-          const latestBlock = await provider.getBlock('latest');
-          this.latestBlockhash = latestBlock.hash;
-          this.lastBlockHashRetrieved = Date.now();
-          log(
-            'Successfully retrieved blockhash manually: ',
-            this.latestBlockhash
-          );
-        } catch (ethersError) {
-          logError('Failed to manually retrieve blockhash using ethers');
-        }
-      });
+      } catch (ethersError) {
+        logError('Failed to manually retrieve blockhash using ethers');
+      }
+    }
   }
 
   /** Currently, we perform a full sync every 30s, including handshaking with every node
@@ -894,12 +925,12 @@ export class LitCore {
 
   /**
    *
-   * Get a random request ID
+   * Get a new random request ID
    *
    * @returns { string }
    *
    */
-  getRequestId() {
+  protected _getNewRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
@@ -954,12 +985,27 @@ export class LitCore {
   private async _fetchCurrentEpochState(
     epochInfo?: EpochInfo
   ): Promise<Pick<EpochCache, 'startTime' | 'currentNumber'>> {
+    if (!this._stakingContract) {
+      throw new InitError(
+        {},
+        'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?'
+      );
+    }
+
     if (!epochInfo) {
       log(
         'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
       );
-      const validatorData = await this._getValidatorData();
-      epochInfo = validatorData.epochInfo;
+      try {
+        const validatorData = await this._getValidatorData();
+        epochInfo = validatorData.epochInfo;
+      } catch (error) {
+        throw new UnknownError(
+          {},
+          '[_fetchCurrentEpochNumber] Error getting current epoch number: %s',
+          error
+        );
+      }
     }
 
     // when we transition to the new epoch, we don't store the start time.  but we
@@ -982,7 +1028,7 @@ export class LitCore {
       Math.floor(Date.now() / 1000) <
         this._epochCache.startTime +
           Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
-      this._epochCache.currentNumber >= 3
+      this._epochCache.currentNumber >= 3 // FIXME: Why this check?
     ) {
       return this._epochCache.currentNumber - 1;
     }
@@ -1097,21 +1143,21 @@ export class LitCore {
     url: string;
   }): AuthSig => {
     if (!sessionSigs) {
-      return throwError({
-        message: `You must pass in sessionSigs`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {},
+        'You must pass in sessionSigs. Received: %s',
+        sessionSigs
+      );
     }
 
     const sigToPassToNode = sessionSigs[url];
 
     if (!sessionSigs[url]) {
-      throwError({
-        message: `You passed sessionSigs but we could not find session sig for node ${url}`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+      throw new InvalidArgumentException(
+        {},
+        'You passed sessionSigs but we could not find session sig for node %s',
+        url
+      );
     }
 
     return sigToPassToNode;
@@ -1252,10 +1298,11 @@ export class LitCore {
       };
     }
 
+    // TODO Likely a good use case for MultiError
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
     const mostCommonError = JSON.parse(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mostCommonString(errors.map((r: any) => JSON.stringify(r)))
+      mostCommonString(errors.map((r: any) => JSON.stringify(r)))!
     );
 
     logErrorWithRequestId(
@@ -1270,15 +1317,15 @@ export class LitCore {
   };
 
   /**
-   *
    * Throw node error
    *
    * @param { RejectedNodePromises } res
+   * @param { string } requestId
    *
-   * @returns { void }
+   * @returns { never }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
+  _throwNodeError = (res: RejectedNodePromises, requestId: string): never => {
     if (res.error) {
       if (
         ((res.error.errorCode &&
@@ -1289,22 +1336,28 @@ export class LitCore {
         log('You are not authorized to access this content');
       }
 
-      throwError({
-        ...res.error,
-        message:
-          res.error.message ||
-          'There was an error getting the signing shares from the nodes',
-        errorCode: res.error.errorCode || LIT_ERROR.UNKNOWN_ERROR.code,
-        requestId,
-      } as NodeClientErrorV0 | NodeClientErrorV1);
+      throw new NodeError(
+        {
+          info: {
+            requestId,
+            errorCode: res.error.errorCode,
+            message: res.error.message,
+          },
+          cause: res.error,
+        },
+        'There was an error getting the signing shares from the nodes. Response from the nodes: %s',
+        JSON.stringify(res)
+      );
     } else {
-      throwError({
-        message: `There was an error getting the signing shares from the nodes.  Response from the nodes: ${JSON.stringify(
-          res
-        )}`,
-        error: LIT_ERROR.UNKNOWN_ERROR,
-        requestId,
-      });
+      throw new UnknownError(
+        {
+          info: {
+            requestId,
+          },
+        },
+        `There was an error getting the signing shares from the nodes. Response from the nodes: %s`,
+        JSON.stringify(res)
+      );
     }
   };
 
@@ -1387,22 +1440,25 @@ export class LitCore {
    * Calculates an HD public key from a given keyId
    * The curve type or signature type is assumed to be k256 unless provided
    * @param keyId
-   * @param {LIT_CURVE} sigType
+   * @param {LIT_CURVE_VALUES} sigType
    * @returns {string} public key
    */
-  computeHDPubKey = (
+  computeHDPubKey = async (
     keyId: string,
-    sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
-  ): string => {
+    sigType: LIT_CURVE_VALUES = LIT_CURVE.EcdsaCaitSith
+  ): Promise<string> => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');
-      throwError({
-        message: `root public keys not found, have you connected to the nodes?`,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-      });
+      throw new LitNodeClientNotReadyError(
+        {},
+        'root public keys not found, have you connected to the nodes?'
+      );
     }
-    return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
+    return await computeHDPubKey(
+      this.hdRootPubkeys as string[],
+      keyId,
+      sigType
+    );
   };
 
   /**

@@ -1,14 +1,50 @@
-# Getting started
+# PKP Ethers
 
-This module presents a modified version of `new ethers.Wallet()`, known as `PKPEthersWallet`. Unlike its counterpart, `PKPEthersWallet` does not store private keys nor does it support the creation of random wallets.
+A specialized Ethereum wallet implementation using Lit Protocol's PKP (Programmable Key Pair) technology, built as an extension of ethers.js Wallet. This package provides secure transaction signing and account management through Lit nodes without storing private keys locally.
 
-Despite these differences, it retains the ability to sign and send transactions, process JSON requests, retrieve balance and transaction count, among other functionalities, just like a standard ethers.js Wallet instance.
+## Installation
 
-API: https://docs.ethers.org/v4/api-wallet.html
-
-```
+```bash
 yarn add @lit-protocol/pkp-ethers ethers
 ```
 
-More info here:
-https://github.com/LIT-Protocol/pkp-ethers/tree/master/packages/wallet
+## Quick Start
+
+```typescript
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+
+// Initialize wallet
+const wallet = new PKPEthersWallet({
+  controllerAuthSig: authSig,
+  pkpPubKey: publicKey,
+});
+
+// Get wallet address
+const address = await wallet.getAddress();
+
+// Sign transaction
+const signedTx = await wallet.signTransaction({
+  to: recipient,
+  value: ethers.utils.parseEther('0.1'),
+});
+```
+
+## Key Features
+
+- Secure transaction signing via LIT nodes
+- Full ethers.js Wallet compatibility
+- JSON-RPC request handling
+- Balance and nonce management
+- Gas estimation support
+- Message signing capabilities
+
+## Core Functionality
+
+- Transaction Management: Sign and send transactions
+- Account Operations: Get balances and transaction counts
+- Message Signing: Sign messages and typed data
+- Network Integration: Connect to any EVM network
+- Gas Handling: Estimate and manage gas costs
+
+For detailed API documentation, visit:
+https://docs.ethers.org/v4/api-wallet.html

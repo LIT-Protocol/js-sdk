@@ -7,6 +7,6 @@
     "allowJs": true,
     "checkJs": false
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "esbuild.config.js"],
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
 }

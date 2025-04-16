@@ -1,27 +1,26 @@
-# lit-auth-client
+# Lit Auth Client
 
-`lit-auth-client` makes it easy to manage PKP authentication with Lit Protocol. This library offers convenient methods for social logins, Ethereum wallet sign-ins, and minting and fetching of PKPs linked to auth methods.
+A comprehensive authentication client for managing PKP (Programmable Key Pair) authentication with Lit Protocol. This package simplifies the integration of various authentication methods including social logins and Ethereum wallet sign-ins.
 
-## 📜 API Reference
-
-Check out the [API reference](https://docs.lit-js-sdk-v2.litprotocol.com/modules/lit_auth_client_src.html).
-
-## 📦 Installation
-
-Get started by installing the package:
+## Installation
 
 ```bash
 yarn add @lit-protocol/lit-auth-client
 ```
 
-## 🙌 Contributing
+## Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+See the lit-pkp-auth-demo [here](https://github.com/LIT-Protocol/lit-pkp-auth-demo/blob/8f9e301e82e655b28fe9ab767ad3778bfe74701d/src/utils/lit.ts#L75-L85)
 
-### Building
+## Key Features
 
-Run `nx build lit-auth-client` to build the library.
+- Social login integration
+- Ethereum wallet authentication
+- PKP minting and management
+- Auth method linking
+- Secure token handling
+- Multiple provider support
 
-### Running unit tests
+## Documentation
 
-Run `nx test lit-auth-client` to execute the unit tests via [Jest](https://jestjs.io).
+For detailed API documentation, visit the [API reference](https://docs.lit-js-sdk-v2.litprotocol.com/modules/lit_auth_client_src.html).

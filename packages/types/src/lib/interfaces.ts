@@ -1,6 +1,5 @@
 import { Provider } from '@ethersproject/abstract-provider';
-// @ts-expect-error JSZip types are not properly resolved by TSC :(
-import * as JSZip from 'jszip/dist/jszip.js';
+import depd from 'depd';
 
 import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
@@ -20,6 +19,9 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
+
+const deprecated = depd('lit-js-sdk:types:interfaces');
+
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -40,7 +42,7 @@ export interface AuthSig {
   /**
    * The signature produced by signing the `signMessage` property with the corresponding private key for the `address` property.
    */
-  sig: any;
+  sig: string;
 
   /**
    * The method used to derive the signature (e.g, `web3.eth.personal.sign`).
@@ -112,6 +114,7 @@ export interface AuthCallbackParams extends LitActionSdkParams {
 
   uri?: string;
 
+  domain?: string;
   /**
    * Cosmos wallet type, to support mutliple popular cosmos wallets
    * Keplr & Cypher -> window.keplr
@@ -134,27 +137,6 @@ export interface IProvider {
 }
 
 /** ---------- Crypto ---------- */
-export interface EncryptedZip {
-  symmetricKey: SymmetricKey;
-  encryptedZip: Blob;
-}
-
-export interface DecryptZipFileWithMetadata {
-  decryptedFile: Uint8Array;
-  metadata: MetadataForFile;
-}
-
-export interface MetadataForFile {
-  name: string | any;
-  type: string | any;
-  size: string | number | any;
-  accessControlConditions: any[] | any;
-  evmContractConditions: any[] | any;
-  solRpcConditions: any[] | any;
-  unifiedAccessControlConditions: any[] | any;
-  chain: string;
-  dataToEncryptHash: string;
-}
 
 export interface EncryptedFile {
   encryptedFile: Blob;
@@ -164,24 +146,6 @@ export interface EncryptedFile {
 export interface DecryptFileProps {
   file: AcceptedFileType;
   symmetricKey: SymmetricKey;
-}
-
-export interface VerifyJWTProps {
-  publicKey: string;
-  // A JWT signed by the LIT network using the BLS12-381 algorithm
-  jwt: string;
-}
-
-export interface IJWT<T> {
-  verified: boolean;
-  header: JWTHeader;
-  payload: T;
-  signature: Uint8Array;
-}
-
-export interface JWTHeader {
-  alg: string;
-  typ: string;
 }
 
 export interface SigningAccessControlConditionJWTPayload
@@ -440,11 +404,6 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
   sessionSigs?: any;
 }
 
-export interface GetSignedTokenRequest
-  extends SigningAccessControlConditionRequest {
-  sessionSigs: SessionSigsMap;
-}
-
 /**
  * Struct in rust
  * -----
@@ -606,18 +565,19 @@ export interface EncryptResponse {
   dataToEncryptHash: string;
 }
 
+export interface EncryptUint8ArrayRequest
+  extends MultipleAccessControlConditions {
+  /**
+   * The uint8array that you wish to encrypt
+   */
+  dataToEncrypt: Uint8Array;
+}
+
 export interface EncryptStringRequest extends MultipleAccessControlConditions {
   /**
    * String that you wish to encrypt
    */
   dataToEncrypt: string;
-}
-
-export interface EncryptZipRequest extends MultipleAccessControlConditions {
-  /**
-   * The zip that you wish to encrypt
-   */
-  zip: JSZip;
 }
 
 export interface EncryptFileRequest extends DecryptRequestBase {
@@ -639,7 +599,7 @@ export interface SigResponse {
   r: string;
   s: string;
   recid: number;
-  signature: string; // 0x...
+  signature: `0x${string}`;
   publicKey: string; // pkp public key (no 0x prefix)
   dataSigned: string;
 }
@@ -744,12 +704,12 @@ export interface BlsSignatureShare {
 }
 
 export interface SuccessNodePromises<T> {
-  success: boolean;
+  success: true;
   values: T[];
 }
 
 export interface RejectedNodePromises {
-  success: boolean;
+  success: false;
   error: NodeErrorV1;
 }
 
@@ -767,17 +727,6 @@ export interface NodeErrorV1 {
   errorCode?: string;
 }
 
-// V3 - Cayenne
-// {
-//   errorKind: 'Unexpected',
-//   errorCode: 'NodeUnknownError',
-//   status: 400,
-//   message: 'Unknown error occured',
-//   correlationId: 'lit_ef00fbaebb614',
-//   details: [
-//     'unexpected error: ECDSA signing failed: unexpected error: unexpected error: Message length to be signed is not 32 bytes.  Please hash it before sending it to the node to sign.  You can use SHA256 or Keccak256 for example'
-//   ]
-// }
 export interface NodeErrorV3 {
   errorKind: string;
   errorCode: string;
@@ -788,16 +737,34 @@ export interface NodeErrorV3 {
 }
 
 /**
- *
  * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
- *
  */
-export interface NodeClientErrorV0 {
+export const NodeClientErrorV0 = new Proxy(
+  {
+    errorCode: '',
+    message: '',
+    error: '',
+    name: '',
+  },
+  {
+    get(target, prop, receiver) {
+      deprecated(
+        'NodeClientErrorV0 is deprecated and will be removed in a future version. Use NodeClientErrorV1 instead.'
+      );
+      return Reflect.get(target, prop, receiver);
+    },
+  }
+);
+
+/**
+ * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
+ */
+export type NodeClientErrorV0 = typeof NodeClientErrorV0 & {
   errorCode?: string;
   message: string;
   error: any;
   name?: string;
-}
+};
 
 export interface NodeClientErrorV1 {
   message: string;
@@ -949,36 +916,6 @@ export interface DecryptFromJsonProps {
   parsedJsonData: EncryptToJsonPayload;
 }
 
-export interface EncryptFileAndZipWithMetadataProps
-  extends MultipleAccessControlConditions {
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
-
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: string;
-
-  // The file you wish to encrypt
-  file: File;
-
-  // An instance of LitNodeClient that is already connected
-  litNodeClient: ILitNodeClient;
-
-  // An optional readme text that will be inserted into readme.txt in the final zip file.  This is useful in case someone comes across this zip file and wants to know how to decrypt it.  This file could contain instructions and a URL to use to decrypt the file.
-  readme: string;
-}
-
-export interface DecryptZipFileWithMetadataProps extends SessionSigsOrAuthSig {
-  /**
-   * The zip file blob with metadata inside it and the encrypted asset
-   */
-  file: File | Blob;
-
-  /**
-   * An instance of LitNodeClient that is already connected
-   */
-  litNodeClient: ILitNodeClient;
-}
-
 /**
  * Struct in rust
  * -----
@@ -1082,9 +1019,6 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
 
   chainId?: number;
 
-  /**
-   * domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
-   */
   domain?: string;
 
   /**
@@ -1139,7 +1073,7 @@ export interface CommonGetSessionSigsProps {
   switchChain?: boolean;
   /**
    * The serialized session key pair to sign.
-   * If not provided, a session key pair will be fetched from localStorge or generated.
+   * If not provided, a session key pair will be fetched from localStorage or generated.
    */
   sessionKey?: SessionKeyPair;
 
@@ -1155,6 +1089,8 @@ export interface CommonGetSessionSigsProps {
    * Not limited to capacityDelegationAuthSig. Other AuthSigs with other purposes can also be in this array.
    */
   capabilityAuthSigs?: AuthSig[];
+
+  domain?: string;
 }
 
 export interface BaseProviderGetSessionSigsProps
@@ -1213,6 +1149,7 @@ export interface GetWalletSigProps extends LitActionSdkParams {
   sessionKeyUri: string;
   nonce: string;
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+  domain?: string;
 }
 
 export interface SessionSigningTemplate {
@@ -1282,7 +1219,6 @@ export interface PKPBaseProp {
   litActionJsParams?: any;
   controllerSessionSigs?: SessionSigs;
 
-  // -- soon to be deprecated
   /**
    * @deprecated - use authContext
    */
@@ -1339,34 +1275,8 @@ export interface PKPClientHelpers {
 }
 
 /**
- * ========== LitAuthClient ==========
+ * ========== Lit Auth Client ==========
  */
-export interface LitAuthClientOptions {
-  /**
-   * Endpoint to interact with a blockchain network. Defaults to the Lit Chronicle.
-   */
-  rpcUrl?: string;
-  /**
-   * Options for Lit's relay server
-   */
-  litRelayConfig?: LitRelayConfig;
-  /**
-   * Pass in a custom relay server
-   */
-  customRelay?: IRelay;
-  /**
-   * Lit Node Client
-   */
-  litNodeClient?: any;
-
-  /**
-   * If enable will turn on logging
-   */
-  debug?: boolean;
-
-  litOtpConfig?: OtpProviderOptions;
-}
-
 export interface OtpSessionResult {
   /**
    * Status message of the request
@@ -1414,6 +1324,27 @@ export interface IRelay {
    * @returns {Promise<IRelayMintResponse>} Response from the relay server
    */
   mintPKP(body: string): Promise<IRelayMintResponse>;
+  /**
+   * Mint a new PKP for the given auth method
+   *
+   * @throws {Error} - Throws an error if no AuthMethods are given
+   * @param {AuthMethod[]} authMethods - AuthMethods authentication methods to be added to the pkp
+   * @param {{ pkpPermissionScopes?: number[][]; sendPkpToitself?: boolean; addPkpEthAddressAsPermittedAddress?: boolean;}} options
+   *
+   * @returns {Promise<{pkpTokenId?: string; pkpEthAddress?: string; pkpPublicKey?: string}>} pkp information
+   */
+  mintPKPWithAuthMethods(
+    authMethods: AuthMethod[],
+    options: {
+      pkpPermissionScopes?: number[][];
+      sendPkpToitself?: boolean;
+      addPkpEthAddressAsPermittedAddress?: boolean;
+    }
+  ): Promise<{
+    pkpTokenId?: string;
+    pkpEthAddress?: string;
+    pkpPublicKey?: string;
+  }>;
   /**
    * Poll the relay server for status of minting request
    *
@@ -1667,29 +1598,6 @@ export interface BaseProviderSessionSigsParams {
   litNodeClient?: ILitNodeClient;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
-}
-
-export interface LoginUrlParams {
-  /**
-   * Auth method name
-   */
-  provider: string | null;
-  /**
-   * Access token
-   */
-  accessToken: string | null;
-  /**
-   * ID token
-   */
-  idToken: string | null;
-  /**
-   * OAuth state param
-   */
-  state: string | null;
-  /**
-   * Error codes from Lit's login server
-   */
-  error: string | null;
 }
 
 export interface BaseAuthenticateOptions {}

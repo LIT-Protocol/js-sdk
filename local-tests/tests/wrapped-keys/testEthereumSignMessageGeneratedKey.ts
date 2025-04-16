@@ -8,9 +8,9 @@ const { generatePrivateKey, signMessageWithEncryptedKey } = api;
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testEthereumSignMessageGeneratedKey
- * ✅ NETWORK=manzano yarn test:local --filter=testEthereumSignMessageGeneratedKey
- * ✅ NETWORK=localchain yarn test:local --filter=testEthereumSignMessageGeneratedKey
+ * ✅ NETWORK=datil-dev yarn test:local --filter=testEthereumSignMessageGeneratedKey
+ * ✅ NETWORK=datil-test yarn test:local --filter=testEthereumSignMessageGeneratedKey
+ * ✅ NETWORK=custom yarn test:local --filter=testEthereumSignMessageGeneratedKey
  */
 export const testEthereumSignMessageGeneratedKey = async (
   devEnv: TinnyEnvironment

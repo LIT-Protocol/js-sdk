@@ -17,6 +17,7 @@ import inquirer from 'inquirer';
 const VERCEL_PROJECT = {
   V5: 'prj_Xq6tl0JfFOmWlCLlMkh0B5rzFHoK',
   V6: 'prj_Ed96nvLrMCQgjVN252BmnHD1kRy4',
+  V7: 'prj_87TpDb44hK5zKtny2fjcLcyND73Q',
 };
 
 const args = getArgs();
@@ -40,6 +41,7 @@ async function selectProject() {
       choices: [
         { name: 'V5', value: VERCEL_PROJECT.V5 },
         { name: 'V6', value: VERCEL_PROJECT.V6 },
+        { name: 'V7', value: VERCEL_PROJECT.V7 },
       ],
     },
   ]);

@@ -1,5 +1,5 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { ethers } from 'ethers';
+
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -13,9 +13,8 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  *
  *
  * ## Test Commands:
- * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ NETWORK=manzano yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign
- * - ✅ NETWORK=localchain yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign
+ * - ✅ NETWORK=datil-test yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign
+ * - ✅ NETWORK=custom yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign
  */
 
 export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign =
@@ -87,6 +86,26 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign 
     // signature must start with 0x
     if (!runWithSessionSigs.signature.startsWith('0x')) {
       throw new Error(`Expected "signature" to start with 0x`);
+    }
+
+    const signature = ethers.utils.joinSignature({
+      r: '0x' + runWithSessionSigs.r,
+      s: '0x' + runWithSessionSigs.s,
+      recoveryParam: runWithSessionSigs.recid,
+    });
+    const recoveredPubKey = ethers.utils.recoverPublicKey(
+      alice.loveLetter,
+      signature
+    );
+    if (recoveredPubKey !== `0x${runWithSessionSigs.publicKey.toLowerCase()}`) {
+      throw new Error(
+        `Expected recovered public key to match runWithSessionSigs.publicKey`
+      );
+    }
+    if (recoveredPubKey !== `0x${bob.pkp.publicKey.toLowerCase()}`) {
+      throw new Error(
+        `Expected recovered public key to match bob.pkp.publicKey`
+      );
     }
 
     // recid must be parseable as a number

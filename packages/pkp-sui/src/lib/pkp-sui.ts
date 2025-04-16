@@ -32,6 +32,10 @@ import { sha256 } from '@noble/hashes/sha256';
 
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { PKPBaseProp, PKPWallet, SigResponse } from '@lit-protocol/types';
+import {
+  InvalidArgumentException,
+  UnknownError,
+} from '@lit-protocol/constants';
 
 import { getDigestFromBytes } from './TransactionBlockData';
 
@@ -143,7 +147,14 @@ export class PKPSuiWallet implements PKPWallet, Signer {
     if (transactionBlock instanceof Uint8Array) {
       return transactionBlock;
     }
-    throw new Error('Unknown transaction format');
+    throw new InvalidArgumentException(
+      {
+        info: {
+          transactionBlock,
+        },
+      },
+      `Unknown transaction format`
+    );
   }
 
   /**
@@ -212,7 +223,14 @@ export class PKPSuiWallet implements PKPWallet, Signer {
     } else if (tx instanceof Uint8Array) {
       return getDigestFromBytes(tx);
     } else {
-      throw new Error('Unknown transaction format.');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            tx,
+          },
+        },
+        'Unknown transaction format.'
+      );
     }
   }
 
@@ -251,7 +269,14 @@ export class PKPSuiWallet implements PKPWallet, Signer {
     } else if (input.transactionBlock instanceof Uint8Array) {
       dryRunTxBytes = input.transactionBlock;
     } else {
-      throw new Error('Unknown transaction format');
+      throw new InvalidArgumentException(
+        {
+          info: {
+            transactionBlock: input.transactionBlock,
+          },
+        },
+        'Unknown transaction format'
+      );
     }
 
     return this.provider.dryRunTransactionBlock({
@@ -271,7 +296,14 @@ export class PKPSuiWallet implements PKPWallet, Signer {
     const txEffects = await this.dryRunTransactionBlock(...args);
     const gasEstimation = getTotalGasUsedUpperBound(txEffects.effects);
     if (typeof gasEstimation === 'undefined') {
-      throw new Error('Failed to estimate the gas cost from transaction');
+      throw new UnknownError(
+        {
+          info: {
+            txEffects,
+          },
+        },
+        'Failed to estimate the gas cost from transaction'
+      );
     }
     return gasEstimation;
   }

@@ -9,10 +9,11 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "resolveJsonModule": false
   },
   "files": [],
-  "include": [],
+  "include": ["global.d.ts"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

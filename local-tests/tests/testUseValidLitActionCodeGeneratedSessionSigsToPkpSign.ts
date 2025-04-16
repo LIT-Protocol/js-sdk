@@ -1,24 +1,19 @@
-import { LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { ethers } from 'ethers';
+
 import { log } from '@lit-protocol/misc';
-import { LitAbility } from '@lit-protocol/types';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
- * ❌ NOT AVAILABLE IN HABANERO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  * ✅ NETWORK=datil-dev yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
+ * ✅ NETWORK=custom yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  *
  **/
 export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment
 ) => {
-  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
   const alice = await devEnv.createRandomPerson();
   const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
@@ -63,6 +58,26 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
   // recid must be parseable as a number
   if (isNaN(res.recid)) {
     throw new Error(`Expected "recid" to be parseable as a number`);
+  }
+
+  const signature = ethers.utils.joinSignature({
+    r: '0x' + res.r,
+    s: '0x' + res.s,
+    recoveryParam: res.recid,
+  });
+  const recoveredPubKey = ethers.utils.recoverPublicKey(
+    alice.loveLetter,
+    signature
+  );
+  if (recoveredPubKey !== `0x${res.publicKey.toLowerCase()}`) {
+    throw new Error(`Expected recovered public key to match res.publicKey`);
+  }
+  if (
+    recoveredPubKey !== `0x${alice.authMethodOwnedPkp.publicKey.toLowerCase()}`
+  ) {
+    throw new Error(
+      `Expected recovered public key to match alice.authMethodOwnedPkp.publicKey`
+    );
   }
 
   log('✅ res:', res);

@@ -1,4 +1,4 @@
-import { Logger, LogLevel, LogManager } from './logger';
+import { LOG_LEVEL, LogLevel, LogManager } from './logger';
 
 describe('logger', () => {
   let lm: LogManager;
@@ -25,7 +25,7 @@ describe('logger', () => {
     lm.withConfig({
       condenseLogs: true,
     });
-    let logger = lm.get('category');
+    const logger = lm.get('category');
     expect(logger.Config?.['condenseLogs']).toEqual(true);
   });
 
@@ -33,37 +33,37 @@ describe('logger', () => {
     lm.withConfig({
       condenseLogs: true,
     });
-    let logger = lm.get('category', 'bar');
-    logger.setLevel(LogLevel.INFO);
+    const logger = lm.get('category', 'bar');
+    logger.setLevel(LOG_LEVEL.INFO);
     expect(logger.Config?.['condenseLogs']).toEqual(true);
     logger.info('hello');
     logger.info('hello');
-    let logs = lm.getLogsForId('bar');
+    const logs = lm.getLogsForId('bar');
     expect(logs.length).toEqual(1);
   });
 
   it('should respect info logging level', () => {
     const logger = lm.get('info-logger', 'foo');
-    logger.setLevel(LogLevel.INFO);
+    logger.setLevel(LOG_LEVEL.INFO);
     logger.info('logging');
     logger.debug('shouldnt log');
-    let logs = lm.getLogsForId('foo');
+    const logs = lm.getLogsForId('foo');
     expect(logs.length).toEqual(1);
   });
 
   it('should log error at any level', () => {
     const logger = lm.get('info-logger', 'foo2');
-    logger.setLevel(LogLevel.DEBUG);
+    logger.setLevel(LOG_LEVEL.DEBUG);
     logger.debug('logging');
     logger.error('error');
-    let logs = lm.getLogsForId('foo2');
+    const logs = lm.getLogsForId('foo2');
     expect(logs.length).toEqual(2);
   });
 
   it('should safe serialize circular references', () => {
     const logger = lm.get('info-logger', 'foo3');
-    logger.setLevel(LogLevel.DEBUG);
-    let circ: any = { foo: 'bar' };
+    logger.setLevel(LOG_LEVEL.DEBUG);
+    const circ: any = { foo: 'bar' };
     circ.circ = circ;
     logger.debug('circular reference to serialize', circ);
     console.log(lm.getLogsForId('foo3'));
@@ -72,9 +72,9 @@ describe('logger', () => {
 
   it('should trace logs through multiple categories', () => {
     const logger = lm.get('info-logger', 'foo4');
-    logger.setLevel(LogLevel.DEBUG);
+    logger.setLevel(LOG_LEVEL.DEBUG);
     const logger2 = lm.get('debug-logger', 'foo4');
-    logger2.setLevel(LogLevel.DEBUG);
+    logger2.setLevel(LOG_LEVEL.DEBUG);
     logger2.debug('foo');
     logger.debug('bar');
     expect(lm.getLogsForId('foo4').length).toEqual(2);
@@ -84,7 +84,7 @@ describe('logger', () => {
     const count = 1_000;
     for (let i = 0; i < count; i++) {
       const logger = lm.get('' + i, 'foo5');
-      logger.setLevel(LogLevel.OFF);
+      logger.setLevel(LOG_LEVEL.OFF);
       logger.debug(i + '');
     }
 
@@ -95,7 +95,7 @@ describe('logger', () => {
     const count = 10_000;
     for (let i = 0; i < count; i++) {
       const logger = lm.get('' + i, 'foo6');
-      logger.setLevel(LogLevel.DEBUG);
+      logger.setLevel(LOG_LEVEL.DEBUG);
       logger.debug(i + '');
     }
 
@@ -122,7 +122,8 @@ describe('logger', () => {
     const requestIds = lm.LoggerIds;
 
     expect(requestIds.length).toBe(2);
-    expect(loggerA.timestamp).toEqual(requestIds[0]);
-    expect(loggerB.timestamp).toEqual(requestIds[1]);
+    expect(loggerA.timestamp).toBeLessThan(loggerB.timestamp);
+    expect(requestIds[0]).toBe('1');
+    expect(requestIds[1]).toBe('2');
   });
 });
