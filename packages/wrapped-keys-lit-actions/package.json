@@ -24,7 +24,9 @@
     "genReact": false
   },
   "scripts": {
-    "generate-lit-actions": "yarn node ./esbuild.config.js"
+    "prepublishOnly": "yarn generate-lit-actions && yarn publish-lit-actions",
+    "generate-lit-actions": "yarn node ./esbuild.config.js",
+    "publish-lit-actions": "yarn node ./sync-actions-to-ipfs"
   },
   "version": "7.1.0",
   "main": "./dist/src/index.js",

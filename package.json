@@ -111,6 +111,7 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsx-a11y": "6.9.0",
     "inquirer": "^9.2.21",
+    "ipfs-only-hash": "^4.0.0",
     "ipfs-unixfs-importer": "12.0.1",
     "jest": "27.5.1",
     "lerna": "^5.4.3",

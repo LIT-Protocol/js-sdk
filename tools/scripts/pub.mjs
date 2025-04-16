@@ -12,7 +12,6 @@ import {
   redLog,
   question,
   writeJsonFile,
-  yellowLog,
 } from './utils.mjs';
 
 const args = getArgs();
@@ -178,7 +177,7 @@ await question('Are you sure you want to publish to? (y/n)', {
     });
 
     while (true) {
-      // wait for 1 second
+      // wait a few secs to check again if all packages are published
       await new Promise((resolve) => setTimeout(resolve, 2000));
       if (counter >= dirs.length) {
         greenLog('🎉 Publish complete!', true);
