@@ -158,19 +158,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     blockExplorerUrls: ['https://explorer.harmony.one/'],
     vmType: 'EVM',
   },
-  mumbai: {
-    contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
-    chainId: 80001,
-    name: 'Mumbai',
-    symbol: 'MATIC',
-    decimals: 18,
-    rpcUrls: [
-      'https://rpc-mumbai.maticvigil.com/v1/96bf5fa6e03d272fbd09de48d03927b95633726c',
-    ],
-    blockExplorerUrls: ['https://mumbai.polygonscan.com'],
-    type: 'ERC1155',
-    vmType: 'EVM',
-  },
   cronos: {
     contractAddress: '0xc716950e5DEae248160109F562e1C9bF8E0CA25B',
     chainId: 25,
