@@ -446,10 +446,10 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  zoraGoerli: {
+  zoraSepolia: {
     contractAddress: null,
     chainId: 999999999,
-    name: 'Zora Goerli',
+    name: 'Zora Sepolia',
     symbol: 'ETH',
     decimals: 18,
     rpcUrls: ['https://sepolia.rpc.zora.energy'],
@@ -459,12 +459,12 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
   zksyncTestnet: {
     contractAddress: null,
-    chainId: 280,
+    chainId: 300,
     name: 'zkSync Era Testnet',
     symbol: 'ETH',
     decimals: 18,
-    rpcUrls: ['https://testnet.era.zksync.dev'],
-    blockExplorerUrls: ['https://goerli.explorer.zksync.io/'],
+    rpcUrls: ['https://sepolia.era.zksync.dev'],
+    blockExplorerUrls: ['https://sepolia.explorer.zksync.io/'],
     type: null,
     vmType: 'EVM',
   },
