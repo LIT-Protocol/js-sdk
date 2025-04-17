@@ -174,8 +174,9 @@ export abstract class BaseProvider {
       );
     }
 
+    const wallet = ethers.Wallet.createRandom();
     const litContracts = new LitContracts({
-      randomPrivatekey: true,
+      signer: wallet,
       network: this.litNodeClient.config.litNetwork,
     });
     try {
