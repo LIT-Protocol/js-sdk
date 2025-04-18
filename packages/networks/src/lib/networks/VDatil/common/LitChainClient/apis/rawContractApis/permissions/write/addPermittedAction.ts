@@ -1,9 +1,9 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { ipfsCidV0ToHex } from 'services/lit/utils/transformers/ipfsCidV0ToHex';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { isIpfsCidV0 } from 'services/lit/utils/z-validate';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { ipfsCidV0ToHex } from '../../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
 import { LitTxVoid } from '../../../types';
@@ -25,12 +25,16 @@ const addPermittedActionSchema = z
   });
 
 type AddPermittedActionRequest = z.input<typeof addPermittedActionSchema>;
+type ValidatedAddPermittedActionRequest = z.output<
+  typeof addPermittedActionSchema
+>;
 
 export async function addPermittedAction(
   request: AddPermittedActionRequest,
   networkCtx: DatilContext
 ): Promise<LitTxVoid> {
-  const validatedRequest = addPermittedActionSchema.parse(request);
+  const validatedRequest: ValidatedAddPermittedActionRequest =
+    addPermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =

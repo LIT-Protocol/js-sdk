@@ -16,6 +16,11 @@ import { createLitContracts } from './utils/createLitContracts';
 import { mintPKP } from './highLevelApis/mintPKP/mintPKP';
 import { PKPPermissionsManager } from './highLevelApis/PKPPermissionsManager';
 
+// Define type for utils to avoid TypeScript serialization error
+type UtilsType = {
+  createLitContracts: typeof createLitContracts;
+};
+
 // ==================== Exports ====================
 // ========== Treeshakable ==========
 // Individual exports allow better tree-shaking
@@ -71,6 +76,6 @@ export const api = {
   PKPPermissionsManager,
 };
 
-export const utils = {
+export const utils: UtilsType = {
   createLitContracts,
 };

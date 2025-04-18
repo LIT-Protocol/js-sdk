@@ -1,5 +1,5 @@
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { logger } from '@lit-protocol/logger';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
 import { getPermittedAddresses } from '../../../rawContractApis/permissions/read/getPermittedAddresses';
 import {
@@ -71,32 +71,32 @@ export async function getPermissionsContext(
 }
 
 // Example usage
-if (import.meta.main) {
-  // const networkCtx = datilDevNetworkContext;
-  // async function example() {
-  //   // Can use any of these identifiers:
-  //   const ctx = await getPermissionsContext(
-  //     {
-  //       tokenId:
-  //         "76136736151863037541847315168980811654782785653773679312890341037699996601290",
-  //     },
-  //     networkCtx
-  //   );
-  //   // Check current permissions
-  //   const isActionAllowed = ctx.isActionPermitted("0x1234..." as `0x${string}`);
-  //   const isAddressAllowed = ctx.isAddressPermitted(
-  //     "0x5678..." as `0x${string}`
-  //   );
-  //   const isAuthMethodAllowed = ctx.isAuthMethodPermitted(
-  //     1, // AuthMethodType.EthWallet
-  //     "0x1234567890abcdef1234567890abcdef12345678"
-  //   );
-  //   console.log("Action permitted:", isActionAllowed);
-  //   console.log("Address permitted:", isAddressAllowed);
-  //   console.log("Auth method permitted:", isAuthMethodAllowed);
-  //   console.log("All permitted actions:", ctx.actions);
-  //   console.log("All permitted addresses:", ctx.addresses);
-  //   console.log("All permitted auth methods:", ctx.authMethods);
-  // }
-  // example().catch(console.error);
-}
+// if (import.meta.main) {
+//   // const networkCtx = datilDevNetworkContext;
+//   // async function example() {
+//   //   // Can use any of these identifiers:
+//   //   const ctx = await getPermissionsContext(
+//   //     {
+//   //       tokenId:
+//   //         "76136736151863037541847315168980811654782785653773679312890341037699996601290",
+//   //     },
+//   //     networkCtx
+//   //   );
+//   //   // Check current permissions
+//   //   const isActionAllowed = ctx.isActionPermitted("0x1234..." as `0x${string}`);
+//   //   const isAddressAllowed = ctx.isAddressPermitted(
+//   //     "0x5678..." as `0x${string}`
+//   //   );
+//   //   const isAuthMethodAllowed = ctx.isAuthMethodPermitted(
+//   //     1, // AuthMethodType.EthWallet
+//   //     "0x1234567890abcdef1234567890abcdef12345678"
+//   //   );
+//   //   console.log("Action permitted:", isActionAllowed);
+//   //   console.log("Address permitted:", isAddressAllowed);
+//   //   console.log("Auth method permitted:", isAuthMethodAllowed);
+//   //   console.log("All permitted actions:", ctx.actions);
+//   //   console.log("All permitted addresses:", ctx.addresses);
+//   //   console.log("All permitted auth methods:", ctx.authMethods);
+//   // }
+//   // example().catch(console.error);
+// }

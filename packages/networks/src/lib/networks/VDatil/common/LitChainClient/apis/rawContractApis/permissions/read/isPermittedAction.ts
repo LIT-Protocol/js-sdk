@@ -1,9 +1,9 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { ipfsCidV0ToHex } from 'services/lit/utils/transformers/ipfsCidV0ToHex';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { isIpfsCidV0 } from 'services/lit/utils/z-validate';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { ipfsCidV0ToHex } from '../../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { createLitContracts } from '../../../utils/createLitContracts';
 
@@ -20,6 +20,9 @@ const isPermittedActionSchema = z
   });
 
 type IsPermittedActionRequest = z.input<typeof isPermittedActionSchema>;
+type ValidatedIsPermittedActionRequest = z.output<
+  typeof isPermittedActionSchema
+>;
 
 /**
  * Checks if an action is permitted for a PKP token
@@ -31,7 +34,8 @@ export async function isPermittedAction(
   request: IsPermittedActionRequest,
   networkCtx: DatilContext
 ): Promise<boolean> {
-  const validatedRequest = isPermittedActionSchema.parse(request);
+  const validatedRequest: ValidatedIsPermittedActionRequest =
+    isPermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract } = createLitContracts(networkCtx);

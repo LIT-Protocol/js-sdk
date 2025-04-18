@@ -1,4 +1,4 @@
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../../types';
 import {
   MintRequestRaw,
   MintRequestSchema,
@@ -50,6 +50,8 @@ export async function mintNextAndAddAuthMethods(
       validatedRequest.sendPkpToItself,
     ],
     {
+      account: walletClient.account!,
+      chain: walletClient.chain!,
       value: mintCost,
     }
   );

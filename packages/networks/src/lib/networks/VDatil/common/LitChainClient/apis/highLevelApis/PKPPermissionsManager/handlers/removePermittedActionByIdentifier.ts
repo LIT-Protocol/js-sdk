@@ -1,6 +1,6 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { isIpfsCidV0 } from 'services/lit/utils/z-validate';
+import { DatilContext } from '../../../../../../types';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
 import { z } from 'zod';
 import {
   PkpIdentifierRaw,

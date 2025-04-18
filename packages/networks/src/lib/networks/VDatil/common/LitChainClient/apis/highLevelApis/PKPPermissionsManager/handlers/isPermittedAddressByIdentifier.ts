@@ -1,6 +1,6 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { isPermittedAddress } from '../../../rawContractApis/permissions/read/isPermittedAddress';
 import {

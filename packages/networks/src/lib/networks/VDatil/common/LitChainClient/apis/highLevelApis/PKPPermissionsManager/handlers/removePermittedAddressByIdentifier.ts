@@ -1,5 +1,5 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../../types';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,

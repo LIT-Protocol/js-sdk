@@ -1,16 +1,19 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { createLitContracts } from '../../../utils/createLitContracts';
-import { datilDevNetworkContext } from 'services/lit/LitNetwork/vDatil/datil-dev/networkContext';
+import { datilDevNetworkContext } from '../../../../../../datil-dev/networkContext';
 
 const getPermittedAuthMethodsSchema = z.object({
   tokenId: toBigInt,
 });
 
 type GetPermittedAuthMethodsRequest = z.input<
+  typeof getPermittedAuthMethodsSchema
+>;
+type ValidatedGetPermittedAuthMethodsRequest = z.output<
   typeof getPermittedAuthMethodsSchema
 >;
 
@@ -31,7 +34,8 @@ export async function getPermittedAuthMethods(
   request: GetPermittedAuthMethodsRequest,
   networkCtx: DatilContext
 ): Promise<readonly AuthMethod[]> {
-  const validatedRequest = getPermittedAuthMethodsSchema.parse(request);
+  const validatedRequest: ValidatedGetPermittedAuthMethodsRequest =
+    getPermittedAuthMethodsSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract } = createLitContracts(networkCtx);
@@ -42,16 +46,16 @@ export async function getPermittedAuthMethods(
   return res;
 }
 
-// Example usage when running as main
-if (import.meta.main) {
-  const networkCtx = datilDevNetworkContext;
+// // Example usage when running as main
+// if (import.meta.main) {
+//   const networkCtx = datilDevNetworkContext;
 
-  const res = await getPermittedAuthMethods(
-    {
-      tokenId:
-        '76136736151863037541847315168980811654782785653773679312890341037699996601290',
-    },
-    networkCtx
-  );
-  console.log('permittedAuthMethods', res);
-}
+//   const res = await getPermittedAuthMethods(
+//     {
+//       tokenId:
+//         '76136736151863037541847315168980811654782785653773679312890341037699996601290',
+//     },
+//     networkCtx
+//   );
+//   console.log('permittedAuthMethods', res);
+// }

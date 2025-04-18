@@ -1,9 +1,9 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { ipfsCidV0ToHex } from 'services/lit/utils/transformers/ipfsCidV0ToHex';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { isIpfsCidV0 } from 'services/lit/utils/z-validate';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { ipfsCidV0ToHex } from '../../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
@@ -23,6 +23,9 @@ const removePermittedActionSchema = z
   });
 
 type RemovePermittedActionRequest = z.input<typeof removePermittedActionSchema>;
+type ValidatedRemovePermittedActionRequest = z.output<
+  typeof removePermittedActionSchema
+>;
 
 /**
  * Removes a permitted action from a PKP token
@@ -34,7 +37,8 @@ export async function removePermittedAction(
   request: RemovePermittedActionRequest,
   networkCtx: DatilContext
 ): Promise<LitTxVoid> {
-  const validatedRequest = removePermittedActionSchema.parse(request);
+  const validatedRequest: ValidatedRemovePermittedActionRequest =
+    removePermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =

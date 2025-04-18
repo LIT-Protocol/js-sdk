@@ -1,5 +1,5 @@
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { logger } from '@lit-protocol/logger';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
 import {
   PkpIdentifierRaw,

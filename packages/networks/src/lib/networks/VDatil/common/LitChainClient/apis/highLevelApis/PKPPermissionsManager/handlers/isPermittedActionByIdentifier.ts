@@ -1,7 +1,7 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { isIpfsCidV0 } from 'services/lit/utils/z-validate';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { isPermittedAction } from '../../../rawContractApis/permissions/read/isPermittedAction';
 import {
