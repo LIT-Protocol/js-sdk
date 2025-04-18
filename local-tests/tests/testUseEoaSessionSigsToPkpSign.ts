@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 
-import { log } from '@lit-protocol/misc';
 import { getEoaAuthContext } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -82,5 +81,5 @@ export const testUseEoaSessionSigsToPkpSign = async (
     );
   }
 
-  log('✅ testUseEoaSessionSigsToPkpSign');
+  console.log('✅ testUseEoaSessionSigsToPkpSign');
 };

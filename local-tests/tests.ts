@@ -1,3 +1,4 @@
+import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
@@ -10,24 +11,17 @@ import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSes
 import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
 import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
-import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaSessionSigsToEncryptDecryptString';
-import { testUseEoaSessionSigsToEncryptDecryptUint8Array } from './tests/testUseEoaSessionSigsToEncryptDecryptUint8Array';
-import { testUsePkpSessionSigsToEncryptDecryptString } from './tests/testUsePkpSessionSigsToEncryptDecryptString';
-import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
 import { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionCodeToGenerateSessionSigs';
-import { testUseEoaSessionSigsToEncryptDecryptFile } from './tests/testUseEoaSessionSigsToEncryptDecryptFile';
 import { testUsePkpSessionSigsToExecuteJsSigningInParallel } from './tests/testUsePkpSessionSigsToExecuteJsSigningInParallel';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel';
 import { testUsePkpSessionSigsToExecuteJsClaimKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimKeys';
 import { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUsePkpSessionSigsToExecuteJsJsonResponse } from './tests/testUsePkpSessionSigsToExecuteJsJsonResponse';
 import { testUsePkpSessionSigsToExecuteJsConsoleLog } from './tests/testUsePkpSessionSigsToExecuteJsConsoleLog';
-import { testUsePkpSessionSigsToEncryptDecryptFile } from './tests/testUsePkpSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
-import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
 import { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
@@ -64,7 +58,6 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
-import { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 import { testRelayer } from './tests/testRelayer';
 
@@ -103,24 +96,17 @@ export { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSes
 export { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 export { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
 export { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
-export { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaSessionSigsToEncryptDecryptString';
-export { testUseEoaSessionSigsToEncryptDecryptUint8Array } from './tests/testUseEoaSessionSigsToEncryptDecryptUint8Array';
-export { testUsePkpSessionSigsToEncryptDecryptString } from './tests/testUsePkpSessionSigsToEncryptDecryptString';
-export { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
 export { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionCodeToGenerateSessionSigs';
-export { testUseEoaSessionSigsToEncryptDecryptFile } from './tests/testUseEoaSessionSigsToEncryptDecryptFile';
 export { testUsePkpSessionSigsToExecuteJsSigningInParallel } from './tests/testUsePkpSessionSigsToExecuteJsSigningInParallel';
 export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel';
 export { testUsePkpSessionSigsToExecuteJsClaimKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimKeys';
 export { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimMultipleKeys';
 export { testUsePkpSessionSigsToExecuteJsJsonResponse } from './tests/testUsePkpSessionSigsToExecuteJsJsonResponse';
 export { testUsePkpSessionSigsToExecuteJsConsoleLog } from './tests/testUsePkpSessionSigsToExecuteJsConsoleLog';
-export { testUsePkpSessionSigsToEncryptDecryptFile } from './tests/testUsePkpSessionSigsToEncryptDecryptFile';
 export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys';
 export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys';
 export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse';
 export { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
-export { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 export { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 export { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
 
@@ -163,7 +149,6 @@ export { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/t
 export { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 export { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 export { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
-export { testExecuteJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
 export { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 export { testRelayer } from './tests/testRelayer';
 
@@ -197,7 +182,7 @@ const relayerTests = {
 
 // --filter=WrappedKey
 const wrappedKeysTests = {
-  // -- valid cases
+  // // -- valid cases
   // testBatchGeneratePrivateKeys,
   // testEthereumSignMessageGeneratedKey,
   // testEthereumBroadcastTransactionGeneratedKey,
@@ -205,22 +190,22 @@ const wrappedKeysTests = {
   // testEthereumSignTransactionWrappedKey,
   // testEthereumBroadcastTransactionWrappedKey,
   // testEthereumBroadcastWrappedKeyWithFetchGasParams,
-  // -- generate wrapped keys
+  // // -- generate wrapped keys
   // testGenerateEthereumWrappedKey,
   // testGenerateSolanaWrappedKey,
-  // -- import wrapped keys
+  // // -- import wrapped keys
   // testImportWrappedKey,
-  // -- export wrapped keys
+  // // -- export wrapped keys
   // testExportWrappedKey,
-  // -- solana wrapped keys
+  // // -- solana wrapped keys
   // testSignMessageWithSolanaEncryptedKey,
   // testSignTransactionWithSolanaEncryptedKey,
-  // -- invalid cases
+  // // -- invalid cases
   // testFailEthereumSignTransactionWrappedKeyWithMissingParam,
   // testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
   // testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
   // testFailBatchGeneratePrivateKeysAtomic,
-  // -- import wrapped keys
+  // // -- import wrapped keys
   // testFailImportWrappedKeysWithSamePrivateKey,
   // testFailImportWrappedKeysWithEoaSessionSig,
   // testFailImportWrappedKeysWithMaxExpirySessionSig,
@@ -230,15 +215,13 @@ const wrappedKeysTests = {
 
 const eoaSessionSigsTests = {
   testUseEoaSessionSigsToExecuteJsSigning,
+  testUseEoaSessionSigsToRequestSingleResponse,
   testUseEoaSessionSigsToPkpSign,
   testUseEoaSessionSigsToExecuteJsSigningInParallel,
   testUseEoaSessionSigsToExecuteJsClaimKeys,
   testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
   testUseEoaSessionSigsToExecuteJsJsonResponse,
   testUseEoaSessionSigsToExecuteJsConsoleLog,
-  testUseEoaSessionSigsToEncryptDecryptString,
-  testUseEoaSessionSigsToEncryptDecryptUint8Array,
-  testUseEoaSessionSigsToEncryptDecryptFile,
 };
 
 const pkpSessionSigsTests = {
@@ -249,8 +232,6 @@ const pkpSessionSigsTests = {
   testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
   testUsePkpSessionSigsToExecuteJsJsonResponse,
   testUsePkpSessionSigsToExecuteJsConsoleLog,
-  testUsePkpSessionSigsToEncryptDecryptString,
-  testUsePkpSessionSigsToEncryptDecryptFile,
 };
 
 const litActionSessionSigsTests = {
@@ -261,8 +242,6 @@ const litActionSessionSigsTests = {
   testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
   testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
   testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
-  testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString,
-  testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile,
 
   // -- invalid cases
   testUseInvalidLitActionIpfsCodeToGenerateSessionSigs,
@@ -286,6 +265,11 @@ const bareAuthSigTests = {
   // testSolAuthSigToEncryptDecryptString,
   // -- cosmos auth sig
   // testCosmosAuthSigToEncryptDecryptString,
+};
+
+const eip1271AuthSigTests = {
+  // testKeccakEip1271AuthSigToEncryptDecryptString,
+  // testShaEip1271AuthSigToEncryptDecryptString,
 };
 
 const pkpEthersTest = {
@@ -332,9 +316,6 @@ const litActionCombiningTests = {
   ecdsaSignAndCombine: {
     testExecuteJsSignAndCombineEcdsa,
   },
-  decryptAndCombine: {
-    testExecuteJsDecryptAndCombine,
-  },
   broadcastAndCombine: {
     testExecuteJsBroadcastAndCollect,
   },
@@ -347,6 +328,7 @@ export const tinnyTests = {
   ...pkpSessionSigsTests,
   ...litActionSessionSigsTests,
   ...litActionIpfsIdSessionSigsTests,
+  ...eip1271AuthSigTests,
   ...bareAuthSigTests,
 
   ...pkpEthersTest.eoaSessionSigs,
@@ -354,7 +336,6 @@ export const tinnyTests = {
   ...pkpEthersTest.litActionSessionSigs,
 
   ...litActionCombiningTests.broadcastAndCombine,
-  ...litActionCombiningTests.decryptAndCombine,
   ...litActionCombiningTests.ecdsaSignAndCombine,
 
   ...relayerTests,

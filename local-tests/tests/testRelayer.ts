@@ -1,7 +1,8 @@
-import { log } from '@lit-protocol/misc';
 import { ClaimRequest, ClientClaimProcessor } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-import { EthWalletProvider, LitRelay } from '@lit-protocol/lit-auth-client';
+import { authenticators, LitRelay } from '@lit-protocol/auth';
+
+const { MetamaskAuthenticator } = authenticators;
 
 /**
  * Test Commands:
@@ -18,20 +19,6 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     relayUrl: LitRelay.getRelayUrl(devEnv.network),
     relayApiKey: 'test-api-key',
   });
-  const ethWalletProvider = new EthWalletProvider({
-    relay: litRelay,
-    litNodeClient: devEnv.litNodeClient,
-  });
-
-  const pkps = await ethWalletProvider.fetchPKPsThroughRelayer(
-    alice.authMethod
-  );
-
-  if (pkps.length <= 0) {
-    throw new Error('No PKPs found');
-  } else {
-    console.log('✅ 1. [testRelayer] /fetch-pkps-by-auth-method works');
-  }
 
   // -- test claims
   const claimRequest: ClaimRequest<ClientClaimProcessor> = {
@@ -102,5 +89,5 @@ export const testRelayer = async (devEnv: TinnyEnvironment) => {
     }
   });
 
-  log('✅ 2. [testRelayer] Claim works');
+  console.log('✅ 2. [testRelayer] Claim works');
 };

@@ -1,9 +1,5 @@
 import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
 import { AuthSig } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8ArrayToBase64,
-} from '@lit-protocol/uint8arrays';
 
 import {
   LIT_SESSIONSIG_AUTHORIZATION_SCHEMA_PREFIX,
@@ -12,11 +8,12 @@ import {
 import { BaseRequestParams, SupportedNetworks } from './types';
 
 function composeAuthHeader(sessionSig: AuthSig) {
-  const sessionSigUintArr = uint8arrayFromString(JSON.stringify(sessionSig));
+  const sessionSigsString = JSON.stringify(sessionSig);
 
-  return `${LIT_SESSIONSIG_AUTHORIZATION_SCHEMA_PREFIX}${uint8ArrayToBase64(
-    sessionSigUintArr
-  )}`;
+  return `${LIT_SESSIONSIG_AUTHORIZATION_SCHEMA_PREFIX}${Buffer.from(
+    sessionSigsString,
+    'utf8'
+  ).toString('base64')}`;
 }
 
 const supportedNetworks: SupportedNetworks[] = [

@@ -1,14 +1,16 @@
 import { SiweMessage } from 'siwe';
+
 import {
   LIT_ABILITY,
   LIT_RESOURCE_PREFIX,
   LIT_NAMESPACE,
   LIT_RECAP_ABILITY,
 } from '@lit-protocol/constants';
+
 import { LitAccessControlConditionResource } from '../resources';
 import { RecapSessionCapabilityObject } from './recap-session-capability-object';
 
-const isClass = (v: any) => {
+const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
 };
 

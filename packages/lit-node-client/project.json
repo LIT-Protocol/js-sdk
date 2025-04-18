@@ -29,6 +29,15 @@
         "jestConfig": "packages/lit-node-client/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "testWatch": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-node-client"],
+      "options": {
+        "jestConfig": "packages/lit-node-client/jest.config.ts",
+        "watch": true,
+        "passWithNoTests": true
+      }
     }
   },
   "tags": []

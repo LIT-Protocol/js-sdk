@@ -1,4 +1,3 @@
-import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { api } from '@lit-protocol/wrapped-keys';
@@ -94,7 +93,7 @@ export const testEthereumSignMessageWrappedKey = async (
       );
     }
 
-    log('✅ testEthereumSignMessageWrappedKey');
+    console.log('✅ testEthereumSignMessageWrappedKey');
   } finally {
     devEnv.releasePrivateKeyFromUser(alice);
   }

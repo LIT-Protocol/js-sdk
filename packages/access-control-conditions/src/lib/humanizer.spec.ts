@@ -1,11 +1,12 @@
-import * as humanizer from './humanizer';
-import { humanizeAccessControlConditions } from './humanizer';
 import {
   AccsCOSMOSParams,
   AccsEVMParams,
   AccsSOLV2Params,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
+
+import * as humanizer from './humanizer';
+import { humanizeAccessControlConditions } from './humanizer';
 
 // ---------- Test Cases ----------
 describe('humanizer.ts', () => {
@@ -60,7 +61,7 @@ describe('humanizer.ts', () => {
     expect(OUTPUT).toBe('at most');
   });
   it('should humanizeEvmBasicAccessControlConditions', async () => {
-    const INPUT: Array<AccsEVMParams> = [
+    const INPUT: AccsEVMParams[] = [
       {
         contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
         functionName: 'balanceOf',
@@ -108,7 +109,7 @@ describe('humanizer.ts', () => {
   });
 
   it('should humanizeSolRpcConditions', async () => {
-    const INPUT: Array<AccsSOLV2Params> = [
+    const INPUT: AccsSOLV2Params[] = [
       {
         method: 'getTokenAccountBalance',
         params: ['tn2WEWk4Kqj157XsSdmBBcjWumVhkyJECXCKPq9ReL9'],
@@ -134,7 +135,7 @@ describe('humanizer.ts', () => {
   });
 
   it('should humanizeCosmosConditions', async () => {
-    const INPUT: Array<AccsCOSMOSParams> = [
+    const INPUT: AccsCOSMOSParams[] = [
       {
         conditionType: 'cosmos',
         path: '/cosmos/bank/v1beta1/balances/:userAddress',

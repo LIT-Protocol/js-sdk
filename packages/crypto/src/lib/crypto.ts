@@ -1,7 +1,9 @@
+import { ed25519 } from '@noble/curves/ed25519';
 import { joinSignature, splitSignature } from 'ethers/lib/utils';
 
 import {
   InvalidParamType,
+  InvalidSignatureError,
   LIT_CURVE,
   LIT_CURVE_VALUES,
   NetworkError,
@@ -9,13 +11,9 @@ import {
   UnknownError,
   UnknownSignatureError,
 } from '@lit-protocol/constants';
-import { log } from '@lit-protocol/misc';
-import { nacl } from '@lit-protocol/nacl';
+import { logger } from '@lit-protocol/logger';
+import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { NodeAttestation, SessionKeyPair, SigShare } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
 import {
   blsCombine,
   blsDecrypt,
@@ -144,7 +142,13 @@ export const combineSignatureShares = async (
   const signature = await blsCombine(sigShares);
 
   if (signature.length !== 192) {
-    throw new Error(
+    throw new InvalidSignatureError(
+      {
+        info: {
+          signature,
+          shares,
+        },
+      },
       `Signature length is not 192. Got ${signature.length} instead.`
     );
   }
@@ -300,15 +304,62 @@ export const computeHDPubKey = async (
  * @returns { SessionKeyPair } sessionKeyPair
  */
 export const generateSessionKeyPair = (): SessionKeyPair => {
-  const keyPair = nacl.sign.keyPair();
+  const privateKey = ed25519.utils.randomPrivateKey();
+  const publicKey = ed25519.getPublicKey(privateKey);
+  const combinedSecretKey = new Uint8Array(
+    privateKey.length + publicKey.length
+  );
+  combinedSecretKey.set(privateKey, 0);
+  combinedSecretKey.set(publicKey, privateKey.length);
 
   const sessionKeyPair: SessionKeyPair = {
-    publicKey: uint8arrayToString(keyPair.publicKey, 'base16'),
-    secretKey: uint8arrayToString(keyPair.secretKey, 'base16'),
+    publicKey: Buffer.from(publicKey).toString('hex'),
+    secretKey: Buffer.from(combinedSecretKey).toString('hex'), // TODO check if concatenated public key is needed
   };
 
   return sessionKeyPair;
 };
+
+/**
+ * Converts a public key between compressed and uncompressed formats.
+ *
+ * @param publicKey - Public key as a Buffer (33 bytes compressed or 65 bytes uncompressed)
+ * @returns Converted public key as a Buffer
+ */
+export function publicKeyCompress(publicKey: Buffer): Buffer {
+  // Validate the public key length is either 33 (compressed) or 65 (uncompressed)
+  if (publicKey.length !== 33 && publicKey.length !== 65) {
+    throw new InvalidSignatureError(
+      {
+        info: {
+          publicKey,
+        },
+      },
+      'Invalid public key length. Expected 33 (compressed) or 65 (uncompressed) bytes.'
+    );
+  }
+
+  // If the key is already compressed (33 bytes), return it unchanged.
+  if (publicKey.length === 33) {
+    return publicKey;
+  }
+
+  if (publicKey[0] !== 0x04) {
+    throw new InvalidSignatureError(
+      {
+        info: {
+          publicKey,
+        },
+      },
+      'Invalid uncompressed public key format: does not start with 0x04.'
+    );
+  }
+
+  const x = publicKey.subarray(1, 33);
+  const y = publicKey.subarray(33, 65);
+  const prefix = y[y.length - 1] % 2 === 0 ? 0x02 : 0x03;
+  return Buffer.concat([Buffer.from([prefix]), x]);
+}
 
 async function doDecrypt(
   ciphertextBase64: string,
@@ -334,7 +385,7 @@ async function doDecrypt(
 async function getAmdCert(url: string): Promise<Uint8Array> {
   const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
 
-  log(
+  logger.info(
     `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} to manage CORS restrictions and to avoid being rate limited by AMD.`
   );
 
@@ -356,18 +407,26 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
 
   try {
     return await fetchAsUint8Array(proxyUrl);
-  } catch (e) {
-    log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
+  } catch (error) {
+    logger.error({
+      function: 'getAmdCert',
+      msg: `Failed to fetch AMD cert from proxy`,
+      error,
+    });
   }
 
   // Try direct fetch only if proxy fails
-  log('[getAmdCert] Attempting to fetch directly without proxy.');
+  logger.info('Attempting to fetch directly without proxy.');
 
   try {
     return await fetchAsUint8Array(url);
-  } catch (e) {
-    log('[getAmdCert] Direct fetch also failed:', e);
-    throw e; // Re-throw to signal that both methods failed
+  } catch (error) {
+    logger.error({
+      function: 'getAmdCert',
+      msg: 'Direct fetch also failed',
+      error,
+    });
+    throw error; // Re-throw to signal that both methods failed
   }
 }
 
@@ -468,13 +527,13 @@ export const checkSevSnpAttestation = async (
   const vcekUrl = await sevSnpGetVcekUrl(report);
   // use local storage if we have one available
   if (globalThis.localStorage) {
-    log('Using local storage for certificate caching');
-    vcekCert = localStorage.getItem(vcekUrl);
+    logger.info('Using local storage for certificate caching');
+    vcekCert = getStorageItem(vcekUrl);
     if (vcekCert) {
-      vcekCert = uint8arrayFromString(vcekCert, 'base64');
+      vcekCert = Buffer.from(vcekCert, 'base64');
     } else {
       vcekCert = await getAmdCert(vcekUrl);
-      localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
+      setStorageItem(vcekUrl, Buffer.from(vcekCert).toString('base64'));
     }
   } else {
     const cache = ((
@@ -500,8 +559,3 @@ export const checkSevSnpAttestation = async (
   // pass base64 encoded report to wasm wrapper
   return sevSnpVerify(report, data, signatures, challenge, vcekCert);
 };
-
-declare global {
-  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
-  var LitNodeClient: any;
-}
