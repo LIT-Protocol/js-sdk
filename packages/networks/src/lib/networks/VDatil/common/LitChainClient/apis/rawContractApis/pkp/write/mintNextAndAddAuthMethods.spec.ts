@@ -33,7 +33,7 @@ describe('LitChainClient', () => {
     expect(tx.hash).toBeDefined();
     expect(tx.decodedLogs.length).toBeGreaterThan(0);
     expect(tx.data.tokenId).toBeDefined();
-    expect(tx.data.pubkey).toStartWith('0x');
-    expect(tx.data.ethAddress).toStartWith('0x');
+    expect(tx.data.pubkey).toMatch(/^0x/);
+    expect(tx.data.ethAddress).toMatch(/^0x/);
   });
 });

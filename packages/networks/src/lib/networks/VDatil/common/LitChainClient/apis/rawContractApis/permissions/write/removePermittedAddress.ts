@@ -1,7 +1,7 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
@@ -19,6 +19,9 @@ const removePermittedAddressSchema = z.object({
 type RemovePermittedAddressRequest = z.input<
   typeof removePermittedAddressSchema
 >;
+type ValidatedRemovePermittedAddressRequest = z.output<
+  typeof removePermittedAddressSchema
+>;
 
 /**
  * Removes a permitted address from a PKP token
@@ -30,7 +33,8 @@ export async function removePermittedAddress(
   request: RemovePermittedAddressRequest,
   networkCtx: DatilContext
 ): Promise<LitTxVoid> {
-  const validatedRequest = removePermittedAddressSchema.parse(request);
+  const validatedRequest: ValidatedRemovePermittedAddressRequest =
+    removePermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =

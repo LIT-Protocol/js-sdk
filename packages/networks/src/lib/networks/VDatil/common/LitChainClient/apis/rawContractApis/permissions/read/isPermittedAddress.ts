@@ -1,7 +1,7 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { createLitContracts } from '../../../utils/createLitContracts';
 
@@ -14,6 +14,9 @@ const isPermittedAddressSchema = z.object({
 });
 
 type IsPermittedAddressRequest = z.input<typeof isPermittedAddressSchema>;
+type ValidatedIsPermittedAddressRequest = z.output<
+  typeof isPermittedAddressSchema
+>;
 
 /**
  * Checks if an address is permitted for a PKP token
@@ -25,7 +28,8 @@ export async function isPermittedAddress(
   request: IsPermittedAddressRequest,
   networkCtx: DatilContext
 ): Promise<boolean> {
-  const validatedRequest = isPermittedAddressSchema.parse(request);
+  const validatedRequest: ValidatedIsPermittedAddressRequest =
+    isPermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract } = createLitContracts(networkCtx);

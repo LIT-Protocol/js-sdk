@@ -1,4 +1,4 @@
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../../../VDatil/types';
 import {
   ClaimRequestRaw,
   ClaimRequestSchema,
@@ -29,7 +29,7 @@ export async function claimAndMintNextAndAddAuthMethodsWithTypes(
   networkCtx: DatilContext
 ): Promise<LitTxRes<PKPData>> {
   const validatedRequest = ClaimRequestSchema.parse(request);
-  const { pkpHelperContract, pkpNftContract, publicClient } =
+  const { pkpHelperContract, pkpNftContract, publicClient, walletClient } =
     createLitContracts(networkCtx);
 
   // Get mint cost
@@ -66,6 +66,8 @@ export async function claimAndMintNextAndAddAuthMethodsWithTypes(
     'claimAndMintNextAndAddAuthMethodsWithTypes',
     [claimMaterial, authMethodData],
     {
+      account: walletClient.account!,
+      chain: walletClient.chain!,
       value: mintCost,
     }
   );

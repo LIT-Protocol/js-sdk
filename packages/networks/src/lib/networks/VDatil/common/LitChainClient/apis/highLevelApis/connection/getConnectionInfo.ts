@@ -1,7 +1,6 @@
-import { getActiveUnkickedValidatorStructsAndCounts } from 'services/lit/LitNetwork/vDatil/common/LitChainClient/apis/rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
-import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from 'services/lit/LitNetwork/vDatil/common/LitChainClient/schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
-import { datilDevNetworkContext } from 'services/lit/LitNetwork/vDatil/datil-dev/networkContext';
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../types';
+import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
+import { getActiveUnkickedValidatorStructsAndCounts } from '../../rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
 
 /**
  * Interface representing the structure of connection information
@@ -88,12 +87,12 @@ export async function getConnectionInfo({
  *
  * Usage: bun run src/services/lit/LitNetwork/vDatil/common/LitChainClient/apis/highLevelApis/connection/getConnectionInfo.ts
  */
-if (import.meta.main) {
-  // Use the development network context for testing
-  const results = await getConnectionInfo({
-    networkCtx: datilDevNetworkContext,
-  });
+// if (import.meta.main) {
+//   // Use the development network context for testing
+//   const results = await getConnectionInfo({
+//     networkCtx: datilDevNetworkContext,
+//   });
 
-  console.log('Connection Info Results:');
-  console.log(JSON.stringify(results, null, 2));
-}
+//   console.log('Connection Info Results:');
+//   console.log(JSON.stringify(results, null, 2));
+// }

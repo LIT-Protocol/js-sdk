@@ -68,10 +68,10 @@ describe('mintPKP', () => {
       (log) => log.eventName === 'PermittedAuthMethodAdded'
     );
 
-    expect(permittedAuthMethodScopeAddedEvent?.args.id).toBe(
+    expect(permittedAuthMethodScopeAddedEvent?.args['id']).toBe(
       '0x4cb822e6f51d9723f22b9374c4ef7d41ae2b1a5463738516aeb117ff387ba51a'
     );
-    expect(permittedAuthMethodAddedEvent?.args.id).toBe(
+    expect(permittedAuthMethodAddedEvent?.args['id']).toBe(
       '0x4cb822e6f51d9723f22b9374c4ef7d41ae2b1a5463738516aeb117ff387ba51a'
     );
   });

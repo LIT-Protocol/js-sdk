@@ -1,6 +1,6 @@
 import { Hex } from 'viem';
-import { logger } from '../../../../../../../../../utils/logger';
-import { getAuthIdByAuthMethod } from '../../../../../../../LitAuthManager/authUtils';
+import { logger } from '@lit-protocol/logger';
+import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
 import { DatilContext } from '../../../../../types';
 import { PKPData } from '../../../schemas/shared/PKPDataSchema';
 import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';

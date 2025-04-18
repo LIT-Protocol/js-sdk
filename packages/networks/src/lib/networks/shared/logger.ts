@@ -9,4 +9,4 @@ const baseLogger = pino({
   },
 });
 
-export const logger = pinoCaller(baseLogger);
+export const logger = pinoCaller(baseLogger as any);

@@ -3,10 +3,10 @@
  * This module provides a consistent way to obtain PKP token IDs regardless of the input format.
  */
 
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { isEthAddress } from 'services/lit/utils/z-validate';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { isEthAddress } from '../../../../../../../shared/utils/z-validate';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { createLitContracts } from '../../../utils/createLitContracts';
 import { pubkeyToTokenId } from './pubkeyToTokenId';

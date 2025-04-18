@@ -1,7 +1,7 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
 import { LitTxVoid } from '../../../types';
@@ -19,6 +19,9 @@ const addPermittedAddressSchema = z.object({
 });
 
 type AddPermittedAddressRequest = z.input<typeof addPermittedAddressSchema>;
+type ValidatedAddPermittedAddressRequest = z.output<
+  typeof addPermittedAddressSchema
+>;
 
 /**
  * Adds a permitted address to a PKP token
@@ -30,7 +33,8 @@ export async function addPermittedAddress(
   request: AddPermittedAddressRequest,
   networkCtx: DatilContext
 ): Promise<LitTxVoid> {
-  const validatedRequest = addPermittedAddressSchema.parse(request);
+  const validatedRequest: ValidatedAddPermittedAddressRequest =
+    addPermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =

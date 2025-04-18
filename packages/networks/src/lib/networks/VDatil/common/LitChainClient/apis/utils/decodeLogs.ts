@@ -1,6 +1,5 @@
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../VDatil/types';
 import { decodeEventLog, Log } from 'viem';
-import { LIT_CONTRACT_NAME } from '../../_config';
 import { createLitContracts } from './createLitContracts';
 
 export type DecodedLog = {

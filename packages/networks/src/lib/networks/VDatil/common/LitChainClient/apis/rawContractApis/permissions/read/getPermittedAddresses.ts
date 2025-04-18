@@ -1,7 +1,7 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { createLitContracts } from '../../../utils/createLitContracts';
 
@@ -10,6 +10,9 @@ const getPermittedAddressesSchema = z.object({
 });
 
 type GetPermittedAddressesRequest = z.input<typeof getPermittedAddressesSchema>;
+type ValidatedGetPermittedAddressesRequest = z.output<
+  typeof getPermittedAddressesSchema
+>;
 
 /**
  * Get permitted addresses for a PKP token
@@ -21,7 +24,8 @@ export async function getPermittedAddresses(
   request: GetPermittedAddressesRequest,
   networkCtx: DatilContext
 ): Promise<readonly `0x${string}`[]> {
-  const validatedRequest = getPermittedAddressesSchema.parse(request);
+  const validatedRequest: ValidatedGetPermittedAddressesRequest =
+    getPermittedAddressesSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract } = createLitContracts(networkCtx);

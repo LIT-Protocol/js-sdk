@@ -1,4 +1,4 @@
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../../../VDatil/types';
 import {
   ClaimAndMintRaw,
   ClaimAndMintSchema,
@@ -32,6 +32,8 @@ export async function claimAndMint(
     'claimAndMint',
     [ECDSA_SECP256K1, derivedKeyId, signatures, stakingContract.address],
     {
+      account: walletClient.account!,
+      chain: walletClient.chain!,
       value: mintCost,
     }
   );

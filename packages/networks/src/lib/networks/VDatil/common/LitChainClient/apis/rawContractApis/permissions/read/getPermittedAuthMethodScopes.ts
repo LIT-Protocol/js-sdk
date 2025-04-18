@@ -1,10 +1,10 @@
 // import { datilDevNetworkContext } from "services/lit/LitNetwork/vDatil/datil-dev/networkContext";
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
-import { toBigInt } from 'services/lit/utils/z-transformers';
-import { logger } from 'utils/logger';
+import { DatilContext } from '../../../../../../types';
+import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
+import { logger } from '@lit-protocol/logger';
 import { z } from 'zod';
 import { createLitContracts } from '../../../utils/createLitContracts';
-import { datilDevNetworkContext } from 'services/lit/LitNetwork/vDatil/datil-dev/networkContext';
+import { datilDevNetworkContext } from '../../../../../../datil-dev/networkContext';
 
 const getPermittedAuthMethodScopesSchema = z.object({
   tokenId: toBigInt,
@@ -14,6 +14,9 @@ const getPermittedAuthMethodScopesSchema = z.object({
 });
 
 type GetPermittedAuthMethodScopesRequest = z.input<
+  typeof getPermittedAuthMethodScopesSchema
+>;
+type ValidatedGetPermittedAuthMethodScopesRequest = z.output<
   typeof getPermittedAuthMethodScopesSchema
 >;
 
@@ -27,7 +30,8 @@ export async function getPermittedAuthMethodScopes(
   request: GetPermittedAuthMethodScopesRequest,
   networkCtx: DatilContext
 ): Promise<readonly boolean[]> {
-  const validatedRequest = getPermittedAuthMethodScopesSchema.parse(request);
+  const validatedRequest: ValidatedGetPermittedAuthMethodScopesRequest =
+    getPermittedAuthMethodScopesSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract } = createLitContracts(networkCtx);
@@ -43,19 +47,19 @@ export async function getPermittedAuthMethodScopes(
   return res;
 }
 
-// Example usage when running as main
-if (import.meta.main) {
-  const networkCtx = datilDevNetworkContext;
+// // Example usage when running as main
+// if (import.meta.main) {
+//   const networkCtx = datilDevNetworkContext;
 
-  const res = await getPermittedAuthMethodScopes(
-    {
-      tokenId:
-        '76136736151863037541847315168980811654782785653773679312890341037699996601290',
-      authMethodType: 1,
-      authMethodId: '0x1234567890abcdef1234567890abcdef12345678',
-      // scopeId: 0,
-    },
-    networkCtx
-  );
-  console.log('permittedAuthMethodScopes', res);
-}
+//   const res = await getPermittedAuthMethodScopes(
+//     {
+//       tokenId:
+//         '76136736151863037541847315168980811654782785653773679312890341037699996601290',
+//       authMethodType: 1,
+//       authMethodId: '0x1234567890abcdef1234567890abcdef12345678',
+//       // scopeId: 0,
+//     },
+//     networkCtx
+//   );
+//   console.log('permittedAuthMethodScopes', res);
+// }

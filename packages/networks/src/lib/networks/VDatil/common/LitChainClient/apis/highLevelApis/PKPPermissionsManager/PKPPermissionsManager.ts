@@ -26,7 +26,7 @@
  * ```
  */
 
-import { DatilContext } from 'services/lit/LitNetwork/vDatil/types';
+import { DatilContext } from '../../../../../types';
 import { PkpIdentifierRaw } from '../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 // Import all handler functions
@@ -46,7 +46,7 @@ import { isPermittedAddressByIdentifier } from './handlers/isPermittedAddressByI
 import { removePermittedActionByIdentifier } from './handlers/removePermittedActionByIdentifier';
 import { removePermittedAddressByIdentifier } from './handlers/removePermittedAddressByIdentifier';
 
-import { logger } from 'utils/logger';
+import { logger } from '@lit-protocol/logger';
 import { ScopeString } from '../../../schemas/shared/ScopeSchema';
 import { LitTxVoid } from '../../types';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
