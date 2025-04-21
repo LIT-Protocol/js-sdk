@@ -174,49 +174,38 @@ export abstract class BaseProvider {
       );
     }
 
-    const wallet = ethers.Wallet.createRandom();
     const litContracts = new LitContracts({
-      signer: wallet,
-      network: this.litNodeClient.config.litNetwork,
+      signer: new ethers.Wallet(ethers.Wallet.createRandom().privateKey, new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)),
+      network: LIT_NETWORK.DatilDev,
+      rpc: LIT_RPC.CHRONICLE_YELLOWSTONE
     });
-    try {
-      await litContracts.connect();
-    } catch (err) {
-      throw new UnknownError(
-        {
-          cause: err,
-        },
-        'Unable to connect to LitContracts'
-      );
-    }
 
+    console.log("🔄 Connecting to Lit Contracts...");
+    await litContracts.connect();
+    console.log("✅ Connected to Lit Contracts");
+
+    let pkps: IRelayPKP[] = [];
     try {
-      const pkpPermissions = litContracts.pkpPermissionsContract;
-      const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
-        authMethodType,
-        authMethodId
-      );
-      const pkps: IRelayPKP[] = [];
-      for (const tokenId of tokenIds) {
-        const pubkey = await pkpPermissions.read.getPubkey(tokenId);
-        if (pubkey) {
-          const ethAddress = ethers.utils.computeAddress(pubkey);
-          pkps.push({
-            tokenId: tokenId.toString(),
-            publicKey: pubkey,
-            ethAddress: ethAddress,
-          });
+        const pkpPermissions = litContracts.pkpPermissionsContract;
+        const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
+          authMethod.authMethodType,
+          await googleProvider.getAuthMethodId(authMethod)
+        );
+        for (const tokenId of tokenIds) {
+          const pubkey = await pkpPermissions.read.getPubkey(tokenId);
+          if (pubkey) {
+            const ethAddress = ethers.utils.computeAddress(pubkey);
+            pkps.push({
+              tokenId: tokenId.toString(),
+              publicKey: pubkey,
+              ethAddress: ethAddress,
+            });
+          }
         }
-      }
-      return pkps;
-    } catch (err) {
-      throw new UnknownError(
-        {
-          cause: err,
-        },
-        'Unable to get PKPs for auth method'
-      );
+    } catch (error) {
+      console.error("Failed to fetch PKPs from contract:", error);
     }
+    console.log(pkps);
   }
 
   /**
