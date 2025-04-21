@@ -74,7 +74,6 @@ export const getEoaAuthContext = (
 
       return authSig;
     },
-
     ...(centralisation === 'decentralised' && {
       capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig],
     }),
