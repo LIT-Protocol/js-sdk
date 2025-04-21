@@ -16,8 +16,7 @@ export interface AuthenticationContext {
 }
 
 export interface GetAuthContextParams {
-  authContextType: 'eoa' | 'pkp' | 'lit-action';
-  pkpPublicKey: `0x${string}`;
+  authMethodType: AUTH_METHOD_TYPE_TYPE;
   pkpAddress: `0x${string}`;
   litNodeClient: LitNodeClient;
   signer: {
@@ -29,22 +28,18 @@ export interface GetAuthContextParams {
 export const getAuthContext = (
   params: GetAuthContextParams
 ): AuthenticationContext => {
-  switch (params.authContextType) {
-    case 'eoa':
+  switch (params.authMethodType) {
+    case 'EthWallet':
       return getEoaAuthContext({
         litNodeClient: params.litNodeClient,
         identity: {
-          pkpPublicKey: params.pkpPublicKey,
+          pkpPublicKey: params.pkpAddress,
           signer: params.signer,
           signerAddress: params.pkpAddress,
         },
       });
-    // case 'pkp':
-    // case 'lit-action':
     default:
-      throw new Error(
-        `Unsupported auth method type: ${params.authContextType}`
-      );
+      throw new Error(`Unsupported auth method type: ${params.authMethodType}`);
   }
 };
 
