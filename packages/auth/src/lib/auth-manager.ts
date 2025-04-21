@@ -1,5 +1,4 @@
-import { generateSessionKeyPair } from '@lit-protocol/crypto';
-
+import { getAuthContext } from './AuthManager/getAuthContext';
 import type { LitAuthStorageProvider } from './storage/types';
 import type { LitAuthData } from './types';
 
@@ -26,6 +25,6 @@ async function signSessionKey({ storage }: LitAuthManagerConfig) {
 
 export function getAuthManager({ storage }: LitAuthManagerConfig) {
   return {
-    getAuthContext() {},
+    getAuthContext,
   };
 }
