@@ -186,22 +186,22 @@ export abstract class BaseProvider {
 
     let pkps: IRelayPKP[] = [];
     try {
-        const pkpPermissions = litContracts.pkpPermissionsContract;
-        const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
-          authMethod.authMethodType,
-          await googleProvider.getAuthMethodId(authMethod)
-        );
-        for (const tokenId of tokenIds) {
-          const pubkey = await pkpPermissions.read.getPubkey(tokenId);
-          if (pubkey) {
-            const ethAddress = ethers.utils.computeAddress(pubkey);
-            pkps.push({
-              tokenId: tokenId.toString(),
-              publicKey: pubkey,
-              ethAddress: ethAddress,
-            });
-          }
+      const pkpPermissions = litContracts.pkpPermissionsContract;
+      const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
+        authMethod.authMethodType,
+        await googleProvider.getAuthMethodId(authMethod)
+      );
+      for (const tokenId of tokenIds) {
+        const pubkey = await pkpPermissions.read.getPubkey(tokenId);
+        if (pubkey) {
+          const ethAddress = ethers.utils.computeAddress(pubkey);
+          pkps.push({
+            tokenId: tokenId.toString(),
+            publicKey: pubkey,
+            ethAddress: ethAddress,
+          });
         }
+      }
     } catch (error) {
       console.error("Failed to fetch PKPs from contract:", error);
     }
