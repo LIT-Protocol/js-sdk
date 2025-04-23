@@ -188,8 +188,8 @@ export abstract class BaseProvider {
     try {
       const pkpPermissions = litContracts.pkpPermissionsContract;
       const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
-        authMethod.authMethodType,
-        await googleProvider.getAuthMethodId(authMethod)
+        authMethodType,
+        authMethodId
       );
       for (const tokenId of tokenIds) {
         const pubkey = await pkpPermissions.read.getPubkey(tokenId);
