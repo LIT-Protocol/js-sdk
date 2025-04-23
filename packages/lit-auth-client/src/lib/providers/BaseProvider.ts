@@ -195,6 +195,7 @@ export abstract class BaseProvider {
         authMethodType,
         authMethodId
       );
+      const pkps: IRelayPKP[] = [];
       for (const tokenId of tokenIds) {
         const pubkey = await pkpPermissions.read.getPubkey(tokenId);
         if (pubkey) {
@@ -206,6 +207,7 @@ export abstract class BaseProvider {
           });
         }
       }
+      return pkps;
     } catch (error) {
       console.error("Failed to fetch PKPs from contract:", error);
     }
