@@ -188,7 +188,7 @@ export abstract class BaseProvider {
         'Unable to connect to LitContracts'
       );
     }
-    
+
     try {
       const pkpPermissions = litContracts.pkpPermissionsContract;
       const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
