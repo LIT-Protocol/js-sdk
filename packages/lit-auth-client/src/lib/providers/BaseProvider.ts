@@ -208,8 +208,13 @@ export abstract class BaseProvider {
         }
       }
       return pkps;
-    } catch (error) {
-      console.error("Failed to fetch PKPs from contract:", error);
+    } catch (err) {
+      throw new UnknownError(
+        {
+          cause: err,
+        },
+        'Unable to get PKPs for auth method'
+      );
     }
   }
 
