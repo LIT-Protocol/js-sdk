@@ -178,7 +178,6 @@ export abstract class BaseProvider {
       signer: new ethers.Wallet(ethers.Wallet.createRandom().privateKey, new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)),
       network: this.litNodeClient.config.litNetwork,
     });
-
     try {
       await litContracts.connect();
     } catch (err) {
@@ -189,6 +188,7 @@ export abstract class BaseProvider {
         'Unable to connect to LitContracts'
       );
     }
+    
     try {
       const pkpPermissions = litContracts.pkpPermissionsContract;
       const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
