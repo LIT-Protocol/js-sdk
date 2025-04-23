@@ -209,7 +209,6 @@ export abstract class BaseProvider {
     } catch (error) {
       console.error("Failed to fetch PKPs from contract:", error);
     }
-    console.log(pkps);
   }
 
   /**
