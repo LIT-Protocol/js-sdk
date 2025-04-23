@@ -1,7 +1,6 @@
 import {
   createSiweMessageWithRecaps,
-  generateAuthSig,
-  ResourceAbilityRequestBuilder,
+  generateAuthSig
 } from '@lit-protocol/auth-helpers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
@@ -20,24 +19,15 @@ interface GetEoaAuthContextParams {
     };
     signerAddress: `0x${string}`;
   };
-  resources?: LitResourceAbilityRequest[];
+  resources: LitResourceAbilityRequest[];
   capabilityAuthSigs?: AuthSig[];
 }
 
-export const getEoaAuthContext = ({
-  litNodeClient,
-  identity: { pkpPublicKey, signer, signerAddress },
-  resources,
-  capabilityAuthSigs,
-}: GetEoaAuthContextParams) => {
-  const resourceBuilder = new ResourceAbilityRequestBuilder();
-  resourceBuilder.addPKPSigningRequest('*');
-  const resourceRequests = resourceBuilder.build();
-
+export const getEoaAuthContext = (params: GetEoaAuthContextParams) => {
   return {
-    pkpPublicKey,
+    pkpPublicKey: params.identity.pkpPublicKey,
     chain: 'ethereum',
-    resourceAbilityRequests: resources || resourceRequests,
+    resourceAbilityRequests: params.resources,
     authNeededCallback: async ({
       uri,
       expiration,
@@ -59,20 +49,20 @@ export const getEoaAuthContext = ({
         uri: uri,
         expiration: expiration,
         resources: resourceAbilityRequests,
-        walletAddress: signerAddress,
-        nonce: await litNodeClient.getLatestBlockhash(),
-        litNodeClient: litNodeClient,
+        walletAddress: params.identity.signerAddress,
+        nonce: await params.litNodeClient.getLatestBlockhash(),
+        litNodeClient: params.litNodeClient,
       });
 
       const authSig = await generateAuthSig({
-        signer: signer,
+        signer: params.identity.signer,
         toSign,
       });
 
       return authSig;
     },
-    ...(capabilityAuthSigs && {
-      capabilityAuthSigs: [...capabilityAuthSigs],
+    ...(params.capabilityAuthSigs && {
+      capabilityAuthSigs: [...params.capabilityAuthSigs],
     }),
   };
 };
