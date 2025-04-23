@@ -180,11 +180,16 @@ export abstract class BaseProvider {
       rpc: LIT_RPC.CHRONICLE_YELLOWSTONE
     });
 
-    console.log("🔄 Connecting to Lit Contracts...");
-    await litContracts.connect();
-    console.log("✅ Connected to Lit Contracts");
-
-    let pkps: IRelayPKP[] = [];
+    try {
+      await litContracts.connect();
+    } catch (err) {
+      throw new UnknownError(
+        {
+          cause: err,
+        },
+        'Unable to connect to LitContracts'
+      );
+    }
     try {
       const pkpPermissions = litContracts.pkpPermissionsContract;
       const tokenIds = await pkpPermissions.read.getTokenIdsForAuthMethod(
