@@ -176,8 +176,7 @@ export abstract class BaseProvider {
 
     const litContracts = new LitContracts({
       signer: new ethers.Wallet(ethers.Wallet.createRandom().privateKey, new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)),
-      network: LIT_NETWORK.DatilDev,
-      rpc: LIT_RPC.CHRONICLE_YELLOWSTONE
+      network: this.litNodeClient.config.litNetwork,
     });
 
     try {
