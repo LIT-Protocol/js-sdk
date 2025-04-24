@@ -732,17 +732,6 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  fhenixNitrogen: {
-    contractAddress: null,
-    chainId: 8008148,
-    name: 'Fhenix Nitrogen',
-    symbol: 'tFHE',
-    decimals: 18,
-    rpcUrls: ['https://api.nitrogen.fhenix.zone'],
-    blockExplorerUrls: ['https://explorer.nitrogen.fhenix.zone'],
-    type: null,
-    vmType: 'EVM',
-  },
   hederaTestnet: {
     contractAddress: null,
     chainId: 296,
