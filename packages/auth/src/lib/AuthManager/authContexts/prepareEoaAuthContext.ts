@@ -1,6 +1,6 @@
 import {
   createSiweMessageWithRecaps,
-  generateAuthSig
+  generateAuthSig,
 } from '@lit-protocol/auth-helpers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
@@ -8,22 +8,24 @@ import {
   AuthSig,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
+import { BaseAuthContextType, BaseIdentity } from './BaseAuthContextType';
 
-interface GetEoaAuthContextParams {
-  litNodeClient: LitNodeClient;
-  identity: {
-    pkpPublicKey: string;
-    signer: {
-      signMessage: (message: any) => Promise<string>;
-      getAddress?: () => Promise<string>;
-    };
-    signerAddress: `0x${string}`;
+interface EoaIdentity extends BaseIdentity {
+  signer: {
+    signMessage: (message: any) => Promise<string>;
+    getAddress?: () => Promise<string>;
   };
-  resources: LitResourceAbilityRequest[];
-  capabilityAuthSigs?: AuthSig[];
+  signerAddress: `0x${string}`;
 }
 
-export const getEoaAuthContext = (params: GetEoaAuthContextParams) => {
+export interface PrepareEoaAuthContextParams
+  extends BaseAuthContextType<EoaIdentity> {
+  identity: EoaIdentity;
+}
+
+export const prepareEoaAuthContext = async (
+  params: PrepareEoaAuthContextParams
+) => {
   return {
     pkpPublicKey: params.identity.pkpPublicKey,
     chain: 'ethereum',
@@ -79,7 +81,7 @@ export const getEoaAuthContext = (params: GetEoaAuthContextParams) => {
 
 //   console.log('resourceRequests', JSON.stringify(resourceRequests, null, 2));
 
-//   const authContext = getEoaAuthContext({
+//   const authContext = prepareEoaAuthContext({
 //     litNodeClient: litNodeClient,
 //     identity: {
 //       pkpPublicKey: '0x123',

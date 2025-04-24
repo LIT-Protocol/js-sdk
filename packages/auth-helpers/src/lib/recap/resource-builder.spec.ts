@@ -5,13 +5,13 @@ import {
   LitPaymentDelegationResource,
   LitPKPResource,
 } from '../resources';
-import { ResourceAbilityRequestBuilder } from './resource-builder';
+import { createResourceBuilder } from './resource-builder';
 
-describe('ResourceAbilityRequestBuilder', () => {
-  let builder: ResourceAbilityRequestBuilder;
+describe('createResourceBuilder', () => {
+  let builder: ReturnType<typeof createResourceBuilder>;
 
   beforeEach(() => {
-    builder = new ResourceAbilityRequestBuilder();
+    builder = createResourceBuilder();
   });
 
   it('should build an array of resource ability requests', () => {
@@ -21,7 +21,7 @@ describe('ResourceAbilityRequestBuilder', () => {
       .addPKPSigningRequest(resourceId1)
       .addLitActionExecutionRequest(resourceId2);
 
-    const requests = builder.build();
+    const requests = builder.requests;
     expect(JSON.stringify(requests)).toBe(
       JSON.stringify([
         {
@@ -44,7 +44,7 @@ describe('ResourceAbilityRequestBuilder', () => {
       .addAccessControlConditionDecryptionRequest('abc') // ACC Decryption
       .addPaymentDelegationRequest('def'); // Payment Delegation
 
-    const requests = builder.build();
+    const requests = builder.requests;
     expect(JSON.stringify(requests)).toBe(
       JSON.stringify([
         {
