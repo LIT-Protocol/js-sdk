@@ -48,7 +48,6 @@ export const prepareEoaAuthContext = async (
         resources: resourceAbilityRequests,
         walletAddress: params.identity.signerAddress,
         nonce: await params.litNodeClient.getLatestBlockhash(),
-        litNodeClient: params.litNodeClient,
       });
 
       const authSig = await generateAuthSig({
@@ -65,26 +64,34 @@ export const prepareEoaAuthContext = async (
 };
 
 // if (import.meta.main) {
-//   const litNodeClient = new LitNodeClient({
-//     litNetwork: 'naga-dev',
-//     debug: true,
-//   });
+//   (async () => {
+//     const { LitNodeClient } = await import('@lit-protocol/lit-node-client');
+//     const { createResourceBuilder } = await import(
+//       '@lit-protocol/auth-helpers'
+//     );
 
-//   const resourceBuilder = new ResourceAbilityRequestBuilder();
-//   resourceBuilder.addPKPSigningRequest('*');
-//   const resourceRequests = resourceBuilder.build();
+//     const litNodeClient = new LitNodeClient({
+//       litNetwork: 'naga-dev',
+//       debug: true,
+//     });
 
-//   console.log('resourceRequests', JSON.stringify(resourceRequests, null, 2));
+//     await litNodeClient.connect();
 
-//   const authContext = prepareEoaAuthContext({
-//     litNodeClient: litNodeClient,
-//     identity: {
-//       pkpPublicKey: '0x123',
-//       signer: { signMessage: async () => '0x123' },
-//       signerAddress: '0x123',
-//     },
-//     resources: resourceRequests,
-//   });
+//     const resourceRequests =
+//       createResourceBuilder().addPKPSigningRequest('*').requests;
 
-//   console.log('authContext', authContext);
+//     console.log('resourceRequests', JSON.stringify(resourceRequests, null, 2));
+
+//     const authContext = await prepareEoaAuthContext({
+//       litNodeClient: litNodeClient,
+//       identity: {
+//         pkpPublicKey: '0x123',
+//         signer: { signMessage: async () => '0x123' },
+//         signerAddress: '0x123',
+//       },
+//       resources: resourceRequests,
+//     });
+
+//     console.log('authContext', authContext);
+//   })();
 // }

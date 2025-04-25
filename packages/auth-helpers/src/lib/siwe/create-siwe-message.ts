@@ -83,21 +83,9 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
   // -- add recap resources if needed
   if (params.resources) {
-    if (!params.litNodeClient) {
-      throw new InvalidArgumentException(
-        {
-          info: {
-            params,
-          },
-        },
-        'litNodeClient is required'
-      );
-    }
-
     siweMessage = await addRecapToSiweMessage({
       siweMessage,
       resources: params.resources,
-      litNodeClient: params.litNodeClient,
     });
   }
 
@@ -127,17 +115,6 @@ export const createSiweMessageWithRecaps = async (
 export const createSiweMessageWithCapacityDelegation = async (
   params: WithCapacityDelegation
 ) => {
-  if (!params.litNodeClient) {
-    throw new InvalidArgumentException(
-      {
-        info: {
-          params,
-        },
-      },
-      'litNodeClient is required'
-    );
-  }
-
   return createSiweMessage({
     ...params,
   });

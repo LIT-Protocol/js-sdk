@@ -1100,7 +1100,6 @@ export interface BaseSiweMessage {
   statement?: string;
   version?: string;
   chainId?: number;
-  litNodeClient?: ILitNodeClient;
 }
 
 export interface WithRecap extends BaseSiweMessage {
@@ -1118,7 +1117,6 @@ export interface WithCapacityDelegation extends BaseSiweMessage {
 }
 
 export interface CapacityDelegationFields extends BaseSiweMessage {
-  litNodeClient: ILitNodeClient;
   delegateeAddresses?: string[];
   uses?: string;
 }

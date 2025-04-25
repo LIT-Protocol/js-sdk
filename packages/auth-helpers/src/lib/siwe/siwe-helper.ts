@@ -77,7 +77,6 @@ export const generateSessionCapabilityObjectWithWildcards = async (
  * Adds recap capabilities to a SiweMessage.
  * @param siweMessage - The SiweMessage to add recap capabilities to.
  * @param resources - An array of LitResourceAbilityRequest objects representing the resources and abilities to add.
- * @param litNodeClient - The LitNodeClient interface
  * @returns The updated SiweMessage with recap capabilities added.
  * @throws An error if the resources array is empty or if litNodeClient is not provided.
  * @throws An error if the generated capabilities fail to verify for any resource and ability.
@@ -85,11 +84,9 @@ export const generateSessionCapabilityObjectWithWildcards = async (
 export const addRecapToSiweMessage = async ({
   siweMessage,
   resources,
-  litNodeClient,
 }: {
   siweMessage: SiweMessage;
   resources: LitResourceAbilityRequest[];
-  litNodeClient: ILitNodeClient;
 }) => {
   if (!resources || resources.length < 1) {
     throw new InvalidArgumentException(
@@ -100,18 +97,6 @@ export const addRecapToSiweMessage = async ({
         },
       },
       'resources is required'
-    );
-  }
-
-  if (!litNodeClient) {
-    throw new InvalidArgumentException(
-      {
-        info: {
-          resources,
-          siweMessage,
-        },
-      },
-      'litNodeClient is required'
     );
   }
 
