@@ -1800,26 +1800,6 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
           );
         }
 
-        // Check if IPFS options are provided and if the code should be fetched from IPFS and overwrite the current code.
-        // This will fetch the code from the specified IPFS gateway using the provided ipfsId,
-        // and update the params with the fetched code, removing the ipfsId afterward.
-        const overwriteCode =
-          params.ipfsOptions?.overwriteCode ||
-          GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[this.config.litNetwork];
-
-        if (overwriteCode && props.litActionIpfsId) {
-          const code = await this._getFallbackIpfsCode(
-            params.ipfsOptions?.gatewayUrl,
-            props.litActionIpfsId
-          );
-
-          props = {
-            ...props,
-            litActionCode: code,
-            litActionIpfsId: undefined,
-          };
-        }
-
         /**
          * We must provide an empty array for authMethods even if we are not using any auth methods.
          * So that the nodes can serialize the request correctly.

@@ -2,12 +2,7 @@ import {
   createSiweMessageWithRecaps,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import {
-  AuthCallbackParams,
-  AuthSig,
-  LitResourceAbilityRequest,
-} from '@lit-protocol/types';
+import { AuthCallbackParams } from '@lit-protocol/types';
 import { BaseAuthContextType, BaseIdentity } from './BaseAuthContextType';
 
 interface EoaIdentity extends BaseIdentity {
