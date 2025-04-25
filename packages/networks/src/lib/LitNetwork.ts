@@ -45,4 +45,23 @@ export abstract class LitNetwork {
 
   abstract createExecuteJsRequests(params: unknown): Promise<unknown>;
   abstract handleExecuteJsResponses(params: unknown): Promise<unknown>;
+
+  // Methods for PKP Session Key Signing
+  abstract createSignSessionKeyRequest(params: unknown): Promise<unknown>;
+  abstract handleSignSessionKeyResponse(params: unknown): Promise<unknown>;
+
+  // Methods for PKP Claiming
+  abstract createClaimKeyRequest(params: unknown): Promise<unknown>;
+  abstract handleClaimKeyResponse(params: unknown): Promise<unknown>;
+
+  // Methods for Encryption Signing (part of Decrypt flow)
+  abstract createEncryptionSignRequest(params: unknown): Promise<unknown>;
+  abstract handleEncryptionSignResponse(params: unknown): Promise<unknown>;
+
+  // Methods for Node Pricing / Selection Logic
+  abstract getNodePrices(): Promise<unknown>;
+  abstract getMaxNodesForProduct(params: unknown): Promise<unknown>;
+
+  // Optional: Method for IPFS Fallback Logic
+  // abstract getIpfsCode(ipfsId: string): Promise<string>;
 }

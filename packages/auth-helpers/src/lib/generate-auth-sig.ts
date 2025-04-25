@@ -22,7 +22,14 @@ export const generateAuthSig = async ({
   address,
   algo,
 }: {
-  signer: ethers.Wallet | ethers.Signer | SignerLike;
+  signer:
+    | ethers.Wallet
+    | ethers.Signer
+    | SignerLike
+    | {
+        signMessage: (message: any) => Promise<string>;
+        getAddress?: () => Promise<string>;
+      };
   toSign: string;
   address?: string;
   algo?: 'ed25519';
@@ -44,7 +51,9 @@ export const generateAuthSig = async ({
 
   // If address is not provided, derive it from the signer
   if (!address) {
-    address = await signer.getAddress();
+    address = await (
+      signer as { getAddress: () => Promise<string> }
+    ).getAddress();
   }
 
   // checksum the address
