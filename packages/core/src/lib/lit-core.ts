@@ -266,6 +266,7 @@ export class LitCore {
   }
 
   /**
+   * module: LitNetwork
    * See rust/lit-node/common/lit-node-testnet/src/validator.rs > threshold for more details
    */
   protected _getThreshold = (): number => {
@@ -362,6 +363,8 @@ export class LitCore {
   }
 
   /**
+   * module: LitNodeClient (we need to remove lit-core)
+   * // check this in Datil.
    * Gets the set of nodes from validator data, transforming bootstrap URLs into NodeSet objects.
    *
    * @returns {Promise<NodeSet[]>} A promise that resolves with an array of NodeSet objects.
@@ -398,6 +401,7 @@ export class LitCore {
   }
 
   /**
+   * module: LitClient (use the chainclient to get the latest blockhash)
    * Return the latest blockhash from the nodes
    * @returns { Promise<string> } latest blockhash
    */
@@ -943,6 +947,8 @@ export class LitCore {
     };
   }
 
+  // module: value from LitChainClient
+  // !!: don't pass the getter, we want to same value entirely in the flow.
   get currentEpochNumber(): number | null {
     // if the epoch started less than 15s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
     // this gives the nodes time to sync with the chain and see the new epoch before we try to use it
@@ -1049,6 +1055,7 @@ export class LitCore {
   };
 
   /**
+   * module: LitClient takes in the realm context/config. 
    * Get and gather node promises
    *
    * @param { string[] } nodeUrls URLs of nodes to get promises for
@@ -1111,6 +1118,7 @@ export class LitCore {
   };
 
   /**
+   * module: LitClient
    * Handle node promises
    *
    * @param { Array<Promise<any>> } nodePromises

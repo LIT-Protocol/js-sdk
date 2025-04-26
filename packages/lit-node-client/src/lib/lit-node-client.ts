@@ -129,6 +129,7 @@ import { formatSessionSigs } from './helpers/session-sigs-reader';
 import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
+// request handler
 export class LitNodeClient extends LitCore implements ILitNodeClient {
   private readonly _litNodeLogger: Logger;
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -830,6 +831,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
   };
 
   /**
+   * module: LitClient
    * Generates a promise by sending a command to the Lit node
    *
    * @param url - The URL to send the command to.
@@ -1225,10 +1227,11 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
   /** ============================== SESSION ============================== */
 
   /**
+   * @deprecated - this function will soon be moved to the auth package
    * Sign a session public key using a PKP, which generates an authSig.
    * @returns {Object} An object containing the resulting signature.
    */
-  private _signSessionKey = async (
+  signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
     this._litNodeLogger.info({ msg: `[signSessionKey] params:`, params });
@@ -1249,6 +1252,8 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     // Try to get it from local storage, if not generates one~
     const sessionKey: SessionKeyPair =
+
+    // should be handled in the storage
       params.sessionKey ?? this._getSessionKey();
     const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
@@ -1304,7 +1309,6 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       siweMessage = await createSiweMessageWithRecaps({
         ...siweParams,
         resources: params.resourceAbilityRequests,
-        litNodeClient: this,
       });
     } else {
       siweMessage = await createSiweMessage(siweParams);
@@ -1517,6 +1521,8 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     });
   };
 
+  // module: private method of the Naga network. 
+  // only applies to Naga, internally for Naga network stuff.
   getMaxPricesForNodeProduct = async ({
     userMaxPrice,
     product,
@@ -1741,6 +1747,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
   };
 
   /**
+   * @deprecated - this function will soon be replaced by the auth package, getAuthContext.fromPKP
    * Retrieves the PKP sessionSigs.
    *
    * @param params - The parameters for retrieving the PKP sessionSigs.
@@ -1806,13 +1813,15 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
          */
         const authMethods = params.authMethods || [];
 
-        const response = await this._signSessionKey({
+        const response = await this.signSessionKey({
           sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
           authMethods: [...authMethods],
           pkpPublicKey: params.pkpPublicKey,
           expiration: props.expiration,
-          resources: props.resources,
+
+          // @deprecated - this is not used??
+          // resources: props.resources,
           chainId: 1,
 
           // -- required fields
@@ -1991,6 +2000,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
    * @returns Filtered array of valid BlsResponseData
    * @throws InvalidSignatureError if validation fails
    */
+  // private method of the network (most code with exist in the network module)
   private _validateSignSessionKeyResponseData(
     responseData: BlsResponseData[],
     requestId: string,

@@ -1,46 +1,64 @@
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
+  AuthCallbackParams,
   AuthMethod,
   AuthSig,
-  AuthenticationContext,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
 import { Hex } from 'viem';
-import { BaseIdentity } from './BaseAuthContextType';
+import { BaseAuthContextType, BaseIdentity } from './BaseAuthContextType';
+import { AuthMethodSchema, SessionKeyPairSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
 
 interface PkpIdentity extends BaseIdentity {
-  pkpPublicKey: Hex;
-  authMethods: AuthMethod[];
+  authMethods: z.infer<typeof AuthMethodSchema>[];
+  expiration: string;
+  sessionKey: z.infer<typeof SessionKeyPairSchema>;
 }
 
 /**
  * Interface for parameters required to get the native auth context.
  */
-export interface PreparePkpAuthContextParams {
-  litNodeClient: LitNodeClient;
+export interface PreparePkpAuthContextParams
+  extends BaseAuthContextType<PkpIdentity> {
   identity: PkpIdentity;
-  resources: LitResourceAbilityRequest[];
-  capabilityAuthSigs?: AuthSig[];
-  expiration?: string;
+
+  /**
+   * The following are dependencies that were used to be provided by the litNodeClient
+   */
+  deps: {
+    litNodeClient: LitNodeClient;
+  };
 }
 
+// always take a provider
 /**
  * Get the auth context for a Lit supported native auth method (eg. WebAuthn, Discord, Google).
  * This context is needed for requesting session signatures with PKP-based authentication.
  *
  * @param {PreparePkpAuthContextParams} params - Parameters for getting the native auth context.
- * @returns {AuthenticationContext} The authentication context object.
  */
-export const preparePkpAuthContext = (
-  params: PreparePkpAuthContextParams
-): AuthenticationContext => {
-  const authContext = params.litNodeClient.getPkpAuthContext({
+export const preparePkpAuthContext = (params: PreparePkpAuthContextParams) => {
+  return {
+    chain: 'ethereum', // TODO: make this dynamic
     pkpPublicKey: params.identity.pkpPublicKey,
-    authMethods: params.identity.authMethods,
-    expiration: params.expiration,
     resourceAbilityRequests: params.resources,
     capabilityAuthSigs: params.capabilityAuthSigs,
-  });
+    authMethods: params.identity.authMethods,
+    expiration: params.identity.expiration,
+    sessionKey: params.identity.sessionKey,
+    authNeededCallback: async (props: AuthCallbackParams) => {
+      const response = await params.deps.litNodeClient.signSessionKey({
+        sessionKey: params.identity.sessionKey,
+        statement: 'some custom statement', // TODO: make this dynamic
+        authMethods: params.identity.authMethods,
+        pkpPublicKey: params.identity.pkpPublicKey,
+        expiration: params.identity.expiration,
+        resourceAbilityRequests: params.resources,
+        chainId: 1,
+      });
 
-  return authContext;
+      return response.authSig;
+    },
+  };
 };

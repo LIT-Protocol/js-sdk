@@ -686,7 +686,10 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
   expiration?: string;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resources: any;
+  /**
+   * @deprecated - this is not used????
+   */
+  resources?: any;
 
   chainId?: number;
 

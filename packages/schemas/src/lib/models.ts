@@ -186,6 +186,7 @@ export const AuthenticationContextSchema = LitActionSdkParamsSchema.extend({
   expiration: z.any().optional(),
 
   /**
+   * @deprecated
    * The chain to use for the session signature and sign the session key. This value is almost always `ethereum`. If you're using EVM, this parameter isn't very important.
    */
   chain: ChainSchema.optional(),
@@ -199,6 +200,7 @@ export const AuthenticationContextSchema = LitActionSdkParamsSchema.extend({
   resourceAbilityRequests: z.array(LitResourceAbilityRequestSchema),
 
   /**
+   * @deprecated
    * The session capability object that you want to request for this session.
    * It is likely you will not need this, as the object will be automatically derived from the `resourceAbilityRequests`.
    * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.

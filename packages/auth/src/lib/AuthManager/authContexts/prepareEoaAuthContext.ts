@@ -16,6 +16,13 @@ interface EoaIdentity extends BaseIdentity {
 export interface PrepareEoaAuthContextParams
   extends BaseAuthContextType<EoaIdentity> {
   identity: EoaIdentity;
+
+  /**
+   * The following are dependencies that were used to be provided by the litNodeClient
+   */
+  deps: {
+    nonce: string;
+  };
 }
 
 export const prepareEoaAuthContext = async (
@@ -47,7 +54,7 @@ export const prepareEoaAuthContext = async (
         expiration: expiration,
         resources: resourceAbilityRequests,
         walletAddress: params.identity.signerAddress,
-        nonce: await params.litNodeClient.getLatestBlockhash(),
+        nonce: params.deps.nonce,
       });
 
       const authSig = await generateAuthSig({
@@ -65,31 +72,41 @@ export const prepareEoaAuthContext = async (
 
 // if (import.meta.main) {
 //   (async () => {
-//     const { LitNodeClient } = await import('@lit-protocol/lit-node-client');
-//     const { createResourceBuilder } = await import(
-//       '@lit-protocol/auth-helpers'
-//     );
+//     /**
+//      * @deprecated - this should be provided externally, previously it was provided by the litNodeClient
+//      */
+//     async function getNonce(): Promise<string> {
+//       const { LitNodeClient } = await import('@lit-protocol/lit-node-client');
+//       const litNodeClient = new LitNodeClient({
+//         litNetwork: 'naga-dev',
+//         debug: true,
+//       });
 
-//     const litNodeClient = new LitNodeClient({
-//       litNetwork: 'naga-dev',
-//       debug: true,
-//     });
+//       await litNodeClient.connect();
+//       return await litNodeClient.getLatestBlockhash();
+//     }
 
-//     await litNodeClient.connect();
+//     /**
+//      * @deprecated - this should be provided externally, previously it was provided by the litNodeClient
+//      */
+//     async function getDefaultResources() {
+//       const { createResourceBuilder } = await import(
+//         '@lit-protocol/auth-helpers'
+//       );
 
-//     const resourceRequests =
-//       createResourceBuilder().addPKPSigningRequest('*').requests;
-
-//     console.log('resourceRequests', JSON.stringify(resourceRequests, null, 2));
+//       return createResourceBuilder().addPKPSigningRequest('*').requests;
+//     }
 
 //     const authContext = await prepareEoaAuthContext({
-//       litNodeClient: litNodeClient,
 //       identity: {
 //         pkpPublicKey: '0x123',
 //         signer: { signMessage: async () => '0x123' },
 //         signerAddress: '0x123',
 //       },
-//       resources: resourceRequests,
+//       deps: {
+//         nonce: await getNonce(),
+//       },
+//       resources: await getDefaultResources(),
 //     });
 
 //     console.log('authContext', authContext);
