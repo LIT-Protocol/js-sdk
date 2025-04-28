@@ -40,7 +40,7 @@ import {
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
 import { getNodePrices } from '@lit-protocol/contracts-sdk';
-import { composeLitUrl, mostCommonValue, LitCore } from '@lit-protocol/core';
+import { composeLitUrl, mostCommonValue, LitCore } from './core';
 import {
   combineSignatureShares,
   encrypt,
@@ -130,7 +130,7 @@ import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 
 // request handler
-export class LitNodeClient extends LitCore implements ILitNodeClient {
+export class LitNodeClient extends LitCore {
   private readonly _litNodeLogger: Logger;
   /** Tracks the total max price a user is willing to pay for each supported product type
    * This must be distributed across all nodes; each node will get a percentage of this price
@@ -812,13 +812,13 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
       claims,
       signatures: hasSignedData
         ? {
-            [key]: await getSignatures({
-              requestId,
-              networkPubKeySet: this.networkPubKeySet,
-              threshold: _params.useSingleNode ? 1 : this._getThreshold(),
-              signedMessageShares: flattenedSignedMessageShares,
-            }),
-          }
+          [key]: await getSignatures({
+            requestId,
+            networkPubKeySet: this.networkPubKeySet,
+            threshold: _params.useSingleNode ? 1 : this._getThreshold(),
+            signedMessageShares: flattenedSignedMessageShares,
+          }),
+        }
         : {},
       // decryptions: [],
       response: parsedResponse,
@@ -1253,7 +1253,7 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     // Try to get it from local storage, if not generates one~
     const sessionKey: SessionKeyPair =
 
-    // should be handled in the storage
+      // should be handled in the storage
       params.sessionKey ?? this._getSessionKey();
     const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
 
@@ -1601,8 +1601,8 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1684,10 +1684,10 @@ export class LitNodeClient extends LitCore implements ILitNodeClient {
 
     const capabilities = params.capabilityAuthSigs
       ? [
-          ...(params.capabilityAuthSigs ?? []),
-          params.capabilityAuthSigs,
-          authSig,
-        ]
+        ...(params.capabilityAuthSigs ?? []),
+        params.capabilityAuthSigs,
+        authSig,
+      ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     // This is the template that will be combined with the node address as a single object, then signed by the session key
