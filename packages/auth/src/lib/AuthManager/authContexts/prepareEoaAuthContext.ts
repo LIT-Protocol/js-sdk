@@ -3,7 +3,7 @@ import {
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
 import { AuthCallbackParams } from '@lit-protocol/types';
-import { BaseAuthContextType, BaseIdentity } from './BaseAuthContextType';
+import { BaseAuthContextType, BaseAuthMaterial, BaseIdentity } from './BaseAuthContextType';
 
 interface EoaIdentity extends BaseIdentity {
   signer: {
@@ -14,9 +14,9 @@ interface EoaIdentity extends BaseIdentity {
 }
 
 export interface PrepareEoaAuthContextParams
-  extends BaseAuthContextType<EoaIdentity> {
+  extends BaseAuthContextType<EoaIdentity, BaseAuthMaterial> {
   identity: EoaIdentity;
-
+  authMaterial: BaseAuthMaterial;
   /**
    * The following are dependencies that were used to be provided by the litNodeClient
    */
@@ -31,7 +31,7 @@ export const prepareEoaAuthContext = async (
   return {
     pkpPublicKey: params.identity.pkpPublicKey,
     chain: 'ethereum',
-    resourceAbilityRequests: params.resources,
+    resourceAbilityRequests: params.authMaterial.resources,
     authNeededCallback: async ({
       uri,
       expiration,
@@ -64,8 +64,8 @@ export const prepareEoaAuthContext = async (
 
       return authSig;
     },
-    ...(params.capabilityAuthSigs && {
-      capabilityAuthSigs: [...params.capabilityAuthSigs],
+    ...(params.authMaterial.capabilityAuthSigs && {
+      capabilityAuthSigs: [...params.authMaterial.capabilityAuthSigs],
     }),
   };
 };

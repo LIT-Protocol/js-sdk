@@ -88,6 +88,7 @@ import {
   JsonPKPClaimKeyRequest,
   JsonPkpSignRequest,
   JsonPkpSignSdkParams,
+  JsonSignSessionKeyRequestForPKP,
   JsonSignSessionKeyRequestV1,
   JsonSignSessionKeyRequestV2,
   LitNodeClientConfig,
@@ -1229,7 +1230,7 @@ export class LitNodeClient extends LitCore {
 
   v2 = {
     signPKPSessionKey: async (
-      requestBody: JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE>,
+      requestBody: JsonSignSessionKeyRequestForPKP,
       nodeUrls: string[]
     ): Promise<AuthSig> => {
       const endpoint = LIT_ENDPOINT.SIGN_SESSION_KEY;
@@ -1314,7 +1315,7 @@ export class LitNodeClient extends LitCore {
       // const sigType = mostCommonValue(blsSignedData.map((s) => s.curveType));
       const signatureShares = getBlsSignatures(blsSignedData);
       const blsCombinedSignature = await combineSignatureShares(signatureShares);
-      const publicKey = removeHexPrefix(params.pkpPublicKey);
+      const publicKey = removeHexPrefix(requestBody.pkpPublicKey);
       // const dataSigned = mostCommonValue(blsSignedData.map((s) => s.dataSigned));
       const mostCommonSiweMessage = mostCommonValue(
         blsSignedData.map((s) => s.siweMessage)
@@ -1401,6 +1402,8 @@ export class LitNodeClient extends LitCore {
       pkpPublicKey: params.pkpPublicKey,
       siweMessage: siweMessage,
       curveType: LIT_CURVE.BLS,
+      epoch: this.currentEpochNumber,
+      signingScheme: LIT_CURVE.BLS,
 
       // -- custom auths
       ...(params?.litActionIpfsId && {
@@ -1408,8 +1411,6 @@ export class LitNodeClient extends LitCore {
       }),
       ...(params?.litActionCode && { code: params.litActionCode }),
       ...(params?.jsParams && { jsParams: params.jsParams }),
-      ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
-      signingScheme: LIT_CURVE.BLS,
     };
 
     // this._litNodeLogger.info({ msg: `[signSessionKey] body:`, body });

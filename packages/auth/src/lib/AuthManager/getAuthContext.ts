@@ -8,7 +8,7 @@ import { preparePkpAuthContext } from './authContexts/preparePkpAuthContext';
 export const getAuthContext = {
   fromEOA: prepareEoaAuthContext,
   fromPKP: preparePkpAuthContext,
-  // fromLitAction: prepareLitActionAuthContext,
+  // fromCustom: prepareCustomAuthContext,
 };
 
 // if (import.meta.main) {

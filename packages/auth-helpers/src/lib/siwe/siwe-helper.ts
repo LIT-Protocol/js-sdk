@@ -7,7 +7,6 @@ import {
 import {
   CapacityDelegationFields,
   CapacityDelegationRequest,
-  ILitNodeClient,
   ILitResource,
   ISessionCapabilityObject,
   LitResourceAbilityRequest,

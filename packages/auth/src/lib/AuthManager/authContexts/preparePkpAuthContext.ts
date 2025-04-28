@@ -3,6 +3,7 @@ import {
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
+  JsonSignSessionKeyRequestForPKP,
   JsonSignSessionKeyRequestV2,
   LitResourceAbilityRequest,
   NodeSet,
@@ -62,7 +63,7 @@ export const preparePkpAuthRequestBody = async (params: {
     nonce: string;
     currentEpoch: number;
   }
-}): Promise<JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE>> => {
+}): Promise<JsonSignSessionKeyRequestForPKP> => {
 
   // -- dependencies from litNodeClient(must be generated internally, not provided by the user)
   // const nodeUrls = (await params.deps.litNodeClient.getMaxPricesForNodeProduct({
@@ -98,7 +99,7 @@ export const preparePkpAuthRequestBody = async (params: {
     nonce: params.deps.nonce,
   })
 
-  const requestBody: JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE> = {
+  const requestBody: JsonSignSessionKeyRequestForPKP = {
     nodeSet: params.deps.nodeSet,
     sessionKey: _identity.session.uri,
     authMethods: params.identity.authMethods,
@@ -106,6 +107,7 @@ export const preparePkpAuthRequestBody = async (params: {
     siweMessage: _siweMessage,
     curveType: LIT_CURVE.BLS,
     signingScheme: LIT_CURVE.BLS,
+    epoch: params.deps.currentEpoch,
   }
 
   return requestBody;

@@ -237,12 +237,30 @@ export interface JsonSignSessionKeyRequestV1
   litActionIpfsId?: string;
 }
 
+export interface JsonSignSessionKeyRequestForPKP {
+  nodeSet: NodeSet[];
+  sessionKey: string;
+  authMethods: AuthMethod[];
+  pkpPublicKey: string;
+  siweMessage: string;
+  curveType: 'BLS';
+  signingScheme: 'BLS'
+  epoch: number;
+}
+
+export interface JsonSignSessionKeyRequestForLitAction extends
+  JsonSignSessionKeyRequestForPKP,
+  LitActionSdkParams { }
+
+/**
+ * @deprecated
+ */
 export interface JsonSignSessionKeyRequestV2<T>
   extends Pick<LitActionSdkParams, 'jsParams'>,
   NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
-  pkpPublicKey?: string;
+  pkpPublicKey: string;
   siweMessage: string;
   curveType: 'BLS';
   epoch?: number;
