@@ -8,7 +8,7 @@ import { Web3Wallet } from '@walletconnect/web3wallet';
 import { ethers } from 'ethers';
 
 import {
-  createSiweMessageWithRecaps,
+  createSiweMessageWithResources,
   generateAuthSig,
   LitPKPResource,
 } from '@lit-protocol/auth-helpers';
@@ -40,7 +40,7 @@ describe('PKPWalletConnect', () => {
         authNeededCallback: async function (
           params: AuthCallbackParams
         ): Promise<AuthSig> {
-          const toSign = await createSiweMessageWithRecaps({
+          const toSign = await createSiweMessageWithResources({
             uri: params.uri!,
             expiration: params.expiration!,
             resources: params.resourceAbilityRequests!,

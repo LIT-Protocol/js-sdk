@@ -224,7 +224,7 @@ export interface NodeSetRequired {
 
 export interface JsonSignSessionKeyRequestV1
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    NodeSetRequired {
+  NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
@@ -239,7 +239,7 @@ export interface JsonSignSessionKeyRequestV1
 
 export interface JsonSignSessionKeyRequestV2<T>
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    NodeSetRequired {
+  NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
@@ -415,7 +415,7 @@ export type JsonExecutionSdkParams = z.infer<
 
 export interface JsonExecutionRequest
   extends Pick<LitActionSdkParams, 'jsParams'>,
-    NodeSetRequired {
+  NodeSetRequired {
   authSig: AuthSig;
 
   /**
@@ -454,11 +454,11 @@ export interface SigResponse {
 
 export interface ExecuteJsResponseBase {
   signatures:
-    | {
-        sig: SigResponse;
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | any;
+  | {
+    sig: SigResponse;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | any;
 }
 
 /**
@@ -673,7 +673,7 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
   /**
    * The public key of the PKP
    */
-  pkpPublicKey?: string;
+  pkpPublicKey: string;
 
   /**
    * The auth sig of the user.  Returned via the checkAndSignAuthMessage function
@@ -687,9 +687,8 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   /**
-   * @deprecated - this is not used????
    */
-  resources?: any;
+  resources?: LitResourceAbilityRequest[];
 
   chainId?: number;
 
@@ -699,9 +698,10 @@ export interface SignSessionKeyProp extends LitActionSdkParams {
   domain?: string;
 
   /**
+   * @deprecated - use `resources` instead
    * A LIT resource ability is a combination of a LIT resource and a LIT ability.
    */
-  resourceAbilityRequests?: LitResourceAbilityRequest[];
+  // resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 export interface SignSessionKeyResponse {

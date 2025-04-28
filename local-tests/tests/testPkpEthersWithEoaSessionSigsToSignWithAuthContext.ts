@@ -1,7 +1,7 @@
 import {
   LitActionResource,
   LitPKPResource,
-  createSiweMessageWithRecaps,
+  createSiweMessageWithResources,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
 import { LIT_ABILITY } from '@lit-protocol/constants';
@@ -27,7 +27,7 @@ export const testPkpEthersWithEoaSessionSigsToSignWithAuthContext = async (
       authNeededCallback: async function (
         params: AuthCallbackParams
       ): Promise<AuthSig> {
-        const toSign = await createSiweMessageWithRecaps({
+        const toSign = await createSiweMessageWithResources({
           uri: params.uri,
           expiration: params.expiration,
           resources: params.resourceAbilityRequests,

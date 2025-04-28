@@ -1,5 +1,5 @@
 import {
-  createSiweMessageWithRecaps,
+  createSiweMessageWithResources,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
 import { AuthCallbackParams } from '@lit-protocol/types';
@@ -49,7 +49,7 @@ export const prepareEoaAuthContext = async (
         throw new Error('uri is required');
       }
 
-      const toSign = await createSiweMessageWithRecaps({
+      const toSign = await createSiweMessageWithResources({
         uri: uri,
         expiration: expiration,
         resources: resourceAbilityRequests,

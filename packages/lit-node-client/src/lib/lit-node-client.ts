@@ -8,9 +8,10 @@ import {
   getHashedAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
 import {
+  createPKPSiweMessage,
   createSiweMessage,
   createSiweMessageWithCapacityDelegation,
-  createSiweMessageWithRecaps,
+  createSiweMessageWithResources,
   decode,
   generateAuthSig,
   generateSessionCapabilityObjectWithWildcards,
@@ -714,7 +715,7 @@ export class LitNodeClient extends LitCore {
           sessionSigs,
         },
         requestId,
-        this._getNodeSet(targetNodeUrls)
+        this.getNodeSet(targetNodeUrls)
       )
     );
 
@@ -928,7 +929,7 @@ export class LitNodeClient extends LitCore {
           //   }),
 
           // nodeSet: thresholdNodeSet,
-          nodeSet: this._getNodeSet(targetNodeUrls),
+          nodeSet: this.getNodeSet(targetNodeUrls),
           signingScheme: 'EcdsaK256Sha256',
         };
 
@@ -1226,6 +1227,114 @@ export class LitNodeClient extends LitCore {
 
   /** ============================== SESSION ============================== */
 
+  v2 = {
+    signPKPSessionKey: async (
+      requestBody: JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE>,
+      nodeUrls: string[]
+    ): Promise<AuthSig> => {
+      const endpoint = LIT_ENDPOINT.SIGN_SESSION_KEY;
+
+      // -- prepare request promises
+      const requestId = this._getNewRequestId();
+      const nodePromises = this._getNodePromises(
+        nodeUrls,
+        (url: string) => {
+
+          const urlWithPath = composeLitUrl({
+            url,
+            endpoint,
+          });
+
+          return this.generatePromise(urlWithPath, requestBody, requestId);
+        }
+      );
+
+      // -- resolve promises
+      let res;
+      try {
+        res = await this._handleNodePromises(
+          nodePromises,
+          requestId,
+          this._getThreshold()
+        );
+        this._litNodeLogger.info({ msg: 'signSessionKey node promises', res });
+      } catch (e) {
+        throw new UnknownError(
+          {
+            info: {
+              requestId,
+            },
+            cause: e,
+          },
+          'Error when handling node promises'
+        );
+      }
+
+      // -- validate the response
+      if (!res.success) {
+        throw new UnknownError(
+          {
+            info: {
+              requestId,
+              res,
+            },
+          },
+          `[signPKPSessionKey] failed to sign session key`
+        )
+      }
+
+      // -- prepare the response
+      const responseData: BlsResponseData[] = res.values as BlsResponseData[];
+      const signedDataList = responseData.map((s) => s.dataSigned);
+
+      // -- validate the signed data list
+      if (signedDataList.length <= 0) {
+        const err = `[signSessionKey] signedDataList is empty.`;
+        this._litNodeLogger.info(err);
+        throw new InvalidSignatureError(
+          {
+            info: {
+              requestId,
+              responseData,
+              signedDataList,
+            },
+          },
+          err
+        );
+      }
+
+      // -- validate if we have enough shares.
+      const blsSignedData: BlsResponseData[] = this._validateSignSessionKeyResponseData(
+        responseData,
+        requestId,
+        this._getThreshold()
+      );
+
+      // -- construct the response
+      // const sigType = mostCommonValue(blsSignedData.map((s) => s.curveType));
+      const signatureShares = getBlsSignatures(blsSignedData);
+      const blsCombinedSignature = await combineSignatureShares(signatureShares);
+      const publicKey = removeHexPrefix(params.pkpPublicKey);
+      // const dataSigned = mostCommonValue(blsSignedData.map((s) => s.dataSigned));
+      const mostCommonSiweMessage = mostCommonValue(
+        blsSignedData.map((s) => s.siweMessage)
+      );
+      const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
+      const authSig: AuthSig = {
+        sig: JSON.stringify({
+          ProofOfPossession: blsCombinedSignature,
+        }),
+        algo: 'LIT_BLS',
+        derivedVia: 'lit.bls',
+        signedMessage,
+        address: computeAddress(hexPrefixed(publicKey)),
+      }
+
+      return authSig;
+
+    }
+  }
+
   /**
    * @deprecated - this function will soon be moved to the auth package
    * Sign a session public key using a PKP, which generates an authSig.
@@ -1234,16 +1343,8 @@ export class LitNodeClient extends LitCore {
   signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
-    this._litNodeLogger.info({ msg: `[signSessionKey] params:`, params });
 
-    // ========== Validate Params ==========
-    // -- validate: If it's NOT ready
-    if (!this.ready) {
-      throw new LitNodeClientNotReadyError(
-        {},
-        '[signSessionKey] ]LitNodeClient is not ready.  Please call await litNodeClient.connect() first.'
-      );
-    }
+    const resources = params.resources;
 
     // -- construct SIWE message that will be signed by node to generate an authSig.
     const _expiration =
@@ -1273,46 +1374,15 @@ export class LitNodeClient extends LitCore {
       );
     }
 
-    // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
-    const pkpEthAddress = (function () {
-      // prefix '0x' if it's not already prefixed
-      params.pkpPublicKey = hexPrefixed(params.pkpPublicKey!);
-
-      if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
-
-      // This will be populated by the node, using dummy value for now.
-      return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
-    })();
-
-    let siwe_statement = 'Lit Protocol PKP session signature';
-    if (params.statement) {
-      siwe_statement += ' ' + params.statement;
-      this._litNodeLogger.info(
-        `[signSessionKey] statement found in params: "${params.statement}"`
-      );
-    }
-
-    let siweMessage;
-
-    const siweParams = {
-      domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
-      walletAddress: pkpEthAddress,
-      statement: siwe_statement,
-      uri: sessionKeyUri,
-      version: '1',
-      chainId: params.chainId ?? 1,
-      expiration: _expiration,
+    const siweMessage = await createPKPSiweMessage({
+      pkpPublicKey: params.pkpPublicKey,
+      sessionKeyUri,
       nonce: await this.getLatestBlockhash(),
-    };
-
-    if (params.resourceAbilityRequests) {
-      siweMessage = await createSiweMessageWithRecaps({
-        ...siweParams,
-        resources: params.resourceAbilityRequests,
-      });
-    } else {
-      siweMessage = await createSiweMessage(siweParams);
-    }
+      expiration: _expiration,
+      resources: resources,
+      statement: params.statement,
+      domain: params.domain,
+    })
 
     // This may seem a bit weird because we usually only care about prices for sessionSigs...
     // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
@@ -1320,13 +1390,15 @@ export class LitNodeClient extends LitCore {
       product: 'LIT_ACTION',
     });
 
+    const nodeUrls = targetNodePrices.map(({ url }) => url);
+
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
     const body: JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE> = {
-      nodeSet: this._getNodeSet(targetNodePrices.map(({ url }) => url)),
+      nodeSet: this.getNodeSet(nodeUrls),
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
-      ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
+      pkpPublicKey: params.pkpPublicKey,
       siweMessage: siweMessage,
       curveType: LIT_CURVE.BLS,
 
@@ -1340,14 +1412,13 @@ export class LitNodeClient extends LitCore {
       signingScheme: LIT_CURVE.BLS,
     };
 
-    this._litNodeLogger.info({ msg: `[signSessionKey] body:`, body });
+    // this._litNodeLogger.info({ msg: `[signSessionKey] body:`, body });
 
     const requestId = this._getNewRequestId();
     this._litNodeLogger.info({ requestId, signSessionKeyBody: body });
 
-    const targetNodeUrls = targetNodePrices.map(({ url }) => url);
     const nodePromises = this._getNodePromises(
-      targetNodeUrls,
+      nodeUrls,
       (url: string) => {
         const reqBody: JsonSignSessionKeyRequestV1 = body;
 
@@ -1444,8 +1515,8 @@ export class LitNodeClient extends LitCore {
 
     const blsSignedData: BlsResponseData[] = validatedSignedDataList;
 
-    const sigType = mostCommonValue(blsSignedData.map((s) => s.curveType));
-    this._litNodeLogger.info(`[signSessionKey] sigType:`, sigType);
+    // const sigType = mostCommonValue(blsSignedData.map((s) => s.curveType));
+    // this._litNodeLogger.info(`[signSessionKey] sigType:`, sigType);
 
     const signatureShares = getBlsSignatures(blsSignedData);
 
@@ -1464,8 +1535,8 @@ export class LitNodeClient extends LitCore {
     const publicKey = removeHexPrefix(params.pkpPublicKey);
     this._litNodeLogger.info(`[signSessionKey] publicKey:`, publicKey);
 
-    const dataSigned = mostCommonValue(blsSignedData.map((s) => s.dataSigned));
-    this._litNodeLogger.info(`[signSessionKey] dataSigned:`, dataSigned);
+    // const dataSigned = mostCommonValue(blsSignedData.map((s) => s.dataSigned));
+    // this._litNodeLogger.info(`[signSessionKey] dataSigned:`, dataSigned);
 
     const mostCommonSiweMessage = mostCommonValue(
       blsSignedData.map((s) => s.siweMessage)

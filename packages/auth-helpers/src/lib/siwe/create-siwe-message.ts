@@ -1,9 +1,12 @@
 import { SiweMessage } from 'siwe';
+import { computeAddress } from '@ethersproject/transactions';
 
 import { InvalidArgumentException } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
   CapacityDelegationFields,
+  LitResourceAbilityRequest,
+  SessionKeyPair,
   WithCapacityDelegation,
   WithRecap,
 } from '@lit-protocol/types';
@@ -12,6 +15,66 @@ import {
   addRecapToSiweMessage,
   createCapacityCreditsResourceData,
 } from './siwe-helper';
+
+interface CreatePKPSiweMessageParams {
+  /** Public key of the PKP that will sign */
+  pkpPublicKey: string;
+  /** URI identifying the session key */
+  sessionKeyUri: string;
+  /** Nonce from the Lit Node */
+  nonce: string;
+  /** Expiration time for the session */
+  expiration: string;
+  /** Optional statement to append to the default SIWE statement */
+  statement?: string;
+  /** Optional domain for the SIWE message */
+  domain?: string;
+  /** Optional resources and abilities for SIWE ReCap */
+  resources?: LitResourceAbilityRequest[];
+}
+
+/**
+ * Creates the specific SIWE message that needs to be signed by a PKP
+ * to authorize a session key.
+ * @param params - Parameters for creating the PKP SIWE message.
+ * @returns A promise that resolves to the prepared SIWE message string.
+ */
+export const createPKPSiweMessage = async (
+  params: CreatePKPSiweMessageParams
+): Promise<string> => {
+
+  let siweMessage;
+
+  // Compute the address from the public key.
+  const pkpEthAddress = computeAddress(params.pkpPublicKey);
+
+  let siwe_statement = 'Lit Protocol PKP session signature';
+  if (params.statement) {
+    siwe_statement += ' ' + params.statement;
+  }
+
+  const siweParams = {
+    domain: params.domain || globalThis.location?.host || 'litprotocol.com',
+    walletAddress: pkpEthAddress,
+    statement: siwe_statement,
+    uri: params.sessionKeyUri,
+    version: '1',
+    chainId: 1,
+    expiration: params.expiration,
+    nonce: params.nonce,
+  };
+
+  if (params.resources) {
+    siweMessage = await createSiweMessageWithResources({
+      ...siweParams,
+      resources: params.resources,
+    });
+  } else {
+    siweMessage = await createSiweMessage(siweParams);
+  }
+
+  return siweMessage;
+};
 
 /**
  * Creates a SIWE
@@ -98,7 +161,7 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
  * @param { WithRecap } params - The parameters for creating the SIWE message with recaps.
  * @returns A Promise that resolves to a string representing the SIWE message.
  */
-export const createSiweMessageWithRecaps = async (
+export const createSiweMessageWithResources = async (
   params: WithRecap
 ): Promise<string> => {
   return createSiweMessage({

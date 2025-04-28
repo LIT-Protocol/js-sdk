@@ -6,13 +6,23 @@ export interface BaseIdentity {
   pkpPublicKey: Hex;
 }
 
+export interface BaseAuthMaterial {
+  resources: LitResourceAbilityRequest[];
+  expiration: string;
+  statement?: string;
+  capabilityAuthSigs?: AuthSig[];
+  domain?: string;
+}
+
 /**
  * Any auth context type must implement this interface.
  */
-export interface BaseAuthContextType<T extends BaseIdentity> {
-  resources: LitResourceAbilityRequest[];
-  capabilityAuthSigs?: AuthSig[];
+export interface BaseAuthContextType<
+  T extends BaseIdentity,
+  M extends BaseAuthMaterial
+> {
   identity: T;
+  authMaterial: M;
 }
 
 export interface BaseBehaviour {

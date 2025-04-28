@@ -2,7 +2,7 @@ import {
   LitActionResource,
   LitPKPResource,
   generateAuthSig,
-  createSiweMessageWithRecaps,
+  createSiweMessageWithResources,
 } from '@lit-protocol/auth-helpers';
 import {
   AuthCallbackParams,
@@ -58,7 +58,7 @@ export const getEoaAuthContext = (
         throw new Error('uri is required');
       }
 
-      const toSign = await createSiweMessageWithRecaps({
+      const toSign = await createSiweMessageWithResources({
         uri: uri,
         expiration: expiration,
         resources: resourceAbilityRequests,
@@ -117,7 +117,7 @@ export const getEoaAuthContextWithCapacityDelegations = (
         throw new Error('uri is required');
       }
 
-      const toSign = await createSiweMessageWithRecaps({
+      const toSign = await createSiweMessageWithResources({
         uri: uri,
         expiration: expiration,
         resources: resourceAbilityRequests,
