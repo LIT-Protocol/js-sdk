@@ -27,3 +27,10 @@ export {
   getAuthIdByAuthMethod,
   LitRelay,
 };
+
+export type LitAuthAuthenticators =
+  | MetamaskAuthenticator
+  | StytchOtpAuthenticator
+  | WebAuthnAuthenticator
+  | AppleAuthenticator
+  | DiscordAuthenticator;

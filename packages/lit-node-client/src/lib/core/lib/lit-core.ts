@@ -363,6 +363,7 @@ export class LitCore {
   }
 
   /**
+   * @depreacted - use NodeInfoSchema instead.
    * module: LitNodeClient (we need to remove lit-core)
    * // check this in Datil.
    * Gets the set of nodes from validator data, transforming bootstrap URLs into NodeSet objects.
@@ -419,7 +420,7 @@ export class LitCore {
   };
 
   /**
-   *
+   * @deprecated 
    * Connect to the LIT nodes
    *
    * @returns { Promise } A promise that resolves when the nodes are connected.

@@ -1,4 +1,4 @@
-import { mostCommonValue } from '@lit-protocol/core';
+import { mostCommonValue } from '../core';
 
 export const assembleMostCommonResponse = (responses: object[]): object => {
   const result: Record<string, any> = {};

@@ -60,6 +60,7 @@ import {
   DecryptRequestSchema,
   EncryptRequestSchema,
   JsonExecutionSdkParamsBaseSchema,
+  NodeSignedAuthSig,
 } from '@lit-protocol/schemas';
 import {
   AuthCallback,
@@ -109,7 +110,7 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 import { AuthMethod } from '@lit-protocol/types';
-
+import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/auth';
 import { assembleMostCommonResponse } from './helpers/assemble-most-common-response';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
@@ -130,8 +131,12 @@ import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { formatSessionSigs } from './helpers/session-sigs-reader';
 import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
+import { z } from 'zod';
 
 // request handler
+/**
+ * @deprecated - soon to be replaced
+ */
 export class LitNodeClient extends LitCore {
   private readonly _litNodeLogger: Logger;
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -216,7 +221,6 @@ export class LitNodeClient extends LitCore {
 
     const siweMessage = await createSiweMessageWithCapacityDelegation({
       uri: SIWE_URI_PREFIX.DELEGATION,
-      litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
       nonce: await this.getLatestBlockhash(),
       expiration: params.expiration,
@@ -814,13 +818,13 @@ export class LitNodeClient extends LitCore {
       claims,
       signatures: hasSignedData
         ? {
-          [key]: await getSignatures({
-            requestId,
-            networkPubKeySet: this.networkPubKeySet,
-            threshold: _params.useSingleNode ? 1 : this._getThreshold(),
-            signedMessageShares: flattenedSignedMessageShares,
-          }),
-        }
+            [key]: await getSignatures({
+              requestId,
+              networkPubKeySet: this.networkPubKeySet,
+              threshold: _params.useSingleNode ? 1 : this._getThreshold(),
+              signedMessageShares: flattenedSignedMessageShares,
+            }),
+          }
         : {},
       // decryptions: [],
       response: parsedResponse,
@@ -1229,24 +1233,27 @@ export class LitNodeClient extends LitCore {
   /** ============================== SESSION ============================== */
 
   v2 = {
-    signPKPSessionKey: async (
-      requestBody: JsonSignSessionKeyRequestForPKP,
-      nodeUrls: string[]
-    ): Promise<AuthSig> => {
+    signPKPSessionKey: async (params: {
+      requestBody: z.output<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
+      nodeUrls: string[];
+    }): Promise<AuthSig> => {
       const endpoint = LIT_ENDPOINT.SIGN_SESSION_KEY;
 
       // -- prepare request promises
       const requestId = this._getNewRequestId();
       const nodePromises = this._getNodePromises(
-        nodeUrls,
+        params.nodeUrls,
         (url: string) => {
-
           const urlWithPath = composeLitUrl({
             url,
             endpoint,
           });
 
-          return this.generatePromise(urlWithPath, requestBody, requestId);
+          return this.generatePromise(
+            urlWithPath,
+            params.requestBody,
+            requestId
+          );
         }
       );
 
@@ -1281,7 +1288,7 @@ export class LitNodeClient extends LitCore {
             },
           },
           `[signPKPSessionKey] failed to sign session key`
-        )
+        );
       }
 
       // -- prepare the response
@@ -1305,36 +1312,33 @@ export class LitNodeClient extends LitCore {
       }
 
       // -- validate if we have enough shares.
-      const blsSignedData: BlsResponseData[] = this._validateSignSessionKeyResponseData(
-        responseData,
-        requestId,
-        this._getThreshold()
-      );
+      const blsSignedData: BlsResponseData[] =
+        this._validateSignSessionKeyResponseData(
+          responseData,
+          requestId,
+          this._getThreshold()
+        );
 
       // -- construct the response
-      // const sigType = mostCommonValue(blsSignedData.map((s) => s.curveType));
       const signatureShares = getBlsSignatures(blsSignedData);
-      const blsCombinedSignature = await combineSignatureShares(signatureShares);
-      const publicKey = removeHexPrefix(requestBody.pkpPublicKey);
-      // const dataSigned = mostCommonValue(blsSignedData.map((s) => s.dataSigned));
+      const blsCombinedSignature = await combineSignatureShares(
+        signatureShares
+      );
+
       const mostCommonSiweMessage = mostCommonValue(
         blsSignedData.map((s) => s.siweMessage)
       );
+
       const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
-      const authSig: AuthSig = {
-        sig: JSON.stringify({
-          ProofOfPossession: blsCombinedSignature,
-        }),
-        algo: 'LIT_BLS',
-        derivedVia: 'lit.bls',
+      const _authSig = NodeSignedAuthSig.parse({
+        blsCombinedSignature,
         signedMessage,
-        address: computeAddress(hexPrefixed(publicKey)),
-      }
+        pkpPublicKey: params.requestBody.pkpPublicKey,
+      });
 
-      return authSig;
-
-    }
-  }
+      return _authSig;
+    },
+  };
 
   /**
    * @deprecated - this function will soon be moved to the auth package
@@ -1344,7 +1348,6 @@ export class LitNodeClient extends LitCore {
   signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
-
     const resources = params.resources;
 
     // -- construct SIWE message that will be signed by node to generate an authSig.
@@ -1354,7 +1357,6 @@ export class LitNodeClient extends LitCore {
 
     // Try to get it from local storage, if not generates one~
     const sessionKey: SessionKeyPair =
-
       // should be handled in the storage
       params.sessionKey ?? this._getSessionKey();
     const sessionKeyUri = this._getSessionKeyUri(sessionKey.publicKey);
@@ -1383,7 +1385,7 @@ export class LitNodeClient extends LitCore {
       resources: resources,
       statement: params.statement,
       domain: params.domain,
-    })
+    });
 
     // This may seem a bit weird because we usually only care about prices for sessionSigs...
     // But this also ensures we use the cheapest nodes and takes care of getting the minNodeCount of node URLs for the operation
@@ -1418,19 +1420,16 @@ export class LitNodeClient extends LitCore {
     const requestId = this._getNewRequestId();
     this._litNodeLogger.info({ requestId, signSessionKeyBody: body });
 
-    const nodePromises = this._getNodePromises(
-      nodeUrls,
-      (url: string) => {
-        const reqBody: JsonSignSessionKeyRequestV1 = body;
+    const nodePromises = this._getNodePromises(nodeUrls, (url: string) => {
+      const reqBody: JsonSignSessionKeyRequestV1 = body;
 
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
-        });
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
+      });
 
-        return this.generatePromise(urlWithPath, reqBody, requestId);
-      }
-    );
+      return this.generatePromise(urlWithPath, reqBody, requestId);
+    });
 
     // -- resolve promises
     let res;
@@ -1593,7 +1592,7 @@ export class LitNodeClient extends LitCore {
     });
   };
 
-  // module: private method of the Naga network. 
+  // module: private method of the Naga network.
   // only applies to Naga, internally for Naga network stuff.
   getMaxPricesForNodeProduct = async ({
     userMaxPrice,
@@ -1673,8 +1672,8 @@ export class LitNodeClient extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -1756,10 +1755,10 @@ export class LitNodeClient extends LitCore {
 
     const capabilities = params.capabilityAuthSigs
       ? [
-        ...(params.capabilityAuthSigs ?? []),
-        params.capabilityAuthSigs,
-        authSig,
-      ]
+          ...(params.capabilityAuthSigs ?? []),
+          params.capabilityAuthSigs,
+          authSig,
+        ]
       : [...(params.capabilityAuthSigs ?? []), authSig];
 
     // This is the template that will be combined with the node address as a single object, then signed by the session key

@@ -7,7 +7,51 @@ import {
   LIT_NETWORK,
   LIT_RESOURCE_PREFIX,
   VMTYPE,
+  SIWE_URI_PREFIX,
 } from '@lit-protocol/constants';
+import { computeAddress } from 'ethers/lib/utils';
+
+export const HexPrefixedSchema = z
+  .string()
+  .transform((val) => (val.startsWith('0x') ? val : `0x${val}`))
+  .refine((val) => /^0x[0-9a-fA-F]*$/.test(val), {
+    message: 'String must start with 0x and contain only hex characters',
+  });
+
+// Naga V8: Selected Nodes for ECDSA endpoints #1223
+// https://github.com/LIT-Protocol/lit-assets/pull/1223/
+export const NodeSetSchema = z.object({
+  // reference: https://github.com/LIT-Protocol/lit-assets/blob/f82b28e83824a861547307aaed981a6186e51d48/rust/lit-node/common/lit-node-testnet/src/node_collection.rs#L185-L191
+  // eg: 192.168.0.1:8080
+  socketAddress: z.string(),
+
+  // (See PR description) the value parameter is a U64 that generates a sort order. This could be pricing related information, or another value to help select the right nodes. The value could also be zero with only the correct number of nodes participating in the signing request.
+  value: z.number(),
+});
+
+export const NodeInfoSchema = z
+  .array(
+    z.object({
+      url: z.string(),
+      price: z.bigint(),
+    })
+  )
+  .transform((item) => ({
+    urls: item.map((item) => item.url),
+    nodeSet: item
+      .map((item) => item.url)
+      .map((url) => {
+        // remove protocol from the url as we only need ip:port
+        const urlWithoutProtocol = url.replace(/(^\w+:|^)\/\//, '') as string;
+
+        return NodeSetSchema.parse({
+          socketAddress: urlWithoutProtocol,
+
+          // CHANGE: This is a placeholder value. Brendon said: It's not used anymore in the nodes, but leaving it as we may need it in the future.
+          value: 1,
+        });
+      }),
+  }));
 
 const definedLiteralSchema = z.union([z.string(), z.number(), z.boolean()]);
 export type DefinedLiteral = z.infer<typeof definedLiteralSchema>;
@@ -156,6 +200,24 @@ export const AuthSigSchema = z.object({
   algo: z.string().optional(),
 });
 
+export const NodeSignedAuthSig = z
+  .object({
+    blsCombinedSignature: z.string(),
+    signedMessage: z.string(),
+    pkpPublicKey: HexPrefixedSchema,
+  })
+  .transform((item) =>
+    AuthSigSchema.parse({
+      sig: JSON.stringify({
+        ProofOfPossession: item.blsCombinedSignature,
+        algo: 'LIT_BLS',
+        derivedVia: 'lit.bls',
+        signedMessage: item.signedMessage,
+        address: computeAddress(item.pkpPublicKey),
+      }),
+    })
+  );
+
 export const ResponseStrategySchema = z.enum([
   'leastCommon',
   'mostCommon',
@@ -256,10 +318,16 @@ export const LitActionSdkParamsSchema = z.object({
 
 export const CosmosWalletTypeSchema = z.enum(['keplr', 'leap'] as const);
 
-export const SessionKeyPairSchema = z.object({
-  publicKey: z.string(),
-  secretKey: z.string(),
-});
+export const SessionKeyPairSchema = z
+  .object({
+    publicKey: z.string(),
+    secretKey: z.string(),
+  })
+  .transform((item) => ({
+    publicKey: item.publicKey,
+    secretKey: item.secretKey,
+    sessionKeyUri: `${SIWE_URI_PREFIX.SESSION_KEY}${item.publicKey}`,
+  }));
 
 export const AttenuationsObjectSchema = z.record(
   z.string(),

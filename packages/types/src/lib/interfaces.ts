@@ -17,6 +17,7 @@ import {
   LitActionResponseStrategySchema,
   LitActionSdkParamsSchema,
   SessionKeyPairSchema,
+  NodeSetSchema,
 } from '@lit-protocol/schemas';
 
 import { SigType } from './EndpointResponses';
@@ -207,14 +208,7 @@ export interface JsonSignChainDataRequest {
 
 // Naga V8: Selected Nodes for ECDSA endpoints #1223
 // https://github.com/LIT-Protocol/lit-assets/pull/1223/
-export interface NodeSet {
-  // reference: https://github.com/LIT-Protocol/lit-assets/blob/f82b28e83824a861547307aaed981a6186e51d48/rust/lit-node/common/lit-node-testnet/src/node_collection.rs#L185-L191
-  // eg: 192.168.0.1:8080
-  socketAddress: string;
-
-  // (See PR description) the value parameter is a U64 that generates a sort order. This could be pricing related information, or another value to help select the right nodes. The value could also be zero with only the correct number of nodes participating in the signing request.
-  value: number;
-}
+export type NodeSet = z.infer<typeof NodeSetSchema>;
 
 // Naga V8: Ability to pass selected nodes to ECDSA endpoints, and use these instead of the nodes' self-determined peers.
 // https://github.com/LIT-Protocol/lit-assets/pull/1223
@@ -224,7 +218,7 @@ export interface NodeSetRequired {
 
 export interface JsonSignSessionKeyRequestV1
   extends Pick<LitActionSdkParams, 'jsParams'>,
-  NodeSetRequired {
+    NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
@@ -237,6 +231,9 @@ export interface JsonSignSessionKeyRequestV1
   litActionIpfsId?: string;
 }
 
+/**
+ * module: LitNodeClient
+ */
 export interface JsonSignSessionKeyRequestForPKP {
   nodeSet: NodeSet[];
   sessionKey: string;
@@ -244,20 +241,22 @@ export interface JsonSignSessionKeyRequestForPKP {
   pkpPublicKey: string;
   siweMessage: string;
   curveType: 'BLS';
-  signingScheme: 'BLS'
+  signingScheme: 'BLS';
   epoch: number;
 }
-
-export interface JsonSignSessionKeyRequestForLitAction extends
-  JsonSignSessionKeyRequestForPKP,
-  LitActionSdkParams { }
+/**
+ * module: LitNodeClient
+ */
+export interface JsonSignSessionKeyRequestForLitAction
+  extends JsonSignSessionKeyRequestForPKP,
+    LitActionSdkParams {}
 
 /**
  * @deprecated
  */
 export interface JsonSignSessionKeyRequestV2<T>
   extends Pick<LitActionSdkParams, 'jsParams'>,
-  NodeSetRequired {
+    NodeSetRequired {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey: string;
@@ -433,7 +432,7 @@ export type JsonExecutionSdkParams = z.infer<
 
 export interface JsonExecutionRequest
   extends Pick<LitActionSdkParams, 'jsParams'>,
-  NodeSetRequired {
+    NodeSetRequired {
   authSig: AuthSig;
 
   /**
@@ -472,11 +471,11 @@ export interface SigResponse {
 
 export interface ExecuteJsResponseBase {
   signatures:
-  | {
-    sig: SigResponse;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  | any;
+    | {
+        sig: SigResponse;
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | any;
 }
 
 /**
@@ -1042,6 +1041,11 @@ export interface EthWalletProviderOptions {
    * The origin from which the signing request is made
    */
   origin?: string;
+
+  /**
+   * Latest blockhash
+   */
+  nonce: string;
 }
 
 export interface WebAuthnProviderOptions {
@@ -1092,6 +1096,11 @@ export interface EthWalletAuthenticateOptions {
    * @returns {string} - Ethereum wallet address
    */
   getAddress?: () => string;
+
+  /**
+   * Latest blockhash
+   */
+  nonce: string;
 }
 
 export interface StytchOtpAuthenticateOptions {
@@ -1131,7 +1140,7 @@ export interface WithRecap extends BaseSiweMessage {
 
 export interface WithCapacityDelegation extends BaseSiweMessage {
   uri: 'lit:capability:delegation';
-  litNodeClient: ILitNodeClient;
+  // litNodeClient: ILitNodeClient;
   delegateeAddresses?: string[];
   // paymentId?: string;
   uses?: string;

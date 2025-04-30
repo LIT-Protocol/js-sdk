@@ -15,23 +15,28 @@ import {
   addRecapToSiweMessage,
   createCapacityCreditsResourceData,
 } from './siwe-helper';
+import { z } from 'zod';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
 
-interface CreatePKPSiweMessageParams {
+/**
+ * Schema for parameters needed to create a PKP SIWE message
+ */
+export const CreatePKPSiweMessageParamsSchema = z.object({
   /** Public key of the PKP that will sign */
-  pkpPublicKey: string;
+  pkpPublicKey: HexPrefixedSchema,
   /** URI identifying the session key */
-  sessionKeyUri: string;
+  sessionKeyUri: z.string(),
   /** Nonce from the Lit Node */
-  nonce: string;
+  nonce: z.string(),
   /** Expiration time for the session */
-  expiration: string;
+  expiration: z.string(),
   /** Optional statement to append to the default SIWE statement */
-  statement?: string;
+  statement: z.string().optional(),
   /** Optional domain for the SIWE message */
-  domain?: string;
+  domain: z.string().optional(),
   /** Optional resources and abilities for SIWE ReCap */
-  resources?: LitResourceAbilityRequest[];
-}
+  resources: z.array(z.any()).optional(), // Using any here as LitResourceAbilityRequest is imported
+});
 
 /**
  * Creates the specific SIWE message that needs to be signed by a PKP
@@ -40,9 +45,8 @@ interface CreatePKPSiweMessageParams {
  * @returns A promise that resolves to the prepared SIWE message string.
  */
 export const createPKPSiweMessage = async (
-  params: CreatePKPSiweMessageParams
+  params: z.infer<typeof CreatePKPSiweMessageParamsSchema>
 ): Promise<string> => {
-
   let siweMessage;
 
   // Compute the address from the public key.

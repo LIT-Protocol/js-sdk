@@ -26,7 +26,7 @@ interface DomainAndOrigin {
   origin?: string;
 }
 
-export class MetamaskAuthenticator extends BaseAuthenticator {
+export class MetamaskAuthenticator {
   private static readonly _logger = getChildLogger({
     module: 'MetamaskAuthenticator',
   });
@@ -39,8 +39,8 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
    */
   public origin: string;
 
-  constructor(options: EthWalletProviderOptions & BaseProviderOptions) {
-    super(options);
+  constructor(options: EthWalletProviderOptions) {
+    // super(options);
 
     const { domain, origin } =
       MetamaskAuthenticator.getDomainAndOrigin(options);
@@ -91,7 +91,7 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
       signer: options,
       address: options.address,
       chain: options.chain,
-      litNodeClient: this.litNodeClient,
+      nonce: options.nonce,
       expiration: options.expiration,
       domain: this.domain,
       origin: this.origin,
@@ -125,13 +125,13 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
     signer,
     address,
     chain,
-    litNodeClient,
+    nonce,
     expiration,
     domain,
     origin,
   }: {
     signer: ethers.Signer | ethers.Wallet | EthWalletAuthenticateOptions;
-    litNodeClient: LitNodeClient;
+    nonce: string;
     address?: string;
     chain?: LitEVMChainKeys;
     expiration?: string;
@@ -182,7 +182,7 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
         version: '1',
         chainId,
         expirationTime: expiration,
-        nonce: await litNodeClient.getLatestBlockhash(),
+        nonce: nonce,
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);
@@ -200,7 +200,7 @@ export class MetamaskAuthenticator extends BaseAuthenticator {
     } else {
       authSig = await checkAndSignEVMAuthMessage({
         chain,
-        nonce: await litNodeClient.getLatestBlockhash(),
+        nonce: nonce,
       });
     }
 

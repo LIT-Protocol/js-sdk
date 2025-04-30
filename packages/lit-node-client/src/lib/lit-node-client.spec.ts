@@ -1,4 +1,11 @@
 import { LIT_NETWORK } from '@lit-protocol/constants';
+import {
+  DecryptRequest,
+  EncryptResponse,
+  ClaimKeyResponse,
+  SignSessionKeyResponse,
+  CapacityCreditsReq,
+} from '@lit-protocol/types';
 
 import { LitNodeClient } from './lit-node-client';
 

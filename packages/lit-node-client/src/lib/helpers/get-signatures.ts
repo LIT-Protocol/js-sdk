@@ -7,13 +7,13 @@ import {
   UnknownSignatureType,
   CurveTypeNotFoundError,
 } from '@lit-protocol/constants';
-import { mostCommonValue } from '@lit-protocol/core';
 import { combineEcdsaShares } from '@lit-protocol/crypto';
 import { logger } from '@lit-protocol/logger';
 import {
   EcdsaSignedMessageShareParsed,
   SigResponse,
 } from '@lit-protocol/types';
+import { mostCommonValue } from '../core';
 
 /**
  * Retrieves and combines signature shares from multiple nodes to generate the final signatures.
