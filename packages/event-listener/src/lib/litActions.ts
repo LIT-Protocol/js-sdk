@@ -5,7 +5,7 @@ import { LitActionResource } from '@lit-protocol/auth-helpers';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
-const { MetamaskAuthenticator } = authenticators;
+const { EOAAuthenticator } = authenticators;
 
 export const signWithLitActionCode = `(async () =>  {
             const signature = await Lit.Actions.signAndCombineEcdsa({
@@ -50,7 +50,7 @@ export async function executeLitAction({
       pkpPublicKey,
       capabilityAuthSigs: [],
       authMethods: [
-        await MetamaskAuthenticator.authenticate({
+        await EOAAuthenticator.authenticate({
           signer: authSigner,
           litNodeClient: litNodeClient,
           expiration,

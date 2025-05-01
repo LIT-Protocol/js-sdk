@@ -41,11 +41,11 @@ export const storagePlugins = {
  */
 export { authenticators };
 export { getAuthManager } from './lib/auth-manager';
-export type {
-  AuthManagerConfigUnion,
-  PkpAuthManagerConfig,
-  EoaAuthManagerConfig,
-} from './lib/auth-manager';
+// export type {
+//   AuthManagerConfigUnion,
+//   PkpAuthManagerConfig,
+//   EoaAuthManagerConfig,
+// } from './lib/auth-manager';
 
 /**
  * Factory function to create and configure an instance of the Auth Manager.

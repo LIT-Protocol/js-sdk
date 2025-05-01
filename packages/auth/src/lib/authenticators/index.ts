@@ -2,7 +2,7 @@ import { LitRelay } from '../relay';
 import { AppleAuthenticator } from './AppleAuthenticator';
 import { DiscordAuthenticator } from './DiscordAuthenticator';
 import { GoogleAuthenticator } from './GoogleAuthenticator';
-import { MetamaskAuthenticator } from './metamask';
+import { EOAAuthenticator } from './metamask';
 import {
   StytchOtpAuthenticator,
   StytchAuthFactorOtpAuthenticator,
@@ -17,7 +17,7 @@ import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
 export {
   AppleAuthenticator,
   DiscordAuthenticator,
-  MetamaskAuthenticator,
+  EOAAuthenticator,
   GoogleAuthenticator,
   StytchAuthFactorOtpAuthenticator,
   StytchOtpAuthenticator,
@@ -29,7 +29,7 @@ export {
 };
 
 export type LitAuthAuthenticators =
-  | MetamaskAuthenticator
+  | EOAAuthenticator
   | StytchOtpAuthenticator
   | WebAuthnAuthenticator
   | AppleAuthenticator

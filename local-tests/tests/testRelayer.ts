@@ -2,7 +2,7 @@ import { ClaimRequest, ClientClaimProcessor } from '@lit-protocol/types';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { authenticators, LitRelay } from '@lit-protocol/auth';
 
-const { MetamaskAuthenticator } = authenticators;
+const { EOAAuthenticator } = authenticators;
 
 /**
  * Test Commands:

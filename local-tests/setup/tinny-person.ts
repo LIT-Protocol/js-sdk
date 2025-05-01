@@ -12,7 +12,7 @@ import { AUTH_METHOD_SCOPE, LIT_NETWORK } from '@lit-protocol/constants';
 
 import { authenticators } from '@lit-protocol/auth';
 
-const { MetamaskAuthenticator } = authenticators;
+const { EOAAuthenticator } = authenticators;
 
 export class TinnyPerson {
   public privateKey: string;
@@ -53,7 +53,7 @@ export class TinnyPerson {
   }
 
   async getAuthMethodId(): Promise<string> {
-    return MetamaskAuthenticator.authMethodId(this.authMethod);
+    return EOAAuthenticator.authMethodId(this.authMethod);
   }
 
   /**
@@ -116,7 +116,7 @@ export class TinnyPerson {
     console.log(
       '[𐬺🧪 Tinny Person𐬺] Crafting an authMethod from the authSig for the eth wallet auth method...'
     );
-    this.authMethod = await MetamaskAuthenticator.authenticate({
+    this.authMethod = await EOAAuthenticator.authenticate({
       signer: this.wallet,
       litNodeClient: this.envConfig.litNodeClient,
     });

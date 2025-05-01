@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, Signer } from 'ethers';
 import { SiweMessage } from 'siwe';
 
 import {
@@ -26,9 +26,11 @@ interface DomainAndOrigin {
   origin?: string;
 }
 
-export class MetamaskAuthenticator {
+export class EOAAuthenticator {
+  public static id = 'EOAAuthenticator';
+
   private static readonly _logger = getChildLogger({
-    module: 'MetamaskAuthenticator',
+    module: 'EOAAuthenticator',
   });
   /**
    * The domain from which the signing request is made
@@ -42,8 +44,7 @@ export class MetamaskAuthenticator {
   constructor(options: EthWalletProviderOptions) {
     // super(options);
 
-    const { domain, origin } =
-      MetamaskAuthenticator.getDomainAndOrigin(options);
+    const { domain, origin } = EOAAuthenticator.getDomainAndOrigin(options);
     this.domain = domain;
     this.origin = origin;
   }
@@ -54,7 +55,7 @@ export class MetamaskAuthenticator {
       domain = options.domain || window.location.hostname;
       origin = options.origin || window.location.origin;
     } catch (e) {
-      MetamaskAuthenticator._logger.error(
+      EOAAuthenticator._logger.error(
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       domain = options.domain || 'localhost';
@@ -74,7 +75,14 @@ export class MetamaskAuthenticator {
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    */
   public async authenticate(
-    options?: EthWalletAuthenticateOptions
+    options?: EthWalletAuthenticateOptions & {
+      signer:
+        | Signer
+        | {
+            signMessage: (message: string) => Promise<string>;
+            getAddress: () => Promise<string>;
+          };
+    }
   ): Promise<AuthMethod> {
     if (!options) {
       throw new InvalidArgumentException(
@@ -87,8 +95,8 @@ export class MetamaskAuthenticator {
       );
     }
 
-    return MetamaskAuthenticator.authenticate({
-      signer: options,
+    return EOAAuthenticator.authenticate({
+      signer: options.signer,
       address: options.address,
       chain: options.chain,
       nonce: options.nonce,
@@ -111,7 +119,7 @@ export class MetamaskAuthenticator {
    * @param {string} [options.origin] - Origin from which the signing request is made
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    * @static
-   * @memberof MetamaskAuthenticator
+   * @memberof EOAAuthenticator
    *
    * @example
    * ```typescript
@@ -121,16 +129,15 @@ export class MetamaskAuthenticator {
    *   });
    * ```
    */
-  public static async authenticate({
-    signer,
-    address,
-    chain,
-    nonce,
-    expiration,
-    domain,
-    origin,
-  }: {
-    signer: ethers.Signer | ethers.Wallet | EthWalletAuthenticateOptions;
+  public static async authenticate(params: {
+    signer:
+      | ethers.Signer
+      | ethers.Wallet
+      | EthWalletAuthenticateOptions
+      | {
+          signMessage: (message: string) => Promise<string>;
+          getAddress: () => Promise<string>;
+        };
     nonce: string;
     address?: string;
     chain?: LitEVMChainKeys;
@@ -138,69 +145,73 @@ export class MetamaskAuthenticator {
     domain?: string;
     origin?: string;
   }): Promise<AuthMethod> {
-    chain = chain || 'ethereum';
+    const chain = params.chain || 'ethereum';
 
     let authSig: AuthSig;
 
     // convert to EIP-55 format or else SIWE complains
-    address =
-      address ||
-      (await signer?.getAddress!()) ||
-      (signer as ethers.Wallet)?.address;
+    const address =
+      params.address ||
+      (await params.signer?.getAddress!()) ||
+      (params.signer as ethers.Wallet)?.address;
 
     if (!address) {
       throw new InvalidArgumentException(
         {
           info: {
             address,
-            signer,
+            signer: params.signer,
           },
         },
         `Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`
       );
     }
 
-    address = ethers.utils.getAddress(address);
+    const checksumAddress = ethers.utils.getAddress(address);
 
-    if (signer?.signMessage) {
+    if (params.signer?.signMessage) {
       // Get chain ID or default to Ethereum mainnet
       const selectedChain = LIT_CHAINS[chain];
       const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
 
       // Get expiration or default to 24 hours
-      expiration =
-        expiration || new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+      const expiration =
+        params.expiration ||
+        new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
       const { domain: resolvedDomain, origin: resolvedOrigin } =
-        MetamaskAuthenticator.getDomainAndOrigin({ domain, origin });
+        EOAAuthenticator.getDomainAndOrigin({
+          domain: params.domain,
+          origin: params.origin,
+        });
 
       // Prepare Sign in with Ethereum message
       const preparedMessage: Partial<SiweMessage> = {
         domain: resolvedDomain,
         uri: resolvedOrigin,
-        address,
+        address: checksumAddress,
         version: '1',
         chainId,
         expirationTime: expiration,
-        nonce: nonce,
+        nonce: params.nonce,
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);
       const toSign: string = message.prepareMessage();
 
       // Use provided function to sign message
-      const signature = await signer.signMessage(toSign);
+      const signature = await params.signer.signMessage(toSign);
 
       authSig = {
         sig: signature,
         derivedVia: 'web3.eth.personal.sign',
         signedMessage: toSign,
-        address: address,
+        address: checksumAddress,
       };
     } else {
       authSig = await checkAndSignEVMAuthMessage({
         chain,
-        nonce: nonce,
+        nonce: params.nonce,
       });
     }
 
@@ -220,7 +231,7 @@ export class MetamaskAuthenticator {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return MetamaskAuthenticator.authMethodId(authMethod);
+    return EOAAuthenticator.authMethodId(authMethod);
   }
 
   public static async authMethodId(authMethod: AuthMethod): Promise<string> {

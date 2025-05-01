@@ -1237,7 +1237,7 @@ export class LitNodeClient extends LitCore {
       requestBody: z.output<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
       nodeUrls: string[];
     }): Promise<AuthSig> => {
-      const endpoint = LIT_ENDPOINT.SIGN_SESSION_KEY;
+      const _endpoint = LIT_ENDPOINT.SIGN_SESSION_KEY;
 
       // -- prepare request promises
       const requestId = this._getNewRequestId();
@@ -1246,7 +1246,7 @@ export class LitNodeClient extends LitCore {
         (url: string) => {
           const urlWithPath = composeLitUrl({
             url,
-            endpoint,
+            endpoint: _endpoint,
           });
 
           return this.generatePromise(

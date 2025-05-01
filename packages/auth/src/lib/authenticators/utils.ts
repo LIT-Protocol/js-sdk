@@ -9,7 +9,7 @@ import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 
 import { DiscordAuthenticator } from './DiscordAuthenticator';
 import { GoogleAuthenticator } from './GoogleAuthenticator';
-import { MetamaskAuthenticator } from './metamask/MetamaskAuthenticator';
+import { EOAAuthenticator } from './metamask/EOAAuthenticator';
 import { StytchAuthFactorOtpAuthenticator } from './stytch/StytchAuthFactorOtpAuthenticator';
 import { StytchOtpAuthenticator } from './stytch/StytchOtpAuthenticator';
 import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
@@ -336,7 +336,7 @@ export async function getAuthIdByAuthMethod(
 
   switch (authMethod.authMethodType) {
     case AUTH_METHOD_TYPE.EthWallet:
-      authId = await MetamaskAuthenticator.authMethodId(authMethod);
+      authId = await EOAAuthenticator.authMethodId(authMethod);
       break;
     case AUTH_METHOD_TYPE.Discord:
       authId = await DiscordAuthenticator.authMethodId(authMethod);

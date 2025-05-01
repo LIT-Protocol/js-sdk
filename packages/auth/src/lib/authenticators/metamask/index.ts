@@ -1,3 +1,3 @@
-import { MetamaskAuthenticator } from './MetamaskAuthenticator';
+import { EOAAuthenticator } from './EOAAuthenticator';
 
-export { MetamaskAuthenticator };
+export { EOAAuthenticator };

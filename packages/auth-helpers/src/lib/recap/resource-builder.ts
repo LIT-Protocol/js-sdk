@@ -107,5 +107,9 @@ export const createResourceBuilder = () => {
     }> {
       return requests;
     },
+
+    getResources() {
+      return requests;
+    },
   };
 };

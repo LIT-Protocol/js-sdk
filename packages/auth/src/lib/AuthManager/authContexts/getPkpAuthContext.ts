@@ -21,11 +21,12 @@ const PkpAuthenticationSchema = BaseAuthenticationSchema.extend({
 });
 
 const PkpAuthorisationSchema = BaseAuthorisationSchema;
-
 const PkpSessionControlSchema = BaseSessionControlSchema;
-
 const PkpMetadataSchema = BaseMetadataSchema;
 
+/**
+ * Return Object Schema
+ */
 export const JsonSignSessionKeyRequestForPkpReturnSchema = z.object({
   nodeSet: z.array(NodeSetSchema),
   sessionKey: z.string(),
@@ -37,28 +38,34 @@ export const JsonSignSessionKeyRequestForPkpReturnSchema = z.object({
   epoch: z.number(),
 });
 
-export const JsonSignSessionKeyRequestForPkpSchema = z
-  .object({
-    authentication: PkpAuthenticationSchema,
-    authorisation: PkpAuthorisationSchema,
-    sessionControl: PkpSessionControlSchema,
-    metadata: PkpMetadataSchema,
-    nodeSet: z.array(NodeSetSchema),
-    siweMessage: z.string(),
-    epoch: z.number(),
-  })
-  .transform((item) =>
-    JsonSignSessionKeyRequestForPkpReturnSchema.parse({
-      authMethods: item.authentication.authMethods,
-      pkpPublicKey: item.authentication.pkpPublicKey,
-      nodeSet: item.nodeSet,
-      siweMessage: item.siweMessage,
-      curveType: 'BLS' as const,
-      signingScheme: 'BLS' as const,
-      epoch: item.epoch,
-    })
-  );
+// /**
+//  * Request Object Schema
+//  */
+// export const JsonSignSessionKeyRequestForPkpSchema = z
+//   .object({
+//     authentication: PkpAuthenticationSchema,
+//     authorisation: PkpAuthorisationSchema,
+//     sessionControl: PkpSessionControlSchema,
+//     metadata: PkpMetadataSchema,
+//     nodeSet: z.array(NodeSetSchema),
+//     siweMessage: z.string(),
+//     epoch: z.number(),
+//   })
+//   .transform((item) =>
+//     JsonSignSessionKeyRequestForPkpReturnSchema.parse({
+//       authMethods: item.authentication.authMethods,
+//       pkpPublicKey: item.authentication.pkpPublicKey,
+//       nodeSet: item.nodeSet,
+//       siweMessage: item.siweMessage,
+//       curveType: 'BLS' as const,
+//       signingScheme: 'BLS' as const,
+//       epoch: item.epoch,
+//     })
+//   );
 
+/**
+ * Prepare PKP Auth Request Body
+ */
 const preparePkpAuthRequestBody = async (params: {
   authentication: z.infer<typeof PkpAuthenticationSchema>;
   authorisation: z.infer<typeof PkpAuthorisationSchema>;
@@ -108,22 +115,27 @@ const preparePkpAuthRequestBody = async (params: {
   };
 };
 
+export const ConnectionSchema = z.object({
+  nodeUrls: z.array(
+    z.object({
+      url: z.string(),
+      price: z.bigint().optional(), // This only exists for Naga
+    })
+  ),
+  nonce: z.string(),
+  currentEpoch: z.number(),
+});
+
+/**
+ * Get PKP Auth Context Schema
+ */
 export const GetPkpAuthContextSchema = createBaseAuthContextTypeSchema(
   PkpAuthenticationSchema,
   PkpAuthorisationSchema,
   PkpSessionControlSchema,
   PkpMetadataSchema
 ).extend({
-  connection: z.object({
-    nodeUrls: z.array(
-      z.object({
-        url: z.string(),
-        price: z.bigint().optional(), // This only exists for Naga
-      })
-    ),
-    nonce: z.string(),
-    currentEpoch: z.number(),
-  }),
+  connection: ConnectionSchema,
   nodeSignSessionKey: z.function().args(
     z.object({
       requestBody: JsonSignSessionKeyRequestForPkpReturnSchema,
@@ -157,18 +169,15 @@ export const getPkpAuthContext = async (
     },
   });
 
-  console.log(`[getPkpAuthContext] requestBody:`, requestBody);
+  // console.log(`[getPkpAuthContext] requestBody:`, requestBody);
 
   return {
     chain: 'ethereum',
     pkpPublicKey: _params.authentication.pkpPublicKey,
     authMethods: _params.authentication.authMethods,
-
-    // @ts-expect-error - sessionKeyPair has a default in the schema, so it will never be ""possibly undefined"
-    sessionKey: _params.authentication.sessionKeyPair,
+    sessionKey: requestBody.sessionKey,
     resources: _params.authorisation.resources,
     capabilityAuthSigs: _params.authorisation.capabilityAuthSigs,
-
     // @ts-expect-error - sessionControl has a default in the schema, so it will never be ""possibly undefined"
     expiration: _params.sessionControl.expiration,
     authNeededCallback: async () => {
@@ -181,3 +190,40 @@ export const getPkpAuthContext = async (
     },
   };
 };
+
+// const authContext = await LitAuth.getPkpAuthContext({
+//   authentication: {
+//     pkpPublicKey:
+//       '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+
+//     // an authenticator outside of this should handle the authMethods
+//     authMethods: [
+//       {
+//         authMethodType: 1,
+//         accessToken: '123',
+//       },
+//     ],
+//   },
+//   authorisation: {
+//     resources: createResourceBuilder().addPKPSigningRequest('*').requests,
+//     // -- (optional) default is null
+//     // capabilityAuthSigs: [],
+//   },
+//   // -- (optional) default is 15 minutes
+//   // sessionControl: {
+//   //   expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+//   // },
+
+//   // -- (optional) default is empty string
+//   // metadata: {
+//   //   statement: 'test',
+//   // },
+//   connection: {
+//     nodeUrls: _nodeUrls,
+//     nonce: _nonce,
+//     currentEpoch: _currentEpoch,
+//   },
+//   nodeSignSessionKey: _signSessionKey,
+// });
+
+// console.log('authContext:', JSON.stringify(authContext, null, 2));
