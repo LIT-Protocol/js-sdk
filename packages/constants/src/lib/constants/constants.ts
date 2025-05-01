@@ -1077,6 +1077,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  load: {
+    contractAddress: null,
+    chainId: 9496,
+    name: 'Load Network',
+    symbol: 'LOAD',
+    decimals: 18,
+    rpcUrls: ['https://alphanet.load.network'],
+    blockExplorerUrls: ['https://explorer.load.network'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 /**
