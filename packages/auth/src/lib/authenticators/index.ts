@@ -28,9 +28,9 @@ export {
   LitRelay,
 };
 
-export type LitAuthAuthenticators =
-  | EOAAuthenticator
-  | StytchOtpAuthenticator
-  | WebAuthnAuthenticator
-  | AppleAuthenticator
-  | DiscordAuthenticator;
+export type LitAuthAuthenticator =
+  | typeof EOAAuthenticator
+  | typeof StytchOtpAuthenticator
+  | typeof WebAuthnAuthenticator
+  | typeof AppleAuthenticator
+  | typeof DiscordAuthenticator;

@@ -11,14 +11,11 @@ import {
   createBaseAuthContextTypeSchema,
 } from './BaseAuthContextType';
 import { z } from 'zod';
-import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { HexPrefixedSchema, SignerSchema } from '@lit-protocol/schemas';
 
 // Define specific Authentication schema for EOA
 const EoaAuthenticationSchema = BaseAuthenticationSchema.extend({
-  signer: z.object({
-    signMessage: z.function().args(z.any()).returns(z.promise(z.string())),
-    getAddress: z.function().args().returns(z.promise(z.string())).optional(),
-  }),
+  signer: SignerSchema,
   signerAddress: HexPrefixedSchema,
 });
 

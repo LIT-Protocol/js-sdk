@@ -43,7 +43,7 @@ function assertLocalstorageValid(
  * @param {object} params - The parameters required to build the lookup key.
  * @param {string} params.appName - The name of the application; used to store different auth material for the same PKP on the same domain
  * @param {string} params.networkName - The name of the network; used to store different auth material per LIT network
- * @param {string} params.pkpAddress - The LIT PKP address.
+ * @param {string} params.address - ETH Address (could be PKP address or EOA address)
  *
  * @returns {string} The generated lookup key for localStorage.
  *
@@ -52,13 +52,13 @@ function assertLocalstorageValid(
 function buildLookupKey({
   appName,
   networkName,
-  pkpAddress,
+  address,
 }: {
   appName: string;
   networkName: string;
-  pkpAddress: string;
+  address: string;
 }): string {
-  return `${LOCALSTORAGE_LIT_AUTH_PREFIX}:${appName}:${networkName}:${pkpAddress}`;
+  return `${LOCALSTORAGE_LIT_AUTH_PREFIX}:${appName}:${networkName}:${address}`;
 }
 
 export function localStorage({
@@ -71,23 +71,23 @@ export function localStorage({
   return {
     config: { appName, networkName, localStorage },
 
-    async write({ pkpAddress, authData }) {
+    async write({ address, authData }) {
       localStorage.setItem(
         buildLookupKey({
           appName,
           networkName,
-          pkpAddress,
+          address,
         }),
         JSON.stringify(authData)
       );
     },
 
-    async read({ pkpAddress }): Promise<LitAuthData | null> {
+    async read({ address }): Promise<LitAuthData | null> {
       const value = localStorage.getItem(
         buildLookupKey({
           appName,
           networkName,
-          pkpAddress,
+          address,
         })
       );
 

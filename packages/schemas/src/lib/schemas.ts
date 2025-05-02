@@ -11,6 +11,20 @@ import {
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
 
+export const SignerSchema = z.object({
+  signMessage: z.function().args(z.string()).returns(z.promise(z.string())),
+  getAddress: z.function().args().returns(z.promise(z.string())),
+});
+
+export const ExpirationSchema = z
+  .string()
+  .refine(
+    (val) => !isNaN(Date.parse(val)) && val === new Date(val).toISOString(),
+    {
+      message: 'Must be a valid ISO 8601 date string',
+    }
+  );
+
 export const HexPrefixedSchema = z
   .string()
   .transform((val) => (val.startsWith('0x') ? val : `0x${val}`))

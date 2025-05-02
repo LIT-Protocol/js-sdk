@@ -63,10 +63,7 @@ export const JsonSignSessionKeyRequestForPkpReturnSchema = z.object({
 //     })
 //   );
 
-/**
- * Prepare PKP Auth Request Body
- */
-const preparePkpAuthRequestBody = async (params: {
+interface PreparePkpAuthRequestBodyParams {
   authentication: z.infer<typeof PkpAuthenticationSchema>;
   authorisation: z.infer<typeof PkpAuthorisationSchema>;
   sessionControl: z.infer<typeof PkpSessionControlSchema>;
@@ -79,7 +76,14 @@ const preparePkpAuthRequestBody = async (params: {
     nonce: string;
     currentEpoch: number;
   };
-}): Promise<z.output<typeof JsonSignSessionKeyRequestForPkpReturnSchema>> => {
+}
+
+/**
+ * Prepare PKP Auth Request Body
+ */
+const preparePkpAuthRequestBody = async (
+  params: PreparePkpAuthRequestBodyParams
+): Promise<z.output<typeof JsonSignSessionKeyRequestForPkpReturnSchema>> => {
   const _authentication = PkpAuthenticationSchema.parse(params.authentication);
   const _authorisation = PkpAuthorisationSchema.parse(params.authorisation);
   const _sessionControl = PkpSessionControlSchema.parse(params.sessionControl);
@@ -115,7 +119,7 @@ const preparePkpAuthRequestBody = async (params: {
   };
 };
 
-export const ConnectionSchema = z.object({
+const ConnectionSchema = z.object({
   nodeUrls: z.array(
     z.object({
       url: z.string(),
@@ -125,6 +129,13 @@ export const ConnectionSchema = z.object({
   nonce: z.string(),
   currentEpoch: z.number(),
 });
+
+const NodeSignSessionKeySchema = z.function().args(
+  z.object({
+    requestBody: JsonSignSessionKeyRequestForPkpReturnSchema,
+    nodeUrls: z.array(z.string()),
+  })
+);
 
 /**
  * Get PKP Auth Context Schema
@@ -136,12 +147,7 @@ export const GetPkpAuthContextSchema = createBaseAuthContextTypeSchema(
   PkpMetadataSchema
 ).extend({
   connection: ConnectionSchema,
-  nodeSignSessionKey: z.function().args(
-    z.object({
-      requestBody: JsonSignSessionKeyRequestForPkpReturnSchema,
-      nodeUrls: z.array(z.string()),
-    })
-  ),
+  nodeSignSessionKey: NodeSignSessionKeySchema,
 });
 
 /**
@@ -169,8 +175,6 @@ export const getPkpAuthContext = async (
     },
   });
 
-  // console.log(`[getPkpAuthContext] requestBody:`, requestBody);
-
   return {
     chain: 'ethereum',
     pkpPublicKey: _params.authentication.pkpPublicKey,
@@ -178,6 +182,7 @@ export const getPkpAuthContext = async (
     sessionKey: requestBody.sessionKey,
     resources: _params.authorisation.resources,
     capabilityAuthSigs: _params.authorisation.capabilityAuthSigs,
+
     // @ts-expect-error - sessionControl has a default in the schema, so it will never be ""possibly undefined"
     expiration: _params.sessionControl.expiration,
     authNeededCallback: async () => {

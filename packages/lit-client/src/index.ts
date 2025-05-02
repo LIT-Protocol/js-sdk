@@ -3,7 +3,7 @@
 import * as LitAuth from '@lit-protocol/auth';
 interface LitClientConfig {
   network: 'naga-dev';
-  authManager: ReturnType<typeof LitAuth.getAuthManager>;
+  // authManager: ReturnType<typeof LitAuth.getAuthManager>;
 }
 
 export const getLitClient = (params: LitClientConfig) => {
