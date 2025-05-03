@@ -6,13 +6,11 @@ import {
 } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  BaseProviderOptions,
-  StytchOtpProviderOptions,
   StytchOtpAuthenticateOptions,
   StytchToken,
 } from '@lit-protocol/types';
 
-import { BaseAuthenticator } from '../BaseAuthenticator';
+import { StytchAuthFactorOtpConfig } from '../../auth-manager';
 import {
   FactorParser,
   emailOtpAuthFactorParser,
@@ -21,19 +19,10 @@ import {
   whatsAppOtpAuthFactorParser,
 } from './parsers';
 
-export class StytchAuthFactorOtpAuthenticator<
-  T extends FactorParser
-> extends BaseAuthenticator {
-  private _factor: T;
+export class StytchAuthFactorOtpAuthenticator<T extends FactorParser> {
   private static _provider: string = 'https://stytch.com/session';
 
-  constructor(
-    params: BaseProviderOptions,
-    config: StytchOtpProviderOptions,
-    factor: T
-  ) {
-    super(params);
-    this._factor = factor;
+  constructor(public config: StytchAuthFactorOtpConfig) {
   }
 
   /**
@@ -44,44 +33,36 @@ export class StytchAuthFactorOtpAuthenticator<
    * @returns {AuthMethod} Authentication Method for auth method type OTP
    *
    */
-  public async authenticate<T>(options?: T | undefined): Promise<AuthMethod> {
+  public async authenticate(options: StytchAuthFactorOtpConfig): Promise<AuthMethod> {
     return new Promise<AuthMethod>((resolve, reject) => {
-      if (!options) {
-        reject(
-          new Error(
-            'No Authentication options provided, please supply an authenticated JWT'
-          )
-        );
-      }
-
-      const accessToken: string | undefined = (
-        options as unknown as StytchOtpAuthenticateOptions
-      )?.accessToken;
+      const accessToken: string | undefined = options.accessToken;
       if (!accessToken) {
         reject(
           new Error('No access token provided, please provide a stych auth jwt')
         );
+        return;
       }
 
-      const parsedToken: StytchToken =
-        StytchAuthFactorOtpAuthenticator._parseJWT(accessToken);
-      const factorParser = StytchAuthFactorOtpAuthenticator._resolveAuthFactor(
-        this._factor
-      );
-
       try {
+        const parsedToken: StytchToken =
+          StytchAuthFactorOtpAuthenticator._parseJWT(accessToken);
+
+        const factorParser = StytchAuthFactorOtpAuthenticator._resolveAuthFactor(
+          options.factor
+        );
+
         factorParser.parser(
           parsedToken,
           StytchAuthFactorOtpAuthenticator._provider
         );
+
+        resolve({
+          authMethodType: factorParser.authMethodType,
+          accessToken: accessToken,
+        });
       } catch (e) {
         reject(e);
       }
-
-      resolve({
-        authMethodType: factorParser.authMethodType,
-        accessToken: accessToken,
-      });
     });
   }
 
@@ -93,51 +74,46 @@ export class StytchAuthFactorOtpAuthenticator<
    *
    * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return StytchAuthFactorOtpAuthenticator.authMethodId(authMethod);
-  }
-
-  /**
-   * Get auth method id that can be used to look up and interact with
-   * PKPs associated with the given auth method.
-   * Will parse out the given `authentication factor` and use the transport
-   * for the otp code as the `user identifier` for the given auth method.
-   * @param {AuthMethod} authMethod - Auth method object
-   *
-   * @returns {Promise<string>} - Auth method id
-   */
   public static async authMethodId(authMethod: AuthMethod): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const accessToken = authMethod.accessToken;
-      const parsedToken: StytchToken =
-        StytchAuthFactorOtpAuthenticator._parseJWT(accessToken);
-      let factor: FactorParser = 'email';
-      switch (authMethod.authMethodType) {
-        case AUTH_METHOD_TYPE.StytchEmailFactorOtp:
-          factor = 'email';
-          break;
-        case AUTH_METHOD_TYPE.StytchSmsFactorOtp:
-          factor = 'sms';
-          break;
-        case AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp:
-          factor = 'whatsApp';
-          break;
-        case AUTH_METHOD_TYPE.StytchTotpFactorOtp:
-          factor = 'totp';
-          break;
-        default:
-          throw new InvalidArgumentException(
-            {
-              info: {
-                authMethodType: authMethod.authMethodType,
-              },
-            },
-            'Unsupport stytch auth type'
-          );
+      if (!accessToken) {
+        reject(new Error('Access token missing from AuthMethod'));
+        return;
       }
-      const factorParser = this._resolveAuthFactor(factor).parser;
       try {
-        resolve(factorParser(parsedToken, this._provider));
+        const parsedToken: StytchToken =
+          StytchAuthFactorOtpAuthenticator._parseJWT(accessToken);
+        let factor: FactorParser;
+        switch (authMethod.authMethodType) {
+          case AUTH_METHOD_TYPE.StytchEmailFactorOtp:
+            factor = 'email';
+            break;
+          case AUTH_METHOD_TYPE.StytchSmsFactorOtp:
+            factor = 'sms';
+            break;
+          case AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp:
+            factor = 'whatsApp';
+            break;
+          case AUTH_METHOD_TYPE.StytchTotpFactorOtp:
+            factor = 'totp';
+            break;
+          default:
+            throw new InvalidArgumentException(
+              {
+                info: {
+                  authMethodType: authMethod.authMethodType,
+                },
+              },
+              'Unsupported stytch auth type for authMethodId generation'
+            );
+        }
+        const factorResolver = this._resolveAuthFactor(factor);
+        const authId = factorResolver.parser(
+          parsedToken,
+          this._provider
+        );
+        resolve(authId);
       } catch (e) {
         reject(e);
       }
@@ -169,6 +145,11 @@ export class StytchAuthFactorOtpAuthenticator<
           parser: totpAuthFactorParser,
           authMethodType: AUTH_METHOD_TYPE.StytchTotpFactorOtp,
         };
+      default:
+        throw new InvalidArgumentException(
+          { info: { factor } },
+          `Invalid factor type: ${factor}`
+        );
     }
   }
 

@@ -18,6 +18,8 @@ import { getPkpAuthContext } from './AuthManager/authContexts/getPkpAuthContext'
 import type { LitAuthStorageProvider } from './storage/types';
 import type { AuthMethodType, LitAuthData } from './types';
 
+export { AuthConfigSchema };
+
 interface AuthManagerParams {
   storage: LitAuthStorageProvider;
 }
@@ -147,6 +149,23 @@ export type WebAuthnConfig = {
   username?: string;
   rpName?: string;
   customArgs?: MintRequestBody;
+};
+
+// -- Stytch Config
+export type StytchOtpConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  appId: string;
+  accessToken: string;
+  userId?: string;
+};
+
+// -- Stytch Auth Factor Config
+import { FactorParser } from './authenticators/stytch/parsers';
+
+export type StytchAuthFactorOtpConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  accessToken: string;
+  factor: FactorParser;
 };
 
 export const EoaAuthDepsSchema = z.object({

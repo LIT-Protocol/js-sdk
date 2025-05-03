@@ -156,6 +156,53 @@ async function createMyLitService() {
       authConfig: myAuthConfig,
       litClient: litClient,
     });
+
+  console.log(
+    'webAuthnAuthContextViaAuthenticate:',
+    webAuthnAuthContextViaAuthenticate
+  );
+
+  // -- PKP Stytch OTP Auth Context
+  // Assume user has completed Stytch OTP flow and obtained an accessToken
+  const stytchAccessToken = 'your-stytch-otp-verified-token'; // Replace with actual token
+  const stytchAppId = 'your-stytch-project-id'; // Replace with actual App ID
+
+  const pkpStytchOtpAuthContext = await authManager.getPkpAuthContext({
+    authenticator: LitAuth.authenticators.StytchOtpAuthenticator,
+    config: {
+      pkpPublicKey:
+        '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+      appId: stytchAppId,
+      accessToken: stytchAccessToken,
+      // userId: 'optional-stytch-user-id' // optional
+    },
+    authConfig: myAuthConfig,
+    litClient: litClient,
+  });
+
+  console.log('pkpStytchOtpAuthContext:', pkpStytchOtpAuthContext);
+
+  // -- PKP Stytch Auth Factor OTP Auth Context
+  // Assume user has completed Stytch OTP flow for a specific factor (e.g., email)
+  const stytchFactorAccessToken = 'your-stytch-otp-verified-token-for-factor'; // Replace with actual token
+
+  const pkpStytchEmailFactorAuthContext = await authManager.getPkpAuthContext({
+    authenticator: LitAuth.authenticators.StytchAuthFactorOtpAuthenticator,
+    config: {
+      pkpPublicKey:
+        '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+      accessToken: stytchFactorAccessToken,
+      factor: 'email', // Specify the factor used (email, sms, whatsApp, totp)
+    },
+    authConfig: myAuthConfig,
+    litClient: litClient,
+  });
+
+  console.log(
+    'pkpStytchEmailFactorAuthContext:',
+    pkpStytchEmailFactorAuthContext
+  );
+
   // before getting auth context
   // // we TRY to parse the url
   // const pkpAuthContext = await authManager.getPkpAuthContext({

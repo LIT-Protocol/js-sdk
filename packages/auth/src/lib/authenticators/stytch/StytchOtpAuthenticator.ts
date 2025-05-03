@@ -3,84 +3,77 @@ import { ethers } from 'ethers';
 import { AUTH_METHOD_TYPE, WrongParamFormat } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  BaseProviderOptions,
   StytchOtpAuthenticateOptions,
   StytchToken,
-  StytchOtpProviderOptions,
 } from '@lit-protocol/types';
 
-import { BaseAuthenticator } from '../BaseAuthenticator';
+import { StytchOtpConfig } from '../../auth-manager';
 
-export class StytchOtpAuthenticator extends BaseAuthenticator {
-  private _params: StytchOtpProviderOptions;
+export class StytchOtpAuthenticator {
   private _provider: string = 'https://stytch.com/session';
 
-  constructor(params: BaseProviderOptions, config: StytchOtpProviderOptions) {
-    super(params);
-    this._params = config;
-  }
+  constructor(public config: StytchOtpConfig) {}
 
   /**
    * Validates claims within a stytch authenticated JSON Web Token
    * @param options authentication option containing the authenticated token
-   * @returns {AuthMethod} Authentication Method for auth method type OTP
+   * @returns {Promise<AuthMethod>} Authentication Method for auth method type OTP
    * */
-  override authenticate<T>(options?: T | undefined): Promise<AuthMethod> {
+  authenticate(options: StytchOtpConfig): Promise<AuthMethod> {
     return new Promise<AuthMethod>((resolve, reject) => {
-      if (!options) {
-        reject(
-          new Error(
-            'No Authentication options provided, please supply an authenticated JWT'
-          )
-        );
-      }
-
       const userId: string | undefined =
-        this._params.userId ??
-        (options as unknown as StytchOtpAuthenticateOptions).userId;
+        options.userId ??
+        (options as StytchOtpAuthenticateOptions)?.userId;
 
-      const accessToken: string | undefined = (
-        options as unknown as StytchOtpAuthenticateOptions
-      )?.accessToken;
+      const accessToken: string | undefined = options.accessToken;
       if (!accessToken) {
         reject(
-          new Error('No access token provided, please provide a stych auth jwt')
+          new Error('No access token provided, please provide a stytch auth jwt')
         );
+        return;
       }
 
-      const parsedToken: StytchToken =
-        StytchOtpAuthenticator._parseJWT(accessToken);
-      const audience = (parsedToken['aud'] as string[])[0];
-      if (audience != this._params.appId) {
-        reject(new Error('Parsed application id does not match parameters'));
-      }
+      try {
+        const parsedToken: StytchToken =
+          StytchOtpAuthenticator._parseJWT(accessToken);
+        const audience = (parsedToken['aud'] as string[])[0];
+        if (audience != options.appId) {
+          reject(new Error('Parsed application id does not match parameters'));
+          return;
+        }
 
-      if (!audience) {
-        reject(
-          new Error(
-            'could not find project id in token body, is this a stych token?'
-          )
-        );
-      }
-      const session = parsedToken[this._provider];
-      const authFactor = session['authentication_factors'][0];
+        if (!audience) {
+          reject(
+            new Error(
+              'could not find project id in token body, is this a stych token?'
+            )
+          );
+          return;
+        }
+        const session = parsedToken[this._provider];
+        const authFactor = session['authentication_factors'][0];
 
-      if (!authFactor) {
-        reject(new Error('Could not find authentication info in session'));
-      }
+        if (!authFactor) {
+          reject(new Error('Could not find authentication info in session'));
+          return;
+        }
 
-      if (userId && userId != parsedToken['sub']) {
-        reject(
-          new Error(
-            'UserId does not match token contents. is this the right token for your application?'
-          )
-        );
-      }
+        if (userId && userId != parsedToken['sub']) {
+          reject(
+            new Error(
+              'UserId does not match token contents. is this the right token for your application?'
+            )
+          );
+          return;
+        }
 
-      resolve({
-        authMethodType: AUTH_METHOD_TYPE.StytchOtp,
-        accessToken: accessToken,
-      });
+        resolve({
+          authMethodType: AUTH_METHOD_TYPE.StytchOtp,
+          accessToken: accessToken,
+        });
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 
@@ -92,7 +85,7 @@ export class StytchOtpAuthenticator extends BaseAuthenticator {
    *
    * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+  public static async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
     return StytchOtpAuthenticator.authMethodId(authMethod);
   }
 
