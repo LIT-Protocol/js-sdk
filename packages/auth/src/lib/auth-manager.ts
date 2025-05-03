@@ -1,7 +1,17 @@
-import { AuthMethod } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  OAuthProviderOptions,
+} from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { z } from 'zod';
-import { EOAAuthenticator, LitAuthAuthenticator } from './authenticators';
+import {
+  DiscordAuthenticator,
+  EOAAuthenticator,
+  GoogleAuthenticator,
+  LitAuthAuthenticator,
+  WebAuthnAuthenticator,
+} from './authenticators';
 import {
   getEoaAuthContext,
   GetEoaAuthContextSchema,
@@ -11,85 +21,105 @@ import {
   GetPkpAuthContextSchema,
 } from './AuthManager/authContexts/getPkpAuthContext';
 import type { LitAuthStorageProvider } from './storage/types';
-import type { LitAuthData } from './types';
+import type { AuthMethodType, LitAuthData } from './types';
 import {
   AuthSigSchema,
   ExpirationSchema,
+  HexPrefixedSchema,
   LitResourceAbilityRequestSchema,
+  NodeUrlsSchema,
   SignerSchema,
+  UrlSchema,
 } from '@lit-protocol/schemas';
+import { AuthConfigSchema } from './AuthManager/authContexts/BaseAuthContextType';
+import { generateSessionKeyPair } from '@lit-protocol/crypto';
+import { BaseAuthenticateConfig } from './authenticators/BaseAuthenticator';
+import { WebAuthnPkpConfig } from './authenticators/WebAuthnAuthenticator';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 
-// -- Specific Authenticator Config Types --
-// type EOAAuthenticatorConfig = {
-//   provider: typeof EOAAuthenticator;
-//   options: {
-//     signer:
-//       | ethers.Signer
-//       | {
-//           signMessage: (message: string) => Promise<string>;
-//           getAddress: () => Promise<string>;
-//         };
-//   };
-// };
-
-// Add other specific authenticator configs here, e.g.:
-// type WebAuthnAuthenticatorConfig = {
-//   method: typeof WebAuthnAuthenticator;
-//   options: WebAuthnProviderOptions;
-// };
-
-// -- Discriminated Union for Authenticator Config --
-// type AuthenticatorConfig = EOAAuthenticatorConfig; // Add others with | like EOAAuthenticatorConfig | WebAuthnAuthenticatorConfig
-
-// Define the strict authentication schema using the base schema
-// const StrictPkpAuthenticationSchema =
-//   GetPkpAuthContextSchema.shape.authentication
-//     .pick({
-//       pkpPublicKey: true,
-//       domain: true,
-//     })
-//     .strict();
+interface AuthManagerParams {
+  storage: LitAuthStorageProvider;
+}
 
 /**
- * Configuration structure for using PKP-based authentication with AuthManager.
- * This does not fully mimic the GetPkpAuthContextSchema, but is a subset of it,
- * because the full config will be manipulated by AuthManager to add missing fields.
+ * The auth context that both EOA and PKP auth contexts have in common.
  */
-// export type PkpAuthManagerConfig = {
-//   contextGetter: typeof getPkpAuthContext;
-//   authenticators: AuthenticatorConfig[]; // Use the discriminated union type here
-//   authentication: z.infer<typeof StrictPkpAuthenticationSchema>;
-//   authorisation: z.infer<typeof GetPkpAuthContextSchema.shape.authorisation>;
-//   sessionControl?: z.infer<typeof GetPkpAuthContextSchema.shape.sessionControl>;
-//   metadata?: z.infer<typeof GetPkpAuthContextSchema.shape.metadata>;
-//   connection?: z.infer<typeof GetPkpAuthContextSchema.shape.connection>;
-// };
+interface BaseAuthContext<T> {
+  // authenticator: LitAuthAuthenticator;
+  authConfig: z.infer<typeof AuthConfigSchema>;
+  config: T;
+  litClient: {
+    getLatestBlockhash: () => Promise<string>;
+    getCurrentEpoch: () => Promise<number>;
+    getSignSessionKey: Function;
+    getMaxPricesForNodeProduct: Function;
+  };
+}
 
 /**
- * Configuration structure for using EOA-based authentication with AuthManager.
- * This does not fully mimic the GetPkpAuthContextSchema, but is a subset of it,
- * because the full config will be manipulated by AuthManager to add missing fields.
+ * The EOA auth context adapter params.
  */
-// export type EoaAuthManagerConfig = {
-//   contextGetter: typeof getEoaAuthContext;
-// };
+interface EoaAuthContextAdapterParams
+  extends BaseAuthContext<{
+    pkpPublicKey: string;
+    signer: z.infer<typeof SignerSchema>;
+  }> {}
 
 /**
- * A union type representing all possible authentication configurations
- * supported by AuthManager.
+ * Defines the base structure for PKP Auth Context Adapter parameters,
+ * excluding the parts that vary by authenticator.
  */
-// export type AuthManagerConfigUnion =
-//   | PkpAuthManagerConfig
-//   | EoaAuthManagerConfig;
+export interface BasePkpAuthContextAdapterParams {
+  authConfig: AuthConfig;
+  litClient: BaseAuthContext<any>['litClient'];
+}
 
-// interface LitAuthManagerConfig {
-//   getAuthContext: typeof getAuthContext;
-//   storage: LitAuthStorageProvider;
-// }
-
-async function tryGetCachedAuthData() {
+/**
+ * Tries to retrieve cached authentication data from storage for a given address.
+ * If no cached data is found, it generates a new session key pair, saves it
+ * to storage, and returns the newly created auth data.
+ * @returns {Promise<LitAuthData | null>} The cached or newly generated auth data, or null if no data is found.
+ */
+async function tryGetCachedAuthData({
+  storage,
+  address,
+  expiration,
+  type,
+}: {
+  storage: LitAuthStorageProvider;
+  address: string;
+  expiration: string;
+  type: AuthMethodType;
+}): Promise<LitAuthData> {
   // Use `storage` to see if there is cached auth data
-  // If error thrown trying to get it, error to caller or ??
+  let authData = (await storage.read({
+    address,
+  })) as LitAuthData;
+
+  if (!authData) {
+    const _expiration = ExpirationSchema.parse(expiration);
+
+    // generate session key pair
+    authData = {
+      sessionKey: {
+        keyPair: generateSessionKeyPair(),
+        expiresAt: _expiration,
+      },
+      authMethodType: type, // TODO: Should this be dynamic based on context?
+    };
+
+    // save session key pair to storage
+    await storage.write({
+      address: address,
+      authData,
+    });
+  }
+
+  if (!authData) {
+    throw new Error('Failed to retrieve or generate authentication data.');
+  }
+
+  return authData;
 }
 
 async function tryGetAuthMethodFromAuthenticator() {
@@ -104,72 +134,74 @@ function validateAuthData(authData: LitAuthData) {
 // Use LitNodeClient to signSessionKey with AuthData
 // }
 
-// export function getAuthManager({ storage }: LitAuthManagerConfig) {
-//   return {
-//     getAuthContext,
-//   };
-// }
-
 // type AuthManagerState = {
 //   sessionKeyPair: SessionKeyPair | undefined;
 // };
 
-export const AuthConfigSchema = z.object({
-  capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
-  expiration: ExpirationSchema.optional().default(
-    new Date(Date.now() + 1000 * 60 * 15).toISOString()
-  ),
-  statement: z.string().optional().default(''),
-  resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
+export type AuthConfig = z.infer<typeof AuthConfigSchema>;
+
+export type EoaConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  signer: z.infer<typeof SignerSchema>;
+  domain?: string;
+  origin?: string;
+  // nonce: string;
+};
+
+export type GoogleConfig = OAuthProviderOptions & {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+};
+
+export type DiscordConfig = OAuthProviderOptions & {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  clientId?: string;
+};
+
+export const EoaAuthDepsSchema = z.object({
+  nonce: z.any(),
 });
 
-export type AuthConfig = z.infer<typeof AuthConfigSchema>;
-interface BaseAuthContext {
-  authenticator: LitAuthAuthenticator;
-  authConfig: z.infer<typeof AuthConfigSchema>;
-
-  // @deprecated - not deprecated, it's a TODO to fix this.
-  litClient: {
-    getLatestBlockhash: () => Promise<string>;
-    getCurrentEpoch: () => Promise<number>;
-    getSignSessionKey: Function;
-  };
-}
-
-export const LitClientConfigSchema = z.object({
+export const PkpAuthDepsSchema = z.object({
   nonce: z.any(),
   currentEpoch: z.any(),
   getSignSessionKey: z.any(),
+  nodeUrls: NodeUrlsSchema,
 });
 
-const _getEoaAuthContext = async (
-  params: BaseAuthContext & {
-    signer: z.infer<typeof SignerSchema>;
-  }
+const getEoaAuthContextAdapter = async (
+  upstreamParams: AuthManagerParams,
+  params: EoaAuthContextAdapterParams
 ) => {
-  console.log('params:', params);
-
-  const litClientConfig = LitClientConfigSchema.parse({
+  const litClientConfig = EoaAuthDepsSchema.parse({
     nonce: await params.litClient.getLatestBlockhash(),
-    currentEpoch: await params.litClient.getCurrentEpoch(),
-    getSignSessionKey: params.litClient.getSignSessionKey,
+    // currentEpoch: no need for EOA
+    // getSignSessionKey: no need for EOA
   });
 
+  // Try to get LitAuthData from storage or generate a new one
+  const authData = await tryGetCachedAuthData({
+    storage: upstreamParams.storage,
+    address: await params.config.signer.getAddress(),
+    expiration: params.authConfig.expiration,
+    type: 'EthWallet',
+  });
+
+  console.log('getEoaAuthContextAdapter - authData:', authData);
+
   // now use the actual getEoaAuthContext
+  // we don't really care how messy the params look like, this adapter function will massage them into the correct shape
   return getEoaAuthContext({
     authentication: {
-      pkpPublicKey: '0x0000000000000000000000000000000000000000',
-      signer: params.signer,
-      signerAddress: await params.signer.getAddress(),
+      pkpPublicKey: params.config.pkpPublicKey,
+      signer: params.config.signer,
+      signerAddress: await params.config.signer.getAddress(),
+      sessionKeyPair: authData.sessionKey.keyPair,
     },
-    authorisation: {
+    authConfig: {
+      domain: params.authConfig.domain,
       resources: params.authConfig.resources,
       capabilityAuthSigs: params.authConfig.capabilityAuthSigs,
-    },
-    sessionControl: {
       expiration: params.authConfig.expiration,
-    },
-    metadata: {
       statement: params.authConfig.statement,
     },
     deps: {
@@ -178,135 +210,78 @@ const _getEoaAuthContext = async (
   });
 };
 
-const _getPkpAuthContext = async (
-  params: BaseAuthContext & {
-    pkpAddress: string;
+type ConstructorConfig<T> = T extends new (config: infer C) => any ? C : never;
+
+async function getPkpAuthContextAdapter<T extends new (config: any) => any>(
+  upstreamParams: AuthManagerParams,
+  params: {
+    authenticator: T;
+    config: ConstructorConfig<T>;
+    authConfig: AuthConfig;
+    litClient: BaseAuthContext<any>['litClient'];
   }
-) => {};
+) {
+  const litClientConfig = PkpAuthDepsSchema.parse({
+    nonce: await params.litClient.getLatestBlockhash(),
+    currentEpoch: await params.litClient.getCurrentEpoch(),
+    getSignSessionKey: params.litClient.getSignSessionKey,
+    nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
+      product: 'LIT_ACTION',
+    }),
+  });
 
-export const getAuthManager = ({
-  storage,
-}: // auth,
-// connection,
-// nodeAction,
-{
-  storage: LitAuthStorageProvider;
-  // auth: AuthManagerConfigUnion; // Use the union type here,
+  const pkpAddress = ethers.utils.computeAddress(params.config.pkpPublicKey);
 
-  // this is shown an optional but is required by the LitClient
-  // connection?: z.infer<typeof GetPkpAuthContextSchema.shape.connection>;
-  // nodeAction?: z.infer<typeof GetPkpAuthContextSchema.shape.nodeSignSessionKey>;
-}) => {
-  // ===== V2 ======
+  const authData = await tryGetCachedAuthData({
+    storage: upstreamParams.storage,
+    address: pkpAddress,
+    expiration: params.authConfig.expiration,
+    type: 'EthWallet',
+  });
 
-  return {
-    // getEoaAuthContext: _getEoaAuthContext.bind(null, undefined, { nonce }),
-    getEoaAuthContext: _getEoaAuthContext,
-    getPkpAuthContext: _getPkpAuthContext,
+  console.log('getPkpAuthContextAdapter - authData:', authData);
+
+  const authenticator = new params.authenticator(params.config);
+
+  // inject litClientConfig into params.config
+  params.config = {
+    ...params.config,
+    ...litClientConfig,
   };
 
-  // ===== V1 ======
-  // Remove immediate authContext calculation
-  // let authContext;
-  // let getAuthMethod;
-  // Mapping authenticators internally????
-  // switch (auth.contextGetter.name) {
-  //   case 'getPkpAuthContext': {
-  //     const config = auth as PkpAuthManagerConfig;
-  //     const getter = config.contextGetter;
-  //     // An async function for the user to call to get the auth context
-  //     // NOTE: This is NOT called by the AuthManager, but by the user
-  //     const getAuthContext = async ({
-  //       authenticator,
-  //       pkpAddress,
-  //     }) => {
-  //       // ============================== Resolve Auth Methods ==============================
-  //       const authMethods = (
-  //         await Promise.all(
-  //           config.authenticators.map((authConfig) => {
-  //             // Check if it's an EOAAuthenticator instance to call authenticate
-  //             // A more robust type check or instanceof might be needed here
-  //             // depending on the actual types and inheritance structure.
-  //             if (authConfig.provider.id === EOAAuthenticator.id) {
-  //               // Instantiate the authenticator, merging required options
-  //               const _opts = {
-  //                 signer: authConfig.options.signer,
-  //                 nonce: connection!.nonce,
-  //               };
-  //               const authenticator = new authConfig.provider(_opts);
-  //               return authenticator.authenticate(_opts);
-  //             }
-  //             return undefined;
-  //           })
-  //         )
-  //       ).filter((provider): provider is AuthMethod => provider !== undefined);
-  //       // ============================== Full Config Needed By Getter ==============================
-  //       const fullConfigNeededByGetter: z.infer<
-  //         typeof GetPkpAuthContextSchema
-  //       > = {
-  //         authentication: {
-  //           pkpPublicKey: config.authentication.pkpPublicKey,
-  //           authMethods: authMethods,
-  //         },
-  //         authorisation: {
-  //           resources: config.authorisation.resources,
-  //         },
-  //         sessionControl: {
-  //           expiration: config.sessionControl?.expiration!,
-  //         },
-  //         metadata: {
-  //           statement: config.metadata?.statement!,
-  //         },
-  //         connection: connection!,
-  //         nodeSignSessionKey: nodeAction!,
-  //       };
-  //       // Need to parse/validate fullConfigNeededByGetter against GetPkpAuthContextSchema
-  //       // before passing to getter, or redesign getter itself.
-  //       // Note: The original getter might be async or sync. Assuming async based on getEoaAuthContext.
-  //       const authContext = await getter(
-  //         fullConfigNeededByGetter as z.infer<typeof GetPkpAuthContextSchema>
-  //       );
-  //       return authContext;
-  //     };
-  //     return {
-  //       // Return the function itself
-  //       getAuthContext,
-  //       // getAuthMethod, // Keep commented if not implemented yet
-  //     };
-  //   }
-  //   case 'getEoaAuthContext': {
-  //     const eoaAuth = auth as EoaAuthManagerConfig;
-  //     const getter = eoaAuth.contextGetter as typeof getEoaAuthContext;
-  //     const config = eoaAuth.provider as z.infer<typeof GetEoaAuthContextSchema>;
-  //     // Define the async function to get the context later
-  //     const getAuthContext = async () => {
-  //       // modify the config if storage is provided
-  //       //...
-  //       const authContext = await getter(config);
-  //       return authContext;
-  //     };
-  //     // getAuthMethod = eoaAuth.authenticator.authenticate.bind(
-  //     //   eoaAuth.authenticator
-  //     // );
-  //     return {
-  //       // Return the function itself
-  //       getAuthContext,
-  //       getAuthMethod: () => {}, // Keep placeholder if needed
-  //     };
-  //   }
-  //   default:
-  //     throw new Error(
-  //       `Invalid auth context getter: ${auth.contextGetter.name}`
-  //     );
-  // }
-  // This part is now unreachable due to returns inside the switch cases
-  // // let state: AuthManagerState = {
-  // //   sessionKeyPair: undefined,
-  // // };
-  // return {
-  //   // get: () => state,
-  //   // restore: (nextState: AuthManagerState) => (state = nextState),
-  //   authContext,
-  //   // getAuthMethod,
-  // };
+  const authMethod = await authenticator.authenticate(params.config);
+
+  return getPkpAuthContext({
+    authentication: {
+      pkpPublicKey: params.config.pkpPublicKey,
+      authMethods: [authMethod],
+    },
+    authConfig: {
+      domain: params.authConfig.domain,
+      resources: params.authConfig.resources,
+      capabilityAuthSigs: params.authConfig.capabilityAuthSigs,
+      expiration: params.authConfig.expiration,
+      statement: params.authConfig.statement,
+    },
+    deps: {
+      connection: {
+        nonce: litClientConfig.nonce,
+        currentEpoch: litClientConfig.currentEpoch,
+        nodeUrls: litClientConfig.nodeUrls,
+      },
+      nodeSignSessionKey: litClientConfig.getSignSessionKey,
+    },
+  });
+}
+
+export const getAuthManager = (authManagerParams: AuthManagerParams) => {
+  return {
+    getEoaAuthContext: getEoaAuthContextAdapter.bind(null, authManagerParams),
+    getPkpAuthContext: <T extends new (config: any) => any>(params: {
+      authenticator: T;
+      config: ConstructorConfig<T>;
+      authConfig: AuthConfig;
+      litClient: BaseAuthContext<any>['litClient'];
+    }) => getPkpAuthContextAdapter(authManagerParams, params),
+  };
 };

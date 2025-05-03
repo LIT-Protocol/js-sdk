@@ -11,6 +11,22 @@ import {
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
 
+export const UrlSchema = z.string().url({ message: 'Invalid URL format' });
+
+export const NodeUrlsSchema = z.array(
+  z.object({
+    url: z.string(),
+    price: z.bigint().optional(), // This only exists for Naga
+  })
+);
+
+export const SessionKeyUriSchema = z.string().transform((val) => {
+  if (!val.startsWith(SIWE_URI_PREFIX.SESSION_KEY)) {
+    return `${SIWE_URI_PREFIX.SESSION_KEY}${val}`;
+  }
+  return val;
+});
+
 export const SignerSchema = z.object({
   signMessage: z.function().args(z.string()).returns(z.promise(z.string())),
   getAddress: z.function().args().returns(z.promise(z.string())),
@@ -332,16 +348,15 @@ export const LitActionSdkParamsSchema = z.object({
 
 export const CosmosWalletTypeSchema = z.enum(['keplr', 'leap'] as const);
 
-export const SessionKeyPairSchema = z
-  .object({
-    publicKey: z.string(),
-    secretKey: z.string(),
-  })
-  .transform((item) => ({
-    publicKey: item.publicKey,
-    secretKey: item.secretKey,
-    sessionKeyUri: `${SIWE_URI_PREFIX.SESSION_KEY}${item.publicKey}`,
-  }));
+export const SessionKeyPairSchema = z.object({
+  publicKey: z.string(),
+  secretKey: z.string(),
+});
+// .transform((item) => ({
+//   publicKey: item.publicKey,
+//   secretKey: item.secretKey,
+//   sessionKeyUri: `${SIWE_URI_PREFIX.SESSION_KEY}${item.publicKey}`,
+// }));
 
 export const AttenuationsObjectSchema = z.record(
   z.string(),

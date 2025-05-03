@@ -2,35 +2,29 @@ import {
   createSiweMessageWithResources,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers';
-import { AuthCallbackParams } from '@lit-protocol/types';
 import {
-  BaseAuthenticationSchema,
-  BaseAuthorisationSchema,
-  BaseMetadataSchema,
-  BaseSessionControlSchema,
-  createBaseAuthContextTypeSchema,
-} from './BaseAuthContextType';
+  HexPrefixedSchema,
+  SessionKeyPairSchema,
+  SessionKeyUriSchema,
+  SignerSchema,
+} from '@lit-protocol/schemas';
+import { AuthCallbackParams } from '@lit-protocol/types';
 import { z } from 'zod';
-import { HexPrefixedSchema, SignerSchema } from '@lit-protocol/schemas';
+import {
+  AuthConfigSchema,
+  BaseAuthenticationSchema,
+} from './BaseAuthContextType';
 
 // Define specific Authentication schema for EOA
 const EoaAuthenticationSchema = BaseAuthenticationSchema.extend({
   signer: SignerSchema,
   signerAddress: HexPrefixedSchema,
+  sessionKeyPair: SessionKeyPairSchema,
 });
 
-// Use the base schemas directly for other parts, as EOA doesn't add specific fields here
-const EoaAuthorisationSchema = BaseAuthorisationSchema;
-const EoaSessionControlSchema = BaseSessionControlSchema;
-const EoaMetadataSchema = BaseMetadataSchema;
-
-// Create the full context schema using the base creator function
-export const GetEoaAuthContextSchema = createBaseAuthContextTypeSchema(
-  EoaAuthenticationSchema,
-  EoaAuthorisationSchema,
-  EoaSessionControlSchema,
-  EoaMetadataSchema
-).extend({
+export const GetEoaAuthContextSchema = z.object({
+  authentication: EoaAuthenticationSchema,
+  authConfig: AuthConfigSchema,
   deps: z.object({
     nonce: z.string(),
   }),
@@ -46,9 +40,10 @@ export const getEoaAuthContext = async (
   return {
     pkpPublicKey: _params.authentication.pkpPublicKey,
     chain: 'ethereum',
-    resourceAbilityRequests: _params.authorisation.resources,
+    resourceAbilityRequests: _params.authConfig.resources,
+    sessionKeyPair: _params.authentication.sessionKeyPair,
     authNeededCallback: async ({
-      uri,
+      // uri,
       expiration,
       resourceAbilityRequests,
     }: AuthCallbackParams) => {
@@ -60,14 +55,19 @@ export const getEoaAuthContext = async (
         throw new Error('resourceAbilityRequests is required');
       }
 
-      if (!uri) {
-        throw new Error('uri is required');
-      }
+      // if (!uri) {
+      //   throw new Error('uri is required');
+      // }
+
+      const uri = SessionKeyUriSchema.parse(
+        _params.authentication.sessionKeyPair.publicKey
+      );
 
       const toSign = await createSiweMessageWithResources({
-        uri,
-        expiration: _params.sessionControl.expiration,
-        resources: _params.authorisation.resources,
+        uri: uri,
+        domain: _params.authConfig.domain,
+        expiration: _params.authConfig.expiration,
+        resources: _params.authConfig.resources,
         walletAddress: _params.authentication.signerAddress,
         nonce: _params.deps.nonce, // deps is added via .extend, accessed directly
       });
@@ -79,8 +79,8 @@ export const getEoaAuthContext = async (
 
       return authSig;
     },
-    ...(_params.authorisation.capabilityAuthSigs && {
-      capabilityAuthSigs: [..._params.authorisation.capabilityAuthSigs],
+    ...(_params.authConfig.capabilityAuthSigs && {
+      capabilityAuthSigs: [..._params.authConfig.capabilityAuthSigs],
     }),
   };
 };

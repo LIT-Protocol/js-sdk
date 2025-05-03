@@ -29,6 +29,7 @@ async function createMyLitService() {
       getLatestBlockhash: litNodeClient.getLatestBlockhash,
       getCurrentEpoch: async () => litNodeClient.currentEpochNumber ?? 0,
       getSignSessionKey: litNodeClient.v2.signPKPSessionKey,
+      getMaxPricesForNodeProduct: litNodeClient.getMaxPricesForNodeProduct,
     };
   };
 
@@ -46,73 +47,85 @@ async function createMyLitService() {
       networkName: 'naga-dev',
       storagePath: './lit-auth-storage',
     }),
-    // auth: {
-    //   contextGetter: LitAuth.getPkpAuthContext, // <-- getPkpAuthManager instead?
-    //   authenticators: [
-    //     {
-    //       provider: LitAuth.authenticators.EOAAuthenticator,
-    //       options: {
-    //         signer: ethersSigner,
-    //       },
-    //     },
-    //   ],
-
-    //   authentication: {
-    //     // <-- move this as arg to getAuthContext
-    //     pkpPublicKey:
-    //       '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
-    //   },
-    //   authorisation: {
-    //     resources: createResourceBuilder()
-    //       .addPKPSigningRequest('*')
-    //       .getResources(),
-
-    // -- (optional)
-    // capabilityAuthSigs: [],
-    // },
-    // -- (optional) default is 15 minutes
-    // or authConfig
-    // sessionControl: {
-    //   expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-    // },
-    // -- (optional) default is empty string
-    // metadata: {
-    //   statement: 'test',
-    // },
-    // authConfig: {
-    // put everything here instead of categorising into different fields.
-    // },
-    // },
-    // litNodeClient: litNodeClient,
-    // connection: {
-    //   // get this from network/chain client
-    //   nodeUrls: _nodeUrls,
-    //   // get this from network/chain client
-    //   currentEpoch: _currentEpoch,
-
-    //   // get this from lit client
-    //   nonce: _nonce,
-    // },
-    // nodeAction: _signSessionKey, // <-- pkp needs this, but not EOA
   });
 
   const myAuthConfig: AuthConfig = {
-    expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+    expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // 15 miniutes
     statement: 'test',
+    domain: 'example.com',
     capabilityAuthSigs: [],
     resources: createResourceBuilder().addPKPSigningRequest('*').getResources(),
   };
 
   const litClient = getLitClient({ network: 'naga-dev' });
 
-  // Call the returned function to get the context\
+  // There's actually two eth authetnicators
+  // - Ethers
+  // - web3 wallet (metamask)
+  // Call the returned function to get the context
   // pass the lit client inside here
-  const authContext = await authManager.getEoaAuthContext({
-    signer: ethersSigner,
-    authenticator: LitAuth.authenticators.EOAAuthenticator,
+  // uri: location.href
+  // lit:session: uri <-- add it
+  const eoaAuthContext = await authManager.getEoaAuthContext({
+    config: {
+      signer: ethersSigner,
+      pkpPublicKey:
+        '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+    },
     authConfig: myAuthConfig,
     litClient: litClient,
   });
+
+  // -- EOA Auth Context
+  const pkpEoaAuthContext = await authManager.getPkpAuthContext({
+    authenticator: LitAuth.authenticators.EOAAuthenticator,
+    config: {
+      signer: ethersSigner,
+      pkpPublicKey:
+        '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+    },
+    authConfig: myAuthConfig,
+    litClient: litClient,
+  });
+
+  console.log('pkpEoaAuthContext:', pkpEoaAuthContext);
+
+  // -- PKP Google Auth Context
+  const pkpGoogleAuthContext = await authManager.getPkpAuthContext({
+    authenticator: LitAuth.authenticators.GoogleAuthenticator,
+    config: {
+      pkpPublicKey:
+        '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+      // baseUrl: 'https://login.litgateway.com',
+      // redirectUri: window.location.origin,
+      // clientId: '123',
+    },
+    authConfig: myAuthConfig,
+    litClient: litClient,
+  });
+
+  console.log('pkpGoogleAuthContext:', pkpGoogleAuthContext);
+
+  // -- PKP Discord Auth Context
+  const pkpDiscordAuthContext = await authManager.getPkpAuthContext({
+    authenticator: LitAuth.authenticators.DiscordAuthenticator,
+    config: {
+      pkpPublicKey:
+        '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+      // method: 'register',
+      // baseUrl: 'https://login.litgateway.com',
+      // redirectUri: window.location.origin,
+      // clientId: '1052874239658692668',
+    },
+    authConfig: myAuthConfig,
+    litClient: litClient,
+  });
+
+  console.log('pkpDiscordAuthContext:', pkpDiscordAuthContext);
+
+  // -- WebAuthn Auth Context
+
+  // 1. we first need to associate a webauthn authenticator with the user
 
   // before getting auth context
   // // we TRY to parse the url
@@ -129,7 +142,6 @@ async function createMyLitService() {
   // if false
   //
 
-  console.log('authContext:', authContext);
   // const authMethod = await authManager.getAuthMethod();
 
   // receive authMaterial instead

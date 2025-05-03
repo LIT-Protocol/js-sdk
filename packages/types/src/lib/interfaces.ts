@@ -18,6 +18,7 @@ import {
   LitActionSdkParamsSchema,
   SessionKeyPairSchema,
   NodeSetSchema,
+  UrlSchema,
 } from '@lit-protocol/schemas';
 
 import { SigType } from './EndpointResponses';
@@ -1022,14 +1023,12 @@ export interface BaseProviderOptions {
 }
 
 export interface OAuthProviderOptions {
+  baseUrl?: z.infer<typeof UrlSchema>;
+
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   redirectUri?: string;
-  /**
-   * OAuth client ID
-   */
-  clientId?: string;
 }
 
 export interface EthWalletProviderOptions {

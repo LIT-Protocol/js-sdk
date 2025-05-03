@@ -1,5 +1,4 @@
 import { LitRelay } from '../relay';
-import { AppleAuthenticator } from './AppleAuthenticator';
 import { DiscordAuthenticator } from './DiscordAuthenticator';
 import { GoogleAuthenticator } from './GoogleAuthenticator';
 import { EOAAuthenticator } from './metamask';
@@ -15,7 +14,6 @@ import {
 import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
 
 export {
-  AppleAuthenticator,
   DiscordAuthenticator,
   EOAAuthenticator,
   GoogleAuthenticator,
@@ -32,5 +30,4 @@ export type LitAuthAuthenticator =
   | typeof EOAAuthenticator
   | typeof StytchOtpAuthenticator
   | typeof WebAuthnAuthenticator
-  | typeof AppleAuthenticator
   | typeof DiscordAuthenticator;

@@ -1,150 +1,20 @@
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 
-import {
-  AUTH_METHOD_TYPE,
-  UnauthorizedException,
-  UnknownError,
-} from '@lit-protocol/constants';
-import {
-  AuthMethod,
-  BaseProviderOptions,
-  OAuthProviderOptions,
-} from '@lit-protocol/types';
+import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
+import { AuthMethod } from '@lit-protocol/types';
 
-import { BaseAuthenticator } from './BaseAuthenticator';
-import {
-  prepareLoginUrl,
-  parseLoginParams,
-  getStateParam,
-  decode,
-  LIT_LOGIN_GATEWAY,
-} from './utils';
+import { GoogleConfig } from '../auth-manager';
+import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
 
-export class GoogleAuthenticator extends BaseAuthenticator {
+export class GoogleAuthenticator {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
 
-  constructor(options: BaseProviderOptions & OAuthProviderOptions) {
-    super(options);
-    this.redirectUri = options.redirectUri || window.location.origin;
-  }
-
-  /**
-   * Redirect user to the Lit's Google login page
-   *
-   * @param {Function} [callback] - Optional callback to handle login URL
-   * @returns {Promise<void>} - Redirects user to Lit login page
-   */
-  public async signIn(callback?: (url: string) => void): Promise<void> {
-    // Get login url
-    const loginUrl = await prepareLoginUrl('google', this.redirectUri);
-
-    // If callback is provided, use it. Otherwise, redirect to login url
-    if (callback) {
-      callback(loginUrl);
-    } else {
-      window.location.assign(loginUrl);
-    }
-  }
-
-  /**
-   * Validate the URL parameters returned from Lit's login server and return the authentication data
-   *
-   * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
-   */
-  public async authenticate<T>(
-    _?: T,
-    urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
-  ): Promise<AuthMethod> {
-    // Check if current url matches redirect uri using the callback if provided
-    const isUrlValid = urlCheckCallback
-      ? urlCheckCallback(window.location.href, this.redirectUri)
-      : window.location.href.startsWith(this.redirectUri);
-
-    if (!isUrlValid) {
-      throw new UnauthorizedException(
-        {
-          info: {
-            url: window.location.href,
-            redirectUri: this.redirectUri,
-          },
-        },
-        `Current url does not match provided redirect uri`
-      );
-    }
-
-    // Check url for params
-    const { provider, idToken, state, error } = parseLoginParams(
-      window.location.search
-    );
-
-    // Check if there's an error
-    if (error) {
-      throw new UnknownError(
-        {
-          info: {
-            error,
-          },
-          cause: new Error(error),
-        },
-        error ?? 'Received error from discord authentication'
-      );
-    }
-
-    // Check if provider is Google
-    if (!provider || provider !== 'google') {
-      throw new UnauthorizedException(
-        {
-          info: {
-            provider,
-            redirectUri: this.redirectUri,
-          },
-        },
-        'OAuth provider does not match "google"'
-      );
-    }
-
-    // Check if state param matches
-    if (!state || decode(decodeURIComponent(state)) !== getStateParam()) {
-      throw new UnauthorizedException(
-        {
-          info: {
-            state,
-            redirectUri: this.redirectUri,
-          },
-        },
-        'Invalid state parameter in callback URL'
-      );
-    }
-
-    // Clear params from url
-    window.history.replaceState(
-      null,
-      window.document.title,
-      window.location.pathname
-    );
-
-    // Check if id token is present in url
-    if (!idToken) {
-      throw new UnauthorizedException(
-        {
-          info: {
-            idToken,
-            redirectUri: this.redirectUri,
-          },
-        },
-        'Missing ID token in callback URL'
-      );
-    }
-
-    const authMethod = {
-      authMethodType: AUTH_METHOD_TYPE.GoogleJwt,
-      accessToken: idToken,
-    };
-    return authMethod;
+  constructor(params: GoogleConfig) {
+    this.redirectUri = params.redirectUri || window.location.origin;
   }
 
   /**
@@ -152,13 +22,17 @@ export class GoogleAuthenticator extends BaseAuthenticator {
    *
    * @param baseURL
    */
-  public async signInUsingPopup(baseURL: string): Promise<AuthMethod> {
+  public async authenticate(params: GoogleConfig): Promise<AuthMethod> {
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
-    const url = await prepareLoginUrl('google', this.redirectUri, baseURL);
+    const url = await prepareLoginUrl(
+      'google',
+      this.redirectUri,
+      params.baseUrl
+    );
     const popup = window.open(
       `${url}&caller=${window.location.origin}`,
       'popup',
@@ -179,7 +53,7 @@ export class GoogleAuthenticator extends BaseAuthenticator {
       }, 1000);
 
       window.addEventListener('message', (event) => {
-        if (event.origin !== (baseURL || LIT_LOGIN_GATEWAY)) {
+        if (event.origin !== (params.baseUrl || LIT_LOGIN_GATEWAY)) {
           return;
         }
 

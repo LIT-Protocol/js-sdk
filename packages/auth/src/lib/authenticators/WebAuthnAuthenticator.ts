@@ -16,18 +16,33 @@ import {
 import {
   AuthMethod,
   BaseProviderOptions,
+  IRelay,
   MintRequestBody,
   WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 
-import { BaseAuthenticator } from './BaseAuthenticator';
+import { BaseAuthenticateConfig, BaseAuthenticator } from './BaseAuthenticator';
 import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
+import { BasePkpAuthContextAdapterParams } from '../auth-manager';
+
+export type WebAuthnPkpConfig = BasePkpAuthContextAdapterParams & {
+  authenticator: typeof WebAuthnAuthenticator;
+  config: BaseAuthenticateConfig & {
+    method: 'register' | 'authenticate';
+
+    // register config
+    username?: string;
+    relay: IRelay;
+    rpName?: string;
+    customArgs?: MintRequestBody;
+  };
+};
 
 export class WebAuthnAuthenticator extends BaseAuthenticator {
   /**
    * Name of relying party. Defaults to "lit"
    */
-  private rpName?: string;
+  public rpName?: string;
 
   constructor(options: BaseProviderOptions & WebAuthnProviderOptions) {
     super(options);
@@ -41,11 +56,11 @@ export class WebAuthnAuthenticator extends BaseAuthenticator {
    *
    * @returns {Promise<PublicKeyCredentialCreationOptionsJSON>} - Options to pass to the authenticator
    */
-  public async register(
-    username?: string
-  ): Promise<PublicKeyCredentialCreationOptionsJSON> {
-    return await this.relay.generateRegistrationOptions(username);
-  }
+  // public async register(
+  //   username?: string
+  // ): Promise<PublicKeyCredentialCreationOptionsJSON> {
+  //   return await this.relay.generateRegistrationOptions(username);
+  // }
 
   /**
    * Mint PKP with verified registration data
@@ -55,19 +70,33 @@ export class WebAuthnAuthenticator extends BaseAuthenticator {
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
-  public async verifyAndMintPKPThroughRelayer(
-    options: PublicKeyCredentialCreationOptionsJSON,
-    customArgs?: MintRequestBody
-  ): Promise<string> {
+  // username?: string,
+  // customArgs?: MintRequestBody
+  public async register(params: WebAuthnPkpConfig): Promise<string> {
+    const _rpName = params.config.rpName || 'lit';
+
+    const pubKeyCredOpts: PublicKeyCredentialCreationOptionsJSON =
+      await params.config.relay.generateRegistrationOptions(
+        params.config.username
+      );
+
     // Submit registration options to the authenticator
     const { startRegistration } = await import('@simplewebauthn/browser');
-    const attResp: RegistrationResponseJSON = await startRegistration(options);
+    const attResp: RegistrationResponseJSON = await startRegistration(
+      pubKeyCredOpts
+    );
 
-    // Get auth method id
-    const authMethodId = await this.getAuthMethodId({
+    // Create auth method
+    const authMethod = {
       authMethodType: AUTH_METHOD_TYPE.WebAuthn,
       accessToken: JSON.stringify(attResp),
-    });
+    };
+
+    // Get auth method id
+    const authMethodId = await WebAuthnAuthenticator.authMethodId(
+      authMethod,
+      _rpName
+    );
 
     // Get auth method pub key
     const authMethodPubkey =
@@ -86,13 +115,13 @@ export class WebAuthnAuthenticator extends BaseAuthenticator {
 
     const args = {
       ...defaultArgs,
-      ...customArgs,
+      ...params.config.customArgs,
     };
 
     const body = JSON.stringify(args);
 
     // Mint PKP
-    const mintRes = await this.relay.mintPKP(body);
+    const mintRes = await params.config.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
       throw new UnknownError(
         {
@@ -108,32 +137,16 @@ export class WebAuthnAuthenticator extends BaseAuthenticator {
   }
 
   /**
-   * @override
-   * This method is not applicable for WebAuthnProvider and should not be used.
-   * Use verifyAndMintPKPThroughRelayer instead to mint a PKP for a WebAuthn credential.
-   *
-   * @throws {Error} - Throws an error when called for WebAuthnProvider.
-   */
-  public override async mintPKPThroughRelayer(): Promise<string> {
-    throw new RemovedFunctionError(
-      {
-        info: {
-          method: 'mintPKPThroughRelayer',
-        },
-      },
-      'Use verifyAndMintPKPThroughRelayer for WebAuthnProvider instead.'
-    );
-  }
-
-  /**
    * Authenticate with a WebAuthn credential and return the relevant authentication data
    *
+   * @param {any} [options] - Optional configuration (not used by WebAuthn directly, but allows consistent calling)
    * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
    */
-  public async authenticate(): Promise<AuthMethod> {
-    const blockHash = await this.litNodeClient.getLatestBlockhash();
+  public async authenticate(params: WebAuthnPkpConfig): Promise<AuthMethod> {
+    const nonce = await params.litClient.getLatestBlockhash();
+
     // Turn into byte array
-    const blockHashBytes = ethers.utils.arrayify(blockHash);
+    const blockHashBytes = ethers.utils.arrayify(nonce);
 
     // Construct authentication options
     const rpId = getRPIdFromOrigin(window.location.origin);

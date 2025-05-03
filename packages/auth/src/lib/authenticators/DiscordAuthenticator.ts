@@ -1,26 +1,14 @@
 import { ethers } from 'ethers';
 
-import {
-  AUTH_METHOD_TYPE,
-  UnauthorizedException,
-  UnknownError,
-} from '@lit-protocol/constants';
-import {
-  AuthMethod,
-  BaseProviderOptions,
-  OAuthProviderOptions,
-} from '@lit-protocol/types';
+import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
+import { AuthMethod } from '@lit-protocol/types';
 
-import { BaseAuthenticator } from './BaseAuthenticator';
-import {
-  prepareLoginUrl,
-  parseLoginParams,
-  getStateParam,
-  decode,
-  LIT_LOGIN_GATEWAY,
-} from './utils';
+import { DiscordConfig } from '../auth-manager';
+import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
 
-export class DiscordAuthenticator extends BaseAuthenticator {
+const DEFAULT_CLIENT_ID = '1052874239658692668';
+
+export class DiscordAuthenticator {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
@@ -30,126 +18,28 @@ export class DiscordAuthenticator extends BaseAuthenticator {
    */
   private clientId?: string;
 
-  constructor(options: BaseProviderOptions & OAuthProviderOptions) {
-    super(options);
-    this.redirectUri = options.redirectUri || window.location.origin;
-    this.clientId = options.clientId || '1052874239658692668';
+  constructor(params: DiscordConfig) {
+    this.redirectUri = params.redirectUri || window.location.origin;
+    this.clientId = params.clientId || DEFAULT_CLIENT_ID;
   }
 
   /**
-   * Redirect user to the Lit's Discord login page
+   * Authenticate using a popup window.
    *
-   * @returns {Promise<void>} - Redirects user to Lit login page
+   * @param {string} baseURL - The base URL for the Lit Login Gateway.
+   * @returns {Promise<AuthMethod>} - Auth method object containing the OAuth token.
    */
-  public async signIn(): Promise<void> {
-    // Get login url
-    const loginUrl = await prepareLoginUrl('discord', this.redirectUri);
-    // Redirect to login url
-    window.location.assign(loginUrl);
-  }
-
-  /**
-   * Validate the URL parameters returned from Lit's login server and return the authentication data
-   *
-   * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
-   */
-  public async authenticate(): Promise<AuthMethod> {
-    // Check if current url matches redirect uri
-    if (!window.location.href.startsWith(this.redirectUri)) {
-      throw new UnauthorizedException(
-        {
-          info: {
-            url: window.location.href,
-            redirectUri: this.redirectUri,
-          },
-        },
-        `Current url does not match provided redirect uri`
-      );
-    }
-
-    // Check url for params
-    const { provider, accessToken, state, error } = parseLoginParams(
-      window.location.search
-    );
-
-    // Check if there's an error
-    if (error) {
-      throw new UnknownError(
-        {
-          info: {
-            error,
-          },
-          cause: new Error(error),
-        },
-        error ?? 'Received error from discord authentication'
-      );
-    }
-
-    // Check if provider is Discord
-    if (!provider || provider !== 'discord') {
-      throw new UnauthorizedException(
-        {
-          info: {
-            provider,
-            redirectUri: this.redirectUri,
-          },
-        },
-        'OAuth provider does not match "discord"'
-      );
-    }
-
-    // Check if state param matches
-    if (!state || decode(decodeURIComponent(state)) !== getStateParam()) {
-      throw new UnauthorizedException(
-        {
-          info: {
-            state,
-            redirectUri: this.redirectUri,
-          },
-        },
-        'Invalid state parameter in callback URL'
-      );
-    }
-
-    // Clear params from url
-    window.history.replaceState(
-      null,
-      window.document.title,
-      window.location.pathname
-    );
-
-    // Check if access token is present in url
-    if (!accessToken) {
-      throw new UnauthorizedException(
-        {
-          info: {
-            accessToken,
-            redirectUri: this.redirectUri,
-          },
-        },
-        `Missing access token in callback URL`
-      );
-    }
-
-    const authMethod = {
-      authMethodType: AUTH_METHOD_TYPE.Discord,
-      accessToken: accessToken,
-    };
-    return authMethod;
-  }
-
-  /**
-   * Sign in using popup window
-   *
-   * @param baseURL
-   */
-  public async signInUsingPopup(baseURL: string): Promise<AuthMethod> {
+  public async authenticate(params: DiscordConfig): Promise<AuthMethod> {
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
-    const url = await prepareLoginUrl('discord', this.redirectUri, baseURL);
+    const url = await prepareLoginUrl(
+      'discord',
+      this.redirectUri,
+      params.baseUrl
+    );
     const popup = window.open(
       `${url}&caller=${window.location.origin}`,
       'popup',
@@ -170,7 +60,7 @@ export class DiscordAuthenticator extends BaseAuthenticator {
       }, 1000);
 
       window.addEventListener('message', (event) => {
-        if (event.origin !== (baseURL || LIT_LOGIN_GATEWAY)) {
+        if (event.origin !== (params.baseUrl || LIT_LOGIN_GATEWAY)) {
           return;
         }
 
@@ -213,7 +103,7 @@ export class DiscordAuthenticator extends BaseAuthenticator {
     authMethod: AuthMethod,
     clientId?: string
   ): Promise<string> {
-    const _clientId = clientId || '1052874239658692668';
+    const _clientId = clientId || DEFAULT_CLIENT_ID;
 
     // -- get user id from access token
     let userId;

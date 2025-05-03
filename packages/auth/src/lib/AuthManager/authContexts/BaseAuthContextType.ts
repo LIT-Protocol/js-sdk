@@ -1,5 +1,6 @@
 import {
   AuthSigSchema,
+  ExpirationSchema,
   HexPrefixedSchema,
   LitResourceAbilityRequestSchema,
 } from '@lit-protocol/schemas';
@@ -16,7 +17,7 @@ export const DEFAULT_EXPIRATION = new Date(
 // 👤 Who you say you are
 export const BaseAuthenticationSchema = z.object({
   pkpPublicKey: HexPrefixedSchema,
-  domain: z.string().optional(),
+  // domain: z.string().optional(),
 });
 
 // 🔑 What you say you can do
@@ -40,6 +41,16 @@ export const BaseMetadataSchema = z
   })
   .default({})
   .or(z.undefined());
+
+export const AuthConfigSchema = z.object({
+  capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
+  expiration: ExpirationSchema.optional().default(
+    new Date(Date.now() + 1000 * 60 * 15).toISOString()
+  ),
+  statement: z.string().optional().default(''),
+  domain: z.string().optional().default(''),
+  resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
+});
 
 // =========== BaseAuthContextType schemas ===========
 

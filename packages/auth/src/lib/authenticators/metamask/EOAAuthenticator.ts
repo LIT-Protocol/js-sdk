@@ -2,24 +2,29 @@ import { ethers, Signer } from 'ethers';
 import { SiweMessage } from 'siwe';
 
 import {
-  LIT_CHAINS,
   AUTH_METHOD_TYPE,
   InvalidArgumentException,
+  LIT_CHAINS,
   LitEVMChainKeys,
   WrongParamFormat,
 } from '@lit-protocol/constants';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthMethod,
   AuthSig,
-  BaseProviderOptions,
-  EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
+  EthWalletProviderOptions,
 } from '@lit-protocol/types';
 
-import { BaseAuthenticator } from '../BaseAuthenticator';
 import { checkAndSignEVMAuthMessage } from './eth';
+import { EoaConfig } from '../../auth-manager';
+
+// export type EoaPkpConfig = BasePkpAuthContextAdapterParams & {
+//   authenticator: typeof EOAAuthenticator; // Use the class as discriminant
+//   config: BaseAuthenticateConfig & {
+//     signer: z.infer<typeof SignerSchema>;
+//   };
+// };
 
 interface DomainAndOrigin {
   domain?: string;
@@ -27,8 +32,6 @@ interface DomainAndOrigin {
 }
 
 export class EOAAuthenticator {
-  public static id = 'EOAAuthenticator';
-
   private static readonly _logger = getChildLogger({
     module: 'EOAAuthenticator',
   });
@@ -41,7 +44,7 @@ export class EOAAuthenticator {
    */
   public origin: string;
 
-  constructor(options: EthWalletProviderOptions) {
+  constructor(public options: EoaConfig) {
     // super(options);
 
     const { domain, origin } = EOAAuthenticator.getDomainAndOrigin(options);
@@ -209,6 +212,7 @@ export class EOAAuthenticator {
         address: checksumAddress,
       };
     } else {
+      // This is the only thing that POPS
       authSig = await checkAndSignEVMAuthMessage({
         chain,
         nonce: params.nonce,

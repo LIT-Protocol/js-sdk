@@ -145,7 +145,9 @@ export function getProviderFromUrl(): string | null {
  */
 export async function setStateParam(): Promise<string> {
   const state = Math.random().toString(36).substring(2, 17);
-  sessionStorage.setItem(STATE_PARAM_KEY, state);
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(STATE_PARAM_KEY, state);
+  }
   return state;
 }
 
@@ -175,7 +177,12 @@ export function removeStateParam(): void {
  * @returns {string} - Encoded string
  */
 export function encode(value: string): string {
-  return window.btoa(value);
+  if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
+    return window.btoa(value);
+  }
+
+  // Node.js fallback
+  return Buffer.from(value, 'utf-8').toString('base64');
 }
 
 /**
