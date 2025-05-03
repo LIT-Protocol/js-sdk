@@ -1,43 +1,11 @@
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { getLitClient } from '.';
-import { ethers } from 'ethers';
-import { privateKeyToAccount } from 'viem/accounts';
-import { hexToBytes } from 'viem';
-import {
-  AuthConfig,
-  AuthConfigSchema,
-} from 'packages/auth/src/lib/auth-manager';
+import { AuthConfig } from 'packages/auth/src/lib/auth-manager';
+import { getLitClient } from './examples/getLitClient';
+import { myEthersSigner } from './examples/myEthersSigner';
 
 async function createMyLitService() {
-  // --- all the litNodeClient dependencies we want to remove soon
-  const litNodeClient = new LitNodeClient({
-    litNetwork: 'naga-dev',
-  });
-
-  await litNodeClient.connect();
-  const _nodeUrls = await litNodeClient.getMaxPricesForNodeProduct({
-    product: 'LIT_ACTION',
-  });
-  const _nonce = await litNodeClient.getLatestBlockhash();
-  const _currentEpoch = litNodeClient.currentEpochNumber!;
-  const _signSessionKey = litNodeClient.v2.signPKPSessionKey;
-
-  const getLitClient = ({ network }: { network: 'naga-dev' }) => {
-    return {
-      getLatestBlockhash: litNodeClient.getLatestBlockhash,
-      getCurrentEpoch: async () => litNodeClient.currentEpochNumber ?? 0,
-      getSignSessionKey: litNodeClient.v2.signPKPSessionKey,
-      getMaxPricesForNodeProduct: litNodeClient.getMaxPricesForNodeProduct,
-    };
-  };
-
   // --- end of litNodeClient dependencies we want to remove soon
-
-  const ethersSigner = new ethers.Wallet(
-    '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
-  );
 
   // get rid of statefulness
   // never couple to 1 pkp, always design for lookup
@@ -57,7 +25,7 @@ async function createMyLitService() {
     resources: createResourceBuilder().addPKPSigningRequest('*').getResources(),
   };
 
-  const litClient = getLitClient({ network: 'naga-dev' });
+  const litClient = await getLitClient({ network: 'naga-dev' });
 
   // There's actually two eth authetnicators
   // - Ethers
@@ -66,9 +34,11 @@ async function createMyLitService() {
   // pass the lit client inside here
   // uri: location.href
   // lit:session: uri <-- add it
+
+  // ---------------------------- EOA Auth Context Example ----------------------------
   const eoaAuthContext = await authManager.getEoaAuthContext({
     config: {
-      signer: ethersSigner,
+      signer: myEthersSigner,
       pkpPublicKey:
         '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
     },
@@ -76,13 +46,13 @@ async function createMyLitService() {
     litClient: litClient,
   });
 
-  // -- EOA Auth Context
+  // ---------------------------- PKP EOA Auth Context Example ----------------------------
   const pkpEoaAuthContext = await authManager.getPkpAuthContext({
     authenticator: LitAuth.authenticators.EOAAuthenticator,
     config: {
       pkpPublicKey:
         '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
-      signer: ethersSigner,
+      signer: myEthersSigner,
     },
     authConfig: myAuthConfig,
     litClient: litClient,
@@ -90,7 +60,7 @@ async function createMyLitService() {
 
   console.log('pkpEoaAuthContext:', pkpEoaAuthContext);
 
-  // -- PKP Google Auth Context
+  // ---------------------------- PKP Google Auth Context Example ----------------------------
   const pkpGoogleAuthContext = await authManager.getPkpAuthContext({
     authenticator: LitAuth.authenticators.GoogleAuthenticator,
     config: {
@@ -106,7 +76,7 @@ async function createMyLitService() {
 
   console.log('pkpGoogleAuthContext:', pkpGoogleAuthContext);
 
-  // -- PKP Discord Auth Context
+  // ---------------------------- PKP Discord Auth Context Example ----------------------------
   const pkpDiscordAuthContext = await authManager.getPkpAuthContext({
     authenticator: LitAuth.authenticators.DiscordAuthenticator,
     config: {
@@ -124,7 +94,7 @@ async function createMyLitService() {
 
   console.log('pkpDiscordAuthContext:', pkpDiscordAuthContext);
 
-  // -- WebAuthn Auth Context
+  // ---------------------------- PKP WebAuthn Auth Context Example ----------------------------
 
   // There are two ways, register and getAuthMethod or authenticate and getAuthMethod
   const webAuthnAuthContextViaRegister = await authManager.getPkpAuthContext({
@@ -162,7 +132,7 @@ async function createMyLitService() {
     webAuthnAuthContextViaAuthenticate
   );
 
-  // -- PKP Stytch OTP Auth Context
+  // ---------------------------- PKP Stytch OTP Auth Context Example ----------------------------
   // Assume user has completed Stytch OTP flow and obtained an accessToken
   const stytchAccessToken = 'your-stytch-otp-verified-token'; // Replace with actual token
   const stytchAppId = 'your-stytch-project-id'; // Replace with actual App ID
@@ -174,6 +144,7 @@ async function createMyLitService() {
         '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
       appId: stytchAppId,
       accessToken: stytchAccessToken,
+      provider: 'https://stytch.com/session',
       // userId: 'optional-stytch-user-id' // optional
     },
     authConfig: myAuthConfig,
@@ -182,7 +153,7 @@ async function createMyLitService() {
 
   console.log('pkpStytchOtpAuthContext:', pkpStytchOtpAuthContext);
 
-  // -- PKP Stytch Auth Factor OTP Auth Context
+  // ---------------------------- PKP Stytch Auth Factor OTP Auth Context Example ----------------------------
   // Assume user has completed Stytch OTP flow for a specific factor (e.g., email)
   const stytchFactorAccessToken = 'your-stytch-otp-verified-token-for-factor'; // Replace with actual token
 
@@ -202,41 +173,6 @@ async function createMyLitService() {
     'pkpStytchEmailFactorAuthContext:',
     pkpStytchEmailFactorAuthContext
   );
-
-  // before getting auth context
-  // // we TRY to parse the url
-  // const pkpAuthContext = await authManager.getPkpAuthContext({
-  // pkpAddress
-  // authenticator: just one <-- This is the authtncator i want you to use.
-  // authConfig: {}
-  // litClient (nonce or whatever the fuck)
-  // });
-
-  // authManager.didtheuserjustloggedin();
-  // if true
-  // parse the login params,
-  // if false
-  //
-
-  // const authMethod = await authManager.getAuthMethod();
-
-  // receive authMaterial instead
-  // const litClient = getLitClient({
-  //   network: 'naga-dev',
-  //   // authManager, ❌
-  // });
-
-  // litClient.encrypt({
-  //   // authContext:
-  // });
-
-  // return litClient;
-
-  // as a user,
-  // authManager
-  // litClient
-
-  // authContext to do shit with the litClient
 }
 
 const litService = createMyLitService();

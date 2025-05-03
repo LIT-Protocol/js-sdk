@@ -8,9 +8,11 @@ import {
 } from '@lit-protocol/types';
 
 import { StytchOtpConfig } from '../../auth-manager';
+import { AuthMethodTypeStringMap } from '../../types';
 
+const DEFAULT_PROVIDER = 'https://stytch.com/session';
 export class StytchOtpAuthenticator {
-  private _provider: string = 'https://stytch.com/session';
+  public static id = AuthMethodTypeStringMap.StytchOtp;
 
   constructor(public config: StytchOtpConfig) {}
 
@@ -19,16 +21,19 @@ export class StytchOtpAuthenticator {
    * @param options authentication option containing the authenticated token
    * @returns {Promise<AuthMethod>} Authentication Method for auth method type OTP
    * */
-  authenticate(options: StytchOtpConfig): Promise<AuthMethod> {
+  public static async authenticate(
+    options: StytchOtpConfig
+  ): Promise<AuthMethod> {
     return new Promise<AuthMethod>((resolve, reject) => {
       const userId: string | undefined =
-        options.userId ??
-        (options as StytchOtpAuthenticateOptions)?.userId;
+        options.userId ?? (options as StytchOtpAuthenticateOptions)?.userId;
 
       const accessToken: string | undefined = options.accessToken;
       if (!accessToken) {
         reject(
-          new Error('No access token provided, please provide a stytch auth jwt')
+          new Error(
+            'No access token provided, please provide a stytch auth jwt'
+          )
         );
         return;
       }
@@ -50,7 +55,7 @@ export class StytchOtpAuthenticator {
           );
           return;
         }
-        const session = parsedToken[this._provider];
+        const session = parsedToken[options.provider || DEFAULT_PROVIDER];
         const authFactor = session['authentication_factors'][0];
 
         if (!authFactor) {

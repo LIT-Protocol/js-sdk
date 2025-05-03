@@ -18,12 +18,27 @@ import {
   totpAuthFactorParser,
   whatsAppOtpAuthFactorParser,
 } from './parsers';
+import { AuthMethodTypeStringMap } from '../../types';
 
+/**
+ * @deprecated - we need to break this out into a separate authenticator as they are different auth method type
+ * eg. 
+    StytchEmailFactorOtp: "StytchEmailFactorOtp";
+    StytchSmsFactorOtp: "StytchSmsFactorOtp";
+    StytchWhatsAppFactorOtp: "StytchWhatsAppFactorOtp";
+    StytchTotpFactorOtp: "StytchTotpFactorOtp";
+
+    public static id = AuthMethodTypeStringMap.StytchEmailFactorOtp;
+    public static id = AuthMethodTypeStringMap.StytchSmsFactorOtp;
+    public static id = AuthMethodTypeStringMap.StytchWhatsAppFactorOtp;
+    public static id = AuthMethodTypeStringMap.StytchTotpFactorOtp;
+ */
 export class StytchAuthFactorOtpAuthenticator<T extends FactorParser> {
+  public static id = AuthMethodTypeStringMap.StytchOtp;
+
   private static _provider: string = 'https://stytch.com/session';
 
-  constructor(public config: StytchAuthFactorOtpConfig) {
-  }
+  constructor(public config: StytchAuthFactorOtpConfig) {}
 
   /**
    * Validates claims within a stytch authenticated JSON Web Token
@@ -33,7 +48,9 @@ export class StytchAuthFactorOtpAuthenticator<T extends FactorParser> {
    * @returns {AuthMethod} Authentication Method for auth method type OTP
    *
    */
-  public async authenticate(options: StytchAuthFactorOtpConfig): Promise<AuthMethod> {
+  public static async authenticate(
+    options: StytchAuthFactorOtpConfig
+  ): Promise<AuthMethod> {
     return new Promise<AuthMethod>((resolve, reject) => {
       const accessToken: string | undefined = options.accessToken;
       if (!accessToken) {
@@ -47,9 +64,8 @@ export class StytchAuthFactorOtpAuthenticator<T extends FactorParser> {
         const parsedToken: StytchToken =
           StytchAuthFactorOtpAuthenticator._parseJWT(accessToken);
 
-        const factorParser = StytchAuthFactorOtpAuthenticator._resolveAuthFactor(
-          options.factor
-        );
+        const factorParser =
+          StytchAuthFactorOtpAuthenticator._resolveAuthFactor(options.factor);
 
         factorParser.parser(
           parsedToken,
@@ -109,10 +125,7 @@ export class StytchAuthFactorOtpAuthenticator<T extends FactorParser> {
             );
         }
         const factorResolver = this._resolveAuthFactor(factor);
-        const authId = factorResolver.parser(
-          parsedToken,
-          this._provider
-        );
+        const authId = factorResolver.parser(parsedToken, this._provider);
         resolve(authId);
       } catch (e) {
         reject(e);

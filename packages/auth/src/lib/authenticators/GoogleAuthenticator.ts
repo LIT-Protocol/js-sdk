@@ -5,9 +5,11 @@ import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
 import { AuthMethod } from '@lit-protocol/types';
 
 import { GoogleConfig } from '../auth-manager';
+import { AuthMethodTypeStringMap } from '../types';
 import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
 
 export class GoogleAuthenticator {
+  public static id = AuthMethodTypeStringMap.Google;
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
@@ -22,7 +24,7 @@ export class GoogleAuthenticator {
    *
    * @param baseURL
    */
-  public async authenticate(params: GoogleConfig): Promise<AuthMethod> {
+  public static async authenticate(params: GoogleConfig): Promise<AuthMethod> {
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
@@ -30,7 +32,7 @@ export class GoogleAuthenticator {
 
     const url = await prepareLoginUrl(
       'google',
-      this.redirectUri,
+      params.redirectUri || window.location.origin,
       params.baseUrl
     );
     const popup = window.open(

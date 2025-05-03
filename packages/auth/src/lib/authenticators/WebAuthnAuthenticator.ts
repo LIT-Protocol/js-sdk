@@ -23,6 +23,7 @@ import {
 import { BaseAuthenticateConfig, BaseAuthenticator } from './BaseAuthenticator';
 import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
 import { WebAuthnConfig } from '../auth-manager';
+import { AuthMethodTypeStringMap } from '../types';
 
 // export type WebAuthnPkpConfig = {
 //   config: BaseAuthenticateConfig & {
@@ -37,6 +38,8 @@ import { WebAuthnConfig } from '../auth-manager';
 // };
 
 export class WebAuthnAuthenticator {
+  public static id = AuthMethodTypeStringMap.WebAuthn;
+
   /**
    * Name of relying party. Defaults to "lit"
    */
@@ -57,7 +60,7 @@ export class WebAuthnAuthenticator {
    */
   // username?: string,
   // customArgs?: MintRequestBody
-  public async register(params: WebAuthnConfig): Promise<string> {
+  public static async register(params: WebAuthnConfig): Promise<string> {
     const _rpName = params.rpName || 'lit';
 
     const pubKeyCredOpts: PublicKeyCredentialCreationOptionsJSON =
@@ -76,7 +79,7 @@ export class WebAuthnAuthenticator {
     };
 
     // Get auth method id
-    const authMethodId = await WebAuthnAuthenticator.authMethodId(
+    const authMethodId = await WebAuthnAuthenticator.getAuthMethodId(
       authMethod,
       _rpName
     );
@@ -125,7 +128,7 @@ export class WebAuthnAuthenticator {
    * @param {any} [options] - Optional configuration (not used by WebAuthn directly, but allows consistent calling)
    * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
    */
-  public async authenticate(
+  public static async authenticate(
     params: WebAuthnConfig & { nonce: string }
   ): Promise<AuthMethod> {
     const nonce = params.nonce;
@@ -176,11 +179,11 @@ export class WebAuthnAuthenticator {
    *
    * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return WebAuthnAuthenticator.authMethodId(authMethod, this.rpName);
-  }
+  // public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+  //   return WebAuthnAuthenticator.authMethodId(authMethod, this.rpName);
+  // }
 
-  public static async authMethodId(
+  public static async getAuthMethodId(
     authMethod: AuthMethod,
     rpName?: string
   ): Promise<string> {

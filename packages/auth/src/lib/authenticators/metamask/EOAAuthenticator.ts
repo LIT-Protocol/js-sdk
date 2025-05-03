@@ -18,6 +18,7 @@ import {
 
 import { checkAndSignEVMAuthMessage } from './eth';
 import { EoaConfig } from '../../auth-manager';
+import { AuthMethodTypeStringMap } from '../../types';
 
 // export type EoaPkpConfig = BasePkpAuthContextAdapterParams & {
 //   authenticator: typeof EOAAuthenticator; // Use the class as discriminant
@@ -32,6 +33,8 @@ interface DomainAndOrigin {
 }
 
 export class EOAAuthenticator {
+  public static id = AuthMethodTypeStringMap.AppleJwt;
+
   private static readonly _logger = getChildLogger({
     module: 'EOAAuthenticator',
   });

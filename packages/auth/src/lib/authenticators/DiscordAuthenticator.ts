@@ -5,10 +5,13 @@ import { AuthMethod } from '@lit-protocol/types';
 
 import { DiscordConfig } from '../auth-manager';
 import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
+import { AuthMethodTypeStringMap } from '../types';
 
 const DEFAULT_CLIENT_ID = '1052874239658692668';
 
 export class DiscordAuthenticator {
+  public static id = AuthMethodTypeStringMap.Discord;
+
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
@@ -29,7 +32,7 @@ export class DiscordAuthenticator {
    * @param {string} baseURL - The base URL for the Lit Login Gateway.
    * @returns {Promise<AuthMethod>} - Auth method object containing the OAuth token.
    */
-  public async authenticate(params: DiscordConfig): Promise<AuthMethod> {
+  public static async authenticate(params: DiscordConfig): Promise<AuthMethod> {
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
@@ -37,7 +40,7 @@ export class DiscordAuthenticator {
 
     const url = await prepareLoginUrl(
       'discord',
-      this.redirectUri,
+      params.redirectUri || window.location.origin,
       params.baseUrl
     );
     const popup = window.open(
