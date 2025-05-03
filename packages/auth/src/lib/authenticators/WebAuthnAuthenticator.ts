@@ -1,7 +1,7 @@
 import {
   PublicKeyCredentialCreationOptionsJSON,
-  UserVerificationRequirement,
   RegistrationResponseJSON,
+  UserVerificationRequirement,
 } from '@simplewebauthn/typescript-types';
 import base64url from 'base64url';
 import { ethers } from 'ethers';
@@ -9,7 +9,6 @@ import { ethers } from 'ethers';
 import {
   AUTH_METHOD_TYPE,
   InvalidArgumentException,
-  RemovedFunctionError,
   UnknownError,
   WrongParamFormat,
 } from '@lit-protocol/constants';
@@ -23,44 +22,30 @@ import {
 
 import { BaseAuthenticateConfig, BaseAuthenticator } from './BaseAuthenticator';
 import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
-import { BasePkpAuthContextAdapterParams } from '../auth-manager';
+import { WebAuthnConfig } from '../auth-manager';
 
-export type WebAuthnPkpConfig = BasePkpAuthContextAdapterParams & {
-  authenticator: typeof WebAuthnAuthenticator;
-  config: BaseAuthenticateConfig & {
-    method: 'register' | 'authenticate';
+// export type WebAuthnPkpConfig = {
+//   config: BaseAuthenticateConfig & {
+//     method: 'register' | 'authenticate';
 
-    // register config
-    username?: string;
-    relay: IRelay;
-    rpName?: string;
-    customArgs?: MintRequestBody;
-  };
-};
+//     // register config
+//     username?: string;
+//     relay: IRelay;
+//     rpName?: string;
+//     customArgs?: MintRequestBody;
+//   };
+// };
 
-export class WebAuthnAuthenticator extends BaseAuthenticator {
+export class WebAuthnAuthenticator {
   /**
    * Name of relying party. Defaults to "lit"
    */
   public rpName?: string;
 
-  constructor(options: BaseProviderOptions & WebAuthnProviderOptions) {
-    super(options);
+  constructor(public options: WebAuthnConfig) {
+    // super(options);
     this.rpName = options.rpName || 'lit';
   }
-
-  /**
-   * Generate registration options for the browser to pass to a supported authenticator
-   *
-   * @param {string} username - Username to register credential with
-   *
-   * @returns {Promise<PublicKeyCredentialCreationOptionsJSON>} - Options to pass to the authenticator
-   */
-  // public async register(
-  //   username?: string
-  // ): Promise<PublicKeyCredentialCreationOptionsJSON> {
-  //   return await this.relay.generateRegistrationOptions(username);
-  // }
 
   /**
    * Mint PKP with verified registration data
@@ -72,13 +57,11 @@ export class WebAuthnAuthenticator extends BaseAuthenticator {
    */
   // username?: string,
   // customArgs?: MintRequestBody
-  public async register(params: WebAuthnPkpConfig): Promise<string> {
-    const _rpName = params.config.rpName || 'lit';
+  public async register(params: WebAuthnConfig): Promise<string> {
+    const _rpName = params.rpName || 'lit';
 
     const pubKeyCredOpts: PublicKeyCredentialCreationOptionsJSON =
-      await params.config.relay.generateRegistrationOptions(
-        params.config.username
-      );
+      await params.relay.generateRegistrationOptions(params.username);
 
     // Submit registration options to the authenticator
     const { startRegistration } = await import('@simplewebauthn/browser');
@@ -115,13 +98,13 @@ export class WebAuthnAuthenticator extends BaseAuthenticator {
 
     const args = {
       ...defaultArgs,
-      ...params.config.customArgs,
+      ...params.customArgs,
     };
 
     const body = JSON.stringify(args);
 
     // Mint PKP
-    const mintRes = await params.config.relay.mintPKP(body);
+    const mintRes = await params.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
       throw new UnknownError(
         {
@@ -142,8 +125,10 @@ export class WebAuthnAuthenticator extends BaseAuthenticator {
    * @param {any} [options] - Optional configuration (not used by WebAuthn directly, but allows consistent calling)
    * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
    */
-  public async authenticate(params: WebAuthnPkpConfig): Promise<AuthMethod> {
-    const nonce = await params.litClient.getLatestBlockhash();
+  public async authenticate(
+    params: WebAuthnConfig & { nonce: string }
+  ): Promise<AuthMethod> {
+    const nonce = params.nonce;
 
     // Turn into byte array
     const blockHashBytes = ethers.utils.arrayify(nonce);

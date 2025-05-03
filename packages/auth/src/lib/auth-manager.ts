@@ -1,41 +1,22 @@
+import { generateSessionKeyPair } from '@lit-protocol/crypto';
 import {
-  AuthMethod,
-  BaseProviderOptions,
+  ExpirationSchema,
+  HexPrefixedSchema,
+  NodeUrlsSchema,
+  SignerSchema,
+} from '@lit-protocol/schemas';
+import {
+  IRelay,
+  MintRequestBody,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { z } from 'zod';
-import {
-  DiscordAuthenticator,
-  EOAAuthenticator,
-  GoogleAuthenticator,
-  LitAuthAuthenticator,
-  WebAuthnAuthenticator,
-} from './authenticators';
-import {
-  getEoaAuthContext,
-  GetEoaAuthContextSchema,
-} from './AuthManager/authContexts/getEoaAuthContext';
-import {
-  getPkpAuthContext,
-  GetPkpAuthContextSchema,
-} from './AuthManager/authContexts/getPkpAuthContext';
+import { AuthConfigSchema } from './AuthManager/authContexts/BaseAuthContextType';
+import { getEoaAuthContext } from './AuthManager/authContexts/getEoaAuthContext';
+import { getPkpAuthContext } from './AuthManager/authContexts/getPkpAuthContext';
 import type { LitAuthStorageProvider } from './storage/types';
 import type { AuthMethodType, LitAuthData } from './types';
-import {
-  AuthSigSchema,
-  ExpirationSchema,
-  HexPrefixedSchema,
-  LitResourceAbilityRequestSchema,
-  NodeUrlsSchema,
-  SignerSchema,
-  UrlSchema,
-} from '@lit-protocol/schemas';
-import { AuthConfigSchema } from './AuthManager/authContexts/BaseAuthContextType';
-import { generateSessionKeyPair } from '@lit-protocol/crypto';
-import { BaseAuthenticateConfig } from './authenticators/BaseAuthenticator';
-import { WebAuthnPkpConfig } from './authenticators/WebAuthnAuthenticator';
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 
 interface AuthManagerParams {
   storage: LitAuthStorageProvider;
@@ -157,6 +138,17 @@ export type DiscordConfig = OAuthProviderOptions & {
   clientId?: string;
 };
 
+export type WebAuthnConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  method: 'register' | 'authenticate';
+
+  // register config
+  relay: IRelay;
+  username?: string;
+  rpName?: string;
+  customArgs?: MintRequestBody;
+};
+
 export const EoaAuthDepsSchema = z.object({
   nonce: z.any(),
 });
@@ -249,7 +241,14 @@ async function getPkpAuthContextAdapter<T extends new (config: any) => any>(
     ...litClientConfig,
   };
 
-  const authMethod = await authenticator.authenticate(params.config);
+  let authMethod;
+
+  // only for webauthn (maybe we can support other types)
+  if (params.config.method === 'register') {
+    authMethod = await authenticator.register(params.config);
+  } else {
+    authMethod = await authenticator.authenticate(params.config);
+  }
 
   return getPkpAuthContext({
     authentication: {
