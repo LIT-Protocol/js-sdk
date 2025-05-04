@@ -74,9 +74,6 @@ async function tryGetCachedAuthData(params: {
   expiration: string;
   type: AuthMethodType;
 }): Promise<LitAuthData> {
-  console.log('params:', params);
-  process.exit();
-
   // Use `storage` to see if there is cached auth data
   let authData = (await params.storage.read({
     address: params.address,
@@ -188,6 +185,7 @@ export const PkpAuthDepsSchema = z.object({
   getSignSessionKey: z.any(),
   nodeUrls: NodeUrlsSchema,
 });
+type ConstructorConfig<T> = T extends new (config: infer C) => any ? C : never;
 
 const getEoaAuthContextAdapter = async (
   upstreamParams: AuthManagerParams,
@@ -230,8 +228,6 @@ const getEoaAuthContextAdapter = async (
     },
   });
 };
-
-type ConstructorConfig<T> = T extends new (config: infer C) => any ? C : never;
 
 async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
   upstreamParams: AuthManagerParams,
@@ -311,17 +307,59 @@ async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
   });
 }
 
-// ----- Custom Auth Context Adapter -----
+// Define the expected structure for Custom Authenticator classes
+interface ICustomAuthenticator {
+  new (settings: any): ICustomAuthenticatorInstance;
+  LIT_ACTION_CODE_BASE64?: string;
+  LIT_ACTION_IPFS_ID?: string;
+}
 
+interface ICustomAuthenticatorInstance {
+  // Method to perform external auth and return jsParams for the Lit Action
+  // Accepts the config object which includes pkpPublicKey and other needed params
+  authenticate(config: {
+    pkpPublicKey: string;
+    [key: string]: any;
+  }): Promise<Record<string, any> | null>;
+}
+
+// ----- Custom Auth Context Adapter  -----
 async function getCustomAuthContextAdapter(
   upstreamParams: AuthManagerParams,
   params: {
-    config: CustomAuthConfig;
-    authConfig: AuthConfig; // For SIWE details
+    authenticator: ICustomAuthenticator; // Use the interface type
+    settings: Record<string, any>; // For constructor
+    config: { pkpPublicKey: string; [key: string]: any }; // For authenticate method
+    authConfig: AuthConfig; // For SIWE/session
     litClient: BaseAuthContext<any>['litClient'];
   }
 ) {
-  // 1. Get node dependencies
+  // 1. Instantiate the custom authenticator helper using 'settings'
+  const customAuthHelper = new params.authenticator(params.settings);
+
+  // 2. Call the helper's authenticate method using 'config'
+  if (!customAuthHelper.authenticate) {
+    throw new Error("Custom authenticator is missing 'authenticate' method.");
+  }
+  // Pass the entire config object to the authenticator's authenticate method
+  const jsParams = await customAuthHelper.authenticate(params.config);
+  if (!jsParams) {
+    throw new Error('Custom authenticator failed to produce jsParams.');
+  }
+
+  // 3. Get the static Lit Action code/ID from the authenticator class
+  const litActionCode = params.authenticator.LIT_ACTION_CODE_BASE64;
+  const litActionIpfsId = params.authenticator.LIT_ACTION_IPFS_ID; // Optional
+  if (!litActionCode && !litActionIpfsId) {
+    throw new Error(
+      'Custom authenticator is missing static LIT_ACTION_CODE_BASE64 or LIT_ACTION_IPFS_ID.'
+    );
+  }
+
+  // 4. Extract pkpPublicKey (already available in params.config)
+  const pkpPublicKey = params.config.pkpPublicKey;
+
+  // 5. Get node dependencies, session key etc.
   const litClientConfig = PkpAuthDepsSchema.parse({
     nonce: await params.litClient.getLatestBlockhash(),
     currentEpoch: await params.litClient.getCurrentEpoch(),
@@ -330,63 +368,43 @@ async function getCustomAuthContextAdapter(
       product: 'LIT_ACTION', // Or appropriate product
     }),
   });
-
-  // 2. Get PKP Address and Session Key
-  const pkpAddress = ethers.utils.computeAddress(params.config.pkpPublicKey);
+  const pkpAddress = ethers.utils.computeAddress(pkpPublicKey);
   const authData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
     address: pkpAddress,
     expiration: params.authConfig.expiration,
-    type: 'LitAction',
+    type: 'LitAction', // Session type remains LitAction
   });
 
-  // 3. Prepare the arguments for the node signing function
-  // This structure needs to align with what getPkpAuthContext uses for signSessionKey
-  // It might involve calling a similar internal `preparePkpAuthRequestBody` function
-  // adapted for custom auth, or constructing the body directly.
-
-  // Example direct construction (adapt based on actual signPKPSessionKey V2 requirements):
+  // 6. Prepare the request body for the node signing function
   const requestBodyForCustomAuth = {
-    // Fields required by signPKPSessionKey V2 when using custom auth
-    sessionKey: authData.sessionKey.keyPair.publicKey, // Assuming URI is needed
-    pkpPublicKey: params.config.pkpPublicKey,
-    // -- SIWE related fields from authConfig
+    sessionKey: authData.sessionKey.keyPair.publicKey,
+    pkpPublicKey: pkpPublicKey,
     statement: params.authConfig.statement,
     domain: params.authConfig.domain,
     expiration: params.authConfig.expiration,
     resources: params.authConfig.resources,
-    uri: authData.sessionKey.keyPair.publicKey, // Assuming session key URI needed for SIWE
+    uri: authData.sessionKey.keyPair.publicKey,
     nonce: litClientConfig.nonce,
-    // -- Custom Auth specific fields
-    ...(params.config.litActionCode && { code: params.config.litActionCode }),
-    ...(params.config.litActionIpfsId && {
-      litActionIpfsId: params.config.litActionIpfsId,
-    }),
-    jsParams: params.config.jsParams,
-    // -- Other common fields
-    authMethods: [], // Custom auth doesn't use verifiable authMethods in the same way
+    ...(litActionCode && { code: litActionCode }),
+    ...(litActionIpfsId && { litActionIpfsId: litActionIpfsId }),
+    jsParams: jsParams, // Use the result from customAuthHelper.authenticate
+    authMethods: [],
     epoch: litClientConfig.currentEpoch,
-    // Fields like curveType, signingScheme may be needed depending on signPKPSessionKey V2
-    // curveType: 'BLS',
-    // signingScheme: 'BLS',
+    // ... other fields like curveType, signingScheme ...
   };
 
-  // 4. Return the context object with the callback
+  // 7. Return the auth context object
   return {
-    chain: 'ethereum', // Assuming ethereum context
-    pkpPublicKey: params.config.pkpPublicKey,
-    // Include other relevant fields from authConfig if needed by the consuming application
+    chain: 'ethereum',
+    pkpPublicKey: pkpPublicKey,
     resources: params.authConfig.resources,
     capabilityAuthSigs: params.authConfig.capabilityAuthSigs,
     expiration: params.authConfig.expiration,
-    // sessionKey: authData.sessionKey.keyPair.publicKey, // Expose session key if useful?
-
-    // The callback invokes the node signing function with the prepared body
     authNeededCallback: async () => {
-      // Adjust the call based on the actual signature of getSignSessionKey
       const authSig = await litClientConfig.getSignSessionKey({
         requestBody: requestBodyForCustomAuth,
-        nodeUrls: litClientConfig.nodeUrls.map((node) => node.url),
+        nodeUrls: litClientConfig.nodeUrls.map((node: any) => node.url),
       });
       return authSig;
     },
@@ -402,9 +420,12 @@ export const getAuthManager = (authManagerParams: AuthManagerParams) => {
       authConfig: AuthConfig;
       litClient: BaseAuthContext<any>['litClient'];
     }) => getPkpAuthContextAdapter(authManagerParams, params),
-    getCustomAuthContext: getCustomAuthContextAdapter.bind(
-      null,
-      authManagerParams
-    ),
+    getCustomAuthContext: <T extends ICustomAuthenticator>(params: {
+      authenticator: T;
+      settings: ConstructorParameters<T>[0]; // Infer settings type from constructor
+      config: { pkpPublicKey: string; [key: string]: any }; // Execution config
+      authConfig: AuthConfig;
+      litClient: BaseAuthContext<any>['litClient'];
+    }) => getCustomAuthContextAdapter(authManagerParams, params),
   };
 };
