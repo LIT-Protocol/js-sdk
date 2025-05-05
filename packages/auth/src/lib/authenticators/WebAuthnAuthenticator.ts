@@ -22,20 +22,20 @@ import {
 
 import { BaseAuthenticateConfig, BaseAuthenticator } from './BaseAuthenticator';
 import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
-import { WebAuthnConfig } from '../auth-manager';
 import { AuthMethodTypeStringMap } from '../types';
+import { z } from 'zod';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
 
-// export type WebAuthnPkpConfig = {
-//   config: BaseAuthenticateConfig & {
-//     method: 'register' | 'authenticate';
+export type WebAuthnConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  method: 'register' | 'authenticate';
 
-//     // register config
-//     username?: string;
-//     relay: IRelay;
-//     rpName?: string;
-//     customArgs?: MintRequestBody;
-//   };
-// };
+  // register config
+  relay: IRelay;
+  username?: string;
+  rpName?: string;
+  customArgs?: MintRequestBody;
+};
 
 export class WebAuthnAuthenticator {
   public static id = AuthMethodTypeStringMap.WebAuthn;

@@ -40,7 +40,7 @@ export const storagePlugins = {
  * Authenticators handle the process of verifying user identity via different methods (e.g., WebAuthn, OAuth, Stytch).
  */
 export { authenticators };
-export { getAuthManager } from './lib/auth-manager';
+export { getAuthManager } from './lib/AuthManager/auth-manager';
 // export type {
 //   AuthManagerConfigUnion,
 //   PkpAuthManagerConfig,

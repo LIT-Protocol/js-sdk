@@ -1,13 +1,19 @@
 import { ethers } from 'ethers';
 
 import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
-import { AuthMethod } from '@lit-protocol/types';
+import { AuthMethod, OAuthProviderOptions } from '@lit-protocol/types';
 
-import { DiscordConfig } from '../auth-manager';
-import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
 import { AuthMethodTypeStringMap } from '../types';
+import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
 
 const DEFAULT_CLIENT_ID = '1052874239658692668';
+
+type DiscordConfig = OAuthProviderOptions & {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  clientId?: string;
+};
 
 export class DiscordAuthenticator {
   public static id = AuthMethodTypeStringMap.Discord;

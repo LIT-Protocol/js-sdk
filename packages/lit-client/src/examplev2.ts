@@ -1,6 +1,6 @@
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
-import { AuthConfig } from 'packages/auth/src/lib/auth-manager';
+import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
 import { getLitClient } from './examples/getLitClient';
 import { myEthersSigner } from './examples/myEthersSigner';
 

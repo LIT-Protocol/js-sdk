@@ -4,7 +4,7 @@ import {
   HexPrefixedSchema,
   LitResourceAbilityRequestSchema,
 } from '@lit-protocol/schemas';
-import { z, ZodTypeAny } from 'zod';
+import { z } from 'zod';
 
 // =========== Default values ===========
 export const DEFAULT_EXPIRATION = new Date(
@@ -20,28 +20,6 @@ export const BaseAuthenticationSchema = z.object({
   // domain: z.string().optional(),
 });
 
-// 🔑 What you say you can do
-export const BaseAuthorisationSchema = z.object({
-  resources: z.array(LitResourceAbilityRequestSchema),
-  capabilityAuthSigs: z.array(AuthSigSchema).optional(),
-});
-
-// ⏳ When you say you can do it
-export const BaseSessionControlSchema = z
-  .object({
-    expiration: z.string().default(DEFAULT_EXPIRATION),
-  })
-  .default({})
-  .or(z.undefined());
-
-// 📝 What you say about yourself
-export const BaseMetadataSchema = z
-  .object({
-    statement: z.string().default(''),
-  })
-  .default({})
-  .or(z.undefined());
-
 export const AuthConfigSchema = z.object({
   capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
   expiration: ExpirationSchema.optional().default(
@@ -51,42 +29,3 @@ export const AuthConfigSchema = z.object({
   domain: z.string().optional().default(''),
   resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
 });
-
-// =========== BaseAuthContextType schemas ===========
-
-/**
- * Any auth context type must implement this interface.
- */
-export interface BaseAuthContextType<
-  T extends z.infer<typeof BaseAuthenticationSchema>,
-  M extends z.infer<typeof BaseAuthorisationSchema>,
-  S extends z.infer<typeof BaseSessionControlSchema>,
-  D extends z.infer<typeof BaseMetadataSchema>
-> {
-  authentication: T;
-  authorisation: M;
-  sessionControl: S;
-  metadata: D;
-}
-
-/**
- * Creates a Zod schema for the BaseAuthContextType structure.
- */
-export const createBaseAuthContextTypeSchema = <
-  T_Schema extends ZodTypeAny,
-  M_Schema extends ZodTypeAny,
-  S_Schema extends ZodTypeAny,
-  D_Schema extends ZodTypeAny
->(
-  authenticationSchema: T_Schema,
-  authorisationSchema: M_Schema,
-  sessionControlSchema: S_Schema,
-  metadataSchema: D_Schema
-) => {
-  return z.object({
-    authentication: authenticationSchema,
-    authorisation: authorisationSchema,
-    sessionControl: sessionControlSchema,
-    metadata: metadataSchema,
-  });
-};

@@ -2,11 +2,16 @@ import { ethers } from 'ethers';
 import * as jose from 'jose';
 
 import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
-import { AuthMethod } from '@lit-protocol/types';
+import { AuthMethod, OAuthProviderOptions } from '@lit-protocol/types';
 
-import { GoogleConfig } from '../auth-manager';
 import { AuthMethodTypeStringMap } from '../types';
 import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
+
+type GoogleConfig = OAuthProviderOptions & {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+};
 
 export class GoogleAuthenticator {
   public static id = AuthMethodTypeStringMap.Google;

@@ -1,5 +1,3 @@
-import { ethers } from 'ethers';
-
 // Define the structure of the JS params the Lit Action expects
 interface GitHubJsParams {
   customAuthMethod: {

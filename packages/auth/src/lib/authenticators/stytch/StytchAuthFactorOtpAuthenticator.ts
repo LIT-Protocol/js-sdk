@@ -6,11 +6,12 @@ import {
 } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  StytchOtpAuthenticateOptions,
-  StytchToken,
+  StytchToken
 } from '@lit-protocol/types';
 
-import { StytchAuthFactorOtpConfig } from '../../auth-manager';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
+import { AuthMethodTypeStringMap } from '../../types';
 import {
   FactorParser,
   emailOtpAuthFactorParser,
@@ -18,7 +19,12 @@ import {
   totpAuthFactorParser,
   whatsAppOtpAuthFactorParser,
 } from './parsers';
-import { AuthMethodTypeStringMap } from '../../types';
+
+export type StytchAuthFactorOtpConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  accessToken: string;
+  factor: FactorParser;
+};
 
 /**
  * @deprecated - we need to break this out into a separate authenticator as they are different auth method type

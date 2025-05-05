@@ -1,8 +1,9 @@
 import { GitHubCustomAuthenticator } from 'packages/auth/src/lib/custom/GitHubCustomAuthenticator';
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
-import { AuthConfig } from 'packages/auth/src/lib/auth-manager';
+import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
 import { getLitClient } from './getLitClient';
+import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContexts/BaseAuthContextType';
 
 (async () => {
   // 1. get auth manager providing your own storage solution
@@ -16,7 +17,7 @@ import { getLitClient } from './getLitClient';
 
   // 2. prepare your own custom auth config
   const myAuthConfig: AuthConfig = {
-    expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // 15 miniutes
+    expiration: DEFAULT_EXPIRATION,
     statement: 'test',
     domain: 'example.com',
     capabilityAuthSigs: [],

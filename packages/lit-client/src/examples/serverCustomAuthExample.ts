@@ -1,8 +1,9 @@
 import { ServerCustomAuthenticator } from 'packages/auth/src/lib/custom/ServerCustomAuthenticator';
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
-import { AuthConfig } from 'packages/auth/src/lib/auth-manager';
+import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
 import { getLitClient } from './getLitClient';
+import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContexts/BaseAuthContextType';
 
 /**
  * Server Custom Auth Example
@@ -26,7 +27,7 @@ import { getLitClient } from './getLitClient';
 
     // 2. Prepare auth config for SIWE message and session
     const myAuthConfig: AuthConfig = {
-      expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // 15 minutes
+      expiration: DEFAULT_EXPIRATION,
       statement: 'Sign in with your server account',
       domain: 'example.com',
       capabilityAuthSigs: [],
@@ -62,9 +63,9 @@ import { getLitClient } from './getLitClient';
       const serverAuthContext = await authManager.getCustomAuthContext({
         authenticator: ServerCustomAuthenticator, // Pass the class
         settings: serverAuthSettings, // Pass constructor settings
-        config: serverAuthConfig,     // Pass execution config (credentials etc.)
-        authConfig: myAuthConfig,     // Pass SIWE/session config
-        litClient,                  // Pass Lit Client dependencies
+        config: serverAuthConfig, // Pass execution config (credentials etc.)
+        authConfig: myAuthConfig, // Pass SIWE/session config
+        litClient, // Pass Lit Client dependencies
       });
 
       console.log(

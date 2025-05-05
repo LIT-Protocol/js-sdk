@@ -7,10 +7,20 @@ import {
   StytchToken,
 } from '@lit-protocol/types';
 
-import { StytchOtpConfig } from '../../auth-manager';
 import { AuthMethodTypeStringMap } from '../../types';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
 
 const DEFAULT_PROVIDER = 'https://stytch.com/session';
+
+type StytchOtpConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  appId: string;
+  accessToken: string;
+  userId?: string;
+  provider: string | 'https://stytch.com/session';
+};
+
 export class StytchOtpAuthenticator {
   public static id = AuthMethodTypeStringMap.StytchOtp;
 

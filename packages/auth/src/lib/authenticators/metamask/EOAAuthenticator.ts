@@ -13,19 +13,20 @@ import {
   AuthMethod,
   AuthSig,
   EthWalletAuthenticateOptions,
-  EthWalletProviderOptions,
 } from '@lit-protocol/types';
 
-import { checkAndSignEVMAuthMessage } from './eth';
-import { EoaConfig } from '../../auth-manager';
 import { AuthMethodTypeStringMap } from '../../types';
+import { checkAndSignEVMAuthMessage } from './eth';
+import { z } from 'zod';
+import { HexPrefixedSchema, SignerSchema } from '@lit-protocol/schemas';
 
-// export type EoaPkpConfig = BasePkpAuthContextAdapterParams & {
-//   authenticator: typeof EOAAuthenticator; // Use the class as discriminant
-//   config: BaseAuthenticateConfig & {
-//     signer: z.infer<typeof SignerSchema>;
-//   };
-// };
+type EoaConfig = {
+  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+  signer: z.infer<typeof SignerSchema>;
+  domain?: string;
+  origin?: string;
+  // nonce: string;
+};
 
 interface DomainAndOrigin {
   domain?: string;
