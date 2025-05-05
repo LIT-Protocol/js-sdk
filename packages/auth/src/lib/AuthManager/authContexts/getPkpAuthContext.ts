@@ -14,6 +14,7 @@ import {
   AuthConfigSchema,
   BaseAuthenticationSchema,
 } from './BaseAuthContextType';
+import { LitAuthData, LitAuthDataSchema } from '../../types';
 
 const PkpAuthenticationSchema = BaseAuthenticationSchema.extend({
   authMethods: z.array(AuthMethodSchema),
@@ -52,6 +53,7 @@ export const GetPkpAuthContextSchema = z.object({
   deps: z.object({
     connection: ConnectionSchema,
     nodeSignSessionKey: NodeSignSessionKeySchema,
+    authData: LitAuthDataSchema,
   }),
 });
 
@@ -61,6 +63,7 @@ interface PreparePkpAuthRequestBodyParams {
 
   // dependencies from litNodeClient(must be generated internally, not provided by the user)
   deps: {
+    authData: LitAuthData;
     nodeUrls: string[];
     nodeSet: NodeSet[];
     nonce: string;
@@ -77,11 +80,8 @@ const preparePkpAuthRequestBody = async (
   const _authentication = PkpAuthenticationSchema.parse(params.authentication);
   const _authConfig = AuthConfigSchema.parse(params.authConfig);
 
-  // -- create sessionKeyPair
-  const localSessionKeyPair = generateSessionKeyPair();
-
   const _sessionKeyUri = SessionKeyUriSchema.parse(
-    localSessionKeyPair.publicKey
+    params.deps.authData.sessionKey.keyPair.publicKey
   );
 
   // Auth Material (Siwe Message)
@@ -123,6 +123,7 @@ export const getPkpAuthContext = async (
     authentication: _params.authentication,
     authConfig: _params.authConfig,
     deps: {
+      authData: _params.deps.authData,
       nodeUrls: _nodeInfo.urls,
       nodeSet: _nodeInfo.nodeSet,
       nonce: _params.deps.connection.nonce,

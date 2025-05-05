@@ -63,18 +63,7 @@ export const LitAuthDataSchema = z.object({
     keyPair: SessionKeyPairSchema,
     expiresAt: ExpirationSchema,
   }),
-  // Use z.enum with the strongly-typed keys array
   authMethodType: z.enum(authMethodTypeKeys),
 });
 
 export type LitAuthData = z.infer<typeof LitAuthDataSchema>;
-
-// export interface LitAuthData {
-//   sessionKey: {
-//     keyPair: z.infer<typeof SessionKeyPairSchema>;
-//     expiresAt: z.infer<typeof ExpirationSchema>;
-//   };
-
-//   // result of authenticator
-//   authMethodType: keyof typeof AUTH_METHOD_TYPE;
-// }

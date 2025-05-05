@@ -46,7 +46,7 @@ export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
 
   const pkpAddress = ethers.utils.computeAddress(params.config.pkpPublicKey);
 
-  // {
+  // @example   {
   //   sessionKey: {
   //     keyPair: {
   //       publicKey: "bf8001bfdead23402d867d1acd965b45b405676a966db4237af11ba5eb85d7ce",
@@ -93,6 +93,7 @@ export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
       statement: params.authConfig.statement,
     },
     deps: {
+      authData,
       connection: {
         nonce: litClientConfig.nonce,
         currentEpoch: litClientConfig.currentEpoch,
