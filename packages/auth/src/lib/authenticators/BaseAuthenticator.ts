@@ -24,7 +24,6 @@ import { validateMintRequestBody } from './validators';
 import { HexPrefixedSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 
-
 export interface BaseAuthenticateConfig {
   pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
 }

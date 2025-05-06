@@ -14,12 +14,12 @@ import {
   AuthConfigSchema,
   BaseAuthenticationSchema,
 } from './BaseAuthContextType';
+import { LitAuthDataSchema } from '../../types';
 
 // Define specific Authentication schema for EOA
 const EoaAuthenticationSchema = BaseAuthenticationSchema.extend({
   signer: SignerSchema,
   signerAddress: HexPrefixedSchema,
-  sessionKeyPair: SessionKeyPairSchema,
 });
 
 export const GetEoaAuthContextSchema = z.object({
@@ -27,6 +27,7 @@ export const GetEoaAuthContextSchema = z.object({
   authConfig: AuthConfigSchema,
   deps: z.object({
     nonce: z.string(),
+    authData: LitAuthDataSchema,
   }),
 });
 
@@ -35,13 +36,14 @@ export const getEoaAuthContext = async (
 ) => {
   // Validate the input parameters against the schema
   const _params = GetEoaAuthContextSchema.parse(params);
+  const _sessionKeyPair = _params.deps.authData.sessionKey.keyPair;
 
   // Prepare the auth context object to be returned
   return {
     pkpPublicKey: _params.authentication.pkpPublicKey,
     chain: 'ethereum',
     resourceAbilityRequests: _params.authConfig.resources,
-    sessionKeyPair: _params.authentication.sessionKeyPair,
+    sessionKeyPair: _sessionKeyPair,
     authNeededCallback: async ({
       // uri,
       expiration,
@@ -59,9 +61,7 @@ export const getEoaAuthContext = async (
       //   throw new Error('uri is required');
       // }
 
-      const uri = SessionKeyUriSchema.parse(
-        _params.authentication.sessionKeyPair.publicKey
-      );
+      const uri = SessionKeyUriSchema.parse(_sessionKeyPair.publicKey);
 
       const toSign = await createSiweMessageWithResources({
         uri: uri,

@@ -1,8 +1,8 @@
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
-import { getLitClient } from './examples/getLitClient';
-import { myEthersSigner } from './examples/myEthersSigner';
+import { getLitClient } from './getLitClient';
+import { myEthersSigner } from './myEthersSigner';
 
 async function createMyLitService() {
   // --- end of litNodeClient dependencies we want to remove soon

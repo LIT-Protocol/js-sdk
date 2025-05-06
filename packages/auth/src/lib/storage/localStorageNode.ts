@@ -39,20 +39,20 @@ interface LocalStorageNodeConfig {
  * @param {object} params - The parameters required to build the lookup key.
  * @param {string} params.appName - The name of the application.
  * @param {string} params.networkName - The name of the network.
- * @param {string} params.pkpAddress - The LIT PKP address.
+ * @param {string} params.address - The LIT PKP address.
  * @returns {string} The generated lookup key for localStorage.
  * @private
  */
 function buildLookupKey({
   appName,
   networkName,
-  pkpAddress,
+  address,
 }: {
   appName: string;
   networkName: string;
-  pkpAddress: string;
+  address: string;
 }): string {
-  return `${LOCALSTORAGE_LIT_AUTH_PREFIX}:${appName}:${networkName}:${pkpAddress}`;
+  return `${LOCALSTORAGE_LIT_AUTH_PREFIX}:${appName}:${networkName}:${address}`;
 }
 
 /**
@@ -76,16 +76,16 @@ export function localStorageNode({
     /**
      * Writes authentication data to the Node.js localStorage.
      * @param {object} params - Parameters for writing data.
-     * @param {string} params.pkpAddress - The PKP address to associate the data with.
+     * @param {string} params.address - The PKP address to associate the data with.
      * @param {LitAuthData} params.authData - The authentication data to store.
      * @returns {Promise<void>}
      */
-    async write({ pkpAddress, authData }): Promise<void> {
+    async write({ address, authData }): Promise<void> {
       localStorage.setItem(
         buildLookupKey({
           appName,
           networkName,
-          pkpAddress,
+          address,
         }),
         JSON.stringify(authData)
       );
@@ -94,15 +94,15 @@ export function localStorageNode({
     /**
      * Reads authentication data from the Node.js localStorage.
      * @param {object} params - Parameters for reading data.
-     * @param {string} params.pkpAddress - The PKP address whose data is to be read.
+     * @param {string} params.address - The PKP address whose data is to be read.
      * @returns {Promise<LitAuthData | null>} The stored authentication data, or null if not found.
      */
-    async read({ pkpAddress }): Promise<LitAuthData | null> {
+    async read({ address }): Promise<LitAuthData | null> {
       const value = localStorage.getItem(
         buildLookupKey({
           appName,
           networkName,
-          pkpAddress,
+          address,
         })
       );
 
@@ -114,12 +114,12 @@ export function localStorageNode({
           // Ensure robust parsing
           return JSON.parse(value) as LitAuthData;
         } catch (error) {
-          console.error("Failed to parse stored auth data:", error);
+          console.error('Failed to parse stored auth data:', error);
           // Optionally clear the corrupted item
-          // localStorage.removeItem(buildLookupKey({ appName, networkName, pkpAddress }));
+          // localStorage.removeItem(buildLookupKey({ appName, networkName, address }));
           return null;
         }
       }
     },
   };
-} 
+}

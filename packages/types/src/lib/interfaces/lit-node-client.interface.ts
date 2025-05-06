@@ -1,4 +1,13 @@
-import { AuthCallback, AuthMethod, AuthSig, ExecuteJsResponse, JsonExecutionSdkParams, JsonPkpSignSdkParams, SessionSigsMap, SigResponse } from '@lit-protocol/types';
+import {
+  AuthCallback,
+  AuthMethod,
+  AuthSig,
+  ExecuteJsResponse,
+  JsonExecutionSdkParams,
+  JsonPkpSignSdkParams,
+  SessionSigsMap,
+  SigResponse,
+} from '@lit-protocol/types';
 
 // import { DecryptRequest, DecryptResponse } from './decrypt';
 // import { EncryptResponse, EncryptSdkParams } from './encrypt';
@@ -29,4 +38,4 @@ export interface ILitNodeClient {
   // Other potential methods to review/remove based on refactoring goals
   // getSessionSigs: (params: any) => Promise<SessionSigsMap>; // Define specific types
   // signSessionKey: (params: SignSessionKeyProp) => Promise<SignSessionKeyResponse>;
-} 
+}

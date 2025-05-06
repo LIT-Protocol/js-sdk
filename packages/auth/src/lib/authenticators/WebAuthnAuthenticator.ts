@@ -79,7 +79,7 @@ export class WebAuthnAuthenticator {
     };
 
     // Get auth method id
-    const authMethodId = await WebAuthnAuthenticator.getAuthMethodId(
+    const authMethodId = await WebAuthnAuthenticator.authMethodId(
       authMethod,
       _rpName
     );
@@ -179,11 +179,11 @@ export class WebAuthnAuthenticator {
    *
    * @returns {Promise<string>} - Auth method id
    */
-  // public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-  //   return WebAuthnAuthenticator.authMethodId(authMethod, this.rpName);
-  // }
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    return WebAuthnAuthenticator.authMethodId(authMethod, this.rpName);
+  }
 
-  public static async getAuthMethodId(
+  public static async authMethodId(
     authMethod: AuthMethod,
     rpName?: string
   ): Promise<string> {

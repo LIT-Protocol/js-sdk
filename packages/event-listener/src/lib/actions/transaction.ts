@@ -138,7 +138,7 @@ export class TransactionAction extends Action {
           sigName: 'signedTransaction',
         },
       });
-      if (!litActionResponse.success) {
+      if (!litActionResponse!.success) {
         throw new AutomationError(
           {
             info: {
@@ -151,14 +151,14 @@ export class TransactionAction extends Action {
                 'contractABI' in params ? params.contractABI : undefined,
               method: 'method' in params ? params.method : undefined,
               params: 'params' in params ? params.params : undefined,
-              logs: litActionResponse.logs,
+              logs: litActionResponse!.logs,
             },
           },
           `Failed to sign transaction`
         );
       }
 
-      const signature = litActionResponse.response as string;
+      const signature = litActionResponse!.response as string;
       const jsonSignature = JSON.parse(signature);
       jsonSignature.r = '0x' + jsonSignature.r.substring(2);
       jsonSignature.s = '0x' + jsonSignature.s;

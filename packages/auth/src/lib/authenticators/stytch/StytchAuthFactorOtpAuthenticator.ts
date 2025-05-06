@@ -4,10 +4,7 @@ import {
   InvalidArgumentException,
   WrongParamFormat,
 } from '@lit-protocol/constants';
-import {
-  AuthMethod,
-  StytchToken
-} from '@lit-protocol/types';
+import { AuthMethod, StytchToken } from '@lit-protocol/types';
 
 import { HexPrefixedSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';

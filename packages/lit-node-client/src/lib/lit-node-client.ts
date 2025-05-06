@@ -60,6 +60,7 @@ import {
   DecryptRequestSchema,
   EncryptRequestSchema,
   JsonExecutionSdkParamsBaseSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema,
   NodeSignedAuthSig,
 } from '@lit-protocol/schemas';
 import {
@@ -110,7 +111,6 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 import { AuthMethod } from '@lit-protocol/types';
-import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/auth';
 import { assembleMostCommonResponse } from './helpers/assemble-most-common-response';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';

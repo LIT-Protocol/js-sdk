@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { authenticators } from '@lit-protocol/auth';
 import { LitActionResource } from '@lit-protocol/auth-helpers';
 import { LIT_ABILITY } from '@lit-protocol/constants';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { ILitNodeClient } from '@lit-protocol/types';
 
 const { EOAAuthenticator } = authenticators;
 
@@ -18,7 +18,7 @@ export const signWithLitActionCode = `(async () =>  {
           })();`;
 
 interface ExecuteLitAction {
-  litNodeClient: LitNodeClient;
+  litNodeClient: ILitNodeClient;
   capacityTokenId?: string;
   pkpEthAddress: string;
   pkpPublicKey: string;
@@ -52,6 +52,8 @@ export async function executeLitAction({
       authMethods: [
         await EOAAuthenticator.authenticate({
           signer: authSigner,
+
+          // @ts-expect-error - litNodeClient is not typed
           litNodeClient: litNodeClient,
           expiration,
         }),

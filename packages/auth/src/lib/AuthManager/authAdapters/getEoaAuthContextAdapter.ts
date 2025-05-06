@@ -47,7 +47,6 @@ export const getEoaAuthContextAdapter = async (
       pkpPublicKey: params.config.pkpPublicKey,
       signer: params.config.signer,
       signerAddress: await params.config.signer.getAddress(),
-      sessionKeyPair: authData.sessionKey.keyPair,
     },
     authConfig: {
       domain: params.authConfig.domain,
@@ -57,6 +56,7 @@ export const getEoaAuthContextAdapter = async (
       statement: params.authConfig.statement,
     },
     deps: {
+      authData: authData,
       nonce: litClientConfig.nonce,
     },
   });

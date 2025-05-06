@@ -8,7 +8,7 @@ import type { LitAuthStorageProvider } from './lib/storage/types';
 import type { LitAuthData } from './lib/types';
 
 // -- exports
-export { JsonSignSessionKeyRequestForPkpReturnSchema } from './lib/AuthManager/authContexts/getPkpAuthContext';
+export { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schemas';
 /**
  * Type definition for a storage provider compatible with the Lit Auth client.
  * Storage providers are used to cache authentication data.

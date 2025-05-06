@@ -89,6 +89,7 @@ export class PKPWalletConnect {
       ...(this.debug && { logger: 'debug' }),
     };
 
+    // @ts-expect-error - Core is not typed
     const core = new Core(coreOpts);
 
     this.client = await Web3Wallet.init({

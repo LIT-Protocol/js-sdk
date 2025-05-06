@@ -1,6 +1,9 @@
 import { ethers } from 'ethers';
 
-import { WrongParamFormat, InvalidArgumentException } from '@lit-protocol/constants';
+import {
+  WrongParamFormat,
+  InvalidArgumentException,
+} from '@lit-protocol/constants';
 import { StytchToken } from '@lit-protocol/types';
 
 import type {

@@ -1,5 +1,6 @@
 export * from './lib/encryption';
 export * from './lib/models';
 export * from './lib/schemas';
+export * from './lib/auth/auth-schemas';
 export * from './lib/validation';
 export * from './lib/transformers';

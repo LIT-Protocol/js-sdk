@@ -1,5 +1,4 @@
 import { generateSessionKeyPair } from '@lit-protocol/crypto';
-import type { LitClientType } from '@lit-protocol/lit-client';
 import { ExpirationSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import type { LitAuthStorageProvider } from '../storage/types';
@@ -28,6 +27,9 @@ export interface BaseAuthContext<T> {
   // authenticator: LitAuthAuthenticator;
   authConfig: z.infer<typeof AuthConfigSchema>;
   config: T;
+
+  // @ts-expect-error - LitClientType is not defined in the package. We need to define this
+  // once the LitClienType is ready
   litClient: LitClientType;
 }
 

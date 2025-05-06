@@ -101,7 +101,8 @@ export class ServerCustomAuthenticator {
   // This method now just prepares the jsParams with credentials for the Lit Action.
   async authenticate(
     config: ServerAuthConfig
-  ): Promise<Record<string, any> | null> { // Returns jsParams
+  ): Promise<Record<string, any> | null> {
+    // Returns jsParams
     try {
       // Prepare jsParams with the credentials and API URL
       const jsParams: ServerAuthJsParams = {

@@ -420,7 +420,7 @@ export class LitCore {
   };
 
   /**
-   * @deprecated 
+   * @deprecated
    * Connect to the LIT nodes
    *
    * @returns { Promise } A promise that resolves when the nodes are connected.
@@ -647,9 +647,11 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not handshake with nodes after timeout of ${this.config.connectTimeout
-            }ms. Could only connect to ${Object.keys(serverKeys).length} of ${this.config.bootstrapUrls.length
-            } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          const msg = `Error: Could not handshake with nodes after timeout of ${
+            this.config.connectTimeout
+          }ms. Could only connect to ${Object.keys(serverKeys).length} of ${
+            this.config.bootstrapUrls.length
+          } nodes. Please check your network connection and try again. Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           reject(new InitError({ info: { requestId } }, msg));
         }, this.config.connectTimeout);
@@ -956,8 +958,8 @@ export class LitCore {
       this._epochCache.currentNumber &&
       this._epochCache.startTime &&
       Math.floor(Date.now() / 1000) <
-      this._epochCache.startTime +
-      Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
+        this._epochCache.startTime +
+          Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
       this._epochCache.currentNumber >= EPOCH_READY_FOR_LOCAL_DEV
     ) {
       return this._epochCache.currentNumber - 1;
@@ -1023,7 +1025,7 @@ export class LitCore {
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    SendNodeCommand): Promise<any> => {
+  SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epoch: this.currentEpochNumber };
 
@@ -1055,7 +1057,7 @@ export class LitCore {
   };
 
   /**
-   * module: LitClient takes in the realm context/config. 
+   * module: LitClient takes in the realm context/config.
    * Get and gather node promises
    *
    * @param { string[] } nodeUrls URLs of nodes to get promises for

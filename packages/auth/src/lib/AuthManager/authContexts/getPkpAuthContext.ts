@@ -1,37 +1,21 @@
 import { createPKPSiweMessage } from '@lit-protocol/auth-helpers';
 import {
   AuthMethodSchema,
-  HexPrefixedSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema,
   NodeInfoSchema,
-  NodeSetSchema,
   NodeUrlsSchema,
   SessionKeyUriSchema,
 } from '@lit-protocol/schemas';
 import { NodeSet } from '@lit-protocol/types';
 import { z } from 'zod';
-import { generateSessionKeyPair } from '../utils/generateSessionKeyPair';
+import { LitAuthData, LitAuthDataSchema } from '../../types';
 import {
   AuthConfigSchema,
   BaseAuthenticationSchema,
 } from './BaseAuthContextType';
-import { LitAuthData, LitAuthDataSchema } from '../../types';
 
 const PkpAuthenticationSchema = BaseAuthenticationSchema.extend({
   authMethods: z.array(AuthMethodSchema),
-});
-
-/**
- * Return Object Schema
- */
-export const JsonSignSessionKeyRequestForPkpReturnSchema = z.object({
-  nodeSet: z.array(NodeSetSchema),
-  sessionKey: SessionKeyUriSchema,
-  authMethods: z.array(AuthMethodSchema),
-  pkpPublicKey: HexPrefixedSchema,
-  siweMessage: z.string(),
-  curveType: z.literal('BLS'),
-  signingScheme: z.literal('BLS'),
-  epoch: z.number(),
 });
 
 const ConnectionSchema = z.object({
