@@ -53,6 +53,11 @@ import {
   providerTest,
   SendNodeCommand,
 } from './types';
+import {
+  createRefreshedValue,
+  RefreshedValue,
+} from '../../state-manager/createRefreshedValue';
+import { fetchBlockchainData } from '../../state-manager/fetchBlockchainData';
 
 // ==================== CONSTANTS ====================
 const MINIMUM_THRESHOLD = 3;
@@ -126,7 +131,7 @@ export class LitCore {
   networkPubKey: string | null = null;
   networkPubKeySet: string | null = null;
   hdRootPubkeys: string[] | null = null;
-  latestBlockhash: string | null = null;
+  // latestBlockhash: string | null = null;
   lastBlockHashRetrieved: number | null = null;
   private _stakingContract: ethers.Contract | null = null;
   private _stakingContractListener: null | Listener = null;
@@ -138,6 +143,8 @@ export class LitCore {
   private _blockHashUrl =
     'https://block-indexer.litgateway.com/get_most_recent_valid_block';
 
+  private refreshedBlockhashManager: RefreshedValue<string>; // Declare as a class property
+
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
     if (!(config.litNetwork in LIT_NETWORKS)) {
@@ -148,6 +155,12 @@ export class LitCore {
         validNetworks
       );
     }
+
+    this.refreshedBlockhashManager = createRefreshedValue<string>({
+      fetch: fetchBlockchainData,
+      ttlMs: BLOCKHASH_SYNC_INTERVAL,
+      initialValue: '',
+    });
 
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
@@ -406,17 +419,18 @@ export class LitCore {
    * Return the latest blockhash from the nodes
    * @returns { Promise<string> } latest blockhash
    */
-  getLatestBlockhash = async (): Promise<string> => {
-    await this._syncBlockhash();
-    if (!this.latestBlockhash) {
+  public getLatestBlockhash = async (): Promise<string> => {
+    const blockhash = await this.refreshedBlockhashManager.getOrRefreshAndGet();
+
+    if (!blockhash) {
       throw new InvalidEthBlockhash(
         {},
         `latestBlockhash is not available. Received: "%s"`,
-        this.latestBlockhash
+        blockhash
       );
     }
 
-    return this.latestBlockhash;
+    return blockhash;
   };
 
   /**
@@ -517,7 +531,7 @@ export class LitCore {
       networkPubKeySet: this.networkPubKeySet,
       hdRootPubkeys: this.hdRootPubkeys,
       subnetPubkey: this.subnetPubKey,
-      latestBlockhash: this.latestBlockhash,
+      // latestBlockhash: this.latestBlockhash,
     });
 
     // browser only
@@ -759,104 +773,6 @@ export class LitCore {
     }
     return null;
   };
-
-  /**
-   * Fetches the latest block hash and log any errors that are returned
-   * Nodes will accept any blockhash in the last 30 days but use the latest 10 as challenges for webauthn
-   * Note: last blockhash from providers might not be propagated to the nodes yet, so we need to use a slightly older one
-   * @returns void
-   */
-  private async _syncBlockhash() {
-    const currentTime = Date.now();
-    const blockHashValidityDuration = BLOCKHASH_SYNC_INTERVAL;
-
-    if (
-      this.latestBlockhash &&
-      this.lastBlockHashRetrieved &&
-      currentTime - this.lastBlockHashRetrieved < blockHashValidityDuration
-    ) {
-      this._coreLogger.info('Blockhash is still valid. No need to sync.');
-      return;
-    }
-
-    this._coreLogger.info({
-      msg: 'Syncing state for new blockhash',
-      currentBlockhash: this.latestBlockhash,
-    });
-
-    try {
-      // This fetches from the lit propagation service so nodes will always have it
-      const resp = await fetch(this._blockHashUrl);
-      // If the blockhash retrieval failed, throw an error to trigger fallback in catch block
-      if (!resp.ok) {
-        throw new NetworkError(
-          {
-            responseResult: resp.ok,
-            responseStatus: resp.status,
-          },
-          `Error getting latest blockhash from ${this._blockHashUrl}. Received: "${resp.status}"`
-        );
-      }
-
-      const blockHashBody: EthBlockhashInfo = await resp.json();
-      const { blockhash, timestamp } = blockHashBody;
-
-      // If the blockhash retrieval does not have the required fields, throw an error to trigger fallback in catch block
-      if (!blockhash || !timestamp) {
-        throw new NetworkError(
-          {
-            responseResult: resp.ok,
-            blockHashBody,
-          },
-          `Error getting latest blockhash from block indexer. Received: "${blockHashBody}"`
-        );
-      }
-
-      this.latestBlockhash = blockHashBody.blockhash;
-      this.lastBlockHashRetrieved = parseInt(timestamp) * 1000;
-      this._coreLogger.info({
-        msg: 'Done syncing state new blockhash',
-        latestBlockhash: this.latestBlockhash,
-      });
-    } catch (error: unknown) {
-      const err = error as BlockHashErrorResponse | Error;
-
-      this._coreLogger.error({
-        msg: 'Error while attempting to fetch new latestBlockhash',
-        errorMessage: err instanceof Error ? err.message : err.messages,
-        reason: err instanceof Error ? err : err.reason,
-      });
-
-      this._coreLogger.info(
-        'Attempting to fetch blockhash manually using ethers with fallback RPC URLs...'
-      );
-      const { testResult } =
-        (await this._getProviderWithFallback<ethers.providers.Block>(
-          // We use a previous block to avoid nodes not having received the latest block yet
-          (provider) => provider.getBlock(BLOCKHASH_COUNT_PROVIDER_DELAY)
-        )) || {};
-
-      if (!testResult || !testResult.hash) {
-        this._coreLogger.error(
-          'All fallback RPC URLs failed. Unable to retrieve blockhash.'
-        );
-        return;
-      }
-
-      try {
-        this.latestBlockhash = testResult.hash;
-        this.lastBlockHashRetrieved = testResult.timestamp;
-        this._coreLogger.info({
-          msg: 'Successfully retrieved blockhash manually',
-          latestBlockhash: this.latestBlockhash,
-        });
-      } catch (ethersError) {
-        this._coreLogger.error(
-          'Failed to manually retrieve blockhash using ethers'
-        );
-      }
-    }
-  }
 
   /**
    * LitClient's job

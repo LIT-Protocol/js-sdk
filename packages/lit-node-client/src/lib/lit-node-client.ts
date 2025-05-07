@@ -9,13 +9,11 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import {
   createPKPSiweMessage,
-  createSiweMessage,
   createSiweMessageWithCapacityDelegation,
-  createSiweMessageWithResources,
   decode,
   generateAuthSig,
   generateSessionCapabilityObjectWithWildcards,
-  LitAccessControlConditionResource,
+  LitAccessControlConditionResource
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
@@ -41,7 +39,6 @@ import {
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
 import { getNodePrices } from '@lit-protocol/contracts-sdk';
-import { composeLitUrl, mostCommonValue, LitCore } from './core';
 import {
   combineSignatureShares,
   encrypt,
@@ -49,7 +46,7 @@ import {
   verifyAndDecryptWithSignatureShares,
   verifySignature,
 } from '@lit-protocol/crypto';
-import { Logger, getChildLogger } from '@lit-protocol/logger';
+import { getChildLogger, Logger } from '@lit-protocol/logger';
 import {
   getStorageItem,
   removeStorageItem,
@@ -67,6 +64,7 @@ import {
   AuthCallback,
   AuthCallbackParams,
   type AuthenticationContext,
+  AuthMethod,
   AuthSig,
   BlsResponseData,
   CapacityCreditsReq,
@@ -84,13 +82,11 @@ import {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetWalletSigProps,
-  ILitNodeClient,
   JsonExecutionRequest,
   JsonExecutionSdkParams,
   JsonPKPClaimKeyRequest,
   JsonPkpSignRequest,
   JsonPkpSignSdkParams,
-  JsonSignSessionKeyRequestForPKP,
   JsonSignSessionKeyRequestV1,
   JsonSignSessionKeyRequestV2,
   LitNodeClientConfig,
@@ -108,9 +104,10 @@ import {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   SigResponse,
-  SuccessNodePromises,
+  SuccessNodePromises
 } from '@lit-protocol/types';
-import { AuthMethod } from '@lit-protocol/types';
+import { z } from 'zod';
+import { composeLitUrl, LitCore, mostCommonValue } from './core';
 import { assembleMostCommonResponse } from './helpers/assemble-most-common-response';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
@@ -131,7 +128,6 @@ import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { formatSessionSigs } from './helpers/session-sigs-reader';
 import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
-import { z } from 'zod';
 
 // request handler
 /**
