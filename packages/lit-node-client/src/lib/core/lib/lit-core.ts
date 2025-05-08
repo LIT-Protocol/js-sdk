@@ -27,13 +27,11 @@ import {
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
-import { Logger, getChildLogger } from '@lit-protocol/logger';
+import { getChildLogger, Logger } from '@lit-protocol/logger';
 import {
   AuthSig,
-  BlockHashErrorResponse,
   CustomNetwork,
   EpochInfo,
-  EthBlockhashInfo,
   JsonHandshakeResponse,
   LitNodeClientConfig,
   NodeSet,
@@ -42,39 +40,39 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 
+import {
+  createEvmEventState,
+  EventState,
+} from '../../state-manager/createEvmEventState';
+import {
+  createRefreshedValue,
+  RefreshedValue,
+} from '../../state-manager/createRefreshedValue';
+import { fetchBlockchainData } from '../../state-manager/fetchBlockchainData';
 import { composeLitUrl } from './helpers/endpoint-version';
 import { mostCommonValue } from './helpers/most-common-value';
 import {
   CoreNodeConfig,
   EpochCache,
   HandshakeWithNode,
-  Listener,
   NodeCommandServerKeysResponse,
   providerTest,
   SendNodeCommand,
 } from './types';
-import {
-  createRefreshedValue,
-  RefreshedValue,
-} from '../../state-manager/createRefreshedValue';
-import { fetchBlockchainData } from '../../state-manager/fetchBlockchainData';
+import { calculateEffectiveEpochNumber } from './helpers/calculateEffectiveEpochNumber';
+import { areStringArraysDifferent } from './helpers/areStringArraysDifferent';
 
 // ==================== CONSTANTS ====================
 const MINIMUM_THRESHOLD = 3;
 
-/**
- * This number is primarily used for local testing. When running nodes locally,
- * epoch 1 is the first epoch and does not contain any peers, we need to
- * wait for the DKG process to complete.
- */
-const EPOCH_READY_FOR_LOCAL_DEV = 3;
-
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
-const EPOCH_PROPAGATION_DELAY = 45_000;
+// const EPOCH_PROPAGATION_DELAY = 45_000;
 // This interval is responsible for keeping latest block hash up to date
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
 // When fetching the blockhash from a provider (not lit), we use a 5 minutes old block to ensure the nodes centralized indexer has it
-const BLOCKHASH_COUNT_PROVIDER_DELAY = -30; // 30 blocks ago. Eth block are mined every 12s. 30 blocks is 6 minutes, indexer/nodes must have it by now
+
+// _sycnBlockhash was removed
+// const BLOCKHASH_COUNT_PROVIDER_DELAY = -30; // 30 blocks ago. Eth block are mined every 12s. 30 blocks is 6 minutes, indexer/nodes must have it by now
 
 // Intentionally not including datil-dev here per discussion with Howard
 const NETWORKS_REQUIRING_SEV: string[] = [
@@ -112,6 +110,11 @@ export type LitNodeClientConfigWithDefaults = Required<
     nodeProtocol?: typeof HTTP | typeof HTTPS | null;
   };
 
+// Use the values from the LIT_NETWORK enum/object for the type
+// This assumes LIT_NETWORK is an object like { NagaDev: 'naga-dev', Custom: 'custom' }
+// and it has been exported with `as const` or its values are otherwise string literals.
+export type LitNetworkValue = (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
+
 export class LitCore {
   private readonly _coreLogger: Logger;
   config: LitNodeClientConfigWithDefaults = {
@@ -119,9 +122,9 @@ export class LitCore {
     debug: true,
     connectTimeout: 20000,
     checkNodeAttestation: false,
-    litNetwork: LIT_NETWORK.Custom,
-    minNodeCount: 2, // Default value, should be replaced
-    bootstrapUrls: [], // Default value, should be replaced
+    litNetwork: LIT_NETWORK.Custom, // LIT_NETWORK.Custom is a string literal, e.g., 'custom'
+    minNodeCount: 2,
+    bootstrapUrls: [],
     nodeProtocol: null,
   };
   connectedNodes = new Set<string>();
@@ -134,14 +137,15 @@ export class LitCore {
   // latestBlockhash: string | null = null;
   lastBlockHashRetrieved: number | null = null;
   private _stakingContract: ethers.Contract | null = null;
-  private _stakingContractListener: null | Listener = null;
+  private _stakingContractStateInstance: EventState<STAKING_STATES_VALUES | null> | null =
+    null;
   private _connectingPromise: null | Promise<void> = null;
-  private _epochCache: EpochCache = {
+  public _epochCache: EpochCache = {
     currentNumber: null,
     startTime: null,
   };
-  private _blockHashUrl =
-    'https://block-indexer.litgateway.com/get_most_recent_valid_block';
+  // private _blockHashUrl =
+  //   'https://block-indexer.litgateway.com/get_most_recent_valid_block';
 
   private refreshedBlockhashManager: RefreshedValue<string>; // Declare as a class property
 
@@ -213,69 +217,25 @@ export class LitCore {
   }
 
   /**
+   * Internal mechanism to
    * Retrieves the validator data including staking contract, epoch, minNodeCount, and bootstrapUrls.
-   * @returns An object containing the validator data.
-   * @throws Error if minNodeCount is not provided, is less than or equal to 0, or if bootstrapUrls are not available.
+   * It directly calls LitContracts.getConnectionInfo and handles logging.
+   * Assumes LitContracts.getConnectionInfo performs necessary validations or throws if data is invalid.
    */
   private async _getValidatorData(): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
+    epochCache: EpochCache;
     minNodeCount: number;
     bootstrapUrls: string[];
     nodePrices: { url: string; prices: bigint[] }[];
   }> {
-    const {
-      stakingContract,
-      epochInfo,
-      minNodeCount,
-      bootstrapUrls,
-      nodePrices,
-    } = await LitContracts.getConnectionInfo({
+    return await LitContracts.getConnectionInfo({
       litNetwork: this.config.litNetwork,
       networkContext: this.config.contractContext,
       rpcUrl: this.config.rpcUrl,
       nodeProtocol: this.config.nodeProtocol,
     });
-
-    // Validate minNodeCount
-    if (!minNodeCount) {
-      throw new InvalidArgumentException(
-        {},
-        `minimum validator count is %s, which is invalid. Please check your network connection and try again.`,
-        minNodeCount
-      );
-    }
-
-    // Validate bootstrapUrls
-    if (!Array.isArray(bootstrapUrls) || bootstrapUrls.length <= 0) {
-      throw new InitError(
-        {},
-        `Failed to get bootstrapUrls for network %s`,
-        this.config.litNetwork
-      );
-    }
-
-    this._coreLogger.info({ msg: '[_getValidatorData] epochInfo', epochInfo });
-    this._coreLogger.info({
-      msg: '[_getValidatorData] minNodeCount',
-      minNodeCount,
-    });
-    this._coreLogger.info({
-      msg: '[_getValidatorData] Bootstrap urls',
-      bootstrapUrls,
-    });
-    this._coreLogger.info({
-      msg: '[_getValidatorData] stakingContract',
-      address: stakingContract.address,
-    });
-
-    return {
-      stakingContract,
-      epochInfo,
-      minNodeCount,
-      bootstrapUrls,
-      nodePrices,
-    };
   }
 
   /**
@@ -288,92 +248,6 @@ export class LitCore {
       Math.floor((this.connectedNodes.size * 2) / 3)
     );
   };
-
-  private async _handleStakingContractStateChange(
-    state: STAKING_STATES_VALUES
-  ) {
-    this._coreLogger.info(`New state detected: "${state}"`);
-
-    const validatorData = await this._getValidatorData();
-
-    if (state === STAKING_STATES.Active) {
-      // We always want to track the most recent epoch number on _all_ networks
-
-      this._epochState = await this._fetchCurrentEpochState(
-        validatorData.epochInfo
-      );
-
-      if (CENTRALISATION_BY_NETWORK[this.config.litNetwork] !== 'centralised') {
-        // We don't need to handle node urls changing on centralised networks, since their validator sets are static
-        try {
-          this._coreLogger.info(
-            'State found to be new validator set locked, checking validator set'
-          );
-          const existingNodeUrls: string[] = [...this.config.bootstrapUrls];
-
-          const delta: string[] = validatorData.bootstrapUrls.filter((item) =>
-            existingNodeUrls.includes(item)
-          );
-          // if the sets differ we reconnect.
-          if (delta.length > 1) {
-            // check if the node sets are non-matching and re-connect if they do not.
-            /*
-                TODO: This covers *most* cases where a node may come in or out of the active
-                set which we will need to re attest to the execution environments.
-                However, the sdk currently does not know if there is an active network operation pending.
-                Such that the state when the request was sent will now mutate when the response is sent back.
-                The sdk should be able to understand its current execution environment and wait on an active
-                network request to the previous epoch's node set before changing over.
-              */
-            this._coreLogger.info({
-              msg: 'Active validator sets changed, new validators. Check delta. Starting node connection',
-              delta,
-            });
-          }
-
-          await this.connect();
-        } catch (err: unknown) {
-          // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
-          // But for now, our every-30-second network sync will fix things in at most 30s from now.
-          // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
-          const { message = '' } = err as Error;
-          this._coreLogger.error({
-            msg: 'Error while attempting to reconnect to nodes after epoch transition',
-            message,
-          });
-        }
-      }
-    }
-  }
-
-  /**
-   * Sets up a listener to detect state changes (new epochs) in the staking contract.
-   * When a new epoch is detected, it triggers the `setNewConfig` function to update
-   * the client's configuration based on the new state of the network. This ensures
-   * that the client's configuration is always in sync with the current state of the
-   * staking contract.
-   */
-  private _listenForNewEpoch() {
-    // Check if we've already set up the listener to avoid duplicates
-    if (this._stakingContractListener) {
-      // Already listening, do nothing
-      return;
-    }
-
-    if (this._stakingContract) {
-      this._coreLogger.info({
-        msg: 'listening for state change on staking contract',
-        address: this._stakingContract.address,
-      });
-
-      // Stash a function instance, because its identity must be consistent for '.off()' usage to work later
-      this._stakingContractListener = (state: STAKING_STATES_VALUES) => {
-        // Intentionally not return or await; Listeners are _not async_
-        this._handleStakingContractStateChange(state);
-      };
-      this._stakingContract.on('StateChanged', this._stakingContractListener);
-    }
-  }
 
   /**
    * @depreacted - use NodeInfoSchema instead.
@@ -404,14 +278,7 @@ export class LitCore {
   async disconnect() {
     this.ready = false;
 
-    this._stopListeningForNewEpoch();
-  }
-
-  _stopListeningForNewEpoch() {
-    if (this._stakingContract && this._stakingContractListener) {
-      this._stakingContract.off('StateChanged', this._stakingContractListener);
-      this._stakingContractListener = null;
-    }
+    this._stopStakingListenerWithEvmState();
   }
 
   /**
@@ -434,7 +301,7 @@ export class LitCore {
   };
 
   /**
-   * @deprecated
+   * @deprecated - soon to be replaced by the LitClient
    * Connect to the LIT nodes
    *
    * @returns { Promise } A promise that resolves when the nodes are connected.
@@ -455,7 +322,7 @@ export class LitCore {
 
   private async _connect() {
     // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
-    this._stopListeningForNewEpoch();
+    this._stopStakingListenerWithEvmState();
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
     // this._stopNetworkPolling();
 
@@ -506,10 +373,7 @@ export class LitCore {
     this._stakingContract = validatorData.stakingContract;
     this.config.minNodeCount = validatorData.minNodeCount;
     this.config.bootstrapUrls = validatorData.bootstrapUrls;
-
-    this._epochState = await this._fetchCurrentEpochState(
-      validatorData.epochInfo
-    );
+    this._epochCache = validatorData.epochCache;
 
     // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
     // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
@@ -518,7 +382,7 @@ export class LitCore {
     Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
 
     // this._scheduleNetworkSync();
-    this._listenForNewEpoch();
+    this._setupStakingListenerWithEvmState();
 
     this.ready = true;
 
@@ -828,68 +692,10 @@ export class LitCore {
     });
   };
 
-  private async _fetchCurrentEpochState(
-    epochInfo?: EpochInfo
-  ): Promise<Pick<EpochCache, 'startTime' | 'currentNumber'>> {
-    if (!this._stakingContract) {
-      throw new InitError(
-        {},
-        'Unable to fetch current epoch number; no staking contract configured. Did you forget to `connect()`?'
-      );
-    }
-
-    if (!epochInfo) {
-      this._coreLogger.info(
-        'epochinfo not found. Not a problem, fetching current epoch state from staking contract'
-      );
-      try {
-        const validatorData = await this._getValidatorData();
-        epochInfo = validatorData.epochInfo;
-      } catch (error) {
-        throw new UnknownError(
-          {},
-          '[_fetchCurrentEpochNumber] Error getting current epoch number: %s',
-          error
-        );
-      }
-    }
-
-    // when we transition to the new epoch, we don't store the start time.  but we
-    // set the endTime to the current timestamp + epochLength.
-    // by reversing this and subtracting epochLength from the endTime, we get the start time
-    const startTime = epochInfo.endTime - epochInfo.epochLength;
-
-    return {
-      currentNumber: epochInfo.number,
-      startTime,
-    };
-  }
-
-  // module: value from LitChainClient
-  // !!: don't pass the getter, we want to same value entirely in the flow.
-  get currentEpochNumber(): number | null {
-    // if the epoch started less than 15s ago (aka EPOCH_PROPAGATION_DELAY), use the previous epoch number
-    // this gives the nodes time to sync with the chain and see the new epoch before we try to use it
-    if (
-      this._epochCache.currentNumber &&
-      this._epochCache.startTime &&
-      Math.floor(Date.now() / 1000) <
-        this._epochCache.startTime +
-          Math.floor(EPOCH_PROPAGATION_DELAY / 1000) &&
-      this._epochCache.currentNumber >= EPOCH_READY_FOR_LOCAL_DEV
-    ) {
-      return this._epochCache.currentNumber - 1;
-    }
-    return this._epochCache.currentNumber;
-  }
-
-  private set _epochState({
-    currentNumber,
-    startTime,
-  }: Pick<EpochCache, 'startTime' | 'currentNumber'>) {
-    this._epochCache.currentNumber = currentNumber;
-    this._epochCache.startTime = startTime;
-  }
+  // private set _epochState(epochInfo: EpochInfo) {
+  //   this._epochCache.currentNumber = epochInfo.number;
+  //   this._epochCache.startTime = epochInfo.endTime - epochInfo.epochLength;
+  // }
 
   // ==================== SENDING COMMAND ====================
   private async _sendRequest(
@@ -942,8 +748,10 @@ export class LitCore {
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SendNodeCommand): Promise<any> => {
+    const currentEpochNumber = calculateEffectiveEpochNumber(this._epochCache);
+
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
-    data = { ...data, epoch: this.currentEpochNumber };
+    data = { ...data, epoch: currentEpochNumber };
 
     // If there is a `sessionSigs' object in the params remove before sending the request;
     // this line has been added as a catch all to prevent sending with the request
@@ -1240,6 +1048,103 @@ export class LitCore {
       return ethers.utils.keccak256(
         ethers.utils.toUtf8Bytes(`${appId}:${userId}`)
       );
+    }
+  }
+
+  private _setupStakingListenerWithEvmState() {
+    if (!this._stakingContract) {
+      this._coreLogger.warn(
+        'Staking contract not available to set up listener.'
+      );
+      return;
+    }
+    // If instance exists, ensure it's listening. If called during an active connection, it might have been stopped.
+    if (this._stakingContractStateInstance) {
+      this._stakingContractStateInstance.listen();
+      return;
+    }
+
+    this._coreLogger.info({
+      msg: 'Setting up EVM event state listener for staking contract StateChanged',
+      address: this._stakingContract.address,
+    });
+
+    this._stakingContractStateInstance =
+      createEvmEventState<STAKING_STATES_VALUES | null>({
+        contract: this._stakingContract,
+        eventName: 'StateChanged',
+        initialValue: null,
+        transform: (args: any[]): STAKING_STATES_VALUES => {
+          return args[0] as STAKING_STATES_VALUES;
+        },
+        onChange: async (newState) => {
+          if (newState === null) return;
+
+          this._coreLogger.info(
+            `New state detected via createEvmEventState: "${newState}"`
+          );
+
+          const validatorData = await this._getValidatorData();
+
+          if (newState === STAKING_STATES.Active) {
+            // update the epoch cache
+            this._epochCache = validatorData.epochCache;
+
+            if (
+              CENTRALISATION_BY_NETWORK[this.config.litNetwork] !==
+              'centralised'
+            ) {
+              try {
+                this._coreLogger.info(
+                  'State found to be new validator set locked, checking validator set (via createEvmEventState)'
+                );
+                const existingNodeUrls: string[] = [
+                  ...this.config.bootstrapUrls,
+                ];
+                const newBootstrapUrls: string[] = validatorData.bootstrapUrls;
+
+                const isDifferent = areStringArraysDifferent(
+                  existingNodeUrls,
+                  newBootstrapUrls
+                );
+
+                if (isDifferent) {
+                  this._coreLogger.info({
+                    msg: 'Active validator sets changed. Starting node connection (via createEvmEventState)',
+                    oldUrls: existingNodeUrls,
+                    newUrls: newBootstrapUrls,
+                  });
+                  // Update bootstrapUrls before connecting if they have indeed changed
+                  // this.config.bootstrapUrls = newBootstrapUrls; // This line might cause issues if connect() reads from a stale config or if it modifies it internally before this takes effect.
+                  // It's safer for connect() to re-fetch/receive the latest bootstrapUrls as part of its own logic if it needs to.
+                  // For now, relying on connect() to use the validatorData.bootstrapUrls it gets.
+                  await this.connect();
+                } else {
+                  this._coreLogger.info(
+                    'Active validator sets checked, no changes detected that require reconnect. (via createEvmEventState)'
+                  );
+                }
+              } catch (err: unknown) {
+                const { message = '' } = err as Error;
+                this._coreLogger.error({
+                  msg: 'Error while attempting to reconnect to nodes after epoch transition (via createEvmEventState)',
+                  message,
+                });
+              }
+            }
+          }
+        },
+      });
+
+    this._stakingContractStateInstance.listen();
+  }
+
+  private _stopStakingListenerWithEvmState() {
+    if (this._stakingContractStateInstance) {
+      this._coreLogger.info(
+        'Stopping EVM event state listener for staking contract StateChanged'
+      );
+      this._stakingContractStateInstance.stop();
     }
   }
 }

@@ -9,6 +9,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { logger } from '@lit-protocol/logger';
 
+import { ILitNodeClient } from '@lit-protocol/types';
 import { Action, ACTION_REPOSITORY } from './actions';
 import { MachineContext } from './context/machine-context';
 import {
@@ -49,7 +50,7 @@ export class StateMachine {
   private readonly onError?: (error: unknown, context?: string) => void;
   private context: MachineContext;
 
-  public readonly litNodeClient: LitNodeClient;
+  public readonly litNodeClient: ILitNodeClient;
   private readonly privateKey?: string;
   public litContracts: LitContracts;
 
@@ -74,7 +75,7 @@ export class StateMachine {
       ...ACTION_REPOSITORY,
       ...params.actionRepository,
     };
-    this.litNodeClient = params.litNodeClient;
+    this.litNodeClient = params.litNodeClient as unknown as ILitNodeClient;
     this.litContracts = params.litContracts;
     this.privateKey = params.privateKey;
   }

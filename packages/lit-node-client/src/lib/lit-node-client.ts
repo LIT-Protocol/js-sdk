@@ -13,7 +13,7 @@ import {
   decode,
   generateAuthSig,
   generateSessionCapabilityObjectWithWildcards,
-  LitAccessControlConditionResource
+  LitAccessControlConditionResource,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
@@ -104,7 +104,7 @@ import {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   SigResponse,
-  SuccessNodePromises
+  SuccessNodePromises,
 } from '@lit-protocol/types';
 import { z } from 'zod';
 import { composeLitUrl, LitCore, mostCommonValue } from './core';
@@ -128,6 +128,7 @@ import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { formatSessionSigs } from './helpers/session-sigs-reader';
 import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
+import { calculateEffectiveEpochNumber } from './core/lib/helpers/calculateEffectiveEpochNumber';
 
 // request handler
 /**
@@ -1167,6 +1168,10 @@ export class LitNodeClient extends LitCore {
           );
         }
 
+        const currentEpochNumber = calculateEffectiveEpochNumber(
+          this._epochCache
+        );
+
         const reqBody: EncryptionSignRequest = {
           accessControlConditions: formattedAccessControlConditions,
           evmContractConditions: formattedEVMContractConditions,
@@ -1176,7 +1181,7 @@ export class LitNodeClient extends LitCore {
           dataToEncryptHash,
           chain,
           authSig: authSigToSend,
-          epoch: this.currentEpochNumber!,
+          epoch: currentEpochNumber!,
         };
 
         const urlWithParh = composeLitUrl({
@@ -1393,6 +1398,8 @@ export class LitNodeClient extends LitCore {
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
+    const currentEpochNumber = calculateEffectiveEpochNumber(this._epochCache);
+
     const body: JsonSignSessionKeyRequestV2<LIT_CURVE_TYPE> = {
       nodeSet: this.getNodeSet(nodeUrls),
       sessionKey: sessionKeyUri,
@@ -1400,7 +1407,7 @@ export class LitNodeClient extends LitCore {
       pkpPublicKey: params.pkpPublicKey,
       siweMessage: siweMessage,
       curveType: LIT_CURVE.BLS,
-      epoch: this.currentEpochNumber,
+      epoch: currentEpochNumber,
       signingScheme: LIT_CURVE.BLS,
 
       // -- custom auths

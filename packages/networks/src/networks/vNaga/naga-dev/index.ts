@@ -1,9 +1,7 @@
 import { HTTPS, LIT_CHAINS, LIT_ENDPOINT } from '@lit-protocol/constants';
 import { nagaDev } from '@lit-protocol/contracts';
 
-import { LitNetwork } from '../../../LitNetwork';
-
-import type { LitNetworkConfig } from '../../../types';
+import type { LitNetworkConfig } from '../../../lib/types';
 
 export class NagaDev extends LitNetwork {
   constructor(params: Partial<LitNetworkConfig>) {
@@ -59,3 +57,6 @@ export class NagaDev extends LitNetwork {
     return {};
   }
 }
+
+export { NagaDevOperations, clearNagaDevCache } from './naga-dev.module';
+export { nagaDevConfigData } from './naga-dev.config';

@@ -4,6 +4,7 @@ import { Action } from './action';
 import { executeLitAction } from '../litActions';
 import { StateMachine } from '../state-machine';
 import { ContextOrLiteral, PKPInfo } from '../types';
+import { ILitNodeClient } from '@lit-protocol/types';
 
 interface LitActionActionParams {
   debug?: boolean;
@@ -32,7 +33,8 @@ export class LitActionAction extends Action {
       }
 
       const litActionResponse = await executeLitAction({
-        litNodeClient: params.stateMachine.litNodeClient,
+        litNodeClient: params.stateMachine
+          .litNodeClient as unknown as ILitNodeClient,
         capacityTokenId: params.stateMachine.resolveContextPathOrLiteral({
           contextPath: 'activeCapacityTokenId',
         }) as unknown as string,

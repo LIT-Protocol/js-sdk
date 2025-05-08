@@ -13,7 +13,8 @@ import {
   UnknownError,
 } from '@lit-protocol/constants';
 import { publicKeyCompress } from '@lit-protocol/crypto';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
+// import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { ILitNodeClient } from '@lit-protocol/types';
 import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
   AuthenticationContext,
@@ -38,7 +39,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   compressedPubKey!: string;
   compressedPubKeyBuffer!: Uint8Array;
 
-  litNodeClient!: LitNodeClient;
+  litNodeClient!: ILitNodeClient;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams!: T;
@@ -76,7 +77,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
-    this.litNodeClient = prop.litNodeClient as LitNodeClient;
+    this.litNodeClient = prop.litNodeClient as ILitNodeClient;
   }
 
   /**
@@ -315,7 +316,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     const res = await this.litNodeClient.executeJs(executeJsArgs);
 
-    const sig = res.signatures[sigName];
+    const sig = res?.signatures[sigName];
 
     this._logger.debug({ msg: 'res', res });
     this._logger.debug({ msg: 'res.signatures[sigName]', sig });

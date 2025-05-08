@@ -1,7 +1,6 @@
 import { HTTPS, LIT_CHAINS, LIT_ENDPOINT } from '@lit-protocol/constants';
 import { nagaDev } from '@lit-protocol/contracts';
-
-import { LitNetwork } from '../../../LitNetwork';
+import { LitNetwork } from '../../../LitNetworkOperations';
 
 import type { LitNetworkConfig } from '../../../types';
 

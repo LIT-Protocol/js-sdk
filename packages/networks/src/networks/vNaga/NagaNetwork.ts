@@ -1,4 +1,4 @@
-import { LitNetwork } from '../../LitNetwork';
+import { LitNetwork } from '../../LitNetworkOperations';
 import { LitChainConfig, LitNetworkConfig } from '../../types';
 import {
   HTTP,

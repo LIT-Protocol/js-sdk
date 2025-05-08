@@ -851,6 +851,10 @@ export class LitContracts {
   }): Promise<{
     stakingContract: ethers.Contract;
     epochInfo: EpochInfo;
+    epochCache: {
+      currentNumber: null | number;
+      startTime: null | number;
+    };
     minNodeCount: number;
     bootstrapUrls: string[];
     nodePrices: { url: string; prices: bigint[] }[];
@@ -931,6 +935,11 @@ export class LitContracts {
       nodeProtocol,
     });
 
+    const epochCache = {
+      currentNumber: typedEpochInfo.number,
+      startTime: typedEpochInfo.endTime - typedEpochInfo.epochLength,
+    };
+
     // example of Network to Price Map: {
     //   'http://xxx:7470': 100, <-- lowest price
     //   'http://yyy:7471': 300, <-- highest price
@@ -939,6 +948,7 @@ export class LitContracts {
     return {
       stakingContract,
       epochInfo: typedEpochInfo,
+      epochCache,
       minNodeCount: minNodeCountInt,
       bootstrapUrls: bootstrapUrls,
       nodePrices: priceFeedInfo.networkPrices,

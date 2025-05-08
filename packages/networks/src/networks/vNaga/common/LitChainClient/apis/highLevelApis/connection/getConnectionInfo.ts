@@ -1,7 +1,6 @@
-import { getActiveUnkickedValidatorStructsAndCounts } from '../../../../../common/LitChainClient/apis/rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
-import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../../../common/LitChainClient/schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
 import { NagaContext } from '../../../../../types';
-import { networkContext } from '../../../_config';
+import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
+import { getActiveUnkickedValidatorStructsAndCounts } from '../../rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
 
 /**
  * Interface representing the structure of connection information

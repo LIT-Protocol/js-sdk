@@ -2,7 +2,7 @@ import { ServerCustomAuthenticator } from 'packages/auth/src/lib/custom/ServerCu
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
-import { getLitClient } from './getLitClient';
+import { getLitClient } from '@lit-protocol/lit-client';
 import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContexts/BaseAuthContextType';
 
 /**
