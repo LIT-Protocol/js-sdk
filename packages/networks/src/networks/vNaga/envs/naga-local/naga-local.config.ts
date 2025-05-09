@@ -1,5 +1,5 @@
 import { Hex } from 'viem';
-import * as anvil from '../../../../chains/Anvil';
+import * as chainInfo from '../../../../chains/Anvil';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
 
 /**
@@ -18,25 +18,24 @@ interface NagaLocalDevSpecificConfigs {
   privateKey?: Hex;
 }
 
-export const nagaLocalDevelopNetworkContext: INetworkConfig<
+export const networkConfig: INetworkConfig<
   typeof signatures,
   NagaLocalDevSpecificConfigs
 > = {
   minimumThreshold: MINIMUM_THRESHOLD,
   network: NETWORK,
-  rpcUrl: anvil.RPC_URL,
+  rpcUrl: chainInfo.RPC_URL,
   abiSignatures: signatures,
-  chainConfig: anvil.viemChainConfig,
+  chainConfig: chainInfo.viemChainConfig,
   httpProtocol: PROTOCOL,
   networkSpecificConfigs: {
     realmId: REALM_ID,
-    privateKey: anvil.DEV_PRIVATE_KEY,
+    privateKey: chainInfo.DEV_PRIVATE_KEY,
   },
   endpoints: NAGA_ENDPOINT,
 };
 
-export type NagaLocalDevelopNetworkContext =
-  typeof nagaLocalDevelopNetworkContext;
+export type NagaLocalDevelopNetworkContext = typeof networkConfig;
 
 // network object calls the chain client
 // LitClient could use the network to figure out

@@ -1,5 +1,5 @@
-import { generateValidatorURLs } from '../../../../../shared/utils/transformers';
 import { z } from 'zod';
+import { generateValidatorURLs } from '../../../../../shared/utils/transformers';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import {
   createContractsManager,

@@ -38,10 +38,12 @@ export const createStateManager = ({
       _logger.info(`New state detected via createEvmEventState: "${newState}"`);
 
       // 2. get the current connection info
+      // const validatorData = await
     },
   });
 
   return {
     blockhashManager,
+    eventStateManager,
   };
 };

@@ -1,4 +1,4 @@
-import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/ContractsManager';
+import type { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { createContractsManager } from '../../../../contract-manager/createContractsManager';
 import {
@@ -39,6 +39,8 @@ export async function mintNextAndAddAuthMethods(
 
   const mintCost = await pkpNftContract.read.mintCost();
 
+  console.log('mintCost', mintCost);
+
   const hash = await callWithAdjustedOverrides(
     pkpHelperContract,
     'mintNextAndAddAuthMethods',
@@ -53,8 +55,6 @@ export async function mintNextAndAddAuthMethods(
     ],
     {
       value: mintCost,
-      account: null,
-      chain: null,
     }
   );
 

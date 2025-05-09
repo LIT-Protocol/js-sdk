@@ -1,5 +1,5 @@
 import { nagaDevSignatures } from '@lit-protocol/contracts';
-import * as anvil from '../../../../chains/Anvil';
+import * as chainInfo from '../../../../chains/ChronicleYellowstone';
 import { NAGA_ENDPOINT } from '../../constants/endpoints';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
 
@@ -25,9 +25,9 @@ export const networkConfig: INetworkConfig<
 > = {
   minimumThreshold: MINIMUM_THRESHOLD,
   network: NETWORK,
-  rpcUrl: anvil.RPC_URL,
+  rpcUrl: chainInfo.RPC_URL,
   abiSignatures: nagaDevSignatures,
-  chainConfig: anvil.viemChainConfig,
+  chainConfig: chainInfo.viemChainConfig,
   httpProtocol: PROTOCOL,
   networkSpecificConfigs: {
     realmId: DEFAULT_REALM_ID,

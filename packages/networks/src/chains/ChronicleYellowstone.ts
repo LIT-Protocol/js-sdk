@@ -1,10 +1,10 @@
 import { Chain, http } from 'viem';
-import { createConfig } from 'wagmi';
+import { createConfig } from '@wagmi/core';
 
 export const CHAIN_ID = 175188;
 export const CHAIN_NAME = 'Chronicle Yellowstone';
 export const CHAIN_SYMBOL = 'tstLPX';
-export const RPC_URL = 'https://yellowstone-rpc.litprotocol.com/http';
+export const RPC_URL = 'https://yellowstone-rpc.litprotocol.com/';
 export const EXPLORER_URL = 'https://yellowstone-explorer.litprotocol.com/';
 export const EXPLORER_NAME = 'Yellowstone Explorer'; // Added for viem compatibility
 
@@ -15,9 +15,9 @@ export const viemChainConfig: Readonly<Chain> = Object.freeze({
   id: CHAIN_ID,
   name: CHAIN_NAME,
   nativeCurrency: {
-    name: CHAIN_NAME, // Often the same as chain name or a more specific currency name
+    name: CHAIN_NAME,
     symbol: CHAIN_SYMBOL,
-    decimals: 18, // Standard for many EVM chains
+    decimals: 18,
   },
   rpcUrls: {
     default: {
