@@ -22,6 +22,7 @@ import {
   getNodePrices,
   getPriceFeedInfo,
 } from './highLevelApis/priceFeed/priceFeedApi';
+import { getConnectionInfo } from './highLevelApis/connection/getConnectionInfo';
 
 // ==================== Exports ====================
 // ========== Treeshakable ==========
@@ -74,6 +75,9 @@ export const rawApi = {
       PRODUCT_IDS,
     },
   },
+  connection: {
+    getConnectionInfo,
+  },
 };
 
 export const api = {
@@ -86,5 +90,9 @@ export const api = {
   pricing: {
     getPriceFeedInfo,
     getNodePrices,
+  },
+
+  connection: {
+    getConnectionInfo,
   },
 };

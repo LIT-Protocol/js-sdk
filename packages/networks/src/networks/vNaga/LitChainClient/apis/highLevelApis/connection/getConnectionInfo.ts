@@ -2,6 +2,8 @@ import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-ma
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
 import { getActiveUnkickedValidatorStructsAndCounts } from '../../rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
+import { getPriceFeedInfo, PriceFeedInfo } from '../priceFeed';
+import { NagaDevSpecificConfigs } from '@nagaDev/config';
 
 /**
  * Interface representing the structure of connection information
@@ -14,8 +16,13 @@ interface ConnectionInfo {
     retries: number;
     timeout: number;
   };
+  epochState: {
+    currentNumber: number;
+    startTime: number;
+  };
   minNodeCount: number;
   bootstrapUrls: string[];
+  priceFeedInfo: PriceFeedInfo;
 }
 
 /**
@@ -79,6 +86,23 @@ export async function getConnectionInfo({
       })
     : validatorURLs;
 
+  // The network nodes are known from the `getActiveUnkickedValidatorStructsAndCounts` function, but we also want to sort them by price feed,
+  // which requires calling the price feed contract.
+  const priceFeedInfo = await getPriceFeedInfo(
+    {
+      realmId: networkCtx.networkSpecificConfigs.realmId,
+      networkCtx: networkCtx,
+    },
+    {
+      accountOrWalletClient,
+    }
+  );
+
+  const epochState = {
+    currentNumber: epochInfo.number,
+    startTime: epochInfo.endTime - epochInfo.epochLength,
+  };
+
   return {
     epochInfo: epochInfo as {
       epochLength: number;
@@ -87,8 +111,10 @@ export async function getConnectionInfo({
       retries: number;
       timeout: number;
     },
+    epochState,
     minNodeCount: Number(minNodeCount),
     bootstrapUrls,
+    priceFeedInfo,
   };
 }
 

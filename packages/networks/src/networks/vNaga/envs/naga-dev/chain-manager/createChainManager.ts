@@ -3,6 +3,7 @@ import { PkpIdentifierRaw } from '@vNaga/LitChainClient/apis/rawContractApis/per
 import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../interfaces/NetworkContext';
 import { networkConfig } from '../naga-dev.config';
+// import { networkConfig as localConfig } from '../../naga-local/naga-local.config';
 
 export const createChainManager = (
   accountOrWalletClient: ExpectedAccountOrWalletClient
@@ -38,29 +39,33 @@ export const createChainManager = (
         getPriceFeedInfo: bindContext(api.pricing.getPriceFeedInfo),
         getNodePrices: bindContext(api.pricing.getNodePrices),
       },
+      connection: {
+        getConnectionInfo: (args?: {
+          nodeProtocol?: string | null;
+        }): ReturnType<typeof api.connection.getConnectionInfo> => {
+          return api.connection.getConnectionInfo({
+            networkCtx: _networkConfig,
+            accountOrWalletClient: accountOrWalletClient,
+            nodeProtocol: args?.nodeProtocol,
+          });
+        },
+      },
     },
   };
 };
 
 // @ts-ignore
-if (import.meta.main) {
-  (async () => {
-    const { privateKeyToAccount } = await import('viem/accounts');
+// if (import.meta.main) {
+//   (async () => {
+//     const { privateKeyToAccount } = await import('viem/accounts');
 
-    const viemAccount = privateKeyToAccount(process.env['PRIVATE_KEY'] as any);
+//     const viemAccount = privateKeyToAccount(process.env['PRIVATE_KEY'] as any);
 
-    const chainManager = createChainManager(viemAccount);
+//     const chainManager = createChainManager(viemAccount);
 
-    const result = await chainManager.api.mintPKP({
-      scopes: ['sign-anything'],
-      authMethod: {
-        authMethodType: 1,
-        accessToken: JSON.stringify({
-          accessToken: '0x',
-        }),
-      },
-    });
+//     const connectionInfo =
+//       await chainManager.api.connection.getConnectionInfo();
 
-    console.log(result);
-  })();
-}
+//     console.log(connectionInfo);
+//   })();
+// }
