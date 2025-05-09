@@ -1,1 +1,1 @@
-export { createLitContracts } from './createLitContracts';
+export { createLitContracts } from '../../createLitContracts';

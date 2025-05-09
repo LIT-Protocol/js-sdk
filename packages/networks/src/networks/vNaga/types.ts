@@ -1,5 +1,5 @@
-import { NagaLocalDevelopNetworkContext } from './envs/local-dev/networkContext';
-// import { NagaDevNetworkContext } from "./naga-dev/networkContext";
+// import { NagaLocalDevelopNetworkContext } from './envs/local-dev/local-dev.config';
+// import { NagaDevNetworkConfig } from "./naga-dev/networkContext";
 // import { NagaTestNetworkContext } from "./naga-test/networkContext";
 // import { NagaMainnetNetworkContext } from "./naga-mainnet/networkContext";
 
@@ -14,13 +14,13 @@ import { NagaLocalDevelopNetworkContext } from './envs/local-dev/networkContext'
  *
  * @example
  * ```typescript
- * function example(networkCtx: NagaContext) {
+ * function example(networkCtx: DefaultNetworkConfig) {
  *   networkCtx.sharedMethod();    // ✅ OK - exists in both contexts
  *   networkCtx.devOnlyMethod();   // ❌ Error - only exists in DevNetwork
  * }
  * ```
  */
-export type NagaContext = NagaLocalDevelopNetworkContext;
-// | NagaDevNetworkContext
+// export type NagaContext = NagaLocalDevelopNetworkContext;
+// | NagaDevNetworkConfig
 // | NagaTestNetworkContext
 // | NagaMainnetNetworkContext;

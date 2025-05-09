@@ -1,7 +1,7 @@
+import { generateValidatorURLs } from '../../../../../shared/utils/transformers';
 import { z } from 'zod';
-import { generateValidatorURLs } from '../../../../../../shared/utils/transformers';
-import { NagaContext } from '../../../../../types';
-import { createLitContracts } from '../../utils/createLitContracts';
+import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../createLitContracts';
 
 /**
  * Product IDs used for price feed and node selection
@@ -35,14 +35,14 @@ type GetNodesForRequestRequest = z.infer<typeof getNodesForRequestSchema>;
  */
 export async function getNodesForRequest(
   request: GetNodesForRequestRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ) {
   const { productIds } = getNodesForRequestSchema.parse(request);
 
   const { priceFeed } = createLitContracts(networkCtx);
 
   const nodesForRequest = await priceFeed.read.getNodesForRequest([
-    networkCtx.realmId,
+    networkCtx.networkSpecificConfigs.realmId,
     productIds,
   ]);
 
@@ -50,6 +50,7 @@ export async function getNodesForRequest(
   const minNodeCount = nodesForRequest[1];
   const nodesAndPrices = nodesForRequest[2];
 
+  // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
   const nodesAndPricesWithUrls = nodesAndPrices.map((info) => {
     const { validator } = info;
     const validatorUrl = generateValidatorURLs([validator]);

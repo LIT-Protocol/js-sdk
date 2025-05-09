@@ -1,6 +1,6 @@
 import { decodeEventLog, Log } from 'viem';
-import { NagaContext } from '../../../../types';
-import { createLitContracts } from './createLitContracts';
+import { DefaultNetworkConfig } from '../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../createLitContracts';
 
 export type DecodedLog = {
   eventName: string;
@@ -16,10 +16,10 @@ export type DecodedLog = {
  */
 export const decodeLogs = async (
   logs: Log[],
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<DecodedLog[]> => {
   // Get network context for contract ABIs
-  const networkContext = networkCtx.chainConfig.contractData;
+  const networkContext = networkCtx.abiSignatures;
 
   if (!networkContext) {
     throw new Error(`Network "${networkCtx.network}" not found`);

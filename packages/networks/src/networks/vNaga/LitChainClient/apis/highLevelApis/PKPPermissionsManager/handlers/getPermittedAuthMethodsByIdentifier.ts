@@ -1,6 +1,6 @@
-import { logger } from '../../../../../../../shared/logger';
-import { NagaContext } from '../../../../../../types';
-import { networkContext } from '../../../../_config';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+
 import {
   AuthMethod,
   getPermittedAuthMethods,
@@ -18,7 +18,7 @@ import {
  */
 export async function getPermittedAuthMethodsByIdentifier(
   identifier: PkpIdentifierRaw,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<readonly AuthMethod[]> {
   logger.debug({ identifier });
 

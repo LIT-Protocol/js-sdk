@@ -1,6 +1,5 @@
-import { logger } from '../../../../../../../shared/logger';
-import { NagaContext } from '../../../../../../types';
-import { networkContext } from '../../../../_config';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPermittedAuthMethodScopes } from '../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes';
 import {
   PkpIdentifierRaw,
@@ -24,7 +23,7 @@ export async function getPermittedAuthMethodScopesByIdentifier(
     authMethodId: string;
     scopeId?: number;
   },
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<readonly boolean[]> {
   logger.debug({ params });
 

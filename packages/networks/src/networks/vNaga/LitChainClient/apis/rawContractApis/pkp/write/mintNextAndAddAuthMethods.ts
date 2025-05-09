@@ -1,4 +1,4 @@
-import { NagaContext } from '../../../../../../types';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import {
   MintRequestRaw,
   MintRequestSchema,
@@ -9,7 +9,7 @@ import {
 } from '../../../../schemas/shared/PKPDataSchema';
 import { LitTxRes } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
 
 /**
@@ -28,7 +28,7 @@ import { decodeLogs } from '../../../utils/decodeLogs';
  */
 export async function mintNextAndAddAuthMethods(
   request: MintRequestRaw,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxRes<PKPData>> {
   const validatedRequest = MintRequestSchema.parse(request);
 

@@ -1,7 +1,4 @@
-import {
-  createEvmEventState,
-  EvmEventEmitter
-} from './createEvmEventState';
+import { createEvmEventState, EvmEventEmitter } from './createEvmEventState';
 
 describe('createEvmEventState', () => {
   let mockContract: EvmEventEmitter;

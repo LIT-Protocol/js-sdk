@@ -19,12 +19,12 @@ The Permissions Manager is part of the PKP Auth Service and doesn't require sepa
 
 ```typescript
 import { PKPPermissionsManager } from 'services/lit/LitChainClient/apis/abstract/PKPPermissionsManager';
-import { nagaDevNetworkContext } from 'services/lit/LitNetwork/vNaga/datil-dev/networkContext';
+import { nagaDevNetworkConfig } from 'services/lit/LitNetwork/vNaga/datil-dev/networkContext';
 
 // Create the permissions manager with a PKP identifier
 const manager = new PKPPermissionsManager(
   { tokenId: 'YOUR_TOKEN_ID' }, // Can also use { pubkey: "0x..." } or { address: "0x..." }
-  nagaDevNetworkContext
+  nagaDevNetworkConfig
 );
 ```
 
@@ -133,7 +133,7 @@ await manager.revokeAllPermissions();
 // Static method to get all PKPs associated with an address
 const pkps = await PKPPermissionsManager.getPKPsByAddress(
   '0xYourAddress',
-  nagaDevNetworkContext
+  nagaDevNetworkConfig
 );
 ```
 

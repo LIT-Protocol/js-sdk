@@ -1,9 +1,9 @@
 // import { networkContext } from "../../../_config";
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { NagaContext } from '../../../../../../types';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { logger } from '../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../../createLitContracts';
 
 const isPermittedAddressSchema = z.object({
   tokenId: toBigInt,
@@ -23,7 +23,7 @@ type IsPermittedAddressRequest = z.input<typeof isPermittedAddressSchema>;
  */
 export async function isPermittedAddress(
   request: IsPermittedAddressRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<boolean> {
   const validatedRequest = isPermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });

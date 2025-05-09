@@ -26,7 +26,6 @@
  * ```
  */
 
-import { NagaContext } from '../../../../../types';
 import { PkpIdentifierRaw } from '../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 // Import all handler functions
@@ -46,10 +45,11 @@ import { isPermittedAddressByIdentifier } from './handlers/isPermittedAddressByI
 import { removePermittedActionByIdentifier } from './handlers/removePermittedActionByIdentifier';
 import { removePermittedAddressByIdentifier } from './handlers/removePermittedAddressByIdentifier';
 
-import { logger } from '../../../../../../shared/logger';
+import { logger } from '../../../../../shared/logger';
 import { ScopeString } from '../../../schemas/shared/ScopeSchema';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import { LitTxVoid } from '../../types';
+import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action
@@ -57,7 +57,7 @@ const COMMON_TEST_IPFS_IDS = ['QmPK1s3pNYLi9ERiq3BDxKa4XosgWwFRQUydHUtz4YgpqB'];
 
 export class PKPPermissionsManager {
   private identifier: PkpIdentifierRaw;
-  private networkContext: NagaContext;
+  private networkContext: DefaultNetworkConfig;
 
   /**
    * Creates a new PKP permissions manager instance
@@ -65,7 +65,10 @@ export class PKPPermissionsManager {
    * @param identifier - PKP identifier (tokenId, pubkey, or address)
    * @param networkContext - Network context for contract interactions
    */
-  constructor(identifier: PkpIdentifierRaw, networkContext: NagaContext) {
+  constructor(
+    identifier: PkpIdentifierRaw,
+    networkContext: DefaultNetworkConfig
+  ) {
     this.identifier = identifier;
     this.networkContext = networkContext;
   }
@@ -265,7 +268,10 @@ export class PKPPermissionsManager {
    * @param address - Ethereum address to check
    * @returns Promise resolving to array of PKP information
    */
-  static async getPKPsByAddress(address: string, networkContext: NagaContext) {
+  static async getPKPsByAddress(
+    address: string,
+    networkContext: DefaultNetworkConfig
+  ) {
     return getPKPsByAddress({ ownerAddress: address }, networkContext);
   }
 

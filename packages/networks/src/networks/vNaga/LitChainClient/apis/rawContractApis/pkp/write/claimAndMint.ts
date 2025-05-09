@@ -1,4 +1,4 @@
-import { NagaContext } from '../../../../../../types';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import {
   ClaimAndMintRaw,
   ClaimAndMintSchema,
@@ -9,11 +9,11 @@ import {
 } from '../../../../schemas/shared/PKPDataSchema';
 import { LitTxRes } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
 export async function claimAndMint(
   request: ClaimAndMintRaw,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxRes<PKPData>> {
   const validatedRequest = ClaimAndMintSchema.parse(request);
 
@@ -30,7 +30,7 @@ export async function claimAndMint(
     pkpNftContract,
     'claimAndMint',
     [
-      networkCtx.realmId,
+      networkCtx.networkSpecificConfigs.realmId,
       ECDSA_SECP256K1,
       derivedKeyId,
       signatures,

@@ -1,10 +1,10 @@
 import { getAddress } from 'viem';
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
 import { tokenOfOwnerByIndex } from '../../../rawContractApis/pkp/read/tokenOfOwnerByIndex';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { createLitContracts } from '../../../../createLitContracts';
 
 // Schema for the request
 const getPKPsByAddressSchema = z.object({
@@ -101,7 +101,7 @@ export interface PKPInfo {
 async function fetchSinglePKP(
   ownerAddress: `0x${string}`,
   index: number,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<PKPInfo | null> {
   try {
     // Get the token ID
@@ -152,7 +152,7 @@ async function fetchSinglePKP(
  */
 export async function getPKPsByAddress(
   request: GetPKPsByAddressRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<PKPInfo[]> {
   const { ownerAddress } = getPKPsByAddressSchema.parse(request);
 

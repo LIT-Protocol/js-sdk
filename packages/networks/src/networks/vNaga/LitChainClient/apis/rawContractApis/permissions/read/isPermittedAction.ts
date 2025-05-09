@@ -1,11 +1,11 @@
 // import { networkContext } from "../../../_config";
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { ipfsCidV0ToHex } from '../../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
-import { NagaContext } from '../../../../../../types';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { logger } from '../../../../../../shared/logger';
+import { ipfsCidV0ToHex } from '../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../../createLitContracts';
 
 const isPermittedActionSchema = z
   .object({
@@ -29,7 +29,7 @@ type IsPermittedActionRequest = z.input<typeof isPermittedActionSchema>;
  */
 export async function isPermittedAction(
   request: IsPermittedActionRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<boolean> {
   const validatedRequest = isPermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });

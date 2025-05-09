@@ -1,11 +1,11 @@
 // import { networkContext } from "../../../_config";
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
 
 const removePermittedAddressSchema = z.object({
@@ -28,7 +28,7 @@ type RemovePermittedAddressRequest = z.input<
  */
 export async function removePermittedAddress(
   request: RemovePermittedAddressRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const validatedRequest = removePermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });

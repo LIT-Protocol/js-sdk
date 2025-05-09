@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { NagaContext } from '../../../../../../types';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
@@ -31,7 +31,7 @@ type RemovePermittedAddressByIdentifierRequest = z.infer<
  */
 export async function removePermittedAddressByIdentifier(
   request: RemovePermittedAddressByIdentifierRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const { targetAddress, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(

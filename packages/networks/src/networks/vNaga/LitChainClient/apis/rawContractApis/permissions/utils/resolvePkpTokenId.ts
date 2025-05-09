@@ -4,12 +4,13 @@
  */
 
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { isEthAddress } from '../../../../../../../shared/utils/z-validate';
-import { NagaContext } from '../../../../../../types';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { logger } from '../../../../../../shared/logger';
+
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../../createLitContracts';
 import { pubkeyToTokenId } from './pubkeyToTokenId';
+import { toBigInt } from 'packages/networks/src/networks/shared/utils/z-transformers';
+import { isEthAddress } from 'packages/networks/src/networks/shared/utils/z-validate';
 
 // Input validation schema
 export const PkpIdentifierSchema = z.discriminatedUnion('field', [
@@ -54,7 +55,7 @@ export type PkpIdentifierRaw = ExactlyOne<{
  */
 export async function resolvePkpTokenId(
   identifier: PkpIdentifierRaw,
-  networkCtx?: NagaContext
+  networkCtx?: DefaultNetworkConfig
 ): Promise<bigint> {
   // Check for multiple fields
   const providedFields = Object.keys(identifier);

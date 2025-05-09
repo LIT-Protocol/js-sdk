@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { NagaContext } from '../../../../../../types';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { ScopeStringSchema } from '../../../../schemas/shared/ScopeSchema';
 import {
   PkpIdentifierRaw,
@@ -33,7 +33,7 @@ type AddPermittedAddressByIdentifierRequest = z.infer<
  */
 export async function addPermittedAddressByIdentifier(
   request: AddPermittedAddressByIdentifierRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const { targetAddress, scopes, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(

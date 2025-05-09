@@ -1,14 +1,15 @@
 // import { networkContext } from "../../../_config";
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { ipfsCidV0ToHex } from '../../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
+import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { ipfsCidV0ToHex } from '../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
 
 const removePermittedActionSchema = z
   .object({
@@ -32,7 +33,7 @@ type RemovePermittedActionRequest = z.input<typeof removePermittedActionSchema>;
  */
 export async function removePermittedAction(
   request: RemovePermittedActionRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const validatedRequest = removePermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });

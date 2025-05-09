@@ -91,7 +91,7 @@ interface PriceFeedInfo {
 ```typescript
 interface GetPriceFeedInfoParams {
   realmId?: number;
-  networkCtx: NagaContext;
+  networkCtx: DefaultNetworkConfig;
   productIds?: bigint[];
 }
 ```

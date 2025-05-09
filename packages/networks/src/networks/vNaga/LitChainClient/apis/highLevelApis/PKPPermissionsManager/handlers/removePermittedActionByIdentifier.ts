@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
-import { NagaContext } from '../../../../../../types';
+import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
@@ -32,7 +32,7 @@ type RemovePermittedActionByIdentifierRequest = z.infer<
  */
 export async function removePermittedActionByIdentifier(
   request: RemovePermittedActionByIdentifierRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const { ipfsId, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(

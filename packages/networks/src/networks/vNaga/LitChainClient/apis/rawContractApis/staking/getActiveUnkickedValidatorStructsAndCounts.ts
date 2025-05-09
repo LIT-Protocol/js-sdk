@@ -1,17 +1,17 @@
-import { NagaContext } from '../../../../../types';
+import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../createLitContracts';
 import { GetActiveUnkickedValidatorStructsAndCountsSchema } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
-import { createLitContracts } from '../../utils/createLitContracts';
 
 // const REALM_ID = 1n;
 
 export async function getActiveUnkickedValidatorStructsAndCounts(
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ) {
   const { stakingContract } = createLitContracts(networkCtx);
 
   const res =
     await stakingContract.read.getActiveUnkickedValidatorStructsAndCounts([
-      networkCtx.realmId,
+      networkCtx.networkSpecificConfigs.realmId,
     ]);
 
   const validatedRes =
@@ -20,7 +20,7 @@ export async function getActiveUnkickedValidatorStructsAndCounts(
   const transformedRes = {
     ...validatedRes,
     validatorURLs: validatedRes.validatorURLs.map(
-      (url) => networkCtx.httpProtocol + url
+      (url: string) => networkCtx.httpProtocol + url
     ),
   };
 

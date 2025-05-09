@@ -1,7 +1,7 @@
-import { Hex } from 'viem';
-import { logger } from '../../../../../../shared/logger';
 import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
-import { NagaContext } from '../../../../../types';
+import { logger } from '../../../../../shared/logger';
+import { Hex } from 'viem';
+import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { PKPData } from '../../../schemas/shared/PKPDataSchema';
 import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';
 import { LitTxRes } from '../../types';
@@ -34,7 +34,7 @@ import { MintPKPRequest, MintPKPSchema } from './MintPKPSchema';
  */
 export const mintPKP = async (
   request: MintPKPRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxRes<PKPData>> => {
   const validatedRequest = MintPKPSchema.parse(request);
 

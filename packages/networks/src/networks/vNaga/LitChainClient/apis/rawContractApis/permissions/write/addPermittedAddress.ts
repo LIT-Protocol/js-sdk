@@ -1,12 +1,12 @@
 // import { networkContext } from "../../../_config";
+import { toBigInt } from 'packages/networks/src/networks/shared/utils/z-transformers';
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../../createLitContracts';
 import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../utils/createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
 
 const addPermittedAddressSchema = z.object({
@@ -28,7 +28,7 @@ type AddPermittedAddressRequest = z.input<typeof addPermittedAddressSchema>;
  */
 export async function addPermittedAddress(
   request: AddPermittedAddressRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const validatedRequest = addPermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });

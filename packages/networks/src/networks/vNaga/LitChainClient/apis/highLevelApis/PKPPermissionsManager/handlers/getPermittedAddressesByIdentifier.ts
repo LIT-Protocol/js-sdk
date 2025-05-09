@@ -1,5 +1,5 @@
-import { logger } from '../../../../../../../shared/logger';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPermittedAddresses } from '../../../rawContractApis/permissions/read/getPermittedAddresses';
 import {
   PkpIdentifierRaw,
@@ -14,7 +14,7 @@ import {
  */
 export async function getPermittedAddressesByIdentifier(
   identifier: PkpIdentifierRaw,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<readonly `0x${string}`[]> {
   logger.debug({ identifier });
 

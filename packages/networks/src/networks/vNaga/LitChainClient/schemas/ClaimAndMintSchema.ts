@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { toHexString } from '../../../../shared/utils/z-transformers';
 import { SignatureDataSchema } from './shared/SignatureDataSchema';
+import { toHexString } from '../../../shared/utils/z-transformers';
 
 export const ClaimAndMintSchema = z.object({
   derivedKeyId: toHexString,

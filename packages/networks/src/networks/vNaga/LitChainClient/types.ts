@@ -23,4 +23,4 @@ export interface ContractDeploymentInfo {
 // Data returned by a method that fetches all relevant contract deployments for a network
 export interface NetworkContractDeployments {
   [contractName: string]: ContractDeploymentInfo;
-} 
+}

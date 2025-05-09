@@ -1,5 +1,7 @@
 import { Hash } from 'viem';
-import { GAS_LIMIT_ADJUSTMENT } from '../../_config';
+
+const GAS_LIMIT_INCREASE_PERCENTAGE = 10;
+const GAS_LIMIT_ADJUSTMENT = BigInt(100 + GAS_LIMIT_INCREASE_PERCENTAGE);
 
 /**
  * Strongly-typed wrapper around viem's `writeContract` that adjusts gas overrides for Arbitrum Stylus contracts

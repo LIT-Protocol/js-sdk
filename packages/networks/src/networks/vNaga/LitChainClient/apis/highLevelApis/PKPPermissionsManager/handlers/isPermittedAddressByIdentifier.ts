@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { isPermittedAddress } from '../../../rawContractApis/permissions/read/isPermittedAddress';
 import {
   PkpIdentifierRaw,
@@ -31,7 +31,7 @@ type IsPermittedAddressByIdentifierRequest = z.infer<
  */
 export async function isPermittedAddressByIdentifier(
   request: IsPermittedAddressByIdentifierRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<boolean> {
   logger.debug({ request });
 

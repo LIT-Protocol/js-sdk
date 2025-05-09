@@ -1,9 +1,9 @@
 // import { networkContext } from "../../../_config";
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { NagaContext } from '../../../../../../types';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { logger } from '../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../../createLitContracts';
 
 const getPermittedAuthMethodScopesSchema = z.object({
   tokenId: toBigInt,
@@ -24,7 +24,7 @@ type GetPermittedAuthMethodScopesRequest = z.input<
  */
 export async function getPermittedAuthMethodScopes(
   request: GetPermittedAuthMethodScopesRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<readonly boolean[]> {
   const validatedRequest = getPermittedAuthMethodScopesSchema.parse(request);
   logger.debug({ validatedRequest });

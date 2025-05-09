@@ -23,7 +23,7 @@
  * ```
  */
 
-import { NagaContext } from '../../../../../types';
+import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import {
   getNodesForRequest,
   PRODUCT_IDS,
@@ -46,7 +46,7 @@ export interface PriceFeedInfo {
 // Type for the parameters
 export interface GetPriceFeedInfoParams {
   realmId?: number;
-  networkCtx: NagaContext;
+  networkCtx: DefaultNetworkConfig;
   productIds?: bigint[];
 }
 
@@ -71,12 +71,18 @@ async function fetchPriceFeedInfo(
 
   // Extract and format the network prices
   const prices = nodesResponse.nodesAndPrices
+
+    // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
     .map((node) => {
       return {
         url: node.validatorUrl,
+
+        // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
         prices: node.prices.map((price) => BigInt(price)),
       };
     })
+
+    // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
     .sort(({ prices: pricesA }, { prices: pricesB }) => {
       // Sort by first price since the cheapest for any product will often be cheapest for all
       const diff = Number(pricesA[0] - pricesB[0]);

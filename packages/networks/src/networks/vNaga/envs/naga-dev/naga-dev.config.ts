@@ -1,24 +1,40 @@
-import { HTTPS, LIT_NETWORK, LIT_ENDPOINT } from '@lit-protocol/constants';
-import type { LitNetworkConfig } from '../../../types';
-import * as chronicleYellowstone from '../../../../chains/ChronicleYellowstone'; // Assuming NagaDev runs on a Yellowstone-like chain
+import { nagaDevSignatures } from '@lit-protocol/contracts';
+import { Hex } from 'viem';
+import * as anvil from '../../../../chains/Anvil';
+import { INetworkConfig } from '../../interfaces/NetworkContext';
+import { NAGA_ENDPOINT } from '../../shared/endpoints';
+
+const NETWORK = 'naga-dev';
+const PROTOCOL = 'https://';
+const MINIMUM_THRESHOLD = 3;
 
 /**
- * Static configuration for the NagaDev network.
+ * TODO: This is a temporary default realm id. There's are two abis functions called 'getAllReservedValidators' and 'numRealms' in the latest lit-assets branch. We need to call that to see how many realms there are. If there's only one realm, then we can use that as the default realm id. Otherwise, we will randomly choose one.
  */
-export const nagaDevConfigData: Readonly<LitNetworkConfig> = Object.freeze({
-  networkName: LIT_NETWORK.NagaDev, // 'naga-dev'
-  httpProtocol: HTTPS,
-  endpoints: LIT_ENDPOINT, // Uses default LIT_ENDPOINT structure
-  rpcUrl: chronicleYellowstone.RPC_URL, // NagaDev RPC, aligns with its chain
-  chainConfig: {
-    // Overriding parts of ChronicleYellowstoneChain if NagaDev has slight differences
-    // but shares the core infrastructure. Or, if it's identical, just spread it:
-    // ...chronicleYellowstone.viemChainConfig,
-    // For this example, let's assume it IS ChronicleYellowstone for its chain aspects
-    ...chronicleYellowstone.viemChainConfig,
-    // If NagaDev had a specific chainId or name different from generic Yellowstone, override here:
-    // chainId: 456789,
-    // name: "NagaDev Bespoke Chain",
+const DEFAULT_REALM_ID = 1n;
+
+export interface NagaDevSpecificConfigs {
+  realmId?: bigint;
+  privateKey?: Hex;
+}
+
+export const nagaDevNetworkConfig: INetworkConfig<
+  typeof nagaDevSignatures,
+  NagaDevSpecificConfigs
+> = {
+  minimumThreshold: MINIMUM_THRESHOLD,
+  network: NETWORK,
+  rpcUrl: anvil.RPC_URL,
+  abiSignatures: nagaDevSignatures,
+  chainConfig: anvil.viemChainConfig,
+  httpProtocol: PROTOCOL,
+  networkSpecificConfigs: {
+    realmId: DEFAULT_REALM_ID,
   },
-  minNodeCount: 5, // Example: specific minimum node count for NagaDev
-});
+  endpoints: NAGA_ENDPOINT,
+};
+
+export type NagaDevNetworkConfig = typeof nagaDevNetworkConfig;
+
+// network object calls the chain client
+// LitClient could use the network to figure out

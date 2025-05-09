@@ -6,7 +6,7 @@ import {
   toBigIntMatrix,
   toBoolean,
   toHexStringArray,
-} from '../../../../shared/utils/z-transformers';
+} from '../../../shared/utils/z-transformers';
 
 export const MintRequestSchema = z.object({
   keyType: toBigInt,

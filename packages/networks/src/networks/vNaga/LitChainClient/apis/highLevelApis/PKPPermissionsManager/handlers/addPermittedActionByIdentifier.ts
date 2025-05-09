@@ -1,5 +1,5 @@
-import { NagaContext } from '../../../../../../types';
-import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
 import { z } from 'zod';
 import { ScopeStringSchema } from '../../../../schemas/shared/ScopeSchema';
 import {
@@ -34,7 +34,7 @@ type AddPermittedActionByIdentifierRequest = z.infer<
  */
 export async function addPermittedActionByIdentifier(
   request: AddPermittedActionByIdentifierRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const { ipfsId, scopes, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(

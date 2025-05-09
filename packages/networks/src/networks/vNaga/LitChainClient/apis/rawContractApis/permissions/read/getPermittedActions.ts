@@ -1,9 +1,9 @@
 // import { networkContext } from "../../../_config";
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { NagaContext } from '../../../../../../types';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { logger } from '../../../../../../shared/logger';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../../createLitContracts';
 
 const getPermittedActionsSchema = z.object({
   tokenId: toBigInt,
@@ -19,7 +19,7 @@ type GetPermittedActionsRequest = z.input<typeof getPermittedActionsSchema>;
  */
 export async function getPermittedActions(
   request: GetPermittedActionsRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<readonly `0x${string}`[]> {
   const validatedRequest = getPermittedActionsSchema.parse(request);
   logger.debug({ validatedRequest });

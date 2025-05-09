@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { isPermittedAction } from '../../../rawContractApis/permissions/read/isPermittedAction';
 import {
   PkpIdentifierRaw,
@@ -32,7 +32,7 @@ type IsPermittedActionByIdentifierRequest = z.infer<
  */
 export async function isPermittedActionByIdentifier(
   request: IsPermittedActionByIdentifierRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<boolean> {
   logger.debug({ request });
 

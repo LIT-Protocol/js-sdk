@@ -1,14 +1,14 @@
 // import { networkContext } from "../../../_config";
 import { z } from 'zod';
-import { logger } from '../../../../../../../shared/logger';
-import { ipfsCidV0ToHex } from '../../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
-import { toBigInt } from '../../../../../../../shared/utils/z-transformers';
-import { isIpfsCidV0 } from '../../../../../../../shared/utils/z-validate';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { ipfsCidV0ToHex } from '../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
 
 const addPermittedActionSchema = z
@@ -28,7 +28,7 @@ type AddPermittedActionRequest = z.input<typeof addPermittedActionSchema>;
 
 export async function addPermittedAction(
   request: AddPermittedActionRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<LitTxVoid> {
   const validatedRequest = addPermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });

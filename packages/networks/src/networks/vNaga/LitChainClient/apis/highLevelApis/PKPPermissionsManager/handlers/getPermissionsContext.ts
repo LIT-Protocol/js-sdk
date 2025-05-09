@@ -1,5 +1,5 @@
-import { logger } from '../../../../../../../shared/logger';
-import { NagaContext } from '../../../../../../types';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
 import { getPermittedAddresses } from '../../../rawContractApis/permissions/read/getPermittedAddresses';
 import {
@@ -30,7 +30,7 @@ export interface PermissionsContext {
  */
 export async function getPermissionsContext(
   identifier: PkpIdentifierRaw,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<PermissionsContext> {
   // Resolve the identifier to a tokenId
   const tokenId = (await resolvePkpTokenId(identifier, networkCtx)).toString();

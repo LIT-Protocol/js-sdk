@@ -1,7 +1,7 @@
-import { NagaContext } from '../../../../../../types';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { z } from 'zod';
-import { createLitContracts } from '../../../utils/createLitContracts';
-import { logger } from '../../../../../../../shared/logger';
+import { createLitContracts } from '../../../../createLitContracts';
+import { logger } from '../../../../../../shared/logger';
 
 // Schema for the request
 const getPubkeyByTokenIdSchema = z.object({
@@ -18,7 +18,7 @@ type GetPubkeyByTokenIdRequest = z.infer<typeof getPubkeyByTokenIdSchema>;
  */
 export async function getPubkeyByTokenId(
   request: GetPubkeyByTokenIdRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<string> {
   const { tokenId } = getPubkeyByTokenIdSchema.parse(request);
 

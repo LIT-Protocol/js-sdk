@@ -1,8 +1,9 @@
-import { HTTP, HTTPS, LIT_ENDPOINT } from '@lit-protocol/constants';
+import { HTTP, HTTPS } from '@lit-protocol/constants';
 import type { EpochInfo, LitContractContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 // import type { LitChainConfig } from './types'; // Import LitChainConfig from local types.ts
 import { Chain } from 'viem';
+import { NagaEndpointsType } from './vNaga/shared/endpoints';
 
 /**
  * Defines the operations that a network module must provide.
@@ -24,7 +25,7 @@ export interface LitNetworkOperations {
    * This might be used to derive specific node URLs or could be an object
    * containing direct endpoint URLs if they differ structurally from the global LIT_ENDPOINT.
    */
-  getEndpoints: () => typeof LIT_ENDPOINT; // Or a more specific endpoint map type for the network
+  getEndpoints: () => NagaEndpointsType; // Or a more specific endpoint map type for the network
 
   /**
    * Gets the default RPC URL for interacting with the blockchain of this network.

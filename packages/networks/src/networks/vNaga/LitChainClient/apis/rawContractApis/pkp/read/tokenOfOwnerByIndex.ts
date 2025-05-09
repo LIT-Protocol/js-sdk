@@ -1,7 +1,7 @@
-import { logger } from '../../../../../../../shared/logger';
-import { NagaContext } from '../../../../../../types';
 import { z } from 'zod';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { logger } from '../../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createLitContracts } from '../../../../createLitContracts';
 
 // Schema for the request
 const tokenOfOwnerByIndexSchema = z.object({
@@ -19,7 +19,7 @@ type TokenOfOwnerByIndexRequest = z.infer<typeof tokenOfOwnerByIndexSchema>;
  */
 export async function tokenOfOwnerByIndex(
   request: TokenOfOwnerByIndexRequest,
-  networkCtx: NagaContext
+  networkCtx: DefaultNetworkConfig
 ): Promise<string> {
   const { ownerAddress, index } = tokenOfOwnerByIndexSchema.parse(request);
 
@@ -29,6 +29,8 @@ export async function tokenOfOwnerByIndex(
   const { pkpNftContract } = createLitContracts(networkCtx);
   // Convert index to bigint for contract call
   const indexBigInt = BigInt(index);
+
+  pkpNftContract.read;
 
   // Ensure ownerAddress is properly typed as a hex string
   const typedOwnerAddress = ownerAddress as `0x${string}`;

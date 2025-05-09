@@ -1,4 +1,4 @@
-import { NagaContext } from '../../../../../types';
+import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
 import { getActiveUnkickedValidatorStructsAndCounts } from '../../rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
 
@@ -21,7 +21,7 @@ interface ConnectionInfo {
  * Interface for the parameters of getConnectionInfo function
  */
 interface GetConnectionInfoParams {
-  networkCtx: NagaContext;
+  networkCtx: DefaultNetworkConfig;
   nodeProtocol?: string | null;
 }
 
@@ -76,7 +76,13 @@ export async function getConnectionInfo({
     : validatorURLs;
 
   return {
-    epochInfo,
+    epochInfo: epochInfo as {
+      epochLength: number;
+      number: number;
+      endTime: number;
+      retries: number;
+      timeout: number;
+    },
     minNodeCount: Number(minNodeCount),
     bootstrapUrls,
   };

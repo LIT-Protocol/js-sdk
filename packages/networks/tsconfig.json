@@ -18,5 +18,6 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ]
+  ],
+  "exclude": ["packages/networks/src/networks/VDatil"]
 }
