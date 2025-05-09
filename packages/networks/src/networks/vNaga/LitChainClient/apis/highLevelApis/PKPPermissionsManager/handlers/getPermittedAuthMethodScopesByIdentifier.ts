@@ -1,3 +1,4 @@
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPermittedAuthMethodScopes } from '../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes';
@@ -23,7 +24,8 @@ export async function getPermittedAuthMethodScopesByIdentifier(
     authMethodId: string;
     scopeId?: number;
   },
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<readonly boolean[]> {
   logger.debug({ params });
 
@@ -36,7 +38,8 @@ export async function getPermittedAuthMethodScopesByIdentifier(
       authMethodId: params.authMethodId,
       scopeId: params.scopeId,
     },
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 }
 

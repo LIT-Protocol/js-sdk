@@ -1,3 +1,4 @@
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
@@ -14,12 +15,17 @@ import {
  */
 export async function getPermittedActionsByIdentifier(
   identifier: PkpIdentifierRaw,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<readonly `0x${string}`[]> {
   logger.debug({ identifier });
 
   const pkpTokenId = await resolvePkpTokenId(identifier, networkCtx);
-  return getPermittedActions({ tokenId: pkpTokenId.toString() }, networkCtx);
+  return getPermittedActions(
+    { tokenId: pkpTokenId.toString() },
+    networkCtx,
+    accountOrWalletClient
+  );
 }
 
 // Example usage when running as main

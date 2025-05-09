@@ -5,7 +5,7 @@ import { INetworkConfig } from '../../interfaces/NetworkContext';
 /**
  * This is locally generated signatures
  */
-import { NAGA_ENDPOINT } from '../../shared/endpoints';
+import { NAGA_ENDPOINT } from '../../constants/endpoints';
 import { signatures } from './generated/naga-develop';
 
 const NETWORK = 'custom';

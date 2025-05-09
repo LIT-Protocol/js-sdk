@@ -1,4 +1,6 @@
+import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/ContractsManager';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { createContractsManager } from '../../../../contract-manager/createContractsManager';
 import {
   MintRequestRaw,
   MintRequestSchema,
@@ -9,7 +11,6 @@ import {
 } from '../../../../schemas/shared/PKPDataSchema';
 import { LitTxRes } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
 
 /**
@@ -28,12 +29,13 @@ import { decodeLogs } from '../../../utils/decodeLogs';
  */
 export async function mintNextAndAddAuthMethods(
   request: MintRequestRaw,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxRes<PKPData>> {
   const validatedRequest = MintRequestSchema.parse(request);
 
   const { pkpHelperContract, pkpNftContract, publicClient, walletClient } =
-    createLitContracts(networkCtx);
+    createContractsManager(networkCtx, accountOrWalletClient);
 
   const mintCost = await pkpNftContract.read.mintCost();
 
@@ -58,7 +60,11 @@ export async function mintNextAndAddAuthMethods(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  const decodedLogs = await decodeLogs(receipt.logs, networkCtx);
+  const decodedLogs = await decodeLogs(
+    receipt.logs,
+    networkCtx,
+    accountOrWalletClient
+  );
 
   // {
   //   eventName: "PKPMinted",

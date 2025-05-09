@@ -8,7 +8,10 @@ import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 import { decodeLogs } from '../../../utils/decodeLogs';
 
 const addPermittedActionSchema = z
@@ -28,13 +31,14 @@ type AddPermittedActionRequest = z.input<typeof addPermittedActionSchema>;
 
 export async function addPermittedAction(
   request: AddPermittedActionRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxVoid> {
   const validatedRequest = addPermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =
-    createLitContracts(networkCtx);
+    createContractsManager(networkCtx, accountOrWalletClient);
 
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
@@ -44,7 +48,11 @@ export async function addPermittedAction(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  const decodedLogs = await decodeLogs(receipt.logs, networkCtx);
+  const decodedLogs = await decodeLogs(
+    receipt.logs,
+    networkCtx,
+    accountOrWalletClient
+  );
 
   return { hash, receipt, decodedLogs };
 }

@@ -50,6 +50,7 @@ import { ScopeString } from '../../../schemas/shared/ScopeSchema';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import { LitTxVoid } from '../../types';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action
@@ -58,7 +59,7 @@ const COMMON_TEST_IPFS_IDS = ['QmPK1s3pNYLi9ERiq3BDxKa4XosgWwFRQUydHUtz4YgpqB'];
 export class PKPPermissionsManager {
   private identifier: PkpIdentifierRaw;
   private networkContext: DefaultNetworkConfig;
-
+  private accountOrWalletClient: ExpectedAccountOrWalletClient;
   /**
    * Creates a new PKP permissions manager instance
    *
@@ -67,10 +68,12 @@ export class PKPPermissionsManager {
    */
   constructor(
     identifier: PkpIdentifierRaw,
-    networkContext: DefaultNetworkConfig
+    networkContext: DefaultNetworkConfig,
+    accountOrWalletClient: ExpectedAccountOrWalletClient
   ) {
     this.identifier = identifier;
     this.networkContext = networkContext;
+    this.accountOrWalletClient = accountOrWalletClient;
   }
 
   /**
@@ -100,7 +103,8 @@ export class PKPPermissionsManager {
         scopes: params.scopes,
         ...this.getIdentifierParams(),
       },
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -121,7 +125,8 @@ export class PKPPermissionsManager {
         scopes: params.scopes,
         ...this.getIdentifierParams(),
       },
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -137,7 +142,8 @@ export class PKPPermissionsManager {
         ipfsId: params.ipfsId,
         ...this.getIdentifierParams(),
       },
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -155,7 +161,8 @@ export class PKPPermissionsManager {
         targetAddress: params.address, // This is important - the field must be targetAddress
         ...this.getIdentifierParams(),
       },
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -171,7 +178,8 @@ export class PKPPermissionsManager {
         ipfsId: params.ipfsId,
         ...this.getIdentifierParams(),
       },
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -187,7 +195,8 @@ export class PKPPermissionsManager {
         targetAddress: params.address, // This is important - the field must be targetAddress
         ...this.getIdentifierParams(),
       },
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -199,7 +208,8 @@ export class PKPPermissionsManager {
   async getPermittedActions(): Promise<readonly `0x${string}`[]> {
     return getPermittedActionsByIdentifier(
       this.getIdentifierParams(),
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -211,7 +221,8 @@ export class PKPPermissionsManager {
   async getPermittedAddresses(): Promise<readonly `0x${string}`[]> {
     return getPermittedAddressesByIdentifier(
       this.getIdentifierParams(),
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -223,7 +234,8 @@ export class PKPPermissionsManager {
   async getPermittedAuthMethods(): Promise<readonly AuthMethod[]> {
     return getPermittedAuthMethodsByIdentifier(
       this.getIdentifierParams(),
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -246,7 +258,8 @@ export class PKPPermissionsManager {
         identifier: this.getIdentifierParams(),
         ...params,
       },
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -258,7 +271,8 @@ export class PKPPermissionsManager {
   async getPermissionsContext(): Promise<PermissionsContext> {
     return getPermissionsContext(
       this.getIdentifierParams(),
-      this.networkContext
+      this.networkContext,
+      this.accountOrWalletClient
     );
   }
 
@@ -270,9 +284,14 @@ export class PKPPermissionsManager {
    */
   static async getPKPsByAddress(
     address: string,
-    networkContext: DefaultNetworkConfig
+    networkContext: DefaultNetworkConfig,
+    accountOrWalletClient: ExpectedAccountOrWalletClient
   ) {
-    return getPKPsByAddress({ ownerAddress: address }, networkContext);
+    return getPKPsByAddress(
+      { ownerAddress: address },
+      networkContext,
+      accountOrWalletClient
+    );
   }
 
   /**

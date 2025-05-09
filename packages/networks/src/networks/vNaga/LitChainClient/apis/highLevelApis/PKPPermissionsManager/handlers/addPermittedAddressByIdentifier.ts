@@ -7,6 +7,7 @@ import {
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 import { addPermittedAddress } from '../../../rawContractApis/permissions/write/addPermittedAddress';
 import { LitTxVoid } from '../../../types';
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 
 // Schema for the request
 const addPermittedAddressByIdentifierSchema = z.intersection(
@@ -33,7 +34,8 @@ type AddPermittedAddressByIdentifierRequest = z.infer<
  */
 export async function addPermittedAddressByIdentifier(
   request: AddPermittedAddressByIdentifierRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxVoid> {
   const { targetAddress, scopes, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(
@@ -47,7 +49,8 @@ export async function addPermittedAddressByIdentifier(
       address: targetAddress,
       scopes,
     },
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 }
 

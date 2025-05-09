@@ -1,13 +1,20 @@
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../contract-manager/createContractsManager';
 import { GetActiveUnkickedValidatorStructsAndCountsSchema } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
 
 // const REALM_ID = 1n;
 
 export async function getActiveUnkickedValidatorStructsAndCounts(
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ) {
-  const { stakingContract } = createLitContracts(networkCtx);
+  const { stakingContract } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
 
   const res =
     await stakingContract.read.getActiveUnkickedValidatorStructsAndCounts([

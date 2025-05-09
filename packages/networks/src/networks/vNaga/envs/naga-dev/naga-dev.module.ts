@@ -1,7 +1,7 @@
 import { HTTP, HTTPS, LIT_NETWORK } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import type { LitNetworkOperations } from '../../../LitNetworkOperations';
-import { nagaDevNetworkConfig } from './naga-dev.config';
+import { networkConfig } from './naga-dev.config';
 import type { LitContractContext, EpochInfo } from '@lit-protocol/types';
 import { NagaChainClient } from '../../LitChainClient/NagaChainClient.bak';
 
@@ -28,14 +28,14 @@ type ConnectionInfoConfigOverride = {
 
 let connectionInfoCache: Promise<NagaDevConnectionInfo> | null = null;
 
-const DEFAULT_MIN_NODE_COUNT = nagaDevNetworkConfig.minimumThreshold || 1;
+const DEFAULT_MIN_NODE_COUNT = networkConfig.minimumThreshold || 1;
 
 const fetchAndCacheConnectionInfo = async (
   configOverride?: ConnectionInfoConfigOverride
 ): Promise<NagaDevConnectionInfo> => {
-  const rpcUrlToUse = configOverride?.rpcUrl || nagaDevNetworkConfig.rpcUrl;
+  const rpcUrlToUse = configOverride?.rpcUrl || networkConfig.rpcUrl;
   const networkName =
-    nagaDevNetworkConfig.network as (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
+    networkConfig.network as (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK];
 
   // Initialize Chain Client
   const chainClient = new NagaChainClient({
@@ -77,7 +77,7 @@ const fetchAndCacheConnectionInfo = async (
 
   // The protocol for node communication is distinct from chain RPC
   const nodeProtocolToUse =
-    configOverride?.nodeProtocol || nagaDevNetworkConfig.httpProtocol;
+    configOverride?.nodeProtocol || networkConfig.httpProtocol;
 
   // Construct the final connection info object
   const connectionInfoResult: NagaDevConnectionInfo = {
@@ -98,17 +98,17 @@ const fetchAndCacheConnectionInfo = async (
 };
 
 export const NagaDevOperations: LitNetworkOperations = {
-  getNetworkName: () => nagaDevNetworkConfig.network,
-  getHttpProtocol: () => nagaDevNetworkConfig.httpProtocol,
-  getEndpoints: () => nagaDevNetworkConfig.endpoints,
-  getRpcUrl: () => nagaDevNetworkConfig.rpcUrl,
-  getChainConfig: () => nagaDevNetworkConfig.chainConfig,
+  getNetworkName: () => networkConfig.network,
+  getHttpProtocol: () => networkConfig.httpProtocol,
+  getEndpoints: () => networkConfig.endpoints,
+  getRpcUrl: () => networkConfig.rpcUrl,
+  getChainConfig: () => networkConfig.chainConfig,
 
   // getConnectionInfo now uses the NagaChainClient for on-chain data
   getConnectionInfo: async (configOverride?: ConnectionInfoConfigOverride) => {
-    const rpcUrlToUse = configOverride?.rpcUrl || nagaDevNetworkConfig.rpcUrl;
+    const rpcUrlToUse = configOverride?.rpcUrl || networkConfig.rpcUrl;
     const nodeProtocolToUse =
-      configOverride?.nodeProtocol || nagaDevNetworkConfig.httpProtocol;
+      configOverride?.nodeProtocol || networkConfig.httpProtocol;
 
     if (
       !connectionInfoCache ||
@@ -122,6 +122,10 @@ export const NagaDevOperations: LitNetworkOperations = {
     }
     return connectionInfoCache;
   },
+
+  // getLitStateManager: () => {
+  //   // const chainClient =
+  // },
 };
 
 export const clearNagaDevCache = () => {

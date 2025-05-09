@@ -1,6 +1,9 @@
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { z } from 'zod';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 import { logger } from '../../../../../../shared/logger';
 
 // Schema for the request
@@ -18,14 +21,18 @@ type GetPubkeyByTokenIdRequest = z.infer<typeof getPubkeyByTokenIdSchema>;
  */
 export async function getPubkeyByTokenId(
   request: GetPubkeyByTokenIdRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<string> {
   const { tokenId } = getPubkeyByTokenIdSchema.parse(request);
 
   logger.debug({ tokenId }, 'Fetching public key by token ID');
 
   // Create contract instances
-  const { pubkeyRouterContract } = createLitContracts(networkCtx);
+  const { pubkeyRouterContract } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
 
   // Convert tokenId to bigint for contract call
   const tokenIdBigInt = BigInt(tokenId);

@@ -37,7 +37,7 @@ import {
 // export { removePermittedAction } from "./rawContractApis/permissions/write/removePermittedAction";
 // export { addPermittedAddress } from "./rawContractApis/permissions/write/addPermittedAddress";
 // export { removePermittedAddress } from "./rawContractApis/permissions/write/removePermittedAddress";
-// export { createLitContracts } from "./utils/createLitContracts";
+// export { createContractsManager } from "./utils/createContractsManager";
 
 // High-level APIs
 // export { mintPKP } from "./highLevelApis/mintPKP/mintPKP";
@@ -88,5 +88,3 @@ export const api = {
     getNodePrices,
   },
 };
-// Export utils from separate file
-export * as utils from './utils';

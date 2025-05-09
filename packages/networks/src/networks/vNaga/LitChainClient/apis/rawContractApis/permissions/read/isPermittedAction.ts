@@ -5,7 +5,10 @@ import { ipfsCidV0ToHex } from '../../../../../../shared/utils/transformers/ipfs
 import { toBigInt } from '../../../../../../shared/utils/z-transformers';
 import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 
 const isPermittedActionSchema = z
   .object({
@@ -29,12 +32,16 @@ type IsPermittedActionRequest = z.input<typeof isPermittedActionSchema>;
  */
 export async function isPermittedAction(
   request: IsPermittedActionRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<boolean> {
   const validatedRequest = isPermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });
 
-  const { pkpPermissionsContract } = createLitContracts(networkCtx);
+  const { pkpPermissionsContract } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
 
   return pkpPermissionsContract.read.isPermittedAction([
     validatedRequest.tokenId,

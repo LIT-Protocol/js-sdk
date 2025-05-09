@@ -2,14 +2,17 @@
 import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 
+import { ipfsCidV0ToHex } from '../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
-import { isIpfsCidV0 } from '../../../../../../shared/utils/z-validate';
-import { toBigInt } from '../../../../../../shared/utils/z-transformers';
-import { ipfsCidV0ToHex } from '../../../../../../shared/utils/transformers/ipfsCidV0ToHex';
 
 const removePermittedActionSchema = z
   .object({
@@ -33,13 +36,14 @@ type RemovePermittedActionRequest = z.input<typeof removePermittedActionSchema>;
  */
 export async function removePermittedAction(
   request: RemovePermittedActionRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxVoid> {
   const validatedRequest = removePermittedActionSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =
-    createLitContracts(networkCtx);
+    createContractsManager(networkCtx, accountOrWalletClient);
 
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
@@ -49,7 +53,11 @@ export async function removePermittedAction(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  const decodedLogs = await decodeLogs(receipt.logs, networkCtx);
+  const decodedLogs = await decodeLogs(
+    receipt.logs,
+    networkCtx,
+    accountOrWalletClient
+  );
 
   return { hash, receipt, decodedLogs };
 }

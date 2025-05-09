@@ -8,6 +8,7 @@ import {
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 import { addPermittedAction } from '../../../rawContractApis/permissions/write/addPermittedAction';
 import { LitTxVoid } from '../../../types';
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 
 // Schema for the request
 const addPermittedActionByIdentifierSchema = z.intersection(
@@ -34,7 +35,8 @@ type AddPermittedActionByIdentifierRequest = z.infer<
  */
 export async function addPermittedActionByIdentifier(
   request: AddPermittedActionByIdentifierRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxVoid> {
   const { ipfsId, scopes, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(
@@ -48,7 +50,8 @@ export async function addPermittedActionByIdentifier(
       ipfsId,
       scopes,
     },
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 }
 

@@ -3,7 +3,10 @@ import { toBigInt } from 'packages/networks/src/networks/shared/utils/z-transfor
 import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
@@ -28,13 +31,14 @@ type AddPermittedAddressRequest = z.input<typeof addPermittedAddressSchema>;
  */
 export async function addPermittedAddress(
   request: AddPermittedAddressRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxVoid> {
   const validatedRequest = addPermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });
 
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =
-    createLitContracts(networkCtx);
+    createContractsManager(networkCtx, accountOrWalletClient);
 
   pkpPermissionsContract.write.addPermittedAddress;
 
@@ -50,7 +54,11 @@ export async function addPermittedAddress(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  const decodedLogs = await decodeLogs(receipt.logs, networkCtx);
+  const decodedLogs = await decodeLogs(
+    receipt.logs,
+    networkCtx,
+    accountOrWalletClient
+  );
 
   return { hash, receipt, decodedLogs };
 }

@@ -2,9 +2,12 @@ import { getAddress } from 'viem';
 import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
 import { tokenOfOwnerByIndex } from '../../../rawContractApis/pkp/read/tokenOfOwnerByIndex';
-import { createLitContracts } from '../../../../createLitContracts';
 
 // Schema for the request
 const getPKPsByAddressSchema = z.object({
@@ -101,20 +104,29 @@ export interface PKPInfo {
 async function fetchSinglePKP(
   ownerAddress: `0x${string}`,
   index: number,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PKPInfo | null> {
   try {
     // Get the token ID
     const tokenId = await tokenOfOwnerByIndex(
       { ownerAddress, index },
-      networkCtx
+      networkCtx,
+      accountOrWalletClient
     );
 
     // Get the public key
-    const publicKey = await getPubkeyByTokenId({ tokenId }, networkCtx);
+    const publicKey = await getPubkeyByTokenId(
+      { tokenId },
+      networkCtx,
+      accountOrWalletClient
+    );
 
     // Compute the Ethereum address from the public key
-    const { pubkeyRouterContract } = createLitContracts(networkCtx);
+    const { pubkeyRouterContract } = createContractsManager(
+      networkCtx,
+      accountOrWalletClient
+    );
 
     // Remove '0x' prefix if present for the contract call
     const publicKeyBytes = publicKey.startsWith('0x')
@@ -152,7 +164,8 @@ async function fetchSinglePKP(
  */
 export async function getPKPsByAddress(
   request: GetPKPsByAddressRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PKPInfo[]> {
   const { ownerAddress } = getPKPsByAddressSchema.parse(request);
 
@@ -182,7 +195,12 @@ export async function getPKPsByAddress(
       // Create an array of promises for the current batch
       const batchPromises = Array.from({ length: BATCH_SIZE }, (_, i) => {
         const index = startIndex + i;
-        return fetchSinglePKP(typedOwnerAddress, index, networkCtx);
+        return fetchSinglePKP(
+          typedOwnerAddress,
+          index,
+          networkCtx,
+          accountOrWalletClient
+        );
       });
 
       // Wait for all promises to resolve

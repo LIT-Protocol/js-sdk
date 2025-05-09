@@ -1,7 +1,7 @@
 import { CallExecutionError, ContractFunctionRevertedError } from 'viem';
 import { networkContext, NetworkContext } from '../../../../_config';
 import { ClaimAndMintSchema } from '../../../../schemas/ClaimAndMintSchema';
-import { createLitContracts } from '../../../utils/createLitContracts';
+import { createContractsManager } from '../../../utils/createContractsManager';
 import { claimAndMint } from './claimAndMint';
 
 describe('LitChainClient', () => {
@@ -86,7 +86,7 @@ describe('LitChainClient', () => {
     });
     const { derivedKeyId, signatures } = validatedRequest;
     const { pkpNftContract, publicClient, stakingContract, walletClient } =
-      createLitContracts(networkCtx);
+      createContractsManager(networkCtx);
 
     const mintCost = await pkpNftContract.read.mintCost();
 

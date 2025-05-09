@@ -1,5 +1,5 @@
 import { Chain } from 'viem';
-import { NagaEndpointsType } from '../shared/endpoints';
+import { NagaEndpointsType } from '../constants/endpoints';
 import { signatures as localDevSignatures } from '../envs/naga-local/generated/naga-develop';
 
 const HTTP = 'http://' as const;

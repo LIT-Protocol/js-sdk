@@ -7,6 +7,7 @@ import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 
 // Schema for validating the request parameters
 const isPermittedActionByIdentifierSchema = z.intersection(
@@ -32,14 +33,16 @@ type IsPermittedActionByIdentifierRequest = z.infer<
  */
 export async function isPermittedActionByIdentifier(
   request: IsPermittedActionByIdentifierRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<boolean> {
   logger.debug({ request });
 
   const { ipfsId, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(
     identifier as PkpIdentifierRaw,
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 
   return isPermittedAction(
@@ -47,7 +50,8 @@ export async function isPermittedActionByIdentifier(
       tokenId: pkpTokenId.toString(),
       ipfsId,
     },
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 }
 

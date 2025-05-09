@@ -3,7 +3,7 @@ import type { EpochInfo, LitContractContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 // import type { LitChainConfig } from './types'; // Import LitChainConfig from local types.ts
 import { Chain } from 'viem';
-import { NagaEndpointsType } from './vNaga/shared/endpoints';
+import { NagaEndpointsType } from './vNaga/constants/endpoints';
 
 /**
  * Defines the operations that a network module must provide.
@@ -54,4 +54,6 @@ export interface LitNetworkOperations {
    * Gets the chain-specific configuration for this network.
    */
   getChainConfig: () => Chain;
+
+  // getLitStateManager: () => ReturnType<typeof createLitStateManager>;
 }

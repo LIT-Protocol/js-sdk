@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { toBigInt } from '../../../../../../shared/utils/z-transformers';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 
 const getPermittedAuthMethodScopesSchema = z.object({
   tokenId: toBigInt,
@@ -24,12 +27,16 @@ type GetPermittedAuthMethodScopesRequest = z.input<
  */
 export async function getPermittedAuthMethodScopes(
   request: GetPermittedAuthMethodScopesRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<readonly boolean[]> {
   const validatedRequest = getPermittedAuthMethodScopesSchema.parse(request);
   logger.debug({ validatedRequest });
 
-  const { pkpPermissionsContract } = createLitContracts(networkCtx);
+  const { pkpPermissionsContract } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
   const res = await pkpPermissionsContract.read.getPermittedAuthMethodScopes([
     validatedRequest.tokenId,
     BigInt(validatedRequest.authMethodType),

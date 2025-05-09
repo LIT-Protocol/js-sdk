@@ -1,52 +1,72 @@
+import { GetWalletClientReturnType } from '@wagmi/core';
 import {
+  Account,
+  Chain,
   createPublicClient,
   createWalletClient,
   getContract,
   http,
-  PublicClient,
+  WalletClient,
 } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { signatures } from '../envs/naga-local/generated/naga-develop';
-import { INetworkConfig } from '../interfaces/NetworkContext';
-interface CreateLitContractsOptions {
-  publicClient?: PublicClient;
+import { signatures } from '../../envs/naga-local/generated/naga-develop';
+import { INetworkConfig } from '../../interfaces/NetworkContext';
+
+export type ExpectedAccountOrWalletClient =
+  | Account
+  | WalletClient
+  | GetWalletClientReturnType
+  | any;
+
+function _resolveAccount({
+  accountOrWalletClient,
+  chainConfig,
+  rpcUrl,
+}: {
+  accountOrWalletClient: ExpectedAccountOrWalletClient;
+  chainConfig: Chain;
+  rpcUrl: string;
+}) {
+  // If a wallet client is already provided, use it directly
+  if (accountOrWalletClient.type === 'local') {
+    // If an account is provided, create a wallet client with it
+    const walletClient = createWalletClient({
+      account: accountOrWalletClient as Account,
+      chain: chainConfig,
+      transport: http(rpcUrl),
+    });
+    return walletClient;
+  } else {
+    return accountOrWalletClient as WalletClient;
+  }
 }
 
 // ❗️ WARNING! This is a hacky fix to bypass the type system. We automatically add "any" type
 // before building the packages. When we develop, we will remove the : any to ensure type safety.
-export const createLitContracts = (
-  networkCtx: INetworkConfig<typeof signatures, any>,
-  opts?: CreateLitContractsOptions
+export const createContractsManager = <T, M>(
+  networkConfig: INetworkConfig<T, M>,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): any => {
-  // 1. Fallback to env-based private key if user doesn't supply a wagmi walletClient
-  const fallbackTransport = http(networkCtx.rpcUrl);
-  const fallbackAccount = privateKeyToAccount(
-    networkCtx.networkSpecificConfigs.privateKey as `0x${string}`
-  );
-
   // 2. Decide which publicClient to use
   const publicClient =
-    opts?.publicClient ??
+    // opts?.publicClient ??
     createPublicClient({
-      chain: networkCtx.chainConfig,
-      transport: fallbackTransport,
+      chain: networkConfig.chainConfig,
+      transport: http(networkConfig.rpcUrl),
     });
 
   // 3. Decide which walletClient to use
-  const walletClient =
-    // networkCtx?.walletClient ??
-    createWalletClient({
-      chain: networkCtx.chainConfig,
-      transport: fallbackTransport,
-      account: fallbackAccount,
-    });
+  const walletClient = _resolveAccount({
+    accountOrWalletClient,
+    chainConfig: networkConfig.chainConfig,
+    rpcUrl: networkConfig.rpcUrl,
+  });
 
-  // 4. Get the contract data
-  const contractData = networkCtx.abiSignatures;
+  // 4. Get the contract data (casting a default type to ensure type safety)
+  const contractData = networkConfig.abiSignatures as typeof signatures;
 
   if (!contractData) {
     throw new Error(
-      `Contract data not found for network: ${networkCtx.network}`
+      `Contract data not found for network: ${networkConfig.network}`
     );
   }
 

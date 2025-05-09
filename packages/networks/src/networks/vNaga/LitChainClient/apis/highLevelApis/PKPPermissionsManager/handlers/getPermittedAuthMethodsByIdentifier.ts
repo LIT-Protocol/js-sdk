@@ -1,3 +1,4 @@
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 
@@ -18,14 +19,16 @@ import {
  */
 export async function getPermittedAuthMethodsByIdentifier(
   identifier: PkpIdentifierRaw,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<readonly AuthMethod[]> {
   logger.debug({ identifier });
 
   const pkpTokenId = await resolvePkpTokenId(identifier, networkCtx);
   return getPermittedAuthMethods(
     { tokenId: pkpTokenId.toString() },
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 }
 

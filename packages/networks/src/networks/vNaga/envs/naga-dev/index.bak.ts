@@ -60,4 +60,4 @@ export class NagaDev extends LitNetwork {
 }
 
 export { NagaDevOperations, clearNagaDevCache } from './naga-dev.module';
-export { nagaDevNetworkConfig } from './naga-dev.config';
+export { networkConfig } from './naga-dev.config';

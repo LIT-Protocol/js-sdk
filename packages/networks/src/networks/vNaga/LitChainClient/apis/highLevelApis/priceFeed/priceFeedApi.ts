@@ -23,6 +23,7 @@
  * ```
  */
 
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import {
   getNodesForRequest,
@@ -62,27 +63,32 @@ let lastUpdatedTimestamp = 0;
  * @returns The price feed information including epoch ID, minimum node count, and sorted network prices
  */
 async function fetchPriceFeedInfo(
-  params: GetPriceFeedInfoParams
+  params: GetPriceFeedInfoParams,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PriceFeedInfo> {
   const { realmId = 1, networkCtx, productIds = PRODUCT_IDS_ARRAY } = params;
 
   // Get nodes and prices from raw contract API
-  const nodesResponse = await getNodesForRequest({ productIds }, networkCtx);
+  const nodesResponse = await getNodesForRequest(
+    { productIds },
+    networkCtx,
+    accountOrWalletClient
+  );
 
   // Extract and format the network prices
   const prices = nodesResponse.nodesAndPrices
 
-    // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
+    // @ts-ignore - this will show type error when createContractsManager is returning any (during build time)
     .map((node) => {
       return {
         url: node.validatorUrl,
 
-        // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
+        // @ts-ignore - this will show type error when createContractsManager is returning any (during build time)
         prices: node.prices.map((price) => BigInt(price)),
       };
     })
 
-    // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
+    // @ts-ignore - this will show type error when createContractsManager is returning any (during build time)
     .sort(({ prices: pricesA }, { prices: pricesB }) => {
       // Sort by first price since the cheapest for any product will often be cheapest for all
       const diff = Number(pricesA[0] - pricesB[0]);
@@ -104,10 +110,11 @@ async function fetchPriceFeedInfo(
  * @returns The price feed information
  */
 async function fetchPriceFeedInfoWithLocalPromise(
-  params: GetPriceFeedInfoParams
+  params: GetPriceFeedInfoParams,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PriceFeedInfo> {
   try {
-    fetchingPriceFeedInfo = fetchPriceFeedInfo(params);
+    fetchingPriceFeedInfo = fetchPriceFeedInfo(params, accountOrWalletClient);
 
     priceFeedInfo = await fetchingPriceFeedInfo;
     lastUpdatedTimestamp = Date.now();
@@ -142,7 +149,8 @@ async function fetchPriceFeedInfoWithLocalPromise(
 }
  */
 export async function getPriceFeedInfo(
-  params: GetPriceFeedInfoParams
+  params: GetPriceFeedInfoParams,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PriceFeedInfo> {
   // If there's a local promise, an update is in progress; wait for that
   if (fetchingPriceFeedInfo) {
@@ -158,7 +166,7 @@ export async function getPriceFeedInfo(
   }
 
   // Fetch new prices, update local cache values, and return them
-  return fetchPriceFeedInfoWithLocalPromise(params);
+  return fetchPriceFeedInfoWithLocalPromise(params, accountOrWalletClient);
 }
 
 /**
@@ -181,9 +189,10 @@ export async function getPriceFeedInfo(
 ]
  */
 export async function getNodePrices(
-  params: GetPriceFeedInfoParams
+  params: GetPriceFeedInfoParams,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PriceFeedInfo['networkPrices']> {
-  const priceInfo = await getPriceFeedInfo(params);
+  const priceInfo = await getPriceFeedInfo(params, accountOrWalletClient);
   return priceInfo.networkPrices;
 }
 

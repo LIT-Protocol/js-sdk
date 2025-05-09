@@ -1,3 +1,4 @@
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
 import { getActiveUnkickedValidatorStructsAndCounts } from '../../rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
@@ -23,6 +24,7 @@ interface ConnectionInfo {
 interface GetConnectionInfoParams {
   networkCtx: DefaultNetworkConfig;
   nodeProtocol?: string | null;
+  accountOrWalletClient: ExpectedAccountOrWalletClient;
 }
 
 /**
@@ -43,10 +45,12 @@ interface GetConnectionInfoParams {
 export async function getConnectionInfo({
   networkCtx,
   nodeProtocol,
+  accountOrWalletClient,
 }: GetConnectionInfoParams): Promise<ConnectionInfo> {
   // Get the validated data from the raw contract API
   const validatedData = await getActiveUnkickedValidatorStructsAndCounts(
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 
   const { epochInfo, minNodeCount, validatorURLs } =

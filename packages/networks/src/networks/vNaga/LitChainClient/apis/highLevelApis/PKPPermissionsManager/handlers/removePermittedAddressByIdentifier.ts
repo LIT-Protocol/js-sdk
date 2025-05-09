@@ -6,6 +6,7 @@ import {
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 import { removePermittedAddress } from '../../../rawContractApis/permissions/write/removePermittedAddress';
 import { LitTxVoid } from '../../../types';
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 
 // Schema for the request
 const removePermittedAddressByIdentifierSchema = z.intersection(
@@ -31,7 +32,8 @@ type RemovePermittedAddressByIdentifierRequest = z.infer<
  */
 export async function removePermittedAddressByIdentifier(
   request: RemovePermittedAddressByIdentifierRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxVoid> {
   const { targetAddress, ...identifier } = request;
   const pkpTokenId = await resolvePkpTokenId(
@@ -44,7 +46,8 @@ export async function removePermittedAddressByIdentifier(
       tokenId: pkpTokenId.toString(),
       address: targetAddress,
     },
-    networkCtx
+    networkCtx,
+    accountOrWalletClient
   );
 }
 

@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { LitContract } from '@lit-protocol/types';
 
 // Basic context needed by a chain client
 export interface LitChainClientContext {

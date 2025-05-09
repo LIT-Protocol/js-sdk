@@ -1,5 +1,9 @@
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
+import {
   ClaimAndMintRaw,
   ClaimAndMintSchema,
 } from '../../../../schemas/ClaimAndMintSchema';
@@ -9,18 +13,18 @@ import {
 } from '../../../../schemas/shared/PKPDataSchema';
 import { LitTxRes } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
-import { createLitContracts } from '../../../../createLitContracts';
 import { decodeLogs } from '../../../utils/decodeLogs';
 export async function claimAndMint(
   request: ClaimAndMintRaw,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxRes<PKPData>> {
   const validatedRequest = ClaimAndMintSchema.parse(request);
 
   const { derivedKeyId, signatures } = validatedRequest;
 
   const { pkpNftContract, publicClient, stakingContract, walletClient } =
-    createLitContracts(networkCtx);
+    createContractsManager(networkCtx, accountOrWalletClient);
 
   // Get mint cost
   const mintCost = await pkpNftContract.read.mintCost();
@@ -45,7 +49,11 @@ export async function claimAndMint(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  const decodedLogs = await decodeLogs(receipt.logs, networkCtx);
+  const decodedLogs = await decodeLogs(
+    receipt.logs,
+    networkCtx,
+    accountOrWalletClient
+  );
 
   const args = decodedLogs.find((log) => log.eventName === 'PKPMinted')?.args;
 

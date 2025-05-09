@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { toBigInt } from '../../../../../../shared/utils/z-transformers';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 
 const isPermittedAddressSchema = z.object({
   tokenId: toBigInt,
@@ -23,12 +26,16 @@ type IsPermittedAddressRequest = z.input<typeof isPermittedAddressSchema>;
  */
 export async function isPermittedAddress(
   request: IsPermittedAddressRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<boolean> {
   const validatedRequest = isPermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });
 
-  const { pkpPermissionsContract } = createLitContracts(networkCtx);
+  const { pkpPermissionsContract } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
 
   return pkpPermissionsContract.read.isPermittedAddress([
     validatedRequest.tokenId,

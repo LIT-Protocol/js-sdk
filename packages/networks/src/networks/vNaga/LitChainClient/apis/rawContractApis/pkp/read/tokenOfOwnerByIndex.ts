@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 
 // Schema for the request
 const tokenOfOwnerByIndexSchema = z.object({
@@ -19,14 +22,18 @@ type TokenOfOwnerByIndexRequest = z.infer<typeof tokenOfOwnerByIndexSchema>;
  */
 export async function tokenOfOwnerByIndex(
   request: TokenOfOwnerByIndexRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<string> {
   const { ownerAddress, index } = tokenOfOwnerByIndexSchema.parse(request);
 
   logger.debug({ ownerAddress, index }, 'Fetching token of owner by index');
 
   // Create contract instances
-  const { pkpNftContract } = createLitContracts(networkCtx);
+  const { pkpNftContract } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
   // Convert index to bigint for contract call
   const indexBigInt = BigInt(index);
 

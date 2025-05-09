@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { toBigInt } from '../../../../../../shared/utils/z-transformers';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 
 const getPermittedAuthMethodsSchema = z.object({
   tokenId: toBigInt,
@@ -28,12 +31,16 @@ export interface AuthMethod {
  */
 export async function getPermittedAuthMethods(
   request: GetPermittedAuthMethodsRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<readonly AuthMethod[]> {
   const validatedRequest = getPermittedAuthMethodsSchema.parse(request);
   logger.debug({ validatedRequest });
 
-  const { pkpPermissionsContract } = createLitContracts(networkCtx);
+  const { pkpPermissionsContract } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
   const res = await pkpPermissionsContract.read.getPermittedAuthMethods([
     validatedRequest.tokenId,
   ]);

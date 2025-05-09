@@ -1,7 +1,10 @@
 import { generateValidatorURLs } from '../../../../../shared/utils/transformers';
 import { z } from 'zod';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../contract-manager/createContractsManager';
 
 /**
  * Product IDs used for price feed and node selection
@@ -35,11 +38,15 @@ type GetNodesForRequestRequest = z.infer<typeof getNodesForRequestSchema>;
  */
 export async function getNodesForRequest(
   request: GetNodesForRequestRequest,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ) {
   const { productIds } = getNodesForRequestSchema.parse(request);
 
-  const { priceFeed } = createLitContracts(networkCtx);
+  const { priceFeed } = createContractsManager(
+    networkCtx,
+    accountOrWalletClient
+  );
 
   const nodesForRequest = await priceFeed.read.getNodesForRequest([
     networkCtx.networkSpecificConfigs.realmId,
@@ -50,7 +57,7 @@ export async function getNodesForRequest(
   const minNodeCount = nodesForRequest[1];
   const nodesAndPrices = nodesForRequest[2];
 
-  // @ts-ignore - this will show type error when createLitContracts is returning any (during build time)
+  // @ts-ignore - this will show type error when createContractsManager is returning any (during build time)
   const nodesAndPricesWithUrls = nodesAndPrices.map((info) => {
     const { validator } = info;
     const validatorUrl = generateValidatorURLs([validator]);

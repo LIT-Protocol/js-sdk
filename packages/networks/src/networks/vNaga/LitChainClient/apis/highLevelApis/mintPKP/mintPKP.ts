@@ -1,6 +1,7 @@
 import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
-import { logger } from '../../../../../shared/logger';
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { Hex } from 'viem';
+import { logger } from '../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { PKPData } from '../../../schemas/shared/PKPDataSchema';
 import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';
@@ -34,7 +35,8 @@ import { MintPKPRequest, MintPKPSchema } from './MintPKPSchema';
  */
 export const mintPKP = async (
   request: MintPKPRequest,
-  networkCtx: DefaultNetworkConfig
+  networkConfig: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxRes<PKPData>> => {
   const validatedRequest = MintPKPSchema.parse(request);
 
@@ -62,7 +64,8 @@ export const mintPKP = async (
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
     },
-    networkCtx
+    networkConfig,
+    accountOrWalletClient
   );
 
   return tx;

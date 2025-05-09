@@ -1,3 +1,4 @@
+import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
@@ -30,7 +31,8 @@ export interface PermissionsContext {
  */
 export async function getPermissionsContext(
   identifier: PkpIdentifierRaw,
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PermissionsContext> {
   // Resolve the identifier to a tokenId
   const tokenId = (await resolvePkpTokenId(identifier, networkCtx)).toString();
@@ -38,9 +40,9 @@ export async function getPermissionsContext(
 
   // Fetch all permissions in parallel
   const [actions, addresses, authMethods] = await Promise.all([
-    getPermittedActions({ tokenId }, networkCtx),
-    getPermittedAddresses({ tokenId }, networkCtx),
-    getPermittedAuthMethods({ tokenId }, networkCtx),
+    getPermittedActions({ tokenId }, networkCtx, accountOrWalletClient),
+    getPermittedAddresses({ tokenId }, networkCtx, accountOrWalletClient),
+    getPermittedAuthMethods({ tokenId }, networkCtx, accountOrWalletClient),
   ]);
 
   logger.debug(

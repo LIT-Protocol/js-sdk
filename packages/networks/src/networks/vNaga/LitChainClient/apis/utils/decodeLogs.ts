@@ -1,6 +1,9 @@
 import { decodeEventLog, Log } from 'viem';
 import { DefaultNetworkConfig } from '../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../contract-manager/createContractsManager';
 
 export type DecodedLog = {
   eventName: string;
@@ -16,7 +19,8 @@ export type DecodedLog = {
  */
 export const decodeLogs = async (
   logs: Log[],
-  networkCtx: DefaultNetworkConfig
+  networkCtx: DefaultNetworkConfig,
+  accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<DecodedLog[]> => {
   // Get network context for contract ABIs
   const networkContext = networkCtx.abiSignatures;
@@ -32,7 +36,7 @@ export const decodeLogs = async (
     pubkeyRouterContract,
     publicClient,
     walletClient,
-  } = createLitContracts(networkCtx);
+  } = createContractsManager(networkCtx, accountOrWalletClient);
 
   // Map contract addresses to their ABIs
   const contractABIs = new Map<string, any>();

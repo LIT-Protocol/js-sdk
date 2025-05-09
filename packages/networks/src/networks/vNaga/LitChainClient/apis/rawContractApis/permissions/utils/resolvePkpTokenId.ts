@@ -7,7 +7,10 @@ import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { createLitContracts } from '../../../../createLitContracts';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 import { pubkeyToTokenId } from './pubkeyToTokenId';
 import { toBigInt } from 'packages/networks/src/networks/shared/utils/z-transformers';
 import { isEthAddress } from 'packages/networks/src/networks/shared/utils/z-validate';
@@ -55,7 +58,8 @@ export type PkpIdentifierRaw = ExactlyOne<{
  */
 export async function resolvePkpTokenId(
   identifier: PkpIdentifierRaw,
-  networkCtx?: DefaultNetworkConfig
+  networkCtx?: DefaultNetworkConfig,
+  accountOrWalletClient?: ExpectedAccountOrWalletClient
 ): Promise<bigint> {
   // Check for multiple fields
   const providedFields = Object.keys(identifier);
@@ -102,7 +106,10 @@ export async function resolvePkpTokenId(
       throw new Error('Network context required for address resolution');
     }
 
-    const { pubkeyRouterContract } = createLitContracts(networkCtx);
+    const { pubkeyRouterContract } = createContractsManager(
+      networkCtx,
+      accountOrWalletClient
+    );
     const pkpTokenId = await pubkeyRouterContract.read.ethAddressToPkpId([
       validatedInput.address as `0x${string}`,
     ]);

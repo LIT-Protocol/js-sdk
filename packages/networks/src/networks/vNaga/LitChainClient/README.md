@@ -44,7 +44,7 @@ The client provides three main API objects:
 
 **Utility Functions:**
 
-- `createLitContracts` - Create contract instances for interacting with Lit Protocol
+- `createContractsManager` - Create contract instances for interacting with Lit Protocol
 
 ## Usage Examples
 
@@ -105,7 +105,7 @@ const isPermitted =
 import { LitChainClientUtils } from '../LitChainClient/apis';
 
 // Create contract instances
-const contracts = LitChainClientUtils.createLitContracts(networkContext);
+const contracts = LitChainClientUtils.createContractsManager(networkContext);
 ```
 
 ## Configuration

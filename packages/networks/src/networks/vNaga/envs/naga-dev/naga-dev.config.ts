@@ -1,8 +1,7 @@
 import { nagaDevSignatures } from '@lit-protocol/contracts';
-import { Hex } from 'viem';
 import * as anvil from '../../../../chains/Anvil';
+import { NAGA_ENDPOINT } from '../../constants/endpoints';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
-import { NAGA_ENDPOINT } from '../../shared/endpoints';
 
 const NETWORK = 'naga-dev';
 const PROTOCOL = 'https://';
@@ -15,11 +14,13 @@ const DEFAULT_REALM_ID = 1n;
 
 export interface NagaDevSpecificConfigs {
   realmId?: bigint;
-  privateKey?: Hex;
+  // privateKey?: Hex;
 }
 
-export const nagaDevNetworkConfig: INetworkConfig<
-  typeof nagaDevSignatures,
+export type NagaDevSignatures = typeof nagaDevSignatures;
+
+export const networkConfig: INetworkConfig<
+  NagaDevSignatures,
   NagaDevSpecificConfigs
 > = {
   minimumThreshold: MINIMUM_THRESHOLD,
@@ -34,7 +35,7 @@ export const nagaDevNetworkConfig: INetworkConfig<
   endpoints: NAGA_ENDPOINT,
 };
 
-export type NagaDevNetworkConfig = typeof nagaDevNetworkConfig;
+export type NagaDevNetworkConfig = typeof networkConfig;
 
 // network object calls the chain client
 // LitClient could use the network to figure out

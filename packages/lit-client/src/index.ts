@@ -15,17 +15,17 @@ export const getLitClient = async ({
   network,
 }: // networkModule,
 {
-  network: 'naga-dev';
+  network: any;
   // networkModule: ReturnType<typeof getLitNetworkModule>
 }) => {
   // 1. use the networkModule
 
   // --- all the litNodeClient dependencies we want to remove soon
-  const litNodeClient = new LitNodeClient({
-    litNetwork: network,
-  });
+  // const litNodeClient = new LitNodeClient({
+  //   litNetwork: network,
+  // });
 
-  await litNodeClient.connect();
+  // await litNodeClient.connect();
   // const _nodeUrls = await litNodeClient.getMaxPricesForNodeProduct({
   //   product: 'LIT_ACTION',
   // });
@@ -36,17 +36,15 @@ export const getLitClient = async ({
   // const currentEpochNumber = calculateEffectiveEpochNumber(this._epochCache);
 
   return {
-    getLatestBlockhash: litNodeClient.getLatestBlockhash,
-
-    // @ts-expect-error - will be fixed soon as this value will be provided by the LitNetwork
-    getCurrentEpoch: async () => litNodeClient.currentEpochNumber ?? 0,
-    getSignSessionKey: litNodeClient.v2.signPKPSessionKey,
-
-    /**
-     * @deprecated - This will be renamed to `getUrls` soon as max prices is only for Naga, but we also need to support
-     * Datil.
-     */
-    getMaxPricesForNodeProduct: litNodeClient.getMaxPricesForNodeProduct,
+    // getLatestBlockhash: litNodeClient.getLatestBlockhash,
+    // // @ts-expect-error - will be fixed soon as this value will be provided by the LitNetwork
+    // getCurrentEpoch: async () => litNodeClient.currentEpochNumber ?? 0,
+    // getSignSessionKey: litNodeClient.v2.signPKPSessionKey,
+    // /**
+    //  * @deprecated - This will be renamed to `getUrls` soon as max prices is only for Naga, but we also need to support
+    //  * Datil.
+    //  */
+    // getMaxPricesForNodeProduct: litNodeClient.getMaxPricesForNodeProduct,
   };
 };
 

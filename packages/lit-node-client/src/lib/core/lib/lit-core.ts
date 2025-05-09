@@ -40,15 +40,15 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 
-import {
-  createEvmEventState,
-  EventState,
-} from '../../state-manager/createEvmEventState';
-import {
-  createRefreshedValue,
-  RefreshedValue,
-} from '../../state-manager/createRefreshedValue';
-import { fetchBlockchainData } from '../../state-manager/fetchBlockchainData';
+// import {
+//   createEvmEventState,
+//   EventState,
+// } from '../../../../../networks/src/networks/shared/StateManager/src/createEvmEventState';
+// import {
+//   createRefreshedValue,
+//   RefreshedValue,
+// } from '../../../../../networks/src/networks/shared/StateManager/src/createRefreshedValue';
+// import { fetchBlockchainData } from '../../../../../networks/src/networks/shared/StateManager/helpers/fetchBlockchainData';
 import { composeLitUrl } from './helpers/endpoint-version';
 import { mostCommonValue } from './helpers/most-common-value';
 import {
@@ -137,8 +137,8 @@ export class LitCore {
   // latestBlockhash: string | null = null;
   lastBlockHashRetrieved: number | null = null;
   private _stakingContract: ethers.Contract | null = null;
-  private _stakingContractStateInstance: EventState<STAKING_STATES_VALUES | null> | null =
-    null;
+  // private _stakingContractStateInstance: EventState<STAKING_STATES_VALUES | null> | null =
+  //   null;
   private _connectingPromise: null | Promise<void> = null;
   public _epochCache: EpochCache = {
     currentNumber: null,
@@ -147,7 +147,7 @@ export class LitCore {
   // private _blockHashUrl =
   //   'https://block-indexer.litgateway.com/get_most_recent_valid_block';
 
-  private refreshedBlockhashManager: RefreshedValue<string>; // Declare as a class property
+  // private refreshedBlockhashManager: RefreshedValue<string>; // Declare as a class property
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
@@ -160,11 +160,11 @@ export class LitCore {
       );
     }
 
-    this.refreshedBlockhashManager = createRefreshedValue<string>({
-      fetch: fetchBlockchainData,
-      ttlMs: BLOCKHASH_SYNC_INTERVAL,
-      initialValue: '',
-    });
+    // this.refreshedBlockhashManager = createRefreshedValue<string>({
+    //   fetch: fetchBlockchainData,
+    //   ttlMs: BLOCKHASH_SYNC_INTERVAL,
+    //   initialValue: '',
+    // });
 
     // Initialize default config based on litNetwork
     switch (config?.litNetwork) {
@@ -278,7 +278,7 @@ export class LitCore {
   async disconnect() {
     this.ready = false;
 
-    this._stopStakingListenerWithEvmState();
+    // this._stopStakingListenerWithEvmState();
   }
 
   /**
@@ -287,17 +287,19 @@ export class LitCore {
    * @returns { Promise<string> } latest blockhash
    */
   public getLatestBlockhash = async (): Promise<string> => {
-    const blockhash = await this.refreshedBlockhashManager.getOrRefreshAndGet();
+    // const blockhash = await this.refreshedBlockhashManager.getOrRefreshAndGet();
 
-    if (!blockhash) {
-      throw new InvalidEthBlockhash(
-        {},
-        `latestBlockhash is not available. Received: "%s"`,
-        blockhash
-      );
-    }
+    // if (!blockhash) {
+    //   throw new InvalidEthBlockhash(
+    //     {},
+    //     `latestBlockhash is not available. Received: "%s"`,
+    //     blockhash
+    //   );
+    // }
 
-    return blockhash;
+    // return blockhash;
+
+    throw new Error('This function is deprecated.');
   };
 
   /**
@@ -322,7 +324,7 @@ export class LitCore {
 
   private async _connect() {
     // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
-    this._stopStakingListenerWithEvmState();
+    // this._stopStakingListenerWithEvmState();
     // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
     // this._stopNetworkPolling();
 
@@ -1059,92 +1061,92 @@ export class LitCore {
       return;
     }
     // If instance exists, ensure it's listening. If called during an active connection, it might have been stopped.
-    if (this._stakingContractStateInstance) {
-      this._stakingContractStateInstance.listen();
-      return;
-    }
+    // if (this._stakingContractStateInstance) {
+    //   this._stakingContractStateInstance.listen();
+    //   return;
+    // }
 
     this._coreLogger.info({
       msg: 'Setting up EVM event state listener for staking contract StateChanged',
       address: this._stakingContract.address,
     });
 
-    this._stakingContractStateInstance =
-      createEvmEventState<STAKING_STATES_VALUES | null>({
-        contract: this._stakingContract,
-        eventName: 'StateChanged',
-        initialValue: null,
-        transform: (args: any[]): STAKING_STATES_VALUES => {
-          return args[0] as STAKING_STATES_VALUES;
-        },
-        onChange: async (newState) => {
-          if (newState === null) return;
+    // this._stakingContractStateInstance =
+    //   createEvmEventState<STAKING_STATES_VALUES | null>({
+    //     contract: this._stakingContract,
+    //     eventName: 'StateChanged',
+    //     initialValue: null,
+    //     transform: (args: any[]): STAKING_STATES_VALUES => {
+    //       return args[0] as STAKING_STATES_VALUES;
+    //     },
+    //     onChange: async (newState) => {
+    //       if (newState === null) return;
 
-          this._coreLogger.info(
-            `New state detected via createEvmEventState: "${newState}"`
-          );
+    //       this._coreLogger.info(
+    //         `New state detected via createEvmEventState: "${newState}"`
+    //       );
 
-          const validatorData = await this._getValidatorData();
+    //       const validatorData = await this._getValidatorData();
 
-          if (newState === STAKING_STATES.Active) {
-            // update the epoch cache
-            this._epochCache = validatorData.epochCache;
+    //       if (newState === STAKING_STATES.Active) {
+    //         // update the epoch cache
+    //         this._epochCache = validatorData.epochCache;
 
-            if (
-              CENTRALISATION_BY_NETWORK[this.config.litNetwork] !==
-              'centralised'
-            ) {
-              try {
-                this._coreLogger.info(
-                  'State found to be new validator set locked, checking validator set (via createEvmEventState)'
-                );
-                const existingNodeUrls: string[] = [
-                  ...this.config.bootstrapUrls,
-                ];
-                const newBootstrapUrls: string[] = validatorData.bootstrapUrls;
+    //         if (
+    //           CENTRALISATION_BY_NETWORK[this.config.litNetwork] !==
+    //           'centralised'
+    //         ) {
+    //           try {
+    //             this._coreLogger.info(
+    //               'State found to be new validator set locked, checking validator set (via createEvmEventState)'
+    //             );
+    //             const existingNodeUrls: string[] = [
+    //               ...this.config.bootstrapUrls,
+    //             ];
+    //             const newBootstrapUrls: string[] = validatorData.bootstrapUrls;
 
-                const isDifferent = areStringArraysDifferent(
-                  existingNodeUrls,
-                  newBootstrapUrls
-                );
+    //             const isDifferent = areStringArraysDifferent(
+    //               existingNodeUrls,
+    //               newBootstrapUrls
+    //             );
 
-                if (isDifferent) {
-                  this._coreLogger.info({
-                    msg: 'Active validator sets changed. Starting node connection (via createEvmEventState)',
-                    oldUrls: existingNodeUrls,
-                    newUrls: newBootstrapUrls,
-                  });
-                  // Update bootstrapUrls before connecting if they have indeed changed
-                  // this.config.bootstrapUrls = newBootstrapUrls; // This line might cause issues if connect() reads from a stale config or if it modifies it internally before this takes effect.
-                  // It's safer for connect() to re-fetch/receive the latest bootstrapUrls as part of its own logic if it needs to.
-                  // For now, relying on connect() to use the validatorData.bootstrapUrls it gets.
-                  await this.connect();
-                } else {
-                  this._coreLogger.info(
-                    'Active validator sets checked, no changes detected that require reconnect. (via createEvmEventState)'
-                  );
-                }
-              } catch (err: unknown) {
-                const { message = '' } = err as Error;
-                this._coreLogger.error({
-                  msg: 'Error while attempting to reconnect to nodes after epoch transition (via createEvmEventState)',
-                  message,
-                });
-              }
-            }
-          }
-        },
-      });
+    //             if (isDifferent) {
+    //               this._coreLogger.info({
+    //                 msg: 'Active validator sets changed. Starting node connection (via createEvmEventState)',
+    //                 oldUrls: existingNodeUrls,
+    //                 newUrls: newBootstrapUrls,
+    //               });
+    //               // Update bootstrapUrls before connecting if they have indeed changed
+    //               // this.config.bootstrapUrls = newBootstrapUrls; // This line might cause issues if connect() reads from a stale config or if it modifies it internally before this takes effect.
+    //               // It's safer for connect() to re-fetch/receive the latest bootstrapUrls as part of its own logic if it needs to.
+    //               // For now, relying on connect() to use the validatorData.bootstrapUrls it gets.
+    //               await this.connect();
+    //             } else {
+    //               this._coreLogger.info(
+    //                 'Active validator sets checked, no changes detected that require reconnect. (via createEvmEventState)'
+    //               );
+    //             }
+    //           } catch (err: unknown) {
+    //             const { message = '' } = err as Error;
+    //             this._coreLogger.error({
+    //               msg: 'Error while attempting to reconnect to nodes after epoch transition (via createEvmEventState)',
+    //               message,
+    //             });
+    //           }
+    //         }
+    //       }
+    //     },
+    //   });
 
-    this._stakingContractStateInstance.listen();
+    // this._stakingContractStateInstance.listen();
   }
 
-  private _stopStakingListenerWithEvmState() {
-    if (this._stakingContractStateInstance) {
-      this._coreLogger.info(
-        'Stopping EVM event state listener for staking contract StateChanged'
-      );
-      this._stakingContractStateInstance.stop();
-    }
-  }
+  // private _stopStakingListenerWithEvmState() {
+  //   if (this._stakingContractStateInstance) {
+  //     this._coreLogger.info(
+  //       'Stopping EVM event state listener for staking contract StateChanged'
+  //     );
+  //     this._stakingContractStateInstance.stop();
+  //   }
+  // }
 }
