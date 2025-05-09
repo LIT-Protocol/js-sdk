@@ -1,9 +1,11 @@
-import { createChainManager } from 'packages/networks/dist/src/networks/vNaga/envs/naga-dev/chain-manager/createChainManager';
+import { createChainManager } from './createChainManager';
 import { privateKeyToAccount } from 'viem/accounts';
 
 describe('createChainManager', () => {
   it('should create a chain manager', () => {
-    const viemAccount = privateKeyToAccount(`0x${process.env['PRIVATE_KEY']!}`);
+    const viemAccount = privateKeyToAccount(
+      process.env['PRIVATE_KEY']! as `0x${string}`
+    );
 
     const chainManager = createChainManager(viemAccount);
 
