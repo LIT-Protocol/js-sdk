@@ -1,4 +1,4 @@
-import { NagaLocalDevelopNetworkContext } from './local-develop/networkContext';
+import { NagaLocalDevelopNetworkContext } from './envs/local-dev/networkContext';
 // import { NagaDevNetworkContext } from "./naga-dev/networkContext";
 // import { NagaTestNetworkContext } from "./naga-test/networkContext";
 // import { NagaMainnetNetworkContext } from "./naga-mainnet/networkContext";

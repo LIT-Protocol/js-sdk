@@ -1,5 +1,5 @@
-import { LitNetwork } from '../../LitNetworkOperations';
-import { LitChainConfig, LitNetworkConfig } from '../../types';
+import { LitNetwork } from '../LitNetworkOperations';
+import { LitChainConfig, LitNetworkConfig } from '../types';
 import {
   HTTP,
   HTTPS,

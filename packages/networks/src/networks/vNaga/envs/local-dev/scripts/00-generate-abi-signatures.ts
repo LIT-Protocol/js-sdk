@@ -1,7 +1,8 @@
-// @ts-ignore - need to fix the import path in the lit-protocol/contracts package
 import { generateSignaturesFromContext } from '@lit-protocol/contracts/custom-network-signatures';
 
 const JSON_FILE_PATH = process.env['NETWORK_CONFIG'] as string;
+
+console.log('JSON_FILE_PATH:', JSON_FILE_PATH);
 
 if (!JSON_FILE_PATH) {
   throw new Error(
@@ -13,7 +14,7 @@ async function main() {
   await generateSignaturesFromContext({
     jsonFilePath: JSON_FILE_PATH,
     networkName: 'naga-develop',
-    outputDir: './naga-develop-signatures',
+    outputDir: '../generated',
     useScriptDirectory: true,
 
     // @ts-ignore

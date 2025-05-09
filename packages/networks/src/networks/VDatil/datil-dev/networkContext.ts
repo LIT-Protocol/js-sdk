@@ -5,7 +5,7 @@ import {
   anvilConfig,
   anvilFirstPrivateKey,
   anvilRpcUrl,
-} from '../../shared/chains/anvil.js';
+} from '../../../chains/Anvil.js';
 import { INetworkContext } from '../common/NetworkContext';
 
 export const datilDevNetworkContext: INetworkContext<

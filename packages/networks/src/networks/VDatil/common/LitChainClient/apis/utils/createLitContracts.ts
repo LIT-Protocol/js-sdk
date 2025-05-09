@@ -1,15 +1,14 @@
-import { chronicleYellowstone } from '../../../../../shared/chains/yellowstone.ts';
-import { DatilContext } from '../../../../../VDatil/types';
 import {
   createPublicClient,
   createWalletClient,
   getContract,
+  Hex,
   http,
   PublicClient,
   WalletClient,
-  Hex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { DatilContext } from '../../../../../VDatil/types';
 
 interface CreateLitContractsOptions {
   publicClient?: PublicClient;

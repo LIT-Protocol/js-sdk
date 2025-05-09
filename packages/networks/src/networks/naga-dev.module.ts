@@ -2,7 +2,7 @@ import { HTTP, HTTPS, LIT_NETWORK } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import type { EpochInfo, LitContractContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import type { LitNetworkOperations } from '../LitNetworkOperations';
+import type { LitNetworkOperations } from './LitNetworkOperations';
 import { nagaDevConfig } from './naga-dev.config';
 
 // Re-define LitNetworkValue here if not easily importable from lit-core or a shared types package

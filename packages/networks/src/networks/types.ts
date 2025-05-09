@@ -1,17 +1,18 @@
 // TODO: These types can probably be moved into the `networks` package and only exposed by way of the `LitNetwork` if necessary
 import { LIT_ENDPOINT, HTTP, HTTPS } from '@lit-protocol/constants';
+import { Chain } from 'viem';
 
 /**
  * Configuration specific to the underlying blockchain of a Lit network.
  */
-export interface LitChainConfig {
-  chainId: number;
-  name: string; // e.g., "Chronicle Yellowstone", "Anvil Localhost"
-  symbol: string; // e.g., "tstLPX", "ETH"
-  rpcUrl: string; // Primary RPC URL for this chain
-  blockExplorerUrls?: string[];
-  // Add other chain-specific properties as needed, e.g., contract addresses for chain-specific registries
-}
+// export interface LitChainConfig {
+//   chainId: number;
+//   name: string; // e.g., "Chronicle Yellowstone", "Anvil Localhost"
+//   symbol: string; // e.g., "tstLPX", "ETH"
+//   rpcUrl: string; // Primary RPC URL for this chain
+//   blockExplorerUrls?: string[];
+//   // Add other chain-specific properties as needed, e.g., contract addresses for chain-specific registries
+// }
 
 /**
  * Configuration for a specific Lit network.
@@ -21,7 +22,7 @@ export interface LitNetworkConfig {
   httpProtocol: typeof HTTP | typeof HTTPS; // Default protocol for Lit nodes
   endpoints: typeof LIT_ENDPOINT; // Base LIT_ENDPOINT, potentially overridden for the network
   rpcUrl: string; // Default RPC for this Lit network (often same as chainConfig.rpcUrl)
-  chainConfig: LitChainConfig; // Blockchain-specific details
+  chainConfig: Chain; // Blockchain-specific details
   minNodeCount?: number; // Optional: Minimum nodes required for network operations, defaults can be set in modules
 }
 

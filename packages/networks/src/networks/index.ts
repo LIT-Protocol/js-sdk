@@ -1,15 +1,23 @@
 // Core types and interfaces
-export type { LitNetworkConfig, LitChainConfig } from './types';
-export type { LitNetworkOperations } from './LitNetworkOperations';
+export type { LitNetworkOperations } from '../LitNetworkOperations';
+export type { LitNetworkConfig } from '../types';
+// export type { LitChainConfig, LitNetworkConfig } from './types';
 
 // Available Network Names (Manually maintained or auto-generated from directories)
 // This uses LIT_NETWORK constants for consistency if they cover all network names.
 // Otherwise, define a specific union type.
 import { LIT_NETWORK } from '@lit-protocol/constants';
-export type LitKnownNetwork = typeof LIT_NETWORK[keyof typeof LIT_NETWORK] | 'custom' | 'local-dev'; // Add other known string literals if not in LIT_NETWORK
+export type LitKnownNetwork =
+  | (typeof LIT_NETWORK)[keyof typeof LIT_NETWORK]
+  | 'custom'
+  | 'local-dev'; // Add other known string literals if not in LIT_NETWORK
 
 // Network Modules
-import { NagaDevOperations, clearNagaDevCache as clearNagaDev } from './networks/vNaga/naga-dev';
+import { LitNetworkOperations } from '../LitNetworkOperations';
+import {
+  NagaDevOperations,
+  clearNagaDevCache as clearNagaDev,
+} from './vNaga/envs/naga-dev';
 // --- Conceptual: Import other network modules as they are created ---
 // import { ManzanoMainnetOperations, clearManzanoMainnetCache } from './networks/vManzano/manzano-mainnet';
 // import { LocalDevelopOperations, clearLocalDevelopCache } from './networks/vNaga/local-develop';
@@ -30,7 +38,9 @@ const networkModules: Partial<Record<LitKnownNetwork, LitNetworkOperations>> = {
 export function getLitNetwork(network: LitKnownNetwork): LitNetworkOperations {
   const selectedModule = networkModules[network];
   if (!selectedModule) {
-    throw new Error(`Network module for "${network}" not found or not yet implemented.`);
+    throw new Error(
+      `Network module for "${network}" not found or not yet implemented.`
+    );
   }
   return selectedModule;
 }
@@ -70,5 +80,5 @@ export { NagaDevOperations };
 // export { LocalDevelopOperations }; // Example
 
 // Export shared chain configurations for convenience
-export { ChronicleYellowstoneChain } from './networks/shared/chains/ChronicleYellowstone';
-export { AnvilChain } from './networks/shared/chains/anvil'; 
+export * as AnvilChain from '../chains/Anvil';
+export * as ChronicleYellowstoneChain from '../chains/ChronicleYellowstone';

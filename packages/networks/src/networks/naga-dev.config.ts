@@ -5,7 +5,7 @@ import {
   LIT_NETWORK,
   RPC_URL_BY_NETWORK,
 } from '@lit-protocol/constants';
-import type { LitChainConfig } from '../types'; // Assuming types.ts is one level up
+import type { LitChainConfig } from './types'; // Assuming types.ts is one level up
 
 /**
  * Static configuration for the NagaDev network.

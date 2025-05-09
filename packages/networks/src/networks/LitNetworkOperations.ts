@@ -1,7 +1,8 @@
 import { HTTP, HTTPS, LIT_ENDPOINT } from '@lit-protocol/constants';
 import type { EpochInfo, LitContractContext } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import type { LitChainConfig } from './types'; // Import LitChainConfig from local types.ts
+// import type { LitChainConfig } from './types'; // Import LitChainConfig from local types.ts
+import { Chain } from 'viem';
 
 /**
  * Defines the operations that a network module must provide.
@@ -51,5 +52,5 @@ export interface LitNetworkOperations {
   /**
    * Gets the chain-specific configuration for this network.
    */
-  getChainConfig: () => LitChainConfig;
+  getChainConfig: () => Chain;
 }
