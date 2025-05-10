@@ -45,7 +45,7 @@ function _resolveAccount({
 export const createContractsManager = <T, M>(
   networkConfig: INetworkConfig<T, M>,
   accountOrWalletClient: ExpectedAccountOrWalletClient
-) => {
+): any => {
   // 2. Decide which publicClient to use
   const publicClient =
     // opts?.publicClient ??

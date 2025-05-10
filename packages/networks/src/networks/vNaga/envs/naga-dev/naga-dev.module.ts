@@ -97,7 +97,7 @@ const fetchAndCacheConnectionInfo = async (
   return connectionInfoResult;
 };
 
-export const NagaDevOperations: LitNetworkOperations = {
+export const nagaDevModule: LitNetworkOperations = {
   getNetworkName: () => networkConfig.network,
   getHttpProtocol: () => networkConfig.httpProtocol,
   getEndpoints: () => networkConfig.endpoints,

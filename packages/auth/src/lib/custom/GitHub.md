@@ -33,7 +33,7 @@ API Endpoint (e.g., /api/verify-github-code): This endpoint will:
 import React, { useState, useEffect } from 'react';
 import * as LitAuth from '@lit-protocol/auth';
 import { GitHubCustomAuthenticator } from 'packages/auth/src/lib/custom/GitHubCustomAuthenticator'; // Adjust import path
-import { getLitClient } from './examples/getLitClient'; // Your Lit Client setup helper
+import { getLitClient } from '@lit-protocol/lit-client';/ Your Lit Client setup helper
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 
 // --- Configuration (Could come from backend or .env for client ID) ---
