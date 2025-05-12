@@ -9,7 +9,6 @@ import { NagaEndpointsType } from './vNaga/constants/endpoints';
  * The operations that a network module must provide.
  */
 export type LitNetworkModule = {
-
   id: 'naga' | 'datil';
 
   /**

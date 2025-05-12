@@ -1,7 +1,6 @@
 import { createRefreshedValue, RefreshedValue } from './createRefreshedValue';
 
 describe('createRefreshedValue', () => {
-  const initialValue = 0;
   const ttlMs = 3000;
   let fetchCounter: number;
   let fetchFn: jest.Mock<Promise<number>, []>;
@@ -17,7 +16,6 @@ describe('createRefreshedValue', () => {
     refreshed = createRefreshedValue({
       fetch: fetchFn,
       ttlMs,
-      initialValue,
     });
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -35,24 +33,22 @@ describe('createRefreshedValue', () => {
     // For ttlMs = 3000ms: slightlyLessThanTtl is 2500ms, ensuring it's still fresh
     const slightlyLessThanTtl = ttlMs - 500;
 
-    // --- Expected: 1 ---
-    // Advance time by 3000ms to make the initial value stale
-    jest.advanceTimersByTime(ttlMs);
-    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 1
+    // --- Expected: 1 --- (Initial Fetch)
+    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 1 (fetchCounter becomes 1)
     expect(currentValue).toBe(1);
     expect(fetchFn).toHaveBeenCalledTimes(1);
 
     // --- Expected: 2 ---
     // Advance time by 3000ms to make current value (1) stale
     jest.advanceTimersByTime(ttlMs);
-    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 2
+    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 2 (fetchCounter becomes 2)
     expect(currentValue).toBe(2);
     expect(fetchFn).toHaveBeenCalledTimes(2);
 
     // --- Expected: 3 ---
     // Advance time by 3000ms to make current value (2) stale
     jest.advanceTimersByTime(ttlMs);
-    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 3
+    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 3 (fetchCounter becomes 3)
     expect(currentValue).toBe(3);
     expect(fetchFn).toHaveBeenCalledTimes(3);
 
@@ -75,8 +71,8 @@ describe('createRefreshedValue', () => {
     // --- Expected: 4 ---
     // Value (3) was last considered fresh with 2500ms elapsed since its fetch.
     // To make it stale (reach 3000ms), advance by an additional 500ms.
-    jest.advanceTimersByTime(ttlMs - slightlyLessThanTtl); // Corresponds to advancing by 500ms to reach 3000ms total elapsed
-    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 4
+    jest.advanceTimersByTime(ttlMs - slightlyLessThanTtl); // Advance by 500ms to reach 3000ms total elapsed since last fetch
+    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 4 (fetchCounter becomes 4)
     expect(currentValue).toBe(4);
     expect(fetchFn).toHaveBeenCalledTimes(4);
 
@@ -90,8 +86,8 @@ describe('createRefreshedValue', () => {
     // --- Expected: 5 ---
     // Value (4) was last considered fresh with 1500ms elapsed since its fetch.
     // To make it stale (reach 3000ms), advance by an additional 1500ms.
-    jest.advanceTimersByTime(ttlMs - halfTtl); // Corresponds to advancing by 1500ms to reach 3000ms total elapsed
-    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 5
+    jest.advanceTimersByTime(ttlMs - halfTtl); // Advance by 1500ms to reach 3000ms total elapsed since last fetch
+    currentValue = await refreshed.getOrRefreshAndGet(); // Fetches 5 (fetchCounter becomes 5)
     expect(currentValue).toBe(5);
     expect(fetchFn).toHaveBeenCalledTimes(5);
   });

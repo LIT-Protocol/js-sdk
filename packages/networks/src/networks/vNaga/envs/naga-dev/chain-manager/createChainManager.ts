@@ -58,10 +58,12 @@ export const createChainManager = (
 
 export const createReadOnlyChainManager = () => {
   // dummy private key for read actions
-  const dummyAccount = privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
+  const dummyAccount = privateKeyToAccount(
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+  );
   const chainManager = createChainManager(dummyAccount);
   return createChainManager(chainManager);
-}
+};
 
 // @ts-ignore
 // if (import.meta.main) {

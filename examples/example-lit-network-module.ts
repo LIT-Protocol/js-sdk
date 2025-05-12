@@ -7,11 +7,11 @@ import { privateKeyToAccount } from 'viem/accounts';
   console.log('💨 Running lit network module example');
   console.log('------------------------------------');
 
-  const litClient = await getLitClient({
-    network: nagaDev,
-  });
+  const litClient = await getLitClient(nagaDev);
 
   console.log('litClient:', litClient);
+
+  // litClient.disconnect();
 
   // const viemAccount = privateKeyToAccount(
   //   process.env['PRIVATE_KEY'] as `0x${string}`

@@ -8,7 +8,7 @@ import { NagaDevSpecificConfigs } from '@nagaDev/config';
 /**
  * Interface representing the structure of connection information
  */
-interface ConnectionInfo {
+export interface ConnectionInfo {
   epochInfo: {
     epochLength: number;
     number: number;

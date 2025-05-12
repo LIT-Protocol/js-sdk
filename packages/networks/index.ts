@@ -5,3 +5,4 @@ export { nagaDev } from './src/networks/vNaga/envs/naga-dev';
 
 // ----- types
 export type { LitNetworkModule } from './src/networks/LitNetworkModule';
+export type { NagaDevModule } from './src/networks/vNaga/envs/naga-dev/naga-dev.module';
