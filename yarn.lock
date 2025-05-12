@@ -19488,6 +19488,13 @@ pino-abstract-transport@v0.5.0:
     duplexify "^4.1.2"
     split2 "^4.0.0"
 
+pino-caller@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/pino-caller/-/pino-caller-4.0.0.tgz#3c79bcf3db9480d49b0e280b71bdc5dc00cfda7d"
+  integrity sha512-z0i/iYp4zH02uIQG8LwFK5dMKTdAYgwZM9LSzoOATJ0H5LTeJ3OZeNBpGget9DpnNaewIt5NkN5YGNvkCZ+JbQ==
+  dependencies:
+    source-map-support "^0.5.13"
+
 pino-pretty@^13.0.0:
   version "13.0.0"
   resolved "https://registry.yarnpkg.com/pino-pretty/-/pino-pretty-13.0.0.tgz#21d57fe940e34f2e279905d7dba2d7e2c4f9bf17"
@@ -21653,6 +21660,14 @@ source-map-support@^0.4.15:
   integrity sha512-try0/JqxPLF9nOjvSta7tVondkP5dwgyLDjVoyMDlmjugT2lRZ1OfsrYTkCd2hkDnJTKRbO/Rl3orm8vlsUzbA==
   dependencies:
     source-map "^0.5.6"
+
+source-map-support@^0.5.13:
+  version "0.5.21"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
+  integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==
+  dependencies:
+    buffer-from "^1.0.0"
+    source-map "^0.6.0"
 
 source-map-url@^0.4.0:
   version "0.4.1"
