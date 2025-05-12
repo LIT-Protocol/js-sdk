@@ -10,7 +10,7 @@ import {
 } from 'viem';
 import { signatures } from '../../envs/naga-local/generated/naga-develop';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
-
+import { privateKeyToAccount } from 'viem/accounts';
 export type ExpectedAccountOrWalletClient =
   | Account
   | WalletClient
@@ -40,12 +40,20 @@ function _resolveAccount({
   }
 }
 
+export const createReadOnlyContractsManager = <T, M>(
+  networkConfig: INetworkConfig<T, M>
+) => {
+  // dummy private key for read actions
+  const dummyAccount = privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
+  return createContractsManager(networkConfig, dummyAccount);
+}
+
 // ❗️ WARNING! This is a hacky fix to bypass the type system. We automatically add "any" type
 // before building the packages. When we develop, we will remove the : any to ensure type safety.
 export const createContractsManager = <T, M>(
   networkConfig: INetworkConfig<T, M>,
   accountOrWalletClient: ExpectedAccountOrWalletClient
-): any => {
+) => {
   // 2. Decide which publicClient to use
   const publicClient =
     // opts?.publicClient ??

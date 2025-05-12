@@ -3,6 +3,8 @@ import { PkpIdentifierRaw } from '@vNaga/LitChainClient/apis/rawContractApis/per
 import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../interfaces/NetworkContext';
 import { networkConfig } from '../naga-dev.config';
+import { privateKeyToAccount } from 'viem/accounts';
+
 // import { networkConfig as localConfig } from '../../naga-local/naga-local.config';
 
 export const createChainManager = (
@@ -53,6 +55,13 @@ export const createChainManager = (
     },
   };
 };
+
+export const createReadOnlyChainManager = () => {
+  // dummy private key for read actions
+  const dummyAccount = privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
+  const chainManager = createChainManager(dummyAccount);
+  return createChainManager(chainManager);
+}
 
 // @ts-ignore
 // if (import.meta.main) {

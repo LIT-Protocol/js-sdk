@@ -4,12 +4,14 @@ import { ethers } from 'ethers';
 // import type { LitChainConfig } from './types'; // Import LitChainConfig from local types.ts
 import { Chain } from 'viem';
 import { NagaEndpointsType } from './vNaga/constants/endpoints';
-
+// import { createStateManager } from './vNaga/envs/naga-dev/state-manager/createStateManager'
 /**
- * Defines the operations that a network module must provide.
- * This functional approach replaces the previous LitNetwork abstract class.
+ * The operations that a network module must provide.
  */
-export interface LitNetworkOperations {
+export type LitNetworkModule = {
+
+  id: 'naga' | 'datil';
+
   /**
    * Gets the unique string name of the network (e.g., "naga-dev", "datil-mainnet").
    */
@@ -38,22 +40,12 @@ export interface LitNetworkOperations {
    * Assumes underlying implementation handles fetching, validation, and caching.
    * @param configOverride - Optional overrides, e.g., for node protocol.
    */
-  getConnectionInfo: (configOverride?: {
-    nodeProtocol?: typeof HTTP | typeof HTTPS;
-    networkContext?: LitContractContext; // Allow passing context, e.g., for resolver scenarios
-    rpcUrl?: string;
-  }) => Promise<{
-    stakingContract: ethers.Contract;
-    epochInfo: EpochInfo;
-    minNodeCount: number;
-    bootstrapUrls: string[];
-    nodePrices: { url: string; prices: bigint[] }[];
-  }>;
+  getConnectionInfo: () => any;
 
   /**
    * Gets the chain-specific configuration for this network.
    */
   getChainConfig: () => Chain;
 
-  // getLitStateManager: () => ReturnType<typeof createLitStateManager>;
-}
+  getStateManager: any;
+};

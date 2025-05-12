@@ -1,6 +1,6 @@
 // @ts-nocheck
 // Core types and interfaces
-export type { LitNetworkOperations } from '../LitNetworkOperations';
+export type { LitNetworkModule } from '../LitNetworkModule';
 export type { LitNetworkConfig } from '../types';
 // export type { LitChainConfig, LitNetworkConfig } from './types';
 
@@ -14,7 +14,7 @@ export type LitKnownNetwork =
   | 'local-dev'; // Add other known string literals if not in LIT_NETWORK
 
 // Network Modules
-import { LitNetworkOperations } from '../LitNetworkOperations';
+import { LitNetworkModule } from '../LitNetworkModule';
 import {
   NagaDevOperations,
   clearNagaDevCache as clearNagaDev,
@@ -23,7 +23,7 @@ import {
 // import { ManzanoMainnetOperations, clearManzanoMainnetCache } from './networks/vManzano/manzano-mainnet';
 // import { LocalDevelopOperations, clearLocalDevelopCache } from './networks/vNaga/local-develop';
 
-const networkModules: Partial<Record<LitKnownNetwork, LitNetworkOperations>> = {
+const networkModules: Partial<Record<LitKnownNetwork, LitNetworkModule>> = {
   [LIT_NETWORK.NagaDev]: NagaDevOperations,
   // [LIT_NETWORK.ManzanoMainnet]: ManzanoMainnetOperations, // Example
   // 'local-dev': LocalDevelopOperations, // Example for a network not in LIT_NETWORK enum
@@ -33,10 +33,10 @@ const networkModules: Partial<Record<LitKnownNetwork, LitNetworkOperations>> = {
  * Retrieves the network operations module for a specified Lit Protocol network.
  *
  * @param network The name of the Lit Protocol network (e.g., "naga-dev", "manzano-mainnet").
- * @returns The LitNetworkOperations object for the specified network.
+ * @returns The LitNetworkModule object for the specified network.
  * @throws Error if the network module is not found.
  */
-export function getLitNetwork(network: LitKnownNetwork): LitNetworkOperations {
+export function getLitNetwork(network: LitKnownNetwork): LitNetworkModule {
   const selectedModule = networkModules[network];
   if (!selectedModule) {
     throw new Error(

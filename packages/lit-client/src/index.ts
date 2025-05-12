@@ -6,6 +6,8 @@
 // }
 
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { LitNetworkModule } from '@lit-protocol/networks';
+import { LitNagaNetworkModule } from 'packages/networks/src/networks/vNaga/LitNagaNetworkModule';
 
 /**
  * @deprecated - this is currently just a wrapper of Lit Node Client and exposes a set of methods
@@ -14,11 +16,30 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 export const getLitClient = async ({
   network,
 }: // networkModule,
-{
-  network: any;
-  // networkModule: ReturnType<typeof getLitNetworkModule>
-}) => {
+  {
+    network: LitNetworkModule;
+    // networkModule: ReturnType<typeof getLitNetworkModule>
+  }) => {
   // 1. use the networkModule
+  let _networkModule = network;
+
+
+  // ❗️ NOTE: There should be better type inference somewhere to handle different network modules
+  // handle datil network module
+  if (_networkModule.id === 'datil') {
+    throw new Error('Datil is not supported yet');
+  }
+
+  // handle naga network module
+  const nagaNetworkModule = _networkModule as LitNagaNetworkModule;
+
+  console.log(_networkModule);
+
+  const connectionInfo = await nagaNetworkModule.getConnectionInfo();
+
+  console.log("connection:", connectionInfo)
+
+  // console.log(await _networkModule.getConnectionInfo())
 
   // --- all the litNodeClient dependencies we want to remove soon
   // const litNodeClient = new LitNodeClient({
