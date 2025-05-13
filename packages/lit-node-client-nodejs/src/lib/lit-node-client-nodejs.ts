@@ -51,6 +51,8 @@ import {
   hashLitMessage,
   verifyAndDecryptWithSignatureShares,
   verifySignature,
+  walletDecrypt,
+  walletEncrypt,
 } from '@lit-protocol/crypto';
 import {
   defaultMintClaimCallback,
@@ -127,10 +129,12 @@ import type {
   JsonPkpSignSdkParams,
   JsonSignSessionKeyRequestV1,
   JsonSignSessionKeyRequestV2,
+  JsonSignSessionKeyResponse,
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeSet,
+  PKPSignEndpointResponse,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -139,7 +143,10 @@ import type {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   SuccessNodePromises,
+  WalletEncryptedPayload,
 } from '@lit-protocol/types';
+import { json } from 'node:stream/consumers';
+import { GenericResponse } from 'packages/core/src/lib/types';
 
 export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   /** Tracks the total max price a user is willing to pay for each supported product type
@@ -604,7 +611,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     url: string,
     formattedParams: JsonExecutionSdkParams & { sessionSigs: SessionSigsMap },
     requestId: string,
-    nodeSet: NodeSet[]
+    nodeSet: { node: NodeSet, nodeIdentityKey: string }[]
   ) {
     // -- choose the right signature
     const sessionSig = this._getSessionSigByUrl({
@@ -615,7 +622,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     const reqBody: JsonExecutionRequest = {
       ...formattedParams,
       authSig: sessionSig,
-      nodeSet,
+      nodeSet: nodeSet,
     };
 
     const urlWithPath = composeLitUrl({
@@ -889,6 +896,17 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
     // Handle promises for commands sent to Lit nodes
 
     const targetNodeUrls = targetNodePrices.map(({ url }) => url);
+    let keySets: Record<string, { theirPublicKey: Uint8Array, secretKey: Uint8Array }> = {};
+    targetNodeUrls.forEach((url) => {
+      const theirPublicKey = uint8arrayFromString(this.serverKeys[url].nodeIdentityKey);
+      const keyPair = nacl.box.keyPair.generate();
+      const secretKey = keyPair.secretKey;
+
+      keySets[url] = {
+        theirPublicKey,
+        secretKey,
+      };
+    });
     const nodePromises = this._getNodePromises(
       targetNodeUrls,
       (url: string) => {
@@ -905,6 +923,8 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
                 params.signingScheme as EcdsaSigType,
                 params.messageToSign!
               );
+
+        const { theirPublicKey, secretKey } = keySets[url];
 
         const reqBody: JsonPkpSignRequest = {
           toSign: normalizeArray(toSign),
@@ -929,7 +949,13 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
           endpoint: LIT_ENDPOINT.PKP_SIGN,
         });
 
-        return this.generatePromise(urlWithPath, reqBody, requestId);
+        const encrypted = walletEncrypt(
+          theirPublicKey,
+          secretKey,
+          uint8arrayFromString(JSON.stringify(reqBody))
+        );
+
+        return { url, promise: this.generatePromise(urlWithPath, encrypted, requestId) };
       }
     );
 
@@ -944,7 +970,29 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       return this._throwNodeError(res, requestId);
     }
 
-    const responseData = res.values;
+    const responseData = res.values.map((values) => {
+      const secretKey = keySets[values.url].secretKey;
+
+      const decrypted = walletDecrypt(
+        secretKey,
+        values.result,
+      );
+
+      const response: GenericResponse<PKPSignEndpointResponse> = JSON.parse(uint8arrayToString(decrypted, 'utf8'));
+
+      if (!response.ok) {
+        const error = response.error ?? "";
+        const errorObject = response.errorObject ?? {};
+
+        throw new Error(`${error} - ${errorObject}`);
+      }
+
+      if (!response.data) {
+        throw new Error('No data returned from pkp sign');
+      }
+
+      return response.data;
+    });
 
     logWithRequestId(
       requestId,
@@ -1521,6 +1569,7 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
   };
 
   getSignSessionKeyShares = async (
+    nodeIdentityKey: string,
     url: string,
     params: {
       body: {
@@ -1538,11 +1587,34 @@ export class LitNodeClientNodeJs extends LitCore implements ILitNodeClient {
       url,
       endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
     });
-    return await this._sendCommandToNode({
+
+    const theirPublicKey = uint8arrayFromString(nodeIdentityKey, 'base16');
+    const keyPair = nacl.box.keyPair();
+    const secretKey = keyPair.secretKey;
+
+    const encrypted = await walletEncrypt(
+      secretKey,
+      theirPublicKey,
+      uint8arrayFromString(JSON.stringify(params.body), 'utf8')
+    );
+
+    const response: WalletEncryptedPayload = await this._sendCommandToNode({
       url: urlWithPath,
-      data: params.body,
+      data: encrypted,
       requestId,
     });
+
+    const decrypted = await walletDecrypt(
+      secretKey,
+      response,
+    );
+
+    const outerResponse: GenericResponse<JsonSignSessionKeyResponse> = JSON.parse(uint8arrayToString(decrypted, 'utf8'));
+    if (!outerResponse.ok) {
+      throw new Error(`${outerResponse.error} - ${outerResponse.errorObject}`);
+    }
+
+    return outerResponse.data;
   };
 
   getMaxPricesForNodeProduct = async ({

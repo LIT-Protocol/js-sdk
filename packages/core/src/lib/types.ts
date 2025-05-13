@@ -8,6 +8,13 @@ export interface SendNodeCommand {
   requestId: string;
 }
 
+export interface GenericResponse<T> {
+  ok: boolean;
+  error?: string;
+  errorObject?: string;
+  data?: T;
+}
+
 export interface NodeCommandServerKeysResponse {
   serverPublicKey: string;
   subnetPublicKey: string;
@@ -16,6 +23,7 @@ export interface NodeCommandServerKeysResponse {
   hdRootPubkeys: string[];
   attestation?: NodeAttestation;
   latestBlockhash?: string;
+  nodeIdentityKey: string;
 }
 
 export interface HandshakeWithNode {
