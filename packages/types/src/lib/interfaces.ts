@@ -264,6 +264,16 @@ export interface JsonSignSessionKeyRequestV2<T>
   signingScheme: T;
 }
 
+export interface JsonSignSessionKeyResponse {
+  result: string;
+  signatureShare: any;
+  shareId: string;
+  curveType: string;
+  siweMessage: string;
+  dataSigned: string;
+  blsRootPubkey: string;
+}
+
 // [
 //   {
 //     "result": "success",
@@ -572,7 +582,7 @@ export interface BlsSignatureShare {
 
 export interface SuccessNodePromises<T> {
   success: true;
-  values: T[];
+  values: { url: string, result: T }[];
 }
 
 export interface RejectedNodePromises {
@@ -671,17 +681,6 @@ export interface WalletEncryptedPayload {
   V1: {
     verification_key: string;
     ciphertext_and_tag: string;
-    session_signature: string;
-    random: string;
-    created_at: string;
-  };
-}
-
-export interface WalletEncryptedPayload {
-  V1: {
-    verification_key: string;
-    ciphertext_and_tag: string;
-    session_signature: string;
     random: string;
     created_at: string;
   };
@@ -711,6 +710,7 @@ export interface JsonHandshakeResponse {
   networkPubKeySet: string;
   hdRootPubkeys: string[];
   latestBlockhash?: string;
+  nodeIdentityKey: string;
 }
 
 export interface EncryptToJsonProps extends MultipleAccessControlConditions {

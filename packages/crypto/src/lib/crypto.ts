@@ -353,14 +353,11 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   }
 }
 
-export const walletEncrypt = async (
+export const walletEncrypt = (
   myWalletSecretKey: Uint8Array,
   theirWalletPublicKey: Uint8Array,
-  sessionSig: AuthSig,
   message: Uint8Array
-): Promise<WalletEncryptedPayload> => {
-  const uint8SessionSig = Buffer.from(JSON.stringify(sessionSig));
-
+): WalletEncryptedPayload => {
   const random = new Uint8Array(16);
   crypto.getRandomValues(random);
   const dateNow = Date.now();
@@ -372,12 +369,10 @@ export const walletEncrypt = async (
   nacl.lowlevel.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
 
   // Construct AAD (Additional Authenticated Data) - data that is authenticated but not encrypted
-  const sessionSignature = uint8SessionSig; // Replace with actual session signature
   const theirPublicKey = Buffer.from(theirWalletPublicKey); // Replace with their public key
   const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
 
   const aad = Buffer.concat([
-    sessionSignature,
     random,
     timestamp,
     theirPublicKey,
@@ -398,17 +393,16 @@ export const walletEncrypt = async (
     V1: {
       verification_key: uint8ArrayToHex(myWalletPublicKey),
       ciphertext_and_tag: uint8ArrayToHex(ciphertext),
-      session_signature: uint8ArrayToHex(sessionSignature),
       random: uint8ArrayToHex(random),
       created_at: new Date(dateNow).toISOString(),
     },
   };
 };
 
-export const walletDecrypt = async (
+export const walletDecrypt = (
   myWalletSecretKey: Uint8Array,
   payload: WalletEncryptedPayload
-): Promise<Uint8Array> => {
+): Uint8Array => {
   const dateSent = new Date(payload.V1.created_at);
   const createdAt = Math.floor(dateSent.getTime() / 1000);
   const timestamp = Buffer.alloc(8);
@@ -419,15 +413,11 @@ export const walletDecrypt = async (
 
   // Construct AAD
   const random = Buffer.from(hexToUint8Array(payload.V1.random));
-  const sessionSignature = Buffer.from(
-    hexToUint8Array(payload.V1.session_signature)
-  ); // Replace with actual session signature
   const theirPublicKey = hexToUint8Array(payload.V1.verification_key);
   const theirPublicKeyBuffer = Buffer.from(theirPublicKey); // Replace with their public key
   const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
 
   const aad = Buffer.concat([
-    sessionSignature,
     random,
     timestamp,
     theirPublicKeyBuffer,

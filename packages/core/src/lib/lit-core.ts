@@ -50,12 +50,14 @@ import {
   RejectedNodePromises,
   SessionSigsMap,
   SuccessNodePromises,
+  WalletEncryptedPayload,
 } from '@lit-protocol/types';
 
 import { composeLitUrl } from './endpoint-version';
 import {
   CoreNodeConfig,
   EpochCache,
+  GenericResponse,
   HandshakeWithNode,
   Listener,
   NodeCommandServerKeysResponse,
@@ -545,13 +547,30 @@ export class LitCore {
       requestId
     );
 
+    if (!handshakeResult.ok) {
+      const error = handshakeResult.error ?? "";
+      const errorObject = handshakeResult.errorObject ?? "";
+
+      logErrorWithRequestId(
+        requestId,
+        `Error handshaking with the node ${url}: ${error} - ${errorObject}`
+      );
+      throw new Error(`${error} - ${errorObject}`);
+    }
+
+    if (!handshakeResult.data) {
+      throw new Error('Handshake response data is empty');
+    }
+    const handshakeResponse = handshakeResult.data;
+
     const keys: JsonHandshakeResponse = {
-      serverPubKey: handshakeResult.serverPublicKey,
-      subnetPubKey: handshakeResult.subnetPublicKey,
-      networkPubKey: handshakeResult.networkPublicKey,
-      networkPubKeySet: handshakeResult.networkPublicKeySet,
-      hdRootPubkeys: handshakeResult.hdRootPubkeys,
-      latestBlockhash: handshakeResult.latestBlockhash,
+      serverPubKey: handshakeResponse.serverPublicKey,
+      subnetPubKey: handshakeResponse.subnetPublicKey,
+      networkPubKey: handshakeResponse.networkPublicKey,
+      networkPubKeySet: handshakeResponse.networkPublicKeySet,
+      hdRootPubkeys: handshakeResponse.hdRootPubkeys,
+      latestBlockhash: handshakeResponse.latestBlockhash,
+      nodeIdentityKey: handshakeResponse.nodeIdentityKey,
     };
 
     // Nodes that have just bootstrapped will not have negotiated their keys, yet
@@ -587,7 +606,7 @@ export class LitCore {
       this.config.checkNodeAttestation ||
       NETWORKS_REQUIRING_SEV.includes(this.config.litNetwork)
     ) {
-      const attestation = handshakeResult.attestation;
+      const attestation = handshakeResponse.attestation;
 
       if (!attestation) {
         throw new InvalidNodeAttestation(
@@ -887,7 +906,7 @@ export class LitCore {
   protected _handshakeWithNode = async (
     params: HandshakeWithNode,
     requestId: string
-  ): Promise<NodeCommandServerKeysResponse> => {
+  ): Promise<GenericResponse<NodeCommandServerKeysResponse>> => {
     // -- get properties from params
     const { url } = params;
 
@@ -1029,9 +1048,9 @@ export class LitCore {
   protected _getNodePromises = (
     nodeUrls: string[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback: (url: string) => Promise<any>
+    callback: (url: string) => { url: string, promise: Promise<any>},
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any>[] => {
+  ): { url: string, promise: Promise<any> }[] => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
 
     const nodePromises = [];
@@ -1090,25 +1109,25 @@ export class LitCore {
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    */
   protected _handleNodePromises = async <T>(
-    nodePromises: Promise<T>[],
+    nodePromises: { url: string, promise: Promise<T> }[],
     requestId: string,
     minNodeCount: number
-  ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
+  ): Promise<SuccessNodePromises<WalletEncryptedPayload> | RejectedNodePromises> => {
     async function waitForNSuccessesWithErrors<T>(
-      promises: Promise<T>[],
+      promises: { url: string, promise: Promise<T> }[],
       n: number
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ): Promise<{ successes: T[]; errors: any[] }> {
+    ): Promise<{ successes: { url: string, result: T }[]; errors: any[] }> {
       let responses = 0;
-      const successes: T[] = [];
+      const successes: { url: string, result: T }[] = [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errors: any[] = [];
 
       return new Promise((resolve) => {
-        promises.forEach((promise) => {
+        promises.forEach(({ url, promise }) => {
           promise
             .then((result) => {
-              successes.push(result);
+              successes.push({ url, result });
               if (successes.length >= n) {
                 // If we've got enough successful responses to continue, resolve immediately even if some are pending
                 resolve({ successes, errors });
