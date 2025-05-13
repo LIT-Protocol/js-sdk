@@ -1,29 +1,9 @@
 import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { ConnectionInfo } from '@vNaga/LitChainClient/types';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
 import { getActiveUnkickedValidatorStructsAndCounts } from '../../rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
-import { getPriceFeedInfo, PriceFeedInfo } from '../priceFeed';
-import { NagaDevSpecificConfigs } from '@nagaDev/config';
-
-/**
- * Interface representing the structure of connection information
- */
-export interface ConnectionInfo {
-  epochInfo: {
-    epochLength: number;
-    number: number;
-    endTime: number;
-    retries: number;
-    timeout: number;
-  };
-  epochState: {
-    currentNumber: number;
-    startTime: number;
-  };
-  minNodeCount: number;
-  bootstrapUrls: string[];
-  priceFeedInfo: PriceFeedInfo;
-}
+import { getPriceFeedInfo } from '../priceFeed';
 
 /**
  * Interface for the parameters of getConnectionInfo function

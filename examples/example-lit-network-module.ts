@@ -1,23 +1,25 @@
-import { nagaDev } from '@lit-protocol/networks';
 import { getLitClient } from '@lit-protocol/lit-client';
-import { createChainManager } from 'packages/networks/src/networks/vNaga/envs/naga-dev/chain-manager/createChainManager';
-import { privateKeyToAccount } from 'viem/accounts';
 
 (async () => {
   console.log('💨 Running lit network module example');
   console.log('------------------------------------');
 
-  const litClient = await getLitClient(nagaDev);
+  // 1. Pick the network you want to connect to:
+  const { nagaDev } = await import('@lit-protocol/networks');
 
-  console.log('litClient:', litClient);
+  // 2. Get the LitClient instance
+  const litClient = await getLitClient({ network: nagaDev });
 
+  // 3. Get an instance of the auth manager
+  // const authManager = await import('@lit-protocol/auth');
+
+  // 4. Create an auth config
+  // const authConfig = authManager.getEoaAuthContext({
+
+  // })
+
+  // 5. Use the litClient APIs
+
+  // (optiional) If you ever want to disconnect from the network (stopping the event listener)
   // litClient.disconnect();
-
-  // const viemAccount = privateKeyToAccount(
-  //   process.env['PRIVATE_KEY'] as `0x${string}`
-  // );
-
-  // const chainManager = createChainManager(viemAccount);
-
-  // console.log(chainManager);
 })();

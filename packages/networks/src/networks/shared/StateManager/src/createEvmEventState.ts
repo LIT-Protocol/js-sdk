@@ -46,14 +46,14 @@ export const createEvmEventState = <T>({
 
   const listen = () => {
     if (attached) return;
-    console.log(`Listening for ${eventName}`);
+    console.log(`👂 Listening for ${eventName}`);
     contract.on(eventName, listener);
     attached = true;
   };
 
   const stop = () => {
     if (!attached) return;
-    console.log(`Stopping listener for ${eventName}`);
+    console.log(`🔇 Stopping listener for ${eventName}`);
     contract.off(eventName, listener);
     attached = false;
   };

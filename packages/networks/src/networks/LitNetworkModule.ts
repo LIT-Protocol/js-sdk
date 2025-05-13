@@ -9,7 +9,15 @@ import { NagaEndpointsType } from './vNaga/constants/endpoints';
  * The operations that a network module must provide.
  */
 export type LitNetworkModule = {
-  id: 'naga' | 'datil';
+  id: string;
+
+  version: string;
+
+  config: {
+    requiredAttestation: boolean;
+    abortTimeout: number;
+    minimumThreshold: number;
+  };
 
   /**
    * Gets the unique string name of the network (e.g., "naga-dev", "datil-mainnet").

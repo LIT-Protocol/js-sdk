@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { PriceFeedInfo } from './apis/highLevelApis';
 
 // Basic context needed by a chain client
 export interface LitChainClientContext {
@@ -22,4 +23,24 @@ export interface ContractDeploymentInfo {
 // Data returned by a method that fetches all relevant contract deployments for a network
 export interface NetworkContractDeployments {
   [contractName: string]: ContractDeploymentInfo;
+}
+
+/**
+ * Interface representing the structure of connection information
+ */
+export interface ConnectionInfo {
+  epochInfo: {
+    epochLength: number;
+    number: number;
+    endTime: number;
+    retries: number;
+    timeout: number;
+  };
+  epochState: {
+    currentNumber: number;
+    startTime: number;
+  };
+  minNodeCount: number;
+  bootstrapUrls: string[];
+  priceFeedInfo: PriceFeedInfo;
 }

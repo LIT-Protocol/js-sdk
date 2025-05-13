@@ -13,7 +13,7 @@ import {
   EcdsaSignedMessageShareParsed,
   SigResponse,
 } from '@lit-protocol/types';
-import { mostCommonValue } from '../core';
+import { mostCommonValue } from '../../lib.v2/helper/most-common-value';
 
 /**
  * Retrieves and combines signature shares from multiple nodes to generate the final signatures.

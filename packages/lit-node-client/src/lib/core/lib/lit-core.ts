@@ -50,7 +50,7 @@ import {
 // } from '../../../../../networks/src/networks/shared/StateManager/src/createRefreshedValue';
 // import { fetchBlockchainData } from '../../../../../networks/src/networks/shared/StateManager/helpers/fetchBlockchainData';
 import { composeLitUrl } from './helpers/endpoint-version';
-import { mostCommonValue } from './helpers/most-common-value';
+import { mostCommonValue } from '../../../lib.v2/helper/most-common-value';
 import {
   CoreNodeConfig,
   EpochCache,
@@ -614,33 +614,34 @@ export class LitCore {
     };
   }
 
-  private _getProviderWithFallback = async <T>(
-    providerTest: providerTest<T>
-  ): Promise<{
-    provider: ethers.providers.JsonRpcProvider;
-    testResult: T;
-  } | null> => {
-    for (const url of FALLBACK_RPC_URLS) {
-      try {
-        const provider = new ethers.providers.JsonRpcProvider({
-          url: url,
+  // private _getProviderWithFallback = async <T>(
+  //   providerTest: providerTest<T>
+  // ): Promise<{
+  //   provider: ethers.providers.JsonRpcProvider;
+  //   testResult: T;
+  // } | null> => {
+  //   for (const url of FALLBACK_RPC_URLS) {
+  //     try {
+  //       const provider = new ethers.providers.JsonRpcProvider({
+  //         url: url,
 
-          // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
-          timeout: 60000,
-        });
-        const testResult = await providerTest(provider); // Check to see if the provider is working
-        return {
-          provider,
-          testResult,
-        };
-      } catch (error) {
-        this._coreLogger.error(`RPC URL failed: ${url}`);
-      }
-    }
-    return null;
-  };
+  //         // https://docs.ethers.org/v5/api/utils/web/#ConnectionInfo
+  //         timeout: 60000,
+  //       });
+  //       const testResult = await providerTest(provider); // Check to see if the provider is working
+  //       return {
+  //         provider,
+  //         testResult,
+  //       };
+  //     } catch (error) {
+  //       this._coreLogger.error(`RPC URL failed: ${url}`);
+  //     }
+  //   }
+  //   return null;
+  // };
 
   /**
+   * @deprecated - use {@link createRequestId} instead
    * LitClient's job
    * Get a new random request ID
    * @returns { string }

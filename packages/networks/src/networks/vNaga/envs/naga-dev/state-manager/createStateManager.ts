@@ -1,6 +1,9 @@
 import { STAKING_STATES, STAKING_STATES_VALUES } from '@lit-protocol/constants';
 import { createReadOnlyChainManager } from '@nagaDev/ChainManager';
-import { createReadOnlyContractsManager } from '@vNaga/LitChainClient';
+import {
+  ConnectionInfo,
+  createReadOnlyContractsManager,
+} from '@vNaga/LitChainClient';
 import { ethers } from 'ethers';
 import { fetchBlockchainData } from '../../../../shared/StateManager/helpers/fetchBlockchainData';
 import {
@@ -15,7 +18,8 @@ import { NagaDevNetworkConfig } from '../naga-dev.config';
 // Import EpochInfo type (adjust path if necessary based on actual export location)
 import type { EpochInfo } from '@lit-protocol/types';
 import { getChildLogger } from '@lit-protocol/logger';
-import { ConnectionInfo } from '@vNaga/LitChainClient/apis/highLevelApis/connection/getConnectionInfo';
+import { areStringArraysDifferent } from './helper/areStringArraysDifferent';
+import { LitNetworkModule } from '../../../../LitNetworkModule';
 
 const _logger = getChildLogger({
   module: 'StateManager',
@@ -23,49 +27,32 @@ const _logger = getChildLogger({
 
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
-// -- Helper Function (copied from lit-node-client) --
-/**
- * Compares two arrays of strings to determine if they are different.
- * Two arrays are considered different if they have different lengths,
- * or if they do not contain the same elements with the same frequencies, regardless of order.
- *
- * @param arr1 The first array of strings.
- * @param arr2 The second array of strings.
- * @returns True if the arrays are different, false otherwise.
- */
-const areStringArraysDifferent = (arr1: string[], arr2: string[]): boolean => {
-  if (arr1.length !== arr2.length) {
-    return true;
-  }
+// type ConnectionInfoChangeListener = (newConnectionInfo: ConnectionInfo) => void;
+// type UnsubscribeFunction = () => void;
 
-  // Create sorted copies of the arrays
-  const sortedArr1 = [...arr1].sort();
-  const sortedArr2 = [...arr2].sort();
-
-  // Compare the sorted arrays element by element
-  for (let i = 0; i < sortedArr1.length; i++) {
-    if (sortedArr1[i] !== sortedArr2[i]) {
-      return true; // Found a difference
-    }
-  }
-
-  return false; // Arrays are permutations of each other (same elements, same frequencies)
+export type CallbackParams = {
+  bootstrapUrls: string[];
+  currentEpoch: number;
+  version: string;
+  requiredAttestation: boolean;
+  minimumThreshold: number;
+  abortTimeout: number;
 };
-// -- End Helper Function --
 
 /**
  * It returns a blockhash manager for latestBlockhash/nonce and event state
  * manager for latest connection info.
  */
-export const createStateManager = async ({
-  networkConfig,
-}: {
+export const createStateManager = async <T>(params: {
   networkConfig: NagaDevNetworkConfig;
+  callback: (params: CallbackParams) => Promise<T>;
+  networkModule: LitNetworkModule;
 }) => {
   // --- Internal State --- Keep track of the latest known values
   let latestBootstrapUrls: string[] = [];
   let latestEpochInfo: EpochInfo | null = null;
   let latestConnectionInfo: ConnectionInfo | null = null;
+  let callbackResult: T | null = null;
 
   // --- Internal Managers --- (Not directly exposed)
   const blockhashManager: RefreshedValue<string> = createRefreshedValue<string>(
@@ -76,7 +63,7 @@ export const createStateManager = async ({
   );
 
   const readOnlyChainManager = createReadOnlyChainManager();
-  const contractManager = createReadOnlyContractsManager(networkConfig);
+  const contractManager = createReadOnlyContractsManager(params.networkConfig);
 
   // --- Initial Fetch for Connection Info ---
   try {
@@ -91,6 +78,16 @@ export const createStateManager = async ({
       initialEpoch: latestEpochInfo?.number,
       initialConnectionInfo,
     });
+
+    // --- Initial callback
+    callbackResult = await params.callback({
+      bootstrapUrls: latestBootstrapUrls,
+      currentEpoch: latestEpochInfo?.number,
+      version: params.networkModule.version,
+      requiredAttestation: params.networkModule.config.requiredAttestation,
+      minimumThreshold: params.networkModule.config.minimumThreshold,
+      abortTimeout: params.networkModule.config.abortTimeout,
+    });
   } catch (error) {
     _logger.error(
       'Failed to get initial connection info for State Manager',
@@ -104,7 +101,7 @@ export const createStateManager = async ({
   const stakingContract = new ethers.Contract(
     contractManager.stakingContract.address,
     contractManager.stakingContract.abi,
-    new ethers.providers.JsonRpcProvider(networkConfig.rpcUrl)
+    new ethers.providers.JsonRpcProvider(params.networkConfig.rpcUrl)
   );
 
   const eventStateManager: EventState<STAKING_STATES_VALUES | null> =
@@ -117,33 +114,28 @@ export const createStateManager = async ({
       },
       onChange: async (newState) => {
         // 1. check if the new state is valid
-        if (!newState) return;
+        if (newState === null) return;
 
         _logger.info(`New staking state detected: "${newState}"`);
 
         // 2. If state is Active, refresh connection info
-        if (
-          newState === (STAKING_STATES.Active as STAKING_STATES_VALUES) ||
-          newState ===
-            (STAKING_STATES.NextValidatorSetLocked as STAKING_STATES_VALUES)
-          // newState === (STAKING_STATES.ReadyForNextEpoch as STAKING_STATES_VALUES)
-        ) {
+        if (newState === (STAKING_STATES.Active as STAKING_STATES_VALUES)) {
           try {
             _logger.info(
-              'Staking state is Active. Fetching latest connection info...'
+              '🖐 Staking state is Active. Fetching latest connection info...'
             );
-            const validatorData =
+            const newConnectionInfo =
               await readOnlyChainManager.api.connection.getConnectionInfo();
-            const newBootstrapUrls = validatorData.bootstrapUrls;
-            const newEpochInfo = validatorData.epochInfo; // Get new epoch info
-            latestConnectionInfo = validatorData; // Update internal state for connection info
+            const newBootstrapUrls = newConnectionInfo.bootstrapUrls;
+            const newEpochInfo = newConnectionInfo.epochInfo; // Get new epoch info
+            latestConnectionInfo = newConnectionInfo; // Update internal state for connection info
 
-            const isDifferent = areStringArraysDifferent(
+            const bootstrapUrlsChanged = areStringArraysDifferent(
               latestBootstrapUrls,
               newBootstrapUrls
             );
 
-            if (isDifferent) {
+            if (bootstrapUrlsChanged) {
               _logger.warn({
                 msg: 'Bootstrap URLs changed. Updating internal state.',
                 oldUrls: latestBootstrapUrls,
@@ -165,6 +157,17 @@ export const createStateManager = async ({
                 `Epoch number ${newEpochInfo.number} remains the same.`
               );
             }
+
+            // -- callback
+            callbackResult = await params.callback({
+              bootstrapUrls: latestBootstrapUrls,
+              currentEpoch: latestEpochInfo!.number,
+              version: params.networkModule.version,
+              requiredAttestation:
+                params.networkModule.config.requiredAttestation,
+              minimumThreshold: params.networkModule.config.minimumThreshold,
+              abortTimeout: params.networkModule.config.abortTimeout,
+            });
           } catch (error) {
             _logger.error(
               'Failed to get connection info during staking onChange',
@@ -185,7 +188,6 @@ export const createStateManager = async ({
   // If createRefreshedValue requires explicit start, call it too.
   // Adjust based on actual library API.
   eventStateManager.listen(); // Assuming .listen() starts the EVM listener
-  // blockhashManager.start(); // Assuming .start() might be needed for createRefreshedValue
 
   _logger.info('State manager background processes started.');
 
@@ -203,19 +205,8 @@ export const createStateManager = async ({
       }
     },
 
-    /**
-     * Gets the latest known list of bootstrap URLs, updated when staking state becomes Active.
-     */
-    getLatestBootstrapUrls: (): string[] => {
-      return [...latestBootstrapUrls]; // Return a copy
-    },
-
-    /**
-     * Gets the latest known epoch info, updated when staking state becomes Active.
-     */
-    getLatestEpochInfo: (): EpochInfo | null => {
-      // Return a deep copy if EpochInfo is mutable, otherwise direct return is fine
-      return latestEpochInfo ? { ...latestEpochInfo } : null;
+    getCallbackResult: (): T | null => {
+      return callbackResult;
     },
 
     /**
@@ -232,7 +223,6 @@ export const createStateManager = async ({
     stop: () => {
       _logger.info('Stopping state manager listeners...');
       // RefreshedValue does not have a stop method, only stop the event listener
-      // blockhashManager.stop();
       eventStateManager.stop();
     },
   };

@@ -1,21 +1,32 @@
-import { HTTP, HTTPS, LIT_NETWORK } from '@lit-protocol/constants';
-import { ethers } from 'ethers';
-import type { LitNetworkModule } from '../../../LitNetworkModule';
-import { networkConfig } from './naga-dev.config';
-import type { LitContractContext, EpochInfo } from '@lit-protocol/types';
-import { createStateManager } from './state-manager/createStateManager';
-import { privateKeyToAccount } from 'viem/accounts';
 import { createReadOnlyChainManager } from '@nagaDev/ChainManager';
-// import { LitNagaNetworkModule } from '../../LitNagaNetworkModule';
+import { networkConfig } from './naga-dev.config';
+import {
+  CallbackParams,
+  createStateManager,
+} from './state-manager/createStateManager';
+import { version } from '@lit-protocol/constants';
+import { ConnectionInfo } from '@vNaga/LitChainClient';
+import { LitNetworkModule } from '../../../LitNetworkModule';
 
 export const nagaDevModule = {
   id: 'naga',
+  version: `${version}-naga-dev`,
+  config: {
+    requiredAttestation: false,
+    abortTimeout: 20_000,
+    minimumThreshold: networkConfig.minimumThreshold,
+  },
   getNetworkName: () => networkConfig.network,
   getHttpProtocol: () => networkConfig.httpProtocol,
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
-  getConnectionInfo: async () => {
+  /**
+   * @deprecated Prefer using {@link getStateManager} to access connection information and other network state.
+   * Retrieves connection information directly using the read-only chain manager.
+   * @returns {Promise<ConnectionInfo>} A promise that resolves with the connection information.
+   */
+  getConnectionInfo: async (): Promise<ConnectionInfo> => {
     const readOnlyChainManager = createReadOnlyChainManager();
 
     // Explicitly type 'connection' with the awaited return type of the SDK's getConnectionInfo
@@ -24,11 +35,14 @@ export const nagaDevModule = {
 
     return connection;
   },
-  getStateManager: async (): Promise<
-    Awaited<ReturnType<typeof createStateManager>>
-  > => {
-    return await createStateManager({
+  getStateManager: async <T>(params: {
+    callback: (params: CallbackParams) => Promise<T>;
+    networkModule: LitNetworkModule;
+  }): Promise<Awaited<ReturnType<typeof createStateManager<T>>>> => {
+    return await createStateManager<T>({
       networkConfig,
+      callback: params.callback,
+      networkModule: params.networkModule,
     });
   },
 };

@@ -1,4 +1,4 @@
-import { mostCommonValue } from '../core';
+import { mostCommonValue } from '../../lib.v2/helper/most-common-value';
 
 export const assembleMostCommonResponse = (responses: object[]): object => {
   const result: Record<string, any> = {};

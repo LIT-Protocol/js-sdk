@@ -107,7 +107,7 @@ import {
   SuccessNodePromises,
 } from '@lit-protocol/types';
 import { z } from 'zod';
-import { composeLitUrl, LitCore, mostCommonValue } from './core';
+import { composeLitUrl, LitCore } from './core';
 import { assembleMostCommonResponse } from './helpers/assemble-most-common-response';
 import { encodeCode } from './helpers/encode-code';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
@@ -129,6 +129,7 @@ import { formatSessionSigs } from './helpers/session-sigs-reader';
 import { validateSessionSigs } from './helpers/session-sigs-validator';
 import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 import { calculateEffectiveEpochNumber } from './core/lib/helpers/calculateEffectiveEpochNumber';
+import { mostCommonValue } from '../lib.v2/helper/most-common-value';
 
 // request handler
 /**
