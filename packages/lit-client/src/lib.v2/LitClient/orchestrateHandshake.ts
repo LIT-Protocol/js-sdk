@@ -7,6 +7,11 @@ import {
   RawHandshakeResponse,
   resolveHandshakeResponse,
 } from '@lit-protocol/lit-node-client';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  name: 'lit-client.orchestrateHandshake',
+});
 
 export type OrchestrateHandshakeResponse = {
   serverKeys: Record<string, RawHandshakeResponse>;
@@ -23,7 +28,7 @@ export const orchestrateHandshake = async (params: {
   minimumThreshold: number;
   abortTimeout: number;
 }): Promise<OrchestrateHandshakeResponse> => {
-  console.log('🌶️ orchestrating handshake...');
+  _logger.info('🌶️ orchestrating handshake...');
 
   // -- States --
   const serverKeys: Record<string, RawHandshakeResponse> = {}; // Store processed keys
@@ -120,7 +125,7 @@ export const orchestrateHandshake = async (params: {
     threshold,
   };
 
-  console.log('🌶️ orchestrateHandshake result:', result);
+  _logger.info(`🌶️ orchestrateHandshake result ${JSON.stringify(result)}`);
 
   return result;
 };

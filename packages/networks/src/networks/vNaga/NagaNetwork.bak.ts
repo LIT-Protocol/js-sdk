@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { LitNetwork } from '../LitNetworkModule';
+import { LitNetwork } from '../LitNetworkModule.bak';
 import { LitChainConfig, LitNetworkConfig } from '../types';
 import {
   HTTP,

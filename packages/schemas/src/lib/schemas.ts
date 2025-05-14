@@ -10,6 +10,7 @@ import {
   SIWE_URI_PREFIX,
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
+import { LitResourceAbilityRequestSchema } from './models';
 
 export const UrlSchema = z.string().url({ message: 'Invalid URL format' });
 
@@ -228,6 +229,16 @@ export const AuthSigSchema = z.object({
    * An optional property only seen when generating session signatures, this is the signing algorithm used to generate session signatures.
    */
   algo: z.string().optional(),
+});
+
+export const AuthConfigSchema = z.object({
+  capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
+  expiration: ExpirationSchema.optional().default(
+    new Date(Date.now() + 1000 * 60 * 15).toISOString()
+  ),
+  statement: z.string().optional().default(''),
+  domain: z.string().optional().default(''),
+  resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
 });
 
 export const NodeSignedAuthSig = z

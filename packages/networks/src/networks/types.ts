@@ -1,5 +1,7 @@
 // TODO: These types can probably be moved into the `networks` package and only exposed by way of the `LitNetwork` if necessary
 import { LIT_ENDPOINT, HTTP, HTTPS } from '@lit-protocol/constants';
+// import { CallbackParams } from '@nagaDev/StateManager';
+// import { createStateManager } from 'packages/networks/dist/src/networks/vNaga/envs/naga-dev/state-manager/createStateManager';
 import { Chain } from 'viem';
 
 /**
@@ -29,3 +31,20 @@ export interface LitNetworkConfig {
 // Re-exporting from @lit-protocol/types for convenience if widely used, or import directly.
 // For now, assuming they are imported where needed.
 // export type { LitContractContext, EpochInfo } from '@lit-protocol/types';
+
+export interface LitNetworkModuleBase {
+  id: string;
+  version: string;
+  config: {
+    requiredAttestation: boolean;
+    abortTimeout: number;
+    minimumThreshold: number;
+  };
+
+  getNetworkName: () => string;
+  getHttpProtocol: () => typeof HTTP | typeof HTTPS;
+  getEndpoints: () => typeof LIT_ENDPOINT;
+  getRpcUrl: () => string;
+  getChainConfig: () => Chain;
+  getStateManager: () => Promise<any>;
+}

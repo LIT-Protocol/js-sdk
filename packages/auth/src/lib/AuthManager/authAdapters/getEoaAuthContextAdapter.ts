@@ -27,7 +27,7 @@ export const getEoaAuthContextAdapter = async (
   params: EoaAuthContextAdapterParams
 ) => {
   const litClientConfig = EoaAuthDepsSchema.parse({
-    nonce: await params.litClient.getLatestBlockhash(),
+    nonce: params.litClient.latestBlockhash,
   });
 
   // Try to get LitAuthData from storage or generate a new one

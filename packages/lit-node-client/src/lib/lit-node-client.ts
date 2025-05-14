@@ -168,6 +168,7 @@ export class LitNodeClient extends LitCore {
     }
   }
 
+  // @deprecated - unused
   setDefaultMaxPrice(product: keyof typeof PRODUCT_IDS, price: bigint) {
     this.defaultMaxPriceByProduct[product] = price;
   }

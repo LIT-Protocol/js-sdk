@@ -1,8 +1,10 @@
 import {
   createSiweMessageWithResources,
   generateAuthSig,
+  generateSessionCapabilityObjectWithWildcards,
 } from '@lit-protocol/auth-helpers';
 import {
+  AuthConfigSchema,
   HexPrefixedSchema,
   SessionKeyPairSchema,
   SessionKeyUriSchema,
@@ -10,14 +12,12 @@ import {
 } from '@lit-protocol/schemas';
 import { AuthCallbackParams } from '@lit-protocol/types';
 import { z } from 'zod';
-import {
-  AuthConfigSchema,
-  BaseAuthenticationSchema,
-} from './BaseAuthContextType';
+import { BaseAuthenticationSchema } from './BaseAuthContextType';
 import { LitAuthDataSchema } from '../../types';
 
 // Define specific Authentication schema for EOA
-const EoaAuthenticationSchema = BaseAuthenticationSchema.extend({
+const EoaAuthenticationSchema = z.object({
+  pkpPublicKey: HexPrefixedSchema,
   signer: SignerSchema,
   signerAddress: HexPrefixedSchema,
 });
@@ -37,6 +37,10 @@ export const getEoaAuthContext = async (
   // Validate the input parameters against the schema
   const _params = GetEoaAuthContextSchema.parse(params);
   const _sessionKeyPair = _params.deps.authData.sessionKey.keyPair;
+  const _sessionCapabilityObject =
+    await generateSessionCapabilityObjectWithWildcards(
+      _params.authConfig.resources.map((r) => r.resource)
+    );
 
   // Prepare the auth context object to be returned
   return {
@@ -44,6 +48,8 @@ export const getEoaAuthContext = async (
     chain: 'ethereum',
     resourceAbilityRequests: _params.authConfig.resources,
     sessionKeyPair: _sessionKeyPair,
+    sessionCapabilityObject: _sessionCapabilityObject,
+    authConfig: _params.authConfig,
     authNeededCallback: async ({
       // uri,
       expiration,

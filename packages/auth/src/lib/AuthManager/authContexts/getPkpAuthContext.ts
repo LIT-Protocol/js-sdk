@@ -1,5 +1,6 @@
 import { createPKPSiweMessage } from '@lit-protocol/auth-helpers';
 import {
+  AuthConfigSchema,
   AuthMethodSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
   NodeInfoSchema,
@@ -9,10 +10,7 @@ import {
 import { NodeSet } from '@lit-protocol/types';
 import { z } from 'zod';
 import { LitAuthData, LitAuthDataSchema } from '../../types';
-import {
-  AuthConfigSchema,
-  BaseAuthenticationSchema,
-} from './BaseAuthContextType';
+import { BaseAuthenticationSchema } from './BaseAuthContextType';
 
 const PkpAuthenticationSchema = BaseAuthenticationSchema.extend({
   authMethods: z.array(AuthMethodSchema),

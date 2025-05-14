@@ -19,16 +19,13 @@ import { NagaDevNetworkConfig } from '../naga-dev.config';
 import type { EpochInfo } from '@lit-protocol/types';
 import { getChildLogger } from '@lit-protocol/logger';
 import { areStringArraysDifferent } from './helper/areStringArraysDifferent';
-import { LitNetworkModule } from '../../../../LitNetworkModule';
+import { LitNetworkModuleBase } from 'packages/networks/src/networks/types';
 
 const _logger = getChildLogger({
   module: 'StateManager',
 });
 
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
-
-// type ConnectionInfoChangeListener = (newConnectionInfo: ConnectionInfo) => void;
-// type UnsubscribeFunction = () => void;
 
 export type CallbackParams = {
   bootstrapUrls: string[];
@@ -46,7 +43,7 @@ export type CallbackParams = {
 export const createStateManager = async <T>(params: {
   networkConfig: NagaDevNetworkConfig;
   callback: (params: CallbackParams) => Promise<T>;
-  networkModule: LitNetworkModule;
+  networkModule: LitNetworkModuleBase;
 }) => {
   // --- Internal State --- Keep track of the latest known values
   let latestBootstrapUrls: string[] = [];

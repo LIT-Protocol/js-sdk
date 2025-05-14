@@ -1,5 +1,10 @@
 import { generateSessionKeyPair } from '@lit-protocol/crypto';
-import { ExpirationSchema } from '@lit-protocol/schemas';
+import {
+  AuthConfigSchema,
+  ExpirationSchema,
+  HexPrefixedSchema,
+  SignerSchema,
+} from '@lit-protocol/schemas';
 import { z } from 'zod';
 import type { LitAuthStorageProvider } from '../storage/types';
 import type { AuthMethodType, LitAuthData } from '../types';
@@ -12,9 +17,6 @@ import {
   AuthenticatorWithId,
   getPkpAuthContextAdapter,
 } from './authAdapters/getPkpAuthContextAdapter';
-import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
-
-export { AuthConfigSchema };
 
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
@@ -30,7 +32,7 @@ export interface BaseAuthContext<T> {
 
   // @ts-expect-error - LitClientType is not defined in the package. We need to define this
   // once the LitClienType is ready
-  litClient: LitClientType;
+  litClient: ReturnType<typeof getLitClient>;
 }
 
 /**
@@ -106,7 +108,16 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const getAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
-    getEoaAuthContext: getEoaAuthContextAdapter.bind(null, authManagerParams),
+    createEoaAuthContext: <
+      T extends BaseAuthContext<{
+        signer: z.infer<typeof SignerSchema>;
+        pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      }>
+    >(params: {
+      config: T['config'];
+      authConfig: AuthConfig;
+      litClient: T['litClient'];
+    }) => getEoaAuthContextAdapter(authManagerParams, params),
     getPkpAuthContext: <T extends AuthenticatorWithId>(params: {
       authenticator: T;
       config: ConstructorConfig<T>;

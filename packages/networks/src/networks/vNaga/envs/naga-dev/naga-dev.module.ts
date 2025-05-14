@@ -1,12 +1,15 @@
-import { createReadOnlyChainManager } from '@nagaDev/ChainManager';
+import { version } from '@lit-protocol/constants';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
+import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
+import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
+import { AuthContextSchema } from './session-manager/AuthContextSchema';
+// import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
   createStateManager,
 } from './state-manager/createStateManager';
-import { version } from '@lit-protocol/constants';
-import { ConnectionInfo } from '@vNaga/LitChainClient';
-import { LitNetworkModule } from '../../../LitNetworkModule';
 
 export const nagaDevModule = {
   id: 'naga',
@@ -21,29 +24,63 @@ export const nagaDevModule = {
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
-  /**
-   * @deprecated Prefer using {@link getStateManager} to access connection information and other network state.
-   * Retrieves connection information directly using the read-only chain manager.
-   * @returns {Promise<ConnectionInfo>} A promise that resolves with the connection information.
-   */
-  getConnectionInfo: async (): Promise<ConnectionInfo> => {
-    const readOnlyChainManager = createReadOnlyChainManager();
 
-    // Explicitly type 'connection' with the awaited return type of the SDK's getConnectionInfo
-    const connection =
-      await readOnlyChainManager.api.connection.getConnectionInfo();
-
-    return connection;
-  },
-  getStateManager: async <T>(params: {
+  // main responsiblities:
+  // - return latestBlockhash
+  // - listens for StateChange events and updates the connection info
+  // - orchestrate handshake via callback
+  getStateManager: async <T, M>(params: {
     callback: (params: CallbackParams) => Promise<T>;
-    networkModule: LitNetworkModule;
+    networkModule: M;
   }): Promise<Awaited<ReturnType<typeof createStateManager<T>>>> => {
     return await createStateManager<T>({
       networkConfig,
       callback: params.callback,
-      networkModule: params.networkModule,
+      networkModule: params.networkModule as LitNetworkModuleBase,
     });
+  },
+
+  api: {
+    pkpSign: {
+      schema: z.object({
+        pubKey: HexPrefixedSchema,
+        toSign: z.array(z.number()),
+        authContext: AuthContextSchema,
+        userMaxPrice: z.bigint().optional(),
+      }),
+      createRequest: async (params: {
+        pricingContext: z.input<typeof PricingContextSchema>;
+        authContext: z.input<typeof AuthContextSchema>;
+      }) => {
+        //1. Pricing Context
+        // Pricing context properties:
+        // - product { id: bigint, name: string }
+        // - userMaxPrice { bigint }
+        // - nodePrices { url: string, prices: bigint[] }[]
+        // - threshold { number }
+        const pricingContext = PricingContextSchema.parse(
+          params.pricingContext
+        );
+        console.log('pricingContext', pricingContext);
+
+        //  2. Auth Context
+        // Auth context properties:
+        // - pkpPublicKey { string }
+        // - chain: { string }
+        // - resourceAbilityRequests: { resource, ability }[]
+        // - sessionKeyPair { publicKey, secretKey }
+        // - authNeededCallback
+        // - capabilityAuthSigs
+        const authContext = params.authContext;
+        console.log('authContext:', authContext);
+
+        // 3. Generate JIT session sigs
+        // const sessionSigs = await createJitSessionSigs({
+        //   pricingContext,
+        //   authContext,
+        // });
+      },
+    },
   },
 };
 
