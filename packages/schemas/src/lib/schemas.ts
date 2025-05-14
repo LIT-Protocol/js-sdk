@@ -10,7 +10,47 @@ import {
   SIWE_URI_PREFIX,
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
-import { LitResourceAbilityRequestSchema } from './models';
+
+import { sha256 } from '@noble/hashes/sha2';
+
+export const Bytes32Schema: z.ZodType<Uint8Array> = z
+  .any()
+  .transform((val, ctx): Uint8Array => {
+    if (val instanceof Uint8Array) {
+      if (val.length !== 32) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Uint8Array must be exactly 32 bytes, received ${val.length} bytes`,
+        });
+        return z.NEVER;
+      }
+      return val;
+    }
+
+    if (Array.isArray(val)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Arrays are not allowed as input for signing.',
+      });
+      return z.NEVER;
+    }
+
+    let str: string;
+    try {
+      str = typeof val === 'string' ? val : JSON.stringify(val);
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Value cannot be stringified',
+      });
+      return z.NEVER;
+    }
+
+    const encoded = new TextEncoder().encode(str);
+    return sha256(encoded);
+  });
+
+export const NormalizeArraySchema = z.array(z.number());
 
 export const UrlSchema = z.string().url({ message: 'Invalid URL format' });
 
@@ -28,10 +68,15 @@ export const SessionKeyUriSchema = z.string().transform((val) => {
   return val;
 });
 
-export const SignerSchema = z.object({
-  signMessage: z.function().args(z.string()).returns(z.promise(z.string())),
-  getAddress: z.function().args().returns(z.promise(z.string())),
-});
+/**
+ * @deprecated - use z.any() instead. If we parse using this,
+ * it will remove all the other properties.
+ */
+export const SignerSchema = z.any();
+// z.object({
+//   signMessage: z.function().args(z.string()).returns(z.promise(z.string())),
+//   getAddress: z.function().args().returns(z.promise(z.string())),
+// });
 
 export const ExpirationSchema = z
   .string()
@@ -59,6 +104,15 @@ export const NodeSetSchema = z.object({
   // (See PR description) the value parameter is a U64 that generates a sort order. This could be pricing related information, or another value to help select the right nodes. The value could also be zero with only the correct number of nodes participating in the signing request.
   value: z.number(),
 });
+
+export const NodeSetsFromUrlsSchema = z
+  .array(z.string().url())
+  .transform((urls) =>
+    urls.map((url) => {
+      const socketAddress = url.replace(/(^\w+:|^)\/\//, '');
+      return NodeSetSchema.parse({ socketAddress, value: 1 });
+    })
+  );
 
 export const NodeInfoSchema = z
   .array(
@@ -229,16 +283,6 @@ export const AuthSigSchema = z.object({
    * An optional property only seen when generating session signatures, this is the signing algorithm used to generate session signatures.
    */
   algo: z.string().optional(),
-});
-
-export const AuthConfigSchema = z.object({
-  capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
-  expiration: ExpirationSchema.optional().default(
-    new Date(Date.now() + 1000 * 60 * 15).toISOString()
-  ),
-  statement: z.string().optional().default(''),
-  domain: z.string().optional().default(''),
-  resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
 });
 
 export const NodeSignedAuthSig = z

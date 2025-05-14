@@ -1,4 +1,5 @@
 import { ed25519 } from '@noble/curves/ed25519';
+import { bytesToHex } from '@noble/hashes/utils';
 import { joinSignature, splitSignature } from 'ethers/lib/utils';
 
 import {
@@ -318,20 +319,13 @@ export const computeHDPubKey = async (
 export const generateSessionKeyPair = (): SessionKeyPair => {
   const privateKey = ed25519.utils.randomPrivateKey();
   const publicKey = ed25519.getPublicKey(privateKey);
-  const combinedSecretKey = new Uint8Array(
-    privateKey.length + publicKey.length
-  );
-  combinedSecretKey.set(privateKey, 0);
-  combinedSecretKey.set(publicKey, privateKey.length);
 
   const sessionKeyPair = {
-    publicKey: Buffer.from(publicKey).toString('hex'),
-    secretKey: Buffer.from(combinedSecretKey).toString('hex'), // TODO check if concatenated public key is needed
+    publicKey: bytesToHex(publicKey),
+    secretKey: bytesToHex(privateKey),
   };
 
-  const parsedSessionKeyPair = SessionKeyPairSchema.parse(sessionKeyPair);
-
-  return parsedSessionKeyPair;
+  return SessionKeyPairSchema.parse(sessionKeyPair);
 };
 
 /**

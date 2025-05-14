@@ -4,7 +4,6 @@ import {
   generateSessionCapabilityObjectWithWildcards,
 } from '@lit-protocol/auth-helpers';
 import {
-  AuthConfigSchema,
   HexPrefixedSchema,
   SessionKeyPairSchema,
   SessionKeyUriSchema,
@@ -12,7 +11,10 @@ import {
 } from '@lit-protocol/schemas';
 import { AuthCallbackParams } from '@lit-protocol/types';
 import { z } from 'zod';
-import { BaseAuthenticationSchema } from './BaseAuthContextType';
+import {
+  AuthConfigSchema,
+  BaseAuthenticationSchema,
+} from './BaseAuthContextType';
 import { LitAuthDataSchema } from '../../types';
 
 // Define specific Authentication schema for EOA
@@ -41,32 +43,20 @@ export const getEoaAuthContext = async (
     await generateSessionCapabilityObjectWithWildcards(
       _params.authConfig.resources.map((r) => r.resource)
     );
+  const siweResources = _sessionCapabilityObject
+    ? [_sessionCapabilityObject.encodeAsSiweResource]
+    : undefined;
 
   // Prepare the auth context object to be returned
   return {
     pkpPublicKey: _params.authentication.pkpPublicKey,
     chain: 'ethereum',
     resourceAbilityRequests: _params.authConfig.resources,
+    siweResources,
     sessionKeyPair: _sessionKeyPair,
     sessionCapabilityObject: _sessionCapabilityObject,
     authConfig: _params.authConfig,
-    authNeededCallback: async ({
-      // uri,
-      expiration,
-      resourceAbilityRequests,
-    }: AuthCallbackParams) => {
-      if (!expiration) {
-        throw new Error('expiration is required');
-      }
-
-      if (!resourceAbilityRequests) {
-        throw new Error('resourceAbilityRequests is required');
-      }
-
-      // if (!uri) {
-      //   throw new Error('uri is required');
-      // }
-
+    authNeededCallback: async () => {
       const uri = SessionKeyUriSchema.parse(_sessionKeyPair.publicKey);
 
       const toSign = await createSiweMessageWithResources({

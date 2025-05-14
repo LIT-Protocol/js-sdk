@@ -8,6 +8,7 @@ import { JsonPkpSignSdkParams } from '@lit-protocol/types';
 import { createRequestId } from '@lit-protocol/lit-node-client';
 import { PRODUCT_IDS } from '@lit-protocol/constants';
 import { z } from 'zod';
+import { Bytes32Schema, HexPrefixedSchema } from '@lit-protocol/schemas';
 // import { LitNetworkModule } from './type';
 
 export const getLitClient = async ({
@@ -48,8 +49,9 @@ export const getLitClient = async ({
     pkpSign: async (
       params: z.infer<typeof _networkModule.api.pkpSign.schema>
     ) => {
-      const requestId = createRequestId();
-      const request = _networkModule.api.pkpSign.createRequest({
+      // const _requestId = createRequestId();
+      // const _latestBlockhash = await _stateManager.getLatestBlockhash();
+      const _request = await _networkModule.api.pkpSign.createRequest({
         pricingContext: {
           product: 'SIGN',
           userMaxPrice: params.userMaxPrice,
@@ -57,7 +59,14 @@ export const getLitClient = async ({
           threshold: handshakeResult!.threshold,
         },
         authContext: params.authContext,
+        signingContext: {
+          pubKey: HexPrefixedSchema.parse(params.pubKey),
+          toSign: Bytes32Schema.parse(params.toSign),
+        },
+        // latestBlockhash: _latestBlockhash,
       });
+
+      console.log('🔄 _request', _request);
     },
   };
 };

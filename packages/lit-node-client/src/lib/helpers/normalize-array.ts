@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /**
  * Converts an ArrayLike object to a regular array.
  *
@@ -15,3 +17,4 @@ export const normalizeArray = (toSign: ArrayLike<number>) => {
   }
   return arr;
 };
+

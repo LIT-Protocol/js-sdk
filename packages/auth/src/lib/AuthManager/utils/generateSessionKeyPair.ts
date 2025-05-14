@@ -1,6 +1,7 @@
 import { SessionKeyPairSchema } from '@lit-protocol/schemas';
 import { SessionKeyPair } from '@lit-protocol/types';
 import { ed25519 } from '@noble/curves/ed25519';
+import { bytesToHex } from '@noble/hashes/utils';
 /**
  * Generates a session key pair using the ed25519 algorithm.
  * The session key pair includes a public key, a secret key (concatenation of private and public keys),
@@ -21,21 +22,13 @@ import { ed25519 } from '@noble/curves/ed25519';
 export const generateSessionKeyPair = (): SessionKeyPair => {
   const privateKey = ed25519.utils.randomPrivateKey();
   const publicKey = ed25519.getPublicKey(privateKey);
-  const combinedSecretKey = new Uint8Array(
-    privateKey.length + publicKey.length
-  );
-  combinedSecretKey.set(privateKey, 0);
-  combinedSecretKey.set(publicKey, privateKey.length);
 
   const sessionKeyPair = {
-    publicKey: Buffer.from(publicKey).toString('hex'),
-    secretKey: Buffer.from(combinedSecretKey).toString('hex'), // TODO check if concatenated public key is needed
+    publicKey: bytesToHex(publicKey),
+    secretKey: bytesToHex(privateKey),
   };
 
-  // Parse and validate using the Zod schema, which also adds the sessionKeyUri
-  const parsedSessionKeyPair = SessionKeyPairSchema.parse(sessionKeyPair);
-
-  return parsedSessionKeyPair;
+  return SessionKeyPairSchema.parse(sessionKeyPair);
 };
 
 // if (import.meta.main) {

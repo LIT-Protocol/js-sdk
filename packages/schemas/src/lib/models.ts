@@ -10,6 +10,7 @@ import {
   DefinedJsonSchema,
   EvmChainSchema,
   ExecuteJsAdvancedOptionsSchema,
+  ExpirationSchema,
   IpfsOptionsSchema,
   LitAbilitySchema,
   LitActionSdkParamsSchema,

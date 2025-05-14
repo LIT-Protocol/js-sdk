@@ -1,15 +1,21 @@
 import { version } from '@lit-protocol/constants';
-import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import {
+  Bytes32Schema,
+  HexPrefixedSchema,
+  NodeSetSchema,
+  NodeSetsFromUrlsSchema,
+} from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
 import { AuthContextSchema } from './session-manager/AuthContextSchema';
-// import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
+import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
   createStateManager,
 } from './state-manager/createStateManager';
+import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
 
 export const nagaDevModule = {
   id: 'naga',
@@ -44,13 +50,18 @@ export const nagaDevModule = {
     pkpSign: {
       schema: z.object({
         pubKey: HexPrefixedSchema,
-        toSign: z.array(z.number()),
+        toSign: z.any(),
         authContext: AuthContextSchema,
         userMaxPrice: z.bigint().optional(),
       }),
       createRequest: async (params: {
         pricingContext: z.input<typeof PricingContextSchema>;
         authContext: z.input<typeof AuthContextSchema>;
+        signingContext: {
+          pubKey: z.infer<typeof HexPrefixedSchema>;
+          toSign: z.infer<typeof Bytes32Schema>;
+        };
+        // latestBlockhash: string;
       }) => {
         //1. Pricing Context
         // Pricing context properties:
@@ -75,10 +86,38 @@ export const nagaDevModule = {
         console.log('authContext:', authContext);
 
         // 3. Generate JIT session sigs
-        // const sessionSigs = await createJitSessionSigs({
-        //   pricingContext,
-        //   authContext,
-        // });
+        const sessionSigs = await createJitSessionSigs({
+          pricingContext,
+          authContext,
+          // latestBlockhash: params.latestBlockhash,
+        });
+
+        // 4. Generate requests
+        const _requestId = createRequestId();
+        const requests = [];
+
+        const urls = Object.keys(sessionSigs);
+        for (const url of urls) {
+          const sessionAuthSig = sessionSigs[url];
+          const body = {
+            toSign: params.signingContext.toSign,
+            pubKey: params.signingContext.pubKey,
+            authSig: sessionAuthSig,
+            nodeSet: NodeSetsFromUrlsSchema.parse(urls),
+            signingScheme: 'EcdsaK256Sha256',
+          };
+          const urlWithPath = composeLitUrl({
+            url,
+            endpoint: nagaDevModule.getEndpoints().PKP_SIGN,
+          });
+          requests.push({
+            id: _requestId,
+            url: urlWithPath,
+            body,
+          });
+        }
+
+        return requests;
       },
     },
   },

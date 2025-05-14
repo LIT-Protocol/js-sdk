@@ -33,12 +33,17 @@ import { z } from 'zod';
 // }
 export const AuthContextSchema = z.object({
   pkpPublicKey: HexPrefixedSchema,
-  resourceAbilityRequests: LitResourceAbilityRequestSchema,
+  chain: z.string(),
   sessionKeyPair: SessionKeyPairSchema,
+  // which one do we need here?
+  resourceAbilityRequests: z.array(LitResourceAbilityRequestSchema),
+  // which one do we need here?
   sessionCapabilityObject: ISessionCapabilityObjectSchema,
+  // which one do we need here?
+  siweResources: z.array(z.any()),
   authNeededCallback: z.function(),
   capabilityAuthSigs: z.array(AuthSigSchema),
-  // authConfig: AuthConfigSchema,
+  authConfig: AuthConfigSchema,
 });
 
 export type AuthContext = z.infer<typeof AuthContextSchema>;

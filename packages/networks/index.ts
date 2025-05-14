@@ -17,3 +17,5 @@ export type LitNetworkModule = NagaDevModule;
 // | DatilTestModule
 // | DatilProdModule
 // | DatilLocalModule
+
+import * as litConstants from '@lit-protocol/constants';

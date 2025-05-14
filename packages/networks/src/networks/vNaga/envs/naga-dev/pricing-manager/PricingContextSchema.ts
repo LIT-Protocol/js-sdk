@@ -12,16 +12,18 @@ export const PricingContextSchema = z
     threshold: z.number(),
   })
   .transform(({ product, userMaxPrice, nodePrices, threshold }) => {
+    const _userMaxPrice =
+      userMaxPrice ??
+      getUserMaxPrice({
+        product: product,
+      });
+
     return {
       product: {
         id: PRODUCT_IDS[product],
         name: product,
       },
-      userMaxPrice:
-        userMaxPrice ??
-        getUserMaxPrice({
-          product: product,
-        }),
+      userMaxPrice: _userMaxPrice,
       nodePrices,
       threshold,
     };

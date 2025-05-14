@@ -1703,6 +1703,7 @@ export class LitNodeClient extends LitCore {
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
+    // TODO: do we need this in the revamp?
     const needToResignSessionKey = await this._checkNeedToResignSessionKey({
       authSig,
       sessionKeyUri,

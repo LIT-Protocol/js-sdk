@@ -1,6 +1,5 @@
 import { generateSessionKeyPair } from '@lit-protocol/crypto';
 import {
-  AuthConfigSchema,
   ExpirationSchema,
   HexPrefixedSchema,
   SignerSchema,
@@ -17,6 +16,7 @@ import {
   AuthenticatorWithId,
   getPkpAuthContextAdapter,
 } from './authAdapters/getPkpAuthContextAdapter';
+import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
 
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
