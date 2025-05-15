@@ -1,32 +1,29 @@
 import { version } from '@lit-protocol/constants';
+import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
 import {
   Bytes32Schema,
   HexPrefixedSchema,
-  NodeSetSchema,
-  NodeSetsFromUrlsSchema,
+  NodeSetsFromUrlsSchema
 } from '@lit-protocol/schemas';
+import {
+  createChainManager,
+  type CreateChainManagerReturn,
+} from '@nagaDev/ChainManager';
+import { ConnectionInfo } from '@vNaga/LitChainClient';
+import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { z } from 'zod';
+import { normalizeArray } from '../../../shared/utils/normalize-array';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
 import {
-  AuthContext,
-  AuthContextSchema,
+  AuthContextSchema
 } from './session-manager/AuthContextSchema';
 import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
   createStateManager,
 } from './state-manager/createStateManager';
-import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
-import { ConnectionInfo } from '@vNaga/LitChainClient';
-import { normalizeArray } from 'packages/lit-node-client/src/lib/helpers/normalize-array';
-import {
-  createChainManager,
-  type CreateChainManagerReturn,
-} from '@nagaDev/ChainManager';
-import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
-import { AuthenticationContext } from '@lit-protocol/types';
 
 // Define the object first
 const nagaDevModuleObject = {
@@ -108,8 +105,8 @@ const nagaDevModuleObject = {
             toSign: normalizeArray(params.signingContext.toSign),
             signingScheme: 'EcdsaK256Sha256',
 
-            // ❗️ THIS FREAKING "pubkey" where "k" is lowercase!!
-            pubkey: params.signingContext.pubKey,
+            // ❗️ THIS FREAKING "pubkey"! "k" is lowercase!!
+            pubkey: HexPrefixedSchema.parse(params.signingContext.pubKey),
             authSig: sessionAuthSig,
             nodeSet: NodeSetsFromUrlsSchema.parse(urls),
           };

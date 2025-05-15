@@ -1,24 +1,18 @@
+import * as LitNodeApi from '@lit-protocol/lit-node-client';
 import type {
   ConnectionInfo,
   LitNetworkModule,
   NagaDevModule,
 } from '@lit-protocol/networks';
-import { Bytes32Schema, HexPrefixedSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { orchestrateHandshake } from './orchestrateHandshake';
-// import { LitNetworkModule } from './type';
-import * as LitNodeApi from '@lit-protocol/lit-node-client';
-import { nagaDevModule } from 'packages/networks/src/networks/vNaga/envs/naga-dev/naga-dev.module';
-import { ExpectedAccountOrWalletClient } from 'packages/networks/src/networks/vNaga/LitChainClient/contract-manager/createContractsManager';
 
 export const getLitClient = async ({
   network,
 }: {
   network: LitNetworkModule;
 }) => {
-  // renaming it to make it clearer that this is the network module
-  // const networkModule = network;
-
+  // -------------------- Datil Network Module --------------------
   // ❗️ NOTE: There should be better type inference somewhere to handle different network modules
   // handle datil network module
   if (network.id === 'datil') {
@@ -45,7 +39,7 @@ export const getLitClient = async ({
   return {
     disconnect: _stateManager.stop,
     connectionInfo,
-    mintPkp: nagaDevModule.chainApi.mintPkp,
+    mintPkp: _networkModule.chainApi.mintPkp,
     latestBlockhash: await _stateManager.getLatestBlockhash(),
     pkpSign: async (
       params: z.infer<typeof _networkModule.api.pkpSign.schema>
@@ -60,13 +54,11 @@ export const getLitClient = async ({
         },
         authContext: params.authContext,
         signingContext: {
-          // pubKey: HexPrefixedSchema.parse(params.pubKey),
-          // toSign: Bytes32Schema.parse(params.toSign),
           pubKey: params.pubKey,
           toSign: params.toSign,
         },
         connectionInfo,
-        version: nagaDevModule.version,
+        version: _networkModule.version,
       });
 
       console.log('🔄 _request', _request);

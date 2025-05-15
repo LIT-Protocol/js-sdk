@@ -37,7 +37,7 @@ export async function sendNodeRequest<T>(
       method: 'POST',
       headers: _headers,
       body: JSON.stringify(requestData),
-      signal: controller.signal,
+      // signal: controller.signal,
     };
 
     // if (_fullUrl.includes('pkp/sign/v2')) {

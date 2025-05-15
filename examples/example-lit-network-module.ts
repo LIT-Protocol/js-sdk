@@ -66,7 +66,9 @@ import { privateKeyToAccount } from 'viem/accounts';
   // 5. Use the litClient APIs
   await litClient.pkpSign({
     pubKey: mintPkp.data.pubkey,
-    // toSign: 'hello',
+    // pubKey:
+    //   '0x0456b5b733081fdfa30adda3a80e7efb3afdd437ea682cf3acfd5753bac38595f23288dd4e457fc7726235834ca6ada0fa2188accb9fb00f899a21afebd041831d',
+
     toSign: new Uint8Array([
       116, 248, 31, 225, 103, 217, 155, 76, 180, 29, 109, 12, 205, 168, 34, 120,
       202, 238, 159, 62, 47, 37, 213, 229, 163, 147, 111, 243, 220, 236, 96,
