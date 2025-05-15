@@ -36,11 +36,11 @@ async function createMyLitService() {
   // lit:session: uri <-- add it
 
   // ---------------------------- EOA Auth Context Example ----------------------------
-  const eoaAuthContext = await authManager.getEoaAuthContext({
+  const eoaAuthContext = await authManager.createEoaAuthContext({
     config: {
       signer: myEthersSigner,
-      pkpPublicKey:
-        '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+      // pkpPublicKey:
+      //   '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
     },
     authConfig: myAuthConfig,
     litClient: litClient,

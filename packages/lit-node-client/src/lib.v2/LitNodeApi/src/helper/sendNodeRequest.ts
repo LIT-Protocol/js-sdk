@@ -7,25 +7,23 @@ const ABORT_TIMEOUT = 20_000; // Abort after 20s
 export async function sendNodeRequest<T>(
   // Interface for common request parameters
   params: {
-    url: string; // Base URL of the node (e.g., "http://127.0.0.1:7470")
-    endpoint: LitEndpoint; // e.g., LIT_ENDPOINT.HANDSHAKE
+    // url?: string; // Base URL of the node (e.g., "http://127.0.0.1:7470")
+    // endpoint?: LitEndpoint; // e.g., LIT_ENDPOINT.HANDSHAKE
+    fullPath: string; // "https://148.113.162.28:7470/web/pkp/sign/v2",
     data: any; // Request-specific payload
     requestId: string; // Unique ID for logging/tracing,
     epoch: number; // current epoch number
     version: string; // client sdk version
   }
 ): Promise<T> {
-  const _fullUrl = composeLitUrl({
-    url: params.url,
-    endpoint: params.endpoint,
-  });
+  const _fullUrl = params.fullPath;
 
   const _headers = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
     'X-Lit-SDK-Version': params.version,
     'X-Lit-SDK-Type': 'Typescript', // Or determine dynamically
-    'X-Request-Id': params.requestId, // Use the passed request ID
+    'X-Request-Id': `lit_${params.requestId}`, // Use the passed request ID
   };
 
   const controller = new AbortController();
@@ -35,12 +33,19 @@ export async function sendNodeRequest<T>(
   const requestData = { ...params.data, epoch: params.epoch };
 
   try {
-    const response = await fetch(_fullUrl, {
+    const req = {
       method: 'POST',
       headers: _headers,
       body: JSON.stringify(requestData),
       signal: controller.signal,
-    });
+    };
+
+    // if (_fullUrl.includes('pkp/sign/v2')) {
+    //   console.log('🔄 req', req);
+    //   process.exit();
+    // }
+
+    const response = await fetch(_fullUrl, req);
 
     const isJson = response.headers
       .get('content-type')
@@ -61,20 +66,20 @@ export async function sendNodeRequest<T>(
       throw new NetworkError(
         {
           info: {
-            url: params.url,
+            fullPath: params.fullPath,
             requestId: params.requestId,
             reason: 'Request timed out',
           },
           cause: e,
         },
-        `Request to ${params.url} aborted after ${ABORT_TIMEOUT}ms`
+        `Request to ${params.fullPath} aborted after ${ABORT_TIMEOUT}ms`
       );
     }
 
     throw new NetworkError(
       {
         info: {
-          url: params.url,
+          fullPath: params.fullPath,
           request: {
             method: 'POST',
             headers: _headers,
@@ -84,7 +89,7 @@ export async function sendNodeRequest<T>(
         },
         cause: e,
       },
-      `Network or parsing error during request to ${_fullUrl}: ${
+      `Network or parsing error during request to ${params.fullPath}: ${
         (e as Error).message
       }`
     );

@@ -7,23 +7,45 @@ import { privateKeyToAccount } from 'viem/accounts';
 
 // import { networkConfig as localConfig } from '../../naga-local/naga-local.config';
 
+export type CreateChainManagerReturn = {
+  api: {
+    mintPKP: (
+      req: Parameters<typeof api.mintPKP>[0]
+    ) => ReturnType<typeof api.mintPKP>;
+    pkpPermissionsManager: (
+      pkpIdentifier: PkpIdentifierRaw
+    ) => InstanceType<typeof api.PKPPermissionsManager>;
+    pricing: {
+      getPriceFeedInfo: (
+        req: Parameters<typeof api.pricing.getPriceFeedInfo>[0]
+      ) => ReturnType<typeof api.pricing.getPriceFeedInfo>;
+      getNodePrices: (
+        req: Parameters<typeof api.pricing.getNodePrices>[0]
+      ) => ReturnType<typeof api.pricing.getNodePrices>;
+    };
+    connection: {
+      getConnectionInfo: (args?: {
+        nodeProtocol?: string | null;
+      }) => ReturnType<typeof api.connection.getConnectionInfo>;
+    };
+  };
+};
+
 export const createChainManager = (
   accountOrWalletClient: ExpectedAccountOrWalletClient
-) => {
+): CreateChainManagerReturn => {
   // TODO: This ideally should set to NagaDevNetworkConfig.
   const _networkConfig = networkConfig as unknown as DefaultNetworkConfig;
 
   // Helper to bind the network context to an API function
-  const bindContext = <
-    T extends (
-      req: any,
+  const bindContext = <ReqArgType, RetType>(
+    fn: (
+      req: ReqArgType,
       ctx: DefaultNetworkConfig,
       accountOrWalletClient: ExpectedAccountOrWalletClient
-    ) => any
-  >(
-    fn: T
+    ) => RetType
   ) => {
-    return (req: Parameters<T>[0]): ReturnType<T> =>
+    return (req: ReqArgType): RetType =>
       fn(req, _networkConfig, accountOrWalletClient);
   };
 

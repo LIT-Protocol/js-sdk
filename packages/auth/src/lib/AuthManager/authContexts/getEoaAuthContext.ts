@@ -19,7 +19,7 @@ import { LitAuthDataSchema } from '../../types';
 
 // Define specific Authentication schema for EOA
 const EoaAuthenticationSchema = z.object({
-  pkpPublicKey: HexPrefixedSchema,
+  // pkpPublicKey: HexPrefixedSchema,
   signer: SignerSchema,
   signerAddress: HexPrefixedSchema,
 });
@@ -47,34 +47,45 @@ export const getEoaAuthContext = async (
     ? [_sessionCapabilityObject.encodeAsSiweResource]
     : undefined;
 
+  const auth = async () => {
+    const uri = SessionKeyUriSchema.parse(_sessionKeyPair.publicKey);
+
+    const toSign = await createSiweMessageWithResources({
+      uri: uri,
+      domain: _params.authConfig.domain,
+      expiration: _params.authConfig.expiration,
+      resources: _params.authConfig.resources,
+      walletAddress: _params.authentication.signerAddress,
+      nonce: _params.deps.nonce, // deps is added via .extend, accessed directly
+    });
+
+    const authSig = await generateAuthSig({
+      signer: _params.authentication.signer,
+      toSign,
+    });
+
+    return authSig;
+  };
+
+  const authSig = await auth();
+
+  const authMethod = {
+    authMethodType: 1,
+    accessToken: JSON.stringify(authSig),
+  };
+
   // Prepare the auth context object to be returned
   return {
-    pkpPublicKey: _params.authentication.pkpPublicKey,
+    signer: _params.authentication.signer,
+    authMethod,
+    // pkpPublicKey: _params.authentication.pkpPublicKey,
     chain: 'ethereum',
     resourceAbilityRequests: _params.authConfig.resources,
     siweResources,
     sessionKeyPair: _sessionKeyPair,
     sessionCapabilityObject: _sessionCapabilityObject,
     authConfig: _params.authConfig,
-    authNeededCallback: async () => {
-      const uri = SessionKeyUriSchema.parse(_sessionKeyPair.publicKey);
-
-      const toSign = await createSiweMessageWithResources({
-        uri: uri,
-        domain: _params.authConfig.domain,
-        expiration: _params.authConfig.expiration,
-        resources: _params.authConfig.resources,
-        walletAddress: _params.authentication.signerAddress,
-        nonce: _params.deps.nonce, // deps is added via .extend, accessed directly
-      });
-
-      const authSig = await generateAuthSig({
-        signer: _params.authentication.signer,
-        toSign,
-      });
-
-      return authSig;
-    },
+    authNeededCallback: auth,
     ...(_params.authConfig.capabilityAuthSigs && {
       capabilityAuthSigs: [..._params.authConfig.capabilityAuthSigs],
     }),

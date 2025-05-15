@@ -23,6 +23,7 @@ import { mostCommonValue } from '../../helper/most-common-value'; // Corrected p
 
 // Assuming InvalidEthBlockhash is an error class, e.g., from @lit-protocol/errors
 import { InvalidEthBlockhash } from '@lit-protocol/constants'; // Corrected path
+import { composeLitUrl } from '@lit-protocol/lit-node-client';
 
 // Interface for the handshake-specific payload
 interface HandshakeRequestData {
@@ -61,10 +62,14 @@ export const handshake = async (params: {
   epoch: number;
   version: string;
 }): Promise<RawHandshakeResponse> => {
+  const fullPath = composeLitUrl({
+    url: params.url!,
+    endpoint: LIT_ENDPOINT.HANDSHAKE,
+  });
+
   return RawHandshakeResponseSchema.parse(
     await sendNodeRequest<RawHandshakeResponse>({
-      url: params.url,
-      endpoint: LIT_ENDPOINT.HANDSHAKE,
+      fullPath,
       data: params.data,
       requestId: params.requestId,
       epoch: params.epoch,

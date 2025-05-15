@@ -3,13 +3,13 @@ import type {
   LitNetworkModule,
   NagaDevModule,
 } from '@lit-protocol/networks';
-import { orchestrateHandshake } from './orchestrateHandshake';
-import { JsonPkpSignSdkParams } from '@lit-protocol/types';
-import { createRequestId } from '@lit-protocol/lit-node-client';
-import { PRODUCT_IDS } from '@lit-protocol/constants';
-import { z } from 'zod';
 import { Bytes32Schema, HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
+import { orchestrateHandshake } from './orchestrateHandshake';
 // import { LitNetworkModule } from './type';
+import * as LitNodeApi from '@lit-protocol/lit-node-client';
+import { nagaDevModule } from 'packages/networks/src/networks/vNaga/envs/naga-dev/naga-dev.module';
+import { ExpectedAccountOrWalletClient } from 'packages/networks/src/networks/vNaga/LitChainClient/contract-manager/createContractsManager';
 
 export const getLitClient = async ({
   network,
@@ -45,12 +45,12 @@ export const getLitClient = async ({
   return {
     disconnect: _stateManager.stop,
     connectionInfo,
+    mintPkp: nagaDevModule.chainApi.mintPkp,
     latestBlockhash: await _stateManager.getLatestBlockhash(),
     pkpSign: async (
       params: z.infer<typeof _networkModule.api.pkpSign.schema>
     ) => {
-      // const _requestId = createRequestId();
-      // const _latestBlockhash = await _stateManager.getLatestBlockhash();
+      // 1. create a request
       const _request = await _networkModule.api.pkpSign.createRequest({
         pricingContext: {
           product: 'SIGN',
@@ -60,13 +60,21 @@ export const getLitClient = async ({
         },
         authContext: params.authContext,
         signingContext: {
-          pubKey: HexPrefixedSchema.parse(params.pubKey),
-          toSign: Bytes32Schema.parse(params.toSign),
+          // pubKey: HexPrefixedSchema.parse(params.pubKey),
+          // toSign: Bytes32Schema.parse(params.toSign),
+          pubKey: params.pubKey,
+          toSign: params.toSign,
         },
-        // latestBlockhash: _latestBlockhash,
+        connectionInfo,
+        version: nagaDevModule.version,
       });
 
       console.log('🔄 _request', _request);
+
+      // 2. send the request
+      const res1 = await LitNodeApi.sendNodeRequest(_request[0]);
+
+      console.log('🔄 res1', res1);
     },
   };
 };

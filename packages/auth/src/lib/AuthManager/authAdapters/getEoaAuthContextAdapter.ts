@@ -44,7 +44,7 @@ export const getEoaAuthContextAdapter = async (
   // we don't really care how messy the params look like, this adapter function will massage them into the correct shape
   return getEoaAuthContext({
     authentication: {
-      pkpPublicKey: params.config.pkpPublicKey,
+      // pkpPublicKey: params.config.pkpPublicKey,
       signer: params.config.signer,
       signerAddress: await params.config.signer.getAddress(),
     },

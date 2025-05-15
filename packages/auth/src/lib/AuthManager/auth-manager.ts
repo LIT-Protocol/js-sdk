@@ -111,7 +111,7 @@ export const getAuthManager = (authManagerParams: AuthManagerParams) => {
     createEoaAuthContext: <
       T extends BaseAuthContext<{
         signer: z.infer<typeof SignerSchema>;
-        pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+        // pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
       }>
     >(params: {
       config: T['config'];

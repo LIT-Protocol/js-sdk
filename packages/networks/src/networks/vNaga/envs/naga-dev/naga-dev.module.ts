@@ -9,15 +9,27 @@ import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
-import { AuthContextSchema } from './session-manager/AuthContextSchema';
+import {
+  AuthContext,
+  AuthContextSchema,
+} from './session-manager/AuthContextSchema';
 import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
   createStateManager,
 } from './state-manager/createStateManager';
 import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
+import { ConnectionInfo } from '@vNaga/LitChainClient';
+import { normalizeArray } from 'packages/lit-node-client/src/lib/helpers/normalize-array';
+import {
+  createChainManager,
+  type CreateChainManagerReturn,
+} from '@nagaDev/ChainManager';
+import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { AuthenticationContext } from '@lit-protocol/types';
 
-export const nagaDevModule = {
+// Define the object first
+const nagaDevModuleObject = {
   id: 'naga',
   version: `${version}-naga-dev`,
   config: {
@@ -30,7 +42,6 @@ export const nagaDevModule = {
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
-
   // main responsiblities:
   // - return latestBlockhash
   // - listens for StateChange events and updates the connection info
@@ -46,6 +57,19 @@ export const nagaDevModule = {
     });
   },
 
+  chainApi: {
+    mintPkp: async (account: any, authContext: any) => {
+      console.log('XX authContext:', authContext);
+
+      const chainManager = createChainManager(account);
+      const mintPKP = await chainManager.api.mintPKP({
+        scopes: ['sign-anything'],
+        authMethod: authContext.authMethod,
+      });
+
+      return mintPKP;
+    },
+  },
   api: {
     pkpSign: {
       schema: z.object({
@@ -61,70 +85,65 @@ export const nagaDevModule = {
           pubKey: z.infer<typeof HexPrefixedSchema>;
           toSign: z.infer<typeof Bytes32Schema>;
         };
-        // latestBlockhash: string;
+        connectionInfo: ConnectionInfo;
+        version: string;
       }) => {
-        //1. Pricing Context
-        // Pricing context properties:
-        // - product { id: bigint, name: string }
-        // - userMaxPrice { bigint }
-        // - nodePrices { url: string, prices: bigint[] }[]
-        // - threshold { number }
-        const pricingContext = PricingContextSchema.parse(
-          params.pricingContext
-        );
-        console.log('pricingContext', pricingContext);
-
-        //  2. Auth Context
-        // Auth context properties:
-        // - pkpPublicKey { string }
-        // - chain: { string }
-        // - resourceAbilityRequests: { resource, ability }[]
-        // - sessionKeyPair { publicKey, secretKey }
-        // - authNeededCallback
-        // - capabilityAuthSigs
-        const authContext = params.authContext;
-        console.log('authContext:', authContext);
-
-        // 3. Generate JIT session sigs
+        // -- 1. generate JIT session sigs
         const sessionSigs = await createJitSessionSigs({
-          pricingContext,
-          authContext,
-          // latestBlockhash: params.latestBlockhash,
+          pricingContext: PricingContextSchema.parse(params.pricingContext),
+          authContext: params.authContext,
         });
 
-        // 4. Generate requests
+        console.log('sessionSigs:', sessionSigs);
+
+        // -- 2. generate requests
         const _requestId = createRequestId();
         const requests = [];
 
         const urls = Object.keys(sessionSigs);
+
         for (const url of urls) {
           const sessionAuthSig = sessionSigs[url];
           const body = {
-            toSign: params.signingContext.toSign,
-            pubKey: params.signingContext.pubKey,
+            toSign: normalizeArray(params.signingContext.toSign),
+            signingScheme: 'EcdsaK256Sha256',
+
+            // ❗️ THIS FREAKING "pubkey" where "k" is lowercase!!
+            pubkey: params.signingContext.pubKey,
             authSig: sessionAuthSig,
             nodeSet: NodeSetsFromUrlsSchema.parse(urls),
-            signingScheme: 'EcdsaK256Sha256',
           };
           const urlWithPath = composeLitUrl({
             url,
-            endpoint: nagaDevModule.getEndpoints().PKP_SIGN,
+            endpoint: nagaDevModuleObject.getEndpoints().PKP_SIGN,
           });
           requests.push({
-            id: _requestId,
-            url: urlWithPath,
-            body,
+            fullPath: urlWithPath,
+            data: body,
+            requestId: _requestId,
+            epoch: params.connectionInfo.epochState.currentNumber,
+            version: params.version,
           });
         }
-
         return requests;
       },
     },
   },
 };
 
+// Now define the type by taking the type of the object, but overriding getChainManager
+export type NagaDevModule = Omit<
+  typeof nagaDevModuleObject,
+  'getChainManager'
+> & {
+  getChainManager: (
+    accountOrWalletClient: ExpectedAccountOrWalletClient
+  ) => CreateChainManagerReturn;
+};
+
+// Export the correctly typed object
+export const nagaDevModule = nagaDevModuleObject as NagaDevModule;
+
 export type NagaDevStateManagerType = Awaited<
   ReturnType<typeof createStateManager>
 >;
-
-export type NagaDevModule = typeof nagaDevModule;

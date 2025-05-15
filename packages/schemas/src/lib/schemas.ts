@@ -12,10 +12,9 @@ import {
 import { computeAddress } from 'ethers/lib/utils';
 
 import { sha256 } from '@noble/hashes/sha2';
-
-export const Bytes32Schema: z.ZodType<Uint8Array> = z
+export const Bytes32Schema: z.ZodType<number[]> = z
   .any()
-  .transform((val, ctx): Uint8Array => {
+  .transform((val, ctx): number[] => {
     if (val instanceof Uint8Array) {
       if (val.length !== 32) {
         ctx.addIssue({
@@ -24,7 +23,7 @@ export const Bytes32Schema: z.ZodType<Uint8Array> = z
         });
         return z.NEVER;
       }
-      return val;
+      return Array.from(val);
     }
 
     if (Array.isArray(val)) {
@@ -47,7 +46,7 @@ export const Bytes32Schema: z.ZodType<Uint8Array> = z
     }
 
     const encoded = new TextEncoder().encode(str);
-    return sha256(encoded);
+    return Array.from(sha256(encoded));
   });
 
 export const NormalizeArraySchema = z.array(z.number());
