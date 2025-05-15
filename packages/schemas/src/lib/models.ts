@@ -97,7 +97,7 @@ export const AuthCallbackSchema = z
   .returns(z.promise(AuthSigSchema));
 
 export const ISessionCapabilityObjectSchema = z.object({
-  attenuations: AttenuationsObjectSchema,
+  attenuations: z.lazy(() => AttenuationsObjectSchema),
   proofs: z.array(z.string()), // CID[]
   statement: z.string(),
   addProof: z.function().args(z.string()).returns(z.void()), // (proof: CID) => void

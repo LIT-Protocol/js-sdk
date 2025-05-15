@@ -1,4 +1,4 @@
-import { generateSessionKeyPair } from '@lit-protocol/crypto';
+import { generateSessionKeyPair } from './generateSessionKeyPair';
 import { ed25519 } from '@noble/curves/ed25519';
 import { hexToBytes } from '@noble/hashes/utils';
 

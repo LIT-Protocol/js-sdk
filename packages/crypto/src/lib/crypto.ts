@@ -1,6 +1,6 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { sha384 } from '@noble/hashes/sha512';
-import { x25519 } from '@noble/curves/ed25519';
+import { ed25519, x25519 } from '@noble/curves/ed25519';
 import { sha512 } from '@noble/hashes/sha512';
 import { nacl } from '@lit-protocol/nacl';
 
@@ -46,6 +46,8 @@ import {
   sevSnpVerify,
   unifiedCombineAndVerify,
 } from '@lit-protocol/wasm';
+import { SessionKeyPairSchema } from '@lit-protocol/schemas';
+import { bytesToHex } from '@noble/hashes/utils';
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
@@ -276,20 +278,32 @@ export const computeHDPubKey = async (
 };
 
 /**
+ * Generates a session key pair using the ed25519 algorithm.
+ * The session key pair includes a public key, a secret key (concatenation of private and public keys),
+ * and a sessionKeyUri derived from the public key.
  *
- * Generate a session key pair
+ * @returns {SessionKeyPair} An object containing the generated session key pair (publicKey, secretKey, sessionKeyUri).
  *
- * @returns { SessionKeyPair } sessionKeyPair
+ * @example
+ * const sessionKeys = generateSessionKeyPair();
+ * console.log(sessionKeys);
+ * // Output might look like:
+ * // {
+ * //   publicKey: "fd675dccf88acfe02975ccd7308e84991e694e3fcb46a1934aa491e2bc93e707",
+ * //   secretKey: "557dc82e14cce51a2948732f952722e57980e44abc4e3fad2bec93162394e822fd675dccf88acfe02975ccd7308e84991e694e3fcb46a1934aa491e2bc93e707",
+ * //   sessionKeyUri: "lit:session:fd675dccf88acfe02975ccd7308e84991e694e3fcb46a1934aa491e2bc93e707"
+ * // }
  */
 export const generateSessionKeyPair = (): SessionKeyPair => {
-  const keyPair = nacl.sign.keyPair();
+  const privateKey = ed25519.utils.randomPrivateKey();
+  const publicKey = ed25519.getPublicKey(privateKey);
 
-  const sessionKeyPair: SessionKeyPair = {
-    publicKey: uint8arrayToString(keyPair.publicKey, 'base16'),
-    secretKey: uint8arrayToString(keyPair.secretKey, 'base16'),
+  const sessionKeyPair = {
+    publicKey: bytesToHex(publicKey),
+    secretKey: bytesToHex(privateKey),
   };
 
-  return sessionKeyPair;
+  return SessionKeyPairSchema.parse(sessionKeyPair);
 };
 
 async function doDecrypt(

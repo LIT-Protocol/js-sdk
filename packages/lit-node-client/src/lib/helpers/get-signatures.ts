@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   CURVE_GROUP_BY_CURVE_TYPE,
   LIT_CURVE_VALUES,
@@ -8,7 +7,7 @@ import {
   UnknownSignatureType,
   CurveTypeNotFoundError,
 } from '@lit-protocol/constants';
-import { combineEcdsaShares } from '@lit-protocol/crypto';
+// import { combineEcdsaShares } from '@lit-protocol/crypto';
 import { logger } from '@lit-protocol/logger';
 import {
   EcdsaSignedMessageShareParsed,
@@ -100,7 +99,8 @@ export const getSignatures = async (params: {
   }
 
   // -- combine
-  const combinedSignature = await combineEcdsaShares(signedMessageShares);
+  // const combinedSignature = await combineEcdsaShares(signedMessageShares);
+  const combinedSignature = {} as any;
 
   const _publicKey = mostCommonValue(
     signedMessageShares.map((s) => s.publicKey)

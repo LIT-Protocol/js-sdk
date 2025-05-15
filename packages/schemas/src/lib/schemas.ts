@@ -465,14 +465,16 @@ export const AuthContextSchema = z.object({
   chain: z.string(),
   sessionKeyPair: SessionKeyPairSchema,
   // which one do we need here?
-  resourceAbilityRequests: z.array(LitResourceAbilityRequestSchema),
+  resourceAbilityRequests: z.array(
+    z.lazy(() => LitResourceAbilityRequestSchema)
+  ),
   // which one do we need here?
-  sessionCapabilityObject: ISessionCapabilityObjectSchema,
+  sessionCapabilityObject: z.lazy(() => ISessionCapabilityObjectSchema),
   // which one do we need here? TODO: ❗️ specify the type properly
   siweResources: z.any(),
   authNeededCallback: z.function(),
   capabilityAuthSigs: z.array(AuthSigSchema),
-  authConfig: AuthConfigSchema,
+  authConfig: z.lazy(() => AuthConfigSchema),
 });
 
 export type AuthContext = z.infer<typeof AuthContextSchema>;
@@ -481,7 +483,7 @@ export const EoaAuthContextSchema = z.object({
   authMethod: AuthMethodSchema,
   authNeededCallback: z.function(),
   sessionKeyPair: SessionKeyPairSchema,
-  authConfig: AuthConfigSchema,
+  authConfig: z.lazy(() => AuthConfigSchema),
 });
 
 export const GenericAuthContextSchema = z.union([
