@@ -34,7 +34,7 @@ import { privateKeyToAccount } from 'viem/accounts';
     authConfig: {
       expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // 15 miniutes
       statement: '🔥THIS IS A TEST STATEMENT🔥',
-      domain: 'localhost:3000/🔥💦',
+      domain: 'localhost:3000',
       capabilityAuthSigs: [],
       resources: createResourceBuilder()
         .addPKPSigningRequest('*')
@@ -45,16 +45,16 @@ import { privateKeyToAccount } from 'viem/accounts';
   });
 
   // mint pkp
-  const mintPkp = await litClient.mintPkp(authContext, ['sign-anything']);
+  const mintPkp = await litClient.mintPkp({
+    authContext,
+    scopes: ['sign-anything'],
+  });
 
   // 5. Use the litClient APIs
   await litClient.pkpSign({
+    signingScheme: 'EcdsaK256Sha256',
     pubKey: mintPkp.data.pubkey,
-    toSign: new Uint8Array([
-      116, 248, 31, 225, 103, 217, 155, 76, 180, 29, 109, 12, 205, 168, 34, 120,
-      202, 238, 159, 62, 47, 37, 213, 229, 163, 147, 111, 243, 220, 236, 96,
-      208,
-    ]),
+    toSign: 'hello',
     authContext: authContext,
     userMaxPrice: 1000000000000000000n,
   });

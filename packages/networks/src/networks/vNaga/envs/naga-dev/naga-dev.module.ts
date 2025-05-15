@@ -92,7 +92,7 @@ const nagaDevModuleObject = {
         authContext: z.input<typeof AuthContextSchema>;
         signingContext: {
           pubKey: z.infer<typeof HexPrefixedSchema>;
-          toSign: z.infer<typeof Bytes32Schema>;
+          toSign: any;
         };
         connectionInfo: ConnectionInfo;
         version: string;
@@ -110,14 +110,13 @@ const nagaDevModuleObject = {
         const urls = Object.keys(sessionSigs);
 
         for (const url of urls) {
-          const sessionAuthSig = sessionSigs[url];
           const body = {
-            toSign: NormaliseArraySchema.parse(params.signingContext.toSign),
+            toSign: Bytes32Schema.parse(params.signingContext.toSign),
             signingScheme: 'EcdsaK256Sha256',
 
             // ❗️ THIS FREAKING "pubkey"! "k" is lowercase!!
             pubkey: HexPrefixedSchema.parse(params.signingContext.pubKey),
-            authSig: sessionAuthSig,
+            authSig: sessionSigs[url],
             nodeSet: NodeSetsFromUrlsSchema.parse(urls),
           };
           const urlWithPath = composeLitUrl({

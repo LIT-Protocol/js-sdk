@@ -1,4 +1,3 @@
-import * as LitNodeApi from '@lit-protocol/lit-node-client';
 import type {
   ConnectionInfo,
   LitNetworkModule,
@@ -6,33 +5,49 @@ import type {
 } from '@lit-protocol/networks';
 import { z } from 'zod';
 import {
+  NodeSignResponse,
   processBatchRequests,
   RequestItem,
-  NodeSignResponse,
 } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
 
+type AnyNetworkModule = NagaNetworkModule | DatilNetworkModule;
+
+// ❗️ NOTE: There should be better type inference somewhere to handle different network modules
+// handle datil network module
 export const getLitClient = async ({
   network,
 }: {
-  network: LitNetworkModule;
+  network: AnyNetworkModule;
 }) => {
-  // -------------------- Datil Network Module --------------------
-  // ❗️ NOTE: There should be better type inference somewhere to handle different network modules
-  // handle datil network module
-  if (network.id === 'datil') {
-    throw new Error('Datil is not supported yet');
+  // -- (v8) Naga Network Module
+  if (network.id === 'naga') {
+    return _getNagaLitClient(network);
   }
 
-  // -------------------- Naga Network Module --------------------
-  const _networkModule = network as NagaDevModule;
-  const _stateManager = await _networkModule.getStateManager<
+  // -- (v7) Datil Network Module
+  if (network.id === 'datil') {
+    return _getDatilLitClient();
+  }
+
+  throw new Error(
+    `Network module ${network.id || JSON.stringify(network)} not supported`
+  );
+};
+
+/**
+ * This is the default network type used for all Naga environments (v8)
+ */
+type NagaNetworkModule = NagaDevModule;
+
+export const _getNagaLitClient = async (networkModule: NagaNetworkModule) => {
+  const _stateManager = await networkModule.getStateManager<
     Awaited<ReturnType<typeof orchestrateHandshake>>,
-    NagaDevModule
+    NagaNetworkModule
   >({
     // so whenever there's a new state detected, it will orchestrate a handshake and update the connection info
     callback: orchestrateHandshake,
-    networkModule: network,
+    networkModule,
   });
 
   // This is essnetially the result from orchestrateHandshake
@@ -50,15 +65,17 @@ export const getLitClient = async ({
   return {
     disconnect: _stateManager.stop,
     connectionInfo,
-    mintPkp: _networkModule.chainApi.mintPkp,
+    mintPkp: networkModule.chainApi.mintPkp,
     latestBlockhash: await _stateManager.getLatestBlockhash(),
     pkpSign: async (
-      params: z.infer<typeof _networkModule.api.pkpSign.schema>
+      params: z.infer<typeof networkModule.api.pkpSign.schema>
     ) => {
+      const PRODUCT_NAME = 'SIGN';
+
       // 1. create a request array
-      const _requestArray = await _networkModule.api.pkpSign.createRequest({
+      const _requestArray = await networkModule.api.pkpSign.createRequest({
         pricingContext: {
-          product: 'SIGN',
+          product: PRODUCT_NAME,
           userMaxPrice: params.userMaxPrice,
           nodePrices: connectionInfo.priceFeedInfo.networkPrices,
           threshold: handshakeResult.threshold,
@@ -69,7 +86,7 @@ export const getLitClient = async ({
           toSign: params.toSign,
         },
         connectionInfo,
-        version: _networkModule.version,
+        version: networkModule.version,
       });
 
       console.log('🔄 _requestArray to be sent to nodes:', _requestArray);
@@ -110,6 +127,15 @@ export const getLitClient = async ({
       }
     },
   };
+};
+
+/**
+ * This is the default network type used for all Datil environments (v7)
+ */
+type DatilNetworkModule = LitNetworkModule;
+
+export const _getDatilLitClient = async () => {
+  throw new Error('Datil is not supported yet');
 };
 
 export type LitClientType = Awaited<ReturnType<typeof getLitClient>>;

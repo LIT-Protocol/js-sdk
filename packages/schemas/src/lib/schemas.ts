@@ -10,8 +10,7 @@ import {
   SIWE_URI_PREFIX,
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
-
-import { sha256 } from '@noble/hashes/sha2';
+import { keccak_256 } from '@noble/hashes/sha3'; // small, fast, audited
 
 export const DomainSchema = z
   .string()
@@ -22,43 +21,33 @@ export const DomainSchema = z
       'Domain must not contain path or trailing slash (e.g., "localhost:3000" is valid, "localhost:3000/" is not)',
   });
 
-// @deprecated - we need to update this so that any type will be converted to a number[]
-export const Bytes32Schema: z.ZodType<number[]> = z
-  .any()
-  .transform((val, ctx): number[] => {
-    if (val instanceof Uint8Array) {
-      if (val.length !== 32) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Uint8Array must be exactly 32 bytes, received ${val.length} bytes`,
-        });
-        return z.NEVER;
-      }
-      return Array.from(val);
-    }
+/**
+ * Always convert any types into a hashed 32 bytes buffer
+ * You can either use:
+ * - ethers.utils.arrayify(ethers.utils.keccak256)
+ * - crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex')
+ * as long as the hash function returns 32 bytes, it will work.
+ */
+export const Bytes32Schema = z.any().transform((data) => {
+  // Step 1: Normalize to Uint8Array
+  if (typeof data === 'string') {
+    data = new TextEncoder().encode(data);
+  }
 
-    if (Array.isArray(val)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Arrays are not allowed as input for signing.',
-      });
-      return z.NEVER;
-    }
+  if (Array.isArray(data)) {
+    data = Uint8Array.from(data);
+  }
 
-    let str: string;
-    try {
-      str = typeof val === 'string' ? val : JSON.stringify(val);
-    } catch {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Value cannot be stringified',
-      });
-      return z.NEVER;
-    }
+  if (!(data instanceof Uint8Array)) {
+    throw new Error('Data must be a string, number[], or Uint8Array');
+  }
 
-    const encoded = new TextEncoder().encode(str);
-    return Array.from(sha256(encoded));
-  });
+  // Step 2: Hash using keccak256
+  const hash = keccak_256(data); // returns Uint8Array(32)
+
+  // Step 3: Normalize to number[]
+  return Array.from(hash);
+});
 
 export const NormalizeArraySchema = z.array(z.number());
 
