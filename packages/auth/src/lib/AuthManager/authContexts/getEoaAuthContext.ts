@@ -1,6 +1,8 @@
 import { createSiweMessageWithResources } from '@lit-protocol/auth-helpers';
-import { EoaAuthContextSchema } from '@lit-protocol/networks';
-import { SessionKeyUriSchema } from '@lit-protocol/schemas';
+import {
+  EoaAuthContextSchema,
+  SessionKeyUriSchema,
+} from '@lit-protocol/schemas';
 import { Account } from 'viem';
 import { z } from 'zod';
 import { getViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';

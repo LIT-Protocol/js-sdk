@@ -254,10 +254,10 @@ export async function processBatchRequests<T, M = NodeResponse>(
     };
   }
 
-  const nodePromises = requests.map((req) => executeSingleRequest<M, T>(req));
+  const nodePromises = requests.map((req) => executeSingleRequest<T, M>(req));
 
   const { successes, errors: failures } =
-    await waitForNSuccessesWithErrorsHelper<T>(nodePromises, minSuccessCount);
+    await waitForNSuccessesWithErrorsHelper<M>(nodePromises, minSuccessCount);
 
   if (successes.length >= minSuccessCount) {
     return {

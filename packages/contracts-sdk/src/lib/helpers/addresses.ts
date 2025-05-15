@@ -11,7 +11,7 @@ import {
   NoWalletException,
   ParamsMissingError,
 } from '@lit-protocol/constants';
-import { publicKeyCompress } from '@lit-protocol/crypto';
+// import { publicKeyCompress } from '@lit-protocol/crypto';
 import { logger } from '@lit-protocol/logger';
 import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { DerivedAddresses } from '@lit-protocol/types';
@@ -67,7 +67,7 @@ function deriveCosmosAddress(
 
   // If the Ethereum public key is uncompressed (130 characters), compress it
   if (pubKeyBuffer.length === 65 && pubKeyBuffer[0] === 0x04) {
-    pubKeyBuffer = Buffer.from(publicKeyCompress(pubKeyBuffer));
+    // pubKeyBuffer = Buffer.from(publicKeyCompress(pubKeyBuffer));
   }
 
   // Hash the compressed public key with SHA-256

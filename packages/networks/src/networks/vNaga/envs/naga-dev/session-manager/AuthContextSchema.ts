@@ -33,36 +33,36 @@ import { Account } from 'viem';
 //   authNeededCallback: [AsyncFunction: authNeededCallback],
 //   capabilityAuthSigs: [],
 // }
-export const AuthContextSchema = z.object({
-  pkpPublicKey: HexPrefixedSchema.optional(),
-  // viemAccount: z.custom<Account>().optional(),
-  // authMethod: AuthMethodSchema.optional(),
-  chain: z.string(),
-  sessionKeyPair: SessionKeyPairSchema,
-  // which one do we need here?
-  resourceAbilityRequests: z.array(LitResourceAbilityRequestSchema),
-  // which one do we need here?
-  sessionCapabilityObject: ISessionCapabilityObjectSchema,
-  // which one do we need here? TODO: ❗️ specify the type properly
-  siweResources: z.any(),
-  authNeededCallback: z.function(),
-  capabilityAuthSigs: z.array(AuthSigSchema),
-  authConfig: AuthConfigSchema,
-});
+// export const AuthContextSchema = z.object({
+//   pkpPublicKey: HexPrefixedSchema.optional(),
+//   // viemAccount: z.custom<Account>().optional(),
+//   // authMethod: AuthMethodSchema.optional(),
+//   chain: z.string(),
+//   sessionKeyPair: SessionKeyPairSchema,
+//   // which one do we need here?
+//   resourceAbilityRequests: z.array(LitResourceAbilityRequestSchema),
+//   // which one do we need here?
+//   sessionCapabilityObject: ISessionCapabilityObjectSchema,
+//   // which one do we need here? TODO: ❗️ specify the type properly
+//   siweResources: z.any(),
+//   authNeededCallback: z.function(),
+//   capabilityAuthSigs: z.array(AuthSigSchema),
+//   authConfig: AuthConfigSchema,
+// });
 
-export type AuthContext = z.infer<typeof AuthContextSchema>;
+// export type AuthContext = z.infer<typeof AuthContextSchema>;
 
-export const EoaAuthContextSchema = z.object({
-  viemAccount: z.custom<Account>(),
-  authMethod: AuthMethodSchema,
-  authNeededCallback: z.function(),
-  sessionKeyPair: SessionKeyPairSchema,
-  authConfig: AuthConfigSchema,
-});
+// export const EoaAuthContextSchema = z.object({
+//   viemAccount: z.custom<Account>(),
+//   authMethod: AuthMethodSchema,
+//   authNeededCallback: z.function(),
+//   sessionKeyPair: SessionKeyPairSchema,
+//   authConfig: AuthConfigSchema,
+// });
 
-export const GenericAuthContextSchema = z.union([
-  AuthContextSchema,
-  EoaAuthContextSchema,
-]);
+// export const GenericAuthContextSchema = z.union([
+//   AuthContextSchema,
+//   EoaAuthContextSchema,
+// ]);
 
-export type GenericAuthContext = z.infer<typeof GenericAuthContextSchema>;
+// export type GenericAuthContext = z.infer<typeof GenericAuthContextSchema>;

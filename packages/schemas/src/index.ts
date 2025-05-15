@@ -3,7 +3,6 @@ import { ExpirationSchema } from './lib/schemas';
 import { z } from 'zod';
 import { LitResourceAbilityRequestSchema } from './lib/models';
 import { AuthSigSchema } from './lib/schemas';
-import { LitResourceAbilityRequest } from '@lit-protocol/types';
 export * from './lib/auth/auth-schemas';
 export * from './lib/encryption';
 export * from './lib/models';

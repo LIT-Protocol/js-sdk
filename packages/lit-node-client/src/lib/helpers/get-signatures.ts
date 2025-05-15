@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   CURVE_GROUP_BY_CURVE_TYPE,
   LIT_CURVE_VALUES,

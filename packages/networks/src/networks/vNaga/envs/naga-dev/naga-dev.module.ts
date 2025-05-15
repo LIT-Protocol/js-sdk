@@ -1,10 +1,6 @@
 import { version } from '@lit-protocol/constants';
 import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
-import {
-  Bytes32Schema,
-  HexPrefixedSchema,
-  NodeSetsFromUrlsSchema,
-} from '@lit-protocol/schemas';
+import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
 import {
   createChainManager,
   type CreateChainManagerReturn,
@@ -14,10 +10,6 @@ import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
-import {
-  AuthContextSchema,
-  EoaAuthContextSchema,
-} from './session-manager/AuthContextSchema';
 import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
@@ -25,12 +17,12 @@ import {
 } from './state-manager/createStateManager';
 
 // Import the necessary types for the explicit return type annotation
+import { RequestItem } from '@lit-protocol/types';
 import type { LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
 import { PKPSignCreateRequestType } from './api-manager/pkpSign/pkpSign.CreateRequestType';
 import { PKPSignInputSchema } from './api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
-import { RequestItem } from '@lit-protocol/types';
 
 // Define the object first
 const nagaDevModuleObject = {

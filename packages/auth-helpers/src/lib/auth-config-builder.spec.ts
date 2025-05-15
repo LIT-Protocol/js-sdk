@@ -3,7 +3,6 @@ import { AuthConfigSchema } from '@lit-protocol/schemas';
 import { LitResourceAbilityRequest } from '@lit-protocol/types';
 import { createAuthConfigBuilder } from './auth-config-builder';
 
-
 describe('createAuthConfigBuilder', () => {
   const defaultValues = AuthConfigSchema.parse({});
 

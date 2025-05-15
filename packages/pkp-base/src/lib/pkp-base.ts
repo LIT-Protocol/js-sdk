@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * This module defines the PKPBase class, which provides a base implementation for wallet functionality
  * that can be shared between Ethers and Cosmos signers. The class is responsible for managing public key

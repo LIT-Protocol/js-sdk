@@ -7,7 +7,6 @@ import { z } from 'zod';
 import {
   NodeResponse,
   processBatchRequests,
-  RequestItem,
 } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
 

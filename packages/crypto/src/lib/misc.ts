@@ -9,7 +9,7 @@ import {
   NetworkError,
   RELAYER_URL_BY_NETWORK,
   UnknownError,
-  WrongNetworkException
+  WrongNetworkException,
 } from '@lit-protocol/constants';
 import {
   AuthSig,
@@ -18,7 +18,7 @@ import {
   LitNodeClientConfig,
   MintCallback,
   NodeErrorV3,
-  RelayClaimProcessor
+  RelayClaimProcessor,
 } from '@lit-protocol/types';
 
 const logBuffer: any[][] = [];

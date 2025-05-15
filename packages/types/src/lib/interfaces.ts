@@ -40,6 +40,25 @@ import {
 
 /** ---------- Auth Sig ---------- */
 
+export interface CombinedLitNodeSignature {
+  signature: string;
+  verifying_key: string;
+  signed_data: string;
+  recovery_id: number | null;
+}
+
+export interface CleanLitNodeSignature {
+  signature: Hex;
+  verifyingKey: Hex;
+  signedData: Hex;
+  recoveryId: 0 | 1 | null;
+}
+
+export interface LitNodeSignature extends CleanLitNodeSignature {
+  publicKey: Hex;
+  sigType: SigType;
+}
+
 /**
  * An `AuthSig` represents a cryptographic proof of ownership for an Ethereum address, created by signing a standardized [ERC-5573 SIWE ReCap](https://eips.ethereum.org/EIPS/eip-5573) (Sign-In with Ethereum) message. This signature serves as a verifiable credential, allowing the Lit network to associate specific permissions, access rights, and operational parameters with the signing Ethereum address. By incorporating various capabilities, resources, and parameters into the SIWE message before signing, the resulting `AuthSig` effectively defines and communicates these authorizations and specifications for the address within the Lit network.
  */
@@ -1266,4 +1285,24 @@ export interface EthBlockhashInfo {
   blockhash: string;
   timestamp: string;
   blockNumber: number;
+}
+
+export interface WalletEncryptedPayload {
+  V1: {
+    verification_key: string;
+    ciphertext_and_tag: string;
+    session_signature: string;
+    random: string;
+    created_at: string;
+  };
+}
+
+export interface WalletEncryptedPayload {
+  V1: {
+    verification_key: string;
+    ciphertext_and_tag: string;
+    session_signature: string;
+    random: string;
+    created_at: string;
+  };
 }

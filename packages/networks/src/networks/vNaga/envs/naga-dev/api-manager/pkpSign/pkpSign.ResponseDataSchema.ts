@@ -7,6 +7,4 @@ import {
 } from '@lit-protocol/schemas';
 import { z } from 'zod';
 
-export const PKPSignResponseDataSchema = z.object({
-
-});
+export const PKPSignResponseDataSchema = z.object({});

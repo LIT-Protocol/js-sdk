@@ -3,10 +3,7 @@ import { HexPrefixedSchema } from '@lit-protocol/schemas';
 import { ConnectionInfo } from '@vNaga/LitChainClient';
 import { z } from 'zod';
 import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
-import {
-  AuthContextSchema,
-  EoaAuthContextSchema,
-} from '../../session-manager/AuthContextSchema';
+import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
 
 export type PKPSignCreateRequestType = {
   pricingContext: z.input<typeof PricingContextSchema>;

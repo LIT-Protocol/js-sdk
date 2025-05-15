@@ -1,17 +1,23 @@
 import { z } from 'zod';
 
 import {
-  LIT_AUTH_SIG_CHAIN_KEYS,
+  AUTH_METHOD_TYPE,
   LIT_ABILITY,
+  LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS_KEYS,
   LIT_NETWORK,
   LIT_RESOURCE_PREFIX,
-  VMTYPE,
   SIWE_URI_PREFIX,
-  AUTH_METHOD_TYPE,
+  VMTYPE,
 } from '@lit-protocol/constants';
-import { computeAddress } from 'ethers/lib/utils';
 import { keccak_256 } from '@noble/hashes/sha3'; // small, fast, audited
+import { computeAddress } from 'ethers/lib/utils';
+import { Account } from 'viem';
+import {
+  AuthConfigSchema,
+  ISessionCapabilityObjectSchema,
+  LitResourceAbilityRequestSchema,
+} from '..';
 
 /**
  * Schema for validating node request objects
@@ -451,3 +457,36 @@ export const AttenuationsObjectSchema = z.record(
   z.string(),
   z.record(z.string(), z.array(DefinedJsonSchema))
 );
+
+export const AuthContextSchema = z.object({
+  pkpPublicKey: HexPrefixedSchema.optional(),
+  // viemAccount: z.custom<Account>().optional(),
+  // authMethod: AuthMethodSchema.optional(),
+  chain: z.string(),
+  sessionKeyPair: SessionKeyPairSchema,
+  // which one do we need here?
+  resourceAbilityRequests: z.array(LitResourceAbilityRequestSchema),
+  // which one do we need here?
+  sessionCapabilityObject: ISessionCapabilityObjectSchema,
+  // which one do we need here? TODO: ❗️ specify the type properly
+  siweResources: z.any(),
+  authNeededCallback: z.function(),
+  capabilityAuthSigs: z.array(AuthSigSchema),
+  authConfig: AuthConfigSchema,
+});
+
+export type AuthContext = z.infer<typeof AuthContextSchema>;
+export const EoaAuthContextSchema = z.object({
+  viemAccount: z.custom<Account>(),
+  authMethod: AuthMethodSchema,
+  authNeededCallback: z.function(),
+  sessionKeyPair: SessionKeyPairSchema,
+  authConfig: AuthConfigSchema,
+});
+
+export const GenericAuthContextSchema = z.union([
+  AuthContextSchema,
+  EoaAuthContextSchema,
+]);
+
+export type GenericAuthContext = z.infer<typeof GenericAuthContextSchema>;

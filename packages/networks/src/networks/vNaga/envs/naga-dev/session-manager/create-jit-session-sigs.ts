@@ -9,7 +9,7 @@ import { hexToBytes } from '@noble/hashes/utils';
 import { z } from 'zod';
 import { getMaxPricesForNodeProduct } from '../pricing-manager/getMaxPricesForNodeProduct';
 import { PricingContext } from '../pricing-manager/PricingContextSchema';
-import { AuthContextSchema, EoaAuthContextSchema } from './AuthContextSchema';
+import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
 import { formatSessionSigs } from './helper/session-sigs-reader';
 import { validateSessionSigs } from './helper/session-sigs-validator';
 

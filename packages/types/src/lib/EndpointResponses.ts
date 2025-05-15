@@ -1,3 +1,5 @@
+import { EcdsaSigType } from '@lit-protocol/constants';
+
 export type SigType =
   | 'BLS'
   | 'K256'
@@ -64,4 +66,11 @@ export interface EcdsaSignedMessageShareParsed {
   publicKey: string;
   sigType: SigType;
   dataSigned: string;
+}
+
+export interface LitActionSignedData {
+  publicKey: string;
+  signatureShare: string; // JSON.stringify(SignatureShare)
+  sigName: string;
+  sigType: EcdsaSigType;
 }

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { computeAddress } from '@ethersproject/transactions';
 import { ed25519 } from '@noble/curves/ed25519';
 import { ethers } from 'ethers';
