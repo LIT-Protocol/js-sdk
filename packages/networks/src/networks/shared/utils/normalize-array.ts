@@ -1,4 +1,3 @@
-
 /**
  * Converts an ArrayLike object to a regular array.
  *

@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 import { InvalidArgumentException } from '@lit-protocol/constants';
 import { AuthSig, SignerLike } from '@lit-protocol/types';
-
+import { Account, getAddress } from 'viem';
 /**
  * Generate an AuthSig object using the signer.
  *
@@ -78,6 +78,48 @@ export const generateAuthSig = async ({
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: toSign,
     address: address,
+    ...(algo && { algo }),
+  };
+};
+
+export const generateAuthSigWithViem = async ({
+  signer,
+  toSign,
+  address,
+  algo,
+}: {
+  signer: Account;
+  toSign: string;
+  address?: string;
+  algo?: 'ed25519';
+}): Promise<AuthSig> => {
+  if (typeof signer.signMessage !== 'function') {
+    throw new InvalidArgumentException(
+      { info: { signer, address, algo } },
+      'signer does not have a signMessage method'
+    );
+  }
+
+  const signature = await signer.signMessage({ message: toSign });
+
+  if (!address) {
+    address = signer.address;
+  }
+
+  address = getAddress(address);
+
+  if (!address) {
+    throw new InvalidArgumentException(
+      { info: { signer, address, algo } },
+      'address is required'
+    );
+  }
+
+  return {
+    sig: signature,
+    derivedVia: 'web3.eth.personal.sign',
+    signedMessage: toSign,
+    address,
     ...(algo && { algo }),
   };
 };

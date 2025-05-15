@@ -1,24 +1,14 @@
 import { getAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { getLitClient } from '@lit-protocol/lit-client';
-import { ethers } from 'ethers';
-import { Account, Hex } from 'viem';
+import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
 (async () => {
   console.log('💨 Running lit network module example');
   console.log('------------------------------------');
 
-  const account = privateKeyToAccount(process.env.PRIVATE_KEY as Hex);
-
-  const getSigner = (account: Account) => {
-    return {
-      signMessage: async (message: string) => account.signMessage({ message }),
-      getAddress: async () => account.address,
-    };
-  };
-
-  const mySigner = getSigner(account);
+  const myAccount = privateKeyToAccount(process.env.PRIVATE_KEY as Hex);
 
   // 1. Pick the network you want to connect to:
   const { nagaDev } = await import('@lit-protocol/networks');
@@ -37,15 +27,14 @@ import { privateKeyToAccount } from 'viem/accounts';
   });
 
   // 4. Create an auth config
-  const authContext = await authManager.createEoaAuthContext({
+  const authContext = await authManager.getEoaAuthContext({
     config: {
-      // We need to change this to using Viem
-      signer: mySigner,
+      account: myAccount,
     },
     authConfig: {
       expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // 15 miniutes
-      // statement: 'test',
-      domain: 'localhost',
+      statement: '🔥THIS IS A TEST STATEMENT🔥',
+      domain: 'localhost:3000/🔥💦',
       capabilityAuthSigs: [],
       resources: createResourceBuilder()
         .addPKPSigningRequest('*')
@@ -56,26 +45,18 @@ import { privateKeyToAccount } from 'viem/accounts';
   });
 
   // mint pkp
-  const mintPkp = await litClient.mintPkp(account, authContext);
-
-  console.log('mintPkp:', mintPkp.data.pubkey);
-  // process.exit();
-
-  // process.exit();
+  const mintPkp = await litClient.mintPkp(authContext, ['sign-anything']);
 
   // 5. Use the litClient APIs
   await litClient.pkpSign({
     pubKey: mintPkp.data.pubkey,
-    // pubKey:
-    //   '0x0456b5b733081fdfa30adda3a80e7efb3afdd437ea682cf3acfd5753bac38595f23288dd4e457fc7726235834ca6ada0fa2188accb9fb00f899a21afebd041831d',
-
     toSign: new Uint8Array([
       116, 248, 31, 225, 103, 217, 155, 76, 180, 29, 109, 12, 205, 168, 34, 120,
       202, 238, 159, 62, 47, 37, 213, 229, 163, 147, 111, 243, 220, 236, 96,
       208,
     ]),
     authContext: authContext,
-    // userMaxPrice: 1000000000000000000n,
+    userMaxPrice: 1000000000000000000n,
   });
 
   // (optiional) If you ever want to disconnect from the network (stopping the event listener)

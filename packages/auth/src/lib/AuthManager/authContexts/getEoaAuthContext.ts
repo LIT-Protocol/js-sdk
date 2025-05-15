@@ -1,27 +1,26 @@
 import {
   createSiweMessageWithResources,
-  generateAuthSig,
+  generateAuthSigWithViem,
   generateSessionCapabilityObjectWithWildcards,
 } from '@lit-protocol/auth-helpers';
+import { SessionKeyUriSchema } from '@lit-protocol/schemas';
 import {
-  HexPrefixedSchema,
-  SessionKeyPairSchema,
-  SessionKeyUriSchema,
-  SignerSchema,
-} from '@lit-protocol/schemas';
-import { AuthCallbackParams } from '@lit-protocol/types';
+  AuthCallback,
+  AuthMethod,
+  AuthSig,
+  ISessionCapabilityObject,
+  LitResourceAbilityRequest,
+  SessionKeyPair,
+} from '@lit-protocol/types';
+import { Account } from 'viem';
 import { z } from 'zod';
-import {
-  AuthConfigSchema,
-  BaseAuthenticationSchema,
-} from './BaseAuthContextType';
 import { LitAuthDataSchema } from '../../types';
+import { AuthConfig } from '../auth-manager';
+import { AuthConfigSchema } from './BaseAuthContextType';
 
 // Define specific Authentication schema for EOA
-const EoaAuthenticationSchema = z.object({
-  // pkpPublicKey: HexPrefixedSchema,
-  signer: SignerSchema,
-  signerAddress: HexPrefixedSchema,
+export const EoaAuthenticationSchema = z.object({
+  viemAccount: z.custom<Account>(),
 });
 
 export const GetEoaAuthContextSchema = z.object({
@@ -33,18 +32,31 @@ export const GetEoaAuthContextSchema = z.object({
   }),
 });
 
+export interface GetEoaAuthContextReturn {
+  viemAccount: Account;
+  authMethod: AuthMethod;
+  chain: 'ethereum';
+  resourceAbilityRequests: LitResourceAbilityRequest[] | undefined; // Or specific array type if resources are always defined
+  siweResources: string[] | undefined; // Array of strings from encodeAsSiweResource
+  sessionKeyPair: SessionKeyPair; // From SessionKeyPairSchema
+  sessionCapabilityObject: ISessionCapabilityObject | undefined; // From generateSessionCapabilityObjectWithWildcards
+  authConfig: AuthConfig;
+  authNeededCallback: AuthCallback;
+  capabilityAuthSigs?: AuthSig[]; // Optional, from authConfig
+}
+
 export const getEoaAuthContext = async (
   params: z.infer<typeof GetEoaAuthContextSchema>
-) => {
+): Promise<GetEoaAuthContextReturn> => {
   // Validate the input parameters against the schema
   const _params = GetEoaAuthContextSchema.parse(params);
   const _sessionKeyPair = _params.deps.authData.sessionKey.keyPair;
   const _sessionCapabilityObject =
     await generateSessionCapabilityObjectWithWildcards(
-      _params.authConfig.resources.map((r) => r.resource)
+      _params.authConfig.resources.map((r: any) => r.resource)
     );
   const siweResources = _sessionCapabilityObject
-    ? [_sessionCapabilityObject.encodeAsSiweResource]
+    ? [_sessionCapabilityObject.encodeAsSiweResource()]
     : undefined;
 
   const auth = async () => {
@@ -52,15 +64,16 @@ export const getEoaAuthContext = async (
 
     const toSign = await createSiweMessageWithResources({
       uri: uri,
+      statement: _params.authConfig.statement,
       domain: _params.authConfig.domain,
       expiration: _params.authConfig.expiration,
       resources: _params.authConfig.resources,
-      walletAddress: _params.authentication.signerAddress,
-      nonce: _params.deps.nonce, // deps is added via .extend, accessed directly
+      walletAddress: _params.authentication.viemAccount.address,
+      nonce: _params.deps.nonce,
     });
 
-    const authSig = await generateAuthSig({
-      signer: _params.authentication.signer,
+    const authSig = await generateAuthSigWithViem({
+      signer: params.authentication.viemAccount,
       toSign,
     });
 
@@ -70,13 +83,14 @@ export const getEoaAuthContext = async (
   const authSig = await auth();
 
   const authMethod = {
-    authMethodType: 1,
+    authMethodType: 1 as const,
     accessToken: JSON.stringify(authSig),
   };
 
   // Prepare the auth context object to be returned
   return {
-    signer: _params.authentication.signer,
+    viemAccount: _params.authentication.viemAccount,
+    // authSig: authSig,
     authMethod,
     // pkpPublicKey: _params.authentication.pkpPublicKey,
     chain: 'ethereum',

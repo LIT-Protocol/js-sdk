@@ -11,13 +11,16 @@ import {
   getCustomAuthContextAdapter,
   ICustomAuthenticator,
 } from './authAdapters/getCustomAuthContextAdapter';
-import { getEoaAuthContextAdapter } from './authAdapters/getEoaAuthContextAdapter';
+import {
+  EoaAuthContextAdapterParams,
+  getEoaAuthContextAdapter,
+} from './authAdapters/getEoaAuthContextAdapter';
 import {
   AuthenticatorWithId,
   getPkpAuthContextAdapter,
 } from './authAdapters/getPkpAuthContextAdapter';
 import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
-
+import { Account } from 'viem';
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
 }
@@ -108,28 +111,25 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const getAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
-    createEoaAuthContext: <
-      T extends BaseAuthContext<{
-        signer: z.infer<typeof SignerSchema>;
-        // pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
-      }>
-    >(params: {
-      config: T['config'];
-      authConfig: AuthConfig;
-      litClient: T['litClient'];
-    }) => getEoaAuthContextAdapter(authManagerParams, params),
+    getEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
+      return getEoaAuthContextAdapter(authManagerParams, params);
+    },
     getPkpAuthContext: <T extends AuthenticatorWithId>(params: {
       authenticator: T;
       config: ConstructorConfig<T>;
       authConfig: AuthConfig;
       litClient: BaseAuthContext<any>['litClient'];
-    }) => getPkpAuthContextAdapter(authManagerParams, params),
+    }) => {
+      return getPkpAuthContextAdapter(authManagerParams, params);
+    },
     getCustomAuthContext: <T extends ICustomAuthenticator>(params: {
       authenticator: T;
       settings: ConstructorParameters<T>[0]; // Infer settings type from constructor
       config: { pkpPublicKey: string; [key: string]: any }; // Execution config
       authConfig: AuthConfig;
       litClient: BaseAuthContext<any>['litClient'];
-    }) => getCustomAuthContextAdapter(authManagerParams, params),
+    }) => {
+      return getCustomAuthContextAdapter(authManagerParams, params);
+    },
   };
 };

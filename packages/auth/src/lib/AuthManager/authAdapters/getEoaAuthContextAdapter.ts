@@ -1,4 +1,4 @@
-import { SignerSchema } from '@lit-protocol/schemas';
+import { Account } from 'viem';
 import { z } from 'zod';
 import {
   AuthManagerParams,
@@ -6,7 +6,6 @@ import {
   tryGetCachedAuthData,
 } from '../auth-manager';
 import { getEoaAuthContext } from '../authContexts/getEoaAuthContext';
-
 export const EoaAuthDepsSchema = z.object({
   nonce: z.any(),
   // currentEpoch: no need for EOA
@@ -18,8 +17,7 @@ export const EoaAuthDepsSchema = z.object({
  */
 export interface EoaAuthContextAdapterParams
   extends BaseAuthContext<{
-    pkpPublicKey: string;
-    signer: z.infer<typeof SignerSchema>;
+    account: Account;
   }> {}
 
 export const getEoaAuthContextAdapter = async (
@@ -33,7 +31,7 @@ export const getEoaAuthContextAdapter = async (
   // Try to get LitAuthData from storage or generate a new one
   const authData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
-    address: await params.config.signer.getAddress(),
+    address: params.config.account.address,
     expiration: params.authConfig.expiration,
     type: 'EthWallet',
   });
@@ -44,9 +42,7 @@ export const getEoaAuthContextAdapter = async (
   // we don't really care how messy the params look like, this adapter function will massage them into the correct shape
   return getEoaAuthContext({
     authentication: {
-      // pkpPublicKey: params.config.pkpPublicKey,
-      signer: params.config.signer,
-      signerAddress: await params.config.signer.getAddress(),
+      viemAccount: params.config.account,
     },
     authConfig: {
       domain: params.authConfig.domain,

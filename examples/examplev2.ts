@@ -1,10 +1,16 @@
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
-import { myEthersSigner } from './myEthersSigner';
 import { getLitClient } from '@lit-protocol/lit-client';
+import { privateKeyToAccount } from 'viem/accounts';
+import { Hex } from 'viem';
 
 async function createMyLitService() {
+  const myAccount = privateKeyToAccount(process.env.PRIVATE_KEY as Hex);
+
+  // 1. Pick the network you want to connect to:
+  const { nagaDev } = await import('@lit-protocol/networks');
+
   // --- end of litNodeClient dependencies we want to remove soon
 
   // get rid of statefulness
@@ -19,13 +25,13 @@ async function createMyLitService() {
 
   const myAuthConfig: AuthConfig = {
     expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // 15 miniutes
-    statement: 'test',
-    domain: 'example.com',
+    statement: '🔥THIS IS A TEST STATEMENT🔥',
+    domain: 'example.com/🔥',
     capabilityAuthSigs: [],
     resources: createResourceBuilder().addPKPSigningRequest('*').getResources(),
   };
 
-  const litClient = await getLitClient({ network: 'naga-dev' });
+  const litClient = await getLitClient({ network: nagaDev });
 
   // There's actually two eth authetnicators
   // - Ethers
@@ -36,15 +42,17 @@ async function createMyLitService() {
   // lit:session: uri <-- add it
 
   // ---------------------------- EOA Auth Context Example ----------------------------
-  const eoaAuthContext = await authManager.createEoaAuthContext({
+  const eoaAuthContext = await authManager.getEoaAuthContext({
     config: {
-      signer: myEthersSigner,
-      // pkpPublicKey:
-      //   '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
+      account: myAccount,
     },
     authConfig: myAuthConfig,
     litClient: litClient,
   });
+
+  console.log('eoaAuthContext:', eoaAuthContext);
+
+  process.exit();
 
   // ---------------------------- PKP EOA Auth Context Example ----------------------------
   const pkpEoaAuthContext = await authManager.getPkpAuthContext({

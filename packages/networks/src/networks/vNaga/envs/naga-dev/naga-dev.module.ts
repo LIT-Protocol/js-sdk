@@ -3,7 +3,7 @@ import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
 import {
   Bytes32Schema,
   HexPrefixedSchema,
-  NodeSetsFromUrlsSchema
+  NodeSetsFromUrlsSchema,
 } from '@lit-protocol/schemas';
 import {
   createChainManager,
@@ -16,14 +16,16 @@ import { normalizeArray } from '../../../shared/utils/normalize-array';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
-import {
-  AuthContextSchema
-} from './session-manager/AuthContextSchema';
+import { AuthContextSchema } from './session-manager/AuthContextSchema';
 import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
   createStateManager,
 } from './state-manager/createStateManager';
+import {
+  ScopeSchemaRaw,
+  ScopeString,
+} from '@vNaga/LitChainClient/schemas/shared/ScopeSchema';
 
 // Define the object first
 const nagaDevModuleObject = {
@@ -55,12 +57,14 @@ const nagaDevModuleObject = {
   },
 
   chainApi: {
-    mintPkp: async (account: any, authContext: any) => {
-      console.log('XX authContext:', authContext);
+    mintPkp: async (
+      authContext: any,
+      scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[]
+    ) => {
+      const chainManager = createChainManager(authContext.viemAccount);
 
-      const chainManager = createChainManager(account);
       const mintPKP = await chainManager.api.mintPKP({
-        scopes: ['sign-anything'],
+        scopes: scopes,
         authMethod: authContext.authMethod,
       });
 

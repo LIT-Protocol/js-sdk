@@ -64,9 +64,9 @@ export const getLitClient = async ({
       console.log('🔄 _request', _request);
 
       // 2. send the request
-      const res1 = await LitNodeApi.sendNodeRequest(_request[0]);
+      // const res1 = await LitNodeApi.sendNodeRequest(_request[0]);
 
-      console.log('🔄 res1', res1);
+      // console.log('🔄 res1', res1);
     },
   };
 };
