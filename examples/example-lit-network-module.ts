@@ -1,9 +1,9 @@
 import { getAuthManager, storagePlugins } from '@lit-protocol/auth';
-import { createResourceBuilder } from '@lit-protocol/auth-helpers';
+// import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { getLitClient } from '@lit-protocol/lit-client';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-
+import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
 (async () => {
   console.log('💨 Running lit network module example');
   console.log('------------------------------------');
@@ -19,6 +19,7 @@ import { privateKeyToAccount } from 'viem/accounts';
   // 3. Get an instance of the auth manager
   // const authManager = await import('@lit-protocol/auth');
   const authManager = getAuthManager({
+    // Web user will default to localStorage if no storage is provided
     storage: storagePlugins.localStorageNode({
       appName: 'my-app',
       networkName: 'naga-dev',
@@ -26,38 +27,45 @@ import { privateKeyToAccount } from 'viem/accounts';
     }),
   });
 
-  // 4. Create an auth config
+  // 4. Create an auth config, you can store that somewhere
+  // for future use.
+  const authConfig = createAuthConfigBuilder()
+    .addExpiration(new Date(Date.now() + 1000 * 60 * 15).toISOString())
+    .addStatement('🔥THIS IS A TEST STATEMENT🔥')
+    .addCapabilityAuthSigs([])
+    .addDomain('localhost:3000')
+    .addPKPSigningRequest('*')
+    .addLitActionExecutionRequest('*')
+    .build();
+
   const authContext = await authManager.getEoaAuthContext({
     config: {
       account: myAccount,
     },
-    authConfig: {
-      expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // 15 miniutes
-      statement: '🔥THIS IS A TEST STATEMENT🔥',
-      domain: 'localhost:3000',
-      capabilityAuthSigs: [],
-      resources: createResourceBuilder()
-        .addPKPSigningRequest('*')
-        .addLitActionExecutionRequest('*')
-        .getResources(),
-    },
+    authConfig: authConfig,
     litClient: litClient,
   });
 
+  console.log('authContext:', authContext);
+
   // mint pkp
-  const mintPkp = await litClient.mintPkp({
+  const { data: mintedPkpInfo } = await litClient.mintPkp({
     authContext,
     scopes: ['sign-anything'],
   });
 
+  console.log('mintedPkpInfo:', mintedPkpInfo);
   // 5. Use the litClient APIs
+
   await litClient.pkpSign({
-    signingScheme: 'EcdsaK256Sha256',
-    pubKey: mintPkp.data.pubkey,
+    pubKey: mintedPkpInfo.pubkey,
     toSign: 'hello',
+    signingScheme: 'EcdsaK256Sha256',
     authContext: authContext,
-    userMaxPrice: 1000000000000000000n,
+    // -- optional
+    // userMaxPrice: 1000000000000000000n,
   });
+  process.exit();
 
   // (optiional) If you ever want to disconnect from the network (stopping the event listener)
   // litClient.disconnect();

@@ -83,34 +83,30 @@ export const generateAuthSig = async ({
 };
 
 export const generateAuthSigWithViem = async ({
-  signer,
+  account,
   toSign,
-  address,
+
   algo,
 }: {
-  signer: Account;
+  account: Account;
   toSign: string;
-  address?: string;
+
   algo?: 'ed25519';
 }): Promise<AuthSig> => {
-  if (typeof signer.signMessage !== 'function') {
+  if (typeof account.signMessage !== 'function') {
     throw new InvalidArgumentException(
-      { info: { signer, address, algo } },
-      'signer does not have a signMessage method'
+      { info: { account, algo } },
+      'account does not have a signMessage method'
     );
   }
 
-  const signature = await signer.signMessage({ message: toSign });
+  const signature = await account.signMessage({ message: toSign });
 
-  if (!address) {
-    address = signer.address;
-  }
-
-  address = getAddress(address);
+  const address = getAddress(account.address);
 
   if (!address) {
     throw new InvalidArgumentException(
-      { info: { signer, address, algo } },
+      { info: { account, address, algo } },
       'address is required'
     );
   }

@@ -39,8 +39,6 @@ export async function mintNextAndAddAuthMethods(
 
   const mintCost = await pkpNftContract.read.mintCost();
 
-  console.log('mintCost', mintCost);
-
   const hash = await callWithAdjustedOverrides(
     pkpHelperContract,
     'mintNextAndAddAuthMethods',

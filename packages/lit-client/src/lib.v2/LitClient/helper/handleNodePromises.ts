@@ -1,4 +1,5 @@
 import * as LitNodeApi from '@lit-protocol/lit-node-client';
+import { RequestItem } from '@lit-protocol/types';
 
 /**
  * @fileOverview
@@ -35,26 +36,26 @@ export interface NodeSetEntry {
  * Interface for the 'data' payload of a single request item sent to a node.
  * This should align with the expected schema for endpoints like PKP_SIGN.
  */
-export interface RequestItemData {
-  toSign: number[] | Uint8Array;
-  signingScheme: string; // e.g., "EcdsaK256Sha256"
-  pubkey: string; // The public key for which the signature is requested
-  authSig: RequestAuthSig;
-  nodeSet: NodeSetEntry[];
-  // Add any other fields that might be part of the request data.
-}
+// export interface RequestItemData {
+//   toSign: number[] | Uint8Array;
+//   signingScheme: string; // e.g., "EcdsaK256Sha256"
+//   pubkey: string; // The public key for which the signature is requested
+//   authSig: RequestAuthSig;
+//   nodeSet: NodeSetEntry[];
+//   // Add any other fields that might be part of the request data.
+// }
 
-/**
- * Interface for a single request item to be sent to a Lit Protocol node.
- * This structure should match the objects within the '_request' array in getLitClient.ts.
- */
-export interface RequestItem {
-  fullPath: string; // The full URL endpoint of the node
-  data: RequestItemData; // The payload for the request
-  requestId: string; // Identifier for this specific request/batch
-  epoch: number; // The current epoch number
-  version: string; // The version of the Lit Protocol client/network
-}
+// /**
+//  * Interface for a single request item to be sent to a Lit Protocol node.
+//  * This structure should match the objects within the '_request' array in getLitClient.ts.
+//  */
+// export interface RequestItem<T> {
+//   fullPath: string; // The full URL endpoint of the node
+//   data: T; // The payload for the request
+//   requestId: string; // Identifier for this specific request/batch
+//   epoch: number; // The current epoch number
+//   version: string; // The version of the Lit Protocol client/network
+// }
 
 /**
  * Represents a successful outcome from processing the batch of requests.
@@ -85,7 +86,7 @@ export type ProcessedBatchResult<T> = BatchSuccessResult<T> | BatchErrorResult;
  * This should be refined based on the actual response structure of `LitNodeApi.sendNodeRequest`
  * for PKP signing.
  */
-export interface NodeSignResponse {
+export interface NodeResponse {
   // Example fields - adjust based on actual node response
   signatureShare?: string;
   signature?: string;
@@ -103,12 +104,12 @@ export interface NodeSignResponse {
  * Executes a single asynchronous request to a Lit Protocol node.
  * This function wraps `LitNodeApi.sendNodeRequest`.
  *
- * @template T The expected type of the data in a successful response (defaults to `NodeSignResponse`).
+ * @template T The expected type of the data in a successful response (defaults to `NodeResponse`).
  * @param requestItem The `RequestItem` object to be processed.
  * @returns A Promise that resolves with the response data or rejects with an error.
  */
-async function executeSingleRequest<T = NodeSignResponse>(
-  requestItem: RequestItem
+async function executeSingleRequest<M, T = NodeResponse>(
+  requestItem: RequestItem<M>
 ): Promise<T> {
   // The linter indicates sendNodeRequest expects an object matching RequestItem's structure (with fullPath).
   return LitNodeApi.sendNodeRequest(requestItem) as Promise<T>;
@@ -151,75 +152,133 @@ function getMostCommonError(errors: any[]): any {
 
 /**
  * Processes a batch of request items asynchronously and aggregates their results.
+ * It implements an "early success" mechanism: if `minSuccessCount` successful responses
+ * are received, it resolves immediately without waiting for all other requests to complete.
  *
- * @template T The expected type of a successful response from a single request (defaults to `NodeSignResponse`).
+ * @template M The type of the data payload within each `RequestItem`.
+ * @template T The expected type of a successful response from a single request (defaults to `NodeResponse`).
  * @param requests An array of `RequestItem` objects to be processed.
  * @param batchRequestId A unique identifier for this batch of requests.
  * @param minSuccessCount The minimum number of successful responses required for the batch to be considered successful.
  * @returns A Promise that resolves to a `ProcessedBatchResult<T>`, indicating either overall success with the collected values or failure with an error.
  */
-export async function processBatchRequests<T = NodeSignResponse>(
-  requests: RequestItem[],
+export async function processBatchRequests<T, M = NodeResponse>(
+  requests: RequestItem<T>[],
   batchRequestId: string,
   minSuccessCount: number
-): Promise<ProcessedBatchResult<T>> {
+): Promise<ProcessedBatchResult<M>> {
   if (!Array.isArray(requests)) {
     return {
-        success: false,
-        error: {
-            name: 'InvalidInputError',
-            message: 'The "requests" parameter must be an array.',
-            details: { batchRequestId }
-        }
+      success: false,
+      error: {
+        name: 'InvalidInputError',
+        message: 'The "requests" parameter must be an array.',
+        details: { batchRequestId },
+      },
     };
+  }
+
+  /**
+   * Waits for N successes from a list of promises, or until all promises settle.
+   * Resolves early if N successes are achieved.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function waitForNSuccessesWithErrorsHelper<LocalT>(
+    promises: Promise<LocalT>[],
+    n: number
+  ): Promise<{ successes: LocalT[]; errors: any[] }> {
+    let responses = 0;
+    const successes: LocalT[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errors: any[] = [];
+    let resolved = false;
+
+    return new Promise((resolveOuter) => {
+      if (n === 0) {
+        resolveOuter({ successes: [], errors: [] });
+        return;
+      }
+
+      if (promises.length === 0 && n > 0) {
+        // Cannot achieve n successes if there are no promises and n > 0.
+        resolveOuter({ successes: [], errors: [] });
+        return;
+      }
+
+      // If promises.length is 0 and n is 0, it's handled by the n === 0 case.
+      // If promises.length > 0 but less than n (e.g. 2 promises, n=3),
+      // it will naturally fall through to the `responses === promises.length`
+      // case, collecting all available successes and errors.
+
+      promises.forEach((promise) => {
+        promise
+          .then((result) => {
+            if (resolved) return; // Already resolved, ignore further results for this path
+            successes.push(result);
+            if (successes.length >= n) {
+              resolved = true;
+              resolveOuter({ successes, errors }); // errors array contains errors encountered so far
+            }
+          })
+          .catch((error) => {
+            if (resolved) return; // Already resolved, ignore further errors for this path
+            errors.push(error);
+            // No early exit on errors alone, wait for other promises or all to settle.
+          })
+          .finally(() => {
+            if (resolved) return; // Already resolved
+
+            responses++;
+            if (responses === promises.length) {
+              // All promises have settled, and we haven't resolved yet
+              // (which means successes.length < n)
+              resolved = true;
+              resolveOuter({ successes, errors });
+            }
+          });
+      });
+    });
   }
 
   if (requests.length === 0) {
     if (minSuccessCount === 0) {
-        return { success: true, values: [] };
+      return { success: true, values: [] };
     }
     return {
-        success: false,
-        error: {
-            name: 'InvalidInputError',
-            message: 'Request array is empty, but minSuccessCount > 0.',
-            details: { batchRequestId, minSuccessCount }
-        }
+      success: false,
+      error: {
+        name: 'InvalidInputError',
+        message: 'Request array is empty, but minSuccessCount > 0.',
+        details: { batchRequestId, minSuccessCount },
+      },
     };
   }
 
-  const nodePromises = requests.map((req) => executeSingleRequest<T>(req));
-  const settledResults = await Promise.allSettled(nodePromises);
+  const nodePromises = requests.map((req) => executeSingleRequest<M, T>(req));
 
-  const successes: T[] = [];
-  const failures: any[] = [];
-
-  settledResults.forEach((result) => {
-    if (result.status === 'fulfilled') {
-      successes.push(result.value);
-    } else {
-      failures.push(result.reason);
-    }
-  });
+  const { successes, errors: failures } =
+    await waitForNSuccessesWithErrorsHelper<T>(nodePromises, minSuccessCount);
 
   if (successes.length >= minSuccessCount) {
     return {
       success: true,
-      values: successes,
+      values: successes, // Contains at least minSuccessCount items
     };
   }
 
+  // If we are here, successes.length < minSuccessCount
   if (failures.length === 0) {
-    // Not enough successes, but no explicit errors were thrown by promises.
+    // Not enough successes, but no explicit errors were caught by promises.
+    // This means all promises settled successfully, but the total count was less than minSuccessCount.
     return {
       success: false,
       error: {
         name: 'InsufficientSuccessNoError',
-        message: `Batch ${batchRequestId}: Not enough successful responses (${successes.length}) from ${requests.length} attempts, and no errors were reported. Minimum required: ${minSuccessCount}.`,
+        message: `Batch ${batchRequestId}: Not enough successful responses (${successes.length}) from ${nodePromises.length} attempts, and no errors were reported. Minimum required: ${minSuccessCount}.`,
         details: {
           batchRequestId,
           successCount: successes.length,
-          failureCount: failures.length,
+          failureCount: failures.length, // This will be 0
           minSuccessCount,
           totalRequests: nodePromises.length,
         },
@@ -227,10 +286,11 @@ export async function processBatchRequests<T = NodeSignResponse>(
     };
   }
 
+  // Not enough successes, and there were failures.
   const mostCommonError = getMostCommonError(failures);
 
   return {
     success: false,
-    error: mostCommonError,
+    error: mostCommonError, // This will be one of the error objects from the failures array
   };
 }

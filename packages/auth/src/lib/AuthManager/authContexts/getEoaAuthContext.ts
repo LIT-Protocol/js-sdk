@@ -1,22 +1,10 @@
-import {
-  createSiweMessageWithResources,
-  generateAuthSig,
-  generateAuthSigWithViem,
-  generateSessionCapabilityObjectWithWildcards,
-} from '@lit-protocol/auth-helpers';
+import { createSiweMessageWithResources } from '@lit-protocol/auth-helpers';
+import { EoaAuthContextSchema } from '@lit-protocol/networks';
 import { SessionKeyUriSchema } from '@lit-protocol/schemas';
-import {
-  AuthCallback,
-  AuthMethod,
-  AuthSig,
-  ISessionCapabilityObject,
-  LitResourceAbilityRequest,
-  SessionKeyPair,
-} from '@lit-protocol/types';
 import { Account } from 'viem';
 import { z } from 'zod';
+import { getViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';
 import { LitAuthDataSchema } from '../../types';
-import { AuthConfig } from '../auth-manager';
 import { AuthConfigSchema } from './BaseAuthContextType';
 
 // Define specific Authentication schema for EOA
@@ -33,139 +21,39 @@ export const GetEoaAuthContextSchema = z.object({
   }),
 });
 
-export interface GetEoaAuthContextReturn {
-  viemAccount: Account;
-  authMethod: AuthMethod;
-  chain: 'ethereum';
-  resourceAbilityRequests: LitResourceAbilityRequest[] | undefined; // Or specific array type if resources are always defined
-  siweResources: string[] | undefined; // Array of strings from encodeAsSiweResource
-  sessionKeyPair: SessionKeyPair; // From SessionKeyPairSchema
-  sessionCapabilityObject: ISessionCapabilityObject | undefined; // From generateSessionCapabilityObjectWithWildcards
-  authConfig: AuthConfig;
-  authNeededCallback: AuthCallback;
-  capabilityAuthSigs?: AuthSig[]; // Optional, from authConfig
-}
-
 export const getEoaAuthContext = async (
   params: z.infer<typeof GetEoaAuthContextSchema>
-): Promise<GetEoaAuthContextReturn> => {
-  // Validate the input parameters against the schema
+): Promise<z.infer<typeof EoaAuthContextSchema>> => {
+  // -- validate params
   const _params = GetEoaAuthContextSchema.parse(params);
   const _sessionKeyPair = _params.deps.authData.sessionKey.keyPair;
-  const _sessionCapabilityObject =
-    await generateSessionCapabilityObjectWithWildcards(
-      _params.authConfig.resources.map((r: any) => r.resource)
-    );
-  const siweResources = _sessionCapabilityObject
-    ? [_sessionCapabilityObject.encodeAsSiweResource()]
-    : undefined;
 
-  const authenticate = async () => {
-    const uri = SessionKeyUriSchema.parse(_sessionKeyPair.publicKey);
+  const authenticator = getViemAccountAuthenticator({
+    account: params.authentication.viemAccount,
+  });
 
-    const toSign = await createSiweMessageWithResources({
-      uri: uri,
-      statement: _params.authConfig.statement,
-      domain: _params.authConfig.domain,
-      expiration: _params.authConfig.expiration,
-      resources: _params.authConfig.resources,
-      walletAddress: _params.authentication.viemAccount.address,
-      nonce: _params.deps.nonce,
-    });
+  const toSign = await createSiweMessageWithResources({
+    uri: SessionKeyUriSchema.parse(_sessionKeyPair.publicKey),
+    statement: _params.authConfig.statement,
+    domain: _params.authConfig.domain,
+    expiration: _params.authConfig.expiration,
+    resources: _params.authConfig.resources,
+    walletAddress: _params.authentication.viemAccount.address,
+    nonce: _params.deps.nonce,
+  });
 
-    // const getSigner = () => {
-    //   return {
-    //     signMessage: async (message: string) => {
-    //       if (!_params.authentication.viemAccount) {
-    //         throw new Error('viemAccount is not defined');
-    //       }
-    //       // @ts-ignore
-    //       return _params.authentication.viemAccount.signMessage({
-    //         message,
-    //       });
-    //     },
-    //     getAddress: async () => {
-    //       return _params.authentication.viemAccount.address;
-    //     },
-    //   };
-    // };
+  const authMethod = await authenticator.authenticate(toSign);
 
-    const authSig = await generateAuthSigWithViem({
-      signer: _params.authentication.viemAccount,
-      toSign,
-    });
-
-    return authSig;
-  };
-
-  const authSig = await authenticate();
-
-  const authMethod = {
-    authMethodType: 1 as const,
-    accessToken: JSON.stringify(authSig),
-  };
-
-  // Prepare the auth context object to be returned
   return {
     viemAccount: _params.authentication.viemAccount,
-    // authSig: authSig,
     authMethod,
-    // pkpPublicKey: _params.authentication.pkpPublicKey,
-    chain: 'ethereum',
-    resourceAbilityRequests: _params.authConfig.resources,
-    siweResources,
+    authNeededCallback: async () => {
+      const authenticator = getViemAccountAuthenticator({
+        account: params.authentication.viemAccount,
+      });
+      return authenticator.getAuthSig(toSign);
+    },
     sessionKeyPair: _sessionKeyPair,
-    sessionCapabilityObject: _sessionCapabilityObject,
     authConfig: _params.authConfig,
-    authNeededCallback: authenticate,
-    ...(_params.authConfig.capabilityAuthSigs && {
-      capabilityAuthSigs: [..._params.authConfig.capabilityAuthSigs],
-    }),
   };
 };
-
-// if (import.meta.main) {
-//   (async () => {
-//     /**
-//      * @deprecated - this should be provided externally, previously it was provided by the litNodeClient
-//      */
-//     async function getNonce(): Promise<string> {
-//       const { LitNodeClient } = await import('@lit-protocol/lit-node-client');
-//       const litNodeClient = new LitNodeClient({
-//         litNetwork: 'naga-dev',
-//         debug: true,
-//       });
-
-//       await litNodeClient.connect();
-//       return await litNodeClient.getLatestBlockhash();
-//     }
-
-//     /**
-//      * @deprecated - this should be provided externally, previously it was provided by the litNodeClient
-//      */
-//     async function getDefaultResources() {
-//       const { createResourceBuilder } = await import(
-//         '@lit-protocol/auth-helpers'
-//       );
-
-//       return createResourceBuilder().addPKPSigningRequest('*').requests;
-//     }
-
-//     const authContext = await GetEoaAuthContext({
-//       identity: {
-//         pkpPublicKey: '0x123',
-//         signer: { signMessage: async () => '0x123' },
-//         signerAddress: '0x123',
-//       },
-//       authMaterial: {
-//         resources: await getDefaultResources(),
-//         expiration: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Example expiration
-//       },
-//       deps: {
-//         nonce: await getNonce(),
-//       },
-//     });
-
-//     console.log('authContext', authContext);
-//   })();
-// }

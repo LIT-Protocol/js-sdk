@@ -8,9 +8,44 @@ import {
   LIT_RESOURCE_PREFIX,
   VMTYPE,
   SIWE_URI_PREFIX,
+  AUTH_METHOD_TYPE,
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
 import { keccak_256 } from '@noble/hashes/sha3'; // small, fast, audited
+
+/**
+ * Schema for validating node request objects
+ * @template T - The type of data expected in the request
+ * @example
+ * // Define a schema for a specific request type
+ * const MyRequestSchema = NodeRequestSchema<MyDataType>();
+ *
+ * // Validate a request
+ * const request = {
+ *   fullPath: '/api/v1/sign',
+ *   data: { message: 'Hello' },
+ *   requestId: '123',
+ *   epoch: 1,
+ *   version: '1.0.0'
+ * };
+ * const validated = MyRequestSchema.parse(request);
+ */
+// export const NodeRequestSchema = <T>() =>
+//   z.object({
+//     fullPath: z.string(),
+//     data: z.custom<T>(),
+//     requestId: z.string(),
+//     epoch: z.number(),
+//     version: z.string(),
+//   });
+
+export const NodeRequestSchema = z.object({
+  fullPath: z.string(),
+  data: z.any(),
+  requestId: z.string(),
+  epoch: z.number(),
+  version: z.string(),
+});
 
 export const DomainSchema = z
   .string()
@@ -343,7 +378,7 @@ export const ExecuteJsAdvancedOptionsSchema = z.object({
 //     pub access_token: String,
 // }
 export const AuthMethodSchema = z.object({
-  authMethodType: z.number(),
+  authMethodType: z.nativeEnum(AUTH_METHOD_TYPE),
   accessToken: z.string(),
 });
 

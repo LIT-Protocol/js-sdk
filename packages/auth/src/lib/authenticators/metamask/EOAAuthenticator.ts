@@ -34,7 +34,7 @@ interface DomainAndOrigin {
 }
 
 export class EOAAuthenticator {
-  public static id = AuthMethodTypeStringMap.AppleJwt;
+  public static id = AuthMethodTypeStringMap.EthWallet;
 
   private static readonly _logger = getChildLogger({
     module: 'EOAAuthenticator',

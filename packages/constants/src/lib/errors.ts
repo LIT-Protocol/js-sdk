@@ -93,6 +93,11 @@ export const LIT_ERROR: Record<string, ErrorConfig> = {
     code: 'wrong_param_format',
     kind: LIT_ERROR_KIND.Validation,
   },
+  WRONG_ACCOUNT_TYPE: {
+    name: 'WrongAccountType',
+    code: 'wrong_account_type',
+    kind: LIT_ERROR_KIND.Validation,
+  },
   LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION: {
     name: 'LocalStorageItemNotFoundException',
     code: 'local_storage_item_not_found_exception',
@@ -344,4 +349,5 @@ export const {
   WasmInitError,
   WrongNetworkException,
   WrongParamFormat,
+  WrongAccountType,
 } = errorClasses;

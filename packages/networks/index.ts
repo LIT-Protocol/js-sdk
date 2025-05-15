@@ -19,3 +19,8 @@ export type LitNetworkModule = NagaDevModule;
 // | DatilLocalModule
 
 // import * as litConstants from '@lit-protocol/constants';
+export type { AuthContext } from './src/networks/vNaga/envs/naga-dev/session-manager/AuthContextSchema';
+export {
+  AuthContextSchema,
+  EoaAuthContextSchema,
+} from './src/networks/vNaga/envs/naga-dev/session-manager/AuthContextSchema';

@@ -10,12 +10,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@lit-protocol/schemas": [
-        "packages/schemas/src"      
-      ],
-      "@lit-protocol/*": [
-        "packages/*/src"
-      ],
+      "@lit-protocol/schemas": ["packages/schemas/src"],
+      "@lit-protocol/*": ["packages/*/src"],
       "@vNaga/LitChainClient": [
         "packages/networks/src/networks/vNaga/LitChainClient"
       ],
@@ -38,6 +34,7 @@
   },
   "files": [],
   "include": [],
+  "exclude": ["dist", "node_modules"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

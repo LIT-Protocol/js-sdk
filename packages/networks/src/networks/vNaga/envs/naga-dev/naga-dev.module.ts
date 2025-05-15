@@ -9,26 +9,28 @@ import {
   createChainManager,
   type CreateChainManagerReturn,
 } from '@nagaDev/ChainManager';
-import { ConnectionInfo } from '@vNaga/LitChainClient';
 import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { z } from 'zod';
-import { NormaliseArraySchema } from '../../../shared/utils/NormaliseArraySchema';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
 import {
-  AuthContext,
   AuthContextSchema,
+  EoaAuthContextSchema,
 } from './session-manager/AuthContextSchema';
 import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
   createStateManager,
 } from './state-manager/createStateManager';
-import {
-  ScopeSchemaRaw,
-  ScopeString,
-} from '@vNaga/LitChainClient/schemas/shared/ScopeSchema';
+
+// Import the necessary types for the explicit return type annotation
+import type { LitTxRes } from '../../LitChainClient/apis/types';
+import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
+import { PKPSignCreateRequestType } from './api-manager/pkpSign/pkpSign.CreateRequestType';
+import { PKPSignInputSchema } from './api-manager/pkpSign/pkpSign.InputSchema';
+import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
+import { RequestItem } from '@lit-protocol/types';
 
 // Define the object first
 const nagaDevModuleObject = {
@@ -60,43 +62,57 @@ const nagaDevModuleObject = {
   },
 
   chainApi: {
-    mintPkp: async ({
-      authContext,
-      scopes,
-    }: {
-      // TODO: EOA has ViemAccount as a property, has "any" for now.
-      authContext: AuthContext | any;
+    mintPkp: async (params: {
+      authContext:
+        | z.infer<typeof AuthContextSchema>
+        | z.infer<typeof EoaAuthContextSchema>;
       scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
-    }) => {
-      const chainManager = createChainManager(authContext.viemAccount);
+    }): Promise<LitTxRes<PKPData>> => {
+      // ========== This is EoaAuthContextSchema ==========
+      if (
+        'viemAccount' in params.authContext &&
+        params.authContext.viemAccount
+      ) {
+        const { viemAccount, authMethod } = params.authContext;
 
-      const mintPKP = await chainManager.api.mintPKP({
-        scopes: scopes,
-        authMethod: authContext.authMethod,
-      });
+        const chainManager = createChainManager(viemAccount);
 
-      return mintPKP;
+        return await chainManager.api.mintPKP({
+          scopes: params.scopes,
+          authMethod: authMethod,
+        });
+      }
+
+      // ========== This is AuthContextSchema ==========
+      else if (
+        'authConfig' in params.authContext &&
+        params.authContext.authConfig &&
+        'sessionKeyPair' in params.authContext
+      ) {
+        // This is AuthContextSchema
+        throw new Error(
+          `The provided AuthContext is session-based and requires minting via a relayer, which uses its private key to mint a PKP and add your auth methods.
+        
+        If 'sendPkpToItself' is set to true, the private key used to mint the PKP (i.e., msg.sender) does NOT automatically retain control over the PKP just by being the minter.
+        
+        If the msg.sender's address was NOT included in the permittedAddresses array during minting, and no other permittedAuthMethod controlled by the msg.sender was added, then the msg.sender would lose control over the PKP's signing capabilities. The PKP NFT would be owned by its own address, and only the explicitly permitted entities would be able to use it.
+        
+        However, if the msg.sender's address WAS included in permittedAddresses, or an auth method they control was added, then they would retain control—not because they minted it, but because they were explicitly granted permission.`
+        );
+      } else {
+        throw new Error(
+          'Invalid authContext provided: does not conform to EoaAuthContextSchema or AuthContextSchema properly.'
+        );
+      }
     },
   },
   api: {
     pkpSign: {
-      schema: z.object({
-        signingScheme: z.enum(['EcdsaK256Sha256', 'EcdsaK256Sha384']),
-        pubKey: HexPrefixedSchema,
-        toSign: z.any(),
-        authContext: AuthContextSchema,
-        userMaxPrice: z.bigint().optional(),
-      }),
-      createRequest: async (params: {
-        pricingContext: z.input<typeof PricingContextSchema>;
-        authContext: z.input<typeof AuthContextSchema>;
-        signingContext: {
-          pubKey: z.infer<typeof HexPrefixedSchema>;
-          toSign: any;
-        };
-        connectionInfo: ConnectionInfo;
-        version: string;
-      }) => {
+      schemas: {
+        Input: PKPSignInputSchema,
+        RequestData: PKPSignRequestDataSchema,
+      },
+      createRequest: async (params: PKPSignCreateRequestType) => {
         // -- 1. generate JIT session sigs
         const sessionSigs = await createJitSessionSigs({
           pricingContext: PricingContextSchema.parse(params.pricingContext),
@@ -105,34 +121,50 @@ const nagaDevModuleObject = {
 
         // -- 2. generate requests
         const _requestId = createRequestId();
-        const requests = [];
+        const requests: RequestItem<
+          z.infer<typeof PKPSignRequestDataSchema>
+        >[] = [];
 
         const urls = Object.keys(sessionSigs);
 
         for (const url of urls) {
-          const body = {
-            toSign: Bytes32Schema.parse(params.signingContext.toSign),
-            signingScheme: 'EcdsaK256Sha256',
-
-            // ❗️ THIS FREAKING "pubkey"! "k" is lowercase!!
-            pubkey: HexPrefixedSchema.parse(params.signingContext.pubKey),
+          const _requestData = PKPSignRequestDataSchema.parse({
+            toSign: params.signingContext.toSign,
+            signingScheme: params.signingContext.signingScheme,
+            pubkey: params.signingContext.pubKey,
             authSig: sessionSigs[url],
-            nodeSet: NodeSetsFromUrlsSchema.parse(urls),
-          };
-          const urlWithPath = composeLitUrl({
+            nodeSet: urls,
+          });
+
+          const _urlWithPath = composeLitUrl({
             url,
             endpoint: nagaDevModuleObject.getEndpoints().PKP_SIGN,
           });
+
           requests.push({
-            fullPath: urlWithPath,
-            data: body,
+            fullPath: _urlWithPath,
+            data: _requestData,
             requestId: _requestId,
             epoch: params.connectionInfo.epochState.currentNumber,
             version: params.version,
           });
         }
 
+        if (!requests || requests.length === 0) {
+          console.error('No requests generated for pkpSign.');
+          throw new Error('Failed to generate requests for pkpSign.');
+        }
+
         return requests;
+      },
+      handleResponse: async (result: any) => {
+        if (result.success) {
+          console.log('✅ PKP Sign batch successful:', result.values);
+          return { success: true, responses: result.values }; // Example success return
+        } else {
+          console.error('🚨 PKP Sign batch failed:', result.error);
+          throw result.error;
+        }
       },
     },
   },

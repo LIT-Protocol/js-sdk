@@ -1,11 +1,15 @@
 import { InvalidSessionSigs } from '@lit-protocol/constants';
-import { SessionSigningTemplate, SessionSigsMap } from '@lit-protocol/types';
+import {
+  SessionSigningTemplate,
+  SessionSigsMap,
+  LitResourceAbilityRequest,
+} from '@lit-protocol/types';
 import { ed25519 } from '@noble/curves/ed25519';
 import { hexToBytes } from '@noble/hashes/utils';
 import { z } from 'zod';
 import { getMaxPricesForNodeProduct } from '../pricing-manager/getMaxPricesForNodeProduct';
 import { PricingContext } from '../pricing-manager/PricingContextSchema';
-import { AuthContextSchema } from './AuthContextSchema';
+import { AuthContextSchema, EoaAuthContextSchema } from './AuthContextSchema';
 import { formatSessionSigs } from './helper/session-sigs-reader';
 import { validateSessionSigs } from './helper/session-sigs-validator';
 
@@ -48,47 +52,14 @@ export function normalizeAndStringify(input: string): string {
 }
 
 export const createJitSessionSigs = async (params: {
-  authContext: z.input<typeof AuthContextSchema>;
+  authContext: z.input<typeof AuthContextSchema | typeof EoaAuthContextSchema>;
   pricingContext: PricingContext;
   // latestBlockhash: string;
 }): Promise<SessionSigsMap> => {
-  // console.log('🔄 creating jit session sigs');
-
-  // -- prepare context
-  // lit:session:<session-key-public-key>
-  // const _sessionKeyUri = SessionKeyUriSchema.parse(
-  //   params.authContext.sessionKeyPair.publicKey
-  // );
-  // const _sessionCapabilityObject = params.authContext.sessionCapabilityObject;
-  // const _expiration = params.authContext.authConfig.expiration;
-
-  // -- get authsig
-  // const body = {
-  //   chain: params.authContext.chain,
-  //   statement: params.authContext.sessionCapabilityObject.statement,
-  //   resources: params.authContext.siweResources,
-  //   expiration: params.authContext.authConfig.expiration,
-  //   uri: SessionKeyUriSchema.parse(params.authContext.sessionKeyPair.publicKey),
-  //   sessionKey: params.authContext.sessionKeyPair,
-  //   nonce: params.latestBlockhash,
-
-  //   // for recap
-  //   ...(params.authContext.resourceAbilityRequests && {
-  //     resourceAbilityRequests: params.authContext.resourceAbilityRequests,
-  //   }),
-
-  //   // for lit action custom auth
-  //   // ...(litActionCode && { litActionCode }),
-  //   // ...(litActionIpfsId && { litActionIpfsId }),
-  //   // ...(jsParams && { jsParams }),
-  // };
-
-  // console.log('🔄 body', body);
-
   const authSig = await params.authContext.authNeededCallback();
 
   const capabilities = [
-    ...(params.authContext.capabilityAuthSigs || []), // Spreads existing sigs, or an empty array if null/undefined/empty
+    ...(params.authContext.authConfig.capabilityAuthSigs || []), // Spreads existing sigs, or an empty array if null/undefined/empty
     authSig,
   ];
 
@@ -98,7 +69,8 @@ export const createJitSessionSigs = async (params: {
   // so that the node can verify the session signature
   const sessionSigningTemplate = {
     sessionKey: params.authContext.sessionKeyPair.publicKey,
-    resourceAbilityRequests: params.authContext.resourceAbilityRequests,
+    resourceAbilityRequests: (params.authContext.authConfig.resources ||
+      []) as LitResourceAbilityRequest[],
     capabilities: capabilities,
     issuedAt: new Date().toISOString(),
 
