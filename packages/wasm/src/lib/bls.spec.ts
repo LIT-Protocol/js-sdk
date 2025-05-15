@@ -42,6 +42,7 @@ describe('BLS', () => {
       messageBase64Buffer,
       identityParamsUtf8Buffer
     );
+    console.log('ciphertext:', ciphertext);
     expect(ciphertext).toBeInstanceOf(Uint8Array);
     expect(ciphertext.byteLength).toEqual(115);
   });
