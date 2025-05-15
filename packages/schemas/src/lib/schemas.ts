@@ -12,6 +12,17 @@ import {
 import { computeAddress } from 'ethers/lib/utils';
 
 import { sha256 } from '@noble/hashes/sha2';
+
+export const DomainSchema = z
+  .string()
+  .optional()
+  .default('')
+  .refine((val) => val === '' || /^[^/]+(:\d+)?$/.test(val), {
+    message:
+      'Domain must not contain path or trailing slash (e.g., "localhost:3000" is valid, "localhost:3000/" is not)',
+  });
+
+// @deprecated - we need to update this so that any type will be converted to a number[]
 export const Bytes32Schema: z.ZodType<number[]> = z
   .any()
   .transform((val, ctx): number[] => {

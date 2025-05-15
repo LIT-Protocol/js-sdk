@@ -25,91 +25,87 @@ builder
 const requests = builder.build();
 
  */
-export const createResourceBuilder = () => {
-  const requests: Array<{
+
+// Define the builder interface
+interface IResourceBuilder {
+  addPKPSigningRequest: (resourceId: string) => IResourceBuilder;
+  addLitActionExecutionRequest: (resourceId: string) => IResourceBuilder;
+  addAccessControlConditionSigningRequest: (
+    resourceId: string
+  ) => IResourceBuilder;
+  addAccessControlConditionDecryptionRequest: (
+    resourceId: string
+  ) => IResourceBuilder;
+  addPaymentDelegationRequest: (resourceId: string) => IResourceBuilder;
+  readonly requests: Array<{
+    resource: ILitResource;
+    ability: LIT_ABILITY_VALUES;
+  }>;
+  getResources: () => Array<{
+    resource: ILitResource;
+    ability: LIT_ABILITY_VALUES;
+  }>;
+}
+
+export const createResourceBuilder = (): IResourceBuilder => {
+  const requestsArray: Array<{
     resource: ILitResource;
     ability: LIT_ABILITY_VALUES;
   }> = [];
 
-  return {
-    /**
-     * Adds a PKP signing request to the builder.
-     * @param resourceId - The ID of the resource.
-     * @returns The builder instance.
-     */
+  // Need to declare the builder object first so its methods can refer to it.
+  const builder: IResourceBuilder = {
     addPKPSigningRequest(resourceId: string) {
-      requests.push({
+      requestsArray.push({
         resource: new LitPKPResource(resourceId),
         ability: LIT_ABILITY.PKPSigning,
       });
-      return this;
+      return builder; // Return the builder instance
     },
 
-    /**
-     * Adds a Lit action execution request to the builder.
-     * @param resourceId - The ID of the resource.
-     * @returns The builder instance.
-     */
     addLitActionExecutionRequest(resourceId: string) {
-      requests.push({
+      requestsArray.push({
         resource: new LitActionResource(resourceId),
         ability: LIT_ABILITY.LitActionExecution,
       });
-      return this;
+      return builder; // Return the builder instance
     },
 
-    /**
-     * Adds an access control condition signing request to the builder.
-     * @param resourceId - The ID of the resource.
-     * @returns The builder instance.
-     */
     addAccessControlConditionSigningRequest(resourceId: string) {
-      requests.push({
+      requestsArray.push({
         resource: new LitAccessControlConditionResource(resourceId),
         ability: LIT_ABILITY.AccessControlConditionSigning,
       });
-      return this;
+      return builder; // Return the builder instance
     },
 
-    /**
-     * Adds an access control condition decryption request to the builder.
-     * @param resourceId - The ID of the resource.
-     * @returns The builder instance.
-     */
     addAccessControlConditionDecryptionRequest(resourceId: string) {
-      requests.push({
+      requestsArray.push({
         resource: new LitAccessControlConditionResource(resourceId),
         ability: LIT_ABILITY.AccessControlConditionDecryption,
       });
-      return this;
+      return builder; // Return the builder instance
     },
 
-    /**
-     * Adds a rate limit increase authentication request to the builder.
-     * @param resourceId - The ID of the resource.
-     * @returns The builder instance.
-     */
     addPaymentDelegationRequest(resourceId: string) {
-      requests.push({
+      requestsArray.push({
         resource: new LitPaymentDelegationResource(resourceId),
         ability: LIT_ABILITY.PaymentDelegation,
       });
-      return this;
+      return builder; // Return the builder instance
     },
 
-    /**
-     * Return the array of resource ability requests.
-     * @returns The array of resource ability requests.
-     */
     get requests(): Array<{
       resource: ILitResource;
       ability: LIT_ABILITY_VALUES;
     }> {
-      return requests;
+      return requestsArray;
     },
 
     getResources() {
-      return requests;
+      return requestsArray;
     },
   };
+
+  return builder;
 };

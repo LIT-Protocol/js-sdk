@@ -5,6 +5,11 @@ import type {
   NagaDevModule,
 } from '@lit-protocol/networks';
 import { z } from 'zod';
+import {
+  processBatchRequests,
+  RequestItem,
+  NodeSignResponse,
+} from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
 
 export const getLitClient = async ({
@@ -36,6 +41,12 @@ export const getLitClient = async ({
     _stateManager.getLatestConnectionInfo() as ConnectionInfo;
   console.log('connectionInfo', connectionInfo);
 
+  if (!handshakeResult) {
+    throw new Error(
+      'Handshake result is not available from state manager. LitClient cannot be initialized.'
+    );
+  }
+
   return {
     disconnect: _stateManager.stop,
     connectionInfo,
@@ -44,13 +55,13 @@ export const getLitClient = async ({
     pkpSign: async (
       params: z.infer<typeof _networkModule.api.pkpSign.schema>
     ) => {
-      // 1. create a request
-      const _request = await _networkModule.api.pkpSign.createRequest({
+      // 1. create a request array
+      const _requestArray = await _networkModule.api.pkpSign.createRequest({
         pricingContext: {
           product: 'SIGN',
           userMaxPrice: params.userMaxPrice,
           nodePrices: connectionInfo.priceFeedInfo.networkPrices,
-          threshold: handshakeResult!.threshold,
+          threshold: handshakeResult.threshold,
         },
         authContext: params.authContext,
         signingContext: {
@@ -61,12 +72,42 @@ export const getLitClient = async ({
         version: _networkModule.version,
       });
 
-      console.log('🔄 _request', _request);
+      console.log('🔄 _requestArray to be sent to nodes:', _requestArray);
 
-      // 2. send the request
-      // const res1 = await LitNodeApi.sendNodeRequest(_request[0]);
+      if (!_requestArray || _requestArray.length === 0) {
+        console.error('No requests generated for pkpSign.');
+        // Or throw an error, or return a specific error structure
+        throw new Error('Failed to generate requests for pkpSign.');
+      }
 
-      // console.log('🔄 res1', res1);
+      // 2. send the requests to nodes using the new helper
+      const batchRequestId = _requestArray[0].requestId; // Assuming all requests in batch share an ID
+      const minSuccessCount = handshakeResult.threshold;
+
+      console.log(
+        `Processing batch ${batchRequestId} with ${minSuccessCount} minimum successes.`
+      );
+
+      const result = await processBatchRequests<NodeSignResponse>(
+        _requestArray as RequestItem[], // Cast to the expected RequestItem type
+        batchRequestId,
+        minSuccessCount
+      );
+
+      console.log('📦 Batch processing result:', result);
+
+      if (result.success) {
+        // Handle successful signing aggregation if needed.
+        // For now, just returning the array of successful node responses.
+        // You might need to further process `result.values` to get a single combined signature.
+        console.log('✅ PKP Sign batch successful:', result.values);
+        return { success: true, responses: result.values }; // Example success return
+      } else {
+        // Handle error from batch processing
+        console.error('🚨 PKP Sign batch failed:', result.error);
+        // Propagate the error or return a structured error response
+        throw result.error; // Or return { success: false, error: result.error };
+      }
     },
   };
 };

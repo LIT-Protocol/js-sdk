@@ -12,11 +12,14 @@ import {
 import { ConnectionInfo } from '@vNaga/LitChainClient';
 import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { z } from 'zod';
-import { normalizeArray } from '../../../shared/utils/normalize-array';
+import { NormaliseArraySchema } from '../../../shared/utils/NormaliseArraySchema';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
-import { AuthContextSchema } from './session-manager/AuthContextSchema';
+import {
+  AuthContext,
+  AuthContextSchema,
+} from './session-manager/AuthContextSchema';
 import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
@@ -57,10 +60,14 @@ const nagaDevModuleObject = {
   },
 
   chainApi: {
-    mintPkp: async (
-      authContext: any,
-      scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[]
-    ) => {
+    mintPkp: async ({
+      authContext,
+      scopes,
+    }: {
+      // TODO: EOA has ViemAccount as a property, has "any" for now.
+      authContext: AuthContext | any;
+      scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+    }) => {
       const chainManager = createChainManager(authContext.viemAccount);
 
       const mintPKP = await chainManager.api.mintPKP({
@@ -74,6 +81,7 @@ const nagaDevModuleObject = {
   api: {
     pkpSign: {
       schema: z.object({
+        signingScheme: z.enum(['EcdsaK256Sha256', 'EcdsaK256Sha384']),
         pubKey: HexPrefixedSchema,
         toSign: z.any(),
         authContext: AuthContextSchema,
@@ -95,8 +103,6 @@ const nagaDevModuleObject = {
           authContext: params.authContext,
         });
 
-        console.log('sessionSigs:', sessionSigs);
-
         // -- 2. generate requests
         const _requestId = createRequestId();
         const requests = [];
@@ -106,7 +112,7 @@ const nagaDevModuleObject = {
         for (const url of urls) {
           const sessionAuthSig = sessionSigs[url];
           const body = {
-            toSign: normalizeArray(params.signingContext.toSign),
+            toSign: NormaliseArraySchema.parse(params.signingContext.toSign),
             signingScheme: 'EcdsaK256Sha256',
 
             // ❗️ THIS FREAKING "pubkey"! "k" is lowercase!!
@@ -126,6 +132,7 @@ const nagaDevModuleObject = {
             version: params.version,
           });
         }
+
         return requests;
       },
     },

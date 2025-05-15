@@ -1,5 +1,6 @@
 import {
   AuthSigSchema,
+  DomainSchema,
   ExpirationSchema,
   HexPrefixedSchema,
   LitResourceAbilityRequestSchema,
@@ -26,6 +27,6 @@ export const AuthConfigSchema = z.object({
     new Date(Date.now() + 1000 * 60 * 15).toISOString()
   ),
   statement: z.string().optional().default(''),
-  domain: z.string().optional().default(''),
+  domain: DomainSchema.optional().default(''),
   resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
 });

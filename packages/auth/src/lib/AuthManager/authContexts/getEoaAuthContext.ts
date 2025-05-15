@@ -1,5 +1,6 @@
 import {
   createSiweMessageWithResources,
+  generateAuthSig,
   generateAuthSigWithViem,
   generateSessionCapabilityObjectWithWildcards,
 } from '@lit-protocol/auth-helpers';
@@ -59,7 +60,7 @@ export const getEoaAuthContext = async (
     ? [_sessionCapabilityObject.encodeAsSiweResource()]
     : undefined;
 
-  const auth = async () => {
+  const authenticate = async () => {
     const uri = SessionKeyUriSchema.parse(_sessionKeyPair.publicKey);
 
     const toSign = await createSiweMessageWithResources({
@@ -72,15 +73,32 @@ export const getEoaAuthContext = async (
       nonce: _params.deps.nonce,
     });
 
+    // const getSigner = () => {
+    //   return {
+    //     signMessage: async (message: string) => {
+    //       if (!_params.authentication.viemAccount) {
+    //         throw new Error('viemAccount is not defined');
+    //       }
+    //       // @ts-ignore
+    //       return _params.authentication.viemAccount.signMessage({
+    //         message,
+    //       });
+    //     },
+    //     getAddress: async () => {
+    //       return _params.authentication.viemAccount.address;
+    //     },
+    //   };
+    // };
+
     const authSig = await generateAuthSigWithViem({
-      signer: params.authentication.viemAccount,
+      signer: _params.authentication.viemAccount,
       toSign,
     });
 
     return authSig;
   };
 
-  const authSig = await auth();
+  const authSig = await authenticate();
 
   const authMethod = {
     authMethodType: 1 as const,
@@ -99,7 +117,7 @@ export const getEoaAuthContext = async (
     sessionKeyPair: _sessionKeyPair,
     sessionCapabilityObject: _sessionCapabilityObject,
     authConfig: _params.authConfig,
-    authNeededCallback: auth,
+    authNeededCallback: authenticate,
     ...(_params.authConfig.capabilityAuthSigs && {
       capabilityAuthSigs: [..._params.authConfig.capabilityAuthSigs],
     }),
