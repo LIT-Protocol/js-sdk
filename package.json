@@ -12,7 +12,6 @@
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
-    "bundles": "yarn node ./esbuilder/lit-connect-modal/esbuild.js",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
     "test:ci": "nx affected --target=test --all --code-coverage",
