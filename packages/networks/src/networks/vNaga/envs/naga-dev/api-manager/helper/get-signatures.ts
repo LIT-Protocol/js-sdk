@@ -143,10 +143,10 @@ export const combinePKPSignSignatures = async (params: {
 }): Promise<LitNodeSignature> => {
   const { threshold, requestId, nodesPkpSignResponseData } = params;
 
-  console.log(
-    `[${requestId}] Initial nodesPkpSignResponseData (count: ${nodesPkpSignResponseData.length}):`,
-    JSON.stringify(nodesPkpSignResponseData, null, 2)
-  );
+  // console.log(
+  //   `[${requestId}] Initial nodesPkpSignResponseData (count: ${nodesPkpSignResponseData.length}):`,
+  //   JSON.stringify(nodesPkpSignResponseData, null, 2)
+  // );
 
   assertThresholdShares(requestId, threshold, nodesPkpSignResponseData);
 

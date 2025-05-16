@@ -21,37 +21,75 @@ import {
   EcdsaSigType,
   SigningSchemeSchema,
 } from '@lit-protocol/constants';
-import { BytesArraySchema } from '@lit-protocol/schemas';
+import { BytesArraySchema, SigningChainSchema } from '@lit-protocol/schemas';
 import { sha256, sha384 } from '@noble/hashes/sha2';
+import { keccak_256, keccak_384 } from '@noble/hashes/sha3';
 import { z } from 'zod';
 
-// only want the EcdsaSigType from the SigningSchemeSchema
+// Only want the EcdsaSigType from the SigningSchemeSchema
+// Example:
+// [
+//   'EcdsaK256Sha256',
+//   'EcdsaP256Sha256',
+//   'EcdsaP384Sha384',
+// ]
 type DesiredEcdsaSchemes = Extract<
   z.infer<typeof SigningSchemeSchema>,
   EcdsaSigType
 >;
 
-export const ecdsaHashFunctions: Record<
+// Example:
+// ethereum: {
+//   EcdsaK256Sha256: <hash_function>,
+//   EcdsaP256Sha256: <hash_function>,
+//   EcdsaP384Sha384: <hash_function>,
+// },
+type EcdsaHashMapper = Record<
   DesiredEcdsaSchemes,
   (arg0: Uint8Array) => Uint8Array
-> = {
-  EcdsaK256Sha256: sha256,
-  EcdsaP256Sha256: sha256,
-  EcdsaP384Sha384: sha384,
-} as const;
+>;
+
+// Hash function mapping by chain:
+// - Ethereum: Uses keccak256 (SHA-3 variant) for all ECDSA schemes
+// - Bitcoin: Uses SHA-256 for all ECDSA schemes
+// - Cosmos: Supports multiple curves but primarily uses SHA-256
+// - Solana: Uses Edwards curves (Ed25519) which has its own hashing mechanism
+type ChainHashMapper = {
+  [key in z.infer<typeof SigningChainSchema>]: EcdsaHashMapper;
+};
+
+export const chainHashMapper: ChainHashMapper = {
+  ethereum: {
+    EcdsaK256Sha256: keccak_256,
+    EcdsaP256Sha256: keccak_256,
+    EcdsaP384Sha384: keccak_384,
+  },
+  bitcoin: {
+    EcdsaK256Sha256: sha256,
+    EcdsaP256Sha256: sha256,
+    EcdsaP384Sha384: sha384,
+  },
+
+  // @ts-ignore TODO: add support for this
+  cosmos: undefined,
+
+  // @ts-ignore TODO: add support for this
+  solana: undefined,
+};
 
 export const LitMessageSchema = z
   .object({
     toSign: BytesArraySchema,
     signingScheme: SigningSchemeSchema,
+    chain: SigningChainSchema,
   })
-  .transform(({ toSign, signingScheme }) => {
+  .transform(({ toSign, signingScheme, chain }) => {
     if (CURVE_GROUP_BY_CURVE_TYPE[signingScheme] === 'FROST') {
       return toSign;
     }
 
     if (CURVE_GROUP_BY_CURVE_TYPE[signingScheme] === 'ECDSA') {
-      const hashedMessage = ecdsaHashFunctions[
+      const hashedMessage = chainHashMapper[chain][
         signingScheme as DesiredEcdsaSchemes
       ](new Uint8Array(toSign));
       return BytesArraySchema.parse(hashedMessage);

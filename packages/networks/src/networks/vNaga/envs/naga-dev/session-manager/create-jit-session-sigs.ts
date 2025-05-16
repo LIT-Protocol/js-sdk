@@ -51,7 +51,7 @@ export function normalizeAndStringify(input: string): string {
   }
 }
 
-export const createJitSessionSigs = async (params: {
+export const createSessionSigs = async (params: {
   authContext: z.input<typeof AuthContextSchema | typeof EoaAuthContextSchema>;
   pricingContext: PricingContext;
   // latestBlockhash: string;
@@ -112,6 +112,7 @@ export const createJitSessionSigs = async (params: {
     );
     const signature = ed25519.sign(messageHex, secretKeyBytes);
 
+    // one of these is essentially what wrapped key service need.
     sessionSigs[nodeAddress] = {
       sig: Buffer.from(signature).toString('hex'),
       derivedVia: 'litSessionSignViaNacl',

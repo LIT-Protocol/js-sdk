@@ -111,6 +111,9 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const createAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
+    // createRequestToken: async () => {
+    //   // use createSessionSisg then send to wrapped key service
+    // }
     createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);
     },

@@ -1,5 +1,5 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
-import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { HexPrefixedSchema, SigningChainSchema } from '@lit-protocol/schemas';
 import { ConnectionInfo } from '@vNaga/LitChainClient';
 import { z } from 'zod';
 import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
@@ -15,4 +15,5 @@ export type PKPSignCreateRequestParams = {
   };
   connectionInfo: ConnectionInfo;
   version: string;
+  chain: z.infer<typeof SigningChainSchema>;
 };

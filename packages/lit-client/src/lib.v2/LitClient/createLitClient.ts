@@ -1,8 +1,4 @@
-import type {
-  ConnectionInfo,
-  LitNetworkModule,
-  NagaDevModule,
-} from '@lit-protocol/networks';
+import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
@@ -59,68 +55,113 @@ export const _createNagaLitClient = async (
     );
   }
 
+  async function _pkpSign(
+    params: z.infer<typeof networkModule.api.pkpSign.schemas.Input.raw>
+  ) {
+    console.log(`🔥 signing on ${params.chain} with ${params.signingScheme}`);
+
+    // -- get the fresh handshake results
+    const currentHandshakeResult = _stateManager.getCallbackResult();
+    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+
+    if (!currentHandshakeResult) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of pkpSign.'
+      );
+    }
+
+    // 1. This is where the orchestration begins — we delegate the creation of the
+    // request array to the `networkModule`. It encapsulates logic specific to the
+    // active network (e.g., pricing, thresholds, metadata) and returns a set of
+    // structured requests ready to be dispatched to the nodes.
+    const requestArray = await networkModule.api.pkpSign.createRequest({
+      // add chain context (btc, eth, cosmos, solana)
+      pricingContext: {
+        product: 'SIGN',
+        userMaxPrice: params.userMaxPrice,
+        nodePrices: currentConnectionInfo.priceFeedInfo.networkPrices,
+        threshold: currentHandshakeResult.threshold,
+      },
+      authContext: params.authContext,
+      signingContext: {
+        pubKey: params.pubKey,
+        toSign: params.toSign,
+        signingScheme: params.signingScheme,
+      },
+      connectionInfo: currentConnectionInfo,
+      version: networkModule.version,
+      chain: params.chain,
+    });
+
+    const requestId = requestArray[0].requestId;
+
+    // 2. With the request array prepared, we now coordinate the parallel execution
+    // across multiple nodes. This step handles batching, minimum threshold success
+    // tracking, and error tolerance. The orchestration layer ensures enough valid
+    // responses are collected before proceeding.
+    const result = await dispatchRequests<
+      z.infer<typeof networkModule.api.pkpSign.schemas.RequestData>,
+      z.infer<typeof networkModule.api.pkpSign.schemas.ResponseData>
+    >(requestArray, requestId, currentHandshakeResult.threshold);
+
+    // 3. Once node responses are received and validated, we delegate final
+    // interpretation and formatting of the result back to the `networkModule`.
+    // This allows the module to apply network-specific logic such as decoding,
+    // formatting, or transforming the response into a usable signature object.
+    return await networkModule.api.pkpSign.handleResponse(result, requestId);
+  }
+
   return {
     // This function is likely be used by another module to get the current context, eg. auth manager
+    // only adding what is required by other modules for now.
     getContext: async () => {
       return {
         latestBlockhash: await _stateManager.getLatestBlockhash(),
-
-        // only adding what is required by other modules for now.
         // connectionInfo: _stateManager.getLatestConnectionInfo(),
       };
     },
     disconnect: _stateManager.stop,
     mintPkp: networkModule.chainApi.mintPkp,
-    pkpSign: async (
-      params: z.infer<typeof networkModule.api.pkpSign.schemas.Input>
-    ) => {
-      // -- get the fresh handshake results
-      const currentHandshakeResult = _stateManager.getCallbackResult();
-      const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
-
-      if (!currentHandshakeResult) {
-        throw new Error(
-          'Handshake result is not available from state manager at the time of pkpSign.'
-        );
-      }
-
-      // 1. This is where the orchestration begins — we delegate the creation of the
-      // request array to the `networkModule`. It encapsulates logic specific to the
-      // active network (e.g., pricing, thresholds, metadata) and returns a set of
-      // structured requests ready to be dispatched to the nodes.
-      const requestArray = await networkModule.api.pkpSign.createRequest({
-        pricingContext: {
-          product: 'SIGN',
-          userMaxPrice: params.userMaxPrice,
-          nodePrices: currentConnectionInfo.priceFeedInfo.networkPrices,
-          threshold: currentHandshakeResult.threshold,
+    chain: {
+      raw: {
+        pkpSign: async (
+          params: z.infer<typeof networkModule.api.pkpSign.schemas.Input.raw>
+        ) => {
+          return _pkpSign(params);
         },
-        authContext: params.authContext,
-        signingContext: {
-          pubKey: params.pubKey,
-          toSign: params.toSign,
-          signingScheme: params.signingScheme,
+      },
+      ethereum: {
+        pkpSign: async (
+          params: z.input<
+            typeof networkModule.api.pkpSign.schemas.Input.ethereum
+          >
+        ) => {
+          return _pkpSign(
+            networkModule.api.pkpSign.schemas.Input.ethereum.parse(params)
+          );
         },
-        connectionInfo: currentConnectionInfo,
-        version: networkModule.version,
-      });
-
-      const requestId = requestArray[0].requestId;
-
-      // 2. With the request array prepared, we now coordinate the parallel execution
-      // across multiple nodes. This step handles batching, minimum threshold success
-      // tracking, and error tolerance. The orchestration layer ensures enough valid
-      // responses are collected before proceeding.
-      const result = await dispatchRequests<
-        z.infer<typeof networkModule.api.pkpSign.schemas.RequestData>,
-        z.infer<typeof networkModule.api.pkpSign.schemas.ResponseData>
-      >(requestArray, requestId, currentHandshakeResult.threshold);
-
-      // 3. Once node responses are received and validated, we delegate final
-      // interpretation and formatting of the result back to the `networkModule`.
-      // This allows the module to apply network-specific logic such as decoding,
-      // formatting, or transforming the response into a usable signature object.
-      return await networkModule.api.pkpSign.handleResponse(result, requestId);
+      },
+      bitcoin: {
+        pkpSign: async (
+          params: z.input<
+            typeof networkModule.api.pkpSign.schemas.Input.bitcoin
+          >
+        ) => {
+          return _pkpSign(
+            networkModule.api.pkpSign.schemas.Input.bitcoin.parse(params)
+          );
+        },
+      },
+      // solana: {
+      //   pkpSign: async () => {
+      //     throw new Error('Solana is not supported yet');
+      //   },
+      // },
+      // cosmos: {
+      //   pkpSign: async () => {
+      //     throw new Error('Cosmos is not supported yet');
+      //   },
+      // },
     },
   };
 };

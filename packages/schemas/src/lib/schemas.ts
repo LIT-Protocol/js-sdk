@@ -10,7 +10,6 @@ import {
   SIWE_URI_PREFIX,
   VMTYPE,
 } from '@lit-protocol/constants';
-import { keccak_256 } from '@noble/hashes/sha3'; // small, fast, audited
 import { computeAddress } from 'ethers/lib/utils';
 import { Account } from 'viem';
 import {
@@ -18,6 +17,13 @@ import {
   ISessionCapabilityObjectSchema,
   LitResourceAbilityRequestSchema,
 } from '..';
+
+export const SigningChainSchema = z.enum([
+  'ethereum',
+  'bitcoin',
+  'cosmos',
+  'solana',
+]);
 
 /**
  * Schema for validating node request objects

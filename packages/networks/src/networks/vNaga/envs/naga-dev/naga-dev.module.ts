@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
-import { createJitSessionSigs } from './session-manager/create-jit-session-sigs';
+import { createSessionSigs } from './session-manager/create-jit-session-sigs';
 import {
   CallbackParams,
   createStateManager,
@@ -22,7 +22,11 @@ import type { LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 import { PKPSignCreateRequestParams } from './api-manager/pkpSign/pkpSign.CreateRequestParams';
-import { PKPSignInputSchema } from './api-manager/pkpSign/pkpSign.InputSchema';
+import {
+  BitCoinPKPSignInputSchema,
+  EthereumPKPSignInputSchema,
+  PKPSignInputSchema,
+} from './api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
 
@@ -104,13 +108,17 @@ const nagaDevModuleObject = {
   api: {
     pkpSign: {
       schemas: {
-        Input: PKPSignInputSchema,
+        Input: {
+          raw: PKPSignInputSchema,
+          ethereum: EthereumPKPSignInputSchema,
+          bitcoin: BitCoinPKPSignInputSchema,
+        },
         RequestData: PKPSignRequestDataSchema,
         ResponseData: PKPSignResponseDataSchema,
       },
       createRequest: async (params: PKPSignCreateRequestParams) => {
-        // -- 1. generate JIT session sigs
-        const sessionSigs = await createJitSessionSigs({
+        // -- 1. generate session sigs
+        const sessionSigs = await createSessionSigs({
           pricingContext: PricingContextSchema.parse(params.pricingContext),
           authContext: params.authContext,
         });
@@ -130,6 +138,10 @@ const nagaDevModuleObject = {
             pubkey: params.signingContext.pubKey,
             authSig: sessionSigs[url],
             nodeSet: urls,
+
+            // additional meta to determine hash function, but not
+            // sent to the node
+            chain: params.chain,
           });
 
           const _urlWithPath = composeLitUrl({
@@ -157,7 +169,7 @@ const nagaDevModuleObject = {
         result: ProcessedBatchResult<z.infer<typeof PKPSignResponseDataSchema>>,
         requestId: string
       ) => {
-        console.log('Incoming result for pkpSign handleResponse:', result);
+        // console.log('Incoming result for pkpSign handleResponse:', result);
 
         if (!result.success) {
           console.error(
@@ -174,8 +186,6 @@ const nagaDevModuleObject = {
           requestId,
           threshold: networkConfig.minimumThreshold,
         });
-
-        console.log('signatures combined in handleResponse:', signatures);
 
         return signatures;
       },
