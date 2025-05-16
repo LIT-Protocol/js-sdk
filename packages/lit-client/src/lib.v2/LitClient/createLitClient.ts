@@ -64,7 +64,7 @@ export const _createNagaLitClient = async (
     const currentHandshakeResult = _stateManager.getCallbackResult();
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
-    if (!currentHandshakeResult) {
+    if (!currentHandshakeResult || !currentConnectionInfo) {
       throw new Error(
         'Handshake result is not available from state manager at the time of pkpSign.'
       );

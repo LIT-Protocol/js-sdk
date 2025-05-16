@@ -23,7 +23,7 @@
  * ```
  */
 
-import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { ExpectedAccountOrWalletClient } from '../../../../LitChainClient/contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import {
   getNodesForRequest,

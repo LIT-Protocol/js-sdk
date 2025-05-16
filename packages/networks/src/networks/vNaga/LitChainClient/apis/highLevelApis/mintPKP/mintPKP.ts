@@ -1,9 +1,9 @@
 import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
-import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
 import { Hex } from 'viem';
 import { logger } from '../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { PKPData } from '../../../schemas/shared/PKPDataSchema';
+import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
 import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';
 import { LitTxRes } from '../../types';
 import { MintPKPRequest, MintPKPSchema } from './MintPKPSchema';

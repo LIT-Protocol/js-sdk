@@ -50,7 +50,7 @@ import { ScopeString } from '../../../schemas/shared/ScopeSchema';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import { LitTxVoid } from '../../types';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
-import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action

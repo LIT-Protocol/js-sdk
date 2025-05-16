@@ -1,16 +1,13 @@
 import { DOCS, version } from '@lit-protocol/constants';
 import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
 import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
-import {
-  createChainManager,
-  type CreateChainManagerReturn,
-} from '@nagaDev/ChainManager';
-import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+
 import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
+import type { ExpectedAccountOrWalletClient } from '../../LitChainClient/contract-manager/createContractsManager';
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
-import { createSessionSigs } from './session-manager/create-jit-session-sigs';
+import { issueSessionFromContext } from './session-manager/issueSessionFromContext';
 import {
   CallbackParams,
   createStateManager,
@@ -29,6 +26,10 @@ import {
 } from './api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
+import {
+  createChainManager,
+  CreateChainManagerReturn,
+} from './chain-manager/createChainManager';
 
 // Define ProcessedBatchResult type (mirroring structure from dispatchRequests)
 type ProcessedBatchResult<T> =
@@ -118,7 +119,7 @@ const nagaDevModuleObject = {
       },
       createRequest: async (params: PKPSignCreateRequestParams) => {
         // -- 1. generate session sigs
-        const sessionSigs = await createSessionSigs({
+        const sessionSigs = await issueSessionFromContext({
           pricingContext: PricingContextSchema.parse(params.pricingContext),
           authContext: params.authContext,
         });

@@ -111,6 +111,7 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const createAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
+    // TODO: for wrapped keys!
     // createRequestToken: async () => {
     //   // use createSessionSisg then send to wrapped key service
     // }

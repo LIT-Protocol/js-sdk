@@ -1,10 +1,13 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
-import { HexPrefixedSchema, SigningChainSchema } from '@lit-protocol/schemas';
-import { ConnectionInfo } from '@vNaga/LitChainClient';
+import {
+  AuthContextSchema,
+  EoaAuthContextSchema,
+  HexPrefixedSchema,
+  SigningChainSchema,
+} from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
-import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
-
+import { ConnectionInfo } from '../../../../LitChainClient/types';
 export type PKPSignCreateRequestParams = {
   pricingContext: z.input<typeof PricingContextSchema>;
   authContext: z.input<typeof AuthContextSchema | typeof EoaAuthContextSchema>;

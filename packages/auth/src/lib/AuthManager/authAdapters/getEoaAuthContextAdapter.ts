@@ -19,7 +19,6 @@ export const getEoaAuthContextAdapter = async (
   upstreamParams: AuthManagerParams,
   params: EoaAuthContextAdapterParams
 ) => {
-
   // TODO: This is not typed - we have to fix this!
   const litClientCtx = await params.litClient.getContext();
 

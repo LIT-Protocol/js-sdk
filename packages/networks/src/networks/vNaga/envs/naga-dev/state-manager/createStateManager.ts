@@ -1,9 +1,4 @@
 import { STAKING_STATES, STAKING_STATES_VALUES } from '@lit-protocol/constants';
-import { createReadOnlyChainManager } from '@nagaDev/ChainManager';
-import {
-  ConnectionInfo,
-  createReadOnlyContractsManager,
-} from '@vNaga/LitChainClient';
 import { ethers } from 'ethers';
 import { fetchBlockchainData } from '../../../../shared/StateManager/helpers/fetchBlockchainData';
 import {
@@ -14,12 +9,17 @@ import {
   createRefreshedValue,
   RefreshedValue,
 } from '../../../../shared/StateManager/src/createRefreshedValue';
+import {
+  ConnectionInfo,
+  createReadOnlyContractsManager,
+} from '../../../LitChainClient';
+import { createReadOnlyChainManager } from '../chain-manager/createChainManager';
 import { NagaDevNetworkConfig } from '../naga-dev.config';
 // Import EpochInfo type (adjust path if necessary based on actual export location)
-import type { EpochInfo } from '@lit-protocol/types';
 import { getChildLogger } from '@lit-protocol/logger';
-import { areStringArraysDifferent } from './helper/areStringArraysDifferent';
+import type { EpochInfo } from '@lit-protocol/types';
 import { LitNetworkModuleBase } from 'packages/networks/src/networks/types';
+import { areStringArraysDifferent } from './helper/areStringArraysDifferent';
 
 const _logger = getChildLogger({
   module: 'StateManager',

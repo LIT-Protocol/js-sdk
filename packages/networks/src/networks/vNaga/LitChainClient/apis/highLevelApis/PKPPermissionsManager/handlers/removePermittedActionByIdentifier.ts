@@ -7,7 +7,7 @@ import {
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 import { removePermittedAction } from '../../../rawContractApis/permissions/write/removePermittedAction';
 import { LitTxVoid } from '../../../types';
-import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
 
 // Schema for the request
 const removePermittedActionByIdentifierSchema = z.intersection(

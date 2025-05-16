@@ -1,7 +1,7 @@
-import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
-import { ConnectionInfo } from '@vNaga/LitChainClient/types';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
 import { GetActiveUnkickedValidatorStructsAndCountsTransformed } from '../../../schemas/GetActiveUnkickedValidatorStructsAndCountsSchema';
+import { ConnectionInfo } from '../../../types';
 import { getActiveUnkickedValidatorStructsAndCounts } from '../../rawContractApis/staking/getActiveUnkickedValidatorStructsAndCounts';
 import { getPriceFeedInfo } from '../priceFeed';
 

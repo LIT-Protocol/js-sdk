@@ -8,7 +8,7 @@ import {
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 import { addPermittedAction } from '../../../rawContractApis/permissions/write/addPermittedAction';
 import { LitTxVoid } from '../../../types';
-import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
 
 // Schema for the request
 const addPermittedActionByIdentifierSchema = z.intersection(

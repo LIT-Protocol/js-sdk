@@ -51,7 +51,7 @@ export function normalizeAndStringify(input: string): string {
   }
 }
 
-export const createSessionSigs = async (params: {
+export const issueSessionFromContext = async (params: {
   authContext: z.input<typeof AuthContextSchema | typeof EoaAuthContextSchema>;
   pricingContext: PricingContext;
   // latestBlockhash: string;

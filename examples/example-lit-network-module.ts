@@ -3,6 +3,11 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
 import { createLitClient } from '@lit-protocol/lit-client';
 import { privateKeyToAccount } from 'viem/accounts';
 
+// This is a copy/paste of an example that you could immdiately use it in the project
+// export const createLitService = async () => {
+//   return litClient;
+// }
+
 (async () => {
   console.log('💨 Running lit network module example');
   console.log('------------------------------------');
@@ -33,9 +38,9 @@ import { privateKeyToAccount } from 'viem/accounts';
 
   // Step 5: Build a reusable auth configuration (authConfig)
   const authConfig = createAuthConfigBuilder()
-    .addExpiration(new Date(Date.now() + 1000 * 60 * 15).toISOString()) // valid for 15 mins
-    .addStatement('🔥THIS IS A TEST STATEMENT🔥') // custom user-facing message
-    .addCapabilityAuthSigs([]) // empty for now; add session capabilities later
+    // .addExpiration(new Date(Date.now() + 1000 * 60 * 15).toISOString()) // valid for 15 mins
+    // .addStatement('🔥THIS IS A TEST STATEMENT🔥') // custom user-facing message
+    // .addCapabilityAuthSigs([]) // empty for now; add session capabilities later
     .addDomain('localhost:3000') // where the request originates
     .addPKPSigningRequest('*') // wildcard scope for PKP signing
     .addLitActionExecutionRequest('*') // wildcard scope for Lit Actions
@@ -46,11 +51,9 @@ import { privateKeyToAccount } from 'viem/accounts';
     config: {
       account: myAccount,
     },
-    authConfig: authConfig,
+    authConfig,
     litClient: litClient,
   });
-
-  // const pkpAuthContext =
 
   // Step 7: Mint a new Programmable Key Pair (PKP) via the Lit Network
   const { data: mintedPkpInfo } = await litClient.mintPkp({
@@ -90,8 +93,6 @@ import { privateKeyToAccount } from 'viem/accounts';
   // });
 
   // console.log('✅ Signature2:', signature2);
-
-  process.exit();
 
   // Optional: Disconnect from the Lit network
   await litClient.disconnect();

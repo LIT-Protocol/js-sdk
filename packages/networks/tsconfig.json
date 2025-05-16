@@ -1,37 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "../../",
     "module": "commonjs",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@lit-protocol/schemas": ["packages/schemas/src"],
-      "@lit-protocol/*": ["packages/*/src"],
-      "@vNaga/LitChainClient": [
-        "packages/networks/src/networks/vNaga/LitChainClient"
-      ],
-      "@vNaga/LitChainClient/*": [
-        "packages/networks/src/networks/vNaga/LitChainClient/*"
-      ],
-      "@vNaga/LitChainClient/ContractsManager": [
-        "packages/networks/src/networks/vNaga/LitChainClient/contract-manager/createContractsManager"
-      ],
-      "@nagaDev/config": [
-        "packages/networks/src/networks/vNaga/envs/naga-dev/naga-dev.config"
-      ],
-      "@nagaDev/StateManager": [
-        "packages/networks/src/networks/vNaga/envs/naga-dev/state-manager/createStateManager"
-      ],
-      "@nagaDev/ChainManager": [
-        "packages/networks/src/networks/vNaga/envs/naga-dev/chain-manager/createChainManager"
-      ],
-      "@naga/schemas": ["packages/networks/src/networks/vNaga/schemas"]
-    }
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "include": [],

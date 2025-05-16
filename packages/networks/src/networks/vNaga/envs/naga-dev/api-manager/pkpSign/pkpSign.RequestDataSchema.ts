@@ -10,7 +10,7 @@ import {
   NodeSetsFromUrlsSchema,
   SigningChainSchema,
 } from '@lit-protocol/schemas';
-import { LitMessageSchema } from '@naga/schemas';
+import { LitMessageSchema } from '../../../../schemas/LitMessageSchema';
 import { z } from 'zod';
 
 export const PKPSignRequestDataSchema = z

@@ -6,7 +6,7 @@ import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
-import { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
 
 // Schema for validating the request parameters
 const isPermittedAddressByIdentifierSchema = z.intersection(

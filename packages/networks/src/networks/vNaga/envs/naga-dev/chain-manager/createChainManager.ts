@@ -1,6 +1,6 @@
-import { api } from '@vNaga/LitChainClient';
-import { PkpIdentifierRaw } from '@vNaga/LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
-import type { ExpectedAccountOrWalletClient } from '@vNaga/LitChainClient/contract-manager/createContractsManager';
+import { api } from '../../../LitChainClient';
+import { PkpIdentifierRaw } from '../../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
+import type { ExpectedAccountOrWalletClient } from '../../../LitChainClient/contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../interfaces/NetworkContext';
 import { networkConfig } from '../naga-dev.config';
 import { privateKeyToAccount } from 'viem/accounts';
