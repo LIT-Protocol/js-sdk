@@ -50,6 +50,13 @@
         "passWithNoTests": true,
         "watch": true
       }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd dist/packages/access-control-conditions-schemas && npm publish --access public"
+      },
+      "dependsOn": ["build"]
     }
   },
   "tags": []

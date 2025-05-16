@@ -39,6 +39,13 @@
         "passWithNoTests": true,
         "watch": true
       }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd dist/packages/crypto && npm publish --access public"
+      },
+      "dependsOn": ["build"]
     }
   },
   "tags": []

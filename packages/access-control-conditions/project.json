@@ -31,6 +31,13 @@
         "jestConfig": "packages/access-control-conditions/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd dist/packages/access-control-conditions && npm publish --access public"
+      },
+      "dependsOn": ["build"]
     }
   },
   "tags": []
