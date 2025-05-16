@@ -1,5 +1,4 @@
 import { DOCS, version } from '@lit-protocol/constants';
-import { composeLitUrl, createRequestId } from '@lit-protocol/lit-node-client';
 import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
 
 import { z } from 'zod';
@@ -8,13 +7,12 @@ import type { ExpectedAccountOrWalletClient } from '../../LitChainClient/contrac
 import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
 import { issueSessionFromContext } from './session-manager/issueSessionFromContext';
-import {
-  CallbackParams,
-  createStateManager,
-} from './state-manager/createStateManager';
+import { createStateManager } from './state-manager/createStateManager';
 
 // Import the necessary types for the explicit return type annotation
-import { RequestItem } from '@lit-protocol/types';
+import { CallbackParams, RequestItem } from '@lit-protocol/types';
+import { createRequestId } from '../../../shared/helpers/createRequestId';
+import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
 import type { LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
@@ -50,7 +48,7 @@ const nagaDevModuleObject = {
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
-
+  // composeLitUrl: composeLitUrl,
   /**
    * 🧠 This is the core function that keeps all the network essential information
    * up to data, such as:

@@ -1203,6 +1203,9 @@ export interface CapacityCreditsRes {
 
 export type LitActionSdkParams = z.infer<typeof LitActionSdkParamsSchema>;
 
+/**
+ * @deprecated - use the one in @lit-protocol/networks
+ */
 export interface LitEndpoint {
   path: string;
   version: string;

@@ -7,8 +7,7 @@ import {
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
-// import { LitContracts } from '@lit-protocol/contracts-sdk';
-// import { LitNodeClient } from '@lit-protocol/lit-node-client';
+
 import {
   AuthMethod,
   BaseProviderOptions,

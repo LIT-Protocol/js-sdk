@@ -1,6 +1,6 @@
 import { nagaDevSignatures } from '@lit-protocol/contracts';
 import * as chainInfo from '../../../../chains/ChronicleYellowstone';
-import { NAGA_ENDPOINT } from '../../constants/endpoints';
+import { NAGA_ENDPOINT } from '../../endpoints-manager/endpoints';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
 
 const NETWORK = 'naga-dev';

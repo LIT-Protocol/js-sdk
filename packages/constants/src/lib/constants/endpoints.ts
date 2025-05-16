@@ -4,6 +4,7 @@ export const LIT_ENDPOINT_VERSION = {
   V2: '/v2',
 } as const;
 
+// @deprecated - this will be provided by each network module
 export const LIT_ENDPOINT = {
   // internal
   HANDSHAKE: {

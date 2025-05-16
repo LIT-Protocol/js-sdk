@@ -1,4 +1,4 @@
-import * as LitNodeApi from '@lit-protocol/lit-node-client';
+import * as LitNodeApi from '../../LitNodeClient/LitNodeApi';
 import { RequestItem } from '@lit-protocol/types';
 
 /**
@@ -36,6 +36,7 @@ export interface NodeSetEntry {
  * Represents a successful outcome from processing the batch of requests.
  * @template T The type of the value returned by a successful individual request.
  */
+
 export interface BatchSuccessResult<T> {
   success: true;
   values: T[];

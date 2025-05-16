@@ -1,20 +1,22 @@
 import { InitError } from '@lit-protocol/constants';
-import type { ResolvedHandshakeResponse } from '@lit-protocol/lit-node-client';
-import * as LitNodeApi from '@lit-protocol/lit-node-client';
-import {
-  createRandomHexString,
-  createRequestId,
-  RawHandshakeResponse,
-  resolveHandshakeResponse,
-} from '@lit-protocol/lit-node-client';
+import * as LitNodeApi from '../LitNodeClient/LitNodeApi';
+
 import { getChildLogger } from '@lit-protocol/logger';
+import { EndPoint } from '@lit-protocol/types';
+import { createRandomHexString } from '../LitNodeClient/helper/createRandomHexString';
+import {
+  ResolvedHandshakeResponse,
+  resolveHandshakeResponse,
+} from '../LitNodeClient/LitNodeApi';
+import { composeLitUrl } from '../LitNodeClient/LitNodeApi/src/helper/composeLitUrl';
+import { createRequestId } from './helper/createRequestId';
 
 const _logger = getChildLogger({
   name: 'lit-client.orchestrateHandshake',
 });
 
 export type OrchestrateHandshakeResponse = {
-  serverKeys: Record<string, RawHandshakeResponse>;
+  serverKeys: Record<string, LitNodeApi.RawHandshakeResponse>;
   connectedNodes: Set<string>;
   coreNodeConfig: ResolvedHandshakeResponse | null;
   threshold: number;
@@ -27,11 +29,12 @@ export const orchestrateHandshake = async (params: {
   requiredAttestation: boolean;
   minimumThreshold: number;
   abortTimeout: number;
+  endpoints: EndPoint;
 }): Promise<OrchestrateHandshakeResponse> => {
   _logger.info('🌶️ orchestrating handshake...');
 
   // -- States --
-  const serverKeys: Record<string, RawHandshakeResponse> = {}; // Store processed keys
+  const serverKeys: Record<string, LitNodeApi.RawHandshakeResponse> = {}; // Store processed keys
   const connectedNodes = new Set<string>();
   const requestId = createRequestId();
   let timeoutHandle: ReturnType<typeof setTimeout>;
@@ -52,9 +55,14 @@ export const orchestrateHandshake = async (params: {
       Promise.all(
         params.bootstrapUrls.map(async (url: string) => {
           try {
+            const fullPath = composeLitUrl({
+              url: url,
+              endpoint: params.endpoints.HANDSHAKE,
+            });
+
             // 1. Call the thin API
             const retrievedServerKeys = await LitNodeApi.handshake({
-              url,
+              fullPath: fullPath,
               data: {
                 clientPublicKey: 'test',
                 challenge: createRandomHexString(64),

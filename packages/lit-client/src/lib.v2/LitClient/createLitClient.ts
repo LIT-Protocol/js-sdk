@@ -38,6 +38,8 @@ export const _createNagaLitClient = async (
     NagaNetworkModule
   >({
     // so whenever there's a new state detected, it will orchestrate a handshake and update the connection info
+    // the reason that this is done via a "callback" is because the "orchestrateHandshake" function is not network-dependent
+    // If you want to edit the arguments being passed to the callback, ou can edit in the 'createStateManager.ts' funtion
     callback: orchestrateHandshake,
     networkModule,
   });
@@ -114,10 +116,10 @@ export const _createNagaLitClient = async (
   return {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
+    // maybe you will need connectionInfo: _stateManager.getLatestConnectionInfo(),
     getContext: async () => {
       return {
         latestBlockhash: await _stateManager.getLatestBlockhash(),
-        // connectionInfo: _stateManager.getLatestConnectionInfo(),
       };
     },
     disconnect: _stateManager.stop,

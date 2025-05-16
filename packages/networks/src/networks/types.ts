@@ -40,7 +40,6 @@ export interface LitNetworkModuleBase {
     abortTimeout: number;
     minimumThreshold: number;
   };
-
   getNetworkName: () => string;
   getHttpProtocol: () => typeof HTTP | typeof HTTPS;
   getEndpoints: () => typeof LIT_ENDPOINT;

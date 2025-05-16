@@ -17,7 +17,7 @@ import { createReadOnlyChainManager } from '../chain-manager/createChainManager'
 import { NagaDevNetworkConfig } from '../naga-dev.config';
 // Import EpochInfo type (adjust path if necessary based on actual export location)
 import { getChildLogger } from '@lit-protocol/logger';
-import type { EpochInfo } from '@lit-protocol/types';
+import type { CallbackParams, EndPoint, EpochInfo } from '@lit-protocol/types';
 import { LitNetworkModuleBase } from 'packages/networks/src/networks/types';
 import { areStringArraysDifferent } from './helper/areStringArraysDifferent';
 
@@ -27,14 +27,22 @@ const _logger = getChildLogger({
 
 const BLOCKHASH_SYNC_INTERVAL = 30_000;
 
-export type CallbackParams = {
-  bootstrapUrls: string[];
-  currentEpoch: number;
-  version: string;
-  requiredAttestation: boolean;
-  minimumThreshold: number;
-  abortTimeout: number;
-};
+// export type EndPoint = {
+//   [key: string]: {
+//     path: string;
+//     version: string;
+//   };
+// };
+
+// export type CallbackParams = {
+//   bootstrapUrls: string[];
+//   currentEpoch: number;
+//   version: string;
+//   requiredAttestation: boolean;
+//   minimumThreshold: number;
+//   abortTimeout: number;
+//   endpoints: EndPoint[];
+// };
 
 /**
  * It returns a blockhash manager for latestBlockhash/nonce and event state
@@ -87,6 +95,7 @@ export const createStateManager = async <T>(params: {
       requiredAttestation: params.networkModule.config.requiredAttestation,
       minimumThreshold: params.networkModule.config.minimumThreshold,
       abortTimeout: params.networkModule.config.abortTimeout,
+      endpoints: params.networkModule.getEndpoints(),
     });
   } catch (error) {
     _logger.error(
@@ -167,6 +176,7 @@ export const createStateManager = async <T>(params: {
                 params.networkModule.config.requiredAttestation,
               minimumThreshold: params.networkModule.config.minimumThreshold,
               abortTimeout: params.networkModule.config.abortTimeout,
+              endpoints: params.networkModule.getEndpoints(),
             });
           } catch (error) {
             _logger.error(

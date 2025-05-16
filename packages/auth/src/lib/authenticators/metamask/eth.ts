@@ -14,26 +14,26 @@ import { getAddress } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
 import {
-  ConstantValues,
   ConstantKeys,
+  ConstantValues,
   Environment,
   InvalidSignatureError,
   LIT_CHAINS,
+  LIT_CHAINS_KEYS,
   LOCAL_STORAGE_KEYS,
   UnknownError,
   UnsupportedChainException,
   WrongNetworkException,
   WrongParamFormat,
-  LIT_CHAINS_KEYS,
 } from '@lit-protocol/constants';
-import { validateSessionSig } from '@lit-protocol/lit-node-client';
 import { getChildLogger, logger } from '@lit-protocol/logger';
 import {
   getStorageItem,
-  setStorageItem,
   removeStorageItem,
+  setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
+import { validateSessionSig } from './helper/session-sigs-validator';
 
 import LitConnectModal from './connect-modal/modal';
 
