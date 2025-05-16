@@ -111,10 +111,10 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const getAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
-    getEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
+    createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);
     },
-    getPkpAuthContext: <T extends AuthenticatorWithId>(params: {
+    createPkpAuthContext: <T extends AuthenticatorWithId>(params: {
       authenticator: T;
       config: ConstructorConfig<T>;
       authConfig: AuthConfig;
@@ -122,7 +122,7 @@ export const getAuthManager = (authManagerParams: AuthManagerParams) => {
     }) => {
       return getPkpAuthContextAdapter(authManagerParams, params);
     },
-    getCustomAuthContext: <T extends ICustomAuthenticator>(params: {
+    createCustomAuthContext: <T extends ICustomAuthenticator>(params: {
       authenticator: T;
       settings: ConstructorParameters<T>[0]; // Infer settings type from constructor
       config: { pkpPublicKey: string; [key: string]: any }; // Execution config

@@ -33,31 +33,6 @@ export interface NodeSetEntry {
 }
 
 /**
- * Interface for the 'data' payload of a single request item sent to a node.
- * This should align with the expected schema for endpoints like PKP_SIGN.
- */
-// export interface RequestItemData {
-//   toSign: number[] | Uint8Array;
-//   signingScheme: string; // e.g., "EcdsaK256Sha256"
-//   pubkey: string; // The public key for which the signature is requested
-//   authSig: RequestAuthSig;
-//   nodeSet: NodeSetEntry[];
-//   // Add any other fields that might be part of the request data.
-// }
-
-// /**
-//  * Interface for a single request item to be sent to a Lit Protocol node.
-//  * This structure should match the objects within the '_request' array in getLitClient.ts.
-//  */
-// export interface RequestItem<T> {
-//   fullPath: string; // The full URL endpoint of the node
-//   data: T; // The payload for the request
-//   requestId: string; // Identifier for this specific request/batch
-//   epoch: number; // The current epoch number
-//   version: string; // The version of the Lit Protocol client/network
-// }
-
-/**
  * Represents a successful outcome from processing the batch of requests.
  * @template T The type of the value returned by a successful individual request.
  */

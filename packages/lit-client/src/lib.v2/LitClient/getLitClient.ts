@@ -69,12 +69,10 @@ export const _getNagaLitClient = async (networkModule: NagaNetworkModule) => {
     pkpSign: async (
       params: z.infer<typeof networkModule.api.pkpSign.schemas.Input>
     ) => {
-      const PRODUCT_NAME = 'SIGN';
-
       // 1. create a request array
       const requestArray = await networkModule.api.pkpSign.createRequest({
         pricingContext: {
-          product: PRODUCT_NAME,
+          product: 'SIGN',
           userMaxPrice: params.userMaxPrice,
           nodePrices: connectionInfo.priceFeedInfo.networkPrices,
           threshold: handshakeResult.threshold,
@@ -89,14 +87,16 @@ export const _getNagaLitClient = async (networkModule: NagaNetworkModule) => {
         version: networkModule.version,
       });
 
+      const requestId = requestArray[0].requestId;
+
       // 2. send the requests to nodes using the new helper
       const result = await processBatchRequests<
         z.infer<typeof networkModule.api.pkpSign.schemas.RequestData>,
         any
-      >(requestArray, requestArray[0].requestId, handshakeResult.threshold);
+      >(requestArray, requestId, handshakeResult.threshold);
 
       // 3. ask the network module to handle the result
-      return await networkModule.api.pkpSign.handleResponse(result);
+      return await networkModule.api.pkpSign.handleResponse(result, requestId);
     },
   };
 };

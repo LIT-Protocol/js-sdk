@@ -38,7 +38,7 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
     .addLitActionExecutionRequest('*')
     .build();
 
-  const authContext = await authManager.getEoaAuthContext({
+  const eoaAuthContext = await authManager.createEoaAuthContext({
     config: {
       account: myAccount,
     },
@@ -46,11 +46,11 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
     litClient: litClient,
   });
 
-  console.log('authContext:', authContext);
+  console.log('eoaAuthContext:', eoaAuthContext);
 
   // mint pkp
   const { data: mintedPkpInfo } = await litClient.mintPkp({
-    authContext,
+    authContext: eoaAuthContext,
     scopes: ['sign-anything'],
   });
 
@@ -61,7 +61,7 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
     pubKey: mintedPkpInfo.pubkey,
     toSign: 'hello',
     signingScheme: 'EcdsaK256Sha256',
-    authContext: authContext,
+    authContext: eoaAuthContext,
     // -- optional
     // userMaxPrice: 1000000000000000000n,
   });

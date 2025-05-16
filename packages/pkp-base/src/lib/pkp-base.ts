@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * This module defines the PKPBase class, which provides a base implementation for wallet functionality
  * that can be shared between Ethers and Cosmos signers. The class is responsible for managing public key
@@ -13,8 +12,6 @@ import {
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
-import { publicKeyCompress } from '@lit-protocol/crypto';
-// import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { Logger, getChildLogger } from '@lit-protocol/logger';
 import {
@@ -25,6 +22,7 @@ import {
   SigResponse,
   RPCUrls,
 } from '@lit-protocol/types';
+import { publicKeyCompress } from './crypto-utils';
 
 /**
  * A base class that can be shared between Ethers and Cosmos signers.
@@ -121,15 +119,16 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * @returns {string} - The compressed public key.
    */
   private compressPubKey(pubKey: string): string {
+    let pubKeyWithPrefix = pubKey;
     const testBuffer = Buffer.from(pubKey, 'hex');
     if (testBuffer.length === 64) {
-      pubKey = '04' + pubKey;
+      // If the key is 64 bytes, it's X and Y. Prepend 0x04 for uncompressed format.
+      pubKeyWithPrefix = '04' + pubKey;
     }
 
-    // const hex = Buffer.from(pubKey, 'hex');
-    const uint8array = Buffer.from(pubKey, 'hex');
-    const compressedKey = publicKeyCompress(uint8array);
-    const hex = Buffer.from(compressedKey).toString('hex');
+    const uint8array = Buffer.from(pubKeyWithPrefix, 'hex');
+    const compressedKeyBytes = publicKeyCompress(uint8array);
+    const hex = Buffer.from(compressedKeyBytes).toString('hex');
 
     return hex;
   }
