@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
 import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
 
-export type PKPSignCreateRequestType = {
+export type PKPSignCreateRequestParams = {
   pricingContext: z.input<typeof PricingContextSchema>;
   authContext: z.input<typeof AuthContextSchema | typeof EoaAuthContextSchema>;
   signingContext: {

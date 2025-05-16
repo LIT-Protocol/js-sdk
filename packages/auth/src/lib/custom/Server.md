@@ -39,7 +39,7 @@ This shows how a React frontend might use the `ServerCustomAuthenticator` helper
 import React, { useState } from 'react';
 import * as LitAuth from '@lit-protocol/auth';
 import { ServerCustomAuthenticator } from 'packages/auth/src/lib/custom/ServerCustomAuthenticator'; // Adjust import path
-import { getLitClient } from './examples/getLitClient'; // Your Lit Client setup helper
+import { createLitClient } from './examples/createLitClient'; // Your Lit Client setup helper
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 
 // --- Configuration ---
@@ -54,7 +54,7 @@ function LoginForm() {
   const [litAuthContext, setLitAuthContext] = useState(null);
 
   // Initialize AuthManager (consider memoization/context)
-  const authManager = LitAuth.getAuthManager({
+  const authManager = LitAuth.createAuthManager({
     storage: LitAuth.storagePlugins.localStorageNode({
       /* ... */
     }),
@@ -89,7 +89,7 @@ function LoginForm() {
     };
 
     try {
-      const litClient = await getLitClient({ network: 'naga-dev' });
+      const litClient = await createLitClient({ network: 'naga-dev' });
 
       // Call the AuthManager
       const context = await authManager.getCustomAuthContext({

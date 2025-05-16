@@ -35,7 +35,7 @@ export interface BaseAuthContext<T> {
 
   // @ts-expect-error - LitClientType is not defined in the package. We need to define this
   // once the LitClienType is ready
-  litClient: ReturnType<typeof getLitClient>;
+  litClient: ReturnType<typeof createLitClient>;
 }
 
 /**
@@ -109,7 +109,7 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
   ? C
   : never;
 
-export const getAuthManager = (authManagerParams: AuthManagerParams) => {
+export const createAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
     createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);

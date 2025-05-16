@@ -1,7 +1,7 @@
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
-import { getLitClient } from '@lit-protocol/lit-client';
+import { createLitClient } from '@lit-protocol/lit-client';
 import { privateKeyToAccount } from 'viem/accounts';
 import { Hex } from 'viem';
 
@@ -15,7 +15,7 @@ async function createMyLitService() {
 
   // get rid of statefulness
   // never couple to 1 pkp, always design for lookup
-  const authManager = LitAuth.getAuthManager({
+  const authManager = LitAuth.createAuthManager({
     storage: LitAuth.storagePlugins.localStorageNode({
       appName: 'my-app',
       networkName: 'naga-dev',
@@ -31,7 +31,7 @@ async function createMyLitService() {
     resources: createResourceBuilder().addPKPSigningRequest('*').getResources(),
   };
 
-  const litClient = await getLitClient({ network: nagaDev });
+  const litClient = await createLitClient({ network: nagaDev });
 
   // There's actually two eth authetnicators
   // - Ethers

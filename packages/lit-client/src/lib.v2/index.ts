@@ -1,1 +1,1 @@
-export * from './LitClient/getLitClient';
+export * from './LitClient/createLitClient';

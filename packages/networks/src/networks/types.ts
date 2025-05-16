@@ -46,5 +46,5 @@ export interface LitNetworkModuleBase {
   getEndpoints: () => typeof LIT_ENDPOINT;
   getRpcUrl: () => string;
   getChainConfig: () => Chain;
-  getStateManager: () => Promise<any>;
+  createStateManager: () => Promise<any>;
 }

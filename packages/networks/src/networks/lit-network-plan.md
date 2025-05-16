@@ -7,7 +7,7 @@ This plan outlines the steps to refactor the Lit SDK's network handling, moving 
 1.  **Decouple `LitNodeClient` (formerly `LitCore`) from Network Specifics**: `LitNodeClient` should not know the intimate details (RPC URLs, contract addresses, specific protocols) of each supported Lit Protocol network.
 2.  **Centralise Network Configuration**: Each network (Naga, Datil, etc.) should have its configuration and data-fetching logic self-contained.
 3.  **Functional Approach for Network Modules**: Instead of a `LitNetwork` abstract class, use functional modules or interfaces to define and implement network capabilities.
-4.  **Orchestration via `getLitClient`**: A top-level `getLitClient` (or similar) function will be responsible for instantiating/configuring the correct network module and providing it to `LitNodeClient`.
+4.  **Orchestration via `createLitClient`**: A top-level `createLitClient` (or similar) function will be responsible for instantiating/configuring the correct network module and providing it to `LitNodeClient`.
 
 ## Phase 1: Define Network Module Interface & Initial Implementation
 
@@ -55,9 +55,9 @@ This plan outlines the steps to refactor the Lit SDK's network handling, moving 
 3.  **Task: Update `_fetchCurrentEpochState`**
     - This method currently calls `_getValidatorData` if `epochInfo` isn't passed. It should be updated to potentially get `epochInfo` directly from the `networkModule` if `_getValidatorData`'s role changes.
 
-## Phase 3: Implement `getLitClient` Orchestrator
+## Phase 3: Implement `createLitClient` Orchestrator
 
-1.  **Task: Implement/Refine `getLitClient`**
+1.  **Task: Implement/Refine `createLitClient`**
 
     - This function will take a simple network identifier (e.g., `network: 'naga-dev' | 'datil-mainnet'`).
     - Based on the identifier, it will:
@@ -76,9 +76,9 @@ This plan outlines the steps to refactor the Lit SDK's network handling, moving 
 1.  **Task: Unit Tests for Network Modules**
     - Write unit tests for each network module implementation to ensure they correctly provide data according to the `LitNetworkOperations` interface.
 2.  **Task: Integration Tests**
-    - Update/create integration tests to verify `LitNodeClient` functions correctly with different network modules orchestrated by `getLitClient`.
+    - Update/create integration tests to verify `LitNodeClient` functions correctly with different network modules orchestrated by `createLitClient`.
 3.  **Task: Deprecate Old Configuration Paths**
-    - Gradually deprecate direct network configuration on `LitNodeClient` if the new `getLitClient` and network module approach is adopted.
+    - Gradually deprecate direct network configuration on `LitNodeClient` if the new `createLitClient` and network module approach is adopted.
 
 ## Open Questions/Considerations:
 

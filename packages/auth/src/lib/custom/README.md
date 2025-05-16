@@ -160,10 +160,10 @@ import * as LitAuth from '@lit-protocol/auth';
 // ... other imports
 
 async function authenticateUser() {
-  const authManager = LitAuth.getAuthManager({
+  const authManager = LitAuth.createAuthManager({
     /* ... storage ... */
   });
-  const litClient = await getLitClient({
+  const litClient = await createLitClient({
     /* ... */
   });
 

@@ -1,5 +1,5 @@
 // -- imports
-// import { getAuthManager } from './lib/auth-manager';
+// import { createAuthManager } from './lib/auth-manager';
 import * as authenticators from './lib/authenticators';
 import { LitRelay } from './lib/authenticators';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
@@ -40,7 +40,7 @@ export const storagePlugins = {
  * Authenticators handle the process of verifying user identity via different methods (e.g., WebAuthn, OAuth, Stytch).
  */
 export { authenticators };
-export { getAuthManager } from './lib/AuthManager/auth-manager';
+export { createAuthManager } from './lib/AuthManager/auth-manager';
 // export type {
 //   AuthManagerConfigUnion,
 //   PkpAuthManagerConfig,
@@ -55,7 +55,7 @@ export { getAuthManager } from './lib/AuthManager/auth-manager';
  * @param {LitAuthStorageProvider} config.storage - The storage provider instance to use for caching.
  * @returns An instance of the Auth Manager.
  */
-// export { getAuthManager } from './lib/auth-manager';
+// export { createAuthManager } from './lib/auth-manager';
 // export { getAuthContext } from './lib/AuthManager/getAuthContext';
 export { getEoaAuthContext } from './lib/AuthManager/authContexts/getEoaAuthContext';
 export { getPkpAuthContext } from './lib/AuthManager/authContexts/getPkpAuthContext';

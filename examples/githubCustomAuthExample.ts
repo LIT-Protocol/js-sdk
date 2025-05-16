@@ -2,12 +2,12 @@ import { GitHubCustomAuthenticator } from 'packages/auth/src/lib/custom/GitHubCu
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
-import { getLitClient } from '@lit-protocol/lit-client';
+import { createLitClient } from '@lit-protocol/lit-client';
 import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContexts/BaseAuthContextType';
 
 (async () => {
   // 1. get auth manager providing your own storage solution
-  const authManager = LitAuth.getAuthManager({
+  const authManager = LitAuth.createAuthManager({
     storage: LitAuth.storagePlugins.localStorageNode({
       appName: 'my-app',
       networkName: 'naga-dev',
@@ -25,7 +25,7 @@ import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContex
   };
 
   // 3. get lit client
-  const litClient = await getLitClient({ network: 'naga-dev' });
+  const litClient = await createLitClient({ network: 'naga-dev' });
 
   // -- PKP Custom GitHub Auth Context --
   // This demonstrates the pattern, assuming browser environment for OAuth redirect

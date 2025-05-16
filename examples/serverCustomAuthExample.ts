@@ -2,7 +2,7 @@ import { ServerCustomAuthenticator } from 'packages/auth/src/lib/custom/ServerCu
 import * as LitAuth from '@lit-protocol/auth';
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 import { AuthConfig } from 'packages/auth/src/lib/AuthManager/auth-manager';
-import { getLitClient } from '@lit-protocol/lit-client';
+import { createLitClient } from '@lit-protocol/lit-client';
 import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContexts/BaseAuthContextType';
 
 /**
@@ -17,7 +17,7 @@ import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContex
     console.log('Starting Server Custom Auth Example...');
 
     // 1. Get auth manager with storage plugin
-    const authManager = LitAuth.getAuthManager({
+    const authManager = LitAuth.createAuthManager({
       storage: LitAuth.storagePlugins.localStorageNode({
         appName: 'my-app',
         networkName: 'naga-dev',
@@ -37,7 +37,7 @@ import { DEFAULT_EXPIRATION } from 'packages/auth/src/lib/AuthManager/authContex
     };
 
     // 3. Get lit client instance
-    const litClient = await getLitClient({ network: 'naga-dev' });
+    const litClient = await createLitClient({ network: 'naga-dev' });
 
     // Target PKP for this authentication
     const pkpPublicKey =

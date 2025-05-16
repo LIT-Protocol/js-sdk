@@ -6,11 +6,6 @@ import {
   tryGetCachedAuthData,
 } from '../auth-manager';
 import { getEoaAuthContext } from '../authContexts/getEoaAuthContext';
-export const EoaAuthDepsSchema = z.object({
-  nonce: z.any(),
-  // currentEpoch: no need for EOA
-  // getSignSessionKey: no need for EOA
-});
 
 /**
  * The EOA auth context adapter params.
@@ -24,9 +19,9 @@ export const getEoaAuthContextAdapter = async (
   upstreamParams: AuthManagerParams,
   params: EoaAuthContextAdapterParams
 ) => {
-  const litClientConfig = EoaAuthDepsSchema.parse({
-    nonce: params.litClient.latestBlockhash,
-  });
+
+  // TODO: This is not typed - we have to fix this!
+  const litClientCtx = await params.litClient.getContext();
 
   // Try to get LitAuthData from storage or generate a new one
   const authData = await tryGetCachedAuthData({
@@ -35,8 +30,6 @@ export const getEoaAuthContextAdapter = async (
     expiration: params.authConfig.expiration,
     type: 'EthWallet',
   });
-
-  console.log('getEoaAuthContextAdapter - authData:', authData);
 
   // now use the actual getEoaAuthContext
   // we don't really care how messy the params look like, this adapter function will massage them into the correct shape
@@ -53,7 +46,7 @@ export const getEoaAuthContextAdapter = async (
     },
     deps: {
       authData: authData,
-      nonce: litClientConfig.nonce,
+      nonce: litClientCtx.latestBlockhash,
     },
   });
 };

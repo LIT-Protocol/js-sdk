@@ -137,7 +137,7 @@ function getMostCommonError(errors: any[]): any {
  * @param minSuccessCount The minimum number of successful responses required for the batch to be considered successful.
  * @returns A Promise that resolves to a `ProcessedBatchResult<T>`, indicating either overall success with the collected values or failure with an error.
  */
-export async function processBatchRequests<T, M = NodeResponse>(
+export async function dispatchRequests<T, M = NodeResponse>(
   requests: RequestItem<T>[],
   batchRequestId: string,
   minSuccessCount: number

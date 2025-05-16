@@ -5,9 +5,9 @@
 Refactor the current architecture where `LitCore` handles both low-level node communication and higher-level orchestration/state management. The new architecture will separate these concerns:
 
 1.  **Thin Network Wrapper (Conceptual: `LitNodeApi`)**: Responsible _only_ for making individual HTTP requests to specific Lit node endpoints and handling basic request/response formatting and errors for that single interaction.
-2.  **Orchestration Layer (`LitClient` / `getLitClient`)**: Responsible for managing the overall process, interacting with multiple nodes (using the thin wrapper), handling multi-node timeouts, performing consensus logic, verifying attestations, managing client-side state, and providing the user-facing SDK API.
+2.  **Orchestration Layer (`LitClient` / `createLitClient`)**: Responsible for managing the overall process, interacting with multiple nodes (using the thin wrapper), handling multi-node timeouts, performing consensus logic, verifying attestations, managing client-side state, and providing the user-facing SDK API.
 
-**Ultimate Outcome:** This refactoring aims to **eliminate the need for the `LitCore` and `LitNodeClient` classes**, replacing them with the thin `LitNodeApi` wrapper and the `getLitClient` factory function + orchestration logic.
+**Ultimate Outcome:** This refactoring aims to **eliminate the need for the `LitCore` and `LitNodeClient` classes**, replacing them with the thin `LitNodeApi` wrapper and the `createLitClient` factory function + orchestration logic.
 
 ## Proposed File Structure
 
@@ -20,7 +20,7 @@ Refactor the current architecture where `LitCore` handles both low-level node co
   - **`mostCommonValue.ts`:** Utility for consensus logic (if not already centrally available).
   - _(Potentially other utility files as needed for orchestration helpers)_
 - **`packages/lit-client/src/index.ts` (Existing File - Refactored):**
-  - The main entry point (`getLitClient` factory function).
+  - The main entry point (`createLitClient` factory function).
   - Imports and orchestrates calls to `lit-node-api` and `lit-client/utils`.
   - Defines the structure and methods of the returned client object.
 - **`packages/lit-node-client/src/outline.md` (This File):**
@@ -42,7 +42,7 @@ Refactor the current architecture where `LitCore` handles both low-level node co
 - **Output**: Parsed JSON response body on success, or throws an error.
 - **Excludes**: Multi-node coordination, consensus logic, cross-node timeouts, complex error handling across nodes, attestation _verification_, state management.
 
-### Orchestration Layer (`LitClient` / `getLitClient`)
+### Orchestration Layer (`LitClient` / `createLitClient`)
 
 - **Location:** `packages/lit-client/src/index.ts` (using helpers from `packages/lit-client/src/utils/`)
 - **Input**: Network configuration module, user configuration (timeouts, attestation preferences).
@@ -65,12 +65,12 @@ Refactor the current architecture where `LitCore` handles both low-level node co
 1.  Create the new files and directories as outlined in the "Proposed File Structure" section.
 2.  Implement the `LitNodeApi` module (`lit-node-api.ts`), starting with the `sendNodeRequest` helper and the `handshake` function.
 3.  Implement the necessary helper functions in `packages/lit-client/src/utils/` (`identifiers.ts`, `handshake-helpers.ts`, etc.).
-4.  Refactor `getLitClient` in `packages/lit-client/src/index.ts`:
+4.  Refactor `createLitClient` in `packages/lit-client/src/index.ts`:
     - Remove direct `fetch` calls or logic duplicated from `LitCore`.
     - Import and use `LitNodeApi.handshake` within the `Promise.all` loop for handshake orchestration.
     - Import and use the utility functions for response processing, consensus, and ID generation.
     - Ensure configuration (`connectTimeout`, `checkNodeAttestation`) is correctly passed down or used.
-5.  Define the structure of the object returned by `getLitClient`, including the derived `config` and `connectedNodes`.
+5.  Define the structure of the object returned by `createLitClient`, including the derived `config` and `connectedNodes`.
 6.  Implement the essential user-facing methods on the returned client object (start with `disconnect`, `getLatestBlockhash`).
 7.  Incrementally implement the remaining user-facing methods (e.g., `executeJs`, `signSessionKey`, etc.), following the pattern: orchestrate `LitNodeApi` calls -> collect results -> process/combine -> return.
 8.  Gradually deprecate and remove the complex orchestration/state logic and eventually the entire classes from `LitCore` and `LitNodeClient`.

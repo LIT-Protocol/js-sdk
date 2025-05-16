@@ -28,6 +28,7 @@ export const getEoaAuthContext = async (
 ): Promise<z.infer<typeof EoaAuthContextSchema>> => {
   // -- validate params
   const _params = GetEoaAuthContextSchema.parse(params);
+
   const _sessionKeyPair = _params.deps.authData.sessionKey.keyPair;
 
   const authenticator = getViemAccountAuthenticator({

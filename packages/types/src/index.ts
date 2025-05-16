@@ -8,7 +8,7 @@ export * from './lib/EndpointResponses';
 
 /**
  * Interface for a single request item to be sent to a Lit Protocol node.
- * This structure should match the objects within the '_request' array in getLitClient.ts.
+ * This structure should match the objects within the '_request' array in createLitClient.ts.
  */
 export interface RequestItem<T> {
   fullPath: string; // The full URL endpoint of the node

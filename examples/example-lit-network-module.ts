@@ -1,24 +1,24 @@
-import { getAuthManager, storagePlugins } from '@lit-protocol/auth';
-// import { createResourceBuilder } from '@lit-protocol/auth-helpers';
-import { getLitClient } from '@lit-protocol/lit-client';
-import { Hex } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
+import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
+import { createLitClient } from '@lit-protocol/lit-client';
+import { privateKeyToAccount } from 'viem/accounts';
 (async () => {
   console.log('💨 Running lit network module example');
   console.log('------------------------------------');
 
-  const myAccount = privateKeyToAccount(process.env.PRIVATE_KEY as Hex);
+  const myAccount = privateKeyToAccount(
+    process.env.PRIVATE_KEY as `0x${string}`
+  );
 
   // 1. Pick the network you want to connect to:
   const { nagaDev } = await import('@lit-protocol/networks');
 
   // 2. Get the LitClient instance
-  const litClient = await getLitClient({ network: nagaDev });
+  const litClient = await createLitClient({ network: nagaDev });
 
   // 3. Get an instance of the auth manager
   // const authManager = await import('@lit-protocol/auth');
-  const authManager = getAuthManager({
+  const authManager = createAuthManager({
     // Web user will default to localStorage if no storage is provided
     storage: storagePlugins.localStorageNode({
       appName: 'my-app',
@@ -46,8 +46,6 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
     litClient: litClient,
   });
 
-  console.log('eoaAuthContext:', eoaAuthContext);
-
   // mint pkp
   const { data: mintedPkpInfo } = await litClient.mintPkp({
     authContext: eoaAuthContext,
@@ -55,9 +53,9 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
   });
 
   console.log('mintedPkpInfo:', mintedPkpInfo);
-  // 5. Use the litClient APIs
 
-  await litClient.pkpSign({
+  // 5. Use the litClient APIs
+  const signature = await litClient.pkpSign({
     pubKey: mintedPkpInfo.pubkey,
     toSign: 'hello',
     signingScheme: 'EcdsaP384Sha384',
@@ -65,8 +63,14 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
     // -- optional
     // userMaxPrice: 1000000000000000000n,
   });
-  process.exit();
 
+  signature.recoveryId;
+
+  // test values are being updated
+  // setInterval(async () => {
+  //   const accessCounter = litClient.getAccessCounter();
+  //   console.log('accessCounter:', accessCounter);
+  // }, 3000);
   // (optiional) If you ever want to disconnect from the network (stopping the event listener)
-  // litClient.disconnect();
+  litClient.disconnect();
 })();

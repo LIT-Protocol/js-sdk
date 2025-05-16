@@ -20,14 +20,13 @@ import {
 import { RequestItem } from '@lit-protocol/types';
 import type { LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
-import { PKPSignCreateRequestType } from './api-manager/pkpSign/pkpSign.CreateRequestType';
+import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
+import { PKPSignCreateRequestParams } from './api-manager/pkpSign/pkpSign.CreateRequestParams';
 import { PKPSignInputSchema } from './api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
-import { combinePKPSignNodeShares } from '@lit-protocol/crypto';
-import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 
-// Define ProcessedBatchResult type (mirroring structure from processBatchRequests)
+// Define ProcessedBatchResult type (mirroring structure from dispatchRequests)
 type ProcessedBatchResult<T> =
   | { success: true; values: T[] }
   | { success: false; error: any; failedNodeUrls?: string[] };
@@ -46,11 +45,15 @@ const nagaDevModuleObject = {
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
-  // main responsiblities:
-  // - return latestBlockhash
-  // - listens for StateChange events and updates the connection info
-  // - orchestrate handshake via callback
-  getStateManager: async <T, M>(params: {
+
+  /**
+   * 🧠 This is the core function that keeps all the network essential information
+   * up to data, such as:
+   * - latest blockhash
+   * - connection info (node urls, epoch, etc.) - it listens for StateChange events
+   * - orchestrate handshake via callback
+   */
+  createStateManager: async <T, M>(params: {
     callback: (params: CallbackParams) => Promise<T>;
     networkModule: M;
   }): Promise<Awaited<ReturnType<typeof createStateManager<T>>>> => {
@@ -105,7 +108,7 @@ const nagaDevModuleObject = {
         RequestData: PKPSignRequestDataSchema,
         ResponseData: PKPSignResponseDataSchema,
       },
-      createRequest: async (params: PKPSignCreateRequestType) => {
+      createRequest: async (params: PKPSignCreateRequestParams) => {
         // -- 1. generate JIT session sigs
         const sessionSigs = await createJitSessionSigs({
           pricingContext: PricingContextSchema.parse(params.pricingContext),
@@ -166,7 +169,6 @@ const nagaDevModuleObject = {
 
         const { values } = PKPSignResponseDataSchema.parse(result);
 
-        // process.exit();
         const signatures = await combinePKPSignSignatures({
           nodesPkpSignResponseData: values,
           requestId,

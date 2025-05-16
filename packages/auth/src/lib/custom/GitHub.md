@@ -33,7 +33,7 @@ API Endpoint (e.g., /api/verify-github-code): This endpoint will:
 import React, { useState, useEffect } from 'react';
 import * as LitAuth from '@lit-protocol/auth';
 import { GitHubCustomAuthenticator } from 'packages/auth/src/lib/custom/GitHubCustomAuthenticator'; // Adjust import path
-import { getLitClient } from '@lit-protocol/lit-client';/ Your Lit Client setup helper
+import { createLitClient } from '@lit-protocol/lit-client';/ Your Lit Client setup helper
 import { createResourceBuilder } from '@lit-protocol/auth-helpers';
 
 // --- Configuration (Could come from backend or .env for client ID) ---
@@ -50,7 +50,7 @@ function App() {
 
   // --- Initialize AuthManager ---
   // Memoize or initialize outside component if needed
-  const authManager = LitAuth.getAuthManager({
+  const authManager = LitAuth.createAuthManager({
     storage: LitAuth.storagePlugins.localStorageNode({
       appName: 'my-github-app',
       networkName: 'naga-dev',
@@ -102,7 +102,7 @@ function App() {
 
         try {
           // Get Lit Client instance (ensure it's ready)
-          const litClient = await getLitClient({ network: 'naga-dev' });
+          const litClient = await createLitClient({ network: 'naga-dev' });
 
           // Call the AuthManager using the class, settings, and config
           const context = await authManager.getCustomAuthContext({

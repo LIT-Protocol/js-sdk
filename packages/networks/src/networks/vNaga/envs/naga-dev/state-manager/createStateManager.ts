@@ -51,6 +51,9 @@ export const createStateManager = async <T>(params: {
   let latestConnectionInfo: ConnectionInfo | null = null;
   let callbackResult: T | null = null;
 
+  // just a test to check on the Lit Client we are getting the latest result
+  // let counter = 0;
+
   // --- Internal Managers --- (Not directly exposed)
   const blockhashManager: RefreshedValue<string> = createRefreshedValue<string>(
     {
@@ -188,6 +191,11 @@ export const createStateManager = async <T>(params: {
 
   _logger.info('State manager background processes started.');
 
+  // -- Start counter
+  // const timer = setInterval(() => {
+  //   counter++;
+  // }, 3000);
+
   // --- Return the Public Interface ---
   return {
     /**
@@ -206,6 +214,10 @@ export const createStateManager = async <T>(params: {
       return callbackResult;
     },
 
+    // getCounter: (): number => {
+    //   return counter;
+    // },
+
     /**
      * Gets the latest known connection info, updated when staking state becomes Active.
      */
@@ -221,6 +233,7 @@ export const createStateManager = async <T>(params: {
       _logger.info('Stopping state manager listeners...');
       // RefreshedValue does not have a stop method, only stop the event listener
       eventStateManager.stop();
+      // clearInterval(timer);
     },
   };
 };
