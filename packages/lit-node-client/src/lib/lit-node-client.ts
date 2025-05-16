@@ -40,7 +40,7 @@ import {
   UnsupportedMethodError,
   WalletSignatureNotFoundError,
 } from '@lit-protocol/constants';
-import { getNodePrices } from '@lit-protocol/contracts-sdk';
+// import { getNodePrices } from '@lit-protocol/contracts-sdk';
 import {
   combineSignatureShares,
   encrypt,
@@ -133,6 +133,9 @@ import { blsSessionSigVerify } from './helpers/validate-bls-session-sig';
 import { calculateEffectiveEpochNumber } from './core/lib/helpers/calculateEffectiveEpochNumber';
 import { mostCommonValue } from '../lib.v2/helper/most-common-value';
 
+const getNodePrices = () => {
+  throw new Error('Deprecated!');
+};
 // request handler
 /**
  * @deprecated - soon to be replaced

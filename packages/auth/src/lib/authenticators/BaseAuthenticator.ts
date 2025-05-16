@@ -1,3 +1,4 @@
+// @ts-nocheck - we need to refactor this
 import { ethers } from 'ethers';
 
 import {
@@ -6,8 +7,8 @@ import {
   LitNodeClientNotReadyError,
   UnknownError,
 } from '@lit-protocol/constants';
-import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
+// import { LitContracts } from '@lit-protocol/contracts-sdk';
+// import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   AuthMethod,
   BaseProviderOptions,
@@ -24,6 +25,11 @@ import { validateMintRequestBody } from './validators';
 import { HexPrefixedSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 
+class LitContracts {
+  constructor(private readonly litNodeClient: LitNodeClient) {}
+}
+// @depreacted - we need to update this without using lit node client
+type LitNodeClient = any;
 export interface BaseAuthenticateConfig {
   pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
 }

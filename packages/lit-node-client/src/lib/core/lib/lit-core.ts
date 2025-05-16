@@ -26,7 +26,7 @@ import {
   UnknownError,
   version,
 } from '@lit-protocol/constants';
-import { LitContracts } from '@lit-protocol/contracts-sdk';
+// import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import { getChildLogger, Logger } from '@lit-protocol/logger';
 import {
@@ -40,7 +40,9 @@ import {
   SessionSigsMap,
   SuccessNodePromises,
 } from '@lit-protocol/types';
-
+class LitContracts {
+  constructor(private readonly litNodeClient: LitNodeClient) {}
+}
 // import {
 //   createEvmEventState,
 //   EventState,
