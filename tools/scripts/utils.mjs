@@ -1,15 +1,11 @@
-import fs from 'fs';
-import path from 'path';
 import { exec, spawn } from 'child_process';
+import fs from 'fs';
+import path, { join } from 'path';
 import { exit } from 'process';
 import readline from 'readline';
-import { join } from 'path';
 
-import { toBech32 } from '@cosmjs/encoding';
-import { Secp256k1 } from '@cosmjs/crypto';
-import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import siwe from 'siwe';
 import { ethers } from 'ethers';
+import siwe from 'siwe';
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
@@ -637,13 +633,6 @@ export async function checkEmptyDirectories(dirPath) {
   }
 
   return emptyDirs;
-}
-
-export function getCosmosAddress(pubkeyBuffer) {
-  return toBech32(
-    'cosmos',
-    rawSecp256k1PubkeyToRawAddress(Secp256k1.compressPubkey(pubkeyBuffer))
-  );
 }
 
 export function getPubKeyBuffer(pubKey) {

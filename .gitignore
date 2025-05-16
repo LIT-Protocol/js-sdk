@@ -82,3 +82,4 @@ generate-digest.ts
 .cursor/rules
 packages/networks/src/networks/vDatil
 lit-auth-storage
+.ctx
