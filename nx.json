@@ -59,7 +59,7 @@
       }
     }
   },
-  "defaultProject": "lit-node-client",
+  "defaultProject": "lit-client",
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "sharedGlobals": [],

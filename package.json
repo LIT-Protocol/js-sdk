@@ -19,7 +19,8 @@
     "gen:context": "bun run packages/networks/src/networks/vNaga/envs/naga-local/scripts/00-generate-abi-signatures.ts",
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
-    "prettier": "nx format:write --all"
+    "prettier": "nx format:write --all",
+    "tools": "node ./tools/scripts/tools.mjs"
   },
   "private": true,
   "dependencies": {

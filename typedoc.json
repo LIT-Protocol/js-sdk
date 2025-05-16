@@ -3,13 +3,14 @@
   "entryPoints": [
     "./packages/access-control-conditions/src/index.ts",
     "./packages/access-control-conditions-schemas/src/index.ts",
-    "./packages/auth-browser/src/index.ts",
+    "./packages/auth/src/index.ts",
     "./packages/auth-helpers/src/index.ts",
     "./packages/constants/src/index.ts",
     "./packages/crypto/src/index.ts",
-    "./packages/lit-auth-client/src/index.ts",
+    "./packages/lit-client/src/index.ts",
     "./packages/lit-node-client/src/index.ts",
-    "./packages/lit-node-client-nodejs/src/index.ts",
+    "./packages/logger/src/index.ts",
+    "./packages/networks/src/index.ts",
     "./packages/schemas/src/index.ts",
     "./packages/types/src/index.ts",
     "./packages/wasm/src/index.ts",
@@ -18,7 +19,9 @@
   ],
   "out": "doc",
   "skipErrorChecking": true,
-  "plugin": ["typedoc-theme-hierarchy"],
+  "plugin": [
+    "typedoc-theme-hierarchy"
+  ],
   "theme": "hierarchy",
   "customCss": "doc.css"
 }
