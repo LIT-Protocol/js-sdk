@@ -1,10 +1,4 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
-import {
-  AuthSigSchema,
-  Bytes32Schema,
-  HexPrefixedSchema,
-  NodeSetsFromUrlsSchema,
-} from '@lit-protocol/schemas';
 import { z } from 'zod';
 
 // Define the schema for the EcdsaSignedMessageShare object
@@ -35,14 +29,20 @@ const FrostSignedMessageShareDataSchema = z.object({
 
 export const PKPSignResponseDataSchema = z.object({
   success: z.boolean(),
-  values: z.array(z.object({
-    success: z.boolean(),
-    signedData: z.array(z.number()),
-    signatureShare: z.union([
-      z.object({ EcdsaSignedMessageShare: EcdsaSignedMessageShareDataSchema }),
-      z.object({ FrostSignedMessageShare: FrostSignedMessageShareDataSchema }),
-      // Add other potential share types here if they exist
-      // For example: z.object({ SomeOtherShareType: SomeOtherShareSchema })
-    ]),
-  })),
+  values: z.array(
+    z.object({
+      success: z.boolean(),
+      signedData: z.array(z.number()),
+      signatureShare: z.union([
+        z.object({
+          EcdsaSignedMessageShare: EcdsaSignedMessageShareDataSchema,
+        }),
+        z.object({
+          FrostSignedMessageShare: FrostSignedMessageShareDataSchema,
+        }),
+        // Add other potential share types here if they exist
+        // For example: z.object({ SomeOtherShareType: SomeOtherShareSchema })
+      ]),
+    })
+  ),
 });

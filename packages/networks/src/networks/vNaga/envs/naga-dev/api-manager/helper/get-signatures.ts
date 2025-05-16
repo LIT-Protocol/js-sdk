@@ -10,36 +10,42 @@ import {
   logErrorWithRequestId,
   mostCommonString,
 } from '@lit-protocol/crypto';
-import { LitNodeSignature } from '@lit-protocol/types';
+import {
+  LitNodeSignature,
+  SigType,
+  PKPSignEndpointResponse as CryptoPKPSignEndpointResponse,
+} from '@lit-protocol/types';
 import { parsePkpSignResponse } from './parse-pkp-sign-response';
 import {
   ExecuteJsValueResponse,
-  PKPSignEndpointResponse,
+  PKPSignEndpointResponse as LocalPKPSignEndpointResponse,
   LitActionSignedData,
 } from '../types';
+import { z } from 'zod';
+import { PKPSignResponseDataSchema } from '../pkpSign/pkpSign.ResponseDataSchema';
 
 function assertThresholdShares(
   requestId: string,
   threshold: number,
   shares: { success: boolean }[]
 ) {
-  const successfulShares = shares.filter((response) => response.success);
+  const successfulShareSources = shares.filter((response) => response.success);
 
-  if (successfulShares.length < threshold) {
+  if (successfulShareSources.length < threshold) {
     logErrorWithRequestId(
       requestId,
-      `Not enough nodes to get the lit action signatures. Expected ${threshold}, got ${successfulShares.length}`
+      `Not enough successful items. Expected ${threshold}, got ${successfulShareSources.length}`
     );
-
     throw new NoValidShares(
       {
         info: {
           requestId,
-          shares,
+          itemCount: shares.length,
+          successfulItems: successfulShareSources.length,
           threshold,
         },
       },
-      `The total number of valid lit action signatures shares "${successfulShares.length}" does not meet the threshold of "${threshold}"`
+      `The total number of successful items "${successfulShareSources.length}" does not meet the threshold of "${threshold}"`
     );
   }
 }
@@ -102,7 +108,6 @@ export const combineExecuteJSSignatures = async (params: {
         );
       }
 
-      // -- combine signature shares
       const combinedSignature = await combineExecuteJsNodeShares(
         signatureShares
       );
@@ -127,49 +132,172 @@ export const combineExecuteJSSignatures = async (params: {
  * Combines signature shares from multiple nodes running pkp sign to generate the final signature.
  *
  * @param {number} params.threshold - The threshold number of nodes
- * @param {PKPSignEndpointResponse[]} params.nodesLitActionSignedData - The array of signature shares from each node.
+ * @param {PKPSignEndpointResponse[]} params.nodesPkpSignResponseData - The array of signature shares from each node.
  * @param {string} params.requestId - The request ID, for logging purposes.
  * @returns {LitNodeSignature} - The final signatures or an object containing the final signatures.
  */
 export const combinePKPSignSignatures = async (params: {
-  nodesPkpSignResponseData: PKPSignEndpointResponse[];
+  nodesPkpSignResponseData: z.infer<typeof PKPSignResponseDataSchema>['values'];
   requestId: string;
   threshold: number;
 }): Promise<LitNodeSignature> => {
   const { threshold, requestId, nodesPkpSignResponseData } = params;
 
+  console.log(
+    `[${requestId}] Initial nodesPkpSignResponseData (count: ${nodesPkpSignResponseData.length}):`,
+    JSON.stringify(nodesPkpSignResponseData, null, 2)
+  );
+
   assertThresholdShares(requestId, threshold, nodesPkpSignResponseData);
 
-  const parsedPkpSignResponse = parsePkpSignResponse(nodesPkpSignResponseData);
-  const publicKey = mostCommonString(
-    parsedPkpSignResponse.map((s) => s.publicKey)
-  );
-  const sigType = mostCommonString(parsedPkpSignResponse.map((s) => s.sigType));
+  const sharesAfterInitialFilter = nodesPkpSignResponseData
+    .filter((share) => share.success)
+    .filter(Boolean);
 
-  if (!publicKey || !sigType) {
+  const rawShares = sharesAfterInitialFilter.filter((share) => {
+    const sigShareType = typeof share.signatureShare;
+    const sigShareIsNull = share.signatureShare === null;
+    const sigShareIsObjectNonNull =
+      sigShareType === 'object' && !sigShareIsNull;
+    return sigShareIsObjectNonNull;
+  });
+
+  if (rawShares.length < threshold) {
+    throw new NoValidShares(
+      { info: { requestId, rawSharesCount: rawShares.length, threshold } },
+      `Not enough processable signature shares after initial filtering: ${rawShares.length} (expected ${threshold})`
+    );
+  }
+
+  const preparedShares: Array<{
+    originalRawShare: z.infer<
+      typeof PKPSignResponseDataSchema
+    >['values'][number];
+    parsedSignatureShareObject: any;
+    localPSEInput: LocalPKPSignEndpointResponse;
+    publicKey?: string;
+    sigType?: string;
+  }> = [];
+
+  for (const rawShare of rawShares) {
+    try {
+      const signatureShareObject = rawShare.signatureShare;
+      preparedShares.push({
+        originalRawShare: rawShare,
+        parsedSignatureShareObject: signatureShareObject,
+        localPSEInput: {
+          success: rawShare.success,
+          signedData: rawShare.signedData,
+          signatureShare: signatureShareObject,
+        },
+      });
+    } catch (e) {
+      logErrorWithRequestId(
+        requestId,
+        `Error processing rawShare (should be object): ${JSON.stringify(
+          rawShare.signatureShare
+        )}`,
+        e
+      );
+    }
+  }
+
+  if (preparedShares.length < threshold) {
     throw new NoValidShares(
       {
         info: {
           requestId,
-          publicKey,
-          shares: nodesPkpSignResponseData,
-          sigType,
+          sharesAfterParsingAttempt: preparedShares.length,
+          threshold,
         },
       },
-      'Could not get public key or sig type from pkp sign shares'
+      `Not enough shares after object preparation: ${preparedShares.length}`
     );
   }
 
-  // -- combine signature shares
-  const combinedSignature = await combinePKPSignNodeShares(
-    nodesPkpSignResponseData
+  const parsingResults = parsePkpSignResponse(
+    preparedShares.map((p) => p.localPSEInput)
   );
+
+  if (preparedShares.length !== parsingResults.length) {
+    logErrorWithRequestId(
+      requestId,
+      `Mismatch in length between prepared shares (${preparedShares.length}) and parsing results (${parsingResults.length})`
+    );
+    throw new Error(
+      'Share processing length mismatch after parsePkpSignResponse'
+    );
+  }
+  preparedShares.forEach((ps, index) => {
+    const result = parsingResults[index];
+    if (result) {
+      ps.publicKey = result.publicKey;
+      ps.sigType = result.sigType;
+    } else {
+      logErrorWithRequestId(
+        requestId,
+        `No parsing result for prepared share at index ${index}`
+      );
+    }
+  });
+
+  const sharesForCryptoLib: CryptoPKPSignEndpointResponse[] = preparedShares
+    .filter((ps) => ps.publicKey && ps.sigType)
+    .map((ps) => ({
+      success: ps.originalRawShare.success,
+      signedData: new Uint8Array(ps.originalRawShare.signedData as number[]),
+      signatureShare: ps.parsedSignatureShareObject,
+    }));
+
+  if (sharesForCryptoLib.length < threshold) {
+    throw new NoValidShares(
+      {
+        info: {
+          requestId,
+          sharesForCryptoCount: sharesForCryptoLib.length,
+          threshold,
+        },
+      },
+      `Not enough shares for crypto lib: ${sharesForCryptoLib.length}`
+    );
+  }
+
+  const combinedSignature = await combinePKPSignNodeShares(sharesForCryptoLib);
+
+  const successfullyProcessedShares = preparedShares.filter(
+    (ps) => ps.publicKey && ps.sigType
+  );
+
+  const finalPublicKey = mostCommonString(
+    successfullyProcessedShares
+      .map((p) => p.publicKey)
+      .filter(Boolean) as string[]
+  );
+  const finalSigType = mostCommonString(
+    successfullyProcessedShares
+      .map((p) => p.sigType)
+      .filter(Boolean) as string[]
+  );
+
+  if (!finalPublicKey || !finalSigType) {
+    throw new NoValidShares(
+      {
+        info: {
+          requestId,
+          finalPublicKey,
+          finalSigType,
+          pkSigPairsCount: successfullyProcessedShares.length,
+        },
+      },
+      'Could not determine final public key or sig type from parsed shares'
+    );
+  }
 
   const sigResponse = {
     ...combinedSignature,
-    publicKey,
-    sigType,
+    publicKey: finalPublicKey,
+    sigType: finalSigType as SigType,
   };
 
-  return sigResponse;
+  return sigResponse as LitNodeSignature;
 };

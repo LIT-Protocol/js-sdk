@@ -63,14 +63,9 @@ export const DomainSchema = z
   });
 
 /**
- * Always convert any types into a hashed 32 bytes buffer
- * You can either use:
- * - ethers.utils.arrayify(ethers.utils.keccak256)
- * - crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex')
- * as long as the hash function returns 32 bytes, it will work.
+ * Turn any data into a bytes array
  */
-export const Bytes32Schema = z.any().transform((data) => {
-  // Step 1: Normalize to Uint8Array
+export const BytesArraySchema = z.any().transform((data) => {
   if (typeof data === 'string') {
     data = new TextEncoder().encode(data);
   }
@@ -83,11 +78,7 @@ export const Bytes32Schema = z.any().transform((data) => {
     throw new Error('Data must be a string, number[], or Uint8Array');
   }
 
-  // Step 2: Hash using keccak256
-  const hash = keccak_256(data); // returns Uint8Array(32)
-
-  // Step 3: Normalize to number[]
-  return Array.from(hash);
+  return Array.from(data);
 });
 
 export const NormalizeArraySchema = z.array(z.number());

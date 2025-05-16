@@ -92,7 +92,7 @@ export const _getNagaLitClient = async (networkModule: NagaNetworkModule) => {
       // 2. send the requests to nodes using the new helper
       const result = await processBatchRequests<
         z.infer<typeof networkModule.api.pkpSign.schemas.RequestData>,
-        any
+        z.infer<typeof networkModule.api.pkpSign.schemas.ResponseData>
       >(requestArray, requestId, handshakeResult.threshold);
 
       // 3. ask the network module to handle the result

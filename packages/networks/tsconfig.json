@@ -29,7 +29,8 @@
       ],
       "@nagaDev/ChainManager": [
         "packages/networks/src/networks/vNaga/envs/naga-dev/chain-manager/createChainManager"
-      ]
+      ],
+      "@naga/schemas": ["packages/networks/src/networks/vNaga/schemas"]
     }
   },
   "files": [],

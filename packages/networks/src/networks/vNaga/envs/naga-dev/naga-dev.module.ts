@@ -27,6 +27,11 @@ import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.Respons
 import { combinePKPSignNodeShares } from '@lit-protocol/crypto';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 
+// Define ProcessedBatchResult type (mirroring structure from processBatchRequests)
+type ProcessedBatchResult<T> =
+  | { success: true; values: T[] }
+  | { success: false; error: any; failedNodeUrls?: string[] };
+
 // Define the object first
 const nagaDevModuleObject = {
   id: 'naga',
@@ -98,6 +103,7 @@ const nagaDevModuleObject = {
       schemas: {
         Input: PKPSignInputSchema,
         RequestData: PKPSignRequestDataSchema,
+        ResponseData: PKPSignResponseDataSchema,
       },
       createRequest: async (params: PKPSignCreateRequestType) => {
         // -- 1. generate JIT session sigs
@@ -145,28 +151,31 @@ const nagaDevModuleObject = {
         return requests;
       },
       handleResponse: async (
-        result: z.infer<typeof PKPSignResponseDataSchema>,
+        result: ProcessedBatchResult<z.infer<typeof PKPSignResponseDataSchema>>,
         requestId: string
       ) => {
-        console.log('result:', result.values);
+        console.log('Incoming result for pkpSign handleResponse:', result);
 
+        if (!result.success) {
+          console.error(
+            '🚨 PKP Sign batch failed in handleResponse:',
+            result.error
+          );
+          throw Error(result.error);
+        }
+
+        const { values } = PKPSignResponseDataSchema.parse(result);
+
+        // process.exit();
         const signatures = await combinePKPSignSignatures({
-          nodesPkpSignResponseData: result.values,
+          nodesPkpSignResponseData: values,
           requestId,
           threshold: networkConfig.minimumThreshold,
         });
 
-        console.log('signatures:', signatures);
+        console.log('signatures combined in handleResponse:', signatures);
 
-        // return signatures;
-
-        // if (result.success) {
-        //   console.log('✅ PKP Sign batch successful:', result.values);
-        //   return { success: true, responses: result.values }; // Example success return
-        // } else {
-        //   console.error('🚨 PKP Sign batch failed:', result.error);
-        //   throw result.error;
-        // }
+        return signatures;
       },
     },
   },

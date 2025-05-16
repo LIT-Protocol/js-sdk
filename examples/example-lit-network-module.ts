@@ -60,7 +60,7 @@ import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
   await litClient.pkpSign({
     pubKey: mintedPkpInfo.pubkey,
     toSign: 'hello',
-    signingScheme: 'EcdsaK256Sha256',
+    signingScheme: 'EcdsaP384Sha384',
     authContext: eoaAuthContext,
     // -- optional
     // userMaxPrice: 1000000000000000000n,

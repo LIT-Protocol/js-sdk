@@ -1,9 +1,3 @@
-import { sha256 } from '@noble/hashes/sha256';
-import { sha384 } from '@noble/hashes/sha512';
-import { ed25519, x25519 } from '@noble/curves/ed25519';
-import { sha512 } from '@noble/hashes/sha512';
-import { nacl } from '@lit-protocol/nacl';
-
 import {
   CurveTypeNotFoundError,
   EcdsaSigType,
@@ -12,15 +6,8 @@ import {
   NoValidShares,
   UnknownError,
 } from '@lit-protocol/constants';
-import {
-  applyTransformations,
-  cleanArrayValues,
-  cleanStringValues,
-  convertKeysToCamelCase,
-  convertNumberArraysToUint8Arrays,
-  hexifyStringValues,
-  log,
-} from './misc';
+import { nacl } from '@lit-protocol/nacl';
+import { SessionKeyPairSchema } from '@lit-protocol/schemas';
 import {
   AuthSig,
   CleanLitNodeSignature,
@@ -46,8 +33,18 @@ import {
   sevSnpVerify,
   unifiedCombineAndVerify,
 } from '@lit-protocol/wasm';
-import { SessionKeyPairSchema } from '@lit-protocol/schemas';
+import { ed25519 } from '@noble/curves/ed25519';
+import { sha256, sha384 } from '@noble/hashes/sha2';
 import { bytesToHex } from '@noble/hashes/utils';
+import {
+  applyTransformations,
+  cleanArrayValues,
+  cleanStringValues,
+  convertKeysToCamelCase,
+  convertNumberArraysToUint8Arrays,
+  hexifyStringValues,
+  log,
+} from './misc';
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
