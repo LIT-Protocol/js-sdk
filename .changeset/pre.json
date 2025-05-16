@@ -18,6 +18,7 @@
     "@lit-protocol/wrapped-keys-lit-actions": "8.0.0-alpha.0"
   },
   "changesets": [
-    "hot-baboons-help"
+    "hot-baboons-help",
+    "yellow-seas-crash"
   ]
 }
