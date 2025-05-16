@@ -15,6 +15,8 @@
     "test:unit:watch": "npx nx run-many --target=test --watch",
     "publish:packages": "node ./tools/scripts/pub.mjs --prod",
     "publish:beta": "node ./tools/scripts/pub.mjs --tag beta",
+    "show:affected": "npx nx show projects --affected --uncommitted",
+    "publish:affected:alpha:dry-run": "npx nx affected --target=publish --uncommitted --parallel=false -- --tag alpha --dry-run",
     "build:tinny": "node ./local-tests/build.mjs",
     "publish:tinny": "cd ./local-tests && npm publish",
     "gen:context": "bun run packages/networks/src/networks/vNaga/envs/naga-local/scripts/00-generate-abi-signatures.ts",
@@ -59,6 +61,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.4",
     "@nx/devkit": "17.3.0",
     "@nx/esbuild": "17.3.0",
     "@nx/eslint-plugin": "17.3.0",
@@ -105,6 +108,7 @@
     "prettier": "^2.6.2",
     "rimraf": "^6.0.1",
     "ts-jest": "29.2.5",
+    "tslib": "^2.8.1",
     "typedoc": "^0.26.6",
     "typedoc-theme-hierarchy": "^5.0.0",
     "typescript": "5.8.3"
