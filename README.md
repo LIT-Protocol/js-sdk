@@ -50,9 +50,8 @@ yarn add @lit-protocol/lit-node-client
 
 <!-- autogen:package:start -->
 
-| Package                                                                                                      | Category                                                                          | Download                                                                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [@lit-protocol/lit-node-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client) | ![lit-node-client](https://img.shields.io/badge/-nodejs-2E8B57 'lit-node-client') | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client"><img src="https://img.shields.io/npm/v/@lit-protocol/lit-node-client"/></a> |
+| Package | Category | Download |
+| ------- | -------- | -------- |
 
 If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case::
 

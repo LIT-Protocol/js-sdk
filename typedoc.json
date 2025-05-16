@@ -19,9 +19,7 @@
   ],
   "out": "doc",
   "skipErrorChecking": true,
-  "plugin": [
-    "typedoc-theme-hierarchy"
-  ],
+  "plugin": ["typedoc-theme-hierarchy"],
   "theme": "hierarchy",
   "customCss": "doc.css"
 }

@@ -508,11 +508,52 @@ export const checkAndSignEVMAuthMessage = async ({
   // -- 5. case: Lit auth signature is NOT in the local storage
   try {
     logger.info('checking if sig is in local storage');
-    const authSigString = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
-    authSig = JSON.parse(authSigString);
+    const authSigFromStorageResult: any = getStorageItem(
+      LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
+    );
+    let parsedAuthSig: AuthSig | undefined;
+
+    if (authSigFromStorageResult) {
+      let authSigString: string | null = null;
+      if (
+        typeof authSigFromStorageResult.isSuccess === 'function' &&
+        authSigFromStorageResult.isSuccess() &&
+        typeof authSigFromStorageResult.value === 'string'
+      ) {
+        authSigString = authSigFromStorageResult.value;
+      } else if (
+        typeof authSigFromStorageResult.isRight === 'function' &&
+        authSigFromStorageResult.isRight() &&
+        typeof authSigFromStorageResult.value === 'string'
+      ) {
+        authSigString = authSigFromStorageResult.value;
+      } else if (typeof authSigFromStorageResult.right === 'string') {
+        authSigString = authSigFromStorageResult.right;
+      } else if (typeof authSigFromStorageResult === 'string') {
+        authSigString = authSigFromStorageResult;
+      }
+
+      if (authSigString) {
+        try {
+          parsedAuthSig = JSON.parse(authSigString);
+        } catch (e) {
+          logger.warn({
+            msg: 'Could not parse auth sig from local storage',
+            error: e,
+          });
+          // parsedAuthSig remains undefined
+        }
+      } else {
+        logger.warn({
+          msg: 'Auth sig from storage was not a valid string or could not be unwrapped',
+          data: authSigFromStorageResult,
+        });
+      }
+    }
+    authSig = parsedAuthSig;
   } catch (error) {
     logger.warn({
-      msg: 'Could not get sig from local storage',
+      msg: 'Error accessing or processing sig from local storage',
       error,
     });
   }
@@ -633,8 +674,60 @@ const _signAndGetAuth = async ({
     nonce,
   });
 
-  const authSigString = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
-  const authSig: AuthSig = JSON.parse(authSigString);
+  // This is a temporary fix to build
+  const authSigFromStorageResult: any = getStorageItem(
+    LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
+  );
+  let authSig: AuthSig; // Must be initialized or assigned
+
+  if (authSigFromStorageResult) {
+    let authSigString: string | null = null;
+    if (
+      typeof authSigFromStorageResult.isSuccess === 'function' &&
+      authSigFromStorageResult.isSuccess() &&
+      typeof authSigFromStorageResult.value === 'string'
+    ) {
+      authSigString = authSigFromStorageResult.value;
+    } else if (
+      typeof authSigFromStorageResult.isRight === 'function' &&
+      authSigFromStorageResult.isRight() &&
+      typeof authSigFromStorageResult.value === 'string'
+    ) {
+      authSigString = authSigFromStorageResult.value;
+    } else if (typeof authSigFromStorageResult.right === 'string') {
+      authSigString = authSigFromStorageResult.right;
+    } else if (typeof authSigFromStorageResult === 'string') {
+      authSigString = authSigFromStorageResult;
+    }
+
+    if (authSigString) {
+      try {
+        authSig = JSON.parse(authSigString);
+      } catch (e) {
+        logger.error({
+          msg: 'Failed to parse authSigString from storage in _signAndGetAuth',
+          error: e,
+        });
+        // This path means authSig will not be assigned, which could be an issue.
+        // The function expects to return an AuthSig. We might need to throw or return a default.
+        // For now, let's throw to indicate a critical failure, similar to parse failing.
+        throw new Error(
+          'Failed to parse AuthSig from storage: ' + (e as Error).message
+        );
+      }
+    } else {
+      logger.error({
+        msg: 'Auth sig from storage was not a valid string or could not be unwrapped in _signAndGetAuth',
+        data: authSigFromStorageResult,
+      });
+      throw new Error(
+        'Retrieved auth sig from storage was not in expected format.'
+      );
+    }
+  } else {
+    logger.error('No auth sig found in storage for _signAndGetAuth.');
+    throw new Error('No AuthSig found in storage.');
+  }
 
   return authSig;
 };
