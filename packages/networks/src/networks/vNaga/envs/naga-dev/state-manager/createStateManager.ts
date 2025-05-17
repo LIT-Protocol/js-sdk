@@ -18,7 +18,7 @@ import { NagaDevNetworkConfig } from '../naga-dev.config';
 // Import EpochInfo type (adjust path if necessary based on actual export location)
 import { getChildLogger } from '@lit-protocol/logger';
 import type { CallbackParams, EndPoint, EpochInfo } from '@lit-protocol/types';
-import { LitNetworkModuleBase } from 'packages/networks/src/networks/types';
+import { LitNetworkModuleBase } from '../../../../types';
 import { areStringArraysDifferent } from './helper/areStringArraysDifferent';
 
 const _logger = getChildLogger({

@@ -1,5 +1,5 @@
 // import { networkContext } from "../../../_config";
-import { toBigInt } from 'packages/networks/src/networks/shared/utils/z-transformers';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
 import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';

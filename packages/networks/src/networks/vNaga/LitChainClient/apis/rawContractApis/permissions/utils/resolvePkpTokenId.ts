@@ -12,8 +12,8 @@ import {
   ExpectedAccountOrWalletClient,
 } from '../../../../contract-manager/createContractsManager';
 import { pubkeyToTokenId } from './pubkeyToTokenId';
-import { toBigInt } from 'packages/networks/src/networks/shared/utils/z-transformers';
-import { isEthAddress } from 'packages/networks/src/networks/shared/utils/z-validate';
+import { toBigInt } from '../../../../../../shared/utils/z-transformers';
+import { isEthAddress } from '../../../../../../shared/utils/z-validate';
 
 // Input validation schema
 export const PkpIdentifierSchema = z.discriminatedUnion('field', [
