@@ -23,7 +23,7 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "8.0.0-alpha.2",
+  "version": "8.0.0-alpha.4",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

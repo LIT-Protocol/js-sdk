@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "reset": "rimraf dist node_modules doc tmp yarn-error.log yarn.lock package-lock.json bun.lockb learn-debug.log tmp .nx lit-auth-storage",
-    "go": "npx nx run-many --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions",
+    "go": "rm -rf ./dist && npx nx run-many --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions",
     "build": "npm run build:packages",
     "build:dev": "node ./tools/scripts/tools.mjs --remove-local-dev && rm -rf ./dist && node ./tools/scripts/tools.mjs check --no-empty-directories=true && node ./tools/scripts/tools.mjs fixTsConfig && node ./tools/scripts/tools.mjs --match-versions && npx nx run-many --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions && node ./tools/scripts/tools.mjs --setup-local-dev && npm run build:verify",
     "build:packages": "node ./tools/scripts/tools.mjs --remove-local-dev && rm -rf ./dist && node ./tools/scripts/tools.mjs check --no-empty-directories=true && node ./tools/scripts/tools.mjs fixTsConfig && node ./tools/scripts/tools.mjs --match-versions && npx nx run-many --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions && node ./tools/scripts/tools.mjs --setup-local-dev && npm run gen:readme && npm run build:verify && npm run build:tinny && npx nx format:write --all",

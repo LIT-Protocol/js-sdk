@@ -1,5 +1,35 @@
 # @lit-protocol/lit-client
 
+## 8.0.0-alpha.5
+
+### Major Changes
+
+- add export to index.ts
+
+## 8.0.0-alpha.4
+
+### Major Changes
+
+- version 4
+
+## 8.0.0-alpha.3
+
+### Major Changes
+
+- test
+
+## 8.0.0-alpha.2
+
+### Major Changes
+
+- test
+
+## 8.0.0-alpha.1
+
+### Major Changes
+
+- third attempt.
+
 ## 8.0.0-alpha.2
 
 ### Major Changes
