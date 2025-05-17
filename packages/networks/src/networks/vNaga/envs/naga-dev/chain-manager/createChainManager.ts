@@ -86,19 +86,3 @@ export const createReadOnlyChainManager = () => {
   const chainManager = createChainManager(dummyAccount);
   return createChainManager(chainManager);
 };
-
-// @ts-ignore
-// if (import.meta.main) {
-//   (async () => {
-//     const { privateKeyToAccount } = await import('viem/accounts');
-
-//     const viemAccount = privateKeyToAccount(process.env['PRIVATE_KEY'] as any);
-
-//     const chainManager = createChainManager(viemAccount);
-
-//     const connectionInfo =
-//       await chainManager.api.connection.getConnectionInfo();
-
-//     console.log(connectionInfo);
-//   })();
-// }

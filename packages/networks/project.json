@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/networks",
-        "main": "packages/networks/index.ts",
+        "main": "packages/networks/src/index.ts",
         "tsConfig": "packages/networks/tsconfig.lib.json",
         "assets": ["packages/networks/*.md"],
         "updateBuildableProjectDepsInPackageJson": true

@@ -132,12 +132,12 @@ export const issueSessionFromContext = async (params: {
   }
 
   // make this only log when debug is enabled
-  if (typeof process !== 'undefined' && process.env['PINO_LOG_LEVEL']) {
-    console.log(
-      '💡 PINO_LOG_LEVEL is defined, printing human readable session sigs'
-    );
-    console.log(formatSessionSigs(JSON.stringify(sessionSigs)));
-  }
+  // if (typeof process !== 'undefined' && process.env['PINO_LOG_LEVEL']) {
+  //   console.log(
+  //     '💡 PINO_LOG_LEVEL is defined, printing human readable session sigs'
+  //   );
+  //   console.log(formatSessionSigs(JSON.stringify(sessionSigs)));
+  // }
 
   return sessionSigs;
 };
