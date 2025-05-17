@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.6
+
+### Major Changes
+
+- fix import paths
+
 ## 8.0.0-alpha.5
 
 ### Major Changes

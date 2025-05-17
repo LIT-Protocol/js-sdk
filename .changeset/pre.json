@@ -18,6 +18,7 @@
     "@lit-protocol/wrapped-keys-lit-actions": "8.0.0-alpha.3"
   },
   "changesets": [
+    "chilly-rice-stand",
     "cuddly-comics-take",
     "cuddly-rats-say",
     "easy-mugs-fry",
