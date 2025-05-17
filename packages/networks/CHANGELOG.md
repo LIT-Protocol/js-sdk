@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.5
+
+### Major Changes
+
+- Update the project.json to point to the correct index.ts file:
+
 ## 8.0.0-alpha.4
 
 ### Major Changes
