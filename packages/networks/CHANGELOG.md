@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.7
+
+### Major Changes
+
+- fix browser compatability
+
 ## 8.0.0-alpha.6
 
 ### Major Changes

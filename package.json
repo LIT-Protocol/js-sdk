@@ -56,6 +56,7 @@
     "siwe-recap": "0.0.2-alpha.0",
     "stytch": "^12.4.0",
     "uint8arrays": "^4.0.3",
+    "viem": "2.29.4",
     "wagmi": "^2.14.13",
     "zod": "3.24.3",
     "zod-validation-error": "^3.4.0"
