@@ -1,4 +1,4 @@
-import { pino, Logger as Pino, LoggerOptions, DestinationStream } from 'pino';
+import pinoInstance, { Logger as Pino, LoggerOptions, DestinationStream } from 'pino';
 
 const DEFAULT_LOGGER_OPTIONS = {
   name: 'LitProtocolSDK',
@@ -6,13 +6,13 @@ const DEFAULT_LOGGER_OPTIONS = {
 };
 
 type Logger = Pino<string, boolean>;
-let logger: Logger = pino(DEFAULT_LOGGER_OPTIONS);
+let logger: Logger = pinoInstance(DEFAULT_LOGGER_OPTIONS);
 
 function setLoggerOptions(
   loggerOptions: LoggerOptions<string, false>,
   destination?: DestinationStream
 ): Logger {
-  logger = pino(
+  logger = pinoInstance(
     {
       ...DEFAULT_LOGGER_OPTIONS,
       ...loggerOptions,
