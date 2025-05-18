@@ -26,7 +26,6 @@ const optionMaps = new Map([
   ['--match-versions', () => matchVersionsFunc()],
   ['default', () => helpFunc()],
   ['--verify', () => validateDependencyVersions()],
-  ['fixTsConfig', () => fixTsConfigFunc()],
 ]);
 
 const setup = () => {
@@ -53,19 +52,6 @@ function helpFunc() {
   );
   exit();
 }
-
-async function fixTsConfigFunc() {
-  const TSCONFIG = JSON.parse(await readFile('tsconfig.json'));
-
-  TSCONFIG.compilerOptions.paths = {
-    '@lit-protocol/*': ['packages/*/src'],
-  };
-
-  await writeFile('tsconfig.json', JSON.stringify(TSCONFIG, null, 2));
-
-  process.exit();
-}
-
 
 async function setupLocalDevFunc() {
   const PROJECT_NAME = args[1];
