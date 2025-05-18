@@ -22,7 +22,6 @@ const OPTION = args[0];
 
 const optionMaps = new Map([
   ['--help', () => helpFunc()],
-  ['--remove-local-dev', () => removeLocalDevFunc()],
   ['--setup-local-dev', () => setupLocalDevFunc()],
   ['--match-versions', () => matchVersionsFunc()],
   ['default', () => helpFunc()],
@@ -93,34 +92,6 @@ async function checkFunc() {
   process.exit(0);
 }
 
-async function removeLocalDevFunc() {
-  // First, remove existing dist symlink if exists.
-  const removeList = (await listDirsRecursive('./packages', false)).map(
-    (item) => item.replace('packages/', '')
-  );
-
-  console.log('removeList', removeList);
-
-  await asyncForEach(removeList, async (item) => {
-    greenLog(
-      `Removing:
-- symlink packages/${item}/dist
-- "main" and "typings" from packages/${item}/package.json
-        `,
-      true
-    );
-    await childRunCommand(`rm -rf packages/${item}/dist`);
-
-    const packageJson = await readJsonFile(`packages/${item}/package.json`);
-
-    delete packageJson.main;
-    delete packageJson.typings;
-
-    await writeJsonFile(`packages/${item}/package.json`, packageJson);
-  });
-
-  exit();
-}
 
 async function setupLocalDevFunc() {
   const PROJECT_NAME = args[1];
