@@ -27,7 +27,6 @@ const optionMaps = new Map([
   ['default', () => helpFunc()],
   ['--verify', () => validateDependencyVersions()],
   ['fixTsConfig', () => fixTsConfigFunc()],
-  ['check', () => checkFunc()],
 ]);
 
 const setup = () => {
@@ -65,31 +64,6 @@ async function fixTsConfigFunc() {
   await writeFile('tsconfig.json', JSON.stringify(TSCONFIG, null, 2));
 
   process.exit();
-}
-
-async function checkFunc() {
-  /**
-   * When you are working on a branch and you switch to another branch, you might have empty directories.
-   */
-  if (!getFlag('--no-empty-directories')) {
-    redLog('Please use the --no-empty-directories flag to run this command');
-    process.exit();
-  }
-
-  const emptyDirectories = await checkEmptyDirectories('packages');
-
-  // If there's any empty directories, say that "Empty directories found! Do you want to remove then? This happened because you might be switching branches."
-  if (emptyDirectories.length > 0) {
-    redLog(
-      `\n❌ Empty directories found! Do you want to remove then?\n\n    ${emptyDirectories.join(
-        '\n'
-      )}\n`,
-      true
-    );
-    process.exit(1);
-  }
-
-  process.exit(0);
 }
 
 
