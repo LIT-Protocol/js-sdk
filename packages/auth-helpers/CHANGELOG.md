@@ -1,5 +1,11 @@
 # @lit-protocol/auth-helpers
 
+## 8.0.0-alpha.5
+
+### Major Changes
+
+- this should fix the browser pino logger issue
+
 ## 8.0.0-alpha.4
 
 ### Major Changes
