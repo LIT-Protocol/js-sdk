@@ -12,8 +12,6 @@
     "test:local": "node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/test.mjs",
     "test:unit": "npx nx run-many --target=test",
     "test:unit:watch": "npx nx run-many --target=test --watch",
-    "publish:packages": "node ./tools/scripts/pub.mjs --prod",
-    "publish:beta": "node ./tools/scripts/pub.mjs --tag beta",
     "show:affected": "npx nx show projects --affected --uncommitted",
     "publish:affected:alpha:dry-run": "npx nx affected --target=publish --uncommitted --parallel=false -- --tag alpha --dry-run",
     "build:tinny": "node ./local-tests/build.mjs",
