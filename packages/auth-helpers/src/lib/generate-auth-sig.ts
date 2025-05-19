@@ -2,20 +2,27 @@ import { ethers } from 'ethers';
 
 import { InvalidArgumentException } from '@lit-protocol/constants';
 import { AuthSig, SignerLike } from '@lit-protocol/types';
-import { Account, getAddress } from 'viem';
+import { Account, getAddress, Hex, WalletClient } from 'viem';
+import { GetWalletClientReturnType } from '@wagmi/core';
+
+type ExpectedAccountOrWalletClient =
+  | Account
+  | WalletClient
+  | GetWalletClientReturnType;
+
 /**
- * Generate an AuthSig object using the signer.
- *
- * For more context:
- * We are only using authSig to generate session sigs. In a newer version, we will stop accepting
- * authSig all together from the node and will only accept session sigs. The address being
- * used here will be checksummed.
- *
- * @param signer the signer must have a "signMessage" method
- * @param toSign - the message to sign
- * @param address - (optional) the address of the signer
- * @returns
- */
+* Generate an AuthSig object using the signer.
+*
+* For more context:
+* We are only using authSig to generate session sigs. In a newer version, we will stop accepting
+* authSig all together from the node and will only accept session sigs. The address being
+* used here will be checksummed.
+*
+* @param signer the signer must have a "signMessage" method
+* @param toSign - the message to sign
+* @param address - (optional) the address of the signer
+* @returns
+*/
 export const generateAuthSig = async ({
   signer,
   toSign,
@@ -23,13 +30,13 @@ export const generateAuthSig = async ({
   algo,
 }: {
   signer:
-    | ethers.Wallet
-    | ethers.Signer
-    | SignerLike
-    | {
-        signMessage: (message: any) => Promise<string>;
-        getAddress?: () => Promise<string>;
-      };
+  | ethers.Wallet
+  | ethers.Signer
+  | SignerLike
+  | {
+    signMessage: (message: any) => Promise<string>;
+    getAddress?: () => Promise<string>;
+  };
   toSign: string;
   address?: string;
   algo?: 'ed25519';
@@ -85,13 +92,13 @@ export const generateAuthSig = async ({
 export const generateAuthSigWithViem = async ({
   account,
   toSign,
-
   algo,
+  address,
 }: {
-  account: Account;
-  toSign: string;
-
+  account: ExpectedAccountOrWalletClient;
+  toSign: string | Hex;
   algo?: 'ed25519';
+  address: string,
 }): Promise<AuthSig> => {
   if (typeof account.signMessage !== 'function') {
     throw new InvalidArgumentException(
@@ -100,10 +107,9 @@ export const generateAuthSigWithViem = async ({
     );
   }
 
+  // @ts-ignore - TODO: fix this.
   const signature = await account.signMessage({ message: toSign });
-
-  const address = getAddress(account.address);
-
+  // const _address = address || getAddress(account.address);
   if (!address) {
     throw new InvalidArgumentException(
       { info: { account, address, algo } },
@@ -118,4 +124,34 @@ export const generateAuthSigWithViem = async ({
     address,
     ...(algo && { algo }),
   };
+
+  // if ('account' in account && account.account?.type === 'json-rpc') {
+  //   const walletClient = account as WalletClient;
+  //   const signature = await walletClient.signMessage({ message: toSign, account: walletClient.account! });
+  //   const address = getAddress(walletClient.account!.address);
+  //   console.log("xxx address:", address);
+
+  //   if (!address) {
+  //     throw new InvalidArgumentException(
+  //       { info: { account, address, algo } },
+  //       'address is required'
+  //     );
+  //   }
+
+  //   return {
+  //     sig: signature,
+  //     derivedVia: 'web3.eth.personal.sign',
+  //     signedMessage: toSign,
+  //     address,
+  //     ...(algo && { algo }),
+  //   };
+
+  // } else {
+
+
+  // }
+
+
+
+
 };

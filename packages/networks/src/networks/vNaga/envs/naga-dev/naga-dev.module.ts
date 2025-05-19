@@ -70,18 +70,18 @@ const nagaDevModuleObject = {
   chainApi: {
     mintPkp: async (params: {
       authContext:
-        | z.infer<typeof AuthContextSchema>
-        | z.infer<typeof EoaAuthContextSchema>;
+      | z.infer<typeof AuthContextSchema>
+      | z.infer<typeof EoaAuthContextSchema>;
       scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
     }): Promise<LitTxRes<PKPData>> => {
       // ========== This is EoaAuthContextSchema ==========
       if (
-        'viemAccount' in params.authContext &&
-        params.authContext.viemAccount
+        'account' in params.authContext &&
+        params.authContext.account
       ) {
-        const { viemAccount, authMethod } = params.authContext;
+        const { account, authMethod } = params.authContext;
 
-        const chainManager = createChainManager(viemAccount);
+        const chainManager = createChainManager(account);
 
         return await chainManager.api.mintPKP({
           scopes: params.scopes,

@@ -55,6 +55,9 @@ import { privateKeyToAccount } from 'viem/accounts';
     litClient: litClient,
   });
 
+  console.log('✅ eoaAuthContext:', eoaAuthContext);
+
+
   // Step 7: Mint a new Programmable Key Pair (PKP) via the Lit Network
   const { data: mintedPkpInfo } = await litClient.mintPkp({
     authContext: eoaAuthContext,

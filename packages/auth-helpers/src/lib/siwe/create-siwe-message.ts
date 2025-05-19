@@ -89,6 +89,7 @@ export const createPKPSiweMessage = async (
 export const createSiweMessage = async <T extends BaseSiweMessage>(
   params: T
 ): Promise<string> => {
+
   // -- validations
   if (!params.walletAddress) {
     throw new InvalidArgumentException(
