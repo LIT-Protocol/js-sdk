@@ -476,7 +476,8 @@ export const AuthContextSchema = z.object({
 
 export type AuthContext = z.infer<typeof AuthContextSchema>;
 export const EoaAuthContextSchema = z.object({
-  viemAccount: z.custom<Account>(),
+  account: z.any(),
+  authenticator: z.any(),
   authMethod: AuthMethodSchema,
   authNeededCallback: z.function(),
   sessionKeyPair: SessionKeyPairSchema,

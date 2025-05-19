@@ -1,9 +1,5 @@
 import { generateSessionKeyPair } from '@lit-protocol/crypto';
-import {
-  ExpirationSchema,
-  HexPrefixedSchema,
-  SignerSchema,
-} from '@lit-protocol/schemas';
+import { ExpirationSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import type { LitAuthStorageProvider } from '../storage/types';
 import type { AuthMethodType, LitAuthData } from '../types';
@@ -20,10 +16,14 @@ import {
   getPkpAuthContextAdapter,
 } from './authAdapters/getPkpAuthContextAdapter';
 import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
-import { Account } from 'viem';
+import { getChildLogger } from '@lit-protocol/logger';
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
 }
+
+const _logger = getChildLogger({
+  module: 'auth-manager',
+});
 
 /**
  * The auth context that both EOA and PKP auth contexts have in common.
@@ -65,7 +65,13 @@ export async function tryGetCachedAuthData(params: {
     address: params.address,
   })) as LitAuthData;
 
+  _logger.info('tryGetCachedAuthData', {
+    address: params.address,
+    authData,
+  });
+
   if (!authData) {
+    _logger.info('no auth data found, generating new auth data');
     const _expiration = ExpirationSchema.parse(params.expiration);
 
     // generate session key pair
@@ -85,8 +91,14 @@ export async function tryGetCachedAuthData(params: {
   }
 
   if (!authData) {
+    _logger.error('Failed to retrieve or generate authentication data.');
     throw new Error('Failed to retrieve or generate authentication data.');
   }
+
+  _logger.info('tryGetCachedAuthData success', {
+    address: params.address,
+    authData,
+  });
 
   return authData;
 }

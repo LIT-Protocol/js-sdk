@@ -1,19 +1,50 @@
-import { Account } from 'viem';
+import { AuthConfigSchema } from '@lit-protocol/schemas';
+import { Account, WalletClient } from 'viem';
 import { z } from 'zod';
+import { getViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';
+import { getWalletClientAuthenticator } from '../../authenticators/WalletClientAuthenticator';
+import { AuthManagerParams, tryGetCachedAuthData } from '../auth-manager';
 import {
-  AuthManagerParams,
-  BaseAuthContext,
-  tryGetCachedAuthData,
-} from '../auth-manager';
-import { getEoaAuthContext } from '../authContexts/getEoaAuthContext';
+  ExpectedAccountOrWalletClient,
+  getEoaAuthContext,
+} from '../authContexts/getEoaAuthContext';
+import {
+  isResourceShorthandInput,
+  transformShorthandResources,
+  ResourceShorthandInput,
+} from '@lit-protocol/auth-helpers';
+import { LitResourceAbilityRequest } from '@lit-protocol/types';
 
 /**
  * The EOA auth context adapter params.
  */
-export interface EoaAuthContextAdapterParams
-  extends BaseAuthContext<{
-    account: Account;
-  }> {}
+export interface EoaAuthContextAdapterParams {
+  authConfig: Omit<z.infer<typeof AuthConfigSchema>, 'resources'> & {
+    resources:
+      | z.infer<typeof AuthConfigSchema>['resources']
+      | ResourceShorthandInput;
+  };
+  config: {
+    account: ExpectedAccountOrWalletClient;
+  };
+  // @ts-expect-error - LitClientType is not defined in the package. We need to define this
+  // once the LitClienType is ready
+  litClient: ReturnType<typeof createLitClient>;
+}
+
+/**
+ * This check verifies two main things:
+ * 1. `account` has a property named `account` (typical for Viem's WalletClient structure
+ *    when an account is associated).
+ * 2. The associated `account.account` (which should be a Viem Account object)
+ *    has `type === 'json-rpc'`, indicating it's managed by a JSON-RPC provider
+ *    (e.g., a browser extension like MetaMask).
+ */
+const isWalletClient = (
+  account: ExpectedAccountOrWalletClient
+): account is WalletClient => {
+  return 'account' in account && account.account?.type === 'json-rpc';
+};
 
 export const getEoaAuthContextAdapter = async (
   upstreamParams: AuthManagerParams,
@@ -22,10 +53,46 @@ export const getEoaAuthContextAdapter = async (
   // TODO: This is not typed - we have to fix this!
   const litClientCtx = await params.litClient.getContext();
 
+  let processedResources: LitResourceAbilityRequest[];
+
+  // Transform resources if they are in shorthand format
+  if (isResourceShorthandInput(params.authConfig.resources)) {
+    processedResources = transformShorthandResources(
+      params.authConfig.resources
+    );
+  } else {
+    // Type assertion: Assuming if not shorthand, it's already the correct full format.
+    processedResources = params.authConfig
+      .resources as LitResourceAbilityRequest[];
+  }
+
+  // Construct a validated AuthConfig object for internal use, ensuring defaults are applied
+  // and the structure (especially transformed resources) is correct.
+  const authConfigForValidation = {
+    ...params.authConfig,
+    resources: processedResources, // Use the processed (transformed or original) resources
+  };
+
+  // Validate the entire AuthConfig object after potential transformation of resources.
+  // AuthConfigSchema expects resources to be in the full, structured format.
+  const validatedAuthConfig = AuthConfigSchema.parse(authConfigForValidation);
+
+  let authenticator:
+    | ReturnType<typeof getViemAccountAuthenticator>
+    | ReturnType<typeof getWalletClientAuthenticator>;
+
+  if (isWalletClient(params.config.account)) {
+    const walletClient = params.config.account as WalletClient;
+    authenticator = getWalletClientAuthenticator({ account: walletClient });
+  } else {
+    const viemAccount = params.config.account as Account;
+    authenticator = getViemAccountAuthenticator({ account: viemAccount });
+  }
+
   // Try to get LitAuthData from storage or generate a new one
   const authData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
-    address: params.config.account.address,
+    address: authenticator.address,
     expiration: params.authConfig.expiration,
     type: 'EthWallet',
   });
@@ -34,14 +101,15 @@ export const getEoaAuthContextAdapter = async (
   // we don't really care how messy the params look like, this adapter function will massage them into the correct shape
   return getEoaAuthContext({
     authentication: {
-      viemAccount: params.config.account,
+      authenticator: authenticator,
+      account: params.config.account,
     },
     authConfig: {
-      domain: params.authConfig.domain,
-      resources: params.authConfig.resources,
-      capabilityAuthSigs: params.authConfig.capabilityAuthSigs,
-      expiration: params.authConfig.expiration,
-      statement: params.authConfig.statement,
+      domain: validatedAuthConfig.domain,
+      resources: validatedAuthConfig.resources,
+      capabilityAuthSigs: validatedAuthConfig.capabilityAuthSigs,
+      expiration: validatedAuthConfig.expiration,
+      statement: validatedAuthConfig.statement,
     },
     deps: {
       authData: authData,

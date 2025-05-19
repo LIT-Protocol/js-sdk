@@ -36,24 +36,22 @@ import { privateKeyToAccount } from 'viem/accounts';
     }),
   });
 
-  // Step 5: Build a reusable auth configuration (authConfig)
-  const authConfig = createAuthConfigBuilder()
-    // .addExpiration(new Date(Date.now() + 1000 * 60 * 15).toISOString()) // valid for 15 mins
-    // .addStatement('🔥THIS IS A TEST STATEMENT🔥') // custom user-facing message
-    // .addCapabilityAuthSigs([]) // empty for now; add session capabilities later
-    .addDomain('localhost:3000') // where the request originates
-    .addPKPSigningRequest('*') // wildcard scope for PKP signing
-    .addLitActionExecutionRequest('*') // wildcard scope for Lit Actions
-    .build();
-
   // Step 6: Create an EOA-based auth context from your account and config
   const eoaAuthContext = await authManager.createEoaAuthContext({
     config: {
       account: myAccount,
     },
-    authConfig,
+    authConfig: {
+      statement: '',
+      domain: '',
+      resources: [['pkp-signing', '*']],
+      capabilityAuthSigs: [],
+      expiration: '',
+    },
     litClient: litClient,
   });
+
+  console.log('✅ eoaAuthContext:', eoaAuthContext);
 
   // Step 7: Mint a new Programmable Key Pair (PKP) via the Lit Network
   const { data: mintedPkpInfo } = await litClient.mintPkp({
