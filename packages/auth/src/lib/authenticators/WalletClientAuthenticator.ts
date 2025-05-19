@@ -6,21 +6,28 @@ import {
 } from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
 import { AuthMethod, AuthSig } from '@lit-protocol/types';
+import { GetWalletClientReturnType } from '@wagmi/core';
 import {
   Account,
   getAddress,
   keccak256,
-  stringToBytes
+  stringToBytes,
+  WalletClient,
 } from 'viem';
 
 const _logger = getChildLogger({
-  module: 'ViemAccountAuthenticator',
+  module: 'WalletClientAuthenticator',
 });
 
-export const getViemAccountAuthenticator = (params: { account: Account }) => {
-  const _address = params.account.address;
+export const getWalletClientAuthenticator = (params: {
+  account: WalletClient;
+}) => {
+  const _address = params.account.account!.address;
 
-  const _createAuthSig = async (account: Account, messageToSign: string) => {
+  const _createAuthSig = async (
+    account: GetWalletClientReturnType | WalletClient,
+    messageToSign: string
+  ) => {
     if (!account.signMessage) {
       throw new WrongAccountType(
         {
@@ -37,7 +44,7 @@ export const getViemAccountAuthenticator = (params: { account: Account }) => {
   };
 
   return {
-    type: 'account',
+    type: 'walletClient',
     address: _address,
     getAuthSig: async (messageToSign: string) => {
       _logger.info('Generating auth sig for viem account');
