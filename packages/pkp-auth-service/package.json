@@ -4,8 +4,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "bun run src/server.ts",
-    "worker": "bun run src/worker.ts"
+    "start:server": "bun run src/auth-server/server.ts",
+    "start:worker": "bun run src/queue-manager/worker.ts",
+    "start": "concurrently -n server,worker -c green,cyan \"bun run start:server\" \"bun run start:worker\""
   },
   "dependencies": {
     "@elysiajs/bearer": "^1.2.0",
@@ -35,6 +36,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "bun-types": "^1.0.0"
+    "bun-types": "^1.0.0",
+    "concurrently": "^9.1.2"
   }
 }

@@ -1,5 +1,5 @@
 import { rateLimit } from 'elysia-rate-limit';
-import { env } from '../config/env';
+import { env } from '../../_setup/env';
 
 export const rateLimiter = rateLimit({
   max: Number(env.MAX_REQUESTS_PER_WINDOW),

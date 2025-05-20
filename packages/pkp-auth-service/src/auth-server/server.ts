@@ -5,17 +5,19 @@ import { Elysia } from 'elysia';
 import { JSONStringify as BigIntStringify } from 'json-with-bigint';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { env } from './config/env';
-import { initSystemContext } from './initSystemContext';
-import { apiKeyGateAndTracking } from './middleware/apiKeyGate';
-import { rateLimiter } from './middleware/rateLimiter';
+import { env } from '../_setup/env';
+import { initSystemContext } from '../_setup/initSystemContext';
 import {
   addJob,
   getJobStatus,
   mainAppQueue,
-} from './services/queue/bullmqSetup'; // Import the BullMQ queue
-import { getStatusDoc } from './services/queue/handlers/getStatus.doc';
-import { mintPkpDoc } from './services/queue/handlers/pkpMint.doc';
+} from '../queue-manager/src/bullmqSetup'; // Import the BullMQ queue
+
+import { mintPkpDoc } from '../queue-manager/src/handlers/pkpMint/pkpMint.doc';
+import { getStatusDoc } from '../queue-manager/src/handlers/status/getStatus.doc';
+import { apiKeyGateAndTracking } from './middleware/apiKeyGate';
+import { rateLimiter } from './middleware/rateLimiter';
+import { resp } from './src/response-helpers/response-helpers';
 
 // Init system context
 await initSystemContext({ appName: 'pkp-auth-service' });
@@ -65,65 +67,31 @@ export const app = new Elysia()
       async ({ body }: { body: MintRequestRaw }) => {
         try {
           const job = await addJob('pkpMint', { requestBody: body });
-
-          return new Response(
-            BigIntStringify({
-              jobId: job.id,
-              message: 'PKP minting request queued successfully.',
-            }),
-            {
-              headers: { 'content-type': 'application/json' },
-              status: 202,
-            }
-          );
+          return resp[202](job.id, 'PKP minting request queued successfully.');
         } catch (error: any) {
           console.error(`[API] Failed to add job 'pkpMint' to queue:`, error);
-          return new Response(
-            BigIntStringify({
-              error: 'Failed to queue PKP minting request.',
-              details: error.message,
-            }),
-            {
-              headers: { 'content-type': 'application/json' },
-              status: 500,
-            }
+          return resp[500](
+            'Failed to queue PKP minting request.' + error.message
           );
         }
       },
       mintPkpDoc
     );
-    return app; // Return app for chaining, if Elysia pattern requires
+    return app;
   })
   .get(
     '/status/:jobId',
     async ({ params }: { params: { jobId: string } }) => {
       const { jobId } = params;
       if (!jobId) {
-        return new Response(BigIntStringify({ error: 'Job ID is required.' }), {
-          headers: { 'content-type': 'application/json' },
-          status: 400,
-        });
+        return resp[400]('Job ID is required.');
       }
-
       try {
         const responsePayload = await getJobStatus(jobId);
-
-        return new Response(BigIntStringify(responsePayload), {
-          headers: { 'content-type': 'application/json' },
-          status: 200,
-        });
+        return resp[200](responsePayload);
       } catch (error: any) {
         console.error(`[API] Failed to get status for job ${jobId}:`, error);
-        return new Response(
-          BigIntStringify({
-            error: 'Failed to retrieve job status.',
-            details: error.message,
-          }),
-          {
-            headers: { 'content-type': 'application/json' },
-            status: 500,
-          }
-        );
+        return resp[500]('Failed to retrieve job status.' + error.message);
       }
     },
     getStatusDoc

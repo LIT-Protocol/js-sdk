@@ -1,7 +1,7 @@
 import { getChildLogger } from '@lit-protocol/logger';
 import { Worker } from 'bullmq';
 import { bullmqConnectionOptions, mainQueueName } from './bullmqSetup';
-import { jobRegistry, JobName } from './jobRegistry';
+import { JobName, jobRegistry } from './jobRegistry';
 
 const logger = getChildLogger({
   name: 'generic-bullmq-worker',
@@ -21,7 +21,6 @@ export function createGenericWorker() {
 
       if (handler) {
         try {
-          // job.data contains the payload passed when the job was added
           const result = await handler(job.data);
           logger.info(`Job ${job.id} (${job.name}) completed successfully.`, {
             jobId: job.id,
@@ -40,7 +39,7 @@ export function createGenericWorker() {
                 typeof error === 'object' && error !== null ? error : undefined,
             }
           );
-          throw error; // Re-throw to let BullMQ handle failure/retries
+          throw error;
         }
       } else {
         const errorMessage = `No handler found for job name: ${job.name}. Job ID: ${job.id}`;
@@ -49,9 +48,8 @@ export function createGenericWorker() {
       }
     },
     {
-      connection: bullmqConnectionOptions, // Use imported connection options
-      concurrency: parseInt(process.env.WORKER_CONCURRENCY || '5', 10), // Allow configuring concurrency
-      // Other worker options can be added here, e.g., limiter
+      connection: bullmqConnectionOptions,
+      concurrency: parseInt(process.env.WORKER_CONCURRENCY || '5', 10),
     }
   );
 
@@ -59,7 +57,7 @@ export function createGenericWorker() {
     if (job) {
       logger.info(`Job ${job.id} (${job.name}) final state: completed.`, {
         jobId: job.id,
-        jobName: job.name /* result can be logged if not too large */,
+        jobName: job.name,
       });
     } else {
       logger.warn(

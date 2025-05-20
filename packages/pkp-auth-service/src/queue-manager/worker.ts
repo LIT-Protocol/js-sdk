@@ -1,11 +1,7 @@
-import { initSystemContext } from './initSystemContext';
-import {
-  bullmqConnectionOptions,
-  mainQueueName,
-} from './services/queue/bullmqSetup';
-import { createGenericWorker } from './services/queue/genericWorker';
+import { initSystemContext } from '../_setup/initSystemContext';
+import { bullmqConnectionOptions, mainQueueName } from './src/bullmqSetup';
+import { createGenericWorker } from './src/genericWorker';
 
-// Helper type for logging, assuming our parseRedisUrl produces this structure
 interface ParsedRedisConnectionOpts {
   host?: string;
   port?: number;
@@ -19,7 +15,6 @@ async function startWorker() {
   console.log(' Attempting to start Generic BullMQ Worker Process... ');
   console.log('------------------------------------------------------');
   console.log(`✅ [WorkerProcess] Main Queue Name: "${mainQueueName}"`);
-  // console.log(`✅ [WorkerProcess] Using REDIS_URL from env: ${env.REDIS_URL}`);
 
   // Log connection options safely
   if (

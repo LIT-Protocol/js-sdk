@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
-import { env } from '../config/env';
-import { redisClient } from '../services/redis/redis';
+import { env } from '../../_setup/env';
+import { redisClient } from '../../_setup/redis';
 
 export const apiKeyGateAndTracking = new Elysia().onRequest(
   async ({ request, set }) => {

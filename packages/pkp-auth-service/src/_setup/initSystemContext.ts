@@ -2,7 +2,7 @@ import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { createLitClient } from '@lit-protocol/lit-client';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { env } from './config/env';
+import { env } from './env';
 
 declare global {
   var systemContext: {
