@@ -2,7 +2,6 @@ import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { MintRequestRaw } from '@lit-protocol/networks/src/networks/vNaga/LitChainClient/schemas/MintRequestSchema';
 import { Elysia } from 'elysia';
-import { JSONStringify as BigIntStringify } from 'json-with-bigint';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { env } from '../_setup/env';
@@ -19,9 +18,14 @@ import { apiKeyGateAndTracking } from './middleware/apiKeyGate';
 import { rateLimiter } from './middleware/rateLimiter';
 import { resp } from './src/response-helpers/response-helpers';
 
-// Init system context
+// =============================================================
+//                     Init System Context
+// =============================================================
 await initSystemContext({ appName: 'pkp-auth-service' });
 
+// =============================================================
+//                     Create Elysia App
+// =============================================================
 export const app = new Elysia()
   .get('/', () => ({
     message: 'PKP Auth Service is running. PKP minting is now asynchronous.',
@@ -30,6 +34,10 @@ export const app = new Elysia()
   .use(apiKeyGateAndTracking)
   .use(rateLimiter)
   .use(cors())
+
+  // =============================================================
+  //                     Swagger Documentation
+  // =============================================================
   .use(
     swagger({
       documentation: {
@@ -48,29 +56,30 @@ export const app = new Elysia()
       shortMessage: string;
       message?: string;
     };
-    return new Response(
-      BigIntStringify({
-        error:
-          _error.shortMessage ||
-          _error.message ||
-          'An unexpected error occurred.',
-      }),
-      {
-        headers: { 'content-type': 'application/json' },
-        status: 500,
-      }
+    return resp.ERROR(
+      _error.shortMessage || _error.message || 'An unexpected error occurred.'
     );
   })
+
+  // =============================================================
+  //                     PKP Auth Service (/pkp)
+  // =============================================================
   .group('/pkp', (app) => {
+    // =============================================================
+    //                     Mint PKP (/pkp/mint)
+    // =============================================================
     app.post(
       '/mint',
       async ({ body }: { body: MintRequestRaw }) => {
         try {
           const job = await addJob('pkpMint', { requestBody: body });
-          return resp[202](job.id, 'PKP minting request queued successfully.');
+          return resp.QUEUED(
+            job.id,
+            'PKP minting request queued successfully.'
+          );
         } catch (error: any) {
           console.error(`[API] Failed to add job 'pkpMint' to queue:`, error);
-          return resp[500](
+          return resp.ERROR(
             'Failed to queue PKP minting request.' + error.message
           );
         }
@@ -79,19 +88,22 @@ export const app = new Elysia()
     );
     return app;
   })
+  // =============================================================
+  //                     Get Job Status (/pkp/status/:jobId)
+  // =============================================================
   .get(
     '/status/:jobId',
     async ({ params }: { params: { jobId: string } }) => {
       const { jobId } = params;
       if (!jobId) {
-        return resp[400]('Job ID is required.');
+        return resp.BAD_REQUEST('Job ID is required.');
       }
       try {
         const responsePayload = await getJobStatus(jobId);
-        return resp[200](responsePayload);
+        return resp.SUCCESS(responsePayload);
       } catch (error: any) {
         console.error(`[API] Failed to get status for job ${jobId}:`, error);
-        return resp[500]('Failed to retrieve job status.' + error.message);
+        return resp.ERROR('Failed to retrieve job status.' + error.message);
       }
     },
     getStatusDoc
@@ -144,7 +156,9 @@ export const app = new Elysia()
 //   return app;
 // }
 
-// Start server if not imported as a module
+// =============================================================
+//                     Start Server
+// =============================================================
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = env.PORT || 3000;
   app.listen(port, () => {

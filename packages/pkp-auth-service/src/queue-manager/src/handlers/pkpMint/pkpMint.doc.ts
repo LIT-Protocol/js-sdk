@@ -3,11 +3,30 @@ import { t } from 'elysia';
 export const mintPkpDoc = {
   body: t.Object(
     {
-      sendPkpToItself: t.Optional(
-        t.Boolean({
-          default: false,
+      authMethodType: t.Required(
+        t.Number({
           description:
-            "If true, the minted PKP's ETH address is set as its own recipient. Defaults to false.",
+            'The numeric type of authentication method to use for the PKP. Supported types include:\n' +
+            '- 1: EthWallet\n' +
+            '- 2: LitAction\n' +
+            '- 3: WebAuthn\n' +
+            '- 4: Discord\n' +
+            '- 5: Google\n' +
+            '- 6: GoogleJwt\n' +
+            '- 8: AppleJwt\n' +
+            '- 9: StytchOtp\n' +
+            '- 10: StytchEmailFactorOtp\n' +
+            '- 11: StytchSmsFactorOtp\n' +
+            '- 12: StytchWhatsAppFactorOtp\n' +
+            '- 13: StytchTotpFactorOtp\n\n' +
+            'Custom auth methods can also be used by providing their corresponding numeric ID.',
+        })
+      ),
+      authMethodId: t.Required(
+        t.String({
+          default: '0x',
+          description:
+            "The ID of the authentication method to use for the PKP. Defaults to '0x'.",
         })
       ),
       pubkey: t.Optional(

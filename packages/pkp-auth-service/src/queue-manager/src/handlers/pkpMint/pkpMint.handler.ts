@@ -1,4 +1,4 @@
-import { MintRequestRaw } from '@lit-protocol/networks/src/networks/vNaga/LitChainClient/schemas/MintRequestSchema';
+import { Hex } from 'viem';
 
 /**
  * Handles PKP minting tasks.
@@ -6,16 +6,20 @@ import { MintRequestRaw } from '@lit-protocol/networks/src/networks/vNaga/LitCha
  * @returns The result of the PKP minting process.
  */
 export async function handlePkpMintTask(jobData: {
-  requestBody: MintRequestRaw;
+  requestBody: {
+    authMethodType: number;
+    authMethodId: Hex;
+    pubkey: Hex;
+  };
 }): Promise<any> {
   const result = await globalThis.systemContext.litClient.mintPkp({
     authContext: await globalThis.systemContext.createEoaAuthContext(),
     scopes: ['sign-anything'],
-    // If you intend to use properties from jobData.requestBody directly for mintPkp,
-    // ensure they are correctly mapped. For example:
-    // keyType: jobData.requestBody.keyType,
-    // permittedAuthMethodTypes: jobData.requestBody.permittedAuthMethodTypes,
-    // ... and so on, if these are part of MintRequestRaw and expected by mintPkp.
+    overwrites: {
+      authMethodType: jobData.requestBody.authMethodType,
+      authMethodId: jobData.requestBody.authMethodId,
+      pubkey: jobData.requestBody.pubkey,
+    },
   });
 
   console.log(

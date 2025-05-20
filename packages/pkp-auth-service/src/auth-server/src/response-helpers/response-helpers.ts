@@ -27,8 +27,15 @@ const _res400 = (error: string) => {
   });
 };
 
-export const resp: Record<number, (...args: any[]) => Response> = {
-  202: _res202,
-  500: _res500,
-  400: _res400,
+const _res200 = (data: any) => {
+  return new Response(BigIntStringify(data), {
+    headers: HEADERS,
+    status: 200,
+  });
+};
+export const resp: Record<string, (...args: any[]) => Response> = {
+  SUCCESS: _res200,
+  QUEUED: _res202,
+  ERROR: _res500,
+  BAD_REQUEST: _res400,
 };

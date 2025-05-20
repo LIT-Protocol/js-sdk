@@ -1,9 +1,7 @@
-import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
-import { Hex } from 'viem';
 import { logger } from '../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
-import { PKPData } from '../../../schemas/shared/PKPDataSchema';
 import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
+import { PKPData } from '../../../schemas/shared/PKPDataSchema';
 import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';
 import { LitTxRes } from '../../types';
 import { MintPKPRequest, MintPKPSchema } from './MintPKPSchema';
@@ -38,31 +36,19 @@ export const mintPKP = async (
   networkConfig: DefaultNetworkConfig,
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxRes<PKPData>> => {
-  const validatedRequest = MintPKPSchema.parse(request);
+  const validatedRequest = await MintPKPSchema.parseAsync(request);
 
   logger.debug({ validatedRequest });
-
-  let _authMethodId: Hex;
-
-  if (validatedRequest.customAuthMethodId) {
-    _authMethodId = validatedRequest.customAuthMethodId as Hex;
-  } else {
-    // Generate the authMethodId automatically from the auth method
-    const authMethodId = await getAuthIdByAuthMethod(
-      validatedRequest.authMethod
-    );
-    _authMethodId = authMethodId as Hex;
-  }
 
   const tx = await mintNextAndAddAuthMethods(
     {
       keyType: 2,
-      permittedAuthMethodTypes: [validatedRequest.authMethod.authMethodType],
-      permittedAuthMethodIds: [_authMethodId],
-      permittedAuthMethodPubkeys: [validatedRequest.pubkey || '0x'],
+      permittedAuthMethodTypes: [validatedRequest.authMethodType],
+      permittedAuthMethodIds: [validatedRequest.authMethodId],
+      permittedAuthMethodPubkeys: [validatedRequest.pubkey],
       permittedAuthMethodScopes: [validatedRequest.scopes],
       addPkpEthAddressAsPermittedAddress: true,
-      sendPkpToItself: validatedRequest.sendPkpToItself || false,
+      sendPkpToItself: true,
     },
     networkConfig,
     accountOrWalletClient

@@ -1,5 +1,6 @@
 import { DOCS, version } from '@lit-protocol/constants';
 import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
+import { Hex } from 'viem';
 
 import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
@@ -67,18 +68,50 @@ const nagaDevModuleObject = {
     });
   },
 
+  // @deprecated - TODO: This is not deprecated, just marked it as such so we don't forget to implement it
+  createAuthService: () => {
+    const AUTH_SERVICE_URL = 'https://naga-auth-service.getlit.dev/';
+
+    return {
+      prepareMintPkpHttpRequest: (params: {
+        authMethodId?: Hex;
+        authMethodType?: number;
+        pubkey?: Hex;
+        customAuthMethodId?: string;
+      }) => {
+        return params;
+      },
+    };
+  },
   chainApi: {
+    /**
+     * Mints a PKP using the provided authentication context and optional parameters.
+     *
+     * @param params - The parameters for minting a PKP.
+     * @param params.authContext - The authentication context (E.g., EOA wallet and its authMethod).
+     * @param params.scopes - The permission scopes for the PKP.
+     * Note: The values within `overwrites` allow for fine-grained control. The underlying `MintPKPSchema`
+     * handles the precise precedence: direct inputs in `overwrites` > `customAuthMethodId` in `overwrites` > values derived from `authContext.authMethod`.
+     */
     mintPkp: async (params: {
       authContext:
-      | z.infer<typeof AuthContextSchema>
-      | z.infer<typeof EoaAuthContextSchema>;
+        | z.infer<typeof AuthContextSchema>
+        | z.infer<typeof EoaAuthContextSchema>;
       scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+
+      /**
+       * @deprecated - TODO: This is usually used by the external auth service to mint a PKP,
+       * such as the PKP Auth Service (Previously known as the Relayer). Perhaps we want to move this to a separate function? eg. [networkModule].authService.mintPkp
+       */
+      overwrites?: {
+        authMethodId?: Hex;
+        authMethodType?: number;
+        pubkey?: Hex;
+        customAuthMethodId?: string;
+      };
     }): Promise<LitTxRes<PKPData>> => {
       // ========== This is EoaAuthContextSchema ==========
-      if (
-        'account' in params.authContext &&
-        params.authContext.account
-      ) {
+      if ('account' in params.authContext && params.authContext.account) {
         const { account, authMethod } = params.authContext;
 
         const chainManager = createChainManager(account);
@@ -86,6 +119,10 @@ const nagaDevModuleObject = {
         return await chainManager.api.mintPKP({
           scopes: params.scopes,
           authMethod: authMethod,
+          authMethodId: params.overwrites?.authMethodId,
+          authMethodType: params.overwrites?.authMethodType,
+          pubkey: params.overwrites?.pubkey,
+          customAuthMethodId: params.overwrites?.customAuthMethodId,
         });
       }
 
