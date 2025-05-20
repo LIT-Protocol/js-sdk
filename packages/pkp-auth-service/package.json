@@ -1,0 +1,40 @@
+{
+  "name": "@lit-protocol/pkp-auth-service",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/server.ts",
+    "worker": "bun run src/worker.ts"
+  },
+  "dependencies": {
+    "@elysiajs/bearer": "^1.2.0",
+    "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/swagger": "^1.2.0",
+    "@lit-protocol/constants": "^7.0.6",
+    "@lit-protocol/contracts": "^0.1.6",
+    "@simplewebauthn/server": "6.2.1",
+    "@simplewebauthn/typescript-types": "^8.3.4",
+    "@t3-oss/env-core": "^0.12.0",
+    "bs58": "^6.0.0",
+    "bullmq": "^5.52.3",
+    "cors": "^2.8.5",
+    "elysia": "^1.2.12",
+    "elysia-rate-limit": "^4.3.0",
+    "ethers": "5.7.2",
+    "google-auth-library": "^9.15.1",
+    "jose": "^6.0.7",
+    "json-with-bigint": "^2.4.2",
+    "pino": "^9.6.0",
+    "pino-caller": "^3.4.0",
+    "pino-pretty": "^13.0.0",
+    "redis": "^4.6.13",
+    "uuidv4": "^6.2.13",
+    "viem": "^2.23.2",
+    "wagmi": "^2.14.11",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "bun-types": "^1.0.0"
+  }
+}

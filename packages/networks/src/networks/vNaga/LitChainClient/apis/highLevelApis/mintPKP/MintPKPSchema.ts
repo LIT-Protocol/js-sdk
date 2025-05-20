@@ -9,6 +9,7 @@ export const MintPKPSchema = z
     scopes: z.array(ScopeSchemaRaw),
     pubkey: z.string().optional(),
     customAuthMethodId: z.string().optional(),
+    sendPkpToItself: z.boolean().optional(),
   })
   .transform((data) => {
     // If no customAuthMethodId provided, return data as-is

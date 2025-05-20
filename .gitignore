@@ -83,3 +83,4 @@ generate-digest.ts
 packages/networks/src/networks/vDatil
 lit-auth-storage
 .ctx
+packages/pkp-auth-service/lit-auth-*

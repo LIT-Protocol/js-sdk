@@ -62,7 +62,7 @@ export const mintPKP = async (
       permittedAuthMethodPubkeys: [validatedRequest.pubkey || '0x'],
       permittedAuthMethodScopes: [validatedRequest.scopes],
       addPkpEthAddressAsPermittedAddress: true,
-      sendPkpToItself: true,
+      sendPkpToItself: validatedRequest.sendPkpToItself || false,
     },
     networkConfig,
     accountOrWalletClient

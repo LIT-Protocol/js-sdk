@@ -1,0 +1,51 @@
+{
+  "name": "pkp-auth-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/pkp-auth-service/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/pkp-auth-service",
+        "main": "packages/pkp-auth-service/src/server.ts",
+        "tsConfig": "packages/pkp-auth-service/tsconfig.lib.json",
+        "assets": ["packages/pkp-auth-service/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run packages/pkp-auth-service/src/server.ts",
+        "cwd": "packages/pkp-auth-service"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/pkp-auth-service/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-auth-service"],
+      "options": {
+        "jestConfig": "packages/pkp-auth-service/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-auth-service"],
+      "options": {
+        "jestConfig": "packages/pkp-auth-service/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}
