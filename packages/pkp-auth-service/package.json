@@ -6,11 +6,13 @@
   "scripts": {
     "start:server": "bun run src/auth-server/server.ts",
     "start:worker": "bun run src/queue-manager/worker.ts",
-    "start": "concurrently -n server,worker -c green,cyan \"bun run start:server\" \"bun run start:worker\""
+    "start:login-server": "bun run src/login-server/server.ts",
+    "start": "concurrently -n server,worker,login-server -c green,cyan,blue \"bun run start:server\" \"bun run start:worker\" \"bun run start:login-server\""
   },
   "dependencies": {
     "@elysiajs/bearer": "^1.2.0",
     "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/static": "^1.3.0",
     "@elysiajs/swagger": "^1.2.0",
     "@lit-protocol/constants": "^7.0.6",
     "@lit-protocol/contracts": "^0.1.6",
