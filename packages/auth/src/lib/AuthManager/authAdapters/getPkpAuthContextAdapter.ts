@@ -35,9 +35,12 @@ export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
     litClient: BaseAuthContext<any>['litClient'];
   }
 ) {
+  // TODO: This is not typed - we have to fix this!
+  const litClientCtx = await params.litClient.getContext();
+
   const litClientConfig = PkpAuthDepsSchema.parse({
-    nonce: await params.litClient.getLatestBlockhash(),
-    currentEpoch: await params.litClient.getCurrentEpoch(),
+    nonce: litClientCtx.latestBlockhash,
+    currentEpoch: litClientCtx.epochState.currentNumber,
     getSignSessionKey: params.litClient.getSignSessionKey,
     nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
       product: 'LIT_ACTION',

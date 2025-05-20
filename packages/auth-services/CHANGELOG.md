@@ -1,4 +1,4 @@
-# @lit-protocol/pkp-auth-service
+# @lit-protocol/auth-services
 
 ## 0.1.0
 

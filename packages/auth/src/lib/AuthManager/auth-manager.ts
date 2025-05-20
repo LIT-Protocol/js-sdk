@@ -1,4 +1,5 @@
 import { generateSessionKeyPair } from '@lit-protocol/crypto';
+import { getChildLogger } from '@lit-protocol/logger';
 import { ExpirationSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import type { LitAuthStorageProvider } from '../storage/types';
@@ -16,7 +17,8 @@ import {
   getPkpAuthContextAdapter,
 } from './authAdapters/getPkpAuthContextAdapter';
 import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
-import { getChildLogger } from '@lit-protocol/logger';
+import { DiscordAuthenticator, GoogleAuthenticator } from '../authenticators';
+import { LIT_LOGIN_GATEWAY } from '../authenticators/utils';
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
 }
@@ -127,6 +129,48 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
     // createRequestToken: async () => {
     //   // use createSessionSisg then send to wrapped key service
     // }
+    signIn: {
+      social: async (params: {
+        provider: 'google' | 'discord';
+
+        /**
+         * You could use `https://login.litgateway.com` as a baseUrl.
+         * It's highly recommended to use your own auth server for production.
+         * However, If you are just testing/developing, you could use `https://login.litgateway.com` as a baseUrl.
+         *
+         * @example
+         * https://login.litgateway.com
+         *
+         * @example
+         * http://localhost:3300
+         */
+        baseUrl: `https://login.litgateway.com` | string;
+      }) => {
+        if (params.provider === 'google') {
+          const data = await GoogleAuthenticator.authenticate(
+            params.baseUrl,
+            params.baseUrl
+          );
+
+          console.log('🔥🔥 authMethod', data);
+
+          return data;
+        }
+
+        if (params.provider === 'discord') {
+          const data = await DiscordAuthenticator.authenticate(
+            params.baseUrl,
+            params.baseUrl
+          );
+
+          console.log('🔥🔥 authMethod', data);
+
+          return data;
+        }
+
+        throw new Error(`Invalid provider: ${params.provider}`);
+      },
+    },
     createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);
     },

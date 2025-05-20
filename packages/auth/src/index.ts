@@ -1,6 +1,7 @@
 // -- imports
 // import { createAuthManager } from './lib/auth-manager';
 import * as authenticators from './lib/authenticators';
+import { GoogleAuthenticator } from './lib/authenticators/GoogleAuthenticator';
 import { LitRelay } from './lib/authenticators';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
 import { localStorage, localStorageNode } from './lib/storage';
@@ -39,6 +40,7 @@ export const storagePlugins = {
  * A collection of available authenticator classes and utility functions.
  * Authenticators handle the process of verifying user identity via different methods (e.g., WebAuthn, OAuth, Stytch).
  */
+export { GoogleAuthenticator };
 export { authenticators };
 export { createAuthManager } from './lib/AuthManager/auth-manager';
 // export type {

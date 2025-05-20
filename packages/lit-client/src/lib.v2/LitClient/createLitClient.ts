@@ -120,6 +120,7 @@ export const _createNagaLitClient = async (
     getContext: async () => {
       return {
         latestBlockhash: await _stateManager.getLatestBlockhash(),
+        currentEpoch: _stateManager.getLatestConnectionInfo(),
       };
     },
     disconnect: _stateManager.stop,

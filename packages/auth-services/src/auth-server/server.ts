@@ -21,7 +21,7 @@ import { resp } from './src/response-helpers/response-helpers';
 // =============================================================
 //                     Init System Context
 // =============================================================
-await initSystemContext({ appName: 'pkp-auth-service' });
+await initSystemContext({ appName: 'auth-services' });
 
 // =============================================================
 //                     Create Elysia App

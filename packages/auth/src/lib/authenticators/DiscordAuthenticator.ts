@@ -38,17 +38,20 @@ export class DiscordAuthenticator {
    * @param {string} baseURL - The base URL for the Lit Login Gateway.
    * @returns {Promise<AuthMethod>} - Auth method object containing the OAuth token.
    */
-  public static async authenticate(params: DiscordConfig): Promise<AuthMethod> {
+  public static async authenticate(
+    baseURL: string,
+    /**
+     * If you are using the Lit Login Server or a clone from that, the redirectUri is the same as the baseUri. That's
+     * because the app.js is loaded in the index.html file.
+     */
+    redirectUri: string
+  ): Promise<AuthMethod> {
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
-    const url = await prepareLoginUrl(
-      'discord',
-      params.redirectUri || window.location.origin,
-      params.baseUrl
-    );
+    const url = await prepareLoginUrl('discord', redirectUri, baseURL);
     const popup = window.open(
       `${url}&caller=${window.location.origin}`,
       'popup',
@@ -69,7 +72,7 @@ export class DiscordAuthenticator {
       }, 1000);
 
       window.addEventListener('message', (event) => {
-        if (event.origin !== (params.baseUrl || LIT_LOGIN_GATEWAY)) {
+        if (event.origin !== (baseURL || LIT_LOGIN_GATEWAY)) {
           return;
         }
 

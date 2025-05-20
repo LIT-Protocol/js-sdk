@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'pkp-auth-service',
+  displayName: 'auth-services',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,7 +11,7 @@ export default {
     '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/pkp-auth-service',
+  coverageDirectory: '../../coverage/packages/auth-services',
   setupFilesAfterEnv: ['../../jest.setup.js'],
   testEnvironment: 'node',
 }; 

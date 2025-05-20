@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/pkp-auth-service",
+  "name": "@lit-protocol/auth-services",
   "version": "0.1.0",
   "license": "MIT",
   "private": true,

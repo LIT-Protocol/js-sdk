@@ -10,7 +10,7 @@ interface ParsedRedisConnectionOpts {
 }
 
 async function startWorker() {
-  await initSystemContext({ appName: 'pkp-auth-service-worker' });
+  await initSystemContext({ appName: 'auth-services-worker' });
   console.log('------------------------------------------------------');
   console.log(' Attempting to start Generic BullMQ Worker Process... ');
   console.log('------------------------------------------------------');
