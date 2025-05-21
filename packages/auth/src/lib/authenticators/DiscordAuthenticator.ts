@@ -6,6 +6,8 @@ import { AuthMethod, OAuthProviderOptions } from '@lit-protocol/types';
 import { HexPrefixedSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { AuthMethodTypeStringMap } from '../types';
+import { pollResponse } from './helper/pollResponse';
+import { JobStatusResponse } from './types';
 import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
 
 const DEFAULT_CLIENT_ID = '1052874239658692668';
@@ -93,6 +95,74 @@ export class DiscordAuthenticator {
         }
       });
     });
+  }
+
+  public static async mintPkp({
+    loginServerBaseUrl,
+    authServerBaseUrl,
+  }: {
+    loginServerBaseUrl: string;
+    authServerBaseUrl: string;
+  }): Promise<{
+    _raw: JobStatusResponse;
+    txHash: z.infer<typeof HexPrefixedSchema>;
+    pkpInfo: {
+      tokenId: string;
+      publicKey: z.infer<typeof HexPrefixedSchema>;
+      ethAddress: z.infer<typeof HexPrefixedSchema>;
+    };
+  }> {
+    const authMethod = await DiscordAuthenticator.authenticate(
+      loginServerBaseUrl,
+      loginServerBaseUrl
+    );
+
+    const authMethodType = authMethod.authMethodType;
+    const authMethodId = await DiscordAuthenticator.authMethodId(authMethod);
+
+    const url = `${authServerBaseUrl}/pkp/mint`;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ authMethodType, authMethodId }),
+    });
+
+    if (res.status === 202) {
+      const { jobId, message } = await res.json();
+      console.log('[Server Response] message:', message);
+
+      const statusUrl = `${authServerBaseUrl}/status/${jobId}`;
+
+      try {
+        const completedJobStatus = await pollResponse<JobStatusResponse>({
+          url: statusUrl,
+          isCompleteCondition: (response) => response.state === 'completed',
+          isErrorCondition: (response) =>
+            response.state === 'failed' || response.state === 'error',
+          intervalMs: 3000,
+          maxRetries: 10,
+          errorMessageContext: `PKP Minting Job ${jobId}`,
+        });
+
+        return {
+          _raw: completedJobStatus,
+          txHash: completedJobStatus.returnValue.hash,
+          pkpInfo: completedJobStatus.returnValue.data,
+        };
+      } catch (error: any) {
+        console.error('Error during PKP minting polling:', error);
+        const errMsg = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to mint PKP after polling: ${errMsg}`);
+      }
+    } else {
+      const errorBody = await res.text();
+      throw new Error(
+        `Failed to initiate PKP minting. Status: ${res.status}, Body: ${errorBody}`
+      );
+    }
   }
 
   /**

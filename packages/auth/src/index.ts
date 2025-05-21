@@ -2,6 +2,7 @@
 // import { createAuthManager } from './lib/auth-manager';
 import * as authenticators from './lib/authenticators';
 import { GoogleAuthenticator } from './lib/authenticators/GoogleAuthenticator';
+import { DiscordAuthenticator } from './lib/authenticators/DiscordAuthenticator';
 import { LitRelay } from './lib/authenticators';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
 import { localStorage, localStorageNode } from './lib/storage';
@@ -40,7 +41,6 @@ export const storagePlugins = {
  * A collection of available authenticator classes and utility functions.
  * Authenticators handle the process of verifying user identity via different methods (e.g., WebAuthn, OAuth, Stytch).
  */
-export { GoogleAuthenticator };
 export { authenticators };
 export { createAuthManager } from './lib/AuthManager/auth-manager';
 // export type {
@@ -82,3 +82,6 @@ export { getAuthIdByAuthMethod } from './lib/authenticators/utils';
  * @returns {SessionKeyPair} The generated session key pair.
  */
 export { generateSessionKeyPair } from './lib/AuthManager/utils/generateSessionKeyPair';
+
+// ============================== Authenticators ==============================
+export { GoogleAuthenticator, DiscordAuthenticator };

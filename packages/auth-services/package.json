@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "scripts": {
     "start:server": "bun run src/auth-server/server.ts",
     "start:worker": "bun run src/queue-manager/worker.ts",

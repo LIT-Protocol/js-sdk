@@ -7,7 +7,7 @@ import { Hex } from 'viem';
  */
 export async function handlePkpMintTask(jobData: {
   requestBody: {
-    authMethodType: number;
+    authMethodType: string;
     authMethodId: Hex;
     pubkey: Hex;
   };
@@ -16,7 +16,7 @@ export async function handlePkpMintTask(jobData: {
     authContext: await globalThis.systemContext.createEoaAuthContext(),
     scopes: ['sign-anything'],
     overwrites: {
-      authMethodType: jobData.requestBody.authMethodType,
+      authMethodType: Number(jobData.requestBody.authMethodType),
       authMethodId: jobData.requestBody.authMethodId,
       pubkey: jobData.requestBody.pubkey,
     },

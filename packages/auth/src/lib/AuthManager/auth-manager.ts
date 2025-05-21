@@ -129,48 +129,47 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
     // createRequestToken: async () => {
     //   // use createSessionSisg then send to wrapped key service
     // }
-    signIn: {
-      social: async (params: {
-        provider: 'google' | 'discord';
+    // signIn: {
+    //   social: async (params: {
+    //     provider: 'google' | 'discord';
 
-        /**
-         * You could use `https://login.litgateway.com` as a baseUrl.
-         * It's highly recommended to use your own auth server for production.
-         * However, If you are just testing/developing, you could use `https://login.litgateway.com` as a baseUrl.
-         *
-         * @example
-         * https://login.litgateway.com
-         *
-         * @example
-         * http://localhost:3300
-         */
-        baseUrl: `https://login.litgateway.com` | string;
-      }) => {
-        if (params.provider === 'google') {
-          const data = await GoogleAuthenticator.authenticate(
-            params.baseUrl,
-            params.baseUrl
-          );
+    //     /**
+    //      * You could use `https://login.litgateway.com` as a baseUrl.
+    //      * It's highly recommended to use your own auth server for production.
+    //      * However, If you are just testing/developing, you could use `https://login.litgateway.com` as a baseUrl.
+    //      *
+    //      * @example
+    //      * https://login.litgateway.com
+    //      *
+    //      * @example
+    //      * http://localhost:3300
+    //      */
+    //     baseUrl: `https://login.litgateway.com` | string;
+    //   }) => {
+    //     if (params.provider === 'google') {
+    //       const authMethod = await GoogleAuthenticator.authenticate(
+    //         params.baseUrl,
+    //         params.baseUrl
+    //       );
 
-          console.log('🔥🔥 authMethod', data);
+    //       console.log('🔥🔥 authMethod', authMethod);
 
-          return data;
-        }
+    //       return authMethod;
+    //     }
 
-        if (params.provider === 'discord') {
-          const data = await DiscordAuthenticator.authenticate(
-            params.baseUrl,
-            params.baseUrl
-          );
+    //     if (params.provider === 'discord') {
+    //       const authMethod = await DiscordAuthenticator.authenticate(
+    //         params.baseUrl,
+    //         params.baseUrl
+    //       );
 
-          console.log('🔥🔥 authMethod', data);
+    //       console.log('🔥🔥 authMethod', authMethod);
+    //       return authMethod;
+    //     }
 
-          return data;
-        }
-
-        throw new Error(`Invalid provider: ${params.provider}`);
-      },
-    },
+    //     throw new Error(`Invalid provider: ${params.provider}`);
+    //   },
+    // },
     createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);
     },

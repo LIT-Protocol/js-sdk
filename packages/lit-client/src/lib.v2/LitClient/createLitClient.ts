@@ -2,8 +2,30 @@ import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
+import { GoogleAuthenticator, DiscordAuthenticator } from '@lit-protocol/auth';
 
 type AnyNetworkModule = NagaNetworkModule | DatilNetworkModule;
+
+interface GoogleAuthOptions {
+  loginServerBaseUrl: string;
+  authServerBaseUrl: string;
+}
+
+interface DiscordAuthOptions {
+  loginServerBaseUrl: string;
+  authServerBaseUrl: string;
+}
+
+// Create a discriminated union for the parameter object
+type MintWithAuthParams =
+  | {
+      authenticator: typeof GoogleAuthenticator;
+      config: GoogleAuthOptions;
+    }
+  | {
+      authenticator: typeof DiscordAuthenticator;
+      config: DiscordAuthOptions;
+    };
 
 // ❗️ NOTE: There should be better type inference somewhere to handle different network modules
 // handle datil network module
@@ -125,6 +147,34 @@ export const _createNagaLitClient = async (
     },
     disconnect: _stateManager.stop,
     mintPkp: networkModule.chainApi.mintPkp,
+    mintWithAuth: async (params: MintWithAuthParams) => {
+      // This is social auths
+      if ('loginServerBaseUrl' in params.config) {
+        const res = await params.authenticator.mintPkp({
+          loginServerBaseUrl: params.config.loginServerBaseUrl,
+          authServerBaseUrl: params.config.authServerBaseUrl,
+        });
+
+        console.log('🔥🔥 res', res);
+      }
+
+      // if (
+      //   params.authenticator === GoogleAuthenticator &&
+      //   'redirectUri' in params.config
+      // ) {
+      //   // params.opts is now correctly typed as GoogleAuthOptions
+      //   console.log('Google Auth Options:', params.config.redirectUri);
+      // } else if (
+      //   params.authenticator === DiscordAuthenticator &&
+      //   'botToken' in params.config
+      // ) {
+      //   // params.opts is now correctly typed as DiscordAuthOptions
+      //   console.log('Discord Auth Options:', params.config.botToken);
+      // }
+      // // Actual minting logic will go here
+      // // Replace Promise<void> with the actual return type of the minting operation
+      // return Promise.resolve(); // Placeholder return
+    },
     chain: {
       raw: {
         pkpSign: async (

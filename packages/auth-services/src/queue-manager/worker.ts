@@ -9,7 +9,7 @@ interface ParsedRedisConnectionOpts {
   db?: number;
 }
 
-async function startWorker() {
+export async function startAuthServiceWorker() {
   await initSystemContext({ appName: 'auth-services-worker' });
   console.log('------------------------------------------------------');
   console.log(' Attempting to start Generic BullMQ Worker Process... ');
@@ -57,7 +57,7 @@ async function startWorker() {
 }
 
 (async () => {
-  await startWorker();
+  await startAuthServiceWorker();
 })().catch((error) => {
   console.error(
     '[WorkerProcess] Unhandled error during worker startup sequence:',
