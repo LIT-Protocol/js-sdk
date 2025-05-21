@@ -6,6 +6,7 @@ import {
   tryGetCachedAuthData,
 } from '../auth-manager';
 import { PkpAuthDepsSchema } from './getPkpAuthContextAdapter';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 
 export interface ICustomAuthenticator {
   new (settings: any): ICustomAuthenticatorInstance;
@@ -71,7 +72,7 @@ export async function getCustomAuthContextAdapter(
     storage: upstreamParams.storage,
     address: pkpAddress,
     expiration: params.authConfig.expiration,
-    type: 'LitAction', // Session type remains LitAction
+    type: AUTH_METHOD_TYPE.LitAction, // Session type remains LitAction
   });
 
   // 6. Prepare the request body for the node signing function
