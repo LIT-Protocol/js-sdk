@@ -11,8 +11,11 @@ import { issueSessionFromContext } from './session-manager/issueSessionFromConte
 import { createStateManager } from './state-manager/createStateManager';
 
 // Import the necessary types for the explicit return type annotation
-import { CallbackParams, RequestItem } from '@lit-protocol/types';
+import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
+import { AuthMethod, CallbackParams, RequestItem } from '@lit-protocol/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
+import { handleAuthServiceRequest } from '../../../shared/helpers/handleAuthServiceRequest';
+import { JobStatusResponse } from '../../../shared/helpers/pollResponse';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
 import type { LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
@@ -139,6 +142,33 @@ const nagaDevModuleObject = {
           'Invalid authContext provided: does not conform to EoaAuthContextSchema or AuthContextSchema properly.'
         );
       }
+    },
+  },
+  authService: {
+    pkpMint: async (params: {
+      authMethod: AuthMethod;
+      authServerBaseUrl?: string;
+    }) => {
+      const _serverUrl =
+        networkConfig.authServerBaseUrl || params.authServerBaseUrl;
+      const _authMethodType = params.authMethod.authMethodType;
+      const _authMethodId = await getAuthIdByAuthMethod(params.authMethod);
+
+      const res = await handleAuthServiceRequest({
+        jobName: 'PKP Minting',
+        serverUrl: _serverUrl!,
+        path: '/pkp/mint',
+        body: {
+          authMethodType: _authMethodType,
+          authMethodId: _authMethodId,
+        },
+      });
+
+      return res as unknown as Promise<{
+        _raw: JobStatusResponse;
+        txHash: string;
+        data: PKPData;
+      }>;
     },
   },
   api: {

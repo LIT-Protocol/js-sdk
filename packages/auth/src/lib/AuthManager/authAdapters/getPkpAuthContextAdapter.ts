@@ -1,4 +1,4 @@
-import { NodeUrlsSchema } from '@lit-protocol/schemas';
+import { HexPrefixedSchema, NodeUrlsSchema } from '@lit-protocol/schemas';
 import { ethers } from 'ethers';
 import { z } from 'zod';
 import { AuthMethodType } from '../../types';
@@ -10,14 +10,14 @@ import {
   tryGetCachedAuthData,
 } from '../auth-manager';
 import { getPkpAuthContext } from '../authContexts/getPkpAuthContext';
-
-// Define this near the top of the file or in a shared types file
-export interface AuthenticatorWithId {
-  new (config: any): any; // the constructor signature (maybe all the AuthConfigs eg. GoogleConfig?)
-  id: AuthMethodType; // Or potentially AuthMethodType if that's more specific
-  authenticate: Function; // Add this line
-  register?: Function; // Technically only needed for webauthn
-}
+import { AuthMethod } from '@lit-protocol/types';
+// // Define this near the top of the file or in a shared types file
+// export interface AuthenticatorWithId {
+//   new (config: any): any; // the constructor signature (maybe all the AuthConfigs eg. GoogleConfig?)
+//   id: AuthMethodType; // Or potentially AuthMethodType if that's more specific
+//   authenticate: Function; // Add this line
+//   register?: Function; // Technically only needed for webauthn
+// }
 
 export const PkpAuthDepsSchema = z.object({
   nonce: z.any(),
@@ -26,11 +26,11 @@ export const PkpAuthDepsSchema = z.object({
   nodeUrls: NodeUrlsSchema,
 });
 
-export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
+export async function getPkpAuthContextAdapter(
   upstreamParams: AuthManagerParams,
   params: {
-    authenticator: T;
-    config: ConstructorConfig<T>;
+    authMethod: AuthMethod;
+    pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
     authConfig: AuthConfig;
     litClient: BaseAuthContext<any>['litClient'];
   }
@@ -38,16 +38,23 @@ export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
   // TODO: This is not typed - we have to fix this!
   const litClientCtx = await params.litClient.getContext();
 
-  const litClientConfig = PkpAuthDepsSchema.parse({
-    nonce: litClientCtx.latestBlockhash,
-    currentEpoch: litClientCtx.epochState.currentNumber,
-    getSignSessionKey: params.litClient.getSignSessionKey,
-    nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
-      product: 'LIT_ACTION',
-    }),
-  });
+  console.log('litClientCtx:', litClientCtx);
 
-  const pkpAddress = ethers.utils.computeAddress(params.config.pkpPublicKey);
+  // const litClientConfig = PkpAuthDepsSchema.parse({
+  //   nonce: litClientCtx.latestBlockhash,
+  //   currentEpoch: litClientCtx.currentEpoch.epochState.currentNumber,
+
+  //   // we need this in the network module
+  //   getSignSessionKey: params.litClient.getSignSessionKey,
+  //   // we need this in the network module
+  //   nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
+  //     product: 'LIT_ACTION',
+  //   }),
+  // });
+
+  // console.log('litClientConfig:', litClientConfig);
+
+  const pkpAddress = ethers.utils.computeAddress(params.pkpPublicKey);
 
   // @example   {
   //   sessionKey: {
@@ -63,30 +70,32 @@ export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
     storage: upstreamParams.storage,
     address: pkpAddress,
     expiration: params.authConfig.expiration,
-    type: params.authenticator.id,
+    type: params.authMethod.authMethodType,
   });
 
-  const authenticator = new params.authenticator(params.config);
+  console.log('authData:', authData);
 
-  // inject litClientConfig into params.config
-  params.config = {
-    ...params.config,
-    ...litClientConfig,
-  };
+  // const authenticator = new params.authenticator(params.config);
 
-  let authMethod;
+  // // inject litClientConfig into params.config
+  // params.config = {
+  //   ...params.config,
+  //   ...litClientConfig,
+  // };
 
-  // only for webauthn (maybe we can support other types)
-  if (params.config.method === 'register') {
-    authMethod = await authenticator.register(params.config);
-  } else {
-    authMethod = await authenticator.authenticate(params.config);
-  }
+  // let authMethod;
+
+  // // only for webauthn (maybe we can support other types)
+  // if (params.config.method === 'register') {
+  //   authMethod = await authenticator.register(params.config);
+  // } else {
+  //   authMethod = await authenticator.authenticate(params.config);
+  // }
 
   return getPkpAuthContext({
     authentication: {
-      pkpPublicKey: params.config.pkpPublicKey,
-      authMethods: [authMethod],
+      pkpPublicKey: params.pkpPublicKey,
+      authMethods: [params.authMethod],
     },
     authConfig: {
       domain: params.authConfig.domain,
@@ -98,11 +107,16 @@ export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
     deps: {
       authData,
       connection: {
-        nonce: litClientConfig.nonce,
-        currentEpoch: litClientConfig.currentEpoch,
-        nodeUrls: litClientConfig.nodeUrls,
+        nonce: litClientCtx.latestBlockhash,
+        currentEpoch: litClientCtx.currentEpoch.epochState.currentNumber,
+        // nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
+        //   product: 'LIT_ACTION',
+        // }),
+        nodeUrls: litClientCtx.getMaxPricesForNodeProduct({
+          product: 'LIT_ACTION',
+        }),
       },
-      nodeSignSessionKey: litClientConfig.getSignSessionKey,
+      nodeSignSessionKey: litClientCtx.getSignSessionKey,
     },
   });
 }

@@ -33,6 +33,7 @@ export const networkConfig: INetworkConfig<
     privateKey: chainInfo.DEV_PRIVATE_KEY,
   },
   endpoints: NAGA_ENDPOINT,
+  authServerBaseUrl: 'http://localhost:3000',
 };
 
 export type NagaLocalDevelopNetworkContext = typeof networkConfig;

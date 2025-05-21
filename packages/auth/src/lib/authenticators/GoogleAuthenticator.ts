@@ -25,40 +25,26 @@ export class GoogleAuthenticator {
     this.redirectUri = params.redirectUri || window.location.origin;
   }
 
-  // /**
-  //  * Redirect user to the Lit's Google login page
-  //  *
-  //  * @param {Function} [callback] - Optional callback to handle login URL
-  //  * @returns {Promise<void>} - Redirects user to Lit login page
-  //  */
-  // static async signIn(
-  //   redirectUri: string,
-  //   callback?: (url: string) => void
-  // ): Promise<void> {
-  //   // Get login url
-  //   const loginUrl = await prepareLoginUrl('google', redirectUri);
-
-  //   // If callback is provided, use it. Otherwise, redirect to login url
-  //   if (callback) {
-  //     callback(loginUrl);
-  //   } else {
-  //     window.location.assign(loginUrl);
-  //   }
-  // }
-
   /**
-   * Sign in using popup window
+   * Signup with popup window
    *
-   * @param baseURL
+   * You could use `https://login.litgateway.com` as a baseUrl.
+   * It's highly recommended to use your own auth server for production.
+   * However, If you are just testing/developing, you could use `https://login.litgateway.com` as a baseUrl.
+   *
+   * @example
+   * https://login.litgateway.com
+   *
+   * @example
+   * http://localhost:3300
    */
-  public static async authenticate(
-    baseURL: string,
+  public static async authenticate(baseURL: string): Promise<AuthMethod> {
     /**
      * If you are using the Lit Login Server or a clone from that, the redirectUri is the same as the baseUri. That's
      * because the app.js is loaded in the index.html file.
      */
-    redirectUri: string
-  ): Promise<AuthMethod> {
+    const redirectUri = baseURL;
+
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
@@ -107,74 +93,6 @@ export class GoogleAuthenticator {
         }
       });
     });
-  }
-
-  public static async mintPkp({
-    loginServerBaseUrl,
-    authServerBaseUrl,
-  }: {
-    loginServerBaseUrl: string;
-    authServerBaseUrl: string;
-  }): Promise<{
-    _raw: JobStatusResponse;
-    txHash: z.infer<typeof HexPrefixedSchema>;
-    pkpInfo: {
-      tokenId: string;
-      publicKey: z.infer<typeof HexPrefixedSchema>;
-      ethAddress: z.infer<typeof HexPrefixedSchema>;
-    };
-  }> {
-    const authMethod = await GoogleAuthenticator.authenticate(
-      loginServerBaseUrl,
-      loginServerBaseUrl
-    );
-
-    const authMethodType = authMethod.authMethodType;
-    const authMethodId = await GoogleAuthenticator.authMethodId(authMethod);
-
-    const url = `${authServerBaseUrl}/pkp/mint`;
-
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ authMethodType, authMethodId }),
-    });
-
-    if (res.status === 202) {
-      const { jobId, message } = await res.json();
-      console.log('[Server Response] message:', message);
-
-      const statusUrl = `${authServerBaseUrl}/status/${jobId}`;
-
-      try {
-        const completedJobStatus = await pollResponse<JobStatusResponse>({
-          url: statusUrl,
-          isCompleteCondition: (response) => response.state === 'completed',
-          isErrorCondition: (response) =>
-            response.state === 'failed' || response.state === 'error',
-          intervalMs: 3000,
-          maxRetries: 10,
-          errorMessageContext: `PKP Minting Job ${jobId}`,
-        });
-
-        return {
-          _raw: completedJobStatus,
-          txHash: completedJobStatus.returnValue.hash,
-          pkpInfo: completedJobStatus.returnValue.data,
-        };
-      } catch (error: any) {
-        console.error('Error during PKP minting polling:', error);
-        const errMsg = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to mint PKP after polling: ${errMsg}`);
-      }
-    } else {
-      const errorBody = await res.text();
-      throw new Error(
-        `Failed to initiate PKP minting. Status: ${res.status}, Body: ${errorBody}`
-      );
-    }
   }
 
   /**
