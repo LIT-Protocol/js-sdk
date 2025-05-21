@@ -176,7 +176,13 @@ export const _createNagaLitClient = async (
 
           console.log('[getContext] getSignSessionKey result:', result);
 
-          return result;
+          const response =
+            await networkModule.api.signSessionKey.handleResponse(
+              result,
+              params.requestBody.pkpPublicKey
+            );
+
+          return response;
         },
       };
     },

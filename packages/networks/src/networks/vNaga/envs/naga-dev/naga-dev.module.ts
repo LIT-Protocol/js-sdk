@@ -2,6 +2,7 @@ import { DOCS, version } from '@lit-protocol/constants';
 import {
   AuthData,
   EoaAuthContextSchema,
+  HexPrefixedSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
   PKPAuthContextSchema,
 } from '@lit-protocol/schemas';
@@ -16,7 +17,18 @@ import { issueSessionFromContext } from './session-manager/issueSessionFromConte
 import { createStateManager } from './state-manager/createStateManager';
 
 // Import the necessary types for the explicit return type annotation
-import { AuthMethod, CallbackParams, RequestItem } from '@lit-protocol/types';
+import {
+  combineSignatureShares,
+  mostCommonString,
+  normalizeAndStringify,
+} from '@lit-protocol/crypto';
+import {
+  AuthMethod,
+  AuthSig,
+  CallbackParams,
+  RequestItem
+} from '@lit-protocol/types';
+import { computeAddress } from 'ethers/lib/utils';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
@@ -31,6 +43,7 @@ import {
 } from './api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
+import { SignSessionKeyResponseDataSchema } from './api-manager/signSessionKey/signSessionKey.ResponseDataSchema';
 import {
   createChainManager,
   CreateChainManagerReturn,
@@ -314,6 +327,66 @@ const nagaDevModuleObject = {
         }
 
         return requests;
+      },
+      handleResponse: async (
+        result: ProcessedBatchResult<
+          z.infer<typeof SignSessionKeyResponseDataSchema>
+        >,
+        pkpPublicKey: Hex | string
+      ) => {
+        if (!result.success) {
+          console.error(
+            '🚨 Sign Session Key batch failed in handleResponse:',
+            result.error
+          );
+          throw Error(result.error);
+        }
+
+        const { values } = SignSessionKeyResponseDataSchema.parse(result);
+
+        console.log('✅ [signSessionKey] values...', values);
+
+        const signatureShares = values.map((s) => ({
+          ProofOfPossession: {
+            identifier: s.signatureShare.ProofOfPossession.identifier,
+            value: s.signatureShare.ProofOfPossession.value,
+          },
+        }));
+
+        console.log('✅ [signSessionKey] signatureShares...', signatureShares);
+
+        const blsCombinedSignature = await combineSignatureShares(
+          signatureShares
+        );
+
+        console.log(
+          '✅ [signSessionKey] blsCombinedSignature...',
+          blsCombinedSignature
+        );
+
+        const _pkpPublicKey = HexPrefixedSchema.parse(pkpPublicKey);
+
+        const mostCommonSiweMessage = mostCommonString(
+          values.map((s) => s.siweMessage)
+        );
+
+        const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
+
+        console.log('✅ [signSessionKey] signedMessage...', signedMessage);
+
+        const authSig: AuthSig = {
+          sig: JSON.stringify({
+            ProofOfPossession: blsCombinedSignature,
+          }),
+          algo: 'LIT_BLS',
+          derivedVia: 'lit.bls',
+          signedMessage,
+          address: computeAddress(_pkpPublicKey),
+        };
+
+        console.log('✅ [signSessionKey] authSig...', authSig);
+
+        return authSig;
       },
     },
   },

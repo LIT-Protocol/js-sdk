@@ -42,11 +42,11 @@ import { privateKeyToAccount } from 'viem/accounts';
       account: myAccount,
     },
     authConfig: {
-      statement: '',
-      domain: '',
-      resources: [['pkp-signing', '*']],
+      statement: 'I authorize the Lit Protocol to mint a PKP for me.',
+      domain: 'example.com',
+      resources: [['pkp-signing', '*'], ['lit-action-execution', '*']],
       capabilityAuthSigs: [],
-      expiration: '',
+      expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
     },
     litClient: litClient,
   });
