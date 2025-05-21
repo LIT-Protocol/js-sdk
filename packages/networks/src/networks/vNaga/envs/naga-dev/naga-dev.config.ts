@@ -33,6 +33,7 @@ export const networkConfig: INetworkConfig<
     realmId: DEFAULT_REALM_ID,
   },
   endpoints: NAGA_ENDPOINT,
+  authServerBaseUrl: 'http://localhost:3301',
 };
 
 export type NagaDevNetworkConfig = typeof networkConfig;

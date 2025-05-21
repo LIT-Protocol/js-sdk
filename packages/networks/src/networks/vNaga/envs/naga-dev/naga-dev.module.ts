@@ -49,6 +49,7 @@ const nagaDevModuleObject = {
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
+  getAuthServerBaseUrl: () => networkConfig.authServerBaseUrl,
   // composeLitUrl: composeLitUrl,
   /**
    * 🧠 This is the core function that keeps all the network essential information
@@ -68,21 +69,20 @@ const nagaDevModuleObject = {
     });
   },
 
-  // @deprecated - TODO: This is not deprecated, just marked it as such so we don't forget to implement it
-  createAuthService: () => {
-    const AUTH_SERVICE_URL = 'https://naga-auth-service.getlit.dev/';
+  // createAuthService: () => {
+  //   const AUTH_SERVICE_URL = 'https://naga-auth-service.getlit.dev/';
 
-    return {
-      prepareMintPkpHttpRequest: (params: {
-        authMethodId?: Hex;
-        authMethodType?: number;
-        pubkey?: Hex;
-        customAuthMethodId?: string;
-      }) => {
-        return params;
-      },
-    };
-  },
+  //   return {
+  //     prepareMintPkpHttpRequest: (params: {
+  //       authMethodId?: Hex;
+  //       authMethodType?: number;
+  //       pubkey?: Hex;
+  //       customAuthMethodId?: string;
+  //     }) => {
+  //       return params;
+  //     },
+  //   };
+  // },
   chainApi: {
     /**
      * Mints a PKP using the provided authentication context and optional parameters.
