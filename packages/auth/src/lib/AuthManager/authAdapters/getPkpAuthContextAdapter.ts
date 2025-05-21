@@ -1,16 +1,15 @@
-import { HexPrefixedSchema, NodeUrlsSchema } from '@lit-protocol/schemas';
+import {
+  HexPrefixedSchema,
+  NodeUrlsSchema,
+  AuthData,
+} from '@lit-protocol/schemas';
 import { ethers } from 'ethers';
 import { z } from 'zod';
-import { AuthMethodType } from '../../types';
-import {
-  AuthConfig,
-  AuthManagerParams,
-  BaseAuthContext,
-  ConstructorConfig,
-  tryGetCachedAuthData,
-} from '../auth-manager';
+import { AuthConfigV2 } from '../../authenticators/types';
+import { AuthManagerParams, tryGetCachedAuthData } from '../auth-manager';
 import { getPkpAuthContext } from '../authContexts/getPkpAuthContext';
-import { AuthMethod } from '@lit-protocol/types';
+import { processResources } from '../utils/processResources';
+import { PRODUCT_IDS } from '@lit-protocol/constants';
 // // Define this near the top of the file or in a shared types file
 // export interface AuthenticatorWithId {
 //   new (config: any): any; // the constructor signature (maybe all the AuthConfigs eg. GoogleConfig?)
@@ -29,16 +28,44 @@ export const PkpAuthDepsSchema = z.object({
 export async function getPkpAuthContextAdapter(
   upstreamParams: AuthManagerParams,
   params: {
-    authMethod: AuthMethod;
+    authData: AuthData;
     pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
-    authConfig: AuthConfig;
-    litClient: BaseAuthContext<any>['litClient'];
+    authConfig: AuthConfigV2;
+    litClient: {
+      getContext: () => Promise<any>;
+    };
   }
 ) {
-  // TODO: This is not typed - we have to fix this!
+  const _resources = processResources(params.authConfig.resources);
   const litClientCtx = await params.litClient.getContext();
 
-  console.log('litClientCtx:', litClientCtx);
+  const latestConnectionInfo = litClientCtx.latestConnectionInfo;
+  // - boostrapUrls
+  // - epochInfo
+  // - epochState
+  //   - currentNumber
+  //   - startTime
+  // - minNodeCount
+  // - priceFeedInfo
+  //   - epochId: bigint
+  //   - minNodeCount: number
+  //   - networkPrices: [{ url: string, price: bigint }]
+  const nodePrices = latestConnectionInfo.priceFeedInfo.networkPrices;
+
+  const handshakeResult = litClientCtx.handshakeResult;
+  console.log('handshakeResult:', handshakeResult);
+  const threshold = handshakeResult.threshold;
+
+  const nodeUrls = litClientCtx.getMaxPricesForNodeProduct({
+    nodePrices: nodePrices,
+    userMaxPrice: litClientCtx.getUserMaxPrice({
+      product: 'LIT_ACTION',
+    }),
+    productId: PRODUCT_IDS['LIT_ACTION'],
+    numRequiredNodes: threshold,
+  });
+
+  console.log('nodeUrls:', nodeUrls);
 
   // const litClientConfig = PkpAuthDepsSchema.parse({
   //   nonce: litClientCtx.latestBlockhash,
@@ -64,58 +91,40 @@ export async function getPkpAuthContextAdapter(
   //     },
   //     expiresAt: "2025-05-02T16:06:19.195Z",
   //   },
-  //   authMethodType: "EthWallet",
+  //   authMethodType: 1,
   // }
-  const authData = await tryGetCachedAuthData({
+  const litAuthData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
     address: pkpAddress,
     expiration: params.authConfig.expiration,
-    type: params.authMethod.authMethodType,
+    type: params.authData.authMethodType,
   });
 
-  console.log('authData:', authData);
-
-  // const authenticator = new params.authenticator(params.config);
-
-  // // inject litClientConfig into params.config
-  // params.config = {
-  //   ...params.config,
-  //   ...litClientConfig,
-  // };
-
-  // let authMethod;
-
-  // // only for webauthn (maybe we can support other types)
-  // if (params.config.method === 'register') {
-  //   authMethod = await authenticator.register(params.config);
-  // } else {
-  //   authMethod = await authenticator.authenticate(params.config);
-  // }
+  console.log('litAuthData:', litAuthData);
 
   return getPkpAuthContext({
     authentication: {
       pkpPublicKey: params.pkpPublicKey,
-      authMethods: [params.authMethod],
+      authData: params.authData,
     },
     authConfig: {
       domain: params.authConfig.domain,
-      resources: params.authConfig.resources,
+      resources: _resources,
       capabilityAuthSigs: params.authConfig.capabilityAuthSigs,
       expiration: params.authConfig.expiration,
       statement: params.authConfig.statement,
     },
     deps: {
-      authData,
+      litAuthData: litAuthData,
       connection: {
         nonce: litClientCtx.latestBlockhash,
-        currentEpoch: litClientCtx.currentEpoch.epochState.currentNumber,
-        // nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
-        //   product: 'LIT_ACTION',
-        // }),
-        nodeUrls: litClientCtx.getMaxPricesForNodeProduct({
-          product: 'LIT_ACTION',
-        }),
+        currentEpoch:
+          litClientCtx.latestConnectionInfo.epochState.currentNumber,
+        nodeUrls: nodeUrls,
       },
+
+      // Technically we don't need this as internally we should be able to use
+      // networkModule.getSignSessionKey as authNeededCallback?
       nodeSignSessionKey: litClientCtx.getSignSessionKey,
     },
   });

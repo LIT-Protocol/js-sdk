@@ -1,30 +1,11 @@
+import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
+import { AuthMethod, Hex } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
-import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
-import { AuthMethod, OAuthProviderOptions } from '@lit-protocol/types';
 
-import { HexPrefixedSchema } from '@lit-protocol/schemas';
-import { z } from 'zod';
-import { AuthMethodTypeStringMap } from '../types';
+import { AuthData } from '@lit-protocol/schemas';
 import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
-import { pollResponse } from './helper/pollResponse';
-import { JobStatusResponse } from './types';
-
-type GoogleConfig = OAuthProviderOptions & {
-  pkpPublicKey?: z.infer<typeof HexPrefixedSchema>;
-};
-
 export class GoogleAuthenticator {
-  public static id = AuthMethodTypeStringMap.Google;
-  /**
-   * The redirect URI that Lit's login server should send the user back to
-   */
-  public redirectUri: string;
-
-  constructor(params: GoogleConfig) {
-    this.redirectUri = params.redirectUri || window.location.origin;
-  }
-
   /**
    * Signup with popup window
    *
@@ -38,7 +19,7 @@ export class GoogleAuthenticator {
    * @example
    * http://localhost:3300
    */
-  public static async authenticate(baseURL: string): Promise<AuthMethod> {
+  public static async authenticate(baseURL: string): Promise<AuthData> {
     /**
      * If you are using the Lit Login Server or a clone from that, the redirectUri is the same as the baseUri. That's
      * because the app.js is loaded in the index.html file.
@@ -62,7 +43,7 @@ export class GoogleAuthenticator {
       throw new UnknownError({}, 'Failed to open popup window');
     }
 
-    return new Promise((resolve, reject) => {
+    const authMethod = await new Promise<AuthMethod>((resolve, reject) => {
       // window does not have a closed event, so we need to poll using a timer
       const interval = setInterval(() => {
         if (popup.closed) {
@@ -93,27 +74,32 @@ export class GoogleAuthenticator {
         }
       });
     });
+
+    return {
+      ...authMethod,
+      authMethodId: await GoogleAuthenticator.authMethodId(authMethod),
+    };
   }
 
-  /**
-   * Get auth method id that can be used to look up and interact with
-   * PKPs associated with the given auth method
-   *
-   * @param {AuthMethod} authMethod - Auth method object
-   *
-   * @returns {Promise<string>} - Auth method id
-   */
-  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return GoogleAuthenticator.authMethodId(authMethod);
-  }
-
-  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
+  public static async authMethodId(authMethod: AuthMethod): Promise<Hex> {
     const tokenPayload = jose.decodeJwt(authMethod.accessToken);
     const userId: string = tokenPayload['sub'] as string;
     const audience: string = tokenPayload['aud'] as string;
     const authMethodId = ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
     );
-    return authMethodId;
+    return authMethodId as Hex;
   }
+
+  // /**
+  //  * Get auth method id that can be used to look up and interact with
+  //  * PKPs associated with the given auth method
+  //  *
+  //  * @param {AuthMethod} authMethod - Auth method object
+  //  *
+  //  * @returns {Promise<string>} - Auth method id
+  //  */
+  // public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+  //   return GoogleAuthenticator.authMethodId(authMethod);
+  // }
 }

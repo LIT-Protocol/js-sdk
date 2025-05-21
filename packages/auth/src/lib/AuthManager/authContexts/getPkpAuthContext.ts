@@ -1,6 +1,7 @@
 import { createPKPSiweMessage } from '@lit-protocol/auth-helpers';
 import {
-  AuthMethodSchema,
+  AuthDataSchema,
+  HexPrefixedSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
   NodeInfoSchema,
   NodeUrlsSchema,
@@ -9,13 +10,16 @@ import {
 import { NodeSet } from '@lit-protocol/types';
 import { z } from 'zod';
 import { LitAuthData, LitAuthDataSchema } from '../../types';
-import {
-  AuthConfigSchema,
-  BaseAuthenticationSchema,
-} from './BaseAuthContextType';
+import { AuthConfig } from '../auth-manager';
+import { AuthConfigSchema } from './BaseAuthContextType';
 
-const PkpAuthenticationSchema = BaseAuthenticationSchema.extend({
-  authMethods: z.array(AuthMethodSchema),
+// const PkpAuthenticationSchema = BaseAuthenticationSchema.extend({
+//   authMethods: z.array(AuthMethodSchema),
+// });
+
+const PkpAuthenticationSchema = z.object({
+  pkpPublicKey: HexPrefixedSchema,
+  authData: AuthDataSchema,
 });
 
 const ConnectionSchema = z.object({
@@ -27,6 +31,8 @@ const ConnectionSchema = z.object({
 const NodeSignSessionKeySchema = z.function().args(
   z.object({
     requestBody: JsonSignSessionKeyRequestForPkpReturnSchema,
+
+    // @deprecated - we only need requestBody because nodeUrls is already provided in it
     nodeUrls: z.array(z.string()),
   })
 );
@@ -37,7 +43,7 @@ export const GetPkpAuthContextSchema = z.object({
   deps: z.object({
     connection: ConnectionSchema,
     nodeSignSessionKey: NodeSignSessionKeySchema,
-    authData: LitAuthDataSchema,
+    litAuthData: LitAuthDataSchema,
   }),
 });
 
@@ -47,7 +53,7 @@ interface PreparePkpAuthRequestBodyParams {
 
   // dependencies from litNodeClient(must be generated internally, not provided by the user)
   deps: {
-    authData: LitAuthData;
+    litAuthData: LitAuthData;
     nodeUrls: string[];
     nodeSet: NodeSet[];
     nonce: string;
@@ -65,7 +71,7 @@ const preparePkpAuthRequestBody = async (
   const _authConfig = AuthConfigSchema.parse(params.authConfig);
 
   const _sessionKeyUri = SessionKeyUriSchema.parse(
-    params.deps.authData.sessionKey.keyPair.publicKey
+    params.deps.litAuthData.sessionKey.keyPair.publicKey
   );
 
   // Auth Material (Siwe Message)
@@ -82,7 +88,7 @@ const preparePkpAuthRequestBody = async (
   return {
     nodeSet: params.deps.nodeSet,
     sessionKey: _sessionKeyUri,
-    authMethods: _authentication.authMethods,
+    authData: _authentication.authData,
     pkpPublicKey: _authentication.pkpPublicKey,
     siweMessage: _siweMessage,
     curveType: 'BLS' as const,
@@ -100,6 +106,8 @@ const preparePkpAuthRequestBody = async (
 export const getPkpAuthContext = async (
   params: z.infer<typeof GetPkpAuthContextSchema>
 ) => {
+  console.log('[getPkpAuthContext] params:', params);
+
   const _params = GetPkpAuthContextSchema.parse(params);
   const _nodeInfo = NodeInfoSchema.parse(params.deps.connection.nodeUrls);
 
@@ -107,7 +115,7 @@ export const getPkpAuthContext = async (
     authentication: _params.authentication,
     authConfig: _params.authConfig,
     deps: {
-      authData: _params.deps.authData,
+      litAuthData: _params.deps.litAuthData,
       nodeUrls: _nodeInfo.urls,
       nodeSet: _nodeInfo.nodeSet,
       nonce: _params.deps.connection.nonce,
@@ -115,14 +123,22 @@ export const getPkpAuthContext = async (
     },
   });
 
+  const authConfig: AuthConfig = {
+    capabilityAuthSigs: _params.authConfig.capabilityAuthSigs,
+    expiration: _params.authConfig.expiration,
+    statement: _params.authConfig.statement,
+    domain: _params.authConfig.domain,
+    resources: _params.authConfig.resources,
+  };
+
   return {
     chain: 'ethereum',
     pkpPublicKey: _params.authentication.pkpPublicKey,
-    authMethods: _params.authentication.authMethods,
-    sessionKey: requestBody.sessionKey,
-    resources: _params.authConfig.resources,
-    capabilityAuthSigs: _params.authConfig.capabilityAuthSigs,
-    expiration: _params.authConfig.expiration,
+    authData: _params.authentication.authData,
+    // sessionKey: requestBody.sessionKey,
+    // resources: _params.authConfig.resources,
+    // capabilityAuthSigs: _params.authConfig.capabilityAuthSigs,
+    // expiration: _params.authConfig.expiration,
     authNeededCallback: async () => {
       const authSig = await _params.deps.nodeSignSessionKey({
         requestBody,
@@ -131,6 +147,8 @@ export const getPkpAuthContext = async (
 
       return authSig;
     },
+    authConfig,
+    sessionKeyPair: _params.deps.litAuthData.sessionKey.keyPair,
   };
 };
 

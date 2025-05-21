@@ -1,24 +1,21 @@
+import { AUTH_METHOD_TYPE_VALUES } from '@lit-protocol/constants';
 import { generateSessionKeyPair } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
-import { ExpirationSchema } from '@lit-protocol/schemas';
-import { z } from 'zod';
-import type { LitAuthStorageProvider } from '../storage/types';
-import type { AuthMethodType, LitAuthData } from '../types';
 import {
-  getCustomAuthContextAdapter,
-  ICustomAuthenticator,
-} from './authAdapters/getCustomAuthContextAdapter';
+  AuthData,
+  ExpirationSchema,
+  HexPrefixedSchema,
+} from '@lit-protocol/schemas';
+import { z } from 'zod';
+import { AuthConfigV2 } from '../authenticators/types';
+import type { LitAuthStorageProvider } from '../storage/types';
+import type { LitAuthData } from '../types';
 import {
   EoaAuthContextAdapterParams,
   getEoaAuthContextAdapter,
 } from './authAdapters/getEoaAuthContextAdapter';
-import {
-  AuthenticatorWithId,
-  getPkpAuthContextAdapter,
-} from './authAdapters/getPkpAuthContextAdapter';
+import { getPkpAuthContextAdapter } from './authAdapters/getPkpAuthContextAdapter';
 import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
-import { DiscordAuthenticator, GoogleAuthenticator } from '../authenticators';
-import { LIT_LOGIN_GATEWAY } from '../authenticators/utils';
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
 }
@@ -60,7 +57,7 @@ export async function tryGetCachedAuthData(params: {
   storage: LitAuthStorageProvider;
   address: string;
   expiration: string;
-  type: AuthMethodType;
+  type: AUTH_METHOD_TYPE_VALUES;
 }): Promise<LitAuthData> {
   // Use `storage` to see if there is cached auth data
   let authData = (await params.storage.read({
@@ -117,6 +114,7 @@ function validateAuthData(authData: LitAuthData) {
 // Use LitNodeClient to signSessionKey with AuthData
 // }
 
+// @deprecated - use AuthConfigV2 instead
 export type AuthConfig = z.infer<typeof AuthConfigSchema>;
 
 export type ConstructorConfig<T> = T extends new (config: infer C) => any
@@ -125,70 +123,31 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const createAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
+    //   throw new Error(`Invalid authenticator: ${params.authenticator}`);
+    // },
     // TODO: for wrapped keys!
     // createRequestToken: async () => {
     //   // use createSessionSisg then send to wrapped key service
     // }
-    // signIn: {
-    //   social: async (params: {
-    //     provider: 'google' | 'discord';
-
-    //     /**
-    //      * You could use `https://login.litgateway.com` as a baseUrl.
-    //      * It's highly recommended to use your own auth server for production.
-    //      * However, If you are just testing/developing, you could use `https://login.litgateway.com` as a baseUrl.
-    //      *
-    //      * @example
-    //      * https://login.litgateway.com
-    //      *
-    //      * @example
-    //      * http://localhost:3300
-    //      */
-    //     baseUrl: `https://login.litgateway.com` | string;
-    //   }) => {
-    //     if (params.provider === 'google') {
-    //       const authMethod = await GoogleAuthenticator.authenticate(
-    //         params.baseUrl,
-    //         params.baseUrl
-    //       );
-
-    //       console.log('🔥🔥 authMethod', authMethod);
-
-    //       return authMethod;
-    //     }
-
-    //     if (params.provider === 'discord') {
-    //       const authMethod = await DiscordAuthenticator.authenticate(
-    //         params.baseUrl,
-    //         params.baseUrl
-    //       );
-
-    //       console.log('🔥🔥 authMethod', authMethod);
-    //       return authMethod;
-    //     }
-
-    //     throw new Error(`Invalid provider: ${params.provider}`);
-    //   },
-    // },
     createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);
     },
-    createPkpAuthContext: <T extends AuthenticatorWithId>(params: {
-      authenticator: T;
-      config: ConstructorConfig<T>;
-      authConfig: AuthConfig;
+    createPkpAuthContext: (params: {
+      authData: AuthData;
+      pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      authConfig: AuthConfigV2;
       litClient: BaseAuthContext<any>['litClient'];
     }) => {
       return getPkpAuthContextAdapter(authManagerParams, params);
     },
-    createCustomAuthContext: <T extends ICustomAuthenticator>(params: {
-      authenticator: T;
-      settings: ConstructorParameters<T>[0]; // Infer settings type from constructor
-      config: { pkpPublicKey: string; [key: string]: any }; // Execution config
-      authConfig: AuthConfig;
-      litClient: BaseAuthContext<any>['litClient'];
-    }) => {
-      return getCustomAuthContextAdapter(authManagerParams, params);
-    },
+    // createCustomAuthContext: <T extends ICustomAuthenticator>(params: {
+    //   authenticator: T;
+    //   settings: ConstructorParameters<T>[0]; // Infer settings type from constructor
+    //   config: { pkpPublicKey: string; [key: string]: any }; // Execution config
+    //   authConfig: AuthConfigV2;
+    //   litClient: BaseAuthContext<any>['litClient'];
+    // }) => {
+    //   return getCustomAuthContextAdapter(authManagerParams, params);
+    // },
   };
 };

@@ -1,11 +1,17 @@
 import { JobStatusResponse, pollResponse } from './pollResponse';
 
-export const handleAuthServiceRequest = async (params: {
+export type AuthServerTx<T> = {
+  _raw: JobStatusResponse;
+  txHash: string;
+  data: T;
+};
+
+export const handleAuthServerRequest = async <T>(params: {
   serverUrl: string;
   path: '/pkp/mint';
   body: any;
   jobName: string;
-}) => {
+}): Promise<AuthServerTx<T>> => {
   const _body = JSON.stringify(params.body);
   const _url = `${params.serverUrl}${params.path}`;
 

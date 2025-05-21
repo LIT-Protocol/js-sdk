@@ -1,16 +1,18 @@
 import { InvalidSessionSigs } from '@lit-protocol/constants';
 import {
+  PKPAuthContextSchema,
+  EoaAuthContextSchema,
+} from '@lit-protocol/schemas';
+import {
+  LitResourceAbilityRequest,
   SessionSigningTemplate,
   SessionSigsMap,
-  LitResourceAbilityRequest,
 } from '@lit-protocol/types';
 import { ed25519 } from '@noble/curves/ed25519';
 import { hexToBytes } from '@noble/hashes/utils';
 import { z } from 'zod';
 import { getMaxPricesForNodeProduct } from '../pricing-manager/getMaxPricesForNodeProduct';
 import { PricingContext } from '../pricing-manager/PricingContextSchema';
-import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
-import { formatSessionSigs } from './helper/session-sigs-reader';
 import { validateSessionSigs } from './helper/session-sigs-validator';
 
 /**
@@ -52,18 +54,19 @@ export function normalizeAndStringify(input: string): string {
 }
 
 export const issueSessionFromContext = async (params: {
-  authContext: z.input<typeof AuthContextSchema | typeof EoaAuthContextSchema>;
+  authContext: z.input<
+    typeof PKPAuthContextSchema | typeof EoaAuthContextSchema
+  >;
   pricingContext: PricingContext;
   // latestBlockhash: string;
 }): Promise<SessionSigsMap> => {
-  const authSig = await params.authContext.authNeededCallback();
+  console.log('[issueSessionFromContext] params:', params);
+  const authSig = await params.authContext.authNeededCallback(params);
 
   const capabilities = [
     ...(params.authContext.authConfig.capabilityAuthSigs || []), // Spreads existing sigs, or an empty array if null/undefined/empty
     authSig,
   ];
-
-  // console.log('🔄 capabilities', capabilities);
 
   // This is the template that will be combined with the node address as a single object, then signed by the session key
   // so that the node can verify the session signature

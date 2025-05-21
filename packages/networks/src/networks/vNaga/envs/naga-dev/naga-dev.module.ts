@@ -1,5 +1,10 @@
 import { DOCS, version } from '@lit-protocol/constants';
-import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
+import {
+  AuthData,
+  EoaAuthContextSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema,
+  PKPAuthContextSchema,
+} from '@lit-protocol/schemas';
 import { Hex } from 'viem';
 
 import { z } from 'zod';
@@ -11,11 +16,9 @@ import { issueSessionFromContext } from './session-manager/issueSessionFromConte
 import { createStateManager } from './state-manager/createStateManager';
 
 // Import the necessary types for the explicit return type annotation
-import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
 import { AuthMethod, CallbackParams, RequestItem } from '@lit-protocol/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
-import { handleAuthServiceRequest } from '../../../shared/helpers/handleAuthServiceRequest';
-import { JobStatusResponse } from '../../../shared/helpers/pollResponse';
+import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
 import type { LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
@@ -32,7 +35,8 @@ import {
   createChainManager,
   CreateChainManagerReturn,
 } from './chain-manager/createChainManager';
-
+import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
+import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
 // Define ProcessedBatchResult type (mirroring structure from dispatchRequests)
 type ProcessedBatchResult<T> =
   | { success: true; values: T[] }
@@ -46,6 +50,7 @@ const nagaDevModuleObject = {
     requiredAttestation: false,
     abortTimeout: 20_000,
     minimumThreshold: networkConfig.minimumThreshold,
+    httpProtocol: networkConfig.httpProtocol,
   },
   getNetworkName: () => networkConfig.network,
   getHttpProtocol: () => networkConfig.httpProtocol,
@@ -53,6 +58,7 @@ const nagaDevModuleObject = {
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
   getAuthServerBaseUrl: () => networkConfig.authServerBaseUrl,
+  getMinimumThreshold: () => networkConfig.minimumThreshold,
   // composeLitUrl: composeLitUrl,
   /**
    * 🧠 This is the core function that keeps all the network essential information
@@ -72,20 +78,8 @@ const nagaDevModuleObject = {
     });
   },
 
-  // createAuthService: () => {
-  //   const AUTH_SERVICE_URL = 'https://naga-auth-service.getlit.dev/';
-
-  //   return {
-  //     prepareMintPkpHttpRequest: (params: {
-  //       authMethodId?: Hex;
-  //       authMethodType?: number;
-  //       pubkey?: Hex;
-  //       customAuthMethodId?: string;
-  //     }) => {
-  //       return params;
-  //     },
-  //   };
-  // },
+  getMaxPricesForNodeProduct: getMaxPricesForNodeProduct,
+  getUserMaxPrice: getUserMaxPrice,
   chainApi: {
     /**
      * Mints a PKP using the provided authentication context and optional parameters.
@@ -98,7 +92,7 @@ const nagaDevModuleObject = {
      */
     mintPkp: async (params: {
       authContext:
-        | z.infer<typeof AuthContextSchema>
+        | z.infer<typeof PKPAuthContextSchema>
         | z.infer<typeof EoaAuthContextSchema>;
       scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
 
@@ -146,29 +140,18 @@ const nagaDevModuleObject = {
   },
   authService: {
     pkpMint: async (params: {
-      authMethod: AuthMethod;
+      authData: AuthData;
       authServerBaseUrl?: string;
     }) => {
-      const _serverUrl =
-        networkConfig.authServerBaseUrl || params.authServerBaseUrl;
-      const _authMethodType = params.authMethod.authMethodType;
-      const _authMethodId = await getAuthIdByAuthMethod(params.authMethod);
-
-      const res = await handleAuthServiceRequest({
+      return await handleAuthServerRequest<PKPData>({
         jobName: 'PKP Minting',
-        serverUrl: _serverUrl!,
+        serverUrl: networkConfig.authServerBaseUrl || params.authServerBaseUrl!,
         path: '/pkp/mint',
         body: {
-          authMethodType: _authMethodType,
-          authMethodId: _authMethodId,
+          authMethodType: params.authData.authMethodType,
+          authMethodId: params.authData.authMethodId,
         },
       });
-
-      return res as unknown as Promise<{
-        _raw: JobStatusResponse;
-        txHash: string;
-        data: PKPData;
-      }>;
     },
   },
   api: {
@@ -183,11 +166,15 @@ const nagaDevModuleObject = {
         ResponseData: PKPSignResponseDataSchema,
       },
       createRequest: async (params: PKPSignCreateRequestParams) => {
+        console.log('✅ creating request...', params);
+
         // -- 1. generate session sigs
         const sessionSigs = await issueSessionFromContext({
           pricingContext: PricingContextSchema.parse(params.pricingContext),
           authContext: params.authContext,
         });
+
+        console.log('✅ session sigs generated...');
 
         // -- 2. generate requests
         const _requestId = createRequestId();
@@ -195,9 +182,12 @@ const nagaDevModuleObject = {
           z.infer<typeof PKPSignRequestDataSchema>
         >[] = [];
 
+        console.log('✅ request id generated...');
+
         const urls = Object.keys(sessionSigs);
 
         for (const url of urls) {
+          console.log('✅ generating request data...', url);
           const _requestData = PKPSignRequestDataSchema.parse({
             toSign: params.signingContext.toSign,
             signingScheme: params.signingContext.signingScheme,
@@ -214,6 +204,8 @@ const nagaDevModuleObject = {
             url,
             endpoint: nagaDevModuleObject.getEndpoints().PKP_SIGN,
           });
+
+          console.log('✅ url with path generated...', _urlWithPath);
 
           requests.push({
             fullPath: _urlWithPath,
@@ -254,6 +246,74 @@ const nagaDevModuleObject = {
         });
 
         return signatures;
+      },
+    },
+    signSessionKey: {
+      schemas: {},
+      createRequest: async (
+        requestBody: z.infer<
+          typeof JsonSignSessionKeyRequestForPkpReturnSchema
+        >,
+        httpProtocol: 'http://' | 'https://',
+        version: string
+      ) => {
+        type RequestBodyType = {
+          sessionKey: string;
+          authMethods: AuthMethod[];
+          pkpPublicKey?: string;
+          siweMessage: string;
+          curveType: 'BLS';
+          epoch?: number;
+          nodeSet: { value: number; socketAddress: string }[];
+        };
+
+        console.log('✅ [signSessionKey] requestBody...', requestBody);
+
+        const nodeUrls = requestBody.nodeSet.map(
+          (node) => `${httpProtocol}${node.socketAddress}`
+        );
+
+        console.log('✅ [signSessionKey] nodeUrls...', nodeUrls);
+
+        // extract the authMethod from the requestBody
+        const authMethod = {
+          authMethodType: requestBody.authData.authMethodType,
+          accessToken: requestBody.authData.accessToken,
+        };
+
+        const requests = [];
+
+        for (const url of nodeUrls) {
+          const _urlWithPath = composeLitUrl({
+            url,
+            endpoint: nagaDevModuleObject.getEndpoints().SIGN_SESSION_KEY,
+          });
+
+          const _body: RequestBodyType = {
+            sessionKey: requestBody.sessionKey,
+            authMethods: [authMethod],
+            pkpPublicKey: requestBody.pkpPublicKey,
+            siweMessage: requestBody.siweMessage,
+            curveType: 'BLS',
+            epoch: requestBody.epoch,
+            nodeSet: requestBody.nodeSet,
+          };
+
+          requests.push({
+            fullPath: _urlWithPath,
+            data: _body,
+            requestId: createRequestId(),
+            epoch: requestBody.epoch,
+            version: version,
+          });
+        }
+
+        if (!requests || requests.length === 0) {
+          console.error('No requests generated for signSessionKey.');
+          throw new Error('Failed to generate requests for signSessionKey.');
+        }
+
+        return requests;
       },
     },
   },

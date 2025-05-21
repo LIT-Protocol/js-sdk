@@ -2,6 +2,7 @@ import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
+import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schemas';
 
 type AnyNetworkModule = NagaNetworkModule | DatilNetworkModule;
 
@@ -113,6 +114,14 @@ export const _createNagaLitClient = async (
     return await networkModule.api.pkpSign.handleResponse(result, requestId);
   }
 
+  // TODO APIS:
+  // getContext():
+  // - [ ] getMaxPricesForNodeProduct
+  // - [ ] getSignSessionKey
+  // Higher level APIs:
+  // - [ ] encrypt
+  // - [ ] decrypt
+  // - [ ] viewPkps
   return {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
@@ -120,15 +129,60 @@ export const _createNagaLitClient = async (
     getContext: async () => {
       return {
         latestBlockhash: await _stateManager.getLatestBlockhash(),
-        currentEpoch: _stateManager.getLatestConnectionInfo(),
-        // getMaxPricesForNodeProduct
-        // getSignSessionKey
+        latestConnectionInfo: _stateManager.getLatestConnectionInfo(),
+        handshakeResult: _stateManager.getCallbackResult(),
+        getMaxPricesForNodeProduct: networkModule.getMaxPricesForNodeProduct,
+        getUserMaxPrice: networkModule.getUserMaxPrice,
+        getSignSessionKey: async (params: {
+          nodeUrls: string[];
+          requestBody: z.infer<
+            typeof JsonSignSessionKeyRequestForPkpReturnSchema
+          >;
+        }) => {
+          // -- get the fresh handshake results
+          const currentHandshakeResult = _stateManager.getCallbackResult();
+          const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+
+          if (!currentHandshakeResult || !currentConnectionInfo) {
+            throw new Error(
+              'Handshake result is not available from state manager at the time of pkpSign.'
+            );
+          }
+
+          console.log('[getContext] getSignSessionKey params:', params);
+
+          const httpProtocol = networkModule.config.httpProtocol;
+
+          // We should now send the requests to the nodes
+          const requestArray =
+            await networkModule.api.signSessionKey.createRequest(
+              params.requestBody,
+              httpProtocol,
+              networkModule.version
+            );
+
+          console.log(
+            '[getContext] getSignSessionKey requestArray:',
+            requestArray
+          );
+
+          const requestId = requestArray[0].requestId;
+
+          const result = await dispatchRequests<any, any>(
+            requestArray,
+            requestId,
+            currentHandshakeResult.threshold
+          );
+
+          console.log('[getContext] getSignSessionKey result:', result);
+
+          return result;
+        },
       };
     },
     disconnect: _stateManager.stop,
     mintPkp: networkModule.chainApi.mintPkp,
     mintWithAuth: networkModule.authService.pkpMint,
-    // viewPkps
     chain: {
       raw: {
         pkpSign: async (
@@ -170,8 +224,6 @@ export const _createNagaLitClient = async (
       //   },
       // },
     },
-    // encrypt(),
-    // decrypt(),
   };
 };
 

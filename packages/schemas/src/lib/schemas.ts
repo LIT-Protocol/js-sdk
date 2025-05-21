@@ -11,7 +11,6 @@ import {
   VMTYPE,
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
-import { Account } from 'viem';
 import {
   AuthConfigSchema,
   ISessionCapabilityObjectSchema,
@@ -455,26 +454,27 @@ export const AttenuationsObjectSchema = z.record(
   z.record(z.string(), z.array(DefinedJsonSchema))
 );
 
-export const AuthContextSchema = z.object({
+export const PKPAuthContextSchema = z.object({
   pkpPublicKey: HexPrefixedSchema.optional(),
   // viemAccount: z.custom<Account>().optional(),
   // authMethod: AuthMethodSchema.optional(),
   chain: z.string(),
   sessionKeyPair: SessionKeyPairSchema,
   // which one do we need here?
-  resourceAbilityRequests: z.array(
-    z.lazy(() => LitResourceAbilityRequestSchema)
-  ),
+  // resourceAbilityRequests: z.array(
+  //   z.lazy(() => LitResourceAbilityRequestSchema)
+  // ),
   // which one do we need here?
-  sessionCapabilityObject: z.lazy(() => ISessionCapabilityObjectSchema),
+  // sessionCapabilityObject: z.lazy(() => ISessionCapabilityObjectSchema),
   // which one do we need here? TODO: ❗️ specify the type properly
-  siweResources: z.any(),
+  // siweResources: z.any(),
   authNeededCallback: z.function(),
-  capabilityAuthSigs: z.array(AuthSigSchema),
+  // capabilityAuthSigs: z.array(AuthSigSchema),
   authConfig: z.lazy(() => AuthConfigSchema),
 });
 
-export type AuthContext = z.infer<typeof AuthContextSchema>;
+export type PKPAuthContextSchema = z.infer<typeof PKPAuthContextSchema>;
+
 export const EoaAuthContextSchema = z.object({
   account: z.any(),
   authenticator: z.any(),
@@ -484,9 +484,9 @@ export const EoaAuthContextSchema = z.object({
   authConfig: z.lazy(() => AuthConfigSchema),
 });
 
-export const GenericAuthContextSchema = z.union([
-  AuthContextSchema,
-  EoaAuthContextSchema,
-]);
+// export const AllAuthContextSchema = z.union([
+//   PKPAuthContextSchema,
+//   EoaAuthContextSchema,
+// ]);
 
-export type GenericAuthContext = z.infer<typeof GenericAuthContextSchema>;
+// export type AllAuthContext = z.infer<typeof AllAuthContextSchema>;

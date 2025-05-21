@@ -14,17 +14,14 @@ import {
 } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  BaseProviderOptions,
   IRelay,
-  MintRequestBody,
-  WebAuthnProviderOptions,
+  MintRequestBody
 } from '@lit-protocol/types';
 
-import { BaseAuthenticateConfig, BaseAuthenticator } from './BaseAuthenticator';
-import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
-import { AuthMethodTypeStringMap } from '../types';
-import { z } from 'zod';
 import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
+import { AuthMethodTypeStringMap } from '../types';
+import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
 
 export type WebAuthnConfig = {
   pkpPublicKey: z.infer<typeof HexPrefixedSchema>;

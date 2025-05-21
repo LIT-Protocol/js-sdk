@@ -53,8 +53,13 @@ export const getEoaAuthContext = async (
 
   return {
     account: _params.authentication.account,
+
+    // @deprecated - use authData instead
     authenticator: _params.authentication.authenticator,
+
+    // @deprecated - use authData instead
     authMethod,
+    
     authNeededCallback: async () => {
       return params.authentication.authenticator.getAuthSig(toSign);
     },
