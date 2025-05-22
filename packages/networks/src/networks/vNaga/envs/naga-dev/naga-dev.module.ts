@@ -169,6 +169,7 @@ const nagaDevModuleObject = {
         body: {
           authMethodType: params.authData.authMethodType,
           authMethodId: params.authData.authMethodId,
+          pubkey: params.authData.webAuthnPublicKey,
         },
       });
     },

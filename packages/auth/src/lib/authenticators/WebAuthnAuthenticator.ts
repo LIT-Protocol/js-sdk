@@ -12,129 +12,125 @@ import {
   UnknownError,
   WrongParamFormat,
 } from '@lit-protocol/constants';
-import {
-  AuthMethod,
-  IRelay,
-  MintRequestBody
-} from '@lit-protocol/types';
+import { AuthMethod, Hex } from '@lit-protocol/types';
 
-import { HexPrefixedSchema } from '@lit-protocol/schemas';
-import { z } from 'zod';
-import { AuthMethodTypeStringMap } from '../types';
+import { AuthData } from '@lit-protocol/schemas';
 import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
 
-export type WebAuthnConfig = {
-  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
-  method: 'register' | 'authenticate';
+import { EthBlockhashInfo } from '@lit-protocol/types';
 
-  // register config
-  relay: IRelay;
-  username?: string;
-  rpName?: string;
-  customArgs?: MintRequestBody;
+const fetchBlockchainData = async () => {
+  try {
+    const resp = await fetch(
+      'https://block-indexer.litgateway.com/get_most_recent_valid_block'
+    );
+    if (!resp.ok) {
+      throw new Error(`Primary fetch failed with status: ${resp.status}`); // Or a custom error
+    }
+
+    const blockHashBody: EthBlockhashInfo = await resp.json();
+    const { blockhash, timestamp } = blockHashBody;
+
+    if (!blockhash || !timestamp) {
+      throw new Error('Invalid data from primary blockhash source');
+    }
+
+    return blockhash;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error(String(error));
+  }
 };
 
+interface WebAuthnRegistrationResponse {
+  opts: PublicKeyCredentialCreationOptionsJSON;
+  webAuthnPublicKey: string;
+}
+
 export class WebAuthnAuthenticator {
-  public static id = AuthMethodTypeStringMap.WebAuthn;
-
   /**
-   * Name of relying party. Defaults to "lit"
+   * Generate registration options for WebAuthn authentication
+   * @params {string} username - Optional username for the WebAuthn credential
+   * @params {string} authServerUrl - The URL of the authentication server
+   * @returns {Promise<PublicKeyCredentialCreationOptionsJSON>} - WebAuthn registration options
    */
-  public rpName?: string;
+  public static async getRegistrationOptions(params: {
+    username?: string;
+    authServerUrl: string;
+  }): Promise<PublicKeyCredentialCreationOptionsJSON> {
+    let url = `${params.authServerUrl}/auth/webauthn/generate-registration-options`;
 
-  constructor(public options: WebAuthnConfig) {
-    // super(options);
-    this.rpName = options.rpName || 'lit';
+    if (params.username && params.username !== '') {
+      url = `${url}?username=${encodeURIComponent(params.username)}`;
+    }
+
+    const response = await fetch(
+      url
+      //   {
+      //   method: 'GET',
+      //   headers: {
+      //     'api-key': params.apiKey,
+      //   },
+      // }
+    );
+    if (response.status < 200 || response.status >= 400) {
+      const err = new Error(
+        `Unable to generate registration options: ${response}`
+      );
+      throw err;
+    }
+
+    const registrationOptions = await response.json();
+    return registrationOptions;
   }
 
   /**
-   * Mint PKP with verified registration data
+   * Register a new WebAuthn credential
    *
-   * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options to pass to the authenticator
-   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
-   *
-   * @returns {Promise<string>} - Mint transaction hash
+   * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options from the server
+   * @returns {Promise<AuthData>} - Auth data containing the WebAuthn credential
    */
-  // username?: string,
-  // customArgs?: MintRequestBody
-  public static async register(params: WebAuthnConfig): Promise<string> {
-    const _rpName = params.rpName || 'lit';
-
-    const pubKeyCredOpts: PublicKeyCredentialCreationOptionsJSON =
-      await params.relay.generateRegistrationOptions(params.username);
+  public static async register(params: {
+    username?: string;
+    authServerUrl: string;
+  }): Promise<WebAuthnRegistrationResponse> {
+    const opts = await WebAuthnAuthenticator.getRegistrationOptions({
+      username: params.username,
+      authServerUrl: params.authServerUrl,
+    });
 
     // Submit registration options to the authenticator
     const { startRegistration } = await import('@simplewebauthn/browser');
-    const attResp: RegistrationResponseJSON = await startRegistration(
-      pubKeyCredOpts
-    );
-
-    // Create auth method
-    const authMethod = {
-      authMethodType: AUTH_METHOD_TYPE.WebAuthn,
-      accessToken: JSON.stringify(attResp),
-    };
-
-    // Get auth method id
-    const authMethodId = await WebAuthnAuthenticator.authMethodId(
-      authMethod,
-      _rpName
-    );
+    const attResp: RegistrationResponseJSON = await startRegistration(opts);
 
     // Get auth method pub key
     const authMethodPubkey =
       WebAuthnAuthenticator.getPublicKeyFromRegistration(attResp);
 
-    // Format args for relay server
-    const defaultArgs = {
-      keyType: 2,
-      permittedAuthMethodTypes: [AUTH_METHOD_TYPE.WebAuthn],
-      permittedAuthMethodIds: [authMethodId],
-      permittedAuthMethodPubkeys: [authMethodPubkey],
-      permittedAuthMethodScopes: [[ethers.BigNumber.from('1')]],
-      addPkpEthAddressAsPermittedAddress: true,
-      sendPkpToItself: true,
+    return {
+      webAuthnPublicKey: authMethodPubkey,
+      opts,
     };
-
-    const args = {
-      ...defaultArgs,
-      ...params.customArgs,
-    };
-
-    const body = JSON.stringify(args);
-
-    // Mint PKP
-    const mintRes = await params.relay.mintPKP(body);
-    if (!mintRes || !mintRes.requestId) {
-      throw new UnknownError(
-        {
-          info: {
-            mintRes,
-          },
-        },
-        'Missing mint response or request ID from relay server'
-      );
-    }
-
-    return mintRes.requestId;
   }
 
   /**
    * Authenticate with a WebAuthn credential and return the relevant authentication data
    *
-   * @param {any} [options] - Optional configuration (not used by WebAuthn directly, but allows consistent calling)
-   * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
+   * @param {string} params.authServerUrl - The URL of the authentication server
+   * @returns {Promise<AuthData>} - Auth data containing WebAuthn authentication response
    */
-  public static async authenticate(
-    params: WebAuthnConfig & { nonce: string }
-  ): Promise<AuthMethod> {
-    const nonce = params.nonce;
-
+  public static async authenticate(params: {
+    registrationResponse: WebAuthnRegistrationResponse;
+    authServerUrl: string;
+  }): Promise<AuthData> {
     // Turn into byte array
-    const blockHashBytes = ethers.utils.arrayify(nonce);
+    const latestBlockhash = await fetchBlockchainData();
+    const blockHashBytes = ethers.utils.arrayify(latestBlockhash);
 
     // Construct authentication options
-    const rpId = getRPIdFromOrigin(window.location.origin);
+    const rpId = getRPIdFromOrigin(params.authServerUrl);
 
     const authenticationOptions = {
       challenge: base64url(Buffer.from(blockHashBytes)),
@@ -165,7 +161,19 @@ export class WebAuthnAuthenticator {
       accessToken: JSON.stringify(actualAuthenticationResponse),
     };
 
-    return authMethod;
+    // Get auth method id (using default rpName 'lit')
+    const authMethodId = await WebAuthnAuthenticator.authMethodId(authMethod);
+
+    // It's incorrect to try and get the registration public key from an authentication response.
+    // The public key is obtained during the registration process (from attestationObject).
+    // If the public key is needed after authentication, it should be retrieved from where it was stored
+    // after the initial registration, not re-extracted from the authentication response here.
+
+    return {
+      ...authMethod,
+      authMethodId,
+      webAuthnPublicKey: params.registrationResponse.webAuthnPublicKey,
+    };
   }
 
   /**
@@ -173,13 +181,10 @@ export class WebAuthnAuthenticator {
    * PKPs associated with the given auth method
    *
    * @param {AuthMethod} authMethod - Auth method object
+   * @param {string} rpName - Optional relying party name, defaults to "lit"
    *
-   * @returns {Promise<string>} - Auth method id
+   * @returns {Promise<Hex>} - Auth method id
    */
-  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    return WebAuthnAuthenticator.authMethodId(authMethod, this.rpName);
-  }
-
   public static async authMethodId(
     authMethod: AuthMethod,
     rpName?: string
@@ -228,13 +233,30 @@ export class WebAuthnAuthenticator {
       );
 
       // Parse the buffer to reconstruct the object
-      // Buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
-      const authenticationResponse = parseAuthenticatorData(attestationBuffer);
+      let authenticationResponse = parseAuthenticatorData(attestationBuffer);
+
+      // Normalize the authenticationResponse. If it (or its parts) has a .toJSON() method,
+      // JSON.stringify will use that. JSON.parse will then create a plain object.
+      try {
+        authenticationResponse = JSON.parse(
+          JSON.stringify(authenticationResponse)
+        );
+      } catch (stringifyParseError) {
+        // If this fails, we might proceed with a complex object, and existing errors might persist.
+        // Consider re-throwing or more robust error handling if this step is critical.
+        // For now, we'll let it proceed and the assertion might catch it.
+        console.error(
+          '[WebAuthnAuthenticator] Error during JSON.parse(JSON.stringify(authenticationResponse)) - proceeding with original object:',
+          stringifyParseError
+        );
+      }
+
       assertAuthenticationResponse(authenticationResponse);
 
       // Public key in cose format to register the auth method
-      const publicKeyCoseBuffer: Buffer = authenticationResponse
-        .attestedCredentialData.credentialPublicKey as Buffer;
+      const publicKeyCoseBuffer: Buffer = Buffer.from(
+        authenticationResponse.attestedCredentialData.credentialPublicKey.data
+      );
 
       // Encode the public key for contract storage
       publicKey = ethers.utils.hexlify(
@@ -253,37 +275,81 @@ export class WebAuthnAuthenticator {
   }
 }
 
+interface ParsedBufferRepresentation {
+  type: 'Buffer';
+  data: number[];
+}
+
+interface AttestedCredentialDataWithParsedPublicKey {
+  credentialPublicKey: ParsedBufferRepresentation;
+  [key: string]: any;
+}
+
+interface AuthenticationResponseWithParsedData {
+  attestedCredentialData: AttestedCredentialDataWithParsedPublicKey;
+  [key: string]: any;
+}
+
 function assertAuthenticationResponse(
   authenticationResponse: unknown
-): asserts authenticationResponse is {
-  attestedCredentialData: {
-    credentialPublicKey: Buffer;
-  };
-} {
-  /* eslint-disable @typescript-eslint/no-explicit-any */
+): asserts authenticationResponse is AuthenticationResponseWithParsedData {
   if (
     typeof authenticationResponse !== 'object' ||
-    authenticationResponse === null ||
-    !('attestedCredentialData' in authenticationResponse) ||
-    typeof (authenticationResponse as any).attestedCredentialData !==
-      'object' ||
-    (authenticationResponse as any).attestedCredentialData === null ||
-    !(
-      'credentialPublicKey' in
-      (authenticationResponse as any).attestedCredentialData
-    ) ||
-    !(
-      (authenticationResponse as any).attestedCredentialData
-        .credentialPublicKey instanceof Buffer
-    )
+    authenticationResponse === null
+  ) {
+    throw new InvalidArgumentException(
+      { info: { authenticationResponse } },
+      'authenticationResponse must be an object and not null'
+    );
+  }
+
+  const ar = authenticationResponse as any;
+  if (
+    !('attestedCredentialData' in ar) ||
+    typeof ar.attestedCredentialData !== 'object' ||
+    ar.attestedCredentialData === null
+  ) {
+    throw new InvalidArgumentException(
+      { info: { authenticationResponse } },
+      'attestedCredentialData is missing, not an object, or null'
+    );
+  }
+
+  const acd = ar.attestedCredentialData;
+  if (
+    !('credentialPublicKey' in acd) ||
+    typeof acd.credentialPublicKey !== 'object' ||
+    acd.credentialPublicKey === null
+  ) {
+    throw new InvalidArgumentException(
+      { info: { authenticationResponse } },
+      'credentialPublicKey is missing, not an object, or null'
+    );
+  }
+
+  const cpk = acd.credentialPublicKey;
+
+  let dataElementsAreNumbers = false;
+  if (Array.isArray(cpk.data)) {
+    dataElementsAreNumbers = cpk.data.every((n: any) => typeof n === 'number');
+  }
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  if (
+    cpk.type !== 'Buffer' ||
+    !Array.isArray(cpk.data) ||
+    !dataElementsAreNumbers
   ) {
     throw new InvalidArgumentException(
       {
         info: {
           authenticationResponse,
+          cpk_type: cpk.type,
+          cpk_data_isArray: Array.isArray(cpk.data),
+          cpk_data_elements_are_numbers: dataElementsAreNumbers,
         },
       },
-      'authenticationResponse does not match the expected structure: { attestedCredentialData: { credentialPublicKey: Buffer } }'
+      'authenticationResponse does not match the expected structure: { attestedCredentialData: { credentialPublicKey: { type: "Buffer", data: number[] } } }'
     );
   }
   /* eslint-enable @typescript-eslint/no-explicit-any */

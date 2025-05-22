@@ -8,11 +8,10 @@ import { getChildLogger } from '@lit-protocol/logger';
 import { AuthMethod, AuthSig } from '@lit-protocol/types';
 import { GetWalletClientReturnType } from '@wagmi/core';
 import {
-  Account,
   getAddress,
   keccak256,
   stringToBytes,
-  WalletClient,
+  WalletClient
 } from 'viem';
 
 const _logger = getChildLogger({

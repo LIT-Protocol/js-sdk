@@ -11,6 +11,7 @@ export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
   authMethodType: AuthMethodSchema.shape.authMethodType,
   accessToken: AuthMethodSchema.shape.accessToken,
+  webAuthnPublicKey: HexPrefixedSchema.optional(),
 });
 
 export type AuthData = z.infer<typeof AuthDataSchema>;

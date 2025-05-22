@@ -3,7 +3,7 @@
 import * as authenticators from './lib/authenticators';
 import { GoogleAuthenticator } from './lib/authenticators/GoogleAuthenticator';
 import { DiscordAuthenticator } from './lib/authenticators/DiscordAuthenticator';
-import { LitRelay } from './lib/authenticators';
+import { LitRelay, WebAuthnAuthenticator } from './lib/authenticators';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
 import { localStorage, localStorageNode } from './lib/storage';
 import type { LitAuthStorageProvider } from './lib/storage/types';
@@ -84,4 +84,4 @@ export { getAuthIdByAuthMethod } from './lib/authenticators/utils';
 export { generateSessionKeyPair } from './lib/AuthManager/utils/generateSessionKeyPair';
 
 // ============================== Authenticators ==============================
-export { GoogleAuthenticator, DiscordAuthenticator };
+export { GoogleAuthenticator, DiscordAuthenticator, WebAuthnAuthenticator };
