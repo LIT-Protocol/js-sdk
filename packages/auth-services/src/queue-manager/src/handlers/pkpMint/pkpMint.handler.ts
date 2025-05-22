@@ -12,8 +12,9 @@ export async function handlePkpMintTask(jobData: {
     pubkey: Hex;
   };
 }): Promise<any> {
-  const result = await globalThis.systemContext.litClient.mintPkp({
-    authContext: await globalThis.systemContext.createEoaAuthContext(),
+  const result = await globalThis.systemContext.litClient.mintWithAuth({
+    account: globalThis.systemContext.account,
+    authData: globalThis.systemContext.authData,
     scopes: ['sign-anything'],
     overwrites: {
       authMethodType: Number(jobData.requestBody.authMethodType),
@@ -27,7 +28,7 @@ export async function handlePkpMintTask(jobData: {
   );
 
   const processedResult = {
-    hash: result.hash,
+    hash: result._raw.hash,
     data: {
       ...result.data,
       tokenId: result.data.tokenId.toString(),

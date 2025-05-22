@@ -1,10 +1,8 @@
-import { DOCS, version } from '@lit-protocol/constants';
+import { version } from '@lit-protocol/constants';
 import {
   AuthData,
-  EoaAuthContextSchema,
   HexPrefixedSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
-  PKPAuthContextSchema,
 } from '@lit-protocol/schemas';
 import { Hex } from 'viem';
 
@@ -22,6 +20,7 @@ import {
   mostCommonString,
   normalizeAndStringify,
 } from '@lit-protocol/crypto';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthMethod,
   AuthSig,
@@ -32,6 +31,8 @@ import { computeAddress } from 'ethers/lib/utils';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
+import { PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
+import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import type { GenericTxRes, LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
@@ -50,7 +51,6 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
-import { getChildLogger } from '@lit-protocol/logger';
 
 const _logger = getChildLogger({
   module: 'naga-dev-module',
@@ -100,6 +100,15 @@ const nagaDevModuleObject = {
   getMaxPricesForNodeProduct: getMaxPricesForNodeProduct,
   getUserMaxPrice: getUserMaxPrice,
   chainApi: {
+    getPKPPermissionsManager: async (params: {
+      pkpIdentifier: PkpIdentifierRaw;
+      account: ExpectedAccountOrWalletClient;
+    }): Promise<PKPPermissionsManager> => {
+      const chainManager = createChainManager(params.account);
+
+      return chainManager.api.pkpPermissionsManager(params.pkpIdentifier);
+    },
+
     /**
      * Mints a PKP using EOA directly
      */
@@ -123,27 +132,52 @@ const nagaDevModuleObject = {
       account: ExpectedAccountOrWalletClient;
       authData: AuthData;
       scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+
+      /**
+       * 👋 This overwrites is used by the auth service to mint a PKP with a specific auth method
+       * that user sent over the wire. Normies usually don't need this, unless you are creating your own
+       * auth service provider.
+       */
+      overwrites?: {
+        authMethodType?: number;
+        authMethodId?: string;
+        pubkey?: string;
+      };
     }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
       const chainManager = createChainManager(params.account);
 
-      const authMethod = {
-        authMethodType: params.authData.authMethodType,
-        accessToken: params.authData.accessToken,
-      };
+      if (params.overwrites) {
+        const res = await chainManager.api.mintPKP({
+          scopes: params.scopes,
+          // authMethod: authMethod,
+          authMethodId: params.authData.authMethodId,
+          authMethodType: params.authData.authMethodType,
+          pubkey: params.overwrites.pubkey,
+        });
 
-      const res = await chainManager.api.mintPKP({
-        scopes: params.scopes,
-        authMethod: authMethod,
-        authMethodId: params.authData.authMethodId,
-        authMethodType: params.authData.authMethodType,
-        pubkey: params.authData.webAuthnPublicKey,
-      });
-
-      return {
-        _raw: res,
-        txHash: res.hash,
-        data: res.data,
-      };
+        return {
+          _raw: res,
+          txHash: res.hash,
+          data: res.data,
+        };
+      } else {
+        const authMethod = {
+          authMethodType: params.authData.authMethodType,
+          accessToken: params.authData.accessToken,
+        };
+        const res = await chainManager.api.mintPKP({
+          scopes: params.scopes,
+          // authMethod: authMethod,
+          authMethodId: params.authData.authMethodId,
+          authMethodType: params.authData.authMethodType,
+          pubkey: params.authData.webAuthnPublicKey,
+        });
+        return {
+          _raw: res,
+          txHash: res.hash,
+          data: res.data,
+        };
+      }
     },
   },
   authService: {

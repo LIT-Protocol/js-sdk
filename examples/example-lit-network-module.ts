@@ -34,21 +34,41 @@ import { privateKeyToAccount } from 'viem/accounts';
   console.log('✅ authData:', authData);
 
   // 3a. Mint a PKP using your account. This is then owned by the account
-  // You will need to manually add permissions to the PKP before it can be used.
-  const mintedPkpWithEoa = await litClient.mintWithEoa({
+  // ❗️ You will need to manually add permissions to the PKP before it can be used.
+  // const mintedPkpWithEoa = await litClient.mintWithEoa({
+  //   account: myAccount,
+  // });
+
+  // console.log('✅ mintedPkpWithEoa:', mintedPkpWithEoa);
+
+  const pkpPermissionsManager = await litClient.getPKPPermissionsManager({
+    pkpIdentifier: {
+      tokenId:
+        '19085041157665114725857884366388574531491480918527872268705580135992933734627n',
+    },
     account: myAccount,
   });
 
-  console.log('✅ mintedPkpWithEoa:', mintedPkpWithEoa);
+  // const permissionsContext =
+  //   await pkpPermissionsManager.getPermissionsContext();
+
+  // console.log('✅ permissionsContext:', permissionsContext);
+
+  const res = await litClient.viewPKPPermissions({
+    tokenId:
+      '41187770417421875121552130823362000593146214289881199183393062900874327880950',
+  });
+
+  console.log('✅ viewPKPPermissions:', res);
 
   // 3b. Minting a PKP with EOA Auth Method. This is then owned by the auth method
-  const mintedPkpWithEoaAuth = await litClient.mintWithAuth({
-    account: myAccount,
-    authData: authData,
-    scopes: ['sign-anything'],
-  });
+  // const mintedPkpWithEoaAuth = await litClient.mintWithAuth({
+  //   account: myAccount,
+  //   authData: authData,
+  //   scopes: ['sign-anything'],
+  // });
 
-  console.log('✅ mintedPkpWithEoaAuth:', mintedPkpWithEoaAuth);
+  // console.log('✅ mintedPkpWithEoaAuth:', mintedPkpWithEoaAuth);
 
   // 4. You can also use the auth service to mint a PKP, just like any other auths
 

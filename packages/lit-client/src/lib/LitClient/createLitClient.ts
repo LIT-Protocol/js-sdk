@@ -12,6 +12,8 @@ import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
 import { getChildLogger } from '@lit-protocol/logger';
+import { PkpIdentifierRaw } from 'packages/networks/src/networks/vNaga/LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
+import { privateKeyToAccount } from 'viem/accounts';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -189,6 +191,28 @@ export const _createNagaLitClient = async (
     },
     disconnect: _stateManager.stop,
     mintWithEoa: networkModule.chainApi.mintWithEoa,
+    getPKPPermissionsManager: networkModule.chainApi.getPKPPermissionsManager,
+    viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
+      // It's an Anvil private key, chill. 🤣
+      const account = privateKeyToAccount(
+        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+      );
+
+      const pkpPermissionsManager =
+        await networkModule.chainApi.getPKPPermissionsManager({
+          pkpIdentifier,
+          account,
+        });
+
+      let permissionsContext =
+        await pkpPermissionsManager.getPermissionsContext();
+
+      return {
+        actions: permissionsContext.actions,
+        addresses: permissionsContext.addresses,
+        authMethods: permissionsContext.authMethods,
+      };
+    },
     mintWithAuth: networkModule.chainApi.mintWithAuth,
     authService: {
       mintWithAuth: networkModule.authService.pkpMint,

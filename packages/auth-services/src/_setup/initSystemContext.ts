@@ -3,6 +3,7 @@ import { createLitClient } from '@lit-protocol/lit-client';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { env } from './env';
+import { AuthData } from '@lit-protocol/schemas';
 
 declare global {
   var systemContext: {
@@ -10,6 +11,7 @@ declare global {
     account: Awaited<ReturnType<typeof privateKeyToAccount>>;
     authManager: Awaited<ReturnType<typeof createAuthManager>>;
     createEoaAuthContext: any;
+    authData: AuthData;
   };
 }
 
@@ -40,6 +42,10 @@ export async function initSystemContext({ appName }: { appName: string }) {
     }),
   });
 
+  const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
+
+  const authData = await ViemAccountAuthenticator.authenticate(account);
+
   globalThis.systemContext = {
     litClient: litClient,
     account: account,
@@ -59,6 +65,7 @@ export async function initSystemContext({ appName }: { appName: string }) {
         litClient: litClient,
       });
     },
+    authData,
   };
   console.log('🔥 [initSystemContext] System context initialized');
 }

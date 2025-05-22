@@ -8,7 +8,7 @@ import { ScopeSchemaRaw } from '../../../schemas/shared/ScopeSchema';
 
 export const MintPKPSchema = z
   .object({
-    authMethod: AuthMethodSchema,
+    // authMethod: AuthMethodSchema,
     authMethodId: HexPrefixedSchema,
     authMethodType: z.number(),
     scopes: z.array(ScopeSchemaRaw),
