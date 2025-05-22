@@ -204,13 +204,13 @@ export const _createNagaLitClient = async (
           account,
         });
 
-      let permissionsContext =
+      const { actions, addresses, authMethods } =
         await pkpPermissionsManager.getPermissionsContext();
 
       return {
-        actions: permissionsContext.actions,
-        addresses: permissionsContext.addresses,
-        authMethods: permissionsContext.authMethods,
+        actions,
+        addresses,
+        authMethods,
       };
     },
     mintWithAuth: networkModule.chainApi.mintWithAuth,

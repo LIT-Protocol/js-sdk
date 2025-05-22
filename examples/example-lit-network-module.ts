@@ -1,5 +1,4 @@
 import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
-import { createAuthConfigBuilder } from '@lit-protocol/auth-helpers';
 import { createLitClient } from '@lit-protocol/lit-client';
 import { privateKeyToAccount } from 'viem/accounts';
 
@@ -16,6 +15,9 @@ import { privateKeyToAccount } from 'viem/accounts';
   const myAccount = privateKeyToAccount(
     process.env.PRIVATE_KEY as `0x${string}`
   );
+
+  const accountAddress = myAccount.address;
+  console.log('🔥 accountAddress:', accountAddress);
 
   // Step 2: Import and choose the Lit network to connect to
   // const { nagaDev } = await import('@lit-protocol/networks');
@@ -41,13 +43,13 @@ import { privateKeyToAccount } from 'viem/accounts';
 
   // console.log('✅ mintedPkpWithEoa:', mintedPkpWithEoa);
 
-  const pkpPermissionsManager = await litClient.getPKPPermissionsManager({
-    pkpIdentifier: {
-      tokenId:
-        '19085041157665114725857884366388574531491480918527872268705580135992933734627n',
-    },
-    account: myAccount,
-  });
+  // const pkpPermissionsManager = await litClient.getPKPPermissionsManager({
+  //   pkpIdentifier: {
+  //     tokenId:
+  //       '19085041157665114725857884366388574531491480918527872268705580135992933734627n',
+  //   },
+  //   account: myAccount,
+  // });
 
   // const permissionsContext =
   //   await pkpPermissionsManager.getPermissionsContext();
@@ -56,7 +58,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 
   const res = await litClient.viewPKPPermissions({
     tokenId:
-      '41187770417421875121552130823362000593146214289881199183393062900874327880950',
+      '88433575961444214305788192241948774655153841244103756866583908638207006919428',
   });
 
   console.log('✅ viewPKPPermissions:', res);

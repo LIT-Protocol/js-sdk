@@ -1,9 +1,7 @@
-import { getAuthIdByAuthMethod } from '@lit-protocol/auth';
 import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { HexPrefixedSchema } from '@lit-protocol/schemas';
-import { Hex, isHex, toBytes, toHex } from 'viem';
+import { Hex } from 'viem';
 import { z } from 'zod';
-import { AuthMethodSchema } from '../../../schemas/shared/AuthMethodSchema';
 import { ScopeSchemaRaw } from '../../../schemas/shared/ScopeSchema';
 
 export const MintPKPSchema = z

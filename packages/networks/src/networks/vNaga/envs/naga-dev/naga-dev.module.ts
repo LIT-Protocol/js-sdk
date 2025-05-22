@@ -25,6 +25,7 @@ import {
   AuthMethod,
   AuthSig,
   CallbackParams,
+  Optional,
   RequestItem,
 } from '@lit-protocol/types';
 import { computeAddress } from 'ethers/lib/utils';
@@ -130,54 +131,23 @@ const nagaDevModuleObject = {
      */
     mintWithAuth: async (params: {
       account: ExpectedAccountOrWalletClient;
-      authData: AuthData;
+      authData: Optional<AuthData, 'accessToken'>;
       scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
-
-      /**
-       * 👋 This overwrites is used by the auth service to mint a PKP with a specific auth method
-       * that user sent over the wire. Normies usually don't need this, unless you are creating your own
-       * auth service provider.
-       */
-      overwrites?: {
-        authMethodType?: number;
-        authMethodId?: string;
-        pubkey?: string;
-      };
     }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
       const chainManager = createChainManager(params.account);
 
-      if (params.overwrites) {
-        const res = await chainManager.api.mintPKP({
-          scopes: params.scopes,
-          // authMethod: authMethod,
-          authMethodId: params.authData.authMethodId,
-          authMethodType: params.authData.authMethodType,
-          pubkey: params.overwrites.pubkey,
-        });
-
-        return {
-          _raw: res,
-          txHash: res.hash,
-          data: res.data,
-        };
-      } else {
-        const authMethod = {
-          authMethodType: params.authData.authMethodType,
-          accessToken: params.authData.accessToken,
-        };
-        const res = await chainManager.api.mintPKP({
-          scopes: params.scopes,
-          // authMethod: authMethod,
-          authMethodId: params.authData.authMethodId,
-          authMethodType: params.authData.authMethodType,
-          pubkey: params.authData.webAuthnPublicKey,
-        });
-        return {
-          _raw: res,
-          txHash: res.hash,
-          data: res.data,
-        };
-      }
+      const res = await chainManager.api.mintPKP({
+        scopes: params.scopes,
+        // authMethod: authMethod,
+        authMethodId: params.authData.authMethodId,
+        authMethodType: params.authData.authMethodType,
+        pubkey: params.authData.publicKey,
+      });
+      return {
+        _raw: res,
+        txHash: res.hash,
+        data: res.data,
+      };
     },
   },
   authService: {
@@ -192,7 +162,7 @@ const nagaDevModuleObject = {
         body: {
           authMethodType: params.authData.authMethodType,
           authMethodId: params.authData.authMethodId,
-          pubkey: params.authData.webAuthnPublicKey,
+          pubkey: params.authData.publicKey,
         },
       });
     },

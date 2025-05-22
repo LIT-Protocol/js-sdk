@@ -30,12 +30,39 @@ import type {
   SolAcc,
 } from '@lit-protocol/access-control-conditions-schemas';
 
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
 export {
   DefinedJson,
   DefinedLiteral,
   Json,
   Literal,
 } from '@lit-protocol/schemas';
+export interface JobStatusResponse {
+  jobId: string;
+  name: string;
+  state:
+    | 'pending'
+    | 'active'
+    | 'completed'
+    | 'failed'
+    | 'delayed'
+    | 'waiting'
+    | 'error'
+    | 'unknown'; // Added 'error' based on potential states
+  progress: number;
+  timestamp: number;
+  processedOn?: number;
+  finishedOn?: number;
+  returnValue?: any;
+  error?: any; // To capture any error messages from the job itself
+}
+
+export type AuthServerTx<T> = {
+  _raw: JobStatusResponse;
+  txHash: string;
+  data: T;
+};
 
 // Zod only derives string, not giving real type safety over it
 export type Hex = `0x${string}`; // z.infer<typeof HexSchema>;

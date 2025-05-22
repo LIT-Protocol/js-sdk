@@ -1,10 +1,5 @@
-import { JobStatusResponse, pollResponse } from './pollResponse';
-
-export type AuthServerTx<T> = {
-  _raw: JobStatusResponse;
-  txHash: string;
-  data: T;
-};
+import { AuthServerTx, JobStatusResponse } from '@lit-protocol/types';
+import { pollResponse } from './pollResponse';
 
 export const handleAuthServerRequest = async <T>(params: {
   serverUrl: string;

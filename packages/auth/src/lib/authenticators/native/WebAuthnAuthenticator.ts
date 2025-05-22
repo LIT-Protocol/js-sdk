@@ -12,12 +12,14 @@ import {
   UnknownError,
   WrongParamFormat,
 } from '@lit-protocol/constants';
-import { AuthMethod, Hex } from '@lit-protocol/types';
+import { AuthMethod, AuthServerTx, Hex } from '@lit-protocol/types';
 
-import { AuthData } from '@lit-protocol/schemas';
+import { AuthData, PKPData } from '@lit-protocol/schemas';
 import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 
 import { EthBlockhashInfo } from '@lit-protocol/types';
+import { pollResponse } from '../helper/pollResponse';
+import { JobStatusResponse } from '../types';
 
 const fetchBlockchainData = async () => {
   try {
@@ -46,8 +48,60 @@ const fetchBlockchainData = async () => {
 
 interface WebAuthnRegistrationResponse {
   opts: PublicKeyCredentialCreationOptionsJSON;
-  webAuthnPublicKey: string;
+  publicKey: string;
 }
+
+const handleAuthServerRequest = async <T>(params: {
+  serverUrl: string;
+  path: '/pkp/mint';
+  body: any;
+  jobName: string;
+}): Promise<AuthServerTx<T>> => {
+  const _body = JSON.stringify(params.body);
+  const _url = `${params.serverUrl}${params.path}`;
+
+  const res = await fetch(_url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: _body,
+  });
+
+  if (res.status === 202) {
+    const { jobId, message } = await res.json();
+    console.log('[Server Response] message:', message);
+
+    const statusUrl = `${params.serverUrl}/status/${jobId}`;
+
+    try {
+      const completedJobStatus = await pollResponse<JobStatusResponse>({
+        url: statusUrl,
+        isCompleteCondition: (response) => response.state === 'completed',
+        isErrorCondition: (response) =>
+          response.state === 'failed' || response.state === 'error',
+        intervalMs: 3000,
+        maxRetries: 10,
+        errorMessageContext: `${params.jobName} Job ${jobId}`,
+      });
+
+      return {
+        _raw: completedJobStatus,
+        txHash: completedJobStatus.returnValue.hash,
+        data: completedJobStatus.returnValue.data,
+      };
+    } catch (error: any) {
+      console.error(`Error during ${params.jobName} polling:`, error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to ${params.jobName} after polling: ${errMsg}`);
+    }
+  } else {
+    const errorBody = await res.text();
+    throw new Error(
+      `Failed to initiate ${params.jobName}. Status: ${res.status}, Body: ${errorBody}`
+    );
+  }
+};
 
 export class WebAuthnAuthenticator {
   /**
@@ -87,15 +141,20 @@ export class WebAuthnAuthenticator {
   }
 
   /**
-   * Register a new WebAuthn credential
+   * Register a new WebAuthn credential & mint a new PKP via the auth server
    *
    * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options from the server
    * @returns {Promise<AuthData>} - Auth data containing the WebAuthn credential
    */
-  public static async register(params: {
+  public static async registerAndMintPKP(params: {
     username?: string;
     authServerUrl: string;
-  }): Promise<WebAuthnRegistrationResponse> {
+  }): Promise<{
+    pkpInfo: PKPData;
+
+    // This is returned in case if you want to craft an authData to mint a PKP via the minWithAuth method
+    webAuthnPublicKey: string;
+  }> {
     const opts = await WebAuthnAuthenticator.getRegistrationOptions({
       username: params.username,
       authServerUrl: params.authServerUrl,
@@ -109,9 +168,34 @@ export class WebAuthnAuthenticator {
     const authMethodPubkey =
       WebAuthnAuthenticator.getPublicKeyFromRegistration(attResp);
 
+    const authMethodId = await WebAuthnAuthenticator.authMethodId({
+      authMethodType: AUTH_METHOD_TYPE.WebAuthn,
+      accessToken: JSON.stringify(attResp),
+    });
+
+    // We could store the public key and look it up by the credential ID (rawId),
+    // but since users registering a WebAuthn credential typically want to mint a PKP to associate with it,
+    // we might as well do that here. 😊
+    // We can implement the alternative approach later if needed.
+    // localStorage.setItem(attResp.rawId, authMethodPubkey);
+
+    const authData = {
+      authMethodType: AUTH_METHOD_TYPE.WebAuthn,
+      authMethodId: authMethodId,
+      pubkey: authMethodPubkey,
+    };
+
+    // Immediate mint a new PKP to associate with the auth method
+    const pkpInfo = await handleAuthServerRequest<PKPData>({
+      jobName: 'PKP Minting',
+      serverUrl: params.authServerUrl,
+      path: '/pkp/mint',
+      body: authData,
+    });
+
     return {
+      pkpInfo: pkpInfo.data,
       webAuthnPublicKey: authMethodPubkey,
-      opts,
     };
   }
 
@@ -121,16 +205,13 @@ export class WebAuthnAuthenticator {
    * @param {string} params.authServerUrl - The URL of the authentication server
    * @returns {Promise<AuthData>} - Auth data containing WebAuthn authentication response
    */
-  public static async authenticate(params: {
-    registrationResponse: WebAuthnRegistrationResponse;
-    authServerUrl: string;
-  }): Promise<AuthData> {
+  public static async authenticate(): Promise<AuthData> {
     // Turn into byte array
     const latestBlockhash = await fetchBlockchainData();
     const blockHashBytes = ethers.utils.arrayify(latestBlockhash);
 
     // Construct authentication options
-    const rpId = getRPIdFromOrigin(params.authServerUrl);
+    const rpId = getRPIdFromOrigin(window.location.origin);
 
     const authenticationOptions = {
       challenge: base64url(Buffer.from(blockHashBytes)),
@@ -164,15 +245,9 @@ export class WebAuthnAuthenticator {
     // Get auth method id (using default rpName 'lit')
     const authMethodId = await WebAuthnAuthenticator.authMethodId(authMethod);
 
-    // It's incorrect to try and get the registration public key from an authentication response.
-    // The public key is obtained during the registration process (from attestationObject).
-    // If the public key is needed after authentication, it should be retrieved from where it was stored
-    // after the initial registration, not re-extracted from the authentication response here.
-
     return {
       ...authMethod,
       authMethodId,
-      webAuthnPublicKey: params.registrationResponse.webAuthnPublicKey,
     };
   }
 

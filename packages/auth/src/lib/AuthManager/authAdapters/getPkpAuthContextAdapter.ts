@@ -1,4 +1,4 @@
-import { PRODUCT_IDS } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE_VALUES, PRODUCT_IDS } from '@lit-protocol/constants';
 import {
   AuthData,
   HexPrefixedSchema,
@@ -66,7 +66,7 @@ export async function getPkpAuthContextAdapter(
     storage: upstreamParams.storage,
     address: pkpAddress,
     expiration: params.authConfig.expiration,
-    type: params.authData.authMethodType,
+    type: params.authData.authMethodType as AUTH_METHOD_TYPE_VALUES,
   });
 
   return getPkpAuthContext({

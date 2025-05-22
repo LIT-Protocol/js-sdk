@@ -1,3 +1,5 @@
+import { AuthData } from '@lit-protocol/schemas';
+import { Optional } from '@lit-protocol/types';
 import { Hex } from 'viem';
 
 /**
@@ -12,15 +14,16 @@ export async function handlePkpMintTask(jobData: {
     pubkey: Hex;
   };
 }): Promise<any> {
+  const userAuthData: Optional<AuthData, 'accessToken'> = {
+    authMethodId: jobData.requestBody.authMethodId,
+    authMethodType: Number(jobData.requestBody.authMethodType),
+    publicKey: jobData.requestBody.pubkey,
+  };
+
   const result = await globalThis.systemContext.litClient.mintWithAuth({
     account: globalThis.systemContext.account,
-    authData: globalThis.systemContext.authData,
+    authData: userAuthData,
     scopes: ['sign-anything'],
-    overwrites: {
-      authMethodType: Number(jobData.requestBody.authMethodType),
-      authMethodId: jobData.requestBody.authMethodId,
-      pubkey: jobData.requestBody.pubkey,
-    },
   });
 
   console.log(

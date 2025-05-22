@@ -9,9 +9,9 @@ import {
 
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
-  authMethodType: AuthMethodSchema.shape.authMethodType,
+  authMethodType: z.union([AuthMethodSchema.shape.authMethodType, z.number()]),
   accessToken: AuthMethodSchema.shape.accessToken,
-  webAuthnPublicKey: HexPrefixedSchema.optional(),
+  publicKey: HexPrefixedSchema.optional(),
 });
 
 export type AuthData = z.infer<typeof AuthDataSchema>;
