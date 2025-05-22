@@ -11,6 +11,11 @@ import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schem
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  module: 'createLitClient',
+});
 
 type AnyNetworkModule = NagaNetworkModule | DatilNetworkModule;
 
@@ -69,7 +74,7 @@ export const _createNagaLitClient = async (
   async function _pkpSign(
     params: z.infer<typeof networkModule.api.pkpSign.schemas.Input.raw>
   ) {
-    console.log(`🔥 signing on ${params.chain} with ${params.signingScheme}`);
+    _logger.info(`🔥 signing on ${params.chain} with ${params.signingScheme}`);
 
     // 🟩 get the fresh handshake results
     const currentHandshakeResult = _stateManager.getCallbackResult();
