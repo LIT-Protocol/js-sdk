@@ -8,52 +8,17 @@ import { ScopeSchemaRaw } from '../../../schemas/shared/ScopeSchema';
 
 export const MintPKPSchema = z
   .object({
-    authMethod: AuthMethodSchema.optional(),
-    authMethodId: HexPrefixedSchema.optional(),
-    authMethodType: z.number().optional(),
+    authMethod: AuthMethodSchema,
+    authMethodId: HexPrefixedSchema,
+    authMethodType: z.number(),
     scopes: z.array(ScopeSchemaRaw),
     pubkey: HexPrefixedSchema.optional(),
-    customAuthMethodId: z.string().optional(),
   })
   .transform(async (data) => {
-    let derivedAuthMethodId: Hex | string | undefined = data.authMethodId;
-    let derivedAuthMethodType: number | undefined = data.authMethodType;
     let derivedPubkey: Hex | undefined;
 
-    // 1. Determine authMethodType
-    if (data.authMethod && typeof derivedAuthMethodType === 'undefined') {
-      derivedAuthMethodType = data.authMethod.authMethodType;
-    }
-
-    // Ensure authMethodType is present
-    if (typeof derivedAuthMethodType === 'undefined') {
-      throw new Error(
-        'authMethodType is required, either directly or via authMethod'
-      );
-    }
-
-    // 2. Determine authMethodId
-    if (typeof derivedAuthMethodId === 'undefined') {
-      if (data.customAuthMethodId) {
-        if (isHex(data.customAuthMethodId)) {
-          derivedAuthMethodId = data.customAuthMethodId;
-        } else {
-          derivedAuthMethodId = toHex(toBytes(data.customAuthMethodId));
-        }
-      } else if (data.authMethod) {
-        derivedAuthMethodId = await getAuthIdByAuthMethod(data.authMethod);
-      }
-    }
-
-    // Ensure authMethodId is present
-    if (typeof derivedAuthMethodId === 'undefined') {
-      throw new Error(
-        'authMethodId is required, either directly, via customAuthMethodId, or via authMethod'
-      );
-    }
-
-    // 3. Determine pubkey based on the (potentially derived) authMethodType
-    if (derivedAuthMethodType === AUTH_METHOD_TYPE.WebAuthn) {
+    // Determine pubkey based on the (potentially derived) authMethodType
+    if (data.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
       if (!data.pubkey) {
         throw new Error('pubkey is required for WebAuthn');
       }
@@ -71,8 +36,8 @@ export const MintPKPSchema = z
     // Return data with resolved/derived values
     return {
       ...data,
-      authMethodId: derivedAuthMethodId,
-      authMethodType: derivedAuthMethodType,
+      authMethodId: data.authMethodId,
+      authMethodType: data.authMethodType,
       pubkey: derivedPubkey,
     };
   });

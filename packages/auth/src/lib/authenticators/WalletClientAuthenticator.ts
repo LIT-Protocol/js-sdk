@@ -7,26 +7,19 @@ import {
 import { getChildLogger } from '@lit-protocol/logger';
 import { AuthMethod, AuthSig } from '@lit-protocol/types';
 import { GetWalletClientReturnType } from '@wagmi/core';
-import {
-  getAddress,
-  keccak256,
-  stringToBytes,
-  WalletClient
-} from 'viem';
+import { getAddress, Hex, keccak256, stringToBytes, WalletClient } from 'viem';
 
 const _logger = getChildLogger({
   module: 'WalletClientAuthenticator',
 });
 
-export const getWalletClientAuthenticator = (params: {
-  account: WalletClient;
-}) => {
-  const _address = params.account.account!.address;
+export class WalletClientAuthenticator {
+  public readonly type = 'walletClient';
 
-  const _createAuthSig = async (
+  static async createAuthSig(
     account: GetWalletClientReturnType | WalletClient,
     messageToSign: string
-  ) => {
+  ): Promise<AuthSig> {
     if (!account.signMessage) {
       throw new WrongAccountType(
         {
@@ -35,55 +28,55 @@ export const getWalletClientAuthenticator = (params: {
         'The provided account does not support signing messages.'
       );
     }
+    // Derive address directly from the account passed to the static method
+    const address = account.account!.address;
     return await generateAuthSigWithViem({
       account: account,
       toSign: messageToSign,
-      address: _address,
+      address: address, // Use derived address
     });
-  };
+  }
 
-  return {
-    type: 'walletClient',
-    address: _address,
-    getAuthSig: async (messageToSign: string) => {
-      _logger.info('Generating auth sig for viem account');
-      const authSig = await _createAuthSig(params.account, messageToSign);
-      return authSig;
-    },
-    authenticate: async (messageToSign: string) => {
-      _logger.info('authenticating with viem account');
-      const authSig = await _createAuthSig(params.account, messageToSign);
+  static async authenticate(
+    account: GetWalletClientReturnType | WalletClient,
+    messageToSign: string
+  ): Promise<AuthMethod> {
+    _logger.info('Authenticating with wallet client (static)');
+    const authSig = await WalletClientAuthenticator.createAuthSig(
+      account,
+      messageToSign
+    );
 
-      const authMethod = {
-        authMethodType: AUTH_METHOD_TYPE.EthWallet,
-        accessToken: JSON.stringify(authSig),
-      };
+    const authMethod: AuthMethod = {
+      authMethodType: AUTH_METHOD_TYPE.EthWallet,
+      accessToken: JSON.stringify(authSig),
+    };
 
-      return authMethod;
-    },
-    getAuthMethodId: async (authMethod: AuthMethod) => {
-      _logger.info('Generating auth method ID for viem account');
-      let address: string;
+    return authMethod;
+  }
 
-      try {
-        const authSig: AuthSig = JSON.parse(authMethod.accessToken);
-        if (!authSig.address) {
-          throw new Error('Address not found in AuthSig.');
-        }
-        address = authSig.address;
-      } catch (err) {
-        throw new WrongParamFormat(
-          {
-            info: { authMethod },
-            cause: err,
-          },
-          'Error when parsing auth method to generate auth method ID. Expected accessToken to be a JSON string of AuthSig.'
-        );
+  public static async authMethodId(authMethod: AuthMethod): Promise<Hex> {
+    _logger.info('Generating auth method ID for viem account');
+    let address: string;
+
+    try {
+      const authSig: AuthSig = JSON.parse(authMethod.accessToken);
+      if (!authSig.address) {
+        throw new Error('Address not found in AuthSig.');
       }
+      address = authSig.address;
+    } catch (err) {
+      throw new WrongParamFormat(
+        {
+          info: { authMethod },
+          cause: err,
+        },
+        'Error when parsing auth method to generate auth method ID. Expected accessToken to be a JSON string of AuthSig.'
+      );
+    }
 
-      const checksumAddress = getAddress(address);
-      const messageBytes = stringToBytes(`${checksumAddress}:lit`);
-      return keccak256(messageBytes);
-    },
-  };
-};
+    const checksumAddress = getAddress(address);
+    const messageBytes = stringToBytes(`${checksumAddress}:lit`);
+    return keccak256(messageBytes) as Hex;
+  }
+}

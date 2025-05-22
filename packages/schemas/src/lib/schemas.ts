@@ -13,6 +13,7 @@ import {
 import { computeAddress } from 'ethers/lib/utils';
 import {
   AuthConfigSchema,
+  AuthDataSchema,
   ISessionCapabilityObjectSchema,
   LitResourceAbilityRequestSchema,
 } from '..';
@@ -478,7 +479,7 @@ export type PKPAuthContextSchema = z.infer<typeof PKPAuthContextSchema>;
 export const EoaAuthContextSchema = z.object({
   account: z.any(),
   authenticator: z.any(),
-  authMethod: AuthMethodSchema,
+  authData: z.lazy(() => AuthDataSchema),
   authNeededCallback: z.function(),
   sessionKeyPair: SessionKeyPairSchema,
   authConfig: z.lazy(() => AuthConfigSchema),

@@ -9,6 +9,9 @@ import { privateKeyToAccount } from 'viem/accounts';
 
 export type CreateChainManagerReturn = {
   api: {
+    mintWithEoa: (
+      req?: Parameters<typeof api.mintWithEoa>[0]
+    ) => ReturnType<typeof api.mintWithEoa>;
     mintPKP: (
       req: Parameters<typeof api.mintPKP>[0]
     ) => ReturnType<typeof api.mintPKP>;
@@ -51,6 +54,7 @@ export const createChainManager = (
 
   return {
     api: {
+      mintWithEoa: bindContext(api.mintWithEoa),
       mintPKP: bindContext(api.mintPKP),
       pkpPermissionsManager: (pkpIdentifier: PkpIdentifierRaw) => {
         return new api.PKPPermissionsManager(

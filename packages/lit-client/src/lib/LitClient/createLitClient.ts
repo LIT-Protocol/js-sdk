@@ -188,8 +188,11 @@ export const _createNagaLitClient = async (
       };
     },
     disconnect: _stateManager.stop,
-    mintPkp: networkModule.chainApi.mintPkp,
-    mintWithAuth: networkModule.authService.pkpMint,
+    mintWithEoa: networkModule.chainApi.mintWithEoa,
+    mintWithAuth: networkModule.chainApi.mintWithAuth,
+    authService: {
+      mintWithAuth: networkModule.authService.pkpMint,
+    },
     chain: {
       raw: {
         pkpSign: async (

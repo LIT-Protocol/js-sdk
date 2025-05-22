@@ -13,7 +13,6 @@ import { privateKeyToAccount } from 'viem/accounts';
   console.log('------------------------------------');
 
   // Step 1: Convert your EOA private key to a viem account object
-  // createClient
   const myAccount = privateKeyToAccount(
     process.env.PRIVATE_KEY as `0x${string}`
   );
@@ -24,6 +23,36 @@ import { privateKeyToAccount } from 'viem/accounts';
 
   // Step 3: Instantiate the LitClient using the selected network
   const litClient = await createLitClient({ network: nagaDev });
+
+  // ==================== EOA Auth ====================
+
+  // 1. Get the authenticator
+  const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
+
+  // 2. Authenticate the account
+  const authData = await ViemAccountAuthenticator.authenticate(myAccount);
+  console.log('✅ authData:', authData);
+
+  // 3a. Mint a PKP using your account. This is then owned by the account
+  // You will need to manually add permissions to the PKP before it can be used.
+  const mintedPkpWithEoa = await litClient.mintWithEoa({
+    account: myAccount,
+  });
+
+  console.log('✅ mintedPkpWithEoa:', mintedPkpWithEoa);
+
+  // 3b. Minting a PKP with EOA Auth Method. This is then owned by the auth method
+  const mintedPkpWithEoaAuth = await litClient.mintWithAuth({
+    account: myAccount,
+    authData: authData,
+    scopes: ['sign-anything'],
+  });
+
+  console.log('✅ mintedPkpWithEoaAuth:', mintedPkpWithEoaAuth);
+
+  // 4. You can also use the auth service to mint a PKP, just like any other auths
+
+  process.exit();
 
   // Step 4: Create an AuthManager to manage authentication state
   // This uses a local storage backend (useful for Node environments)
@@ -44,7 +73,10 @@ import { privateKeyToAccount } from 'viem/accounts';
     authConfig: {
       statement: 'I authorize the Lit Protocol to mint a PKP for me.',
       domain: 'example.com',
-      resources: [['pkp-signing', '*'], ['lit-action-execution', '*']],
+      resources: [
+        ['pkp-signing', '*'],
+        ['lit-action-execution', '*'],
+      ],
       capabilityAuthSigs: [],
       expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
     },
@@ -60,7 +92,7 @@ import { privateKeyToAccount } from 'viem/accounts';
   });
 
   console.log('✅ PKP Minted:', mintedPkpInfo);
-
+  process.exit();
   // Step 8: Use the PKP to sign a message with the given pubkey and scheme
   const signature2 = await litClient.chain.ethereum.pkpSign({
     pubKey: mintedPkpInfo.pubkey,

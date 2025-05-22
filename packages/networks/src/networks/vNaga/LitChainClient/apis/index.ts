@@ -17,6 +17,7 @@ import {
 
 // High-level APIs
 import { mintPKP } from './highLevelApis/mintPKP/mintPKP';
+import { mintWithEoa } from './highLevelApis/mintPKP/mintWithEoa';
 import { PKPPermissionsManager } from './highLevelApis/PKPPermissionsManager';
 import {
   getNodePrices,
@@ -83,7 +84,7 @@ export const rawApi = {
 export const api = {
   // PKP Management
   mintPKP,
-
+  mintWithEoa,
   // Permissions Management
   PKPPermissionsManager,
 

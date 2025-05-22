@@ -1,4 +1,3 @@
-import { LitRelay } from '../relay';
 import { DiscordAuthenticator } from './native/DiscordAuthenticator';
 import { GoogleAuthenticator } from './native/GoogleAuthenticator';
 import { EOAAuthenticator } from './metamask';
@@ -23,7 +22,6 @@ export {
   isSignInRedirect,
   getProviderFromUrl,
   getAuthIdByAuthMethod,
-  LitRelay,
 };
 
 export type LitAuthAuthenticator =

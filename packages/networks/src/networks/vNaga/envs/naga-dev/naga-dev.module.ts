@@ -32,7 +32,7 @@ import { computeAddress } from 'ethers/lib/utils';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
-import type { LitTxRes } from '../../LitChainClient/apis/types';
+import type { GenericTxRes, LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 import { PKPSignCreateRequestParams } from './api-manager/pkpSign/pkpSign.CreateRequestParams';
@@ -101,60 +101,49 @@ const nagaDevModuleObject = {
   getUserMaxPrice: getUserMaxPrice,
   chainApi: {
     /**
-     * Mints a PKP using the provided authentication context and optional parameters.
-     *
-     * @param params - The parameters for minting a PKP.
-     * @param params.authContext - The authentication context (E.g., EOA wallet and its authMethod).
-     * @param params.scopes - The permission scopes for the PKP.
-     * Note: The values within `overwrites` allow for fine-grained control. The underlying `MintPKPSchema`
-     * handles the precise precedence: direct inputs in `overwrites` > `customAuthMethodId` in `overwrites` > values derived from `authContext.authMethod`.
+     * Mints a PKP using EOA directly
      */
-    mintPkp: async (params: {
-      authContext:
-        | z.infer<typeof PKPAuthContextSchema>
-        | z.infer<typeof EoaAuthContextSchema>;
-      scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
-
-      /**
-       * @deprecated - TODO: This is usually used by the external auth service to mint a PKP,
-       * such as the PKP Auth Service (Previously known as the Relayer). Perhaps we want to move this to a separate function? eg. [networkModule].authService.mintPkp
-       */
-      overwrites?: {
-        authMethodId?: Hex;
-        authMethodType?: number;
-        pubkey?: Hex;
-        customAuthMethodId?: string;
+    mintWithEoa: async (params: {
+      account: ExpectedAccountOrWalletClient;
+    }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
+      const chainManager = createChainManager(params.account);
+      const res = await chainManager.api.mintWithEoa();
+      console.log('🔥 mintWithEoa res:', res);
+      return {
+        _raw: res,
+        txHash: res.hash,
+        data: res.data,
       };
-    }): Promise<LitTxRes<PKPData>> => {
-      // ========== This is EoaAuthContextSchema ==========
-      if ('account' in params.authContext && params.authContext.account) {
-        const { account, authMethod } = params.authContext;
+    },
 
-        const chainManager = createChainManager(account);
+    /**
+     * Mints a PKP using Auth Method
+     */
+    mintWithAuth: async (params: {
+      account: ExpectedAccountOrWalletClient;
+      authData: AuthData;
+      scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+    }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
+      const chainManager = createChainManager(params.account);
 
-        return await chainManager.api.mintPKP({
-          scopes: params.scopes,
-          authMethod: authMethod,
-          authMethodId: params.overwrites?.authMethodId,
-          authMethodType: params.overwrites?.authMethodType,
-          pubkey: params.overwrites?.pubkey,
-          customAuthMethodId: params.overwrites?.customAuthMethodId,
-        });
-      }
+      const authMethod = {
+        authMethodType: params.authData.authMethodType,
+        accessToken: params.authData.accessToken,
+      };
 
-      // ========== This is AuthContextSchema ==========
-      else if (
-        'authConfig' in params.authContext &&
-        params.authContext.authConfig &&
-        'sessionKeyPair' in params.authContext
-      ) {
-        // This is AuthContextSchema
-        throw new Error(DOCS.WHAT_IS_AUTH_CONTEXT);
-      } else {
-        throw new Error(
-          'Invalid authContext provided: does not conform to EoaAuthContextSchema or AuthContextSchema properly.'
-        );
-      }
+      const res = await chainManager.api.mintPKP({
+        scopes: params.scopes,
+        authMethod: authMethod,
+        authMethodId: params.authData.authMethodId,
+        authMethodType: params.authData.authMethodType,
+        pubkey: params.authData.webAuthnPublicKey,
+      });
+
+      return {
+        _raw: res,
+        txHash: res.hash,
+        data: res.data,
+      };
     },
   },
   authService: {

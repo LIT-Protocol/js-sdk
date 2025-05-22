@@ -2,8 +2,8 @@ import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { AuthConfigSchema } from '@lit-protocol/schemas';
 import { Account, WalletClient } from 'viem';
 import { AuthConfigV2 } from '../../authenticators/types';
-import { getViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';
-import { getWalletClientAuthenticator } from '../../authenticators/WalletClientAuthenticator';
+import { ViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';
+import { WalletClientAuthenticator } from '../../authenticators/WalletClientAuthenticator';
 import { AuthManagerParams } from '../auth-manager';
 import {
   ExpectedAccountOrWalletClient,
@@ -58,22 +58,26 @@ export const getEoaAuthContextAdapter = async (
   // AuthConfigSchema expects resources to be in the full, structured format.
   const validatedAuthConfig = AuthConfigSchema.parse(authConfigForValidation);
 
-  let authenticator:
-    | ReturnType<typeof getViemAccountAuthenticator>
-    | ReturnType<typeof getWalletClientAuthenticator>;
+  let authenticatorClass:
+    | typeof ViemAccountAuthenticator
+    | typeof WalletClientAuthenticator;
+
+  let authenticatorAddress: string;
 
   if (isWalletClient(params.config.account)) {
     const walletClient = params.config.account as WalletClient;
-    authenticator = getWalletClientAuthenticator({ account: walletClient });
+    authenticatorClass = WalletClientAuthenticator;
+    authenticatorAddress = walletClient.account!.address;
   } else {
     const viemAccount = params.config.account as Account;
-    authenticator = getViemAccountAuthenticator({ account: viemAccount });
+    authenticatorClass = ViemAccountAuthenticator;
+    authenticatorAddress = viemAccount.address;
   }
 
   // Try to get LitAuthData from storage or generate a new one
   const authData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
-    address: authenticator.address,
+    address: authenticatorAddress,
     expiration: params.authConfig.expiration,
     type: AUTH_METHOD_TYPE.EthWallet,
   });
@@ -82,7 +86,7 @@ export const getEoaAuthContextAdapter = async (
   // we don't really care how messy the params look like, this adapter function will massage them into the correct shape
   return getEoaAuthContext({
     authentication: {
-      authenticator: authenticator,
+      authenticator: authenticatorClass,
       account: params.config.account,
     },
     authConfig: {
