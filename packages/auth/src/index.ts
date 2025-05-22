@@ -1,8 +1,8 @@
 // -- imports
 // import { createAuthManager } from './lib/auth-manager';
 import * as authenticators from './lib/authenticators';
-import { GoogleAuthenticator } from './lib/authenticators/GoogleAuthenticator';
-import { DiscordAuthenticator } from './lib/authenticators/DiscordAuthenticator';
+import { GoogleAuthenticator } from './lib/authenticators/native/GoogleAuthenticator';
+import { DiscordAuthenticator } from './lib/authenticators/native/DiscordAuthenticator';
 import { LitRelay, WebAuthnAuthenticator } from './lib/authenticators';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
 import { localStorage, localStorageNode } from './lib/storage';

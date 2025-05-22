@@ -1,13 +1,16 @@
+import { ethers } from 'ethers';
+
 import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
 import { AuthMethod, Hex } from '@lit-protocol/types';
-import { ethers } from 'ethers';
-import * as jose from 'jose';
 
 import { AuthData } from '@lit-protocol/schemas';
-import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
-export class GoogleAuthenticator {
+import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from '../utils';
+
+const DEFAULT_CLIENT_ID = '1052874239658692668';
+
+export class DiscordAuthenticator {
   /**
-   * Signup with popup window
+   * Authenticate using a popup window
    *
    * You could use `https://login.litgateway.com` as a baseUrl.
    * It's highly recommended to use your own auth server for production.
@@ -31,7 +34,7 @@ export class GoogleAuthenticator {
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
-    const url = await prepareLoginUrl('google', redirectUri, baseURL);
+    const url = await prepareLoginUrl('discord', redirectUri, baseURL);
 
     const popup = window.open(
       `${url}&caller=${window.location.origin}`,
@@ -64,11 +67,11 @@ export class GoogleAuthenticator {
           reject(new Error(error));
         }
 
-        if (provider === 'google' && token) {
+        if (provider === 'discord' && token) {
           clearInterval(interval);
           popup.close();
           resolve({
-            authMethodType: AUTH_METHOD_TYPE.GoogleJwt,
+            authMethodType: AUTH_METHOD_TYPE.Discord,
             accessToken: token,
           });
         }
@@ -77,29 +80,54 @@ export class GoogleAuthenticator {
 
     return {
       ...authMethod,
-      authMethodId: await GoogleAuthenticator.authMethodId(authMethod),
+      authMethodId: await DiscordAuthenticator.authMethodId(authMethod),
     };
   }
 
-  public static async authMethodId(authMethod: AuthMethod): Promise<Hex> {
-    const tokenPayload = jose.decodeJwt(authMethod.accessToken);
-    const userId: string = tokenPayload['sub'] as string;
-    const audience: string = tokenPayload['aud'] as string;
-    const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   * @param {string} clientId - Optional Discord client ID, defaults to Lit's client ID
+   *
+   * @returns {Promise<Hex>} - Auth method id
+   */
+  public static async authMethodId(
+    authMethod: AuthMethod,
+    clientId?: string
+  ): Promise<Hex> {
+    const _clientId = clientId || DEFAULT_CLIENT_ID;
+    const userId = await DiscordAuthenticator._fetchDiscordUser(
+      authMethod.accessToken
     );
+
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${_clientId}`)
+    );
+
     return authMethodId as Hex;
   }
 
-  // /**
-  //  * Get auth method id that can be used to look up and interact with
-  //  * PKPs associated with the given auth method
-  //  *
-  //  * @param {AuthMethod} authMethod - Auth method object
-  //  *
-  //  * @returns {Promise<string>} - Auth method id
-  //  */
-  // public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-  //   return GoogleAuthenticator.authMethodId(authMethod);
-  // }
+  /**
+   * Fetch Discord user ID
+   *
+   * @param {string} accessToken - Discord access token
+   *
+   * @returns {Promise<string>} - Discord user ID
+   */
+  private static async _fetchDiscordUser(accessToken: string): Promise<string> {
+    const meResponse = await fetch('https://discord.com/api/users/@me', {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      return user.id;
+    } else {
+      throw new UnknownError({}, 'Unable to verify Discord account');
+    }
+  }
 }

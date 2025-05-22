@@ -7,12 +7,12 @@ import {
 } from '@lit-protocol/constants';
 import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 
-import { DiscordAuthenticator } from './DiscordAuthenticator';
-import { GoogleAuthenticator } from './GoogleAuthenticator';
+import { DiscordAuthenticator } from './native/DiscordAuthenticator';
+import { GoogleAuthenticator } from './native/GoogleAuthenticator';
 import { EOAAuthenticator } from './metamask/EOAAuthenticator';
 import { StytchAuthFactorOtpAuthenticator } from './stytch/StytchAuthFactorOtpAuthenticator';
 import { StytchOtpAuthenticator } from './stytch/StytchOtpAuthenticator';
-import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
+import { WebAuthnAuthenticator } from './native/WebAuthnAuthenticator';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';

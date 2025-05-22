@@ -15,7 +15,7 @@ import {
 import { AuthMethod, Hex } from '@lit-protocol/types';
 
 import { AuthData } from '@lit-protocol/schemas';
-import { getRPIdFromOrigin, parseAuthenticatorData } from './utils';
+import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 
 import { EthBlockhashInfo } from '@lit-protocol/types';
 

@@ -1,6 +1,6 @@
 import { LitRelay } from '../relay';
-import { DiscordAuthenticator } from './DiscordAuthenticator';
-import { GoogleAuthenticator } from './GoogleAuthenticator';
+import { DiscordAuthenticator } from './native/DiscordAuthenticator';
+import { GoogleAuthenticator } from './native/GoogleAuthenticator';
 import { EOAAuthenticator } from './metamask';
 import {
   StytchOtpAuthenticator,
@@ -11,7 +11,7 @@ import {
   getProviderFromUrl,
   getAuthIdByAuthMethod,
 } from './utils';
-import { WebAuthnAuthenticator } from './WebAuthnAuthenticator';
+import { WebAuthnAuthenticator } from './native/WebAuthnAuthenticator';
 
 export {
   DiscordAuthenticator,

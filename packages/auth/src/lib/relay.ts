@@ -21,7 +21,7 @@ import {
 } from '@lit-protocol/types';
 
 import { getAuthIdByAuthMethod } from './authenticators/utils';
-import { WebAuthnAuthenticator } from './authenticators/WebAuthnAuthenticator';
+import { WebAuthnAuthenticator } from './authenticators/native/WebAuthnAuthenticator';
 
 /**
  * Class that communicates with Lit relay server
