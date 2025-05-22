@@ -1,46 +1,28 @@
 import { ethers } from 'ethers';
 
 import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
-import { AuthMethod, OAuthProviderOptions } from '@lit-protocol/types';
+import { AuthMethod, Hex } from '@lit-protocol/types';
 
-import { HexPrefixedSchema } from '@lit-protocol/schemas';
-import { z } from 'zod';
-import { AuthMethodTypeStringMap } from '../types';
-import { pollResponse } from './helper/pollResponse';
-import { JobStatusResponse } from './types';
+import { AuthData } from '@lit-protocol/schemas';
 import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from './utils';
 
 const DEFAULT_CLIENT_ID = '1052874239658692668';
 
-type DiscordConfig = OAuthProviderOptions & {
-  pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
-  clientId?: string;
-};
-
 export class DiscordAuthenticator {
-  public static id = AuthMethodTypeStringMap.Discord;
-
   /**
-   * The redirect URI that Lit's login server should send the user back to
-   */
-  public redirectUri: string;
-  /**
-   * OAuth client ID. Defaults to one used by Lit
-   */
-  private clientId?: string;
-
-  constructor(params: DiscordConfig) {
-    this.redirectUri = params.redirectUri || window.location.origin;
-    this.clientId = params.clientId || DEFAULT_CLIENT_ID;
-  }
-
-  /**
-   * Authenticate using a popup window.
+   * Authenticate using a popup window
    *
-   * @param {string} baseURL - The base URL for the Lit Login Gateway.
-   * @returns {Promise<AuthMethod>} - Auth method object containing the OAuth token.
+   * You could use `https://login.litgateway.com` as a baseUrl.
+   * It's highly recommended to use your own auth server for production.
+   * However, If you are just testing/developing, you could use `https://login.litgateway.com` as a baseUrl.
+   *
+   * @example
+   * https://login.litgateway.com
+   *
+   * @example
+   * http://localhost:3300
    */
-  public static async authenticate(baseURL: string): Promise<AuthMethod> {
+  public static async authenticate(baseURL: string): Promise<AuthData> {
     /**
      * If you are using the Lit Login Server or a clone from that, the redirectUri is the same as the baseUri. That's
      * because the app.js is loaded in the index.html file.
@@ -53,6 +35,7 @@ export class DiscordAuthenticator {
     const top = window.screen.height / 2 - height / 2;
 
     const url = await prepareLoginUrl('discord', redirectUri, baseURL);
+
     const popup = window.open(
       `${url}&caller=${window.location.origin}`,
       'popup',
@@ -63,7 +46,7 @@ export class DiscordAuthenticator {
       throw new UnknownError({}, 'Failed to open popup window');
     }
 
-    return new Promise((resolve, reject) => {
+    const authMethod = await new Promise<AuthMethod>((resolve, reject) => {
       // window does not have a closed event, so we need to poll using a timer
       const interval = setInterval(() => {
         if (popup.closed) {
@@ -94,6 +77,11 @@ export class DiscordAuthenticator {
         }
       });
     });
+
+    return {
+      ...authMethod,
+      authMethodId: await DiscordAuthenticator.authMethodId(authMethod),
+    };
   }
 
   /**
@@ -101,44 +89,24 @@ export class DiscordAuthenticator {
    * PKPs associated with the given auth method
    *
    * @param {AuthMethod} authMethod - Auth method object
+   * @param {string} clientId - Optional Discord client ID, defaults to Lit's client ID
    *
-   * @returns {Promise<string>} - Auth method id
+   * @returns {Promise<Hex>} - Auth method id
    */
-  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    const userId = await this._fetchDiscordUser(authMethod.accessToken);
-    const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${this.clientId}`)
-    );
-    return authMethodId;
-  }
-
   public static async authMethodId(
     authMethod: AuthMethod,
     clientId?: string
-  ): Promise<string> {
+  ): Promise<Hex> {
     const _clientId = clientId || DEFAULT_CLIENT_ID;
+    const userId = await DiscordAuthenticator._fetchDiscordUser(
+      authMethod.accessToken
+    );
 
-    // -- get user id from access token
-    let userId;
-    const meResponse = await fetch('https://discord.com/api/users/@me', {
-      method: 'GET',
-      headers: {
-        authorization: `Bearer ${authMethod.accessToken}`,
-      },
-    });
-    if (meResponse.ok) {
-      const user = await meResponse.json();
-      userId = user.id;
-    } else {
-      throw new UnknownError({}, 'Unable to verify Discord account');
-    }
-
-    // -- get auth method id
     const authMethodId = ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`${userId}:${_clientId}`)
     );
 
-    return authMethodId;
+    return authMethodId as Hex;
   }
 
   /**
@@ -148,7 +116,7 @@ export class DiscordAuthenticator {
    *
    * @returns {Promise<string>} - Discord user ID
    */
-  private async _fetchDiscordUser(accessToken: string): Promise<string> {
+  private static async _fetchDiscordUser(accessToken: string): Promise<string> {
     const meResponse = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
       headers: {
