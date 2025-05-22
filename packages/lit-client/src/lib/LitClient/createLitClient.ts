@@ -12,8 +12,8 @@ import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
 import { getChildLogger } from '@lit-protocol/logger';
-import { PkpIdentifierRaw } from 'packages/networks/src/networks/vNaga/LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import { privateKeyToAccount } from 'viem/accounts';
+import { PkpIdentifierRaw } from '@lit-protocol/types';
 
 const _logger = getChildLogger({
   module: 'createLitClient',

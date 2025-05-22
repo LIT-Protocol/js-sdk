@@ -58,19 +58,19 @@ export const getEoaAuthContext = async (
     nonce: _params.deps.nonce,
   });
 
-  const authMethod = await _params.authentication.authenticator.authenticate(
+  const authData = await _params.authentication.authenticator.authenticate(
     _params.authentication.account as any,
     toSign
   );
 
-  const authMethodId = await _params.authentication.authenticator.authMethodId(
-    authMethod
-  );
+  // const authMethodId = await _params.authentication.authenticator.authMethodId(
+  //   authMethod
+  // );
 
-  const authData: AuthData = {
-    ...authMethod,
-    authMethodId,
-  };
+  // const authData: AuthData = {
+  //   ...authMethod,
+  //   authMethodId,
+  // };
 
   const authSig: AuthSig =
     await _params.authentication.authenticator.createAuthSig(

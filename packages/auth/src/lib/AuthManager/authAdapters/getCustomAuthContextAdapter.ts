@@ -3,10 +3,10 @@ import {
   AuthConfig,
   AuthManagerParams,
   BaseAuthContext,
-  tryGetCachedAuthData,
 } from '../auth-manager';
 import { PkpAuthDepsSchema } from './getPkpAuthContextAdapter';
 import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import { tryGetCachedAuthData } from '../try-getters/tryGetCachedAuthData';
 
 export interface ICustomAuthenticator {
   new (settings: any): ICustomAuthenticatorInstance;

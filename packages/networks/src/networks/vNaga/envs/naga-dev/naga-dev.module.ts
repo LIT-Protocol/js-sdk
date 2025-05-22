@@ -304,7 +304,7 @@ const nagaDevModuleObject = {
         const authMethod = {
           authMethodType: requestBody.authData.authMethodType,
           accessToken: requestBody.authData.accessToken,
-        };
+        } as AuthMethod;
 
         const requests = [];
 
