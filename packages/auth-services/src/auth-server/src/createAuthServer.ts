@@ -1,6 +1,10 @@
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { MintRequestRaw } from '@lit-protocol/networks/src/networks/vNaga/LitChainClient/schemas/MintRequestSchema';
+import {
+  generateRegistrationOptions,
+  type GenerateRegistrationOptionsOpts,
+} from '@simplewebauthn/server';
 import { Elysia } from 'elysia';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -16,6 +20,8 @@ import { getStatusDoc } from '../../queue-manager/src/handlers/status/getStatus.
 import { apiKeyGateAndTracking } from '../middleware/apiKeyGate'; // Adjusted path
 import { rateLimiter } from '../middleware/rateLimiter'; // Adjusted path
 import { resp } from './response-helpers/response-helpers'; // Adjusted path
+import { generateAuthenticatorUserInfo } from './webauthn-helpers/generateAuthenticatorUserInfo';
+import { getDomainFromUrl } from './webauthn-helpers/getDomainFromUrl';
 
 export interface LitAuthServerConfig {
   port?: number;
@@ -53,11 +59,11 @@ export const createLitAuthServer = (
     host: userConfig.host ?? '0.0.0.0',
     network: userConfig.network ?? env.NETWORK,
     litTxsenderRpcUrl: userConfig.litTxsenderRpcUrl ?? env.LIT_TXSENDER_RPC_URL,
-    litTxsenderPrivateKey: userConfig.litTxsenderPrivateKey ?? env.LIT_TXSENDER_PRIVATE_KEY,
+    litTxsenderPrivateKey:
+      userConfig.litTxsenderPrivateKey ?? env.LIT_TXSENDER_PRIVATE_KEY,
     enableApiKeyGate: userConfig.enableApiKeyGate ?? env.ENABLE_API_KEY_GATE,
     appName: userConfig.appName ?? 'auth-services',
   };
-
 
   // Create Elysia app
   const app = new Elysia()
@@ -102,6 +108,62 @@ export const createLitAuthServer = (
         _error.shortMessage || _error.message || 'An unexpected error occurred.'
       );
     })
+
+    .group('/auth', (groupApp) => {
+      groupApp.get(
+        '/webauthn/generate-registration-options',
+        async ({ query, headers, set }) => {
+          const username = query.username as string | undefined;
+          const originHeader = headers['origin'] || 'localhost';
+
+          // Determine rpID from Origin header, default to 'localhost'
+          let rpID = getDomainFromUrl(originHeader);
+
+          if (originHeader) {
+            try {
+              rpID = new URL(originHeader).hostname;
+            } catch (e) {
+              // Log warning if Origin header is present but invalid
+              console.warn(
+                `[AuthServer] Invalid Origin header: "${originHeader}". Using default rpID "${rpID}".`
+              );
+            }
+          } else {
+            // Log warning if Origin header is missing
+            console.warn(
+              `[AuthServer] Origin header missing. Using default rpID "${rpID}".`
+            );
+          }
+
+          // Generate a unique username string if not provided.
+          // This is used for 'userName' and as input for 'userID' generation.
+          const authenticator = generateAuthenticatorUserInfo(username);
+
+          const opts: GenerateRegistrationOptionsOpts = {
+            rpName: 'Lit Protocol',
+            rpID, // Relying Party ID (your domain)
+            userID: authenticator.userId,
+            userName: authenticator.username,
+            timeout: 60000, // 60 seconds
+            attestationType: 'direct', // Consider 'none' for better privacy if direct attestation is not strictly needed
+            authenticatorSelection: {
+              userVerification: 'required', // Require user verification (e.g., PIN, biometric)
+              residentKey: 'required', // Create a client-side discoverable credential
+            },
+            // Supported public key credential algorithms.
+            // -7: ES256 (ECDSA with P-256 curve and SHA-256)
+            // -257: RS256 (RSA PKCS#1 v1.5 with SHA-256)
+            supportedAlgorithmIDs: [-7, -257],
+          };
+
+          const options = generateRegistrationOptions(opts);
+
+          return resp.SUCCESS(options);
+        }
+      );
+      return groupApp;
+    })
+
     // =============================================================
     //                     PKP Auth Service (/pkp)
     // =============================================================
@@ -163,10 +225,10 @@ export const createLitAuthServer = (
         // await initSystemContext({ appName: config.appName });
         // If initSystemContext is in onStart, it will run when .listen() is called.
 
-        serverInstance = await app.listen({
-            port: config.port,
-            hostname: config.host,
-        }) as unknown as Elysia<any>;
+        serverInstance = (await app.listen({
+          port: config.port,
+          hostname: config.host,
+        })) as unknown as Elysia<any>;
 
         console.log('🌐 Network Configuration');
         console.log('   Network: ' + config.network);
@@ -178,7 +240,9 @@ export const createLitAuthServer = (
             );
             console.log('   TX Sender Address: ' + serviceAccount.address);
           } catch (e) {
-            console.warn('   Could not derive TX Sender Address from private key.');
+            console.warn(
+              '   Could not derive TX Sender Address from private key.'
+            );
           }
         } else {
           console.warn(
@@ -188,11 +252,10 @@ export const createLitAuthServer = (
         console.log('🚀 Lit Protocol Auth Service');
         console.log(`   URL: http://${config.host}:${config.port}`);
         console.log(`   Swagger: http://${config.host}:${config.port}/docs`);
-        console.log('   API Key Gate: ' + config.enableApiKeyGate); 
+        console.log('   API Key Gate: ' + config.enableApiKeyGate);
         console.log(`   Queue Name: ${mainAppQueue.name}`);
-
       } catch (err) {
-        console.error("Failed to start server:", err);
+        console.error('Failed to start server:', err);
         process.exit(1); // Exit if server fails to start
       }
     },
@@ -207,4 +270,4 @@ export const createLitAuthServer = (
     },
     getApp: () => app as unknown as Elysia<any>,
   };
-}; 
+};
