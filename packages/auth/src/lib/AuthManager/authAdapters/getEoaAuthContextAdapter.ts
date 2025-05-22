@@ -4,12 +4,13 @@ import { Account, WalletClient } from 'viem';
 import { AuthConfigV2 } from '../../authenticators/types';
 import { getViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';
 import { getWalletClientAuthenticator } from '../../authenticators/WalletClientAuthenticator';
-import { AuthManagerParams, tryGetCachedAuthData } from '../auth-manager';
+import { AuthManagerParams } from '../auth-manager';
 import {
   ExpectedAccountOrWalletClient,
   getEoaAuthContext,
 } from '../authContexts/getEoaAuthContext';
 import { processResources } from '../utils/processResources';
+import { tryGetCachedAuthData } from '../try-getters/tryGetCachedAuthData';
 
 /**
  * The EOA auth context adapter params.

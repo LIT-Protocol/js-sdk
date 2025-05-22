@@ -14,9 +14,9 @@
  * // Use nodeStorage.write(...) and nodeStorage.read(...)
  */
 
-import type { LitAuthStorageProvider } from './types';
-import type { LitAuthData } from '../types';
 import { LocalStorage } from 'node-localstorage'; // Use node-localstorage
+import type { LitAuthData } from '../types';
+import type { LitAuthStorageProvider } from './types';
 
 const LOCALSTORAGE_LIT_AUTH_PREFIX = 'lit-auth';
 
@@ -119,6 +119,33 @@ export function localStorageNode({
           // localStorage.removeItem(buildLookupKey({ appName, networkName, address }));
           return null;
         }
+      }
+    },
+
+    async writeInnerDelegationAuthSig({ publicKey, authSig }) {
+      localStorage.setItem(
+        buildLookupKey({
+          appName: `${appName}-inner-delegation`,
+          networkName,
+          address: publicKey,
+        }),
+        JSON.stringify(authSig)
+      );
+    },
+
+    async readInnerDelegationAuthSig({ publicKey }) {
+      const value = localStorage.getItem(
+        buildLookupKey({
+          appName: `${appName}-inner-delegation`,
+          networkName,
+          address: publicKey,
+        })
+      );
+
+      if (!value) {
+        return null;
+      } else {
+        return JSON.parse(value);
       }
     },
   };

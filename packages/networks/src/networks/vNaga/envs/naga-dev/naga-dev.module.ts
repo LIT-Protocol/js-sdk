@@ -26,7 +26,7 @@ import {
   AuthMethod,
   AuthSig,
   CallbackParams,
-  RequestItem
+  RequestItem,
 } from '@lit-protocol/types';
 import { computeAddress } from 'ethers/lib/utils';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
@@ -50,6 +50,12 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  module: 'naga-dev-module',
+});
+
 // Define ProcessedBatchResult type (mirroring structure from dispatchRequests)
 type ProcessedBatchResult<T> =
   | { success: true; values: T[] }
@@ -179,7 +185,9 @@ const nagaDevModuleObject = {
         ResponseData: PKPSignResponseDataSchema,
       },
       createRequest: async (params: PKPSignCreateRequestParams) => {
-        console.log('✅ creating request...', params);
+        _logger.info('pkpSign:createRequest: Creating request', {
+          params,
+        });
 
         // -- 1. generate session sigs
         const sessionSigs = await issueSessionFromContext({
@@ -187,7 +195,7 @@ const nagaDevModuleObject = {
           authContext: params.authContext,
         });
 
-        console.log('✅ session sigs generated...');
+        _logger.info('pkpSign:createRequest: Session sigs generated');
 
         // -- 2. generate requests
         const _requestId = createRequestId();
@@ -195,12 +203,14 @@ const nagaDevModuleObject = {
           z.infer<typeof PKPSignRequestDataSchema>
         >[] = [];
 
-        console.log('✅ request id generated...');
+        _logger.info('pkpSign:createRequest: Request id generated');
 
         const urls = Object.keys(sessionSigs);
 
         for (const url of urls) {
-          console.log('✅ generating request data...', url);
+          _logger.info('pkpSign:createRequest: Generating request data', {
+            url,
+          });
           const _requestData = PKPSignRequestDataSchema.parse({
             toSign: params.signingContext.toSign,
             signingScheme: params.signingContext.signingScheme,
@@ -218,7 +228,9 @@ const nagaDevModuleObject = {
             endpoint: nagaDevModuleObject.getEndpoints().PKP_SIGN,
           });
 
-          console.log('✅ url with path generated...', _urlWithPath);
+          _logger.info('pkpSign:createRequest: Url with path generated', {
+            _urlWithPath,
+          });
 
           requests.push({
             fullPath: _urlWithPath,
@@ -230,7 +242,9 @@ const nagaDevModuleObject = {
         }
 
         if (!requests || requests.length === 0) {
-          console.error('No requests generated for pkpSign.');
+          _logger.error(
+            'pkpSign:createRequest: No requests generated for pkpSign.'
+          );
           throw new Error('Failed to generate requests for pkpSign.');
         }
 
@@ -280,13 +294,17 @@ const nagaDevModuleObject = {
           nodeSet: { value: number; socketAddress: string }[];
         };
 
-        console.log('✅ [signSessionKey] requestBody...', requestBody);
+        _logger.info('signSessionKey:createRequest: Request body', {
+          requestBody,
+        });
 
         const nodeUrls = requestBody.nodeSet.map(
           (node) => `${httpProtocol}${node.socketAddress}`
         );
 
-        console.log('✅ [signSessionKey] nodeUrls...', nodeUrls);
+        _logger.info('signSessionKey:createRequest: Node urls', {
+          nodeUrls,
+        });
 
         // extract the authMethod from the requestBody
         const authMethod = {
@@ -322,7 +340,9 @@ const nagaDevModuleObject = {
         }
 
         if (!requests || requests.length === 0) {
-          console.error('No requests generated for signSessionKey.');
+          _logger.error(
+            'signSessionKey:createRequest: No requests generated for signSessionKey.'
+          );
           throw new Error('Failed to generate requests for signSessionKey.');
         }
 
@@ -344,7 +364,9 @@ const nagaDevModuleObject = {
 
         const { values } = SignSessionKeyResponseDataSchema.parse(result);
 
-        console.log('✅ [signSessionKey] values...', values);
+        _logger.info('signSessionKey:handleResponse: Values', {
+          values,
+        });
 
         const signatureShares = values.map((s) => ({
           ProofOfPossession: {
@@ -353,16 +375,17 @@ const nagaDevModuleObject = {
           },
         }));
 
-        console.log('✅ [signSessionKey] signatureShares...', signatureShares);
+        _logger.info('signSessionKey:handleResponse: Signature shares', {
+          signatureShares,
+        });
 
         const blsCombinedSignature = await combineSignatureShares(
           signatureShares
         );
 
-        console.log(
-          '✅ [signSessionKey] blsCombinedSignature...',
-          blsCombinedSignature
-        );
+        _logger.info('signSessionKey:handleResponse: BLS combined signature', {
+          blsCombinedSignature,
+        });
 
         const _pkpPublicKey = HexPrefixedSchema.parse(pkpPublicKey);
 
@@ -372,7 +395,9 @@ const nagaDevModuleObject = {
 
         const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
 
-        console.log('✅ [signSessionKey] signedMessage...', signedMessage);
+        _logger.info('signSessionKey:handleResponse: Signed message', {
+          signedMessage,
+        });
 
         const authSig: AuthSig = {
           sig: JSON.stringify({
@@ -384,7 +409,9 @@ const nagaDevModuleObject = {
           address: computeAddress(_pkpPublicKey),
         };
 
-        console.log('✅ [signSessionKey] authSig...', authSig);
+        _logger.info('signSessionKey:handleResponse: Auth sig', {
+          authSig,
+        });
 
         return authSig;
       },

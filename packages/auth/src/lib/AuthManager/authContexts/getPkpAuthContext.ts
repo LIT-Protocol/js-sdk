@@ -1,4 +1,5 @@
 import { createPKPSiweMessage } from '@lit-protocol/auth-helpers';
+import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthDataSchema,
   HexPrefixedSchema,
@@ -9,13 +10,15 @@ import {
 } from '@lit-protocol/schemas';
 import { NodeSet } from '@lit-protocol/types';
 import { z } from 'zod';
+import { LitAuthStorageProvider } from '../../storage';
 import { LitAuthData, LitAuthDataSchema } from '../../types';
 import { AuthConfig } from '../auth-manager';
+import { tryGetCachedDelegationAuthSig } from '../try-getters/tryGetCachedDelegationAuthSig';
 import { AuthConfigSchema } from './BaseAuthContextType';
 
-// const PkpAuthenticationSchema = BaseAuthenticationSchema.extend({
-//   authMethods: z.array(AuthMethodSchema),
-// });
+const _logger = getChildLogger({
+  module: 'getPkpAuthContext',
+});
 
 const PkpAuthenticationSchema = z.object({
   pkpPublicKey: HexPrefixedSchema,
@@ -28,11 +31,9 @@ const ConnectionSchema = z.object({
   currentEpoch: z.number(),
 });
 
-const NodeSignSessionKeySchema = z.function().args(
+const SignSessionKeySchema = z.function().args(
   z.object({
     requestBody: JsonSignSessionKeyRequestForPkpReturnSchema,
-
-    // @deprecated - we only need requestBody because nodeUrls is already provided in it
     nodeUrls: z.array(z.string()),
   })
 );
@@ -42,8 +43,12 @@ export const GetPkpAuthContextSchema = z.object({
   authConfig: AuthConfigSchema,
   deps: z.object({
     connection: ConnectionSchema,
-    nodeSignSessionKey: NodeSignSessionKeySchema,
+    signSessionKey: SignSessionKeySchema,
     litAuthData: LitAuthDataSchema,
+    storage: z.custom<LitAuthStorageProvider>(),
+
+    // @depreacted - to be removed. testing only.
+    pkpAddress: z.string(),
   }),
 });
 
@@ -106,7 +111,9 @@ const preparePkpAuthRequestBody = async (
 export const getPkpAuthContext = async (
   params: z.infer<typeof GetPkpAuthContextSchema>
 ) => {
-  console.log('[getPkpAuthContext] params:', params);
+  _logger.info('getPkpAuthContext: params', {
+    params,
+  });
 
   const _params = GetPkpAuthContextSchema.parse(params);
   const _nodeInfo = NodeInfoSchema.parse(params.deps.connection.nodeUrls);
@@ -131,60 +138,31 @@ export const getPkpAuthContext = async (
     resources: _params.authConfig.resources,
   };
 
+  const delegationAuthSig = await tryGetCachedDelegationAuthSig({
+    storage: _params.deps.storage,
+    address: _params.deps.pkpAddress,
+    expiration: _params.authConfig.expiration,
+    signSessionKey: () =>
+      _params.deps.signSessionKey({
+        requestBody,
+        nodeUrls: _nodeInfo.urls,
+      }),
+  });
+
+  _logger.info('getPkpAuthContext: delegationAuthSig', {
+    delegationAuthSig,
+  });
+
   return {
     chain: 'ethereum',
     pkpPublicKey: _params.authentication.pkpPublicKey,
     authData: _params.authentication.authData,
-    // sessionKey: requestBody.sessionKey,
-    // resources: _params.authConfig.resources,
-    // capabilityAuthSigs: _params.authConfig.capabilityAuthSigs,
-    // expiration: _params.authConfig.expiration,
-    authNeededCallback: async () => {
-      const authSig = await _params.deps.nodeSignSessionKey({
-        requestBody,
-        nodeUrls: _nodeInfo.urls,
-      });
 
-      return authSig;
+    // @deprecated - to be removed.
+    authNeededCallback: async () => {
+      return delegationAuthSig;
     },
     authConfig,
     sessionKeyPair: _params.deps.litAuthData.sessionKey.keyPair,
   };
 };
-
-// const authContext = await LitAuth.getPkpAuthContext({
-//   authentication: {
-//     pkpPublicKey:
-//       '0x04e5603fe1cc5ce207c12950939738583b599f22a152c3672a4c0eee887d75dd405246ac3ed2430283935a99733eac9520581af9923c0fc04fad1d67d60908ce18',
-
-//     // an authenticator outside of this should handle the authMethods
-//     authMethods: [
-//       {
-//         authMethodType: 1,
-//         accessToken: '123',
-//       },
-//     ],
-//   },
-//   authorisation: {
-//     resources: createResourceBuilder().addPKPSigningRequest('*').requests,
-//     // -- (optional) default is null
-//     // capabilityAuthSigs: [],
-//   },
-//   // -- (optional) default is 15 minutes
-//   // sessionControl: {
-//   //   expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-//   // },
-
-//   // -- (optional) default is empty string
-//   // metadata: {
-//   //   statement: 'test',
-//   // },
-//   connection: {
-//     nodeUrls: _nodeUrls,
-//     nonce: _nonce,
-//     currentEpoch: _currentEpoch,
-//   },
-//   nodeSignSessionKey: _signSessionKey,
-// });
-
-// console.log('authContext:', JSON.stringify(authContext, null, 2));

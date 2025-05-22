@@ -60,8 +60,7 @@ export const issueSessionFromContext = async (params: {
   pricingContext: PricingContext;
   // latestBlockhash: string;
 }): Promise<SessionSigsMap> => {
-  console.log('[issueSessionFromContext] params:', params);
-  const authSig = await params.authContext.authNeededCallback(params);
+  const authSig = await params.authContext.authNeededCallback();
 
   const capabilities = [
     ...(params.authContext.authConfig.capabilityAuthSigs || []), // Spreads existing sigs, or an empty array if null/undefined/empty

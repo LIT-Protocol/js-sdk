@@ -1,8 +1,16 @@
+// 🟩 (LitClient)
+// 🟪 (Network Module)
+// The general API interaction pattern is as follows:
+// 1. 🟩 get the fresh handshake results
+// 2. 🟪 Create requests
+// 3. 🟩 Dispatch requests
+// 4. 🟪 Handle response
+
 import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
+import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
-import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schemas';
 
 type AnyNetworkModule = NagaNetworkModule | DatilNetworkModule;
 
@@ -63,7 +71,7 @@ export const _createNagaLitClient = async (
   ) {
     console.log(`🔥 signing on ${params.chain} with ${params.signingScheme}`);
 
-    // -- get the fresh handshake results
+    // 🟩 get the fresh handshake results
     const currentHandshakeResult = _stateManager.getCallbackResult();
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
@@ -73,6 +81,7 @@ export const _createNagaLitClient = async (
       );
     }
 
+    // 🟪 Create requests
     // 1. This is where the orchestration begins — we delegate the creation of the
     // request array to the `networkModule`. It encapsulates logic specific to the
     // active network (e.g., pricing, thresholds, metadata) and returns a set of
@@ -98,6 +107,7 @@ export const _createNagaLitClient = async (
 
     const requestId = requestArray[0].requestId;
 
+    // 🟩 Dispatch requests
     // 2. With the request array prepared, we now coordinate the parallel execution
     // across multiple nodes. This step handles batching, minimum threshold success
     // tracking, and error tolerance. The orchestration layer ensures enough valid
@@ -107,6 +117,7 @@ export const _createNagaLitClient = async (
       z.infer<typeof networkModule.api.pkpSign.schemas.ResponseData>
     >(requestArray, requestId, currentHandshakeResult.threshold);
 
+    // 🟪 Handle response
     // 3. Once node responses are received and validated, we delegate final
     // interpretation and formatting of the result back to the `networkModule`.
     // This allows the module to apply network-specific logic such as decoding,
@@ -114,14 +125,49 @@ export const _createNagaLitClient = async (
     return await networkModule.api.pkpSign.handleResponse(result, requestId);
   }
 
+  async function _signSessionKey(params: {
+    nodeUrls: string[];
+    requestBody: z.infer<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
+  }) {
+    // 1. 🟩 get the fresh handshake results
+    const currentHandshakeResult = _stateManager.getCallbackResult();
+    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+
+    if (!currentHandshakeResult || !currentConnectionInfo) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of pkpSign.'
+      );
+    }
+
+    // 2. 🟪 Create requests
+    const requestArray = await networkModule.api.signSessionKey.createRequest(
+      params.requestBody,
+      networkModule.config.httpProtocol,
+      networkModule.version
+    );
+
+    const requestId = requestArray[0].requestId;
+
+    // 3. 🟩 Dispatch requests
+    const result = await dispatchRequests<any, any>(
+      requestArray,
+      requestId,
+      currentHandshakeResult.threshold
+    );
+
+    // 4. 🟪 Handle response
+    return await networkModule.api.signSessionKey.handleResponse(
+      result,
+      params.requestBody.pkpPublicKey
+    );
+  }
+
   // TODO APIS:
-  // getContext():
-  // - [ ] getMaxPricesForNodeProduct
-  // - [ ] getSignSessionKey
-  // Higher level APIs:
+  // - [ ] viewPkps
   // - [ ] encrypt
   // - [ ] decrypt
-  // - [ ] viewPkps
+  // - [ ] Sign with Solana
+  // - [ ] Sign withCosmos
   return {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
@@ -133,57 +179,7 @@ export const _createNagaLitClient = async (
         handshakeResult: _stateManager.getCallbackResult(),
         getMaxPricesForNodeProduct: networkModule.getMaxPricesForNodeProduct,
         getUserMaxPrice: networkModule.getUserMaxPrice,
-        getSignSessionKey: async (params: {
-          nodeUrls: string[];
-          requestBody: z.infer<
-            typeof JsonSignSessionKeyRequestForPkpReturnSchema
-          >;
-        }) => {
-          // -- get the fresh handshake results
-          const currentHandshakeResult = _stateManager.getCallbackResult();
-          const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
-
-          if (!currentHandshakeResult || !currentConnectionInfo) {
-            throw new Error(
-              'Handshake result is not available from state manager at the time of pkpSign.'
-            );
-          }
-
-          console.log('[getContext] getSignSessionKey params:', params);
-
-          const httpProtocol = networkModule.config.httpProtocol;
-
-          // We should now send the requests to the nodes
-          const requestArray =
-            await networkModule.api.signSessionKey.createRequest(
-              params.requestBody,
-              httpProtocol,
-              networkModule.version
-            );
-
-          console.log(
-            '[getContext] getSignSessionKey requestArray:',
-            requestArray
-          );
-
-          const requestId = requestArray[0].requestId;
-
-          const result = await dispatchRequests<any, any>(
-            requestArray,
-            requestId,
-            currentHandshakeResult.threshold
-          );
-
-          console.log('[getContext] getSignSessionKey result:', result);
-
-          const response =
-            await networkModule.api.signSessionKey.handleResponse(
-              result,
-              params.requestBody.pkpPublicKey
-            );
-
-          return response;
-        },
+        signSessionKey: _signSessionKey,
       };
     },
     disconnect: _stateManager.stop,
@@ -219,16 +215,6 @@ export const _createNagaLitClient = async (
           );
         },
       },
-      // solana: {
-      //   pkpSign: async () => {
-      //     throw new Error('Solana is not supported yet');
-      //   },
-      // },
-      // cosmos: {
-      //   pkpSign: async () => {
-      //     throw new Error('Cosmos is not supported yet');
-      //   },
-      // },
     },
   };
 };

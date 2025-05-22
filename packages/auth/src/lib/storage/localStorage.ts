@@ -98,5 +98,35 @@ export function localStorage({
         return JSON.parse(value);
       }
     },
+
+    /**
+     * The authSig that was returned from the signSessionKey endpoint
+     */
+    async writeInnerDelegationAuthSig({ publicKey, authSig }) {
+      localStorage.setItem(
+        buildLookupKey({
+          appName: `${appName}-inner-delegation`,
+          networkName,
+          address: publicKey,
+        }),
+        JSON.stringify(authSig)
+      );
+    },
+
+    async readInnerDelegationAuthSig({ publicKey }) {
+      const value = localStorage.getItem(
+        buildLookupKey({
+          appName: `${appName}-inner-delegation`,
+          networkName,
+          address: publicKey,
+        })
+      );
+
+      if (!value) {
+        return null;
+      } else {
+        return JSON.parse(value);
+      }
+    },
   };
 }

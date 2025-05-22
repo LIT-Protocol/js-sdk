@@ -1,3 +1,9 @@
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  module: 'pollResponse',
+});
+
 // Interface for the job status response
 export interface JobStatusResponse {
   jobId: string;
@@ -103,7 +109,7 @@ export async function pollResponse<TResponse>({
 }: PollResponseParams<TResponse>): Promise<TResponse> {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      console.log(
+      _logger.info(
         `${errorMessageContext}: Polling attempt ${
           i + 1
         }/${maxRetries} for ${url}`
@@ -117,7 +123,7 @@ export async function pollResponse<TResponse>({
           );
         }
         // Log other non-ok statuses but continue retrying unless it's a client error type that won't resolve on its own.
-        console.error(
+        _logger.error(
           `${errorMessageContext}: Polling attempt ${
             i + 1
           } failed with HTTP status: ${
@@ -127,7 +133,7 @@ export async function pollResponse<TResponse>({
         // Optionally, specific handling for other critical HTTP errors could be added here to throw immediately.
       } else {
         const data = (await response.json()) as TResponse;
-        console.log(
+        _logger.info(
           `${errorMessageContext}: Polling attempt ${
             i + 1
           }/${maxRetries} - current status/data:`,
@@ -135,7 +141,7 @@ export async function pollResponse<TResponse>({
         );
 
         if (isErrorCondition?.(data)) {
-          console.error(
+          _logger.error(
             `${errorMessageContext}: Error condition met during polling.`,
             data
           );
@@ -154,7 +160,7 @@ export async function pollResponse<TResponse>({
         }
 
         if (isCompleteCondition(data)) {
-          console.log(
+          _logger.info(
             `${errorMessageContext}: Completion condition met successfully.`,
             data
           );
@@ -164,7 +170,7 @@ export async function pollResponse<TResponse>({
       }
     } catch (error: any) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(
+      _logger.error(
         `${errorMessageContext}: Error during polling attempt ${
           i + 1
         }/${maxRetries} for ${url}:`,

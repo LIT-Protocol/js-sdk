@@ -1,15 +1,11 @@
-import { AUTH_METHOD_TYPE_VALUES } from '@lit-protocol/constants';
-import { generateSessionKeyPair } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthData,
-  ExpirationSchema,
-  HexPrefixedSchema,
+  HexPrefixedSchema
 } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { AuthConfigV2 } from '../authenticators/types';
 import type { LitAuthStorageProvider } from '../storage/types';
-import type { LitAuthData } from '../types';
 import {
   EoaAuthContextAdapterParams,
   getEoaAuthContextAdapter,
@@ -46,72 +42,12 @@ export interface BasePkpAuthContextAdapterParams {
   litClient: BaseAuthContext<any>['litClient'];
 }
 
-// ----- Helper Functions -----
-/**
- * Tries to retrieve cached authentication data from storage for a given address.
- * If no cached data is found, it generates a new session key pair, saves it
- * to storage, and returns the newly created auth data.
- * @returns {Promise<LitAuthData | null>} The cached or newly generated auth data, or null if no data is found.
- */
-export async function tryGetCachedAuthData(params: {
-  storage: LitAuthStorageProvider;
-  address: string;
-  expiration: string;
-  type: AUTH_METHOD_TYPE_VALUES;
-}): Promise<LitAuthData> {
-  // Use `storage` to see if there is cached auth data
-  let authData = (await params.storage.read({
-    address: params.address,
-  })) as LitAuthData;
+// async function tryGetAuthMethodFromAuthenticator() {
+//   // Use authenticator `getAuthMethod()` method to get a new auth method
+// }
 
-  _logger.info('tryGetCachedAuthData', {
-    address: params.address,
-    authData,
-  });
-
-  if (!authData) {
-    _logger.info('no auth data found, generating new auth data');
-    const _expiration = ExpirationSchema.parse(params.expiration);
-
-    // generate session key pair
-    authData = {
-      sessionKey: {
-        keyPair: generateSessionKeyPair(),
-        expiresAt: _expiration,
-      },
-      authMethodType: params.type,
-    };
-
-    // save session key pair to storage
-    await params.storage.write({
-      address: params.address,
-      authData,
-    });
-  }
-
-  if (!authData) {
-    _logger.error('Failed to retrieve or generate authentication data.');
-    throw new Error('Failed to retrieve or generate authentication data.');
-  }
-
-  _logger.info('tryGetCachedAuthData success', {
-    address: params.address,
-    authData,
-  });
-
-  return authData;
-}
-
-async function tryGetAuthMethodFromAuthenticator() {
-  // Use authenticator `getAuthMethod()` method to get a new auth method
-}
-
-function validateAuthData(authData: LitAuthData) {
-  // Validate auth data is not expired, and is well-formed
-}
-
-// async function signSessionKey({ storage }: LitAuthManagerConfig) {
-// Use LitNodeClient to signSessionKey with AuthData
+// function validateAuthData(authData: LitAuthData) {
+//   // Validate auth data is not expired, and is well-formed
 // }
 
 // @deprecated - use AuthConfigV2 instead
