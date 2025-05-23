@@ -12,6 +12,10 @@ export const AuthDataSchema = z.object({
   authMethodType: z.union([AuthMethodSchema.shape.authMethodType, z.number()]),
   accessToken: AuthMethodSchema.shape.accessToken,
   publicKey: HexPrefixedSchema.optional(),
+
+  // any other auth specific data
+  // eg. stytch contains user_id
+  metadata: z.any().optional(),
 });
 
 export type AuthData = z.infer<typeof AuthDataSchema>;

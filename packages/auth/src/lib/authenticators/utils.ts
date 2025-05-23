@@ -10,10 +10,8 @@ import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 import { DiscordAuthenticator } from './native/DiscordAuthenticator';
 import { GoogleAuthenticator } from './native/GoogleAuthenticator';
 import { EOAAuthenticator } from './metamask/EOAAuthenticator';
-import { StytchAuthFactorOtpAuthenticator } from './stytch/StytchAuthFactorOtpAuthenticator';
-import { StytchOtpAuthenticator } from './stytch/StytchOtpAuthenticator';
 import { WebAuthnAuthenticator } from './native/WebAuthnAuthenticator';
-
+import { StytchEmailOtpAuthenticator } from './stytch/factors/StytchEmailOtpAuthenticator';
 export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
 
@@ -354,14 +352,14 @@ export async function getAuthIdByAuthMethod(
     case AUTH_METHOD_TYPE.GoogleJwt:
       authId = await GoogleAuthenticator.authMethodId(authMethod);
       break;
-    case AUTH_METHOD_TYPE.StytchOtp:
-      authId = await StytchOtpAuthenticator.authMethodId(authMethod);
-      break;
+    // case AUTH_METHOD_TYPE.StytchOtp:
+    //   authId = await StytchOtpAuthenticator.authMethodId(authMethod);
+    //   break;
     case AUTH_METHOD_TYPE.StytchEmailFactorOtp:
     case AUTH_METHOD_TYPE.StytchSmsFactorOtp:
     case AUTH_METHOD_TYPE.StytchTotpFactorOtp:
     case AUTH_METHOD_TYPE.StytchWhatsAppFactorOtp:
-      authId = await StytchAuthFactorOtpAuthenticator.authMethodId(authMethod);
+      authId = await StytchEmailOtpAuthenticator.authMethodId(authMethod);
       break;
     default:
       throw new InvalidArgumentException(

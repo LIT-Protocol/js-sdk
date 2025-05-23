@@ -1,10 +1,7 @@
 import { DiscordAuthenticator } from './native/DiscordAuthenticator';
 import { GoogleAuthenticator } from './native/GoogleAuthenticator';
 import { EOAAuthenticator } from './metamask';
-import {
-  StytchOtpAuthenticator,
-  StytchAuthFactorOtpAuthenticator,
-} from './stytch';
+
 import {
   isSignInRedirect,
   getProviderFromUrl,
@@ -16,8 +13,6 @@ export {
   DiscordAuthenticator,
   EOAAuthenticator,
   GoogleAuthenticator,
-  StytchAuthFactorOtpAuthenticator,
-  StytchOtpAuthenticator,
   WebAuthnAuthenticator,
   isSignInRedirect,
   getProviderFromUrl,
@@ -26,6 +21,5 @@ export {
 
 export type LitAuthAuthenticator =
   | typeof EOAAuthenticator
-  | typeof StytchOtpAuthenticator
   | typeof WebAuthnAuthenticator
   | typeof DiscordAuthenticator;

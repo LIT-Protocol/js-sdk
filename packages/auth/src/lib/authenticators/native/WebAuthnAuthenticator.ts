@@ -107,14 +107,14 @@ export class WebAuthnAuthenticator {
   /**
    * Generate registration options for WebAuthn authentication
    * @params {string} username - Optional username for the WebAuthn credential
-   * @params {string} authServerUrl - The URL of the authentication server
+   * @params {string} authServiceBaseUrl - The URL of the authentication server
    * @returns {Promise<PublicKeyCredentialCreationOptionsJSON>} - WebAuthn registration options
    */
   public static async getRegistrationOptions(params: {
     username?: string;
-    authServerUrl: string;
+    authServiceBaseUrl: string;
   }): Promise<PublicKeyCredentialCreationOptionsJSON> {
-    let url = `${params.authServerUrl}/auth/webauthn/generate-registration-options`;
+    let url = `${params.authServiceBaseUrl}/auth/webauthn/generate-registration-options`;
 
     if (params.username && params.username !== '') {
       url = `${url}?username=${encodeURIComponent(params.username)}`;
@@ -148,7 +148,7 @@ export class WebAuthnAuthenticator {
    */
   public static async registerAndMintPKP(params: {
     username?: string;
-    authServerUrl: string;
+    authServiceBaseUrl: string;
   }): Promise<{
     pkpInfo: PKPData;
 
@@ -157,7 +157,7 @@ export class WebAuthnAuthenticator {
   }> {
     const opts = await WebAuthnAuthenticator.getRegistrationOptions({
       username: params.username,
-      authServerUrl: params.authServerUrl,
+      authServiceBaseUrl: params.authServiceBaseUrl,
     });
 
     // Submit registration options to the authenticator
@@ -188,7 +188,7 @@ export class WebAuthnAuthenticator {
     // Immediate mint a new PKP to associate with the auth method
     const pkpInfo = await handleAuthServerRequest<PKPData>({
       jobName: 'PKP Minting',
-      serverUrl: params.authServerUrl,
+      serverUrl: params.authServiceBaseUrl,
       path: '/pkp/mint',
       body: authData,
     });
@@ -202,7 +202,7 @@ export class WebAuthnAuthenticator {
   /**
    * Authenticate with a WebAuthn credential and return the relevant authentication data
    *
-   * @param {string} params.authServerUrl - The URL of the authentication server
+   * @param {string} params.authServiceBaseUrl - The URL of the authentication server
    * @returns {Promise<AuthData>} - Auth data containing WebAuthn authentication response
    */
   public static async authenticate(): Promise<AuthData> {

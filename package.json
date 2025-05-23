@@ -18,7 +18,7 @@
     "prettier": "npx nx format:write --all",
     "link-all": "for dir in packages/*/; do echo \"Linking in $dir\"; (cd \"$dir\" && bun link) || { echo \"ERROR: Failed to link in $dir\"; exit 1; }; done",
     "unlink-all": "for dir in packages/*/; do echo \"Unlinking in $dir\"; (cd \"$dir\" && bun unlink) || { echo \"ERROR: Failed to unlink in $dir\"; exit 1; }; done",
-    "start:auth-services": "cd packages/auth-services && bun run start"
+    "auth-services": "cd packages/auth-services && bun run start"
   },
   "private": true,
   "dependencies": {

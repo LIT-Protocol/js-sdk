@@ -1,28 +1,26 @@
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
-import { MintRequestRaw } from '@lit-protocol/networks/src/networks/vNaga/LitChainClient/schemas/MintRequestSchema';
-import {
-  generateRegistrationOptions,
-  type GenerateRegistrationOptionsOpts,
-} from '@simplewebauthn/server';
 import { Elysia } from 'elysia';
+import * as stytch from 'stytch'; // Added Stytch import
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { env } from '../../_setup/env'; // Adjusted path
 import { initSystemContext } from '../../_setup/initSystemContext'; // Adjusted path
-import {
-  addJob,
-  getJobStatus,
-  mainAppQueue,
-} from '../../queue-manager/src/bullmqSetup'; // Adjusted path
-import { mintPkpDoc } from '../../queue-manager/src/handlers/pkpMint/pkpMint.doc'; // Adjusted path
-import { getStatusDoc } from '../../queue-manager/src/handlers/status/getStatus.doc'; // Adjusted path
+import { mainAppQueue } from '../../queue-manager/src/bullmqSetup'; // Adjusted path
 import { apiKeyGateAndTracking } from '../middleware/apiKeyGate'; // Adjusted path
 import { rateLimiter } from '../middleware/rateLimiter'; // Adjusted path
 import { resp } from './response-helpers/response-helpers'; // Adjusted path
-import { generateAuthenticatorUserInfo } from './webauthn-helpers/generateAuthenticatorUserInfo';
-import { getDomainFromUrl } from './webauthn-helpers/getDomainFromUrl';
-
+import {
+  customAuthLoginRoute,
+  customAuthVerifyTokenRoute,
+} from './routes/auth/custom-auth-routes';
+import { stytchEmailRoutes } from './routes/auth/stytch/stytch-email';
+import { stytchWhatsAppRoutes } from './routes/auth/stytch/stytch-otp';
+import { stytchSmsRoutes } from './routes/auth/stytch/stytch-sms';
+import { stytchTotpRoutes } from './routes/auth/stytch/stytch-topt-2fa';
+import { webAuthnGenerateRegistrationOptionsRoute } from './routes/auth/webauthn/webauthn';
+import { mint } from './routes/pkp/mint';
+import { statusRoutes } from './routes/status';
 export interface LitAuthServerConfig {
   port?: number;
   host?: string;
@@ -68,6 +66,15 @@ export const createLitAuthServer = (
   // Create Elysia app
   const app = new Elysia()
     .decorate('config', config) // Make config accessible in routes if needed
+    .decorate(
+      'stytchClient',
+      new stytch.Client({
+        // Decorate with Stytch client instance
+        project_id: process.env.STYTCH_PROJECT_ID as string,
+        secret: process.env.STYTCH_SECRET as string,
+        // You might want to add env: stytch.envs.live or stytch.envs.test based on your environment
+      })
+    )
     .onStart(async () => {
       // =============================================================
       //                     Init System Context
@@ -109,58 +116,23 @@ export const createLitAuthServer = (
       );
     })
 
+    // =============================================================
+    //                     Auth Service (/auth)
+    // =============================================================
     .group('/auth', (groupApp) => {
-      groupApp.get(
-        '/webauthn/generate-registration-options',
-        async ({ query, headers, set }) => {
-          const username = query.username as string | undefined;
-          const originHeader = headers['origin'] || 'localhost';
+      // WebAuthn
+      webAuthnGenerateRegistrationOptionsRoute(groupApp);
 
-          // Determine rpID from Origin header, default to 'localhost'
-          let rpID = getDomainFromUrl(originHeader);
+      // Stytch
+      stytchEmailRoutes(groupApp);
+      stytchSmsRoutes(groupApp);
+      stytchWhatsAppRoutes(groupApp);
+      stytchTotpRoutes(groupApp);
 
-          if (originHeader) {
-            try {
-              rpID = new URL(originHeader).hostname;
-            } catch (e) {
-              // Log warning if Origin header is present but invalid
-              console.warn(
-                `[AuthServer] Invalid Origin header: "${originHeader}". Using default rpID "${rpID}".`
-              );
-            }
-          } else {
-            // Log warning if Origin header is missing
-            console.warn(
-              `[AuthServer] Origin header missing. Using default rpID "${rpID}".`
-            );
-          }
+      // Custom Auth
+      customAuthLoginRoute(groupApp);
+      customAuthVerifyTokenRoute(groupApp);
 
-          // Generate a unique username string if not provided.
-          // This is used for 'userName' and as input for 'userID' generation.
-          const authenticator = generateAuthenticatorUserInfo(username);
-
-          const opts: GenerateRegistrationOptionsOpts = {
-            rpName: 'Lit Protocol',
-            rpID, // Relying Party ID (your domain)
-            userID: authenticator.userId,
-            userName: authenticator.username,
-            timeout: 60000, // 60 seconds
-            attestationType: 'direct', // Consider 'none' for better privacy if direct attestation is not strictly needed
-            authenticatorSelection: {
-              userVerification: 'required', // Require user verification (e.g., PIN, biometric)
-              residentKey: 'required', // Create a client-side discoverable credential
-            },
-            // Supported public key credential algorithms.
-            // -7: ES256 (ECDSA with P-256 curve and SHA-256)
-            // -257: RS256 (RSA PKCS#1 v1.5 with SHA-256)
-            supportedAlgorithmIDs: [-7, -257],
-          };
-
-          const options = generateRegistrationOptions(opts);
-
-          return resp.SUCCESS(options);
-        }
-      );
       return groupApp;
     })
 
@@ -168,49 +140,15 @@ export const createLitAuthServer = (
     //                     PKP Auth Service (/pkp)
     // =============================================================
     .group('/pkp', (app) => {
-      // =============================================================
-      //                     Mint PKP (/pkp/mint)
-      // =============================================================
-      app.post(
-        '/mint',
-        async ({ body }: { body: MintRequestRaw }) => {
-          try {
-            const job = await addJob('pkpMint', { requestBody: body });
-            return resp.QUEUED(
-              job.id,
-              'PKP minting request queued successfully.'
-            );
-          } catch (error: any) {
-            console.error(`[API] Failed to add job 'pkpMint' to queue:`, error);
-            return resp.ERROR(
-              'Failed to queue PKP minting request.' + error.message
-            );
-          }
-        },
-        mintPkpDoc
-      );
+      // Mint PKP
+      mint(app);
+
       return app;
     })
     // =============================================================
-    //                     Get Job Status (/pkp/status/:jobId)
+    //                     Job Status Routes
     // =============================================================
-    .get(
-      '/status/:jobId',
-      async ({ params }: { params: { jobId: string } }) => {
-        const { jobId } = params;
-        if (!jobId) {
-          return resp.BAD_REQUEST('Job ID is required.');
-        }
-        try {
-          const responsePayload = await getJobStatus(jobId);
-          return resp.SUCCESS(responsePayload);
-        } catch (error: any) {
-          console.error(`[API] Failed to get status for job ${jobId}:`, error);
-          return resp.ERROR('Failed to retrieve job status.' + error.message);
-        }
-      },
-      getStatusDoc
-    );
+    .use(statusRoutes);
 
   let serverInstance: any = null; // To store the running server instance
 

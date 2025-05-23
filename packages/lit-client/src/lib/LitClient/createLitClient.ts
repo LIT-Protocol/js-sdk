@@ -1,10 +1,8 @@
-// 🟩 (LitClient)
-// 🟪 (Network Module)
-// The general API interaction pattern is as follows:
-// 1. 🟩 get the fresh handshake results
-// 2. 🟪 Create requests
-// 3. 🟩 Dispatch requests
-// 4. 🟪 Handle response
+// 🏓 The general API interaction pattern is as follows:
+// 1. 🟩 (LitClient) get the fresh handshake results
+// 2. 🟪 (Network Module) Create requests
+// 3. 🟩 (LitClient) Dispatch requests
+// 4. 🟪 (Network Module) Handle response
 
 import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
 import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schemas';
@@ -170,10 +168,10 @@ export const _createNagaLitClient = async (
   }
 
   // TODO APIS:
-  // - [ ] viewPkps
+  // - [x] viewPkps
   // - [ ] encrypt
   // - [ ] decrypt
-  // - [ ] Sign with Solana
+  // - [ ] Sign withSolana
   // - [ ] Sign withCosmos
   return {
     // This function is likely be used by another module to get the current context, eg. auth manager

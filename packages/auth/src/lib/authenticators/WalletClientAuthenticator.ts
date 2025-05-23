@@ -1,13 +1,42 @@
-import { generateAuthSigWithViem } from '@lit-protocol/auth-helpers';
+import {
+  createSiweMessage,
+  generateAuthSigWithViem,
+} from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE,
   WrongAccountType,
   WrongParamFormat,
 } from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
-import { AuthMethod, AuthSig } from '@lit-protocol/types';
+import { AuthData } from '@lit-protocol/schemas';
+import { AuthMethod, AuthSig, EthBlockhashInfo } from '@lit-protocol/types';
 import { GetWalletClientReturnType } from '@wagmi/core';
 import { getAddress, Hex, keccak256, stringToBytes, WalletClient } from 'viem';
+
+const fetchBlockchainData = async () => {
+  try {
+    const resp = await fetch(
+      'https://block-indexer.litgateway.com/get_most_recent_valid_block'
+    );
+    if (!resp.ok) {
+      throw new Error(`Primary fetch failed with status: ${resp.status}`); // Or a custom error
+    }
+
+    const blockHashBody: EthBlockhashInfo = await resp.json();
+    const { blockhash, timestamp } = blockHashBody;
+
+    if (!blockhash || !timestamp) {
+      throw new Error('Invalid data from primary blockhash source');
+    }
+
+    return blockhash;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error(String(error));
+  }
+};
 
 const _logger = getChildLogger({
   module: 'WalletClientAuthenticator',
@@ -39,12 +68,21 @@ export class WalletClientAuthenticator {
 
   static async authenticate(
     account: GetWalletClientReturnType | WalletClient,
-    messageToSign: string
-  ): Promise<AuthMethod> {
+    messageToSign?: string
+  ): Promise<AuthData> {
+    let _toSign = messageToSign;
+
+    if (!_toSign) {
+      _toSign = await createSiweMessage({
+        walletAddress: account.account!.address,
+        nonce: await fetchBlockchainData(),
+      });
+    }
+
     _logger.info('Authenticating with wallet client (static)');
     const authSig = await WalletClientAuthenticator.createAuthSig(
       account,
-      messageToSign
+      _toSign
     );
 
     const authMethod: AuthMethod = {
@@ -52,7 +90,16 @@ export class WalletClientAuthenticator {
       accessToken: JSON.stringify(authSig),
     };
 
-    return authMethod;
+    const authMethodId = await WalletClientAuthenticator.authMethodId(
+      authMethod
+    );
+
+    const authData: AuthData = {
+      ...authMethod,
+      authMethodId,
+    };
+
+    return authData;
   }
 
   public static async authMethodId(authMethod: AuthMethod): Promise<Hex> {
