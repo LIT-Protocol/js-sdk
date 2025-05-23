@@ -20,10 +20,12 @@ export const PkpIdentifierSchema = z.discriminatedUnion('field', [
   z
     .object({
       field: z.literal('tokenId'),
-      tokenId: toBigInt,
+      tokenId: z.union([z.string(), z.number(), z.bigint()]).transform((val) => {
+        return typeof val === 'bigint' ? val : toBigInt.parse(val);
+      }),
     })
     .strict(),
-  z
+z
     .object({
       field: z.literal('address'),
       address: isEthAddress,
