@@ -11,11 +11,13 @@ import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
+import { getPermittedAuthMethodScopes } from '../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes';
 
 export interface PermissionsContext {
   actions: readonly `0x${string}`[];
   addresses: readonly `0x${string}`[];
   authMethods: readonly AuthMethod[];
+  scopes: readonly boolean[];
   isActionPermitted: (ipfsId: `0x${string}`) => boolean;
   isAddressPermitted: (address: `0x${string}`) => boolean;
   isAuthMethodPermitted: (
@@ -45,6 +47,21 @@ export async function getPermissionsContext(
     getPermittedAuthMethods({ tokenId }, networkCtx, accountOrWalletClient),
   ]);
 
+  // for each auth method, get the scopes
+  const scopes = await Promise.all(
+    authMethods.map((authData) =>
+      getPermittedAuthMethodScopes(
+        {
+          authMethodType: authData.authMethodType,
+          authMethodId: authData.id,
+          tokenId: tokenId,
+        },
+        networkCtx,
+        accountOrWalletClient
+      )
+    )
+  );
+
   logger.debug(
     {
       identifier,
@@ -60,6 +77,7 @@ export async function getPermissionsContext(
     actions,
     addresses,
     authMethods,
+    scopes: scopes.flat(),
     isActionPermitted: (ipfsId: `0x${string}`) => actions.includes(ipfsId),
     isAddressPermitted: (address: `0x${string}`) =>
       addresses.some((addr) => addr.toLowerCase() === address.toLowerCase()),
