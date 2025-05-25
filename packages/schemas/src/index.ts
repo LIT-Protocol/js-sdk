@@ -18,5 +18,4 @@ export const AuthConfigSchema = z.object({
   statement: z.string().optional().default(''),
   domain: z.string().optional().default(''),
   resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
-  // resources: z.custom<LitResourceAbilityRequest[]>(),
 });

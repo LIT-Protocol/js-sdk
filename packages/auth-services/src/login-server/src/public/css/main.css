@@ -1,0 +1,269 @@
+@font-face {
+  font-family: 'Favorit';
+  font-weight: 400;
+  src: local('Favorit'), local('Favorit-Regular'),
+    url('../fonts/ABCFavorit-Regular.woff2') format('woff2'),
+    url('../fonts/ABCFavorit-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Favorit';
+  font-weight: 300;
+  src: local('Favorit Light'), local('Favorit-Light'),
+    url('../fonts/ABCFavorit-Light.woff2') format('woff2'),
+    url('../fonts/ABCFavorit-Light.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Favorit';
+  font-weight: 700;
+  src: local('Favorit Bold'), local('Favorit-Bold'),
+    url('../fonts/ABCFavorit-Bold.woff2') format('woff2'),
+    url('../fonts/ABCFavorit-Bold.woff') format('woff');
+}
+
+/* General styles */
+:root {
+  --background-light: #ffffff;
+  --background-dark: #1a1a1a;
+  --text-light: #1a1a1a;
+  --text-dark: #f5f5f5;
+  --primary: #3D00FF;
+  --primary-variant: #2a00b3;
+  --link-light: #3D00FF;
+  --link-dark: #9D79FF;
+  --lit-gradient-color: #ff844f;
+  --lit-link-color: #e52802;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-light);
+  color: var(--text-light);
+  min-height: 100vh;
+}
+
+body[data-lit-theme="dark"] {
+  background-color: var(--background-dark);
+  color: var(--text-dark);
+}
+
+/* Background gradient */
+.litBg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, #3D00FF 0%, #00C2FF 100%);
+  opacity: 0.05;
+}
+
+body[data-lit-theme="dark"] .litBg {
+  opacity: 0.1;
+}
+
+.litBg--custom {
+  background-size: cover;
+  background-position: center;
+}
+
+/* Hero section styles */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.hero__content {
+  max-width: 800px;
+}
+
+.hero__title {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.hero__copy {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.hero__link {
+  color: var(--link-light);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  transition: opacity 0.2s;
+}
+
+.hero__link:hover {
+  opacity: 0.8;
+}
+
+body[data-lit-theme="dark"] .hero__link {
+  color: var(--link-dark);
+}
+
+.litModal {
+  background-color: var(--lit-modal-bg-color);
+  color: var(--lit-muted-text-color);
+  border-radius: 0.375rem;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100vw - 2rem);
+  max-height: 85vh;
+  padding: 1.5rem;
+  overflow-y: auto;
+  opacity: 0;
+  animation: 300ms litModalFadeIn 1ms ease-in forwards;
+}
+
+[data-lit-theme="light"] .litModal {
+  filter: drop-shadow(0 20px 13px rgba(0,0,0,.03)) drop-shadow(0 8px 5px rgba(0,0,0,.08));
+}
+
+@media (min-width: 375px) {
+  .litModal {
+    width: 354px;
+  }
+}
+
+@media (min-width: 640px) {
+  .litModal {
+    padding: 2rem;
+  }
+}
+
+@keyframes litModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.litModal__title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  text-align: center;
+  color: var(--lit-text-color);
+}
+
+.litModal__body {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+.litModal__body a {
+  color: var(--lit-link-color);
+}
+
+.litModal__body a:hover {
+  filter: brightness(0.85);
+}
+
+.litImg {
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.litImg__bg {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  margin: auto;
+}
+
+.litImg__icon {
+  width: 3rem;
+  height: 3rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.litImg__icon--small {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.litImg--error {
+  color: var(--lit-error-color);
+}
+
+.litImg--error .litImg__bg {
+  background-color: var(--lit-error-background);
+}
+
+.gradientText {
+  background-color: #E3170A;
+  background-image:
+    radial-gradient(at 67% 50%, #ff844f 0px, transparent 50%),
+    radial-gradient(at 18% 7%, #EAC435 0px, transparent 50%);
+  background-size: 100%;
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; 
+}
+
+@media (min-width: 375px) {
+  .hero__title {
+    font-size: 3rem;
+    line-height: 1;
+  }
+  
+  .hero__copy {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .hero {
+    padding: 1.5rem;
+  }
+
+  .hero__title {
+    font-size: 4.5rem;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  
+  .hero__copy {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding: 2rem;
+  }
+
+  .hero__title {
+    font-size: 6rem;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+  
+  .hero__copy {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}

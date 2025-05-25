@@ -10,14 +10,12 @@ export const toBigInt = z
 // Transform a number/string or array of numbers/strings to an array of BigInts
 // eg. "1" -> [1n]
 // eg. [1, "2", 3] -> [1n, 2n, 3n]
-export const toBigIntArray = z
-  .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()]))])
-  .transform((val) => {
-    if (Array.isArray(val)) {
-      return val.map(safeBigInt);
-    }
-    return [safeBigInt(val)];
-  });
+export const toBigIntArray = z.union([
+  z.string(),
+  z.number(),
+  z.bigint(),
+  z.array(z.union([z.string(), z.number(), z.bigint()])),
+]);
 
 // Transform a string to a hex string type
 // eg. "123" -> "0x123"

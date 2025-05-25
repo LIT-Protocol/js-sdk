@@ -1,7 +1,16 @@
 // -- imports
 // import { createAuthManager } from './lib/auth-manager';
 import * as authenticators from './lib/authenticators';
-import { LitRelay } from './lib/authenticators';
+import { WebAuthnAuthenticator } from './lib/authenticators';
+import { DiscordAuthenticator } from './lib/authenticators/native/DiscordAuthenticator';
+import { GoogleAuthenticator } from './lib/authenticators/native/GoogleAuthenticator';
+import { StytchEmailOtpAuthenticator } from './lib/authenticators/stytch/factors/StytchEmailOtpAuthenticator';
+import { StytchSmsOtpAuthenticator } from './lib/authenticators/stytch/factors/StytchSmsOtpAuthenticator';
+import { StytchTotp2FAAuthenticator } from './lib/authenticators/stytch/factors/2fa/StytchTotp2FAAuthenticator';
+
+import { StytchWhatsAppOtpAuthenticator } from './lib/authenticators/stytch/factors/StytchWhatsAppOtpAuthenticator';
+import { ViemAccountAuthenticator } from './lib/authenticators/ViemAccountAuthenticator';
+import { WalletClientAuthenticator } from './lib/authenticators/WalletClientAuthenticator';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
 import { localStorage, localStorageNode } from './lib/storage';
 import type { LitAuthStorageProvider } from './lib/storage/types';
@@ -39,8 +48,8 @@ export const storagePlugins = {
  * A collection of available authenticator classes and utility functions.
  * Authenticators handle the process of verifying user identity via different methods (e.g., WebAuthn, OAuth, Stytch).
  */
-export { authenticators };
 export { createAuthManager } from './lib/AuthManager/auth-manager';
+export { authenticators };
 // export type {
 //   AuthManagerConfigUnion,
 //   PkpAuthManagerConfig,
@@ -63,7 +72,7 @@ export { getPkpAuthContext } from './lib/AuthManager/authContexts/getPkpAuthCont
  * Class responsible for communicating with the Lit Relay server.
  * Used for operations like minting PKPs associated with authentication methods.
  */
-export { LitRelay } from './lib/relay'; // Assuming LitRelay is exported from relay.ts now based on context
+// export { LitRelay } from './lib/relay'; // Assuming LitRelay is exported from relay.ts now based on context
 
 // ============================== UTILS ==============================
 /**
@@ -80,3 +89,18 @@ export { getAuthIdByAuthMethod } from './lib/authenticators/utils';
  * @returns {SessionKeyPair} The generated session key pair.
  */
 export { generateSessionKeyPair } from './lib/AuthManager/utils/generateSessionKeyPair';
+
+// ============================== Authenticators ==============================
+export {
+  DiscordAuthenticator,
+  GoogleAuthenticator,
+  ViemAccountAuthenticator,
+  WalletClientAuthenticator,
+  WebAuthnAuthenticator,
+  StytchEmailOtpAuthenticator,
+  StytchSmsOtpAuthenticator,
+  StytchTotp2FAAuthenticator,
+  StytchWhatsAppOtpAuthenticator,
+};
+
+export { ExampleAppAuthenticator } from './lib/authenticators/custom/ExampleAppAuthenticator';

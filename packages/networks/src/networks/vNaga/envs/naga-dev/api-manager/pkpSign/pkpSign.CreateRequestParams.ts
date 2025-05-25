@@ -1,6 +1,6 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
 import {
-  AuthContextSchema,
+  PKPAuthContextSchema,
   EoaAuthContextSchema,
   HexPrefixedSchema,
   SigningChainSchema,
@@ -10,7 +10,9 @@ import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema
 import { ConnectionInfo } from '../../../../LitChainClient/types';
 export type PKPSignCreateRequestParams = {
   pricingContext: z.input<typeof PricingContextSchema>;
-  authContext: z.input<typeof AuthContextSchema | typeof EoaAuthContextSchema>;
+  authContext: z.input<
+    typeof PKPAuthContextSchema | typeof EoaAuthContextSchema
+  >;
   signingContext: {
     pubKey: z.infer<typeof HexPrefixedSchema>;
     toSign: any;

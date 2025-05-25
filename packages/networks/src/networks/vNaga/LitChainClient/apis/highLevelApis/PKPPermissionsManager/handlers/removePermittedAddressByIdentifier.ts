@@ -41,6 +41,9 @@ export async function removePermittedAddressByIdentifier(
     networkCtx
   );
 
+  console.log('❌ TARGET ADDRESS:', targetAddress);
+  console.log('❌ PKP TOKEN ID:', pkpTokenId);
+
   return removePermittedAddress(
     {
       tokenId: pkpTokenId.toString(),

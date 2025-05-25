@@ -12,4 +12,16 @@ export interface LitAuthStorageProvider {
     params: T,
     options?: unknown
   ): Promise<void>;
+
+  writeInnerDelegationAuthSig(
+    params: {
+      publicKey: string;
+      authSig: string;
+    },
+    options?: unknown
+  ): Promise<void>;
+
+  readInnerDelegationAuthSig(params: {
+    publicKey: string;
+  }): Promise<string | null>;
 }

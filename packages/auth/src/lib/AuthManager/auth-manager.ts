@@ -1,22 +1,17 @@
-import { generateSessionKeyPair } from '@lit-protocol/crypto';
-import { ExpirationSchema } from '@lit-protocol/schemas';
+import { getChildLogger } from '@lit-protocol/logger';
+import { AuthData, HexPrefixedSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
+import { AuthConfigV2 } from '../authenticators/types';
 import type { LitAuthStorageProvider } from '../storage/types';
-import type { AuthMethodType, LitAuthData } from '../types';
-import {
-  getCustomAuthContextAdapter,
-  ICustomAuthenticator,
-} from './authAdapters/getCustomAuthContextAdapter';
 import {
   EoaAuthContextAdapterParams,
   getEoaAuthContextAdapter,
 } from './authAdapters/getEoaAuthContextAdapter';
-import {
-  AuthenticatorWithId,
-  getPkpAuthContextAdapter,
-} from './authAdapters/getPkpAuthContextAdapter';
+import { getPkpAuthContextAdapter } from './authAdapters/getPkpAuthContextAdapter';
 import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
-import { getChildLogger } from '@lit-protocol/logger';
+import { getCustomAuthContextAdapter } from './authAdapters/getCustomAuthContextAdapter';
+import { hexToBigInt, keccak256, toBytes } from 'viem';
+
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
 }
@@ -47,74 +42,15 @@ export interface BasePkpAuthContextAdapterParams {
   litClient: BaseAuthContext<any>['litClient'];
 }
 
-// ----- Helper Functions -----
-/**
- * Tries to retrieve cached authentication data from storage for a given address.
- * If no cached data is found, it generates a new session key pair, saves it
- * to storage, and returns the newly created auth data.
- * @returns {Promise<LitAuthData | null>} The cached or newly generated auth data, or null if no data is found.
- */
-export async function tryGetCachedAuthData(params: {
-  storage: LitAuthStorageProvider;
-  address: string;
-  expiration: string;
-  type: AuthMethodType;
-}): Promise<LitAuthData> {
-  // Use `storage` to see if there is cached auth data
-  let authData = (await params.storage.read({
-    address: params.address,
-  })) as LitAuthData;
-
-  _logger.info('tryGetCachedAuthData', {
-    address: params.address,
-    authData,
-  });
-
-  if (!authData) {
-    _logger.info('no auth data found, generating new auth data');
-    const _expiration = ExpirationSchema.parse(params.expiration);
-
-    // generate session key pair
-    authData = {
-      sessionKey: {
-        keyPair: generateSessionKeyPair(),
-        expiresAt: _expiration,
-      },
-      authMethodType: params.type,
-    };
-
-    // save session key pair to storage
-    await params.storage.write({
-      address: params.address,
-      authData,
-    });
-  }
-
-  if (!authData) {
-    _logger.error('Failed to retrieve or generate authentication data.');
-    throw new Error('Failed to retrieve or generate authentication data.');
-  }
-
-  _logger.info('tryGetCachedAuthData success', {
-    address: params.address,
-    authData,
-  });
-
-  return authData;
-}
-
-async function tryGetAuthMethodFromAuthenticator() {
-  // Use authenticator `getAuthMethod()` method to get a new auth method
-}
-
-function validateAuthData(authData: LitAuthData) {
-  // Validate auth data is not expired, and is well-formed
-}
-
-// async function signSessionKey({ storage }: LitAuthManagerConfig) {
-// Use LitNodeClient to signSessionKey with AuthData
+// async function tryGetAuthMethodFromAuthenticator() {
+//   // Use authenticator `getAuthMethod()` method to get a new auth method
 // }
 
+// function validateAuthData(authData: LitAuthData) {
+//   // Validate auth data is not expired, and is well-formed
+// }
+
+// @deprecated - use AuthConfigV2 instead
 export type AuthConfig = z.infer<typeof AuthConfigSchema>;
 
 export type ConstructorConfig<T> = T extends new (config: infer C) => any
@@ -123,6 +59,8 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const createAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
+    //   throw new Error(`Invalid authenticator: ${params.authenticator}`);
+    // },
     // TODO: for wrapped keys!
     // createRequestToken: async () => {
     //   // use createSessionSisg then send to wrapped key service
@@ -130,21 +68,33 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
     createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);
     },
-    createPkpAuthContext: <T extends AuthenticatorWithId>(params: {
-      authenticator: T;
-      config: ConstructorConfig<T>;
-      authConfig: AuthConfig;
+    createPkpAuthContext: (params: {
+      authData: AuthData;
+      pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      authConfig: AuthConfigV2;
       litClient: BaseAuthContext<any>['litClient'];
     }) => {
       return getPkpAuthContextAdapter(authManagerParams, params);
     },
-    createCustomAuthContext: <T extends ICustomAuthenticator>(params: {
-      authenticator: T;
-      settings: ConstructorParameters<T>[0]; // Infer settings type from constructor
-      config: { pkpPublicKey: string; [key: string]: any }; // Execution config
-      authConfig: AuthConfig;
+    createCustomAuthContext: (params: {
+      // authData: AuthData;
+      pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      authConfig: AuthConfigV2;
       litClient: BaseAuthContext<any>['litClient'];
+
+      // custom auth params
+      customAuthParams: {
+        litActionCode?: string;
+        litActionIpfsId?: string;
+        jsParams?: Record<string, any>;
+      };
     }) => {
+      // make jsParams nested inside jsParams so that
+      // the dev can check all variables inside an object in Lit action
+      params.customAuthParams.jsParams = {
+        jsParams: params.customAuthParams.jsParams,
+      };
+
       return getCustomAuthContextAdapter(authManagerParams, params);
     },
   };

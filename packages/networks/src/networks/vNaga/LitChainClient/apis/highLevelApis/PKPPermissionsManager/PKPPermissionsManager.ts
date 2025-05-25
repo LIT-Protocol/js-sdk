@@ -31,6 +31,7 @@ import { PkpIdentifierRaw } from '../../rawContractApis/permissions/utils/resolv
 // Import all handler functions
 import { addPermittedActionByIdentifier } from './handlers/addPermittedActionByIdentifier';
 import { addPermittedAddressByIdentifier } from './handlers/addPermittedAddressByIdentifier';
+import { addPermittedAuthMethodScopeByIdentifier } from './handlers/addPermittedAuthMethodScopeByIdentifier';
 import {
   getPermissionsContext,
   PermissionsContext,
@@ -51,6 +52,8 @@ import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedA
 import { LitTxVoid } from '../../types';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
+import { safeTransfer } from '../../rawContractApis/pkp/write/safeTransfer';
+import { resolvePkpTokenId } from '../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action
@@ -123,6 +126,29 @@ export class PKPPermissionsManager {
       {
         targetAddress: params.address, // This is important - the field must be targetAddress
         scopes: params.scopes,
+        ...this.getIdentifierParams(),
+      },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Adds a permitted authentication method scope to the PKP
+   *
+   * @param params - Parameters containing authMethodType, authMethodId, and scopeId
+   * @returns Promise resolving to transaction details
+   */
+  async addPermittedAuthMethodScope(params: {
+    authMethodType: string | number | bigint;
+    authMethodId: string;
+    scopeId: string | number | bigint;
+  }): Promise<LitTxVoid> {
+    return addPermittedAuthMethodScopeByIdentifier(
+      {
+        authMethodType: params.authMethodType,
+        authMethodId: params.authMethodId,
+        scopeId: params.scopeId,
         ...this.getIdentifierParams(),
       },
       this.networkContext,
@@ -304,6 +330,12 @@ export class PKPPermissionsManager {
     operations: Array<
       | { type: 'addAction'; ipfsId: string; scopes: ScopeString[] }
       | { type: 'addAddress'; address: string; scopes: ScopeString[] }
+      | {
+          type: 'addAuthMethodScope';
+          authMethodType: string | number | bigint;
+          authMethodId: string;
+          scopeId: string | number | bigint;
+        }
       | { type: 'removeAction'; ipfsId: string }
       | { type: 'removeAddress'; address: string }
     >
@@ -321,6 +353,13 @@ export class PKPPermissionsManager {
           await this.addPermittedAddress({
             address: op.address,
             scopes: op.scopes,
+          });
+          break;
+        case 'addAuthMethodScope':
+          await this.addPermittedAuthMethodScope({
+            authMethodType: op.authMethodType,
+            authMethodId: op.authMethodId,
+            scopeId: op.scopeId,
           });
           break;
         case 'removeAction':

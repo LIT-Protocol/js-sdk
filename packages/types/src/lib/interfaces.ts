@@ -22,7 +22,6 @@ import {
 } from '@lit-protocol/schemas';
 
 import { SigType } from './EndpointResponses';
-import { ILitNodeClient } from './ILitNodeClient';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 import {
   AccessControlConditions,
@@ -790,18 +789,6 @@ export interface SessionSigningTemplate {
   maxPrice: string;
 }
 
-export interface PKPBaseProp {
-  litNodeClient: ILitNodeClient;
-  pkpPubKey: string;
-  rpcs?: RPCUrls;
-  authContext: AuthenticationContext;
-  debug?: boolean;
-  litActionCode?: string;
-  litActionIPFS?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  litActionJsParams?: any;
-}
-
 export interface RPCUrls {
   eth?: string;
   cosmos?: string;
@@ -815,22 +802,6 @@ export interface PKPWallet {
   runLitAction: (toSign: Uint8Array, sigName: string) => Promise<any>;
   runSign: (toSign: Uint8Array) => Promise<SigResponse>;
 }
-
-export type PKPEthersWalletProp = Omit<
-  PKPBaseProp,
-  'controllerAuthSig' | 'controllerAuthMethods'
-> & {
-  litNodeClient: ILitNodeClient;
-  provider?: Provider;
-  rpc?: string;
-};
-
-export interface PKPCosmosWalletProp extends PKPBaseProp {
-  addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
-  rpc?: string;
-}
-
-// note: Omit removes the 'addressPrefix' from PKPCosmosWalletProp
 
 export interface PKPBaseDefaultParams {
   toSign: Uint8Array;

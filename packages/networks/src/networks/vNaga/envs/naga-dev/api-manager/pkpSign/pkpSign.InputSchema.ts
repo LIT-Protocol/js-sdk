@@ -1,6 +1,6 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
 import {
-  AuthContextSchema,
+  PKPAuthContextSchema,
   EoaAuthContextSchema,
   HexPrefixedSchema,
   SigningChainSchema,
@@ -19,7 +19,7 @@ export const PKPSignInputSchema = z.object({
   signingScheme: SigningSchemeSchema,
   pubKey: HexPrefixedSchema,
   toSign: z.any(),
-  authContext: z.union([AuthContextSchema, EoaAuthContextSchema]),
+  authContext: z.union([PKPAuthContextSchema, EoaAuthContextSchema]),
   userMaxPrice: z.bigint().optional(),
 });
 

@@ -37,6 +37,8 @@ export async function removePermittedAddress(
   const validatedRequest = removePermittedAddressSchema.parse(request);
   logger.debug({ validatedRequest });
 
+  console.log('🔥 REMOVE PERMITTED ADDRESS:', validatedRequest);
+
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =
     createContractsManager(networkCtx, accountOrWalletClient);
 

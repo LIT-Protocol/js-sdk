@@ -20,10 +20,12 @@ export const PkpIdentifierSchema = z.discriminatedUnion('field', [
   z
     .object({
       field: z.literal('tokenId'),
-      tokenId: toBigInt,
+      tokenId: z.union([z.string(), z.number(), z.bigint()]).transform((val) => {
+        return typeof val === 'bigint' ? val : toBigInt.parse(val);
+      }),
     })
     .strict(),
-  z
+z
     .object({
       field: z.literal('address'),
       address: isEthAddress,
@@ -42,7 +44,7 @@ type ExactlyOne<T> = {
   [K in keyof T]: Record<K, T[K]> & Partial<Record<Exclude<keyof T, K>, never>>;
 }[keyof T];
 
-// Raw input type that ensures only one identifier is provided
+// @deprecated - use the one in types package instead
 export type PkpIdentifierRaw = ExactlyOne<{
   tokenId: string | number | bigint;
   address: string;

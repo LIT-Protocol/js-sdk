@@ -9,8 +9,12 @@ import {
   WalletClient,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { signatures } from '../../envs/naga-local/generated/naga-develop';
+// import { signatures } from '../../envs/naga-local/generated/naga-develop';
+import { nagaDevSignatures } from '@lit-protocol/contracts';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
+
+type Signatures = typeof nagaDevSignatures;
+
 export type ExpectedAccountOrWalletClient =
   | Account
   | WalletClient
@@ -72,7 +76,7 @@ export const createContractsManager = <T, M>(
   });
 
   // 4. Get the contract data (casting a default type to ensure type safety)
-  const contractData = networkConfig.abiSignatures as typeof signatures;
+  const contractData = networkConfig.abiSignatures as Signatures;
 
   if (!contractData) {
     throw new Error(
@@ -87,6 +91,8 @@ export const createContractsManager = <T, M>(
       contractData.PKPNFT.methods.claimAndMint,
       contractData.PKPNFT.methods.mintCost,
       contractData.PKPNFT.methods.tokenOfOwnerByIndex,
+      contractData.PKPNFT.methods.mintNext,
+      contractData.PKPNFT.methods.safeTransferFrom,
       ...contractData.PKPNFT.events,
     ],
     client: { public: publicClient, wallet: walletClient },
@@ -125,6 +131,7 @@ export const createContractsManager = <T, M>(
     abi: [
       contractData.PKPPermissions.methods.addPermittedAction,
       contractData.PKPPermissions.methods.addPermittedAddress,
+      contractData.PKPPermissions.methods.addPermittedAuthMethodScope,
       contractData.PKPPermissions.methods.getPermittedActions,
       contractData.PKPPermissions.methods.getPermittedAddresses,
       contractData.PKPPermissions.methods.getPermittedAuthMethods,

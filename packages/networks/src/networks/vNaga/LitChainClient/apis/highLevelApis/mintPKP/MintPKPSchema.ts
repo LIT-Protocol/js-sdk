@@ -1,30 +1,42 @@
-import { isHex, toBytes, toHex } from 'viem';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { Hex } from 'viem';
 import { z } from 'zod';
-import { AuthMethodSchema } from '../../../schemas/shared/AuthMethodSchema';
 import { ScopeSchemaRaw } from '../../../schemas/shared/ScopeSchema';
 
 export const MintPKPSchema = z
   .object({
-    authMethod: AuthMethodSchema,
+    // authMethod: AuthMethodSchema,
+    authMethodId: HexPrefixedSchema,
+    authMethodType: z.union([z.number(), z.bigint()]),
     scopes: z.array(ScopeSchemaRaw),
-    pubkey: z.string().optional(),
-    customAuthMethodId: z.string().optional(),
+    pubkey: HexPrefixedSchema.optional(),
   })
-  .transform((data) => {
-    // If no customAuthMethodId provided, return data as-is
-    if (!data.customAuthMethodId) {
-      return data;
+  .transform(async (data) => {
+    let derivedPubkey: Hex | undefined;
+
+    // Determine pubkey based on the (potentially derived) authMethodType
+    if (data.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
+      if (!data.pubkey) {
+        throw new Error('pubkey is required for WebAuthn');
+      }
+      derivedPubkey = data.pubkey as Hex;
+    } else {
+      derivedPubkey = '0x' as Hex;
     }
 
-    // Convert customAuthMethodId to hex if not already in hex format
-    const hexAuthMethodId = isHex(data.customAuthMethodId)
-      ? data.customAuthMethodId
-      : toHex(toBytes(data.customAuthMethodId));
+    // Ensure pubkey is present (it should always be by this point)
+    if (typeof derivedPubkey === 'undefined') {
+      // This case should ideally not be reached if logic above is correct
+      throw new Error('pubkey could not be determined');
+    }
 
-    // Return data with transformed customAuthMethodId
+    // Return data with resolved/derived values
     return {
       ...data,
-      customAuthMethodId: hexAuthMethodId,
+      authMethodId: data.authMethodId,
+      authMethodType: data.authMethodType,
+      pubkey: derivedPubkey,
     };
   });
 

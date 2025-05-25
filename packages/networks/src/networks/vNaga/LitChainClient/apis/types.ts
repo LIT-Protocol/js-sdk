@@ -13,3 +13,9 @@ export type LitTxVoid = {
   receipt: TransactionReceipt;
   decodedLogs: DecodedLog[];
 };
+
+export type GenericTxRes<R, T> = {
+  _raw: R;
+  txHash: string;
+  data: T;
+};

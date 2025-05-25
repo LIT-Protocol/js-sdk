@@ -10,7 +10,7 @@ import {
 
 const getPermittedAuthMethodScopesSchema = z.object({
   tokenId: toBigInt,
-  authMethodType: z.number(),
+  authMethodType: z.union([z.number(), z.bigint()]),
   authMethodId: z.string(),
   scopeId: z.number().optional(),
 });
@@ -43,7 +43,8 @@ export async function getPermittedAuthMethodScopes(
     validatedRequest.authMethodId as `0x${string}`,
     validatedRequest.scopeId !== undefined
       ? BigInt(validatedRequest.scopeId)
-      : BigInt(0),
+      : // 3 cus we only have 3 scopes (no permission, sign-anything, personal-sign)
+        BigInt(3),
   ]);
 
   return res;

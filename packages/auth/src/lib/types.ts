@@ -1,4 +1,7 @@
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+import {
+  AUTH_METHOD_TYPE,
+  AUTH_METHOD_TYPE_VALUES,
+} from '@lit-protocol/constants';
 import {
   ExpirationSchema,
   ObjectMapFromArray,
@@ -63,7 +66,7 @@ export const LitAuthDataSchema = z.object({
     keyPair: SessionKeyPairSchema,
     expiresAt: ExpirationSchema,
   }),
-  authMethodType: z.enum(authMethodTypeKeys),
+  authMethodType: z.custom<AUTH_METHOD_TYPE_VALUES>(),
 });
 
 export type LitAuthData = z.infer<typeof LitAuthDataSchema>;

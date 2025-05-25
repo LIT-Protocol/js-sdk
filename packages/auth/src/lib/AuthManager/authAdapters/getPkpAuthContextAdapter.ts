@@ -1,23 +1,16 @@
-import { NodeUrlsSchema } from '@lit-protocol/schemas';
+import { AUTH_METHOD_TYPE_VALUES, PRODUCT_IDS } from '@lit-protocol/constants';
+import {
+  AuthData,
+  HexPrefixedSchema,
+  NodeUrlsSchema,
+} from '@lit-protocol/schemas';
 import { ethers } from 'ethers';
 import { z } from 'zod';
-import { AuthMethodType } from '../../types';
-import {
-  AuthConfig,
-  AuthManagerParams,
-  BaseAuthContext,
-  ConstructorConfig,
-  tryGetCachedAuthData,
-} from '../auth-manager';
+import { AuthConfigV2 } from '../../authenticators/types';
+import { AuthManagerParams } from '../auth-manager';
 import { getPkpAuthContext } from '../authContexts/getPkpAuthContext';
-
-// Define this near the top of the file or in a shared types file
-export interface AuthenticatorWithId {
-  new (config: any): any; // the constructor signature (maybe all the AuthConfigs eg. GoogleConfig?)
-  id: AuthMethodType; // Or potentially AuthMethodType if that's more specific
-  authenticate: Function; // Add this line
-  register?: Function; // Technically only needed for webauthn
-}
+import { processResources } from '../utils/processResources';
+import { tryGetCachedAuthData } from '../try-getters/tryGetCachedAuthData';
 
 export const PkpAuthDepsSchema = z.object({
   nonce: z.any(),
@@ -26,80 +19,79 @@ export const PkpAuthDepsSchema = z.object({
   nodeUrls: NodeUrlsSchema,
 });
 
-export async function getPkpAuthContextAdapter<T extends AuthenticatorWithId>(
+export async function getPkpAuthContextAdapter(
   upstreamParams: AuthManagerParams,
   params: {
-    authenticator: T;
-    config: ConstructorConfig<T>;
-    authConfig: AuthConfig;
-    litClient: BaseAuthContext<any>['litClient'];
+    authData: AuthData;
+    pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+    authConfig: AuthConfigV2;
+    litClient: {
+      getContext: () => Promise<any>;
+    };
   }
 ) {
-  const litClientConfig = PkpAuthDepsSchema.parse({
-    nonce: await params.litClient.getLatestBlockhash(),
-    currentEpoch: await params.litClient.getCurrentEpoch(),
-    getSignSessionKey: params.litClient.getSignSessionKey,
-    nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
+  const _resources = processResources(params.authConfig.resources);
+
+  // TODO: 👇 The plan is to identify if the certain operations could be wrapped inside a single function
+  // where different network modules can provide their own implementations.
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this!
+  const litClientCtx = await params.litClient.getContext();
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can be in both Naga and Datil)
+  const latestConnectionInfo = litClientCtx.latestConnectionInfo;
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can only be in Naga)
+  const nodePrices = latestConnectionInfo.priceFeedInfo.networkPrices;
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can be in both Naga and Datil)
+  const handshakeResult = litClientCtx.handshakeResult;
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can be in both Naga and Datil)
+  const threshold = handshakeResult.threshold;
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can only be in Naga)
+  const nodeUrls = litClientCtx.getMaxPricesForNodeProduct({
+    nodePrices: nodePrices,
+    userMaxPrice: litClientCtx.getUserMaxPrice({
       product: 'LIT_ACTION',
     }),
+    productId: PRODUCT_IDS['LIT_ACTION'],
+    numRequiredNodes: threshold,
   });
 
-  const pkpAddress = ethers.utils.computeAddress(params.config.pkpPublicKey);
+  const pkpAddress = ethers.utils.computeAddress(params.pkpPublicKey);
 
-  // @example   {
-  //   sessionKey: {
-  //     keyPair: {
-  //       publicKey: "bf8001bfdead23402d867d1acd965b45b405676a966db4237af11ba5eb85d7ce",
-  //       secretKey: "9e19bd14bbc1bf4a6a0d08bd035d279702d31a6da159d52867441ae02e77ba02bf8001bfdead23402d867d1acd965b45b405676a966db4237af11ba5eb85d7ce",
-  //     },
-  //     expiresAt: "2025-05-02T16:06:19.195Z",
-  //   },
-  //   authMethodType: "EthWallet",
-  // }
-  const authData = await tryGetCachedAuthData({
+  const litAuthData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
     address: pkpAddress,
-    expiration: params.authConfig.expiration,
-    type: params.authenticator.id,
+    expiration: params.authConfig.expiration!,
+    type: params.authData.authMethodType as AUTH_METHOD_TYPE_VALUES,
   });
-
-  const authenticator = new params.authenticator(params.config);
-
-  // inject litClientConfig into params.config
-  params.config = {
-    ...params.config,
-    ...litClientConfig,
-  };
-
-  let authMethod;
-
-  // only for webauthn (maybe we can support other types)
-  if (params.config.method === 'register') {
-    authMethod = await authenticator.register(params.config);
-  } else {
-    authMethod = await authenticator.authenticate(params.config);
-  }
 
   return getPkpAuthContext({
     authentication: {
-      pkpPublicKey: params.config.pkpPublicKey,
-      authMethods: [authMethod],
+      pkpPublicKey: params.pkpPublicKey,
+      authData: params.authData,
     },
     authConfig: {
-      domain: params.authConfig.domain,
-      resources: params.authConfig.resources,
-      capabilityAuthSigs: params.authConfig.capabilityAuthSigs,
-      expiration: params.authConfig.expiration,
-      statement: params.authConfig.statement,
+      domain: params.authConfig.domain!,
+      resources: _resources,
+      capabilityAuthSigs: params.authConfig.capabilityAuthSigs!,
+      expiration: params.authConfig.expiration!,
+      statement: params.authConfig.statement!,
     },
     deps: {
-      authData,
+      litAuthData: litAuthData,
       connection: {
-        nonce: litClientConfig.nonce,
-        currentEpoch: litClientConfig.currentEpoch,
-        nodeUrls: litClientConfig.nodeUrls,
+        nonce: litClientCtx.latestBlockhash,
+        currentEpoch:
+          litClientCtx.latestConnectionInfo.epochState.currentNumber,
+        nodeUrls: nodeUrls,
       },
-      nodeSignSessionKey: litClientConfig.getSignSessionKey,
+      signSessionKey: litClientCtx.signSessionKey,
+      storage: upstreamParams.storage,
+      pkpAddress: pkpAddress,
     },
   });
 }

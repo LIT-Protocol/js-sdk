@@ -1,5 +1,11 @@
-import { DOCS, version } from '@lit-protocol/constants';
-import { AuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
+import { version } from '@lit-protocol/constants';
+import {
+  AuthData,
+  HexPrefixedSchema,
+  JsonSignCustomSessionKeyRequestForPkpReturnSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema,
+} from '@lit-protocol/schemas';
+import { Hex } from 'viem';
 
 import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
@@ -10,10 +16,26 @@ import { issueSessionFromContext } from './session-manager/issueSessionFromConte
 import { createStateManager } from './state-manager/createStateManager';
 
 // Import the necessary types for the explicit return type annotation
-import { CallbackParams, RequestItem } from '@lit-protocol/types';
+import {
+  combineSignatureShares,
+  mostCommonString,
+  normalizeAndStringify,
+} from '@lit-protocol/crypto';
+import { getChildLogger } from '@lit-protocol/logger';
+import {
+  AuthMethod,
+  AuthSig,
+  CallbackParams,
+  Optional,
+  RequestItem,
+} from '@lit-protocol/types';
+import { computeAddress } from 'ethers/lib/utils';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
+import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
-import type { LitTxRes } from '../../LitChainClient/apis/types';
+import { PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
+import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
+import type { GenericTxRes, LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 import { PKPSignCreateRequestParams } from './api-manager/pkpSign/pkpSign.CreateRequestParams';
@@ -24,10 +46,18 @@ import {
 } from './api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
+import { SignSessionKeyResponseDataSchema } from './api-manager/signSessionKey/signSessionKey.ResponseDataSchema';
 import {
   createChainManager,
   CreateChainManagerReturn,
 } from './chain-manager/createChainManager';
+import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
+import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
+import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
+
+const _logger = getChildLogger({
+  module: 'naga-dev-module',
+});
 
 // Define ProcessedBatchResult type (mirroring structure from dispatchRequests)
 type ProcessedBatchResult<T> =
@@ -42,12 +72,15 @@ const nagaDevModuleObject = {
     requiredAttestation: false,
     abortTimeout: 20_000,
     minimumThreshold: networkConfig.minimumThreshold,
+    httpProtocol: networkConfig.httpProtocol,
   },
   getNetworkName: () => networkConfig.network,
   getHttpProtocol: () => networkConfig.httpProtocol,
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
+  getAuthServerBaseUrl: () => networkConfig.authServerBaseUrl,
+  getMinimumThreshold: () => networkConfig.minimumThreshold,
   // composeLitUrl: composeLitUrl,
   /**
    * 🧠 This is the core function that keeps all the network essential information
@@ -67,41 +100,93 @@ const nagaDevModuleObject = {
     });
   },
 
+  getMaxPricesForNodeProduct: getMaxPricesForNodeProduct,
+  getUserMaxPrice: getUserMaxPrice,
   chainApi: {
-    mintPkp: async (params: {
-      authContext:
-      | z.infer<typeof AuthContextSchema>
-      | z.infer<typeof EoaAuthContextSchema>;
+    getPKPPermissionsManager: async (params: {
+      pkpIdentifier: PkpIdentifierRaw;
+      account: ExpectedAccountOrWalletClient;
+    }): Promise<PKPPermissionsManager> => {
+      const chainManager = createChainManager(params.account);
+      return chainManager.api.pkpPermissionsManager(params.pkpIdentifier);
+    },
+
+    /**
+     * Mints a PKP using EOA directly
+     */
+    mintWithEoa: async (params: {
+      account: ExpectedAccountOrWalletClient;
+    }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
+      const chainManager = createChainManager(params.account);
+      const res = await chainManager.api.mintWithEoa();
+      console.log('🔥 mintWithEoa res:', res);
+      return {
+        _raw: res,
+        txHash: res.hash,
+        data: res.data,
+      };
+    },
+
+    /**
+     * Mints a PKP using Auth Method
+     */
+    mintWithAuth: async (params: {
+      account: ExpectedAccountOrWalletClient;
+      authData: Optional<AuthData, 'accessToken'>;
       scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
-    }): Promise<LitTxRes<PKPData>> => {
-      // ========== This is EoaAuthContextSchema ==========
-      if (
-        'account' in params.authContext &&
-        params.authContext.account
-      ) {
-        const { account, authMethod } = params.authContext;
+    }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
+      const chainManager = createChainManager(params.account);
+      const res = await chainManager.api.mintPKP({
+        scopes: params.scopes,
+        // authMethod: authMethod,
+        authMethodId: params.authData.authMethodId,
+        authMethodType: params.authData.authMethodType,
+        pubkey: params.authData.publicKey,
+      });
+      return {
+        _raw: res,
+        txHash: res.hash,
+        data: res.data,
+      };
+    },
 
-        const chainManager = createChainManager(account);
-
-        return await chainManager.api.mintPKP({
-          scopes: params.scopes,
-          authMethod: authMethod,
-        });
-      }
-
-      // ========== This is AuthContextSchema ==========
-      else if (
-        'authConfig' in params.authContext &&
-        params.authContext.authConfig &&
-        'sessionKeyPair' in params.authContext
-      ) {
-        // This is AuthContextSchema
-        throw new Error(DOCS.WHAT_IS_AUTH_CONTEXT);
-      } else {
-        throw new Error(
-          'Invalid authContext provided: does not conform to EoaAuthContextSchema or AuthContextSchema properly.'
-        );
-      }
+    mintWithMultiAuths: async (
+      params: {
+        account: ExpectedAccountOrWalletClient;
+      } & MintWithMultiAuthsRequest
+    ): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
+      const chainManager = createChainManager(params.account);
+      const res = await chainManager.api.mintWithMultiAuths({
+        authMethodIds: params.authMethodIds,
+        authMethodTypes: params.authMethodTypes,
+        authMethodScopes: params.authMethodScopes,
+        pubkeys: params.pubkeys,
+        addPkpEthAddressAsPermittedAddress:
+          params.addPkpEthAddressAsPermittedAddress,
+        sendPkpToItself: params.sendPkpToItself,
+      });
+      return {
+        _raw: res,
+        txHash: res.hash,
+        data: res.data,
+      };
+    },
+  },
+  authService: {
+    pkpMint: async (params: {
+      authData: AuthData;
+      authServerBaseUrl?: string;
+    }) => {
+      return await handleAuthServerRequest<PKPData>({
+        jobName: 'PKP Minting',
+        serverUrl: networkConfig.authServerBaseUrl || params.authServerBaseUrl!,
+        path: '/pkp/mint',
+        body: {
+          authMethodType: params.authData.authMethodType,
+          authMethodId: params.authData.authMethodId,
+          pubkey: params.authData.publicKey,
+        },
+      });
     },
   },
   api: {
@@ -116,11 +201,17 @@ const nagaDevModuleObject = {
         ResponseData: PKPSignResponseDataSchema,
       },
       createRequest: async (params: PKPSignCreateRequestParams) => {
+        _logger.info('pkpSign:createRequest: Creating request', {
+          params,
+        });
+
         // -- 1. generate session sigs
         const sessionSigs = await issueSessionFromContext({
           pricingContext: PricingContextSchema.parse(params.pricingContext),
           authContext: params.authContext,
         });
+
+        _logger.info('pkpSign:createRequest: Session sigs generated');
 
         // -- 2. generate requests
         const _requestId = createRequestId();
@@ -128,9 +219,14 @@ const nagaDevModuleObject = {
           z.infer<typeof PKPSignRequestDataSchema>
         >[] = [];
 
+        _logger.info('pkpSign:createRequest: Request id generated');
+
         const urls = Object.keys(sessionSigs);
 
         for (const url of urls) {
+          _logger.info('pkpSign:createRequest: Generating request data', {
+            url,
+          });
           const _requestData = PKPSignRequestDataSchema.parse({
             toSign: params.signingContext.toSign,
             signingScheme: params.signingContext.signingScheme,
@@ -148,6 +244,10 @@ const nagaDevModuleObject = {
             endpoint: nagaDevModuleObject.getEndpoints().PKP_SIGN,
           });
 
+          _logger.info('pkpSign:createRequest: Url with path generated', {
+            _urlWithPath,
+          });
+
           requests.push({
             fullPath: _urlWithPath,
             data: _requestData,
@@ -158,7 +258,9 @@ const nagaDevModuleObject = {
         }
 
         if (!requests || requests.length === 0) {
-          console.error('No requests generated for pkpSign.');
+          _logger.error(
+            'pkpSign:createRequest: No requests generated for pkpSign.'
+          );
           throw new Error('Failed to generate requests for pkpSign.');
         }
 
@@ -187,6 +289,303 @@ const nagaDevModuleObject = {
         });
 
         return signatures;
+      },
+    },
+    signSessionKey: {
+      schemas: {},
+      createRequest: async (
+        requestBody: z.infer<
+          typeof JsonSignSessionKeyRequestForPkpReturnSchema
+        >,
+        httpProtocol: 'http://' | 'https://',
+        version: string
+      ) => {
+        type RequestBodyType = {
+          sessionKey: string;
+          authMethods: AuthMethod[];
+          pkpPublicKey?: string;
+          siweMessage: string;
+          curveType: 'BLS';
+          epoch?: number;
+          nodeSet: { value: number; socketAddress: string }[];
+        };
+
+        _logger.info('signSessionKey:createRequest: Request body', {
+          requestBody,
+        });
+
+        const nodeUrls = requestBody.nodeSet.map(
+          (node) => `${httpProtocol}${node.socketAddress}`
+        );
+
+        _logger.info('signSessionKey:createRequest: Node urls', {
+          nodeUrls,
+        });
+
+        // extract the authMethod from the requestBody
+        const authMethod = {
+          authMethodType: requestBody.authData.authMethodType,
+          accessToken: requestBody.authData.accessToken,
+        } as AuthMethod;
+
+        const requests = [];
+
+        for (const url of nodeUrls) {
+          const _urlWithPath = composeLitUrl({
+            url,
+            endpoint: nagaDevModuleObject.getEndpoints().SIGN_SESSION_KEY,
+          });
+
+          const _body: RequestBodyType = {
+            sessionKey: requestBody.sessionKey,
+            authMethods: [authMethod],
+            pkpPublicKey: requestBody.pkpPublicKey,
+            siweMessage: requestBody.siweMessage,
+            curveType: 'BLS',
+            epoch: requestBody.epoch,
+            nodeSet: requestBody.nodeSet,
+          };
+
+          requests.push({
+            fullPath: _urlWithPath,
+            data: _body,
+            requestId: createRequestId(),
+            epoch: requestBody.epoch,
+            version: version,
+          });
+        }
+
+        if (!requests || requests.length === 0) {
+          _logger.error(
+            'signSessionKey:createRequest: No requests generated for signSessionKey.'
+          );
+          throw new Error('Failed to generate requests for signSessionKey.');
+        }
+
+        return requests;
+      },
+      handleResponse: async (
+        result: ProcessedBatchResult<
+          z.infer<typeof SignSessionKeyResponseDataSchema>
+        >,
+        pkpPublicKey: Hex | string
+      ) => {
+        if (!result.success) {
+          console.error(
+            '🚨 Sign Session Key batch failed in handleResponse:',
+            result.error
+          );
+          throw Error(JSON.stringify(result.error));
+        }
+
+        const { values } = SignSessionKeyResponseDataSchema.parse(result);
+
+        _logger.info('signSessionKey:handleResponse: Values', {
+          values,
+        });
+
+        const signatureShares = values.map((s) => ({
+          ProofOfPossession: {
+            identifier: s.signatureShare.ProofOfPossession.identifier,
+            value: s.signatureShare.ProofOfPossession.value,
+          },
+        }));
+
+        _logger.info('signSessionKey:handleResponse: Signature shares', {
+          signatureShares,
+        });
+
+        // naga-wasm
+        // datil-wasm (we could use the existing package for this or
+        // we should make the current wasm work with Datil too.)
+        const blsCombinedSignature = await combineSignatureShares(
+          signatureShares
+        );
+
+        _logger.info('signSessionKey:handleResponse: BLS combined signature', {
+          blsCombinedSignature,
+        });
+
+        const _pkpPublicKey = HexPrefixedSchema.parse(pkpPublicKey);
+
+        const mostCommonSiweMessage = mostCommonString(
+          values.map((s) => s.siweMessage)
+        );
+
+        const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
+
+        _logger.info('signSessionKey:handleResponse: Signed message', {
+          signedMessage,
+        });
+
+        const authSig: AuthSig = {
+          sig: JSON.stringify({
+            ProofOfPossession: blsCombinedSignature,
+          }),
+          algo: 'LIT_BLS',
+          derivedVia: 'lit.bls',
+          signedMessage,
+          address: computeAddress(_pkpPublicKey),
+        };
+
+        _logger.info('signSessionKey:handleResponse: Auth sig', {
+          authSig,
+        });
+
+        return authSig;
+      },
+    },
+    signCustomSessionKey: {
+      schemas: {},
+      createRequest: async (
+        requestBody: z.infer<
+          typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
+        >,
+        httpProtocol: 'http://' | 'https://',
+        version: string
+      ) => {
+        type RequestBodyType = {
+          sessionKey: string;
+          authMethods: AuthMethod[];
+          pkpPublicKey?: string;
+          siweMessage: string;
+          curveType: 'BLS';
+          epoch?: number;
+          nodeSet: { value: number; socketAddress: string }[];
+          litActionCode?: string;
+          litActionIpfsId?: string;
+          jsParams?: Record<string, any>;
+        };
+
+        _logger.info('signSessionKey:createRequest: Request body', {
+          requestBody,
+        });
+
+        const nodeUrls = requestBody.nodeSet.map(
+          (node) => `${httpProtocol}${node.socketAddress}`
+        );
+
+        _logger.info('signSessionKey:createRequest: Node urls', {
+          nodeUrls,
+        });
+
+        // extract the authMethod from the requestBody
+        // const authMethod = {
+        //   authMethodType: requestBody.authData.authMethodType,
+        //   accessToken: requestBody.authData.accessToken,
+        // } as AuthMethod;
+
+        const requests = [];
+
+        for (const url of nodeUrls) {
+          const _urlWithPath = composeLitUrl({
+            url,
+            endpoint: nagaDevModuleObject.getEndpoints().SIGN_SESSION_KEY,
+          });
+
+          const _body: RequestBodyType = {
+            sessionKey: requestBody.sessionKey,
+            authMethods: [],
+            pkpPublicKey: requestBody.pkpPublicKey,
+            siweMessage: requestBody.siweMessage,
+            curveType: 'BLS',
+            epoch: requestBody.epoch,
+            nodeSet: requestBody.nodeSet,
+            litActionCode: requestBody.litActionCode,
+            litActionIpfsId: requestBody.litActionIpfsId,
+            jsParams: requestBody.jsParams,
+          };
+
+          requests.push({
+            fullPath: _urlWithPath,
+            data: _body,
+            requestId: createRequestId(),
+            epoch: requestBody.epoch,
+            version: version,
+          });
+        }
+
+        if (!requests || requests.length === 0) {
+          _logger.error(
+            'signSessionKey:createRequest: No requests generated for signSessionKey.'
+          );
+          throw new Error('Failed to generate requests for signSessionKey.');
+        }
+
+        // console.log("🔥🔥🔥 requests:", requests);
+        // process.exit();
+
+        return requests;
+      },
+      handleResponse: async (
+        result: ProcessedBatchResult<
+          z.infer<typeof SignSessionKeyResponseDataSchema>
+        >,
+        pkpPublicKey: Hex | string
+      ) => {
+        if (!result.success) {
+          console.error(
+            '🚨 Sign Session Key batch failed in handleResponse:',
+            result.error
+          );
+          throw Error(JSON.stringify(result.error));
+        }
+
+        const { values } = SignSessionKeyResponseDataSchema.parse(result);
+
+        _logger.info('signSessionKey:handleResponse: Values', {
+          values,
+        });
+
+        const signatureShares = values.map((s) => ({
+          ProofOfPossession: {
+            identifier: s.signatureShare.ProofOfPossession.identifier,
+            value: s.signatureShare.ProofOfPossession.value,
+          },
+        }));
+
+        _logger.info('signSessionKey:handleResponse: Signature shares', {
+          signatureShares,
+        });
+
+        // naga-wasm
+        // datil-wasm (we could use the existing package for this or
+        // we should make the current wasm work with Datil too.)
+        const blsCombinedSignature = await combineSignatureShares(
+          signatureShares
+        );
+
+        _logger.info('signSessionKey:handleResponse: BLS combined signature', {
+          blsCombinedSignature,
+        });
+
+        const _pkpPublicKey = HexPrefixedSchema.parse(pkpPublicKey);
+
+        const mostCommonSiweMessage = mostCommonString(
+          values.map((s) => s.siweMessage)
+        );
+
+        const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
+
+        _logger.info('signSessionKey:handleResponse: Signed message', {
+          signedMessage,
+        });
+
+        const authSig: AuthSig = {
+          sig: JSON.stringify({
+            ProofOfPossession: blsCombinedSignature,
+          }),
+          algo: 'LIT_BLS',
+          derivedVia: 'lit.bls',
+          signedMessage,
+          address: computeAddress(_pkpPublicKey),
+        };
+
+        _logger.info('signSessionKey:handleResponse: Auth sig', {
+          authSig,
+        });
+
+        return authSig;
       },
     },
   },
