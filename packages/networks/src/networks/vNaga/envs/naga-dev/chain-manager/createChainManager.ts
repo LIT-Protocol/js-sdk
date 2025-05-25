@@ -15,6 +15,9 @@ export type CreateChainManagerReturn = {
     mintPKP: (
       req: Parameters<typeof api.mintPKP>[0]
     ) => ReturnType<typeof api.mintPKP>;
+    mintWithMultiAuths: (
+      req: Parameters<typeof api.mintWithMultiAuths>[0]
+    ) => ReturnType<typeof api.mintWithMultiAuths>;
     pkpPermissionsManager: (
       pkpIdentifier: PkpIdentifierRaw
     ) => InstanceType<typeof api.PKPPermissionsManager>;
@@ -56,6 +59,7 @@ export const createChainManager = (
     api: {
       mintWithEoa: bindContext(api.mintWithEoa),
       mintPKP: bindContext(api.mintPKP),
+      mintWithMultiAuths: bindContext(api.mintWithMultiAuths),
       pkpPermissionsManager: (pkpIdentifier: PkpIdentifierRaw) => {
         return new api.PKPPermissionsManager(
           pkpIdentifier,

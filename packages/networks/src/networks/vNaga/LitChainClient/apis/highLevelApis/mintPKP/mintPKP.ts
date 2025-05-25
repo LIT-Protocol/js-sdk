@@ -40,6 +40,8 @@ export const mintPKP = async (
 
   logger.debug({ validatedRequest });
 
+  console.log("🔥 [mintPKP] validatedRequest:", validatedRequest);
+
   const tx = await mintNextAndAddAuthMethods(
     {
       keyType: 2,

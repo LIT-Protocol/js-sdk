@@ -12,6 +12,14 @@ import {
 import { LitTxRes } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
 import { decodeLogs } from '../../../utils/decodeLogs';
+import { hexToBytes } from 'viem';
+import { ethers } from 'ethers';
+
+async function getBytesFromIpfsCid(ipfsCid: string): Promise<`0x${string}`> {
+  const decoded = ethers.utils.base58.decode(ipfsCid);
+
+  return `0x${Buffer.from(decoded).toString('hex')}`;
+}
 
 /**
  * Mints a new Programmable Key Pair (PKP) with specified authentication methods.
@@ -38,6 +46,24 @@ export async function mintNextAndAddAuthMethods(
     createContractsManager(networkCtx, accountOrWalletClient);
 
   const mintCost = await pkpNftContract.read.mintCost();
+  
+  // console.log("🔥🔥🔥 validatedRequest:", validatedRequest);
+
+  // const ipfsCid = "QmWL2r7CPi5dDKZetRrj6eVfzwv5Y472QJew9c5B9iRU6j";
+  // const ipfsCidAsBytes = await getBytesFromIpfsCid(ipfsCid);
+  
+
+  // const modifyRequest = {
+  //   ...validatedRequest,
+  //   permittedAuthMethodTypes: [88911n, 2n],
+  //   permittedAuthMethodIds: [validatedRequest.permittedAuthMethodIds[0], ipfsCidAsBytes],
+  //   permittedAuthMethodPubkeys: ["0x", "0x"],
+  //   permittedAuthMethodScopes: [[1], [1]],
+  //   addPkpEthAddressAsPermittedAddress: false,
+  //   sendPkpToItself: true,
+  // }
+
+  // console.log("🔥🔥🔥 modifyRequest:", modifyRequest);
 
   const hash = await callWithAdjustedOverrides(
     pkpHelperContract,
@@ -48,8 +74,8 @@ export async function mintNextAndAddAuthMethods(
       validatedRequest.permittedAuthMethodIds,
       validatedRequest.permittedAuthMethodPubkeys,
       validatedRequest.permittedAuthMethodScopes,
-      validatedRequest.addPkpEthAddressAsPermittedAddress,
-      validatedRequest.sendPkpToItself,
+      validatedRequest.addPkpEthAddressAsPermittedAddress,  // This adds as permitted address
+      validatedRequest.sendPkpToItself, // This keeps control if is true, otherwise it will be added as a permitted address
     ],
     {
       value: mintCost,

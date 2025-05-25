@@ -5,13 +5,23 @@
 // 4. 🟪 (Network Module) Handle response
 
 import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
-import { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schemas';
+import {
+  JsonSignCustomSessionKeyRequestForPkpReturnSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema,
+} from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
 import { getChildLogger } from '@lit-protocol/logger';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PkpIdentifierRaw } from '@lit-protocol/types';
+import { stringToIpfsHash } from './helpers/stringToIpfsHash';
+import {
+  MintWithCustomAuthRequest,
+  MintWithCustomAuthSchema,
+} from './schemas/MintWithCustomAuthSchema';
+import bs58 from 'bs58';
+import { hexToBigInt, keccak256, toBytes, toHex } from 'viem';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -167,6 +177,46 @@ export const _createNagaLitClient = async (
     );
   }
 
+  async function _signCustomSessionKey(params: {
+    nodeUrls: string[];
+    requestBody: z.infer<
+      typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
+    >;
+  }) {
+    // 1. 🟩 get the fresh handshake results
+    const currentHandshakeResult = _stateManager.getCallbackResult();
+    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+
+    if (!currentHandshakeResult || !currentConnectionInfo) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of pkpSign.'
+      );
+    }
+
+    // 2. 🟪 Create requests
+    const requestArray =
+      await networkModule.api.signCustomSessionKey.createRequest(
+        params.requestBody,
+        networkModule.config.httpProtocol,
+        networkModule.version
+      );
+
+    const requestId = requestArray[0].requestId;
+
+    // 3. 🟩 Dispatch requests
+    const result = await dispatchRequests<any, any>(
+      requestArray,
+      requestId,
+      currentHandshakeResult.threshold
+    );
+
+    // 4. 🟪 Handle response
+    return await networkModule.api.signSessionKey.handleResponse(
+      result,
+      params.requestBody.pkpPublicKey
+    );
+  }
+
   // TODO APIS:
   // - [x] viewPkps
   // - [ ] encrypt
@@ -185,10 +235,107 @@ export const _createNagaLitClient = async (
         getMaxPricesForNodeProduct: networkModule.getMaxPricesForNodeProduct,
         getUserMaxPrice: networkModule.getUserMaxPrice,
         signSessionKey: _signSessionKey,
+        signCustomSessionKey: _signCustomSessionKey,
       };
     },
     disconnect: _stateManager.stop,
     mintWithEoa: networkModule.chainApi.mintWithEoa,
+    mintWithAuth: networkModule.chainApi.mintWithAuth,
+    mintWithCustomAuth: async (params: MintWithCustomAuthRequest) => {
+      const validatedParams = MintWithCustomAuthSchema.parse(params);
+
+      // Determine IPFS hash - either from code or CID
+      // let ipfsHash: string;
+      // if (validatedParams.validationCode) {
+      //   // Validate that validation code is not empty
+      //   if (validatedParams.validationCode.trim() === '') {
+      //     throw new Error(
+      //       '❌ validationCode cannot be empty. Please provide a valid Lit Action code or use validationIpfsCid instead.'
+      //     );
+      //   }
+
+      //   // Convert code to IPFS hash
+      //   ipfsHash = await stringToIpfsHash(validatedParams.validationCode);
+
+      //   // Inform user about pinning the IPFS CID
+      //   console.log(
+      //     '💡 Note: Your validation code has been converted to IPFS hash:',
+      //     ipfsHash
+      //   );
+      //   console.log(
+      //     '💡 For production use, please pin this IPFS CID to ensure persistence.'
+      //   );
+      //   console.log(
+      //     '💡 You can pin your Lit Action at: https://explorer.litprotocol.com/create-action'
+      //   );
+      // }
+      // else {
+      //   // Use provided CID
+      //   ipfsHash = validatedParams.validationIpfsCid!;
+
+      //   // Validate IPFS CID format
+      //   if (!ipfsHash.startsWith('Qm') || ipfsHash.length < 46) {
+      //     throw new Error(
+      //       'Invalid IPFS CID format. CID should start with "Qm" and be at least 46 characters long.'
+      //     );
+      //   }
+      // }
+
+      // Convert IPFS hash to hex
+      const ipfsHash = validatedParams.validationIpfsCid!;
+      const ipfsHex = toHex(bs58.decode(ipfsHash));
+
+      // Use the same scope for both auth methods (pass as strings, schema will transform)
+      const scopes = [[validatedParams.scope], [validatedParams.scope]];
+
+      // Call mintWithMultiAuths with transformed data
+
+      const pkp = await networkModule.chainApi.mintWithMultiAuths({
+        account: validatedParams.account,
+        authMethodIds: [validatedParams.authData.authMethodId, ipfsHex],
+        authMethodTypes: [validatedParams.authData.authMethodType, 2n], // 2n is Lit Action
+        authMethodScopes: scopes,
+        pubkeys: ['0x', '0x'],
+        addPkpEthAddressAsPermittedAddress:
+          validatedParams.addPkpEthAddressAsPermittedAddress,
+        sendPkpToItself: validatedParams.sendPkpToItself,
+      });
+      return {
+        validationIpfsCid: ipfsHash,
+        pkpData: pkp,
+      };
+    },
+    utils: {
+      generateUniqueAuthMethodType: ({
+        uniqueDappName,
+      }: {
+        uniqueDappName: string;
+      }) => {
+        const hex = keccak256(toBytes(uniqueDappName));
+        const bigint = hexToBigInt(hex);
+
+        return {
+          hex,
+          bigint,
+        };
+      },
+      generateAuthData: ({
+        uniqueDappName,
+        uniqueAuthMethodType,
+        userId,
+      }: {
+        uniqueDappName: string;
+        uniqueAuthMethodType: bigint;
+        userId: string;
+      }) => {
+        const uniqueUserId = `${uniqueDappName}-${userId}`;
+
+        return {
+          authMethodType: uniqueAuthMethodType,
+          authMethodId: keccak256(toBytes(uniqueUserId)),
+        };
+      },
+    },
     getPKPPermissionsManager: networkModule.chainApi.getPKPPermissionsManager,
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣
@@ -211,7 +358,6 @@ export const _createNagaLitClient = async (
         authMethods,
       };
     },
-    mintWithAuth: networkModule.chainApi.mintWithAuth,
     authService: {
       mintWithAuth: networkModule.authService.pkpMint,
     },

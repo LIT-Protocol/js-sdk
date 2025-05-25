@@ -4,6 +4,11 @@ import * as authenticators from './lib/authenticators';
 import { WebAuthnAuthenticator } from './lib/authenticators';
 import { DiscordAuthenticator } from './lib/authenticators/native/DiscordAuthenticator';
 import { GoogleAuthenticator } from './lib/authenticators/native/GoogleAuthenticator';
+import { StytchEmailOtpAuthenticator } from './lib/authenticators/stytch/factors/StytchEmailOtpAuthenticator';
+import { StytchSmsOtpAuthenticator } from './lib/authenticators/stytch/factors/StytchSmsOtpAuthenticator';
+import { StytchTotp2FAAuthenticator } from './lib/authenticators/stytch/factors/2fa/StytchTotp2FAAuthenticator';
+
+import { StytchWhatsAppOtpAuthenticator } from './lib/authenticators/stytch/factors/StytchWhatsAppOtpAuthenticator';
 import { ViemAccountAuthenticator } from './lib/authenticators/ViemAccountAuthenticator';
 import { WalletClientAuthenticator } from './lib/authenticators/WalletClientAuthenticator';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
@@ -22,7 +27,7 @@ export type { LitAuthStorageProvider };
 /**
  * Type definition for the structure of authentication data used within the Lit Auth client.
  */
-  export type { LitAuthData };
+export type { LitAuthData };
 
 /**
  * Type definition for the structure of authentication context used within the Lit Auth client.
@@ -61,8 +66,8 @@ export { authenticators };
  */
 // export { createAuthManager } from './lib/auth-manager';
 // export { getAuthContext } from './lib/AuthManager/getAuthContext';
-  export { getEoaAuthContext } from './lib/AuthManager/authContexts/getEoaAuthContext';
-  export { getPkpAuthContext } from './lib/AuthManager/authContexts/getPkpAuthContext';
+export { getEoaAuthContext } from './lib/AuthManager/authContexts/getEoaAuthContext';
+export { getPkpAuthContext } from './lib/AuthManager/authContexts/getPkpAuthContext';
 /**
  * Class responsible for communicating with the Lit Relay server.
  * Used for operations like minting PKPs associated with authentication methods.
@@ -91,6 +96,11 @@ export {
   GoogleAuthenticator,
   ViemAccountAuthenticator,
   WalletClientAuthenticator,
-  WebAuthnAuthenticator
+  WebAuthnAuthenticator,
+  StytchEmailOtpAuthenticator,
+  StytchSmsOtpAuthenticator,
+  StytchTotp2FAAuthenticator,
+  StytchWhatsAppOtpAuthenticator,
 };
 
+export { ExampleAppAuthenticator } from './lib/authenticators/custom/ExampleAppAuthenticator';

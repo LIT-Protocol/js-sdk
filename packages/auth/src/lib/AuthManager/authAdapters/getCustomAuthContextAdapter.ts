@@ -1,111 +1,107 @@
-import { ethers } from 'ethers';
+import { AUTH_METHOD_TYPE_VALUES, PRODUCT_IDS } from '@lit-protocol/constants';
 import {
-  AuthConfig,
-  AuthManagerParams,
-  BaseAuthContext,
-} from '../auth-manager';
-import { PkpAuthDepsSchema } from './getPkpAuthContextAdapter';
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
+  AuthData,
+  HexPrefixedSchema,
+  NodeUrlsSchema,
+} from '@lit-protocol/schemas';
+import { ethers } from 'ethers';
+import { z } from 'zod';
+import { AuthConfigV2 } from '../../authenticators/types';
+import { AuthManagerParams } from '../auth-manager';
+import { getCustomAuthContext } from '../authContexts/getCustomAuthContext';
+import { processResources } from '../utils/processResources';
 import { tryGetCachedAuthData } from '../try-getters/tryGetCachedAuthData';
 
-export interface ICustomAuthenticator {
-  new (settings: any): ICustomAuthenticatorInstance;
-  LIT_ACTION_CODE_BASE64?: string;
-  LIT_ACTION_IPFS_ID?: string;
-}
-
-interface ICustomAuthenticatorInstance {
-  // Method to perform external auth and return jsParams for the Lit Action
-  // Accepts the config object which includes pkpPublicKey and other needed params
-  authenticate(config: {
-    pkpPublicKey: string;
-    [key: string]: any;
-  }): Promise<Record<string, any> | null>;
-}
+export const CustomAuthDepsSchema = z.object({
+  nonce: z.any(),
+  currentEpoch: z.any(),
+  getSignSessionKey: z.any(),
+  nodeUrls: NodeUrlsSchema,
+});
 
 export async function getCustomAuthContextAdapter(
   upstreamParams: AuthManagerParams,
   params: {
-    authenticator: ICustomAuthenticator; // Use the interface type
-    settings: Record<string, any>; // For constructor
-    config: { pkpPublicKey: string; [key: string]: any }; // For authenticate method
-    authConfig: AuthConfig; // For SIWE/session
-    litClient: BaseAuthContext<any>['litClient'];
+    // authData: AuthData;
+    pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+    authConfig: AuthConfigV2;
+    litClient: {
+      getContext: () => Promise<any>;
+    };
+    customAuthParams: {
+      litActionCode?: string;
+      litActionIpfsId?: string;
+      jsParams?: Record<string, any>;
+    };
   }
 ) {
-  // 1. Instantiate the custom authenticator helper using 'settings'
-  const customAuthHelper = new params.authenticator(params.settings);
+  const _resources = processResources(params.authConfig.resources);
 
-  // 2. Call the helper's authenticate method using 'config'
-  if (!customAuthHelper.authenticate) {
-    throw new Error("Custom authenticator is missing 'authenticate' method.");
-  }
-  // Pass the entire config object to the authenticator's authenticate method
-  const jsParams = await customAuthHelper.authenticate(params.config);
-  if (!jsParams) {
-    throw new Error('Custom authenticator failed to produce jsParams.');
-  }
+  // TODO: 👇 The plan is to identify if the certain operations could be wrapped inside a single function
+  // where different network modules can provide their own implementations.
 
-  // 3. Get the static Lit Action code/ID from the authenticator class
-  const litActionCode = params.authenticator.LIT_ACTION_CODE_BASE64;
-  const litActionIpfsId = params.authenticator.LIT_ACTION_IPFS_ID; // Optional
-  if (!litActionCode && !litActionIpfsId) {
-    throw new Error(
-      'Custom authenticator is missing static LIT_ACTION_CODE_BASE64 or LIT_ACTION_IPFS_ID.'
-    );
-  }
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this!
+  const litClientCtx = await params.litClient.getContext();
 
-  // 4. Extract pkpPublicKey (already available in params.config)
-  const pkpPublicKey = params.config.pkpPublicKey;
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can be in both Naga and Datil)
+  const latestConnectionInfo = litClientCtx.latestConnectionInfo;
 
-  // 5. Get node dependencies, session key etc.
-  const litClientConfig = PkpAuthDepsSchema.parse({
-    nonce: await params.litClient.getLatestBlockhash(),
-    currentEpoch: await params.litClient.getCurrentEpoch(),
-    getSignSessionKey: params.litClient.getSignSessionKey,
-    nodeUrls: await params.litClient.getMaxPricesForNodeProduct({
-      product: 'LIT_ACTION', // Or appropriate product
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can only be in Naga)
+  const nodePrices = latestConnectionInfo.priceFeedInfo.networkPrices;
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can be in both Naga and Datil)
+  const handshakeResult = litClientCtx.handshakeResult;
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can be in both Naga and Datil)
+  const threshold = handshakeResult.threshold;
+
+  // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can only be in Naga)
+  const nodeUrls = litClientCtx.getMaxPricesForNodeProduct({
+    nodePrices: nodePrices,
+    userMaxPrice: litClientCtx.getUserMaxPrice({
+      product: 'LIT_ACTION',
     }),
+    productId: PRODUCT_IDS['LIT_ACTION'],
+    numRequiredNodes: threshold,
   });
-  const pkpAddress = ethers.utils.computeAddress(pkpPublicKey);
-  const authData = await tryGetCachedAuthData({
+
+  const pkpAddress = ethers.utils.computeAddress(params.pkpPublicKey);
+
+  const litAuthData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
     address: pkpAddress,
-    expiration: params.authConfig.expiration,
-    type: AUTH_METHOD_TYPE.LitAction, // Session type remains LitAction
+    expiration: params.authConfig.expiration!,
+    type: 'custom' as unknown as AUTH_METHOD_TYPE_VALUES,
   });
 
-  // 6. Prepare the request body for the node signing function
-  const requestBodyForCustomAuth = {
-    sessionKey: authData.sessionKey.keyPair.publicKey,
-    pkpPublicKey: pkpPublicKey,
-    statement: params.authConfig.statement,
-    domain: params.authConfig.domain,
-    expiration: params.authConfig.expiration,
-    resources: params.authConfig.resources,
-    uri: authData.sessionKey.keyPair.publicKey,
-    nonce: litClientConfig.nonce,
-    ...(litActionCode && { code: litActionCode }),
-    ...(litActionIpfsId && { litActionIpfsId: litActionIpfsId }),
-    jsParams: jsParams, // Use the result from customAuthHelper.authenticate
-    authMethods: [],
-    epoch: litClientConfig.currentEpoch,
-    // ... other fields like curveType, signingScheme ...
-  };
-
-  // 7. Return the auth context object
-  return {
-    chain: 'ethereum',
-    pkpPublicKey: pkpPublicKey,
-    resources: params.authConfig.resources,
-    capabilityAuthSigs: params.authConfig.capabilityAuthSigs,
-    expiration: params.authConfig.expiration,
-    authNeededCallback: async () => {
-      const authSig = await litClientConfig.getSignSessionKey({
-        requestBody: requestBodyForCustomAuth,
-        nodeUrls: litClientConfig.nodeUrls.map((node: any) => node.url),
-      });
-      return authSig;
+  return getCustomAuthContext({
+    authentication: {
+      pkpPublicKey: params.pkpPublicKey,
+      // authData: {} as any,
     },
-  };
+    authConfig: {
+      domain: params.authConfig.domain!,
+      resources: _resources,
+      capabilityAuthSigs: params.authConfig.capabilityAuthSigs!,
+      expiration: params.authConfig.expiration!,
+      statement: params.authConfig.statement!,
+    },
+    customParams: {
+      litActionCode: params.customAuthParams.litActionCode,
+      litActionIpfsId: params.customAuthParams.litActionIpfsId,
+      jsParams: params.customAuthParams.jsParams,
+    },
+    deps: {
+      litAuthData: litAuthData,
+      connection: {
+        nonce: litClientCtx.latestBlockhash,
+        currentEpoch:
+          litClientCtx.latestConnectionInfo.epochState.currentNumber,
+        nodeUrls: nodeUrls,
+      },
+      signCustomSessionKey: litClientCtx.signCustomSessionKey,
+      storage: upstreamParams.storage,
+      pkpAddress: pkpAddress,
+    },
+  });
 }

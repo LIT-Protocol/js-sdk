@@ -10,10 +10,7 @@ import { mainAppQueue } from '../../queue-manager/src/bullmqSetup'; // Adjusted 
 import { apiKeyGateAndTracking } from '../middleware/apiKeyGate'; // Adjusted path
 import { rateLimiter } from '../middleware/rateLimiter'; // Adjusted path
 import { resp } from './response-helpers/response-helpers'; // Adjusted path
-import {
-  customAuthLoginRoute,
-  customAuthVerifyTokenRoute,
-} from './routes/auth/custom-auth-routes';
+
 import { stytchEmailRoutes } from './routes/auth/stytch/stytch-email';
 import { stytchWhatsAppRoutes } from './routes/auth/stytch/stytch-otp';
 import { stytchSmsRoutes } from './routes/auth/stytch/stytch-sms';
@@ -128,10 +125,6 @@ export const createLitAuthServer = (
       stytchSmsRoutes(groupApp);
       stytchWhatsAppRoutes(groupApp);
       stytchTotpRoutes(groupApp);
-
-      // Custom Auth
-      customAuthLoginRoute(groupApp);
-      customAuthVerifyTokenRoute(groupApp);
 
       return groupApp;
     })

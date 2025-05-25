@@ -27,6 +27,6 @@ export const AuthConfigSchema = z.object({
     new Date(Date.now() + 1000 * 60 * 15).toISOString()
   ),
   statement: z.string().optional().default(''),
-  domain: DomainSchema.optional().default(''),
+  domain: DomainSchema.optional().default('localhost'),
   resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
 });

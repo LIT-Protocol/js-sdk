@@ -14,7 +14,6 @@
  * // Use nodeStorage.write(...) and nodeStorage.read(...)
  */
 
-import { LocalStorage } from 'node-localstorage'; // Use node-localstorage
 import type { LitAuthData } from '../types';
 import type { LitAuthStorageProvider } from './types';
 
@@ -55,6 +54,36 @@ function buildLookupKey({
   return `${LOCALSTORAGE_LIT_AUTH_PREFIX}:${appName}:${networkName}:${address}`;
 }
 
+const isNodeEnvironment =
+  typeof process !== 'undefined' &&
+  process.versions != null &&
+  process.versions.node != null;
+
+let NodeLocalStorageConstructor: any = null; // To cache the constructor after dynamic import
+
+/**
+ * Initializes and returns a node-localstorage instance.
+ * Handles dynamic import and constructor caching.
+ */
+const getNodeStorageInstance = async (storagePath: string): Promise<any> => {
+  if (!NodeLocalStorageConstructor) {
+    try {
+      const module = await import('node-localstorage');
+      NodeLocalStorageConstructor = module.LocalStorage;
+    } catch (e) {
+      console.error(
+        "localStorageNode: Failed to dynamically import 'node-localstorage'. " +
+          "Ensure it's installed if running in a Node.js environment. Error: ",
+        e
+      );
+      throw new Error(
+        "localStorageNode: 'node-localstorage' module unavailable."
+      );
+    }
+  }
+  return new NodeLocalStorageConstructor(storagePath);
+};
+
 /**
  * Factory function to create a LitAuthStorageProvider for Node.js environments.
  *
@@ -66,8 +95,49 @@ export function localStorageNode({
   networkName,
   storagePath,
 }: LocalStorageNodeConfig): LitAuthStorageProvider {
-  // Initialize node-localstorage
-  const localStorage = new LocalStorage(storagePath);
+  if (!isNodeEnvironment) {
+    // Return a stub provider for non-Node.js environments
+    console.warn(
+      'localStorageNode: Detected non-Node.js environment. ' +
+        'Returning a non-functional stub. This provider is for Node.js use only.'
+    );
+    return {
+      config: {
+        appName,
+        networkName,
+        storagePath: 'N/A (browser environment)',
+      },
+      async write({ address, authData }): Promise<void> {
+        console.warn('localStorageNode (stub): write called in browser.');
+      },
+      async read({ address }): Promise<LitAuthData | null> {
+        console.warn('localStorageNode (stub): read called in browser.');
+        return null;
+      },
+      async writeInnerDelegationAuthSig({ publicKey, authSig }) {
+        console.warn(
+          'localStorageNode (stub): writeInnerDelegationAuthSig called in browser.'
+        );
+      },
+      async readInnerDelegationAuthSig({ publicKey }) {
+        console.warn(
+          'localStorageNode (stub): readInnerDelegationAuthSig called in browser.'
+        );
+        return null;
+      },
+    };
+  }
+
+  // For Node.js environments, return a functional provider
+  // The actual 'node-localstorage' instance is created lazily by its methods.
+  let _storageInstancePromise: Promise<any> | null = null;
+
+  const getMemoizedStorageInstance = (): Promise<any> => {
+    if (!_storageInstancePromise) {
+      _storageInstancePromise = getNodeStorageInstance(storagePath);
+    }
+    return _storageInstancePromise;
+  };
 
   return {
     // Include config for potential debugging or extensions
@@ -81,7 +151,8 @@ export function localStorageNode({
      * @returns {Promise<void>}
      */
     async write({ address, authData }): Promise<void> {
-      localStorage.setItem(
+      const store = await getMemoizedStorageInstance();
+      store.setItem(
         buildLookupKey({
           appName,
           networkName,
@@ -98,7 +169,8 @@ export function localStorageNode({
      * @returns {Promise<LitAuthData | null>} The stored authentication data, or null if not found.
      */
     async read({ address }): Promise<LitAuthData | null> {
-      const value = localStorage.getItem(
+      const store = await getMemoizedStorageInstance();
+      const value = store.getItem(
         buildLookupKey({
           appName,
           networkName,
@@ -114,16 +186,21 @@ export function localStorageNode({
           // Ensure robust parsing
           return JSON.parse(value) as LitAuthData;
         } catch (error) {
-          console.error('Failed to parse stored auth data:', error);
-          // Optionally clear the corrupted item
-          // localStorage.removeItem(buildLookupKey({ appName, networkName, address }));
+          console.error(
+            'localStorageNode: Failed to parse stored auth data:',
+            error
+          );
+          // Optionally clear the corrupted item by re-getting store instance
+          // const storeToClear = await getMemoizedStorageInstance();
+          // storeToClear.removeItem(buildLookupKey({ appName, networkName, address }));
           return null;
         }
       }
     },
 
     async writeInnerDelegationAuthSig({ publicKey, authSig }) {
-      localStorage.setItem(
+      const store = await getMemoizedStorageInstance();
+      store.setItem(
         buildLookupKey({
           appName: `${appName}-inner-delegation`,
           networkName,
@@ -134,7 +211,8 @@ export function localStorageNode({
     },
 
     async readInnerDelegationAuthSig({ publicKey }) {
-      const value = localStorage.getItem(
+      const store = await getMemoizedStorageInstance();
+      const value = store.getItem(
         buildLookupKey({
           appName: `${appName}-inner-delegation`,
           networkName,

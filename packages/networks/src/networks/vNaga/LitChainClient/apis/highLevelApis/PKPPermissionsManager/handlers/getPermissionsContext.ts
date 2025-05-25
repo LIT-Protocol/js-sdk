@@ -4,7 +4,7 @@ import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
 import { getPermittedAddresses } from '../../../rawContractApis/permissions/read/getPermittedAddresses';
 import {
-  AuthMethod,
+  AuthMethod as BaseAuthMethod,
   getPermittedAuthMethods,
 } from '../../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import {
@@ -13,11 +13,15 @@ import {
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
 import { getPermittedAuthMethodScopes } from '../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes';
 
+// Extend the base AuthMethod to include scopes
+export interface AuthMethod extends BaseAuthMethod {
+  scopes: readonly string[];
+}
+
 export interface PermissionsContext {
   actions: readonly `0x${string}`[];
   addresses: readonly `0x${string}`[];
   authMethods: readonly AuthMethod[];
-  scopes: readonly boolean[];
   isActionPermitted: (ipfsId: `0x${string}`) => boolean;
   isAddressPermitted: (address: `0x${string}`) => boolean;
   isAuthMethodPermitted: (
@@ -62,6 +66,34 @@ export async function getPermissionsContext(
     )
   );
 
+  // Create reverse mapping from index to scope name
+  const SCOPE_NAMES = [
+    'no-permissions',
+    'sign-anything',
+    'personal-sign',
+  ] as const;
+
+  // Transform boolean scope array to meaningful scope names
+  const transformScopes = (
+    scopeArray: readonly boolean[]
+  ): readonly string[] => {
+    const result: string[] = [];
+    scopeArray.forEach((isEnabled, index) => {
+      if (isEnabled && index < SCOPE_NAMES.length) {
+        result.push(SCOPE_NAMES[index]);
+      }
+    });
+    return result;
+  };
+
+  // Create auth methods with embedded scopes
+  const authMethodsWithScopes: AuthMethod[] = authMethods.map(
+    (authMethod, index) => ({
+      ...authMethod,
+      scopes: transformScopes(scopes[index]),
+    })
+  );
+
   logger.debug(
     {
       identifier,
@@ -76,13 +108,12 @@ export async function getPermissionsContext(
   return {
     actions,
     addresses,
-    authMethods,
-    scopes: scopes.flat(),
+    authMethods: authMethodsWithScopes,
     isActionPermitted: (ipfsId: `0x${string}`) => actions.includes(ipfsId),
     isAddressPermitted: (address: `0x${string}`) =>
       addresses.some((addr) => addr.toLowerCase() === address.toLowerCase()),
     isAuthMethodPermitted: (authMethodType: number, authMethodId: string) =>
-      authMethods.some(
+      authMethodsWithScopes.some(
         (method) =>
           method.authMethodType === BigInt(authMethodType) &&
           method.id.toLowerCase() === authMethodId.toLowerCase()
@@ -117,6 +148,24 @@ export async function getPermissionsContext(
 //   console.log("All permitted actions:", ctx.actions);
 //   console.log("All permitted addresses:", ctx.addresses);
 //   console.log("All permitted auth methods:", ctx.authMethods);
+//
+//   // Access meaningful scope names for each auth method
+//   ctx.authMethods.forEach((authMethod) => {
+//     console.log(`Auth method ${authMethod.id} scopes:`, authMethod.scopes);
+//     // Example output: ['sign-anything', 'personal-sign'] instead of [false, true, true]
+//   });
+//
+//   // Find specific auth method and check if it has certain permissions
+//   const specificAuthMethod = ctx.authMethods.find(
+//     (method) => method.id === "0x1234..."
+//   );
+//   if (specificAuthMethod) {
+//     console.log("Specific auth method scopes:", specificAuthMethod.scopes);
+//     const canSignAnything = specificAuthMethod.scopes.includes('sign-anything');
+//     const canPersonalSign = specificAuthMethod.scopes.includes('personal-sign');
+//     console.log("Can sign anything:", canSignAnything);
+//     console.log("Can personal sign:", canPersonalSign);
+//   }
 // }
 // example().catch(console.error);
 // }

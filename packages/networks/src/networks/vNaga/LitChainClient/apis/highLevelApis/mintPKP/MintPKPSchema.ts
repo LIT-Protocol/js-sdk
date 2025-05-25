@@ -8,7 +8,7 @@ export const MintPKPSchema = z
   .object({
     // authMethod: AuthMethodSchema,
     authMethodId: HexPrefixedSchema,
-    authMethodType: z.number(),
+    authMethodType: z.union([z.number(), z.bigint()]),
     scopes: z.array(ScopeSchemaRaw),
     pubkey: HexPrefixedSchema.optional(),
   })

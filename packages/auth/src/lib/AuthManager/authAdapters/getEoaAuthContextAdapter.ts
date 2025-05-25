@@ -78,7 +78,7 @@ export const getEoaAuthContextAdapter = async (
   const authData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
     address: authenticatorAddress,
-    expiration: params.authConfig.expiration,
+    expiration: params.authConfig.expiration!,
     type: AUTH_METHOD_TYPE.EthWallet,
   });
 

@@ -1,8 +1,5 @@
 import { getChildLogger } from '@lit-protocol/logger';
-import {
-  AuthData,
-  HexPrefixedSchema
-} from '@lit-protocol/schemas';
+import { AuthData, HexPrefixedSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 import { AuthConfigV2 } from '../authenticators/types';
 import type { LitAuthStorageProvider } from '../storage/types';
@@ -12,6 +9,9 @@ import {
 } from './authAdapters/getEoaAuthContextAdapter';
 import { getPkpAuthContextAdapter } from './authAdapters/getPkpAuthContextAdapter';
 import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
+import { getCustomAuthContextAdapter } from './authAdapters/getCustomAuthContextAdapter';
+import { hexToBigInt, keccak256, toBytes } from 'viem';
+
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
 }
@@ -76,14 +76,26 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
     }) => {
       return getPkpAuthContextAdapter(authManagerParams, params);
     },
-    // createCustomAuthContext: <T extends ICustomAuthenticator>(params: {
-    //   authenticator: T;
-    //   settings: ConstructorParameters<T>[0]; // Infer settings type from constructor
-    //   config: { pkpPublicKey: string; [key: string]: any }; // Execution config
-    //   authConfig: AuthConfigV2;
-    //   litClient: BaseAuthContext<any>['litClient'];
-    // }) => {
-    //   return getCustomAuthContextAdapter(authManagerParams, params);
-    // },
+    createCustomAuthContext: (params: {
+      // authData: AuthData;
+      pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      authConfig: AuthConfigV2;
+      litClient: BaseAuthContext<any>['litClient'];
+
+      // custom auth params
+      customAuthParams: {
+        litActionCode?: string;
+        litActionIpfsId?: string;
+        jsParams?: Record<string, any>;
+      };
+    }) => {
+      // make jsParams nested inside jsParams so that
+      // the dev can check all variables inside an object in Lit action
+      params.customAuthParams.jsParams = {
+        jsParams: params.customAuthParams.jsParams,
+      };
+
+      return getCustomAuthContextAdapter(authManagerParams, params);
+    },
   };
 };
