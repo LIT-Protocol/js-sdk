@@ -92,6 +92,7 @@ export const createContractsManager = <T, M>(
       contractData.PKPNFT.methods.mintCost,
       contractData.PKPNFT.methods.tokenOfOwnerByIndex,
       contractData.PKPNFT.methods.mintNext,
+      contractData.PKPNFT.methods.safeTransferFrom,
       ...contractData.PKPNFT.events,
     ],
     client: { public: publicClient, wallet: walletClient },
@@ -130,6 +131,7 @@ export const createContractsManager = <T, M>(
     abi: [
       contractData.PKPPermissions.methods.addPermittedAction,
       contractData.PKPPermissions.methods.addPermittedAddress,
+      contractData.PKPPermissions.methods.addPermittedAuthMethodScope,
       contractData.PKPPermissions.methods.getPermittedActions,
       contractData.PKPPermissions.methods.getPermittedAddresses,
       contractData.PKPPermissions.methods.getPermittedAuthMethods,
