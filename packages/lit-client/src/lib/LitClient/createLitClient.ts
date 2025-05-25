@@ -4,24 +4,40 @@
 // 3. 🟩 (LitClient) Dispatch requests
 // 4. 🟪 (Network Module) Handle response
 
+import {
+  getHashedAccessControlConditions,
+  validateAccessControlConditions,
+} from '@lit-protocol/access-control-conditions';
+import {
+  encrypt as blsEncrypt
+} from '@lit-protocol/crypto';
+import { getChildLogger } from '@lit-protocol/logger';
 import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
 import {
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
-  JsonSignSessionKeyRequestForPkpReturnSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema
 } from '@lit-protocol/schemas';
+import {
+  DecryptRequest,
+  DecryptResponse,
+  EncryptResponse,
+  EncryptSdkParams,
+  PkpIdentifierRaw,
+} from '@lit-protocol/types';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@lit-protocol/uint8arrays';
+import bs58 from 'bs58';
+import { hexToBigInt, keccak256, toBytes, toHex } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import { orchestrateHandshake } from './orchestrateHandshake';
-import { getChildLogger } from '@lit-protocol/logger';
-import { privateKeyToAccount } from 'viem/accounts';
-import { PkpIdentifierRaw } from '@lit-protocol/types';
-import { stringToIpfsHash } from './helpers/stringToIpfsHash';
 import {
   MintWithCustomAuthRequest,
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
-import bs58 from 'bs58';
-import { hexToBigInt, keccak256, toBytes, toHex } from 'viem';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -217,16 +233,195 @@ export const _createNagaLitClient = async (
     );
   }
 
+  /**
+   * Get the identity parameter for encryption.
+   * This combines the hash of access control conditions with the hash of private data.
+   */
+  function _getIdentityParamForEncryption(
+    hashOfConditionsStr: string,
+    hashOfPrivateDataStr: string
+  ): string {
+    return `lit-accesscontrolcondition://${hashOfConditionsStr}/${hashOfPrivateDataStr}`;
+  }
+
+  /**
+   * Validate if the encryption/decryption parameters contain valid access control conditions.
+   */
+  function _validateEncryptionParams(params: any): boolean {
+    return !!(
+      params.accessControlConditions ||
+      params.evmContractConditions ||
+      params.solRpcConditions ||
+      params.unifiedAccessControlConditions
+    );
+  }
+
+  async function _encrypt(params: EncryptSdkParams): Promise<EncryptResponse> {
+    _logger.info('🔒 Encrypting data');
+
+    // ========== Get handshake results ==========
+    const currentHandshakeResult = _stateManager.getCallbackResult();
+
+    if (!currentHandshakeResult) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of encrypt.'
+      );
+    }
+
+    if (!currentHandshakeResult.coreNodeConfig?.subnetPubKey) {
+      throw new Error('subnetPubKey cannot be null');
+    }
+
+    // ========== Validate Params ==========
+    if (!_validateEncryptionParams(params)) {
+      throw new Error(
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
+    }
+
+    // ========== Validate Access Control Conditions Schema ==========
+    await validateAccessControlConditions(params);
+
+    // ========== Hash Access Control Conditions ==========
+    const hashOfConditions: ArrayBuffer | undefined =
+      await getHashedAccessControlConditions(params);
+
+    if (!hashOfConditions) {
+      throw new Error(
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
+    }
+
+    const hashOfConditionsStr = uint8arrayToString(
+      new Uint8Array(hashOfConditions),
+      'base16'
+    );
+
+    // ========== Hash Private Data ==========
+    const hashOfPrivateData = await crypto.subtle.digest(
+      'SHA-256',
+      params.dataToEncrypt
+    );
+    const hashOfPrivateDataStr = uint8arrayToString(
+      new Uint8Array(hashOfPrivateData),
+      'base16'
+    );
+
+    // ========== Assemble identity parameter ==========
+    const identityParam = _getIdentityParamForEncryption(
+      hashOfConditionsStr,
+      hashOfPrivateDataStr
+    );
+
+    // ========== Encrypt ==========
+    const ciphertext = await blsEncrypt(
+      currentHandshakeResult.coreNodeConfig.subnetPubKey,
+      params.dataToEncrypt,
+      uint8arrayFromString(identityParam, 'utf8')
+    );
+
+    return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
+  }
+
+  async function _decrypt(params: DecryptRequest): Promise<DecryptResponse> {
+    _logger.info('🔓 Decrypting data');
+
+    // ========== Get handshake results ==========
+    const currentHandshakeResult = _stateManager.getCallbackResult();
+    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+
+    if (!currentHandshakeResult || !currentConnectionInfo) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of decrypt.'
+      );
+    }
+
+    if (!currentHandshakeResult.coreNodeConfig?.subnetPubKey) {
+      throw new Error('subnetPubKey cannot be null');
+    }
+
+    // ========== Validate Params ==========
+    if (!_validateEncryptionParams(params)) {
+      throw new Error(
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
+    }
+
+    // ========== Validate Access Control Conditions Schema ==========
+    await validateAccessControlConditions(params);
+
+    // ========== Hash Access Control Conditions ==========
+    const hashOfConditions: ArrayBuffer | undefined =
+      await getHashedAccessControlConditions(params);
+
+    if (!hashOfConditions) {
+      throw new Error(
+        'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
+      );
+    }
+
+    const hashOfConditionsStr = uint8arrayToString(
+      new Uint8Array(hashOfConditions),
+      'base16'
+    );
+
+    // ========== Assemble identity parameter ==========
+    const identityParam = _getIdentityParamForEncryption(
+      hashOfConditionsStr,
+      params.dataToEncryptHash
+    );
+
+    // 🟪 Create requests
+    const requestArray = await networkModule.api.decrypt.createRequest({
+      pricingContext: {
+        product: 'DECRYPTION',
+        userMaxPrice: params.userMaxPrice,
+        nodePrices: currentConnectionInfo.priceFeedInfo.networkPrices,
+        threshold: currentHandshakeResult.threshold,
+      },
+      authContext: params.authContext,
+      ciphertext: params.ciphertext,
+      dataToEncryptHash: params.dataToEncryptHash,
+      accessControlConditions: params.accessControlConditions,
+      evmContractConditions: params.evmContractConditions,
+      solRpcConditions: params.solRpcConditions,
+      unifiedAccessControlConditions: params.unifiedAccessControlConditions,
+      connectionInfo: currentConnectionInfo,
+      version: networkModule.version,
+      chain: params.chain,
+    });
+
+    const requestId = requestArray[0].requestId;
+
+    // 🟩 Dispatch requests
+    const result = await dispatchRequests<any, any>(
+      requestArray,
+      requestId,
+      currentHandshakeResult.threshold
+    );
+
+    // 🟪 Handle response
+    return await networkModule.api.decrypt.handleResponse(
+      result,
+      requestId,
+      identityParam,
+      params.ciphertext,
+      currentHandshakeResult.coreNodeConfig.subnetPubKey
+    );
+  }
+
   // TODO APIS:
   // - [x] viewPkps
-  // - [ ] encrypt
-  // - [ ] decrypt
+  // - [x] encrypt
+  // - [x] decrypt
   // - [ ] Sign withSolana
   // - [ ] Sign withCosmos
   return {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
     // maybe you will need connectionInfo: _stateManager.getLatestConnectionInfo(),
+    encrypt: _encrypt,
+    decrypt: _decrypt,
     getContext: async () => {
       return {
         latestBlockhash: await _stateManager.getLatestBlockhash(),

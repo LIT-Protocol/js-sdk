@@ -4,6 +4,7 @@ import {
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
+  DecryptRequestSchema,
 } from '@lit-protocol/schemas';
 import { Hex } from 'viem';
 
@@ -47,6 +48,10 @@ import {
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
 import { SignSessionKeyResponseDataSchema } from './api-manager/signSessionKey/signSessionKey.ResponseDataSchema';
+import { DecryptRequestDataSchema } from './api-manager/decrypt/decrypt.RequestDataSchema';
+import { DecryptResponseDataSchema } from './api-manager/decrypt/decrypt.ResponseDataSchema';
+import { DecryptInputSchema } from './api-manager/decrypt/decrypt.InputSchema';
+import { DecryptCreateRequestParams } from './api-manager/decrypt/decrypt.CreateRequestParams';
 import {
   createChainManager,
   CreateChainManagerReturn,
@@ -289,6 +294,135 @@ const nagaDevModuleObject = {
         });
 
         return signatures;
+      },
+    },
+    decrypt: {
+      schemas: {
+        Input: DecryptInputSchema,
+        RequestData: DecryptRequestDataSchema,
+        ResponseData: DecryptResponseDataSchema,
+      },
+      createRequest: async (params: DecryptCreateRequestParams) => {
+        _logger.info('decrypt:createRequest: Creating request', {
+          params,
+        });
+
+        // -- 1. generate session sigs for decrypt
+        const sessionSigs = await issueSessionFromContext({
+          pricingContext: PricingContextSchema.parse(params.pricingContext),
+          authContext: params.authContext,
+        });
+
+        _logger.info('decrypt:createRequest: Session sigs generated');
+
+        // -- 2. generate requests
+        const _requestId = createRequestId();
+        const requests: RequestItem<
+          z.infer<typeof DecryptRequestDataSchema>
+        >[] = [];
+
+        _logger.info('decrypt:createRequest: Request id generated');
+
+        const urls = Object.keys(sessionSigs);
+
+        for (const url of urls) {
+          _logger.info('decrypt:createRequest: Generating request data', {
+            url,
+          });
+          
+          const _requestData = DecryptRequestDataSchema.parse({
+            ciphertext: params.ciphertext,
+            dataToEncryptHash: params.dataToEncryptHash,
+            accessControlConditions: params.accessControlConditions,
+            evmContractConditions: params.evmContractConditions,
+            solRpcConditions: params.solRpcConditions,
+            unifiedAccessControlConditions: params.unifiedAccessControlConditions,
+            authSig: sessionSigs[url],
+            chain: params.chain,
+          });
+
+          const _urlWithPath = composeLitUrl({
+            url,
+            endpoint: nagaDevModuleObject.getEndpoints().ENCRYPTION_SIGN,
+          });
+
+          _logger.info('decrypt:createRequest: Url with path generated', {
+            _urlWithPath,
+          });
+
+          requests.push({
+            fullPath: _urlWithPath,
+            data: _requestData,
+            requestId: _requestId,
+            epoch: params.connectionInfo.epochState.currentNumber,
+            version: params.version,
+          });
+        }
+
+        if (!requests || requests.length === 0) {
+          _logger.error(
+            'decrypt:createRequest: No requests generated for decrypt.'
+          );
+          throw new Error('Failed to generate requests for decrypt.');
+        }
+
+        return requests;
+      },
+      handleResponse: async (
+        result: ProcessedBatchResult<z.infer<typeof DecryptResponseDataSchema>>,
+        requestId: string,
+        identityParam: string,
+        ciphertext: string,
+        subnetPubKey: string
+      ) => {
+        _logger.info('decrypt:handleResponse: Processing decrypt response', {
+          requestId,
+        });
+
+        if (!result.success) {
+          console.error(
+            '🚨 Decrypt batch failed in handleResponse:',
+            result.error
+          );
+          throw Error(JSON.stringify(result.error));
+        }
+
+        // result.values contains the array of node responses
+        const values = result.values;
+
+        _logger.info('decrypt:handleResponse: Values', {
+          values,
+        });
+
+        // Extract signature shares from node responses
+        const signatureShares = values.map((nodeResponse: any) => {
+          return {
+            ProofOfPossession: {
+              identifier: nodeResponse.signatureShare.ProofOfPossession.identifier,
+              value: nodeResponse.signatureShare.ProofOfPossession.value,
+            },
+          };
+        });
+
+        _logger.info('decrypt:handleResponse: Signature shares extracted', {
+          signatureShares,
+        });
+
+        // Import decrypt function
+        const { verifyAndDecryptWithSignatureShares } = await import('@lit-protocol/crypto');
+        const { uint8arrayFromString } = await import('@lit-protocol/uint8arrays');
+
+        // Verify and decrypt using signature shares
+        const decryptedData = await verifyAndDecryptWithSignatureShares(
+          subnetPubKey,
+          uint8arrayFromString(identityParam, 'utf8'),
+          ciphertext,
+          signatureShares
+        );
+
+        _logger.info('decrypt:handleResponse: Decryption completed');
+
+        return { decryptedData };
       },
     },
     signSessionKey: {

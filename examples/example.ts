@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import { customAuthFlow } from './src/custom-auth-flow';
 import { init } from './src/init';
 import { eoaNativeAuthFlow } from './src/eoa-native-auth-flow';
+import { encryptDecryptFlow } from './src/encrypt-decrypt-flow';
 
 // Configuration constants
 const CLI_TITLE = 'Function Runner CLI';
@@ -14,6 +15,7 @@ const functionMap: Record<string, () => void> = {
   init: init,
   customAuthFlow: customAuthFlow,
   eoaNativeAuthFlow: eoaNativeAuthFlow,
+  encryptDecryptFlow: encryptDecryptFlow,
 };
 
 /**

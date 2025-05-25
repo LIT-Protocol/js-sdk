@@ -2,14 +2,14 @@ import { z } from 'zod';
 
 import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
 
-import { AuthenticationContextSchema } from './models';
+import { PKPAuthContextSchema, EoaAuthContextSchema } from './schemas';
 import { AuthSigSchema, ChainedSchema, PricedSchema } from './schemas';
 
 export const DecryptRequestBaseSchema =
   MultipleAccessControlConditionsSchema.merge(ChainedSchema)
     .merge(PricedSchema.partial())
     .extend({
-      authContext: AuthenticationContextSchema,
+      authContext: z.union([PKPAuthContextSchema, EoaAuthContextSchema]),
       authSig: AuthSigSchema.optional(),
     });
 
