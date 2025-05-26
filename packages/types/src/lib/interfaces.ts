@@ -471,8 +471,25 @@ export type EncryptResponse = z.infer<typeof EncryptResponseSchema>;
 export type DecryptRequest = z.infer<typeof DecryptRequestSchema>;
 
 export interface DecryptResponse {
-  // The decrypted data as a Uint8Array
+  // The decrypted data as a Uint8Array (default)
   decryptedData: Uint8Array;
+  // The converted data based on metadata dataType (if applicable)
+  convertedData?: string | object | Buffer | Blob | File;
+  // The metadata from the encryption
+  metadata?: {
+    dataType?:
+      | 'uint8array'
+      | 'string'
+      | 'json'
+      | 'buffer'
+      | 'image'
+      | 'video'
+      | 'file';
+    mimeType?: string;
+    filename?: string;
+    size?: number;
+    custom?: Record<string, any>;
+  };
 }
 
 export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {

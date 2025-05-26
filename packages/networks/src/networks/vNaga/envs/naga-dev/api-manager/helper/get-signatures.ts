@@ -1,28 +1,26 @@
 import { NoValidShares } from '@lit-protocol/constants';
 import {
-  combineExecuteJsNodeShares,
-  combinePKPSignNodeShares,
-} from '@lit-protocol/crypto';
-import {
   applyTransformations,
   cleanStringValues,
+  combineExecuteJsNodeShares,
+  combinePKPSignNodeShares,
   hexifyStringValues,
   logErrorWithRequestId,
   mostCommonString,
 } from '@lit-protocol/crypto';
 import {
+  PKPSignEndpointResponse as CryptoPKPSignEndpointResponse,
   LitNodeSignature,
   SigType,
-  PKPSignEndpointResponse as CryptoPKPSignEndpointResponse,
 } from '@lit-protocol/types';
-import { parsePkpSignResponse } from './parse-pkp-sign-response';
-import {
-  ExecuteJsValueResponse,
-  PKPSignEndpointResponse as LocalPKPSignEndpointResponse,
-  LitActionSignedData,
-} from '../types';
 import { z } from 'zod';
 import { PKPSignResponseDataSchema } from '../pkpSign/pkpSign.ResponseDataSchema';
+import {
+  ExecuteJsValueResponse,
+  LitActionSignedData,
+  PKPSignEndpointResponse as LocalPKPSignEndpointResponse,
+} from '../types';
+import { parsePkpSignResponse } from './parse-pkp-sign-response';
 
 function assertThresholdShares(
   requestId: string,
@@ -69,6 +67,7 @@ export const combineExecuteJSSignatures = async (params: {
 
   const sigResponses = {} as Record<string, LitNodeSignature>;
 
+  // Group signature shares by signature name (e.g., "random-sig-name", "sig-identifier", etc.)
   const keyedSignedData = nodesLitActionSignedData.reduce<
     Record<string, LitActionSignedData[]>
   >((acc, nodeLitActionSignedData) => {
@@ -86,37 +85,115 @@ export const combineExecuteJSSignatures = async (params: {
   }, {} as Record<string, LitActionSignedData[]>);
 
   const signatureKeys = Object.keys(keyedSignedData);
+
   await Promise.all(
     signatureKeys.map(async (signatureKey) => {
       const signatureShares = keyedSignedData[signatureKey];
+
+      // Parse signature shares similar to PKP sign process
+      const preparedShares: Array<{
+        originalShare: LitActionSignedData;
+        parsedSignatureShareObject: any;
+        publicKey?: string;
+        sigType?: string;
+      }> = [];
+
+      for (const share of signatureShares) {
+        try {
+          // Parse the JSON string in signatureShare field
+          let parsedSignatureShare;
+          if (typeof share.signatureShare === 'string') {
+            parsedSignatureShare = JSON.parse(share.signatureShare);
+          } else {
+            parsedSignatureShare = share.signatureShare;
+          }
+
+          // Extract publicKey and sigType from the share
+          let publicKey = share.publicKey;
+          let sigType = share.sigType;
+
+          // If publicKey is a JSON string, parse it
+          if (typeof publicKey === 'string' && publicKey.startsWith('"')) {
+            publicKey = JSON.parse(publicKey);
+          }
+
+          preparedShares.push({
+            originalShare: share,
+            parsedSignatureShareObject: parsedSignatureShare,
+            publicKey,
+            sigÍType,
+          });
+        } catch (e) {
+          logErrorWithRequestId(
+            requestId,
+            `Error parsing signature share for key ${signatureKey}: ${JSON.stringify(
+              share.signatureShare
+            )}`,
+            e
+          );
+        }
+      }
+
+      if (preparedShares.length < threshold) {
+        throw new NoValidShares(
+          {
+            info: {
+              requestId,
+              signatureKey,
+              preparedSharesCount: preparedShares.length,
+              threshold,
+            },
+          },
+          `Not enough valid signature shares for ${signatureKey}: ${preparedShares.length} (expected ${threshold})`
+        );
+      }
+
+      // Get most common public key and sig type
       const publicKey = mostCommonString(
-        signatureShares.map((s) => s.publicKey)
+        preparedShares.map((s) => s.publicKey).filter(Boolean) as string[]
       );
-      const sigType = mostCommonString(signatureShares.map((s) => s.sigType));
+      const sigType = mostCommonString(
+        preparedShares.map((s) => s.sigType).filter(Boolean) as string[]
+      );
 
       if (!publicKey || !sigType) {
         throw new NoValidShares(
           {
             info: {
               requestId,
+              signatureKey,
               publicKey,
-              shares: nodesLitActionSignedData,
               sigType,
+              shares: preparedShares,
             },
           },
-          'Could not get public key or sig type from lit action shares'
+          `Could not get public key or sig type from lit action shares for ${signatureKey}`
         );
       }
 
+      // Prepare shares for crypto library (similar to PKP sign process)
+      const sharesForCryptoLib: LitActionSignedData[] = preparedShares.map(
+        (ps) => ({
+          publicKey: ps.publicKey!,
+          signatureShare:
+            typeof ps.originalShare.signatureShare === 'string'
+              ? ps.originalShare.signatureShare
+              : JSON.stringify(ps.originalShare.signatureShare),
+          sigName: ps.originalShare.sigName,
+          sigType: ps.sigType! as any, // Cast to match EcdsaSigType
+        })
+      );
+
+      // Combine the signature shares using the crypto library
       const combinedSignature = await combineExecuteJsNodeShares(
-        signatureShares
+        sharesForCryptoLib
       );
 
       const sigResponse = applyTransformations(
         {
           ...combinedSignature,
           publicKey,
-          sigType,
+          sigType: sigType as SigType,
         },
         [cleanStringValues, hexifyStringValues]
       ) as unknown as LitNodeSignature;

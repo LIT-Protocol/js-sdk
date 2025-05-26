@@ -1,11 +1,12 @@
 import { version } from '@lit-protocol/constants';
+import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
-  DecryptRequestSchema,
 } from '@lit-protocol/schemas';
+import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
 import { Hex } from 'viem';
 
 import { z } from 'zod';
@@ -27,6 +28,7 @@ import {
   AuthMethod,
   AuthSig,
   CallbackParams,
+  LitActionResponseStrategy,
   Optional,
   RequestItem,
 } from '@lit-protocol/types';
@@ -35,9 +37,20 @@ import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
 import { PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
+import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
+import { PKPStorageProvider } from '../../LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
 import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import type { GenericTxRes, LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
+import { DecryptCreateRequestParams } from './api-manager/decrypt/decrypt.CreateRequestParams';
+import { DecryptInputSchema } from './api-manager/decrypt/decrypt.InputSchema';
+import { DecryptRequestDataSchema } from './api-manager/decrypt/decrypt.RequestDataSchema';
+import { DecryptResponseDataSchema } from './api-manager/decrypt/decrypt.ResponseDataSchema';
+import { handleResponse as handleExecuteJsResponse } from './api-manager/executeJs';
+import { ExecuteJsCreateRequestParams } from './api-manager/executeJs/executeJs.CreateRequestParams';
+import { ExecuteJsInputSchema } from './api-manager/executeJs/executeJs.InputSchema';
+import { ExecuteJsRequestDataSchema } from './api-manager/executeJs/executeJs.RequestDataSchema';
+import { ExecuteJsResponseDataSchema } from './api-manager/executeJs/executeJs.ResponseDataSchema';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 import { PKPSignCreateRequestParams } from './api-manager/pkpSign/pkpSign.CreateRequestParams';
 import {
@@ -48,18 +61,12 @@ import {
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
 import { SignSessionKeyResponseDataSchema } from './api-manager/signSessionKey/signSessionKey.ResponseDataSchema';
-import { DecryptRequestDataSchema } from './api-manager/decrypt/decrypt.RequestDataSchema';
-import { DecryptResponseDataSchema } from './api-manager/decrypt/decrypt.ResponseDataSchema';
-import { DecryptInputSchema } from './api-manager/decrypt/decrypt.InputSchema';
-import { DecryptCreateRequestParams } from './api-manager/decrypt/decrypt.CreateRequestParams';
 import {
   createChainManager,
   CreateChainManagerReturn,
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
-import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
-import { PKPStorageProvider } from '../../LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
 
 const _logger = getChildLogger({
   module: 'naga-dev-module',
@@ -121,7 +128,11 @@ const nagaDevModuleObject = {
      * Gets all PKPs associated with specific authentication data
      */
     getPKPsByAuthData: async (params: {
-      authData: { authMethodType: number | bigint; authMethodId: string; accessToken?: string };
+      authData: {
+        authMethodType: number | bigint;
+        authMethodId: string;
+        accessToken?: string;
+      };
       pagination?: { limit?: number; offset?: number };
       storageProvider?: PKPStorageProvider;
       account: ExpectedAccountOrWalletClient;
@@ -364,14 +375,15 @@ const nagaDevModuleObject = {
           _logger.info('decrypt:createRequest: Generating request data', {
             url,
           });
-          
+
           const _requestData = DecryptRequestDataSchema.parse({
             ciphertext: params.ciphertext,
             dataToEncryptHash: params.dataToEncryptHash,
             accessControlConditions: params.accessControlConditions,
             evmContractConditions: params.evmContractConditions,
             solRpcConditions: params.solRpcConditions,
-            unifiedAccessControlConditions: params.unifiedAccessControlConditions,
+            unifiedAccessControlConditions:
+              params.unifiedAccessControlConditions,
             authSig: sessionSigs[url],
             chain: params.chain,
           });
@@ -433,7 +445,8 @@ const nagaDevModuleObject = {
         const signatureShares = values.map((nodeResponse: any) => {
           return {
             ProofOfPossession: {
-              identifier: nodeResponse.signatureShare.ProofOfPossession.identifier,
+              identifier:
+                nodeResponse.signatureShare.ProofOfPossession.identifier,
               value: nodeResponse.signatureShare.ProofOfPossession.value,
             },
           };
@@ -442,10 +455,6 @@ const nagaDevModuleObject = {
         _logger.info('decrypt:handleResponse: Signature shares extracted', {
           signatureShares,
         });
-
-        // Import decrypt function
-        const { verifyAndDecryptWithSignatureShares } = await import('@lit-protocol/crypto');
-        const { uint8arrayFromString } = await import('@lit-protocol/uint8arrays');
 
         // Verify and decrypt using signature shares
         const decryptedData = await verifyAndDecryptWithSignatureShares(
@@ -757,6 +766,156 @@ const nagaDevModuleObject = {
         return authSig;
       },
     },
+    executeJs: {
+      schemas: {
+        Input: ExecuteJsInputSchema,
+        RequestData: ExecuteJsRequestDataSchema,
+        ResponseData: ExecuteJsResponseDataSchema,
+      },
+      createRequest: async (params: ExecuteJsCreateRequestParams) => {
+        _logger.info('executeJs:createRequest: Creating request', {
+          hasCode: !!params.executionContext.code,
+          hasIpfsId: !!params.executionContext.ipfsId,
+          hasJsParams: !!params.executionContext.jsParams,
+          responseStrategy: params.responseStrategy?.strategy || 'default',
+        });
+
+        // Store response strategy for later use in handleResponse
+        executeJsResponseStrategy = params.responseStrategy;
+
+        // -- 1. generate session sigs
+        const sessionSigs = await issueSessionFromContext({
+          pricingContext: PricingContextSchema.parse(params.pricingContext),
+          authContext: params.authContext,
+        });
+
+        _logger.info('executeJs:createRequest: Session sigs generated');
+
+        // -- 2. generate requests
+        const _requestId = createRequestId();
+        const requests: RequestItem<
+          z.infer<typeof ExecuteJsRequestDataSchema>
+        >[] = [];
+
+        _logger.info('executeJs:createRequest: Request id generated');
+
+        const urls = Object.keys(sessionSigs);
+
+        for (const url of urls) {
+          _logger.info('executeJs:createRequest: Generating request data', {
+            url,
+          });
+
+          // Base64 encode the code if provided
+          let encodedCode: string | undefined;
+          if (params.executionContext.code) {
+            encodedCode = Buffer.from(
+              params.executionContext.code,
+              'utf-8'
+            ).toString('base64');
+            _logger.info('executeJs:createRequest: Code encoded to base64', {
+              originalLength: params.executionContext.code.length,
+              encodedLength: encodedCode.length,
+            });
+          }
+
+          // Build the request data that gets sent to the nodes
+          const _requestData = ExecuteJsRequestDataSchema.parse({
+            authSig: sessionSigs[url],
+            nodeSet: urls,
+            ...(encodedCode && { code: encodedCode }),
+            ...(params.executionContext.ipfsId && {
+              ipfsId: params.executionContext.ipfsId,
+            }),
+            ...(params.executionContext.jsParams && {
+              jsParams: params.executionContext.jsParams,
+            }),
+          });
+
+          const _urlWithPath = composeLitUrl({
+            url,
+            endpoint: nagaDevModuleObject.getEndpoints().EXECUTE_JS,
+          });
+
+          _logger.info('executeJs:createRequest: Url with path generated', {
+            _urlWithPath,
+          });
+
+          requests.push({
+            fullPath: _urlWithPath,
+            data: _requestData,
+            requestId: _requestId,
+            epoch: params.connectionInfo.epochState.currentNumber,
+            version: params.version,
+          });
+        }
+
+        if (!requests || requests.length === 0) {
+          _logger.error(
+            'executeJs:createRequest: No requests generated for executeJs.'
+          );
+          throw new Error('Failed to generate requests for executeJs.');
+        }
+
+        return requests;
+      },
+      handleResponse: async (
+        result: ProcessedBatchResult<
+          z.infer<typeof ExecuteJsResponseDataSchema>
+        >,
+        requestId: string
+      ) => {
+        _logger.info(
+          'executeJs:handleResponse: Processing executeJs response',
+          {
+            requestId,
+            responseStrategy: executeJsResponseStrategy?.strategy || 'default',
+          }
+        );
+
+        if (!result.success) {
+          console.error(
+            '🚨 ExecuteJs batch failed in handleResponse:',
+            result.error
+          );
+          throw Error(JSON.stringify(result.error));
+        }
+
+        console.log('result:', JSON.stringify(result, null, 2));
+
+        const { values } = ExecuteJsResponseDataSchema.parse(result);
+
+        _logger.info('executeJs:handleResponse: Response values received', {
+          requestId,
+          valueCount: values.length,
+          successfulValues: values.filter((v) => v.success).length,
+        });
+
+        // Use the handleResponse from the executeJs module with response strategy
+        const executeJsResponse = await handleExecuteJsResponse(
+          result,
+          requestId,
+          networkConfig.minimumThreshold,
+          executeJsResponseStrategy
+        );
+
+        _logger.info(
+          'executeJs:handleResponse: ExecuteJs response processed successfully',
+          {
+            requestId,
+            hasSignatures:
+              !!executeJsResponse.signatures &&
+              Object.keys(executeJsResponse.signatures).length > 0,
+            hasResponse: !!executeJsResponse.response,
+            hasClaims:
+              !!executeJsResponse.claims &&
+              Object.keys(executeJsResponse.claims).length > 0,
+          }
+        );
+
+        return executeJsResponse;
+      },
+    },
   },
 };
 
@@ -776,3 +935,6 @@ export const nagaDevModule = nagaDevModuleObject as NagaDevModule;
 export type NagaDevStateManagerType = Awaited<
   ReturnType<typeof createStateManager>
 >;
+
+// Store response strategy separately for executeJs requests
+let executeJsResponseStrategy: LitActionResponseStrategy | undefined;

@@ -37,6 +37,11 @@ import {
   MintWithCustomAuthRequest,
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
+import {
+  convertDecryptedData,
+  extractFileMetadata,
+  inferDataType,
+} from './helpers/convertDecryptedData';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -226,10 +231,70 @@ export const _createNagaLitClient = async (
     );
 
     // 4. 🟪 Handle response
-    return await networkModule.api.signSessionKey.handleResponse(
+    return await networkModule.api.signCustomSessionKey.handleResponse(
       result,
       params.requestBody.pkpPublicKey
     );
+  }
+
+  async function _executeJs(
+    params: z.infer<typeof networkModule.api.executeJs.schemas.Input>
+  ) {
+    _logger.info(`🔥 executing JS with ${params.code ? 'code' : 'ipfsId'}`);
+
+    // 🟩 get the fresh handshake results
+    const currentHandshakeResult = _stateManager.getCallbackResult();
+    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+
+    if (!currentHandshakeResult || !currentConnectionInfo) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of executeJs.'
+      );
+    }
+
+    // 🟪 Create requests
+    // 1. This is where the orchestration begins — we delegate the creation of the
+    // request array to the `networkModule`. It encapsulates logic specific to the
+    // active network (e.g., pricing, thresholds, metadata) and returns a set of
+    // structured requests ready to be dispatched to the nodes.
+    const requestArray = await networkModule.api.executeJs.createRequest({
+      // add pricing context for Lit Actions
+      pricingContext: {
+        product: 'LIT_ACTION',
+        userMaxPrice: params.userMaxPrice,
+        nodePrices: currentConnectionInfo.priceFeedInfo.networkPrices,
+        threshold: currentHandshakeResult.threshold,
+      },
+      authContext: params.authContext,
+      executionContext: {
+        code: params.code,
+        ipfsId: params.ipfsId,
+        jsParams: params.jsParams,
+      },
+      connectionInfo: currentConnectionInfo,
+      version: networkModule.version,
+      useSingleNode: params.useSingleNode,
+      responseStrategy: params.responseStrategy,
+    });
+
+    const requestId = requestArray[0].requestId;
+
+    // 🟩 Dispatch requests
+    // 2. With the request array prepared, we now coordinate the parallel execution
+    // across multiple nodes. This step handles batching, minimum threshold success
+    // tracking, and error tolerance. The orchestration layer ensures enough valid
+    // responses are collected before proceeding.
+    const result = await dispatchRequests<
+      z.infer<typeof networkModule.api.executeJs.schemas.RequestData>,
+      z.infer<typeof networkModule.api.executeJs.schemas.ResponseData>
+    >(requestArray, requestId, currentHandshakeResult.threshold);
+
+    // 🟪 Handle response
+    // 3. Once node responses are received and validated, we delegate final
+    // interpretation and formatting of the result back to the `networkModule`.
+    // This allows the module to apply network-specific logic such as decoding,
+    // formatting, or transforming the response into a usable executeJs result.
+    return await networkModule.api.executeJs.handleResponse(result, requestId);
   }
 
   /**
@@ -298,6 +363,30 @@ export const _createNagaLitClient = async (
     // ========== Convert data to Uint8Array ==========
     const dataAsUint8Array = _convertDataToUint8Array(params.dataToEncrypt);
 
+    // ========== Handle metadata ==========
+    let metadata = params.metadata;
+
+    // If no metadata provided but dataType can be inferred, create it
+    if (!metadata) {
+      const inferredType = inferDataType(params.dataToEncrypt);
+      if (inferredType !== 'uint8array') {
+        metadata = { dataType: inferredType };
+
+        // Extract file metadata for File/Blob objects
+        if (
+          inferredType === 'image' ||
+          inferredType === 'video' ||
+          inferredType === 'file'
+        ) {
+          const fileMetadata = extractFileMetadata(params.dataToEncrypt);
+          metadata = {
+            ...metadata,
+            ...fileMetadata,
+          };
+        }
+      }
+    }
+
     // ========== Validate Params ==========
     if (!_validateEncryptionParams(params)) {
       throw new Error(
@@ -346,11 +435,33 @@ export const _createNagaLitClient = async (
       uint8arrayFromString(identityParam, 'utf8')
     );
 
-    return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
+    return {
+      ciphertext,
+      dataToEncryptHash: hashOfPrivateDataStr,
+      metadata,
+    };
   }
 
   async function _decrypt(params: DecryptRequest): Promise<DecryptResponse> {
     _logger.info('🔓 Decrypting data');
+
+    // ========== Extract data from params ==========
+    // Support both formats: individual properties or complete data object
+    let ciphertext: string;
+    let dataToEncryptHash: string;
+    let metadata: any;
+
+    if ('data' in params) {
+      // New format: complete encrypted data object
+      ciphertext = params.data.ciphertext;
+      dataToEncryptHash = params.data.dataToEncryptHash;
+      metadata = params.data.metadata;
+    } else {
+      // Traditional format: individual properties
+      ciphertext = params.ciphertext;
+      dataToEncryptHash = params.dataToEncryptHash;
+      metadata = params.metadata;
+    }
 
     // ========== Get handshake results ==========
     const currentHandshakeResult = _stateManager.getCallbackResult();
@@ -394,7 +505,7 @@ export const _createNagaLitClient = async (
     // ========== Assemble identity parameter ==========
     const identityParam = _getIdentityParamForEncryption(
       hashOfConditionsStr,
-      params.dataToEncryptHash
+      dataToEncryptHash
     );
 
     // 🟪 Create requests
@@ -406,8 +517,8 @@ export const _createNagaLitClient = async (
         threshold: currentHandshakeResult.threshold,
       },
       authContext: params.authContext,
-      ciphertext: params.ciphertext,
-      dataToEncryptHash: params.dataToEncryptHash,
+      ciphertext: ciphertext,
+      dataToEncryptHash: dataToEncryptHash,
       accessControlConditions: params.accessControlConditions,
       evmContractConditions: params.evmContractConditions,
       solRpcConditions: params.solRpcConditions,
@@ -427,21 +538,32 @@ export const _createNagaLitClient = async (
     );
 
     // 🟪 Handle response
-    return await networkModule.api.decrypt.handleResponse(
+    const decryptResult = await networkModule.api.decrypt.handleResponse(
       result,
       requestId,
       identityParam,
-      params.ciphertext,
+      ciphertext,
       currentHandshakeResult.coreNodeConfig.subnetPubKey
     );
+
+    // ========== Handle metadata and data conversion ==========
+    const response: DecryptResponse = {
+      decryptedData: decryptResult.decryptedData,
+      metadata: metadata,
+    };
+
+    // Convert data if metadata specifies a data type
+    if (metadata?.dataType && metadata.dataType !== 'uint8array') {
+      response.convertedData = convertDecryptedData(
+        decryptResult.decryptedData,
+        metadata.dataType,
+        metadata
+      );
+    }
+
+    return response;
   }
 
-  // TODO APIS:
-  // - [x] viewPkps
-  // - [x] encrypt
-  // - [x] decrypt
-  // - [ ] Sign withSolana
-  // - [ ] Sign withCosmos
   return {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
@@ -457,6 +579,7 @@ export const _createNagaLitClient = async (
         getUserMaxPrice: networkModule.getUserMaxPrice,
         signSessionKey: _signSessionKey,
         signCustomSessionKey: _signCustomSessionKey,
+        executeJs: _executeJs,
       };
     },
     disconnect: _stateManager.stop,
@@ -588,6 +711,11 @@ export const _createNagaLitClient = async (
     },
     authService: {
       mintWithAuth: networkModule.authService.pkpMint,
+    },
+    executeJs: async (
+      params: z.infer<typeof networkModule.api.executeJs.schemas.Input>
+    ) => {
+      return _executeJs(params);
     },
     chain: {
       raw: {
