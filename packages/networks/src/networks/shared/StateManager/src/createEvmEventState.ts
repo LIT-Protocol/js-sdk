@@ -1,3 +1,9 @@
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  module: 'createEvmEventState',
+});
+
 // minimal evm-style emitter interface (ethers.Provider or Contract)
 export type EvmEventEmitter = {
   on: (eventName: string, listener: (...args: any[]) => void) => void;
@@ -46,14 +52,14 @@ export const createEvmEventState = <T>({
 
   const listen = () => {
     if (attached) return;
-    console.log(`👂 Listening for ${eventName}`);
+    _logger.info(`👂 Listening for ${eventName}`);
     contract.on(eventName, listener);
     attached = true;
   };
 
   const stop = () => {
     if (!attached) return;
-    console.log(`🔇 Stopping listener for ${eventName}`);
+    _logger.info(`🔇 Stopping listener for ${eventName}`);
     contract.off(eventName, listener);
     attached = false;
   };

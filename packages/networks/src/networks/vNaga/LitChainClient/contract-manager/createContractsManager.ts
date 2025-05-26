@@ -140,6 +140,7 @@ export const createContractsManager = <T, M>(
       contractData.PKPPermissions.methods.removePermittedAddress,
       contractData.PKPPermissions.methods.isPermittedAction,
       contractData.PKPPermissions.methods.isPermittedAddress,
+      contractData.PKPPermissions.methods.getTokenIdsForAuthMethod,
       ...contractData.PKPPermissions.events,
     ],
     client: { public: publicClient, wallet: walletClient },

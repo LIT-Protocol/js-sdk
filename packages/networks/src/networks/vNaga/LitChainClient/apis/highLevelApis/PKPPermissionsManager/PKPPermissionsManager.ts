@@ -41,19 +41,22 @@ import { getPermittedAddressesByIdentifier } from './handlers/getPermittedAddres
 import { getPermittedAuthMethodsByIdentifier } from './handlers/getPermittedAuthMethodsByIdentifier';
 import { getPermittedAuthMethodScopesByIdentifier } from './handlers/getPermittedAuthMethodScopesByIdentifier';
 import { getPKPsByAddress } from './handlers/getPKPsByAddress';
+import {
+  getPKPsByAuthData,
+  PaginatedPKPsResponse,
+  PKPStorageProvider,
+} from './handlers/getPKPsByAuthMethod';
 import { isPermittedActionByIdentifier } from './handlers/isPermittedActionByIdentifier';
 import { isPermittedAddressByIdentifier } from './handlers/isPermittedAddressByIdentifier';
 import { removePermittedActionByIdentifier } from './handlers/removePermittedActionByIdentifier';
 import { removePermittedAddressByIdentifier } from './handlers/removePermittedAddressByIdentifier';
 
 import { logger } from '../../../../../shared/logger';
+import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
 import { ScopeString } from '../../../schemas/shared/ScopeSchema';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import { LitTxVoid } from '../../types';
-import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
-import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
-import { safeTransfer } from '../../rawContractApis/pkp/write/safeTransfer';
-import { resolvePkpTokenId } from '../../rawContractApis/permissions/utils/resolvePkpTokenId';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action
@@ -314,7 +317,38 @@ export class PKPPermissionsManager {
     accountOrWalletClient: ExpectedAccountOrWalletClient
   ) {
     return getPKPsByAddress(
-      { ownerAddress: address },
+      {
+        ownerAddress: address,
+        pagination: { limit: 10, offset: 0 }, // Provide default pagination
+      },
+      networkContext,
+      accountOrWalletClient
+    );
+  }
+
+  /**
+   * Gets all PKPs associated with specific authentication data
+   *
+   * @param authData - The authentication data object (with authMethodType, authMethodId, etc.)
+   * @param pagination - Optional pagination parameters
+   * @param storageProvider - Optional storage provider for token ID caching
+   * @param networkContext - Network context for contract interactions
+   * @param accountOrWalletClient - Account or wallet client for contract interaction
+   * @returns Promise resolving to paginated PKP information
+   */
+  static async getPKPsByAuthData(
+    authData: {
+      authMethodType: number | bigint;
+      authMethodId: string;
+      accessToken?: string;
+    },
+    pagination: { limit?: number; offset?: number } | undefined,
+    storageProvider: PKPStorageProvider | undefined,
+    networkContext: DefaultNetworkConfig,
+    accountOrWalletClient: ExpectedAccountOrWalletClient
+  ): Promise<PaginatedPKPsResponse> {
+    return getPKPsByAuthData(
+      { authData, pagination, storageProvider },
       networkContext,
       accountOrWalletClient
     );

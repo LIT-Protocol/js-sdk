@@ -307,9 +307,43 @@ export const humanizeEvmBasicAccessControlConditions = async ({
         } else {
           return `Controls wallet with address ${acc.returnValueTest.value}`;
         }
+      } else if (acc.standardContractType === 'LitAction') {
+        // Lit Action condition
+        const cid = acc.contractAddress.replace('ipfs://', '');
+        return `Lit Action ${acc.method}(${acc.parameters.join(
+          ', '
+        )}) at ${cid} should return ${humanizeComparator(
+          acc.returnValueTest.comparator
+        )} ${acc.returnValueTest.value}`;
+      } else if (acc.standardContractType === 'PKPPermissions') {
+        // PKP Permissions condition
+        return `PKP permissions for ${
+          acc.parameters[0] || 'token'
+        } should ${humanizeComparator(acc.returnValueTest.comparator)} ${
+          acc.returnValueTest.value
+        }`;
+      } else if (acc.standardContractType === 'SIWE') {
+        // Sign-In with Ethereum condition
+        return `Valid SIWE signature from ${acc.returnValueTest.value}`;
+      } else if (acc.standardContractType === 'ProofOfHumanity') {
+        // Proof of Humanity verification
+        return `Verified human in Proof of Humanity registry at ${acc.contractAddress}`;
       }
 
-      return 'Oops. something went wrong!';
+      // Fallback for unhandled conditions - provide debugging information
+      logger.warn('Unhandled access control condition', {
+        standardContractType: acc.standardContractType,
+        method: acc.method,
+        contractAddress: acc.contractAddress,
+        chain: acc.chain,
+        conditionType: acc.conditionType,
+      });
+
+      return `Unhandled condition: ${
+        acc.standardContractType || 'unknown'
+      } contract type with method "${acc.method || 'none'}" ${
+        acc.contractAddress ? `at ${acc.contractAddress}` : ''
+      } on ${acc.chain || 'unknown chain'}`;
     })
   );
   return promises.join('');

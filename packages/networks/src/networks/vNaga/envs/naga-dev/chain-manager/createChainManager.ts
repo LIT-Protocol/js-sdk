@@ -1,9 +1,11 @@
+import { privateKeyToAccount } from 'viem/accounts';
 import { api } from '../../../LitChainClient';
+import { PKPStorageProvider } from '../../../LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
+import { getPKPsByAddress } from '../../../LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAddress';
 import { PkpIdentifierRaw } from '../../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import type { ExpectedAccountOrWalletClient } from '../../../LitChainClient/contract-manager/createContractsManager';
 import { DefaultNetworkConfig } from '../../../interfaces/NetworkContext';
 import { networkConfig } from '../naga-dev.config';
-import { privateKeyToAccount } from 'viem/accounts';
 
 // import { networkConfig as localConfig } from '../../naga-local/naga-local.config';
 
@@ -21,6 +23,22 @@ export type CreateChainManagerReturn = {
     pkpPermissionsManager: (
       pkpIdentifier: PkpIdentifierRaw
     ) => InstanceType<typeof api.PKPPermissionsManager>;
+    getPKPsByAuthData: (
+      authData: {
+        authMethodType: number | bigint;
+        authMethodId: string;
+        accessToken?: string;
+      },
+      pagination?: { limit?: number; offset?: number },
+      storageProvider?: PKPStorageProvider
+    ) => ReturnType<typeof api.PKPPermissionsManager.getPKPsByAuthData>;
+    getPKPsByAddress: (
+      params: {
+        ownerAddress: string;
+        pagination?: { limit?: number; offset?: number };
+        storageProvider?: PKPStorageProvider;
+      }
+    ) => ReturnType<typeof getPKPsByAddress>;
     pricing: {
       getPriceFeedInfo: (
         req: Parameters<typeof api.pricing.getPriceFeedInfo>[0]
@@ -63,6 +81,45 @@ export const createChainManager = (
       pkpPermissionsManager: (pkpIdentifier: PkpIdentifierRaw) => {
         return new api.PKPPermissionsManager(
           pkpIdentifier,
+          _networkConfig,
+          accountOrWalletClient
+        );
+      },
+      getPKPsByAuthData: (
+        authData: {
+          authMethodType: number | bigint;
+          authMethodId: string;
+          accessToken?: string;
+        },
+        pagination?: { limit?: number; offset?: number },
+        storageProvider?: PKPStorageProvider
+      ) => {
+        return api.PKPPermissionsManager.getPKPsByAuthData(
+          authData,
+          pagination,
+          storageProvider,
+          _networkConfig,
+          accountOrWalletClient
+        );
+      },
+      getPKPsByAddress: (params: {
+        ownerAddress: string;
+        pagination?: { limit?: number; offset?: number };
+        storageProvider?: PKPStorageProvider;
+      }) => {
+        // Provide default pagination if not provided
+        const defaultPagination = { limit: 10, offset: 0 };
+        const finalPagination = params.pagination ? {
+          limit: params.pagination.limit ?? defaultPagination.limit,
+          offset: params.pagination.offset ?? defaultPagination.offset,
+        } : defaultPagination;
+
+        return getPKPsByAddress(
+          {
+            ownerAddress: params.ownerAddress,
+            pagination: finalPagination,
+            storageProvider: params.storageProvider,
+          },
           _networkConfig,
           accountOrWalletClient
         );

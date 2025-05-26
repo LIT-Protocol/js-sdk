@@ -59,6 +59,7 @@ import {
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
 import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
+import { PKPStorageProvider } from '../../LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
 
 const _logger = getChildLogger({
   module: 'naga-dev-module',
@@ -114,6 +115,40 @@ const nagaDevModuleObject = {
     }): Promise<PKPPermissionsManager> => {
       const chainManager = createChainManager(params.account);
       return chainManager.api.pkpPermissionsManager(params.pkpIdentifier);
+    },
+
+    /**
+     * Gets all PKPs associated with specific authentication data
+     */
+    getPKPsByAuthData: async (params: {
+      authData: { authMethodType: number | bigint; authMethodId: string; accessToken?: string };
+      pagination?: { limit?: number; offset?: number };
+      storageProvider?: PKPStorageProvider;
+      account: ExpectedAccountOrWalletClient;
+    }) => {
+      const chainManager = createChainManager(params.account);
+      return chainManager.api.getPKPsByAuthData(
+        params.authData,
+        params.pagination,
+        params.storageProvider
+      );
+    },
+
+    /**
+     * Gets all PKPs owned by a specific address
+     */
+    getPKPsByAddress: async (params: {
+      ownerAddress: string;
+      pagination?: { limit?: number; offset?: number };
+      storageProvider?: PKPStorageProvider;
+      account: ExpectedAccountOrWalletClient;
+    }) => {
+      const chainManager = createChainManager(params.account);
+      return chainManager.api.getPKPsByAddress({
+        ownerAddress: params.ownerAddress,
+        pagination: params.pagination,
+        storageProvider: params.storageProvider,
+      });
     },
 
     /**

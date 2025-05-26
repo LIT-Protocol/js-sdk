@@ -1,8 +1,41 @@
-import pinoInstance, { Logger as Pino, LoggerOptions, DestinationStream } from 'pino';
+import pinoInstance, {
+  Logger as Pino,
+  LoggerOptions,
+  DestinationStream,
+} from 'pino';
+
+const isNode = () => {
+  let isNode = false;
+  // @ts-ignore
+  if (typeof process === 'object') {
+    // @ts-ignore
+    if (typeof process.versions === 'object') {
+      // @ts-ignore
+      if (typeof process.versions.node !== 'undefined') {
+        isNode = true;
+      }
+    }
+  }
+  return isNode;
+};
+
+export const getDefaultLevel = () => {
+  let logLevel = 'silent';
+
+  if (isNode()) {
+    logLevel = process.env['LOG_LEVEL'] || 'silent';
+  }else{
+    // @ts-ignore
+    logLevel = globalThis['LOG_LEVEL'] || 'silent';
+  }
+
+  console.log('✅ logLevel', logLevel);
+  return logLevel;
+};
 
 const DEFAULT_LOGGER_OPTIONS = {
   name: 'LitProtocolSDK',
-  level: 'info',
+  level: getDefaultLevel(),
 };
 
 type Logger = Pino<string, boolean>;

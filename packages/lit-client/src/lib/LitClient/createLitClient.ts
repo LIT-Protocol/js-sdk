@@ -8,14 +8,12 @@ import {
   getHashedAccessControlConditions,
   validateAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
-import {
-  encrypt as blsEncrypt
-} from '@lit-protocol/crypto';
+import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
 import {
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
-  JsonSignSessionKeyRequestForPkpReturnSchema
+  JsonSignSessionKeyRequestForPkpReturnSchema,
 } from '@lit-protocol/schemas';
 import {
   DecryptRequest,
@@ -29,7 +27,8 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import bs58 from 'bs58';
-import { hexToBigInt, keccak256, toBytes, toHex } from 'viem';
+import { PKPStorageProvider } from '../../../../networks/src/networks/vNaga/LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
+import { toHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { dispatchRequests } from './helper/handleNodePromises';
@@ -245,6 +244,30 @@ export const _createNagaLitClient = async (
   }
 
   /**
+   * Convert various data types to Uint8Array for encryption
+   */
+  function _convertDataToUint8Array(
+    data: string | object | any[] | Uint8Array
+  ): Uint8Array {
+    if (data instanceof Uint8Array) {
+      return data;
+    }
+
+    if (typeof data === 'string') {
+      return new TextEncoder().encode(data);
+    }
+
+    if (typeof data === 'object') {
+      // Convert object/array to JSON string then to Uint8Array
+      const jsonString = JSON.stringify(data);
+      return new TextEncoder().encode(jsonString);
+    }
+
+    // Fallback: convert to string then to Uint8Array
+    return new TextEncoder().encode(String(data));
+  }
+
+  /**
    * Validate if the encryption/decryption parameters contain valid access control conditions.
    */
   function _validateEncryptionParams(params: any): boolean {
@@ -271,6 +294,9 @@ export const _createNagaLitClient = async (
     if (!currentHandshakeResult.coreNodeConfig?.subnetPubKey) {
       throw new Error('subnetPubKey cannot be null');
     }
+
+    // ========== Convert data to Uint8Array ==========
+    const dataAsUint8Array = _convertDataToUint8Array(params.dataToEncrypt);
 
     // ========== Validate Params ==========
     if (!_validateEncryptionParams(params)) {
@@ -300,7 +326,7 @@ export const _createNagaLitClient = async (
     // ========== Hash Private Data ==========
     const hashOfPrivateData = await crypto.subtle.digest(
       'SHA-256',
-      params.dataToEncrypt
+      dataAsUint8Array
     );
     const hashOfPrivateDataStr = uint8arrayToString(
       new Uint8Array(hashOfPrivateData),
@@ -316,7 +342,7 @@ export const _createNagaLitClient = async (
     // ========== Encrypt ==========
     const ciphertext = await blsEncrypt(
       currentHandshakeResult.coreNodeConfig.subnetPubKey,
-      params.dataToEncrypt,
+      dataAsUint8Array,
       uint8arrayFromString(identityParam, 'utf8')
     );
 
@@ -500,37 +526,6 @@ export const _createNagaLitClient = async (
         pkpData: pkp,
       };
     },
-    utils: {
-      generateUniqueAuthMethodType: ({
-        uniqueDappName,
-      }: {
-        uniqueDappName: string;
-      }) => {
-        const hex = keccak256(toBytes(uniqueDappName));
-        const bigint = hexToBigInt(hex);
-
-        return {
-          hex,
-          bigint,
-        };
-      },
-      generateAuthData: ({
-        uniqueDappName,
-        uniqueAuthMethodType,
-        userId,
-      }: {
-        uniqueDappName: string;
-        uniqueAuthMethodType: bigint;
-        userId: string;
-      }) => {
-        const uniqueUserId = `${uniqueDappName}-${userId}`;
-
-        return {
-          authMethodType: uniqueAuthMethodType,
-          authMethodId: keccak256(toBytes(uniqueUserId)),
-        };
-      },
-    },
     getPKPPermissionsManager: networkModule.chainApi.getPKPPermissionsManager,
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣
@@ -552,6 +547,44 @@ export const _createNagaLitClient = async (
         addresses,
         authMethods,
       };
+    },
+    viewPKPsByAuthData: async (params: {
+      authData: {
+        authMethodType: number | bigint;
+        authMethodId: string;
+        accessToken?: string;
+      };
+      pagination?: { limit?: number; offset?: number };
+      storageProvider?: PKPStorageProvider;
+    }) => {
+      // Use read-only account for viewing PKPs
+      const account = privateKeyToAccount(
+        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+      );
+
+      return await networkModule.chainApi.getPKPsByAuthData({
+        authData: params.authData,
+        pagination: params.pagination,
+        storageProvider: params.storageProvider,
+        account,
+      });
+    },
+    viewPKPsByAddress: async (params: {
+      ownerAddress: string;
+      pagination?: { limit?: number; offset?: number };
+      storageProvider?: PKPStorageProvider;
+    }) => {
+      // Use read-only account for viewing PKPs
+      const account = privateKeyToAccount(
+        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+      );
+
+      return await networkModule.chainApi.getPKPsByAddress({
+        ownerAddress: params.ownerAddress,
+        pagination: params.pagination,
+        storageProvider: params.storageProvider,
+        account,
+      });
     },
     authService: {
       mintWithAuth: networkModule.authService.pkpMint,

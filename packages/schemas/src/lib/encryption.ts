@@ -28,10 +28,16 @@ export const DecryptRequestSchema = EncryptResponseSchema.merge(
   DecryptRequestBaseSchema
 );
 
-export const EncryptRequestSchema =
-  MultipleAccessControlConditionsSchema.extend({
-    /**
-     * The uint8array that you wish to encrypt
-     */
-    dataToEncrypt: z.instanceof(Uint8Array),
-  });
+export const EncryptRequestSchema = MultipleAccessControlConditionsSchema.merge(
+  ChainedSchema
+).extend({
+  /**
+   * The data to encrypt - can be string, object, or Uint8Array
+   */
+  dataToEncrypt: z.union([
+    z.string(),
+    z.record(z.any()), // for objects
+    z.array(z.any()), // for arrays
+    z.instanceof(Uint8Array),
+  ]),
+});
