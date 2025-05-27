@@ -22,14 +22,17 @@ export const PKPSignRequestDataSchema = z
     authSig: AuthSigSchema,
     nodeSet: NodeSetsFromUrlsSchema,
     chain: SigningChainSchema,
+    bypassAutoHashing: z.boolean().optional(),
   })
   .transform((item) => {
     return {
-      toSign: LitMessageSchema.parse({
-        toSign: item.toSign,
-        signingScheme: item.signingScheme,
-        chain: item.chain,
-      }),
+      toSign: item.bypassAutoHashing 
+        ? item.toSign 
+        : LitMessageSchema.parse({
+            toSign: item.toSign,
+            signingScheme: item.signingScheme,
+            chain: item.chain,
+          }),
       signingScheme: item.signingScheme,
       pubkey: item.pubkey,
       authSig: item.authSig,

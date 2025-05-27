@@ -503,3 +503,10 @@ export const EoaAuthContextSchema = z.object({
 // ]);
 
 // export type AllAuthContext = z.infer<typeof AllAuthContextSchema>;
+
+export const AuthContextSchema2 = z.union([
+  PKPAuthContextSchema,
+  EoaAuthContextSchema,
+]);
+
+export type AuthContextSchema2 = z.infer<typeof AuthContextSchema2>;

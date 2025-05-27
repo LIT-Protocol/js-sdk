@@ -58,8 +58,6 @@ export const getPKPsFlow = async () => {
   console.log(`⏱️  Second call completed in ${duration2}ms`);
   console.log(`📊 Found ${withStorageResult.pagination.total} total PKPs`);
 
-  process.exit();
-
   console.log(
     '🚀 Starting Get PKPs by Auth Data Flow with Storage Providers...'
   );
@@ -230,7 +228,7 @@ async function demonstratePKPsByAddressCaching() {
   const { litClient } = await init();
 
   const ownerAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'; // Example address
-  
+
   // Create storage provider for caching
   const storageProvider = localStorage({
     appName: 'lit-pkp-demo',
@@ -245,7 +243,9 @@ async function demonstratePKPsByAddressCaching() {
   });
   const time1 = Date.now() - start1;
   console.log(`⏱️  Time: ${time1}ms`);
-  console.log(`📦 Found ${result1.pkps.length} PKPs (total: ${result1.pagination.total})`);
+  console.log(
+    `📦 Found ${result1.pkps.length} PKPs (total: ${result1.pagination.total})`
+  );
   console.log(`🔄 Has more: ${result1.pagination.hasMore}`);
 
   console.log('\n💾 First call with caching:');
@@ -257,7 +257,9 @@ async function demonstratePKPsByAddressCaching() {
   });
   const time2 = Date.now() - start2;
   console.log(`⏱️  Time: ${time2}ms`);
-  console.log(`📦 Found ${result2.pkps.length} PKPs (total: ${result2.pagination.total})`);
+  console.log(
+    `📦 Found ${result2.pkps.length} PKPs (total: ${result2.pagination.total})`
+  );
 
   console.log('\n⚡ Second call with cache (different pagination):');
   const start3 = Date.now();
@@ -286,5 +288,7 @@ async function demonstratePKPsByAddressCaching() {
   console.log(`First cached: ${time2}ms`);
   console.log(`Different pagination: ${time3}ms`);
   console.log(`Overlapping pagination: ${time4}ms`);
-  console.log(`🚀 Cache speedup: ${Math.round((time1 / time4) * 100) / 100}x faster`);
+  console.log(
+    `🚀 Cache speedup: ${Math.round((time1 / time4) * 100) / 100}x faster`
+  );
 }

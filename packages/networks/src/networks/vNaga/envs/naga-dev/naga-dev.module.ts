@@ -288,6 +288,7 @@ const nagaDevModuleObject = {
             // additional meta to determine hash function, but not
             // sent to the node
             chain: params.chain,
+            bypassAutoHashing: params.signingContext.bypassAutoHashing,
           });
 
           const _urlWithPath = composeLitUrl({

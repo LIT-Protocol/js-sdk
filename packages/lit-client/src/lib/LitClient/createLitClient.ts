@@ -12,6 +12,8 @@ import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
 import {
+  AuthContextSchema2,
+  HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
 } from '@lit-protocol/schemas';
@@ -27,21 +29,22 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 import bs58 from 'bs58';
-import { PKPStorageProvider } from '../../../../networks/src/networks/vNaga/LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
-import { toHex } from 'viem';
+import { Chain, Hex, toHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
+import { PKPStorageProvider } from '../../../../networks/src/networks/vNaga/LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
 import { dispatchRequests } from './helper/handleNodePromises';
-import { orchestrateHandshake } from './orchestrateHandshake';
-import {
-  MintWithCustomAuthRequest,
-  MintWithCustomAuthSchema,
-} from './schemas/MintWithCustomAuthSchema';
 import {
   convertDecryptedData,
   extractFileMetadata,
   inferDataType,
 } from './helpers/convertDecryptedData';
+import { createPKPViemAccount } from './intergrations/createPkpViemAccount';
+import { orchestrateHandshake } from './orchestrateHandshake';
+import {
+  MintWithCustomAuthRequest,
+  MintWithCustomAuthSchema,
+} from './schemas/MintWithCustomAuthSchema';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -102,9 +105,15 @@ export const _createNagaLitClient = async (
   }
 
   async function _pkpSign(
-    params: z.infer<typeof networkModule.api.pkpSign.schemas.Input.raw>
+    params: z.infer<typeof networkModule.api.pkpSign.schemas.Input.raw> & {
+      bypassAutoHashing?: boolean;
+    }
   ) {
-    _logger.info(`🔥 signing on ${params.chain} with ${params.signingScheme}`);
+    _logger.info(
+      `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${
+        params.bypassAutoHashing || false
+      })`
+    );
 
     // 🟩 get the fresh handshake results
     const currentHandshakeResult = _stateManager.getCallbackResult();
@@ -121,6 +130,19 @@ export const _createNagaLitClient = async (
     // request array to the `networkModule`. It encapsulates logic specific to the
     // active network (e.g., pricing, thresholds, metadata) and returns a set of
     // structured requests ready to be dispatched to the nodes.
+
+    // Create signing context with optional bypass flag
+    const signingContext: any = {
+      pubKey: params.pubKey,
+      toSign: params.toSign,
+      signingScheme: params.signingScheme,
+    };
+
+    // Add bypass flag if provided
+    if (params.bypassAutoHashing) {
+      signingContext.bypassAutoHashing = true;
+    }
+
     const requestArray = await networkModule.api.pkpSign.createRequest({
       // add chain context (btc, eth, cosmos, solana)
       pricingContext: {
@@ -130,11 +152,7 @@ export const _createNagaLitClient = async (
         threshold: currentHandshakeResult.threshold,
       },
       authContext: params.authContext,
-      signingContext: {
-        pubKey: params.pubKey,
-        toSign: params.toSign,
-        signingScheme: params.signingScheme,
-      },
+      signingContext,
       connectionInfo: currentConnectionInfo,
       version: networkModule.version,
       chain: params.chain,
@@ -564,7 +582,7 @@ export const _createNagaLitClient = async (
     return response;
   }
 
-  return {
+  const litClient = {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
     // maybe you will need connectionInfo: _stateManager.getLatestConnectionInfo(),
@@ -580,6 +598,15 @@ export const _createNagaLitClient = async (
         signSessionKey: _signSessionKey,
         signCustomSessionKey: _signCustomSessionKey,
         executeJs: _executeJs,
+      };
+    },
+    getChainConfig: () => {
+      const viemConfig = networkModule.getChainConfig();
+      const rpcUrl = networkModule.getRpcUrl();
+
+      return {
+        viemConfig: viemConfig,
+        rpcUrl,
       };
     },
     disconnect: _stateManager.stop,
@@ -717,6 +744,31 @@ export const _createNagaLitClient = async (
     ) => {
       return _executeJs(params);
     },
+    getPkpViemAccount: async (params: {
+      pkpPublicKey: string | Hex;
+      authContext: AuthContextSchema2;
+      chainConfig: Chain;
+    }) => {
+      const _pkpPublicKey = HexPrefixedSchema.parse(params.pkpPublicKey);
+
+      return createPKPViemAccount({
+        pkpPublicKey: _pkpPublicKey,
+        authContext: params.authContext,
+        chainConfig: params.chainConfig,
+        sign: async (data: any, options?: { bypassAutoHashing?: boolean }) => {
+          const res = await _pkpSign({
+            chain: 'ethereum',
+            signingScheme: 'EcdsaK256Sha256',
+            pubKey: _pkpPublicKey,
+            toSign: data,
+            authContext: params.authContext,
+            bypassAutoHashing: options?.bypassAutoHashing,
+          });
+
+          return res.signature;
+        },
+      });
+    },
     chain: {
       raw: {
         pkpSign: async (
@@ -749,6 +801,8 @@ export const _createNagaLitClient = async (
       },
     },
   };
+
+  return litClient;
 };
 
 /**

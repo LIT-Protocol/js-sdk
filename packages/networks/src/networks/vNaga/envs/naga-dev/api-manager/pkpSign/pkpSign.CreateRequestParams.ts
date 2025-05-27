@@ -17,6 +17,7 @@ export type PKPSignCreateRequestParams = {
     pubKey: z.infer<typeof HexPrefixedSchema>;
     toSign: any;
     signingScheme: z.infer<typeof SigningSchemeSchema>;
+    bypassAutoHashing?: boolean;
   };
   connectionInfo: ConnectionInfo;
   version: string;
