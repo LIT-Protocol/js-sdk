@@ -16,11 +16,14 @@
 
 import { findMostCommonResponse } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
-import { ExecuteJsResponse, LitActionResponseStrategy } from '@lit-protocol/types';
+import {
+  ExecuteJsResponse,
+  LitActionResponseStrategy,
+} from '@lit-protocol/types';
 import { z } from 'zod';
 import { combineExecuteJSSignatures } from '../helper/get-signatures';
-import { ExecuteJsResponseDataSchema } from './executeJs.ResponseDataSchema';
 import { ExecuteJsValueResponse, LitActionClaimData } from '../types';
+import { ExecuteJsResponseDataSchema } from './executeJs.ResponseDataSchema';
 
 const _logger = getChildLogger({
   module: 'executeJs-api',
@@ -38,7 +41,7 @@ type ProcessedBatchResult<T> =
  */
 const _findFrequency = <T>(arr: T[]): { min: T; max: T } => {
   const frequency: Map<string, { count: number; value: T }> = new Map();
-  
+
   // Count frequencies
   for (const item of arr) {
     const key = JSON.stringify(item);
@@ -49,14 +52,14 @@ const _findFrequency = <T>(arr: T[]): { min: T; max: T } => {
       frequency.set(key, { count: 1, value: item });
     }
   }
-  
+
   // Find min and max
   let minCount = Infinity;
   let maxCount = 0;
   let minValue = arr[0];
   let maxValue = arr[0];
-  
-  for (const { count, value } of frequency.values()) {
+
+  for (const { count, value } of Array.from(frequency.values())) {
     if (count < minCount) {
       minCount = count;
       minValue = value;
@@ -66,7 +69,7 @@ const _findFrequency = <T>(arr: T[]): { min: T; max: T } => {
       maxValue = value;
     }
   }
-  
+
   return { min: minValue, max: maxValue };
 };
 
@@ -87,12 +90,13 @@ export const processLitActionResponseStrategy = (
   const copiedExecutionResponses = executionResponses.map((r) => {
     return '' + r;
   });
-  
+
   if (strategy.strategy === 'custom') {
     try {
       if (strategy.customFilter) {
-        const customResponseFilterResult =
-          strategy?.customFilter(executionResponses as any);
+        const customResponseFilterResult = strategy?.customFilter(
+          executionResponses as any
+        );
         return customResponseFilterResult;
       } else {
         _logger.error(
@@ -127,6 +131,119 @@ export const processLitActionResponseStrategy = (
 };
 
 /**
+ * Check if an object contains signature data (r, s, v properties)
+ * @param obj Object to check
+ * @returns true if object contains signature properties
+ */
+const _isSignatureObject = (obj: any): boolean => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'r' in obj &&
+    's' in obj &&
+    'v' in obj
+  );
+};
+
+/**
+ * Extract signature data from parsed response objects
+ * @param responses Array of parsed response objects
+ * @returns Object containing signatures and cleaned responses
+ */
+const _extractSignaturesFromResponses = (
+  responses: ExecuteJsValueResponse[]
+): {
+  hasSignatureData: boolean;
+  signatureShares: Array<{ signature: any; derivedKeyId?: string }>;
+  cleanedResponses: ExecuteJsValueResponse[];
+} => {
+  const signatureShares: Array<{ signature: any; derivedKeyId?: string }> = [];
+  const cleanedResponses: ExecuteJsValueResponse[] = [];
+  let hasSignatureData = false;
+
+  for (const nodeResp of responses) {
+    try {
+      const parsedResponse = JSON.parse(nodeResp.response as string);
+
+      // Check if response contains signature data
+      if (parsedResponse && typeof parsedResponse === 'object') {
+        // Look for direct signature object
+        if (_isSignatureObject(parsedResponse)) {
+          hasSignatureData = true;
+          signatureShares.push({ signature: parsedResponse });
+          // For direct signature objects, set response to empty or success message
+          cleanedResponses.push({
+            ...nodeResp,
+            response: JSON.stringify({ success: true }),
+          });
+        }
+        // Look for signature within response object (like your example)
+        else if (parsedResponse.signature) {
+          let signatureObj;
+          try {
+            // Handle case where signature is a string that needs parsing
+            signatureObj =
+              typeof parsedResponse.signature === 'string'
+                ? JSON.parse(parsedResponse.signature)
+                : parsedResponse.signature;
+
+            if (_isSignatureObject(signatureObj)) {
+              hasSignatureData = true;
+              signatureShares.push({ signature: signatureObj });
+
+              // Remove signature from response and keep the rest
+              const cleanedResponse = { ...parsedResponse };
+              delete cleanedResponse.signature;
+              cleanedResponses.push({
+                ...nodeResp,
+                response: JSON.stringify(cleanedResponse),
+              });
+            } else {
+              // Not a signature object, keep as-is
+              cleanedResponses.push(nodeResp);
+            }
+          } catch {
+            // Failed to parse signature, keep response as-is
+            cleanedResponses.push(nodeResp);
+          }
+        } else {
+          // Check for nested signature objects in response properties
+          let foundSignature = false;
+          const cleanedResponse = { ...parsedResponse };
+
+          for (const [key, value] of Object.entries(parsedResponse)) {
+            if (_isSignatureObject(value)) {
+              hasSignatureData = true;
+              foundSignature = true;
+              signatureShares.push({ signature: value });
+              delete cleanedResponse[key];
+            }
+          }
+
+          if (foundSignature) {
+            cleanedResponses.push({
+              ...nodeResp,
+              response: JSON.stringify(cleanedResponse),
+            });
+          } else {
+            // No signature data found, keep as-is
+            cleanedResponses.push(nodeResp);
+          }
+        }
+      } else {
+        // Not an object response, keep as-is
+        cleanedResponses.push(nodeResp);
+      }
+    } catch {
+      // Failed to parse JSON, keep original response
+      cleanedResponses.push(nodeResp);
+    }
+  }
+
+  return { hasSignatureData, signatureShares, cleanedResponses };
+};
+
+/**
  * Handles the response from executeJs operation
  *
  * @param result - The batch result from executing the requests
@@ -150,9 +267,13 @@ export const handleResponse = async (
   if (!result.success) {
     _logger.error('executeJs:handleResponse: Batch failed', {
       requestId,
-      error: result.error,
+      error: 'error' in result ? result.error : 'Unknown error',
     });
-    throw new Error(`ExecuteJs batch failed: ${JSON.stringify(result.error)}`);
+    throw new Error(
+      `ExecuteJs batch failed: ${JSON.stringify(
+        'error' in result ? result.error : 'Unknown error'
+      )}`
+    );
   }
 
   const { values } = ExecuteJsResponseDataSchema.parse(result);
@@ -173,30 +294,39 @@ export const handleResponse = async (
   }
 
   // Convert to ExecuteJsValueResponse format for compatibility with old code
-  const responseData: ExecuteJsValueResponse[] = successfulValues.map((value) => ({
-    success: value.success,
-    response: value.response,
-    logs: value.logs,
-    signedData: value.signedData || {},
-    claimData: Object.entries(value.claimData || {}).reduce(
-      (acc, [key, claimData]) => {
-        acc[key] = {
-          signature: '', // Convert from signatures array to single signature for compatibility
-          derivedKeyId: claimData.derivedKeyId || '',
-        };
-        return acc;
-      },
-      {} as Record<string, LitActionClaimData>
-    ),
-    decryptedData: value.decryptedData || {},
-  }));
+  const responseData: ExecuteJsValueResponse[] = successfulValues.map(
+    (value) => ({
+      success: value.success,
+      response: value.response,
+      logs: value.logs,
+      signedData: value.signedData || {},
+      claimData: Object.entries(value.claimData || {}).reduce(
+        (acc, [key, claimData]) => {
+          acc[key] = {
+            signature: '', // Convert from signatures array to single signature for compatibility
+            derivedKeyId: claimData.derivedKeyId || '',
+          };
+          return acc;
+        },
+        {} as Record<string, LitActionClaimData>
+      ),
+      decryptedData: value.decryptedData || {},
+    })
+  );
+
+  // Check for signature data in responses and extract if found
+  const { hasSignatureData, signatureShares, cleanedResponses } =
+    _extractSignaturesFromResponses(responseData);
+
+  // Use cleaned responses for further processing if signatures were extracted
+  const dataToProcess = hasSignatureData ? cleanedResponses : responseData;
 
   // Find most common response data using the existing function
-  const mostCommonResponse = findMostCommonResponse(responseData);
+  const mostCommonResponse = findMostCommonResponse(dataToProcess);
 
   // Apply response strategy processing
   const responseFromStrategy = processLitActionResponseStrategy(
-    responseData,
+    dataToProcess,
     responseStrategy ?? { strategy: 'leastCommon' }
   );
   mostCommonResponse.response = responseFromStrategy as string;
@@ -205,7 +335,7 @@ export const handleResponse = async (
   const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
 
   // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-  if (!hasSignedData && !hasClaimData) {
+  if (!hasSignedData && !hasClaimData && !hasSignatureData) {
     return {
       success: mostCommonResponse.success,
       claims: {},
@@ -221,12 +351,15 @@ export const handleResponse = async (
   let signatures: Record<string, any> = {};
 
   if (hasSignedData) {
-    _logger.info('executeJs:handleResponse: Combining signatures', {
-      requestId,
-    });
+    _logger.info(
+      'executeJs:handleResponse: Combining signatures from signedData',
+      {
+        requestId,
+      }
+    );
 
     signatures = await combineExecuteJSSignatures({
-      nodesLitActionSignedData: responseData,
+      nodesLitActionSignedData: dataToProcess,
       requestId,
       threshold,
     });
@@ -235,6 +368,104 @@ export const handleResponse = async (
       requestId,
       signatureKeys: Object.keys(signatures),
     });
+  }
+
+  // Handle signatures extracted from response data
+  if (hasSignatureData) {
+    _logger.info(
+      'executeJs:handleResponse: Processing signatures from response data',
+      {
+        requestId,
+        signatureCount: signatureShares.length,
+      }
+    );
+
+    // Check if these are final signatures (with r,s,v) or signature shares that need combining
+    const firstSignature = signatureShares[0]?.signature;
+    const isFinalSignature = _isSignatureObject(firstSignature);
+
+    if (isFinalSignature) {
+      _logger.info(
+        'executeJs:handleResponse: Detected final signatures in response, using directly',
+        {
+          requestId,
+        }
+      );
+
+      // These are final signatures, not shares - use them directly
+      // Apply most common strategy to pick the signature to use
+      const signatureObjects = signatureShares.map((share) => share.signature);
+      const mostCommonSignature = findMostCommonResponse(
+        signatureObjects.map((sig) => ({ response: JSON.stringify(sig) }))
+      );
+
+      // Convert r,s,v to the expected signature format
+      const parsedSignature = JSON.parse(mostCommonSignature.response);
+      const signature = {
+        r: parsedSignature.r,
+        s: parsedSignature.s,
+        recovery: parsedSignature.v,
+        v: parsedSignature.v,
+        // Create full signature string if needed
+        signature: `0x${parsedSignature.r}${
+          parsedSignature.s
+        }${parsedSignature.v.toString(16).padStart(2, '0')}`,
+      };
+
+      signatures['response_signature'] = signature;
+
+      _logger.info(
+        'executeJs:handleResponse: Final signature processed successfully',
+        {
+          requestId,
+          signatureKeys: ['response_signature'],
+        }
+      );
+    } else {
+      _logger.info(
+        'executeJs:handleResponse: Detected signature shares, combining them',
+        {
+          requestId,
+          signatureCount: signatureShares.length,
+        }
+      );
+
+      // These are signature shares that need to be combined
+      // Convert signature shares to the format expected by combineExecuteJSSignatures
+      const signatureResponseData: ExecuteJsValueResponse[] =
+        signatureShares.map((share, index) => ({
+          success: true,
+          response: '',
+          logs: '',
+          signedData: {
+            response_signature: {
+              publicKey: share.derivedKeyId || '', // Use derivedKeyId as publicKey fallback
+              signatureShare: JSON.stringify(share.signature),
+              sigName: 'response_signature',
+              sigType: 'K256' as any, // Default to K256 for ECDSA
+            },
+          },
+          claimData: {},
+          decryptedData: {},
+        }));
+
+      const responseSignatures = await combineExecuteJSSignatures({
+        nodesLitActionSignedData: signatureResponseData,
+        requestId,
+        threshold,
+      });
+
+      // Merge with existing signatures
+      signatures = { ...signatures, ...responseSignatures };
+
+      _logger.info(
+        'executeJs:handleResponse: Signature shares combined successfully',
+        {
+          requestId,
+          responseSignatureKeys: Object.keys(responseSignatures),
+        }
+      );
+    }
   }
 
   // Process claims data if present

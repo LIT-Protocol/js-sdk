@@ -11,7 +11,6 @@
  */
 
 import { init } from './init';
-import { ViemAccountAuthenticator } from '@lit-protocol/auth';
 
 // Test Lit Action code that signs data and logs messages
 const TEST_LIT_ACTION_CODE = `
@@ -34,15 +33,7 @@ const TEST_LIT_ACTION_CODE = `
     toSign: toSignBytes32Array,
     publicKey,
     sigName,
-  });
-  
-
-    const sigShare2 = await Lit.Actions.signEcdsa({
-    toSign: toSignBytes32Array,
-    publicKey,
-    sigName,
-  });
-  
+  });  
 })();
 `;
 
@@ -52,49 +43,27 @@ async function main() {
   try {
     // Use the init helper to get client, account, and auth manager
     console.log('📱 Initializing Lit client and auth manager...');
-    const { myAccount, litClient, authManager } = await init();
+    const {
+      myAccount,
+      litClient,
+      authManager,
+      viemAuthContext,
+      viemAccountPkp,
+    } = await init();
     console.log('✅ Lit client and auth manager initialized successfully\n');
-
-    // Create proper EOA auth context
-    console.log('🔑 Creating EOA auth context...');
-    const eoaAuthContext = await authManager.createEoaAuthContext({
-      config: {
-        account: myAccount,
-      },
-      authConfig: {
-        statement: 'I authorize the Lit Protocol to execute this Lit Action.',
-        domain: 'example.com',
-        resources: [
-          ['lit-action-execution', '*'],
-          ['pkp-signing', '*'],
-        ],
-        capabilityAuthSigs: [],
-        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-      },
-      litClient: litClient,
-    });
-    console.log('✅ EOA auth context created successfully\n');
-
-    const authData = await ViemAccountAuthenticator.authenticate(myAccount);
-
-    const mintedPkpWithEoaAuth = await litClient.mintWithAuth({
-      account: myAccount, // or walletClient depending on method
-      authData: authData,
-      scopes: ['sign-anything'],
-    });
 
     // Test 1: Execute Lit Action with simple code
     console.log('🧪 Test 1: Executing simple Lit Action...');
 
     const result = await litClient.executeJs({
       code: TEST_LIT_ACTION_CODE,
-      authContext: eoaAuthContext,
+      authContext: viemAuthContext,
       jsParams: {
         jsParams: {
           message: 'Test message from executeJs',
           sigName: 'random-sig-name',
           toSign: 'Test message from executeJs',
-          publicKey: mintedPkpWithEoaAuth.data.pubkey,
+          publicKey: viemAccountPkp.publicKey,
         },
       },
     });

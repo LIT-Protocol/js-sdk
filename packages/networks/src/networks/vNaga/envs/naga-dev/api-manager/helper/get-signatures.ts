@@ -121,7 +121,7 @@ export const combineExecuteJSSignatures = async (params: {
             originalShare: share,
             parsedSignatureShareObject: parsedSignatureShare,
             publicKey,
-            sigÍType,
+            sigType,
           });
         } catch (e) {
           logErrorWithRequestId(

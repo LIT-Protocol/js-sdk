@@ -1,9 +1,10 @@
-import { InitError } from '@lit-protocol/constants';
+import { InitError, InvalidNodeAttestation } from '@lit-protocol/constants';
 import * as LitNodeApi from '../LitNodeClient/LitNodeApi';
 
 import { getChildLogger } from '@lit-protocol/logger';
 import { EndPoint } from '@lit-protocol/types';
 import { createRandomHexString } from '../LitNodeClient/helper/createRandomHexString';
+import { checkSevSnpAttestation } from '@lit-protocol/crypto';
 import {
   ResolvedHandshakeResponse,
   resolveHandshakeResponse,
@@ -74,19 +75,33 @@ export const orchestrateHandshake = async (params: {
 
             // 2. Process the response (verify attestation etc.)
             if (params.requiredAttestation) {
-              // const challenge = createRandomHexString(64);
-              // const needsAttestationCheck =
-              //   checkNodeAttestation; /* || check if network requires it */
-              // const processedKeys = await processHandshakeResponse(
-              //   rawResponse,
-              //   challenge,
-              //   url,
-              //   needsAttestationCheck,
-              //   handshakeRequestId
-              //   // logger
-              // );
-              // 3. Store results if successful
-              // serverKeys[url] = processedKeys;
+              const challenge = createRandomHexString(64);
+
+              if (!retrievedServerKeys.attestation) {
+                throw new InvalidNodeAttestation(
+                  {},
+                  `Missing attestation in handshake response from ${url}`
+                );
+              }
+
+              // Verify the attestation by checking the signature against AMD certs
+              try {
+                await checkSevSnpAttestation(
+                  retrievedServerKeys.attestation,
+                  challenge,
+                  url
+                );
+                // 3. Store results if successful
+                serverKeys[url] = retrievedServerKeys;
+                connectedNodes.add(url);
+              } catch (error: any) {
+                throw new InvalidNodeAttestation(
+                  {
+                    cause: error,
+                  },
+                  `Lit Node Attestation failed verification for ${url} - ${error.message}`
+                );
+              }
             } else {
               serverKeys[url] = retrievedServerKeys;
               connectedNodes.add(url);
