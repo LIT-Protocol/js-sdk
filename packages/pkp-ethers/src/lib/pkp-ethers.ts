@@ -62,6 +62,8 @@ import {
 
 const logger = new Logger(version);
 
+const EIP1559_TX_TYPE = 2;
+
 export class PKPEthersWallet
   implements
     PKPWallet,
@@ -81,6 +83,8 @@ export class PKPEthersWallet
   // -- manual tx settings --
   manualGasPrice?: string;
   manualGasLimit?: string;
+  manualMaxFeePerGas?: string;
+  manualMaxPriorityFeePerGas?: string;
   nonce?: string;
   chainId?: number;
 
@@ -155,6 +159,14 @@ export class PKPEthersWallet
     this.manualGasLimit = gasLimit;
   };
 
+  setMaxFeePerGas = (maxFeePerGas: string): void => {
+    this.manualMaxFeePerGas = maxFeePerGas;
+  };
+
+  setMaxPriorityFeePerGas = (maxPriorityFeePerGas: string): void => {
+    this.manualMaxPriorityFeePerGas = maxPriorityFeePerGas;
+  };
+
   setNonce = (nonce: string): void => {
     this.nonce = nonce;
   };
@@ -166,6 +178,8 @@ export class PKPEthersWallet
   resetManualSettings = (): void => {
     this.manualGasPrice = undefined;
     this.manualGasLimit = undefined;
+    this.manualMaxFeePerGas = undefined;
+    this.manualMaxPriorityFeePerGas = undefined;
     this.nonce = undefined;
     this.chainId = undefined;
   };
@@ -215,6 +229,20 @@ export class PKPEthersWallet
       transaction.gasLimit = this.manualGasLimit;
     }
 
+    if (this.manualMaxFeePerGas && this.manualMaxPriorityFeePerGas) {
+      transaction.maxFeePerGas = this.manualMaxFeePerGas;
+      transaction.maxPriorityFeePerGas = this.manualMaxPriorityFeePerGas;
+      transaction.type = EIP1559_TX_TYPE;
+      this.pkpBase.log(
+        'signTransaction => EIP-1559 maxFeePerGas:',
+        transaction.maxFeePerGas
+      );
+      this.pkpBase.log(
+        'signTransaction => EIP-1559 maxPriorityFeePerGas:',
+        transaction.maxPriorityFeePerGas
+      );
+    }
+
     if (this.nonce) {
       transaction.nonce = this.nonce;
     }
@@ -239,9 +267,29 @@ export class PKPEthersWallet
         this.pkpBase.log('signTransaction => chainId:', transaction.chainId);
       }
 
-      if (!transaction['gasPrice']) {
-        transaction.gasPrice = await this.getGasPrice();
-        this.pkpBase.log('signTransaction => gasPrice:', transaction.gasPrice);
+      if (
+        !transaction.gasPrice &&
+        (!transaction.maxFeePerGas || !transaction.maxPriorityFeePerGas)
+      ) {
+        const feeData = await this.getFeeData();
+        if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
+          transaction.maxFeePerGas = feeData.maxFeePerGas;
+          transaction.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+          this.pkpBase.log(
+            'signTransaction => maxFeePerGas:',
+            transaction.maxFeePerGas
+          );
+          this.pkpBase.log(
+            'signTransaction => maxPriorityFeePerGas:',
+            transaction.maxPriorityFeePerGas
+          );
+        } else {
+          transaction.gasPrice = feeData.gasPrice || (await this.getGasPrice());
+          this.pkpBase.log(
+            'signTransaction => fallback gasPrice:',
+            transaction.gasPrice
+          );
+        }
       }
     } catch (err) {
       this.pkpBase.log(
