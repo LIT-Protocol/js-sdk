@@ -74,7 +74,7 @@ export const NodeRequestSchema = z.object({
 export const DomainSchema = z
   .string()
   .optional()
-  .default('')
+  .default('localhost')
   .refine((val) => val === '' || /^[^/]+(:\d+)?$/.test(val), {
     message:
       'Domain must not contain path or trailing slash (e.g., "localhost:3000" is valid, "localhost:3000/" is not)',

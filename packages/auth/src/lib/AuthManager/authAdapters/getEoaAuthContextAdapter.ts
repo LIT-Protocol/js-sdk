@@ -9,8 +9,8 @@ import {
   ExpectedAccountOrWalletClient,
   getEoaAuthContext,
 } from '../authContexts/getEoaAuthContext';
-import { processResources } from '../utils/processResources';
 import { tryGetCachedAuthData } from '../try-getters/tryGetCachedAuthData';
+import { processResources } from '../utils/processResources';
 
 /**
  * The EOA auth context adapter params.

@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { ViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';
 import { WalletClientAuthenticator } from '../../authenticators/WalletClientAuthenticator';
 import { LitAuthData } from '../../types';
-import { AuthConfigSchema } from './BaseAuthContextType';
+import { AuthConfigSchema } from '@lit-protocol/schemas';
 
 export type ExpectedAccountOrWalletClient =
   | Account
@@ -36,6 +36,8 @@ export const getEoaAuthContext = async (
   params: GetEoaAuthContextParams
 ): Promise<z.infer<typeof EoaAuthContextSchema>> => {
   const _params = params;
+  const _authConfig = AuthConfigSchema.parse(_params.authConfig);
+
   const _sessionKeyPair = _params.deps.authData.sessionKey.keyPair;
 
   // This will either be the Viem account or the WalletClient account

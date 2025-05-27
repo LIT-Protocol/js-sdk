@@ -1,4 +1,4 @@
-import { ExpirationSchema } from './lib/schemas';
+import { DomainSchema, ExpirationSchema } from './lib/schemas';
 
 import { z } from 'zod';
 import { LitResourceAbilityRequestSchema } from './lib/models';
@@ -10,12 +10,23 @@ export * from './lib/schemas';
 export * from './lib/transformers';
 export * from './lib/validation';
 
-export const AuthConfigSchema = z.object({
-  capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
-  expiration: ExpirationSchema.optional().default(
-    new Date(Date.now() + 1000 * 60 * 15).toISOString()
-  ),
-  statement: z.string().optional().default(''),
-  domain: z.string().optional().default(''),
-  resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
-});
+export const AuthConfigSchema = z.preprocess(
+  // Remove undefined values so Zod defaults can be applied properly
+  (data) => {
+    if (typeof data === 'object' && data !== null) {
+      return Object.fromEntries(
+        Object.entries(data).filter(([_, value]) => value !== undefined)
+      );
+    }
+    return data;
+  },
+  z.object({
+    capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
+    expiration: ExpirationSchema.optional().default(
+      new Date(Date.now() + 1000 * 60 * 15).toISOString()
+    ),
+    statement: z.string().optional().default(''),
+    domain: DomainSchema.optional().default('localhost'),
+    resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
+  })
+);

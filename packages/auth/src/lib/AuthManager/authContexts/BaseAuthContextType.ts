@@ -21,12 +21,26 @@ export const BaseAuthenticationSchema = z.object({
   // domain: z.string().optional(),
 });
 
-export const AuthConfigSchema = z.object({
-  capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
-  expiration: ExpirationSchema.optional().default(
-    new Date(Date.now() + 1000 * 60 * 15).toISOString()
-  ),
-  statement: z.string().optional().default(''),
-  domain: DomainSchema.optional().default('localhost'),
-  resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
-});
+/**
+ * @deprecated - use the one in @lit-protocol/schemas instead
+ */
+export const AuthConfigSchema = z.preprocess(
+  // Remove undefined values so Zod defaults can be applied properly
+  (data) => {
+    if (typeof data === 'object' && data !== null) {
+      return Object.fromEntries(
+        Object.entries(data).filter(([_, value]) => value !== undefined)
+      );
+    }
+    return data;
+  },
+  z.object({
+    capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
+    expiration: ExpirationSchema.optional().default(
+      new Date(Date.now() + 1000 * 60 * 15).toISOString()
+    ),
+    statement: z.string().optional().default(''),
+    domain: DomainSchema.optional().default('localhost'),
+    resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
+  })
+);
