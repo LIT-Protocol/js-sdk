@@ -34,8 +34,7 @@ const TEST_LIT_ACTION_CODE = `
     publicKey,
     sigName,
   });  
-})();
-`;
+})();`;
 
 async function main() {
   console.log('🚀 Starting ExecuteJs Flow Test...\n');
@@ -59,12 +58,10 @@ async function main() {
       code: TEST_LIT_ACTION_CODE,
       authContext: viemAuthContext,
       jsParams: {
-        jsParams: {
-          message: 'Test message from executeJs',
-          sigName: 'random-sig-name',
-          toSign: 'Test message from executeJs',
-          publicKey: viemAccountPkp.publicKey,
-        },
+        message: 'Test message from executeJs',
+        sigName: 'random-sig-name',
+        toSign: 'Test message from executeJs',
+        publicKey: viemAccountPkp.publicKey,
       },
     });
 

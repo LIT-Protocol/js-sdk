@@ -1,61 +1,15 @@
+import { getAddress } from 'viem';
 import { z } from 'zod';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
-import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
-import { getTokenIdsForAuthMethod } from '../../../rawContractApis/pkp/read/getTokenIdsForAuthMethod';
+import {
+  createContractsManager,
+  ExpectedAccountOrWalletClient,
+} from '../../../../contract-manager/createContractsManager';
 import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
-import { createContractsManager } from '../../../../contract-manager/createContractsManager';
-import { getAddress } from 'viem';
-
-// Import PKPInfo from auth package for consistency
-import type { PKPInfo } from '@lit-protocol/auth';
-
-// Local interface for PKP storage - extends the auth package interface
-export interface PKPStorageProvider {
-  readPKPTokens?(params: {
-    authMethodType: number | bigint;
-    authMethodId: string;
-  }): Promise<string[] | null>;
-
-  writePKPTokens?(params: {
-    authMethodType: number | bigint;
-    authMethodId: string;
-    tokenIds: string[];
-  }): Promise<void>;
-
-  // New granular PKP caching by individual token ID
-  readPKPDetails?(params: {
-    tokenId: string;
-  }): Promise<{ publicKey: string; ethAddress: string } | null>;
-
-  writePKPDetails?(params: {
-    tokenId: string;
-    publicKey: string;
-    ethAddress: string;
-  }): Promise<void>;
-
-  // Address-based token caching methods
-  readPKPTokensByAddress?(params: {
-    ownerAddress: string;
-  }): Promise<string[] | null>;
-
-  writePKPTokensByAddress?(params: {
-    ownerAddress: string;
-    tokenIds: string[];
-  }): Promise<void>;
-
-  // Deprecated - kept for backward compatibility
-  readPKPs?(params: {
-    authMethodType: number | bigint;
-    authMethodId: string;
-  }): Promise<PKPInfo[] | null>;
-
-  writePKPs?(params: {
-    authMethodType: number | bigint;
-    authMethodId: string;
-    pkps: PKPInfo[];
-  }): Promise<void>;
-}
+import { getTokenIdsForAuthMethod } from '../../../rawContractApis/pkp/read/getTokenIdsForAuthMethod';
+import type { PKPStorageProvider } from '../../../../../../../storage/types';
+import type { PKPInfo } from '@lit-protocol/types';
 
 // Schema for auth data (matching the structure from ViemAccountAuthenticator)
 const authDataSchema = z.object({
@@ -118,17 +72,21 @@ export async function getPKPsByAuthData(
   try {
     // Step 1: Get all token IDs for this auth method (can be cached)
     let allTokenIds: string[];
-    
+
     if (storageProvider && storageProvider.readPKPTokens) {
       logger.debug('Attempting to fetch token IDs from storage provider');
-      
+
       try {
         const cachedTokenIds = await storageProvider.readPKPTokens({
           authMethodType: authData.authMethodType,
           authMethodId: authData.authMethodId,
         });
 
-        if (cachedTokenIds && Array.isArray(cachedTokenIds) && cachedTokenIds.length > 0) {
+        if (
+          cachedTokenIds &&
+          Array.isArray(cachedTokenIds) &&
+          cachedTokenIds.length > 0
+        ) {
           allTokenIds = cachedTokenIds;
           logger.debug(
             { tokenCount: allTokenIds.length },
@@ -264,10 +222,13 @@ async function fetchPKPDetailsForTokenIds(
 
   // Create contract manager for address derivation (only if needed)
   let contractsManager: ReturnType<typeof createContractsManager> | null = null;
-  
+
   const getContractsManager = () => {
     if (!contractsManager) {
-      contractsManager = createContractsManager(networkCtx, accountOrWalletClient);
+      contractsManager = createContractsManager(
+        networkCtx,
+        accountOrWalletClient
+      );
     }
     return contractsManager;
   };
@@ -280,24 +241,41 @@ async function fetchPKPDetailsForTokenIds(
       // Step 1: Try to get PKP details from granular cache first
       if (storageProvider && storageProvider.readPKPDetails) {
         logger.debug({ tokenId }, 'Checking granular cache for PKP details');
-        
+
         try {
-          const cachedDetails = await storageProvider.readPKPDetails({ tokenId });
-          
-          if (cachedDetails && cachedDetails.publicKey && cachedDetails.ethAddress) {
+          const cachedDetails = await storageProvider.readPKPDetails({
+            tokenId,
+          });
+
+          if (
+            cachedDetails &&
+            cachedDetails.publicKey &&
+            cachedDetails.ethAddress
+          ) {
             logger.debug({ tokenId }, 'PKP details found in granular cache');
             publicKey = cachedDetails.publicKey;
             ethAddress = cachedDetails.ethAddress;
           } else {
             // Cache miss - fetch from contracts
-            logger.debug({ tokenId }, 'Cache miss - fetching PKP details from contracts');
-            const contractDetails = await fetchPKPDetailsFromContract(tokenId, getContractsManager(), networkCtx, accountOrWalletClient);
+            logger.debug(
+              { tokenId },
+              'Cache miss - fetching PKP details from contracts'
+            );
+            const contractDetails = await fetchPKPDetailsFromContract(
+              tokenId,
+              getContractsManager(),
+              networkCtx,
+              accountOrWalletClient
+            );
             publicKey = contractDetails.publicKey;
             ethAddress = contractDetails.ethAddress;
 
             // Store in granular cache
             if (storageProvider.writePKPDetails) {
-              logger.debug({ tokenId }, 'Storing PKP details in granular cache');
+              logger.debug(
+                { tokenId },
+                'Storing PKP details in granular cache'
+              );
               await storageProvider.writePKPDetails({
                 tokenId,
                 publicKey,
@@ -310,14 +288,27 @@ async function fetchPKPDetailsForTokenIds(
             { tokenId, error: cacheError },
             'Granular cache operation failed - falling back to contract call'
           );
-          const contractDetails = await fetchPKPDetailsFromContract(tokenId, getContractsManager(), networkCtx, accountOrWalletClient);
+          const contractDetails = await fetchPKPDetailsFromContract(
+            tokenId,
+            getContractsManager(),
+            networkCtx,
+            accountOrWalletClient
+          );
           publicKey = contractDetails.publicKey;
           ethAddress = contractDetails.ethAddress;
         }
       } else {
         // No granular caching - fetch directly from contracts
-        logger.debug({ tokenId }, 'No granular cache - fetching from contracts');
-        const contractDetails = await fetchPKPDetailsFromContract(tokenId, getContractsManager(), networkCtx, accountOrWalletClient);
+        logger.debug(
+          { tokenId },
+          'No granular cache - fetching from contracts'
+        );
+        const contractDetails = await fetchPKPDetailsFromContract(
+          tokenId,
+          getContractsManager(),
+          networkCtx,
+          accountOrWalletClient
+        );
         publicKey = contractDetails.publicKey;
         ethAddress = contractDetails.ethAddress;
       }
@@ -367,9 +358,10 @@ async function fetchPKPDetailsFromContract(
     ? publicKey.slice(2)
     : publicKey;
 
-  const ethAddressRaw = await pubkeyRouterContract.read.deriveEthAddressFromPubkey([
-    `0x${publicKeyBytes}`,
-  ]);
+  const ethAddressRaw =
+    await pubkeyRouterContract.read.deriveEthAddressFromPubkey([
+      `0x${publicKeyBytes}`,
+    ]);
 
   // Format the address
   const ethAddress = getAddress(ethAddressRaw);

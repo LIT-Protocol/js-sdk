@@ -2,6 +2,7 @@ import { InvalidSessionSigs } from '@lit-protocol/constants';
 import {
   PKPAuthContextSchema,
   EoaAuthContextSchema,
+  AuthConfigSchema,
 } from '@lit-protocol/schemas';
 import {
   LitResourceAbilityRequest,
@@ -61,9 +62,10 @@ export const issueSessionFromContext = async (params: {
   // latestBlockhash: string;
 }): Promise<SessionSigsMap> => {
   const authSig = await params.authContext.authNeededCallback();
+  const _authConfig = AuthConfigSchema.parse(params.authContext.authConfig);
 
   const capabilities = [
-    ...(params.authContext.authConfig.capabilityAuthSigs || []), // Spreads existing sigs, or an empty array if null/undefined/empty
+    ...(_authConfig?.capabilityAuthSigs || []), // Spreads existing sigs, or an empty array if null/undefined/empty
     authSig,
   ];
 
@@ -71,14 +73,13 @@ export const issueSessionFromContext = async (params: {
   // so that the node can verify the session signature
   const sessionSigningTemplate = {
     sessionKey: params.authContext.sessionKeyPair.publicKey,
-    resourceAbilityRequests: (params.authContext.authConfig.resources ||
-      []) as LitResourceAbilityRequest[],
+    resourceAbilityRequests: (_authConfig.resources || []) as LitResourceAbilityRequest[],
     capabilities: capabilities,
     issuedAt: new Date().toISOString(),
 
     // @ts-ignore - adding ! because zod schema has a default so this value will never be undefined
     // otherwise, "const toSign" below will throw lint error
-    expiration: params.authContext.authConfig.expiration!,
+    expiration: _authConfig.expiration!,
   };
 
   // console.log('🔄 sessionSigningTemplate', sessionSigningTemplate);

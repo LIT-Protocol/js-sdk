@@ -25,3 +25,5 @@ export type LitNetworkModule = NagaDevModule;
 //   AuthContextSchema,
 //   EoaAuthContextSchema,
 // } from './src/networks/vNaga/envs/naga-dev/session-manager/AuthContextSchema';
+
+export type { PKPStorageProvider } from './storage/types';

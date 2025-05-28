@@ -44,13 +44,14 @@ import { getPKPsByAddress } from './handlers/getPKPsByAddress';
 import {
   getPKPsByAuthData,
   PaginatedPKPsResponse,
-  PKPStorageProvider,
 } from './handlers/getPKPsByAuthMethod';
 import { isPermittedActionByIdentifier } from './handlers/isPermittedActionByIdentifier';
 import { isPermittedAddressByIdentifier } from './handlers/isPermittedAddressByIdentifier';
 import { removePermittedActionByIdentifier } from './handlers/removePermittedActionByIdentifier';
 import { removePermittedAddressByIdentifier } from './handlers/removePermittedAddressByIdentifier';
+import { removePermittedAuthMethodByIdentifier } from './handlers/removePermittedAuthMethodByIdentifier';
 
+import type { PKPStorageProvider } from '../../../../../../storage/types';
 import { logger } from '../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
@@ -60,7 +61,7 @@ import { LitTxVoid } from '../../types';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action
-const COMMON_TEST_IPFS_IDS = ['QmPK1s3pNYLi9ERiq3BDxKa4XosgWwFRQUydHUtz4YgpqB'];
+const COMMON_TEST_IPFS_IDS = ['QmSQDKRWEXZ9CGoucSTR11Mv6fhGqaytZ1MqrfHdkuS1Vg'];
 
 export class PKPPermissionsManager {
   private identifier: PkpIdentifierRaw;
@@ -188,6 +189,27 @@ export class PKPPermissionsManager {
     return removePermittedAddressByIdentifier(
       {
         targetAddress: params.address, // This is important - the field must be targetAddress
+        ...this.getIdentifierParams(),
+      },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Removes a permitted authentication method from the PKP
+   *
+   * @param params - Parameters containing authMethodType and authMethodId
+   * @returns Promise resolving to transaction details
+   */
+  async removePermittedAuthMethod(params: {
+    authMethodType: string | number | bigint;
+    authMethodId: string;
+  }): Promise<LitTxVoid> {
+    return removePermittedAuthMethodByIdentifier(
+      {
+        authMethodType: params.authMethodType,
+        authMethodId: params.authMethodId,
         ...this.getIdentifierParams(),
       },
       this.networkContext,
@@ -372,6 +394,11 @@ export class PKPPermissionsManager {
         }
       | { type: 'removeAction'; ipfsId: string }
       | { type: 'removeAddress'; address: string }
+      | {
+          type: 'removeAuthMethod';
+          authMethodType: string | number | bigint;
+          authMethodId: string;
+        }
     >
   ): Promise<void> {
     // Process operations sequentially to avoid transaction conflicts
@@ -406,6 +433,12 @@ export class PKPPermissionsManager {
             address: op.address,
           });
           break;
+        case 'removeAuthMethod':
+          await this.removePermittedAuthMethod({
+            authMethodType: op.authMethodType,
+            authMethodId: op.authMethodId,
+          });
+          break;
       }
     }
   }
@@ -423,6 +456,19 @@ export class PKPPermissionsManager {
       await this.removePermittedAddress({
         address,
       });
+    }
+
+    // Remove all auth methods
+    for (const authMethod of context.authMethods) {
+      try {
+        await this.removePermittedAuthMethod({
+          authMethodType: authMethod.authMethodType,
+          authMethodId: authMethod.id,
+        });
+      } catch (error) {
+        // Ignore error - the auth method might not be removable or already removed
+        logger.error({ error }, 'Error removing auth method');
+      }
     }
 
     // For testing, we'll try to remove our known test action

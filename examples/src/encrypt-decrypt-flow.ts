@@ -7,7 +7,8 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { init } from './init';
 
 export const encryptDecryptFlow = async () => {
-  const { litClient } = await init();
+  const { litClient, viemAccountAuthData, viemAccountPkp, viemAuthContext } =
+    await init();
 
   // Alice's account
   const AliceAccount = privateKeyToAccount(generatePrivateKey());
@@ -25,6 +26,7 @@ export const encryptDecryptFlow = async () => {
   const builder = createAccBuilder();
 
   const accs2 = builder
+    // .requireWalletOwnership(BobsAccount.address)
     .requireWalletOwnership(BobsAccount.address)
     .on('ethereum')
     .and()
@@ -63,7 +65,6 @@ export const encryptDecryptFlow = async () => {
   });
 
   console.log('🔑 Encrypted string data:', encryptedStringData);
-  process.exit();
 
   // -- Demo 2: Encrypt JSON object with automatic type inference
   const jsonData = {
@@ -268,6 +269,18 @@ export const encryptDecryptFlow = async () => {
     litClient: bobsLitClient,
   });
 
+  // const bobPkpAuthContext = await bobsAuthManager.createPkpAuthContext({
+  //   authData: viemAccountAuthData,
+  //   pkpPublicKey: viemAccountPkp.publicKey,
+  //   authConfig: {
+  //     domain: 'localhost',
+  //     statement: 'Decrypt test data',
+  //     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+  //     resources: [['access-control-condition-decryption', '*']],
+  //   },
+  //   litClient: bobsLitClient,
+  // });
+
   // 3a. Bob decrypts the string data (NEW SIMPLIFIED METHOD)
   console.log('🔓 Decrypting string data (simplified method)...');
   const decryptedStringResponse = await bobsLitClient.decrypt({
@@ -275,6 +288,7 @@ export const encryptDecryptFlow = async () => {
     unifiedAccessControlConditions: accs2,
     chain: 'ethereum',
     authContext: bobAuthContext,
+    // authContext: bobPkpAuthContext,
   });
 
   console.log('🔓 Decrypted string response:', decryptedStringResponse);

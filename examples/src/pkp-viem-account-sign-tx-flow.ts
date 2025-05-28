@@ -2,7 +2,7 @@ import { storagePlugins } from '@lit-protocol/auth';
 import { init } from './init';
 import { createWalletClient, http, parseEther, createPublicClient } from 'viem';
 
-export const pkpSignMsgFlow = async () => {
+export const pkpSendTxFlow = async () => {
   const { myAccount, litClient, authManager } = await init();
   const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
   const authData = await ViemAccountAuthenticator.authenticate(myAccount);
@@ -100,4 +100,4 @@ export const pkpSignMsgFlow = async () => {
   process.exit();
 };
 
-pkpSignMsgFlow();
+pkpSendTxFlow();

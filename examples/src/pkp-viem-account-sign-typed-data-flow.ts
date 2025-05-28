@@ -19,8 +19,8 @@
  */
 
 import { storagePlugins } from '@lit-protocol/auth';
+import { getAddress, recoverTypedDataAddress } from 'viem';
 import { init } from './init';
-import { recoverTypedDataAddress, getAddress } from 'viem';
 
 /**
  * Test data for EIP-712 message types

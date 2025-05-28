@@ -140,8 +140,26 @@ export async function createPKPViemAccount({
       }
 
       if (tx.gasPrice === undefined && tx.maxFeePerGas === undefined) {
-        tx.gasPrice = await client.getGasPrice();
-        _logger.info('viem => gasPrice:', tx.gasPrice);
+        // Implement EIP-1559 fee estimation
+        const latestBlock = await client.getBlock({ blockTag: 'latest' });
+        const baseFeePerGas = latestBlock.baseFeePerGas;
+        
+        if (baseFeePerGas) {
+          // Network supports EIP-1559
+          const priorityFee = 1500000000n; // 1.5 gwei default priority fee
+          tx.maxPriorityFeePerGas = priorityFee;
+          tx.maxFeePerGas = baseFeePerGas * 2n + priorityFee; // 2x base fee + priority
+          tx.type = 'eip1559';
+          _logger.info('viem => using EIP-1559 fees');
+          _logger.info('viem => baseFeePerGas:', baseFeePerGas);
+          _logger.info('viem => maxPriorityFeePerGas:', tx.maxPriorityFeePerGas);
+          _logger.info('viem => maxFeePerGas:', tx.maxFeePerGas);
+        } else {
+          // Fallback to legacy for networks that don't support EIP-1559
+          tx.gasPrice = await client.getGasPrice();
+          tx.type = 'legacy';
+          _logger.info('viem => using legacy gasPrice:', tx.gasPrice);
+        }
       }
 
       if (tx.gas === undefined) {
@@ -223,8 +241,17 @@ export async function createPKPViemAccount({
 
         // If no gas price fields are set, default to legacy transaction with gasPrice
         if (!populatedTx.gasPrice && !populatedTx.maxFeePerGas) {
-          populatedTx.gasPrice = 20000000000n; // 20 gwei default
-          console.log('viem => defaulting gasPrice to 20 gwei');
+          // Default to EIP-1559 with reasonable estimates
+          const priorityFee = 1500000000n; // 1.5 gwei default priority fee
+          const baseFeeEstimate = 15000000000n; // 15 gwei base fee estimate
+          
+          populatedTx.maxPriorityFeePerGas = priorityFee;
+          populatedTx.maxFeePerGas = baseFeeEstimate * 2n + priorityFee; // Conservative estimate
+          populatedTx.type = 'eip1559';
+          
+          console.log('viem => defaulting to EIP-1559 fees');
+          console.log('viem => maxPriorityFeePerGas:', populatedTx.maxPriorityFeePerGas);
+          console.log('viem => maxFeePerGas:', populatedTx.maxFeePerGas);
         }
 
         // Set default gas if not provided
@@ -234,8 +261,12 @@ export async function createPKPViemAccount({
         }
 
         // Ensure type is set for clarity
-        if (!populatedTx.type && populatedTx.gasPrice) {
-          populatedTx.type = 'legacy';
+        if (!populatedTx.type) {
+          if (populatedTx.maxFeePerGas || populatedTx.maxPriorityFeePerGas) {
+            populatedTx.type = 'eip1559';
+          } else if (populatedTx.gasPrice) {
+            populatedTx.type = 'legacy';
+          }
         }
       }
 

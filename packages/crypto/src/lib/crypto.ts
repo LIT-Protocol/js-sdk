@@ -56,6 +56,20 @@ export interface BlsSignatureShare {
   };
 }
 
+// Release verification config type - moved here for type sharing
+export interface ReleaseVerificationConfig {
+  rpcUrl: string;
+  releaseRegisterContractAddress: string;
+  subnetId: string;
+  environment: number;
+}
+
+// Release verification function type for dependency injection
+export type ReleaseVerificationFunction = (
+  attestation: NodeAttestation,
+  config: ReleaseVerificationConfig
+) => Promise<void>;
+
 /**
  * Encrypt data with a BLS public key.
  * We are using G1 for encryption and G2 for signatures
@@ -486,13 +500,17 @@ function hexToUint8Array(hexString: string): Uint8Array {
  * @param { NodeAttestation } attestation The actual attestation object, which includes the signature and report
  * @param { string } challengeHex The challenge we sent
  * @param { string } url The URL we talked to
+ * @param { ReleaseVerificationConfig } releaseConfig Optional configuration for release ID verification
+ * @param { ReleaseVerificationFunction } releaseVerificationFn Optional function to perform release verification
  *
  * @returns { Promise<void> } A promise that throws if the attestation is invalid
  */
 export const checkSevSnpAttestation = async (
   attestation: NodeAttestation,
   challengeHex: string,
-  url: string
+  url: string,
+  releaseConfig?: ReleaseVerificationConfig,
+  releaseVerificationFn?: ReleaseVerificationFunction
 ): Promise<void> => {
   const noonce = Buffer.from(attestation.noonce, 'base64');
   const challenge = Buffer.from(challengeHex, 'hex');
@@ -606,7 +624,11 @@ export const checkSevSnpAttestation = async (
   }
 
   // pass base64 encoded report to wasm wrapper
-  return sevSnpVerify(report, data, signatures, challenge, vcekCert);
+  await sevSnpVerify(report, data, signatures, challenge, vcekCert);
+
+  if (releaseConfig && releaseVerificationFn) {
+    await releaseVerificationFn(attestation, releaseConfig);
+  }
 };
 
 // Map the right hash function per signing scheme

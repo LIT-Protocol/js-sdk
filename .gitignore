@@ -84,3 +84,5 @@ packages/networks/src/networks/vDatil
 lit-auth-storage
 .ctx
 packages/auth-services/lit-auth-*
+pkp-tokens
+lit-cache

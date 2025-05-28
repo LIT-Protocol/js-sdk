@@ -1,18 +1,19 @@
-import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
+import bs58 from 'bs58';
+import { fromHex } from 'viem';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
+import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
 import { getPermittedActions } from '../../../rawContractApis/permissions/read/getPermittedActions';
 import { getPermittedAddresses } from '../../../rawContractApis/permissions/read/getPermittedAddresses';
 import {
   AuthMethod as BaseAuthMethod,
   getPermittedAuthMethods,
 } from '../../../rawContractApis/permissions/read/getPermittedAuthMethods';
+import { getPermittedAuthMethodScopes } from '../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,
 } from '../../../rawContractApis/permissions/utils/resolvePkpTokenId';
-import { getPermittedAuthMethodScopes } from '../../../rawContractApis/permissions/read/getPermittedAuthMethodScopes';
-
 // Extend the base AuthMethod to include scopes
 export interface AuthMethod extends BaseAuthMethod {
   scopes: readonly string[];
@@ -50,6 +51,22 @@ export async function getPermissionsContext(
     getPermittedAddresses({ tokenId }, networkCtx, accountOrWalletClient),
     getPermittedAuthMethods({ tokenId }, networkCtx, accountOrWalletClient),
   ]);
+
+  // When you get the bytes from the smart contract (as hex string)
+  // const hexBytes =
+  //   '0x1220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'; // example
+
+  // // Remove the '0x' prefix and convert hex to bytes
+  // const bytes = Buffer.from(hexBytes.slice(2), 'hex');
+
+  // // Encode to base58 to get the readable IPFS CID
+  // const ipfsCid = bs58.encode(bytes);
+  // console.log(ipfsCid); // QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG (example)
+
+  // convert actions to ipfsIds
+  const ipfsIds = actions.map((hexedAction) => {
+    return bs58.encode(fromHex(hexedAction, 'bytes'));
+  });
 
   // for each auth method, get the scopes
   const scopes = await Promise.all(
@@ -106,7 +123,7 @@ export async function getPermissionsContext(
   );
 
   return {
-    actions,
+    actions: ipfsIds as `0x${string}`[],
     addresses,
     authMethods: authMethodsWithScopes,
     isActionPermitted: (ipfsId: `0x${string}`) => actions.includes(ipfsId),

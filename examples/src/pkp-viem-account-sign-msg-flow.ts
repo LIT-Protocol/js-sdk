@@ -1,6 +1,6 @@
 import { storagePlugins } from '@lit-protocol/auth';
+import { createPublicClient, createWalletClient, http, parseEther } from 'viem';
 import { init } from './init';
-import { createWalletClient, http, parseEther, createPublicClient } from 'viem';
 
 export const pkpSignMsgFlow = async () => {
   const { myAccount, litClient, authManager } = await init();

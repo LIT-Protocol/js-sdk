@@ -4,10 +4,7 @@ import { hexlify } from '@ethersproject/bytes';
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { verifyMessage } from '@ethersproject/wallet';
-import {
-  EthereumProvider,
-  default as WalletConnectProvider,
-} from '@walletconnect/ethereum-provider';
+
 import depd from 'depd';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
@@ -86,7 +83,7 @@ export type WALLET_ERROR_VALUES = ConstantValues<typeof WALLET_ERROR>;
 
 /** ---------- Local Helpers ---------- */
 
-let litWCProvider: WalletConnectProvider | undefined;
+let litWCProvider:  undefined;
 
 /**
  *
@@ -297,25 +294,25 @@ export const connectWeb3 = async ({
 
   let providerOptions = {};
 
-  if (walletConnectProjectId) {
-    const wcProvider = await EthereumProvider.init({
-      projectId: walletConnectProjectId,
-      chains: [chainId],
-      showQrModal: true,
-      optionalMethods: ['eth_sign'],
-      rpcMap: rpcUrls,
-    });
+  // if (walletConnectProjectId) {
+  //   const wcProvider = await EthereumProvider.init({
+  //     projectId: walletConnectProjectId,
+  //     chains: [chainId],
+  //     showQrModal: true,
+  //     optionalMethods: ['eth_sign'],
+  //     rpcMap: rpcUrls,
+  //   });
 
-    providerOptions = {
-      walletconnect: {
-        provider: wcProvider,
-      },
-    };
+  //   providerOptions = {
+  //     walletconnect: {
+  //       provider: wcProvider,
+  //     },
+  //   };
 
-    if (Environment.isBrowser) {
-      litWCProvider = wcProvider;
-    }
-  }
+  //   if (Environment.isBrowser) {
+  //     litWCProvider = wcProvider;
+  //   }
+  // }
 
   logger.info('getting provider via lit connect modal');
 
@@ -365,16 +362,16 @@ export const disconnectWeb3 = (): void => {
     return;
   }
 
-  if (Environment.isBrowser && litWCProvider) {
-    try {
-      litWCProvider.disconnect();
-    } catch (err) {
-      logger.info(
-        'Attempted to disconnect global WalletConnectProvider for lit-connect-modal',
-        err
-      );
-    }
-  }
+  // if (Environment.isBrowser && litWCProvider) {
+  //   try {
+  //     litWCProvider.disconnect();
+  //   } catch (err) {
+  //     logger.info(
+  //       'Attempted to disconnect global WalletConnectProvider for lit-connect-modal',
+  //       err
+  //     );
+  //   }
+  // }
 
   const storage = LOCAL_STORAGE_KEYS;
 

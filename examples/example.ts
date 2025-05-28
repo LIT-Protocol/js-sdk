@@ -20,7 +20,7 @@ const functionMap: Record<string, () => void> = {
 
 /**
  * Gets the list of available function names plus the exit option
- */
+ */~
 function getAvailableOptions(): string[] {
   return [...Object.keys(functionMap), EXIT_OPTION];
 }

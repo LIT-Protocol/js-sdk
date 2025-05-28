@@ -10,7 +10,11 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
-import type { LitNetworkModule, NagaDevModule } from '@lit-protocol/networks';
+import type {
+  LitNetworkModule,
+  NagaDevModule,
+  PKPStorageProvider,
+} from '@lit-protocol/networks';
 import {
   AuthContextSchema2,
   HexPrefixedSchema,
@@ -32,7 +36,6 @@ import bs58 from 'bs58';
 import { Chain, Hex, toHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
-import { PKPStorageProvider } from '../../../../networks/src/networks/vNaga/LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
 import { dispatchRequests } from './helper/handleNodePromises';
 import {
   convertDecryptedData,

@@ -4,7 +4,7 @@ import * as LitNodeApi from '../LitNodeClient/LitNodeApi';
 import { getChildLogger } from '@lit-protocol/logger';
 import { EndPoint } from '@lit-protocol/types';
 import { createRandomHexString } from '../LitNodeClient/helper/createRandomHexString';
-import { checkSevSnpAttestation } from '@lit-protocol/crypto';
+import { checkSevSnpAttestation, ReleaseVerificationConfig } from '@lit-protocol/crypto';
 import {
   ResolvedHandshakeResponse,
   resolveHandshakeResponse,
@@ -31,6 +31,8 @@ export const orchestrateHandshake = async (params: {
   minimumThreshold: number;
   abortTimeout: number;
   endpoints: EndPoint;
+  releaseVerificationConfig?: ReleaseVerificationConfig;
+  networkModule?: any; // Network module that provides release verification
 }): Promise<OrchestrateHandshakeResponse> => {
   _logger.info('🌶️ orchestrating handshake...');
 
@@ -86,10 +88,13 @@ export const orchestrateHandshake = async (params: {
 
               // Verify the attestation by checking the signature against AMD certs
               try {
+                const releaseVerificationFn = params.networkModule?.getVerifyReleaseId?.();
                 await checkSevSnpAttestation(
                   retrievedServerKeys.attestation,
                   challenge,
-                  url
+                  url,
+                  params.releaseVerificationConfig,
+                  releaseVerificationFn
                 );
                 // 3. Store results if successful
                 serverKeys[url] = retrievedServerKeys;

@@ -1,5 +1,7 @@
+import type { PKPInfo } from '@lit-protocol/types';
 import { getAddress } from 'viem';
 import { z } from 'zod';
+import type { PKPStorageProvider } from '../../../../../../../storage/types';
 import { logger } from '../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../interfaces/NetworkContext';
 import {
@@ -8,8 +10,7 @@ import {
 } from '../../../../contract-manager/createContractsManager';
 import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
 import { tokenOfOwnerByIndex } from '../../../rawContractApis/pkp/read/tokenOfOwnerByIndex';
-import { PKPStorageProvider, PaginatedPKPsResponse } from './getPKPsByAuthMethod';
-import type { PKPInfo } from '@lit-protocol/auth';
+import { PaginatedPKPsResponse } from './getPKPsByAuthMethod';
 
 // Schema for pagination
 const paginationSchema = z.object({
@@ -149,10 +150,7 @@ async function fetchPKPDetailsForTokenIds(
                 publicKey,
                 ethAddress,
               });
-              logger.debug(
-                { tokenId },
-                'PKP details stored in granular cache'
-              );
+              logger.debug({ tokenId }, 'PKP details stored in granular cache');
             }
           }
         } catch (storageError) {
@@ -249,23 +247,31 @@ export async function getPKPsByAddress(
   const { limit, offset } = paginationSchema.parse(pagination);
 
   logger.debug(
-    { ownerAddress, pagination: { limit, offset }, hasStorage: !!storageProvider },
+    {
+      ownerAddress,
+      pagination: { limit, offset },
+      hasStorage: !!storageProvider,
+    },
     'Fetching PKPs by address'
   );
 
   try {
     // Step 1: Get all token IDs for this owner address (can be cached)
     let allTokenIds: string[];
-    
+
     if (storageProvider && storageProvider.readPKPTokensByAddress) {
       logger.debug('Attempting to fetch token IDs from storage provider');
-      
+
       try {
         const cachedTokenIds = await storageProvider.readPKPTokensByAddress({
           ownerAddress,
         });
 
-        if (cachedTokenIds && Array.isArray(cachedTokenIds) && cachedTokenIds.length > 0) {
+        if (
+          cachedTokenIds &&
+          Array.isArray(cachedTokenIds) &&
+          cachedTokenIds.length > 0
+        ) {
           allTokenIds = cachedTokenIds;
           logger.debug(
             { tokenCount: allTokenIds.length },

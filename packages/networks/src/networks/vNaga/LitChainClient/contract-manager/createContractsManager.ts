@@ -30,6 +30,11 @@ function _resolveAccount({
   chainConfig: Chain;
   rpcUrl: string;
 }) {
+  // Check if accountOrWalletClient is null or undefined
+  if (!accountOrWalletClient) {
+    throw new Error('accountOrWalletClient is required but was not provided');
+  }
+
   // If a wallet client is already provided, use it directly
   if (accountOrWalletClient.type === 'local') {
     // If an account is provided, create a wallet client with it
@@ -138,6 +143,7 @@ export const createContractsManager = <T, M>(
       contractData.PKPPermissions.methods.getPermittedAuthMethodScopes,
       contractData.PKPPermissions.methods.removePermittedAction,
       contractData.PKPPermissions.methods.removePermittedAddress,
+      contractData.PKPPermissions.methods.removePermittedAuthMethod,
       contractData.PKPPermissions.methods.isPermittedAction,
       contractData.PKPPermissions.methods.isPermittedAddress,
       contractData.PKPPermissions.methods.getTokenIdsForAuthMethod,

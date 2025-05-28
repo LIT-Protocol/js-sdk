@@ -18,10 +18,12 @@ import { issueSessionFromContext } from './session-manager/issueSessionFromConte
 import { createStateManager } from './state-manager/createStateManager';
 
 // Import the necessary types for the explicit return type annotation
+import { NetworkError } from '@lit-protocol/constants';
 import {
   combineSignatureShares,
   mostCommonString,
   normalizeAndStringify,
+  ReleaseVerificationConfig,
 } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import {
@@ -29,16 +31,18 @@ import {
   AuthSig,
   CallbackParams,
   LitActionResponseStrategy,
+  NodeAttestation,
   Optional,
   RequestItem,
 } from '@lit-protocol/types';
+import { ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
+import type { PKPStorageProvider } from '../../../../storage/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
 import { PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
 import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
-import { PKPStorageProvider } from '../../LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPKPsByAuthMethod';
 import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import type { GenericTxRes, LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
@@ -71,6 +75,201 @@ import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
 const _logger = getChildLogger({
   module: 'naga-dev-module',
 });
+
+// Release verification types and constants
+interface ReleaseInfo {
+  status: number;
+  env: number;
+  typ: number;
+  platform: number;
+  options: { asU32: () => number };
+  publicKey: Uint8Array;
+  idKeyDigest: Uint8Array;
+}
+
+enum ReleaseStatus {
+  Null = 0,
+  Active = 1,
+  Inactive = 2,
+}
+
+// Basic Release Register Contract ABI - only the functions we need
+const RELEASE_REGISTER_ABI = [
+  {
+    inputs: [
+      { name: 'subnetId', type: 'string' },
+      { name: 'releaseIdPadded', type: 'bytes32' },
+    ],
+    name: 'getReleaseByIdAndSubnetId',
+    outputs: [
+      {
+        components: [
+          { name: 'status', type: 'uint8' },
+          { name: 'env', type: 'uint8' },
+          { name: 'typ', type: 'uint8' },
+          { name: 'platform', type: 'uint8' },
+          { name: 'options', type: 'uint32' },
+          { name: 'publicKey', type: 'bytes' },
+          { name: 'idKeyDigest', type: 'bytes32' },
+        ],
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
+
+/**
+ * Extract release ID from attestation data
+ * @param attestation The node attestation containing release ID
+ * @returns The release ID string
+ */
+function extractReleaseId(attestation: NodeAttestation): string {
+  const releaseId = attestation.data.RELEASE_ID;
+  if (!releaseId) {
+    throw new NetworkError(
+      { info: { attestation } },
+      'Missing RELEASE_ID in attestation data'
+    );
+  }
+  return Buffer.from(releaseId, 'base64').toString('utf8');
+}
+
+/**
+ * Extract subnet ID from release ID
+ * Based on the Rust implementation: subnet_id_from_release_id
+ * @param releaseId The release ID string
+ * @returns The subnet ID
+ */
+function getSubnetIdFromReleaseId(releaseId: string): string {
+  // In the Rust code, this extracts the subnet ID from the release ID
+  // For now, this is a simplified version - you may need to adjust based on actual format
+  const parts = releaseId.split('-');
+  if (parts.length < 2) {
+    throw new NetworkError(
+      { info: { releaseId } },
+      'Invalid release ID format'
+    );
+  }
+  return parts[0]; // First part is typically the subnet ID
+}
+
+/**
+ * Pad release ID to 32 bytes for contract call
+ * @param releaseId The release ID string
+ * @returns Padded bytes32 for contract call
+ */
+function padReleaseIdToBytes32(releaseId: string): string {
+  const releaseIdBuffer = Buffer.from(releaseId, 'utf8');
+  if (releaseIdBuffer.length > 32) {
+    throw new NetworkError(
+      { info: { releaseId } },
+      'Release ID too long for bytes32'
+    );
+  }
+  const paddedBuffer = Buffer.alloc(32);
+  releaseIdBuffer.copy(paddedBuffer);
+  return ethers.utils.hexlify(paddedBuffer);
+}
+
+/**
+ * Verify release ID against the on-chain release register contract
+ * This function is provided to the crypto package for dependency injection
+ * @param attestation The node attestation
+ * @param config Configuration for release verification
+ */
+const verifyReleaseId = async (
+  attestation: NodeAttestation,
+  config: ReleaseVerificationConfig
+): Promise<void> => {
+  _logger.info('verifyReleaseId: Starting release verification', {
+    subnetId: config.subnetId,
+    environment: config.environment,
+  });
+
+  // 1. Extract release ID from attestation
+  const releaseId = extractReleaseId(attestation);
+
+  // 2. Verify release ID length
+  if (releaseId.length !== 64) {
+    // RELEASE_ID_STR_LEN from Rust code
+    throw new NetworkError(
+      {
+        info: { releaseId, expectedLength: 64, actualLength: releaseId.length },
+      },
+      `Release ID length is incorrect: expected 64, got ${releaseId.length}`
+    );
+  }
+
+  // 3. Extract and verify subnet ID
+  const releaseSubnetId = getSubnetIdFromReleaseId(releaseId);
+  if (releaseSubnetId !== config.subnetId) {
+    throw new NetworkError(
+      { info: { releaseSubnetId, expectedSubnetId: config.subnetId } },
+      `Subnet ID mismatch: expected ${config.subnetId}, got ${releaseSubnetId}`
+    );
+  }
+
+  // 4. Query the release register contract
+  const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
+  const contract = new ethers.Contract(
+    config.releaseRegisterContractAddress,
+    RELEASE_REGISTER_ABI,
+    provider
+  );
+
+  const releaseIdPadded = padReleaseIdToBytes32(releaseId);
+
+  try {
+    const release = await contract['getReleaseByIdAndSubnetId'](
+      config.subnetId,
+      releaseIdPadded
+    );
+
+    // 5. Verify release status is active
+    if (release.status !== ReleaseStatus.Active) {
+      throw new NetworkError(
+        { info: { releaseId, status: release.status } },
+        `Release is not active: status ${release.status}`
+      );
+    }
+
+    // 6. Verify environment matches
+    if (release.env !== config.environment) {
+      throw new NetworkError(
+        {
+          info: {
+            releaseId,
+            releaseEnv: release.env,
+            expectedEnv: config.environment,
+          },
+        },
+        `Environment mismatch: expected ${config.environment}, got ${release.env}`
+      );
+    }
+
+    _logger.info('verifyReleaseId: Release verification successful', {
+      releaseId,
+      status: release.status,
+      environment: release.env,
+    });
+  } catch (error: any) {
+    if (error.code === 'CALL_EXCEPTION') {
+      throw new NetworkError(
+        {
+          info: {
+            releaseId,
+            contractAddress: config.releaseRegisterContractAddress,
+          },
+        },
+        `Release ID ${releaseId} not found on chain`
+      );
+    }
+    throw error;
+  }
+};
 
 // Define ProcessedBatchResult type (mirroring structure from dispatchRequests)
 type ProcessedBatchResult<T> =
@@ -115,6 +314,7 @@ const nagaDevModuleObject = {
 
   getMaxPricesForNodeProduct: getMaxPricesForNodeProduct,
   getUserMaxPrice: getUserMaxPrice,
+  getVerifyReleaseId: () => verifyReleaseId,
   chainApi: {
     getPKPPermissionsManager: async (params: {
       pkpIdentifier: PkpIdentifierRaw;
@@ -829,7 +1029,9 @@ const nagaDevModuleObject = {
               ipfsId: params.executionContext.ipfsId,
             }),
             ...(params.executionContext.jsParams && {
-              jsParams: params.executionContext.jsParams,
+              jsParams: {
+                jsParams: params.executionContext.jsParams,
+              },
             }),
           });
 

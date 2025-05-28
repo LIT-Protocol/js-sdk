@@ -1,6 +1,8 @@
 import type { LitAuthData } from '../types';
 
-// PKP information interface for caching
+/**
+ * @deprecated Use the PKPInfo type from @lit-protocol/types instead
+ */
 export interface PKPInfo {
   tokenId: string;
   publicKey: string;
