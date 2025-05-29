@@ -1097,6 +1097,7 @@ export const RPC_URL_BY_NETWORK: Record<LIT_NETWORK_VALUES, LIT_RPC_VALUES> = {
 
 /**
  * Mapping of network names to their corresponding relayer URLs.
+ * @deprecated - use naga doesn't use these urls anymore.
  */
 export const RELAYER_URL_BY_NETWORK: Record<LIT_NETWORK_VALUES, string> = {
   [LIT_NETWORK.NagaDev]: 'https://naga-dev-relayer.getlit.dev',

@@ -2,7 +2,7 @@ import {
   PKPAuthContextSchema,
   EoaAuthContextSchema,
 } from '@lit-protocol/schemas';
-import { LitActionResponseStrategy } from '@lit-protocol/types';
+import { LitActionResponseStrategy, NagaJitContext } from '@lit-protocol/types';
 import { z } from 'zod';
 import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
 import { ConnectionInfo } from '../../../../LitChainClient/types';
@@ -21,4 +21,5 @@ export type ExecuteJsCreateRequestParams = {
   version: string;
   useSingleNode?: boolean;
   responseStrategy?: LitActionResponseStrategy;
-}; 
+  jitContext: NagaJitContext;
+};

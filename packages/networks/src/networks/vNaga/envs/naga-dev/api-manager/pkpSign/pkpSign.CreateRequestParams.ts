@@ -1,14 +1,18 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
 import {
-  PKPAuthContextSchema,
   EoaAuthContextSchema,
   HexPrefixedSchema,
+  PKPAuthContextSchema,
   SigningChainSchema,
 } from '@lit-protocol/schemas';
+import { NagaJitContext } from '@lit-protocol/types';
 import { z } from 'zod';
-import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
 import { ConnectionInfo } from '../../../../LitChainClient/types';
+import { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
+import { RawHandshakeResponseSchema } from '../handshake/handshake.schema';
+
 export type PKPSignCreateRequestParams = {
+  serverKeys: Record<string, z.infer<typeof RawHandshakeResponseSchema>>;
   pricingContext: z.input<typeof PricingContextSchema>;
   authContext: z.input<
     typeof PKPAuthContextSchema | typeof EoaAuthContextSchema
@@ -22,4 +26,5 @@ export type PKPSignCreateRequestParams = {
   connectionInfo: ConnectionInfo;
   version: string;
   chain: z.infer<typeof SigningChainSchema>;
+  jitContext: NagaJitContext;
 };

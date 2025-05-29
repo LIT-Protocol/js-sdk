@@ -31,8 +31,10 @@ import {
   AuthSig,
   CallbackParams,
   LitActionResponseStrategy,
+  NagaJitContext,
   NodeAttestation,
   Optional,
+  OrchestrateHandshakeResponse,
   RequestItem,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
@@ -55,6 +57,7 @@ import { ExecuteJsCreateRequestParams } from './api-manager/executeJs/executeJs.
 import { ExecuteJsInputSchema } from './api-manager/executeJs/executeJs.InputSchema';
 import { ExecuteJsRequestDataSchema } from './api-manager/executeJs/executeJs.RequestDataSchema';
 import { ExecuteJsResponseDataSchema } from './api-manager/executeJs/executeJs.ResponseDataSchema';
+import { RawHandshakeResponseSchema } from './api-manager/handshake/handshake.schema';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 import { PKPSignCreateRequestParams } from './api-manager/pkpSign/pkpSign.CreateRequestParams';
 import {
@@ -64,6 +67,7 @@ import {
 } from './api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
+import { GenericResponseSchema } from './api-manager/schemas';
 import { SignSessionKeyResponseDataSchema } from './api-manager/signSessionKey/signSessionKey.ResponseDataSchema';
 import {
   createChainManager,
@@ -71,6 +75,7 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
+import { ConnectionInfo } from '../../LitChainClient/types';
 
 const _logger = getChildLogger({
   module: 'naga-dev-module',
@@ -96,24 +101,13 @@ enum ReleaseStatus {
 // Basic Release Register Contract ABI - only the functions we need
 const RELEASE_REGISTER_ABI = [
   {
-    inputs: [
-      { name: 'subnetId', type: 'string' },
-      { name: 'releaseIdPadded', type: 'bytes32' },
-    ],
-    name: 'getReleaseByIdAndSubnetId',
+    inputs: [],
+    name: 'RELEASE_REGISTER_CONTRACT',
     outputs: [
       {
-        components: [
-          { name: 'status', type: 'uint8' },
-          { name: 'env', type: 'uint8' },
-          { name: 'typ', type: 'uint8' },
-          { name: 'platform', type: 'uint8' },
-          { name: 'options', type: 'uint32' },
-          { name: 'publicKey', type: 'bytes' },
-          { name: 'idKeyDigest', type: 'bytes32' },
-        ],
+        internalType: 'bytes32',
         name: '',
-        type: 'tuple',
+        type: 'bytes32',
       },
     ],
     stateMutability: 'view',
@@ -286,12 +280,16 @@ const nagaDevModuleObject = {
     minimumThreshold: networkConfig.minimumThreshold,
     httpProtocol: networkConfig.httpProtocol,
   },
+  schemas: {
+    GenericResponseSchema: GenericResponseSchema,
+  },
   getNetworkName: () => networkConfig.network,
   getHttpProtocol: () => networkConfig.httpProtocol,
   getEndpoints: () => networkConfig.endpoints,
   getRpcUrl: () => networkConfig.rpcUrl,
   getChainConfig: () => networkConfig.chainConfig,
-  getAuthServerBaseUrl: () => networkConfig.authServerBaseUrl,
+  getDefaultAuthServiceBaseUrl: () => networkConfig.services.authServiceBaseUrl,
+  getDefaultLoginBaseUrl: () => networkConfig.services.loginServiceBaseUrl,
   getMinimumThreshold: () => networkConfig.minimumThreshold,
   // composeLitUrl: composeLitUrl,
   /**
@@ -426,11 +424,13 @@ const nagaDevModuleObject = {
   authService: {
     pkpMint: async (params: {
       authData: AuthData;
-      authServerBaseUrl?: string;
+      authServiceBaseUrl?: string;
     }) => {
       return await handleAuthServerRequest<PKPData>({
         jobName: 'PKP Minting',
-        serverUrl: networkConfig.authServerBaseUrl || params.authServerBaseUrl!,
+        serverUrl:
+          params.authServiceBaseUrl ||
+          networkConfig.services.authServiceBaseUrl,
         path: '/pkp/mint',
         body: {
           authMethodType: params.authData.authMethodType,
@@ -441,6 +441,36 @@ const nagaDevModuleObject = {
     },
   },
   api: {
+    /**
+     * The Lit Client and Network Module exchange data in a request-response cycle:
+     *
+     * 1. 🟪 The Network Module constructs the request.
+     * 2. 🟩 The Lit Client sends it to the Lit Network.
+     * 3. 🟪 The Network Module processes the response.
+     *
+     * In some cases, we need to maintain a piece of state that is relevant to both step 1 (request creation)
+     * and step 3 (response handling). To support this, we introduce a *network-specific context object*
+     * that can be passed between the Lit Client and Network Module.
+     *
+     * One key example is managing a just-in-time (JIT) state for ephemeral secrets or signing keys
+     * — such as those used in PKP signing — which must persist across the request lifecycle.
+     */
+    createJitContext: async (
+      connectionInfo: ConnectionInfo,
+      handshakeResult: OrchestrateHandshakeResponse
+    ): Promise<NagaJitContext> => {
+      console.log('This network has nothing to offer. lol.');
+      return {
+        keySet: undefined!,
+      };
+    },
+    handshake: {
+      schemas: {
+        Input: {
+          ResponseData: RawHandshakeResponseSchema,
+        },
+      },
+    },
     pkpSign: {
       schemas: {
         Input: {
@@ -520,10 +550,9 @@ const nagaDevModuleObject = {
       },
       handleResponse: async (
         result: ProcessedBatchResult<z.infer<typeof PKPSignResponseDataSchema>>,
-        requestId: string
+        requestId: string,
+        jitContext: NagaJitContext
       ) => {
-        // console.log('Incoming result for pkpSign handleResponse:', result);
-
         if (!result.success) {
           console.error(
             '🚨 PKP Sign batch failed in handleResponse:',
@@ -621,7 +650,8 @@ const nagaDevModuleObject = {
         requestId: string,
         identityParam: string,
         ciphertext: string,
-        subnetPubKey: string
+        subnetPubKey: string,
+        jitContext: NagaJitContext
       ) => {
         _logger.info('decrypt:handleResponse: Processing decrypt response', {
           requestId,
@@ -677,7 +707,8 @@ const nagaDevModuleObject = {
           typeof JsonSignSessionKeyRequestForPkpReturnSchema
         >,
         httpProtocol: 'http://' | 'https://',
-        version: string
+        version: string,
+        jitContext: NagaJitContext
       ) => {
         type RequestBodyType = {
           sessionKey: string;
@@ -707,7 +738,7 @@ const nagaDevModuleObject = {
           accessToken: requestBody.authData.accessToken,
         } as AuthMethod;
 
-        const requests = [];
+        const requests: RequestItem<RequestBodyType>[] = [];
 
         for (const url of nodeUrls) {
           const _urlWithPath = composeLitUrl({
@@ -747,7 +778,8 @@ const nagaDevModuleObject = {
         result: ProcessedBatchResult<
           z.infer<typeof SignSessionKeyResponseDataSchema>
         >,
-        pkpPublicKey: Hex | string
+        pkpPublicKey: Hex | string,
+        jitContext: NagaJitContext
       ) => {
         if (!result.success) {
           console.error(
@@ -821,7 +853,8 @@ const nagaDevModuleObject = {
           typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
         >,
         httpProtocol: 'http://' | 'https://',
-        version: string
+        version: string,
+        jitContext: NagaJitContext
       ) => {
         type RequestBodyType = {
           sessionKey: string;
@@ -848,13 +881,7 @@ const nagaDevModuleObject = {
           nodeUrls,
         });
 
-        // extract the authMethod from the requestBody
-        // const authMethod = {
-        //   authMethodType: requestBody.authData.authMethodType,
-        //   accessToken: requestBody.authData.accessToken,
-        // } as AuthMethod;
-
-        const requests = [];
+        const requests: RequestItem<RequestBodyType>[] = [];
 
         for (const url of nodeUrls) {
           const _urlWithPath = composeLitUrl({
@@ -891,16 +918,14 @@ const nagaDevModuleObject = {
           throw new Error('Failed to generate requests for signSessionKey.');
         }
 
-        // console.log("🔥🔥🔥 requests:", requests);
-        // process.exit();
-
         return requests;
       },
       handleResponse: async (
         result: ProcessedBatchResult<
           z.infer<typeof SignSessionKeyResponseDataSchema>
         >,
-        pkpPublicKey: Hex | string
+        pkpPublicKey: Hex | string,
+        jitContext: NagaJitContext
       ) => {
         if (!result.success) {
           console.error(
@@ -1066,7 +1091,8 @@ const nagaDevModuleObject = {
         result: ProcessedBatchResult<
           z.infer<typeof ExecuteJsResponseDataSchema>
         >,
-        requestId: string
+        requestId: string,
+        jitContext: NagaJitContext
       ) => {
         _logger.info(
           'executeJs:handleResponse: Processing executeJs response',

@@ -65,7 +65,7 @@ export async function getPkpAuthContextAdapter(
   const litAuthData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
     address: pkpAddress,
-    expiration: params.authConfig.expiration!,
+    expiration: params.authConfig.expiration,
     type: params.authData.authMethodType as AUTH_METHOD_TYPE_VALUES,
   });
 

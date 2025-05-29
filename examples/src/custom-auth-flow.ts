@@ -1,6 +1,7 @@
 import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { hexToBigInt, keccak256, toBytes } from 'viem';
 import { init } from './init';
+
 export const customAuthFlow = async () => {
   const { myAccount, litClient } = await init();
 
@@ -66,7 +67,7 @@ export const customAuthFlow = async () => {
 
       // 2. Generate the auth data from the unique user id
       const uniqueUserAuthData = this._generateAuthData(userId);
-      console.log('✅ uniqueUserAuthData:', uniqueUserAuthData);
+      // console.log('✅ uniqueUserAuthData:', uniqueUserAuthData);
 
       // 3. Mint a PKP for the user. Then, we will send the PKP to itself, since itself is also
       // a valid ETH Wallet. The owner of the PKP will have NO permissions. To access the PKP,
@@ -79,12 +80,12 @@ export const customAuthFlow = async () => {
           validationIpfsCid: myDappBackend.validationIpfsCid,
         });
 
-      console.log('✅ validationIpfsCid:', validationIpfsCid);
-      console.log('✅ mintedPKP:', mintedPKP);
-      console.log(
-        '✅ hexedUniqueAuthMethodType:',
-        this.hexedUniqueAuthMethodType
-      );
+      // console.log('✅ validationIpfsCid:', validationIpfsCid);
+      // console.log('✅ mintedPKP:', mintedPKP);
+      // console.log(
+      //   '✅ hexedUniqueAuthMethodType:',
+      //   this.hexedUniqueAuthMethodType
+      // );
 
       // find the user first
       const user = this.registeredUsers.find((user) => user.userId === userId);
@@ -187,3 +188,5 @@ export const customAuthFlow = async () => {
 
   console.log('✅ userSignRes:', userSignRes);
 };
+
+customAuthFlow();

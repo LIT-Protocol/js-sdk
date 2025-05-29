@@ -29,7 +29,7 @@ const _logger = getChildLogger({
 export async function tryGetCachedAuthData(params: {
   storage: LitAuthStorageProvider;
   address: string;
-  expiration: string;
+  expiration: string | undefined;
   type: AUTH_METHOD_TYPE_VALUES;
 }): Promise<LitAuthData> {
   // Use `storage` to see if there is cached auth data
@@ -91,6 +91,7 @@ export async function tryGetCachedAuthData(params: {
         address: params.address,
       }
     );
+
     const _expiration = ExpirationSchema.parse(params.expiration);
 
     // generate session key pair

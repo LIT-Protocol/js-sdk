@@ -1,6 +1,4 @@
-import {
-  createAccBuilder
-} from '@lit-protocol/access-control-conditions';
+import { createAccBuilder } from '@lit-protocol/access-control-conditions';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { init } from './init';
 

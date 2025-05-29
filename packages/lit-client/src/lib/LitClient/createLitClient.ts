@@ -128,6 +128,11 @@ export const _createNagaLitClient = async (
       );
     }
 
+    const jitContext = await networkModule.api.createJitContext(
+      currentConnectionInfo,
+      currentHandshakeResult
+    );
+
     // 🟪 Create requests
     // 1. This is where the orchestration begins — we delegate the creation of the
     // request array to the `networkModule`. It encapsulates logic specific to the
@@ -145,11 +150,6 @@ export const _createNagaLitClient = async (
     if (params.bypassAutoHashing) {
       signingContext.bypassAutoHashing = true;
     }
-
-    const jitContext = await networkModule.api.createJitContext(
-      currentConnectionInfo,
-      currentHandshakeResult
-    );
 
     const requestArray = await networkModule.api.pkpSign.createRequest({
       // add chain context (btc, eth, cosmos, solana)
@@ -206,11 +206,17 @@ export const _createNagaLitClient = async (
       );
     }
 
+    const jitContext = await networkModule.api.createJitContext(
+      currentConnectionInfo,
+      currentHandshakeResult
+    );
+
     // 2. 🟪 Create requests
     const requestArray = await networkModule.api.signSessionKey.createRequest(
       params.requestBody,
       networkModule.config.httpProtocol,
-      networkModule.version
+      networkModule.version,
+      jitContext
     );
 
     const requestId = requestArray[0].requestId;
@@ -225,7 +231,8 @@ export const _createNagaLitClient = async (
     // 4. 🟪 Handle response
     return await networkModule.api.signSessionKey.handleResponse(
       result,
-      params.requestBody.pkpPublicKey
+      params.requestBody.pkpPublicKey,
+      jitContext
     );
   }
 
@@ -245,12 +252,24 @@ export const _createNagaLitClient = async (
       );
     }
 
+    const jitContext = await networkModule.api.createJitContext(
+      currentConnectionInfo,
+      currentHandshakeResult
+    );
+
+    if (!currentHandshakeResult || !currentConnectionInfo) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of pkpSign.'
+      );
+    }
+
     // 2. 🟪 Create requests
     const requestArray =
       await networkModule.api.signCustomSessionKey.createRequest(
         params.requestBody,
         networkModule.config.httpProtocol,
-        networkModule.version
+        networkModule.version,
+        jitContext
       );
 
     const requestId = requestArray[0].requestId;
@@ -265,7 +284,8 @@ export const _createNagaLitClient = async (
     // 4. 🟪 Handle response
     return await networkModule.api.signCustomSessionKey.handleResponse(
       result,
-      params.requestBody.pkpPublicKey
+      params.requestBody.pkpPublicKey,
+      jitContext
     );
   }
 
@@ -283,6 +303,11 @@ export const _createNagaLitClient = async (
         'Handshake result is not available from state manager at the time of executeJs.'
       );
     }
+
+    const jitContext = await networkModule.api.createJitContext(
+      currentConnectionInfo,
+      currentHandshakeResult
+    );
 
     // 🟪 Create requests
     // 1. This is where the orchestration begins — we delegate the creation of the
@@ -307,6 +332,7 @@ export const _createNagaLitClient = async (
       version: networkModule.version,
       useSingleNode: params.useSingleNode,
       responseStrategy: params.responseStrategy,
+      jitContext,
     });
 
     const requestId = requestArray[0].requestId;
@@ -326,7 +352,11 @@ export const _createNagaLitClient = async (
     // interpretation and formatting of the result back to the `networkModule`.
     // This allows the module to apply network-specific logic such as decoding,
     // formatting, or transforming the response into a usable executeJs result.
-    return await networkModule.api.executeJs.handleResponse(result, requestId);
+    return await networkModule.api.executeJs.handleResponse(
+      result,
+      requestId,
+      jitContext
+    );
   }
 
   /**
@@ -505,6 +535,17 @@ export const _createNagaLitClient = async (
       );
     }
 
+    const jitContext = await networkModule.api.createJitContext(
+      currentConnectionInfo,
+      currentHandshakeResult
+    );
+
+    if (!currentHandshakeResult || !currentConnectionInfo) {
+      throw new Error(
+        'Handshake result is not available from state manager at the time of decrypt.'
+      );
+    }
+
     if (!currentHandshakeResult.coreNodeConfig?.subnetPubKey) {
       throw new Error('subnetPubKey cannot be null');
     }
@@ -558,6 +599,7 @@ export const _createNagaLitClient = async (
       connectionInfo: currentConnectionInfo,
       version: networkModule.version,
       chain: params.chain,
+      jitContext,
     });
 
     const requestId = requestArray[0].requestId;
@@ -575,7 +617,8 @@ export const _createNagaLitClient = async (
       requestId,
       identityParam,
       ciphertext,
-      currentHandshakeResult.coreNodeConfig.subnetPubKey
+      currentHandshakeResult.coreNodeConfig.subnetPubKey,
+      jitContext
     );
 
     // ========== Handle metadata and data conversion ==========

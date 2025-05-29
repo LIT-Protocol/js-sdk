@@ -8,6 +8,10 @@ import { sendNodeRequest } from './helper/sendNodeRequest';
 // import { CoreNodeConfig } from '@lit-protocol/types'; // Placeholder, adjust if CoreNodeConfig is elsewhere
 // Replicating the CoreNodeConfig interface definition from lit-client/src/index.ts for clarity
 // Ideally, this would be a shared type.
+
+/**
+ * @deprecated - use the one in the type package
+ */
 export interface ResolvedHandshakeResponse {
   subnetPubKey: string;
   networkPubKey: string;
@@ -31,20 +35,26 @@ interface HandshakeRequestData {
 }
 
 // Expected response type for handshake from the node (raw structure)
-export const RawHandshakeResponseSchema = z.object({
-  serverPublicKey: z.string(),
-  subnetPublicKey: z.string(),
-  networkPublicKey: z.string(),
-  networkPublicKeySet: z.string(),
-  clientSdkVersion: z.string(),
-  hdRootPubkeys: z.array(z.string()),
-  attestation: z.any().optional(), // ❗️ Attestation data if provided by node. <network>-dev version will be null.
-  latestBlockhash: HexSchema,
-  nodeVersion: z.string(),
-  epoch: z.number(),
-});
 
-export type RawHandshakeResponse = z.infer<typeof RawHandshakeResponseSchema>;
+/**
+ * @deprecated - we need to move this schema into the network package
+ * and also latest local develop now nested everything inside a data object
+ */
+export type RawHandshakeResponse = {
+  serverPublicKey: string;
+  subnetPublicKey: string;
+  networkPublicKey: string;
+  networkPublicKeySet: string;
+  clientSdkVersion: string;
+  hdRootPubkeys: string[];
+  attestation?: any; // ❗️ Attestation data if provided by node. <network>-dev version will be null.
+  latestBlockhash: string;
+  nodeVersion: string;
+  epoch: number;
+
+  // only in Naga
+  nodeIdentityKey: string;
+};
 
 /**
  * Performs a handshake request with a single Lit node.
@@ -59,16 +69,19 @@ export const handshake = async (params: {
   requestId: string;
   epoch: number;
   version: string;
+  networkModule?: any;
 }): Promise<RawHandshakeResponse> => {
-  return RawHandshakeResponseSchema.parse(
-    await sendNodeRequest<RawHandshakeResponse>({
-      fullPath: params.fullPath,
-      data: params.data,
-      requestId: params.requestId,
-      epoch: params.epoch,
-      version: params.version,
-    })
-  );
+  const res = await sendNodeRequest<RawHandshakeResponse>({
+    fullPath: params.fullPath,
+    data: params.data,
+    requestId: params.requestId,
+    epoch: params.epoch,
+    version: params.version,
+  });
+
+  const _schema = params.networkModule.api.handshake.schemas.Input.ResponseData;
+
+  return _schema.parse(res).parseData();
 };
 
 export const resolveHandshakeResponse = ({

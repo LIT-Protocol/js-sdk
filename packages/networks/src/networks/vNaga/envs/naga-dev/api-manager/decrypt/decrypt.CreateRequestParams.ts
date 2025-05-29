@@ -1,11 +1,17 @@
 import type { ConnectionInfo } from '../../../../LitChainClient/types';
 import type { z } from 'zod';
 import type { PricingContextSchema } from '../../pricing-manager/PricingContextSchema';
-import { PKPAuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
+import {
+  PKPAuthContextSchema,
+  EoaAuthContextSchema,
+} from '@lit-protocol/schemas';
+import { NagaJitContext } from '@lit-protocol/types';
 
 export type DecryptCreateRequestParams = {
   pricingContext: z.input<typeof PricingContextSchema>;
-  authContext: z.input<typeof PKPAuthContextSchema | typeof EoaAuthContextSchema>;
+  authContext: z.input<
+    typeof PKPAuthContextSchema | typeof EoaAuthContextSchema
+  >;
   ciphertext: string;
   dataToEncryptHash: string;
   accessControlConditions?: any;
@@ -15,4 +21,5 @@ export type DecryptCreateRequestParams = {
   connectionInfo: ConnectionInfo;
   version: string;
   chain: string;
-}; 
+  jitContext: NagaJitContext;
+};

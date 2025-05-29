@@ -3,10 +3,15 @@ import {
   walletDecrypt,
   walletEncrypt,
 } from '@lit-protocol/crypto';
-import { NagaJitContext } from 'packages/types/src/lib/v2types';
+import { getChildLogger } from '@lit-protocol/logger';
+import { NagaJitContext } from '@lit-protocol/types';
 import { bytesToHex, stringToBytes } from 'viem';
 import { z } from 'zod';
 import { GenericEncryptedPayloadSchema } from '../schemas';
+
+const _logger = getChildLogger({
+  module: 'E2EERequestManager',
+});
 
 /**
  * Generic function to encrypt request data using JIT context
@@ -113,7 +118,78 @@ const decryptBatchResponse = <T>(
   return decryptedValues;
 };
 
+const handleEncryptedError = (
+  errorResult: any,
+  jitContext: NagaJitContext,
+  operationName: string
+): never => {
+  if (errorResult.error && errorResult.error.payload) {
+    // Try to decrypt the error payload to get the actual error message
+    try {
+      _logger.info(
+        `${operationName}: Attempting to decrypt error payload for detailed error information...`
+      );
+
+      const errorAsEncryptedPayload = {
+        success: true, // Fake success so the decryption can proceed
+        values: [errorResult.error], // Wrap the error payload as if it's a successful response
+      };
+
+      const decryptedErrorValues = decryptBatchResponse(
+        errorAsEncryptedPayload,
+        jitContext,
+        (decryptedJson) => {
+          return decryptedJson.data || decryptedJson; // Return whatever we can get
+        }
+      );
+
+      _logger.error(
+        `${operationName}: Decrypted error details from nodes:`,
+        decryptedErrorValues
+      );
+
+      // Use the actual error message from the nodes
+      const firstError = decryptedErrorValues[0];
+      if (firstError && firstError.error) {
+        const errorMessage = firstError.error;
+        const errorDetails = firstError.errorObject
+          ? `. Details: ${firstError.errorObject}`
+          : '';
+        throw new Error(
+          `${operationName} failed. ${errorMessage}${errorDetails}`
+        );
+      }
+
+      // If no specific error field, show the full decrypted response
+      throw new Error(
+        `${operationName} failed. ${JSON.stringify(decryptedErrorValues)}`
+      );
+    } catch (decryptError) {
+      _logger.error(
+        `${operationName}: Failed to decrypt error payload:`,
+        decryptError
+      );
+
+      // If the decryptError is actually our thrown error with the node's message, re-throw it
+      if (
+        decryptError instanceof Error &&
+        decryptError.message.includes(`${operationName} failed.`)
+      ) {
+        throw decryptError;
+      }
+
+      throw new Error(
+        `${operationName} failed. The nodes returned an encrypted error response that could not be decrypted. ` +
+          `This may indicate a configuration or network connectivity issue.`
+      );
+    }
+  } else {
+    throw new Error(`${operationName} failed with no error details provided`);
+  }
+};
+
 export const E2EERequestManager = {
   encryptRequestData,
   decryptBatchResponse,
+  handleEncryptedError,
 };

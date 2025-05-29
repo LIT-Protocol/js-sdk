@@ -33,7 +33,10 @@ export const networkConfig: INetworkConfig<
     realmId: DEFAULT_REALM_ID,
   },
   endpoints: NAGA_ENDPOINT,
-  authServerBaseUrl: 'http://localhost:3301',
+  services: {
+    authServiceBaseUrl: 'http://localhost:3301',
+    loginServiceBaseUrl: 'https://login.litgateway.com',
+  },
 };
 
 export type NagaDevNetworkConfig = typeof networkConfig;

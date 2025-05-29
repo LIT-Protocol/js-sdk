@@ -1,10 +1,13 @@
 import { InitError, InvalidNodeAttestation } from '@lit-protocol/constants';
 import * as LitNodeApi from '../LitNodeClient/LitNodeApi';
 
+import {
+  checkSevSnpAttestation,
+  ReleaseVerificationConfig,
+} from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import { EndPoint } from '@lit-protocol/types';
 import { createRandomHexString } from '../LitNodeClient/helper/createRandomHexString';
-import { checkSevSnpAttestation, ReleaseVerificationConfig } from '@lit-protocol/crypto';
 import {
   ResolvedHandshakeResponse,
   resolveHandshakeResponse,
@@ -16,6 +19,9 @@ const _logger = getChildLogger({
   name: 'lit-client.orchestrateHandshake',
 });
 
+/**
+ * @deprecated - use the one in the type package
+ */
 export type OrchestrateHandshakeResponse = {
   serverKeys: Record<string, LitNodeApi.RawHandshakeResponse>;
   connectedNodes: Set<string>;
@@ -73,6 +79,7 @@ export const orchestrateHandshake = async (params: {
               requestId: requestId,
               epoch: params.currentEpoch,
               version: params.version,
+              networkModule: params.networkModule,
             });
 
             // 2. Process the response (verify attestation etc.)
@@ -88,7 +95,8 @@ export const orchestrateHandshake = async (params: {
 
               // Verify the attestation by checking the signature against AMD certs
               try {
-                const releaseVerificationFn = params.networkModule?.getVerifyReleaseId?.();
+                const releaseVerificationFn =
+                  params.networkModule?.getVerifyReleaseId?.();
                 await checkSevSnpAttestation(
                   retrievedServerKeys.attestation,
                   challenge,

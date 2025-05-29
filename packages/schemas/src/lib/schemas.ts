@@ -75,9 +75,12 @@ export const DomainSchema = z
   .string()
   .optional()
   .default('localhost')
-  .refine((val) => val === '' || /^[^/]+(:\d+)?$/.test(val), {
-    message:
-      'Domain must not contain path or trailing slash (e.g., "localhost:3000" is valid, "localhost:3000/" is not)',
+  .transform((val) => {
+    if (!val || val === '') return val;
+
+    // Strip away any path or trailing slash - just keep the domain:port part
+    const domainMatch = val.match(/^([^/]+)/);
+    return domainMatch ? domainMatch[1] : val;
   });
 
 /**
@@ -129,6 +132,12 @@ export const SignerSchema = z.any();
 
 export const ExpirationSchema = z
   .string()
+  .optional()
+  .default(() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 15);
+    return now.toISOString();
+  })
   .refine(
     (val) => !isNaN(Date.parse(val)) && val === new Date(val).toISOString(),
     {

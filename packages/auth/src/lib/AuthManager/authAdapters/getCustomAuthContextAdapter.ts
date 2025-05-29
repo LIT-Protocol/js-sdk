@@ -70,7 +70,7 @@ export async function getCustomAuthContextAdapter(
   const litAuthData = await tryGetCachedAuthData({
     storage: upstreamParams.storage,
     address: pkpAddress,
-    expiration: params.authConfig.expiration!,
+    expiration: params.authConfig.expiration,
     type: 'custom' as unknown as AUTH_METHOD_TYPE_VALUES,
   });
 

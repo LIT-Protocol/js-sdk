@@ -29,7 +29,7 @@ export const getDefaultLevel = () => {
     logLevel = globalThis['LOG_LEVEL'] || 'silent';
   }
 
-  console.log('✅ logLevel', logLevel);
+  // console.log('✅ logLevel', logLevel);
   return logLevel;
 };
 

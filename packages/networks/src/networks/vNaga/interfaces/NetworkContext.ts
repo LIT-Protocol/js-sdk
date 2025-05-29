@@ -16,7 +16,10 @@ export interface INetworkConfig<T, M> {
   httpProtocol: SupportedProtocols;
   networkSpecificConfigs?: M;
   endpoints: NagaEndpointsType;
-  authServerBaseUrl: string;
+  services: {
+    authServiceBaseUrl: string;
+    loginServiceBaseUrl: string;
+  };
 }
 
 export type DefaultNetworkConfig = INetworkConfig<

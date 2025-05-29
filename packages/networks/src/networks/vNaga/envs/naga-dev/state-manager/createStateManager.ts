@@ -96,14 +96,16 @@ export const createStateManager = async <T>(params: {
       minimumThreshold: params.networkModule.config.minimumThreshold,
       abortTimeout: params.networkModule.config.abortTimeout,
       endpoints: params.networkModule.getEndpoints(),
+      // releaseVerificationConfig: null,
+      networkModule: params.networkModule,
     });
-  } catch (error) {
+  } catch (error: any) {
     _logger.error(
       'Failed to get initial connection info for State Manager',
       error
     );
     // Depending on requirements, might want to re-throw or handle differently
-    throw new Error('Failed to initialize state manager connection info.');
+    throw new Error(error);
   }
 
   // --- Setup Staking Event Listener ---
@@ -177,6 +179,8 @@ export const createStateManager = async <T>(params: {
               minimumThreshold: params.networkModule.config.minimumThreshold,
               abortTimeout: params.networkModule.config.abortTimeout,
               endpoints: params.networkModule.getEndpoints(),
+              // releaseVerificationConfig: null,
+              networkModule: params.networkModule,
             });
           } catch (error) {
             _logger.error(

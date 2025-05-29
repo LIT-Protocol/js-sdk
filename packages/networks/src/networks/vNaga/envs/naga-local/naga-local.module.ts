@@ -40,7 +40,7 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import nacl from 'tweetnacl';
+import { nacl } from '@lit-protocol/nacl';
 import type { PKPStorageProvider } from '../../../../storage/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
@@ -719,6 +719,15 @@ const nagaLocalModuleObject = {
           requestId,
         });
 
+        // Check if the result indicates failure before attempting decryption
+        if (!result.success) {
+          E2EERequestManager.handleEncryptedError(
+            result,
+            jitContext,
+            'Decryption'
+          );
+        }
+
         // Decrypt the batch response using the E2EE manager
         const decryptedValues = E2EERequestManager.decryptBatchResponse(
           result,
@@ -1034,6 +1043,15 @@ const nagaLocalModuleObject = {
           'signCustomSessionKey:handleResponse: Processing signCustomSessionKey response'
         );
 
+        // Check if the result indicates failure but has an encrypted error payload
+        if (!result.success) {
+          E2EERequestManager.handleEncryptedError(
+            result,
+            jitContext,
+            'Session key signing'
+          );
+        }
+
         // Decrypt the batch response using the E2EE manager
         const decryptedValues = E2EERequestManager.decryptBatchResponse(
           result,
@@ -1229,7 +1247,16 @@ const nagaLocalModuleObject = {
           }
         );
 
-        // Decrypt all responses using the E2EE manager
+        // Check if the result indicates failure before attempting decryption
+        if (!result.success) {
+          E2EERequestManager.handleEncryptedError(
+            result,
+            jitContext,
+            'JS execution'
+          );
+        }
+
+        // Decrypt the batch response using the E2EE manager
         const decryptedResponseValues = E2EERequestManager.decryptBatchResponse(
           result,
           jitContext,

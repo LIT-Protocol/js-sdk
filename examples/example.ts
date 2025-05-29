@@ -3,10 +3,57 @@ import { customAuthFlow } from './src/custom-auth-flow';
 import { init } from './src/init';
 import { eoaNativeAuthFlow } from './src/eoa-native-auth-flow';
 import { encryptDecryptFlow } from './src/encrypt-decrypt-flow';
+import { pkpPermissionsManagerFlow } from './src/pkp-permissions-manager-flow';
+import { pkpSignMsgFlow } from './src/pkp-viem-account-sign-msg-flow';
+import { pkpSendTxFlow } from './src/pkp-viem-account-sign-tx-flow';
+import { encryptDecryptFlow as pkpEncryptDecryptFlow } from './src/pkp-encrypt-decrypt-flow';
+import { pkpSignFlow } from './src/pkpsign-flow';
+import { getPKPsFlow } from './src/get-pkps-flow';
+import { getPKPsByAddressFlow } from './src/get-pkps-by-address-flow';
 
 // Configuration constants
 const CLI_TITLE = 'Function Runner CLI';
 const EXIT_OPTION = 'Exit';
+
+/**
+ * Wrapper functions for flows that don't export their main functions
+ */
+const pkpSignTypedDataFlow = async () => {
+  const { spawn } = await import('child_process');
+  const childProcess = spawn('bun', ['run', 'examples/src/pkp-viem-account-sign-typed-data-flow.ts'], {
+    stdio: 'inherit',
+    cwd: process.cwd(),
+  });
+  
+  return new Promise<void>((resolve, reject) => {
+    childProcess.on('close', (code: number | null) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Process exited with code ${code}`));
+      }
+    });
+  });
+};
+
+const executeJsFlow = async () => {
+  const { spawn } = await import('child_process');
+  const childProcess = spawn('bun', ['run', 'examples/src/executejs-flow.ts'], {
+    stdio: 'inherit',
+    cwd: process.cwd(),
+  });
+  
+  return new Promise<void>((resolve, reject) => {
+    childProcess.on('close', (code: number | null) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Process exited with code ${code}`));
+      }
+    });
+  });
+};
+
 /**
  * Function map containing all available functions
  * Add new functions here to include them in the CLI
@@ -16,11 +63,20 @@ const functionMap: Record<string, () => void> = {
   customAuthFlow: customAuthFlow,
   eoaNativeAuthFlow: eoaNativeAuthFlow,
   encryptDecryptFlow: encryptDecryptFlow,
+  pkpPermissionsManagerFlow: pkpPermissionsManagerFlow,
+  pkpSignMsgFlow: pkpSignMsgFlow,
+  pkpSendTxFlow: pkpSendTxFlow,
+  pkpEncryptDecryptFlow: pkpEncryptDecryptFlow,
+  pkpSignFlow: pkpSignFlow,
+  getPKPsFlow: getPKPsFlow,
+  getPKPsByAddressFlow: getPKPsByAddressFlow,
+  pkpSignTypedDataFlow: pkpSignTypedDataFlow,
+  executeJsFlow: executeJsFlow,
 };
 
 /**
  * Gets the list of available function names plus the exit option
- */~
+ */
 function getAvailableOptions(): string[] {
   return [...Object.keys(functionMap), EXIT_OPTION];
 }
