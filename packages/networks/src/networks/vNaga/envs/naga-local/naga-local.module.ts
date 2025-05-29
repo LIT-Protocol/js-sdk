@@ -75,7 +75,6 @@ import {
   GenericEncryptedPayloadSchema,
   GenericResponseSchema,
 } from './api-manager/schemas';
-import { SignSessionKeyResponseDataSchema } from './api-manager/signSessionKey/signSessionKey.ResponseDataSchema';
 import {
   createChainManager,
   CreateChainManagerReturn,
@@ -710,11 +709,11 @@ const nagaLocalModuleObject = {
       handleResponse: async (
         result: z.infer<typeof GenericEncryptedPayloadSchema>,
         requestId: string,
-       
+
         identityParam: string,
         ciphertext: string,
         subnetPubKey: string,
-        jitContext: NagaJitContext,
+        jitContext: NagaJitContext
       ) => {
         _logger.info('decrypt:handleResponse: Processing decrypt response', {
           requestId,
@@ -776,18 +775,9 @@ const nagaLocalModuleObject = {
           typeof JsonSignSessionKeyRequestForPkpReturnSchema
         >,
         httpProtocol: 'http://' | 'https://',
-        version: string
+        version: string,
+        jitContext: NagaJitContext
       ) => {
-        type RequestBodyType = {
-          sessionKey: string;
-          authMethods: AuthMethod[];
-          pkpPublicKey?: string;
-          siweMessage: string;
-          curveType: 'BLS';
-          epoch?: number;
-          nodeSet: { value: number; socketAddress: string }[];
-        };
-
         _logger.info('signSessionKey:createRequest: Request body', {
           requestBody,
         });
@@ -806,28 +796,51 @@ const nagaLocalModuleObject = {
           accessToken: requestBody.authData.accessToken,
         } as AuthMethod;
 
-        const requests: RequestItem<RequestBodyType>[] = [];
+        const requests: RequestItem<EncryptedPayloadV1>[] = [];
+        const _requestId = createRequestId();
 
         for (const url of nodeUrls) {
+          _logger.info(
+            'signSessionKey:createRequest: Generating request data',
+            {
+              url,
+            }
+          );
+
+          // Create the request data that will be encrypted
+          const _requestData = {
+            sessionKey: requestBody.sessionKey,
+            authMethods: [authMethod],
+            pkpPublicKey: requestBody.pkpPublicKey,
+            siweMessage: requestBody.siweMessage,
+            curveType: 'BLS' as const,
+            epoch: requestBody.epoch,
+            nodeSet: requestBody.nodeSet,
+          };
+
+          // Encrypt the request data using the E2EE manager
+          const encryptedPayload = E2EERequestManager.encryptRequestData(
+            _requestData,
+            url,
+            jitContext
+          );
+
           const _urlWithPath = composeLitUrl({
             url,
             endpoint: nagaLocalModuleObject.getEndpoints().SIGN_SESSION_KEY,
           });
 
-          const _body: RequestBodyType = {
-            sessionKey: requestBody.sessionKey,
-            authMethods: [authMethod],
-            pkpPublicKey: requestBody.pkpPublicKey,
-            siweMessage: requestBody.siweMessage,
-            curveType: 'BLS',
-            epoch: requestBody.epoch,
-            nodeSet: requestBody.nodeSet,
-          };
+          _logger.info(
+            'signSessionKey:createRequest: Url with path generated',
+            {
+              _urlWithPath,
+            }
+          );
 
           requests.push({
             fullPath: _urlWithPath,
-            data: _body,
-            requestId: createRequestId(),
+            data: encryptedPayload,
+            requestId: _requestId,
             epoch: requestBody.epoch,
             version: version,
           });
@@ -843,23 +856,37 @@ const nagaLocalModuleObject = {
         return requests;
       },
       handleResponse: async (
-        result: ProcessedBatchResult<
-          z.infer<typeof SignSessionKeyResponseDataSchema>
-        >,
-        pkpPublicKey: Hex | string
+        result: z.infer<typeof GenericEncryptedPayloadSchema>,
+        pkpPublicKey: Hex | string,
+        jitContext: NagaJitContext
       ) => {
-        if (!result.success) {
-          _logger.error('signSessionKey:handleResponse: Batch failed', {
-            error: result.error,
-          });
-          throw Error(JSON.stringify(result.error));
-        }
+        _logger.info(
+          'signSessionKey:handleResponse: Processing signSessionKey response'
+        );
 
-        const { values } = SignSessionKeyResponseDataSchema.parse(result);
+        // Decrypt the batch response using the E2EE manager
+        const decryptedValues = E2EERequestManager.decryptBatchResponse(
+          result,
+          jitContext,
+          (decryptedJson) => {
+            // The signSessionKey response is directly the individual response object,
+            // not wrapped in a { success, values } structure like other APIs
+            const signSessionKeyData = decryptedJson.data;
+            if (!signSessionKeyData) {
+              throw new Error('Decrypted response missing data field');
+            }
 
-        _logger.info('signSessionKey:handleResponse: Values', {
-          values,
+            // The signSessionKey response is the individual response, return it directly
+            return signSessionKeyData;
+          }
+        );
+
+        _logger.info('signSessionKey:handleResponse: Values decrypted', {
+          valueCount: decryptedValues.length,
         });
+
+        // The decrypted values are already the individual signSessionKey responses
+        const values = decryptedValues;
 
         const signatureShares = values.map((s) => ({
           ProofOfPossession: {
@@ -919,22 +946,10 @@ const nagaLocalModuleObject = {
           typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
         >,
         httpProtocol: 'http://' | 'https://',
-        version: string
+        version: string,
+        jitContext: NagaJitContext
       ) => {
-        type RequestBodyType = {
-          sessionKey: string;
-          authMethods: AuthMethod[];
-          pkpPublicKey?: string;
-          siweMessage: string;
-          curveType: 'BLS';
-          epoch?: number;
-          nodeSet: { value: number; socketAddress: string }[];
-          litActionCode?: string;
-          litActionIpfsId?: string;
-          jsParams?: Record<string, any>;
-        };
-
-        _logger.info('signSessionKey:createRequest: Request body', {
+        _logger.info('signCustomSessionKey:createRequest: Request body', {
           requestBody,
         });
 
@@ -942,30 +957,28 @@ const nagaLocalModuleObject = {
           (node) => `${httpProtocol}${node.socketAddress}`
         );
 
-        _logger.info('signSessionKey:createRequest: Node urls', {
+        _logger.info('signCustomSessionKey:createRequest: Node urls', {
           nodeUrls,
         });
 
-        // extract the authMethod from the requestBody
-        // const authMethod = {
-        //   authMethodType: requestBody.authData.authMethodType,
-        //   accessToken: requestBody.authData.accessToken,
-        // } as AuthMethod;
-
-        const requests: RequestItem<RequestBodyType>[] = [];
+        const requests: RequestItem<EncryptedPayloadV1>[] = [];
+        const _requestId = createRequestId();
 
         for (const url of nodeUrls) {
-          const _urlWithPath = composeLitUrl({
-            url,
-            endpoint: nagaLocalModuleObject.getEndpoints().SIGN_SESSION_KEY,
-          });
+          _logger.info(
+            'signCustomSessionKey:createRequest: Generating request data',
+            {
+              url,
+            }
+          );
 
-          const _body: RequestBodyType = {
+          // Create the request data that will be encrypted
+          const _requestData = {
             sessionKey: requestBody.sessionKey,
             authMethods: [],
             pkpPublicKey: requestBody.pkpPublicKey,
             siweMessage: requestBody.siweMessage,
-            curveType: 'BLS',
+            curveType: 'BLS' as const,
             epoch: requestBody.epoch,
             nodeSet: requestBody.nodeSet,
             litActionCode: requestBody.litActionCode,
@@ -973,10 +986,29 @@ const nagaLocalModuleObject = {
             jsParams: requestBody.jsParams,
           };
 
+          // Encrypt the request data using the E2EE manager
+          const encryptedPayload = E2EERequestManager.encryptRequestData(
+            _requestData,
+            url,
+            jitContext
+          );
+
+          const _urlWithPath = composeLitUrl({
+            url,
+            endpoint: nagaLocalModuleObject.getEndpoints().SIGN_SESSION_KEY,
+          });
+
+          _logger.info(
+            'signCustomSessionKey:createRequest: Url with path generated',
+            {
+              _urlWithPath,
+            }
+          );
+
           requests.push({
             fullPath: _urlWithPath,
-            data: _body,
-            requestId: createRequestId(),
+            data: encryptedPayload,
+            requestId: _requestId,
             epoch: requestBody.epoch,
             version: version,
           });
@@ -984,29 +1016,49 @@ const nagaLocalModuleObject = {
 
         if (!requests || requests.length === 0) {
           _logger.error(
-            'signSessionKey:createRequest: No requests generated for signSessionKey.'
+            'signCustomSessionKey:createRequest: No requests generated for signCustomSessionKey.'
           );
-          throw new Error('Failed to generate requests for signSessionKey.');
+          throw new Error(
+            'Failed to generate requests for signCustomSessionKey.'
+          );
         }
 
         return requests;
       },
       handleResponse: async (
-        result: ProcessedBatchResult<
-          z.infer<typeof SignSessionKeyResponseDataSchema>
-        >,
-        pkpPublicKey: Hex | string
+        result: z.infer<typeof GenericEncryptedPayloadSchema>,
+        pkpPublicKey: Hex | string,
+        jitContext: NagaJitContext
       ) => {
-        if (!result.success) {
-          _logger.error('signSessionKey:handleResponse: Batch failed', {
-            error: result.error,
-          });
-          throw Error(JSON.stringify(result.error));
-        }
+        _logger.info(
+          'signCustomSessionKey:handleResponse: Processing signCustomSessionKey response'
+        );
 
-        const { values } = SignSessionKeyResponseDataSchema.parse(result);
+        // Decrypt the batch response using the E2EE manager
+        const decryptedValues = E2EERequestManager.decryptBatchResponse(
+          result,
+          jitContext,
+          (decryptedJson) => {
+            // The signCustomSessionKey response is directly the individual response object,
+            // not wrapped in a { success, values } structure like other APIs
+            const signCustomSessionKeyData = decryptedJson.data;
+            if (!signCustomSessionKeyData) {
+              throw new Error('Decrypted response missing data field');
+            }
 
-        _logger.info('signSessionKey:handleResponse: Values', {
+            // The signCustomSessionKey response is the individual response, return it directly
+            return signCustomSessionKeyData;
+          }
+        );
+
+        _logger.info('signCustomSessionKey:handleResponse: Values decrypted', {
+          valueCount: decryptedValues.length,
+        });
+
+        // The decrypted values are already the individual signCustomSessionKey responses
+        const values = decryptedValues;
+
+        _logger.info('signCustomSessionKey:handleResponse: Values', {
           values,
         });
 
@@ -1017,7 +1069,7 @@ const nagaLocalModuleObject = {
           },
         }));
 
-        _logger.info('signSessionKey:handleResponse: Signature shares', {
+        _logger.info('signCustomSessionKey:handleResponse: Signature shares', {
           signatureShares,
         });
 
@@ -1028,9 +1080,12 @@ const nagaLocalModuleObject = {
           signatureShares
         );
 
-        _logger.info('signSessionKey:handleResponse: BLS combined signature', {
-          blsCombinedSignature,
-        });
+        _logger.info(
+          'signCustomSessionKey:handleResponse: BLS combined signature',
+          {
+            blsCombinedSignature,
+          }
+        );
 
         const _pkpPublicKey = HexPrefixedSchema.parse(pkpPublicKey);
 
@@ -1040,7 +1095,7 @@ const nagaLocalModuleObject = {
 
         const signedMessage = normalizeAndStringify(mostCommonSiweMessage!);
 
-        _logger.info('signSessionKey:handleResponse: Signed message', {
+        _logger.info('signCustomSessionKey:handleResponse: Signed message', {
           signedMessage,
         });
 
@@ -1054,7 +1109,7 @@ const nagaLocalModuleObject = {
           address: computeAddress(_pkpPublicKey),
         };
 
-        _logger.info('signSessionKey:handleResponse: Auth sig', {
+        _logger.info('signCustomSessionKey:handleResponse: Auth sig', {
           authSig,
         });
 
