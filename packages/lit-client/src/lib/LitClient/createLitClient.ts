@@ -12,11 +12,11 @@ import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import type {
   LitNetworkModule,
-  NagaDevModule,
   PKPStorageProvider,
 } from '@lit-protocol/networks';
 import {
   AuthContextSchema2,
+  EncryptedVersion1Schema,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
@@ -27,6 +27,7 @@ import {
   EncryptResponse,
   EncryptSdkParams,
   PkpIdentifierRaw,
+  RequestItem,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -48,6 +49,7 @@ import {
   MintWithCustomAuthRequest,
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
+import { NagaNetworkModule } from './type';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -74,11 +76,6 @@ export const createLitClient = async ({
       throw new Error(`Network module ${network.id} not supported`);
   }
 };
-
-/**
- * This is the default network type used for all Naga environments (v8)
- */
-type NagaNetworkModule = NagaDevModule;
 
 export const _createNagaLitClient = async (
   networkModule: NagaNetworkModule
@@ -151,7 +148,7 @@ export const _createNagaLitClient = async (
       signingContext.bypassAutoHashing = true;
     }
 
-    const requestArray = await networkModule.api.pkpSign.createRequest({
+    const requestArray = (await networkModule.api.pkpSign.createRequest({
       // add chain context (btc, eth, cosmos, solana)
       serverKeys: currentHandshakeResult.serverKeys,
       pricingContext: {
@@ -166,7 +163,7 @@ export const _createNagaLitClient = async (
       version: networkModule.version,
       chain: params.chain,
       jitContext,
-    });
+    })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
     const requestId = requestArray[0].requestId;
 
@@ -176,8 +173,8 @@ export const _createNagaLitClient = async (
     // tracking, and error tolerance. The orchestration layer ensures enough valid
     // responses are collected before proceeding.
     const result = await dispatchRequests<
-      z.infer<typeof networkModule.api.pkpSign.schemas.RequestData>,
-      z.infer<typeof networkModule.api.pkpSign.schemas.ResponseData>
+      z.infer<typeof EncryptedVersion1Schema>,
+      z.infer<typeof EncryptedVersion1Schema>
     >(requestArray, requestId, currentHandshakeResult.threshold);
 
     // 🟪 Handle response
@@ -185,8 +182,10 @@ export const _createNagaLitClient = async (
     // interpretation and formatting of the result back to the `networkModule`.
     // This allows the module to apply network-specific logic such as decoding,
     // formatting, or transforming the response into a usable signature object.
+
+    // Pass the success result to handleResponse - the result structure matches GenericEncryptedPayloadSchema
     return await networkModule.api.pkpSign.handleResponse(
-      result,
+      result as any,
       requestId,
       jitContext
     );
@@ -230,7 +229,7 @@ export const _createNagaLitClient = async (
 
     // 4. 🟪 Handle response
     return await networkModule.api.signSessionKey.handleResponse(
-      result,
+      result as any,
       params.requestBody.pkpPublicKey,
       jitContext
     );
@@ -283,7 +282,7 @@ export const _createNagaLitClient = async (
 
     // 4. 🟪 Handle response
     return await networkModule.api.signCustomSessionKey.handleResponse(
-      result,
+      result as any,
       params.requestBody.pkpPublicKey,
       jitContext
     );
@@ -314,7 +313,7 @@ export const _createNagaLitClient = async (
     // request array to the `networkModule`. It encapsulates logic specific to the
     // active network (e.g., pricing, thresholds, metadata) and returns a set of
     // structured requests ready to be dispatched to the nodes.
-    const requestArray = await networkModule.api.executeJs.createRequest({
+    const requestArray = (await networkModule.api.executeJs.createRequest({
       // add pricing context for Lit Actions
       pricingContext: {
         product: 'LIT_ACTION',
@@ -333,7 +332,7 @@ export const _createNagaLitClient = async (
       useSingleNode: params.useSingleNode,
       responseStrategy: params.responseStrategy,
       jitContext,
-    });
+    })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
     const requestId = requestArray[0].requestId;
 
@@ -343,8 +342,8 @@ export const _createNagaLitClient = async (
     // tracking, and error tolerance. The orchestration layer ensures enough valid
     // responses are collected before proceeding.
     const result = await dispatchRequests<
-      z.infer<typeof networkModule.api.executeJs.schemas.RequestData>,
-      z.infer<typeof networkModule.api.executeJs.schemas.ResponseData>
+      z.infer<typeof EncryptedVersion1Schema>,
+      z.infer<typeof EncryptedVersion1Schema>
     >(requestArray, requestId, currentHandshakeResult.threshold);
 
     // 🟪 Handle response
@@ -353,7 +352,7 @@ export const _createNagaLitClient = async (
     // This allows the module to apply network-specific logic such as decoding,
     // formatting, or transforming the response into a usable executeJs result.
     return await networkModule.api.executeJs.handleResponse(
-      result,
+      result as any,
       requestId,
       jitContext
     );
@@ -582,7 +581,7 @@ export const _createNagaLitClient = async (
     );
 
     // 🟪 Create requests
-    const requestArray = await networkModule.api.decrypt.createRequest({
+    const requestArray = (await networkModule.api.decrypt.createRequest({
       pricingContext: {
         product: 'DECRYPTION',
         userMaxPrice: params.userMaxPrice,
@@ -600,20 +599,19 @@ export const _createNagaLitClient = async (
       version: networkModule.version,
       chain: params.chain,
       jitContext,
-    });
+    })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
     const requestId = requestArray[0].requestId;
 
     // 🟩 Dispatch requests
-    const result = await dispatchRequests<any, any>(
-      requestArray,
-      requestId,
-      currentHandshakeResult.threshold
-    );
+    const result = await dispatchRequests<
+      z.infer<typeof EncryptedVersion1Schema>,
+      z.infer<typeof EncryptedVersion1Schema>
+    >(requestArray, requestId, currentHandshakeResult.threshold);
 
     // 🟪 Handle response
     const decryptResult = await networkModule.api.decrypt.handleResponse(
-      result,
+      result as any,
       requestId,
       identityParam,
       ciphertext,

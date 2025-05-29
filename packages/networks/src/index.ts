@@ -1,18 +1,20 @@
-import { NagaDevModule } from './networks/vNaga/envs/naga-dev/naga-dev.module';
+// import { NagaDevModule } from './networks/vNaga/envs/naga-rc-naga-2025-04-04/naga-dev.module';
+import { NagaLocalModule } from './networks/vNaga/envs/naga-local/naga-local.module';
 
 // Network modules
 export {
-  nagaDev,
+  // nagaDev,
   // nagaTest,
   // naga,
   nagaLocal,
 } from './networks/vNaga';
 
-// ----- types
-// export type { LitNetworkModule } from './src/networks/LitNetworkModule.bak';
-export type { NagaDevModule } from './networks/vNaga/envs/naga-dev/naga-dev.module';
-export type { ConnectionInfo } from './networks/vNaga/LitChainClient/types';
-export type LitNetworkModule = NagaDevModule;
+// Network module types
+export { NagaLocalModule } from './networks/vNaga/envs/naga-local/naga-local.module';
+
+// All Network modules
+export type LitNetworkModule = NagaLocalModule;
+// | NagaDevModule;
 // | NagaTestModule
 // | NagaProdModule
 // | NagaLocalModule
@@ -21,11 +23,6 @@ export type LitNetworkModule = NagaDevModule;
 // | DatilProdModule
 // | DatilLocalModule
 
-// import * as litConstants from '@lit-protocol/constants';
-// export type { AuthContext } from './src/networks/vNaga/envs/naga-dev/session-manager/AuthContextSchema';
-// export {
-//   AuthContextSchema,
-//   EoaAuthContextSchema,
-// } from './src/networks/vNaga/envs/naga-dev/session-manager/AuthContextSchema';
-
+// ----- types
+export type { ConnectionInfo } from './networks/vNaga/LitChainClient/types';
 export type { PKPStorageProvider } from './storage/types';

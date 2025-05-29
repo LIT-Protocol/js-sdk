@@ -9,7 +9,8 @@ export * from './lib/models';
 export * from './lib/schemas';
 export * from './lib/transformers';
 export * from './lib/validation';
-
+export * from './lib/naga/naga.schema';
+export * from './lib/naga/naga-schema-builder';
 export const AuthConfigSchema = z.preprocess(
   // Remove undefined values so Zod defaults can be applied properly
   (data) => {

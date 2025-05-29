@@ -3,16 +3,16 @@ import { bytesToHex, hexToBytes } from '@noble/curves/abstract/utils';
 import { z } from 'zod';
 import {
   Always32BytesSchema,
-  EncryptedPayloadV1,
-  EncryptedPayloadV1Schema,
   LitAADSchema,
   SodaliteCompatibleSchema,
 } from './e2ee.schemas';
+import { EncryptedVersion1Schema } from '@lit-protocol/schemas';
+
 export const walletEncrypt = (
   myWalletSecretKey: Uint8Array,
   theirWalletPublicKey: Uint8Array,
   message: Uint8Array
-): z.infer<typeof EncryptedPayloadV1Schema> => {
+): z.infer<typeof EncryptedVersion1Schema> => {
   const validatedTheirPublicKey =
     Always32BytesSchema.parse(theirWalletPublicKey);
 
@@ -50,7 +50,7 @@ export const walletEncrypt = (
   const sodaliteCompatibleCiphertext =
     SodaliteCompatibleSchema.parse(ciphertext);
 
-  const result = EncryptedPayloadV1Schema.parse({
+  const result = EncryptedVersion1Schema.parse({
     V1: {
       verification_key: bytesToHex(myWalletPublicKey),
       ciphertext_and_tag: bytesToHex(sodaliteCompatibleCiphertext), // Send sodalite-compatible format
@@ -64,7 +64,7 @@ export const walletEncrypt = (
 
 export const walletDecrypt = (
   myWalletSecretKey: Uint8Array,
-  data: EncryptedPayloadV1
+  data: z.infer<typeof EncryptedVersion1Schema>
 ): Uint8Array => {
   const dateSent = new Date(data.payload.created_at);
   const createdAt = Math.floor(dateSent.getTime() / 1000);

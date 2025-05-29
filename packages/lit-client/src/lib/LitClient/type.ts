@@ -1,10 +1,19 @@
-import type { NagaDevModule } from '@lit-protocol/networks';
+// import type { NagaDevModule20250404 } from '@lit-protocol/networks';
+import { NagaLocalModule } from '@lit-protocol/networks';
 
-export type LitNetworkModule = NagaDevModule;
-// | NagaTestModule
-// | NagaProdModule
-// | NagaLocalModule
-// | DatilDevModule
-// | DatilTestModule
-// | DatilProdModule
-// | DatilLocalModule
+/**
+ * ========== All Network Modules ==========
+ */
+export type LitNetworkModule = NagaNetworkModule;
+// | DatilNetworkModule;
+
+/**
+ * ========== (v8) All Naga Network Modules ==========
+ */
+export type NagaNetworkModule = NagaLocalModule;
+
+/**
+ * ========== (v7) All Datil Network Modules ==========
+ */
+// Coming soon. 😉
+// export type DatilNetworkModule = ...;

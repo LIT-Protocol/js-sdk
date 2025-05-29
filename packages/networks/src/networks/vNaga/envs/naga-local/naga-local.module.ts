@@ -4,6 +4,7 @@ import {
   AuthData,
   EncryptedVersion1Schema,
   GenericEncryptedPayloadSchema,
+  GenericResultBuilder,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
@@ -78,7 +79,6 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
-import { GenericResultBuilder } from 'packages/schemas/src/lib/naga/naga-schema-builder';
 
 const MODULE_NAME = 'naga-local';
 
