@@ -1,8 +1,7 @@
-import { HexSchema } from '@lit-protocol/schemas';
+import { GenericResultBuilder, HexSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
-import { GenericResponseSchema } from '../schemas';
 
-export const RawHandshakeResponseSchema = GenericResponseSchema(
+export const RawHandshakeResponseSchema = GenericResultBuilder(
   z.object({
     serverPublicKey: z.string(),
     subnetPublicKey: z.string(),

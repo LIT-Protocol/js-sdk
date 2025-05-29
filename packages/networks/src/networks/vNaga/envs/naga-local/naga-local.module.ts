@@ -2,6 +2,8 @@ import { version } from '@lit-protocol/constants';
 import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
+  EncryptedVersion1Schema,
+  GenericEncryptedPayloadSchema,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
@@ -20,7 +22,6 @@ import { createStateManager } from './state-manager/createStateManager';
 import { NetworkError } from '@lit-protocol/constants';
 import {
   combineSignatureShares,
-  EncryptedPayloadV1,
   mostCommonString,
   normalizeAndStringify,
   ReleaseVerificationConfig,
@@ -72,18 +73,17 @@ import {
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
 import {
-  GenericEncryptedPayloadSchema,
-  GenericResponseSchema,
-} from './api-manager/schemas';
-import {
   createChainManager,
   CreateChainManagerReturn,
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
+import { GenericResultBuilder } from 'packages/schemas/src/lib/naga/naga-schema-builder';
+
+const MODULE_NAME = 'naga-local';
 
 const _logger = getChildLogger({
-  module: 'naga-local-module',
+  module: `${MODULE_NAME}-module`,
 });
 
 // Release verification types and constants
@@ -283,7 +283,7 @@ type ProcessedBatchResult<T> =
   | { success: false; error: any; failedNodeUrls?: string[] };
 
 // Define the object first
-const nagaLocalModuleObject = {
+const networkModuleObject = {
   id: 'naga',
   version: `${version}-naga-local`,
   config: {
@@ -293,7 +293,7 @@ const nagaLocalModuleObject = {
     httpProtocol: networkConfig.httpProtocol,
   },
   schemas: {
-    GenericResponseSchema: GenericResponseSchema,
+    GenericResponseSchema: GenericResultBuilder,
   },
   getNetworkName: () => networkConfig.network,
   getHttpProtocol: () => networkConfig.httpProtocol,
@@ -502,7 +502,9 @@ const nagaLocalModuleObject = {
         RequestData: PKPSignRequestDataSchema,
         ResponseData: PKPSignResponseDataSchema,
       },
-      createRequest: async (params: PKPSignCreateRequestParams) => {
+      createRequest: async (
+        params: PKPSignCreateRequestParams
+      ): Promise<RequestItem<z.infer<typeof EncryptedVersion1Schema>>[]> => {
         _logger.info('pkpSign:createRequest: Creating request', {
           params,
         });
@@ -518,7 +520,8 @@ const nagaLocalModuleObject = {
         // -- 2. generate requests
         const _requestId = createRequestId();
 
-        const requests: RequestItem<EncryptedPayloadV1>[] = [];
+        const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
+          [];
 
         _logger.info('pkpSign:createRequest: Request id generated');
 
@@ -532,18 +535,6 @@ const nagaLocalModuleObject = {
           _logger.info('pkpSign:createRequest: Generating request data', {
             url,
           });
-
-          // // Generate secret key for this node
-          // const secretKey = nacl.box.keyPair().secretKey;
-
-          // // Store the secret key for later decryption
-          // globalPkpSignSecretKeys[_requestId][url] = secretKey;
-
-          // // Store the node's public key (what we expect as verification_key in response)
-          // const nodePublicKeyHex = params.serverKeys[
-          //   url
-          // ].nodeIdentityKey.replace('0x', '');
-          // globalPkpSignNodeKeys[_requestId][url] = nodePublicKeyHex;
 
           const _requestData = PKPSignRequestDataSchema.parse({
             toSign: Array.from(params.signingContext.toSign),
@@ -559,7 +550,6 @@ const nagaLocalModuleObject = {
             epoch: params.connectionInfo.epochState.currentNumber,
           });
 
-          // Encrypt the request data using the generic encryption function
           const encryptedPayload = E2EERequestManager.encryptRequestData(
             _requestData,
             url,
@@ -568,7 +558,7 @@ const nagaLocalModuleObject = {
 
           const _urlWithPath = composeLitUrl({
             url,
-            endpoint: nagaLocalModuleObject.getEndpoints().PKP_SIGN,
+            endpoint: networkModuleObject.getEndpoints().PKP_SIGN,
           });
 
           _logger.info('pkpSign:createRequest: Url with path generated', {
@@ -590,6 +580,8 @@ const nagaLocalModuleObject = {
           );
           throw new Error('Failed to generate requests for pkpSign.');
         }
+
+        console.log('requests:', requests);
 
         return requests;
       },
@@ -649,7 +641,8 @@ const nagaLocalModuleObject = {
 
         // -- 2. generate requests
         const _requestId = createRequestId();
-        const requests: RequestItem<EncryptedPayloadV1>[] = [];
+        const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
+          [];
 
         _logger.info('decrypt:createRequest: Request id generated');
 
@@ -681,7 +674,7 @@ const nagaLocalModuleObject = {
 
           const _urlWithPath = composeLitUrl({
             url,
-            endpoint: nagaLocalModuleObject.getEndpoints().ENCRYPTION_SIGN,
+            endpoint: networkModuleObject.getEndpoints().ENCRYPTION_SIGN,
           });
 
           _logger.info('decrypt:createRequest: Url with path generated', {
@@ -805,7 +798,8 @@ const nagaLocalModuleObject = {
           accessToken: requestBody.authData.accessToken,
         } as AuthMethod;
 
-        const requests: RequestItem<EncryptedPayloadV1>[] = [];
+        const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
+          [];
         const _requestId = createRequestId();
 
         for (const url of nodeUrls) {
@@ -836,7 +830,7 @@ const nagaLocalModuleObject = {
 
           const _urlWithPath = composeLitUrl({
             url,
-            endpoint: nagaLocalModuleObject.getEndpoints().SIGN_SESSION_KEY,
+            endpoint: networkModuleObject.getEndpoints().SIGN_SESSION_KEY,
           });
 
           _logger.info(
@@ -970,7 +964,8 @@ const nagaLocalModuleObject = {
           nodeUrls,
         });
 
-        const requests: RequestItem<EncryptedPayloadV1>[] = [];
+        const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
+          [];
         const _requestId = createRequestId();
 
         for (const url of nodeUrls) {
@@ -1004,7 +999,7 @@ const nagaLocalModuleObject = {
 
           const _urlWithPath = composeLitUrl({
             url,
-            endpoint: nagaLocalModuleObject.getEndpoints().SIGN_SESSION_KEY,
+            endpoint: networkModuleObject.getEndpoints().SIGN_SESSION_KEY,
           });
 
           _logger.info(
@@ -1161,7 +1156,8 @@ const nagaLocalModuleObject = {
 
         // -- 2. generate requests
         const _requestId = createRequestId();
-        const requests: RequestItem<EncryptedPayloadV1>[] = [];
+        const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
+          [];
 
         _logger.info('executeJs:createRequest: Request id generated');
 
@@ -1209,7 +1205,7 @@ const nagaLocalModuleObject = {
 
           const _urlWithPath = composeLitUrl({
             url,
-            endpoint: nagaLocalModuleObject.getEndpoints().EXECUTE_JS,
+            endpoint: networkModuleObject.getEndpoints().EXECUTE_JS,
           });
 
           _logger.info('executeJs:createRequest: Url with path generated', {
@@ -1316,7 +1312,7 @@ const nagaLocalModuleObject = {
 
 // Now define the type by taking the type of the object, but overriding getChainManager
 export type NagaLocalModule = Omit<
-  typeof nagaLocalModuleObject,
+  typeof networkModuleObject,
   'getChainManager'
 > & {
   getChainManager: (
@@ -1325,8 +1321,4 @@ export type NagaLocalModule = Omit<
 };
 
 // Export the correctly typed object
-export const nagaLocalModule = nagaLocalModuleObject as NagaLocalModule;
-
-export type NagaDevStateManagerType = Awaited<
-  ReturnType<typeof createStateManager>
->;
+export const nagaLocalModule = networkModuleObject as NagaLocalModule;

@@ -1,6 +1,6 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
 import { z } from 'zod';
-import { GenericResultSchema } from '../schemas';
+import { GenericResultSchemaBuilder } from '@lit-protocol/schemas';
 
 // Define the schema for the EcdsaSignedMessageShare object
 const EcdsaSignedMessageShareDataSchema = z.object({
@@ -30,7 +30,7 @@ const FrostSignedMessageShareDataSchema = z.object({
 
 export const PKPSignEncryptedPayloadSchema = z.object({});
 
-export const PKPSignResponseDataSchema = GenericResultSchema(
+export const PKPSignResponseDataSchema = GenericResultSchemaBuilder(
   z.object({
     success: z.boolean(),
     signedData: z.array(z.number()),

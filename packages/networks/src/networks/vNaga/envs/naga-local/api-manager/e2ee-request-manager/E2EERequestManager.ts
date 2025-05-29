@@ -1,13 +1,12 @@
-import {
-  EncryptedPayloadV1,
-  walletDecrypt,
-  walletEncrypt,
-} from '@lit-protocol/crypto';
+import { walletDecrypt, walletEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import { NagaJitContext } from '@lit-protocol/types';
 import { bytesToHex, stringToBytes } from 'viem';
 import { z } from 'zod';
-import { GenericEncryptedPayloadSchema } from '../schemas';
+import {
+  EncryptedVersion1Schema,
+  GenericEncryptedPayloadSchema,
+} from '@lit-protocol/schemas';
 
 const _logger = getChildLogger({
   module: 'E2EERequestManager',
@@ -24,7 +23,7 @@ const encryptRequestData = (
   requestData: any,
   url: string,
   jitContext: NagaJitContext
-): EncryptedPayloadV1 => {
+): z.infer<typeof EncryptedVersion1Schema> => {
   if (!jitContext.keySet[url]) {
     throw new Error(`No encryption keys found for node URL: ${url}`);
   }
@@ -88,7 +87,7 @@ const decryptBatchResponse = <T>(
     }
 
     try {
-      const encryptedPayload: EncryptedPayloadV1 = {
+      const encryptedPayload: z.infer<typeof EncryptedVersion1Schema> = {
         version: encryptedResponse.version,
         payload: encryptedResponse.payload,
       };
@@ -136,7 +135,9 @@ const handleEncryptedError = (
       };
 
       const decryptedErrorValues = decryptBatchResponse(
-        errorAsEncryptedPayload,
+        errorAsEncryptedPayload as z.infer<
+          typeof GenericEncryptedPayloadSchema
+        >,
         jitContext,
         (decryptedJson) => {
           return decryptedJson.data || decryptedJson; // Return whatever we can get
