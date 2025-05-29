@@ -1,7 +1,5 @@
 import { version } from '@lit-protocol/constants';
-import {
-  verifyAndDecryptWithSignatureShares
-} from '@lit-protocol/crypto';
+import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
   HexPrefixedSchema,
@@ -383,7 +381,6 @@ const nagaLocalModuleObject = {
     }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
       const chainManager = createChainManager(params.account);
       const res = await chainManager.api.mintWithEoa();
-      console.log('🔥 mintWithEoa res:', res);
       return {
         _raw: res,
         txHash: res.hash,
@@ -717,10 +714,10 @@ const nagaLocalModuleObject = {
         });
 
         if (!result.success) {
-          console.error(
-            '🚨 Decrypt batch failed in handleResponse:',
-            result.error
-          );
+          _logger.error('decrypt:handleResponse: Batch failed', {
+            requestId,
+            error: result.error,
+          });
           throw Error(JSON.stringify(result.error));
         }
 
@@ -839,10 +836,9 @@ const nagaLocalModuleObject = {
         pkpPublicKey: Hex | string
       ) => {
         if (!result.success) {
-          console.error(
-            '🚨 Sign Session Key batch failed in handleResponse:',
-            result.error
-          );
+          _logger.error('signSessionKey:handleResponse: Batch failed', {
+            error: result.error,
+          });
           throw Error(JSON.stringify(result.error));
         }
 
@@ -980,9 +976,6 @@ const nagaLocalModuleObject = {
           throw new Error('Failed to generate requests for signSessionKey.');
         }
 
-        // console.log("requests:", requests[0]);
-        // process.exit();
-
         return requests;
       },
       handleResponse: async (
@@ -992,10 +985,9 @@ const nagaLocalModuleObject = {
         pkpPublicKey: Hex | string
       ) => {
         if (!result.success) {
-          console.error(
-            '🚨 Sign Session Key batch failed in handleResponse:',
-            result.error
-          );
+          _logger.error('signSessionKey:handleResponse: Batch failed', {
+            error: result.error,
+          });
           throw Error(JSON.stringify(result.error));
         }
 
@@ -1083,9 +1075,7 @@ const nagaLocalModuleObject = {
 
         // -- 2. generate requests
         const _requestId = createRequestId();
-        const requests: RequestItem<
-          z.infer<typeof ExecuteJsRequestDataSchema>
-        >[] = [];
+        const requests: RequestItem<EncryptedPayloadV1>[] = [];
 
         _logger.info('executeJs:createRequest: Request id generated');
 
@@ -1124,6 +1114,13 @@ const nagaLocalModuleObject = {
             }),
           });
 
+          // Encrypt the request data using the E2EE manager
+          const encryptedPayload = E2EERequestManager.encryptRequestData(
+            _requestData,
+            url,
+            params.jitContext
+          );
+
           const _urlWithPath = composeLitUrl({
             url,
             endpoint: nagaLocalModuleObject.getEndpoints().EXECUTE_JS,
@@ -1135,7 +1132,7 @@ const nagaLocalModuleObject = {
 
           requests.push({
             fullPath: _urlWithPath,
-            data: _requestData,
+            data: encryptedPayload,
             requestId: _requestId,
             epoch: params.connectionInfo.epochState.currentNumber,
             version: params.version,
@@ -1152,10 +1149,9 @@ const nagaLocalModuleObject = {
         return requests;
       },
       handleResponse: async (
-        result: ProcessedBatchResult<
-          z.infer<typeof ExecuteJsResponseDataSchema>
-        >,
-        requestId: string
+        result: z.infer<typeof GenericEncryptedPayloadSchema>,
+        requestId: string,
+        jitContext: NagaJitContext
       ) => {
         _logger.info(
           'executeJs:handleResponse: Processing executeJs response',
@@ -1165,27 +1161,39 @@ const nagaLocalModuleObject = {
           }
         );
 
-        if (!result.success) {
-          console.error(
-            '🚨 ExecuteJs batch failed in handleResponse:',
-            result.error
-          );
-          throw Error(JSON.stringify(result.error));
-        }
+        // Decrypt all responses using the E2EE manager
+        const decryptedResponseValues = E2EERequestManager.decryptBatchResponse(
+          result,
+          jitContext,
+          (decryptedJson) => {
+            // Extract the actual executeJs response data from the response wrapper
+            const executeJsData = decryptedJson.data;
+            if (!executeJsData) {
+              throw new Error('Decrypted response missing data field');
+            }
 
-        console.log('result:', JSON.stringify(result, null, 2));
+            return executeJsData; // Return the executeJs response directly
+          }
+        );
 
-        const { values } = ExecuteJsResponseDataSchema.parse(result);
+        // The decryptedResponseValues are individual response objects with the correct fields
+        // Wrap them in the expected batch result format
+        const batchResponseData = {
+          success: true,
+          values: decryptedResponseValues, // These are the individual executeJs responses
+        };
 
-        _logger.info('executeJs:handleResponse: Response values received', {
-          requestId,
-          valueCount: values.length,
-          successfulValues: values.filter((v) => v.success).length,
-        });
+        // Create the correctly structured ProcessedBatchResult for handleExecuteJsResponse
+        const correctProcessedResult: ProcessedBatchResult<
+          z.infer<typeof ExecuteJsResponseDataSchema>
+        > = {
+          success: true as const,
+          values: [batchResponseData], // batchResponseData is the ExecuteJsResponseDataSchema structure
+        };
 
         // Use the handleResponse from the executeJs module with response strategy
         const executeJsResponse = await handleExecuteJsResponse(
-          result,
+          correctProcessedResult,
           requestId,
           networkConfig.minimumThreshold,
           executeJsResponseStrategy
