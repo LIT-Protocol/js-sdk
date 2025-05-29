@@ -18,8 +18,10 @@ interface NagaLocalDevSpecificConfigs {
   privateKey?: Hex;
 }
 
+export type NagaLocalSignatures = typeof signatures;
+
 export const networkConfig: INetworkConfig<
-  typeof signatures,
+  NagaLocalSignatures,
   NagaLocalDevSpecificConfigs
 > = {
   minimumThreshold: MINIMUM_THRESHOLD,
@@ -33,10 +35,13 @@ export const networkConfig: INetworkConfig<
     privateKey: chainInfo.DEV_PRIVATE_KEY,
   },
   endpoints: NAGA_ENDPOINT,
-  authServerBaseUrl: 'http://localhost:3000',
+  services: {
+    authServiceBaseUrl: 'http://localhost:3301',
+    loginServiceBaseUrl: 'http://localhost:3300',
+  },
 };
 
-export type NagaLocalDevelopNetworkContext = typeof networkConfig;
+export type NagaLocalNetworkContext = typeof networkConfig;
 
 // network object calls the chain client
 // LitClient could use the network to figure out
