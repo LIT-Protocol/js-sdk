@@ -175,7 +175,7 @@ export abstract class BaseProvider {
     }
 
     const litContracts = new LitContracts({
-      randomPrivatekey: true,
+      signer: new ethers.Wallet(ethers.Wallet.createRandom().privateKey, new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)),
       network: this.litNodeClient.config.litNetwork,
     });
     try {
