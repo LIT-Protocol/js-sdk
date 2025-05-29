@@ -650,9 +650,7 @@ const nagaLocalModuleObject = {
 
         // -- 2. generate requests
         const _requestId = createRequestId();
-        const requests: RequestItem<
-          z.infer<typeof DecryptRequestDataSchema>
-        >[] = [];
+        const requests: RequestItem<EncryptedPayloadV1>[] = [];
 
         _logger.info('decrypt:createRequest: Request id generated');
 
@@ -675,6 +673,13 @@ const nagaLocalModuleObject = {
             chain: params.chain,
           });
 
+          // Encrypt the request data using the generic encryption function
+          const encryptedPayload = E2EERequestManager.encryptRequestData(
+            _requestData,
+            url,
+            params.jitContext
+          );
+
           const _urlWithPath = composeLitUrl({
             url,
             endpoint: nagaLocalModuleObject.getEndpoints().ENCRYPTION_SIGN,
@@ -686,7 +691,7 @@ const nagaLocalModuleObject = {
 
           requests.push({
             fullPath: _urlWithPath,
-            data: _requestData,
+            data: encryptedPayload,
             requestId: _requestId,
             epoch: params.connectionInfo.epochState.currentNumber,
             version: params.version,
@@ -703,33 +708,41 @@ const nagaLocalModuleObject = {
         return requests;
       },
       handleResponse: async (
-        result: ProcessedBatchResult<z.infer<typeof DecryptResponseDataSchema>>,
+        result: z.infer<typeof GenericEncryptedPayloadSchema>,
         requestId: string,
+       
         identityParam: string,
         ciphertext: string,
-        subnetPubKey: string
+        subnetPubKey: string,
+        jitContext: NagaJitContext,
       ) => {
         _logger.info('decrypt:handleResponse: Processing decrypt response', {
           requestId,
         });
 
-        if (!result.success) {
-          _logger.error('decrypt:handleResponse: Batch failed', {
-            requestId,
-            error: result.error,
-          });
-          throw Error(JSON.stringify(result.error));
-        }
+        // Decrypt the batch response using the E2EE manager
+        const decryptedValues = E2EERequestManager.decryptBatchResponse(
+          result,
+          jitContext,
+          (decryptedJson) => {
+            // Extract the actual decrypt data from the response wrapper
+            const decryptData = decryptedJson.data;
+            if (!decryptData) {
+              throw new Error('Decrypted response missing data field');
+            }
 
-        // result.values contains the array of node responses
-        const values = result.values;
+            // Validate with schema
+            const responseData = DecryptResponseDataSchema.parse(decryptData);
+            return responseData;
+          }
+        );
 
-        _logger.info('decrypt:handleResponse: Values', {
-          values,
+        _logger.info('decrypt:handleResponse: Values decrypted', {
+          valueCount: decryptedValues.length,
         });
 
-        // Extract signature shares from node responses
-        const signatureShares = values.map((nodeResponse: any) => {
+        // Extract signature shares from decrypted node responses
+        const signatureShares = decryptedValues.map((nodeResponse: any) => {
           return {
             ProofOfPossession: {
               identifier:
