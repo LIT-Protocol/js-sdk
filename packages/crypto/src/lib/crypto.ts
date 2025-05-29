@@ -6,17 +6,14 @@ import {
   NoValidShares,
   UnknownError,
 } from '@lit-protocol/constants';
-import { nacl } from '@lit-protocol/nacl';
 import { SessionKeyPairSchema } from '@lit-protocol/schemas';
 import {
-  AuthSig,
   CleanLitNodeSignature,
   CombinedLitNodeSignature,
   LitActionSignedData,
   NodeAttestation,
   PKPSignEndpointResponse,
-  SessionKeyPair,
-  WalletEncryptedPayload,
+  SessionKeyPair
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -378,111 +375,13 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   }
 }
 
-export const walletEncrypt = async (
-  myWalletSecretKey: Uint8Array,
-  theirWalletPublicKey: Uint8Array,
-  sessionSig: AuthSig,
-  message: Uint8Array
-): Promise<WalletEncryptedPayload> => {
-  const uint8SessionSig = Buffer.from(JSON.stringify(sessionSig));
-
-  const random = new Uint8Array(16);
-  crypto.getRandomValues(random);
-  const dateNow = Date.now();
-  const createdAt = Math.floor(dateNow / 1000);
-  const timestamp = Buffer.alloc(8);
-  timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
-
-  const myWalletPublicKey = new Uint8Array(32);
-  nacl.lowlevel.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
-
-  // Construct AAD (Additional Authenticated Data) - data that is authenticated but not encrypted
-  const sessionSignature = uint8SessionSig; // Replace with actual session signature
-  const theirPublicKey = Buffer.from(theirWalletPublicKey); // Replace with their public key
-  const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
-
-  const aad = Buffer.concat([
-    sessionSignature,
-    random,
-    timestamp,
-    theirPublicKey,
-    myPublicKey,
-  ]);
-
-  const hash = new Uint8Array(64);
-  nacl.lowlevel.crypto_hash(hash, aad);
-
-  const nonce = hash.slice(0, 24);
-  const ciphertext = nacl.box(
-    message,
-    nonce,
-    theirPublicKey,
-    myWalletSecretKey
-  );
-  return {
-    V1: {
-      verification_key: uint8ArrayToHex(myWalletPublicKey),
-      ciphertext_and_tag: uint8ArrayToHex(ciphertext),
-      session_signature: uint8ArrayToHex(sessionSignature),
-      random: uint8ArrayToHex(random),
-      created_at: new Date(dateNow).toISOString(),
-    },
-  };
-};
-
-export const walletDecrypt = async (
-  myWalletSecretKey: Uint8Array,
-  payload: WalletEncryptedPayload
-): Promise<Uint8Array> => {
-  const dateSent = new Date(payload.V1.created_at);
-  const createdAt = Math.floor(dateSent.getTime() / 1000);
-  const timestamp = Buffer.alloc(8);
-  timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
-
-  const myWalletPublicKey = new Uint8Array(32);
-  nacl.lowlevel.crypto_scalarmult_base(myWalletPublicKey, myWalletSecretKey);
-
-  // Construct AAD
-  const random = Buffer.from(hexToUint8Array(payload.V1.random));
-  const sessionSignature = Buffer.from(
-    hexToUint8Array(payload.V1.session_signature)
-  ); // Replace with actual session signature
-  const theirPublicKey = hexToUint8Array(payload.V1.verification_key);
-  const theirPublicKeyBuffer = Buffer.from(theirPublicKey); // Replace with their public key
-  const myPublicKey = Buffer.from(myWalletPublicKey); // Replace with your wallet public key
-
-  const aad = Buffer.concat([
-    sessionSignature,
-    random,
-    timestamp,
-    theirPublicKeyBuffer,
-    myPublicKey,
-  ]);
-
-  const hash = new Uint8Array(64);
-  nacl.lowlevel.crypto_hash(hash, aad);
-
-  const nonce = hash.slice(0, 24);
-
-  // Convert hex ciphertext back to Uint8Array
-  const ciphertext = hexToUint8Array(payload.V1.ciphertext_and_tag);
-
-  const message = nacl.box.open(
-    ciphertext,
-    nonce,
-    theirPublicKey,
-    myWalletSecretKey
-  );
-  return message;
-};
-
-function uint8ArrayToHex(array: Uint8Array) {
+export function uint8ArrayToHex(array: Uint8Array) {
   return Array.from(array)
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 }
 
-function hexToUint8Array(hexString: string): Uint8Array {
+export function hexToUint8Array(hexString: string): Uint8Array {
   if (hexString.length % 2 !== 0) {
     throw new Error('Hex string must have an even length');
   }
