@@ -4,7 +4,7 @@ import {
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
 import { createLitClient } from '@lit-protocol/lit-client';
-import { nagaDev, nagaLocal } from '@lit-protocol/networks';
+import { nagaLocal } from '@lit-protocol/networks';
 import { createPublicClient, parseEther } from 'viem';
 import { http } from 'viem';
 import { createWalletClient } from 'viem';

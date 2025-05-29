@@ -1,5 +1,5 @@
 // import { NagaDevModule } from './networks/vNaga/envs/naga-rc-naga-2025-04-04/naga-dev.module';
-import { NagaLocalModule } from './networks/vNaga/envs/naga-local/naga-local.module';
+import type { NagaLocalModule } from './networks/vNaga';
 
 // Network modules
 export {
@@ -10,7 +10,7 @@ export {
 } from './networks/vNaga';
 
 // Network module types
-export { NagaLocalModule } from './networks/vNaga/envs/naga-local/naga-local.module';
+export type { NagaLocalModule } from './networks/vNaga';
 
 // All Network modules
 export type LitNetworkModule = NagaLocalModule;
