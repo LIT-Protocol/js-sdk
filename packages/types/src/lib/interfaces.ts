@@ -1277,23 +1277,3 @@ export interface EthBlockhashInfo {
   timestamp: string;
   blockNumber: number;
 }
-
-export interface WalletEncryptedPayload {
-  V1: {
-    verification_key: string;
-    ciphertext_and_tag: string;
-    session_signature: string;
-    random: string;
-    created_at: string;
-  };
-}
-
-export interface WalletEncryptedPayload {
-  V1: {
-    verification_key: string;
-    ciphertext_and_tag: string;
-    session_signature: string;
-    random: string;
-    created_at: string;
-  };
-}

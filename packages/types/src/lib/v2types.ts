@@ -28,6 +28,9 @@ export type EndPoint = {
   ENCRYPTION_SIGN: EndpointDefinition;
 };
 
+/**
+ * @deprecateed - TODO: we need to move this into the network module, as this might be different for each network
+ */
 export type CallbackParams = {
   bootstrapUrls: string[];
   currentEpoch: number;
@@ -36,6 +39,8 @@ export type CallbackParams = {
   minimumThreshold: number;
   abortTimeout: number;
   endpoints: EndPoint;
+  releaseVerificationConfig?: any;
+  networkModule: any;
 };
 
 // Helper type to ensure only one property exists
@@ -49,3 +54,60 @@ export type PkpIdentifierRaw = ExactlyOne<{
   address: string;
   pubkey: string;
 }>;
+
+export type RawHandshakeNagaResponse = {
+  serverPublicKey: string;
+  subnetPublicKey: string;
+  networkPublicKey: string;
+  networkPublicKeySet: string;
+  clientSdkVersion: string;
+  hdRootPubkeys: string[];
+  attestation?: any; // ❗️ Attestation data if provided by node. <network>-dev version will be null.
+  latestBlockhash: string;
+  nodeVersion: string;
+  epoch: number;
+
+  // only in Naga
+  nodeIdentityKey: string;
+};
+
+export interface ResolvedHandshakeNagaResponse {
+  subnetPubKey: string;
+  networkPubKey: string;
+  networkPubKeySet: string;
+  hdRootPubkeys: string[];
+  latestBlockhash: string;
+  // lastBlockHashRetrieved: number;
+}
+
+export type OrchestrateHandshakeResponse = {
+  serverKeys: Record<string, RawHandshakeNagaResponse>;
+  connectedNodes: Set<string>;
+  coreNodeConfig: ResolvedHandshakeNagaResponse | null;
+  threshold: number;
+};
+
+// export type RawHandshakeDatilResponse = {
+//   serverPublicKey: string;
+//   subnetPublicKey: string;
+//   networkPublicKey: string;
+//   networkPublicKeySet: string;
+//   clientSdkVersion: string;
+//   hdRootPubkeys: string[];
+//   attestation?: any; // ❗️ Attestation data if provided by node. <network>-dev version will be null.
+//   latestBlockhash: string;
+//   nodeVersion: string;
+//   epoch: number;
+
+//   // only in Naga
+//   nodeIdentityKey: string;
+// };
+
+export type KeySet = Record<
+  string,
+  { publicKey: Uint8Array; secretKey: Uint8Array }
+>;
+
+export type NagaJitContext = {
+  keySet: KeySet;
+};

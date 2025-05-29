@@ -1,7 +1,6 @@
 import { version } from '@lit-protocol/constants';
 import {
-  verifyAndDecryptWithSignatureShares,
-  walletEncrypt,
+  verifyAndDecryptWithSignatureShares
 } from '@lit-protocol/crypto';
 import {
   AuthData,
@@ -9,8 +8,7 @@ import {
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
 } from '@lit-protocol/schemas';
-import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
-import { Hex } from 'viem';
+import { Hex, hexToBytes, stringToBytes } from 'viem';
 
 import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
@@ -24,6 +22,7 @@ import { createStateManager } from './state-manager/createStateManager';
 import { NetworkError } from '@lit-protocol/constants';
 import {
   combineSignatureShares,
+  EncryptedPayloadV1,
   mostCommonString,
   normalizeAndStringify,
   ReleaseVerificationConfig,
@@ -33,14 +32,17 @@ import {
   AuthMethod,
   AuthSig,
   CallbackParams,
+  KeySet,
   LitActionResponseStrategy,
+  NagaJitContext,
   NodeAttestation,
   Optional,
+  OrchestrateHandshakeResponse,
   RequestItem,
-  WalletEncryptedPayload,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
+import nacl from 'tweetnacl';
 import type { PKPStorageProvider } from '../../../../storage/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
@@ -50,17 +52,18 @@ import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelAp
 import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import type { GenericTxRes, LitTxRes } from '../../LitChainClient/apis/types';
 import type { PKPData } from '../../LitChainClient/schemas/shared/PKPDataSchema';
+import { ConnectionInfo } from '../../LitChainClient/types';
 import { DecryptCreateRequestParams } from './api-manager/decrypt/decrypt.CreateRequestParams';
 import { DecryptInputSchema } from './api-manager/decrypt/decrypt.InputSchema';
 import { DecryptRequestDataSchema } from './api-manager/decrypt/decrypt.RequestDataSchema';
 import { DecryptResponseDataSchema } from './api-manager/decrypt/decrypt.ResponseDataSchema';
+import { E2EERequestManager } from './api-manager/e2ee-request-manager/E2EERequestManager';
 import { handleResponse as handleExecuteJsResponse } from './api-manager/executeJs';
 import { ExecuteJsCreateRequestParams } from './api-manager/executeJs/executeJs.CreateRequestParams';
 import { ExecuteJsInputSchema } from './api-manager/executeJs/executeJs.InputSchema';
 import { ExecuteJsRequestDataSchema } from './api-manager/executeJs/executeJs.RequestDataSchema';
 import { ExecuteJsResponseDataSchema } from './api-manager/executeJs/executeJs.ResponseDataSchema';
 import { RawHandshakeResponseSchema } from './api-manager/handshake/handshake.schema';
-import { generateNodeKeySets } from './api-manager/helper/generateNodeKeySets';
 import { combinePKPSignSignatures } from './api-manager/helper/get-signatures';
 import { PKPSignCreateRequestParams } from './api-manager/pkpSign/pkpSign.CreateRequestParams';
 import {
@@ -71,7 +74,7 @@ import {
 import { PKPSignRequestDataSchema } from './api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from './api-manager/pkpSign/pkpSign.ResponseDataSchema';
 import {
-  EncryptedPayloadV1Schema,
+  GenericEncryptedPayloadSchema,
   GenericResponseSchema,
 } from './api-manager/schemas';
 import { SignSessionKeyResponseDataSchema } from './api-manager/signSessionKey/signSessionKey.ResponseDataSchema';
@@ -270,6 +273,13 @@ const verifyReleaseId = async (
   }
 };
 
+// Store response strategy separately for executeJs requests
+let executeJsResponseStrategy: LitActionResponseStrategy | undefined;
+
+// Store secret keys for PKP sign requests to use in handleResponse
+// const globalPkpSignSecretKeys: Record<string, Record<string, Uint8Array>> = {};
+// const globalPkpSignNodeKeys: Record<string, Record<string, string>> = {};
+
 // Define ProcessedBatchResult type (mirroring structure from dispatchRequests)
 type ProcessedBatchResult<T> =
   | { success: true; values: T[] }
@@ -446,6 +456,39 @@ const nagaLocalModuleObject = {
     },
   },
   api: {
+    /**
+     * The Lit Client and Network Module exchange data in a request-response cycle:
+     *
+     * 1. 🟪 The Network Module constructs the request.
+     * 2. 🟩 The Lit Client sends it to the Lit Network.
+     * 3. 🟪 The Network Module processes the response.
+     *
+     * In some cases, we need to maintain a piece of state that is relevant to both step 1 (request creation)
+     * and step 3 (response handling). To support this, we introduce a *network-specific context object*
+     * that can be passed between the Lit Client and Network Module.
+     *
+     * One key example is managing a just-in-time (JIT) state for ephemeral secrets or signing keys
+     * — such as those used in PKP signing — which must persist across the request lifecycle.
+     */
+    createJitContext: async (
+      connectionInfo: ConnectionInfo,
+      handshakeResult: OrchestrateHandshakeResponse
+    ): Promise<NagaJitContext> => {
+      const keySet: KeySet = {};
+
+      for (const url of connectionInfo.bootstrapUrls) {
+        keySet[url] = {
+          publicKey: hexToBytes(
+            HexPrefixedSchema.parse(
+              handshakeResult.serverKeys[url].nodeIdentityKey
+            ) as `0x${string}`
+          ),
+          secretKey: nacl.box.keyPair().secretKey,
+        };
+      }
+
+      return { keySet };
+    },
     handshake: {
       schemas: {
         Input: {
@@ -478,22 +521,33 @@ const nagaLocalModuleObject = {
 
         // -- 2. generate requests
         const _requestId = createRequestId();
-        const requests: RequestItem<WalletEncryptedPayload['V1']>[] = [];
+
+        const requests: RequestItem<EncryptedPayloadV1>[] = [];
 
         _logger.info('pkpSign:createRequest: Request id generated');
 
         const urls = Object.keys(sessionSigs);
 
-        console.log('params.serverKeys:', params.serverKeys);
-        const keySets = generateNodeKeySets(urls, params.serverKeys);
-
-        console.log('keySets:', keySets);
-        // process.exit();
+        // // Reset and store secret keys for this request
+        // globalPkpSignSecretKeys[_requestId] = {};
+        // globalPkpSignNodeKeys[_requestId] = {};
 
         for (const url of urls) {
           _logger.info('pkpSign:createRequest: Generating request data', {
             url,
           });
+
+          // // Generate secret key for this node
+          // const secretKey = nacl.box.keyPair().secretKey;
+
+          // // Store the secret key for later decryption
+          // globalPkpSignSecretKeys[_requestId][url] = secretKey;
+
+          // // Store the node's public key (what we expect as verification_key in response)
+          // const nodePublicKeyHex = params.serverKeys[
+          //   url
+          // ].nodeIdentityKey.replace('0x', '');
+          // globalPkpSignNodeKeys[_requestId][url] = nodePublicKeyHex;
 
           const _requestData = PKPSignRequestDataSchema.parse({
             toSign: Array.from(params.signingContext.toSign),
@@ -509,19 +563,12 @@ const nagaLocalModuleObject = {
             epoch: params.connectionInfo.epochState.currentNumber,
           });
 
-          console.log('🔥 _requestData:', _requestData);
-          // process.exit();
-
-          const encrypted = walletEncrypt(
-            keySets[url].secretKey,
-            keySets[url].theirPublicKey,
-            uint8arrayFromString(JSON.stringify(_requestData))
+          // Encrypt the request data using the generic encryption function
+          const encryptedPayload = E2EERequestManager.encryptRequestData(
+            _requestData,
+            url,
+            params.jitContext
           );
-
-          // console.log('encrypted:', encrypted);
-          // process.exit();
-
-          const encryptedPayload = EncryptedPayloadV1Schema.parse(encrypted);
 
           const _urlWithPath = composeLitUrl({
             url,
@@ -534,7 +581,7 @@ const nagaLocalModuleObject = {
 
           requests.push({
             fullPath: _urlWithPath,
-            data: encryptedPayload as any,
+            data: encryptedPayload,
             requestId: _requestId,
             epoch: params.connectionInfo.epochState.currentNumber,
             version: params.version,
@@ -551,32 +598,33 @@ const nagaLocalModuleObject = {
         return requests;
       },
       handleResponse: async (
-        result: ProcessedBatchResult<z.infer<typeof PKPSignResponseDataSchema>>,
-        requestId: string
+        result: z.infer<typeof GenericEncryptedPayloadSchema>,
+        requestId: string,
+        jitContext: NagaJitContext
       ) => {
-        console.log('Incoming result for pkpSign handleResponse:', result);
-        process.exit();
+        const decryptedValues = E2EERequestManager.decryptBatchResponse(
+          result,
+          jitContext,
+          (decryptedJson) => {
+            // Extract the actual PKP sign data from the response wrapper
+            const pkpSignData = decryptedJson.data;
+            if (!pkpSignData) {
+              throw new Error('Decrypted response missing data field');
+            }
 
-        if (!result.success) {
-          console.error(
-            '🚨 PKP Sign batch failed in handleResponse:',
-            (result as { success: false; error: any }).error
-          );
-          throw Error((result as { success: false; error: any }).error);
-        }
+            // Validate with schema - wrap in expected format
+            const wrappedData = {
+              success: pkpSignData.success,
+              values: [pkpSignData], // Wrap the individual response in an array
+            };
 
-        console.log('🔥 result:', result);
-
-        const successResult = result as {
-          success: true;
-          values: z.infer<typeof PKPSignResponseDataSchema>[];
-        };
-        const { values } = PKPSignResponseDataSchema.parse(
-          successResult.values
+            const responseData = PKPSignResponseDataSchema.parse(wrappedData);
+            return responseData.values[0]; // Return the individual PKP sign response
+          }
         );
 
         const signatures = await combinePKPSignSignatures({
-          nodesPkpSignResponseData: values,
+          nodesPkpSignResponseData: decryptedValues,
           requestId,
           threshold: networkConfig.minimumThreshold,
         });
@@ -701,7 +749,7 @@ const nagaLocalModuleObject = {
         // Verify and decrypt using signature shares
         const decryptedData = await verifyAndDecryptWithSignatureShares(
           subnetPubKey,
-          uint8arrayFromString(identityParam, 'utf8'),
+          stringToBytes(identityParam),
           ciphertext,
           signatureShares
         );
@@ -1179,6 +1227,3 @@ export const nagaLocalModule = nagaLocalModuleObject as NagaLocalModule;
 export type NagaDevStateManagerType = Awaited<
   ReturnType<typeof createStateManager>
 >;
-
-// Store response strategy separately for executeJs requests
-let executeJsResponseStrategy: LitActionResponseStrategy | undefined;

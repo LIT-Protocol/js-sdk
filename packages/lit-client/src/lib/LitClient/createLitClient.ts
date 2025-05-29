@@ -146,8 +146,14 @@ export const _createNagaLitClient = async (
       signingContext.bypassAutoHashing = true;
     }
 
+    const jitContext = await networkModule.api.createJitContext(
+      currentConnectionInfo,
+      currentHandshakeResult
+    );
+
     const requestArray = await networkModule.api.pkpSign.createRequest({
       // add chain context (btc, eth, cosmos, solana)
+      serverKeys: currentHandshakeResult.serverKeys,
       pricingContext: {
         product: 'SIGN',
         userMaxPrice: params.userMaxPrice,
@@ -159,6 +165,7 @@ export const _createNagaLitClient = async (
       connectionInfo: currentConnectionInfo,
       version: networkModule.version,
       chain: params.chain,
+      jitContext,
     });
 
     const requestId = requestArray[0].requestId;
@@ -178,7 +185,11 @@ export const _createNagaLitClient = async (
     // interpretation and formatting of the result back to the `networkModule`.
     // This allows the module to apply network-specific logic such as decoding,
     // formatting, or transforming the response into a usable signature object.
-    return await networkModule.api.pkpSign.handleResponse(result, requestId);
+    return await networkModule.api.pkpSign.handleResponse(
+      result,
+      requestId,
+      jitContext
+    );
   }
 
   async function _signSessionKey(params: {
@@ -611,6 +622,10 @@ export const _createNagaLitClient = async (
         viemConfig: viemConfig,
         rpcUrl,
       };
+    },
+    getDefault: {
+      authServiceUrl: networkModule.getDefaultAuthServiceBaseUrl(),
+      loginUrl: networkModule.getDefaultLoginBaseUrl(),
     },
     disconnect: _stateManager.stop,
     mintWithEoa: networkModule.chainApi.mintWithEoa,
