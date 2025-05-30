@@ -1,5 +1,12 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.8
+
+### Major Changes
+
+- 20f98e5: add "@lit-protocol/contracts": "^0.1.23",
+- make workspace packages
+
 ## 1.0.0-alpha.7
 
 ### Major Changes

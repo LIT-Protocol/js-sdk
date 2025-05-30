@@ -2,7 +2,6 @@ import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from './types';
 
 export type ConstantKeys<T> = keyof T;
 export type ConstantValues<T> = T[keyof T];
-
 // ========== Chains ==========
 export const VMTYPE = {
   EVM: 'EVM',
