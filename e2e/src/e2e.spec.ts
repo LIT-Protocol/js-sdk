@@ -17,7 +17,7 @@ import {
 } from './helper/tests';
 import { init } from './init';
 
-describe('e2e tests', () => {
+describe('all', () => {
   // Singleton baby
   let ctx: Awaited<ReturnType<typeof init>>;
 

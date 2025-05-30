@@ -4,10 +4,9 @@ import {
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
 import { createLitClient } from '@lit-protocol/lit-client';
-import { privateKeyToAccount } from 'viem/accounts';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
-import { generatePrivateKey } from 'viem/accounts';
 
 const SupportedNetworkSchema = z.enum(['naga-dev', 'naga-local']);
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
@@ -62,12 +61,12 @@ export const init = async (network?: SupportedNetwork, logLevel?: LogLevel) => {
   let _networkModule;
 
   if (_network === 'naga-dev') {
-    // const { nagaDev } = await import('@lit-protocol/networks');
-    // _networkModule = nagaDev;
-    // await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
-    //   ifLessThan: '0.001',
-    //   thenFundWith: '0.001',
-    // });
+    const { nagaDev } = await import('@lit-protocol/networks');
+    _networkModule = nagaDev;
+    await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
+      ifLessThan: '0.0001',
+      thenFundWith: '0.0001',
+    });
   } else if (_network === 'naga-local') {
     const { nagaLocal } = await import('@lit-protocol/networks');
     _networkModule = nagaLocal;
@@ -103,19 +102,6 @@ export const init = async (network?: SupportedNetwork, logLevel?: LogLevel) => {
 
   /**
    * ====================================
-   * (Local only) Mint a PKP
-   * ====================================
-   */
-  if (_network === 'naga-local') {
-    await litClient.mintWithAuth({
-      authData: aliceViemAccountAuthData,
-      account: aliceViemAccount,
-      scopes: ['sign-anything'],
-    });
-  }
-
-  /**
-   * ====================================
    * Select a PKP
    * ====================================
    */
@@ -131,6 +117,37 @@ export const init = async (network?: SupportedNetwork, logLevel?: LogLevel) => {
     }),
   });
   const aliceViemAccountPkp = aliceViemAccountPkps[0];
+
+  /**
+   * ====================================
+   * (Local only) Mint a PKP
+   * ====================================
+   */
+  if (!aliceViemAccountPkp) {
+    await litClient.mintWithAuth({
+      authData: aliceViemAccountAuthData,
+      account: aliceViemAccount,
+      scopes: ['sign-anything'],
+    });
+  }
+
+  /**
+   * ====================================
+   * Select a PKP
+   * ====================================
+   */
+  const { pkps: aliceViemAccountPkps2 } = await litClient.viewPKPsByAuthData({
+    authData: aliceViemAccountAuthData,
+    pagination: {
+      limit: 5,
+    },
+    storageProvider: storagePlugins.localStorageNode({
+      appName: 'my-app',
+      networkName: 'naga-dev',
+      storagePath: './pkp-tokens',
+    }),
+  });
+  const aliceViemAccountPkp2 = aliceViemAccountPkps2[0];
 
   /**
    * ====================================
@@ -155,6 +172,7 @@ export const init = async (network?: SupportedNetwork, logLevel?: LogLevel) => {
     litClient: litClient,
   });
 
+  console.log('✅ Initialised components');
   /**
    * ====================================
    * Return the initialised components
@@ -166,7 +184,7 @@ export const init = async (network?: SupportedNetwork, logLevel?: LogLevel) => {
     localMasterAccount,
     aliceViemAccount,
     aliceViemAccountAuthData,
-    aliceViemAccountPkp,
+    aliceViemAccountPkp: aliceViemAccountPkp2,
     aliceEoaAuthContext,
   };
 };

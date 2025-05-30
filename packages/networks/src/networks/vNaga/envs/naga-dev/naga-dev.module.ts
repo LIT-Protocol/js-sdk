@@ -14,7 +14,7 @@ import { Hex, hexToBytes, stringToBytes } from 'viem';
 import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
 import type { ExpectedAccountOrWalletClient } from '../../LitChainClient/contract-manager/createContractsManager';
-import { networkConfig } from './naga-local.config';
+import { networkConfig } from './naga-dev.config';
 import { PricingContextSchema } from './pricing-manager/PricingContextSchema';
 import { issueSessionFromContext } from './session-manager/issueSessionFromContext';
 import { createStateManager } from './state-manager/createStateManager';
@@ -80,7 +80,7 @@ import {
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
 
-const MODULE_NAME = 'naga-local';
+const MODULE_NAME = 'naga-dev';
 
 const _logger = getChildLogger({
   module: `${MODULE_NAME}-module`,
@@ -285,7 +285,7 @@ type ProcessedBatchResult<T> =
 // Define the object first
 const networkModuleObject = {
   id: 'naga',
-  version: `${version}-naga-local`,
+  version: `${version}-naga-dev`,
   config: {
     requiredAttestation: false,
     abortTimeout: 20_000,
@@ -1309,7 +1309,7 @@ const networkModuleObject = {
 };
 
 // Now define the type by taking the type of the object, but overriding getChainManager
-export type NagaLocalModule = Omit<
+export type NagaDevModule = Omit<
   typeof networkModuleObject,
   'getChainManager'
 > & {
@@ -1319,4 +1319,4 @@ export type NagaLocalModule = Omit<
 };
 
 // Export the correctly typed object
-export const nagaLocalModule = networkModuleObject as NagaLocalModule;
+export const nagaDevModule = networkModuleObject as NagaDevModule;
