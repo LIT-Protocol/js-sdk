@@ -19,13 +19,13 @@
   },
   "dependencies": {
     "elysia": "^1.2.25",
-    "@lit-protocol/contracts": "^0.1.23"
+    "@lit-protocol/contracts": "^0.1.26"
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [
     "universal"
   ],
-  "version": "8.0.0-alpha.10",
+  "version": "8.0.0-alpha.11",
   "main": "./dist/index.js",
   "typings": "./src/index.d.ts",
   "types": "./dist/index.d.ts"

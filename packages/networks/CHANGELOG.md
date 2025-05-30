@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.11
+
+### Major Changes
+
+- add contracts pkg
+
 ## 8.0.0-alpha.10
 
 ### Major Changes
