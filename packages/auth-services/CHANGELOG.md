@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.4
+
+### Major Changes
+
+- fix exports and paths
+
 ## 1.0.0-alpha.3
 
 ### Major Changes
