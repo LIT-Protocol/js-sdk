@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.6
+
+### Major Changes
+
+- add "zod-validation-error": "^3.4.0"
+
 ## 1.0.0-alpha.5
 
 ### Minor Changes

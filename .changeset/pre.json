@@ -19,6 +19,7 @@
     "@lit-protocol/auth-services": "0.1.0"
   },
   "changesets": [
+    "all-memes-hang",
     "bitter-nights-create",
     "chilly-rice-stand",
     "cuddly-comics-take",
