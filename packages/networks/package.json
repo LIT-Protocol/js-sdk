@@ -18,8 +18,29 @@
     "directory": "../../dist/packages/networks"
   },
   "dependencies": {
+    "@lit-protocol/access-control-conditions-schemas": "workspace:*",
+    "@lit-protocol/auth-helpers": "workspace:*",
+    "@lit-protocol/constants": "workspace:*",
+    "@lit-protocol/contracts": "^0.1.26",
+    "@lit-protocol/crypto": "workspace:*",
+    "@lit-protocol/logger": "workspace:*",
+    "@lit-protocol/misc": "workspace:*",
+    "@lit-protocol/nacl": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*",
+    "@lit-protocol/types": "workspace:*",
+    "@nagaDev/ChainManager": "^1.0.0",
+    "@noble/curves": "^1.8.1",
+    "@noble/hashes": "^1.0.0",
+    "@nrwl/eslint-plugin-nx": "^1.0.0",
+    "@vNaga/LitChainClient": "^1.0.0",
+    "@wagmi/core": "^2.17.1",
+    "bs58": "^6.0.0",
     "elysia": "^1.2.25",
-    "@lit-protocol/contracts": "^0.1.26"
+    "ethers": "^5.7.1",
+    "pino": "^9.6.0",
+    "pino-caller": "^4.0.0",
+    "viem": "2.29.4",
+    "zod": "3.24.3"
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [

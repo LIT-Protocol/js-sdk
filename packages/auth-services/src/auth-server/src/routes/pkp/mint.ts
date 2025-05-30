@@ -1,4 +1,4 @@
-import { MintRequestRaw } from '@lit-protocol/networks/src/networks/vNaga/LitChainClient/schemas/MintRequestSchema';
+import { MintRequestRaw } from '@lit-protocol/networks';
 import { ElysiaInstance } from '../../types/ElysiaInstance.type';
 import { addJob } from '../../../../queue-manager/src/bullmqSetup';
 import { resp } from '../../response-helpers/response-helpers';

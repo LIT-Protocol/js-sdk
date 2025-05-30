@@ -23,5 +23,18 @@
   ],
   "version": "8.0.0-alpha.6",
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "dependencies": {
+    "@lit-protocol/constants": "workspace:*",
+    "@lit-protocol/nacl": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*",
+    "@lit-protocol/types": "workspace:*",
+    "@lit-protocol/uint8arrays": "workspace:*",
+    "@lit-protocol/wasm": "workspace:*",
+    "@noble/curves": "^1.8.1",
+    "@noble/hashes": "^1.0.0",
+    "@nrwl/eslint-plugin-nx": "^1.0.0",
+    "ajv": "^8.12.0",
+    "zod": "3.24.3"
+  }
 }

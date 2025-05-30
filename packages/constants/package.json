@@ -14,7 +14,10 @@
   },
   "type": "commonjs",
   "dependencies": {
-    "@openagenda/verror": "^3.1.4"
+    "@lit-protocol/contracts": "workspace:*",
+    "@nrwl/eslint-plugin-nx": "^1.0.0",
+    "@openagenda/verror": "^3.1.4",
+    "zod": "3.24.3"
   },
   "publishConfig": {
     "access": "public",

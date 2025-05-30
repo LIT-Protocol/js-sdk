@@ -16,6 +16,13 @@
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
+    "check-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "depcheck",
+        "cwd": "packages/crypto"
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],

@@ -22,5 +22,11 @@
   ],
   "version": "8.0.0-alpha.6",
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "dependencies": {
+    "@lit-protocol/constants": "workspace:*",
+    "@nrwl/eslint-plugin-nx": "^1.0.0",
+    "jsonc-eslint-parser": "^1.0.0",
+    "zod": "3.24.3"
+  }
 }

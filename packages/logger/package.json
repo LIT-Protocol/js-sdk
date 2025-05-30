@@ -10,5 +10,9 @@
     "directory": "../../dist/packages/logger"
   },
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "dependencies": {
+    "@nrwl/eslint-plugin-nx": "^1.0.0",
+    "pino": "^9.6.0"
+  }
 }

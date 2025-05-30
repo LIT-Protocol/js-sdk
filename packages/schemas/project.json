@@ -15,6 +15,13 @@
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
+    "check-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "depcheck",
+        "cwd": "packages/schemas"
+      }
+    },
     "generateDoc": {
       "executor": "nx:run-commands",
       "options": {

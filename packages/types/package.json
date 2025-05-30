@@ -25,5 +25,14 @@
   },
   "version": "8.0.0-alpha.6",
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "dependencies": {
+    "@ethersproject/abstract-provider": "^1.0.0",
+    "@lit-protocol/access-control-conditions-schemas": "workspace:*",
+    "@lit-protocol/constants": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*",
+    "@nrwl/eslint-plugin-nx": "^1.0.0",
+    "ethers": "^5.7.1",
+    "zod": "3.24.3"
+  }
 }

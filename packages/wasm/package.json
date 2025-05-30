@@ -30,5 +30,10 @@
     "rust:build:debug": "wasm-pack build ./rust --target web --dev --out-name wasm-internal && yarn rust:postbuild"
   },
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "dependencies": {
+    "@jest/globals": "^1.0.0",
+    "ethers": "^5.7.1",
+    "pako": "^2.1.0"
+  }
 }

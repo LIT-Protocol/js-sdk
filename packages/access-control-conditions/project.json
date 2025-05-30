@@ -15,6 +15,13 @@
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
+    "check-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "depcheck",
+        "cwd": "packages/access-control-conditions"
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],

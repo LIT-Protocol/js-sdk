@@ -35,3 +35,6 @@ export type LitNetworkModule =
 // ----- types
 export type { ConnectionInfo } from './networks/vNaga/LitChainClient/types';
 export type { PKPStorageProvider } from './storage/types';
+
+// Schema types
+export type { MintRequestRaw } from './networks/vNaga/LitChainClient/schemas/MintRequestSchema';

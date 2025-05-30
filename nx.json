@@ -13,8 +13,26 @@
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "dependsOn": ["auto-fix-deps"],
+      "cache": true
+    },
+    "auto-fix-deps": {
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/package.json"
+      ],
+      "outputs": [
+        "{projectRoot}/package.json"
+      ]
+    },
+    "check-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "depcheck"
+      },
+      "cache": true,
+      "inputs": ["default", "^production"]
     },
     "@nx/esbuild:esbuild": {
       "cache": true,

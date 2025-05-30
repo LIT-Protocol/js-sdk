@@ -22,9 +22,32 @@
     "universal"
   ],
   "dependencies": {
-    "cbor-web": "^9.0.2",
+    "@ethersproject/bytes": "^1.0.0",
+    "@ethersproject/providers": "^1.0.0",
+    "@ethersproject/strings": "^1.0.0",
+    "@ethersproject/wallet": "^1.0.0",
+    "@lit-protocol/auth-helpers": "workspace:*",
+    "@lit-protocol/constants": "workspace:*",
+    "@lit-protocol/crypto": "workspace:*",
+    "@lit-protocol/logger": "workspace:*",
+    "@lit-protocol/misc-browser": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*",
+    "@lit-protocol/types": "workspace:*",
+    "@noble/curves": "^1.8.1",
+    "@noble/hashes": "^1.0.0",
+    "@nrwl/eslint-plugin-nx": "^1.0.0",
+    "@simplewebauthn/browser": "^7.2.0",
+    "@simplewebauthn/typescript-types": "^7.0.0",
+    "@wagmi/core": "^2.17.1",
     "base64url": "^3.0.1",
-    "@simplewebauthn/browser": "^7.2.0"
+    "cbor-web": "^9.0.2",
+    "depd": "^2.0.0",
+    "ethers": "^5.7.1",
+    "jose": "^4.14.4",
+    "siwe": "^2.3.2",
+    "stytch": "^12.4.0",
+    "viem": "2.29.4",
+    "zod": "3.24.3"
   },
   "peerDependencies": {
     "tslib": "^2.3.0"
