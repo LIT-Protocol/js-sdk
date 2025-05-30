@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { staticPlugin } from '@elysiajs/static';
+import { cors } from '@elysiajs/cors';
 import { OAuth2Client } from 'google-auth-library';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -73,6 +74,10 @@ export const createLitLoginServer = (
 
   // Create Elysia app
   const app = new Elysia()
+    // Add CORS support for all origins
+    .use(cors({
+      origin: true
+    }))
     // Serve static files from the public directory
     .use(
       staticPlugin({

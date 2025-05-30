@@ -90,7 +90,9 @@ export const createLitAuthServer = (
     .get('/test-rate-limit', () => ({ message: 'OK' }))
     .use(apiKeyGateAndTracking) // This middleware might depend on env vars directly, ensure it's compatible or pass config
     .use(rateLimiter) // This middleware might depend on env vars directly
-    .use(cors())
+    .use(cors({
+      origin: true
+    })) // Enable CORS for all origins
     // =============================================================
     //                     Swagger Documentation
     // =============================================================
