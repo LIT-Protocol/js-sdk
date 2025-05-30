@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.14
+
+### Patch Changes
+
+- add required dependencies
+
 ## 1.0.0-alpha.13
 
 ### Major Changes

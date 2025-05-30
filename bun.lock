@@ -159,6 +159,9 @@
     "packages/constants": {
       "name": "@lit-protocol/constants",
       "version": "8.0.0-alpha.5",
+      "dependencies": {
+        "@openagenda/verror": "^3.1.4",
+      },
     },
     "packages/crypto": {
       "name": "@lit-protocol/crypto",

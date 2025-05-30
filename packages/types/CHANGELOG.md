@@ -1,5 +1,11 @@
 # @lit-protocol/types
 
+## 8.0.0-alpha.6
+
+### Patch Changes
+
+- add required dependencies
+
 ## 8.0.0-alpha.5
 
 ### Major Changes

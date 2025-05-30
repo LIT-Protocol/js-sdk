@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.9
+
+### Patch Changes
+
+- add required dependencies
+
 ## 8.0.0-alpha.8
 
 ### Major Changes

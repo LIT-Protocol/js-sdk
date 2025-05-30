@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/wasm",
-  "version": "8.0.0-alpha.5",
+  "version": "8.0.0-alpha.6",
   "type": "commonjs",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

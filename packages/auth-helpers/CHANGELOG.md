@@ -1,5 +1,11 @@
 # @lit-protocol/auth-helpers
 
+## 8.0.0-alpha.7
+
+### Patch Changes
+
+- add required dependencies
+
 ## 8.0.0-alpha.6
 
 ### Major Changes
