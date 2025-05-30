@@ -12,6 +12,10 @@
     "start:login-server": "bun run src/login-server/server.ts",
     "start": "concurrently -n server,worker,login-server -c green,cyan,blue \"bun run start:server\" \"bun run start:worker\" \"bun run start:login-server\""
   },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/types"
+  },
   "dependencies": {
     "@elysiajs/bearer": "^1.2.0",
     "@elysiajs/cors": "^1.2.0",
