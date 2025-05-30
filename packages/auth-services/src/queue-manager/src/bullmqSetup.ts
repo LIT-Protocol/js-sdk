@@ -1,7 +1,7 @@
 import { ConnectionOptions, Queue } from 'bullmq';
 import { JSONStringify as BigIntStringify } from 'json-with-bigint';
 import { v4 as uuidv4 } from 'uuid';
-import { env } from '../../_setup/env';
+import { env } from '../../env';
 import { parseRedisUrl } from './helper/redisUrlParser';
 import { JobName } from './jobRegistry';
 

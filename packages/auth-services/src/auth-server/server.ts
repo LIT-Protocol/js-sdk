@@ -8,6 +8,8 @@ const litAuthServer = createLitAuthServer({
   litTxsenderRpcUrl: env.LIT_TXSENDER_RPC_URL,
   litTxsenderPrivateKey: env.LIT_TXSENDER_PRIVATE_KEY,
   enableApiKeyGate: env.ENABLE_API_KEY_GATE,
+  stytchProjectId: env.STYTCH_PROJECT_ID,
+  stytchSecretKey: env.STYTCH_SECRET,
 });
 
 litAuthServer.start().catch((err) => {

@@ -26,6 +26,8 @@ export interface LitAuthServerConfig {
   litTxsenderPrivateKey?: string;
   enableApiKeyGate?: boolean;
   appName?: string;
+  stytchProjectId?: string;
+  stytchSecretKey?: string;
 }
 
 export interface LitAuthServer {
@@ -58,6 +60,8 @@ export const createLitAuthServer = (
       userConfig.litTxsenderPrivateKey ?? env.LIT_TXSENDER_PRIVATE_KEY,
     enableApiKeyGate: userConfig.enableApiKeyGate ?? env.ENABLE_API_KEY_GATE,
     appName: userConfig.appName ?? 'auth-services',
+    stytchProjectId: userConfig.stytchProjectId ?? env.STYTCH_PROJECT_ID,
+    stytchSecretKey: userConfig.stytchSecretKey ?? env.STYTCH_SECRET,
   };
 
   // Create Elysia app
@@ -67,8 +71,8 @@ export const createLitAuthServer = (
       'stytchClient',
       new stytch.Client({
         // Decorate with Stytch client instance
-        project_id: process.env.STYTCH_PROJECT_ID as string,
-        secret: process.env.STYTCH_SECRET as string,
+        project_id: config.stytchProjectId as string,
+        secret: config.stytchSecretKey as string,
         // You might want to add env: stytch.envs.live or stytch.envs.test based on your environment
       })
     )

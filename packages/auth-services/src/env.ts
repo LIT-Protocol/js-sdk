@@ -38,6 +38,8 @@ export const env = createEnv({
       .string()
       .transform((val: string): boolean => val === 'true')
       .default('true'),
+    STYTCH_PROJECT_ID: z.string().min(1),
+    STYTCH_SECRET: z.string().min(1),
 
     // ---------- RATE LIMITER ----------
     MAX_REQUESTS_PER_WINDOW: z
