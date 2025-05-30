@@ -18,12 +18,13 @@
     "prettier": "npx nx format:write --all",
     "link-all": "for dir in packages/*/; do echo \"Linking in $dir\"; (cd \"$dir\" && bun link) || { echo \"ERROR: Failed to link in $dir\"; exit 1; }; done",
     "unlink-all": "for dir in packages/*/; do echo \"Unlinking in $dir\"; (cd \"$dir\" && bun unlink) || { echo \"ERROR: Failed to unlink in $dir\"; exit 1; }; done",
-    "auth-services": "cd packages/auth-services && bun run start"
+    "auth-services": "cd packages/auth-services && bun run start",
+    "test:e2e": "bun test ./e2e/src/e2e.spec.ts -t"
   },
   "private": true,
   "dependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
-    "@lit-protocol/contracts": "^0.1.22",
+    "@lit-protocol/contracts": "^0.1.23",
     "@lit-protocol/misc-browser": "7.1.1",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
@@ -38,7 +39,6 @@
     "base64url": "^3.0.1",
     "bs58": "^6.0.0",
     "cbor-web": "^9.0.2",
-    "cid": "multiformats/cid",
     "cross-fetch": "3.1.8",
     "depd": "^2.0.0",
     "elysia": "^1.2.25",
@@ -47,7 +47,6 @@
     "pako": "^2.1.0",
     "pino": "^9.6.0",
     "pino-caller": "^4.0.0",
-    "pino-pretty": "^13.0.0",
     "siwe": "^2.3.2",
     "siwe-recap": "0.0.2-alpha.0",
     "stytch": "^12.4.0",
