@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/auth-services",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
@@ -44,6 +44,7 @@
     "pino-pretty": "^13.0.0",
     "redis": "^4.6.13",
     "stytch": "^12.4.0",
+    "cbor-web": "^9.0.2",
     "zod-validation-error": "^3.4.0",
     "uuidv4": "^6.2.13",
     "viem": "^2.23.2",

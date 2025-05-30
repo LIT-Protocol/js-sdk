@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.7
+
+### Major Changes
+
+- add "cbor-web": "^9.0.2",
+
 ## 1.0.0-alpha.6
 
 ### Major Changes
