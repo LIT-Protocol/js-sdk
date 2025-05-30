@@ -3,12 +3,32 @@ import { z } from 'zod';
 
 export const env = createEnv({
   server: {
-    PORT: z
+    // ===============================================
+    //            LOGIN SERVER CONFIGURATION
+    // ===============================================
+    LOGIN_SERVER_PORT: z
+      .string()
+      .transform((val: string): number => Number(val))
+      .default('3300'),
+    LOGIN_SERVER_HOST: z.string().default('0.0.0.0'),
+    LOGIN_SERVER_STATE_EXPIRY_SECONDS: z
+      .string()
+      .transform((val: string): number => Number(val))
+      .default('30'),
+
+    LOGIN_SERVER_GOOGLE_CLIENT_ID: z.string().min(1),
+    LOGIN_SERVER_GOOGLE_CLIENT_SECRET: z.string().min(1),
+    LOGIN_SERVER_DISCORD_CLIENT_ID: z.string().min(1),
+    LOGIN_SERVER_DISCORD_CLIENT_SECRET: z.string().min(1),
+
+    // ===============================================
+    //            AUTH SERVER CONFIGURATION
+    // ===============================================
+    AUTH_SERVER_PORT: z
       .string()
       .transform((val: string): number => Number(val))
       .default('3001'),
-
-    // ======= REQUIRED CONFIGURATION =======
+    AUTH_SERVER_HOST: z.string().default('0.0.0.0'),
     // Network & Chain
     NETWORK: z.enum(['naga-dev', 'naga-test', 'naga']),
     LIT_TXSENDER_RPC_URL: z.string().url(),

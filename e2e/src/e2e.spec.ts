@@ -26,11 +26,16 @@ describe('all', () => {
   let aliceCustomAuthContext: any;
 
   beforeAll(async () => {
-    ctx = await init();
+    try {
+      ctx = await init();
 
-    // Create PKP and custom auth contexts using helper functions
-    alicePkpAuthContext = await createPkpAuthContext(ctx);
-    aliceCustomAuthContext = await createCustomAuthContext(ctx);
+      // Create PKP and custom auth contexts using helper functions
+      alicePkpAuthContext = await createPkpAuthContext(ctx);
+      aliceCustomAuthContext = await createCustomAuthContext(ctx);
+    } catch (e) {
+      console.error(e);
+      process.exit(1);
+    }
   });
 
   describe('EOA Auth', () => {

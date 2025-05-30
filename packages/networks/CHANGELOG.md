@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.8
+
+### Major Changes
+
+- merged lit-login-server & relayer as auth-services
+
 ## 8.0.0-alpha.7
 
 ### Major Changes

@@ -1,4 +1,18 @@
 <div align="center">
+<h1>Lit Protocol Javascript/Typescript SDK V8.x.x</h1>
+
+<img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
+<br/>
+<a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
+<br/>
+<br/>
+The Lit JavaScript SDK provides developers with a framework for implementing Lit functionality into their own applications. Find installation instructions in the docs to get started with the Lit SDK based on your use case:
+<br/>
+<br/>
+
+---
+
+<div align="center">
 <h1>Lit Protocol Javascript/Typescript SDK V7.x.x</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">

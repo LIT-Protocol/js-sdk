@@ -86,3 +86,4 @@ lit-auth-storage
 packages/auth-services/lit-auth-*
 pkp-tokens
 lit-cache
+lit-auth-local

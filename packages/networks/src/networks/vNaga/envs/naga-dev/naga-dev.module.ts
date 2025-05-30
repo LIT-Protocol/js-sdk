@@ -28,6 +28,7 @@ import {
   ReleaseVerificationConfig,
 } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
+import { nacl } from '@lit-protocol/nacl';
 import {
   AuthMethod,
   AuthSig,
@@ -42,7 +43,6 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import { nacl } from '@lit-protocol/nacl';
 import type { PKPStorageProvider } from '../../../../storage/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';

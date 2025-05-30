@@ -74,6 +74,13 @@ export const init = async (network?: SupportedNetwork, logLevel?: LogLevel) => {
       ifLessThan: '1',
       thenFundWith: '1',
     });
+  } else if (_network === 'naga-staging') {
+    const { nagaStaging } = await import('@lit-protocol/networks');
+    _networkModule = nagaStaging;
+    await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
+      ifLessThan: '0.0001',
+      thenFundWith: '0.0001',
+    });
   } else {
     throw new Error(`❌ Invalid network: ${_network}`);
   }

@@ -15,7 +15,8 @@
     "@lit-protocol/types": "8.0.0-alpha.3",
     "@lit-protocol/wasm": "8.0.0-alpha.3",
     "@lit-protocol/wrapped-keys": "8.0.0-alpha.3",
-    "@lit-protocol/wrapped-keys-lit-actions": "8.0.0-alpha.3"
+    "@lit-protocol/wrapped-keys-lit-actions": "8.0.0-alpha.3",
+    "@lit-protocol/auth-services": "0.1.0"
   },
   "changesets": [
     "bitter-nights-create",
@@ -24,6 +25,7 @@
     "cuddly-rats-say",
     "easy-mugs-fry",
     "fifty-loops-clean",
+    "gentle-phones-wink",
     "honest-windows-tan",
     "hot-baboons-help",
     "short-signs-check",

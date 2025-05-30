@@ -4,7 +4,7 @@ import { Elysia } from 'elysia';
 import * as stytch from 'stytch'; // Added Stytch import
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { env } from '../../_setup/env'; // Adjusted path
+import { env } from '../../env'; // Adjusted path
 import { initSystemContext } from '../../_setup/initSystemContext'; // Adjusted path
 import { mainAppQueue } from '../../queue-manager/src/bullmqSetup'; // Adjusted path
 import { apiKeyGateAndTracking } from '../middleware/apiKeyGate'; // Adjusted path
@@ -50,7 +50,7 @@ export const createLitAuthServer = (
 ): LitAuthServer => {
   // Configuration with defaults from env if not provided in config
   const config = {
-    port: userConfig.port ?? env.PORT ?? 3000,
+    port: userConfig.port ?? env.AUTH_SERVER_PORT ?? 3000,
     host: userConfig.host ?? '0.0.0.0',
     network: userConfig.network ?? env.NETWORK,
     litTxsenderRpcUrl: userConfig.litTxsenderRpcUrl ?? env.LIT_TXSENDER_RPC_URL,
