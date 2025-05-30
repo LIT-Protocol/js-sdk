@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "lit-auth-services",
+      "name": "lit-auth-service",
       "dependencies": {
         "@lit-protocol/auth-services": "1.0.0-alpha.13",
         "@t3-oss/env-core": "^0.13.6",
