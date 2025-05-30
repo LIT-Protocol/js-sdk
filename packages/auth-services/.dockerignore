@@ -1,0 +1,21 @@
+# .dockerignore (in repository root)
+node_modules
+*/node_modules
+.git
+.gitignore
+README.md
+*/README.md
+.env
+*/.env
+.env.local
+*/.env.local
+*/dist
+*/build
+.DS_Store
+*/.DS_Store
+*.log
+*/yarn-error.log
+coverage
+*/coverage
+.nyc_output
+*/.nyc_output

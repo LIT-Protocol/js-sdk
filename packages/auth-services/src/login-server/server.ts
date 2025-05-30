@@ -3,7 +3,8 @@ import { createLitLoginServer } from './src';
 
 // Create a new server instance
 const litLoginServer = createLitLoginServer({
-  port: env.LOGIN_SERVER_PORT,
+  // some host look for PORT env var automatically
+  port: parseInt(process.env.PORT) || env.LOGIN_SERVER_PORT,
   host: env.LOGIN_SERVER_HOST,
   stateExpirySeconds: env.LOGIN_SERVER_STATE_EXPIRY_SECONDS,
 

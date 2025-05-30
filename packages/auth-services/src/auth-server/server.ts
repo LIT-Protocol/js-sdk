@@ -2,7 +2,8 @@ import { env } from '../env';
 import { createLitAuthServer } from './src/createAuthServer';
 
 const litAuthServer = createLitAuthServer({
-  port: env.AUTH_SERVER_PORT,
+  // some host look for PORT env var automatically
+  port: parseInt(process.env.PORT) || env.AUTH_SERVER_PORT,
   host: env.AUTH_SERVER_HOST,
   network: env.NETWORK,
   litTxsenderRpcUrl: env.LIT_TXSENDER_RPC_URL,
