@@ -9,8 +9,7 @@
     "start:server": "bun run src/auth-server/server.ts",
     "start:worker": "bun run src/queue-manager/worker.ts",
     "start:login-server": "bun run src/login-server/server.ts",
-    "start": "concurrently -n server,worker,login-server -c green,cyan,blue \"bun run start:server\" \"bun run start:worker\" \"bun run start:login-server\"",
-    "dev:link": "cd ../.. && bun install && cd packages/auth-services"
+    "start": "concurrently -n server,worker,login-server -c green,cyan,blue \"bun run start:server\" \"bun run start:worker\" \"bun run start:login-server\""
   },
   "publishConfig": {
     "access": "public",
@@ -42,9 +41,10 @@
     "cbor-web": "^9.0.2",
     "zod-validation-error": "^3.4.0",
     "uuidv4": "^6.2.13",
-    "viem": "^2.23.2",
+    "viem": "2.29.4",
     "wagmi": "^2.14.11",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "bun-types": "^1.0.0",
