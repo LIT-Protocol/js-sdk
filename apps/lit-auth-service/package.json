@@ -1,0 +1,23 @@
+{
+  "name": "lit-auth-services",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "^1.2.15",
+    "dotenv": "^16.5.0",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
+  "scripts": {
+    "validate-deps": "npm ls --depth=0 || true",
+    "start": "bun run validate-deps && bun run ./index.ts",
+    "reset": "rimraf package-lock.json bun.lock node_modules"
+  },
+  "type": "module",
+  "dependencies": {
+    "@lit-protocol/auth-services": "1.0.0-alpha.13"
+  }
+}
