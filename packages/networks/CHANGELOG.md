@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.10
+
+### Major Changes
+
+- adding "@lit-protocol/contracts": "^0.1.23",
+
 ## 8.0.0-alpha.9
 
 ### Patch Changes
