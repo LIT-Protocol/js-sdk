@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.2
+
+### Major Changes
+
+- fix build
+
 ## 1.0.0-alpha.1
 
 ### Minor Changes
