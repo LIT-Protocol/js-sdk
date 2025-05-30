@@ -1,5 +1,11 @@
 # @lit-protocol/constants
 
+## 8.0.0-alpha.7
+
+### Major Changes
+
+- add a pipeline to check for missing dependencies
+
 ## 8.0.0-alpha.6
 
 ### Patch Changes

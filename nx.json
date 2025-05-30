@@ -13,7 +13,7 @@
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["auto-fix-deps"],
+      "dependsOn": ["auto-fix-deps", "^build"],
       "cache": true
     },
     "auto-fix-deps": {

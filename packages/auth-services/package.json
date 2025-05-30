@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/auth-services",
-  "version": "1.0.0-alpha.14",
+  "version": "1.0.0-alpha.15",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.js",

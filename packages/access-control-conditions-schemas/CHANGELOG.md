@@ -1,5 +1,16 @@
 # @lit-protocol/access-control-conditions-schemas
 
+## 8.0.0-alpha.7
+
+### Major Changes
+
+- add a pipeline to check for missing dependencies
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/constants@8.0.0-alpha.7
+
 ## 8.0.0-alpha.6
 
 ### Patch Changes

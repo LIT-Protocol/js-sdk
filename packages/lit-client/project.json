@@ -13,7 +13,8 @@
         "tsConfig": "packages/lit-client/tsconfig.lib.json",
         "assets": ["packages/lit-client/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "check-deps": {
       "executor": "nx:run-commands",

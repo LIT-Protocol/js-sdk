@@ -1,5 +1,11 @@
 # @lit-protocol/wrapped-keys-lit-actions
 
+## 8.0.0-alpha.5
+
+### Major Changes
+
+- add a pipeline to check for missing dependencies
+
 ## 8.0.0-alpha.4
 
 ### Major Changes

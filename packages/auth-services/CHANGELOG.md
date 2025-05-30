@@ -1,5 +1,21 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.15
+
+### Major Changes
+
+- add a pipeline to check for missing dependencies
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/auth@8.0.0-alpha.7
+  - @lit-protocol/lit-client@8.0.0-alpha.8
+  - @lit-protocol/logger@8.0.0-alpha.7
+  - @lit-protocol/networks@8.0.0-alpha.12
+  - @lit-protocol/schemas@8.0.0-alpha.7
+  - @lit-protocol/types@8.0.0-alpha.7
+
 ## 1.0.0-alpha.14
 
 ### Patch Changes
