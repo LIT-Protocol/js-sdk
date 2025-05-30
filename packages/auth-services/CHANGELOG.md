@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.11
+
+### Major Changes
+
+- fix import path
+
 ## 1.0.0-alpha.10
 
 ### Major Changes
