@@ -14,7 +14,7 @@ import {
   createReadOnlyContractsManager,
 } from '../../../LitChainClient';
 import { createReadOnlyChainManager } from '../chain-manager/createChainManager';
-import { NagaStagingNetworkConfig } from '../naga-dev.config';
+import { NagaStagingNetworkConfig } from '../naga-staging.config';
 // Import EpochInfo type (adjust path if necessary based on actual export location)
 import { getChildLogger } from '@lit-protocol/logger';
 import type { CallbackParams, EndPoint, EpochInfo } from '@lit-protocol/types';

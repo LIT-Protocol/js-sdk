@@ -5,3 +5,7 @@ export type { NagaLocalModule } from './envs/naga-local/naga-local.module';
 // Naga Dev
 export { nagaDev } from './envs/naga-dev';
 export type { NagaDevModule } from './envs/naga-dev/naga-dev.module';
+
+// Naga Staging
+export { nagaStaging } from './envs/naga-staging';
+export type { NagaStagingModule } from './envs/naga-staging/naga-staging.module';

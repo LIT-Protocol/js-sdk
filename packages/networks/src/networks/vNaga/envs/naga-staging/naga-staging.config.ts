@@ -1,9 +1,11 @@
-import { nagaDevSignatures } from '@lit-protocol/contracts';
+import {
+  nagaStagingSignatures
+} from '@lit-protocol/contracts';
 import * as chainInfo from '../../../../chains/ChronicleYellowstone';
 import { NAGA_ENDPOINT } from '../../endpoints-manager/endpoints';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
 
-const NETWORK = 'naga-dev';
+const NETWORK = 'naga-staging';
 const PROTOCOL = 'https://';
 const MINIMUM_THRESHOLD = 3;
 
@@ -12,21 +14,21 @@ const MINIMUM_THRESHOLD = 3;
  */
 const DEFAULT_REALM_ID = 1n;
 
-export interface NagaDevSpecificConfigs {
+export interface NagaStagingSpecificConfigs {
   realmId?: bigint;
   // privateKey?: Hex;
 }
 
-export type NagaDevSignatures = typeof nagaDevSignatures;
+export type NagaStagingSignatures = typeof nagaStagingSignatures;
 
 export const networkConfig: INetworkConfig<
-  NagaDevSignatures,
-  NagaDevSpecificConfigs
+  NagaStagingSignatures,
+  NagaStagingSpecificConfigs
 > = {
   minimumThreshold: MINIMUM_THRESHOLD,
   network: NETWORK,
   rpcUrl: chainInfo.RPC_URL,
-  abiSignatures: nagaDevSignatures,
+  abiSignatures: nagaStagingSignatures,
   chainConfig: chainInfo.viemChainConfig,
   httpProtocol: PROTOCOL,
   networkSpecificConfigs: {
