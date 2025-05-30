@@ -58,7 +58,7 @@ export const createLitLoginServer = (
   // State storage (in-memory instead of Redis)
   const stateStore = new Map<
     string,
-    { appRedirect: string; caller?: string; timeoutId: NodeJS.Timeout }
+    { appRedirect: string; caller?: string; timeoutId: Timer }
   >();
 
   // Google OAuth2 client setup

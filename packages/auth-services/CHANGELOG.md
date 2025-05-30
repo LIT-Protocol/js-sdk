@@ -4,6 +4,12 @@
 
 ### Major Changes
 
+- The core issue was that the auth-services package was trying to be a modern ES module package with modern dependencies, but was configured with older CommonJS/Node.js settings. Once we aligned everything to be consistently modern ES2022 with bundler resolution, TypeScript could properly:
+
+## 1.0.0-alpha.8
+
+### Major Changes
+
 - 20f98e5: add "@lit-protocol/contracts": "^0.1.23",
 - make workspace packages
 
