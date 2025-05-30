@@ -17,6 +17,9 @@
     "access": "public",
     "directory": "../../dist/packages/networks"
   },
+  "dependencies": {
+    "elysia": "^1.2.25"
+  },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [
     "universal"
