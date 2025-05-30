@@ -1,5 +1,11 @@
 # @lit-protocol/wrapped-keys
 
+## 8.0.0-alpha.9
+
+### Major Changes
+
+- wip
+
 ## 8.0.0-alpha.8
 
 ### Major Changes

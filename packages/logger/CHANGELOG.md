@@ -1,5 +1,11 @@
 # @lit-protocol/logger
 
+## 8.0.0-alpha.11
+
+### Major Changes
+
+- wip
+
 ## 8.0.0-alpha.10
 
 ### Major Changes

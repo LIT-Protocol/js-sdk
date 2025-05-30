@@ -1,5 +1,11 @@
 # @lit-protocol/lit-client
 
+## 8.0.0-alpha.12
+
+### Major Changes
+
+- wip
+
 ## 8.0.0-alpha.11
 
 ### Major Changes
