@@ -16,6 +16,7 @@
     "directory": "./"
   },
   "dependencies": {
+    "@lit-protocol/contracts": "^0.1.23",
     "@elysiajs/bearer": "^1.2.0",
     "@elysiajs/cors": "^1.2.0",
     "@elysiajs/static": "^1.3.0",
