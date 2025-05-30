@@ -5,7 +5,7 @@ import {
 } from '@lit-protocol/auth-services';
 
 const litAuthServer = createLitAuthServer({
-  port: env.AUTH_SERVER_PORT,
+  port: parseInt(process.env.PORT!) || env.AUTH_SERVER_PORT,
   host: env.AUTH_SERVER_HOST,
   network: env.NETWORK,
   litTxsenderRpcUrl: env.LIT_TXSENDER_RPC_URL,
