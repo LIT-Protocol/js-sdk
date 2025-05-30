@@ -1,8 +1,7 @@
 {
   "name": "@lit-protocol/auth-services",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "license": "MIT",
-  "private": true,
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -14,7 +13,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/types"
+    "directory": "./"
   },
   "dependencies": {
     "@elysiajs/bearer": "^1.2.0",
