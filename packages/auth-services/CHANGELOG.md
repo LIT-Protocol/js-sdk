@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.12
+
+### Major Changes
+
+- 4ad5cec: test publish
+- da8bf7c: add "@openagenda/verror": "^3.1.4"
+- wip
+
 ## 1.0.0-alpha.11
 
 ### Major Changes
