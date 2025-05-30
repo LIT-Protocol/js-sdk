@@ -14,8 +14,6 @@
   },
   "type": "commonjs",
   "dependencies": {
-    "@lit-protocol/contracts": "workspace:*",
-    "@nrwl/eslint-plugin-nx": "^1.0.0",
     "@openagenda/verror": "^3.1.4",
     "zod": "3.24.3"
   },
@@ -27,7 +25,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.0.0-alpha.8",
+  "version": "8.0.0-alpha.10",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts"
 }

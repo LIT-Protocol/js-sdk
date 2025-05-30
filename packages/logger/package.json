@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/logger",
-  "version": "8.0.0-alpha.8",
+  "version": "8.0.0-alpha.10",
   "type": "commonjs",
   "tags": [
     "universal"
@@ -12,7 +12,6 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
-    "@nrwl/eslint-plugin-nx": "^1.0.0",
     "pino": "^9.6.0"
   }
 }

@@ -91,7 +91,7 @@ async function main() {
           
           // Handle workspace dependencies
           if (dep.startsWith('@lit-protocol/')) {
-            version = 'workspace:*';
+            // version = 'workspace:*';
           }
           // Get version from root package.json
           else if (allRootDeps[dep]) {
@@ -99,8 +99,9 @@ async function main() {
           }
           // Default to latest for external deps
           else {
-            version = '^1.0.0';
-            console.log(`    ⚠️  ${dep}: no version found, using ^1.0.0`);
+            // throw new Error(`${dep}: no version found, using ^1.0.0`);
+            // version = '^1.0.0';
+            // console.log(`    ⚠️  ${dep}: no version found, using ^1.0.0`);
           }
           
           pkgJson.dependencies[dep] = version;

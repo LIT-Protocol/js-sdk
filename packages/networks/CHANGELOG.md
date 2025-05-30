@@ -1,5 +1,18 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.15
+
+### Major Changes
+
+- wip
+
+## 8.0.0-alpha.14
+
+### Major Changes
+
+- test
+- fix build
+
 ## 8.0.0-alpha.13
 
 ### Major Changes

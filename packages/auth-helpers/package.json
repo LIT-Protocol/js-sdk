@@ -25,16 +25,10 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.0.0-alpha.9",
+  "version": "8.0.0-alpha.11",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
-    "@ethersproject/transactions": "^1.0.0",
-    "@lit-protocol/access-control-conditions": "workspace:*",
-    "@lit-protocol/constants": "workspace:*",
-    "@lit-protocol/schemas": "workspace:*",
-    "@lit-protocol/types": "workspace:*",
-    "@nrwl/eslint-plugin-nx": "^1.0.0",
     "@wagmi/core": "^2.17.1",
     "ethers": "^5.7.1",
     "siwe": "^2.3.2",

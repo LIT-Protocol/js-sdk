@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/wasm",
-  "version": "8.0.0-alpha.8",
+  "version": "8.0.0-alpha.10",
   "type": "commonjs",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -32,7 +32,6 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
-    "@jest/globals": "^1.0.0",
     "ethers": "^5.7.1",
     "pako": "^2.1.0"
   }

@@ -17,11 +17,7 @@
     "directory": "../../dist/packages/schemas"
   },
   "dependencies": {
-    "@lit-protocol/access-control-conditions-schemas": "workspace:*",
-    "@lit-protocol/constants": "workspace:*",
-    "@nrwl/eslint-plugin-nx": "^1.0.0",
     "ethers": "^5.7.1",
-    "jsonc-eslint-parser": "^1.0.0",
     "siwe": "^2.3.2",
     "zod": "3.24.3",
     "zod-validation-error": "^3.4.0"
@@ -30,7 +26,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.0.0-alpha.8",
+  "version": "8.0.0-alpha.10",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts"
 }

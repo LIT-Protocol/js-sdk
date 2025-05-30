@@ -1,5 +1,18 @@
 # @lit-protocol/auth
 
+## 8.0.0-alpha.10
+
+### Major Changes
+
+- wip
+
+## 8.0.0-alpha.9
+
+### Major Changes
+
+- test
+- fix build
+
 ## 8.0.0-alpha.8
 
 ### Major Changes
