@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.5
+
+### Minor Changes
+
+- add imports
+
 ## 1.0.0-alpha.4
 
 ### Major Changes
