@@ -104,6 +104,11 @@
     "packages/auth": {
       "name": "@lit-protocol/auth",
       "version": "8.0.0-alpha.5",
+      "dependencies": {
+        "@simplewebauthn/browser": "^7.2.0",
+        "base64url": "^3.0.1",
+        "cbor-web": "^9.0.2",
+      },
       "peerDependencies": {
         "tslib": "^2.3.0",
       },
@@ -114,7 +119,7 @@
     },
     "packages/auth-services": {
       "name": "@lit-protocol/auth-services",
-      "version": "1.0.0-alpha.11",
+      "version": "1.0.0-alpha.13",
       "dependencies": {
         "@elysiajs/bearer": "^1.2.0",
         "@elysiajs/cors": "^1.2.0",
@@ -170,10 +175,16 @@
     "packages/networks": {
       "name": "@lit-protocol/networks",
       "version": "8.0.0-alpha.8",
+      "dependencies": {
+        "elysia": "^1.2.25",
+      },
     },
     "packages/schemas": {
       "name": "@lit-protocol/schemas",
       "version": "8.0.0-alpha.5",
+      "dependencies": {
+        "zod-validation-error": "^3.4.0",
+      },
     },
     "packages/types": {
       "name": "@lit-protocol/types",
