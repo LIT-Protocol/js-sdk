@@ -1,5 +1,21 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.16
+
+### Major Changes
+
+- fix build pipeline -> dependencies order is important
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/auth@8.0.0-alpha.8
+  - @lit-protocol/lit-client@8.0.0-alpha.9
+  - @lit-protocol/logger@8.0.0-alpha.8
+  - @lit-protocol/networks@8.0.0-alpha.13
+  - @lit-protocol/schemas@8.0.0-alpha.8
+  - @lit-protocol/types@8.0.0-alpha.8
+
 ## 1.0.0-alpha.15
 
 ### Major Changes

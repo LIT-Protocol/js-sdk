@@ -1,5 +1,22 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.13
+
+### Major Changes
+
+- fix build pipeline -> dependencies order is important
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/access-control-conditions-schemas@8.0.0-alpha.8
+  - @lit-protocol/auth-helpers@8.0.0-alpha.9
+  - @lit-protocol/constants@8.0.0-alpha.8
+  - @lit-protocol/crypto@8.0.0-alpha.8
+  - @lit-protocol/logger@8.0.0-alpha.8
+  - @lit-protocol/schemas@8.0.0-alpha.8
+  - @lit-protocol/types@8.0.0-alpha.8
+
 ## 8.0.0-alpha.12
 
 ### Major Changes

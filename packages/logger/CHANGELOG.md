@@ -1,5 +1,11 @@
 # @lit-protocol/logger
 
+## 8.0.0-alpha.8
+
+### Major Changes
+
+- fix build pipeline -> dependencies order is important
+
 ## 8.0.0-alpha.7
 
 ### Major Changes

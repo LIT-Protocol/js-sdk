@@ -1,5 +1,11 @@
 # @lit-protocol/wrapped-keys
 
+## 8.0.0-alpha.6
+
+### Major Changes
+
+- fix build pipeline -> dependencies order is important
+
 ## 8.0.0-alpha.5
 
 ### Major Changes

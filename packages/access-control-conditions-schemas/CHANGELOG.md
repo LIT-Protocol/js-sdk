@@ -1,5 +1,16 @@
 # @lit-protocol/access-control-conditions-schemas
 
+## 8.0.0-alpha.8
+
+### Major Changes
+
+- fix build pipeline -> dependencies order is important
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/constants@8.0.0-alpha.8
+
 ## 8.0.0-alpha.7
 
 ### Major Changes
