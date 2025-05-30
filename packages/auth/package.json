@@ -29,6 +29,7 @@
     "stream": false
   },
   "version": "8.0.0-alpha.5",
-  "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "main": "./dist/index.js",
+  "typings": "./src/index.d.ts",
+  "types": "./dist/index.d.ts"
 }
