@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.9
+
+### Major Changes
+
+- fix(config): auth-services
+
 ## 1.0.0-alpha.8
 
 ### Major Changes
