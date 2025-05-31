@@ -1,5 +1,18 @@
 # @lit-protocol/wrapped-keys-lit-actions
 
+## 8.0.0-alpha.11
+
+### Major Changes
+
+- wip
+- fix http://naga-auth-service.getlit.dev
+
+## 8.0.0-alpha.10
+
+### Major Changes
+
+- fix dependencies
+
 ## 8.0.0-alpha.9
 
 ### Major Changes

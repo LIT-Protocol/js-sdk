@@ -4,6 +4,11 @@ import { redisClient } from '../../_setup/redis';
 
 export const apiKeyGateAndTracking = new Elysia().onRequest(
   async ({ request, set }) => {
+    // Skip API key gate for OPTIONS requests (CORS preflight)
+    if (request.method === 'OPTIONS') {
+      return;
+    }
+
     if (!env.ENABLE_API_KEY_GATE) {
       return;
     }

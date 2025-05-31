@@ -1,5 +1,18 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.22
+
+### Major Changes
+
+- wip
+- fix http://naga-auth-service.getlit.dev
+
+## 1.0.0-alpha.21
+
+### Major Changes
+
+- fix dependencies
+
 ## 1.0.0-alpha.20
 
 ### Major Changes

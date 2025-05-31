@@ -1,5 +1,18 @@
 # @lit-protocol/crypto
 
+## 8.0.0-alpha.13
+
+### Major Changes
+
+- wip
+- fix http://naga-auth-service.getlit.dev
+
+## 8.0.0-alpha.12
+
+### Major Changes
+
+- fix dependencies
+
 ## 8.0.0-alpha.11
 
 ### Major Changes

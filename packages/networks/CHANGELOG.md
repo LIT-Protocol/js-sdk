@@ -1,5 +1,18 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.18
+
+### Major Changes
+
+- wip
+- fix http://naga-auth-service.getlit.dev
+
+## 8.0.0-alpha.17
+
+### Major Changes
+
+- fix dependencies
+
 ## 8.0.0-alpha.16
 
 ### Major Changes
