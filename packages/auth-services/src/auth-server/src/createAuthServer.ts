@@ -66,6 +66,13 @@ export const createLitAuthServer = (
 
   // Create Elysia app
   const app = new Elysia()
+    // Add CORS first to handle preflight requests before other middleware
+    .use(cors({
+      origin: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+      credentials: true
+    }))
     .decorate('config', config) // Make config accessible in routes if needed
     .decorate(
       'stytchClient',
@@ -90,9 +97,6 @@ export const createLitAuthServer = (
     .get('/test-rate-limit', () => ({ message: 'OK' }))
     .use(apiKeyGateAndTracking) // This middleware might depend on env vars directly, ensure it's compatible or pass config
     .use(rateLimiter) // This middleware might depend on env vars directly
-    .use(cors({
-      origin: true
-    })) // Enable CORS for all origins
     // =============================================================
     //                     Swagger Documentation
     // =============================================================

@@ -59,7 +59,7 @@ export const createLitLoginServer = (
   // State storage (in-memory instead of Redis)
   const stateStore = new Map<
     string,
-    { appRedirect: string; caller?: string; timeoutId: Timer }
+    { appRedirect: string; caller?: string; timeoutId: NodeJS.Timeout }
   >();
 
   // Google OAuth2 client setup
@@ -74,9 +74,12 @@ export const createLitLoginServer = (
 
   // Create Elysia app
   const app = new Elysia()
-    // Add CORS support for all origins
+    // Add CORS support first to handle preflight requests properly
     .use(cors({
-      origin: true
+      origin: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+      credentials: true
     }))
     // Serve static files from the public directory
     .use(

@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.20
+
+### Major Changes
+
+- fixing cors
+
 ## 1.0.0-alpha.19
 
 ### Major Changes
