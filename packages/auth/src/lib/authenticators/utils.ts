@@ -9,9 +9,9 @@ import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
 
 import { DiscordAuthenticator } from './native/DiscordAuthenticator';
 import { GoogleAuthenticator } from './native/GoogleAuthenticator';
-import { EOAAuthenticator } from './metamask/EOAAuthenticator';
 import { WebAuthnAuthenticator } from './native/WebAuthnAuthenticator';
 import { StytchEmailOtpAuthenticator } from './stytch/factors/StytchEmailOtpAuthenticator';
+import { ethAuthMethodId } from './metamask';
 export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
 
@@ -341,7 +341,7 @@ export async function getAuthIdByAuthMethod(
 
   switch (authMethod.authMethodType) {
     case AUTH_METHOD_TYPE.EthWallet:
-      authId = await EOAAuthenticator.authMethodId(authMethod);
+      authId = await ethAuthMethodId(authMethod);
       break;
     case AUTH_METHOD_TYPE.Discord:
       authId = await DiscordAuthenticator.authMethodId(authMethod);
