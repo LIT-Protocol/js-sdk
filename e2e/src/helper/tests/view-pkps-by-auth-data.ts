@@ -1,4 +1,5 @@
 import { init } from '../../init';
+import { assert } from '../assertions';
 
 export const createViewPKPsByAuthDataTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -21,20 +22,20 @@ export const createViewPKPsByAuthDataTest = (
       },
     });
 
-    expect(pkps).toBeDefined();
-    expect(pkps.pkps).toBeDefined();
-    expect(Array.isArray(pkps.pkps)).toBe(true);
-    expect(pkps.pagination).toBeDefined();
-    expect(typeof pkps.pagination.total).toBe('number');
-    expect(typeof pkps.pagination.hasMore).toBe('boolean');
+    assert.toBeDefined(pkps);
+    assert.toBeDefined(pkps.pkps);
+    assert.toBe(Array.isArray(pkps.pkps), true);
+    assert.toBeDefined(pkps.pagination);
+    assert.toBe(typeof pkps.pagination.total, 'number');
+    assert.toBe(typeof pkps.pagination.hasMore, 'boolean');
 
     // Should find at least the PKP we created in init
-    expect(pkps.pkps.length).toBeGreaterThan(0);
+    assert.toBeGreaterThan(pkps.pkps.length, 0);
 
     // Verify the PKP structure
     const firstPkp = pkps.pkps[0];
-    expect(firstPkp.tokenId).toBeDefined();
-    expect(firstPkp.publicKey).toBeDefined();
-    expect(firstPkp.ethAddress).toBeDefined();
+    assert.toBeDefined(firstPkp.tokenId);
+    assert.toBeDefined(firstPkp.publicKey);
+    assert.toBeDefined(firstPkp.ethAddress);
   };
 };

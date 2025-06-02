@@ -8,13 +8,21 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
 
-const SupportedNetworkSchema = z.enum(['naga-dev', 'naga-local']);
+const SupportedNetworkSchema = z.enum(['naga-dev', 'naga-local', 'naga-staging']);
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
-export const init = async (network?: SupportedNetwork, logLevel?: LogLevel) => {
+export const init = async (network?: SupportedNetwork, logLevel?: LogLevel): Promise<{
+  litClient: any;
+  authManager: any;
+  localMasterAccount: any;
+  aliceViemAccount: any;
+  aliceViemAccountAuthData: any;
+  aliceViemAccountPkp: any;
+  aliceEoaAuthContext: any;
+}> => {
   /**
    * ====================================
    * Prepare accounts for testing

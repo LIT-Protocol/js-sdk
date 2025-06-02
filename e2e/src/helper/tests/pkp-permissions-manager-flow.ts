@@ -1,5 +1,5 @@
 import { init } from '../../init';
-
+import { assert } from '../assertions';
 export const createPkpPermissionsManagerFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>,
   getAuthContext: () => any
@@ -28,17 +28,17 @@ export const createPkpPermissionsManagerFlowTest = (
       account: pkpViemAccount,
     });
 
-    expect(pkpPermissionsManager).toBeDefined();
+    assert.toBeDefined(pkpPermissionsManager);
 
     // Test 1: Get initial permissions context
     const initialContext = await pkpPermissionsManager.getPermissionsContext();
-    expect(initialContext).toBeDefined();
-    expect(initialContext.addresses).toBeDefined();
-    expect(initialContext.actions).toBeDefined();
-    expect(initialContext.authMethods).toBeDefined();
-    expect(Array.isArray(initialContext.addresses)).toBe(true);
-    expect(Array.isArray(initialContext.actions)).toBe(true);
-    expect(Array.isArray(initialContext.authMethods)).toBe(true);
+    assert.toBeDefined(initialContext);
+    assert.toBeDefined(initialContext.addresses);
+    assert.toBeDefined(initialContext.actions);
+    assert.toBeDefined(initialContext.authMethods);
+    assert.toBe(Array.isArray(initialContext.addresses), true);
+    assert.toBe(Array.isArray(initialContext.actions), true);
+    assert.toBe(Array.isArray(initialContext.authMethods), true);
 
     const initialAddressesCount = initialContext.addresses.length;
     const initialActionsCount = initialContext.actions.length;
@@ -52,8 +52,8 @@ export const createPkpPermissionsManagerFlowTest = (
       await pkpPermissionsManager.isPermittedAction({
         ipfsId: TEST_ACTION_IPFS_ID,
       });
-    expect(typeof initialAddressPermitted).toBe('boolean');
-    expect(typeof initialActionPermitted).toBe('boolean');
+    assert.toBe(typeof initialAddressPermitted, 'boolean');
+    assert.toBe(typeof initialActionPermitted, 'boolean');
 
     // Test 3: Get all permitted items
     const allAddresses = await pkpPermissionsManager.getPermittedAddresses();
@@ -61,32 +61,32 @@ export const createPkpPermissionsManagerFlowTest = (
     const allAuthMethods =
       await pkpPermissionsManager.getPermittedAuthMethods();
 
-    expect(Array.isArray(allAddresses)).toBe(true);
-    expect(Array.isArray(allActions)).toBe(true);
-    expect(Array.isArray(allAuthMethods)).toBe(true);
-    expect(allAddresses.length).toBe(initialAddressesCount);
-    expect(allActions.length).toBe(initialActionsCount);
+    assert.toBe(Array.isArray(allAddresses), true);
+    assert.toBe(Array.isArray(allActions), true);
+    assert.toBe(Array.isArray(allAuthMethods), true);
+    assert.toBe(allAddresses.length, initialAddressesCount);
+    assert.toBe(allActions.length, initialActionsCount);
 
     // Test 4: Test context helper functions
     if (allAddresses.length > 0) {
       const firstAddress = allAddresses[0];
       const isAddressInContext =
         initialContext.isAddressPermitted(firstAddress);
-      expect(typeof isAddressInContext).toBe('boolean');
+      assert.toBe(typeof isAddressInContext, 'boolean');
     }
 
     // Test 5: Working with auth methods
     if (allAuthMethods.length > 0) {
       const firstAuthMethod = allAuthMethods[0];
-      expect(firstAuthMethod.authMethodType).toBeDefined();
-      expect(firstAuthMethod.id).toBeDefined();
+      assert.toBeDefined(firstAuthMethod.authMethodType);
+      assert.toBeDefined(firstAuthMethod.id);
 
       const authMethodScopes =
         await pkpPermissionsManager.getPermittedAuthMethodScopes({
           authMethodType: Number(firstAuthMethod.authMethodType),
           authMethodId: firstAuthMethod.id,
         });
-      expect(Array.isArray(authMethodScopes)).toBe(true);
+      assert.toBe(Array.isArray(authMethodScopes), true);
     }
 
     // Note: We don't test add/remove operations as they require PKP ownership
@@ -95,8 +95,8 @@ export const createPkpPermissionsManagerFlowTest = (
 
     // Test 6: Verify all read operations work consistently
     const finalContext = await pkpPermissionsManager.getPermissionsContext();
-    expect(finalContext.addresses.length).toBe(initialAddressesCount);
-    expect(finalContext.actions.length).toBe(initialActionsCount);
+    assert.toBe(finalContext.addresses.length, initialAddressesCount);
+    assert.toBe(finalContext.actions.length, initialActionsCount);
 
     // Test 7: Verify permission checks are consistent
     const finalAddressPermitted =
@@ -107,7 +107,7 @@ export const createPkpPermissionsManagerFlowTest = (
       ipfsId: TEST_ACTION_IPFS_ID,
     });
 
-    expect(finalAddressPermitted).toBe(initialAddressPermitted);
-    expect(finalActionPermitted).toBe(initialActionPermitted);
+    assert.toBe(finalAddressPermitted, initialAddressPermitted);
+    assert.toBe(finalActionPermitted, initialActionPermitted);
   };
 };

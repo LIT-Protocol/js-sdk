@@ -1,4 +1,5 @@
 import { init } from '../../init';
+import { assert } from '../assertions';
 
 export const createViemSignMessageTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -12,10 +13,10 @@ export const createViemSignMessageTest = (
     });
 
     const signature = await pkpViemAccount.signMessage({
-      message: 'Hello from e2e test!',
+      message: 'Hello Viem + Lit',
     });
 
-    expect(signature).toBeDefined();
-    expect(signature).toMatch(/^0x[a-fA-F0-9]{130}$/);
+    assert.toBeDefined(signature);
+    assert.toMatch(signature, /^0x[a-fA-F0-9]{130}$/);
   };
 };

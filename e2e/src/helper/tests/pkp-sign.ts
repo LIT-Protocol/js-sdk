@@ -1,4 +1,5 @@
 import { init } from '../../init';
+import { assert } from '../assertions';
 
 export const createPkpSignTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -11,6 +12,6 @@ export const createPkpSignTest = (
       toSign: 'Hello, world!',
     });
 
-    expect(res.signature).toBeDefined();
+    assert.toBeDefined(res.signature, "toBeDefined");
   };
 };

@@ -1,4 +1,5 @@
 import { init } from '../../init';
+import { assert } from '../assertions';
 
 export const createPkpEncryptDecryptTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -36,9 +37,9 @@ export const createPkpEncryptDecryptTest = (
       chain: 'ethereum',
     });
 
-    expect(encryptedData).toBeDefined();
-    expect(encryptedData.ciphertext).toBeDefined();
-    expect(encryptedData.dataToEncryptHash).toBeDefined();
+    assert.toBeDefined(encryptedData);
+    assert.toBeDefined(encryptedData.ciphertext);
+    assert.toBeDefined(encryptedData.dataToEncryptHash);
 
     // Decrypt the data using the appropriate auth context
     const decryptedData = await ctx.litClient.decrypt({
@@ -48,8 +49,8 @@ export const createPkpEncryptDecryptTest = (
       authContext: authContext,
     });
 
-    expect(decryptedData).toBeDefined();
-    expect(decryptedData.convertedData).toBeDefined();
-    expect(decryptedData.convertedData).toBe(dataToEncrypt);
+    assert.toBeDefined(decryptedData);
+    assert.toBeDefined(decryptedData.convertedData);
+    assert.toBe(decryptedData.convertedData, dataToEncrypt);
   };
 };

@@ -1,4 +1,5 @@
 import { init } from '../../init';
+import { assert } from '../assertions';
 
 export const createViewPKPsByAddressTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -13,11 +14,11 @@ export const createViewPKPsByAddressTest = (
       },
     });
 
-    expect(pkps).toBeDefined();
-    expect(pkps.pkps).toBeDefined();
-    expect(Array.isArray(pkps.pkps)).toBe(true);
-    expect(pkps.pagination).toBeDefined();
-    expect(typeof pkps.pagination.total).toBe('number');
-    expect(typeof pkps.pagination.hasMore).toBe('boolean');
+    assert.toBeDefined(pkps);
+    assert.toBeDefined(pkps.pkps);
+    assert.toBe(Array.isArray(pkps.pkps), true);
+    assert.toBeDefined(pkps.pagination);
+    assert.toBe(typeof pkps.pagination.total, 'number');
+    assert.toBe(typeof pkps.pagination.hasMore, 'boolean');
   };
 };

@@ -1,4 +1,5 @@
 import { init } from '../../init';
+import { assert } from '../assertions';
 
 export const createViemSignTransactionTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -19,7 +20,7 @@ export const createViemSignTransactionTest = (
 
     const signedTx = await pkpViemAccount.signTransaction(txRequest);
 
-    expect(signedTx).toBeDefined();
-    expect(signedTx).toMatch(/^0x[a-fA-F0-9]+$/);
+    assert.toBeDefined(signedTx);
+    assert.toMatch(signedTx, /^0x[a-fA-F0-9]+$/);
   };
 };

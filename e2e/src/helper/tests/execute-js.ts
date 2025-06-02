@@ -1,4 +1,5 @@
 import { init } from '../../init';
+import { assert } from '../assertions';
 
 export const createExecuteJsTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -32,7 +33,7 @@ export const createExecuteJsTest = (
       },
     });
 
-    expect(result).toBeDefined();
-    expect(result.signatures).toBeDefined();
+    assert.toBeDefined(result);
+    assert.toBeDefined(result.signatures);
   };
 };
