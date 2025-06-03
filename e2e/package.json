@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/e2e",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Lit Protocol E2E testing package for running comprehensive integration tests",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -35,9 +35,6 @@
   "author": "Lit Protocol",
   "license": "MIT",
   "dependencies": {
-    "@lit-protocol/auth": "*",
-    "@lit-protocol/lit-client": "*",
-    "@lit-protocol/networks": "*",
     "viem": "^2.0.0",
     "zod": "^3.22.0"
   },
