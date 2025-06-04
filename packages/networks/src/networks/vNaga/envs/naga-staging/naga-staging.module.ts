@@ -865,6 +865,15 @@ const networkModuleObject = {
           'signSessionKey:handleResponse: Processing signSessionKey response'
         );
 
+        // Check if the result indicates failure before attempting decryption
+        if (!result.success) {
+          E2EERequestManager.handleEncryptedError(
+            result,
+            jitContext,
+            'Session key signing'
+          );
+        }
+
         // Decrypt the batch response using the E2EE manager
         const decryptedValues = E2EERequestManager.decryptBatchResponse(
           result,
@@ -1036,7 +1045,7 @@ const networkModuleObject = {
           'signCustomSessionKey:handleResponse: Processing signCustomSessionKey response'
         );
 
-        // Check if the result indicates failure but has an encrypted error payload
+        // Check if the result indicates failure before attempting decryption
         if (!result.success) {
           E2EERequestManager.handleEncryptedError(
             result,
