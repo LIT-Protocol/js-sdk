@@ -1,11 +1,14 @@
 import type { LitAuthStorageProvider, PKPInfo } from './types';
 import type { LitAuthData } from '../types';
+import { getGlobal } from '@lit-protocol/constants';
 
 const LOCALSTORAGE_LIT_AUTH_PREFIX = 'lit-auth';
 const LOCALSTORAGE_LIT_PKP_PREFIX = 'lit-pkp-tokens';
 const LOCALSTORAGE_LIT_PKP_FULL_PREFIX = 'lit-pkp-full';
 const LOCALSTORAGE_LIT_PKP_DETAILS_PREFIX = 'lit-pkp-details';
 const LOCALSTORAGE_LIT_PKP_ADDRESS_PREFIX = 'lit-pkp-address';
+
+const globalScope = getGlobal();
 
 interface LocalStorageConfig {
   appName: string;
@@ -158,7 +161,7 @@ function buildPKPAddressCacheKey({
 export function localStorage({
   appName,
   networkName,
-  localStorage = globalThis.localStorage,
+  localStorage = globalScope.localStorage,
 }: LocalStorageConfig): LitAuthStorageProvider {
   assertLocalstorageValid(localStorage);
 
@@ -393,10 +396,7 @@ export function localStorage({
     /**
      * Cache PKP token IDs for a specific owner address
      */
-    async writePKPTokensByAddress({
-      ownerAddress,
-      tokenIds,
-    }): Promise<void> {
+    async writePKPTokensByAddress({ ownerAddress, tokenIds }): Promise<void> {
       const cacheKey = buildPKPAddressCacheKey({
         appName,
         networkName,
@@ -415,9 +415,7 @@ export function localStorage({
     /**
      * Retrieve cached PKP token IDs for a specific owner address
      */
-    async readPKPTokensByAddress({
-      ownerAddress,
-    }): Promise<string[] | null> {
+    async readPKPTokensByAddress({ ownerAddress }): Promise<string[] | null> {
       const cacheKey = buildPKPAddressCacheKey({
         appName,
         networkName,

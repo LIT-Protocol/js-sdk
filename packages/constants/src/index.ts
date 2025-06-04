@@ -13,3 +13,5 @@ export * from './lib/constants/curves';
 // ----------- Errors -----------
 export * from './lib/errors';
 export * from './lib/docs';
+
+export * from './lib/helpers';

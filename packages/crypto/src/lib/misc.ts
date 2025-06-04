@@ -20,6 +20,9 @@ import {
   NodeErrorV3,
   RelayClaimProcessor,
 } from '@lit-protocol/types';
+import { getGlobal } from '@lit-protocol/constants';
+
+const globalScope = getGlobal();
 
 const logBuffer: any[][] = [];
 const ajv = new Ajv();
@@ -117,7 +120,7 @@ declare global {
 }
 
 export const getLoggerbyId = (id: string) => {
-  return globalThis.logManager.get(id);
+  return globalScope.logManager.get(id);
 };
 
 /**
@@ -169,11 +172,11 @@ export const logWithRequestId = (id: string, ...args: any) => {
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
     globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).debug(...log);
+      globalScope.logManager.get(globalScope.logger.category, id).debug(...log);
   }
 
   globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
+    globalScope.logManager.get(globalScope.logger.category, id).debug(...args);
 };
 
 export const logErrorWithRequestId = (id: string, ...args: any) => {
@@ -194,11 +197,11 @@ export const logErrorWithRequestId = (id: string, ...args: any) => {
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
     globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).error(...log);
+      globalScope.logManager.get(globalScope.logger.category, id).error(...log);
   }
 
   globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).error(...args);
+    globalScope.logManager.get(globalScope.logger.category, id).error(...args);
 };
 
 export const logError = (...args: any) => {
@@ -219,11 +222,11 @@ export const logError = (...args: any) => {
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
     globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category).error(...log);
+      globalScope.logManager.get(globalScope.logger.category).error(...log);
   }
 
   globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category).error(...args);
+    globalScope.logManager.get(globalScope.logger.category).error(...args);
 };
 
 /**

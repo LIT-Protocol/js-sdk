@@ -42,6 +42,9 @@ import {
   hexifyStringValues,
   log,
 } from './misc';
+import { getGlobal } from '@lit-protocol/constants';
+
+const globalScope = getGlobal();
 
 /** ---------- Exports ---------- */
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
@@ -492,18 +495,18 @@ export const checkSevSnpAttestation = async (
   let vcekCert;
   const vcekUrl = await sevSnpGetVcekUrl(report);
   // use local storage if we have one available
-  if (globalThis.localStorage) {
+  if (globalScope.localStorage) {
     log('Using local storage for certificate caching');
-    vcekCert = localStorage.getItem(vcekUrl);
+    vcekCert = globalScope.localStorage.getItem(vcekUrl);
     if (vcekCert) {
       vcekCert = uint8arrayFromString(vcekCert, 'base64');
     } else {
       vcekCert = await getAmdCert(vcekUrl);
-      localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
+      globalScope.localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
     }
   } else {
     const cache = ((
-      globalThis as unknown as { amdCertStore: Record<string, Uint8Array> }
+      globalScope as unknown as { amdCertStore: Record<string, Uint8Array> }
     ).amdCertStore ??= {});
     cache[vcekUrl] ??= await getAmdCert(vcekUrl);
     vcekCert = cache[vcekUrl];

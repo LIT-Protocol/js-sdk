@@ -1,22 +1,22 @@
-import { SiweMessage } from 'siwe';
 import { computeAddress } from '@ethersproject/transactions';
+import { SiweMessage } from 'siwe';
 
-import { InvalidArgumentException } from '@lit-protocol/constants';
+import { getGlobal, InvalidArgumentException } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
   CapacityDelegationFields,
-  LitResourceAbilityRequest,
-  SessionKeyPair,
   WithCapacityDelegation,
   WithRecap,
 } from '@lit-protocol/types';
 
+import { HexPrefixedSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
 import {
   addRecapToSiweMessage,
   createCapacityCreditsResourceData,
 } from './siwe-helper';
-import { z } from 'zod';
-import { HexPrefixedSchema } from '@lit-protocol/schemas';
+
+const globalScope = getGlobal();
 
 /**
  * Schema for parameters needed to create a PKP SIWE message
@@ -58,7 +58,7 @@ export const createPKPSiweMessage = async (
   }
 
   const siweParams = {
-    domain: params.domain || globalThis.location?.host || 'litprotocol.com',
+    domain: params.domain || globalScope.location?.host || 'litprotocol.com',
     walletAddress: pkpEthAddress,
     statement: siwe_statement,
     uri: params.sessionKeyUri,
@@ -89,7 +89,6 @@ export const createPKPSiweMessage = async (
 export const createSiweMessage = async <T extends BaseSiweMessage>(
   params: T
 ): Promise<string> => {
-
   // -- validations
   if (!params.walletAddress) {
     throw new InvalidArgumentException(
