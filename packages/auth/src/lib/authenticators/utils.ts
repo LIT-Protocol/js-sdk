@@ -11,7 +11,7 @@ import { DiscordAuthenticator } from './native/DiscordAuthenticator';
 import { GoogleAuthenticator } from './native/GoogleAuthenticator';
 import { WebAuthnAuthenticator } from './native/WebAuthnAuthenticator';
 import { StytchEmailOtpAuthenticator } from './stytch/factors/StytchEmailOtpAuthenticator';
-import { ethAuthMethodId } from './metamask';
+import { ethAuthMethodId } from './helper/getEthAuthMethodId';
 export const STATE_PARAM_KEY = 'lit-state-param';
 export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
 
