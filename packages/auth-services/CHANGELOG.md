@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 1.0.0-alpha.23
+
+### Major Changes
+
+- attempt to make vite polyfill minimum
+
 ## 1.0.0-alpha.22
 
 ### Major Changes

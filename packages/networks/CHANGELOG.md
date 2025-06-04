@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.19
+
+### Major Changes
+
+- attempt to make vite polyfill minimum
+
 ## 8.0.0-alpha.18
 
 ### Major Changes

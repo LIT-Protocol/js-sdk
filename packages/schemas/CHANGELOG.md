@@ -1,5 +1,11 @@
 # @lit-protocol/schemas
 
+## 8.0.0-alpha.14
+
+### Major Changes
+
+- attempt to make vite polyfill minimum
+
 ## 8.0.0-alpha.13
 
 ### Major Changes

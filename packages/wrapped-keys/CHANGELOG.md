@@ -1,5 +1,11 @@
 # @lit-protocol/wrapped-keys
 
+## 8.0.0-alpha.12
+
+### Major Changes
+
+- attempt to make vite polyfill minimum
+
 ## 8.0.0-alpha.11
 
 ### Major Changes
