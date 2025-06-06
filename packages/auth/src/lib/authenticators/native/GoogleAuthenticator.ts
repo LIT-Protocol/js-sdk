@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import * as jose from 'jose';
 
 import { AuthData } from '@lit-protocol/schemas';
-import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from '../utils';
+import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from '../helper/utils';
 export class GoogleAuthenticator {
   /**
    * Signup with popup window

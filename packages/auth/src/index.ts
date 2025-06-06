@@ -86,7 +86,7 @@ export { getPkpAuthContext } from './lib/AuthManager/authContexts/getPkpAuthCont
  * @param {AuthMethod} authMethod - The authentication method object.
  * @returns {string} The unique authentication ID.
  */
-export { getAuthIdByAuthMethod } from './lib/authenticators/utils';
+export { getAuthIdByAuthMethod } from './lib/authenticators/helper/utils';
 
 /**
  * Utility function to generate a session key pair.

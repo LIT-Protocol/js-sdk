@@ -4,7 +4,7 @@ import { AUTH_METHOD_TYPE, UnknownError } from '@lit-protocol/constants';
 import { AuthMethod, Hex } from '@lit-protocol/types';
 
 import { AuthData } from '@lit-protocol/schemas';
-import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from '../utils';
+import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from '../helper/utils';
 
 const DEFAULT_CLIENT_ID = '1052874239658692668';
 

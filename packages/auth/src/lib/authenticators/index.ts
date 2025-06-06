@@ -5,7 +5,7 @@ import {
   isSignInRedirect,
   getProviderFromUrl,
   getAuthIdByAuthMethod,
-} from './utils';
+} from './helper/utils';
 import { WebAuthnAuthenticator } from './native/WebAuthnAuthenticator';
 
 export {
