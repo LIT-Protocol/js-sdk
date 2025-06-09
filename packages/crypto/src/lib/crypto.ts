@@ -13,7 +13,7 @@ import {
   LitActionSignedData,
   NodeAttestation,
   PKPSignEndpointResponse,
-  SessionKeyPair
+  SessionKeyPair,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -43,7 +43,6 @@ import {
   log,
 } from './misc';
 import { getGlobal } from '@lit-protocol/constants';
-
 const globalScope = getGlobal();
 
 /** ---------- Exports ---------- */
@@ -502,7 +501,10 @@ export const checkSevSnpAttestation = async (
       vcekCert = uint8arrayFromString(vcekCert, 'base64');
     } else {
       vcekCert = await getAmdCert(vcekUrl);
-      globalScope.localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
+      globalScope.localStorage.setItem(
+        vcekUrl,
+        uint8arrayToString(vcekCert, 'base64')
+      );
     }
   } else {
     const cache = ((

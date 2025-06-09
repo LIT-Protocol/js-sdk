@@ -143,7 +143,7 @@ export async function createPKPViemAccount({
         // Implement EIP-1559 fee estimation
         const latestBlock = await client.getBlock({ blockTag: 'latest' });
         const baseFeePerGas = latestBlock.baseFeePerGas;
-        
+
         if (baseFeePerGas) {
           // Network supports EIP-1559
           const priorityFee = 1500000000n; // 1.5 gwei default priority fee
@@ -152,7 +152,10 @@ export async function createPKPViemAccount({
           tx.type = 'eip1559';
           _logger.info('viem => using EIP-1559 fees');
           _logger.info('viem => baseFeePerGas:', baseFeePerGas);
-          _logger.info('viem => maxPriorityFeePerGas:', tx.maxPriorityFeePerGas);
+          _logger.info(
+            'viem => maxPriorityFeePerGas:',
+            tx.maxPriorityFeePerGas
+          );
           _logger.info('viem => maxFeePerGas:', tx.maxFeePerGas);
         } else {
           // Fallback to legacy for networks that don't support EIP-1559
@@ -244,13 +247,16 @@ export async function createPKPViemAccount({
           // Default to EIP-1559 with reasonable estimates
           const priorityFee = 1500000000n; // 1.5 gwei default priority fee
           const baseFeeEstimate = 15000000000n; // 15 gwei base fee estimate
-          
+
           populatedTx.maxPriorityFeePerGas = priorityFee;
           populatedTx.maxFeePerGas = baseFeeEstimate * 2n + priorityFee; // Conservative estimate
           populatedTx.type = 'eip1559';
-          
+
           console.log('viem => defaulting to EIP-1559 fees');
-          console.log('viem => maxPriorityFeePerGas:', populatedTx.maxPriorityFeePerGas);
+          console.log(
+            'viem => maxPriorityFeePerGas:',
+            populatedTx.maxPriorityFeePerGas
+          );
           console.log('viem => maxFeePerGas:', populatedTx.maxFeePerGas);
         }
 

@@ -26,6 +26,7 @@ import {
   DecryptResponse,
   EncryptResponse,
   EncryptSdkParams,
+  LitNodeSignature,
   PkpIdentifierRaw,
   RequestItem,
 } from '@lit-protocol/types';
@@ -49,21 +50,41 @@ import {
   MintWithCustomAuthRequest,
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
-import { NagaNetworkModule } from './type';
+import { LitClient, NagaNetworkModule } from './type';
+import { NagaLitClient } from './types/NagaLitClient.type';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
 });
 
-type AnyNetworkModule = NagaNetworkModule | DatilNetworkModule;
+type SupportedNetworkModule = NagaNetworkModule | DatilNetworkModule;
 
-// ❗️ NOTE: There should be better type inference somewhere to handle different network modules
-// handle datil network module
+/**
+ * Creates a Lit client based on the provided network configuration.
+ * The Lit Client is the core interface for interacting with the Lit Protocol network.
+ * 1. First, select your network configuration, then create your client instance.
+ * 2. Then, you can use the client instance to interact with the Lit Protocol network.
+ *
+ * @see https://v8-interactive-docs.getlit.dev/setup-lit-client For more information about the Lit Client
+ *
+ * @param config.network - The network module to use (Naga v8 or Datil v7)
+ * @returns A Promise that resolves to the appropriate client instance
+ *
+ * @example
+ * ```typescript
+ * import { nagaDev } from "@lit-protocol/networks"
+ *
+ * // Create Naga client (v8)
+ * const litClient = await createLitClient({
+ *   network: nagaDev,
+ * });
+ * ```
+ */
 export const createLitClient = async ({
   network,
 }: {
-  network: AnyNetworkModule;
-}) => {
+  network: SupportedNetworkModule;
+}): Promise<LitClient> => {
   switch (network.id) {
     // -- (v8) Naga Network Module
     case 'naga':
@@ -77,9 +98,53 @@ export const createLitClient = async ({
   }
 };
 
+/**
+ * Creates a Naga Lit client instance for v8 networks.
+ * This function sets up the state manager, orchestrates handshakes with network nodes,
+ * and returns a fully configured client with all available methods.
+ *
+ * @param networkModule - The Naga network module configuration
+ * @returns A Promise that resolves to a NagaLitClient instance with the following methods:
+ *
+ * **Encryption:**
+ * - `encrypt(params)` - Encrypt data with access control conditions
+ * - `decrypt(params)` - Decrypt data with access control conditions
+ *
+ * **PKP Signing:**
+ * - `chain.raw.pkpSign(params)` - Raw PKP signing with full control
+ * - `chain.ethereum.pkpSign(params)` - Ethereum-specific PKP signing
+ * - `chain.bitcoin.pkpSign(params)` - Bitcoin-specific PKP signing
+ *
+ * **Lit Actions:**
+ * - `executeJs(params)` - Execute JavaScript/Lit Actions on the network
+ *
+ * **PKP Management:**
+ * - `mintWithEoa(params)` - Mint PKP using EOA
+ * - `mintWithAuth(params)` - Mint PKP using authentication
+ * - `mintWithCustomAuth(params)` - Mint PKP with custom authentication
+ * - `getPKPPermissionsManager(params)` - Manage PKP permissions
+ * - `viewPKPPermissions(pkpId)` - View PKP permissions
+ * - `viewPKPsByAuthData(params)` - View PKPs by auth data
+ * - `viewPKPsByAddress(params)` - View PKPs by owner address
+ *
+ * **Utilities:**
+ * - `getChainConfig()` - Get chain configuration and RPC URL
+ * - `getDefault` - Default service URLs (authServiceUrl, loginUrl)
+ * - `authService.mintWithAuth(params)` - Auth service PKP minting
+ *
+ * **Integrations:**
+ * - `getPkpViemAccount(params)` - Get Viem account for PKP interactions
+ *
+ * @example
+ * ```typescript
+ * import { nagaDev } from "@lit-protocol/networks"
+ *
+ * const litClient = await createLitClient({ network: nagaDev });
+ * ```
+ */
 export const _createNagaLitClient = async (
   networkModule: NagaNetworkModule
-) => {
+): Promise<NagaLitClient> => {
   const _stateManager = await networkModule.createStateManager<
     Awaited<ReturnType<typeof orchestrateHandshake>>,
     NagaNetworkModule
@@ -108,7 +173,7 @@ export const _createNagaLitClient = async (
     params: z.infer<typeof networkModule.api.pkpSign.schemas.Input.raw> & {
       bypassAutoHashing?: boolean;
     }
-  ) {
+  ): Promise<LitNodeSignature> {
     _logger.info(
       `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${
         params.bypassAutoHashing || false
@@ -512,16 +577,16 @@ export const _createNagaLitClient = async (
     let dataToEncryptHash: string;
     let metadata: any;
 
-    if ('data' in params) {
+    if ('data' in params && params.data) {
       // New format: complete encrypted data object
-      ciphertext = params.data.ciphertext;
-      dataToEncryptHash = params.data.dataToEncryptHash;
+      ciphertext = params.data.ciphertext!;
+      dataToEncryptHash = params.data.dataToEncryptHash!;
       metadata = params.data.metadata;
     } else {
       // Traditional format: individual properties
-      ciphertext = params.ciphertext;
-      dataToEncryptHash = params.dataToEncryptHash;
-      metadata = params.metadata;
+      ciphertext = (params as any).ciphertext;
+      dataToEncryptHash = (params as any).dataToEncryptHash;
+      metadata = (params as any).metadata;
     }
 
     // ========== Get handshake results ==========
@@ -637,7 +702,7 @@ export const _createNagaLitClient = async (
     return response;
   }
 
-  const litClient = {
+  const litClient: NagaLitClient = {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
     // maybe you will need connectionInfo: _stateManager.getLatestConnectionInfo(),
@@ -723,7 +788,7 @@ export const _createNagaLitClient = async (
       const pkp = await networkModule.chainApi.mintWithMultiAuths({
         account: validatedParams.account,
         authMethodIds: [validatedParams.authData.authMethodId, ipfsHex],
-        authMethodTypes: [validatedParams.authData.authMethodType, 2n], // 2n is Lit Action
+        authMethodTypes: [validatedParams.authData.authMethodType, BigInt(2)], // 2 is Lit Action
         authMethodScopes: scopes,
         pubkeys: ['0x', '0x'],
         addPkpEthAddressAsPermittedAddress:
