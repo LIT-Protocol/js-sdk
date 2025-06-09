@@ -56,7 +56,26 @@ const dirs = (await listDirsRecursive('packages', false)).map(
   (dir) => `./${dir}/src/index.ts`
 );
 
-jsonFile.entryPoints = dirs;
+const onlyInterestedIn = [
+  // './packages/access-control-conditions/src/index.ts',
+  // './packages/access-control-conditions-schemas/src/index.ts',
+  // './packages/auth/src/index.ts',
+  // './packages/auth-helpers/src/index.ts',
+  // './packages/auth-services/src/index.ts',
+  // './packages/constants/src/index.ts',
+  // './packages/crypto/src/index.ts',
+  './packages/lit-client/src/index.ts',
+  // './packages/logger/src/index.ts',
+  // './packages/networks/src/index.ts',
+  // './packages/schemas/src/index.ts',
+  // './packages/types/src/index.ts',
+  // './packages/wasm/src/index.ts',
+  // './packages/wrapped-keys/src/index.ts',
+  // './packages/wrapped-keys-lit-actions/src/index.ts',
+];
+
+// jsonFile.entryPoints = dirs;
+jsonFile.entryPoints = onlyInterestedIn;
 
 await writeJsonFile(TARGET, jsonFile);
 
@@ -68,7 +87,7 @@ await runCommand(`yarn typedoc --options ${TARGET}`);
 if (FLAG === '--preview') {
   // await runCommand(`open ./docs/index.html`);
   liveServer.default.start({
-    port: 4004, // Set the server port. Defaults to 8080.
+    port: 56965, // Set the server port. Defaults to 8080.
     host: '0.0.0.0', // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
     root: './doc', // Set root directory that's being served. Defaults to cwd.
     open: false, // When false, it won't load your browser by default.
