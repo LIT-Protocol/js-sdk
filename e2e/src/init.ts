@@ -4,17 +4,25 @@ import {
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
 import { createLitClient } from '@lit-protocol/lit-client';
+import { Account, PrivateKeyAccount } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
 
-const SupportedNetworkSchema = z.enum(['naga-dev', 'naga-local', 'naga-staging']);
+const SupportedNetworkSchema = z.enum([
+  'naga-dev',
+  'naga-local',
+  'naga-staging',
+]);
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
-export const init = async (network?: SupportedNetwork, logLevel?: LogLevel): Promise<{
+export const init = async (
+  network?: SupportedNetwork,
+  logLevel?: LogLevel
+): Promise<{
   litClient: any;
   authManager: any;
   localMasterAccount: any;

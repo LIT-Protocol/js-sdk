@@ -11,7 +11,11 @@ import {
 import { z } from 'zod';
 import { MintWithCustomAuthRequest } from '../schemas/MintWithCustomAuthSchema';
 import { BaseLitClient } from './BaseClient.type';
-import { AuthContextSchema2, HexPrefixedSchema } from '@lit-protocol/schemas';
+import {
+  AuthContextSchema2,
+  AuthDataSchema,
+  HexPrefixedSchema,
+} from '@lit-protocol/schemas';
 import { Chain, Hex } from 'viem';
 import type { PKPStorageProvider } from '@lit-protocol/networks';
 
@@ -189,11 +193,13 @@ export interface NagaLitClient extends BaseLitClient<any> {
    * ```
    */
   viewPKPsByAuthData: (params: {
-    authData: {
-      authMethodType: number | bigint;
-      authMethodId: string;
-      accessToken?: string;
-    };
+    authData:
+      | {
+          authMethodType: number | bigint;
+          authMethodId: string;
+          accessToken?: string;
+        }
+      | z.infer<typeof AuthDataSchema>;
     pagination?: { limit?: number; offset?: number };
     storageProvider?: PKPStorageProvider;
   }) => Promise<any>;

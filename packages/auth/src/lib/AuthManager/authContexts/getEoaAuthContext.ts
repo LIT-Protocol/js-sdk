@@ -6,7 +6,7 @@ import {
 } from '@lit-protocol/schemas';
 import { AuthSig } from '@lit-protocol/types';
 import { GetWalletClientReturnType } from '@wagmi/core';
-import { Account, WalletClient } from 'viem';
+import { Account, PrivateKeyAccount, WalletClient } from 'viem';
 import { z } from 'zod';
 import { ViemAccountAuthenticator } from '../../authenticators/ViemAccountAuthenticator';
 import { WalletClientAuthenticator } from '../../authenticators/WalletClientAuthenticator';
@@ -16,7 +16,8 @@ import { AuthConfigSchema } from '@lit-protocol/schemas';
 export type ExpectedAccountOrWalletClient =
   | Account
   | WalletClient
-  | GetWalletClientReturnType;
+  | GetWalletClientReturnType
+  | PrivateKeyAccount;
 
 interface GetEoaAuthContextParams {
   authentication: {

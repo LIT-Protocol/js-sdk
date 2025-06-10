@@ -10,7 +10,14 @@ import {
 import { getChildLogger } from '@lit-protocol/logger';
 import { AuthData } from '@lit-protocol/schemas';
 import { AuthMethod, AuthSig, EthBlockhashInfo } from '@lit-protocol/types';
-import { Account, getAddress, Hex, keccak256, stringToBytes } from 'viem';
+import {
+  Account,
+  getAddress,
+  Hex,
+  keccak256,
+  PrivateKeyAccount,
+  stringToBytes,
+} from 'viem';
 
 const _logger = getChildLogger({
   module: 'ViemAccountAuthenticator',
@@ -67,7 +74,7 @@ export class ViemAccountAuthenticator {
   }
 
   static async authenticate(
-    account: Account,
+    account: Account | PrivateKeyAccount,
     messageToSign?: string
   ): Promise<AuthData> {
     let _toSign = messageToSign;

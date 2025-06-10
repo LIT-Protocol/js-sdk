@@ -35,7 +35,7 @@
   "author": "Lit Protocol",
   "license": "MIT",
   "dependencies": {
-    "viem": "^2.0.0",
+    "viem": "2.29.4",
     "zod": "^3.22.0"
   },
   "devDependencies": {
