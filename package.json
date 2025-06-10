@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "reset": "bun unlink-all && rimraf dist node_modules doc tmp yarn-error.log yarn.lock package-lock.json bun.lockb learn-debug.log tmp .nx lit-auth-storage pkp-tokens",
+    "reset": "bun unlink-all && rimraf dist node_modules doc tmp yarn-error.log yarn.lock package-lock.json bun.lockb learn-debug.log tmp .nx lit-auth-storage pkp-tokens lit-auth-local",
     "go": "bun run build && bun link-all",
     "build": "bun unlink-all && bun scripts/auto-fix-deps.mjs && nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions",
     "build:affected": "bun scripts/auto-fix-deps.mjs && nx affected --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions",
