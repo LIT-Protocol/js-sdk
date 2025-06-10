@@ -287,7 +287,7 @@ const networkModuleObject = {
   id: 'naga',
   version: `${version}-naga-staging`,
   config: {
-    requiredAttestation: false,
+    requiredAttestation: true,
     abortTimeout: 20_000,
     minimumThreshold: networkConfig.minimumThreshold,
     httpProtocol: networkConfig.httpProtocol,

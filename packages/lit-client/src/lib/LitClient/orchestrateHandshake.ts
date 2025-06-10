@@ -71,11 +71,14 @@ export const orchestrateHandshake = async (params: {
               endpoint: params.endpoints.HANDSHAKE,
             });
 
+            // Create the challenge once and use it for both handshake request and attestation verification
+            const challenge = createRandomHexString(64);
+
             const _data = {
               fullPath: fullPath,
               data: {
                 clientPublicKey: 'test',
-                challenge: createRandomHexString(64),
+                challenge: challenge,
               },
               requestId: requestId,
               epoch: params.currentEpoch,
@@ -111,8 +114,6 @@ export const orchestrateHandshake = async (params: {
 
             // 2. Process the response (verify attestation etc.)
             if (params.requiredAttestation) {
-              const challenge = createRandomHexString(64);
-
               if (!retrievedServerKeys.attestation) {
                 throw new InvalidNodeAttestation(
                   {},
@@ -121,6 +122,7 @@ export const orchestrateHandshake = async (params: {
               }
 
               // Verify the attestation by checking the signature against AMD certs
+              // Use the same challenge that was sent to the node
               try {
                 const releaseVerificationFn =
                   params.networkModule?.getVerifyReleaseId?.();
