@@ -19,7 +19,7 @@ test-shares = ["lit-frost/default", "vsss-rs"]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 blsful = { version = "3.0.0-pre8", default-features = false, features = ["rust"] }
 base64_light = "0.1.5"
-base64ct = "1.6.0"
+base64ct = "=1.5.3"
 ecdsa = "0.16.9"
 generic-array = "1.1.1"
 lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git" }
@@ -52,6 +52,8 @@ tsify = { version = "0.4.5", default-features = false, features = ["js"] }
 [dev-dependencies]
 k256 = "0.13"
 rand = "0.8"
+
+
 
 [profile.release]
 opt-level = "z"
