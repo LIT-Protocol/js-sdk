@@ -1,4 +1,14 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import {
+  LIT_ENDPOINT_VERSION,
+  PRODUCT_ID_VALUES,
+} from '@lit-protocol/constants';
+
+export interface MaxPricesForNodes {
+  nodePrices: { url: string; prices: bigint[] }[];
+  userMaxPrice: bigint;
+  productId: PRODUCT_ID_VALUES;
+  numRequiredNodes?: number;
+}
 
 /**
  * Interface for a single request item to be sent to a Lit Protocol node.

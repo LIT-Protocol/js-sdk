@@ -1,6 +1,9 @@
 import { MaxPriceTooLow, PRODUCT_ID_VALUES } from '@lit-protocol/constants';
 
-interface MaxPricesForNodes {
+/**
+ * @deprecated - use the one in the type package
+ */
+export interface MaxPricesForNodes {
   nodePrices: { url: string; prices: bigint[] }[];
   userMaxPrice: bigint;
   productId: PRODUCT_ID_VALUES;

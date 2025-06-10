@@ -1,5 +1,5 @@
+import type { Logger as PinoLogger } from 'pino';
 import pino from 'pino';
-import type { Logger as PinoLogger, LoggerOptions } from 'pino';
 
 const getLogLevel = (): string => {
   // Check for process.env.LOG_LEVEL in a Node.js-like environment
@@ -8,7 +8,9 @@ const getLogLevel = (): string => {
     process.env &&
     typeof process.env['LOG_LEVEL'] === 'string'
   ) {
-    return process.env['LOG_LEVEL'];
+    const level = process.env['LOG_LEVEL'];
+    // Convert debug2 to debug for pino compatibility
+    return level === 'debug2' ? 'debug' : level;
   }
   // Default log level for browser or when LOG_LEVEL is not set
   return 'info';

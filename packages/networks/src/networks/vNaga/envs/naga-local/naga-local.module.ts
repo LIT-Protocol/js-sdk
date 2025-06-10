@@ -482,7 +482,6 @@ const networkModuleObject = {
           secretKey: nacl.box.keyPair().secretKey,
         };
       }
-
       return { keySet };
     },
     handshake: {

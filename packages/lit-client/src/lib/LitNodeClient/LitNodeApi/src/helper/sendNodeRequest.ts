@@ -1,6 +1,24 @@
 import { NetworkError } from '@lit-protocol/constants';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  module: 'sendNodeRequest',
+});
 
 const ABORT_TIMEOUT = 20_000; // Abort after 20s
+
+/**
+ * Generates a CURL command string from request parameters for debugging purposes
+ */
+function generateCurlCommand(url: string, req: any): string {
+  const headers = Object.entries(req.headers)
+    .map(([key, value]) => `-H "${key}: ${value}"`)
+    .join(' ');
+
+  const body = req.body ? `--data '${req.body}'` : '';
+
+  return `curl -X ${req.method} ${headers} ${body} "${url}"`.trim();
+}
 
 export async function sendNodeRequest<T>(
   // Interface for common request parameters
@@ -37,6 +55,13 @@ export async function sendNodeRequest<T>(
       body: JSON.stringify(requestData),
       // signal: controller.signal,
     };
+
+    _logger.info('🔄 _fullUrl', _fullUrl);
+    _logger.info('🔄 req', req);
+
+    // Generate and log CURL command
+    const curlCommand = generateCurlCommand(_fullUrl, req);
+    _logger.info('🔄 CURL command:', curlCommand);
 
     // if (_fullUrl.includes('pkp/sign/v2')) {
     //   console.log('🔄 req', req);

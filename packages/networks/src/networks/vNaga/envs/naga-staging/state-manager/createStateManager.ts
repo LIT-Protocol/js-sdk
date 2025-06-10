@@ -75,11 +75,18 @@ export const createStateManager = async <T>(params: {
 
   // --- Initial Fetch for Connection Info ---
   try {
+    _logger.info('🔍 About to fetch initial connection info...');
     const initialConnectionInfo =
       await readOnlyChainManager.api.connection.getConnectionInfo();
+    
+    _logger.info('🔍 Raw initial connection info:', initialConnectionInfo);
+    _logger.info('🔍 Type of initial connection info:', typeof initialConnectionInfo);
+    _logger.info('🔍 Keys in initial connection info:', Object.keys(initialConnectionInfo || {}));
+    
     latestBootstrapUrls = initialConnectionInfo.bootstrapUrls;
     latestEpochInfo = initialConnectionInfo.epochInfo; // Store initial epoch info
     latestConnectionInfo = initialConnectionInfo; // Store initial connection info
+    
     _logger.info({
       msg: 'State Manager Initialized with Connection Info',
       initialUrls: latestBootstrapUrls,
@@ -88,6 +95,17 @@ export const createStateManager = async <T>(params: {
     });
 
     // --- Initial callback
+    _logger.info('🔍 About to call initial callback with params:', {
+      bootstrapUrls: latestBootstrapUrls,
+      currentEpoch: latestEpochInfo?.number,
+      version: params.networkModule.version,
+      requiredAttestation: params.networkModule.config.requiredAttestation,
+      minimumThreshold: params.networkModule.config.minimumThreshold,
+      abortTimeout: params.networkModule.config.abortTimeout,
+      endpoints: params.networkModule.getEndpoints(),
+      networkModule: params.networkModule,
+    });
+    
     callbackResult = await params.callback({
       bootstrapUrls: latestBootstrapUrls,
       currentEpoch: latestEpochInfo?.number,
@@ -99,11 +117,19 @@ export const createStateManager = async <T>(params: {
       // releaseVerificationConfig: null,
       networkModule: params.networkModule,
     });
+    
+    _logger.info('🔍 Callback completed successfully, result:', callbackResult);
   } catch (error: any) {
     _logger.error(
       'Failed to get initial connection info for State Manager',
       error
     );
+    _logger.error('🔍 Full error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      cause: error.cause,
+    });
     // Depending on requirements, might want to re-throw or handle differently
     throw new Error(error);
   }

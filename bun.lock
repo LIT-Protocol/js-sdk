@@ -5,7 +5,7 @@
       "name": "@lit-protocol/js-sdk",
       "dependencies": {
         "@dotenvx/dotenvx": "^1.6.4",
-        "@lit-protocol/contracts": "^0.1.27",
+        "@lit-protocol/contracts": "^0.1.30",
         "@lit-protocol/nacl": "7.1.1",
         "@lit-protocol/uint8arrays": "7.1.1",
         "@metamask/eth-sig-util": "5.0.2",
@@ -95,7 +95,7 @@
     },
     "packages/access-control-conditions": {
       "name": "@lit-protocol/access-control-conditions",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "ethers": "^5.7.1",
         "zod": "3.24.3",
@@ -103,14 +103,14 @@
     },
     "packages/access-control-conditions-schemas": {
       "name": "@lit-protocol/access-control-conditions-schemas",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "zod": "3.24.3",
       },
     },
     "packages/auth": {
       "name": "@lit-protocol/auth",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "@noble/curves": "^1.8.1",
         "@simplewebauthn/browser": "^7.2.0",
@@ -132,7 +132,7 @@
     },
     "packages/auth-helpers": {
       "name": "@lit-protocol/auth-helpers",
-      "version": "8.0.0-alpha.14",
+      "version": "8.0.0-alpha.15",
       "dependencies": {
         "@wagmi/core": "^2.17.1",
         "ethers": "^5.7.1",
@@ -144,7 +144,7 @@
     },
     "packages/auth-services": {
       "name": "@lit-protocol/auth-services",
-      "version": "1.0.0-alpha.22",
+      "version": "1.0.0-alpha.23",
       "dependencies": {
         "@elysiajs/bearer": "^1.2.0",
         "@elysiajs/cors": "^1.2.0",
@@ -183,7 +183,7 @@
     },
     "packages/constants": {
       "name": "@lit-protocol/constants",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "@openagenda/verror": "^3.1.4",
         "zod": "3.24.3",
@@ -191,7 +191,7 @@
     },
     "packages/crypto": {
       "name": "@lit-protocol/crypto",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "@lit-protocol/nacl": "7.1.1",
         "@lit-protocol/uint8arrays": "7.1.1",
@@ -202,7 +202,7 @@
     },
     "packages/lit-client": {
       "name": "@lit-protocol/lit-client",
-      "version": "8.0.0-alpha.14",
+      "version": "8.0.0-alpha.15",
       "dependencies": {
         "@lit-protocol/uint8arrays": "7.1.1",
         "bs58": "^6.0.0",
@@ -212,14 +212,14 @@
     },
     "packages/logger": {
       "name": "@lit-protocol/logger",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "pino": "^9.6.0",
       },
     },
     "packages/networks": {
       "name": "@lit-protocol/networks",
-      "version": "8.0.0-alpha.18",
+      "version": "8.0.0-alpha.19",
       "dependencies": {
         "@lit-protocol/contracts": "^0.1.26",
         "@lit-protocol/nacl": "7.1.1",
@@ -237,7 +237,7 @@
     },
     "packages/schemas": {
       "name": "@lit-protocol/schemas",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "ethers": "^5.7.1",
         "siwe": "^2.3.2",
@@ -247,7 +247,7 @@
     },
     "packages/types": {
       "name": "@lit-protocol/types",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "ethers": "^5.7.1",
         "zod": "3.24.3",
@@ -255,7 +255,7 @@
     },
     "packages/wasm": {
       "name": "@lit-protocol/wasm",
-      "version": "8.0.0-alpha.13",
+      "version": "8.0.0-alpha.14",
       "dependencies": {
         "ethers": "^5.7.1",
         "pako": "^2.1.0",
@@ -263,11 +263,11 @@
     },
     "packages/wrapped-keys": {
       "name": "@lit-protocol/wrapped-keys",
-      "version": "8.0.0-alpha.11",
+      "version": "8.0.0-alpha.12",
     },
     "packages/wrapped-keys-lit-actions": {
       "name": "@lit-protocol/wrapped-keys-lit-actions",
-      "version": "8.0.0-alpha.11",
+      "version": "8.0.0-alpha.12",
     },
   },
   "packages": {
@@ -925,7 +925,7 @@
 
     "@lit-protocol/constants": ["@lit-protocol/constants@workspace:packages/constants"],
 
-    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.27", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-gIlJ/21Y/dme2BE9C0QNjypSsqU9E7lruVSHNmiGyWjIfatXQlK49E6S44HIHIlpkmEWMRg8gUuqity+QA3rZw=="],
+    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.30", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-QFCiUKNhV2zzeaI+FyAwzq9MEwAMxvL7cyQxGgjROjYpmpvZC5Udy9MUAbw9wzYHrPzlLRbQv8B/7+LeQPzzCQ=="],
 
     "@lit-protocol/crypto": ["@lit-protocol/crypto@workspace:packages/crypto"],
 
@@ -4236,6 +4236,8 @@
     "@lit-protocol/auth-services/pino-caller": ["pino-caller@3.4.0", "", { "dependencies": { "source-map-support": "^0.5.13" }, "peerDependencies": { "pino": "*" } }, "sha512-2aEjlmhLA7J3lGBXKDSxtlfDY+cBzGh5PnLFP6ZUhvyqCnqKfv28ulpSch6uymGIdo7fzxXHK2hvR5FrdzbhTg=="],
 
     "@lit-protocol/nacl/tslib": ["tslib@1.14.1", "", {}, "sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg=="],
+
+    "@lit-protocol/networks/@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.27", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-gIlJ/21Y/dme2BE9C0QNjypSsqU9E7lruVSHNmiGyWjIfatXQlK49E6S44HIHIlpkmEWMRg8gUuqity+QA3rZw=="],
 
     "@lit-protocol/uint8arrays/@lit-protocol/constants": ["@lit-protocol/constants@7.1.1", "", { "dependencies": { "@ethersproject/abstract-provider": "5.7.0", "@lit-protocol/accs-schemas": "^0.0.24", "@lit-protocol/contracts": "^0.0.74", "@lit-protocol/types": "7.1.1", "@openagenda/verror": "^3.1.4", "depd": "^2.0.0", "ethers": "^5.7.1", "siwe": "^2.3.2", "tslib": "1.14.1" } }, "sha512-wJY5r8D0FdvtkQtcjx5JfPC3Qeb5SZ1m72HTcvJdqaJaBgaPP4eg2JSUg9uNJ+knOCyfdiBPl47XlWTGqe1X4Q=="],
 
