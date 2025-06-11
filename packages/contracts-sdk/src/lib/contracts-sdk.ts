@@ -2883,6 +2883,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         ownerAddress: string
       ): Promise<{
         txHash: string;
+        actualTokensBurned: number;
       }> => {
         this.log('Pruning expired Capacity Credits NFTs...');
 
@@ -2955,6 +2956,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
           return {
             txHash,
+            actualTokensBurned,
           };
         } catch (e) {
           throw new TransactionError(
