@@ -48,37 +48,36 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 // ----- autogen:imports:end  -----
 
 import {
-  AUTH_METHOD_TYPE_VALUES,
   AUTH_METHOD_SCOPE_VALUES,
-  METAMASK_CHAIN_INFO_BY_NETWORK,
-  NETWORK_CONTEXT_BY_NETWORK,
-  LIT_NETWORK_VALUES,
-  RPC_URL_BY_NETWORK,
-  HTTP_BY_NETWORK,
+  AUTH_METHOD_TYPE_VALUES,
   CENTRALISATION_BY_NETWORK,
-  LIT_NETWORK,
   HTTP,
   HTTPS,
+  HTTP_BY_NETWORK,
   InitError,
-  NetworkError,
-  WrongNetworkException,
-  ParamsMissingError,
   InvalidArgumentException,
+  LIT_NETWORK,
+  LIT_NETWORK_VALUES,
+  METAMASK_CHAIN_INFO_BY_NETWORK,
+  NETWORK_CONTEXT_BY_NETWORK,
+  ParamsMissingError,
+  RPC_URL_BY_NETWORK,
   TransactionError,
+  WrongNetworkException,
 } from '@lit-protocol/constants';
 import { LogManager, Logger } from '@lit-protocol/logger';
+import { derivedAddresses } from '@lit-protocol/misc';
 import { TokenInfo } from '@lit-protocol/types';
 import { computeAddress } from 'ethers/lib/utils';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
-import { derivedAddresses } from '@lit-protocol/misc';
 import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import {
   CIDParser,
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
-import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 import { ValidatorStruct } from './types';
+import { calculateUTCMidnightExpiration, requestsToKilosecond } from './utils';
 
 // const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 // const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
@@ -748,7 +747,8 @@ export class LitContracts {
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
-        case 'Allowlist' || 'AllowList':
+        case 'Allowlist':
+        case 'AllowList':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
             environment
@@ -2869,6 +2869,104 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         // }
 
         return tx;
+      },
+      /**
+       * Prune expired Capacity Credits NFT (RLI) tokens for a specified owner address.
+       * This function burns all expired RLI tokens owned by the target address, helping to clean up the blockchain.
+       * Anyone can call this function to prune expired tokens for any address.
+       *
+       * @param {string} ownerAddress - The address of the owner to prune expired tokens for.
+       * @returns {Promise<PruneExpiredCapacityCreditsRes>} - A promise that resolves to the pruning response with transaction details.
+       * @throws {Error} - If the input parameters are invalid or an error occurs during the pruning process.
+       */
+      pruneExpired: async (
+        ownerAddress: string
+      ): Promise<{
+        txHash: string;
+      }> => {
+        this.log('Pruning expired Capacity Credits NFTs...');
+
+        // Validate input: ownerAddress must be a valid Ethereum address
+        if (!ownerAddress || !ethers.utils.isAddress(ownerAddress)) {
+          throw new InvalidArgumentException(
+            {
+              info: {
+                ownerAddress,
+              },
+            },
+            `A valid owner address is required to prune expired tokens`
+          );
+        }
+
+        this.log(`Target owner address: ${ownerAddress}`);
+
+        try {
+          // Hardcoded ABI for pruneExpired function
+          const pruneExpiredABI = [
+            {
+              inputs: [
+                {
+                  internalType: 'address',
+                  name: 'owner',
+                  type: 'address',
+                },
+              ],
+              name: 'pruneExpired',
+              outputs: [],
+              stateMutability: 'nonpayable',
+              type: 'function',
+            },
+          ];
+
+          // Create contract instance with the hardcoded ABI
+          const contractAddress = this.rateLimitNftContract.read.address;
+          const contract = new ethers.Contract(
+            contractAddress,
+            pruneExpiredABI,
+            this.signer
+          );
+
+          // Call the pruneExpired function
+          const res = await contract['pruneExpired'](ownerAddress);
+
+          const txHash = res.hash;
+          this.log(`Prune transaction submitted: ${txHash}`);
+
+          const tx = await res.wait();
+          this.log('Prune transaction confirmed:', tx);
+
+          // Count the burned tokens from Transfer events (transfers to zero address)
+          const burnEvents = tx.logs.filter((log: any) => {
+            try {
+              const parsedLog =
+                this.rateLimitNftContract.read.interface.parseLog(log);
+              return (
+                parsedLog.name === 'Transfer' &&
+                parsedLog.args['to'] === ethers.constants.AddressZero
+              );
+            } catch {
+              return false;
+            }
+          });
+
+          const actualTokensBurned = burnEvents.length;
+          this.log(`Successfully burned ${actualTokensBurned} expired tokens`);
+          this.log(`Gas used: ${tx.gasUsed.toString()}`);
+
+          return {
+            txHash,
+          };
+        } catch (e) {
+          throw new TransactionError(
+            {
+              info: {
+                ownerAddress,
+              },
+              cause: e,
+            },
+            'Pruning expired capacity credits NFTs failed'
+          );
+        }
       },
     },
   };
