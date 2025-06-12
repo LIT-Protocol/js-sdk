@@ -1,0 +1,21 @@
+config:
+  target: "dummy" # Not used but required by Artillery
+  phases:
+    - duration: 30
+      arrivalRate: 1
+      maxVusers: 3
+      name: "Smoke Test - Basic Functionality"
+  processor: "../processors/multi-endpoint.ts"
+  http:
+    defaults:
+      think:
+        jitter: 0
+  variables:
+    parallelism: 1
+    testSuite: "smoke"
+
+scenarios:
+  - name: "Multi-Endpoint Smoke Test"
+    weight: 100
+    flow:
+      - function: "runMultiEndpointTest" 

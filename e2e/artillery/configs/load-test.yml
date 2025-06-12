@@ -1,0 +1,41 @@
+config:
+  target: "dummy" # Not used but required by Artillery
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      maxVusers: 15
+      name: "Ramp Up"
+    - duration: 180
+      arrivalRate: 10
+      maxVusers: 30
+      name: "Sustained Load"
+    - duration: 60
+      arrivalRate: 5
+      maxVusers: 15
+      name: "Ramp Down"
+  processor: "../processors/multi-endpoint.ts"
+  http:
+    defaults:
+      think:
+        jitter: 100
+  variables:
+    parallelism: 5
+    testSuite: "load"
+
+scenarios:
+  - name: "PKP Sign Load Test"
+    weight: 40
+    flow:
+      - function: "runPkpSignTest"
+  - name: "Encrypt/Decrypt Load Test"
+    weight: 30
+    flow:
+      - function: "runEncryptDecryptTest"
+  - name: "Execute JS Load Test"
+    weight: 20
+    flow:
+      - function: "runExecuteJsTest"
+  - name: "View PKPs Load Test"
+    weight: 10
+    flow:
+      - function: "runViewPkpsTest" 

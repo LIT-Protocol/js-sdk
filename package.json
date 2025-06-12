@@ -23,7 +23,13 @@
     "link-all": "for dir in packages/*/; do echo \"Linking in $dir\"; (cd \"$dir\" && bun link) || { echo \"ERROR: Failed to link in $dir\"; exit 1; }; done",
     "unlink-all": "for dir in packages/*/; do echo \"Unlinking in $dir\"; (cd \"$dir\" && bun unlink) || { echo \"ERROR: Failed to unlink in $dir\"; exit 1; }; done",
     "auth-services": "cd packages/auth-services && bun run start",
-    "test:e2e": "bun test ./e2e/src/e2e.spec.ts -t"
+    "test:e2e": "bun test ./e2e/src/e2e.spec.ts -t",
+    "artillery:smoke": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/smoke-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:load": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/load-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:stress": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/stress-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:spike": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/spike-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:pkp-sign": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign-focused.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:encrypt-decrypt": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/encrypt-decrypt-focused.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
   },
   "private": true,
   "dependencies": {
@@ -84,6 +90,7 @@
     "@types/secp256k1": "^4.0.6",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
+    "artillery": "^2.0.23",
     "axios": "^1.6.0",
     "chalk": "^5.3.0",
     "esbuild": "^0.17.3",

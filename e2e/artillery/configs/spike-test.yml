@@ -1,0 +1,41 @@
+config:
+  target: "dummy" # Not used but required by Artillery
+  phases:
+    - duration: 60
+      arrivalRate: 2
+      maxVusers: 10
+      name: "Normal Load"
+    - duration: 30
+      arrivalRate: 100
+      maxVusers: 300
+      name: "Traffic Spike"
+    - duration: 120
+      arrivalRate: 2
+      maxVusers: 10
+      name: "Recovery Period"
+    - duration: 30
+      arrivalRate: 150
+      maxVusers: 400
+      name: "Second Spike"
+    - duration: 90
+      arrivalRate: 2
+      maxVusers: 10
+      name: "Final Recovery"
+  processor: "../processors/multi-endpoint.ts"
+  http:
+    defaults:
+      think:
+        jitter: 25
+  variables:
+    parallelism: 15
+    testSuite: "spike"
+
+scenarios:
+  - name: "PKP Sign Spike Test"
+    weight: 60
+    flow:
+      - function: "runPkpSignTest"
+  - name: "Encrypt/Decrypt Spike Test"
+    weight: 40
+    flow:
+      - function: "runEncryptDecryptTest" 

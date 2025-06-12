@@ -1,0 +1,37 @@
+config:
+  target: "dummy" # Not used but required by Artillery
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      maxVusers: 20
+      name: "Ramp Up"
+    - duration: 300
+      arrivalRate: 15
+      maxVusers: 50
+      name: "Sustained PKP Signing"
+    - duration: 60
+      arrivalRate: 5
+      maxVusers: 20
+      name: "Ramp Down"
+  processor: "../processors/multi-endpoint.ts"
+  http:
+    defaults:
+      think:
+        jitter: 50
+  variables:
+    parallelism: 8
+    testSuite: "pkp-sign-focused"
+
+scenarios:
+  - name: "PKP Sign with EOA Auth"
+    weight: 40
+    flow:
+      - function: "runPkpSignTestWithEoa"
+  - name: "PKP Sign with PKP Auth"
+    weight: 40
+    flow:
+      - function: "runPkpSignTestWithPkp"
+  - name: "PKP Sign with Custom Auth"
+    weight: 20
+    flow:
+      - function: "runPkpSignTestWithCustom" 
