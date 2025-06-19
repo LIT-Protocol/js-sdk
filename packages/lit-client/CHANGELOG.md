@@ -1,5 +1,11 @@
 # @lit-protocol/lit-client
 
+## 8.0.0-alpha.16
+
+### Major Changes
+
+- feat(payment): add Ledge contract ABIs
+
 ## 8.0.0-alpha.15
 
 ### Major Changes

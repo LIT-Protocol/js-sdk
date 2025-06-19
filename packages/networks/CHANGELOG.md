@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.20
+
+### Major Changes
+
+- feat(payment): add Ledge contract ABIs
+
 ## 8.0.0-alpha.19
 
 ### Major Changes

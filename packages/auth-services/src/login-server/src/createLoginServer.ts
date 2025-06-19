@@ -133,7 +133,7 @@ export const createLitLoginServer = (
         stateStore.set(state, {
           appRedirect,
           caller,
-          timeoutId,
+          timeoutId: timeoutId as unknown as NodeJS.Timeout,
         });
       } catch (err) {
         set.headers = {
@@ -273,7 +273,7 @@ export const createLitLoginServer = (
         stateStore.set(state, {
           appRedirect,
           caller,
-          timeoutId,
+          timeoutId: timeoutId as unknown as NodeJS.Timeout,
         });
       } catch (err) {
         set.headers = {
