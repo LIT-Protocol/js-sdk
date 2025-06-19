@@ -14,6 +14,7 @@ import {
   createViemSignTypedDataTest,
   createViewPKPsByAddressTest,
   createViewPKPsByAuthDataTest,
+  createPaymentManagerFlowTest,
 } from './helper/tests';
 import { init } from './init';
 
@@ -59,6 +60,8 @@ describe('all', () => {
           ctx,
           () => ctx.aliceEoaAuthContext
         )());
+      it('paymentManagerFlow', () =>
+        createPaymentManagerFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
     });
 
     describe('integrations', () => {

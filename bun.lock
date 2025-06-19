@@ -5,7 +5,7 @@
       "name": "@lit-protocol/js-sdk",
       "dependencies": {
         "@dotenvx/dotenvx": "^1.6.4",
-        "@lit-protocol/contracts": "^0.1.30",
+        "@lit-protocol/contracts": "^0.1.32",
         "@lit-protocol/nacl": "7.1.1",
         "@lit-protocol/uint8arrays": "7.1.1",
         "@metamask/eth-sig-util": "5.0.2",
@@ -222,7 +222,7 @@
       "name": "@lit-protocol/networks",
       "version": "8.0.0-alpha.19",
       "dependencies": {
-        "@lit-protocol/contracts": "^0.1.26",
+        "@lit-protocol/contracts": "^0.1.32",
         "@lit-protocol/nacl": "7.1.1",
         "@noble/curves": "^1.8.1",
         "@wagmi/core": "^2.17.1",
@@ -1078,7 +1078,7 @@
 
     "@lit-protocol/constants": ["@lit-protocol/constants@workspace:packages/constants"],
 
-    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.30", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-QFCiUKNhV2zzeaI+FyAwzq9MEwAMxvL7cyQxGgjROjYpmpvZC5Udy9MUAbw9wzYHrPzlLRbQv8B/7+LeQPzzCQ=="],
+    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.32", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-JiYZlN3ujJjTLBFaLU9HP7DOmPPSPMR1VkC9tJXtMGproPXgKncqSJB5Lvj0/aQF5bCIxKV8TQXPd+lPaDwm8A=="],
 
     "@lit-protocol/crypto": ["@lit-protocol/crypto@workspace:packages/crypto"],
 
@@ -5003,6 +5003,8 @@
     "@lerna/version/minimatch": ["minimatch@3.1.2", "", { "dependencies": { "brace-expansion": "^1.1.7" } }, "sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw=="],
 
     "@lerna/write-log-file/write-file-atomic": ["write-file-atomic@4.0.2", "", { "dependencies": { "imurmurhash": "^0.1.4", "signal-exit": "^3.0.7" } }, "sha512-7KxauUdBmSdWnmpaGFg+ppNjKF8uNLry8LyzjauQDOVONfFLNKrKvQOxZ/VuTIcS/gge/YNahf5RIIQWTSarlg=="],
+
+    "@lit-protocol/auth-services/@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.30", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-QFCiUKNhV2zzeaI+FyAwzq9MEwAMxvL7cyQxGgjROjYpmpvZC5Udy9MUAbw9wzYHrPzlLRbQv8B/7+LeQPzzCQ=="],
 
     "@lit-protocol/auth-services/@simplewebauthn/typescript-types": ["@simplewebauthn/typescript-types@8.3.4", "", {}, "sha512-38xtca0OqfRVNloKBrFB5LEM6PN5vzFbJG6rAutPVrtGHFYxPdiV3btYWq0eAZAZmP+dqFPYJxJWeJrGfmYHng=="],
 

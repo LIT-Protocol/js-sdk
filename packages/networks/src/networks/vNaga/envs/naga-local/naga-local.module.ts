@@ -48,6 +48,7 @@ import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
 import { PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
+import { PaymentManager } from '../../LitChainClient/apis/highLevelApis/PaymentManager/PaymentManager';
 import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
 import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import type { GenericTxRes, LitTxRes } from '../../LitChainClient/apis/types';
@@ -332,6 +333,15 @@ const networkModuleObject = {
     }): Promise<PKPPermissionsManager> => {
       const chainManager = createChainManager(params.account);
       return chainManager.api.pkpPermissionsManager(params.pkpIdentifier);
+    },
+
+    /**
+     * Gets a PaymentManager instance for managing deposits, withdrawals, and balance queries
+     */
+    getPaymentManager: async (params: {
+      account: ExpectedAccountOrWalletClient;
+    }): Promise<PaymentManager> => {
+      throw new Error('PaymentManager is not available in naga-local environment. Please use naga-dev instead.');
     },
 
     /**

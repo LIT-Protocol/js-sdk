@@ -164,6 +164,21 @@ export const createContractsManager = <T, M>(
     client: { public: publicClient, wallet: walletClient },
   });
 
+  const ledgerContract = getContract({
+    address: contractData.Ledger.address,
+    abi: [
+      contractData.Ledger.methods.balance,
+      contractData.Ledger.methods.deposit,
+      contractData.Ledger.methods.depositForUser,
+      contractData.Ledger.methods.latestWithdrawRequest,
+      contractData.Ledger.methods.requestWithdraw,
+      contractData.Ledger.methods.stableBalance,
+      contractData.Ledger.methods.userWithdrawDelay,
+      ...contractData.Ledger.events,
+    ],
+    client: { public: publicClient, wallet: walletClient },
+  });
+
   // ---------- End of all your contracts ----------
   return {
     pkpNftContract,
@@ -172,6 +187,7 @@ export const createContractsManager = <T, M>(
     priceFeed,
     pkpPermissionsContract,
     pubkeyRouterContract,
+    ledgerContract,
     publicClient,
     walletClient,
   };

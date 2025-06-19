@@ -102,5 +102,3 @@ See `example.js` for detailed usage examples.
 - **naga-staging** - Staging network (requires LIVE_MASTER_ACCOUNT)
 
 ## License
-
-MIT

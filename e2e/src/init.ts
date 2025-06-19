@@ -80,8 +80,8 @@ export const init = async (
     const { nagaDev } = await import('@lit-protocol/networks');
     _networkModule = nagaDev;
     await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
-      ifLessThan: '0.0001',
-      thenFundWith: '0.0001',
+      ifLessThan: '0.01',
+      thenFundWith: '0.01',
     });
   } else if (_network === 'naga-local') {
     const { nagaLocal } = await import('@lit-protocol/networks');

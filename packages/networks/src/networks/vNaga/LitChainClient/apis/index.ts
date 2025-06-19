@@ -15,11 +15,22 @@ import {
   PRODUCT_IDS,
 } from './rawContractApis/pricing/getNodesForRequest';
 
+// Ledger APIs
+import { getBalance } from './rawContractApis/ledger/read/getBalance';
+import { getStableBalance } from './rawContractApis/ledger/read/getStableBalance';
+import { getWithdrawRequest } from './rawContractApis/ledger/read/getWithdrawRequest';
+import { getUserWithdrawDelay } from './rawContractApis/ledger/read/getUserWithdrawDelay';
+import { deposit } from './rawContractApis/ledger/write/deposit';
+import { depositForUser } from './rawContractApis/ledger/write/depositForUser';
+import { requestWithdraw } from './rawContractApis/ledger/write/requestWithdraw';
+import { withdraw } from './rawContractApis/ledger/write/withdraw';
+
 // High-level APIs
 import { mintPKP } from './highLevelApis/mintPKP/mintPKP';
 import { mintWithEoa } from './highLevelApis/mintPKP/mintWithEoa';
 import { mintWithMultiAuths } from './highLevelApis/mintPKP/mintWithMultiAuths';
 import { PKPPermissionsManager } from './highLevelApis/PKPPermissionsManager';
+import { PaymentManager } from './highLevelApis/PaymentManager/PaymentManager';
 import {
   getNodePrices,
   getPriceFeedInfo,
@@ -71,6 +82,20 @@ export const rawApi = {
       removePermittedAddress,
     },
   },
+  ledger: {
+    read: {
+      getBalance,
+      getStableBalance,
+      getWithdrawRequest,
+      getUserWithdrawDelay,
+    },
+    write: {
+      deposit,
+      depositForUser,
+      requestWithdraw,
+      withdraw,
+    },
+  },
   pricing: {
     getNodesForRequest,
     constants: {
@@ -89,6 +114,8 @@ export const api = {
   mintWithMultiAuths,
   // Permissions Management
   PKPPermissionsManager,
+  // Payment Management
+  PaymentManager,
 
   pricing: {
     getPriceFeedInfo,

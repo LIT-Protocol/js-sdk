@@ -6,6 +6,7 @@ export { createViewPKPsByAuthDataTest } from './view-pkps-by-auth-data';
 export { createPkpEncryptDecryptTest } from './pkp-encrypt-decrypt';
 export { createEncryptDecryptFlowTest } from './encrypt-decrypt-flow';
 export { createPkpPermissionsManagerFlowTest } from './pkp-permissions-manager-flow';
+export { createPaymentManagerFlowTest } from './payment-manager-flow';
 export { createEoaNativeAuthFlowTest } from './eoa-native-auth-flow';
 
 // Viem integration tests

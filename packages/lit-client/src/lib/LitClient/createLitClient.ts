@@ -801,6 +801,11 @@ export const _createNagaLitClient = async (
       };
     },
     getPKPPermissionsManager: networkModule.chainApi.getPKPPermissionsManager,
+    getPaymentManager: async (params: { account: any }) => {
+      return await networkModule.chainApi.getPaymentManager({
+        account: params.account,
+      });
+    },
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣
       const account = privateKeyToAccount(

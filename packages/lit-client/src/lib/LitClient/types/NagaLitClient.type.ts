@@ -162,6 +162,27 @@ export interface NagaLitClient extends BaseLitClient<any> {
   getPKPPermissionsManager: (params: any) => Promise<any>;
 
   /**
+   * Gets a payment manager instance for managing Ledger contract payments
+   * @param params - Configuration parameters
+   * @param params.account - The account to use for transactions
+   * @returns Promise resolving to payment manager instance for deposits, withdrawals, and balance queries
+   * @example
+   * ```typescript
+   * const paymentManager = await litClient.getPaymentManager({ account: myAccount });
+   * 
+   * // Deposit funds
+   * await paymentManager.deposit({ amountInEth: "0.1" });
+   * 
+   * // Check balance
+   * const balance = await paymentManager.getBalance({ userAddress: "0x..." });
+   * 
+   * // Request withdrawal
+   * await paymentManager.requestWithdraw({ amountInEth: "0.05" });
+   * ```
+   */
+  getPaymentManager: (params: { account: any }) => Promise<any>;
+
+  /**
    * Views permissions associated with a PKP
    * @param pkpIdentifier - The PKP identifier (public key or token ID)
    * @returns Promise resolving to PKP permissions including actions, addresses, and auth methods
