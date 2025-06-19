@@ -1,5 +1,11 @@
 # @lit-protocol/lit-client
 
+## 8.0.0-alpha.17
+
+### Major Changes
+
+- bump version
+
 ## 8.0.0-alpha.16
 
 ### Major Changes

@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.21
+
+### Major Changes
+
+- bump version
+
 ## 8.0.0-alpha.20
 
 ### Major Changes
