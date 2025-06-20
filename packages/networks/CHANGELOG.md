@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.22
+
+### Major Changes
+
+- feat(networks): add naga-test support
+
 ## 8.0.0-alpha.21
 
 ### Major Changes
