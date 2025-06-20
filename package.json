@@ -34,7 +34,7 @@
   "private": true,
   "dependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
-    "@lit-protocol/contracts": "^0.1.32",
+    "@lit-protocol/contracts": "^0.1.33",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
     "@metamask/eth-sig-util": "5.0.2",

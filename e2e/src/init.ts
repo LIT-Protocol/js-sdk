@@ -11,6 +11,7 @@ import { fundAccount } from './helper/fundAccount';
 
 const SupportedNetworkSchema = z.enum([
   'naga-dev',
+  'naga-test',
   'naga-local',
   'naga-staging',
 ]);
@@ -79,6 +80,13 @@ export const init = async (
   if (_network === 'naga-dev') {
     const { nagaDev } = await import('@lit-protocol/networks');
     _networkModule = nagaDev;
+    await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
+      ifLessThan: '0.01',
+      thenFundWith: '0.01',
+    });
+  } else if (_network === 'naga-test') {
+    const { nagaTest } = await import('@lit-protocol/networks');
+    _networkModule = nagaTest;
     await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
       ifLessThan: '0.01',
       thenFundWith: '0.01',
