@@ -1,5 +1,6 @@
 import { getChildLogger } from '@lit-protocol/logger';
 import { AuthData, HexPrefixedSchema } from '@lit-protocol/schemas';
+// import { AuthSig, SessionKeyPair } from '@lit-protocol/types';
 import { z } from 'zod';
 import { AuthConfigV2 } from '../authenticators/types';
 import type { LitAuthStorageProvider } from '../storage/types';
@@ -73,6 +74,9 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
       pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
       authConfig: AuthConfigV2;
       litClient: BaseAuthContext<any>['litClient'];
+      // Optional pre-generated auth materials for server-side usage
+      // sessionKeyPair?: SessionKeyPair;
+      // delegationAuthSig?: AuthSig;
     }) => {
       return getPkpAuthContextAdapter(authManagerParams, params);
     },
