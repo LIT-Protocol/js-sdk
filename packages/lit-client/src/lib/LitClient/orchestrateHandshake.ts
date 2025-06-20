@@ -117,7 +117,11 @@ export const orchestrateHandshake = async (params: {
               if (!retrievedServerKeys.attestation) {
                 throw new InvalidNodeAttestation(
                   {},
-                  `Missing attestation in handshake response from ${url}`
+                  `Missing attestation in handshake response from ${url}, received ${JSON.stringify(
+                    retrievedServerKeys,
+                    null,
+                    2
+                  )}. "attestation" field should not be null.`
                 );
               }
 
