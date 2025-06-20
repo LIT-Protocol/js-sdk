@@ -87,8 +87,7 @@ libs.map((lib) => {
 
 let rows = [...bundled, ...universals, ...browsers, ...nodejs];
 let mainModules = [
-  '@lit-protocol/lit-node-client',
-  '@lit-protocol/lit-node-client-nodejs',
+  '@lit-protocol/lit-client',
 ];
 let mainRows = [];
 let otherRows = [];
@@ -136,13 +135,15 @@ ${body}
 
 let mainContent = table(tables.headers, tables.mainRows);
 let otherContent =
-  "If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case::\n\n" +
-  table(tables.headers, tables.otherRows);
+  "If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case:\n" +
+  "\n<div align=\"center\">\n" +
+  table(tables.headers, tables.otherRows) +
+  "\n</div>\n";
 
 // use regex to replace the content between the comments <!-- autogen:package:start --> and <!-- autogen:package:end -->
 const newReadme = readme.replace(
   /<!-- autogen:package:start -->[\s\S]*<!-- autogen:package:end -->/m,
-  `<!-- autogen:package:start -->\n${mainContent}\n\n${otherContent}\n<!-- autogen:package:end -->`
+  `<!-- autogen:package:start -->\n<div align="center">\n${mainContent}\n</div>\n${otherContent}\n<!-- autogen:package:end -->`
 );
 
 // console.log(newReadme);
