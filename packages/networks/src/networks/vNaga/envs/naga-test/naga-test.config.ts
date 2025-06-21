@@ -1,4 +1,4 @@
-import { nagaDevSignatures } from '@lit-protocol/contracts';
+import { nagaTestSignatures } from '@lit-protocol/contracts';
 import * as chainInfo from '../../../../chains/ChronicleYellowstone';
 import { NAGA_ENDPOINT } from '../../endpoints-manager/endpoints';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
@@ -17,7 +17,7 @@ export interface NagaTestSpecificConfigs {
   // privateKey?: Hex;
 }
 
-export type NagaTestSignatures = typeof nagaDevSignatures;
+export type NagaTestSignatures = typeof nagaTestSignatures;
 
 export const networkConfig: INetworkConfig<
   NagaTestSignatures,
@@ -26,7 +26,7 @@ export const networkConfig: INetworkConfig<
   minimumThreshold: MINIMUM_THRESHOLD,
   network: NETWORK,
   rpcUrl: chainInfo.RPC_URL,
-  abiSignatures: nagaDevSignatures,
+  abiSignatures: nagaTestSignatures,
   chainConfig: chainInfo.viemChainConfig,
   httpProtocol: PROTOCOL,
   networkSpecificConfigs: {
