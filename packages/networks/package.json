@@ -35,7 +35,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.0.0-alpha.22",
+  "version": "8.0.0-alpha.23",
   "main": "./dist/index.js",
   "typings": "./src/index.d.ts",
   "types": "./dist/index.d.ts"
