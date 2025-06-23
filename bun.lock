@@ -5,7 +5,7 @@
       "name": "@lit-protocol/js-sdk",
       "dependencies": {
         "@dotenvx/dotenvx": "^1.6.4",
-        "@lit-protocol/contracts": "^0.1.33",
+        "@lit-protocol/contracts": "^0.1.34",
         "@lit-protocol/nacl": "7.1.1",
         "@lit-protocol/uint8arrays": "7.1.1",
         "@metamask/eth-sig-util": "5.0.2",
@@ -220,9 +220,9 @@
     },
     "packages/networks": {
       "name": "@lit-protocol/networks",
-      "version": "8.0.0-alpha.21",
+      "version": "8.0.0-alpha.22",
       "dependencies": {
-        "@lit-protocol/contracts": "^0.1.32",
+        "@lit-protocol/contracts": "^0.1.34",
         "@lit-protocol/nacl": "7.1.1",
         "@noble/curves": "^1.8.1",
         "@wagmi/core": "^2.17.1",
@@ -1078,7 +1078,7 @@
 
     "@lit-protocol/constants": ["@lit-protocol/constants@workspace:packages/constants"],
 
-    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.33", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-L8jpgkCbrCW0l4fsGSd4YmsY8pbtqlDaTc6l9F9uwwSajTp0mjoT8AgwvPifnbLzB6TyHp56/ltKOgImXYZCMA=="],
+    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.34", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Cg+3SrHjnGAxNLB85n+QlmkcgCX99I0VQQ1KVrk3nix/IXoMzG4Mm/najb9EDPegi76WKWKrt2nhqhAkmGj9LQ=="],
 
     "@lit-protocol/crypto": ["@lit-protocol/crypto@workspace:packages/crypto"],
 
@@ -5015,8 +5015,6 @@
     "@lit-protocol/auth-services/pino-caller": ["pino-caller@3.4.0", "", { "dependencies": { "source-map-support": "^0.5.13" }, "peerDependencies": { "pino": "*" } }, "sha512-2aEjlmhLA7J3lGBXKDSxtlfDY+cBzGh5PnLFP6ZUhvyqCnqKfv28ulpSch6uymGIdo7fzxXHK2hvR5FrdzbhTg=="],
 
     "@lit-protocol/nacl/tslib": ["tslib@1.14.1", "", {}, "sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg=="],
-
-    "@lit-protocol/networks/@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.32", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-JiYZlN3ujJjTLBFaLU9HP7DOmPPSPMR1VkC9tJXtMGproPXgKncqSJB5Lvj0/aQF5bCIxKV8TQXPd+lPaDwm8A=="],
 
     "@lit-protocol/uint8arrays/@lit-protocol/constants": ["@lit-protocol/constants@7.1.1", "", { "dependencies": { "@ethersproject/abstract-provider": "5.7.0", "@lit-protocol/accs-schemas": "^0.0.24", "@lit-protocol/contracts": "^0.0.74", "@lit-protocol/types": "7.1.1", "@openagenda/verror": "^3.1.4", "depd": "^2.0.0", "ethers": "^5.7.1", "siwe": "^2.3.2", "tslib": "1.14.1" } }, "sha512-wJY5r8D0FdvtkQtcjx5JfPC3Qeb5SZ1m72HTcvJdqaJaBgaPP4eg2JSUg9uNJ+knOCyfdiBPl47XlWTGqe1X4Q=="],
 
