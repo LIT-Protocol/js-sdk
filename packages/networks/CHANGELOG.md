@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.26
+
+### Major Changes
+
+- add missing `withdraw` ledge abi method
+
 ## 8.0.0-alpha.25
 
 ### Major Changes
