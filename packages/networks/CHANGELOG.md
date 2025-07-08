@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.24
+
+### Major Changes
+
+- add payment delegation apis
+
 ## 8.0.0-alpha.23
 
 ### Major Changes
