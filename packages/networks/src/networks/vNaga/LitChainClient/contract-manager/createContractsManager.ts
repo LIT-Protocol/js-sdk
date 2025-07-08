@@ -174,7 +174,25 @@ export const createContractsManager = <T, M>(
       contractData.Ledger.methods.requestWithdraw,
       contractData.Ledger.methods.stableBalance,
       contractData.Ledger.methods.userWithdrawDelay,
+      contractData.Ledger.methods.withdraw,
       ...contractData.Ledger.events,
+    ],
+    client: { public: publicClient, wallet: walletClient },
+  });
+
+  const paymentDelegationContract = getContract({
+    address: contractData.PaymentDelegation.address,
+    abi: [
+      contractData.PaymentDelegation.methods.delegatePayments,
+      contractData.PaymentDelegation.methods.delegatePaymentsBatch,
+      contractData.PaymentDelegation.methods.getPayers,
+      contractData.PaymentDelegation.methods.getPayersAndRestrictions,
+      contractData.PaymentDelegation.methods.getRestriction,
+      contractData.PaymentDelegation.methods.getUsers,
+      contractData.PaymentDelegation.methods.setRestriction,
+      contractData.PaymentDelegation.methods.undelegatePayments,
+      contractData.PaymentDelegation.methods.undelegatePaymentsBatch,
+      ...contractData.PaymentDelegation.events,
     ],
     client: { public: publicClient, wallet: walletClient },
   });
@@ -188,6 +206,7 @@ export const createContractsManager = <T, M>(
     pkpPermissionsContract,
     pubkeyRouterContract,
     ledgerContract,
+    paymentDelegationContract,
     publicClient,
     walletClient,
   };

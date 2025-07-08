@@ -5,7 +5,7 @@
       "name": "@lit-protocol/js-sdk",
       "dependencies": {
         "@dotenvx/dotenvx": "^1.6.4",
-        "@lit-protocol/contracts": "^0.1.34",
+        "@lit-protocol/contracts": "^0.2.0",
         "@lit-protocol/nacl": "7.1.1",
         "@lit-protocol/uint8arrays": "7.1.1",
         "@metamask/eth-sig-util": "5.0.2",
@@ -220,9 +220,9 @@
     },
     "packages/networks": {
       "name": "@lit-protocol/networks",
-      "version": "8.0.0-alpha.22",
+      "version": "8.0.0-alpha.23",
       "dependencies": {
-        "@lit-protocol/contracts": "^0.1.34",
+        "@lit-protocol/contracts": "^0.2.0",
         "@lit-protocol/nacl": "7.1.1",
         "@noble/curves": "^1.8.1",
         "@wagmi/core": "^2.17.1",
@@ -1078,7 +1078,7 @@
 
     "@lit-protocol/constants": ["@lit-protocol/constants@workspace:packages/constants"],
 
-    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.1.34", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Cg+3SrHjnGAxNLB85n+QlmkcgCX99I0VQQ1KVrk3nix/IXoMzG4Mm/najb9EDPegi76WKWKrt2nhqhAkmGj9LQ=="],
+    "@lit-protocol/contracts": ["@lit-protocol/contracts@0.2.0", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-AoSTZbrGwdnPJjC68rN6vnapmzMCKdvqGyi7OM+dCBRI/pgm7e3b3NXdtAOz5ynzAtnL3gcF9RxqoQthcbBIKw=="],
 
     "@lit-protocol/crypto": ["@lit-protocol/crypto@workspace:packages/crypto"],
 
