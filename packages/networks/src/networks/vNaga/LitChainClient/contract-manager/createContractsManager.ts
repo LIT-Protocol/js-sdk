@@ -174,6 +174,7 @@ export const createContractsManager = <T, M>(
       contractData.Ledger.methods.requestWithdraw,
       contractData.Ledger.methods.stableBalance,
       contractData.Ledger.methods.userWithdrawDelay,
+      contractData.Ledger.methods.withdraw,
       ...contractData.Ledger.events,
     ],
     client: { public: publicClient, wallet: walletClient },
