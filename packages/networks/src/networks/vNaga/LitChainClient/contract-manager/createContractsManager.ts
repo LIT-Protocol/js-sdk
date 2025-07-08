@@ -179,6 +179,23 @@ export const createContractsManager = <T, M>(
     client: { public: publicClient, wallet: walletClient },
   });
 
+  const paymentDelegationContract = getContract({
+    address: contractData.PaymentDelegation.address,
+    abi: [
+      contractData.PaymentDelegation.methods.delegatePayments,
+      contractData.PaymentDelegation.methods.delegatePaymentsBatch,
+      contractData.PaymentDelegation.methods.getPayers,
+      contractData.PaymentDelegation.methods.getPayersAndRestrictions,
+      contractData.PaymentDelegation.methods.getRestriction,
+      contractData.PaymentDelegation.methods.getUsers,
+      contractData.PaymentDelegation.methods.setRestriction,
+      contractData.PaymentDelegation.methods.undelegatePayments,
+      contractData.PaymentDelegation.methods.undelegatePaymentsBatch,
+      ...contractData.PaymentDelegation.events,
+    ],
+    client: { public: publicClient, wallet: walletClient },
+  });
+
   // ---------- End of all your contracts ----------
   return {
     pkpNftContract,
@@ -188,6 +205,7 @@ export const createContractsManager = <T, M>(
     pkpPermissionsContract,
     pubkeyRouterContract,
     ledgerContract,
+    paymentDelegationContract,
     publicClient,
     walletClient,
   };

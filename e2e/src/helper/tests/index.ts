@@ -7,6 +7,7 @@ export { createPkpEncryptDecryptTest } from './pkp-encrypt-decrypt';
 export { createEncryptDecryptFlowTest } from './encrypt-decrypt-flow';
 export { createPkpPermissionsManagerFlowTest } from './pkp-permissions-manager-flow';
 export { createPaymentManagerFlowTest } from './payment-manager-flow';
+export { createPaymentDelegationFlowTest } from './payment-delegation-flow';
 export { createEoaNativeAuthFlowTest } from './eoa-native-auth-flow';
 
 // Viem integration tests

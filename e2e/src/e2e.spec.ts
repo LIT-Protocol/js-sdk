@@ -15,6 +15,7 @@ import {
   createViewPKPsByAddressTest,
   createViewPKPsByAuthDataTest,
   createPaymentManagerFlowTest,
+  createPaymentDelegationFlowTest,
 } from './helper/tests';
 import { init } from './init';
 
@@ -62,6 +63,8 @@ describe('all', () => {
         )());
       it('paymentManagerFlow', () =>
         createPaymentManagerFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
+      it('paymentDelegationFlow', () =>
+        createPaymentDelegationFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
     });
 
     describe('integrations', () => {

@@ -36,6 +36,15 @@ import { depositForUser } from '../../rawContractApis/ledger/write/depositForUse
 import { requestWithdraw } from '../../rawContractApis/ledger/write/requestWithdraw';
 import { withdraw } from '../../rawContractApis/ledger/write/withdraw';
 import { LitTxVoid } from '../../types';
+import { getPayers } from '../../rawContractApis/paymentDelegation/read/getPayers';
+import { getUsers } from '../../rawContractApis/paymentDelegation/read/getUsers';
+import { getRestriction, Restriction } from '../../rawContractApis/paymentDelegation/read/getRestriction';
+import { getPayersAndRestrictions } from '../../rawContractApis/paymentDelegation/read/getPayersAndRestrictions';
+import { delegatePayments } from '../../rawContractApis/paymentDelegation/write/delegatePayments';
+import { undelegatePayments } from '../../rawContractApis/paymentDelegation/write/undelegatePayments';
+import { delegatePaymentsBatch } from '../../rawContractApis/paymentDelegation/write/delegatePaymentsBatch';
+import { undelegatePaymentsBatch } from '../../rawContractApis/paymentDelegation/write/undelegatePaymentsBatch';
+import { setRestriction } from '../../rawContractApis/paymentDelegation/write/setRestriction';
 
 export interface PaymentBalance {
   /** Total balance including pending withdrawals */
@@ -254,6 +263,190 @@ export class PaymentManager {
       canExecute: timeRemaining <= 0,
       timeRemaining: timeRemaining > 0 ? timeRemaining : undefined,
       withdrawRequest,
+    };
+  }
+
+  // ========== Payment Delegation Methods ==========
+
+  /**
+   * Delegate payments to a user
+   * @param params - Parameters containing user address
+   * @returns Transaction result
+   */
+  async delegatePayments(params: { userAddress: string }): Promise<LitTxVoid> {
+    logger.debug('Delegating payments to user', { userAddress: params.userAddress });
+    
+    return await delegatePayments(
+      { userAddress: params.userAddress },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Undelegate payments from a user
+   * @param params - Parameters containing user address
+   * @returns Transaction result
+   */
+  async undelegatePayments(params: { userAddress: string }): Promise<LitTxVoid> {
+    logger.debug('Undelegating payments from user', { userAddress: params.userAddress });
+    
+    return await undelegatePayments(
+      { userAddress: params.userAddress },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Delegate payments to multiple users
+   * @param params - Parameters containing array of user addresses
+   * @returns Transaction result
+   */
+  async delegatePaymentsBatch(params: { userAddresses: string[] }): Promise<LitTxVoid> {
+    logger.debug('Delegating payments to multiple users', { userAddresses: params.userAddresses });
+    
+    return await delegatePaymentsBatch(
+      { userAddresses: params.userAddresses },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Undelegate payments from multiple users
+   * @param params - Parameters containing array of user addresses
+   * @returns Transaction result
+   */
+  async undelegatePaymentsBatch(params: { userAddresses: string[] }): Promise<LitTxVoid> {
+    logger.debug('Undelegating payments from multiple users', { userAddresses: params.userAddresses });
+    
+    return await undelegatePaymentsBatch(
+      { userAddresses: params.userAddresses },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Set payment restriction for the caller
+   * @param params - Restriction parameters
+   * @returns Transaction result
+   */
+  async setRestriction(params: {
+    totalMaxPrice: string;
+    requestsPerPeriod: string;
+    periodSeconds: string;
+  }): Promise<LitTxVoid> {
+    logger.debug('Setting payment restriction', params);
+    
+    return await setRestriction(
+      {
+        restriction: {
+          totalMaxPrice: BigInt(params.totalMaxPrice),
+          requestsPerPeriod: BigInt(params.requestsPerPeriod),
+          periodSeconds: BigInt(params.periodSeconds),
+        }
+      },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Get payers for a user
+   * @param params - Parameters containing user address
+   * @returns Array of payer addresses
+   */
+  async getPayers(params: { userAddress: string }): Promise<string[]> {
+    logger.debug('Getting payers for user', { userAddress: params.userAddress });
+    
+    return await getPayers(
+      { userAddress: params.userAddress },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Get users for a payer
+   * @param params - Parameters containing payer address
+   * @returns Array of user addresses
+   */
+  async getUsers(params: { payerAddress: string }): Promise<string[]> {
+    logger.debug('Getting users for payer', { payerAddress: params.payerAddress });
+    
+    return await getUsers(
+      { payerAddress: params.payerAddress },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Get restriction for a payer
+   * @param params - Parameters containing payer address
+   * @returns Restriction object
+   */
+  async getRestriction(params: { payerAddress: string }): Promise<{
+    totalMaxPrice: string;
+    requestsPerPeriod: string;
+    periodSeconds: string;
+    raw: Restriction;
+  }> {
+    logger.debug('Getting restriction for payer', { payerAddress: params.payerAddress });
+    
+    const restriction = await getRestriction(
+      { payerAddress: params.payerAddress },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+
+    return {
+      totalMaxPrice: restriction.totalMaxPrice.toString(),
+      requestsPerPeriod: restriction.requestsPerPeriod.toString(),
+      periodSeconds: restriction.periodSeconds.toString(),
+      raw: restriction,
+    };
+  }
+
+  /**
+   * Get payers and restrictions for multiple users
+   * @param params - Parameters containing array of user addresses
+   * @returns Object containing arrays of payers and restrictions
+   */
+  async getPayersAndRestrictions(params: { userAddresses: string[] }): Promise<{
+    payers: string[][];
+    restrictions: Array<Array<{
+      totalMaxPrice: string;
+      requestsPerPeriod: string;
+      periodSeconds: string;
+    }>>;
+    raw: {
+      payers: string[][];
+      restrictions: Restriction[][];
+    };
+  }> {
+    logger.debug('Getting payers and restrictions for users', { userAddresses: params.userAddresses });
+    
+    const result = await getPayersAndRestrictions(
+      { userAddresses: params.userAddresses },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+
+    const formattedRestrictions = result.restrictions.map(userRestrictions =>
+      userRestrictions.map(restriction => ({
+        totalMaxPrice: restriction.totalMaxPrice.toString(),
+        requestsPerPeriod: restriction.requestsPerPeriod.toString(),
+        periodSeconds: restriction.periodSeconds.toString(),
+      }))
+    );
+
+    return {
+      payers: result.payers,
+      restrictions: formattedRestrictions,
+      raw: result,
     };
   }
 } 

@@ -30,6 +30,9 @@ export const init = async (
   aliceViemAccount: any;
   aliceViemAccountAuthData: any;
   aliceViemAccountPkp: any;
+  bobViemAccount: any;
+  bobViemAccountAuthData: any;
+  bobViemAccountPkp: any;
   aliceEoaAuthContext: any;
 }> => {
   /**
@@ -46,6 +49,11 @@ export const init = async (
   const aliceViemAccount = privateKeyToAccount(generatePrivateKey());
   const aliceViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
     aliceViemAccount
+  );
+  
+  const bobViemAccount = privateKeyToAccount(generatePrivateKey());
+  const bobViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
+    bobViemAccount
   );
 
   /**
@@ -84,10 +92,18 @@ export const init = async (
       ifLessThan: '0.01',
       thenFundWith: '0.01',
     });
+    await fundAccount(bobViemAccount, liveMasterAccount, _networkModule, {
+      ifLessThan: '0.01',
+      thenFundWith: '0.01',
+    });
   } else if (_network === 'naga-test') {
     const { nagaTest } = await import('@lit-protocol/networks');
     _networkModule = nagaTest;
     await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
+      ifLessThan: '0.01',
+      thenFundWith: '0.01',
+    });
+    await fundAccount(bobViemAccount, liveMasterAccount, _networkModule, {
       ifLessThan: '0.01',
       thenFundWith: '0.01',
     });
@@ -98,10 +114,18 @@ export const init = async (
       ifLessThan: '1',
       thenFundWith: '1',
     });
+    await fundAccount(bobViemAccount, localMasterAccount, _networkModule, {
+      ifLessThan: '1',
+      thenFundWith: '1',
+    });
   } else if (_network === 'naga-staging') {
     const { nagaStaging } = await import('@lit-protocol/networks');
     _networkModule = nagaStaging;
     await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
+      ifLessThan: '0.0001',
+      thenFundWith: '0.0001',
+    });
+    await fundAccount(bobViemAccount, liveMasterAccount, _networkModule, {
       ifLessThan: '0.0001',
       thenFundWith: '0.0001',
     });
@@ -133,7 +157,7 @@ export const init = async (
 
   /**
    * ====================================
-   * Select a PKP
+   * Select PKPs for Alice and Bob
    * ====================================
    */
   const { pkps: aliceViemAccountPkps } = await litClient.viewPKPsByAuthData({
@@ -149,9 +173,22 @@ export const init = async (
   });
   const aliceViemAccountPkp = aliceViemAccountPkps[0];
 
+  const { pkps: bobViemAccountPkps } = await litClient.viewPKPsByAuthData({
+    authData: bobViemAccountAuthData,
+    pagination: {
+      limit: 5,
+    },
+    storageProvider: storagePlugins.localStorageNode({
+      appName: 'my-app',
+      networkName: 'naga-dev',
+      storagePath: './pkp-tokens-bob',
+    }),
+  });
+  const bobViemAccountPkp = bobViemAccountPkps[0];
+
   /**
    * ====================================
-   * (Local only) Mint a PKP
+   * (Local only) Mint PKPs for Alice and Bob
    * ====================================
    */
   if (!aliceViemAccountPkp) {
@@ -162,9 +199,17 @@ export const init = async (
     });
   }
 
+  if (!bobViemAccountPkp) {
+    await litClient.mintWithAuth({
+      authData: bobViemAccountAuthData,
+      account: bobViemAccount,
+      scopes: ['sign-anything'],
+    });
+  }
+
   /**
    * ====================================
-   * Select a PKP
+   * Select final PKPs for Alice and Bob
    * ====================================
    */
   const { pkps: aliceViemAccountPkps2 } = await litClient.viewPKPsByAuthData({
@@ -179,6 +224,19 @@ export const init = async (
     }),
   });
   const aliceViemAccountPkp2 = aliceViemAccountPkps2[0];
+
+  const { pkps: bobViemAccountPkps2 } = await litClient.viewPKPsByAuthData({
+    authData: bobViemAccountAuthData,
+    pagination: {
+      limit: 5,
+    },
+    storageProvider: storagePlugins.localStorageNode({
+      appName: 'my-app',
+      networkName: 'naga-dev',
+      storagePath: './pkp-tokens-bob',
+    }),
+  });
+  const bobViemAccountPkp2 = bobViemAccountPkps2[0];
 
   /**
    * ====================================
@@ -216,6 +274,9 @@ export const init = async (
     aliceViemAccount,
     aliceViemAccountAuthData,
     aliceViemAccountPkp: aliceViemAccountPkp2,
+    bobViemAccount,
+    bobViemAccountAuthData,
+    bobViemAccountPkp: bobViemAccountPkp2,
     aliceEoaAuthContext,
   };
 };
