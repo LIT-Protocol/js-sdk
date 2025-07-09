@@ -85,5 +85,6 @@ lit-auth-storage
 .ctx
 packages/auth-services/lit-auth-*
 pkp-tokens
+pkp-tokens-bob
 lit-cache
 lit-auth-local
