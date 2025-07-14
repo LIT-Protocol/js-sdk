@@ -126,7 +126,7 @@ const handleEncryptedError = (
     // Try to decrypt the error payload to get the actual error message
     try {
       _logger.info(
-        `${operationName}: Attempting to decrypt error payload for detailed error information...`
+        `"${operationName}": Attempting to decrypt error payload for detailed error information...`
       );
 
       const errorAsEncryptedPayload = {
@@ -145,7 +145,7 @@ const handleEncryptedError = (
       );
 
       _logger.error(
-        `${operationName}: Decrypted error details from nodes:`,
+        `"${operationName}": Decrypted error details from nodes:`,
         decryptedErrorValues
       );
 
@@ -157,35 +157,35 @@ const handleEncryptedError = (
           ? `. Details: ${firstError.errorObject}`
           : '';
         throw new Error(
-          `${operationName} failed. ${errorMessage}${errorDetails}`
+          `"${operationName}" failed. ${errorMessage}${errorDetails}`
         );
       }
 
       // If no specific error field, show the full decrypted response
       throw new Error(
-        `${operationName} failed. ${JSON.stringify(decryptedErrorValues)}`
+        `"${operationName}" failed. ${JSON.stringify(decryptedErrorValues)}`
       );
     } catch (decryptError) {
       _logger.error(
-        `${operationName}: Failed to decrypt error payload:`,
+        `"${operationName}": Failed to decrypt error payload:`,
         decryptError
       );
 
       // If the decryptError is actually our thrown error with the node's message, re-throw it
       if (
         decryptError instanceof Error &&
-        decryptError.message.includes(`${operationName} failed.`)
+        decryptError.message.includes(`"${operationName}" failed.`)
       ) {
         throw decryptError;
       }
 
       throw new Error(
-        `${operationName} failed. The nodes returned an encrypted error response that could not be decrypted. ` +
-          `This may indicate a configuration or network connectivity issue.`
+        `"${operationName}" failed. The nodes returned an encrypted error response that could not be decrypted. ` +
+        `This may indicate a configuration or network connectivity issue. ${JSON.stringify(errorResult)}`
       );
     }
   } else {
-    throw new Error(`${operationName} failed with no error details provided`);
+    throw new Error(`"${operationName}" failed. ${JSON.stringify(errorResult)}`);
   }
 };
 

@@ -341,7 +341,8 @@ const networkModuleObject = {
     getPaymentManager: async (params: {
       account: ExpectedAccountOrWalletClient;
     }): Promise<PaymentManager> => {
-      throw new Error('PaymentManager is not available in naga-local environment. Please use naga-dev instead.');
+      const chainManager = createChainManager(params.account);
+      return chainManager.api.paymentManager();
     },
 
     /**
@@ -597,6 +598,16 @@ const networkModuleObject = {
         requestId: string,
         jitContext: NagaJitContext
       ) => {
+
+
+        if (!result.success) {
+          E2EERequestManager.handleEncryptedError(
+            result,
+            jitContext,
+            'PKP Sign'
+          );
+        }
+
         const decryptedValues = E2EERequestManager.decryptBatchResponse(
           result,
           jitContext,
@@ -826,6 +837,7 @@ const networkModuleObject = {
             curveType: 'BLS' as const,
             epoch: requestBody.epoch,
             nodeSet: requestBody.nodeSet,
+            maxPrice: getUserMaxPrice({ product: 'SIGN_SESSION_KEY' }).toString(),
           };
 
           // Encrypt the request data using the E2EE manager
@@ -870,9 +882,19 @@ const networkModuleObject = {
         pkpPublicKey: Hex | string,
         jitContext: NagaJitContext
       ) => {
+
         _logger.info(
           'signSessionKey:handleResponse: Processing signSessionKey response'
         );
+
+        if (!result.success) {
+          E2EERequestManager.handleEncryptedError(
+            result,
+            jitContext,
+            'Session key signing'
+          );
+        }
+
 
         // Decrypt the batch response using the E2EE manager
         const decryptedValues = E2EERequestManager.decryptBatchResponse(

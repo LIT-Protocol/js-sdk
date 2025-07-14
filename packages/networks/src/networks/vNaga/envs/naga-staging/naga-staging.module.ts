@@ -827,6 +827,7 @@ const networkModuleObject = {
             curveType: 'BLS' as const,
             epoch: requestBody.epoch,
             nodeSet: requestBody.nodeSet,
+            maxPrice: getUserMaxPrice({ product: 'SIGN_SESSION_KEY' }).toString(),
           };
 
           // Encrypt the request data using the E2EE manager

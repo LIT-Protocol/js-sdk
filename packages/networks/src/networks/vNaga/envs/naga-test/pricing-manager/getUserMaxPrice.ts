@@ -16,6 +16,7 @@ export const getUserMaxPrice = (params: {
     DECRYPTION: BigInt(-1),
     SIGN: BigInt(-1),
     LIT_ACTION: BigInt(-1),
+    SIGN_SESSION_KEY: BigInt(-1),
   };
 
   if (defaultMaxPriceByProduct[params.product] === BigInt(-1)) {

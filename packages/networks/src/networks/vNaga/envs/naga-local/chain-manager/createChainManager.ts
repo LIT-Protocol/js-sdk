@@ -21,6 +21,7 @@ export type CreateChainManagerReturn = {
     pkpPermissionsManager: (
       pkpIdentifier: PkpIdentifierRaw
     ) => InstanceType<typeof api.PKPPermissionsManager>;
+    paymentManager: () => InstanceType<typeof api.PaymentManager>;
     getPKPsByAuthData: (
       authData: {
         authMethodType: number | bigint;
@@ -77,6 +78,12 @@ export const createChainManager = (
       pkpPermissionsManager: (pkpIdentifier: PkpIdentifierRaw) => {
         return new api.PKPPermissionsManager(
           pkpIdentifier,
+          _networkConfig,
+          accountOrWalletClient
+        );
+      },
+      paymentManager: () => {
+        return new api.PaymentManager(
           _networkConfig,
           accountOrWalletClient
         );
