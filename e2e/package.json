@@ -36,7 +36,7 @@
   "license": "MIT",
   "dependencies": {
     "viem": "2.29.4",
-    "zod": "^3.22.0"
+    "zod": "3.25.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

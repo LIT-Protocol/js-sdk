@@ -5,7 +5,7 @@
       "name": "@lit-protocol/e2e",
       "dependencies": {
         "viem": "2.29.4",
-        "zod": "^3.22.0",
+        "zod": "3.25.0",
       },
       "devDependencies": {
         "@types/node": "^20.0.0",
@@ -31,7 +31,7 @@
 
     "@scure/bip39": ["@scure/bip39@1.5.4", "", { "dependencies": { "@noble/hashes": "~1.7.1", "@scure/base": "~1.2.4" } }, "sha512-TFM4ni0vKvCfBpohoh+/lY05i9gRbSwXWngAsF4CABQxoaOHijxuaZ2R6cStDQ5CHtHO9aGJTr4ksVJASRRyMA=="],
 
-    "@types/node": ["@types/node@20.19.0", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-hfrc+1tud1xcdVTABC2JiomZJEklMcXYNTVtZLAeqTVWD+qL5jkHKT+1lOtqDdGxt+mB53DTtiz673vfjU8D1Q=="],
+    "@types/node": ["@types/node@20.19.8", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-HzbgCY53T6bfu4tT7Aq3TvViJyHjLjPNaAS3HOuMc9pw97KHsUtXNX4L+wu59g1WnjsZSko35MbEqnO58rihhw=="],
 
     "abitype": ["abitype@1.0.8", "", { "peerDependencies": { "typescript": ">=5.0.4", "zod": "^3 >=3.22.0" }, "optionalPeers": ["typescript", "zod"] }, "sha512-ZeiI6h3GnW06uYDLx0etQtX/p8E24UaHHBj57RSjK7YBFe7iuVn07EDpOeP451D06sF27VOz9JJPlIKJmXgkEg=="],
 
@@ -49,6 +49,6 @@
 
     "ws": ["ws@8.18.1", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w=="],
 
-    "zod": ["zod@3.25.57", "", {}, "sha512-6tgzLuwVST5oLUxXTmBqoinKMd3JeesgbgseXeFasKKj8Q1FCZrHnbqJOyiEvr4cVAlbug+CgIsmJ8cl/pU5FA=="],
+    "zod": ["zod@3.25.0", "", {}, "sha512-ficnZKUW0mlNivqeJkosTEkGbJ6NKCtSaOHGx5aXbtfeWMdRyzXLbAIn19my4C/KB7WPY/p9vlGPt+qpOp6c4Q=="],
   }
 }

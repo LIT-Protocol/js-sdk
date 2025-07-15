@@ -64,8 +64,8 @@
     "uint8arrays": "^4.0.3",
     "viem": "2.29.4",
     "wagmi": "^2.15.4",
-    "zod": "3.24.3",
-    "zod-validation-error": "^3.4.0"
+    "zod": "3.25.1",
+    "zod-validation-error": "3.5.3"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
