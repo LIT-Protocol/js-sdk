@@ -34,7 +34,7 @@ export const networkConfig: INetworkConfig<
   },
   endpoints: NAGA_ENDPOINT,
   services: {
-    authServiceBaseUrl: 'https://naga-auth-service.getlit.dev',
+    authServiceBaseUrl: 'https://naga-test-auth-service.onrender.com',
     loginServiceBaseUrl: 'https://login.litgateway.com',
   },
 };
