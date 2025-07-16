@@ -35,7 +35,7 @@
     "jose": "^6.0.7",
     "json-with-bigint": "^2.4.2",
     "pino": "^9.6.0",
-    "pino-caller": "^3.4.0",
+    "pino-caller": "3.4.0",
     "pino-pretty": "^13.0.0",
     "redis": "^4.6.13",
     "stytch": "^12.4.0",
@@ -44,7 +44,7 @@
     "viem": "2.29.4",
     "wagmi": "^2.14.11",
     "zod": "^3.24.2",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "3.4.0"
   },
   "devDependencies": {
     "bun-types": "^1.0.0",
