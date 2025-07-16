@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.0.0-alpha.27
+
+### Major Changes
+
+- added payment manager apis, added maxPrice for signSessionKey endpoint, and updated auth service url for naga-test
+
 ## 8.0.0-alpha.26
 
 ### Major Changes

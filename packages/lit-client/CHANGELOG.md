@@ -1,5 +1,11 @@
 # @lit-protocol/lit-client
 
+## 8.0.0-alpha.18
+
+### Major Changes
+
+- added payment manager apis, added maxPrice for signSessionKey endpoint, and updated auth service url for naga-test
+
 ## 8.0.0-alpha.17
 
 ### Major Changes
