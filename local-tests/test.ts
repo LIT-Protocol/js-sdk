@@ -114,6 +114,7 @@ import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/tes
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
 import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
 import { testPkpSessionSigsDomain } from './tests/testPkpSessionSigsDomain';
+import { testPruneRLI } from './tests/testPruneRLI';
 
 // Use the current LIT action code to test against
 setLitActionsCodeToLocal();
@@ -297,6 +298,10 @@ setLitActionsCodeToLocal();
     },
   };
 
+  const others = {
+    testPruneRLI,
+  };
+
   const testConfig = {
     tests: {
       // testExample,
@@ -319,6 +324,8 @@ setLitActionsCodeToLocal();
 
       ...relayerTests,
       ...wrappedKeysTests,
+
+      ...others,
     },
     devEnv,
   };
