@@ -21,6 +21,7 @@ export type CreateChainManagerReturn = {
     pkpPermissionsManager: (
       pkpIdentifier: PkpIdentifierRaw
     ) => InstanceType<typeof api.PKPPermissionsManager>;
+    paymentManager: () => InstanceType<typeof api.PaymentManager>;
     getPKPsByAuthData: (
       authData: {
         authMethodType: number | bigint;
@@ -81,6 +82,12 @@ export const createChainManager = (
           accountOrWalletClient
         );
       },
+      paymentManager: () => {
+        return new api.PaymentManager(
+          _networkConfig,
+          accountOrWalletClient
+        );
+      },
       getPKPsByAuthData: (
         authData: {
           authMethodType: number | bigint;
@@ -107,9 +114,9 @@ export const createChainManager = (
         const defaultPagination = { limit: 10, offset: 0 };
         const finalPagination = params.pagination
           ? {
-              limit: params.pagination.limit ?? defaultPagination.limit,
-              offset: params.pagination.offset ?? defaultPagination.offset,
-            }
+            limit: params.pagination.limit ?? defaultPagination.limit,
+            offset: params.pagination.offset ?? defaultPagination.offset,
+          }
           : defaultPagination;
 
         return getPKPsByAddress(

@@ -341,7 +341,8 @@ const networkModuleObject = {
     getPaymentManager: async (params: {
       account: ExpectedAccountOrWalletClient;
     }): Promise<PaymentManager> => {
-      throw new Error('PaymentManager is not available in naga-staging environment. Please use naga-dev instead.');
+      const chainManager = createChainManager(params.account);
+      return chainManager.api.paymentManager();
     },
 
     /**
