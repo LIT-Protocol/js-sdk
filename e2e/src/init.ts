@@ -50,7 +50,7 @@ export const init = async (
   const aliceViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
     aliceViemAccount
   );
-  
+
   const bobViemAccount = privateKeyToAccount(generatePrivateKey());
   const bobViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
     bobViemAccount
@@ -167,7 +167,7 @@ export const init = async (
     },
     storageProvider: storagePlugins.localStorageNode({
       appName: 'my-app',
-      networkName: 'naga-dev',
+      networkName: _network,
       storagePath: './pkp-tokens',
     }),
   });
@@ -180,7 +180,7 @@ export const init = async (
     },
     storageProvider: storagePlugins.localStorageNode({
       appName: 'my-app',
-      networkName: 'naga-dev',
+      networkName: _network,
       storagePath: './pkp-tokens-bob',
     }),
   });
@@ -219,7 +219,7 @@ export const init = async (
     },
     storageProvider: storagePlugins.localStorageNode({
       appName: 'my-app',
-      networkName: 'naga-dev',
+      networkName: _network,
       storagePath: './pkp-tokens',
     }),
   });
@@ -232,7 +232,7 @@ export const init = async (
     },
     storageProvider: storagePlugins.localStorageNode({
       appName: 'my-app',
-      networkName: 'naga-dev',
+      networkName: _network,
       storagePath: './pkp-tokens-bob',
     }),
   });

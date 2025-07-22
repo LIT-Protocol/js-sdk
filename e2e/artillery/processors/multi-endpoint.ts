@@ -38,29 +38,42 @@ import {
 let sharedContext: any = null;
 let alicePkpAuthContext: any = null;
 let aliceCustomAuthContext: any = null;
+let initializationPromise: Promise<any> | null = null;
 
 /**
  * Initialize the shared context once per Artillery run
  */
 async function initializeSharedContext() {
   if (sharedContext) return sharedContext;
-
-  try {
-    console.log('🚀 Initializing Artillery shared context...');
-
-    // Use the same init function as e2e tests
-    sharedContext = await init();
-
-    // Create auth contexts using helper functions
-    alicePkpAuthContext = await createPkpAuthContext(sharedContext);
-    aliceCustomAuthContext = await createCustomAuthContext(sharedContext);
-
-    console.log('✅ Artillery shared context initialized');
-    return sharedContext;
-  } catch (error) {
-    console.error('❌ Failed to initialize Artillery context:', error);
-    throw error;
+  
+  // Prevent race conditions by ensuring only one initialization happens
+  if (initializationPromise) {
+    return await initializationPromise;
   }
+
+  initializationPromise = (async () => {
+    try {
+      console.log('🚀 Initializing Artillery shared context...');
+
+      // Use the same init function as e2e tests
+      sharedContext = await init();
+
+      // Create auth contexts using helper functions
+      alicePkpAuthContext = await createPkpAuthContext(sharedContext);
+      aliceCustomAuthContext = await createCustomAuthContext(sharedContext);
+
+      console.log('✅ Artillery shared context initialized');
+      return sharedContext;
+    } catch (error) {
+      console.error('❌ Failed to initialize Artillery context:', error);
+      // Reset state on failure so retry is possible
+      initializationPromise = null;
+      sharedContext = null;
+      throw error;
+    }
+  })();
+
+  return await initializationPromise;
 }
 
 /**
@@ -166,7 +179,7 @@ export async function runMultiEndpointTest(context: any, events: any) {
 /**
  * PKP Sign test functions
  */
-export async function runPkpSignTest(context, events) {
+export async function runPkpSignTest(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 5;
@@ -176,7 +189,7 @@ export async function runPkpSignTest(context, events) {
   await runTestWithMetrics('pkp_sign', testFn, context, events, parallelism);
 }
 
-export async function runPkpSignTestWithEoa(context, events) {
+export async function runPkpSignTestWithEoa(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 5;
@@ -192,7 +205,7 @@ export async function runPkpSignTestWithEoa(context, events) {
   );
 }
 
-export async function runPkpSignTestWithPkp(context, events) {
+export async function runPkpSignTestWithPkp(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 5;
@@ -208,7 +221,7 @@ export async function runPkpSignTestWithPkp(context, events) {
   );
 }
 
-export async function runPkpSignTestWithCustom(context, events) {
+export async function runPkpSignTestWithCustom(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 5;
@@ -227,7 +240,7 @@ export async function runPkpSignTestWithCustom(context, events) {
 /**
  * Encrypt/Decrypt test functions
  */
-export async function runEncryptDecryptTest(context, events) {
+export async function runEncryptDecryptTest(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 3;
@@ -243,7 +256,7 @@ export async function runEncryptDecryptTest(context, events) {
   );
 }
 
-export async function runPkpEncryptDecryptTest(context, events) {
+export async function runPkpEncryptDecryptTest(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 3;
@@ -259,7 +272,7 @@ export async function runPkpEncryptDecryptTest(context, events) {
   );
 }
 
-export async function runEncryptDecryptFlowTest(context, events) {
+export async function runEncryptDecryptFlowTest(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 3;
@@ -278,7 +291,7 @@ export async function runEncryptDecryptFlowTest(context, events) {
 /**
  * Execute JS test function
  */
-export async function runExecuteJsTest(context, events) {
+export async function runExecuteJsTest(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 4;
@@ -291,7 +304,7 @@ export async function runExecuteJsTest(context, events) {
 /**
  * View PKPs test functions
  */
-export async function runViewPkpsTest(context, events) {
+export async function runViewPkpsTest(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 5;
@@ -325,7 +338,7 @@ export async function runViewPkpsTest(context, events) {
 /**
  * Viem integration test functions
  */
-export async function runViemSignTest(context, events) {
+export async function runViemSignTest(context: any, events: any) {
   await initializeSharedContext();
 
   const parallelism = context.vars.parallelism || 3;

@@ -2,7 +2,7 @@
 import { NagaLocalModule } from '@lit-protocol/networks';
 import { NagaDevModule } from '@lit-protocol/networks';
 import { NagaStagingModule } from '@lit-protocol/networks';
-import { NagaLitClient } from './types/NagaLitClient.type';
+// import { NagaLitClient } from './types/NagaLitClient.type';
 
 /**
  * ========== All Network Modules ==========
@@ -27,5 +27,5 @@ export type NagaNetworkModule =
 /**
  * Union type for all possible Lit clients
  */
-export type LitClient = NagaLitClient;
+// export type LitClient = NagaLitClient;
 // | DatilLitClient;
