@@ -50,8 +50,7 @@ import {
   MintWithCustomAuthRequest,
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
-import { LitClient, NagaNetworkModule } from './type';
-import { NagaLitClient } from './types/NagaLitClient.type';
+import { NagaNetworkModule } from './type';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -84,7 +83,7 @@ export const createLitClient = async ({
   network,
 }: {
   network: SupportedNetworkModule;
-}): Promise<LitClient> => {
+}) => {
   switch (network.id) {
     // -- (v8) Naga Network Module
     case 'naga':
@@ -144,7 +143,7 @@ export const createLitClient = async ({
  */
 export const _createNagaLitClient = async (
   networkModule: NagaNetworkModule
-): Promise<NagaLitClient> => {
+) => {
   const _stateManager = await networkModule.createStateManager<
     Awaited<ReturnType<typeof orchestrateHandshake>>,
     NagaNetworkModule
@@ -702,7 +701,7 @@ export const _createNagaLitClient = async (
     return response;
   }
 
-  const litClient: NagaLitClient = {
+  const litClient = {
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
     // maybe you will need connectionInfo: _stateManager.getLatestConnectionInfo(),
