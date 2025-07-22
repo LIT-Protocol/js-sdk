@@ -16,6 +16,7 @@ import type {
 } from '@lit-protocol/networks';
 import {
   AuthContextSchema2,
+  AuthData,
   EncryptedVersion1Schema,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
@@ -831,7 +832,7 @@ export const _createNagaLitClient = async (
         authMethodType: number | bigint;
         authMethodId: string;
         accessToken?: string;
-      };
+      } | AuthData;
       pagination?: { limit?: number; offset?: number };
       storageProvider?: PKPStorageProvider;
     }) => {
