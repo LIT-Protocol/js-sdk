@@ -136,6 +136,7 @@ export const createContractsManager = <T, M>(
     abi: [
       contractData.PKPPermissions.methods.addPermittedAction,
       contractData.PKPPermissions.methods.addPermittedAddress,
+      contractData.PKPPermissions.methods.addPermittedAuthMethod,
       contractData.PKPPermissions.methods.addPermittedAuthMethodScope,
       contractData.PKPPermissions.methods.getPermittedActions,
       contractData.PKPPermissions.methods.getPermittedAddresses,
@@ -144,6 +145,7 @@ export const createContractsManager = <T, M>(
       contractData.PKPPermissions.methods.removePermittedAction,
       contractData.PKPPermissions.methods.removePermittedAddress,
       contractData.PKPPermissions.methods.removePermittedAuthMethod,
+      contractData.PKPPermissions.methods.removePermittedAuthMethodScope,
       contractData.PKPPermissions.methods.isPermittedAction,
       contractData.PKPPermissions.methods.isPermittedAddress,
       contractData.PKPPermissions.methods.getTokenIdsForAuthMethod,
