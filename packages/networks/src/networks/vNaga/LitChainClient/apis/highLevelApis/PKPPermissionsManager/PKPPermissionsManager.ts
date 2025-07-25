@@ -31,6 +31,7 @@ import { PkpIdentifierRaw } from '../../rawContractApis/permissions/utils/resolv
 // Import all handler functions
 import { addPermittedActionByIdentifier } from './handlers/addPermittedActionByIdentifier';
 import { addPermittedAddressByIdentifier } from './handlers/addPermittedAddressByIdentifier';
+import { addPermittedAuthMethodByIdentifier } from './handlers/addPermittedAuthMethodByIdentifier';
 import { addPermittedAuthMethodScopeByIdentifier } from './handlers/addPermittedAuthMethodScopeByIdentifier';
 import {
   getPermissionsContext,
@@ -50,6 +51,7 @@ import { isPermittedAddressByIdentifier } from './handlers/isPermittedAddressByI
 import { removePermittedActionByIdentifier } from './handlers/removePermittedActionByIdentifier';
 import { removePermittedAddressByIdentifier } from './handlers/removePermittedAddressByIdentifier';
 import { removePermittedAuthMethodByIdentifier } from './handlers/removePermittedAuthMethodByIdentifier';
+import { removePermittedAuthMethodScopeByIdentifier } from './handlers/removePermittedAuthMethodScopeByIdentifier';
 
 import type { PKPStorageProvider } from '../../../../../../storage/types';
 import { logger } from '../../../../../shared/logger';
@@ -138,6 +140,31 @@ export class PKPPermissionsManager {
   }
 
   /**
+   * Adds a permitted authentication method to the PKP
+   *
+   * @param params - Parameters containing authMethodType, authMethodId, userPubkey, and scopes
+   * @returns Promise resolving to transaction details
+   */
+  async addPermittedAuthMethod(params: {
+    authMethodType: string | number | bigint;
+    authMethodId: string;
+    userPubkey: string;
+    scopes: ScopeString[];
+  }): Promise<LitTxVoid> {
+    return addPermittedAuthMethodByIdentifier(
+      {
+        authMethodType: params.authMethodType,
+        authMethodId: params.authMethodId,
+        userPubkey: params.userPubkey,
+        scopes: params.scopes,
+        ...this.getIdentifierParams(),
+      },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
    * Adds a permitted authentication method scope to the PKP
    *
    * @param params - Parameters containing authMethodType, authMethodId, and scopeId
@@ -210,6 +237,29 @@ export class PKPPermissionsManager {
       {
         authMethodType: params.authMethodType,
         authMethodId: params.authMethodId,
+        ...this.getIdentifierParams(),
+      },
+      this.networkContext,
+      this.accountOrWalletClient
+    );
+  }
+
+  /**
+   * Removes a specific scope from a permitted authentication method for the PKP
+   *
+   * @param params - Parameters containing authMethodType, authMethodId, and scopeId
+   * @returns Promise resolving to transaction details
+   */
+  async removePermittedAuthMethodScope(params: {
+    authMethodType: string | number | bigint;
+    authMethodId: string;
+    scopeId: string | number | bigint;
+  }): Promise<LitTxVoid> {
+    return removePermittedAuthMethodScopeByIdentifier(
+      {
+        authMethodType: params.authMethodType,
+        authMethodId: params.authMethodId,
+        scopeId: params.scopeId,
         ...this.getIdentifierParams(),
       },
       this.networkContext,
@@ -387,18 +437,31 @@ export class PKPPermissionsManager {
       | { type: 'addAction'; ipfsId: string; scopes: ScopeString[] }
       | { type: 'addAddress'; address: string; scopes: ScopeString[] }
       | {
-          type: 'addAuthMethodScope';
-          authMethodType: string | number | bigint;
-          authMethodId: string;
-          scopeId: string | number | bigint;
-        }
+        type: 'addAuthMethod';
+        authMethodType: string | number | bigint;
+        authMethodId: string;
+        userPubkey: string;
+        scopes: ScopeString[];
+      }
+      | {
+        type: 'addAuthMethodScope';
+        authMethodType: string | number | bigint;
+        authMethodId: string;
+        scopeId: string | number | bigint;
+      }
       | { type: 'removeAction'; ipfsId: string }
       | { type: 'removeAddress'; address: string }
       | {
-          type: 'removeAuthMethod';
-          authMethodType: string | number | bigint;
-          authMethodId: string;
-        }
+        type: 'removeAuthMethod';
+        authMethodType: string | number | bigint;
+        authMethodId: string;
+      }
+      | {
+        type: 'removeAuthMethodScope';
+        authMethodType: string | number | bigint;
+        authMethodId: string;
+        scopeId: string | number | bigint;
+      }
     >
   ): Promise<void> {
     // Process operations sequentially to avoid transaction conflicts
@@ -413,6 +476,14 @@ export class PKPPermissionsManager {
         case 'addAddress':
           await this.addPermittedAddress({
             address: op.address,
+            scopes: op.scopes,
+          });
+          break;
+        case 'addAuthMethod':
+          await this.addPermittedAuthMethod({
+            authMethodType: op.authMethodType,
+            authMethodId: op.authMethodId,
+            userPubkey: op.userPubkey,
             scopes: op.scopes,
           });
           break;
@@ -437,6 +508,13 @@ export class PKPPermissionsManager {
           await this.removePermittedAuthMethod({
             authMethodType: op.authMethodType,
             authMethodId: op.authMethodId,
+          });
+          break;
+        case 'removeAuthMethodScope':
+          await this.removePermittedAuthMethodScope({
+            authMethodType: op.authMethodType,
+            authMethodId: op.authMethodId,
+            scopeId: op.scopeId,
           });
           break;
       }
