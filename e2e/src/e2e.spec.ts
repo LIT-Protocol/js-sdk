@@ -32,7 +32,7 @@ describe('all', () => {
       ctx = await init();
 
       // Create PKP and custom auth contexts using helper functions
-      alicePkpAuthContext = await createPkpAuthContext(ctx);
+      // alicePkpAuthContext = await createPkpAuthContext(ctx);
       aliceCustomAuthContext = await createCustomAuthContext(ctx);
     } catch (e) {
       console.error(e);
@@ -83,29 +83,29 @@ describe('all', () => {
     console.log('🔐 Testing using Programmable Key Pair authentication');
 
     describe('endpoints', () => {
-      it('pkpSign', () => createPkpSignTest(ctx, () => alicePkpAuthContext)());
+      it('pkpSign', () => createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
       it('executeJs', () =>
-        createExecuteJsTest(ctx, () => alicePkpAuthContext)());
+        createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
       it('viewPKPsByAddress', () =>
-        createViewPKPsByAddressTest(ctx, () => alicePkpAuthContext)());
+        createViewPKPsByAddressTest(ctx, () => ctx.alicePkpAuthContext)());
       it('viewPKPsByAuthData', () =>
-        createViewPKPsByAuthDataTest(ctx, () => alicePkpAuthContext)());
+        createViewPKPsByAuthDataTest(ctx, () => ctx.alicePkpAuthContext)());
       it('pkpEncryptDecrypt', () =>
-        createPkpEncryptDecryptTest(ctx, () => alicePkpAuthContext)());
+        createPkpEncryptDecryptTest(ctx, () => ctx.alicePkpAuthContext)());
       it('encryptDecryptFlow', () =>
-        createEncryptDecryptFlowTest(ctx, () => alicePkpAuthContext)());
+        createEncryptDecryptFlowTest(ctx, () => ctx.alicePkpAuthContext)());
       it('pkpPermissionsManagerFlow', () =>
-        createPkpPermissionsManagerFlowTest(ctx, () => alicePkpAuthContext)());
+        createPkpPermissionsManagerFlowTest(ctx, () => ctx.alicePkpAuthContext)());
     });
 
     describe('integrations', () => {
       describe('pkp viem account', () => {
         it('sign message', () =>
-          createViemSignMessageTest(ctx, () => alicePkpAuthContext)());
+          createViemSignMessageTest(ctx, () => ctx.alicePkpAuthContext)());
         it('sign transaction', () =>
-          createViemSignTransactionTest(ctx, () => alicePkpAuthContext)());
+          createViemSignTransactionTest(ctx, () => ctx.alicePkpAuthContext)());
         it('sign typed data', () =>
-          createViemSignTypedDataTest(ctx, () => alicePkpAuthContext)());
+          createViemSignTypedDataTest(ctx, () => ctx.alicePkpAuthContext)());
       });
     });
   });

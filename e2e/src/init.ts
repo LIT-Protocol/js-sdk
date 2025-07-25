@@ -8,6 +8,8 @@ import { Account, PrivateKeyAccount } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
+import { getOrCreatePkp } from './helper/pkp-utils';
+// import { createPkpAuthContext } from './helper/auth-contexts';
 
 const SupportedNetworkSchema = z.enum([
   'naga-dev',
@@ -19,6 +21,10 @@ type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
+
+// Configurations
+const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
+const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 
 export const init = async (
   network?: SupportedNetwork,
@@ -34,6 +40,8 @@ export const init = async (
   bobViemAccountAuthData: any;
   bobViemAccountPkp: any;
   aliceEoaAuthContext: any;
+  alicePkpAuthContext: any;
+  // alicePkpViemAccountPermissionsManager: any,
 }> => {
   /**
    * ====================================
@@ -78,68 +86,50 @@ export const init = async (
 
   /**
    * ====================================
-   * Selecting a network module
+   * Network configuration and setup
    * ❗️ If it's on local chain, we will fund it with the first Anvil account.
    * ❗️ If it's on live chain, we will fund it with the master account. (set in the .env file)
    * ====================================
    */
-  let _networkModule;
 
-  if (_network === 'naga-dev') {
-    const { nagaDev } = await import('@lit-protocol/networks');
-    _networkModule = nagaDev;
-    await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
-      ifLessThan: '0.01',
-      thenFundWith: '0.01',
-    });
-    await fundAccount(bobViemAccount, liveMasterAccount, _networkModule, {
-      ifLessThan: '0.01',
-      thenFundWith: '0.01',
-    });
-  } else if (_network === 'naga-test') {
-    const { nagaTest } = await import('@lit-protocol/networks');
-    _networkModule = nagaTest;
-    await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
-      ifLessThan: '0.01',
-      thenFundWith: '0.01',
-    });
-    await fundAccount(bobViemAccount, liveMasterAccount, _networkModule, {
-      ifLessThan: '0.01',
-      thenFundWith: '0.01',
-    });
-  } else if (_network === 'naga-local') {
-    const { nagaLocal } = await import('@lit-protocol/networks');
-    _networkModule = nagaLocal;
-    await fundAccount(aliceViemAccount, localMasterAccount, _networkModule, {
-      ifLessThan: '1',
-      thenFundWith: '1',
-    });
-    await fundAccount(bobViemAccount, localMasterAccount, _networkModule, {
-      ifLessThan: '1',
-      thenFundWith: '1',
-    });
-  } else if (_network === 'naga-staging') {
-    const { nagaStaging } = await import('@lit-protocol/networks');
-    _networkModule = nagaStaging;
-    await fundAccount(aliceViemAccount, liveMasterAccount, _networkModule, {
-      ifLessThan: '0.0001',
-      thenFundWith: '0.0001',
-    });
-    await fundAccount(bobViemAccount, liveMasterAccount, _networkModule, {
-      ifLessThan: '0.0001',
-      thenFundWith: '0.0001',
-    });
-  } else {
+  // Network configuration map
+  const networkConfig = {
+    'naga-dev': { importName: 'nagaDev', type: 'live' },
+    'naga-test': { importName: 'nagaTest', type: 'live' },
+    'naga-local': { importName: 'nagaLocal', type: 'local' },
+    'naga-staging': { importName: 'nagaStaging', type: 'live' },
+  } as const;
+
+  const config = networkConfig[_network as keyof typeof networkConfig];
+  if (!config) {
     throw new Error(`❌ Invalid network: ${_network}`);
   }
+
+  // Dynamic import of network module
+  const networksModule = await import('@lit-protocol/networks');
+  const _networkModule = networksModule[config.importName];
+
+  // Fund accounts based on network type
+  const isLocal = config.type === 'local';
+  const masterAccount = isLocal ? localMasterAccount : liveMasterAccount;
+  const fundingAmount = isLocal ? LOCAL_NETWORK_FUNDING_AMOUNT : LIVE_NETWORK_FUNDING_AMOUNT;
+
+  // Fund accounts sequentially to avoid nonce conflicts with same sponsor
+  await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
+    ifLessThan: fundingAmount,
+    thenFundWith: fundingAmount,
+  });
+
+  await fundAccount(bobViemAccount, masterAccount, _networkModule, {
+    ifLessThan: fundingAmount,
+    thenFundWith: fundingAmount,
+  });
 
   /**
    * ====================================
    * Initialise the LitClient
    * ====================================
    */
-
-  // @ts-ignore
   const litClient = await createLitClient({ network: _networkModule });
 
   /**
@@ -157,86 +147,25 @@ export const init = async (
 
   /**
    * ====================================
-   * Select PKPs for Alice and Bob
+   * Get or create PKPs for Alice and Bob
    * ====================================
    */
-  const { pkps: aliceViemAccountPkps } = await litClient.viewPKPsByAuthData({
-    authData: aliceViemAccountAuthData,
-    pagination: {
-      limit: 5,
-    },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: 'my-app',
-      networkName: _network,
-      storagePath: './pkp-tokens',
-    }),
-  });
-  const aliceViemAccountPkp = aliceViemAccountPkps[0];
-
-  const { pkps: bobViemAccountPkps } = await litClient.viewPKPsByAuthData({
-    authData: bobViemAccountAuthData,
-    pagination: {
-      limit: 5,
-    },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: 'my-app',
-      networkName: _network,
-      storagePath: './pkp-tokens-bob',
-    }),
-  });
-  const bobViemAccountPkp = bobViemAccountPkps[0];
-
-  /**
-   * ====================================
-   * (Local only) Mint PKPs for Alice and Bob
-   * ====================================
-   */
-  if (!aliceViemAccountPkp) {
-    await litClient.mintWithAuth({
-      authData: aliceViemAccountAuthData,
-      account: aliceViemAccount,
-      scopes: ['sign-anything'],
-    });
-  }
-
-  if (!bobViemAccountPkp) {
-    await litClient.mintWithAuth({
-      authData: bobViemAccountAuthData,
-      account: bobViemAccount,
-      scopes: ['sign-anything'],
-    });
-  }
-
-  /**
-   * ====================================
-   * Select final PKPs for Alice and Bob
-   * ====================================
-   */
-  const { pkps: aliceViemAccountPkps2 } = await litClient.viewPKPsByAuthData({
-    authData: aliceViemAccountAuthData,
-    pagination: {
-      limit: 5,
-    },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: 'my-app',
-      networkName: _network,
-      storagePath: './pkp-tokens',
-    }),
-  });
-  const aliceViemAccountPkp2 = aliceViemAccountPkps2[0];
-
-  const { pkps: bobViemAccountPkps2 } = await litClient.viewPKPsByAuthData({
-    authData: bobViemAccountAuthData,
-    pagination: {
-      limit: 5,
-    },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: 'my-app',
-      networkName: _network,
-      storagePath: './pkp-tokens-bob',
-    }),
-  });
-  const bobViemAccountPkp2 = bobViemAccountPkps2[0];
+  const [aliceViemAccountPkp, bobViemAccountPkp] = await Promise.all([
+    getOrCreatePkp(
+      litClient,
+      aliceViemAccountAuthData,
+      aliceViemAccount,
+      './pkp-tokens',
+      _network
+    ),
+    getOrCreatePkp(
+      litClient,
+      bobViemAccountAuthData,
+      bobViemAccount,
+      './pkp-tokens-bob',
+      _network
+    ),
+  ]);
 
   /**
    * ====================================
@@ -262,6 +191,45 @@ export const init = async (
   });
 
   console.log('✅ Initialised components');
+
+  /**
+   * ====================================
+   * Create PKP auth context
+   * ====================================
+   */
+  const alicePkpAuthContext = await authManager.createPkpAuthContext({
+    authData: aliceViemAccountAuthData,
+    pkpPublicKey: aliceViemAccountPkp.publicKey,
+    authConfig: {
+      resources: [
+        ['pkp-signing', '*'],
+        ['lit-action-execution', '*'],
+        ['access-control-condition-decryption', '*'],
+      ],
+      expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+    },
+    litClient: litClient,
+  });
+
+  // const alicePkpViemAccount = await litClient.getPkpViemAccount({
+  //   pkpPublicKey: aliceViemAccountPkp.publicKey,
+  //   authContext: alicePkpAuthContext,
+  //   chainConfig: _networkModule.getChainConfig(),
+  // });
+
+  // await fundAccount(alicePkpViemAccount, localMasterAccount, _networkModule, {
+  //   ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
+  //   thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+  // });
+
+  // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
+  //   pkpIdentifier: {
+  //     tokenId: aliceViemAccountPkp.tokenId,
+  //   },
+  //   account: alicePkpViemAccount,
+  // });
+
+
   /**
    * ====================================
    * Return the initialised components
@@ -273,10 +241,12 @@ export const init = async (
     localMasterAccount,
     aliceViemAccount,
     aliceViemAccountAuthData,
-    aliceViemAccountPkp: aliceViemAccountPkp2,
+    aliceViemAccountPkp,
     bobViemAccount,
     bobViemAccountAuthData,
-    bobViemAccountPkp: bobViemAccountPkp2,
+    bobViemAccountPkp,
     aliceEoaAuthContext,
+    alicePkpAuthContext,
+    // alicePkpViemAccountPermissionsManager
   };
 };

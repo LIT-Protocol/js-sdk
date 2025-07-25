@@ -40,8 +40,6 @@ export async function addPermittedAddress(
   const { pkpPermissionsContract, pkpNftContract, publicClient, walletClient } =
     createContractsManager(networkCtx, accountOrWalletClient);
 
-  pkpPermissionsContract.write.addPermittedAddress;
-
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
     'addPermittedAddress',
