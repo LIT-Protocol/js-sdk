@@ -25,6 +25,7 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 // Configurations
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
+const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '0.1';
 
 export const init = async (
   network?: SupportedNetwork,
@@ -134,6 +135,18 @@ export const init = async (
 
   /**
    * ====================================
+   * (Master) Initialise Payment Manager
+   * ====================================
+  */
+  const masterPaymentManager = await litClient.getPaymentManager({
+    account: masterAccount,
+  });
+
+  const masterPaymentBalance = await masterPaymentManager.getBalance({ userAddress: masterAccount.address })
+  console.log('✅ Master Payment Balance:', masterPaymentBalance);
+
+  /**
+   * ====================================
    * Initialise the AuthManager
    * ====================================
    */
@@ -211,16 +224,30 @@ export const init = async (
     litClient: litClient,
   });
 
-  // const alicePkpViemAccount = await litClient.getPkpViemAccount({
-  //   pkpPublicKey: aliceViemAccountPkp.publicKey,
-  //   authContext: alicePkpAuthContext,
-  //   chainConfig: _networkModule.getChainConfig(),
-  // });
+  const alicePkpViemAccount = await litClient.getPkpViemAccount({
+    pkpPublicKey: aliceViemAccountPkp.publicKey,
+    authContext: alicePkpAuthContext,
+    chainConfig: _networkModule.getChainConfig(),
+  });
 
-  // await fundAccount(alicePkpViemAccount, localMasterAccount, _networkModule, {
-  //   ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-  //   thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
-  // });
+  await fundAccount(alicePkpViemAccount, masterAccount, _networkModule, {
+    ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
+    thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+  });
+
+  /**
+   * ====================================
+   * Depositing to Lit Ledger for differen 
+   * ====================================
+   */
+
+  // Deposit to the Alice EOA Ledger
+  await masterPaymentManager.depositForUser({ userAddress: aliceViemAccount.address, amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT });
+  console.log('✅ New Alice EOA Ledger Balance:', await masterPaymentManager.getBalance({ userAddress: aliceViemAccount.address }));
+
+  // Deposit to the PKP Ledger
+  await masterPaymentManager.depositForUser({ userAddress: alicePkpViemAccount.address, amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT });
+  console.log('✅ New PKP Ledger Balance:', await masterPaymentManager.getBalance({ userAddress: alicePkpViemAccount.address }));
 
   // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
   //   pkpIdentifier: {
