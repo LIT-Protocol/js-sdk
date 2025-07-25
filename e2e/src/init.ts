@@ -25,6 +25,7 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 // Configurations
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
+const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
 
 export const init = async (
   network?: SupportedNetwork,
@@ -41,6 +42,7 @@ export const init = async (
   bobViemAccountPkp: any;
   aliceEoaAuthContext: any;
   alicePkpAuthContext: any;
+  masterDepositForUser: (userAddress: string) => Promise<void>;
   // alicePkpViemAccountPermissionsManager: any,
 }> => {
   /**
@@ -134,6 +136,18 @@ export const init = async (
 
   /**
    * ====================================
+   * (Master) Initialise Payment Manager
+   * ====================================
+  */
+  const masterPaymentManager = await litClient.getPaymentManager({
+    account: masterAccount,
+  });
+
+  const masterPaymentBalance = await masterPaymentManager.getBalance({ userAddress: masterAccount.address })
+  console.log('✅ Master Payment Balance:', masterPaymentBalance);
+
+  /**
+   * ====================================
    * Initialise the AuthManager
    * ====================================
    */
@@ -211,16 +225,39 @@ export const init = async (
     litClient: litClient,
   });
 
-  // const alicePkpViemAccount = await litClient.getPkpViemAccount({
-  //   pkpPublicKey: aliceViemAccountPkp.publicKey,
-  //   authContext: alicePkpAuthContext,
-  //   chainConfig: _networkModule.getChainConfig(),
-  // });
+  const alicePkpViemAccount = await litClient.getPkpViemAccount({
+    pkpPublicKey: aliceViemAccountPkp.publicKey,
+    authContext: alicePkpAuthContext,
+    chainConfig: _networkModule.getChainConfig(),
+  });
 
-  // await fundAccount(alicePkpViemAccount, localMasterAccount, _networkModule, {
-  //   ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-  //   thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
-  // });
+  await fundAccount(alicePkpViemAccount, masterAccount, _networkModule, {
+    ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
+    thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+  });
+
+  /**
+   * ====================================
+   * Depositing to Lit Ledger for differen 
+   * ====================================
+   */
+
+  async function masterDepositForUser(userAddress: string) {
+    await masterPaymentManager.depositForUser({ userAddress: userAddress, amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT });
+    console.log(`✅ New ${userAddress} Ledger Balance:`, await masterPaymentManager.getBalance({ userAddress: userAddress }));
+  }
+
+  // Deposit to the Alice EOA Ledger
+  await masterDepositForUser(aliceViemAccount.address);
+
+  // Deposit to the PKP Ledger
+  await masterDepositForUser(alicePkpViemAccount.address);
+
+  // Deposit to the Bob EOA Ledger
+  await masterDepositForUser(bobViemAccount.address);
+
+  // Deposit to the Bob PKP Ledger
+  await masterDepositForUser(bobViemAccountPkp.ethAddress);
 
   // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
   //   pkpIdentifier: {
@@ -247,6 +284,7 @@ export const init = async (
     bobViemAccountPkp,
     aliceEoaAuthContext,
     alicePkpAuthContext,
+    masterDepositForUser
     // alicePkpViemAccountPermissionsManager
   };
 };

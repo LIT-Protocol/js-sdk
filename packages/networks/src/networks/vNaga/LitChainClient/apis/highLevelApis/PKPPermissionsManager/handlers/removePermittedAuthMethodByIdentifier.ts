@@ -43,9 +43,9 @@ export async function removePermittedAuthMethodByIdentifier(
     networkCtx
   );
 
-  console.log('❌ AUTH METHOD TYPE:', authMethodType);
-  console.log('❌ AUTH METHOD ID:', authMethodId);
-  console.log('❌ PKP TOKEN ID:', pkpTokenId);
+  // console.log('❌ AUTH METHOD TYPE:', authMethodType);
+  // console.log('❌ AUTH METHOD ID:', authMethodId);
+  // console.log('❌ PKP TOKEN ID:', pkpTokenId);
 
   return removePermittedAuthMethod(
     {

@@ -44,10 +44,10 @@ export async function removePermittedAuthMethodScopeByIdentifier(
     networkCtx
   );
 
-  console.log('🔥 AUTH METHOD TYPE:', authMethodType);
-  console.log('🔥 AUTH METHOD ID:', authMethodId);
-  console.log('🔥 SCOPE ID:', scopeId);
-  console.log('🔥 PKP TOKEN ID:', pkpTokenId);
+  // console.log('🔥 AUTH METHOD TYPE:', authMethodType);
+  // console.log('🔥 AUTH METHOD ID:', authMethodId);
+  // console.log('🔥 SCOPE ID:', scopeId);
+  // console.log('🔥 PKP TOKEN ID:', pkpTokenId);
 
   return removePermittedAuthMethodScope(
     {
