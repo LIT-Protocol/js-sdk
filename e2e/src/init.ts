@@ -25,7 +25,7 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 // Configurations
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
-const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '0.1';
+const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
 
 export const init = async (
   network?: SupportedNetwork,
@@ -42,6 +42,7 @@ export const init = async (
   bobViemAccountPkp: any;
   aliceEoaAuthContext: any;
   alicePkpAuthContext: any;
+  masterDepositForUser: (userAddress: string) => Promise<void>;
   // alicePkpViemAccountPermissionsManager: any,
 }> => {
   /**
@@ -241,13 +242,22 @@ export const init = async (
    * ====================================
    */
 
+  async function masterDepositForUser(userAddress: string) {
+    await masterPaymentManager.depositForUser({ userAddress: userAddress, amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT });
+    console.log(`✅ New ${userAddress} Ledger Balance:`, await masterPaymentManager.getBalance({ userAddress: userAddress }));
+  }
+
   // Deposit to the Alice EOA Ledger
-  await masterPaymentManager.depositForUser({ userAddress: aliceViemAccount.address, amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT });
-  console.log('✅ New Alice EOA Ledger Balance:', await masterPaymentManager.getBalance({ userAddress: aliceViemAccount.address }));
+  await masterDepositForUser(aliceViemAccount.address);
 
   // Deposit to the PKP Ledger
-  await masterPaymentManager.depositForUser({ userAddress: alicePkpViemAccount.address, amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT });
-  console.log('✅ New PKP Ledger Balance:', await masterPaymentManager.getBalance({ userAddress: alicePkpViemAccount.address }));
+  await masterDepositForUser(alicePkpViemAccount.address);
+
+  // Deposit to the Bob EOA Ledger
+  await masterDepositForUser(bobViemAccount.address);
+
+  // Deposit to the Bob PKP Ledger
+  await masterDepositForUser(bobViemAccountPkp.ethAddress);
 
   // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
   //   pkpIdentifier: {
@@ -274,6 +284,7 @@ export const init = async (
     bobViemAccountPkp,
     aliceEoaAuthContext,
     alicePkpAuthContext,
+    masterDepositForUser
     // alicePkpViemAccountPermissionsManager
   };
 };

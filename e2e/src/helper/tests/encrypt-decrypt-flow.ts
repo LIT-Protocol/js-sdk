@@ -9,14 +9,8 @@ export const createEncryptDecryptFlowTest = (
     const { createAccBuilder } = await import(
       '@lit-protocol/access-control-conditions'
     );
-    const { generatePrivateKey, privateKeyToAccount } = await import(
-      'viem/accounts'
-    );
 
     const authContext = getAuthContext();
-
-    // Create a test account for Bob (recipient)
-    const bobAccount = privateKeyToAccount(generatePrivateKey());
 
     // Determine which address to use for Alice based on auth context type
     let aliceAddress: string;
@@ -29,7 +23,7 @@ export const createEncryptDecryptFlowTest = (
     // Set up access control conditions requiring Bob's wallet ownership
     const builder = createAccBuilder();
     const accs = builder
-      .requireWalletOwnership(bobAccount.address)
+      .requireWalletOwnership(ctx.bobViemAccount.address)
       .on('ethereum')
       .build();
 
@@ -50,7 +44,7 @@ export const createEncryptDecryptFlowTest = (
     const jsonData = {
       message: 'Test JSON data',
       sender: aliceAddress,
-      recipient: bobAccount.address,
+      recipient: ctx.bobViemAccount.address,
       timestamp: Date.now(),
     };
 
@@ -105,7 +99,7 @@ export const createEncryptDecryptFlowTest = (
     // Create Bob's auth context for decryption
     const bobAuthContext = await ctx.authManager.createEoaAuthContext({
       config: {
-        account: bobAccount,
+        account: ctx.bobViemAccount,
       },
       authConfig: {
         domain: 'localhost',
