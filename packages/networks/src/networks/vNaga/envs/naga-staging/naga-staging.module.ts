@@ -599,6 +599,15 @@ const networkModuleObject = {
         requestId: string,
         jitContext: NagaJitContext
       ) => {
+
+        if (!result.success) {
+          E2EERequestManager.handleEncryptedError(
+            result,
+            jitContext,
+            'PKP Sign'
+          );
+        }
+
         const decryptedValues = E2EERequestManager.decryptBatchResponse(
           result,
           jitContext,
