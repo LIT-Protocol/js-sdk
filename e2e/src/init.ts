@@ -29,7 +29,8 @@ const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
 
 export const init = async (
   network?: SupportedNetwork,
-  logLevel?: LogLevel
+  logLevel?: LogLevel,
+  masterPrivateKey?: `0x${string}`
 ): Promise<{
   litClient: any;
   authManager: any;
@@ -56,7 +57,11 @@ export const init = async (
   const liveMasterAccount = privateKeyToAccount(
     process.env['LIVE_MASTER_ACCOUNT'] as `0x${string}`
   );
-  const aliceViemAccount = privateKeyToAccount(generatePrivateKey());
+  
+  // Use provided private key for Alice (from wallet pool) or generate new one
+  const aliceViemAccount = privateKeyToAccount(
+    masterPrivateKey || generatePrivateKey()
+  );
   const aliceViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
     aliceViemAccount
   );
