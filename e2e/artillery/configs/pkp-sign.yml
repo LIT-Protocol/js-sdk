@@ -1,10 +1,18 @@
 config:
   target: "dummy"
   phases:
-    - duration: 30
-      arrivalRate: 1
-      maxVusers: 3
-      name: "PKP Sign Test"
+    - duration: 60
+      arrivalRate: 5
+      maxVusers: 20
+      name: "Ramp Up"
+    - duration: 300
+      arrivalRate: 15
+      maxVusers: 50
+      name: "Sustained PKP Signing"
+    - duration: 60
+      arrivalRate: 5
+      maxVusers: 20
+      name: "Ramp Down"
   processor: "../src/processors/pkpSign.ts"
   environments:
     production:
