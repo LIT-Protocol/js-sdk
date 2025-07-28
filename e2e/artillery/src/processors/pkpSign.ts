@@ -1,7 +1,20 @@
 import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
 import { createLitClient } from "@lit-protocol/lit-client";
 import { privateKeyToAccount } from "viem/accounts";
+import { z } from "zod";
 import * as StateManager from "../StateManager";
+
+// PKP Sign Result Schema
+const PkpSignResultSchema = z.object({
+  signature: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex signature"),
+  verifyingKey: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex verifying key"),
+  signedData: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex signed data"),
+  recoveryId: z.number().int().min(0).max(3, "Recovery ID must be 0-3"),
+  publicKey: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex public key"),
+  sigType: z.string().min(1, "Signature type cannot be empty"),
+});
+
+type PkpSignResult = z.infer<typeof PkpSignResultSchema>;
 
 // CONFIGURATIONS
 const _network = process.env['NETWORK'];
@@ -112,10 +125,14 @@ export async function runPkpSignTest(requestParams: any, context: any, ee: any, 
       toSign: `Hello from Artillery! ${Date.now()}`, // Unique message per request
     });
     
+    // Validate the result using Zod schema
+    const validatedResult = PkpSignResultSchema.parse(result);
+    
     const endTime = Date.now();
     const duration = endTime - startTime;
     
     console.log(`✅ pkpSign successful in ${duration}ms`);
+    console.log('✅ pkpSign result:', validatedResult);
     
     // For Artillery, just return - no need to call next()
     return;
