@@ -1,0 +1,18 @@
+config:
+  target: "dummy"
+  phases:
+    - duration: 30
+      arrivalRate: 1
+      maxVusers: 3
+      name: "PKP Sign Test"
+  processor: "../src/processors/pkpSign.ts"
+  environments:
+    production:
+      target: "dummy"
+
+scenarios:
+  - name: "PKP Sign Load Test"
+    weight: 100
+    flow:
+      - function: "runPkpSignTest"
+      - think: 2 

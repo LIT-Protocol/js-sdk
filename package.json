@@ -24,12 +24,8 @@
     "unlink-all": "for dir in packages/*/; do echo \"Unlinking in $dir\"; (cd \"$dir\" && bun unlink) || { echo \"ERROR: Failed to unlink in $dir\"; exit 1; }; done",
     "auth-services": "cd packages/auth-services && bun run start",
     "test:e2e": "bun test ./e2e/src/e2e.spec.ts -t",
-    "artillery:smoke": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/smoke-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
-    "artillery:load": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/load-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
-    "artillery:stress": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/stress-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
-    "artillery:spike": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/spike-test.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
-    "artillery:pkp-sign": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign-focused.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
-    "artillery:encrypt-decrypt": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/encrypt-decrypt-focused.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
+    "artillery:init": "LOG_LEVEL=silent NETWORK=naga-staging bun --watch ./e2e/artillery/src/init.ts",
+    "artillery:pkp-sign": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
   },
   "private": true,
   "dependencies": {
