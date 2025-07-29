@@ -63,8 +63,8 @@ export async function sendNodeRequest<T>(
     const curlCommand = generateCurlCommand(_fullUrl, req);
     _logger.info('🔄 CURL command:', curlCommand);
 
-    // if (_fullUrl.includes('pkp/sign/v2')) {
-    //   console.log('🔄 req', req);
+    // if (_fullUrl.includes('sign_session_key')) {
+    //   console.log("Curl command: ", curlCommand);
     //   process.exit();
     // }
 

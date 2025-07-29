@@ -64,6 +64,9 @@ export async function getPkpAuthContextAdapter(
     litClient: {
       getContext: () => Promise<any>;
     };
+    cache?: {
+      delegationAuthSig?: boolean;
+    }
     // Optional pre-generated auth materials
     // sessionKeyPair?: SessionKeyPair;
     // delegationAuthSig?: AuthSig;
@@ -172,5 +175,6 @@ export async function getPkpAuthContextAdapter(
       storage: upstreamParams.storage,
       pkpAddress: pkpAddress,
     },
+    cache: params.cache,
   });
 }
