@@ -5,10 +5,10 @@ const FILE_NAME = 'artillery-state.json';
 
 // State Object
 const StateObject = {
-  aliceViemEoaAccount: {
-    privateKey: undefined as string | `0x${string}` | undefined,
-    address: undefined as string | `0x${string}` | undefined,
-    authData: undefined as string | undefined,
+  masterAccount: {
+    // privateKey: undefined as string | `0x${string}` | undefined,
+    // address: undefined as string | `0x${string}` | undefined,
+    authData: undefined as any | undefined,  // Changed from string to any since authData is an object
     pkp: undefined as any | undefined,
   },
 };

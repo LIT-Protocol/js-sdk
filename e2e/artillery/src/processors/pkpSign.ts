@@ -3,6 +3,8 @@ import { createLitClient } from "@lit-protocol/lit-client";
 import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
 import * as StateManager from "../StateManager";
+import * as NetworkManager from "../../../../e2e/src/helper/NetworkManager";
+import * as AccountManager from "../AccountManager";
 
 // PKP Sign Result Schema
 const PkpSignResultSchema = z.object({
@@ -16,26 +18,12 @@ const PkpSignResultSchema = z.object({
 
 type PkpSignResult = z.infer<typeof PkpSignResultSchema>;
 
-// CONFIGURATIONS
-const _network = process.env['NETWORK'];
-
-const NETWORK_CONFIG = {
-  'naga-dev': { importName: 'nagaDev', type: 'live' },
-  'naga-test': { importName: 'nagaTest', type: 'live' },
-  'naga-local': { importName: 'nagaLocal', type: 'local' },
-  'naga-staging': { importName: 'nagaStaging', type: 'live' },
-} as const;
-
-const config = NETWORK_CONFIG[_network as keyof typeof NETWORK_CONFIG];
-if (!config) {
-  throw new Error(`❌ Invalid network: ${_network}`);
-}
-
 // Global variables to cache expensive operations
 let litClient: any = null;
 let authManager: any = null;
-let aliceEoaAuthContext: any = null;
+let masterAccountAuthContext: any = null;
 let networkModule: any = null;
+let masterAccount: any = null;
 
 /**
  * Initialize shared resources once
@@ -45,8 +33,7 @@ const initializeSharedResources = async () => {
     console.log('🔧 Initializing shared resources...');
     
     // Import network module
-    const networksModule = await import('@lit-protocol/networks');
-    networkModule = networksModule[config.importName];
+    networkModule = await NetworkManager.getLitNetworkModule();
     
     // Create LitClient
     litClient = await createLitClient({ network: networkModule });
@@ -55,7 +42,7 @@ const initializeSharedResources = async () => {
     authManager = createAuthManager({
       storage: storagePlugins.localStorageNode({
         appName: 'artillery-testing-app',
-        networkName: `${_network}-artillery`,
+        networkName: `${process.env['NETWORK']}-artillery`,
         storagePath: './lit-auth-artillery',
       }),
     });
@@ -68,21 +55,27 @@ const initializeSharedResources = async () => {
  * Create auth context from stored state
  */
 const createAuthContextFromState = async () => {
-  if (!aliceEoaAuthContext) {
+  if (!masterAccountAuthContext) {
     const state = await StateManager.readFile();
     
-    // Validate that private key exists
-    if (!state.aliceViemEoaAccount.privateKey) {
-      throw new Error('❌ Private key not found in state. Run init.ts first.');
+    // Validate that master account authData and PKP exist
+    if (!state.masterAccount.authData) {
+      throw new Error('❌ Master account authData not found in state. Run init.ts first.');
     }
     
-    // Recreate the Viem account from stored private key
-    const aliceViemEoaAccount = privateKeyToAccount(state.aliceViemEoaAccount.privateKey as `0x${string}`);
+    if (!state.masterAccount.pkp) {
+      throw new Error('❌ Master account PKP not found in state. Run init.ts first.');
+    }
     
-    // Recreate auth context
-    aliceEoaAuthContext = await authManager.createEoaAuthContext({
+    // Get the master account from environment (same as init.ts)
+    if (!masterAccount) {
+      masterAccount = await AccountManager.getMasterAccount();
+    }
+    
+    // Create auth context for master account
+    masterAccountAuthContext = await authManager.createEoaAuthContext({
       config: {
-        account: aliceViemEoaAccount,
+        account: masterAccount,
       },
       authConfig: {
         statement: 'I authorize the Lit Protocol to execute this Lit Action.',
@@ -99,7 +92,7 @@ const createAuthContextFromState = async () => {
     });
   }
   
-  return aliceEoaAuthContext;
+  return masterAccountAuthContext;
 };
 
 /**
@@ -121,7 +114,7 @@ export async function runPkpSignTest(requestParams: any, context: any, ee: any, 
     // Perform pkpSign operation
     const result = await litClient.chain.ethereum.pkpSign({
       authContext: authContext,
-      pubKey: state.aliceViemEoaAccount.pkp.publicKey,
+      pubKey: state.masterAccount.pkp.publicKey,
       toSign: `Hello from Artillery! ${Date.now()}`, // Unique message per request
     });
     

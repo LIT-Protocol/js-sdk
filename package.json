@@ -24,7 +24,7 @@
     "unlink-all": "for dir in packages/*/; do echo \"Unlinking in $dir\"; (cd \"$dir\" && bun unlink) || { echo \"ERROR: Failed to unlink in $dir\"; exit 1; }; done",
     "auth-services": "cd packages/auth-services && bun run start",
     "test:e2e": "bun test ./e2e/src/e2e.spec.ts -t",
-    "artillery:init": "LOG_LEVEL=silent NETWORK=naga-staging bun --watch ./e2e/artillery/src/init.ts",
+    "artillery:init": "bun run ./e2e/artillery/src/init.ts",
     "artillery:pkp-sign": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
   },
   "private": true,
