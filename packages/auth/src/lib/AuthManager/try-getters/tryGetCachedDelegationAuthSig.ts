@@ -13,7 +13,7 @@ export async function tryGetCachedDelegationAuthSig(params: {
   cache?: boolean; // If false, always generate a new auth sig
 }) {
   // If cache is explicitly disabled, skip cache reading and generate new auth sig
-  if (!params.cache) {
+  if (params.cache === false) {
     _logger.info(
       'tryGetCachedDelegationAuthSig: Cache disabled, generating new delegation auth sig.',
       {
