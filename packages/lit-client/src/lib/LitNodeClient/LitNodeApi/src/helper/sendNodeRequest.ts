@@ -70,6 +70,23 @@ export async function sendNodeRequest<T>(
 
     const response = await fetch(_fullUrl, req);
 
+    // Only log response details when DEBUG_HTTP is enabled
+    // Safely check for DEBUG_HTTP environment variable in both Node.js and browser
+    let isDebugMode = false;
+    try {
+      isDebugMode = typeof process !== 'undefined' && 
+                   typeof process.env === 'object' && 
+                   process.env['DEBUG_HTTP'] === 'true';
+    } catch (e) {
+      // Ignore any errors - ensures browser compatibility
+      isDebugMode = false;
+    }
+    
+    if (isDebugMode) {
+      const timestamp = new Date().toISOString();
+      console.log(`🔄 response at ${timestamp}`, response);
+    }
+
     const isJson = response.headers
       .get('content-type')
       ?.includes('application/json');

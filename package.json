@@ -25,7 +25,9 @@
     "auth-services": "cd packages/auth-services && bun run start",
     "test:e2e": "bun test ./e2e/src/e2e.spec.ts -t",
     "artillery:init": "bun run ./e2e/artillery/src/init.ts",
-    "artillery:pkp-sign": "dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
+    "artillery:balance-status": "LOG_LEVEL=silent bun run ./e2e/artillery/src/balance-status.ts",
+    "artillery:pkp-sign": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:sign-session-key": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/sign-session-key.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
   },
   "private": true,
   "dependencies": {

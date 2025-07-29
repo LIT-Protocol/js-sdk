@@ -11,7 +11,7 @@ config:
     - duration: 300
       # arrivalRate: 50
       arrivalRate: 10
-      name: "Sustained PKP Signing"
+      name: "Sustained Sign Session Key"
     # Over 60s, ramp down to creating 5 vusers per second
     - duration: 60
       arrivalRate: 5
@@ -19,8 +19,9 @@ config:
   processor: "../src/processors/multi-endpoints.ts"
 
 scenarios:
-  - name: "PKP Sign Stress Test"
+  - name: "Sign Session Key Stress Test"
     weight: 100
     flow:
-      - function: "runPkpSignTest"
+
+      - function: "runSignSessionKeyTest"
       - think: 0.1 

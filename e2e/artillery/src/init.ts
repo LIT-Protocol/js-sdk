@@ -83,21 +83,21 @@ const LEDGER_MINIMUM_BALANCE = 10000;
   console.log('✅ Master Account PKP:', masterAccountPkp);
 
   // create pkp auth context
-  const masterAccountPkpAuthContext = await authManager.createPkpAuthContext({
-    authData: masterAccountAuthData,
-    pkpPublicKey: masterAccountPkp.publicKey,
-    authConfig: {
-      resources: [
-        ['pkp-signing', '*'],
-        ['lit-action-execution', '*'],
-        ['access-control-condition-decryption', '*'],
-      ],
-      expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-    },
-    litClient: litClient,
-  });
+  // const masterAccountPkpAuthContext = await authManager.createPkpAuthContext({
+  //   authData: masterAccountAuthData,
+  //   pkpPublicKey: masterAccountPkp.publicKey,
+  //   authConfig: {
+  //     resources: [
+  //       ['pkp-signing', '*'],
+  //       ['lit-action-execution', '*'],
+  //       ['access-control-condition-decryption', '*'],
+  //     ],
+  //     expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+  //   },
+  //   litClient: litClient,
+  // });
 
-  console.log('✅ Master Account PKP Auth Context:', masterAccountPkpAuthContext);
+  // console.log('✅ Master Account PKP Auth Context:', masterAccountPkpAuthContext);
 
   // 6. create the auth context (this should be generated each time)
   // const masterAccountAuthContext = await authManager.createEoaAuthContext({
