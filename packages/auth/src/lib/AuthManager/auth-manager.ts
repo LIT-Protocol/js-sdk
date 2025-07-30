@@ -74,6 +74,9 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
       pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
       authConfig: AuthConfigV2;
       litClient: BaseAuthContext<any>['litClient'];
+      cache?: {
+        delegationAuthSig?: boolean;
+      }
       // Optional pre-generated auth materials for server-side usage
       // sessionKeyPair?: SessionKeyPair;
       // delegationAuthSig?: AuthSig;

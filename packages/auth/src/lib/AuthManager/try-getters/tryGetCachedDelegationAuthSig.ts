@@ -10,7 +10,29 @@ export async function tryGetCachedDelegationAuthSig(params: {
   address: string;
   expiration: string; // Desired expiration for new sigs, not used for checking existing
   signSessionKey: any; // This is assumed to be a Promise resolving to the auth sig
+  cache?: boolean; // If false, always generate a new auth sig
 }) {
+  // If cache is explicitly disabled, skip cache reading and generate new auth sig
+  if (params.cache === false) {
+    _logger.info(
+      'tryGetCachedDelegationAuthSig: Cache disabled, generating new delegation auth sig.',
+      {
+        address: params.address,
+      }
+    );
+
+    const newDelegationAuthSig = await params.signSessionKey();
+
+    _logger.info(
+      'tryGetCachedDelegationAuthSig: Generated new delegation auth sig (cache disabled, not saved).',
+      {
+        address: params.address,
+      }
+    );
+
+    return newDelegationAuthSig;
+  }
+
   const delegationAuthSigString =
     await params.storage.readInnerDelegationAuthSig({
       publicKey: params.address,
