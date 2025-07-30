@@ -4,22 +4,22 @@ export const mintPkpDoc = {
   body: t.Object(
     {
       authMethodType: t.Required(
-        t.Number({
+        t.String({
           description:
-            'The numeric type of authentication method to use for the PKP. Supported types include:\n' +
-            '- 1: EthWallet\n' +
-            '- 2: LitAction\n' +
-            '- 3: WebAuthn\n' +
-            '- 4: Discord\n' +
-            '- 5: Google\n' +
-            '- 6: GoogleJwt\n' +
-            '- 8: AppleJwt\n' +
-            '- 9: StytchOtp\n' +
-            '- 10: StytchEmailFactorOtp\n' +
-            '- 11: StytchSmsFactorOtp\n' +
-            '- 12: StytchWhatsAppFactorOtp\n' +
-            '- 13: StytchTotpFactorOtp\n\n' +
-            'Custom auth methods can also be used by providing their corresponding numeric ID.',
+            'The type of authentication method to use for the PKP. Supported types include:\n' +
+            '- "1": EthWallet\n' +
+            '- "2": LitAction\n' +
+            '- "3": WebAuthn\n' +
+            '- "4": Discord\n' +
+            '- "5": Google\n' +
+            '- "6": GoogleJwt\n' +
+            '- "8": AppleJwt\n' +
+            '- "9": StytchOtp\n' +
+            '- "10": StytchEmailFactorOtp\n' +
+            '- "11": StytchSmsFactorOtp\n' +
+            '- "12": StytchWhatsAppFactorOtp\n' +
+            '- "13": StytchTotpFactorOtp\n\n' +
+            'Custom auth methods can also be used by providing their corresponding string ID.',
         })
       ),
       authMethodId: t.Required(
@@ -35,6 +35,22 @@ export const mintPkpDoc = {
           description:
             "Public key associated with the authentication method. This is primarily used for WebAuthn, where it should be the public key obtained from the WebAuthn registration process. For other authentication types, if this field is omitted or an empty string is provided, it will default to '0x'. If explicitly providing for non-WebAuthn, use '0x'.",
         })
+      ),
+      scopes: t.Optional(
+        t.Array(
+          t.Union([
+            t.Literal('sign-anything'),
+            t.Literal('personal-sign'),
+            t.Literal('no-permissions'),
+          ]),
+          {
+            description:
+              'Array of permission scopes to grant to the PKP. If omitted, defaults to an empty array (no permissions). Available scopes:\n' +
+              '- "sign-anything": Allows the PKP to sign any message\n' +
+              '- "personal-sign": Allows the PKP to sign personal messages only\n' +
+              '- "no-permissions": Explicitly sets no permissions',
+          }
+        )
       ),
     },
     {
