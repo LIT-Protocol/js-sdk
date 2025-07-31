@@ -866,13 +866,7 @@ export const _createNagaLitClient = async (
       });
     },
     authService: {
-      mintWithAuth: async (params: {
-        authData: AuthData;
-        authServiceBaseUrl?: string;
-        scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
-      }) => {
-        return networkModule.authService.pkpMint(params);
-      },
+      mintWithAuth:  networkModule.authService.pkpMint,
     },
     executeJs: async (
       params: z.infer<typeof networkModule.api.executeJs.schemas.Input>
