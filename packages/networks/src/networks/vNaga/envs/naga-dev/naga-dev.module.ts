@@ -447,6 +447,7 @@ const networkModuleObject = {
     pkpMint: async (params: {
       authData: AuthData;
       authServiceBaseUrl?: string;
+      scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
     }) => {
       return await handleAuthServerRequest<PKPData>({
         jobName: 'PKP Minting',
@@ -458,6 +459,7 @@ const networkModuleObject = {
           authMethodType: params.authData.authMethodType,
           authMethodId: params.authData.authMethodId,
           pubkey: params.authData.publicKey,
+          scopes: params.scopes,
         },
       });
     },

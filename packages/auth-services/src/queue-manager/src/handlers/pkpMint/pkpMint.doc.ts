@@ -36,6 +36,22 @@ export const mintPkpDoc = {
             "Public key associated with the authentication method. This is primarily used for WebAuthn, where it should be the public key obtained from the WebAuthn registration process. For other authentication types, if this field is omitted or an empty string is provided, it will default to '0x'. If explicitly providing for non-WebAuthn, use '0x'.",
         })
       ),
+      scopes: t.Optional(
+        t.Array(
+          t.Union([
+            t.Literal('sign-anything'),
+            t.Literal('personal-sign'),
+            t.Literal('no-permissions'),
+          ]),
+          {
+            description:
+              'Array of permission scopes to grant to the PKP. If omitted, defaults to an empty array (no permissions). Available scopes:\n' +
+              '- "sign-anything": Allows the PKP to sign any message\n' +
+              '- "personal-sign": Allows the PKP to sign personal messages only\n' +
+              '- "no-permissions": Explicitly sets no permissions',
+          }
+        )
+      ),
     },
     {
       description:

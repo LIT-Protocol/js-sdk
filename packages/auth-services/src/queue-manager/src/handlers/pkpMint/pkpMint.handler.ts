@@ -12,6 +12,7 @@ export async function handlePkpMintTask(jobData: {
     authMethodType: string;
     authMethodId: Hex;
     pubkey: Hex;
+    scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
   };
 }): Promise<any> {
   const userAuthData: Optional<AuthData, 'accessToken'> = {
@@ -23,7 +24,7 @@ export async function handlePkpMintTask(jobData: {
   const result = await globalThis.systemContext.litClient.mintWithAuth({
     account: globalThis.systemContext.account,
     authData: userAuthData,
-    scopes: ['sign-anything'],
+    scopes: jobData.requestBody.scopes || [],
   });
 
   console.log(
