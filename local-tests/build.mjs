@@ -30,6 +30,28 @@ export const build = async () => {
     inject: [`./${TEST_DIR}/shim.mjs`],
     mainFields: ['module', 'main'],
   });
+
+  await esbuild.build({
+    entryPoints: [`${TEST_DIR}/health/index.ts`],
+    outfile: `./${TEST_DIR}/build/health/index.mjs`,
+    bundle: true,
+    plugins: [
+      nodeExternalsPlugin({
+        allowList: [
+          'ethers',
+          '@lit-protocol/accs-schemas',
+          '@lit-protocol/contracts',
+          'crypto',
+          'secp256k1',
+        ],
+      }),
+    ],
+    platform: 'node',
+    target: 'esnext',
+    format: 'esm',
+    inject: [`./${TEST_DIR}/shim.mjs`],
+    mainFields: ['module', 'main'],
+  });
 };
 
 /**
