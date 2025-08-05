@@ -275,6 +275,7 @@ export class PKPEthersWallet
         if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
           transaction.maxFeePerGas = feeData.maxFeePerGas;
           transaction.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+          transaction.type = EIP1559_TX_TYPE;
           this.pkpBase.log(
             'signTransaction => maxFeePerGas:',
             transaction.maxFeePerGas
