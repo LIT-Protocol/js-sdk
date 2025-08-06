@@ -21,11 +21,6 @@ env:
 jobs:
   datil-health-check:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        network: [datil-dev, datil-test, datil]
-      max-parallel: 1
     env:
       PRIVATE_KEYS: ${{ secrets.PRIVATE_KEYS }}
     steps:
@@ -42,17 +37,18 @@ jobs:
       - name: Install Yarn dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run health check for ${{ matrix.network }}
-        run: NETWORK=${{ matrix.network }} yarn test:health
+      - name: Run health check for datil-dev
+        run: NETWORK=datil-dev yarn test:health
+
+      - name: Run health check for datil-test
+        run: NETWORK=datil-test yarn test:health
+
+      - name: Run health check for datil
+        run: NETWORK=datil yarn test:health
 
   naga-health-check:
     runs-on: ubuntu-latest
     needs: datil-health-check
-    strategy:
-      fail-fast: false
-      matrix:
-        network: [naga-dev, naga-staging, naga-test]
-      max-parallel: 1
     env:
       LIVE_MASTER_ACCOUNT: ${{ secrets.LIVE_MASTER_ACCOUNT }}
       LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
@@ -60,7 +56,7 @@ jobs:
       - name: Checkout naga branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.naga_branch || 'naga' }}
+          ref: ${{ github.event.inputs.naga_branch || 'master' }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -68,5 +64,11 @@ jobs:
       - name: Install Bun dependencies
         run: bun install --frozen-lockfile
 
-      - name: Run health check for ${{ matrix.network }}
-        run: NETWORK=${{ matrix.network }} bun run test:health
+      - name: Run health check for naga-dev
+        run: NETWORK=naga-dev bun run test:health
+
+      - name: Run health check for naga-staging
+        run: NETWORK=naga-staging bun run test:health
+
+      - name: Run health check for naga-test
+        run: NETWORK=naga-test bun run test:health
