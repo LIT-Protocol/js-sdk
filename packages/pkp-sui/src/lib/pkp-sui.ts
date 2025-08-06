@@ -78,7 +78,7 @@ export class PKPSuiWallet implements PKPWallet, Signer {
     const msgHash = sha256(digest);
     const signature = await this.runSign(msgHash);
     const numToNByteStr = (num: number | bigint): string =>
-      bytesToHex(numberToBytesBE(num, secp256k1.CURVE.nByteLength));
+      bytesToHex(numberToBytesBE(num, secp256k1.CURVE.nByteLength || 32));
 
     // TODO response from PKPBase.runSign has this values defined as strings
     const compactHex =
