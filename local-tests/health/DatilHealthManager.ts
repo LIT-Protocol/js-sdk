@@ -1,7 +1,7 @@
-import { getEoaSessionSigs } from "local-tests/setup/session-sigs/get-eoa-session-sigs";
-import { getPkpSessionSigs } from "local-tests/setup/session-sigs/get-pkp-session-sigs";
-import { TinnyEnvironment } from "local-tests/setup/tinny-environment"
-import { TinnyPerson } from "local-tests/setup/tinny-person";
+import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+import { TinnyPerson } from 'local-tests/setup/tinny-person';
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ILitNodeClient } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
@@ -9,16 +9,15 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { encryptString, decryptToString } from '@lit-protocol/encryption';
 
 export class DatilHealthManager {
-
   env: TinnyEnvironment;
   alice: TinnyPerson;
   eoaSessionSigs: any;
 
-  constructor(){
+  constructor() {
     this.env = new TinnyEnvironment();
   }
 
-  async init(){
+  async init() {
     await this.env.init();
   }
 
@@ -27,58 +26,57 @@ export class DatilHealthManager {
   // this action contains chain & rpc interactions
   // best to cache it, but for the time being, we will create a new person for each test, since we are only running this test
   // once in every 30 minutes.
-  async initPerson(){
-    this.alice = await this.env.createNewPerson("Alice");
+  async initPerson() {
+    this.alice = await this.env.createNewPerson('Alice');
     this.eoaSessionSigs = await getEoaSessionSigs(this.env, this.alice);
   }
 
-  validatePrerequisites(){
-    if(!this.alice){
-      throw new Error("❌ Person not initialized");
+  validatePrerequisites() {
+    if (!this.alice) {
+      throw new Error('❌ Person not initialized');
     }
-    if(!this.eoaSessionSigs){
-      throw new Error("❌ EOA Session Sigs not initialized");
+    if (!this.eoaSessionSigs) {
+      throw new Error('❌ EOA Session Sigs not initialized');
     }
   }
-
 
   // ========== Endpoint Tests ==========
   handshakeTest = async () => {
-    try{
+    try {
       await this.env.setupLitNodeClient();
-    }catch(e){
-      console.error("❌ Failed to setup Lit Node Client");
+    } catch (e) {
+      console.error('❌ Failed to setup Lit Node Client');
       throw e;
     }
-  }
+  };
 
   pkpSignTest = async () => {
     this.validatePrerequisites();
-    try{
+    try {
       await this.env.litNodeClient.pkpSign({
         toSign: this.alice.loveLetter,
         pubKey: this.alice.pkp.publicKey,
         sessionSigs: this.eoaSessionSigs,
-      })
-    }catch(e){
-      console.error("❌ Failed to run pkpSign");
+      });
+    } catch (e) {
+      console.error('❌ Failed to run pkpSign');
       throw e;
     }
-  }
+  };
 
   signSessionKeyTest = async () => {
     this.validatePrerequisites();
-    try{
+    try {
       await getPkpSessionSigs(this.env, this.alice);
-    }catch(e){
-      console.error("❌ Failed to run signSessionKey");
+    } catch (e) {
+      console.error('❌ Failed to run signSessionKey');
       throw e;
     }
-  }
+  };
 
   executeJsTest = async () => {
     this.validatePrerequisites();
-    try{
+    try {
       await this.env.litNodeClient.executeJs({
         sessionSigs: this.eoaSessionSigs,
         code: `(async () => {
@@ -91,17 +89,17 @@ export class DatilHealthManager {
         jsParams: {
           dataToSign: this.alice.loveLetter,
           publicKey: this.alice.pkp.publicKey,
-        }
-      })
-    }catch(e){
-      console.error("❌ Failed to run executeJs");
+        },
+      });
+    } catch (e) {
+      console.error('❌ Failed to run executeJs');
       throw e;
     }
-  }
+  };
 
   decryptTest = async () => {
     this.validatePrerequisites();
-    try{
+    try {
       // Set access control conditions for encrypting and decrypting
       const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
         userAddress: this.alice.wallet.address,
@@ -156,9 +154,9 @@ export class DatilHealthManager {
           `Expected decryptRes to be 'Hello world' but got ${decryptRes}`
         );
       }
-    }catch(e){
-      console.error("❌ Failed to run decrypt");
+    } catch (e) {
+      console.error('❌ Failed to run decrypt');
       throw e;
     }
-  }
+  };
 }
