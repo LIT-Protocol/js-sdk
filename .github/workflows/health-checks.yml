@@ -2,7 +2,7 @@ name: E2E Tests and Health Checks
 
 on:
   schedule:
-     - cron: '*/30 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       datil_branch:
@@ -14,6 +14,10 @@ on:
         required: true
         default: 'naga'
 
+env:
+  LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
+  LIT_STATUS_BACKEND_URL: ${{ vars.LIT_STATUS_BACKEND_URL }}
+
 jobs:
   datil-health-check:
     runs-on: ubuntu-latest
@@ -21,6 +25,9 @@ jobs:
       fail-fast: false
       matrix:
         network: [datil-dev, datil-test, datil]
+      max-parallel: 1
+    env:
+      PRIVATE_KEYS: ${{ secrets.PRIVATE_KEYS }}
     steps:
       - name: Checkout datil branch
         uses: actions/checkout@v4
@@ -40,10 +47,15 @@ jobs:
 
   naga-health-check:
     runs-on: ubuntu-latest
+    needs: datil-health-check
     strategy:
       fail-fast: false
       matrix:
         network: [naga-dev, naga-staging, naga-test]
+      max-parallel: 1
+    env:
+      LIVE_MASTER_ACCOUNT: ${{ secrets.LIVE_MASTER_ACCOUNT }}
+      LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
     steps:
       - name: Checkout naga branch
         uses: actions/checkout@v4
