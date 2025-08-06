@@ -1,12 +1,6 @@
 import { createLitStatusClient } from '@lit-protocol/lit-status-sdk';
 import { DatilHealthManager } from './DatilHealthManager';
 
-// Fix for Node.js crypto in ESM
-import { webcrypto } from 'node:crypto';
-if (!globalThis.crypto) {
-  globalThis.crypto = webcrypto as Crypto;
-}
-
 // Configuration
 const NETWORK = process.env.NETWORK!;
 const PRODUCT = 'js-sdk/datil';

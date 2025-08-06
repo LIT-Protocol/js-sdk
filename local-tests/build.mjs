@@ -78,10 +78,33 @@ try {
   }
 };
 
+/**
+ * Adds crypto polyfill to health check build
+ */
+export const postBuildHealthPolyfill = () => {
+  try {
+    const file = fs.readFileSync(`./${TEST_DIR}/build/health/index.mjs`, 'utf8');
+    const content = `// Additional crypto polyfill check
+try {
+  if (!globalThis.crypto && typeof webcrypto !== 'undefined') {
+    globalThis.crypto = webcrypto;
+  }
+} catch (error) {
+  console.error('❌ Error in crypto polyfill', error);
+}
+`;
+    const newFile = content + file;
+    fs.writeFileSync(`./${TEST_DIR}/build/health/index.mjs`, newFile);
+  } catch (e) {
+    throw new Error(`Error in postBuildHealthPolyfill: ${e}`);
+  }
+};
+
 // Go!
 (async () => {
   const start = Date.now();
   await build();
   postBuildPolyfill();
+  postBuildHealthPolyfill();
   console.log(`[build.mjs] 🚀 Build time: ${Date.now() - start}ms`);
 })();
