@@ -30,6 +30,28 @@ export const build = async () => {
     inject: [`./${TEST_DIR}/shim.mjs`],
     mainFields: ['module', 'main'],
   });
+
+  await esbuild.build({
+    entryPoints: [`${TEST_DIR}/health/index.ts`],
+    outfile: `./${TEST_DIR}/build/health/index.mjs`,
+    bundle: true,
+    plugins: [
+      nodeExternalsPlugin({
+        allowList: [
+          'ethers',
+          '@lit-protocol/accs-schemas',
+          '@lit-protocol/contracts',
+          'crypto',
+          'secp256k1',
+        ],
+      }),
+    ],
+    platform: 'node',
+    target: 'esnext',
+    format: 'esm',
+    inject: [`./${TEST_DIR}/shim.mjs`],
+    mainFields: ['module', 'main'],
+  });
 };
 
 /**
@@ -56,10 +78,36 @@ try {
   }
 };
 
+/**
+ * Adds crypto polyfill to health check build
+ */
+export const postBuildHealthPolyfill = () => {
+  try {
+    const file = fs.readFileSync(
+      `./${TEST_DIR}/build/health/index.mjs`,
+      'utf8'
+    );
+    const content = `// Additional crypto polyfill check
+try {
+  if (!globalThis.crypto && typeof webcrypto !== 'undefined') {
+    globalThis.crypto = webcrypto;
+  }
+} catch (error) {
+  console.error('❌ Error in crypto polyfill', error);
+}
+`;
+    const newFile = content + file;
+    fs.writeFileSync(`./${TEST_DIR}/build/health/index.mjs`, newFile);
+  } catch (e) {
+    throw new Error(`Error in postBuildHealthPolyfill: ${e}`);
+  }
+};
+
 // Go!
 (async () => {
   const start = Date.now();
   await build();
   postBuildPolyfill();
+  postBuildHealthPolyfill();
   console.log(`[build.mjs] 🚀 Build time: ${Date.now() - start}ms`);
 })();
