@@ -21,6 +21,7 @@ env:
 jobs:
   datil-health-check:
     runs-on: ubuntu-latest
+    environment: Health Check
     env:
       PRIVATE_KEYS: ${{ secrets.PRIVATE_KEYS }}
     steps:
