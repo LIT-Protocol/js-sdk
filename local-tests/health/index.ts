@@ -6,8 +6,21 @@ const NETWORK = process.env.NETWORK!;
 const PRODUCT = 'js-sdk/datil';
 
 async function runHealthCheck() {
+  console.log('🔍 Environment Variables:');
+  console.log('  NETWORK:', process.env.NETWORK);
+  console.log('  LIT_STATUS_BACKEND_URL:', process.env.LIT_STATUS_BACKEND_URL);
+  console.log('  LIT_STATUS_WRITE_KEY:', process.env.LIT_STATUS_WRITE_KEY ? '[SET]' : '[NOT SET]');
+  
   if (!NETWORK) {
     throw new Error('❌ NETWORK is not set');
+  }
+  
+  if (!process.env.LIT_STATUS_BACKEND_URL) {
+    throw new Error('❌ LIT_STATUS_BACKEND_URL is not set');
+  }
+  
+  if (!process.env.LIT_STATUS_WRITE_KEY) {
+    throw new Error('❌ LIT_STATUS_WRITE_KEY is not set');
   }
 
   const statusClient = createLitStatusClient({
@@ -66,9 +79,10 @@ async function runHealthCheck() {
 (async () => {
   try {
     await runHealthCheck();
+    console.log('✅ Health check completed successfully');
+    process.exit(0);
   } catch (error) {
-    console.error(error);
-  } finally {
-    process.exit();
+    console.error('❌ Health check failed:', error);
+    process.exit(1);
   }
 })();
