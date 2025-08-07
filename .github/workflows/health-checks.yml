@@ -56,7 +56,7 @@ jobs:
       - name: Run health check for datil-dev
         run: NETWORK=datil-dev yarn test:health
 
-      - name: Runtestealth check for datil-test
+      - name: Run health check for datil-test
         run: NETWORK=datil-test yarn ci:health
 
       - name: Run health check for datil
