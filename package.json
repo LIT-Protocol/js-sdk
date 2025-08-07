@@ -21,6 +21,7 @@
     "test:unit:watch": "nx run-many --target=test --watch",
     "test:unit:bun": "bun ./tools/scripts/unit-test-with-bun.mjs",
     "test:health": "DEBUG=false node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/health/index.mjs",
+    "ci:health": "DEBUG=false node ./local-tests/build.mjs && node ./local-tests/build/health/index.mjs",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:beta": "yarn node ./tools/scripts/pub.mjs --tag beta",
     "publish:staging": "yarn node ./tools/scripts/pub.mjs --tag staging",

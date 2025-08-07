@@ -58,13 +58,13 @@ jobs:
         run: yarn build
 
       - name: Run health check for datil-dev
-        run: NETWORK=datil-dev yarn test:health
+        run: NETWORK=datil-dev yarn ci:health
 
       - name: Run health check for datil-test
-        run: NETWORK=datil-test yarn test:health
+        run: NETWORK=datil-test yarn ci:health
 
       - name: Run health check for datil
-        run: NETWORK=datil yarn test:health
+        run: NETWORK=datil yarn ci:health
 
   # naga-health-check:
   #   runs-on: ubuntu-latest
