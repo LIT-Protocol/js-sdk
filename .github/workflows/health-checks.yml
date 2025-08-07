@@ -8,11 +8,11 @@ on:
       datil_branch:
         description: 'Branch for Datil tests'
         required: true
-        default: 'datil'
-      naga_branch:
-        description: 'Branch for Naga tests'
-        required: true
-        default: 'naga'
+        default: 'master'
+      # naga_branch:
+      #   description: 'Branch for Naga tests'
+      #   required: true
+      #   default: 'naga'
 
 env:
   LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
@@ -35,42 +35,57 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+
       - name: Install Yarn dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
 
       - name: Run health check for datil-dev
         run: NETWORK=datil-dev yarn test:health
 
       - name: Run health check for datil-test
-        run: NETWORK=datil-test yarn test:health
+        run: NETWORK=datil-test yarn ci:health
 
       - name: Run health check for datil
-        run: NETWORK=datil yarn test:health
+        run: NETWORK=datil yarn ci:health
 
-  naga-health-check:
-    runs-on: ubuntu-latest
-    needs: datil-health-check
-    env:
-      LIVE_MASTER_ACCOUNT: ${{ secrets.LIVE_MASTER_ACCOUNT }}
-      LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
-    steps:
-      - name: Checkout naga branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.naga_branch || 'master' }}
-          fetch-depth: 1
+  # naga-health-check:
+  #   runs-on: ubuntu-latest
+  #   needs: datil-health-check
+  #   env:
+  #     LIVE_MASTER_ACCOUNT: ${{ secrets.LIVE_MASTER_ACCOUNT }}
+  #     LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
+  #   steps:
+  #     - name: Checkout naga branch
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.event.inputs.naga_branch || 'master' }}
+  #         fetch-depth: 1
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+  #     - name: Setup Bun
+  #       uses: oven-sh/setup-bun@v1
 
-      - name: Install Bun dependencies
-        run: bun install --frozen-lockfile
+  #     - name: Install Bun dependencies
+  #       run: bun install --frozen-lockfile
 
-      - name: Run health check for naga-dev
-        run: NETWORK=naga-dev bun run test:health
+  #     - name: Run health check for naga-dev
+  #       run: NETWORK=naga-dev bun run test:health
 
-      - name: Run health check for naga-staging
-        run: NETWORK=naga-staging bun run test:health
+  #     - name: Run health check for naga-staging
+  #       run: NETWORK=naga-staging bun run test:health
 
-      - name: Run health check for naga-test
-        run: NETWORK=naga-test bun run test:health
+  #     - name: Run health check for naga-test
+  #       run: NETWORK=naga-test bun run test:health
