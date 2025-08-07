@@ -83,7 +83,10 @@ try {
  */
 export const postBuildHealthPolyfill = () => {
   try {
-    const file = fs.readFileSync(`./${TEST_DIR}/build/health/index.mjs`, 'utf8');
+    const file = fs.readFileSync(
+      `./${TEST_DIR}/build/health/index.mjs`,
+      'utf8'
+    );
     const content = `// Additional crypto polyfill check
 try {
   if (!globalThis.crypto && typeof webcrypto !== 'undefined') {
