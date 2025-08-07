@@ -41,7 +41,7 @@ jobs:
       - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.83.0
+          toolchain: stable
           override: true
           components: rust-std
 
