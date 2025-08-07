@@ -28,7 +28,7 @@ jobs:
       - name: Checkout datil branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.datil_branch || 'datil' }}
+          ref: ${{ github.event.inputs.datil_branch || 'master' }}
           fetch-depth: 1
 
       - name: Setup Node.js
