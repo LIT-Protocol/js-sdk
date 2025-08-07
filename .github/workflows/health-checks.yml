@@ -1,6 +1,9 @@
 name: E2E Tests and Health Checks
 
 on:
+  push:
+    branches: 
+      - feature/inf-607-feature-setup-worker-and-schedule-it-to-run-every-30-minutes
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
