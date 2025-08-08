@@ -715,6 +715,9 @@ export const _createNagaLitClient = async (
         handshakeResult: _stateManager.getCallbackResult(),
         getMaxPricesForNodeProduct: networkModule.getMaxPricesForNodeProduct,
         getUserMaxPrice: networkModule.getUserMaxPrice,
+        getFreshPriceFeedInfo: async () => {
+          return await networkModule.getFreshPriceFeedInfo();
+        },
         signSessionKey: _signSessionKey,
         signCustomSessionKey: _signCustomSessionKey,
         executeJs: _executeJs,

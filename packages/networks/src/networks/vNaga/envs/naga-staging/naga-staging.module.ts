@@ -80,6 +80,8 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
+import { getPriceFeedInfo } from '../../LitChainClient/apis/highLevelApis/priceFeed/priceFeedApi';
+import { createReadOnlyContractsManager } from '../../LitChainClient/contract-manager/createContractsManager';
 
 const MODULE_NAME = 'naga-staging';
 
@@ -321,6 +323,19 @@ const networkModuleObject = {
       callback: params.callback,
       networkModule: params.networkModule as LitNetworkModuleBase,
     });
+  },
+
+  // Expose a fresh price feed fetcher (chain read; independent of state refresh)
+  getFreshPriceFeedInfo: async () => {
+    const { walletClient } = createReadOnlyContractsManager(networkConfig);
+    const realmId = Number(networkConfig.networkSpecificConfigs?.realmId ?? 1);
+    return await getPriceFeedInfo(
+      {
+        realmId,
+        networkCtx: networkConfig as any,
+      },
+      walletClient
+    );
   },
 
   getMaxPricesForNodeProduct: getMaxPricesForNodeProduct,
