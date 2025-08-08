@@ -30,6 +30,7 @@
     "artillery:pkp-sign": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
     "artillery:encrypt-decrypt": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/encrypt-decrypt.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
     "artillery:execute-js": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/execute.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:mix": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/mix.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
     "artillery:sign-session-key": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/sign-session-key.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
   },
   "private": true,
