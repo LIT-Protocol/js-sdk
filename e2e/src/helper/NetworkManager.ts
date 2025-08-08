@@ -47,9 +47,15 @@ export const getViemPublicClient = async ({
   networkModule: any;
 }) => {
   const viemChainConfig = networkModule.getChainConfig();
+
+  const customRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  if (customRpcUrl) {
+    console.log(`🔧 Using custom E2E RPC URL: ${customRpcUrl}`);
+  }
+
   const publicClient = createPublicClient({
     chain: viemChainConfig,
-    transport: http(),
+    transport: customRpcUrl ? http(customRpcUrl) : http(),
   });
 
   return publicClient;
