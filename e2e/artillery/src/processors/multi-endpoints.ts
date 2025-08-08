@@ -113,7 +113,7 @@ export async function runPkpSignTest() {
       authContext: authContext,
       pubKey: state.masterAccount.pkp.publicKey,
       toSign: `Hello from Artillery! ${Date.now()}`, // Unique message per request
-      // userMaxPrice: await litClient
+      // userMaxPrice: 1000000000000000000n,
     });
 
     // Validate the result using Zod schema
