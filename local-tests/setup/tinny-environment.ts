@@ -34,6 +34,8 @@ export class TinnyEnvironment {
     NETWORK:
       (process.env['NETWORK'] as LIT_NETWORK_VALUES) || LIT_NETWORK.Custom,
     DEBUG: process.env['DEBUG'] === 'true',
+    LOG_FORMAT: (process.env['LOG_FORMAT'] as 'text' | 'json' | 'datadog') || 'json',
+    SERVICE_NAME: process.env['SERVICE_NAME'] || 'tinny-tests',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||
       (process.env['NETWORK'] as LIT_NETWORK_VALUES) === 'datil-dev'
@@ -145,7 +147,9 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Done configuring environment current config: ',
       {
         ...this.processEnvs,
-        PRIVATE_KEYS: this.processEnvs.PRIVATE_KEYS.map((_, index) => `[PRIVATE_KEY_${index}]`),
+        PRIVATE_KEYS: this.processEnvs.PRIVATE_KEYS.map(
+          (_, index) => `[PRIVATE_KEY_${index}]`
+        ),
       }
     );
   }
@@ -245,18 +249,24 @@ export class TinnyEnvironment {
         debug: this.processEnvs.DEBUG,
         checkNodeAttestation: false, // disable node attestation check for local testing
         contractContext: networkContext,
+        logFormat: this.processEnvs.LOG_FORMAT,
+        serviceName: this.processEnvs.SERVICE_NAME,
       });
     } else if (centralisation === 'decentralised') {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: true,
         debug: this.processEnvs.DEBUG,
+        logFormat: this.processEnvs.LOG_FORMAT,
+        serviceName: this.processEnvs.SERVICE_NAME,
       });
     } else if (centralisation === 'centralised') {
       this.litNodeClient = new LitNodeClient({
         litNetwork: this.network,
         checkNodeAttestation: false,
         debug: this.processEnvs.DEBUG,
+        logFormat: this.processEnvs.LOG_FORMAT,
+        serviceName: this.processEnvs.SERVICE_NAME,
       });
     } else {
       throw new Error(`Network not supported: "${this.network}"`);

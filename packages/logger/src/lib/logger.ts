@@ -208,6 +208,8 @@ export class Logger {
   private _isParent: boolean;
   private _children: Map<string, Logger>;
   private _timestamp: number;
+  private _logFormat: 'text' | 'json' | 'datadog' = 'text';
+  private _serviceName: string = 'lit-sdk';
 
   public static createLogger(
     category: string,
@@ -319,24 +321,23 @@ export class Logger {
       level
     );
 
-    const arrayLog = log.toArray();
-    if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
-      (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler &&
-        this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LOG_LEVEL.ERROR) &&
-        this._handler &&
-        this._handler(log);
+    const shouldLog = !this._config?.['condenseLogs'] || !this._checkHash(log);
+    const levelCheck = this._level >= level || level === LOG_LEVEL.ERROR;
 
-      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
-    } else if (!this._config?.['condenseLogs']) {
-      (this._level >= level || level === LogLevel.ERROR) &&
-        this._consoleHandler &&
-        this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LOG_LEVEL.ERROR) &&
-        this._handler &&
-        this._handler(log);
-      (this._level >= level || level === LOG_LEVEL.ERROR) && this._addLog(log);
+    if (shouldLog && levelCheck) {
+      // Use JSON output if configured
+      if (this._logFormat === 'json' || this._logFormat === 'datadog') {
+        const jsonLog = this._formatJsonLog(log);
+        console.log(JSON.stringify(jsonLog));
+      } else {
+        // Use traditional array log format
+        const arrayLog = log.toArray();
+        this._consoleHandler && this._consoleHandler(...arrayLog);
+      }
+
+      // Always call custom handler if set
+      this._handler && this._handler(log);
+      this._addLog(log);
     }
   }
 
@@ -395,6 +396,85 @@ export class Logger {
     }
     return output;
   }
+
+  private _formatJsonLog(log: Log): Record<string, any> {
+    const baseLog = {
+      timestamp: log.timestamp,
+      message: log.message,
+      category: log.category,
+      id: log.id,
+      version: version,
+    };
+
+    if (this._logFormat === 'datadog') {
+      // DataDog specific format with severity mapping
+      return {
+        ...baseLog,
+        level: this._mapToDataDogSeverity(log.level),
+        service: this._serviceName,
+        metadata: {
+          args: log.args,
+          sdk_version: version,
+        },
+      };
+    } else {
+      // Generic JSON format
+      return {
+        ...baseLog,
+        level: this._getLogLevelName(log.level),
+        args: log.args,
+      };
+    }
+  }
+
+  private _mapToDataDogSeverity(level: LOG_LEVEL_VALUES): string {
+    switch (level) {
+      case LOG_LEVEL.DEBUG:
+        return 'debug';
+      case LOG_LEVEL.INFO:
+        return 'info';
+      case LOG_LEVEL.WARN:
+        return 'warning';
+      case LOG_LEVEL.ERROR:
+        return 'error';
+      case LOG_LEVEL.FATAL:
+        return 'critical';
+      case LOG_LEVEL.TIMING_START:
+      case LOG_LEVEL.TIMING_END:
+        return 'debug';
+      default:
+        return 'info';
+    }
+  }
+
+  private _getLogLevelName(level: LOG_LEVEL_VALUES): string {
+    switch (level) {
+      case LOG_LEVEL.DEBUG:
+        return 'DEBUG';
+      case LOG_LEVEL.INFO:
+        return 'INFO';
+      case LOG_LEVEL.WARN:
+        return 'WARN';
+      case LOG_LEVEL.ERROR:
+        return 'ERROR';
+      case LOG_LEVEL.FATAL:
+        return 'FATAL';
+      case LOG_LEVEL.TIMING_START:
+        return 'TIMING_START';
+      case LOG_LEVEL.TIMING_END:
+        return 'TIMING_END';
+      default:
+        return 'UNKNOWN';
+    }
+  }
+
+  public setLogFormat(format: 'text' | 'json' | 'datadog'): void {
+    this._logFormat = format;
+  }
+
+  public setServiceName(serviceName: string): void {
+    this._serviceName = serviceName;
+  }
 }
 
 export class LogManager {
@@ -402,6 +482,8 @@ export class LogManager {
   private _loggers: Map<string, Logger>;
   private _level: LOG_LEVEL_VALUES | undefined = LOG_LEVEL.DEBUG;
   private _config: Record<string, any> | undefined;
+  private _logFormat: 'text' | 'json' | 'datadog' = 'text';
+  private _serviceName: string = 'lit-sdk';
 
   static get Instance(): LogManager {
     if (!LogManager._instance) {
@@ -438,6 +520,28 @@ export class LogManager {
     }
   }
 
+  public setLogFormat(format: 'text' | 'json' | 'datadog') {
+    this._logFormat = format;
+    for (const logger of this._loggers) {
+      logger[1].setLogFormat(format);
+      // Also set format for all children
+      for (const child of logger[1].Children) {
+        child[1].setLogFormat(format);
+      }
+    }
+  }
+
+  public setServiceName(serviceName: string) {
+    this._serviceName = serviceName;
+    for (const logger of this._loggers) {
+      logger[1].setServiceName(serviceName);
+      // Also set service name for all children
+      for (const child of logger[1].Children) {
+        child[1].setServiceName(serviceName);
+      }
+    }
+  }
+
   get LoggerIds(): string[] {
     const keys: [string, number][] = [];
     for (const category of this._loggers.entries()) {
@@ -466,6 +570,8 @@ export class LogManager {
 
       instance = this._loggers.get(category) as Logger;
       instance.Config = this._config;
+      instance.setLogFormat(this._logFormat);
+      instance.setServiceName(this._serviceName);
       return instance;
     }
 
@@ -478,6 +584,8 @@ export class LogManager {
 
         instance = this._loggers.get(category) as Logger;
         instance.Config = this._config;
+        instance.setLogFormat(this._logFormat);
+        instance.setServiceName(this._serviceName);
       }
       const children = instance?.Children;
       let child = children?.get(id);
@@ -496,6 +604,8 @@ export class LogManager {
 
       child = children?.get(id) as Logger;
       child.Config = this._config;
+      child.setLogFormat(this._logFormat);
+      child.setServiceName(this._serviceName);
       return children?.get(id) as Logger;
       // fall through condition for if there is no id for the logger and the category is not yet created.
       // ex: LogManager.Instance.get('foo');
@@ -507,6 +617,8 @@ export class LogManager {
 
       instance = this._loggers.get(category) as Logger;
       instance.Config = this._config;
+      instance.setLogFormat(this._logFormat);
+      instance.setServiceName(this._serviceName);
     }
 
     return instance as Logger;

@@ -126,4 +126,118 @@ describe('logger', () => {
     expect(requestIds[0]).toBe('1');
     expect(requestIds[1]).toBe('2');
   });
+
+  describe('JSON output format', () => {
+    let originalConsoleLog: any;
+    let consoleOutput: string[] = [];
+
+    beforeEach(() => {
+      originalConsoleLog = console.log;
+      console.log = jest.fn((output: string) => {
+        consoleOutput.push(output);
+      });
+      consoleOutput = [];
+    });
+
+    afterEach(() => {
+      console.log = originalConsoleLog;
+    });
+
+    it('should output JSON format when configured', () => {
+      lm.setLogFormat('json');
+      const logger = lm.get('json-test', 'test-id');
+      logger.setLevel(LOG_LEVEL.DEBUG);
+
+      logger.info('Test message', { extra: 'data' });
+
+      expect(consoleOutput.length).toBe(1);
+      const jsonLog = JSON.parse(consoleOutput[0]);
+      expect(jsonLog.message).toBe('Test message');
+      expect(jsonLog.level).toBe('INFO');
+      expect(jsonLog.category).toBe('json-test');
+      expect(jsonLog.id).toBe('test-id');
+      expect(jsonLog.args).toEqual([{ extra: 'data' }]);
+    });
+
+    it('should output DataDog format when configured', () => {
+      lm.setLogFormat('datadog');
+      const logger = lm.get('datadog-test', 'dd-id');
+      logger.setLevel(LOG_LEVEL.DEBUG);
+
+      logger.error('Error occurred', { code: 500 });
+
+      expect(consoleOutput.length).toBe(1);
+      const jsonLog = JSON.parse(consoleOutput[0]);
+      expect(jsonLog.message).toBe('Error occurred');
+      expect(jsonLog.level).toBe('error');
+      expect(jsonLog.service).toBe('lit-sdk');
+      expect(jsonLog.category).toBe('datadog-test');
+      expect(jsonLog.id).toBe('dd-id');
+      expect(jsonLog.metadata.args).toEqual([{ code: 500 }]);
+    });
+
+    it('should map log levels correctly for DataDog', () => {
+      lm.setLogFormat('datadog');
+      const logger = lm.get('level-test');
+      logger.setLevel(LOG_LEVEL.DEBUG);
+
+      logger.debug('debug message');
+      logger.info('info message');
+      logger.warn('warn message');
+      logger.error('error message');
+      logger.fatal('fatal message');
+
+      expect(consoleOutput.length).toBe(5);
+
+      expect(JSON.parse(consoleOutput[0]).level).toBe('debug');
+      expect(JSON.parse(consoleOutput[1]).level).toBe('info');
+      expect(JSON.parse(consoleOutput[2]).level).toBe('warning');
+      expect(JSON.parse(consoleOutput[3]).level).toBe('error');
+      expect(JSON.parse(consoleOutput[4]).level).toBe('critical');
+    });
+
+    it('should default to text format when not configured', () => {
+      const logger = lm.get('text-test');
+      logger.setLevel(LOG_LEVEL.INFO);
+
+      const originalConsoleInfo = console.info;
+      console.info = jest.fn();
+
+      logger.info('Text format message');
+
+      expect(console.info).toHaveBeenCalled();
+      expect(consoleOutput.length).toBe(0); // No JSON output
+
+      console.info = originalConsoleInfo;
+    });
+
+    it('should use custom service name in DataDog format', () => {
+      lm.setLogFormat('datadog');
+      lm.setServiceName('my-custom-service');
+      const logger = lm.get('service-test', 'service-id');
+      logger.setLevel(LOG_LEVEL.DEBUG);
+      
+      logger.info('Custom service test', { data: 'test' });
+      
+      expect(consoleOutput.length).toBe(1);
+      const jsonLog = JSON.parse(consoleOutput[0]);
+      expect(jsonLog.service).toBe('my-custom-service');
+      expect(jsonLog.message).toBe('Custom service test');
+      expect(jsonLog.category).toBe('service-test');
+      expect(jsonLog.id).toBe('service-id');
+    });
+
+    it('should default to "lit-sdk" service name when not specified', () => {
+      lm.setLogFormat('datadog');
+      const logger = lm.get('default-service-test');
+      logger.setLevel(LOG_LEVEL.DEBUG);
+      
+      logger.warn('Default service name test');
+      
+      expect(consoleOutput.length).toBe(1);
+      const jsonLog = JSON.parse(consoleOutput[0]);
+      expect(jsonLog.service).toBe('lit-sdk');
+      expect(jsonLog.level).toBe('warning');
+    });
+  });
 });
