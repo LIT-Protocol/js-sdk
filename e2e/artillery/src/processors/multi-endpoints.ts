@@ -1,5 +1,5 @@
 import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
-import { createLitClient } from "@lit-protocol/lit-client";
+import { createLitClient, LitClientType } from "@lit-protocol/lit-client";
 import { z } from "zod";
 import * as StateManager from "../StateManager";
 import * as NetworkManager from "../../../src/helper/NetworkManager";
@@ -16,7 +16,7 @@ const PkpSignResultSchema = z.object({
 });
 
 // Global variables to cache expensive operations
-let litClient: any = null;
+let litClient: LitClientType;
 let authManager: any = null;
 let masterAccountAuthContext: any = null;
 let networkModule: any = null;
@@ -113,6 +113,7 @@ export async function runPkpSignTest() {
       authContext: authContext,
       pubKey: state.masterAccount.pkp.publicKey,
       toSign: `Hello from Artillery! ${Date.now()}`, // Unique message per request
+      // userMaxPrice: await litClient
     });
 
     // Validate the result using Zod schema
