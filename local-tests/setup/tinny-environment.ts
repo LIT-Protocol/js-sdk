@@ -34,7 +34,8 @@ export class TinnyEnvironment {
     NETWORK:
       (process.env['NETWORK'] as LIT_NETWORK_VALUES) || LIT_NETWORK.Custom,
     DEBUG: process.env['DEBUG'] === 'true',
-    LOG_FORMAT: (process.env['LOG_FORMAT'] as 'text' | 'json' | 'datadog') || 'json',
+    LOG_FORMAT:
+      (process.env['LOG_FORMAT'] as 'text' | 'json' | 'datadog') || 'json',
     SERVICE_NAME: process.env['SERVICE_NAME'] || 'tinny-tests',
     REQUEST_PER_KILOSECOND:
       parseInt(process.env['REQUEST_PER_KILOSECOND']) ||

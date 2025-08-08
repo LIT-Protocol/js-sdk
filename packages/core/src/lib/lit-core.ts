@@ -113,7 +113,11 @@ export type LitNodeClientConfigWithDefaults = Required<
   Partial<
     Pick<
       LitNodeClientConfig,
-      'storageProvider' | 'contractContext' | 'rpcUrl' | 'logFormat' | 'serviceName'
+      | 'storageProvider'
+      | 'contractContext'
+      | 'rpcUrl'
+      | 'logFormat'
+      | 'serviceName'
     >
   > & {
     bootstrapUrls: string[];

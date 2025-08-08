@@ -216,9 +216,9 @@ describe('logger', () => {
       lm.setServiceName('my-custom-service');
       const logger = lm.get('service-test', 'service-id');
       logger.setLevel(LOG_LEVEL.DEBUG);
-      
+
       logger.info('Custom service test', { data: 'test' });
-      
+
       expect(consoleOutput.length).toBe(1);
       const jsonLog = JSON.parse(consoleOutput[0]);
       expect(jsonLog.service).toBe('my-custom-service');
@@ -231,9 +231,9 @@ describe('logger', () => {
       lm.setLogFormat('datadog');
       const logger = lm.get('default-service-test');
       logger.setLevel(LOG_LEVEL.DEBUG);
-      
+
       logger.warn('Default service name test');
-      
+
       expect(consoleOutput.length).toBe(1);
       const jsonLog = JSON.parse(consoleOutput[0]);
       expect(jsonLog.service).toBe('lit-sdk');
