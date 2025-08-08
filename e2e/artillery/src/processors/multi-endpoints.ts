@@ -4,6 +4,7 @@ import { z } from 'zod';
 import * as StateManager from '../StateManager';
 import * as NetworkManager from '../../../src/helper/NetworkManager';
 import * as AccountManager from '../AccountManager';
+import { createAccBuilder } from '@lit-protocol/access-control-conditions';
 
 // PKP Sign Result Schema
 const PkpSignResultSchema = z.object({
@@ -139,6 +140,70 @@ export async function runPkpSignTest() {
 
     console.error(
       `❌ pkpSign failed in ${duration}ms:`,
+      error instanceof Error ? error.message : String(error)
+    );
+
+    // Throw the error to let Artillery handle it
+    throw error;
+  }
+}
+
+// test '/web/encryption/sign/v2' endpoint
+export async function runEncryptDecryptTest() {
+  const startTime = Date.now();
+
+  try {
+    // 1. Initialise shared resources (only happens once)
+    await initialiseSharedResources();
+
+    // 2. Read state
+    const state = await StateManager.readFile();
+
+    // Create auth context
+    const authContext = await createAuthContextFromState();
+
+    // Set up access control conditions requiring wallet ownership
+    const addressToUse = authContext.account.address;
+    const builder = createAccBuilder();
+    const accs = builder
+      .requireWalletOwnership(addressToUse)
+      .on('ethereum')
+      .build();
+
+    // Encrypt data with the access control conditions
+    const dataToEncrypt = 'Hello from PKP encrypt-decrypt test!';
+    const encryptedData = await litClient.encrypt({
+      dataToEncrypt,
+      unifiedAccessControlConditions: accs,
+      chain: 'ethereum',
+    });
+
+    // Decrypt the data using the appropriate auth context
+    const decryptedData = await litClient.decrypt({
+      data: encryptedData,
+      unifiedAccessControlConditions: accs,
+      chain: 'ethereum',
+      authContext,
+    });
+
+    // Assert that the decrypted data is the same as the original data
+    if (decryptedData.convertedData !== dataToEncrypt) {
+      throw new Error('❌ Decrypted data does not match the original data');
+    }
+
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    console.log(`✅ encrypt & decrypt successful in ${duration}ms`);
+
+    // For Artillery, just return - no need to call next()
+    return;
+  } catch (error) {
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    console.error(
+      `❌ encrypt & decrypt failed in ${duration}ms:`,
       error instanceof Error ? error.message : String(error)
     );
 
