@@ -9,16 +9,19 @@ async function runHealthCheck() {
   console.log('🔍 Environment Variables:');
   console.log('  NETWORK:', process.env.NETWORK);
   console.log('  LIT_STATUS_BACKEND_URL:', process.env.LIT_STATUS_BACKEND_URL);
-  console.log('  LIT_STATUS_WRITE_KEY:', process.env.LIT_STATUS_WRITE_KEY ? '[SET]' : '[NOT SET]');
-  
+  console.log(
+    '  LIT_STATUS_WRITE_KEY:',
+    process.env.LIT_STATUS_WRITE_KEY ? '[SET]' : '[NOT SET]'
+  );
+
   if (!NETWORK) {
     throw new Error('❌ NETWORK is not set');
   }
-  
+
   if (!process.env.LIT_STATUS_BACKEND_URL) {
     throw new Error('❌ LIT_STATUS_BACKEND_URL is not set');
   }
-  
+
   if (!process.env.LIT_STATUS_WRITE_KEY) {
     throw new Error('❌ LIT_STATUS_WRITE_KEY is not set');
   }

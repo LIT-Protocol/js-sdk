@@ -27,7 +27,7 @@
     "prepare": "yarn update-ipfs-cids",
     "update-ipfs-cids": "yarn node ./update-ipfs-cids.js"
   },
-  "version": "7.2.1",
+  "version": "7.2.4-alpha.0",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
