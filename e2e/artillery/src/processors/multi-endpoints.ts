@@ -18,6 +18,28 @@ const PkpSignResultSchema = z.object({
   sigType: z.string().min(1, 'Signature type cannot be empty'),
 });
 
+// Execute JS Result Schema
+const ExecuteJsResultSchema = z.object({
+  success: z.boolean(),
+  signatures: z.record(
+    z.string(),
+    z.object({
+      signature: z.string().regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex signature'),
+      verifyingKey: z
+        .string()
+        .regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex verifying key'),
+      signedData: z
+        .string()
+        .regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex signed data'),
+      recoveryId: z.number().int().min(0).max(3, 'Recovery ID must be 0-3'),
+      publicKey: z.string().regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex public key'),
+      sigType: z.string().min(1, 'Signature type cannot be empty'),
+    })
+  ),
+  response: z.string(),
+  logs: z.string(),
+});
+
 // Global variables to cache expensive operations
 let litClient: LitClientType;
 let authManager: any = null;
@@ -204,6 +226,73 @@ export async function runEncryptDecryptTest() {
 
     console.error(
       `❌ encrypt & decrypt failed in ${duration}ms:`,
+      error instanceof Error ? error.message : String(error)
+    );
+
+    // Throw the error to let Artillery handle it
+    throw error;
+  }
+}
+
+// test '/web/execute/v2' endpoint
+export async function runExecuteJSTest() {
+  const startTime = Date.now();
+
+  try {
+    // 1. Initialise shared resources (only happens once)
+    await initialiseSharedResources();
+
+    // 2. Read state
+    const state = await StateManager.readFile();
+
+    // Create auth context
+    const authContext = await createAuthContextFromState();
+
+    // Perform executeJs operation
+    const litActionCode = `
+    (async () => {
+      const { sigName, toSign, publicKey } = jsParams;
+      const { keccak256, arrayify } = ethers.utils;
+      
+      const toSignBytes = new TextEncoder().encode(toSign);
+      const toSignBytes32 = keccak256(toSignBytes);
+      const toSignBytes32Array = arrayify(toSignBytes32);
+      
+      const sigShare = await Lit.Actions.signEcdsa({
+        toSign: toSignBytes32Array,
+        publicKey,
+        sigName,
+      });  
+    })();`;
+
+    const result = await litClient.executeJs({
+      code: litActionCode,
+      authContext,
+      jsParams: {
+        message: 'Test message from e2e executeJs',
+        sigName: 'e2e-test-sig',
+        toSign: 'Test message from e2e executeJs',
+        publicKey: state.masterAccount.pkp.publicKey,
+      },
+    });
+
+    // Validate the result using Zod schema
+    const validatedResult = ExecuteJsResultSchema.parse(result);
+
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    console.log(`✅ executeJs successful in ${duration}ms`);
+    console.log('✅ executeJs result:', validatedResult);
+
+    // For Artillery, just return - no need to call next()
+    return;
+  } catch (error) {
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    console.error(
+      `❌ executeJs failed in ${duration}ms:`,
       error instanceof Error ? error.message : String(error)
     );
 
