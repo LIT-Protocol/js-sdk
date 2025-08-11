@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+      # Temporary
+      - feature/node-4634-datil-e2e-tests-should-run-individually
   pull_request:
     branches:
       - master
