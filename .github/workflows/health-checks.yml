@@ -1,6 +1,9 @@
 name: E2E Tests and Health Checks
 
 on:
+  pull_request:
+    branches:
+      - feature/**
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
