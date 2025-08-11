@@ -80,7 +80,6 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
-import { createReadOnlyContractsManager } from '../../LitChainClient/contract-manager/createContractsManager';
 
 const MODULE_NAME = 'naga-local';
 
