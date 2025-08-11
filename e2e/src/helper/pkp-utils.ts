@@ -1,10 +1,10 @@
 /**
  * PKP Utilities
- * 
+ *
  * This module provides utility functions for managing Programmable Key Pairs (PKPs)
- * in the Lit Protocol ecosystem. It handles the common pattern of checking for 
+ * in the Lit Protocol ecosystem. It handles the common pattern of checking for
  * existing PKPs and creating new ones when necessary.
- * 
+ *
  * Usage:
  *   import { getOrCreatePkp } from './helper/pkp-utils';
  *   const pkp = await getOrCreatePkp(litClient, authData, account, storagePath, networkName);
@@ -19,7 +19,7 @@ const PKP_SCOPES = ['sign-anything'];
 
 /**
  * Gets an existing PKP or creates a new one if none exists
- * 
+ *
  * @param litClient - The Lit Protocol client instance
  * @param authData - Authentication data for the account
  * @param account - The account to associate with the PKP
@@ -73,4 +73,4 @@ export const getOrCreatePkp = async (
   });
 
   return newPkps[0];
-}; 
+};

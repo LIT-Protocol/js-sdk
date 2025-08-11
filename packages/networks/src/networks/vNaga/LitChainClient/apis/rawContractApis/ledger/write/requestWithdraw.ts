@@ -33,7 +33,7 @@ export async function requestWithdraw(
     networkCtx,
     accountOrWalletClient
   );
-  
+
   const hash = await callWithAdjustedOverrides(
     ledgerContract,
     'requestWithdraw',
@@ -49,4 +49,4 @@ export async function requestWithdraw(
   );
 
   return { hash, receipt, decodedLogs };
-} 
+}

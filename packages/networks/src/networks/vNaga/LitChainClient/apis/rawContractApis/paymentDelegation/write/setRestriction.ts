@@ -37,7 +37,7 @@ export async function setRestriction(
     networkCtx,
     accountOrWalletClient
   );
-  
+
   const hash = await callWithAdjustedOverrides(
     paymentDelegationContract,
     'setRestriction',

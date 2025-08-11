@@ -42,7 +42,9 @@ export async function getPermissionsContext(
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<PermissionsContext> {
   // Resolve the identifier to a tokenId
-  const tokenId = (await resolvePkpTokenId(identifier, networkCtx, accountOrWalletClient)).toString();
+  const tokenId = (
+    await resolvePkpTokenId(identifier, networkCtx, accountOrWalletClient)
+  ).toString();
   logger.debug({ identifier, tokenId }, 'Loading permissions');
 
   // Fetch all permissions in parallel

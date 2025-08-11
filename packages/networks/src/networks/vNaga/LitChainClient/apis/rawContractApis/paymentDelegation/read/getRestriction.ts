@@ -6,7 +6,9 @@ import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/crea
 
 // Schema for validating the request
 const getRestrictionSchema = z.object({
-  payerAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
+  payerAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
 });
 
 export type GetRestrictionRequest = z.infer<typeof getRestrictionSchema>;
@@ -36,7 +38,9 @@ export async function getRestriction(
     networkCtx,
     accountOrWalletClient
   );
-  
-  const restriction = await paymentDelegationContract.read.getRestriction([validatedRequest.payerAddress]);
+
+  const restriction = await paymentDelegationContract.read.getRestriction([
+    validatedRequest.payerAddress,
+  ]);
   return restriction;
 }

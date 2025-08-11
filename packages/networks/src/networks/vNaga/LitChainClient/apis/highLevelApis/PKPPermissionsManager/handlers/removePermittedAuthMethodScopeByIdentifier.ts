@@ -78,4 +78,4 @@ export async function removePermittedAuthMethodScopeByIdentifier(
 //   );
 
 //   console.log("res", res);
-// } 
+// }

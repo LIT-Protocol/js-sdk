@@ -8,7 +8,7 @@ const StateObject = {
   masterAccount: {
     // privateKey: undefined as string | `0x${string}` | undefined,
     // address: undefined as string | `0x${string}` | undefined,
-    authData: undefined as any | undefined,  // Changed from string to any since authData is an object
+    authData: undefined as any | undefined, // Changed from string to any since authData is an object
     pkp: undefined as any | undefined,
   },
 };
@@ -34,7 +34,7 @@ export const readFile = async (): Promise<State> => {
   try {
     return await _readFile();
   } catch (error) {
-    console.log("🚨 Failed to read file, creating new file...");
+    console.log('🚨 Failed to read file, creating new file...');
     await createFile();
     return await _readFile();
   }
@@ -48,22 +48,23 @@ export const createFile = async () => {
 // Type-safe field paths - dynamically derived from State type
 type StatePaths = {
   [K in keyof State]: K extends string
-  ? State[K] extends object
-  ? {
-    [P in keyof State[K]]: P extends string ? `${K}.${P}` : never
-  }[keyof State[K]] | K  // Include both nested paths AND top-level key
-  : K
-  : never
+    ? State[K] extends object
+      ?
+          | {
+              [P in keyof State[K]]: P extends string ? `${K}.${P}` : never;
+            }[keyof State[K]]
+          | K // Include both nested paths AND top-level key
+      : K
+    : never;
 }[keyof State];
 
 // Helper type to get nested property type
-type GetNestedType<T, P extends string> =
-  P extends `${infer K}.${infer Rest}`
+type GetNestedType<T, P extends string> = P extends `${infer K}.${infer Rest}`
   ? K extends keyof T
-  ? Rest extends keyof T[K]
-  ? T[K][Rest]
-  : never
-  : never
+    ? Rest extends keyof T[K]
+      ? T[K][Rest]
+      : never
+    : never
   : P extends keyof T
   ? T[P]
   : never;
@@ -86,7 +87,11 @@ export const updateField = async <T extends StatePaths>(
   const pathParts = path.split('.') as [keyof State, string];
   const [rootKey, nestedKey] = pathParts;
 
-  if (rootKey in state && typeof state[rootKey] === 'object' && state[rootKey] !== null) {
+  if (
+    rootKey in state &&
+    typeof state[rootKey] === 'object' &&
+    state[rootKey] !== null
+  ) {
     (state[rootKey] as any)[nestedKey] = value;
     await fs.writeFile(FILE_NAME, JSON.stringify(state, null, 2));
   } else {
@@ -125,7 +130,11 @@ export const getOrUpdate = async <T extends StatePaths>(
     const pathParts = path.split('.') as [keyof State, string];
     const [rootKey, nestedKey] = pathParts;
 
-    if (rootKey in state && typeof state[rootKey] === 'object' && state[rootKey] !== null) {
+    if (
+      rootKey in state &&
+      typeof state[rootKey] === 'object' &&
+      state[rootKey] !== null
+    ) {
       const currentValue = (state[rootKey] as any)[nestedKey];
 
       // If value exists and is not null/undefined/empty string, return it

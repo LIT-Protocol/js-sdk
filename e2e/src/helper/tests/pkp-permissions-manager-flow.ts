@@ -112,38 +112,49 @@ export const createPkpPermissionsManagerFlowTest = (
 
     // Test 8: Verify new addPermittedAuthMethod method exists and is callable
     assert.toBeDefined(pkpPermissionsManager.addPermittedAuthMethod);
-    assert.toBe(typeof pkpPermissionsManager.addPermittedAuthMethod, 'function');
+    assert.toBe(
+      typeof pkpPermissionsManager.addPermittedAuthMethod,
+      'function'
+    );
 
     // Test 9: Verify new removePermittedAuthMethodScope method exists and is callable
     assert.toBeDefined(pkpPermissionsManager.removePermittedAuthMethodScope);
-    assert.toBe(typeof pkpPermissionsManager.removePermittedAuthMethodScope, 'function');
+    assert.toBe(
+      typeof pkpPermissionsManager.removePermittedAuthMethodScope,
+      'function'
+    );
 
     // Test 10: Actually test addPermittedAuthMethod functionality
     const testAuthMethodParams = {
       authMethodType: 1, // EthWallet
       authMethodId: '0x1234567890abcdef1234567890abcdef12345678',
-      userPubkey: '0x04abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+      userPubkey:
+        '0x04abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
       scopes: ['sign-anything'] as const,
     };
 
     // Get initial auth methods count
-    const initialAuthMethods = await pkpPermissionsManager.getPermittedAuthMethods();
+    const initialAuthMethods =
+      await pkpPermissionsManager.getPermittedAuthMethods();
     const initialAuthMethodsCount = initialAuthMethods.length;
 
     console.log('🧪 Adding test auth method...');
     // Add the test auth method
-    const addAuthMethodTx = await pkpPermissionsManager.addPermittedAuthMethod(testAuthMethodParams);
+    const addAuthMethodTx = await pkpPermissionsManager.addPermittedAuthMethod(
+      testAuthMethodParams
+    );
     assert.toBeDefined(addAuthMethodTx.hash);
     assert.toBeDefined(addAuthMethodTx.receipt);
     assert.toBe(addAuthMethodTx.receipt.status, 'success');
 
     // Verify the auth method was added
-    const authMethodsAfterAdd = await pkpPermissionsManager.getPermittedAuthMethods();
+    const authMethodsAfterAdd =
+      await pkpPermissionsManager.getPermittedAuthMethods();
     assert.toBe(authMethodsAfterAdd.length, initialAuthMethodsCount + 1);
 
     // Find our added auth method
     const addedAuthMethod = authMethodsAfterAdd.find(
-      (am) => 
+      (am) =>
         am.id === testAuthMethodParams.authMethodId &&
         Number(am.authMethodType) === testAuthMethodParams.authMethodType
     );
@@ -159,38 +170,44 @@ export const createPkpPermissionsManagerFlowTest = (
 
     console.log('🧪 Removing scope from test auth method...');
     // Remove a scope from the auth method
-    const removeScopeTx = await pkpPermissionsManager.removePermittedAuthMethodScope(testScopeParams);
+    const removeScopeTx =
+      await pkpPermissionsManager.removePermittedAuthMethodScope(
+        testScopeParams
+      );
     assert.toBeDefined(removeScopeTx.hash);
     assert.toBeDefined(removeScopeTx.receipt);
     assert.toBe(removeScopeTx.receipt.status, 'success');
 
     // Verify the scope was removed by checking auth method scopes
-    const authMethodScopes = await pkpPermissionsManager.getPermittedAuthMethodScopes({
-      authMethodType: testAuthMethodParams.authMethodType,
-      authMethodId: testAuthMethodParams.authMethodId,
-      scopeId: 1,
-    });
+    const authMethodScopes =
+      await pkpPermissionsManager.getPermittedAuthMethodScopes({
+        authMethodType: testAuthMethodParams.authMethodType,
+        authMethodId: testAuthMethodParams.authMethodId,
+        scopeId: 1,
+      });
     // After removing scope 1, it should return false for that specific scope
     assert.toBe(authMethodScopes[0], false);
     console.log('✅ Scope successfully removed from test auth method');
 
     // Test 12: Cleanup - Remove the test auth method entirely
     console.log('🧹 Cleaning up test auth method...');
-    const removeAuthMethodTx = await pkpPermissionsManager.removePermittedAuthMethod({
-      authMethodType: testAuthMethodParams.authMethodType,
-      authMethodId: testAuthMethodParams.authMethodId,
-    });
+    const removeAuthMethodTx =
+      await pkpPermissionsManager.removePermittedAuthMethod({
+        authMethodType: testAuthMethodParams.authMethodType,
+        authMethodId: testAuthMethodParams.authMethodId,
+      });
     assert.toBeDefined(removeAuthMethodTx.hash);
     assert.toBeDefined(removeAuthMethodTx.receipt);
     assert.toBe(removeAuthMethodTx.receipt.status, 'success');
 
     // Verify the auth method was removed
-    const finalAuthMethods = await pkpPermissionsManager.getPermittedAuthMethods();
+    const finalAuthMethods =
+      await pkpPermissionsManager.getPermittedAuthMethods();
     assert.toBe(finalAuthMethods.length, initialAuthMethodsCount);
 
     // Ensure our test auth method is no longer in the list
     const removedAuthMethod = finalAuthMethods.find(
-      (am) => 
+      (am) =>
         am.id === testAuthMethodParams.authMethodId &&
         Number(am.authMethodType) === testAuthMethodParams.authMethodType
     );

@@ -37,9 +37,12 @@ export const getLitNetworkModule = async (network?: SupportedNetwork) => {
   const _networkModule = networksModule[config.importName];
   console.log('✅ Lit Network Module created for network:', _network);
   console.log('🔍 Chain:', _networkModule.getChainConfig().name);
-  console.log('🔍 RPC URL:', _networkModule.getChainConfig().rpcUrls.default.http[0]);
+  console.log(
+    '🔍 RPC URL:',
+    _networkModule.getChainConfig().rpcUrls.default.http[0]
+  );
   return _networkModule;
-}
+};
 
 export const getViemPublicClient = async ({
   networkModule,
@@ -59,4 +62,4 @@ export const getViemPublicClient = async ({
   });
 
   return publicClient;
-}
+};

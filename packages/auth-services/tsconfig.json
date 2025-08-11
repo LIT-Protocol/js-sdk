@@ -12,7 +12,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "importHelpers": false,
+    "importHelpers": false
   },
   "files": [],
   "include": [],

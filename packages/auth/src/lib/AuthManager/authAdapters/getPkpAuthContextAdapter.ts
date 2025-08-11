@@ -32,7 +32,7 @@ export const PkpAuthDepsSchema = z.object({
 //   try {
 //     // Parse the signed message to extract expiration and validate session key match
 //     const siweMessage = delegationAuthSig.signedMessage;
-    
+
 //     // Check expiration
 //     const expirationMatch = siweMessage.match(/^Expiration Time: (.*)$/m);
 //     if (expirationMatch && expirationMatch[1]) {
@@ -49,7 +49,7 @@ export const PkpAuthDepsSchema = z.object({
 
 //     // TODO: Add resource validation - check if delegationAuthSig has required resources
 //     // This would involve parsing the RECAP URN and checking against requiredResources
-    
+
 //   } catch (error) {
 //     throw new Error(`Invalid delegation signature: ${error instanceof Error ? error.message : 'Unknown error'}`);
 //   }
@@ -66,7 +66,7 @@ export async function getPkpAuthContextAdapter(
     };
     cache?: {
       delegationAuthSig?: boolean;
-    }
+    };
     // Optional pre-generated auth materials
     // sessionKeyPair?: SessionKeyPair;
     // delegationAuthSig?: AuthSig;
@@ -75,7 +75,7 @@ export async function getPkpAuthContextAdapter(
   const _resources = processResources(params.authConfig.resources);
 
   // // Validate optional parameters
-  // if ((params.sessionKeyPair && !params.delegationAuthSig) || 
+  // if ((params.sessionKeyPair && !params.delegationAuthSig) ||
   //     (!params.sessionKeyPair && params.delegationAuthSig)) {
   //   throw new Error('Both sessionKeyPair and delegationAuthSig must be provided together, or neither should be provided');
   // }
@@ -84,7 +84,7 @@ export async function getPkpAuthContextAdapter(
   // if (params.sessionKeyPair && params.delegationAuthSig) {
   //   // Generate sessionKeyUri from the public key
   //   const sessionKeyUri = SessionKeyUriSchema.parse(params.sessionKeyPair.publicKey);
-    
+
   //   // Validate the delegation signature
   //   validateDelegationAuthSig(
   //     params.delegationAuthSig,

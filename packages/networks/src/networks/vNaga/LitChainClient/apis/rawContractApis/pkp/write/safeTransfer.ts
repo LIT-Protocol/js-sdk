@@ -46,14 +46,20 @@ export async function safeTransfer(
   );
 
   // Convert tokenId to bigint if it's not already
-  const tokenIdBigInt = typeof params.tokenId === 'bigint' 
-    ? params.tokenId 
-    : BigInt(params.tokenId);
+  const tokenIdBigInt =
+    typeof params.tokenId === 'bigint'
+      ? params.tokenId
+      : BigInt(params.tokenId);
 
   const hash = await callWithAdjustedOverrides(
     pkpNftContract,
     'safeTransferFrom',
-    [params.from as `0x${string}`, params.to as `0x${string}`, tokenIdBigInt, '0x'],
+    [
+      params.from as `0x${string}`,
+      params.to as `0x${string}`,
+      tokenIdBigInt,
+      '0x',
+    ],
     {}
   );
 

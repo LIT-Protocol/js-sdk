@@ -19,7 +19,7 @@ export async function getUserWithdrawDelay(
     networkCtx,
     accountOrWalletClient
   );
-  
+
   const delay = await ledgerContract.read.userWithdrawDelay();
   return delay;
-} 
+}

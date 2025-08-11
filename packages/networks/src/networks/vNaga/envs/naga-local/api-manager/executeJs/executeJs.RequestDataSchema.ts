@@ -1,7 +1,4 @@
-import {
-  AuthSigSchema,
-  NodeSetsFromUrlsSchema,
-} from '@lit-protocol/schemas';
+import { AuthSigSchema, NodeSetsFromUrlsSchema } from '@lit-protocol/schemas';
 import { z } from 'zod';
 
 /**
@@ -34,4 +31,4 @@ export const ExecuteJsRequestDataSchema = z.object({
    * Node set for the request - automatically transforms URLs to nodeSet format
    */
   nodeSet: NodeSetsFromUrlsSchema,
-}); 
+});

@@ -26,7 +26,9 @@ const addPermittedAuthMethodSchema = z.object({
   scopes: z.array(ScopeSchemaRaw),
 });
 
-type AddPermittedAuthMethodRequest = z.input<typeof addPermittedAuthMethodSchema>;
+type AddPermittedAuthMethodRequest = z.input<
+  typeof addPermittedAuthMethodSchema
+>;
 
 /**
  * Adds a permitted authentication method to a PKP token
@@ -60,11 +62,7 @@ export async function addPermittedAuthMethod(
   const hash = await callWithAdjustedOverrides(
     pkpPermissionsContract,
     'addPermittedAuthMethod',
-    [
-      validatedRequest.tokenId,
-      authMethod,
-      validatedRequest.scopes,
-    ]
+    [validatedRequest.tokenId, authMethod, validatedRequest.scopes]
   );
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });

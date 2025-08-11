@@ -1,13 +1,9 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": [
-    "./packages/lit-client/src/index.ts"
-  ],
+  "entryPoints": ["./packages/lit-client/src/index.ts"],
   "out": "doc",
   "skipErrorChecking": true,
-  "plugin": [
-    "typedoc-theme-hierarchy"
-  ],
+  "plugin": ["typedoc-theme-hierarchy"],
   "theme": "hierarchy",
   "customCss": "doc.css"
 }

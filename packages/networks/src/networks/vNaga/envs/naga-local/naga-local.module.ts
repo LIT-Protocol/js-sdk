@@ -599,8 +599,6 @@ const networkModuleObject = {
         requestId: string,
         jitContext: NagaJitContext
       ) => {
-
-
         if (!result.success) {
           E2EERequestManager.handleEncryptedError(
             result,
@@ -838,7 +836,9 @@ const networkModuleObject = {
             curveType: 'BLS' as const,
             epoch: requestBody.epoch,
             nodeSet: requestBody.nodeSet,
-            maxPrice: getUserMaxPrice({ product: 'SIGN_SESSION_KEY' }).toString(),
+            maxPrice: getUserMaxPrice({
+              product: 'SIGN_SESSION_KEY',
+            }).toString(),
           };
 
           // Encrypt the request data using the E2EE manager
@@ -883,7 +883,6 @@ const networkModuleObject = {
         pkpPublicKey: Hex | string,
         jitContext: NagaJitContext
       ) => {
-
         _logger.info(
           'signSessionKey:handleResponse: Processing signSessionKey response'
         );
@@ -895,7 +894,6 @@ const networkModuleObject = {
             'Session key signing'
           );
         }
-
 
         // Decrypt the batch response using the E2EE manager
         const decryptedValues = E2EERequestManager.decryptBatchResponse(

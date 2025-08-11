@@ -3,7 +3,7 @@
 
 //
 // This test if a PKP EOA Auth Method could add a permitted address via the PKPViemAccount
-// 
+//
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { nonceManager } from 'viem';
 import { fundAccount } from '../helper/fundAccount';
@@ -34,16 +34,16 @@ const aliceViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
   aliceViemAccount
 );
 
-console.log("✅ aliceViemAccountAuthData:", aliceViemAccountAuthData);
+console.log('✅ aliceViemAccountAuthData:', aliceViemAccountAuthData);
 
 try {
   await fundAccount(aliceViemAccount, localMasterAccount, nagaLocal, {
     ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
     thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
   });
-  console.log("✅ Account Funded.")
+  console.log('✅ Account Funded.');
 } catch (e) {
-  throw new Error("❌ Failed to fund account.")
+  throw new Error('❌ Failed to fund account.');
 }
 
 /**
@@ -52,7 +52,7 @@ try {
  * ====================================
  */
 const litClient = await createLitClient({ network: nagaLocal });
-console.log("✅ Created Lit Client")
+console.log('✅ Created Lit Client');
 
 /**
  * ====================================
@@ -66,7 +66,7 @@ const authManager = createAuthManager({
     storagePath: './lit-auth-local',
   }),
 });
-console.log("✅ Created Auth Manager")
+console.log('✅ Created Auth Manager');
 
 // Minting a new PKP
 const tx = await litClient.mintWithAuth({
@@ -74,35 +74,48 @@ const tx = await litClient.mintWithAuth({
   authData: aliceViemAccountAuthData,
   scopes: ['sign-anything'],
 });
-console.log("✅ TX 1 done");
-console.log("ℹ️ tx:", tx)
+console.log('✅ TX 1 done');
+console.log('ℹ️ tx:', tx);
 
 const pkpInfo = tx.data;
-console.log("✅ pkpInfo:", pkpInfo);
+console.log('✅ pkpInfo:', pkpInfo);
 
-const pkpPermissionsManagerForAliceViemAccount = await litClient.getPKPPermissionsManager({
-  pkpIdentifier: {
-    tokenId: pkpInfo.tokenId,
-  },
-  account: aliceViemAccount,
-});
+const pkpPermissionsManagerForAliceViemAccount =
+  await litClient.getPKPPermissionsManager({
+    pkpIdentifier: {
+      tokenId: pkpInfo.tokenId,
+    },
+    account: aliceViemAccount,
+  });
 
-console.log("✅ pkpPermissionsManagerForAliceViemAccount:", await pkpPermissionsManagerForAliceViemAccount.getPermissionsContext());
+console.log(
+  '✅ pkpPermissionsManagerForAliceViemAccount:',
+  await pkpPermissionsManagerForAliceViemAccount.getPermissionsContext()
+);
 
 // check is address permitted
-const aliceViemAccountIsPermitted = await pkpPermissionsManagerForAliceViemAccount.isPermittedAddress({
-  address: aliceViemAccount.address,
-});
+const aliceViemAccountIsPermitted =
+  await pkpPermissionsManagerForAliceViemAccount.isPermittedAddress({
+    address: aliceViemAccount.address,
+  });
 
-console.log(`❗️ ${aliceViemAccount.address} is ${aliceViemAccountIsPermitted ? 'permitted' : 'NOT permitted'}`);
+console.log(
+  `❗️ ${aliceViemAccount.address} is ${
+    aliceViemAccountIsPermitted ? 'permitted' : 'NOT permitted'
+  }`
+);
 
 // check if pkp address is permitted
-const pkpIsPermitted = await pkpPermissionsManagerForAliceViemAccount.isPermittedAddress({
-  address: pkpInfo.ethAddress,
-});
+const pkpIsPermitted =
+  await pkpPermissionsManagerForAliceViemAccount.isPermittedAddress({
+    address: pkpInfo.ethAddress,
+  });
 
-console.log(`❗️ ${pkpInfo.ethAddress} is ${pkpIsPermitted ? 'permitted' : 'NOT permitted'}`);
-
+console.log(
+  `❗️ ${pkpInfo.ethAddress} is ${
+    pkpIsPermitted ? 'permitted' : 'NOT permitted'
+  }`
+);
 
 const authContext = await authManager.createPkpAuthContext({
   authData: aliceViemAccountAuthData,
@@ -110,17 +123,17 @@ const authContext = await authManager.createPkpAuthContext({
   authConfig: {
     capabilityAuthSigs: [],
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-    statement: "",
-    domain: "",
+    statement: '',
+    domain: '',
     resources: [
-      ["pkp-signing", "*"],
-      ["lit-action-execution", "*"],
+      ['pkp-signing', '*'],
+      ['lit-action-execution', '*'],
     ],
   },
   litClient,
 });
 
-console.log("authContext:", authContext);
+console.log('authContext:', authContext);
 
 const pkpViemAccount = await litClient.getPkpViemAccount({
   pkpPublicKey: pkpInfo.pubkey,
@@ -133,23 +146,27 @@ await fundAccount(pkpViemAccount, localMasterAccount, nagaLocal, {
   thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
 });
 
-const pkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
-  pkpIdentifier: {
-    tokenId: pkpInfo.tokenId,
-  },
-  account: pkpViemAccount,
-});
+const pkpViemAccountPermissionsManager =
+  await litClient.getPKPPermissionsManager({
+    pkpIdentifier: {
+      tokenId: pkpInfo.tokenId,
+    },
+    account: pkpViemAccount,
+  });
 
 try {
   const tx2 = await pkpViemAccountPermissionsManager.addPermittedAddress({
-    address: "0x1234567890123456789012345678901234567890",
-    scopes: ["sign-anything"],
+    address: '0x1234567890123456789012345678901234567890',
+    scopes: ['sign-anything'],
   });
-  console.log('tx2:', tx2)
+  console.log('tx2:', tx2);
 } catch (e) {
   throw new Error(e);
 }
 
-console.log("✅ pkpViemAccountPermissionsManager:", await pkpViemAccountPermissionsManager.getPermissionsContext());
+console.log(
+  '✅ pkpViemAccountPermissionsManager:',
+  await pkpViemAccountPermissionsManager.getPermissionsContext()
+);
 
 process.exit();

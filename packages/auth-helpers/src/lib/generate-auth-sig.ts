@@ -11,18 +11,18 @@ type ExpectedAccountOrWalletClient =
   | GetWalletClientReturnType;
 
 /**
-* Generate an AuthSig object using the signer.
-*
-* For more context:
-* We are only using authSig to generate session sigs. In a newer version, we will stop accepting
-* authSig all together from the node and will only accept session sigs. The address being
-* used here will be checksummed.
-*
-* @param signer the signer must have a "signMessage" method
-* @param toSign - the message to sign
-* @param address - (optional) the address of the signer
-* @returns
-*/
+ * Generate an AuthSig object using the signer.
+ *
+ * For more context:
+ * We are only using authSig to generate session sigs. In a newer version, we will stop accepting
+ * authSig all together from the node and will only accept session sigs. The address being
+ * used here will be checksummed.
+ *
+ * @param signer the signer must have a "signMessage" method
+ * @param toSign - the message to sign
+ * @param address - (optional) the address of the signer
+ * @returns
+ */
 export const generateAuthSig = async ({
   signer,
   toSign,
@@ -30,13 +30,13 @@ export const generateAuthSig = async ({
   algo,
 }: {
   signer:
-  | ethers.Wallet
-  | ethers.Signer
-  | SignerLike
-  | {
-    signMessage: (message: any) => Promise<string>;
-    getAddress?: () => Promise<string>;
-  };
+    | ethers.Wallet
+    | ethers.Signer
+    | SignerLike
+    | {
+        signMessage: (message: any) => Promise<string>;
+        getAddress?: () => Promise<string>;
+      };
   toSign: string;
   address?: string;
   algo?: 'ed25519';
@@ -98,7 +98,7 @@ export const generateAuthSigWithViem = async ({
   account: ExpectedAccountOrWalletClient;
   toSign: string | Hex;
   algo?: 'ed25519';
-  address: string,
+  address: string;
 }): Promise<AuthSig> => {
   if (typeof account.signMessage !== 'function') {
     throw new InvalidArgumentException(
@@ -148,10 +148,5 @@ export const generateAuthSigWithViem = async ({
 
   // } else {
 
-
   // }
-
-
-
-
 };

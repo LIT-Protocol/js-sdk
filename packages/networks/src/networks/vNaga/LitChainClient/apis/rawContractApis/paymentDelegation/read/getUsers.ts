@@ -6,7 +6,9 @@ import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/crea
 
 // Schema for validating the request
 const getUsersSchema = z.object({
-  payerAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
+  payerAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
 });
 
 export type GetUsersRequest = z.infer<typeof getUsersSchema>;
@@ -30,7 +32,9 @@ export async function getUsers(
     networkCtx,
     accountOrWalletClient
   );
-  
-  const users = await paymentDelegationContract.read.getUsers([validatedRequest.payerAddress]);
+
+  const users = await paymentDelegationContract.read.getUsers([
+    validatedRequest.payerAddress,
+  ]);
   return users;
 }
