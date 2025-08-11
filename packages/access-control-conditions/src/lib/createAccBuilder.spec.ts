@@ -1,6 +1,6 @@
 /**
  * Test Suite for Access Control Conditions Builder
- * 
+ *
  * This test suite validates:
  * 1. All convenience methods for different condition types (EVM, Solana, Cosmos)
  * 2. Boolean operations (and/or) and complex expressions
@@ -42,9 +42,8 @@ import {
 import { canonicalUnifiedAccessControlConditionFormatter } from './canonicalFormatter';
 
 describe('Access Control Conditions Builder', () => {
-  
   // ========== Canonical Formatting Tests ==========
-  
+
   describe('Canonical Formatting', () => {
     test('should apply canonical formatting to all built conditions', () => {
       const conditions = createAccBuilder()
@@ -53,7 +52,7 @@ describe('Access Control Conditions Builder', () => {
         .build();
 
       expect(conditions).toHaveLength(1);
-      
+
       // After canonical formatting, the condition should not have conditionType
       // as this field is removed for node consumption
       const condition = conditions[0] as any;
@@ -79,7 +78,7 @@ describe('Access Control Conditions Builder', () => {
 
       expect(conditions).toHaveLength(3);
       expect(conditions[1]).toEqual({ operator: 'or' });
-      
+
       // Both conditions should be canonically formatted (no conditionType)
       expect((conditions[0] as any).conditionType).toBeUndefined();
       expect((conditions[2] as any).conditionType).toBeUndefined();
@@ -122,9 +121,9 @@ describe('Access Control Conditions Builder', () => {
       expect((cosmosConditions[0] as any).conditionType).toBeUndefined();
     });
   });
-  
+
   // ========== Basic Convenience Methods ==========
-  
+
   describe('EVM Basic Conditions', () => {
     test('should create ETH balance condition with canonical formatting', () => {
       const conditions = createAccBuilder()
@@ -199,7 +198,9 @@ describe('Access Control Conditions Builder', () => {
       expect(condition.contractAddress).toBe('');
       expect(condition.method).toBe('');
       expect(condition.parameters).toEqual([':userAddress']);
-      expect(condition.returnValueTest.value).toBe('0xd5deBEBe3b0b0CaaB4DD65f76D058bD01e24ea02');
+      expect(condition.returnValueTest.value).toBe(
+        '0xd5deBEBe3b0b0CaaB4DD65f76D058bD01e24ea02'
+      );
     });
 
     test('should create timestamp condition', () => {
@@ -339,7 +340,9 @@ describe('Access Control Conditions Builder', () => {
       const condition = conditions[0] as any;
       expect(condition.path).toBe(':userAddress');
       expect(condition.returnValueTest.key).toBe('');
-      expect(condition.returnValueTest.value).toBe('juno1vn6zl0924yj86jrp330wcwjclzdharljkajxqt');
+      expect(condition.returnValueTest.value).toBe(
+        'juno1vn6zl0924yj86jrp330wcwjclzdharljkajxqt'
+      );
       expect(condition.chain).toBe('juno');
     });
   });
@@ -502,7 +505,9 @@ describe('Access Control Conditions Builder', () => {
       const builder = createAccBuilder();
       const result = builder.validate();
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Cannot build empty conditions. Add at least one condition.');
+      expect(result.errors).toContain(
+        'Cannot build empty conditions. Add at least one condition.'
+      );
     });
 
     test('should catch operators at beginning', () => {
@@ -517,7 +522,7 @@ describe('Access Control Conditions Builder', () => {
       const builder = createAccBuilder()
         .requireEthBalance('1000000000000000000')
         .on('ethereum');
-      
+
       const result = builder.validate();
       expect(result.valid).toBe(true); // This specific case should be valid
     });
@@ -529,7 +534,9 @@ describe('Access Control Conditions Builder', () => {
     test('should throw when chain not specified', () => {
       expect(() => {
         // Create a builder but don't call .on() before trying to build
-        const builder = createAccBuilder().requireEthBalance('1000000000000000000');
+        const builder = createAccBuilder().requireEthBalance(
+          '1000000000000000000'
+        );
         // This should throw when trying to build because chain is not specified
         (builder as any).build();
       }).toThrow('build is not a function');
@@ -559,19 +566,30 @@ describe('Access Control Conditions Builder', () => {
 
   describe('Quick Factory Functions', () => {
     test('createEthBalanceCondition should work', () => {
-      const condition = createEthBalanceCondition('1000000000000000000', 'ethereum');
+      const condition = createEthBalanceCondition(
+        '1000000000000000000',
+        'ethereum'
+      );
       expect(condition.conditionType).toBe('evmBasic');
       expect(condition.method).toBe('eth_getBalance');
     });
 
     test('createTokenBalanceCondition should work', () => {
-      const condition = createTokenBalanceCondition('0x123...', '1000', 'polygon');
+      const condition = createTokenBalanceCondition(
+        '0x123...',
+        '1000',
+        'polygon'
+      );
       expect(condition.conditionType).toBe('evmBasic');
       expect(condition.standardContractType).toBe('ERC20');
     });
 
     test('createNftOwnershipCondition should work for ERC721', () => {
-      const condition = createNftOwnershipCondition('0x123...', 'ethereum', '42');
+      const condition = createNftOwnershipCondition(
+        '0x123...',
+        'ethereum',
+        '42'
+      );
       expect(condition.standardContractType).toBe('ERC721');
     });
 
@@ -634,7 +652,8 @@ describe('Access Control Conditions Builder', () => {
         .requireEthBalance('0.1')
         .on('ethereum')
         .or()
-        .requireSolBalance('1000000000').on('solana') // 1 SOL
+        .requireSolBalance('1000000000')
+        .on('solana') // 1 SOL
         .build();
 
       expect(conditions).toHaveLength(5);
@@ -677,15 +696,17 @@ describe('Access Control Conditions Builder', () => {
 
       expect(conditions).toHaveLength(3);
       expect(conditions[1]).toEqual({ operator: 'or' });
-      
+
       // First condition: Lit Action for weather check
       const litActionCondition = conditions[0] as any;
       expect(litActionCondition.standardContractType).toBe('LitAction');
       expect(litActionCondition.contractAddress).toContain('ipfs://');
-      
+
       // Second condition: Cosmos ATOM balance
       const cosmosCondition = conditions[2] as any;
-      expect(cosmosCondition.path).toBe('/cosmos/bank/v1beta1/balances/:userAddress');
+      expect(cosmosCondition.path).toBe(
+        '/cosmos/bank/v1beta1/balances/:userAddress'
+      );
       expect(cosmosCondition.returnValueTest.key).toBe('$.balances[0].amount');
     });
 
@@ -735,8 +756,13 @@ describe('Access Control Conditions Builder', () => {
         },
       };
 
-      const manuallyFormatted = canonicalUnifiedAccessControlConditionFormatter([rawCondition]);
-      const builderGenerated = createAccBuilder().requireEthBalance('1000000000000000000').on('ethereum').build();
+      const manuallyFormatted = canonicalUnifiedAccessControlConditionFormatter(
+        [rawCondition]
+      );
+      const builderGenerated = createAccBuilder()
+        .requireEthBalance('1000000000000000000')
+        .on('ethereum')
+        .build();
 
       expect(builderGenerated).toEqual(manuallyFormatted);
     });
@@ -756,7 +782,9 @@ describe('Access Control Conditions Builder', () => {
       expect(conditions).toHaveLength(1);
       const condition = conditions[0] as any;
       expect(condition.conditionType).toBeUndefined();
-      expect(condition.contractAddress).toBe('ipfs://QmcgbVu2sJSPpTeFhBd174FnmYmoVYvUFJeDkS7eYtwoFY');
+      expect(condition.contractAddress).toBe(
+        'ipfs://QmcgbVu2sJSPpTeFhBd174FnmYmoVYvUFJeDkS7eYtwoFY'
+      );
       expect(condition.standardContractType).toBe('LitAction');
       expect(condition.method).toBe('go');
       expect(condition.parameters).toEqual(['40']);
@@ -768,17 +796,13 @@ describe('Access Control Conditions Builder', () => {
     test('should support different Lit Action comparators', () => {
       // Test != comparator
       const notEqualConditions = createAccBuilder()
-        .requireLitAction(
-          'QmTestCid',
-          'check',
-          ['test'],
-          'false',
-          '!='
-        )
+        .requireLitAction('QmTestCid', 'check', ['test'], 'false', '!=')
         .build();
 
       expect(notEqualConditions).toHaveLength(1);
-      expect((notEqualConditions[0] as any).returnValueTest.comparator).toBe('!=');
+      expect((notEqualConditions[0] as any).returnValueTest.comparator).toBe(
+        '!='
+      );
 
       // Test contains comparator
       const containsConditions = createAccBuilder()
@@ -792,7 +816,9 @@ describe('Access Control Conditions Builder', () => {
         .build();
 
       expect(containsConditions).toHaveLength(1);
-      expect((containsConditions[0] as any).returnValueTest.comparator).toBe('contains');
+      expect((containsConditions[0] as any).returnValueTest.comparator).toBe(
+        'contains'
+      );
 
       // Test !contains comparator
       const notContainsConditions = createAccBuilder()
@@ -806,7 +832,9 @@ describe('Access Control Conditions Builder', () => {
         .build();
 
       expect(notContainsConditions).toHaveLength(1);
-      expect((notContainsConditions[0] as any).returnValueTest.comparator).toBe('!contains');
+      expect((notContainsConditions[0] as any).returnValueTest.comparator).toBe(
+        '!contains'
+      );
     });
 
     test('should handle multiple parameters in Lit Action', () => {

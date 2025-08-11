@@ -22,4 +22,4 @@ export type ExecuteJsCreateRequestParams = {
   useSingleNode?: boolean;
   responseStrategy?: LitActionResponseStrategy;
   jitContext: NagaJitContext;
-}; 
+};

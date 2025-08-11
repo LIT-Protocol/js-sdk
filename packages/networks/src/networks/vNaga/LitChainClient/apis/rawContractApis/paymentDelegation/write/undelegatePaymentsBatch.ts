@@ -9,10 +9,14 @@ import { decodeLogs } from '../../../utils/decodeLogs';
 
 // Schema for validating the request
 const undelegatePaymentsBatchSchema = z.object({
-  userAddresses: z.array(z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address')),
+  userAddresses: z.array(
+    z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address')
+  ),
 });
 
-export type UndelegatePaymentsBatchRequest = z.infer<typeof undelegatePaymentsBatchSchema>;
+export type UndelegatePaymentsBatchRequest = z.infer<
+  typeof undelegatePaymentsBatchSchema
+>;
 
 /**
  * Undelegate payments from multiple users in batch
@@ -33,7 +37,7 @@ export async function undelegatePaymentsBatch(
     networkCtx,
     accountOrWalletClient
   );
-  
+
   const hash = await callWithAdjustedOverrides(
     paymentDelegationContract,
     'undelegatePaymentsBatch',

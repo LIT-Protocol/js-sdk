@@ -83,10 +83,7 @@ export const createChainManager = (
         );
       },
       paymentManager: () => {
-        return new api.PaymentManager(
-          _networkConfig,
-          accountOrWalletClient
-        );
+        return new api.PaymentManager(_networkConfig, accountOrWalletClient);
       },
       getPKPsByAuthData: (
         authData: {

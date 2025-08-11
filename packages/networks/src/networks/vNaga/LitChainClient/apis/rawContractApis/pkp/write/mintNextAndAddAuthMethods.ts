@@ -46,12 +46,11 @@ export async function mintNextAndAddAuthMethods(
     createContractsManager(networkCtx, accountOrWalletClient);
 
   const mintCost = await pkpNftContract.read.mintCost();
-  
+
   // console.log("🔥🔥🔥 validatedRequest:", validatedRequest);
 
   // const ipfsCid = "QmWL2r7CPi5dDKZetRrj6eVfzwv5Y472QJew9c5B9iRU6j";
   // const ipfsCidAsBytes = await getBytesFromIpfsCid(ipfsCid);
-  
 
   // const modifyRequest = {
   //   ...validatedRequest,
@@ -74,7 +73,7 @@ export async function mintNextAndAddAuthMethods(
       validatedRequest.permittedAuthMethodIds,
       validatedRequest.permittedAuthMethodPubkeys,
       validatedRequest.permittedAuthMethodScopes,
-      validatedRequest.addPkpEthAddressAsPermittedAddress,  // This adds as permitted address
+      validatedRequest.addPkpEthAddressAsPermittedAddress, // This adds as permitted address
       validatedRequest.sendPkpToItself, // This keeps control if is true, otherwise it will be added as a permitted address
     ],
     {

@@ -73,7 +73,8 @@ export const issueSessionFromContext = async (params: {
   // so that the node can verify the session signature
   const sessionSigningTemplate = {
     sessionKey: params.authContext.sessionKeyPair.publicKey,
-    resourceAbilityRequests: (_authConfig.resources || []) as LitResourceAbilityRequest[],
+    resourceAbilityRequests: (_authConfig.resources ||
+      []) as LitResourceAbilityRequest[],
     capabilities: capabilities,
     issuedAt: new Date().toISOString(),
 

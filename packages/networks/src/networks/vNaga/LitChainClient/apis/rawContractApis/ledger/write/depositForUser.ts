@@ -9,7 +9,9 @@ import { decodeLogs } from '../../../utils/decodeLogs';
 
 // Schema for validating the request
 const depositForUserSchema = z.object({
-  userAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
+  userAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
   amountInWei: z.bigint().positive('Amount must be positive'),
 });
 
@@ -34,7 +36,7 @@ export async function depositForUser(
     networkCtx,
     accountOrWalletClient
   );
-  
+
   const hash = await callWithAdjustedOverrides(
     ledgerContract,
     'depositForUser',
@@ -51,4 +53,4 @@ export async function depositForUser(
   );
 
   return { hash, receipt, decodedLogs };
-} 
+}

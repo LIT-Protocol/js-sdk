@@ -181,11 +181,22 @@ export function localStorageNode({
         networkName,
         storagePath: 'N/A (browser environment)',
       },
-      async writePKPTokens({ authMethodType, authMethodId, tokenIds }): Promise<void> {
-        console.warn('localStorageNode (stub): writePKPTokens called in browser.');
+      async writePKPTokens({
+        authMethodType,
+        authMethodId,
+        tokenIds,
+      }): Promise<void> {
+        console.warn(
+          'localStorageNode (stub): writePKPTokens called in browser.'
+        );
       },
-      async readPKPTokens({ authMethodType, authMethodId }): Promise<string[] | null> {
-        console.warn('localStorageNode (stub): readPKPTokens called in browser.');
+      async readPKPTokens({
+        authMethodType,
+        authMethodId,
+      }): Promise<string[] | null> {
+        console.warn(
+          'localStorageNode (stub): readPKPTokens called in browser.'
+        );
         return null;
       },
       async write({ address, authData }): Promise<void> {
@@ -209,22 +220,35 @@ export function localStorageNode({
       async writePKPs({ authMethodType, authMethodId, pkps }): Promise<void> {
         console.warn('localStorageNode (stub): writePKPs called in browser.');
       },
-      async readPKPs({ authMethodType, authMethodId }): Promise<PKPInfo[] | null> {
+      async readPKPs({
+        authMethodType,
+        authMethodId,
+      }): Promise<PKPInfo[] | null> {
         console.warn('localStorageNode (stub): readPKPs called in browser.');
         return null;
       },
       async writePKPDetails({ tokenId, publicKey, ethAddress }): Promise<void> {
-        console.warn('localStorageNode (stub): writePKPDetails called in browser.');
+        console.warn(
+          'localStorageNode (stub): writePKPDetails called in browser.'
+        );
       },
-      async readPKPDetails({ tokenId }): Promise<{ publicKey: string; ethAddress: string } | null> {
-        console.warn('localStorageNode (stub): readPKPDetails called in browser.');
+      async readPKPDetails({
+        tokenId,
+      }): Promise<{ publicKey: string; ethAddress: string } | null> {
+        console.warn(
+          'localStorageNode (stub): readPKPDetails called in browser.'
+        );
         return null;
       },
       async writePKPTokensByAddress({ ownerAddress, tokenIds }): Promise<void> {
-        console.warn('localStorageNode (stub): writePKPTokensByAddress called in browser.');
+        console.warn(
+          'localStorageNode (stub): writePKPTokensByAddress called in browser.'
+        );
       },
       async readPKPTokensByAddress({ ownerAddress }): Promise<string[] | null> {
-        console.warn('localStorageNode (stub): readPKPTokensByAddress called in browser.');
+        console.warn(
+          'localStorageNode (stub): readPKPTokensByAddress called in browser.'
+        );
         return null;
       },
     };
@@ -332,7 +356,11 @@ export function localStorageNode({
     /**
      * Cache PKP token IDs for a specific auth method
      */
-    async writePKPTokens({ authMethodType, authMethodId, tokenIds }): Promise<void> {
+    async writePKPTokens({
+      authMethodType,
+      authMethodId,
+      tokenIds,
+    }): Promise<void> {
       const store = await getMemoisedStorageInstance();
       const cacheKey = buildPKPCacheKey({
         appName,
@@ -340,17 +368,23 @@ export function localStorageNode({
         authMethodType: authMethodType.toString(),
         authMethodId,
       });
-      
-      store.setItem(cacheKey, JSON.stringify({
-        tokenIds,
-        timestamp: Date.now(),
-      }));
+
+      store.setItem(
+        cacheKey,
+        JSON.stringify({
+          tokenIds,
+          timestamp: Date.now(),
+        })
+      );
     },
 
     /**
      * Retrieve cached PKP token IDs for a specific auth method
      */
-    async readPKPTokens({ authMethodType, authMethodId }): Promise<string[] | null> {
+    async readPKPTokens({
+      authMethodType,
+      authMethodId,
+    }): Promise<string[] | null> {
       const store = await getMemoisedStorageInstance();
       const cacheKey = buildPKPCacheKey({
         appName,
@@ -358,22 +392,25 @@ export function localStorageNode({
         authMethodType: authMethodType.toString(),
         authMethodId,
       });
-      
+
       const value = store.getItem(cacheKey);
-      
+
       if (!value) {
         return null;
       }
-      
+
       try {
         const parsed = JSON.parse(value);
         // Optional: Add cache expiration logic here
         // const isExpired = Date.now() - parsed.timestamp > CACHE_EXPIRY_MS;
         // if (isExpired) return null;
-        
+
         return parsed.tokenIds || null;
       } catch (error) {
-        console.error('localStorageNode: Failed to parse cached PKP tokens:', error);
+        console.error(
+          'localStorageNode: Failed to parse cached PKP tokens:',
+          error
+        );
         return null;
       }
     },
@@ -389,17 +426,23 @@ export function localStorageNode({
         authMethodType: authMethodType.toString(),
         authMethodId,
       });
-      
-      store.setItem(cacheKey, JSON.stringify({
-        pkps,
-        timestamp: Date.now(),
-      }));
+
+      store.setItem(
+        cacheKey,
+        JSON.stringify({
+          pkps,
+          timestamp: Date.now(),
+        })
+      );
     },
 
     /**
      * Retrieve cached full PKP information for a specific auth method
      */
-    async readPKPs({ authMethodType, authMethodId }): Promise<PKPInfo[] | null> {
+    async readPKPs({
+      authMethodType,
+      authMethodId,
+    }): Promise<PKPInfo[] | null> {
       const store = await getMemoisedStorageInstance();
       const cacheKey = buildPKPFullCacheKey({
         appName,
@@ -407,22 +450,25 @@ export function localStorageNode({
         authMethodType: authMethodType.toString(),
         authMethodId,
       });
-      
+
       const value = store.getItem(cacheKey);
-      
+
       if (!value) {
         return null;
       }
-      
+
       try {
         const parsed = JSON.parse(value);
         // Optional: Add cache expiration logic here
         // const isExpired = Date.now() - parsed.timestamp > CACHE_EXPIRY_MS;
         // if (isExpired) return null;
-        
+
         return parsed.pkps || null;
       } catch (error) {
-        console.error('localStorageNode: Failed to parse cached PKP data:', error);
+        console.error(
+          'localStorageNode: Failed to parse cached PKP data:',
+          error
+        );
         return null;
       }
     },
@@ -437,37 +483,42 @@ export function localStorageNode({
         networkName,
         tokenId,
       });
-      
-      store.setItem(cacheKey, JSON.stringify({
-        publicKey,
-        ethAddress,
-        timestamp: Date.now(),
-      }));
+
+      store.setItem(
+        cacheKey,
+        JSON.stringify({
+          publicKey,
+          ethAddress,
+          timestamp: Date.now(),
+        })
+      );
     },
 
     /**
      * Retrieve cached granular PKP details for a specific token ID
      */
-    async readPKPDetails({ tokenId }): Promise<{ publicKey: string; ethAddress: string } | null> {
+    async readPKPDetails({
+      tokenId,
+    }): Promise<{ publicKey: string; ethAddress: string } | null> {
       const store = await getMemoisedStorageInstance();
       const cacheKey = buildPKPDetailsCacheKey({
         appName,
         networkName,
         tokenId,
       });
-      
+
       const value = store.getItem(cacheKey);
-      
+
       if (!value) {
         return null;
       }
-      
+
       try {
         const parsed = JSON.parse(value);
         // Optional: Add cache expiration logic here
         // const isExpired = Date.now() - parsed.timestamp > CACHE_EXPIRY_MS;
         // if (isExpired) return null;
-        
+
         if (parsed.publicKey && parsed.ethAddress) {
           return {
             publicKey: parsed.publicKey,
@@ -476,7 +527,10 @@ export function localStorageNode({
         }
         return null;
       } catch (error) {
-        console.error('localStorageNode: Failed to parse cached PKP details:', error);
+        console.error(
+          'localStorageNode: Failed to parse cached PKP details:',
+          error
+        );
         return null;
       }
     },
@@ -488,11 +542,14 @@ export function localStorageNode({
         networkName,
         ownerAddress,
       });
-      
-      store.setItem(cacheKey, JSON.stringify({
-        tokenIds,
-        timestamp: Date.now(),
-      }));
+
+      store.setItem(
+        cacheKey,
+        JSON.stringify({
+          tokenIds,
+          timestamp: Date.now(),
+        })
+      );
     },
 
     async readPKPTokensByAddress({ ownerAddress }): Promise<string[] | null> {
@@ -502,22 +559,25 @@ export function localStorageNode({
         networkName,
         ownerAddress,
       });
-      
+
       const value = store.getItem(cacheKey);
-      
+
       if (!value) {
         return null;
       }
-      
+
       try {
         const parsed = JSON.parse(value);
         // Optional: Add cache expiration logic here
         // const isExpired = Date.now() - parsed.timestamp > CACHE_EXPIRY_MS;
         // if (isExpired) return null;
-        
+
         return parsed.tokenIds || null;
       } catch (error) {
-        console.error('localStorageNode: Failed to parse cached PKP tokens:', error);
+        console.error(
+          'localStorageNode: Failed to parse cached PKP tokens:',
+          error
+        );
         return null;
       }
     },

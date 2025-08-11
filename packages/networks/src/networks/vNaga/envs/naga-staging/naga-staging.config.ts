@@ -1,6 +1,4 @@
-import {
-  nagaStagingSignatures
-} from '@lit-protocol/contracts';
+import { nagaStagingSignatures } from '@lit-protocol/contracts';
 import * as chainInfo from '../../../../chains/ChronicleYellowstone';
 import { NAGA_ENDPOINT } from '../../endpoints-manager/endpoints';
 import { INetworkConfig } from '../../interfaces/NetworkContext';

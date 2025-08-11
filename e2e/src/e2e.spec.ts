@@ -83,7 +83,8 @@ describe('all', () => {
     console.log('🔐 Testing using Programmable Key Pair authentication');
 
     describe('endpoints', () => {
-      it('pkpSign', () => createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
+      it('pkpSign', () =>
+        createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
       it('executeJs', () =>
         createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
       it('viewPKPsByAddress', () =>
@@ -95,7 +96,10 @@ describe('all', () => {
       it('encryptDecryptFlow', () =>
         createEncryptDecryptFlowTest(ctx, () => ctx.alicePkpAuthContext)());
       it('pkpPermissionsManagerFlow', () =>
-        createPkpPermissionsManagerFlowTest(ctx, () => ctx.alicePkpAuthContext)());
+        createPkpPermissionsManagerFlowTest(
+          ctx,
+          () => ctx.alicePkpAuthContext
+        )());
     });
 
     describe('integrations', () => {

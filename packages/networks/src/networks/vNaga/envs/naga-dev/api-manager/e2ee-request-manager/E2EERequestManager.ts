@@ -181,11 +181,15 @@ const handleEncryptedError = (
 
       throw new Error(
         `"${operationName}" failed. The nodes returned an encrypted error response that could not be decrypted. ` +
-        `This may indicate a configuration or network connectivity issue. ${JSON.stringify(errorResult)}`
+          `This may indicate a configuration or network connectivity issue. ${JSON.stringify(
+            errorResult
+          )}`
       );
     }
   } else {
-    throw new Error(`"${operationName}" failed. ${JSON.stringify(errorResult)}`);
+    throw new Error(
+      `"${operationName}" failed. ${JSON.stringify(errorResult)}`
+    );
   }
 };
 

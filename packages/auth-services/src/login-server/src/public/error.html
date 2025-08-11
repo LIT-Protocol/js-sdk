@@ -1,33 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Error - Lit Protocol</title>
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/tailwindcss@3.2.7/src/css/preflight.css" />
-  <link rel="stylesheet" type="text/css" href="/css/main.css" />
-  <script>
-    window.onload = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const error = urlParams.get('error');
-      
-      const errorMessageElement = document.getElementById('error-message');
-      if (errorMessageElement && error) {
-        errorMessageElement.textContent = `Error: ${error}`;
-      }
-    };
-  </script>
-</head>
-<body data-lit-theme="dark">
-  <div class="litBg litBg--custom"></div>
-  <div class="hero">
-    <div class="hero__content">
-      <h1 class="hero__title">Authentication Error</h1>
-      <p id="error-message" class="hero__copy">An error occurred during authentication.</p>
-      <a href="/" class="hero__link">Return to Home</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Error - Lit Protocol</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://unpkg.com/tailwindcss@3.2.7/src/css/preflight.css"
+    />
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <script>
+      window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+
+        const errorMessageElement = document.getElementById('error-message');
+        if (errorMessageElement && error) {
+          errorMessageElement.textContent = `Error: ${error}`;
+        }
+      };
+    </script>
+  </head>
+  <body data-lit-theme="dark">
+    <div class="litBg litBg--custom"></div>
+    <div class="hero">
+      <div class="hero__content">
+        <h1 class="hero__title">Authentication Error</h1>
+        <p id="error-message" class="hero__copy">
+          An error occurred during authentication.
+        </p>
+        <a href="/" class="hero__link">Return to Home</a>
+      </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

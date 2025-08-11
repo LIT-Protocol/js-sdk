@@ -14,4 +14,4 @@ export default {
   coverageDirectory: '../../coverage/packages/auth-services',
   setupFilesAfterEnv: ['../../jest.setup.js'],
   testEnvironment: 'node',
-}; 
+};

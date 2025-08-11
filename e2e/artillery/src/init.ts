@@ -1,9 +1,13 @@
 import '../../src/helper/supressLogs';
-import { createAuthManager, storagePlugins, ViemAccountAuthenticator } from "@lit-protocol/auth";
-import * as StateManager from "./StateManager";
-import { createLitClient } from "@lit-protocol/lit-client";
-import { getOrCreatePkp } from "../../../e2e/src/helper/pkp-utils";
-import * as NetworkManager from "../../../e2e/src/helper/NetworkManager";
+import {
+  createAuthManager,
+  storagePlugins,
+  ViemAccountAuthenticator,
+} from '@lit-protocol/auth';
+import * as StateManager from './StateManager';
+import { createLitClient } from '@lit-protocol/lit-client';
+import { getOrCreatePkp } from '../../../e2e/src/helper/pkp-utils';
+import * as NetworkManager from '../../../e2e/src/helper/NetworkManager';
 import * as AccountManager from '../src/AccountManager';
 
 const _network = process.env['NETWORK'];
@@ -13,49 +17,63 @@ const REJECT_BALANCE_THRESHOLD = 0;
 const LEDGER_MINIMUM_BALANCE = 10000;
 
 (async () => {
-
-  // -- Start 
-  console.log("\x1b[90m✅ Initialising Artillery...\x1b[0m");
+  // -- Start
+  console.log('\x1b[90m✅ Initialising Artillery...\x1b[0m');
 
   // 1. Setup network and chain client
   const networkModule = await NetworkManager.getLitNetworkModule();
-  const publicClient = await NetworkManager.getViemPublicClient({ networkModule });
+  const publicClient = await NetworkManager.getViemPublicClient({
+    networkModule,
+  });
   const litClient = await createLitClient({ network: networkModule });
 
   // 2. Setup the master account
   const masterAccount = await AccountManager.getMasterAccount();
 
   const masterAccountDetails = await AccountManager.getAccountDetails({
-    accountLabel: "Master Account",
+    accountLabel: 'Master Account',
     account: masterAccount,
     publicClient,
     litClient,
   });
 
   if (Number(masterAccountDetails.ethBalance) < REJECT_BALANCE_THRESHOLD) {
-    throw new Error(`🚨 Live Master Account Balance is less than REJECT_BALANCE_THRESHOLD: ${REJECT_BALANCE_THRESHOLD} ETH`);
+    throw new Error(
+      `🚨 Live Master Account Balance is less than REJECT_BALANCE_THRESHOLD: ${REJECT_BALANCE_THRESHOLD} ETH`
+    );
   }
 
   if (LEDGER_MINIMUM_BALANCE > Number(masterAccountDetails.ledgerBalance)) {
-
     // find the difference between the minimum balance and the current balance
-    const difference = LEDGER_MINIMUM_BALANCE - Number(masterAccountDetails.ledgerBalance);
+    const difference =
+      LEDGER_MINIMUM_BALANCE - Number(masterAccountDetails.ledgerBalance);
 
-    console.log(`🚨 Live Master Account Ledger Balance is less than LEDGER_MINIMUM_BALANCE: ${LEDGER_MINIMUM_BALANCE} ETH. Attempting to top up the difference of ${difference} ETH to the master account.`);
+    console.log(
+      `🚨 Live Master Account Ledger Balance is less than LEDGER_MINIMUM_BALANCE: ${LEDGER_MINIMUM_BALANCE} ETH. Attempting to top up the difference of ${difference} ETH to the master account.`
+    );
 
     // deposit the difference
-    console.log("\x1b[90m✅ Depositing the difference to Live Master Account Payment Manager...\x1b[0m");
-    await masterAccountDetails.paymentManager.deposit({ amountInEth: difference.toString() });
+    console.log(
+      '\x1b[90m✅ Depositing the difference to Live Master Account Payment Manager...\x1b[0m'
+    );
+    await masterAccountDetails.paymentManager.deposit({
+      amountInEth: difference.toString(),
+    });
 
     // print the new balance
-    const newBalance = await masterAccountDetails.paymentManager.getBalance({ userAddress: masterAccount.address });
-    console.log('✅ New Live Master Account Payment Balance:', newBalance.availableBalance);
+    const newBalance = await masterAccountDetails.paymentManager.getBalance({
+      userAddress: masterAccount.address,
+    });
+    console.log(
+      '✅ New Live Master Account Payment Balance:',
+      newBalance.availableBalance
+    );
   }
 
   // 3. Authenticate the master account and store the auth data
   const masterAccountAuthData = await StateManager.getOrUpdate(
     'masterAccount.authData',
-    await ViemAccountAuthenticator.authenticate(masterAccount),
+    await ViemAccountAuthenticator.authenticate(masterAccount)
   );
   console.log('✅ Master Account Auth Data:', masterAccountAuthData);
 

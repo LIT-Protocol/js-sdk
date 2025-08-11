@@ -78,15 +78,21 @@ export const createStateManager = async <T>(params: {
     _logger.info('🔍 About to fetch initial connection info...');
     const initialConnectionInfo =
       await readOnlyChainManager.api.connection.getConnectionInfo();
-    
+
     _logger.info('🔍 Raw initial connection info:', initialConnectionInfo);
-    _logger.info('🔍 Type of initial connection info:', typeof initialConnectionInfo);
-    _logger.info('🔍 Keys in initial connection info:', Object.keys(initialConnectionInfo || {}));
-    
+    _logger.info(
+      '🔍 Type of initial connection info:',
+      typeof initialConnectionInfo
+    );
+    _logger.info(
+      '🔍 Keys in initial connection info:',
+      Object.keys(initialConnectionInfo || {})
+    );
+
     latestBootstrapUrls = initialConnectionInfo.bootstrapUrls;
     latestEpochInfo = initialConnectionInfo.epochInfo; // Store initial epoch info
     latestConnectionInfo = initialConnectionInfo; // Store initial connection info
-    
+
     _logger.info({
       msg: 'State Manager Initialized with Connection Info',
       initialUrls: latestBootstrapUrls,
@@ -105,7 +111,7 @@ export const createStateManager = async <T>(params: {
       endpoints: params.networkModule.getEndpoints(),
       networkModule: params.networkModule,
     });
-    
+
     callbackResult = await params.callback({
       bootstrapUrls: latestBootstrapUrls,
       currentEpoch: latestEpochInfo?.number,
@@ -117,7 +123,7 @@ export const createStateManager = async <T>(params: {
       // releaseVerificationConfig: null,
       networkModule: params.networkModule,
     });
-    
+
     _logger.info('🔍 Callback completed successfully, result:', callbackResult);
   } catch (error: any) {
     _logger.error(

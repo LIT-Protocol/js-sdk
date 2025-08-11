@@ -80,7 +80,9 @@ interface PrepareCustomAuthRequestBodyParams {
  */
 const prepareCustomAuthRequestBody = async (
   params: PrepareCustomAuthRequestBodyParams
-): Promise<z.output<typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema>> => {
+): Promise<
+  z.output<typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema>
+> => {
   const _authentication = CustomAuthenticationSchema.parse(
     params.authentication
   );
@@ -118,11 +120,14 @@ const prepareCustomAuthRequestBody = async (
   const customRequestBody = {
     ...requestBody,
     // Add custom lit action parameters
-    ...(_customParams.litActionIpfsId 
+    ...(_customParams.litActionIpfsId
       ? { litActionIpfsId: _customParams.litActionIpfsId }
-      : { litActionCode: _customParams.litActionCode || '(async () => { LitActions.setResponse({ response: "false", error: "No lit action provided" }); })();' }
-    ),
-    ...(_customParams.jsParams && { 
+      : {
+          litActionCode:
+            _customParams.litActionCode ||
+            '(async () => { LitActions.setResponse({ response: "false", error: "No lit action provided" }); })();',
+        }),
+    ...(_customParams.jsParams && {
       jsParams: _customParams.jsParams,
     }),
   };

@@ -14,29 +14,41 @@ export const DecryptRequestBaseSchema =
     });
 
 // Metadata schema for encryption
-export const EncryptionMetadataSchema = z.object({
-  /**
-   * The expected data type for decryption conversion
-   * Supported types: 'uint8array', 'string', 'json', 'buffer', 'image', 'video', 'file'
-   */
-  dataType: z.enum(['uint8array', 'string', 'json', 'buffer', 'image', 'video', 'file']).optional(),
-  /**
-   * MIME type of the file (for image, video, file types)
-   */
-  mimeType: z.string().optional(),
-  /**
-   * Original filename (for image, video, file types)
-   */
-  filename: z.string().optional(),
-  /**
-   * File size in bytes
-   */
-  size: z.number().optional(),
-  /**
-   * Additional custom metadata
-   */
-  custom: z.record(z.any()).optional(),
-}).optional();
+export const EncryptionMetadataSchema = z
+  .object({
+    /**
+     * The expected data type for decryption conversion
+     * Supported types: 'uint8array', 'string', 'json', 'buffer', 'image', 'video', 'file'
+     */
+    dataType: z
+      .enum([
+        'uint8array',
+        'string',
+        'json',
+        'buffer',
+        'image',
+        'video',
+        'file',
+      ])
+      .optional(),
+    /**
+     * MIME type of the file (for image, video, file types)
+     */
+    mimeType: z.string().optional(),
+    /**
+     * Original filename (for image, video, file types)
+     */
+    filename: z.string().optional(),
+    /**
+     * File size in bytes
+     */
+    size: z.number().optional(),
+    /**
+     * Additional custom metadata
+     */
+    custom: z.record(z.any()).optional(),
+  })
+  .optional();
 
 export const EncryptResponseSchema = z.object({
   /**

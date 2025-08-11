@@ -111,7 +111,7 @@ export class StytchWhatsAppOtpAuthenticator {
         );
       }
       accessToken = verifyData.accessToken;
-      userId = verifyData.userId
+      userId = verifyData.userId;
     } catch (e: any) {
       console.error('Error verifying WhatsApp OTP via auth service:', e);
       throw e;

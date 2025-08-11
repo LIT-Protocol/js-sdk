@@ -29,18 +29,18 @@ const BaseMintWithCustomAuthSchema = z.object({
  */
 const MintWithValidationCidSchema = BaseMintWithCustomAuthSchema.extend({
   validationCode: z.undefined().optional(),
-  validationIpfsCid: z.string().refine(
-    (cid) => cid.startsWith('Qm') && cid.length >= 46,
-    {
-      message: 'validationIpfsCid must be a valid IPFS CID starting with "Qm" and at least 46 characters long',
-    }
-  ),
+  validationIpfsCid: z
+    .string()
+    .refine((cid) => cid.startsWith('Qm') && cid.length >= 46, {
+      message:
+        'validationIpfsCid must be a valid IPFS CID starting with "Qm" and at least 46 characters long',
+    }),
 });
 
 /**
  * Union schema that enforces exactly one validation method
  */
-export const MintWithCustomAuthSchema = MintWithValidationCidSchema
+export const MintWithCustomAuthSchema = MintWithValidationCidSchema;
 
 // Create discriminated union types
 // type MintWithValidationCode = z.input<typeof MintWithValidationCodeSchema>;

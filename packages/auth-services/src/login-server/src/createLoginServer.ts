@@ -75,12 +75,14 @@ export const createLitLoginServer = (
   // Create Elysia app
   const app = new Elysia()
     // Add CORS support first to handle preflight requests properly
-    .use(cors({
-      origin: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-      credentials: true
-    }))
+    .use(
+      cors({
+        origin: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+        credentials: true,
+      })
+    )
     // Serve static files from the public directory
     .use(
       staticPlugin({
@@ -372,7 +374,7 @@ export const createLitLoginServer = (
         });
 
         const json = await response.json();
-        
+
         if (!json.access_token) {
           stateStore.delete(state);
           set.headers = { Location: '/error?error=invalid_access_token' };
@@ -385,7 +387,7 @@ export const createLitLoginServer = (
         url.searchParams.set('provider', 'discord');
         url.searchParams.set('access_token', json.access_token);
         url.searchParams.set('state', state);
-        
+
         if (caller) {
           url.searchParams.set('caller', caller);
         }

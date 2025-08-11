@@ -12,6 +12,6 @@ export const createPkpSignTest = (
       toSign: 'Hello, world!',
     });
 
-    assert.toBeDefined(res.signature, "toBeDefined");
+    assert.toBeDefined(res.signature, 'toBeDefined');
   };
 };

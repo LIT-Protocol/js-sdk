@@ -114,4 +114,3 @@ function getChildLogger(
 }
 
 export { getChildLogger, Logger, logger, setLoggerOptions };
-

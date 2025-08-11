@@ -56,4 +56,4 @@ export const ExecuteJsResponseDataSchema = z.object({
       signedData: z.record(z.string(), LitActionSignedDataSchema),
     })
   ),
-}); 
+});

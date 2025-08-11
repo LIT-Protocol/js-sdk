@@ -1,22 +1,24 @@
-import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
-import { createLitClient } from "@lit-protocol/lit-client";
-import { z } from "zod";
-import * as StateManager from "../StateManager";
-import * as NetworkManager from "../../../src/helper/NetworkManager";
-import * as AccountManager from "../AccountManager";
+import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
+import { createLitClient, LitClientType } from '@lit-protocol/lit-client';
+import { z } from 'zod';
+import * as StateManager from '../StateManager';
+import * as NetworkManager from '../../../src/helper/NetworkManager';
+import * as AccountManager from '../AccountManager';
 
 // PKP Sign Result Schema
 const PkpSignResultSchema = z.object({
-  signature: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex signature"),
-  verifyingKey: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex verifying key"),
-  signedData: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex signed data"),
-  recoveryId: z.number().int().min(0).max(3, "Recovery ID must be 0-3"),
-  publicKey: z.string().regex(/^0x[a-fA-F0-9]+$/, "Invalid hex public key"),
-  sigType: z.string().min(1, "Signature type cannot be empty"),
+  signature: z.string().regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex signature'),
+  verifyingKey: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex verifying key'),
+  signedData: z.string().regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex signed data'),
+  recoveryId: z.number().int().min(0).max(3, 'Recovery ID must be 0-3'),
+  publicKey: z.string().regex(/^0x[a-fA-F0-9]+$/, 'Invalid hex public key'),
+  sigType: z.string().min(1, 'Signature type cannot be empty'),
 });
 
 // Global variables to cache expensive operations
-let litClient: any = null;
+let litClient: LitClientType;
 let authManager: any = null;
 let masterAccountAuthContext: any = null;
 let networkModule: any = null;
@@ -57,11 +59,15 @@ const createAuthContextFromState = async () => {
 
     // Validate that master account authData and PKP exist
     if (!state.masterAccount.authData) {
-      throw new Error('❌ Master account authData not found in state. Run init.ts first.');
+      throw new Error(
+        '❌ Master account authData not found in state. Run init.ts first.'
+      );
     }
 
     if (!state.masterAccount.pkp) {
-      throw new Error('❌ Master account PKP not found in state. Run init.ts first.');
+      throw new Error(
+        '❌ Master account PKP not found in state. Run init.ts first.'
+      );
     }
 
     // Get the master account from environment (same as init.ts)
@@ -113,6 +119,7 @@ export async function runPkpSignTest() {
       authContext: authContext,
       pubKey: state.masterAccount.pkp.publicKey,
       toSign: `Hello from Artillery! ${Date.now()}`, // Unique message per request
+      // userMaxPrice: 1000000000000000000n,
     });
 
     // Validate the result using Zod schema
@@ -126,12 +133,14 @@ export async function runPkpSignTest() {
 
     // For Artillery, just return - no need to call next()
     return;
-
   } catch (error) {
     const endTime = Date.now();
     const duration = endTime - startTime;
 
-    console.error(`❌ pkpSign failed in ${duration}ms:`, error instanceof Error ? error.message : String(error));
+    console.error(
+      `❌ pkpSign failed in ${duration}ms:`,
+      error instanceof Error ? error.message : String(error)
+    );
 
     // Throw the error to let Artillery handle it
     throw error;
@@ -140,7 +149,6 @@ export async function runPkpSignTest() {
 
 // test '/web/sign_session_key' endpoint
 export async function runSignSessionKeyTest() {
-
   // ❗️ IT'S IMPORTANT TO SET THIS TO FALSE FOR TESTING
   const DELEGATION_AUTH_SIG_CACHE = false;
 
@@ -167,16 +175,18 @@ export async function runSignSessionKeyTest() {
       litClient: litClient,
       cache: {
         delegationAuthSig: DELEGATION_AUTH_SIG_CACHE,
-      }
+      },
     });
 
     // console.log('✅ Master Account PKP Auth Context:', masterAccountPkpAuthContext);
-
   } catch (error) {
     const endTime = Date.now();
     const duration = endTime - startTime;
 
-    console.error(`❌ signSessionKey failed in ${duration}ms:`, error instanceof Error ? error.message : String(error));
+    console.error(
+      `❌ signSessionKey failed in ${duration}ms:`,
+      error instanceof Error ? error.message : String(error)
+    );
 
     // Throw the error to let Artillery handle it
     throw error;

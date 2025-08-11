@@ -322,7 +322,6 @@ const networkModuleObject = {
       networkModule: params.networkModule as LitNetworkModuleBase,
     });
   },
-
   getMaxPricesForNodeProduct: getMaxPricesForNodeProduct,
   getUserMaxPrice: getUserMaxPrice,
   getVerifyReleaseId: () => verifyReleaseId,
@@ -601,7 +600,6 @@ const networkModuleObject = {
         requestId: string,
         jitContext: NagaJitContext
       ) => {
-
         if (!result.success) {
           E2EERequestManager.handleEncryptedError(
             result,
@@ -839,7 +837,9 @@ const networkModuleObject = {
             curveType: 'BLS' as const,
             epoch: requestBody.epoch,
             nodeSet: requestBody.nodeSet,
-            maxPrice: getUserMaxPrice({ product: 'SIGN_SESSION_KEY' }).toString(),
+            maxPrice: getUserMaxPrice({
+              product: 'SIGN_SESSION_KEY',
+            }).toString(),
           };
 
           // Encrypt the request data using the E2EE manager

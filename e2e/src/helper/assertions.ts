@@ -1,5 +1,5 @@
 /**
- * Conditional assertions that work both in test environments (with expect) 
+ * Conditional assertions that work both in test environments (with expect)
  * and standalone package environments (with simple assertions)
  */
 
@@ -12,7 +12,9 @@ export const assert = {
       expect(value).toBeDefined();
     } else {
       if (value === undefined || value === null) {
-        throw new Error(message || `Expected value to be defined but got ${value}`);
+        throw new Error(
+          message || `Expected value to be defined but got ${value}`
+        );
       }
     }
   },
@@ -32,7 +34,12 @@ export const assert = {
       expect(actual).toEqual(expected);
     } else {
       if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-        throw new Error(message || `Expected ${JSON.stringify(actual)} to equal ${JSON.stringify(expected)}`);
+        throw new Error(
+          message ||
+            `Expected ${JSON.stringify(actual)} to equal ${JSON.stringify(
+              expected
+            )}`
+        );
       }
     }
   },
@@ -52,7 +59,9 @@ export const assert = {
       expect(actual).toBeGreaterThan(expected);
     } else {
       if (actual <= expected) {
-        throw new Error(message || `Expected ${actual} to be greater than ${expected}`);
+        throw new Error(
+          message || `Expected ${actual} to be greater than ${expected}`
+        );
       }
     }
   },
@@ -62,8 +71,10 @@ export const assert = {
       expect(actual).toBeInstanceOf(expected);
     } else {
       if (!(actual instanceof expected)) {
-        throw new Error(message || `Expected ${actual} to be instance of ${expected.name}`);
+        throw new Error(
+          message || `Expected ${actual} to be instance of ${expected.name}`
+        );
       }
     }
-  }
-}; 
+  },
+};

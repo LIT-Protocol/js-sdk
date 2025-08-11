@@ -6,10 +6,14 @@ import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/crea
 
 // Schema for validating the request
 const getWithdrawRequestSchema = z.object({
-  userAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
+  userAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
 });
 
-export type GetWithdrawRequestRequest = z.infer<typeof getWithdrawRequestSchema>;
+export type GetWithdrawRequestRequest = z.infer<
+  typeof getWithdrawRequestSchema
+>;
 
 // Type for the withdraw request structure
 export interface WithdrawRequest {
@@ -36,10 +40,12 @@ export async function getWithdrawRequest(
     networkCtx,
     accountOrWalletClient
   );
-  
-  const withdrawRequest = await ledgerContract.read.latestWithdrawRequest([validatedRequest.userAddress]);
+
+  const withdrawRequest = await ledgerContract.read.latestWithdrawRequest([
+    validatedRequest.userAddress,
+  ]);
   return {
     timestamp: withdrawRequest.timestamp,
     amount: withdrawRequest.amount,
   };
-} 
+}

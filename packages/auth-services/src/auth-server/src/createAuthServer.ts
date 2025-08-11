@@ -67,12 +67,14 @@ export const createLitAuthServer = (
   // Create Elysia app
   const app = new Elysia()
     // Add CORS first to handle preflight requests before other middleware
-    .use(cors({
-      origin: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-      credentials: true
-    }))
+    .use(
+      cors({
+        origin: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+        credentials: true,
+      })
+    )
     .decorate('config', config) // Make config accessible in routes if needed
     .decorate(
       'stytchClient',

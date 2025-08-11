@@ -11,4 +11,4 @@ export const DecryptResponseDataSchema = z.object({
   // Keep backward compatibility fields
   share_id: z.string().optional(),
   signature_share: z.string().optional(),
-}); 
+});
