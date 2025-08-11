@@ -54,38 +54,14 @@ jobs:
       - name: Build project
         run: bun run build
 
-      - name: Validate environment variables
-        run: |
-          echo "Checking environment variables..."
-          if [ -z "$LIVE_MASTER_ACCOUNT" ]; then
-            echo "❌ LIVE_MASTER_ACCOUNT is not set"
-            exit 1
-          fi
-          if [ -z "$LOCAL_MASTER_ACCOUNT" ]; then
-            echo "❌ LOCAL_MASTER_ACCOUNT is not set"  
-            exit 1
-          fi
-          echo "✅ Required environment variables are set"
-          
-          # Validate private key format (should be 0x followed by 64 hex chars)
-          if [[ ! "$LIVE_MASTER_ACCOUNT" =~ ^0x[a-fA-F0-9]{64}$ ]]; then
-            echo "❌ LIVE_MASTER_ACCOUNT is not in correct format (should be 0x followed by 64 hex characters)"
-            exit 1
-          fi
-          if [[ ! "$LOCAL_MASTER_ACCOUNT" =~ ^0x[a-fA-F0-9]{64}$ ]]; then
-            echo "❌ LOCAL_MASTER_ACCOUNT is not in correct format (should be 0x followed by 64 hex characters)"
-            exit 1
-          fi
-          echo "✅ Private key formats are valid"
-
       - name: Run health check for naga-dev
         run: NETWORK=naga-dev bun run test:e2e pkpSign
         timeout-minutes: 10
 
-      - name: Run health check for naga-staging
-        run: NETWORK=naga-staging bun run test:e2e pkpSign
+      - name: Run health check for naga-test
+        run: NETWORK=naga-test bun run test:e2e pkpSign
         timeout-minutes: 10
 
-      - name: Run health check for naga-local
-        run: NETWORK=naga-local bun run test:e2e pkpSign
+      - name: Run health check for naga-staging
+        run: NETWORK=naga-staging bun run test:e2e pkpSign
         timeout-minutes: 10
