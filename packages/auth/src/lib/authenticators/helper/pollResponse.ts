@@ -83,7 +83,9 @@ export async function pollResponse<TResponse>({
   for (let i = 0; i < maxRetries; i++) {
     try {
       console.log(
-        `${errorMessageContext}: Polling attempt ${i + 1}/${maxRetries} for ${url}`
+        `${errorMessageContext}: Polling attempt ${
+          i + 1
+        }/${maxRetries} for ${url}`
       );
       const response = await fetch(url);
 
@@ -123,7 +125,9 @@ export async function pollResponse<TResponse>({
             (data as any)?.returnValue;
           throw new Error(
             `${errorMessageContext} failed. Error condition met. Details: ${
-              errorDetails ? JSON.stringify(errorDetails) : 'No specific error details in response.'
+              errorDetails
+                ? JSON.stringify(errorDetails)
+                : 'No specific error details in response.'
             }`
           );
         }

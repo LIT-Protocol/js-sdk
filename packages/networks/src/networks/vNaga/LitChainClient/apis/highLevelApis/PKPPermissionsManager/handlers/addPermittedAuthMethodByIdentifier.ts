@@ -40,7 +40,8 @@ export async function addPermittedAuthMethodByIdentifier(
   networkCtx: DefaultNetworkConfig,
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxVoid> {
-  const { authMethodType, authMethodId, userPubkey, scopes, ...identifier } = request;
+  const { authMethodType, authMethodId, userPubkey, scopes, ...identifier } =
+    request;
   const pkpTokenId = await resolvePkpTokenId(
     identifier as PkpIdentifierRaw,
     networkCtx
@@ -77,4 +78,4 @@ export async function addPermittedAuthMethodByIdentifier(
 //   );
 
 //   console.log("res", res);
-// } 
+// }

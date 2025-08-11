@@ -29,7 +29,10 @@ import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
 import { ExpectedAccountOrWalletClient } from '../../../contract-manager/createContractsManager';
 import { getBalance } from '../../rawContractApis/ledger/read/getBalance';
 import { getStableBalance } from '../../rawContractApis/ledger/read/getStableBalance';
-import { getWithdrawRequest, WithdrawRequest } from '../../rawContractApis/ledger/read/getWithdrawRequest';
+import {
+  getWithdrawRequest,
+  WithdrawRequest,
+} from '../../rawContractApis/ledger/read/getWithdrawRequest';
 import { getUserWithdrawDelay } from '../../rawContractApis/ledger/read/getUserWithdrawDelay';
 import { deposit } from '../../rawContractApis/ledger/write/deposit';
 import { depositForUser } from '../../rawContractApis/ledger/write/depositForUser';
@@ -38,7 +41,10 @@ import { withdraw } from '../../rawContractApis/ledger/write/withdraw';
 import { LitTxVoid } from '../../types';
 import { getPayers } from '../../rawContractApis/paymentDelegation/read/getPayers';
 import { getUsers } from '../../rawContractApis/paymentDelegation/read/getUsers';
-import { getRestriction, Restriction } from '../../rawContractApis/paymentDelegation/read/getRestriction';
+import {
+  getRestriction,
+  Restriction,
+} from '../../rawContractApis/paymentDelegation/read/getRestriction';
 import { getPayersAndRestrictions } from '../../rawContractApis/paymentDelegation/read/getPayersAndRestrictions';
 import { delegatePayments } from '../../rawContractApis/paymentDelegation/write/delegatePayments';
 import { undelegatePayments } from '../../rawContractApis/paymentDelegation/write/undelegatePayments';
@@ -94,9 +100,9 @@ export class PaymentManager {
    */
   async deposit(params: { amountInEth: string }): Promise<LitTxVoid> {
     logger.debug('Depositing funds', { amountInEth: params.amountInEth });
-    
+
     const amountInWei = parseEther(params.amountInEth);
-    
+
     return await deposit(
       { amountInWei },
       this.networkContext,
@@ -109,21 +115,21 @@ export class PaymentManager {
    * @param params - Deposit parameters including user address
    * @returns Transaction result
    */
-  async depositForUser(params: { 
-    userAddress: string; 
-    amountInEth: string 
+  async depositForUser(params: {
+    userAddress: string;
+    amountInEth: string;
   }): Promise<LitTxVoid> {
-    logger.debug('Depositing funds for user', { 
+    logger.debug('Depositing funds for user', {
       userAddress: params.userAddress,
-      amountInEth: params.amountInEth 
+      amountInEth: params.amountInEth,
     });
-    
+
     const amountInWei = parseEther(params.amountInEth);
-    
+
     return await depositForUser(
-      { 
+      {
         userAddress: params.userAddress,
-        amountInWei 
+        amountInWei,
       },
       this.networkContext,
       this.accountOrWalletClient
@@ -137,10 +143,18 @@ export class PaymentManager {
    */
   async getBalance(params: { userAddress: string }): Promise<PaymentBalance> {
     logger.debug('Getting balance', { userAddress: params.userAddress });
-    
+
     const [totalBalanceWei, availableBalanceWei] = await Promise.all([
-      getBalance({ userAddress: params.userAddress }, this.networkContext, this.accountOrWalletClient),
-      getStableBalance({ userAddress: params.userAddress }, this.networkContext, this.accountOrWalletClient)
+      getBalance(
+        { userAddress: params.userAddress },
+        this.networkContext,
+        this.accountOrWalletClient
+      ),
+      getStableBalance(
+        { userAddress: params.userAddress },
+        this.networkContext,
+        this.accountOrWalletClient
+      ),
     ]);
 
     return {
@@ -149,7 +163,7 @@ export class PaymentManager {
       raw: {
         totalBalance: totalBalanceWei,
         availableBalance: availableBalanceWei,
-      }
+      },
     };
   }
 
@@ -160,9 +174,9 @@ export class PaymentManager {
    */
   async requestWithdraw(params: { amountInEth: string }): Promise<LitTxVoid> {
     logger.debug('Requesting withdrawal', { amountInEth: params.amountInEth });
-    
+
     const amountInWei = parseEther(params.amountInEth);
-    
+
     return await requestWithdraw(
       { amountInWei },
       this.networkContext,
@@ -177,9 +191,9 @@ export class PaymentManager {
    */
   async withdraw(params: { amountInEth: string }): Promise<LitTxVoid> {
     logger.debug('Executing withdrawal', { amountInEth: params.amountInEth });
-    
+
     const amountInWei = parseEther(params.amountInEth);
-    
+
     return await withdraw(
       { amountInWei },
       this.networkContext,
@@ -192,16 +206,21 @@ export class PaymentManager {
    * @param params - Parameters containing user address
    * @returns Withdrawal request information
    */
-  async getWithdrawRequest(params: { userAddress: string }): Promise<WithdrawRequestInfo> {
-    logger.debug('Getting withdrawal request', { userAddress: params.userAddress });
-    
+  async getWithdrawRequest(params: {
+    userAddress: string;
+  }): Promise<WithdrawRequestInfo> {
+    logger.debug('Getting withdrawal request', {
+      userAddress: params.userAddress,
+    });
+
     const withdrawRequest = await getWithdrawRequest(
       { userAddress: params.userAddress },
       this.networkContext,
       this.accountOrWalletClient
     );
 
-    const isPending = withdrawRequest.timestamp > 0n && withdrawRequest.amount > 0n;
+    const isPending =
+      withdrawRequest.timestamp > 0n && withdrawRequest.amount > 0n;
 
     return {
       timestamp: withdrawRequest.timestamp.toString(),
@@ -217,7 +236,7 @@ export class PaymentManager {
    */
   async getWithdrawDelay(): Promise<{ delaySeconds: string; raw: bigint }> {
     logger.debug('Getting withdrawal delay');
-    
+
     const delayWei = await getUserWithdrawDelay(
       this.networkContext,
       this.accountOrWalletClient
@@ -239,11 +258,13 @@ export class PaymentManager {
     timeRemaining?: number;
     withdrawRequest: WithdrawRequestInfo;
   }> {
-    logger.debug('Checking if withdrawal can be executed', { userAddress: params.userAddress });
-    
+    logger.debug('Checking if withdrawal can be executed', {
+      userAddress: params.userAddress,
+    });
+
     const [withdrawRequest, delay] = await Promise.all([
       this.getWithdrawRequest(params),
-      this.getWithdrawDelay()
+      this.getWithdrawDelay(),
     ]);
 
     if (!withdrawRequest.isPending) {
@@ -274,8 +295,10 @@ export class PaymentManager {
    * @returns Transaction result
    */
   async delegatePayments(params: { userAddress: string }): Promise<LitTxVoid> {
-    logger.debug('Delegating payments to user', { userAddress: params.userAddress });
-    
+    logger.debug('Delegating payments to user', {
+      userAddress: params.userAddress,
+    });
+
     return await delegatePayments(
       { userAddress: params.userAddress },
       this.networkContext,
@@ -288,9 +311,13 @@ export class PaymentManager {
    * @param params - Parameters containing user address
    * @returns Transaction result
    */
-  async undelegatePayments(params: { userAddress: string }): Promise<LitTxVoid> {
-    logger.debug('Undelegating payments from user', { userAddress: params.userAddress });
-    
+  async undelegatePayments(params: {
+    userAddress: string;
+  }): Promise<LitTxVoid> {
+    logger.debug('Undelegating payments from user', {
+      userAddress: params.userAddress,
+    });
+
     return await undelegatePayments(
       { userAddress: params.userAddress },
       this.networkContext,
@@ -303,9 +330,13 @@ export class PaymentManager {
    * @param params - Parameters containing array of user addresses
    * @returns Transaction result
    */
-  async delegatePaymentsBatch(params: { userAddresses: string[] }): Promise<LitTxVoid> {
-    logger.debug('Delegating payments to multiple users', { userAddresses: params.userAddresses });
-    
+  async delegatePaymentsBatch(params: {
+    userAddresses: string[];
+  }): Promise<LitTxVoid> {
+    logger.debug('Delegating payments to multiple users', {
+      userAddresses: params.userAddresses,
+    });
+
     return await delegatePaymentsBatch(
       { userAddresses: params.userAddresses },
       this.networkContext,
@@ -318,9 +349,13 @@ export class PaymentManager {
    * @param params - Parameters containing array of user addresses
    * @returns Transaction result
    */
-  async undelegatePaymentsBatch(params: { userAddresses: string[] }): Promise<LitTxVoid> {
-    logger.debug('Undelegating payments from multiple users', { userAddresses: params.userAddresses });
-    
+  async undelegatePaymentsBatch(params: {
+    userAddresses: string[];
+  }): Promise<LitTxVoid> {
+    logger.debug('Undelegating payments from multiple users', {
+      userAddresses: params.userAddresses,
+    });
+
     return await undelegatePaymentsBatch(
       { userAddresses: params.userAddresses },
       this.networkContext,
@@ -339,14 +374,14 @@ export class PaymentManager {
     periodSeconds: string;
   }): Promise<LitTxVoid> {
     logger.debug('Setting payment restriction', params);
-    
+
     return await setRestriction(
       {
         restriction: {
           totalMaxPrice: BigInt(params.totalMaxPrice),
           requestsPerPeriod: BigInt(params.requestsPerPeriod),
           periodSeconds: BigInt(params.periodSeconds),
-        }
+        },
       },
       this.networkContext,
       this.accountOrWalletClient
@@ -359,8 +394,10 @@ export class PaymentManager {
    * @returns Array of payer addresses
    */
   async getPayers(params: { userAddress: string }): Promise<string[]> {
-    logger.debug('Getting payers for user', { userAddress: params.userAddress });
-    
+    logger.debug('Getting payers for user', {
+      userAddress: params.userAddress,
+    });
+
     return await getPayers(
       { userAddress: params.userAddress },
       this.networkContext,
@@ -374,8 +411,10 @@ export class PaymentManager {
    * @returns Array of user addresses
    */
   async getUsers(params: { payerAddress: string }): Promise<string[]> {
-    logger.debug('Getting users for payer', { payerAddress: params.payerAddress });
-    
+    logger.debug('Getting users for payer', {
+      payerAddress: params.payerAddress,
+    });
+
     return await getUsers(
       { payerAddress: params.payerAddress },
       this.networkContext,
@@ -394,8 +433,10 @@ export class PaymentManager {
     periodSeconds: string;
     raw: Restriction;
   }> {
-    logger.debug('Getting restriction for payer', { payerAddress: params.payerAddress });
-    
+    logger.debug('Getting restriction for payer', {
+      payerAddress: params.payerAddress,
+    });
+
     const restriction = await getRestriction(
       { payerAddress: params.payerAddress },
       this.networkContext,
@@ -417,26 +458,30 @@ export class PaymentManager {
    */
   async getPayersAndRestrictions(params: { userAddresses: string[] }): Promise<{
     payers: string[][];
-    restrictions: Array<Array<{
-      totalMaxPrice: string;
-      requestsPerPeriod: string;
-      periodSeconds: string;
-    }>>;
+    restrictions: Array<
+      Array<{
+        totalMaxPrice: string;
+        requestsPerPeriod: string;
+        periodSeconds: string;
+      }>
+    >;
     raw: {
       payers: string[][];
       restrictions: Restriction[][];
     };
   }> {
-    logger.debug('Getting payers and restrictions for users', { userAddresses: params.userAddresses });
-    
+    logger.debug('Getting payers and restrictions for users', {
+      userAddresses: params.userAddresses,
+    });
+
     const result = await getPayersAndRestrictions(
       { userAddresses: params.userAddresses },
       this.networkContext,
       this.accountOrWalletClient
     );
 
-    const formattedRestrictions = result.restrictions.map(userRestrictions =>
-      userRestrictions.map(restriction => ({
+    const formattedRestrictions = result.restrictions.map((userRestrictions) =>
+      userRestrictions.map((restriction) => ({
         totalMaxPrice: restriction.totalMaxPrice.toString(),
         requestsPerPeriod: restriction.requestsPerPeriod.toString(),
         periodSeconds: restriction.periodSeconds.toString(),
@@ -449,4 +494,4 @@ export class PaymentManager {
       raw: result,
     };
   }
-} 
+}

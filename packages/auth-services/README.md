@@ -15,4 +15,4 @@ Alternatively, you can run the start script directly from the package directory 
 ```bash
 cd packages/auth-services
 bun start
-``` 
+```

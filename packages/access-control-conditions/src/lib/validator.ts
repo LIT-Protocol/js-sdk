@@ -19,7 +19,7 @@ import {
  * @param { MultipleAccessControlConditions } accs
  */
 export const validateAccessControlConditions = async (
-  accs: MultipleAccessControlConditions,
+  accs: MultipleAccessControlConditions
 ): Promise<true> => {
   applySchemaWithValidation(
     'validateAccessControlConditions',

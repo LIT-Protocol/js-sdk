@@ -1,9 +1,9 @@
-import * as NetworkManager from "../../../e2e/src/helper/NetworkManager";
-import { privateKeyToAccount } from "viem/accounts";
-import { createPublicClient, formatEther, http } from "viem";
-import { createLitClient } from "@lit-protocol/lit-client";
-import * as StateManager from "./StateManager";
-import { printAligned } from "../../../e2e/src/helper/utils";
+import * as NetworkManager from '../../../e2e/src/helper/NetworkManager';
+import { privateKeyToAccount } from 'viem/accounts';
+import { createPublicClient, formatEther, http } from 'viem';
+import { createLitClient } from '@lit-protocol/lit-client';
+import * as StateManager from './StateManager';
+import { printAligned } from '../../../e2e/src/helper/utils';
 
 export const getMasterAccount = async () => {
   const privateKey = process.env['LIVE_MASTER_ACCOUNT'];
@@ -13,13 +13,13 @@ export const getMasterAccount = async () => {
   }
 
   return privateKeyToAccount(privateKey as `0x${string}`);
-}
+};
 
 export const getAccountDetails = async ({
   account,
   publicClient,
   litClient,
-  accountLabel = "Account",
+  accountLabel = 'Account',
 }: {
   account: any;
   publicClient: any;
@@ -29,33 +29,38 @@ export const getAccountDetails = async ({
   console.log(`\n========== ${accountLabel} Details ==========`);
 
   // Get all the data first
-  const ethBalance = formatEther(await publicClient.getBalance({
-    address: account.address,
-  }));
+  const ethBalance = formatEther(
+    await publicClient.getBalance({
+      address: account.address,
+    })
+  );
 
   const paymentManager = await litClient.getPaymentManager({
     account: account,
   });
 
   const paymentBalance = await paymentManager.getBalance({
-    userAddress: account.address
+    userAddress: account.address,
   });
 
   // Determine status
-  let statusLabel = "";
-  let statusValue = "";
+  let statusLabel = '';
+  let statusValue = '';
 
   if (Number(paymentBalance.availableBalance) < 0) {
-    statusLabel = "🚨 Status:";
+    statusLabel = '🚨 Status:';
     statusValue = `Negative balance (debt): ${paymentBalance.availableBalance}`;
   }
 
   // Print all information with consistent alignment
   printAligned([
-    { label: "🔑 Address:", value: account.address },
-    { label: "💰 ETH Balance:", value: `${ethBalance} ETH` },
-    { label: "💳 Ledger Total Balance:", value: paymentBalance.totalBalance },
-    { label: "💳 Ledger Available Balance:", value: paymentBalance.availableBalance },
+    { label: '🔑 Address:', value: account.address },
+    { label: '💰 ETH Balance:', value: `${ethBalance} ETH` },
+    { label: '💳 Ledger Total Balance:', value: paymentBalance.totalBalance },
+    {
+      label: '💳 Ledger Available Balance:',
+      value: paymentBalance.availableBalance,
+    },
     { label: statusLabel, value: statusValue },
   ]);
 
@@ -63,6 +68,5 @@ export const getAccountDetails = async ({
     ethBalance,
     ledgerBalance: paymentBalance.availableBalance,
     paymentManager,
-  }
-}
-
+  };
+};

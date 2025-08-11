@@ -33,13 +33,10 @@ export async function deposit(
     networkCtx,
     accountOrWalletClient
   );
-  
-  const hash = await callWithAdjustedOverrides(
-    ledgerContract,
-    'deposit',
-    [],
-    { value: validatedRequest.amountInWei }
-  );
+
+  const hash = await callWithAdjustedOverrides(ledgerContract, 'deposit', [], {
+    value: validatedRequest.amountInWei,
+  });
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -50,4 +47,4 @@ export async function deposit(
   );
 
   return { hash, receipt, decodedLogs };
-} 
+}

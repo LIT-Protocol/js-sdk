@@ -9,7 +9,9 @@ import { decodeLogs } from '../../../utils/decodeLogs';
 
 // Schema for validating the request
 const delegatePaymentsSchema = z.object({
-  userAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
+  userAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
 });
 
 export type DelegatePaymentsRequest = z.infer<typeof delegatePaymentsSchema>;
@@ -33,7 +35,7 @@ export async function delegatePayments(
     networkCtx,
     accountOrWalletClient
   );
-  
+
   const hash = await callWithAdjustedOverrides(
     paymentDelegationContract,
     'delegatePayments',

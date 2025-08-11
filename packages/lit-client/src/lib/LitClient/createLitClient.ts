@@ -828,11 +828,13 @@ export const _createNagaLitClient = async (
       };
     },
     viewPKPsByAuthData: async (params: {
-      authData: {
-        authMethodType: number | bigint;
-        authMethodId: string;
-        accessToken?: string;
-      } | AuthData;
+      authData:
+        | {
+            authMethodType: number | bigint;
+            authMethodId: string;
+            accessToken?: string;
+          }
+        | AuthData;
       pagination?: { limit?: number; offset?: number };
       storageProvider?: PKPStorageProvider;
     }) => {
@@ -866,7 +868,7 @@ export const _createNagaLitClient = async (
       });
     },
     authService: {
-      mintWithAuth:  networkModule.authService.pkpMint,
+      mintWithAuth: networkModule.authService.pkpMint,
     },
     executeJs: async (
       params: z.infer<typeof networkModule.api.executeJs.schemas.Input>

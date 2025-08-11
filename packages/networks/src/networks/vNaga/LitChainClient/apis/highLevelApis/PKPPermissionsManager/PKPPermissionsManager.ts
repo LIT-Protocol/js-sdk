@@ -437,31 +437,31 @@ export class PKPPermissionsManager {
       | { type: 'addAction'; ipfsId: string; scopes: ScopeString[] }
       | { type: 'addAddress'; address: string; scopes: ScopeString[] }
       | {
-        type: 'addAuthMethod';
-        authMethodType: string | number | bigint;
-        authMethodId: string;
-        userPubkey: string;
-        scopes: ScopeString[];
-      }
+          type: 'addAuthMethod';
+          authMethodType: string | number | bigint;
+          authMethodId: string;
+          userPubkey: string;
+          scopes: ScopeString[];
+        }
       | {
-        type: 'addAuthMethodScope';
-        authMethodType: string | number | bigint;
-        authMethodId: string;
-        scopeId: string | number | bigint;
-      }
+          type: 'addAuthMethodScope';
+          authMethodType: string | number | bigint;
+          authMethodId: string;
+          scopeId: string | number | bigint;
+        }
       | { type: 'removeAction'; ipfsId: string }
       | { type: 'removeAddress'; address: string }
       | {
-        type: 'removeAuthMethod';
-        authMethodType: string | number | bigint;
-        authMethodId: string;
-      }
+          type: 'removeAuthMethod';
+          authMethodType: string | number | bigint;
+          authMethodId: string;
+        }
       | {
-        type: 'removeAuthMethodScope';
-        authMethodType: string | number | bigint;
-        authMethodId: string;
-        scopeId: string | number | bigint;
-      }
+          type: 'removeAuthMethodScope';
+          authMethodType: string | number | bigint;
+          authMethodId: string;
+          scopeId: string | number | bigint;
+        }
     >
   ): Promise<void> {
     // Process operations sequentially to avoid transaction conflicts

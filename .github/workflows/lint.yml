@@ -4,27 +4,33 @@ on:
   push:
     branches:
       - master
+      - main
+      - develop
 jobs:
   linter:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: '18'
-          cache: 'yarn'
+          bun-version: latest
+      
       - name: Install rust
         uses: dtolnay/rust-toolchain@1.76.0
-      - uses: jetli/wasm-pack-action@v0.4.0
+      
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
         with:
-          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'latest'
+      
       - name: Install project dependencies
-        run: yarn install
+        run: bun install
+      
       - name: Lint
-        run: yarn nx format:check --all
+        run: bun run nx format:check --all

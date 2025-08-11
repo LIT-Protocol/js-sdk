@@ -41,9 +41,8 @@ export type ShorthandResources =
   | z.infer<typeof AuthConfigSchema>['resources']
   | ResourceShorthandInput;
 
-export type AuthConfigV2 = Partial<Omit<
-  z.infer<typeof AuthConfigSchema>,
-  'resources'
->> & {
+export type AuthConfigV2 = Partial<
+  Omit<z.infer<typeof AuthConfigSchema>, 'resources'>
+> & {
   resources: ShorthandResources;
 };

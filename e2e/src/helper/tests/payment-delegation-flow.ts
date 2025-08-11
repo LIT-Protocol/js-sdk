@@ -102,9 +102,10 @@ export const createPaymentDelegationFlowTest = (
     assert.toBe(usersAfterBatch.includes(testAddresses[1]), true);
     console.log('usersAfterBatch', usersAfterBatch);
     // Test 10: Get payers and restrictions for multiple users
-    const payersAndRestrictions = await alicePaymentManager.getPayersAndRestrictions({
-      userAddresses: [bobAddress, testAddresses[0]],
-    });
+    const payersAndRestrictions =
+      await alicePaymentManager.getPayersAndRestrictions({
+        userAddresses: [bobAddress, testAddresses[0]],
+      });
     assert.toBeDefined(payersAndRestrictions);
     assert.toBe(Array.isArray(payersAndRestrictions.payers), true);
     assert.toBe(payersAndRestrictions.payers.length, 2);
@@ -112,9 +113,11 @@ export const createPaymentDelegationFlowTest = (
     assert.toBe(payersAndRestrictions.restrictions.length, 2);
     console.log('payersAndRestrictions', payersAndRestrictions);
     // Test 11: Undelegate from batch users
-    const batchUndelegateTx = await alicePaymentManager.undelegatePaymentsBatch({
-      userAddresses: testAddresses,
-    });
+    const batchUndelegateTx = await alicePaymentManager.undelegatePaymentsBatch(
+      {
+        userAddresses: testAddresses,
+      }
+    );
     assert.toBeDefined(batchUndelegateTx.hash);
     assert.toBe(batchUndelegateTx.receipt.status, 'success');
     console.log('batchUndelegateTx', batchUndelegateTx);

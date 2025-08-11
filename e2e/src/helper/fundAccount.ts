@@ -80,13 +80,15 @@ export const fundAccount = async (
 ) => {
   const customRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
   if (customRpcUrl) {
-    console.log(`🔧 Using custom E2E RPC URL: ${customRpcUrl}`);
+    console.log(`🔧 Using custom E2E RPC URL: ***${customRpcUrl.slice(-6)}`);
   }
 
   // check account balance
   const publicClient = createPublicClient({
     chain: networkModule.getChainConfig(),
-    transport: http(customRpcUrl || networkModule.getChainConfig().rpcUrls.default.http[0]),
+    transport: http(
+      customRpcUrl || networkModule.getChainConfig().rpcUrls.default.http[0]
+    ),
   });
 
   const balance = await publicClient.getBalance({
@@ -99,7 +101,9 @@ export const fundAccount = async (
 
     const walletClient = createWalletClient({
       account: sponsorAccount,
-      transport: http(customRpcUrl || networkModule.getChainConfig().rpcUrls.default.http[0]),
+      transport: http(
+        customRpcUrl || networkModule.getChainConfig().rpcUrls.default.http[0]
+      ),
     });
 
     // Get the next managed nonce for this sponsor account

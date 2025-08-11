@@ -114,7 +114,7 @@ export class StytchEmailOtpAuthenticator {
       }
 
       accessToken = verifyData.accessToken;
-      userId = verifyData.userId
+      userId = verifyData.userId;
     } catch (e: any) {
       console.error('Error verifying OTP via auth service:', e);
       throw e; // Re-throw the error

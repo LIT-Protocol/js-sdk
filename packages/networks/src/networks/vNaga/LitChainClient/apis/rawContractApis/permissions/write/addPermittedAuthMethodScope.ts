@@ -24,7 +24,9 @@ const addPermittedAuthMethodScopeSchema = z.object({
   scopeId: toBigInt,
 });
 
-type AddPermittedAuthMethodScopeRequest = z.input<typeof addPermittedAuthMethodScopeSchema>;
+type AddPermittedAuthMethodScopeRequest = z.input<
+  typeof addPermittedAuthMethodScopeSchema
+>;
 
 /**
  * Adds a permitted authentication method scope to a PKP token

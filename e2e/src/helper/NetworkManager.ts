@@ -37,9 +37,12 @@ export const getLitNetworkModule = async (network?: SupportedNetwork) => {
   const _networkModule = networksModule[config.importName];
   console.log('✅ Lit Network Module created for network:', _network);
   console.log('🔍 Chain:', _networkModule.getChainConfig().name);
-  console.log('🔍 RPC URL:', _networkModule.getChainConfig().rpcUrls.default.http[0]);
+  console.log(
+    '🔍 RPC URL:',
+    _networkModule.getChainConfig().rpcUrls.default.http[0]
+  );
   return _networkModule;
-}
+};
 
 export const getViemPublicClient = async ({
   networkModule,
@@ -50,7 +53,7 @@ export const getViemPublicClient = async ({
 
   const customRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
   if (customRpcUrl) {
-    console.log(`🔧 Using custom E2E RPC URL: ${customRpcUrl}`);
+    console.log(`🔧 Using custom E2E RPC URL: ***${customRpcUrl.slice(-6)}`);
   }
 
   const publicClient = createPublicClient({
@@ -59,4 +62,4 @@ export const getViemPublicClient = async ({
   });
 
   return publicClient;
-}
+};

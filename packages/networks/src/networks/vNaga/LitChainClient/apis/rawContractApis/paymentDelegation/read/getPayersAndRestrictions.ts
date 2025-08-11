@@ -7,10 +7,14 @@ import { Restriction } from './getRestriction';
 
 // Schema for validating the request
 const getPayersAndRestrictionsSchema = z.object({
-  userAddresses: z.array(z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address')),
+  userAddresses: z.array(
+    z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address')
+  ),
 });
 
-export type GetPayersAndRestrictionsRequest = z.infer<typeof getPayersAndRestrictionsSchema>;
+export type GetPayersAndRestrictionsRequest = z.infer<
+  typeof getPayersAndRestrictionsSchema
+>;
 
 export interface PayersAndRestrictionsResponse {
   payers: string[][];
@@ -36,7 +40,10 @@ export async function getPayersAndRestrictions(
     networkCtx,
     accountOrWalletClient
   );
-  
-  const [payers, restrictions] = await paymentDelegationContract.read.getPayersAndRestrictions([validatedRequest.userAddresses]);
+
+  const [payers, restrictions] =
+    await paymentDelegationContract.read.getPayersAndRestrictions([
+      validatedRequest.userAddresses,
+    ]);
   return { payers, restrictions };
 }

@@ -74,4 +74,4 @@ export async function removePermittedAuthMethodByIdentifier(
 //   );
 
 //   console.log("res", res);
-// } 
+// }

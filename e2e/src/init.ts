@@ -114,7 +114,9 @@ export const init = async (
   // Fund accounts based on network type
   const isLocal = config.type === 'local';
   const masterAccount = isLocal ? localMasterAccount : liveMasterAccount;
-  const fundingAmount = isLocal ? LOCAL_NETWORK_FUNDING_AMOUNT : LIVE_NETWORK_FUNDING_AMOUNT;
+  const fundingAmount = isLocal
+    ? LOCAL_NETWORK_FUNDING_AMOUNT
+    : LIVE_NETWORK_FUNDING_AMOUNT;
 
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
   await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
@@ -138,12 +140,14 @@ export const init = async (
    * ====================================
    * (Master) Initialise Payment Manager
    * ====================================
-  */
+   */
   const masterPaymentManager = await litClient.getPaymentManager({
     account: masterAccount,
   });
 
-  const masterPaymentBalance = await masterPaymentManager.getBalance({ userAddress: masterAccount.address })
+  const masterPaymentBalance = await masterPaymentManager.getBalance({
+    userAddress: masterAccount.address,
+  });
   console.log('✅ Master Payment Balance:', masterPaymentBalance);
 
   /**
@@ -238,13 +242,19 @@ export const init = async (
 
   /**
    * ====================================
-   * Depositing to Lit Ledger for differen 
+   * Depositing to Lit Ledger for differen
    * ====================================
    */
 
   async function masterDepositForUser(userAddress: string) {
-    await masterPaymentManager.depositForUser({ userAddress: userAddress, amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT });
-    console.log(`✅ New ${userAddress} Ledger Balance:`, await masterPaymentManager.getBalance({ userAddress: userAddress }));
+    await masterPaymentManager.depositForUser({
+      userAddress: userAddress,
+      amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+    });
+    console.log(
+      `✅ New ${userAddress} Ledger Balance:`,
+      await masterPaymentManager.getBalance({ userAddress: userAddress })
+    );
   }
 
   // Deposit to the Alice EOA Ledger
@@ -266,7 +276,6 @@ export const init = async (
   //   account: alicePkpViemAccount,
   // });
 
-
   /**
    * ====================================
    * Return the initialised components
@@ -284,7 +293,7 @@ export const init = async (
     bobViemAccountPkp,
     aliceEoaAuthContext,
     alicePkpAuthContext,
-    masterDepositForUser
+    masterDepositForUser,
     // alicePkpViemAccountPermissionsManager
   };
 };

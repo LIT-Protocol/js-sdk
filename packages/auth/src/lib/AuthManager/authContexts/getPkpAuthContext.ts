@@ -50,9 +50,11 @@ export const GetPkpAuthContextSchema = z.object({
     // @depreacted - to be removed. testing only.
     pkpAddress: z.string(),
   }),
-  cache: z.object({
-    delegationAuthSig: z.boolean().optional(),
-  }).optional(),
+  cache: z
+    .object({
+      delegationAuthSig: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 interface PreparePkpAuthRequestBodyParams {

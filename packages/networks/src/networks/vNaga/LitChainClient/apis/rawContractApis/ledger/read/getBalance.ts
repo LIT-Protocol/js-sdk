@@ -6,7 +6,9 @@ import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/crea
 
 // Schema for validating the request
 const getBalanceSchema = z.object({
-  userAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
+  userAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
 });
 
 export type GetBalanceRequest = z.infer<typeof getBalanceSchema>;
@@ -30,7 +32,9 @@ export async function getBalance(
     networkCtx,
     accountOrWalletClient
   );
-  
-  const balance = await ledgerContract.read.balance([validatedRequest.userAddress]);
+
+  const balance = await ledgerContract.read.balance([
+    validatedRequest.userAddress,
+  ]);
   return balance;
-} 
+}

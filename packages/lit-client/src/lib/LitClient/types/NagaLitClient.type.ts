@@ -169,13 +169,13 @@ export interface NagaLitClient extends BaseLitClient<any> {
    * @example
    * ```typescript
    * const paymentManager = await litClient.getPaymentManager({ account: myAccount });
-   * 
+   *
    * // Deposit funds
    * await paymentManager.deposit({ amountInEth: "0.1" });
-   * 
+   *
    * // Check balance
    * const balance = await paymentManager.getBalance({ userAddress: "0x..." });
-   * 
+   *
    * // Request withdrawal
    * await paymentManager.requestWithdraw({ amountInEth: "0.05" });
    * ```

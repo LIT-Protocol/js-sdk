@@ -112,7 +112,7 @@ export class StytchSmsOtpAuthenticator {
         );
       }
       accessToken = verifyData.accessToken;
-      userId = verifyData.userId
+      userId = verifyData.userId;
     } catch (e: any) {
       console.error('Error verifying SMS OTP via auth service:', e);
       throw e;
