@@ -9,15 +9,22 @@ on:
         description: 'Branch for Naga tests'
         required: true
         default: 'master'
+
 env:
   LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
   LIT_STATUS_BACKEND_URL: ${{ vars.LIT_STATUS_BACKEND_URL }}
   LIVE_MASTER_ACCOUNT: ${{ vars.LIVE_MASTER_ACCOUNT }}
+
 jobs:
   naga-e2e-tests:
     runs-on: ubuntu-latest
     environment: Health Check
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
