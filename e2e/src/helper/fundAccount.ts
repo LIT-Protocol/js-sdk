@@ -80,7 +80,7 @@ export const fundAccount = async (
 ) => {
   const customRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
   if (customRpcUrl) {
-    console.log(`🔧 Using custom E2E RPC URL: ${customRpcUrl}`);
+    console.log(`🔧 Using custom E2E RPC URL: ***${customRpcUrl.slice(-6)}`);
   }
 
   // check account balance
