@@ -1,6 +1,9 @@
 name: E2E Tests and Health Checks
 
 on:
+  push:
+    branches:
+      - feature/**
   pull_request:
     branches:
       - feature/**
