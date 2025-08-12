@@ -1,5 +1,35 @@
 # @lit-protocol/lit-client
 
+## 8.0.0
+
+### Major Changes
+
+- 49d8f68: feat(payment): add Ledge contract ABIs
+- 16fc970: added payment manager apis, added maxPrice for signSessionKey endpoint, and updated auth service url for naga-test
+- 0d12992: third attempt.
+- 0d12992: version 4
+- b8ae37b: fix build pipeline -> dependencies order is important
+- 0d12992: add export to index.ts
+- 0d12992: test
+- c664381: test
+- ff75c6b: merged lit-login-server & relayer as auth-services
+- 0d12992: test
+- cb6b698: Initial alpha publish.
+- ca72c25: wip
+- c044935: fix dependencies
+- c754e60: bump version
+- fbfa1eb: attempt to make vite polyfill minimum
+- c044935: wip
+- 857e330: add a pipeline to check for missing dependencies
+- c664381: wip
+- c044935: fix http://naga-auth-service.getlit.dev
+- c664381: fix build
+- 2164678: second attempt.
+
+### Patch Changes
+
+- 138437b: add required dependencies
+
 ## 8.0.0-alpha.18
 
 ### Major Changes

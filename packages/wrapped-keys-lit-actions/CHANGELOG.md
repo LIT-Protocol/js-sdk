@@ -1,5 +1,26 @@
 # @lit-protocol/wrapped-keys-lit-actions
 
+## 8.0.0
+
+### Major Changes
+
+- 0d12992: third attempt.
+- 0d12992: version 4
+- b8ae37b: fix build pipeline -> dependencies order is important
+- 0d12992: test
+- c664381: test
+- 0d12992: test
+- cb6b698: Initial alpha publish.
+- ca72c25: wip
+- c044935: fix dependencies
+- fbfa1eb: attempt to make vite polyfill minimum
+- c044935: wip
+- 857e330: add a pipeline to check for missing dependencies
+- c664381: wip
+- c044935: fix http://naga-auth-service.getlit.dev
+- c664381: fix build
+- 2164678: second attempt.
+
 ## 8.0.0-alpha.12
 
 ### Major Changes

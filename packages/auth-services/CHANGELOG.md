@@ -1,5 +1,47 @@
 # @lit-protocol/auth-services
 
+## 1.0.0
+
+### Major Changes
+
+- cac8964: add "zod-validation-error": "^3.4.0"
+- 3ac49c5: fixing cors
+- b8ae37b: fix build pipeline -> dependencies order is important
+- 53973d3: add "cbor-web": "^9.0.2",
+- 6c3938a: fix build
+- 4ad5cec: test publish
+- 3a0a30d: fix imports
+- c664381: test
+- e56fa39: fix import path
+- ff75c6b: merged lit-login-server & relayer as auth-services
+- 67cc0bf: fix(config): auth-services
+- ca72c25: wip
+- c044935: fix dependencies
+- 9d38582: wip
+- da8bf7c: add "@openagenda/verror": "^3.1.4"
+- 20f98e5: add "@lit-protocol/contracts": "^0.1.23",
+- d08eed4: fix exports and paths
+- fbfa1eb: attempt to make vite polyfill minimum
+- c044935: wip
+- 857e330: add a pipeline to check for missing dependencies
+- f2818e1: The core issue was that the auth-services package was trying to be a modern ES module package with modern dependencies, but was configured with older CommonJS/Node.js settings. Once we aligned everything to be consistently modern ES2022 with bundler resolution, TypeScript could properly:
+- c664381: wip
+- 12e304c: fix and publish
+- 8523cb7: wip
+- cb0bbed: wip
+- c6bddb8: make workspace packages
+- c044935: fix http://naga-auth-service.getlit.dev
+- c664381: fix build
+
+### Minor Changes
+
+- f482a99: fix build
+- a0919a9: add imports
+
+### Patch Changes
+
+- 138437b: add required dependencies
+
 ## 1.0.0-alpha.23
 
 ### Major Changes
