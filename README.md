@@ -1,6 +1,7 @@
 <div align="center">
 <h1>Lit Protocol Javascript/Typescript SDK V8.x.x</h1>
 
+
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
