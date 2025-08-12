@@ -1,5 +1,11 @@
 # @lit-protocol/lit-client
 
+## 8.0.0-beta.0
+
+### Major Changes
+
+- first naga beta release
+
 ## 8.0.0
 
 ### Major Changes

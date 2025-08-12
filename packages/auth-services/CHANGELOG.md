@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-beta.0
+
+### Major Changes
+
+- first naga beta release
+
 ## 1.0.0
 
 ### Major Changes
