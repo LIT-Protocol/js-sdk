@@ -52,6 +52,7 @@ import {
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
 import { NagaNetworkModule } from './type';
+import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -175,8 +176,7 @@ export const _createNagaLitClient = async (
     }
   ): Promise<LitNodeSignature> {
     _logger.info(
-      `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${
-        params.bypassAutoHashing || false
+      `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${params.bypassAutoHashing || false
       })`
     );
 
@@ -809,7 +809,7 @@ export const _createNagaLitClient = async (
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣
       const account = privateKeyToAccount(
-        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+        DEV_PRIVATE_KEY
       );
 
       const pkpPermissionsManager =
@@ -829,18 +829,18 @@ export const _createNagaLitClient = async (
     },
     viewPKPsByAuthData: async (params: {
       authData:
-        | {
-            authMethodType: number | bigint;
-            authMethodId: string;
-            accessToken?: string;
-          }
-        | AuthData;
+      | {
+        authMethodType: number | bigint;
+        authMethodId: string;
+        accessToken?: string;
+      }
+      | AuthData;
       pagination?: { limit?: number; offset?: number };
       storageProvider?: PKPStorageProvider;
     }) => {
       // Use read-only account for viewing PKPs
       const account = privateKeyToAccount(
-        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+        DEV_PRIVATE_KEY
       );
 
       return await networkModule.chainApi.getPKPsByAuthData({
@@ -857,7 +857,7 @@ export const _createNagaLitClient = async (
     }) => {
       // Use read-only account for viewing PKPs
       const account = privateKeyToAccount(
-        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+        DEV_PRIVATE_KEY
       );
 
       return await networkModule.chainApi.getPKPsByAddress({

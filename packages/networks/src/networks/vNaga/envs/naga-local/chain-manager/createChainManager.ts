@@ -6,6 +6,7 @@ import type { ExpectedAccountOrWalletClient } from '../../../LitChainClient/cont
 import { DefaultNetworkConfig } from '../../../interfaces/NetworkContext';
 import { networkConfig } from '../naga-local.config';
 import type { PKPStorageProvider } from '../../../../../storage/types';
+import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
 
 export type CreateChainManagerReturn = {
   api: {
@@ -111,9 +112,9 @@ export const createChainManager = (
         const defaultPagination = { limit: 10, offset: 0 };
         const finalPagination = params.pagination
           ? {
-              limit: params.pagination.limit ?? defaultPagination.limit,
-              offset: params.pagination.offset ?? defaultPagination.offset,
-            }
+            limit: params.pagination.limit ?? defaultPagination.limit,
+            offset: params.pagination.offset ?? defaultPagination.offset,
+          }
           : defaultPagination;
 
         return getPKPsByAddress(
@@ -148,7 +149,7 @@ export const createChainManager = (
 export const createReadOnlyChainManager = () => {
   // dummy private key for read actions
   const dummyAccount = privateKeyToAccount(
-    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+    DEV_PRIVATE_KEY
   );
   const chainManager = createChainManager(dummyAccount);
   return createChainManager(chainManager);
