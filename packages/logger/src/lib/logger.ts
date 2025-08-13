@@ -322,7 +322,10 @@ export class Logger {
     );
 
     const shouldLog = !this._config?.['condenseLogs'] || !this._checkHash(log);
-    const levelCheck = this._level >= level || level === LOG_LEVEL.ERROR || level === LogLevel.ERROR;
+    const levelCheck =
+      this._level >= level ||
+      level === LOG_LEVEL.ERROR ||
+      level === LogLevel.ERROR;
 
     if (shouldLog && levelCheck) {
       // Use JSON output if configured
