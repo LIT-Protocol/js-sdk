@@ -15,3 +15,7 @@ tools
 /packages/wasm/rust/*
 /packages/wasm/src/pkg/*
 **/*/dist
+
+# Network schema files and generated files
+packages/networks/src/networks/vNaga/**/*.ts
+packages/wrapped-keys-lit-actions/src/lib/**/*.ts
