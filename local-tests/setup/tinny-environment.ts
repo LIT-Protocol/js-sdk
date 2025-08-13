@@ -145,7 +145,9 @@ export class TinnyEnvironment {
       '[𐬺🧪 Tinny Environment𐬺] Done configuring environment current config: ',
       {
         ...this.processEnvs,
-        PRIVATE_KEYS: this.processEnvs.PRIVATE_KEYS.map((_, index) => `[PRIVATE_KEY_${index}]`),
+        PRIVATE_KEYS: this.processEnvs.PRIVATE_KEYS.map(
+          (_, index) => `[PRIVATE_KEY_${index}]`
+        ),
       }
     );
   }
