@@ -122,7 +122,9 @@ export const throwRemovedFunctionError = (functionName: string) => {
 
 export const bootstrapLogManager = (
   id: string,
-  level: LOG_LEVEL_VALUES = LOG_LEVEL.DEBUG
+  level: LOG_LEVEL_VALUES = LOG_LEVEL.DEBUG,
+  logFormat: 'text' | 'json' | 'datadog' = 'text',
+  serviceName: string = 'lit-sdk'
 ) => {
   if (!globalThis.logManager) {
     globalThis.logManager = LogManager.Instance;
@@ -130,6 +132,8 @@ export const bootstrapLogManager = (
       condenseLogs: true,
     });
     globalThis.logManager.setLevel(level);
+    globalThis.logManager.setLogFormat(logFormat);
+    globalThis.logManager.setServiceName(serviceName);
   }
 
   globalThis.logger = globalThis.logManager.get(id);

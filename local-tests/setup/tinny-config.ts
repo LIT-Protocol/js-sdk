@@ -29,6 +29,18 @@ export interface ProcessEnvs {
   DEBUG: boolean;
 
   /**
+   * The log format to use for structured logging. Can be 'text', 'json', or 'datadog'.
+   * Defaults to 'json' for test environments.
+   */
+  LOG_FORMAT: 'text' | 'json' | 'datadog';
+
+  /**
+   * The service name to use in structured logs. Helps identify test logs in monitoring systems.
+   * Defaults to 'tinny-tests'.
+   */
+  SERVICE_NAME: string;
+
+  /**
    * Capacity Credits: In order to execute a transaction with Lit, you’ll need to reserve capacity on the network using Capacity Credits. These allow holders to reserve a set number of requests over a desired period of time (by default expiration set to 2 days)
    */
   REQUEST_PER_KILOSECOND: number;

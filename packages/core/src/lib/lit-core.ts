@@ -111,7 +111,14 @@ export type LitNodeClientConfigWithDefaults = Required<
   >
 > &
   Partial<
-    Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext' | 'rpcUrl'>
+    Pick<
+      LitNodeClientConfig,
+      | 'storageProvider'
+      | 'contractContext'
+      | 'rpcUrl'
+      | 'logFormat'
+      | 'serviceName'
+    >
   > & {
     bootstrapUrls: string[];
   } & {
@@ -212,7 +219,9 @@ export class LitCore extends EventEmitter {
     setMiscLitConfig(this.config);
     bootstrapLogManager(
       'core',
-      this.config.debug ? LogLevel.DEBUG : LogLevel.OFF
+      this.config.debug ? LogLevel.DEBUG : LogLevel.OFF,
+      this.config.logFormat || 'text',
+      this.config.serviceName || 'lit-sdk'
     );
 
     // -- configure local storage if not present

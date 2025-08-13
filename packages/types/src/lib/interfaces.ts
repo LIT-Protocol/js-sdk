@@ -188,6 +188,8 @@ export interface LitNodeClientConfig {
   storageProvider?: StorageProvider;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
   rpcUrl?: string;
+  logFormat?: 'text' | 'json' | 'datadog';
+  serviceName?: string;
 }
 
 export type CustomNetwork = Pick<
