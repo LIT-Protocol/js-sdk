@@ -32,5 +32,38 @@ jobs:
       - name: Install project dependencies
         run: bun install
       
+      - name: Debug Git and Environment
+        run: |
+          echo "Current branch:"
+          git branch --show-current
+          echo "Available branches:"
+          git branch -a
+          echo "Git remotes:"
+          git remote -v
+          echo "Last 3 commits:"
+          git log --oneline -3
+          echo "Git status:"
+          git status
+          echo "NX configuration:"
+          cat nx.json | head -10
+          echo "Prettier configuration:"
+          cat .prettierrc
+          
       - name: Lint
-        run: bun run nx format:check --all
+        run: |
+          echo "Running format check with verbose output..."
+          bun run nx format:check --all --verbose || {
+            echo "===== FORMAT CHECK FAILED ====="
+            echo "Trying alternative approaches..."
+            echo "1. Checking with npx prettier directly:"
+            npx prettier --check README.md || echo "Prettier check on README.md failed"
+            echo "2. Checking with basic NX command:"
+            bun run nx format:check README.md || echo "NX format check on README.md failed"
+            echo "3. Trying without --all flag:"
+            bun run nx format:check || echo "NX format check without --all failed"
+            echo "4. Running format write and checking again:"
+            bun run nx format:write --all || echo "Format write failed"
+            bun run nx format:check --all || echo "Format check after write still failed"
+            echo "===== END DEBUG ====="
+            exit 1
+          }
