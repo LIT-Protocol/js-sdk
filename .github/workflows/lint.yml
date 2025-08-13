@@ -51,19 +51,17 @@ jobs:
           
       - name: Lint
         run: |
-          echo "Running format check with verbose output..."
-          bun run nx format:check --all --verbose || {
-            echo "===== FORMAT CHECK FAILED ====="
-            echo "Trying alternative approaches..."
-            echo "1. Checking with npx prettier directly:"
-            npx prettier --check README.md || echo "Prettier check on README.md failed"
-            echo "2. Checking with basic NX command:"
-            bun run nx format:check README.md || echo "NX format check on README.md failed"
-            echo "3. Trying without --all flag:"
-            bun run nx format:check || echo "NX format check without --all failed"
-            echo "4. Running format write and checking again:"
-            bun run nx format:write --all || echo "Format write failed"
-            bun run nx format:check --all || echo "Format check after write still failed"
-            echo "===== END DEBUG ====="
+          echo "Running format check..."
+          # Use prettier directly to avoid NX git issues
+          npx prettier --check . || {
+            echo "Format check failed. Running prettier --write to fix issues..."
+            npx prettier --write .
+            echo "Checking again after formatting..."
+            npx prettier --check . || {
+              echo "Still failing after auto-format. Manual intervention needed."
+              exit 1
+            }
+            echo "Auto-formatting successful but changes were made. Please commit the formatted files."
             exit 1
           }
+          echo "Format check passed!"
