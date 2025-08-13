@@ -23,8 +23,9 @@
  * ```
  */
 
+import { NodePrices } from '@lit-protocol/types';
 import { ExpectedAccountOrWalletClient } from '../../../../LitChainClient/contract-manager/createContractsManager';
-import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { INetworkConfig } from '../../../../interfaces/NetworkContext';
 import {
   getNodesForRequest,
   PRODUCT_IDS,
@@ -38,16 +39,13 @@ const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 export interface PriceFeedInfo {
   epochId: any;
   minNodeCount: any;
-  networkPrices: {
-    url: string;
-    prices: bigint[];
-  }[];
+  networkPrices: NodePrices;
 }
 
-// Type for the parameters
+// Type for the parameters - now accepts any valid network config
 export interface GetPriceFeedInfoParams {
   realmId?: number;
-  networkCtx: DefaultNetworkConfig;
+  networkCtx: INetworkConfig<any, any>;
   productIds?: bigint[];
 }
 
@@ -191,7 +189,7 @@ export async function getPriceFeedInfo(
 export async function getNodePrices(
   params: GetPriceFeedInfoParams,
   accountOrWalletClient: ExpectedAccountOrWalletClient
-): Promise<PriceFeedInfo['networkPrices']> {
+): Promise<NodePrices> {
   const priceInfo = await getPriceFeedInfo(params, accountOrWalletClient);
   return priceInfo.networkPrices;
 }

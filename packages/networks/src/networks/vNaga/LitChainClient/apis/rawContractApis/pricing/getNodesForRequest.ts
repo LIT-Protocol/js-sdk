@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { generateValidatorURLs } from '../../../../../shared/utils/transformers';
-import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { DefaultNetworkConfig, INetworkConfig } from '../../../../interfaces/NetworkContext';
 import {
   createContractsManager,
   ExpectedAccountOrWalletClient,
@@ -27,18 +27,15 @@ const getNodesForRequestSchema = z.object({
 type GetNodesForRequestRequest = z.infer<typeof getNodesForRequestSchema>;
 
 /**
- * Get nodes available for a request with their pricing information
- *
- * This function retrieves information about nodes that can service a request,
- * including their pricing data for various product IDs.
- *
+ * Gets nodes for a given set of product IDs with their prices
+ * 
  * @param request - Object containing product IDs to get pricing for
- * @param networkCtx - The Naga network context
+ * @param networkCtx - The network context (any valid network configuration)
  * @returns Information about nodes, their prices, epoch ID, and minimum node count
  */
 export async function getNodesForRequest(
   request: GetNodesForRequestRequest,
-  networkCtx: DefaultNetworkConfig,
+  networkCtx: INetworkConfig<any, any>,
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ) {
   const { productIds } = getNodesForRequestSchema.parse(request);
