@@ -219,7 +219,7 @@ export const _createNagaLitClient = async (
       pricingContext: {
         product: 'SIGN',
         userMaxPrice: params.userMaxPrice,
-        nodePrices: currentConnectionInfo.priceFeedInfo.networkPrices,
+        nodePrices: jitContext.nodePrices,
         threshold: currentHandshakeResult.threshold,
       },
       authContext: params.authContext,
@@ -383,7 +383,7 @@ export const _createNagaLitClient = async (
       pricingContext: {
         product: 'LIT_ACTION',
         userMaxPrice: params.userMaxPrice,
-        nodePrices: currentConnectionInfo.priceFeedInfo.networkPrices,
+        nodePrices: jitContext.nodePrices,
         threshold: currentHandshakeResult.threshold,
       },
       authContext: params.authContext,
@@ -650,7 +650,7 @@ export const _createNagaLitClient = async (
       pricingContext: {
         product: 'DECRYPTION',
         userMaxPrice: params.userMaxPrice,
-        nodePrices: currentConnectionInfo.priceFeedInfo.networkPrices,
+        nodePrices: jitContext.nodePrices,
         threshold: currentHandshakeResult.threshold,
       },
       authContext: params.authContext,

@@ -508,7 +508,7 @@ const networkModuleObject = {
         networkCtx: networkConfig,
       }, account);
 
-      return { keySet, nodePrices: [] };
+      return { keySet, nodePrices };
     },
     handshake: {
       schemas: {

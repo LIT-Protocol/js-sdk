@@ -47,7 +47,7 @@ import type { PKPStorageProvider } from '../../../../storage/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
-import { PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
+import { getNodePrices, PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
 import { PaymentManager } from '../../LitChainClient/apis/highLevelApis/PaymentManager/PaymentManager';
 import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
 import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
@@ -80,6 +80,7 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
+import { privateKeyToAccount } from 'viem/accounts';
 
 const MODULE_NAME = 'naga-dev';
 
@@ -484,6 +485,7 @@ const networkModuleObject = {
     ): Promise<NagaJitContext> => {
       const keySet: KeySet = {};
 
+      // 1. Generate a key set for the JIT context
       for (const url of connectionInfo.bootstrapUrls) {
         keySet[url] = {
           publicKey: hexToBytes(
@@ -495,7 +497,18 @@ const networkModuleObject = {
         };
       }
 
-      return { keySet };
+      // Use read-only account for viewing PKPs
+      const account = privateKeyToAccount(
+        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+      );
+
+      // 2. Fetch the price feed info
+      const nodePrices = await getNodePrices({
+        realmId: 1,
+        networkCtx: networkConfig,
+      }, account);
+
+      return { keySet, nodePrices };
     },
     handshake: {
       schemas: {
