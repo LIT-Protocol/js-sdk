@@ -157,7 +157,9 @@ export async function getPriceFeedInfo(
 ): Promise<PriceFeedInfo> {
   // If there's a local promise, an update is in progress; wait for that
   if (fetchingPriceFeedInfo) {
-    _logger.info('💲 Local promise is already fetching price feed info. Returning that instead.');
+    _logger.info(
+      '💲 Local promise is already fetching price feed info. Returning that instead.'
+    );
     return fetchingPriceFeedInfo;
   }
 
@@ -167,7 +169,8 @@ export async function getPriceFeedInfo(
     Date.now() - lastUpdatedTimestamp < STALE_PRICES_SECONDS
   ) {
     _logger.info(
-      `💲 Returning stale price feed info. Remaining stale time: ${STALE_PRICES_SECONDS - (Date.now() - lastUpdatedTimestamp)
+      `💲 Returning stale price feed info. Remaining stale time: ${
+        STALE_PRICES_SECONDS - (Date.now() - lastUpdatedTimestamp)
       }ms`
     );
     return priceFeedInfo;

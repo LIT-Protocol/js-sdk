@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { generateValidatorURLs } from '../../../../../shared/utils/transformers';
-import { DefaultNetworkConfig, INetworkConfig } from '../../../../interfaces/NetworkContext';
+import {
+  DefaultNetworkConfig,
+  INetworkConfig,
+} from '../../../../interfaces/NetworkContext';
 import {
   createContractsManager,
   ExpectedAccountOrWalletClient,
@@ -28,7 +31,7 @@ type GetNodesForRequestRequest = z.infer<typeof getNodesForRequestSchema>;
 
 /**
  * Gets nodes for a given set of product IDs with their prices
- * 
+ *
  * @param request - Object containing product IDs to get pricing for
  * @param networkCtx - The network context (any valid network configuration)
  * @returns Information about nodes, their prices, epoch ID, and minimum node count

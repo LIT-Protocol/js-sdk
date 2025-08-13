@@ -47,7 +47,10 @@ import type { PKPStorageProvider } from '../../../../storage/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
-import { getNodePrices, PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
+import {
+  getNodePrices,
+  PKPPermissionsManager,
+} from '../../LitChainClient/apis/highLevelApis';
 import { PaymentManager } from '../../LitChainClient/apis/highLevelApis/PaymentManager/PaymentManager';
 import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
 import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
@@ -483,7 +486,6 @@ const networkModuleObject = {
       connectionInfo: ConnectionInfo,
       handshakeResult: OrchestrateHandshakeResponse
     ): Promise<NagaJitContext> => {
-
       // 1. Generate a key set for the JIT context
       const keySet: KeySet = {};
 
@@ -504,10 +506,13 @@ const networkModuleObject = {
       );
 
       // 2. Fetch the price feed info
-      const nodePrices = await getNodePrices({
-        realmId: 1,
-        networkCtx: networkConfig,
-      }, account);
+      const nodePrices = await getNodePrices(
+        {
+          realmId: 1,
+          networkCtx: networkConfig,
+        },
+        account
+      );
 
       return { keySet, nodePrices };
     },
