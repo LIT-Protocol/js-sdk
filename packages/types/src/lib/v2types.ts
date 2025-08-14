@@ -118,6 +118,13 @@ export type KeySet = Record<
   { publicKey: Uint8Array; secretKey: Uint8Array }
 >;
 
+// aka. Network Prices
+export type NodePrices = {
+  url: string;
+  prices: bigint[];
+}[];
+
 export type NagaJitContext = {
   keySet: KeySet;
+  nodePrices: NodePrices;
 };

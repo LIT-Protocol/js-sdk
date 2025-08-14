@@ -22,6 +22,7 @@ export interface INetworkConfig<T, M> {
   };
 }
 
+// TODO: we should use a stablised network config as the default network config
 export type DefaultNetworkConfig = INetworkConfig<
   typeof localDevSignatures,
   any
