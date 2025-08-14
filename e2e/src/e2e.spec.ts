@@ -1,6 +1,7 @@
 import {
   createCustomAuthContext,
   createPkpAuthContext,
+  createPkpAuthContextWithPreGeneratedMaterials,
 } from './helper/auth-contexts';
 import {
   createExecuteJsTest,
@@ -145,6 +146,95 @@ describe('all', () => {
           createViemSignTransactionTest(ctx, () => aliceCustomAuthContext)());
         it('sign typed data', () =>
           createViemSignTypedDataTest(ctx, () => aliceCustomAuthContext)());
+      });
+    });
+  });
+
+  describe('PKP Auth with Pre-generated Materials', () => {
+    console.log('🔐 Testing PKP auth with pre-generated session materials');
+
+    let preGeneratedAuthContext: any;
+
+    beforeAll(async () => {
+      try {
+        preGeneratedAuthContext =
+          await createPkpAuthContextWithPreGeneratedMaterials(ctx);
+      } catch (e) {
+        console.error('Failed to create pre-generated auth context:', e);
+        throw e;
+      }
+    });
+
+    describe('endpoints', () => {
+      it('pkpSign with pre-generated materials', () =>
+        createPkpSignTest(ctx, () => preGeneratedAuthContext)());
+
+      it('executeJs with pre-generated materials', () =>
+        createExecuteJsTest(ctx, () => preGeneratedAuthContext)());
+
+      it('pkpEncryptDecrypt with pre-generated materials', () =>
+        createPkpEncryptDecryptTest(ctx, () => preGeneratedAuthContext)());
+    });
+
+    describe('error handling', () => {
+      it('should reject when only sessionKeyPair is provided', async () => {
+        const tempAuthContext = await ctx.authManager.createPkpAuthContext({
+          authData: ctx.aliceViemAccountAuthData,
+          pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+          authConfig: {
+            resources: [['pkp-signing', '*']],
+            expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+          },
+          litClient: ctx.litClient,
+        });
+
+        const sessionKeyPair = tempAuthContext.sessionKeyPair;
+
+        await expect(
+          ctx.authManager.createPkpAuthContext({
+            authData: ctx.aliceViemAccountAuthData,
+            pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+            authConfig: {
+              resources: [['pkp-signing', '*']],
+              expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+            },
+            litClient: ctx.litClient,
+            sessionKeyPair, // Only providing sessionKeyPair
+            // delegationAuthSig is missing
+          })
+        ).rejects.toThrow(
+          'Both sessionKeyPair and delegationAuthSig must be provided together, or neither should be provided'
+        );
+      });
+
+      it('should reject when only delegationAuthSig is provided', async () => {
+        const tempAuthContext = await ctx.authManager.createPkpAuthContext({
+          authData: ctx.aliceViemAccountAuthData,
+          pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+          authConfig: {
+            resources: [['pkp-signing', '*']],
+            expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+          },
+          litClient: ctx.litClient,
+        });
+
+        const delegationAuthSig = await tempAuthContext.authNeededCallback();
+
+        await expect(
+          ctx.authManager.createPkpAuthContext({
+            authData: ctx.aliceViemAccountAuthData,
+            pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+            authConfig: {
+              resources: [['pkp-signing', '*']],
+              expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+            },
+            litClient: ctx.litClient,
+            // sessionKeyPair is missing
+            delegationAuthSig, // Only providing delegationAuthSig
+          })
+        ).rejects.toThrow(
+          'Both sessionKeyPair and delegationAuthSig must be provided together, or neither should be provided'
+        );
       });
     });
   });
