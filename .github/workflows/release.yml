@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - naga
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - master
+      - naga
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'alpha'
+        type: choice
+        options:
+          - alpha
+          - beta
+          - latest
+
+env:
+  LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
+  LIT_STATUS_BACKEND_URL: ${{ vars.LIT_STATUS_BACKEND_URL }}
+  LIVE_MASTER_ACCOUNT: ${{ secrets.LIVE_MASTER_ACCOUNT }}
+  LOCAL_MASTER_ACCOUNT: ${{ secrets.LOCAL_MASTER_ACCOUNT }}
+  LOG_LEVEL: info
+  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+jobs:
+  test-and-release:
+    runs-on: ubuntu-latest
+    environment: Health Check
+    timeout-minutes: 30
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@1.76.0
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+
+      - name: Setup Node for NPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Bun dependencies
+        run: bun install
+
+      - name: Build project
+        run: bun run build
+
+      - name: Run health check for naga-dev
+        run: NETWORK=naga-dev bun run test:e2e all --timeout 5000000
+        timeout-minutes: 10
+
+      - name: Run health check for naga-test
+        run: NETWORK=naga-test bun run test:e2e all --timeout 5000000
+        timeout-minutes: 10
+
+      - name: Run health check for naga-staging
+        run: NETWORK=naga-staging bun run test:e2e all --timeout 5000000
+        timeout-minutes: 10
+
+      # Release logic - only on push to main/naga branches (not PRs or feature branches)
+      - name: Check release conditions
+        id: release-check
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/naga' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          echo "branch-eligible=true" >> $GITHUB_OUTPUT
+          echo "✅ Branch is eligible for release"
+
+      - name: Check for changesets
+        id: changesets
+        if: steps.release-check.outputs.branch-eligible == 'true' || github.event_name == 'workflow_dispatch'
+        uses: changesets/action@v1
+        with:
+          version: echo "Checking for changesets..."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Beta (naga branch)
+        if: steps.changesets.outputs.hasChangesets == 'true' && github.ref == 'refs/heads/naga'
+        run: |
+          echo "🚀 Publishing alpha release for naga branch"
+          bun run changeset pre enter beta
+          bun run changeset version
+
+          # This will probably fail because we have already entered `beta` mode, but let this fail and 
+          # see if it works so that we don't accidentally publish to `latest`
+          bun run changeset publish --tag beta
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Release Stable (main/master branch)
+        if: steps.changesets.outputs.hasChangesets == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          echo "🚀 Publishing stable release for main branch"
+          bun run changeset pre exit
+          bun run changeset version
+          bun run changeset publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: No changesets found
+        if: (steps.release-check.outputs.branch-eligible == 'true' || github.event_name == 'workflow_dispatch') && steps.changesets.outputs.hasChangesets != 'true'
+        run: |
+          echo "ℹ️ No changesets found - nothing to release"
+          echo "To create a release, add changesets with: bun run changeset"
+          echo "This is normal for documentation updates, refactoring, or other non-package changes"
