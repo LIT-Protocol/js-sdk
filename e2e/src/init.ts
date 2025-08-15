@@ -224,7 +224,8 @@ export const init = async (
         ['lit-action-execution', '*'],
         ['access-control-condition-decryption', '*'],
       ],
-      expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+      // 30m expiration
+      expiration: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
     },
     litClient: litClient,
   });
