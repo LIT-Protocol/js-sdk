@@ -12,7 +12,7 @@ config:
       name: "Sustained PKP Signing"
     # Over 60s, ramp down to creating 5 vusers per second
     - duration: 60
-      arrivalRate: 5
+      arrivalRate: 20
       name: 'Ramp Down'
   processor: '../src/processors/multi-endpoints.ts'
 
