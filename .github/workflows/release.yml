@@ -123,6 +123,22 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Manual Release (workflow_dispatch)
+        if: steps.changesets.outputs.hasChangesets == 'true' && github.event_name == 'workflow_dispatch'
+        run: |
+          echo "🚀 Publishing manual release with tag: ${{ github.event.inputs.release_type }}"
+          if [ "${{ github.event.inputs.release_type }}" != "latest" ]; then
+            bun run changeset pre enter ${{ github.event.inputs.release_type }}
+            bun run changeset version
+            bun run changeset publish --tag ${{ github.event.inputs.release_type }}
+          else
+            bun run changeset pre exit
+            bun run changeset version
+            bun run changeset publish
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: No changesets found
         if: (steps.release-check.outputs.branch-eligible == 'true' || github.event_name == 'workflow_dispatch') && steps.changesets.outputs.hasChangesets != 'true'
         run: |
