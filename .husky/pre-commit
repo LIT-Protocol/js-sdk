@@ -1,0 +1,2 @@
+bun lint-staged
+bun -r run typecheck --if-present

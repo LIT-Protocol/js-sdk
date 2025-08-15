@@ -1,0 +1,5 @@
+#!/bin/sh
+if ! head -1 "$1" | grep -qE "^(feat|fix|chore|docs|test|style|refactor|perf|build|ci|revert|wip)(\(.+?\))?: .{1,}$|^Merge branch .+$"; then
+    echo "Aborting commit. Your commit message must match https://www.conventionalcommits.org/en/v1.0.0/" >&2
+    exit 1
+fi 
