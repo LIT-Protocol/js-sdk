@@ -105,6 +105,71 @@ export default class WebAuthnProvider extends BaseProvider {
   }
 
   /**
+   * Mint PKP with verified registration data
+   *
+   * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options to pass to the authenticator
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
+   *
+   * @returns {Promise<{ requestId: string; authMethod: AuthMethod }>} - Mint transaction hash and auth method
+   */
+  public async verifyAndMintPKPThroughRelayerAndReturnAuthMethod(
+    options: PublicKeyCredentialCreationOptionsJSON,
+    customArgs?: MintRequestBody
+  ): Promise<{ requestId: string; authMethod: AuthMethod }> {
+    // Submit registration options to the authenticator
+    const { startRegistration } = await import('@simplewebauthn/browser');
+    const attResp: RegistrationResponseJSON = await startRegistration(options);
+
+    const authMethod = {
+      authMethodType: AUTH_METHOD_TYPE.WebAuthn,
+      accessToken: JSON.stringify(attResp),
+    };
+
+    // Get auth method id
+    const authMethodId = await this.getAuthMethodId(authMethod);
+
+    // Get auth method pub key
+    const authMethodPubkey =
+      WebAuthnProvider.getPublicKeyFromRegistration(attResp);
+
+    // Format args for relay server
+    const defaultArgs = {
+      keyType: 2,
+      permittedAuthMethodTypes: [AUTH_METHOD_TYPE.WebAuthn],
+      permittedAuthMethodIds: [authMethodId],
+      permittedAuthMethodPubkeys: [authMethodPubkey],
+      permittedAuthMethodScopes: [[ethers.BigNumber.from('1')]],
+      addPkpEthAddressAsPermittedAddress: true,
+      sendPkpToItself: true,
+    };
+
+    const args = {
+      ...defaultArgs,
+      ...customArgs,
+    };
+
+    const body = JSON.stringify(args);
+
+    // Mint PKP
+    const mintRes = await this.relay.mintPKP(body);
+    if (!mintRes || !mintRes.requestId) {
+      throw new UnknownError(
+        {
+          info: {
+            mintRes,
+          },
+        },
+        'Missing mint response or request ID from relay server'
+      );
+    }
+
+    return {
+      requestId: mintRes.requestId,
+      authMethod: authMethod,
+    };
+  }
+
+  /**
    * @override
    * This method is not applicable for WebAuthnProvider and should not be used.
    * Use verifyAndMintPKPThroughRelayer instead to mint a PKP for a WebAuthn credential.
