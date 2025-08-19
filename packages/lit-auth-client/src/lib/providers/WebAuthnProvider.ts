@@ -56,52 +56,11 @@ export default class WebAuthnProvider extends BaseProvider {
     options: PublicKeyCredentialCreationOptionsJSON,
     customArgs?: MintRequestBody
   ): Promise<string> {
-    // Submit registration options to the authenticator
-    const { startRegistration } = await import('@simplewebauthn/browser');
-    const attResp: RegistrationResponseJSON = await startRegistration(options);
-
-    // Get auth method id
-    const authMethodId = await this.getAuthMethodId({
-      authMethodType: AUTH_METHOD_TYPE.WebAuthn,
-      accessToken: JSON.stringify(attResp),
-    });
-
-    // Get auth method pub key
-    const authMethodPubkey =
-      WebAuthnProvider.getPublicKeyFromRegistration(attResp);
-
-    // Format args for relay server
-    const defaultArgs = {
-      keyType: 2,
-      permittedAuthMethodTypes: [AUTH_METHOD_TYPE.WebAuthn],
-      permittedAuthMethodIds: [authMethodId],
-      permittedAuthMethodPubkeys: [authMethodPubkey],
-      permittedAuthMethodScopes: [[ethers.BigNumber.from('1')]],
-      addPkpEthAddressAsPermittedAddress: true,
-      sendPkpToItself: true,
-    };
-
-    const args = {
-      ...defaultArgs,
-      ...customArgs,
-    };
-
-    const body = JSON.stringify(args);
-
-    // Mint PKP
-    const mintRes = await this.relay.mintPKP(body);
-    if (!mintRes || !mintRes.requestId) {
-      throw new UnknownError(
-        {
-          info: {
-            mintRes,
-          },
-        },
-        'Missing mint response or request ID from relay server'
-      );
-    }
-
-    return mintRes.requestId;
+    const result = await this.verifyAndMintPKPThroughRelayerAndReturnAuthMethod(
+      options,
+      customArgs
+    );
+    return result.requestId;
   }
 
   /**
