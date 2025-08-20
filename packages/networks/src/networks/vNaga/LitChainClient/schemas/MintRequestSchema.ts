@@ -10,6 +10,7 @@ import {
 
 export const MintRequestSchema = z.object({
   keyType: toBigInt,
+  keySetId: z.literal('naga-keyset1'),
   permittedAuthMethodTypes: toBigIntArray,
   permittedAuthMethodIds: toHexStringArray,
   permittedAuthMethodPubkeys: toHexStringArray,
