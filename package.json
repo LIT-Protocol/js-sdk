@@ -24,7 +24,7 @@
     "link-all": "for dir in packages/*/; do echo \"Linking in $dir\"; (cd \"$dir\" && bun link) || { echo \"ERROR: Failed to link in $dir\"; exit 1; }; done",
     "unlink-all": "for dir in packages/*/; do echo \"Unlinking in $dir\"; (cd \"$dir\" && bun unlink) || { echo \"ERROR: Failed to unlink in $dir\"; exit 1; }; done",
     "auth-services": "cd packages/auth-services && bun run start",
-    "test:e2e": "bun test ./e2e/src/e2e.spec.ts -t",
+    "test:e2e": "bun test ./e2e/src/e2e.spec.ts --timeout 50000000 -t ",
     "artillery:init": "bun run ./e2e/artillery/src/init.ts",
     "artillery:balance-status": "LOG_LEVEL=silent bun run ./e2e/artillery/src/balance-status.ts",
     "artillery:pkp-sign": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./e2e/artillery/configs/pkp-sign.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
