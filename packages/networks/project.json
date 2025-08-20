@@ -22,7 +22,7 @@
       }
     },
     "lint": {
-      "execu,tor": "@nx/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/networks/**/*.ts"]
