@@ -63,7 +63,3 @@ export class NagaLocalEnvironment extends BaseNetworkEnvironment<
 
 // Create singleton instance
 export const nagaLocalEnvironment = new NagaLocalEnvironment();
-
-// Export the config for backward compatibility
-export const networkConfig = nagaLocalEnvironment.getConfig();
-export type NagaLocalNetworkConfig = typeof networkConfig;

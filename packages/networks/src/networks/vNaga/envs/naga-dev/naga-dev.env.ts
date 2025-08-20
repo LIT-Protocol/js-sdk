@@ -56,7 +56,3 @@ export class NagaDevEnvironment extends BaseNetworkEnvironment<
 
 // Create singleton instance
 export const nagaDevEnvironment = new NagaDevEnvironment();
-
-// Export the config for backward compatibility
-export const networkConfig = nagaDevEnvironment.getConfig();
-export type NagaDevNetworkConfig = typeof networkConfig;

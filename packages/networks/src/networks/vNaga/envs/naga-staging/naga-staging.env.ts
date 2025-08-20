@@ -56,7 +56,3 @@ export class NagaStagingEnvironment extends BaseNetworkEnvironment<
 
 // Create singleton instance
 export const nagaStagingEnvironment = new NagaStagingEnvironment();
-
-// Export the config for backward compatibility
-export const networkConfig = nagaStagingEnvironment.getConfig();
-export type NagaStagingNetworkConfig = typeof networkConfig;
