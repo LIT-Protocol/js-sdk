@@ -7,7 +7,6 @@
     "go": "bun run build && bun link-all",
     "build": "bun unlink-all && nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions && bun run prettier",
     "build:affected": "nx affected --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions",
-    "auto-fix-deps": "bun scripts/auto-fix-deps.mjs",
     "check-deps": "npx nx run-many --target=check-deps --exclude=wrapped-keys,wrapped-keys-lit-actions",
     "validate": "npm run check-deps && npm run build",
     "test:local": "node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/test.mjs",
