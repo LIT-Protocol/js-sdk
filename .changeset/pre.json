@@ -18,5 +18,9 @@
     "@lit-protocol/wrapped-keys": "7.0.0",
     "@lit-protocol/wrapped-keys-lit-actions": "7.0.0"
   },
-  "changesets": ["cute-bottles-ask"]
+  "changesets": [
+    "cute-bottles-ask",
+    "cute-experts-clap",
+    "cyan-bears-invent"
+  ]
 }
