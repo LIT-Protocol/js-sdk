@@ -115,6 +115,7 @@ export const mintWithMultiAuths = async (
   const tx = await mintNextAndAddAuthMethods(
     {
       keyType: 2,
+      keySetId: 'naga-keyset1',
       permittedAuthMethodTypes: validatedRequest.authMethodTypes,
       permittedAuthMethodIds: validatedRequest.authMethodIds,
       permittedAuthMethodPubkeys: validatedRequest.pubkeys,
