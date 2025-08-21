@@ -5,7 +5,7 @@ import type { ExpectedAccountOrWalletClient } from '../../shared/managers/contra
 
 const baseModule = createBaseModule({
   networkConfig: nagaLocalEnvironment.getConfig(),
-  moduleName: 'naga-local',
+  moduleName: nagaLocalEnvironment.getNetworkName(),
   createChainManager: (account: ExpectedAccountOrWalletClient) =>
     createChainManager(account),
 });
@@ -15,9 +15,6 @@ const nagaLocal = {
   ...baseModule,
   // Local environment specific getter for private key
   getPrivateKey: () => nagaLocalEnvironment.getPrivateKey(),
-  // Add getChainManager method for backward compatibility
-  getChainManager: (accountOrWalletClient: ExpectedAccountOrWalletClient) =>
-    createChainManager(accountOrWalletClient),
 };
 
 export type NagaLocal = typeof nagaLocal;
