@@ -1,3 +1,1 @@
-import { nagaLocalModule } from './naga-local.module';
-
-export const nagaLocal = nagaLocalModule;
+export { nagaLocal } from './naga-local.module';

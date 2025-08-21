@@ -34,8 +34,8 @@ export type LitNetworkModule =
 // | DatilLocalModule
 
 // ----- types
-export type { ConnectionInfo } from './networks/vNaga/LitChainClient/types';
+export type { ConnectionInfo } from './networks/vNaga/shared/managers/LitChainClient/types';
 export type { PKPStorageProvider } from './storage/types';
 
 // Schema types
-export type { MintRequestRaw } from './networks/vNaga/LitChainClient/schemas/MintRequestSchema';
+export type { MintRequestRaw } from './networks/vNaga/shared/managers/LitChainClient/schemas/MintRequestSchema';

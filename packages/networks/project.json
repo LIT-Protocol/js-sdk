@@ -21,12 +21,6 @@
         "command": "depcheck"
       }
     },
-    "auto-fix-deps": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "echo 'Dependencies auto-fixed by global script'"
-      }
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],

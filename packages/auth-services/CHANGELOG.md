@@ -1,5 +1,12 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-beta.1
+
+### Patch Changes
+
+- a48fbfb: Initial version after networks unification
+- Initial release for networks unification
+
 ## 2.0.0-beta.0
 
 ### Major Changes

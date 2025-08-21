@@ -176,7 +176,8 @@ export const _createNagaLitClient = async (
     }
   ): Promise<LitNodeSignature> {
     _logger.info(
-      `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${params.bypassAutoHashing || false
+      `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${
+        params.bypassAutoHashing || false
       })`
     );
 
@@ -808,9 +809,7 @@ export const _createNagaLitClient = async (
     },
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣
-      const account = privateKeyToAccount(
-        DEV_PRIVATE_KEY
-      );
+      const account = privateKeyToAccount(DEV_PRIVATE_KEY);
 
       const pkpPermissionsManager =
         await networkModule.chainApi.getPKPPermissionsManager({
@@ -829,19 +828,17 @@ export const _createNagaLitClient = async (
     },
     viewPKPsByAuthData: async (params: {
       authData:
-      | {
-        authMethodType: number | bigint;
-        authMethodId: string;
-        accessToken?: string;
-      }
-      | AuthData;
+        | {
+            authMethodType: number | bigint;
+            authMethodId: string;
+            accessToken?: string;
+          }
+        | AuthData;
       pagination?: { limit?: number; offset?: number };
       storageProvider?: PKPStorageProvider;
     }) => {
       // Use read-only account for viewing PKPs
-      const account = privateKeyToAccount(
-        DEV_PRIVATE_KEY
-      );
+      const account = privateKeyToAccount(DEV_PRIVATE_KEY);
 
       return await networkModule.chainApi.getPKPsByAuthData({
         authData: params.authData,
@@ -856,9 +853,7 @@ export const _createNagaLitClient = async (
       storageProvider?: PKPStorageProvider;
     }) => {
       // Use read-only account for viewing PKPs
-      const account = privateKeyToAccount(
-        DEV_PRIVATE_KEY
-      );
+      const account = privateKeyToAccount(DEV_PRIVATE_KEY);
 
       return await networkModule.chainApi.getPKPsByAddress({
         ownerAddress: params.ownerAddress,

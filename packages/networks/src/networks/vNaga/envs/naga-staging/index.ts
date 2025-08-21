@@ -1,3 +1,1 @@
-import { nagaStagingModule } from './naga-staging.module';
-
-export const nagaStaging = nagaStagingModule;
+export { nagaStaging } from './naga-staging.module';
