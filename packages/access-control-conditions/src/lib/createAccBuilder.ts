@@ -561,12 +561,27 @@ class AccessControlConditionBuilder implements AccBuilder {
 
     this.pendingCondition = {
       conditionType: 'evmBasic',
-      contractAddress: p.contractAddress as string,
-      standardContractType: p.standardContractType as StandardContractType,
-      method: p.method as string,
-      parameters: p.parameters as string[],
-      returnValueTest: p.returnValueTest as any,
-    } as Partial<EvmBasicAcc>;
+      ...p,
+    };
+
+    this.setChain(p.chain as EvmChain);
+    return this;
+  }
+
+  evmContract(
+    params: Omit<EvmContractAcc, 'conditionType'>
+  ): AccBuilder {
+    const p = params as Partial<EvmContractAcc>;
+    
+    // For raw evmContract, chain must be provided in params
+    if (!p.chain) {
+      throw new Error('Chain must be specified in params for evmContract method');
+    }
+
+    this.pendingCondition = {
+      conditionType: 'evmContract',
+      ...p,
+    };
 
     this.setChain(p.chain as EvmChain);
     return this;
@@ -584,13 +599,8 @@ class AccessControlConditionBuilder implements AccBuilder {
 
     this.pendingCondition = {
       conditionType: 'solRpc',
-      method: p.method as string,
-      params: p.params as string[],
-      pdaParams: p.pdaParams as string[],
-      pdaInterface: p.pdaInterface as any,
-      pdaKey: p.pdaKey as string,
-      returnValueTest: p.returnValueTest as any,
-    } as Partial<SolAcc>;
+      ...p,
+    };
 
     this.setChain(p.chain as SolanaChain);
     return this;
@@ -608,9 +618,8 @@ class AccessControlConditionBuilder implements AccBuilder {
 
     this.pendingCondition = {
       conditionType: 'cosmos',
-      path: p.path as string,
-      returnValueTest: p.returnValueTest as any,
-    } as Partial<AtomAcc>;
+      ...p,
+    };
 
     this.setChain(p.chain as CosmosChain);
     return this;
