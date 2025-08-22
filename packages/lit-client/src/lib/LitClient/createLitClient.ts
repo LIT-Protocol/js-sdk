@@ -836,7 +836,6 @@ export const _createNagaLitClient = async (
       }
       | AuthData;
       pagination?: { limit?: number; offset?: number };
-      storageProvider?: PKPStorageProvider;
     }) => {
       // Use read-only account for viewing PKPs
       const account = privateKeyToAccount(
@@ -846,7 +845,7 @@ export const _createNagaLitClient = async (
       return await networkModule.chainApi.getPKPsByAuthData({
         authData: params.authData,
         pagination: params.pagination,
-        storageProvider: params.storageProvider,
+        // storageProvider: params.storageProvider,
         account,
       });
     },
