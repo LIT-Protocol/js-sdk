@@ -21,6 +21,7 @@
     "build:esm": "mkdir -p dist-esm && bun build src/index.ts --outdir dist-esm --format esm --target node --external '@lit-protocol/*' && mv dist-esm/index.js dist/index.mjs && rm -rf dist-esm",
     "prepublishOnly": "bun run build",
     "test": "bun test",
+    "test:e2e": "dotenvx run --env-file=../.env -- bun test ./src/e2e.spec.ts --timeout 50000000 -t",
     "test:watch": "bun test --watch"
   },
   "keywords": [
