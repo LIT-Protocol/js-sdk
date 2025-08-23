@@ -24,6 +24,7 @@ const E2E_DIRECTORY = './e2e';
 let needsCleanup = false;
 let isCleaningUp = false;
 let currentTestProcess = null;
+let isShuttingDown = false;
 
 /**
  * Main execution function
@@ -318,26 +319,37 @@ async function cleanup() {
  */
 async function handleGracefulShutdown(signal) {
   // Prevent multiple signal handlers from running
-  if (isCleaningUp) {
-    console.log(`\n⏳ Already cleaning up, ignoring ${signal}...`);
+  if (isShuttingDown) {
+    console.log(`\n⏳ Already shutting down, ignoring ${signal}...`);
     return;
   }
 
+  isShuttingDown = true;
   console.log(`\n⚠️  Received ${signal}. Performing cleanup before exit...`);
 
   // Kill the test process if it's running
   if (currentTestProcess && !currentTestProcess.killed) {
     console.log('🛑 Terminating running test process...');
-    currentTestProcess.kill('SIGTERM');
-    // Give it a moment to terminate gracefully
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    if (!currentTestProcess.killed) {
-      currentTestProcess.kill('SIGKILL');
+    try {
+      currentTestProcess.kill('SIGTERM');
+      // Give it a moment to terminate gracefully
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (!currentTestProcess.killed) {
+        currentTestProcess.kill('SIGKILL');
+      }
+    } catch (error) {
+      console.log('⚠️  Error terminating test process:', error.message);
     }
   }
 
+  // Only cleanup if we haven't already started
   if (needsCleanup && !isCleaningUp) {
     try {
+      // Temporarily ignore signals during cleanup to prevent interruption
+      process.removeAllListeners('SIGINT');
+      process.removeAllListeners('SIGTERM');
+      process.removeAllListeners('SIGHUP');
+      
       await cleanup();
     } catch (cleanupError) {
       console.error('❌ Cleanup failed during shutdown:', cleanupError.message);
