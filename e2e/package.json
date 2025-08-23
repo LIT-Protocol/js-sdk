@@ -44,9 +44,9 @@
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "@lit-protocol/auth": "8.0.0-prealpha-886.4",
-    "@lit-protocol/lit-client": "8.0.0-prealpha-886.4",
-    "@lit-protocol/networks": "8.0.0-prealpha-886.4"
+    "@lit-protocol/auth": "*",
+    "@lit-protocol/lit-client": "*",
+    "@lit-protocol/networks": "*"
   },
   "engines": {
     "node": ">=18.0.0"
