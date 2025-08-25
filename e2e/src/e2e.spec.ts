@@ -246,7 +246,6 @@ describe('all', () => {
 
   describe('EOA Native', () => {
     console.log('🔐 Testing EOA native authentication and PKP minting');
-
       it('eoaNativeAuthFlow', () => createEoaNativeAuthFlowTest(ctx)());
     });
   });
