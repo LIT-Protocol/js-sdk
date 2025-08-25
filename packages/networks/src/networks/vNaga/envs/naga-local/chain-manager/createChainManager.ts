@@ -112,9 +112,9 @@ export const createChainManager = (
         const defaultPagination = { limit: 10, offset: 0 };
         const finalPagination = params.pagination
           ? {
-            limit: params.pagination.limit ?? defaultPagination.limit,
-            offset: params.pagination.offset ?? defaultPagination.offset,
-          }
+              limit: params.pagination.limit ?? defaultPagination.limit,
+              offset: params.pagination.offset ?? defaultPagination.offset,
+            }
           : defaultPagination;
 
         return getPKPsByAddress(
@@ -148,9 +148,7 @@ export const createChainManager = (
 
 export const createReadOnlyChainManager = () => {
   // dummy private key for read actions
-  const dummyAccount = privateKeyToAccount(
-    DEV_PRIVATE_KEY
-  );
+  const dummyAccount = privateKeyToAccount(DEV_PRIVATE_KEY);
   const chainManager = createChainManager(dummyAccount);
   return createChainManager(chainManager);
 };

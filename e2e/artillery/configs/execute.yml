@@ -1,24 +1,24 @@
 config:
-  target: "dummy"
+  target: 'dummy'
   phases:
     # Over 60s, ramp up to creating 50 vusers per second
     - duration: 60
       arrivalRate: 5
       rampTo: 100
-      name: "Ramp Up"
+      name: 'Ramp Up'
     # Over 300s, create 50 vusers per second
     - duration: 300
       arrivalRate: 100
-      name: "Sustained Encrypt & Decrypt"
+      name: 'Sustained Encrypt & Decrypt'
     # Over 60s, ramp down to creating 5 vusers per second
     - duration: 60
       arrivalRate: 20
-      name: "Ramp Down"
-  processor: "../src/processors/multi-endpoints.ts"
+      name: 'Ramp Down'
+  processor: '../src/processors/multi-endpoints.ts'
 
 scenarios:
-  - name: "Execute JS Stress Test"
+  - name: 'Execute JS Stress Test'
     weight: 100
     flow:
-      - function: "runExecuteJSTest"
-      - think: 0.1 
+      - function: 'runExecuteJSTest'
+      - think: 0.1

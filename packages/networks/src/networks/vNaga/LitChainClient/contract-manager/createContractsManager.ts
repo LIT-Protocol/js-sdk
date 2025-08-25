@@ -54,9 +54,7 @@ export const createReadOnlyContractsManager = <T, M>(
   networkConfig: INetworkConfig<T, M>
 ) => {
   // dummy private key for read actions
-  const dummyAccount = privateKeyToAccount(
-    DEV_PRIVATE_KEY
-  );
+  const dummyAccount = privateKeyToAccount(DEV_PRIVATE_KEY);
   return createContractsManager(networkConfig, dummyAccount);
 };
 
