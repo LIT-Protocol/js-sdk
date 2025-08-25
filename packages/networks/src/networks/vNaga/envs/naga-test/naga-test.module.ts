@@ -501,9 +501,7 @@ const networkModuleObject = {
       }
 
       // Use read-only account for viewing PKPs
-      const account = privateKeyToAccount(
-        DEV_PRIVATE_KEY
-      );
+      const account = privateKeyToAccount(DEV_PRIVATE_KEY);
 
       // 2. Fetch the price feed info
       const nodePrices = await getNodePrices(
