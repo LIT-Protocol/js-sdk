@@ -66,89 +66,94 @@ describe('all', () => {
         createPaymentManagerFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('paymentDelegationFlow', () =>
         createPaymentDelegationFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
-    });
 
-    describe('integrations', () => {
-      describe('pkp viem account', () => {
-        it('sign message', () =>
-          createViemSignMessageTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('sign transaction', () =>
-          createViemSignTransactionTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('sign typed data', () =>
-          createViemSignTypedDataTest(ctx, () => ctx.aliceEoaAuthContext)());
+      describe('integrations', () => {
+        describe('pkp viem account', () => {
+          it('sign message', () =>
+            createViemSignMessageTest(ctx, () => ctx.aliceEoaAuthContext)());
+          it('sign transaction', () =>
+            createViemSignTransactionTest(
+              ctx,
+              () => ctx.aliceEoaAuthContext
+            )());
+          it('sign typed data', () =>
+            createViemSignTypedDataTest(ctx, () => ctx.aliceEoaAuthContext)());
+        });
       });
     });
-  });
 
-  describe('PKP Auth', () => {
-    console.log('🔐 Testing using Programmable Key Pair authentication');
+    describe('PKP Auth', () => {
+      console.log('🔐 Testing using Programmable Key Pair authentication');
 
-    describe('endpoints', () => {
-      it('pkpSign', () =>
-        createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
-      it('executeJs', () =>
-        createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
-      it('viewPKPsByAddress', () =>
-        createViewPKPsByAddressTest(ctx, () => ctx.alicePkpAuthContext)());
-      it('viewPKPsByAuthData', () =>
-        createViewPKPsByAuthDataTest(ctx, () => ctx.alicePkpAuthContext)());
-      it('pkpEncryptDecrypt', () =>
-        createPkpEncryptDecryptTest(ctx, () => ctx.alicePkpAuthContext)());
-      it('encryptDecryptFlow', () =>
-        createEncryptDecryptFlowTest(ctx, () => ctx.alicePkpAuthContext)());
-      it('pkpPermissionsManagerFlow', () =>
-        createPkpPermissionsManagerFlowTest(
-          ctx,
-          () => ctx.alicePkpAuthContext
-        )());
-    });
+      describe('endpoints', () => {
+        it('pkpSign', () =>
+          createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
+        it('executeJs', () =>
+          createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
+        it('viewPKPsByAddress', () =>
+          createViewPKPsByAddressTest(ctx, () => ctx.alicePkpAuthContext)());
+        it('viewPKPsByAuthData', () =>
+          createViewPKPsByAuthDataTest(ctx, () => ctx.alicePkpAuthContext)());
+        it('pkpEncryptDecrypt', () =>
+          createPkpEncryptDecryptTest(ctx, () => ctx.alicePkpAuthContext)());
+        it('encryptDecryptFlow', () =>
+          createEncryptDecryptFlowTest(ctx, () => ctx.alicePkpAuthContext)());
+        it('pkpPermissionsManagerFlow', () =>
+          createPkpPermissionsManagerFlowTest(
+            ctx,
+            () => ctx.alicePkpAuthContext
+          )());
+      });
 
-    describe('integrations', () => {
-      describe('pkp viem account', () => {
-        it('sign message', () =>
-          createViemSignMessageTest(ctx, () => ctx.alicePkpAuthContext)());
-        it('sign transaction', () =>
-          createViemSignTransactionTest(ctx, () => ctx.alicePkpAuthContext)());
-        it('sign typed data', () =>
-          createViemSignTypedDataTest(ctx, () => ctx.alicePkpAuthContext)());
+      describe('integrations', () => {
+        describe('pkp viem account', () => {
+          it('sign message', () =>
+            createViemSignMessageTest(ctx, () => ctx.alicePkpAuthContext)());
+          it('sign transaction', () =>
+            createViemSignTransactionTest(
+              ctx,
+              () => ctx.alicePkpAuthContext
+            )());
+          it('sign typed data', () =>
+            createViemSignTypedDataTest(ctx, () => ctx.alicePkpAuthContext)());
+        });
       });
     });
-  });
 
-  describe('Custom Auth', () => {
-    console.log('🔐 Testing using Custom authentication method');
+    describe('Custom Auth', () => {
+      console.log('🔐 Testing using Custom authentication method');
 
-    describe('endpoints', () => {
-      it('pkpSign', () =>
-        createPkpSignTest(ctx, () => aliceCustomAuthContext)());
-      it('executeJs', () =>
-        createExecuteJsTest(ctx, () => aliceCustomAuthContext)());
-      it('viewPKPsByAddress', () =>
-        createViewPKPsByAddressTest(ctx, () => aliceCustomAuthContext)());
-      it('viewPKPsByAuthData', () =>
-        createViewPKPsByAuthDataTest(ctx, () => aliceCustomAuthContext)());
-      it('pkpEncryptDecrypt', () =>
-        createPkpEncryptDecryptTest(ctx, () => aliceCustomAuthContext)());
-      it('encryptDecryptFlow', () =>
-        createEncryptDecryptFlowTest(ctx, () => aliceCustomAuthContext)());
-      it('pkpPermissionsManagerFlow', () =>
-        createPkpPermissionsManagerFlowTest(
-          ctx,
-          () => aliceCustomAuthContext
-        )());
-    });
+      describe('endpoints', () => {
+        it('pkpSign', () =>
+          createPkpSignTest(ctx, () => aliceCustomAuthContext)());
+        it('executeJs', () =>
+          createExecuteJsTest(ctx, () => aliceCustomAuthContext)());
+        it('viewPKPsByAddress', () =>
+          createViewPKPsByAddressTest(ctx, () => aliceCustomAuthContext)());
+        it('viewPKPsByAuthData', () =>
+          createViewPKPsByAuthDataTest(ctx, () => aliceCustomAuthContext)());
+        it('pkpEncryptDecrypt', () =>
+          createPkpEncryptDecryptTest(ctx, () => aliceCustomAuthContext)());
+        it('encryptDecryptFlow', () =>
+          createEncryptDecryptFlowTest(ctx, () => aliceCustomAuthContext)());
+        it('pkpPermissionsManagerFlow', () =>
+          createPkpPermissionsManagerFlowTest(
+            ctx,
+            () => aliceCustomAuthContext
+          )());
+      });
 
-    describe('integrations', () => {
-      describe('pkp viem account', () => {
-        it('sign message', () =>
-          createViemSignMessageTest(ctx, () => aliceCustomAuthContext)());
-        it('sign transaction', () =>
-          createViemSignTransactionTest(ctx, () => aliceCustomAuthContext)());
-        it('sign typed data', () =>
-          createViemSignTypedDataTest(ctx, () => aliceCustomAuthContext)());
+      describe('integrations', () => {
+        describe('pkp viem account', () => {
+          it('sign message', () =>
+            createViemSignMessageTest(ctx, () => aliceCustomAuthContext)());
+          it('sign transaction', () =>
+            createViemSignTransactionTest(ctx, () => aliceCustomAuthContext)());
+          it('sign typed data', () =>
+            createViemSignTypedDataTest(ctx, () => aliceCustomAuthContext)());
+        });
       });
     });
-  });
 
   describe('PKP Auth with Pre-generated Materials', () => {
     console.log('🔐 Testing PKP auth with pre-generated session materials');
@@ -241,7 +246,7 @@ describe('all', () => {
 
   describe('EOA Native', () => {
     console.log('🔐 Testing EOA native authentication and PKP minting');
-
-    it('eoaNativeAuthFlow', () => createEoaNativeAuthFlowTest(ctx)());
+      it('eoaNativeAuthFlow', () => createEoaNativeAuthFlowTest(ctx)());
+    });
   });
 });

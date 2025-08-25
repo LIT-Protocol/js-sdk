@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "affected": {
-    "defaultBase": "main"
+    "defaultBase": "origin/master"
   },
   "tasksRunnerOptions": {
     "default": {
@@ -13,13 +13,8 @@
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["auto-fix-deps", "^build"],
+      "dependsOn": ["^build"],
       "cache": true
-    },
-    "auto-fix-deps": {
-      "cache": true,
-      "inputs": ["{projectRoot}/src/**/*", "{projectRoot}/package.json"],
-      "outputs": ["{projectRoot}/package.json"]
     },
     "check-deps": {
       "executor": "nx:run-commands",

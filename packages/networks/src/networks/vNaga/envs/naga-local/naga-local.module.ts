@@ -1,4 +1,4 @@
-import { version } from '@lit-protocol/constants';
+import { DEV_PRIVATE_KEY, version } from '@lit-protocol/constants';
 import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
@@ -47,7 +47,10 @@ import type { PKPStorageProvider } from '../../../../storage/types';
 import { createRequestId } from '../../../shared/helpers/createRequestId';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
 import { composeLitUrl } from '../../endpoints-manager/composeLitUrl';
-import { PKPPermissionsManager } from '../../LitChainClient/apis/highLevelApis';
+import {
+  getNodePrices,
+  PKPPermissionsManager,
+} from '../../LitChainClient/apis/highLevelApis';
 import { PaymentManager } from '../../LitChainClient/apis/highLevelApis/PaymentManager/PaymentManager';
 import { MintWithMultiAuthsRequest } from '../../LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
 import { PkpIdentifierRaw } from '../../LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
@@ -80,6 +83,7 @@ import {
 } from './chain-manager/createChainManager';
 import { getMaxPricesForNodeProduct } from './pricing-manager/getMaxPricesForNodeProduct';
 import { getUserMaxPrice } from './pricing-manager/getUserMaxPrice';
+import { privateKeyToAccount } from 'viem/accounts';
 
 const MODULE_NAME = 'naga-local';
 
@@ -482,6 +486,7 @@ const networkModuleObject = {
       connectionInfo: ConnectionInfo,
       handshakeResult: OrchestrateHandshakeResponse
     ): Promise<NagaJitContext> => {
+      // 1. Generate a key set for the JIT context
       const keySet: KeySet = {};
 
       for (const url of connectionInfo.bootstrapUrls) {
@@ -494,7 +499,22 @@ const networkModuleObject = {
           secretKey: nacl.box.keyPair().secretKey,
         };
       }
-      return { keySet };
+
+      // Use read-only account for viewing PKPs
+      const account = privateKeyToAccount(
+        DEV_PRIVATE_KEY
+      );
+
+      // 2. Fetch the price feed info
+      const nodePrices = await getNodePrices(
+        {
+          realmId: 1,
+          networkCtx: networkConfig,
+        },
+        account
+      );
+
+      return { keySet, nodePrices };
     },
     handshake: {
       schemas: {
