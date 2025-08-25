@@ -53,5 +53,4 @@ jobs:
         run: |
           echo "Running format check..."
           # Use prettier directly to avoid NX git issues
-          npx prettier --check .
-          echo "Format check passed!"
+          npx prettier --check . && echo "Format check passed!"
