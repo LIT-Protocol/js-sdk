@@ -12,6 +12,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 // import { signatures } from '../../envs/naga-local/generated/naga-develop';
 import { nagaDevSignatures } from '@lit-protocol/contracts';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
+import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
 
 type Signatures = typeof nagaDevSignatures;
 
@@ -54,7 +55,7 @@ export const createReadOnlyContractsManager = <T, M>(
 ) => {
   // dummy private key for read actions
   const dummyAccount = privateKeyToAccount(
-    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+    DEV_PRIVATE_KEY
   );
   return createContractsManager(networkConfig, dummyAccount);
 };

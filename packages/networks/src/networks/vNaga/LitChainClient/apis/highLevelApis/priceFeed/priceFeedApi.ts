@@ -23,12 +23,18 @@
  * ```
  */
 
+const _logger = getChildLogger({
+  module: 'priceFeedApi',
+});
+
+import { NodePrices } from '@lit-protocol/types';
 import { ExpectedAccountOrWalletClient } from '../../../../LitChainClient/contract-manager/createContractsManager';
-import { DefaultNetworkConfig } from '../../../../interfaces/NetworkContext';
+import { INetworkConfig } from '../../../../interfaces/NetworkContext';
 import {
   getNodesForRequest,
   PRODUCT_IDS,
 } from '../../../apis/rawContractApis/pricing/getNodesForRequest';
+import { getChildLogger } from '@lit-protocol/logger';
 
 // Configuration constants
 const STALE_PRICES_SECONDS = 3 * 1000; // Update prices if > X seconds old
@@ -38,16 +44,13 @@ const PRODUCT_IDS_ARRAY = Object.values(PRODUCT_IDS);
 export interface PriceFeedInfo {
   epochId: any;
   minNodeCount: any;
-  networkPrices: {
-    url: string;
-    prices: bigint[];
-  }[];
+  networkPrices: NodePrices;
 }
 
-// Type for the parameters
+// Type for the parameters - now accepts any valid network config
 export interface GetPriceFeedInfoParams {
   realmId?: number;
-  networkCtx: DefaultNetworkConfig;
+  networkCtx: INetworkConfig<any, any>;
   productIds?: bigint[];
 }
 
@@ -154,6 +157,9 @@ export async function getPriceFeedInfo(
 ): Promise<PriceFeedInfo> {
   // If there's a local promise, an update is in progress; wait for that
   if (fetchingPriceFeedInfo) {
+    _logger.info(
+      '💲 Local promise is already fetching price feed info. Returning that instead.'
+    );
     return fetchingPriceFeedInfo;
   }
 
@@ -162,9 +168,14 @@ export async function getPriceFeedInfo(
     priceFeedInfo &&
     Date.now() - lastUpdatedTimestamp < STALE_PRICES_SECONDS
   ) {
+    _logger.info(
+      `💲 Returning stale price feed info. Remaining stale time: ${
+        STALE_PRICES_SECONDS - (Date.now() - lastUpdatedTimestamp)
+      }ms`
+    );
     return priceFeedInfo;
   }
-
+  _logger.info('💲 Fetching new price feed info');
   // Fetch new prices, update local cache values, and return them
   return fetchPriceFeedInfoWithLocalPromise(params, accountOrWalletClient);
 }
@@ -191,7 +202,7 @@ export async function getPriceFeedInfo(
 export async function getNodePrices(
   params: GetPriceFeedInfoParams,
   accountOrWalletClient: ExpectedAccountOrWalletClient
-): Promise<PriceFeedInfo['networkPrices']> {
+): Promise<NodePrices> {
   const priceInfo = await getPriceFeedInfo(params, accountOrWalletClient);
   return priceInfo.networkPrices;
 }
