@@ -53,15 +53,5 @@ jobs:
         run: |
           echo "Running format check..."
           # Use prettier directly to avoid NX git issues
-          npx prettier --check . || {
-            echo "Format check failed. Running prettier --write to fix issues..."
-            npx prettier --write .
-            echo "Checking again after formatting..."
-            npx prettier --check . || {
-              echo "Still failing after auto-format. Manual intervention needed."
-              exit 1
-            }
-            echo "Auto-formatting successful. All files are now properly formatted."
-            echo "Note: Some files were auto-formatted. Consider committing these changes in your next commit."
-          }
+          npx prettier --check .
           echo "Format check passed!"
