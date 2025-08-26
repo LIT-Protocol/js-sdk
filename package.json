@@ -38,7 +38,6 @@
     "@lit-protocol/contracts": "^0.4.0",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
-    "@metamask/eth-sig-util": "5.0.2",
     "@noble/curves": "^1.8.1",
     "@openagenda/verror": "^3.1.4",
     "@simplewebauthn/browser": "^7.2.0",
