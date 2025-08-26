@@ -48,7 +48,7 @@
     "base64url": "^3.0.1",
     "bs58": "^6.0.0",
     "cbor-web": "^9.0.2",
-    "cross-fetch": "3.1.8",
+    "cross-fetch": "^4.1.0",
     "depcheck": "^1.4.7",
     "depd": "^2.0.0",
     "elysia": "^1.2.25",
@@ -93,7 +93,7 @@
     "artillery": "^2.0.23",
     "axios": "^1.6.0",
     "chalk": "^5.3.0",
-    "esbuild": "^0.17.3",
+    "esbuild": "^0.19.2",
     "esbuild-node-builtins": "^0.1.0",
     "esbuild-node-externals": "^1.14.0",
     "esbuild-plugin-tsc": "^0.4.0",
@@ -120,7 +120,7 @@
     "ts-jest": "29.2.5",
     "typedoc": "^0.26.6",
     "typedoc-theme-hierarchy": "^5.0.0",
-    "typescript": "5.8.3"
+    "typescript": "5.6.3"
   },
   "workspaces": [
     "packages/*"
