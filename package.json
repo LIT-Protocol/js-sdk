@@ -18,6 +18,7 @@
     "gen:local-network-context": "NETWORK_NAME=naga-develop DIRECTORY_NAME=naga-local bun run packages/networks/src/networks/vNaga/shared/scripts/generate-abi-signatures.ts",
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "node ./tools/scripts/gen-readme.mjs",
+    "gen:local-network-context": "bun run packages/networks/src/networks/vNaga/envs/naga-local/scripts/00-generate-abi-signatures.ts",
     "prettier": "npx nx format:write --all",
     "format:check": "npx nx format:check --all",
     "link-all": "for dir in packages/*/; do echo \"Linking in $dir\"; (cd \"$dir\" && bun link) || { echo \"ERROR: Failed to link in $dir\"; exit 1; }; done",
