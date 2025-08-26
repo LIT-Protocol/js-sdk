@@ -24,72 +24,54 @@ export type UnifiedAccessControlCondition =
   | ConditionItem
   | UnifiedAccessControlCondition[]; // Recursive definition
 
-// Schema definitions
-// Atom
-const AtomConditionUnionSchema: z.ZodType<AtomCondition> = z.union([
+const AtomConditionBaseSchema = z.union([
   AtomAccSchema,
   OperatorAccSchema,
-  z.array(z.lazy(() => AtomConditionSchema)),
 ]);
-const AtomConditionSchema: z.ZodType<AtomCondition> = z.lazy(
-  () => AtomConditionUnionSchema
-);
-export const AtomConditionsSchema: z.ZodType<AtomCondition[]> = z
-  .array(AtomConditionSchema)
-  .nonempty();
-// EVM Basic
-const EvmBasicConditionUnionSchema: z.ZodType<EvmBasicCondition> = z.union([
+
+const EvmBasicConditionBaseSchema = z.union([
   EvmBasicAccSchema,
   OperatorAccSchema,
-  z.array(z.lazy(() => EvmBasicConditionSchema)),
 ]);
-const EvmBasicConditionSchema: z.ZodType<EvmBasicCondition> = z.lazy(
-  () => EvmBasicConditionUnionSchema
-);
-export const EvmBasicConditionsSchema: z.ZodType<EvmBasicCondition[]> = z
-  .array(EvmBasicConditionSchema)
-  .nonempty();
-// EVM Contract
-const EvmContractConditionUnionSchema: z.ZodType<EvmContractCondition> =
-  z.union([
-    EvmContractAccSchema,
-    OperatorAccSchema,
-    z.array(z.lazy(() => EvmContractConditionSchema)),
-  ]);
-const EvmContractConditionSchema: z.ZodType<EvmContractCondition> = z.lazy(
-  () => EvmContractConditionUnionSchema
-);
-export const EvmContractConditionsSchema: z.ZodType<EvmContractCondition[]> = z
-  .array(EvmContractConditionSchema)
-  .nonempty();
-// Solana
-const SolRpcConditionUnionSchema: z.ZodType<SolRpcCondition> = z.union([
+
+const EvmContractConditionBaseSchema = z.union([
+  EvmContractAccSchema,
+  OperatorAccSchema,
+]);
+
+const SolRpcConditionBaseSchema = z.union([
   SolAccSchema,
   OperatorAccSchema,
-  z.array(z.lazy(() => SolRpcConditionSchema)),
 ]);
-const SolRpcConditionSchema: z.ZodType<SolRpcCondition> = z.lazy(
-  () => SolRpcConditionUnionSchema
-);
-export const SolRpcConditionsSchema: z.ZodType<SolRpcCondition[]> = z
-  .array(SolRpcConditionSchema)
-  .nonempty();
-// Unified
-const UnifiedConditionUnionSchema: z.ZodType<UnifiedAccessControlCondition> =
-  z.union([
-    AtomAccSchema.required({ conditionType: true }),
-    EvmBasicAccSchema.required({ conditionType: true }),
-    EvmContractAccSchema.required({ conditionType: true }),
-    SolAccSchema.required({ conditionType: true }),
-    OperatorAccSchema,
-    z.array(z.lazy(() => UnifiedConditionSchema)),
-  ]);
-const UnifiedConditionSchema: z.ZodType<UnifiedAccessControlCondition> = z.lazy(
-  () => UnifiedConditionUnionSchema
-);
-export const UnifiedConditionsSchema: z.ZodType<
-  UnifiedAccessControlCondition[]
-> = z.array(UnifiedConditionSchema).nonempty();
+
+const UnifiedConditionBaseSchema = z.union([
+  AtomAccSchema,
+  EvmBasicAccSchema,
+  EvmContractAccSchema,
+  SolAccSchema,
+  OperatorAccSchema,
+]);
+
+// Export the array schemas that allow both base conditions and nested arrays
+export const AtomConditionsSchema = z.array(
+  z.union([AtomConditionBaseSchema, z.array(AtomConditionBaseSchema)])
+).nonempty();
+
+export const EvmBasicConditionsSchema = z.array(
+  z.union([EvmBasicConditionBaseSchema, z.array(EvmBasicConditionBaseSchema)])
+).nonempty();
+
+export const EvmContractConditionsSchema = z.array(
+  z.union([EvmContractConditionBaseSchema, z.array(EvmContractConditionBaseSchema)])
+).nonempty();
+
+export const SolRpcConditionsSchema = z.array(
+  z.union([SolRpcConditionBaseSchema, z.array(SolRpcConditionBaseSchema)])
+).nonempty();
+
+export const UnifiedConditionsSchema = z.array(
+  z.union([UnifiedConditionBaseSchema, z.array(UnifiedConditionBaseSchema)])
+).nonempty();
 
 export const MultipleAccessControlConditionsSchema = z.object({
   // The access control conditions that the user must meet to obtain this signed token.  This could be possession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
