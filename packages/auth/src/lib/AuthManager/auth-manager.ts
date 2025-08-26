@@ -1,6 +1,6 @@
 import { getChildLogger } from '@lit-protocol/logger';
 import { AuthData, HexPrefixedSchema } from '@lit-protocol/schemas';
-// import { AuthSig, SessionKeyPair } from '@lit-protocol/types';
+import { AuthSig, SessionKeyPair } from '@lit-protocol/types';
 import { z } from 'zod';
 import { AuthConfigV2 } from '../authenticators/types';
 import type { LitAuthStorageProvider } from '../storage/types';
@@ -11,7 +11,9 @@ import {
 import { getPkpAuthContextAdapter } from './authAdapters/getPkpAuthContextAdapter';
 import { AuthConfigSchema } from './authContexts/BaseAuthContextType';
 import { getCustomAuthContextAdapter } from './authAdapters/getCustomAuthContextAdapter';
-import { hexToBigInt, keccak256, toBytes } from 'viem';
+import { generatePkpDelegationAuthSig } from './authAdapters/generatePkpDelegationAuthSig';
+import { generateEoaDelegationAuthSig } from './authAdapters/generateEoaDelegationAuthSig';
+import { getPkpAuthContextFromPreGeneratedAdapter } from './authAdapters/getPkpAuthContextFromPreGeneratedAdapter';
 
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
@@ -77,11 +79,19 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
       cache?: {
         delegationAuthSig?: boolean;
       };
-      // Optional pre-generated auth materials for server-side usage
-      // sessionKeyPair?: SessionKeyPair;
-      // delegationAuthSig?: AuthSig;
     }) => {
       return getPkpAuthContextAdapter(authManagerParams, params);
+    },
+    createPkpAuthContextFromPreGenerated: (params: {
+      pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      sessionKeyPair: SessionKeyPair;
+      delegationAuthSig: AuthSig;
+      authData?: AuthData;
+    }) => {
+      return getPkpAuthContextFromPreGeneratedAdapter(
+        authManagerParams,
+        params
+      );
     },
     createCustomAuthContext: (params: {
       // authData: AuthData;
@@ -103,6 +113,23 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
       };
 
       return getCustomAuthContextAdapter(authManagerParams, params);
+    },
+    generatePkpDelegationAuthSig: (params: {
+      pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      authData: AuthData;
+      sessionKeyPair: SessionKeyPair;
+      authConfig: AuthConfigV2;
+      litClient: BaseAuthContext<any>['litClient'];
+    }) => {
+      return generatePkpDelegationAuthSig(authManagerParams, params);
+    },
+    generateEoaDelegationAuthSig: (params: {
+      account: any; // ExpectedAccountOrWalletClient type
+      sessionKeyPair: SessionKeyPair;
+      authConfig: AuthConfigV2;
+      litClient: BaseAuthContext<any>['litClient'];
+    }) => {
+      return generateEoaDelegationAuthSig(authManagerParams, params);
     },
   };
 };

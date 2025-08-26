@@ -49,6 +49,9 @@ export const GetPkpAuthContextSchema = z.object({
 
     // @depreacted - to be removed. testing only.
     pkpAddress: z.string(),
+
+    // Optional pre-generated delegation signature
+    preGeneratedDelegationAuthSig: z.any().optional(),
   }),
   cache: z
     .object({
@@ -143,20 +146,24 @@ export const getPkpAuthContext = async (
     resources: _params.authConfig.resources,
   };
 
-  const delegationAuthSig = await tryGetCachedDelegationAuthSig({
-    cache: _params.cache?.delegationAuthSig,
-    storage: _params.deps.storage,
-    address: _params.deps.pkpAddress,
-    expiration: _params.authConfig.expiration,
-    signSessionKey: () =>
-      _params.deps.signSessionKey({
-        requestBody,
-        nodeUrls: _nodeInfo.urls,
-      }),
-  });
+  // Use pre-generated delegation signature if provided, otherwise generate/fetch one
+  const delegationAuthSig = _params.deps.preGeneratedDelegationAuthSig
+    ? _params.deps.preGeneratedDelegationAuthSig
+    : await tryGetCachedDelegationAuthSig({
+        cache: _params.cache?.delegationAuthSig,
+        storage: _params.deps.storage,
+        address: _params.deps.pkpAddress,
+        expiration: _params.authConfig.expiration,
+        signSessionKey: () =>
+          _params.deps.signSessionKey({
+            requestBody,
+            nodeUrls: _nodeInfo.urls,
+          }),
+      });
 
   _logger.info('getPkpAuthContext: delegationAuthSig', {
     delegationAuthSig,
+    isPreGenerated: !!_params.deps.preGeneratedDelegationAuthSig,
   });
 
   return {
