@@ -711,6 +711,46 @@ export const signatures = {
         stateMutability: 'nonpayable',
         type: 'function',
       },
+      addPermittedAuthMethod: {
+        inputs: [
+          {
+            internalType: 'uint256',
+            name: 'tokenId',
+            type: 'uint256',
+          },
+          {
+            components: [
+              {
+                internalType: 'uint256',
+                name: 'authMethodType',
+                type: 'uint256',
+              },
+              {
+                internalType: 'bytes',
+                name: 'id',
+                type: 'bytes',
+              },
+              {
+                internalType: 'bytes',
+                name: 'userPubkey',
+                type: 'bytes',
+              },
+            ],
+            internalType: 'struct LibPKPPermissionsStorage.AuthMethod',
+            name: 'authMethod',
+            type: 'tuple',
+          },
+          {
+            internalType: 'uint256[]',
+            name: 'scopes',
+            type: 'uint256[]',
+          },
+        ],
+        name: 'addPermittedAuthMethod',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
       addPermittedAuthMethodScope: {
         inputs: [
           {
@@ -974,6 +1014,34 @@ export const signatures = {
           },
         ],
         name: 'removePermittedAuthMethod',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      removePermittedAuthMethodScope: {
+        inputs: [
+          {
+            internalType: 'uint256',
+            name: 'tokenId',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'authMethodType',
+            type: 'uint256',
+          },
+          {
+            internalType: 'bytes',
+            name: 'id',
+            type: 'bytes',
+          },
+          {
+            internalType: 'uint256',
+            name: 'scopeId',
+            type: 'uint256',
+          },
+        ],
+        name: 'removePermittedAuthMethodScope',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',

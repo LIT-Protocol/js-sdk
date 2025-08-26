@@ -1,5 +1,12 @@
 # @lit-protocol/access-control-conditions-schemas
 
+## 8.0.0-beta.1
+
+### Patch Changes
+
+- a48fbfb: Initial version after networks unification
+- Initial release for networks unification
+
 ## 8.0.0-beta.0
 
 ### Major Changes
