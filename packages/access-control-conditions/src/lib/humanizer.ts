@@ -331,13 +331,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
       }
 
       // Fallback for unhandled conditions - provide debugging information
-      logger.warn('Unhandled access control condition', {
-        standardContractType: acc.standardContractType,
-        method: acc.method,
-        contractAddress: acc.contractAddress,
-        chain: acc.chain,
-        conditionType: acc.conditionType,
-      });
+      logger.warn('Unhandled access control condition', acc);
 
       return `Unhandled condition: ${
         acc.standardContractType || 'unknown'
