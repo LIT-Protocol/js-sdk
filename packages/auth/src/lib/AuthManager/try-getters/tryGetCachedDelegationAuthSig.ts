@@ -15,19 +15,19 @@ export async function tryGetCachedDelegationAuthSig(params: {
   // If cache is explicitly disabled, skip cache reading and generate new auth sig
   if (params.cache === false) {
     _logger.info(
-      'tryGetCachedDelegationAuthSig: Cache disabled, generating new delegation auth sig.',
       {
         address: params.address,
-      }
+      },
+      'tryGetCachedDelegationAuthSig: Cache disabled, generating new delegation auth sig.'
     );
 
     const newDelegationAuthSig = await params.signSessionKey();
 
     _logger.info(
-      'tryGetCachedDelegationAuthSig: Generated new delegation auth sig (cache disabled, not saved).',
       {
         address: params.address,
-      }
+      },
+      'tryGetCachedDelegationAuthSig: Generated new delegation auth sig (cache disabled, not saved).'
     );
 
     return newDelegationAuthSig;
@@ -38,18 +38,21 @@ export async function tryGetCachedDelegationAuthSig(params: {
       publicKey: params.address,
     });
 
-  _logger.info('tryGetCachedDelegationAuthSig: Attempting to read from cache', {
-    address: params.address,
-    foundInCache: !!delegationAuthSigString,
-  });
+  _logger.info(
+    {
+      address: params.address,
+      foundInCache: !!delegationAuthSigString,
+    },
+    'tryGetCachedDelegationAuthSig: Attempting to read from cache'
+  );
 
   if (delegationAuthSigString) {
     _logger.info(
-      'tryGetCachedDelegationAuthSig: Found cached delegation auth sig',
       {
         address: params.address,
         cachedSig: delegationAuthSigString,
-      }
+      },
+      'tryGetCachedDelegationAuthSig: Found cached delegation auth sig'
     );
 
     try {
@@ -74,8 +77,8 @@ export async function tryGetCachedDelegationAuthSig(params: {
               sigExpirationTime = extractedTime;
             } catch (dateError) {
               _logger.warn(
-                'tryGetCachedDelegationAuthSig: Extracted expirationTime from signedMessage is not a valid date.',
-                { extractedTime, address: params.address, error: dateError }
+                { extractedTime, address: params.address, error: dateError },
+                'tryGetCachedDelegationAuthSig: Extracted expirationTime from signedMessage is not a valid date.'
               );
               sigExpirationTime = undefined; // Invalidate if parsing fails
             }
@@ -87,48 +90,48 @@ export async function tryGetCachedDelegationAuthSig(params: {
         const expirationDate = new Date(sigExpirationTime);
         if (expirationDate.getTime() > Date.now()) {
           _logger.info(
-            'tryGetCachedDelegationAuthSig: Found valid (unexpired) cached delegation auth sig',
             {
               address: params.address,
               expiresAt: sigExpirationTime,
-            }
+            },
+            'tryGetCachedDelegationAuthSig: Found valid (unexpired) cached delegation auth sig'
           );
           return cachedSig;
         } else {
           _logger.info(
-            'tryGetCachedDelegationAuthSig: Cached delegation auth sig has expired',
             {
               address: params.address,
               expiredAt: sigExpirationTime,
-            }
+            },
+            'tryGetCachedDelegationAuthSig: Cached delegation auth sig has expired'
           );
         }
       } else {
         _logger.warn(
-          'tryGetCachedDelegationAuthSig: Cached delegation auth sig found, but valid expirationTime is missing or not in expected format. Will regenerate.',
           {
             address: params.address,
             // Log a preview for debugging, avoid logging the full potentially large object
             cachedSigPreview: delegationAuthSigString.substring(0, 200),
-          }
+          },
+          'tryGetCachedDelegationAuthSig: Cached delegation auth sig found, but valid expirationTime is missing or not in expected format. Will regenerate.'
         );
       }
     } catch (e: any) {
       _logger.error(
-        'tryGetCachedDelegationAuthSig: Error parsing or validating cached delegation auth sig. Will regenerate.',
         {
           address: params.address,
           error: e.message || e,
-        }
+        },
+        'tryGetCachedDelegationAuthSig: Error parsing or validating cached delegation auth sig. Will regenerate.'
       );
     }
   }
 
   _logger.info(
-    'tryGetCachedDelegationAuthSig: No valid cached sig found or cache expired/invalid. Generating new delegation auth sig.',
     {
       address: params.address,
-    }
+    },
+    'tryGetCachedDelegationAuthSig: No valid cached sig found or cache expired/invalid. Generating new delegation auth sig.'
   );
 
   const newDelegationAuthSig = await params.signSessionKey();
@@ -139,10 +142,10 @@ export async function tryGetCachedDelegationAuthSig(params: {
   });
 
   _logger.info(
-    'tryGetCachedDelegationAuthSig: Generated and saved new delegation auth sig.',
     {
       address: params.address,
-    }
+    },
+    'tryGetCachedDelegationAuthSig: Generated and saved new delegation auth sig.'
   );
 
   return newDelegationAuthSig;

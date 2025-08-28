@@ -105,8 +105,8 @@ export const processLitActionResponseStrategy = (
       }
     } catch (e) {
       _logger.error(
-        'Error while executing custom response filter, defaulting to most common',
-        (e as Error).toString()
+        { error: (e as Error).toString() },
+        'Error while executing custom response filter, defaulting to most common'
       );
     }
   }
@@ -258,17 +258,23 @@ export const handleResponse = async (
   threshold: number,
   responseStrategy?: LitActionResponseStrategy
 ): Promise<ExecuteJsResponse> => {
-  _logger.info('executeJs:handleResponse: Processing executeJs response', {
-    requestId,
-    threshold,
-    responseStrategy: responseStrategy?.strategy || 'default',
-  });
+  _logger.info(
+    {
+      requestId,
+      threshold,
+      responseStrategy: responseStrategy?.strategy || 'default',
+    },
+    'executeJs:handleResponse: Processing executeJs response'
+  );
 
   if (!result.success) {
-    _logger.error('executeJs:handleResponse: Batch failed', {
-      requestId,
-      error: 'error' in result ? result.error : 'Unknown error',
-    });
+    _logger.error(
+      {
+        requestId,
+        error: 'error' in result ? result.error : 'Unknown error',
+      },
+      'executeJs:handleResponse: Batch failed'
+    );
     throw new Error(
       `ExecuteJs batch failed: ${JSON.stringify(
         'error' in result ? result.error : 'Unknown error'
@@ -280,11 +286,14 @@ export const handleResponse = async (
   const executeJsResponseData = result.values[0];
   const { values } = ExecuteJsResponseDataSchema.parse(executeJsResponseData);
 
-  _logger.info('executeJs:handleResponse: Response values received', {
-    requestId,
-    valueCount: values.length,
-    successfulValues: values.filter((v) => v.success).length,
-  });
+  _logger.info(
+    {
+      requestId,
+      valueCount: values.length,
+      successfulValues: values.filter((v) => v.success).length,
+    },
+    'executeJs:handleResponse: Response values received'
+  );
 
   // Filter successful responses
   const successfulValues = values.filter((value) => value.success);
@@ -354,10 +363,10 @@ export const handleResponse = async (
 
   if (hasSignedData) {
     _logger.info(
-      'executeJs:handleResponse: Combining signatures from signedData',
       {
         requestId,
-      }
+      },
+      'executeJs:handleResponse: Combining signatures from signedData'
     );
 
     signatures = await combineExecuteJSSignatures({
@@ -366,20 +375,23 @@ export const handleResponse = async (
       threshold,
     });
 
-    _logger.info('executeJs:handleResponse: Signatures combined successfully', {
-      requestId,
-      signatureKeys: Object.keys(signatures),
-    });
+    _logger.info(
+      {
+        requestId,
+        signatureKeys: Object.keys(signatures),
+      },
+      'executeJs:handleResponse: Signatures combined successfully'
+    );
   }
 
   // Handle signatures extracted from response data
   if (hasSignatureData) {
     _logger.info(
-      'executeJs:handleResponse: Processing signatures from response data',
       {
         requestId,
         signatureCount: signatureShares.length,
-      }
+      },
+      'executeJs:handleResponse: Processing signatures from response data'
     );
 
     // Check if these are final signatures (with r,s,v) or signature shares that need combining
@@ -388,10 +400,10 @@ export const handleResponse = async (
 
     if (isFinalSignature) {
       _logger.info(
-        'executeJs:handleResponse: Detected final signatures in response, using directly',
         {
           requestId,
-        }
+        },
+        'executeJs:handleResponse: Detected final signatures in response, using directly'
       );
 
       // These are final signatures, not shares - use them directly
@@ -417,19 +429,19 @@ export const handleResponse = async (
       signatures['response_signature'] = signature;
 
       _logger.info(
-        'executeJs:handleResponse: Final signature processed successfully',
         {
           requestId,
           signatureKeys: ['response_signature'],
-        }
+        },
+        'executeJs:handleResponse: Final signature processed successfully'
       );
     } else {
       _logger.info(
-        'executeJs:handleResponse: Detected signature shares, combining them',
         {
           requestId,
           signatureCount: signatureShares.length,
-        }
+        },
+        'executeJs:handleResponse: Detected signature shares, combining them'
       );
 
       // These are signature shares that need to be combined
@@ -461,11 +473,11 @@ export const handleResponse = async (
       signatures = { ...signatures, ...responseSignatures };
 
       _logger.info(
-        'executeJs:handleResponse: Signature shares combined successfully',
         {
           requestId,
           responseSignatureKeys: Object.keys(responseSignatures),
-        }
+        },
+        'executeJs:handleResponse: Signature shares combined successfully'
       );
     }
   }
@@ -474,10 +486,13 @@ export const handleResponse = async (
   let claims: Record<string, { signatures: any[]; derivedKeyId: string }> = {};
 
   if (hasClaimData) {
-    _logger.info('executeJs:handleResponse: Processing claims data', {
-      requestId,
-      claimKeys: Object.keys(mostCommonResponse.claimData),
-    });
+    _logger.info(
+      {
+        requestId,
+        claimKeys: Object.keys(mostCommonResponse.claimData),
+      },
+      'executeJs:handleResponse: Processing claims data'
+    );
 
     // Convert claim data to expected format
     claims = Object.entries(mostCommonResponse.claimData).reduce(
@@ -516,13 +531,13 @@ export const handleResponse = async (
   };
 
   _logger.info(
-    'executeJs:handleResponse: ExecuteJs response created successfully',
     {
       requestId,
       hasSignatures: Object.keys(signatures).length > 0,
       hasResponse: !!processedResponse,
       hasClaims: Object.keys(claims).length > 0,
-    }
+    },
+    'executeJs:handleResponse: ExecuteJs response created successfully'
   );
 
   return executeJsResponse;

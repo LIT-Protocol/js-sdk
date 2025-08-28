@@ -86,34 +86,43 @@ export const handshake = async (params: {
 
   // Debug logging to understand the response structure
   _logger.info(
-    '🔍 Raw response from sendNodeRequest:',
-    JSON.stringify(res, null, 2)
+    { raw: JSON.stringify(res, null, 2) },
+    '🔍 Raw response from sendNodeRequest:'
   );
-  _logger.info('🔍 Type of res:', typeof res);
-  _logger.info('🔍 Keys in res:', Object.keys(res || {}));
+  _logger.info({ type: typeof res }, '🔍 Type of res:');
+  _logger.info({ keys: Object.keys(res || {}) }, '🔍 Keys in res:');
 
   const _schema = params.networkModule.api.handshake.schemas.Input.ResponseData;
 
   // Debug logging for schema information
-  _logger.info('🔍 Schema structure:', _schema);
-  _logger.info('🔍 About to parse response with schema...');
+  _logger.info({ schema: _schema }, '🔍 Schema structure:');
+  _logger.info({}, '🔍 About to parse response with schema...');
 
   try {
     const parsedResult = _schema.parse(res);
-    _logger.info('🔍 Parsed result:', JSON.stringify(parsedResult, null, 2));
-    _logger.info('🔍 Type of parsedResult:', typeof parsedResult);
-    _logger.info('🔍 Keys in parsedResult:', Object.keys(parsedResult || {}));
+    _logger.info(
+      { parsed: JSON.stringify(parsedResult, null, 2) },
+      '🔍 Parsed result:'
+    );
+    _logger.info({ type: typeof parsedResult }, '🔍 Type of parsedResult:');
+    _logger.info(
+      { keys: Object.keys(parsedResult || {}) },
+      '🔍 Keys in parsedResult:'
+    );
 
     const finalData = parsedResult.parseData();
     _logger.info(
-      '🔍 Final data after parseData():',
-      JSON.stringify(finalData, null, 2)
+      { final: JSON.stringify(finalData, null, 2) },
+      '🔍 Final data after parseData():'
     );
 
     return finalData;
   } catch (error) {
-    _logger.error('🔍 Schema parsing failed:', error);
-    _logger.error('🔍 Failed response was:', JSON.stringify(res, null, 2));
+    _logger.error({ error }, '🔍 Schema parsing failed:');
+    _logger.error(
+      { failed: JSON.stringify(res, null, 2) },
+      '🔍 Failed response was:'
+    );
 
     // Handle the case where nodes return error responses with valid data in errorObject
     if (
@@ -124,7 +133,7 @@ export const handshake = async (params: {
       'errorObject' in res &&
       res.errorObject
     ) {
-      _logger.info('🔍 Attempting to parse errorObject as backup...');
+      _logger.info({}, '🔍 Attempting to parse errorObject as backup...');
 
       try {
         // Try to parse the errorObject as JSON string
@@ -135,8 +144,8 @@ export const handshake = async (params: {
         const errorData = JSON.parse(errorObjectString);
 
         _logger.info(
-          '🔍 Parsed errorObject data:',
-          JSON.stringify(errorData, null, 2)
+          { parsedError: JSON.stringify(errorData, null, 2) },
+          '🔍 Parsed errorObject data:'
         );
 
         // Check if this looks like valid handshake data
@@ -148,6 +157,7 @@ export const handshake = async (params: {
             'epoch' in errorData)
         ) {
           _logger.info(
+            {},
             '🔍 ErrorObject contains valid handshake data, using as fallback'
           );
           return errorData as RawHandshakeResponse;

@@ -61,12 +61,14 @@ export const createStateManager = async <T>(params: {
     latestBootstrapUrls = initialConnectionInfo.bootstrapUrls;
     latestEpochInfo = initialConnectionInfo.epochInfo; // Store initial epoch info
     latestConnectionInfo = initialConnectionInfo; // Store initial connection info
-    _logger.info({
-      msg: 'State Manager Initialized with Connection Info',
-      initialUrls: latestBootstrapUrls,
-      initialEpoch: latestEpochInfo?.number,
-      initialConnectionInfo,
-    });
+    _logger.info(
+      {
+        initialUrls: latestBootstrapUrls,
+        initialEpoch: latestEpochInfo?.number,
+        initialConnectionInfo,
+      },
+      'State Manager Initialized with Connection Info'
+    );
 
     // --- Initial callback
     callbackResult = await params.callback({
@@ -128,11 +130,13 @@ export const createStateManager = async <T>(params: {
             );
 
             if (bootstrapUrlsChanged) {
-              _logger.warn({
-                msg: 'Bootstrap URLs changed. Updating internal state.',
-                oldUrls: latestBootstrapUrls,
-                newUrls: newBootstrapUrls,
-              });
+              _logger.warn(
+                {
+                  oldUrls: latestBootstrapUrls,
+                  newUrls: newBootstrapUrls,
+                },
+                'Bootstrap URLs changed. Updating internal state.'
+              );
               latestBootstrapUrls = newBootstrapUrls; // Update internal state
             } else {
               _logger.info('BootstrapUrls remain unchanged.');
@@ -165,8 +169,8 @@ export const createStateManager = async <T>(params: {
             });
           } catch (error) {
             _logger.error(
-              'Failed to get connection info during staking onChange',
-              error
+              { error },
+              'Failed to get connection info during staking onChange'
             );
             // Decide how to handle this error - maybe keep old state?
           }
@@ -200,7 +204,7 @@ export const createStateManager = async <T>(params: {
       try {
         return await blockhashManager.getOrRefreshAndGet();
       } catch (error) {
-        _logger.error('Error getting latest blockhash', error);
+        _logger.error({ error }, 'Error getting latest blockhash');
         throw error; // Re-throw after logging
       }
     },

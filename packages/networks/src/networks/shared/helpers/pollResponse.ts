@@ -91,6 +91,7 @@ export async function pollResponse<TResponse>({
   for (let i = 0; i < maxRetries; i++) {
     try {
       _logger.info(
+        {},
         `${errorMessageContext}: Polling attempt ${
           i + 1
         }/${maxRetries} for ${url}`
@@ -105,6 +106,7 @@ export async function pollResponse<TResponse>({
         }
         // Log other non-ok statuses but continue retrying unless it's a client error type that won't resolve on its own.
         _logger.error(
+          {},
           `${errorMessageContext}: Polling attempt ${
             i + 1
           } failed with HTTP status: ${
@@ -115,16 +117,16 @@ export async function pollResponse<TResponse>({
       } else {
         const data = (await response.json()) as TResponse;
         _logger.info(
+          { data },
           `${errorMessageContext}: Polling attempt ${
             i + 1
-          }/${maxRetries} - current status/data:`,
-          data
+          }/${maxRetries} - current status/data:`
         );
 
         if (isErrorCondition?.(data)) {
           _logger.error(
-            `${errorMessageContext}: Error condition met during polling.`,
-            data
+            { data },
+            `${errorMessageContext}: Error condition met during polling.`
           );
           // Attempt to get more specific error details if available
           const errorDetails =
@@ -142,8 +144,8 @@ export async function pollResponse<TResponse>({
 
         if (isCompleteCondition(data)) {
           _logger.info(
-            `${errorMessageContext}: Completion condition met successfully.`,
-            data
+            { data },
+            `${errorMessageContext}: Completion condition met successfully.`
           );
           return data;
         }
@@ -152,10 +154,10 @@ export async function pollResponse<TResponse>({
     } catch (error: any) {
       const message = error instanceof Error ? error.message : String(error);
       _logger.error(
+        { message },
         `${errorMessageContext}: Error during polling attempt ${
           i + 1
-        }/${maxRetries} for ${url}:`,
-        message
+        }/${maxRetries} for ${url}:`
       );
       // If it's the last attempt, or a critical error (like 404 or an explicit error condition from isErrorCondition), rethrow.
       if (

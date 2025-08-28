@@ -99,7 +99,7 @@ export class PaymentManager {
    * @returns Transaction result
    */
   async deposit(params: { amountInEth: string }): Promise<LitTxVoid> {
-    logger.debug('Depositing funds', { amountInEth: params.amountInEth });
+    logger.debug({ amountInEth: params.amountInEth }, 'Depositing funds');
 
     const amountInWei = parseEther(params.amountInEth);
 
@@ -119,10 +119,13 @@ export class PaymentManager {
     userAddress: string;
     amountInEth: string;
   }): Promise<LitTxVoid> {
-    logger.debug('Depositing funds for user', {
-      userAddress: params.userAddress,
-      amountInEth: params.amountInEth,
-    });
+    logger.debug(
+      {
+        userAddress: params.userAddress,
+        amountInEth: params.amountInEth,
+      },
+      'Depositing funds for user'
+    );
 
     const amountInWei = parseEther(params.amountInEth);
 
@@ -142,7 +145,7 @@ export class PaymentManager {
    * @returns Balance information in ETH and Wei
    */
   async getBalance(params: { userAddress: string }): Promise<PaymentBalance> {
-    logger.debug('Getting balance', { userAddress: params.userAddress });
+    logger.debug({ userAddress: params.userAddress }, 'Getting balance');
 
     const [totalBalanceWei, availableBalanceWei] = await Promise.all([
       getBalance(
@@ -173,7 +176,7 @@ export class PaymentManager {
    * @returns Transaction result
    */
   async requestWithdraw(params: { amountInEth: string }): Promise<LitTxVoid> {
-    logger.debug('Requesting withdrawal', { amountInEth: params.amountInEth });
+    logger.debug({ amountInEth: params.amountInEth }, 'Requesting withdrawal');
 
     const amountInWei = parseEther(params.amountInEth);
 
@@ -190,7 +193,7 @@ export class PaymentManager {
    * @returns Transaction result
    */
   async withdraw(params: { amountInEth: string }): Promise<LitTxVoid> {
-    logger.debug('Executing withdrawal', { amountInEth: params.amountInEth });
+    logger.debug({ amountInEth: params.amountInEth }, 'Executing withdrawal');
 
     const amountInWei = parseEther(params.amountInEth);
 
@@ -209,9 +212,12 @@ export class PaymentManager {
   async getWithdrawRequest(params: {
     userAddress: string;
   }): Promise<WithdrawRequestInfo> {
-    logger.debug('Getting withdrawal request', {
-      userAddress: params.userAddress,
-    });
+    logger.debug(
+      {
+        userAddress: params.userAddress,
+      },
+      'Getting withdrawal request'
+    );
 
     const withdrawRequest = await getWithdrawRequest(
       { userAddress: params.userAddress },
@@ -258,9 +264,12 @@ export class PaymentManager {
     timeRemaining?: number;
     withdrawRequest: WithdrawRequestInfo;
   }> {
-    logger.debug('Checking if withdrawal can be executed', {
-      userAddress: params.userAddress,
-    });
+    logger.debug(
+      {
+        userAddress: params.userAddress,
+      },
+      'Checking if withdrawal can be executed'
+    );
 
     const [withdrawRequest, delay] = await Promise.all([
       this.getWithdrawRequest(params),
@@ -295,9 +304,12 @@ export class PaymentManager {
    * @returns Transaction result
    */
   async delegatePayments(params: { userAddress: string }): Promise<LitTxVoid> {
-    logger.debug('Delegating payments to user', {
-      userAddress: params.userAddress,
-    });
+    logger.debug(
+      {
+        userAddress: params.userAddress,
+      },
+      'Delegating payments to user'
+    );
 
     return await delegatePayments(
       { userAddress: params.userAddress },
@@ -314,9 +326,12 @@ export class PaymentManager {
   async undelegatePayments(params: {
     userAddress: string;
   }): Promise<LitTxVoid> {
-    logger.debug('Undelegating payments from user', {
-      userAddress: params.userAddress,
-    });
+    logger.debug(
+      {
+        userAddress: params.userAddress,
+      },
+      'Undelegating payments from user'
+    );
 
     return await undelegatePayments(
       { userAddress: params.userAddress },
@@ -333,9 +348,12 @@ export class PaymentManager {
   async delegatePaymentsBatch(params: {
     userAddresses: string[];
   }): Promise<LitTxVoid> {
-    logger.debug('Delegating payments to multiple users', {
-      userAddresses: params.userAddresses,
-    });
+    logger.debug(
+      {
+        userAddresses: params.userAddresses,
+      },
+      'Delegating payments to multiple users'
+    );
 
     return await delegatePaymentsBatch(
       { userAddresses: params.userAddresses },
@@ -352,9 +370,12 @@ export class PaymentManager {
   async undelegatePaymentsBatch(params: {
     userAddresses: string[];
   }): Promise<LitTxVoid> {
-    logger.debug('Undelegating payments from multiple users', {
-      userAddresses: params.userAddresses,
-    });
+    logger.debug(
+      {
+        userAddresses: params.userAddresses,
+      },
+      'Undelegating payments from multiple users'
+    );
 
     return await undelegatePaymentsBatch(
       { userAddresses: params.userAddresses },
@@ -373,7 +394,7 @@ export class PaymentManager {
     requestsPerPeriod: string;
     periodSeconds: string;
   }): Promise<LitTxVoid> {
-    logger.debug('Setting payment restriction', params);
+    logger.debug(params, 'Setting payment restriction');
 
     return await setRestriction(
       {
@@ -394,9 +415,12 @@ export class PaymentManager {
    * @returns Array of payer addresses
    */
   async getPayers(params: { userAddress: string }): Promise<string[]> {
-    logger.debug('Getting payers for user', {
-      userAddress: params.userAddress,
-    });
+    logger.debug(
+      {
+        userAddress: params.userAddress,
+      },
+      'Getting payers for user'
+    );
 
     return await getPayers(
       { userAddress: params.userAddress },
@@ -411,9 +435,12 @@ export class PaymentManager {
    * @returns Array of user addresses
    */
   async getUsers(params: { payerAddress: string }): Promise<string[]> {
-    logger.debug('Getting users for payer', {
-      payerAddress: params.payerAddress,
-    });
+    logger.debug(
+      {
+        payerAddress: params.payerAddress,
+      },
+      'Getting users for payer'
+    );
 
     return await getUsers(
       { payerAddress: params.payerAddress },
@@ -433,9 +460,12 @@ export class PaymentManager {
     periodSeconds: string;
     raw: Restriction;
   }> {
-    logger.debug('Getting restriction for payer', {
-      payerAddress: params.payerAddress,
-    });
+    logger.debug(
+      {
+        payerAddress: params.payerAddress,
+      },
+      'Getting restriction for payer'
+    );
 
     const restriction = await getRestriction(
       { payerAddress: params.payerAddress },
@@ -470,9 +500,12 @@ export class PaymentManager {
       restrictions: Restriction[][];
     };
   }> {
-    logger.debug('Getting payers and restrictions for users', {
-      userAddresses: params.userAddresses,
-    });
+    logger.debug(
+      {
+        userAddresses: params.userAddresses,
+      },
+      'Getting payers and restrictions for users'
+    );
 
     const result = await getPayersAndRestrictions(
       { userAddresses: params.userAddresses },

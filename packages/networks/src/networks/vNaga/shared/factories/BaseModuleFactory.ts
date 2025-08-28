@@ -502,7 +502,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         createRequest: async (
           params: PKPSignCreateRequestParams
         ): Promise<RequestItem<z.infer<typeof EncryptedVersion1Schema>>[]> => {
-          _logger.info('pkpSign:createRequest: Creating request', { params });
+          _logger.info({ params }, 'pkpSign:createRequest: Creating request');
 
           // Generate session sigs
           const sessionSigs = await issueSessionFromContext({
@@ -520,9 +520,10 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           const urls = Object.keys(sessionSigs);
 
           for (const url of urls) {
-            _logger.info('pkpSign:createRequest: Generating request data', {
-              url,
-            });
+            _logger.info(
+              { url },
+              'pkpSign:createRequest: Generating request data'
+            );
 
             const _requestData = PKPSignRequestDataSchema.parse({
               toSign: Array.from(params.signingContext.toSign),
@@ -613,7 +614,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           ResponseData: DecryptResponseDataSchema,
         },
         createRequest: async (params: DecryptCreateRequestParams) => {
-          _logger.info('decrypt:createRequest: Creating request', { params });
+          _logger.info({ params }, 'decrypt:createRequest: Creating request');
 
           // Generate session sigs for decrypt
           const sessionSigs = await issueSessionFromContext({
@@ -673,9 +674,10 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           subnetPubKey: string,
           jitContext: NagaJitContext
         ) => {
-          _logger.info('decrypt:handleResponse: Processing decrypt response', {
-            requestId,
-          });
+          _logger.info(
+            { requestId },
+            'decrypt:handleResponse: Processing decrypt response'
+          );
 
           if (!result.success) {
             E2EERequestManager.handleEncryptedError(
@@ -957,12 +959,15 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           ResponseData: ExecuteJsResponseDataSchema,
         },
         createRequest: async (params: ExecuteJsCreateRequestParams) => {
-          _logger.info('executeJs:createRequest: Creating request', {
-            hasCode: !!params.executionContext.code,
-            hasIpfsId: !!params.executionContext.ipfsId,
-            hasJsParams: !!params.executionContext.jsParams,
-            responseStrategy: params.responseStrategy?.strategy || 'default',
-          });
+          _logger.info(
+            {
+              hasCode: !!params.executionContext.code,
+              hasIpfsId: !!params.executionContext.ipfsId,
+              hasJsParams: !!params.executionContext.jsParams,
+              responseStrategy: params.responseStrategy?.strategy || 'default',
+            },
+            'executeJs:createRequest: Creating request'
+          );
 
           // Store response strategy for later use in handleResponse
           executeJsResponseStrategy = params.responseStrategy;
@@ -1030,12 +1035,12 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           jitContext: NagaJitContext
         ) => {
           _logger.info(
-            'executeJs:handleResponse: Processing executeJs response',
             {
               requestId,
               responseStrategy:
                 executeJsResponseStrategy?.strategy || 'default',
-            }
+            },
+            'executeJs:handleResponse: Processing executeJs response'
           );
 
           if (!result.success) {

@@ -146,9 +146,12 @@ const prepareCustomAuthRequestBody = async (
 export const getCustomAuthContext = async (
   params: z.infer<typeof GetCustomAuthContextSchema>
 ) => {
-  _logger.info('getCustomAuthContext: params', {
-    params,
-  });
+  _logger.info(
+    {
+      params,
+    },
+    'getCustomAuthContext: params'
+  );
 
   // const _params = GetCustomAuthContextSchema.parse(params);
   const _params = params;
@@ -186,9 +189,12 @@ export const getCustomAuthContext = async (
       }),
   });
 
-  _logger.info('getCustomAuthContext: delegationAuthSig', {
-    delegationAuthSig,
-  });
+  _logger.info(
+    {
+      delegationAuthSig,
+    },
+    'getCustomAuthContext: delegationAuthSig'
+  );
 
   return {
     chain: 'ethereum',

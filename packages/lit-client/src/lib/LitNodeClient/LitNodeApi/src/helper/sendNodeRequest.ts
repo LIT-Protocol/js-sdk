@@ -56,12 +56,12 @@ export async function sendNodeRequest<T>(
       // signal: controller.signal,
     };
 
-    _logger.info('🔄 _fullUrl', _fullUrl);
-    _logger.info('🔄 req', req);
+    _logger.info({ _fullUrl }, '🔄 _fullUrl');
+    _logger.info({ req }, '🔄 req');
 
     // Generate and log CURL command
     const curlCommand = generateCurlCommand(_fullUrl, req);
-    _logger.info('🔄 CURL command:', curlCommand);
+    _logger.info({ curlCommand }, '🔄 CURL command:');
 
     // if (_fullUrl.includes('sign_session_key')) {
     //   console.log("Curl command: ", curlCommand);

@@ -37,8 +37,8 @@ export async function createPKPViemAccount({
 
   const address = publicKeyToAddress(uncompressedPubKey);
 
-  _logger.info('uncompressedPubKey', uncompressedPubKey);
-  _logger.info('address', address);
+  _logger.info({ uncompressedPubKey }, 'uncompressedPubKey');
+  _logger.info({ address }, 'address');
 
   const formatSignature = (signature: SigResponse): Hex => {
     const r = `0x${signature.r.padStart(64, '0')}` as Hex;
@@ -68,20 +68,23 @@ export async function createPKPViemAccount({
   }> => {
     // Pass raw bytes to PKP - PKP will apply keccak256 internally
     const signature = await sign(bytesToSign);
-    _logger.info('🔍 Raw signature from PKP:', signature);
+    _logger.info({ signature }, '🔍 Raw signature from PKP:');
 
     // Parse signature components
     const r = `0x${signature.slice(2, 66).padStart(64, '0')}` as Hex;
     const s = `0x${signature.slice(66, 130).padStart(64, '0')}` as Hex;
-    _logger.info('🔍 Parsed r:', r);
-    _logger.info('🔍 Parsed s:', s);
+    _logger.info({ r }, '🔍 Parsed r:');
+    _logger.info({ s }, '🔍 Parsed s:');
 
     let recovered: string | undefined;
     let recoveryId: number | undefined;
 
     // PKP applies keccak256 to raw bytes, so we recover using the same hash
     const hashForRecovery = keccak256(bytesToSign);
-    _logger.info('🔍 Hash for recovery (keccak256 of bytes):', hashForRecovery);
+    _logger.info(
+      { hashForRecovery },
+      '🔍 Hash for recovery (keccak256 of bytes):'
+    );
 
     for (let recId = 0; recId <= 1; recId++) {
       const v = BigInt(27 + recId);
@@ -92,6 +95,7 @@ export async function createPKPViemAccount({
       });
 
       _logger.info(
+        {},
         `🔍 Recovery attempt ${recId}: recovered=${maybe}, expected=${expectedAddress}`
       );
 
@@ -131,12 +135,12 @@ export async function createPKPViemAccount({
     try {
       if (tx.nonce === undefined) {
         tx.nonce = await client.getTransactionCount({ address });
-        _logger.info('viem => nonce:', tx.nonce);
+        _logger.info({ nonce: tx.nonce }, 'viem => nonce:');
       }
 
       if (tx.chainId === undefined) {
         tx.chainId = await client.getChainId();
-        _logger.info('viem => chainId:', tx.chainId);
+        _logger.info({ chainId: tx.chainId }, 'viem => chainId:');
       }
 
       if (tx.gasPrice === undefined && tx.maxFeePerGas === undefined) {
@@ -151,17 +155,23 @@ export async function createPKPViemAccount({
           tx.maxFeePerGas = baseFeePerGas * 2n + priorityFee; // 2x base fee + priority
           tx.type = 'eip1559';
           _logger.info('viem => using EIP-1559 fees');
-          _logger.info('viem => baseFeePerGas:', baseFeePerGas);
+          _logger.info({ baseFeePerGas }, 'viem => baseFeePerGas:');
           _logger.info(
-            'viem => maxPriorityFeePerGas:',
-            tx.maxPriorityFeePerGas
+            { maxPriorityFeePerGas: tx.maxPriorityFeePerGas },
+            'viem => maxPriorityFeePerGas:'
           );
-          _logger.info('viem => maxFeePerGas:', tx.maxFeePerGas);
+          _logger.info(
+            { maxFeePerGas: tx.maxFeePerGas },
+            'viem => maxFeePerGas:'
+          );
         } else {
           // Fallback to legacy for networks that don't support EIP-1559
           tx.gasPrice = await client.getGasPrice();
           tx.type = 'legacy';
-          _logger.info('viem => using legacy gasPrice:', tx.gasPrice);
+          _logger.info(
+            { gasPrice: tx.gasPrice },
+            'viem => using legacy gasPrice:'
+          );
         }
       }
 
@@ -175,11 +185,11 @@ export async function createPKPViemAccount({
             data: tx.data,
           } as any);
           tx.gas = gasEstimate;
-          _logger.info('viem => gas:', tx.gas);
+          _logger.info({ gas: tx.gas }, 'viem => gas:');
         } catch (gasError) {
           _logger.warn(
-            'viem => gas estimation failed, using default:',
-            gasError
+            { gasError },
+            'viem => gas estimation failed, using default:'
           );
           tx.gas = 21000n; // Default gas for simple transfers
         }
@@ -311,13 +321,13 @@ export async function createPKPViemAccount({
 
       // Use the bypass option to skip LitMessageSchema transformation
       const signature = await sign(digestBytes, { bypassAutoHashing: true });
-      _logger.info('🔍 Raw signature from PKP (EIP-712):', signature);
+      _logger.info({ signature }, '🔍 Raw signature from PKP (EIP-712):');
 
       // Parse signature components
       const r = `0x${signature.slice(2, 66).padStart(64, '0')}` as Hex;
       const s = `0x${signature.slice(66, 130).padStart(64, '0')}` as Hex;
-      _logger.info('🔍 Parsed r:', r);
-      _logger.info('🔍 Parsed s:', s);
+      _logger.info({ r }, '🔍 Parsed r:');
+      _logger.info({ s }, '🔍 Parsed s:');
 
       // Find recovery ID by testing both possibilities
       let recoveryId: number | undefined;
@@ -339,7 +349,7 @@ export async function createPKPViemAccount({
             break;
           }
         } catch (e) {
-          _logger.info(`🔍 Recovery failed for recId ${recId}:`, e);
+          _logger.info({ e }, `🔍 Recovery failed for recId ${recId}:`);
         }
       }
 

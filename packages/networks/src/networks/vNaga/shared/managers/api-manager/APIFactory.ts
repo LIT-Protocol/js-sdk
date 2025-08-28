@@ -35,7 +35,7 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
     createRequest: async (
       params: PKPSignCreateRequestParams
     ): Promise<RequestItem<z.infer<typeof EncryptedVersion1Schema>>[]> => {
-      _logger.info('pkpSign:createRequest: Creating request', { params });
+      _logger.info({ params }, 'pkpSign:createRequest: Creating request');
 
       // Generate session sigs
       const sessionSigs = await issueSessionFromContext({
@@ -52,7 +52,7 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
       const urls = Object.keys(sessionSigs);
 
       for (const url of urls) {
-        _logger.info('pkpSign:createRequest: Generating request data', { url });
+        _logger.info({ url }, 'pkpSign:createRequest: Generating request data');
 
         const _requestData = PKPSignRequestDataSchema.parse({
           toSign: Array.from(params.signingContext.toSign),
@@ -134,7 +134,7 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
 export function createDecryptAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
   return {
     createRequest: async (params: DecryptCreateRequestParams) => {
-      _logger.info('decrypt:createRequest: Creating request', { params });
+      _logger.info({ params }, 'decrypt:createRequest: Creating request');
 
       // Generate session sigs for decrypt
       const sessionSigs = await issueSessionFromContext({
@@ -220,7 +220,7 @@ export function createDecryptAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
 export function createExecuteJsAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
   return {
     createRequest: async (params: ExecuteJsCreateRequestParams) => {
-      _logger.info('executeJs:createRequest: Creating request', { params });
+      _logger.info({ params }, 'executeJs:createRequest: Creating request');
 
       // Generate session sigs
       const sessionSigs = await issueSessionFromContext({

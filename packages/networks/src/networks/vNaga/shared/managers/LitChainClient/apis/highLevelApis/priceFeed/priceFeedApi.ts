@@ -22,11 +22,6 @@
  * });
  * ```
  */
-
-const _logger = getChildLogger({
-  module: 'priceFeedApi',
-});
-
 import { NodePrices } from '@lit-protocol/types';
 import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
 import { INetworkConfig } from '../../../../../../shared/interfaces/NetworkContext';
@@ -35,6 +30,10 @@ import {
   PRODUCT_IDS,
 } from '../../rawContractApis/pricing/getNodesForRequest';
 import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  module: 'priceFeedApi',
+});
 
 // Configuration constants
 const STALE_PRICES_SECONDS = 3 * 1000; // Update prices if > X seconds old
