@@ -21,12 +21,15 @@ export async function initSystemContext({ appName }: { appName: string }) {
   let networkModule: any;
 
   // TODO: Add more supports for other networks
-  if (env.NETWORK !== 'naga-dev') {
+  if (env.NETWORK === 'naga-dev') {
+    networkModule = await import('@lit-protocol/networks');
+  } else if (env.NETWORK === 'naga-test') {
+    networkModule = await import('@lit-protocol/networks');
+  } else if (env.NETWORK === 'naga-staging') {
+    networkModule = await import('@lit-protocol/networks');
+  } else {
     throw new Error(`Unsupported network: ${env.NETWORK}`);
   }
-
-  const { nagaDev } = await import('@lit-protocol/networks');
-  networkModule = nagaDev;
 
   const litClient = await createLitClient({
     network: networkModule,
