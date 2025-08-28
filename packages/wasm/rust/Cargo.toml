@@ -62,3 +62,6 @@ wasm-opt=['-Os']
 
 [package.metadata.wasm-pack.profile.profiling]
 wasm-opt = ['-g', '-O']
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
