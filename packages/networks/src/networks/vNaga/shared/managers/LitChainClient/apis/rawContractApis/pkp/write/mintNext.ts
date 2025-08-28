@@ -22,7 +22,7 @@ export async function mintNext(
   const hash = await callWithAdjustedOverrides(
     pkpNftContract,
     'mintNext',
-    [2, 'naga-keyset1'],
+    [2],
     {
       value: mintCost,
     }

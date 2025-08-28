@@ -45,7 +45,6 @@ export const mintPKP = async (
   const tx = await mintNextAndAddAuthMethods(
     {
       keyType: 2,
-      keySetId: 'naga-keyset1',
       permittedAuthMethodTypes: [validatedRequest.authMethodType],
       permittedAuthMethodIds: [validatedRequest.authMethodId],
       permittedAuthMethodPubkeys: [validatedRequest.pubkey],
