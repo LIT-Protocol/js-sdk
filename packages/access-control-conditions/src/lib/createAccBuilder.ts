@@ -194,7 +194,10 @@ export interface AccBuilder {
   custom(
     condition: Partial<AtomAcc | EvmBasicAcc | EvmContractAcc | SolAcc>
   ): AccBuilder;
-  raw(condition: UnifiedAccessControlCondition): AccBuilder;
+  unifiedAccs(condition: UnifiedAccessControlCondition): AccBuilder;
+  evmBasic(params: Omit<EvmBasicAcc, 'conditionType'>): AccBuilder;
+  solRpc(params: Omit<SolAcc, 'conditionType'>): AccBuilder;
+  cosmos(params: Omit<AtomAcc, 'conditionType'>): AccBuilder;
 
   // ========== Boolean Operations ==========
   and(): AccBuilder;
@@ -540,9 +543,85 @@ class AccessControlConditionBuilder implements AccBuilder {
     return this;
   }
 
-  raw(condition: UnifiedAccessControlCondition): AccBuilder {
+  unifiedAccs(condition: UnifiedAccessControlCondition): AccBuilder {
     this.commitPendingCondition();
     this.conditions.push(condition);
+    return this;
+  }
+
+  evmBasic(
+    params: Omit<EvmBasicAcc, 'conditionType'>
+  ): AccBuilder {
+    const p = params as Partial<EvmBasicAcc>;
+    
+    // For raw evmBasic, chain must be provided in params
+    if (!p.chain) {
+      throw new Error('Chain must be specified in params for evmBasic method');
+    }
+
+    this.pendingCondition = {
+      conditionType: 'evmBasic',
+      ...p,
+    };
+
+    this.setChain(p.chain as EvmChain);
+    return this;
+  }
+
+  evmContract(
+    params: Omit<EvmContractAcc, 'conditionType'>
+  ): AccBuilder {
+    const p = params as Partial<EvmContractAcc>;
+    
+    // For raw evmContract, chain must be provided in params
+    if (!p.chain) {
+      throw new Error('Chain must be specified in params for evmContract method');
+    }
+
+    this.pendingCondition = {
+      conditionType: 'evmContract',
+      ...p,
+    };
+
+    this.setChain(p.chain as EvmChain);
+    return this;
+  }
+
+  solRpc(
+    params: Omit<SolAcc, 'conditionType'>
+  ): AccBuilder {
+    const p = params as Partial<SolAcc>;
+    
+    // For raw solRpc, chain must be provided in params
+    if (!p.chain) {
+      throw new Error('Chain must be specified in params for solRpc method');
+    }
+
+    this.pendingCondition = {
+      conditionType: 'solRpc',
+      ...p,
+    };
+
+    this.setChain(p.chain as SolanaChain);
+    return this;
+  }
+
+  cosmos(
+    params: Omit<AtomAcc, 'conditionType'>
+  ): AccBuilder {
+    const p = params as Partial<AtomAcc>;
+    
+    // For raw cosmos, chain must be provided in params
+    if (!p.chain) {
+      throw new Error('Chain must be specified in params for cosmos method');
+    }
+
+    this.pendingCondition = {
+      conditionType: 'cosmos',
+      ...p,
+    };
+
+    this.setChain(p.chain as CosmosChain);
     return this;
   }
 

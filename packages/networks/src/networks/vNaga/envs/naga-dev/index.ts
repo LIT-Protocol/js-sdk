@@ -1,3 +1,1 @@
-import { nagaDevModule } from './naga-dev.module';
-
-export const nagaDev = nagaDevModule;
+export { nagaDev } from './naga-dev.module';
