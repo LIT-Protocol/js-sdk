@@ -69,7 +69,6 @@ export async function mintNextAndAddAuthMethods(
     'mintNextAndAddAuthMethods',
     [
       validatedRequest.keyType,
-      validatedRequest.keySetId,
       validatedRequest.permittedAuthMethodTypes,
       validatedRequest.permittedAuthMethodIds,
       validatedRequest.permittedAuthMethodPubkeys,
