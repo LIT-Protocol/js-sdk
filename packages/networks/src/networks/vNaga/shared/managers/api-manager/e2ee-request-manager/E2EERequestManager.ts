@@ -126,6 +126,7 @@ const handleEncryptedError = (
     // Try to decrypt the error payload to get the actual error message
     try {
       _logger.info(
+        {},
         `"${operationName}": Attempting to decrypt error payload for detailed error information...`
       );
 
@@ -145,8 +146,8 @@ const handleEncryptedError = (
       );
 
       _logger.error(
-        `"${operationName}": Decrypted error details from nodes:`,
-        decryptedErrorValues
+        { decryptedErrorValues },
+        `"${operationName}": Decrypted error details from nodes:`
       );
 
       // Use the actual error message from the nodes
@@ -167,8 +168,8 @@ const handleEncryptedError = (
       );
     } catch (decryptError) {
       _logger.error(
-        `"${operationName}": Failed to decrypt error payload:`,
-        decryptError
+        { decryptError },
+        `"${operationName}": Failed to decrypt error payload:`
       );
 
       // If the decryptError is actually our thrown error with the node's message, re-throw it

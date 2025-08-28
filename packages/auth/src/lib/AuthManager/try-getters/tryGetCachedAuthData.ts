@@ -37,48 +37,54 @@ export async function tryGetCachedAuthData(params: {
     address: params.address,
   })) as LitAuthData | null; // Allow null if nothing is found
 
-  _logger.info('tryGetCachedAuthData: Attempting to read from cache', {
-    address: params.address,
-    foundInCache: !!authData,
-  });
+  _logger.info(
+    {
+      address: params.address,
+      foundInCache: !!authData,
+    },
+    'tryGetCachedAuthData: Attempting to read from cache'
+  );
 
   if (authData && authData.sessionKey && authData.sessionKey.expiresAt) {
     try {
       const expirationDate = new Date(authData.sessionKey.expiresAt);
       if (expirationDate.getTime() > Date.now()) {
         _logger.info(
-          'tryGetCachedAuthData: Found valid (unexpired) cached auth data',
           {
             address: params.address,
             expiresAt: authData.sessionKey.expiresAt,
-          }
+          },
+          'tryGetCachedAuthData: Found valid (unexpired) cached auth data'
         );
         return authData; // Return valid, unexpired authData
       } else {
-        _logger.info('tryGetCachedAuthData: Cached auth data has expired', {
-          address: params.address,
-          expiredAt: authData.sessionKey.expiresAt,
-        });
+        _logger.info(
+          {
+            address: params.address,
+            expiredAt: authData.sessionKey.expiresAt,
+          },
+          'tryGetCachedAuthData: Cached auth data has expired'
+        );
         authData = null; // Treat as not found if expired
       }
     } catch (e: any) {
       _logger.warn(
-        'tryGetCachedAuthData: Error parsing expirationDate from cached auth data. Will regenerate.',
         {
           address: params.address,
           expiresAtValue: authData!.sessionKey!.expiresAt,
           error: e.message || e,
-        }
+        },
+        'tryGetCachedAuthData: Error parsing expirationDate from cached auth data. Will regenerate.'
       );
       authData = null; // Treat as not found if parsing fails
     }
   } else if (authData) {
     _logger.warn(
-      'tryGetCachedAuthData: Cached auth data found, but sessionKey or expiresAt is missing. Will regenerate.',
       {
         address: params.address,
         authDataPreview: JSON.stringify(authData).substring(0, 200),
-      }
+      },
+      'tryGetCachedAuthData: Cached auth data found, but sessionKey or expiresAt is missing. Will regenerate.'
     );
     authData = null; // Treat as not found if incomplete
   }
@@ -86,10 +92,10 @@ export async function tryGetCachedAuthData(params: {
   // If authData is null at this point (either not found, expired, or invalid), generate new.
   if (!authData) {
     _logger.info(
-      'tryGetCachedAuthData: No valid cached auth data found or cache expired/invalid. Generating new auth data.',
       {
         address: params.address,
-      }
+      },
+      'tryGetCachedAuthData: No valid cached auth data found or cache expired/invalid. Generating new auth data.'
     );
 
     const _expiration = ExpirationSchema.parse(params.expiration);
@@ -108,9 +114,12 @@ export async function tryGetCachedAuthData(params: {
       address: params.address,
       authData,
     });
-    _logger.info('tryGetCachedAuthData: Generated and saved new auth data.', {
-      address: params.address,
-    });
+    _logger.info(
+      {
+        address: params.address,
+      },
+      'tryGetCachedAuthData: Generated and saved new auth data.'
+    );
   }
 
   // Final check to ensure authData is not null, which should be guaranteed by the logic above.
@@ -124,10 +133,13 @@ export async function tryGetCachedAuthData(params: {
 
   const finalAuthData: LitAuthData = authData;
 
-  _logger.info('tryGetCachedAuthData: Success, returning auth data.', {
-    address: params.address,
-    // authData, // Avoid logging full authData which may contain sensitive info like keyPair and also resolves linter issue.
-  });
+  _logger.info(
+    {
+      address: params.address,
+      // authData, // Avoid logging full authData which may contain sensitive info like keyPair and also resolves linter issue.
+    },
+    'tryGetCachedAuthData: Success, returning auth data.'
+  );
 
   return finalAuthData;
 }

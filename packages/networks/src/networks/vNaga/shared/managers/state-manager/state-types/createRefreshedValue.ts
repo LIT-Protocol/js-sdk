@@ -36,6 +36,7 @@ export const createRefreshedValue = <T>({
     value = newValue;
     lastUpdatedAt = Date.now();
     _logger.debug(
+      {},
       `[RefreshedValue] Value successfully updated via _set. Last updated at: ${lastUpdatedAt}`
     );
   };
@@ -55,23 +56,25 @@ export const createRefreshedValue = <T>({
         // isExpired must be true
         reason = `Value is stale (age: ${age}ms, TTL: ${ttlMs}ms). Attempting refresh.`;
       }
-      _logger.debug(`[RefreshedValue] ${reason}`);
+      _logger.debug({}, `[RefreshedValue] ${reason}`);
 
       try {
         const freshValue = await fetch();
         _set(freshValue);
         return freshValue;
       } catch (err) {
-        _logger.error(`[RefreshedValue] Fetch attempt failed. Error:`, err);
+        _logger.error({ err }, `[RefreshedValue] Fetch attempt failed. Error:`);
         if (value === undefined) {
           // If it's the first fetch and it failed, there's no fallback.
           _logger.error(
+            {},
             `[RefreshedValue] Initial fetch failed. Rethrowing error.`
           );
           throw err; // Propagate the error
         }
         // If a subsequent refresh failed, log and return the stale 'value'.
         _logger.warn(
+          {},
           `[RefreshedValue] Refresh failed. Returning previously cached (stale) value.`
         );
         // 'value' here is the last successfully fetched value, guaranteed to be T.
@@ -80,6 +83,7 @@ export const createRefreshedValue = <T>({
     } else {
       // Value is not undefined and not expired
       _logger.debug(
+        {},
         `[RefreshedValue] Value is fresh (age: ${age}ms, TTL: ${ttlMs}ms). Returning cached value.`
       );
       // 'value' is guaranteed to be T because it's not undefined and not expired.
