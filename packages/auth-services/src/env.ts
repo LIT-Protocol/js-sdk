@@ -30,7 +30,7 @@ export const env = createEnv({
       .default('3001'),
     AUTH_SERVER_HOST: z.string().default('0.0.0.0'),
     // Network & Chain
-    NETWORK: z.enum(['naga-dev', 'naga-test', 'naga']),
+    NETWORK: z.enum(['naga-dev', 'naga-test', 'naga-staging', 'naga']),
     LIT_TXSENDER_RPC_URL: z.string().url(),
     LIT_TXSENDER_PRIVATE_KEY: z.string().min(1),
     LOG_LEVEL: z.enum(['info', 'debug', 'warn', 'error']).default('info'),
