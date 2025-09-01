@@ -3,7 +3,8 @@ import { assert } from '../assertions';
 
 export const createExecuteJsTest = (
   ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any
+  getAuthContext: () => any,
+  pubkey?: string
 ) => {
   return async () => {
     const litActionCode = `
@@ -29,7 +30,7 @@ export const createExecuteJsTest = (
         message: 'Test message from e2e executeJs',
         sigName: 'e2e-test-sig',
         toSign: 'Test message from e2e executeJs',
-        publicKey: ctx.aliceViemAccountPkp.publicKey,
+        publicKey: pubkey || ctx.aliceViemAccountPkp.publicKey,
       },
     });
 
