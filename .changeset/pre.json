@@ -18,5 +18,23 @@
     "@lit-protocol/wrapped-keys": "7.0.0",
     "@lit-protocol/wrapped-keys-lit-actions": "7.0.0"
   },
-  "changesets": ["cute-bottles-ask", "cute-experts-clap", "cyan-bears-invent"]
+  "changesets": [
+    "chilly-crabs-say",
+    "cold-singers-pay",
+    "cuddly-sloths-clap",
+    "cute-bottles-ask",
+    "cute-experts-clap",
+    "cyan-bears-invent",
+    "flat-vans-find",
+    "gentle-dodos-shout",
+    "lucky-bags-crash",
+    "moody-hornets-create",
+    "orange-cows-judge",
+    "salty-rockets-try",
+    "strong-parrots-buy",
+    "tame-moose-notice",
+    "true-corners-obey",
+    "wet-birds-dream",
+    "wicked-webs-travel"
+  ]
 }

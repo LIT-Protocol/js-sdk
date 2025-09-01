@@ -1,5 +1,35 @@
 # @lit-protocol/auth
 
+## 8.0.0-beta.11
+
+### Patch Changes
+
+- Second attempt to fix webauthn. The error seems to be WebAuthnAuthenticator is missing a scope.
+
+## 8.0.0-beta.10
+
+### Patch Changes
+
+- first attempt to fix webauthn
+
+## 8.0.0-beta.9
+
+### Patch Changes
+
+- fix applied to pkp custom auth for the sign session key endpoint.
+
+## 8.0.0-beta.8
+
+### Patch Changes
+
+- naga dev beta release with keyset
+- test
+- test
+- test
+- test
+- test
+- released naga-dev keyset support. contract addresses and ABIs have been updated
+
 ## 8.0.0-beta.1
 
 ### Patch Changes
