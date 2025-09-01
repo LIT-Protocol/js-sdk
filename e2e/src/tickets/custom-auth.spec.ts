@@ -62,7 +62,7 @@ describe('Custom Auth Frontend Logic', () => {
     // ============================================================
     const validationIpfsCid = 'QmP3ZoTSGQ2P9cAZ4pBUjmPC34xbJZFRoWnCXT2SdHA2uD';
 
-    // Step 3: Mint PKPs for Users - Mint PKPs for your users using the custom auth method  
+    // Step 3: Mint PKPs for Users - Mint PKPs for your users using the custom auth method
     // type and validation CID.
     // Each user gets their own unique PKP tied to your dApp's authentication system.
     const litClient = await createLitClient({ network: nagaDev });
@@ -157,16 +157,14 @@ describe('Custom Auth Frontend Logic', () => {
 
     const signatures = await litClient.chain.raw.pkpSign({
       chain: 'ethereum',
-      signingScheme: 'EcdsaK256Sha256', // From dropdown
+      signingScheme: 'EcdsaK256Sha256',
       pubKey: alicePkpPublicKey,
       authContext: aliceAuthContext,
-      toSign: messageBytes, // UTF-8 encoded message
-
-      // 💰 Optional: Set custom maximum price you're willing to pay
-      // userMaxPrice: BigInt("1000000000000000"), // 0.001 ETH in Wei
-      // If not specified, Lit Protocol will automatically find the most optimised price
+      toSign: messageBytes,
     });
 
     console.log('signatures:', signatures);
+
+    expect(signatures).toBeDefined();
   });
 });
