@@ -3,18 +3,19 @@ import { assert } from '../assertions';
 
 export const createViewPKPsByAuthDataTest = (
   ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any
+  getAuthContext: () => any,
+  authData?: any,
 ) => {
   return async () => {
     const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
-    const authData = await ViemAccountAuthenticator.authenticate(
+    const _authData = authData ||  await ViemAccountAuthenticator.authenticate(
       ctx.aliceViemAccount
     );
 
     const pkps = await ctx.litClient.viewPKPsByAuthData({
       authData: {
-        authMethodType: authData.authMethodType,
-        authMethodId: authData.authMethodId,
+        authMethodType: _authData.authMethodType,
+        authMethodId: _authData.authMethodId,
       },
       pagination: {
         limit: 10,
