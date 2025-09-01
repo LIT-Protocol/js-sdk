@@ -31,9 +31,8 @@ export const mintPkpDoc = {
       ),
       pubkey: t.Optional(
         t.String({
-          default: '0x',
           description:
-            "Public key associated with the authentication method. This is primarily used for WebAuthn, where it should be the public key obtained from the WebAuthn registration process. For other authentication types, if this field is omitted or an empty string is provided, it will default to '0x'. If explicitly providing for non-WebAuthn, use '0x'.",
+            'For WebAuthn (type 3), pubkey is required and must be the COSE key. For other types, omit it.',
         })
       ),
       scopes: t.Optional(

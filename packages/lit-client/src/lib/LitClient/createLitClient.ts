@@ -346,11 +346,15 @@ export const _createNagaLitClient = async (
       currentHandshakeResult.threshold
     );
 
+    // console.log('custom session key result:', result);
+    // console.log('custom request id:', requestId);
+
     // 4. 🟪 Handle response
     return await networkModule.api.signCustomSessionKey.handleResponse(
       result as any,
       params.requestBody.pkpPublicKey,
-      jitContext
+      jitContext,
+      requestId
     );
   }
 

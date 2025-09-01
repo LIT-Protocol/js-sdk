@@ -17,8 +17,10 @@ export const MintPKPSchema = z
 
     // Determine pubkey based on the (potentially derived) authMethodType
     if (data.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
-      if (!data.pubkey) {
-        throw new Error('pubkey is required for WebAuthn');
+      if (!data.pubkey || data.pubkey === '0x') {
+        throw new Error(
+          `pubkey is required for WebAuthn and cannot be 0x. Received pubkey: "${data.pubkey}" and authMethodType: ${data.authMethodType}`
+        );
       }
       derivedPubkey = data.pubkey as Hex;
     } else {
