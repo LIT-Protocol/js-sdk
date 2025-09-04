@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
 import type { ExpectedAccountOrWalletClient } from '../managers/contract-manager/createContractsManager';
 import type { INetworkConfig } from '../interfaces/NetworkContext';
+import { createChainManagerFactory } from './BaseChainManagerFactory';
 
 // Shared utilities
 import { NetworkError } from '@lit-protocol/constants';
@@ -1102,56 +1103,38 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
     withOverrides: (overrides: { rpcUrl?: string }) => {
       const resolvedRpcUrl = overrides.rpcUrl ?? baseModule.getRpcUrl();
 
-      const wrapped = {
-        ...baseModule,
-
-        getRpcUrl: () => resolvedRpcUrl,
-
-        getChainConfig: () => {
-          const chain = baseModule.getChainConfig();
-          return {
-            ...chain,
-            rpcUrls: {
-              ...chain.rpcUrls,
-              default: {
-                ...chain.rpcUrls.default,
-                http: [resolvedRpcUrl],
-              },
-              ['public']: {
-                ...(chain.rpcUrls as any)['public'],
-                http: [resolvedRpcUrl],
-              },
-            },
-          } as typeof chain;
+      // Build an overridden network config and a chain manager bound to it
+      const overriddenChainConfig = {
+        ...networkConfig.chainConfig,
+        rpcUrls: {
+          ...networkConfig.chainConfig.rpcUrls,
+          default: {
+            ...networkConfig.chainConfig.rpcUrls.default,
+            http: [resolvedRpcUrl],
+          },
+          ['public']: {
+            ...(networkConfig.chainConfig.rpcUrls as any)['public'],
+            http: [resolvedRpcUrl],
+          },
         },
+      } as typeof networkConfig.chainConfig;
 
-        createStateManager: async <StateT, ModuleT>(params: {
-          callback: (params: CallbackParams) => Promise<StateT>;
-          networkModule: ModuleT;
-        }): Promise<Awaited<ReturnType<typeof createStateManager<StateT>>>> => {
-          const createReadOnlyChainManager = () => {
-            const dummyAccount = privateKeyToAccount(DEV_PRIVATE_KEY);
-            return createChainManager(dummyAccount);
-          };
+      const overriddenNetworkConfig = {
+        ...networkConfig,
+        rpcUrl: resolvedRpcUrl,
+        chainConfig: overriddenChainConfig,
+      } as typeof networkConfig;
 
-          const overriddenNetworkConfig = {
-            ...networkConfig,
-            rpcUrl: resolvedRpcUrl,
-            chainConfig: wrapped.getChainConfig(),
-          } as typeof networkConfig;
+      const createChainManagerOverridden = (account: ExpectedAccountOrWalletClient) =>
+        createChainManagerFactory(overriddenNetworkConfig, account);
 
-          return await createStateManager<StateT>({
-            networkConfig: overriddenNetworkConfig,
-            callback: params.callback,
-            networkModule: wrapped as unknown as LitNetworkModuleBase,
-            createReadOnlyChainManager,
-          });
-        },
-      } as typeof baseModule & {
-        withOverrides: (o: { rpcUrl?: string }) => any;
-      };
-
-      return wrapped;
+      // Rebuild a fresh module bound to the overridden config
+      return createBaseModule({
+        networkConfig: overriddenNetworkConfig,
+        moduleName,
+        createChainManager: createChainManagerOverridden,
+        verifyReleaseId: baseModule.getVerifyReleaseId(),
+      });
     },
   };
 
