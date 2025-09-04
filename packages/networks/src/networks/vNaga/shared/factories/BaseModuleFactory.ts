@@ -1085,6 +1085,72 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         },
       },
     },
+    /**
+     * Returns a wrapped module instance with runtime overrides while keeping the base immutable.
+     * Currently supports overriding the RPC URL used by consumers of this module.
+     *
+     * @param overrides - The overrides to apply to the module.
+     * @returns A wrapped module instance with the overrides applied.
+     * @example
+     *
+     * import { nagaDev } from '@lit-protocol/networks';
+     * const nagaDevWithOverride = nagaDev.withOverrides({ rpcUrl: 'https://custom-rpc-url.com' });
+     * const litClient = await createLitClient({ network: nagaDevWithOverride });
+     */
+    withOverrides: (overrides: { rpcUrl?: string }) => {
+      const resolvedRpcUrl = overrides.rpcUrl ?? baseModule.getRpcUrl();
+
+      const wrapped = {
+        ...baseModule,
+
+        getRpcUrl: () => resolvedRpcUrl,
+
+        getChainConfig: () => {
+          const chain = baseModule.getChainConfig();
+          return {
+            ...chain,
+            rpcUrls: {
+              ...chain.rpcUrls,
+              default: {
+                ...chain.rpcUrls.default,
+                http: [resolvedRpcUrl],
+              },
+              ['public']: {
+                ...(chain.rpcUrls as any)['public'],
+                http: [resolvedRpcUrl],
+              },
+            },
+          } as typeof chain;
+        },
+
+        createStateManager: async <StateT, ModuleT>(params: {
+          callback: (params: CallbackParams) => Promise<StateT>;
+          networkModule: ModuleT;
+        }): Promise<Awaited<ReturnType<typeof createStateManager<StateT>>>> => {
+          const createReadOnlyChainManager = () => {
+            const dummyAccount = privateKeyToAccount(DEV_PRIVATE_KEY);
+            return createChainManager(dummyAccount);
+          };
+
+          const overriddenNetworkConfig = {
+            ...networkConfig,
+            rpcUrl: resolvedRpcUrl,
+            chainConfig: wrapped.getChainConfig(),
+          } as typeof networkConfig;
+
+          return await createStateManager<StateT>({
+            networkConfig: overriddenNetworkConfig,
+            callback: params.callback,
+            networkModule: wrapped as unknown as LitNetworkModuleBase,
+            createReadOnlyChainManager,
+          });
+        },
+      } as typeof baseModule & {
+        withOverrides: (o: { rpcUrl?: string }) => any;
+      };
+
+      return wrapped;
+    },
   };
 
   return baseModule;

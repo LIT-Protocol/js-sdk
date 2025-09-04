@@ -10,9 +10,9 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
-import type {
-  LitNetworkModule,
-  PKPStorageProvider,
+import {
+  type LitNetworkModule,
+  type PKPStorageProvider,
 } from '@lit-protocol/networks';
 import {
   AuthContextSchema2,
