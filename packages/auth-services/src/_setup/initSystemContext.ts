@@ -15,7 +15,13 @@ declare global {
   };
 }
 
-export async function initSystemContext({ appName }: { appName: string }) {
+export async function initSystemContext({
+  appName,
+  rpcUrl,
+}: {
+  appName: string;
+  rpcUrl?: string;
+}) {
   console.log('🔥 [initSystemContext] Initializing system context...');
 
   let networkModule: any;
@@ -34,8 +40,14 @@ export async function initSystemContext({ appName }: { appName: string }) {
     throw new Error(`Unsupported network: ${env.NETWORK}`);
   }
 
+  // Apply runtime override if rpcUrl provided
+  const effectiveModule =
+    rpcUrl && typeof networkModule.withOverrides === 'function'
+      ? networkModule.withOverrides({ rpcUrl })
+      : networkModule;
+
   const litClient = await createLitClient({
-    network: networkModule,
+    network: effectiveModule,
   });
 
   const account = privateKeyToAccount(env.LIT_TXSENDER_PRIVATE_KEY as Hex);
