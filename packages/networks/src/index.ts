@@ -39,3 +39,15 @@ export type { PKPStorageProvider } from './storage/types';
 
 // Schema types
 export type { MintRequestRaw } from './networks/vNaga/shared/managers/LitChainClient/schemas/MintRequestSchema';
+
+// ----- re-exports for SDK consumers
+export type { ExpectedAccountOrWalletClient } from './networks/vNaga/shared/managers/contract-manager/createContractsManager';
+export { PKPPermissionsManager } from './networks/vNaga/shared/managers/LitChainClient/apis/highLevelApis/PKPPermissionsManager';
+export { PaymentManager } from './networks/vNaga/shared/managers/LitChainClient/apis/highLevelApis/PaymentManager/PaymentManager';
+export type {
+  GenericTxRes,
+  LitTxRes,
+} from './networks/vNaga/shared/managers/LitChainClient/apis/types';
+export type { PKPData } from './networks/vNaga/shared/managers/LitChainClient/schemas/shared/PKPDataSchema';
+export type { AuthMethod } from './networks/vNaga/shared/managers/LitChainClient/apis/highLevelApis/PKPPermissionsManager/handlers/getPermissionsContext';
+export type { PkpIdentifierRaw } from './networks/vNaga/shared/managers/LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
