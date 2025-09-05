@@ -898,7 +898,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         handleResponse: async (
           result: z.infer<typeof GenericEncryptedPayloadSchema>,
           pkpPublicKey: Hex | string,
-          jitContext: NagaJitContext
+          jitContext: NagaJitContext,
+          requestId?: string
         ) => {
           if (!result.success) {
             E2EERequestManager.handleEncryptedError(

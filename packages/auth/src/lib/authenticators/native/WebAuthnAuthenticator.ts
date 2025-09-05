@@ -149,6 +149,7 @@ export class WebAuthnAuthenticator {
   public static async registerAndMintPKP(params: {
     username?: string;
     authServiceBaseUrl: string;
+    scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
   }): Promise<{
     pkpInfo: PKPData;
 
@@ -183,6 +184,7 @@ export class WebAuthnAuthenticator {
       authMethodType: AUTH_METHOD_TYPE.WebAuthn,
       authMethodId: authMethodId,
       pubkey: authMethodPubkey,
+      scopes: params.scopes,
     };
 
     // Immediate mint a new PKP to associate with the auth method

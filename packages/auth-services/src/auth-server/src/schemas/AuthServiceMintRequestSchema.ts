@@ -28,6 +28,7 @@ export type AuthServiceMintRequestTransformed = z.infer<
 export const tAuthServiceMintRequestSchema = t.Object({
   authMethodType: t.String(),
   authMethodId: t.String(),
+  pubkey: t.Optional(t.String()),
   pubkey: t.Optional(t.String({ default: '0x' })),
   scopes: t.Optional(
     t.Array(

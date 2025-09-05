@@ -350,7 +350,8 @@ export const _createNagaLitClient = async (
     return await networkModule.api.signCustomSessionKey.handleResponse(
       result as any,
       params.requestBody.pkpPublicKey,
-      jitContext
+      jitContext,
+      requestId
     );
   }
 

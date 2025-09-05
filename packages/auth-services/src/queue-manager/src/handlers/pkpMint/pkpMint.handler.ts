@@ -14,7 +14,18 @@ export async function handlePkpMintTask(jobData: {
     pubkey: Hex;
     scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
   };
+  reqId?: string;
 }): Promise<any> {
+  if (
+    // AUTH_METHOD_TYPE.WebAuthn = 3 (without importing the constants package)
+    Number(jobData.requestBody.authMethodType) === 3 &&
+    (!jobData.requestBody.pubkey || jobData.requestBody.pubkey === '0x')
+  ) {
+    throw new Error(
+      `[PKP Mint][HANDLER] WebAuthn requires a non-empty COSE pubkey; got '${jobData.requestBody.pubkey}'. reqId=${jobData.reqId}`
+    );
+  }
+
   const userAuthData: Optional<AuthData, 'accessToken'> = {
     authMethodId: jobData.requestBody.authMethodId,
     authMethodType: Number(jobData.requestBody.authMethodType),
