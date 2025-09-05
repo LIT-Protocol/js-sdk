@@ -1,5 +1,29 @@
 # @lit-protocol/auth-helpers
 
+## 8.0.0-beta.15
+
+### Patch Changes
+
+- withOverrides no longer monkey-patches methods nor wraps every chain API. It now builds an overridden networkConfig with the resolved RPC URL and a cloned chainConfig whose rpcUrls.default.http and rpcUrls['public'].http use the override. So all downstream consumers (state manager, chain APIs, contracts) automatically use the overridden RPC via the standard construction path. No per-method wrapping needed.
+
+## 8.0.0-beta.14
+
+### Patch Changes
+
+- fix "any" return types due to the return/param types are not imported/re-exported from the public entry points. Here are the Affected methods mintWithEoa mintWithAuth mintWithCustomAuth getPKPPermissionsManager getPaymentManager viewPKPPermissions
+
+## 8.0.0-beta.13
+
+### Patch Changes
+
+- fix auth server to override default RPC URL
+
+## 8.0.0-beta.12
+
+### Patch Changes
+
+- added .withOverrides method to override the RPC URL in the network module.
+
 ## 8.0.0-beta.11
 
 ### Patch Changes

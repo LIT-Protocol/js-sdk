@@ -35,6 +35,7 @@ export const SigningChainSchema = z.enum([
   'bitcoin',
   'cosmos',
   'solana',
+  // 'custom',
 ]);
 
 /**

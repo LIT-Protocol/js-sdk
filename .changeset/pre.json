@@ -19,6 +19,7 @@
     "@lit-protocol/wrapped-keys-lit-actions": "7.0.0"
   },
   "changesets": [
+    "afraid-moons-go",
     "chilly-crabs-say",
     "cold-singers-pay",
     "cuddly-sloths-clap",
@@ -26,10 +27,13 @@
     "cute-experts-clap",
     "cyan-bears-invent",
     "flat-vans-find",
+    "flat-waves-cross",
     "gentle-dodos-shout",
+    "large-readers-wonder",
     "lucky-bags-crash",
     "moody-hornets-create",
     "orange-cows-judge",
+    "rich-cows-start",
     "salty-rockets-try",
     "strong-parrots-buy",
     "tame-moose-notice",
