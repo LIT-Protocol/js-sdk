@@ -182,9 +182,9 @@ const handleEncryptedError = (
 
       throw new Error(
         `"${operationName}" failed. The nodes returned an encrypted error response that could not be decrypted. ` +
-          `This may indicate a configuration or network connectivity issue. ${JSON.stringify(
-            errorResult
-          )}`
+        `This may indicate a configuration or network connectivity issue. ${JSON.stringify(
+          errorResult
+        )}. If you are running custom session sigs, it might mean the validation has failed. We will continue to improve this error message to provide more information.`
       );
     }
   } else {
