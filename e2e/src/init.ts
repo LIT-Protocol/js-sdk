@@ -109,7 +109,21 @@ export const init = async (
 
   // Dynamic import of network module
   const networksModule = await import('@lit-protocol/networks');
-  const _networkModule = networksModule[config.importName];
+  const _baseNetworkModule = networksModule[config.importName];
+
+  // Optional RPC override from env
+  const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  const _networkModule =
+    rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
+      ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
+      : _baseNetworkModule;
+
+  if (rpcOverride) {
+    console.log(
+      '✅ Using RPC override (LIT_YELLOWSTONE_PRIVATE_RPC_URL):',
+      rpcOverride
+    );
+  }
 
   // Fund accounts based on network type
   const isLocal = config.type === 'local';

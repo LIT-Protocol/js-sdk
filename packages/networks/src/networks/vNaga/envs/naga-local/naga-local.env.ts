@@ -21,7 +21,7 @@ export class NagaLocalEnvironment extends BaseNetworkEnvironment<
   NagaLocalSignatures,
   NagaLocalSpecificConfigs
 > {
-  constructor() {
+  constructor(options?: { rpcUrlOverride?: string }) {
     super({
       network: NETWORK,
       abiSignatures: signatures, // Note: Uses locally generated signatures
@@ -36,15 +36,25 @@ export class NagaLocalEnvironment extends BaseNetworkEnvironment<
       minimumThreshold: MINIMUM_THRESHOLD,
       httpProtocol: PROTOCOL, // Note: HTTP not HTTPS
       requiredAttestation: false,
+      rpcUrlOverride: options?.rpcUrlOverride,
     });
   }
 
-  protected getRpcUrl(): string {
-    return chainInfo.RPC_URL; // Note: Uses Anvil instead of ChronicleYellowstone
+  protected getRpcUrl(overrideRpc?: string): string {
+    return overrideRpc ?? chainInfo.RPC_URL; // Note: Uses Anvil instead of ChronicleYellowstone
   }
 
-  protected getChainConfig(): Chain {
-    return chainInfo.viemChainConfig; // Note: Anvil chain config
+  protected getChainConfig(overrideRpc?: string): Chain {
+    const rpc = overrideRpc ?? chainInfo.RPC_URL;
+    const base = chainInfo.viemChainConfig; // Note: Anvil chain config
+    return {
+      ...base,
+      rpcUrls: {
+        ...base.rpcUrls,
+        default: { ...base.rpcUrls.default, http: [rpc] },
+        public: { ...(base.rpcUrls as any)['public'], http: [rpc] },
+      },
+    } as Chain;
   }
 
   protected getEndpoints(): NagaEndpointsType {
