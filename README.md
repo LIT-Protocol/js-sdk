@@ -5,13 +5,7 @@
   <br/>
   <a href="https://x.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a> <a href="https://t.me/+aa73FAF9Vp82ZjJh"><img src="https://img.shields.io/badge/Telegram-blue?logo=telegram&style=social"/></a> <a href="https://litgateway.com/discord"><img src="https://img.shields.io/badge/Discord-blue?logo=discord&style=social"/></a>
   
-  
-  <br/>
-  <br/>
-
   <p align="center">
-    A comprehensive suite of tools for blockchain integration, authentication, and NFT functionality
-    <br />
     <br />
     <a href="https://litprotocol.mintlify.app/"><strong>Explore the docs »</strong></a> | 
     <br />
