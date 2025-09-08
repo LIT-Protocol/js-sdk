@@ -11,7 +11,10 @@ interface ParsedRedisConnectionOpts {
 }
 
 export async function startAuthServiceWorker() {
-  await initSystemContext({ appName: 'auth-services-worker', rpcUrl: env.LIT_TXSENDER_RPC_URL });
+  await initSystemContext({
+    appName: 'auth-services-worker',
+    rpcUrl: env.LIT_TXSENDER_RPC_URL,
+  });
   console.log('------------------------------------------------------');
   console.log(' Attempting to start Generic BullMQ Worker Process... ');
   console.log('------------------------------------------------------');

@@ -33,7 +33,6 @@ const config: Config = {
 
   // Resolve monorepo packages to sources
   moduleNameMapper: {
-
     // Local packages
     [`^@lit-protocol/(${localPackages.join('|')})/lib/(.*)$`]:
       '<rootDir>/packages/$1/src/lib/$2',
