@@ -1,6 +1,5 @@
 import { ConnectionOptions, Queue } from 'bullmq';
 import { JSONStringify as BigIntStringify } from 'json-with-bigint';
-import { v4 as uuidv4 } from 'uuid';
 import { env } from '../../env';
 import { parseRedisUrl } from './helper/redisUrlParser';
 import { JobName } from './jobRegistry';
@@ -20,7 +19,7 @@ export const addJob = async (
   jobData: { requestBody: any }
 ) => {
   const job = await mainAppQueue.add(jobName, jobData, {
-    jobId: uuidv4(),
+    jobId: crypto.randomUUID(),
   });
 
   console.log(`[BullMQ] Job ${job.id} added to queue ${mainAppQueue.name}`);
