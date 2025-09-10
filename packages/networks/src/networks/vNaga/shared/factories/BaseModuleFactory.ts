@@ -423,6 +423,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         authData: AuthData;
         authServiceBaseUrl?: string;
         scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+        apiKey?: string;
       }) => {
         return await handleAuthServerRequest<PKPData>({
           jobName: 'PKP Minting',
@@ -436,6 +437,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             pubkey: params.authData.publicKey,
             scopes: params.scopes,
           },
+          headers: params.apiKey ? { 'x-api-key': params.apiKey } : undefined,
         });
       },
     },

@@ -56,6 +56,7 @@ const handleAuthServerRequest = async <T>(params: {
   path: '/pkp/mint';
   body: any;
   jobName: string;
+  headers?: Record<string, string>;
 }): Promise<AuthServerTx<T>> => {
   const _body = JSON.stringify(params.body);
   const _url = `${params.serverUrl}${params.path}`;
@@ -64,6 +65,7 @@ const handleAuthServerRequest = async <T>(params: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(params.headers || {}),
     },
     body: _body,
   });
@@ -150,6 +152,7 @@ export class WebAuthnAuthenticator {
     username?: string;
     authServiceBaseUrl: string;
     scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+    apiKey?: string;
   }): Promise<{
     pkpInfo: PKPData;
 
@@ -193,6 +196,7 @@ export class WebAuthnAuthenticator {
       serverUrl: params.authServiceBaseUrl,
       path: '/pkp/mint',
       body: authData,
+      headers: params.apiKey ? { 'x-api-key': params.apiKey } : undefined,
     });
 
     return {
