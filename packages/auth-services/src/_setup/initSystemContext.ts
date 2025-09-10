@@ -29,6 +29,31 @@ export async function initSystemContext({ appName }: { appName: string }) {
   else if (env.NETWORK === 'naga-staging') networkModule = nagaStaging;
   else throw new Error(`Unsupported network: ${env.NETWORK}`);
 
+  const overrideRpc = rpcUrl || env.LIT_TXSENDER_RPC_URL;
+
+  // Apply runtime override if rpcUrl provided
+  const effectiveModule =
+    overrideRpc && typeof networkModule.withOverrides === 'function'
+      ? networkModule.withOverrides({ rpcUrl: overrideRpc })
+      : networkModule;
+
+  try {
+    const baseRpc =
+      typeof networkModule.getRpcUrl === 'function'
+        ? networkModule.getRpcUrl()
+        : 'n/a';
+    const effRpc =
+      typeof effectiveModule.getRpcUrl === 'function'
+        ? effectiveModule.getRpcUrl()
+        : 'n/a';
+    console.log(
+      '[initSystemContext] RPC (base → effective):',
+      baseRpc,
+      '→',
+      effRpc
+    );
+  } catch {}
+
   const litClient = await createLitClient({
     network: networkModule,
   });
