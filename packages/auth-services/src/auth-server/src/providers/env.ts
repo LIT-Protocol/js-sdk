@@ -1,4 +1,28 @@
 import 'dotenv/config';
+import { createEnv } from '@t3-oss/env-core';
+import { z } from 'zod';
+
+export const env = createEnv({
+  server: {
+    AUTH_SERVER_PORT: z.coerce.number().int().positive().default(3000),
+    AUTH_SERVER_HOST: z.string().min(1).default('0.0.0.0'),
+    NETWORK: z.string().min(1).optional(),
+    LIT_TXSENDER_RPC_URL: z.string().url().optional(),
+    LIT_TXSENDER_PRIVATE_KEY: z.string().min(1).optional(),
+    ENABLE_API_KEY_GATE: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((v) => v === 'true'),
+    REDIS_URL: z.string().url().optional(),
+    STYTCH_PROJECT_ID: z.string().min(1).optional(),
+    STYTCH_SECRET: z.string().min(1).optional(),
+    MAX_REQUESTS_PER_WINDOW: z.coerce.number().int().positive().default(60),
+    WINDOW_MS: z.coerce.number().int().positive().default(60_000),
+  },
+  clientPrefix: 'PUBLIC_',
+  client: {},
+  runtimeEnv: process.env,
+});
 
 export type AppConfig = {
   authServerPort: number;
@@ -12,32 +36,4 @@ export type AppConfig = {
   stytchSecretKey?: string;
   maxRequestsPerWindow: number;
   windowMs: number;
-};
-
-export const loadEnv = (overrides: Partial<AppConfig> = {}): AppConfig => {
-  const parsedPort = Number(process.env['AUTH_SERVER_PORT'] || 3000);
-  const parsedWindowMs = Number(process.env['WINDOW_MS'] || 60_000);
-  const parsedMaxReqs = Number(process.env['MAX_REQUESTS_PER_WINDOW'] || 60);
-
-  return {
-    authServerPort: overrides.authServerPort ?? parsedPort,
-    authServerHost:
-      overrides.authServerHost ??
-      (process.env['AUTH_SERVER_HOST'] || '0.0.0.0'),
-    network: overrides.network ?? process.env['NETWORK'],
-    litTxsenderRpcUrl:
-      overrides.litTxsenderRpcUrl ?? process.env['LIT_TXSENDER_RPC_URL'],
-    litTxsenderPrivateKey:
-      overrides.litTxsenderPrivateKey ??
-      process.env['LIT_TXSENDER_PRIVATE_KEY'],
-    enableApiKeyGate:
-      overrides.enableApiKeyGate ??
-      process.env['ENABLE_API_KEY_GATE'] === 'true',
-    redisUrl: overrides.redisUrl ?? process.env['REDIS_URL'],
-    stytchProjectId:
-      overrides.stytchProjectId ?? process.env['STYTCH_PROJECT_ID'],
-    stytchSecretKey: overrides.stytchSecretKey ?? process.env['STYTCH_SECRET'],
-    maxRequestsPerWindow: overrides.maxRequestsPerWindow ?? parsedMaxReqs,
-    windowMs: overrides.windowMs ?? parsedWindowMs,
-  };
 };

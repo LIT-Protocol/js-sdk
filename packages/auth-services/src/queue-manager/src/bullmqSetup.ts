@@ -1,11 +1,12 @@
 import { ConnectionOptions, Queue } from 'bullmq';
+import { env } from '../../env';
+import { parseRedisUrl } from './helper/redisUrlParser';
+import { JobName } from './jobRegistry';
+
 const BigIntStringify = (obj: any) =>
   JSON.stringify(obj, (_key, value) =>
     typeof value === 'bigint' ? value.toString() : value
   );
-import { env } from '../../env';
-import { parseRedisUrl } from './helper/redisUrlParser';
-import { JobName } from './jobRegistry';
 
 export const mainQueueName = 'pkpAuthServiceQueue';
 

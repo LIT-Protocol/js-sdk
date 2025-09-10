@@ -1,7 +1,10 @@
 import express, { Express } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
 import { OAuth2Client } from 'google-auth-library';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export type LoginAppConfig = {
   origin: string;
@@ -27,8 +30,15 @@ export const createLoginApp = (config: LoginAppConfig): Express => {
   );
 
   const app = express();
-  app.use(helmet());
   app.use(cors({ origin: true, credentials: true }));
+
+  const staticDir = path.join(__dirname, 'public'); 
+  app.use(express.static(staticDir, { index: 'index.html', maxAge: '1h' }));
+
+  // error page /error goes to /error.html
+  app.get('/error', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'error.html'));
+  });
 
   app.get('/auth/google', (req, res) => {
     const appRedirect = req.query['app_redirect'] as string;
