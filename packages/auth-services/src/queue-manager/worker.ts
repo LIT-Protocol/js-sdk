@@ -1,5 +1,5 @@
 import { initSystemContext } from '../_setup/initSystemContext';
-import { bullmqConnectionOptions, mainQueueName } from './src/bullmqSetup';
+import { mainQueueName, setBullmqRedisUrl } from './src/bullmqSetup';
 import { createGenericWorker } from './src/genericWorker';
 import { env } from '../env';
 
@@ -10,33 +10,23 @@ interface ParsedRedisConnectionOpts {
   db?: number;
 }
 
-export async function startAuthServiceWorker() {
+export async function startAuthServiceWorker(params?: {
+  litTxsenderRpcUrl?: string;
+  redisUrl?: string;
+}) {
   await initSystemContext({
     appName: 'auth-services-worker',
-    rpcUrl: env.LIT_TXSENDER_RPC_URL,
+    rpcUrl: params?.litTxsenderRpcUrl ?? env.LIT_TXSENDER_RPC_URL,
   });
+  if (params?.redisUrl) {
+    setBullmqRedisUrl(params.redisUrl);
+  }
   console.log('------------------------------------------------------');
   console.log(' Attempting to start Generic BullMQ Worker Process... ');
   console.log('------------------------------------------------------');
   console.log(`✅ [WorkerProcess] Main Queue Name: "${mainQueueName}"`);
 
-  // Log connection options safely
-  if (
-    typeof bullmqConnectionOptions === 'object' &&
-    bullmqConnectionOptions !== null
-  ) {
-    const opts = bullmqConnectionOptions as ParsedRedisConnectionOpts;
-    console.log(
-      `✅ [WorkerProcess] Parsed Redis Connection Host: ${opts.host || 'N/A'}`
-    );
-    console.log(
-      `✅ [WorkerProcess] Parsed Redis Connection Port: ${opts.port || 'N/A'}`
-    );
-  } else {
-    console.log(
-      `❌ [WorkerProcess] BullMQ Connection Options are not in the expected object format (e.g., could be a string if supported).`
-    );
-  }
+  // Connection options are internalised; skipping detailed logs
 
   try {
     const workerInstance = createGenericWorker();
@@ -59,13 +49,3 @@ export async function startAuthServiceWorker() {
     process.exit(1); // Exit if worker setup fails critically
   }
 }
-
-(async () => {
-  await startAuthServiceWorker();
-})().catch((error) => {
-  console.error(
-    '[WorkerProcess] Unhandled error during worker startup sequence:',
-    error
-  );
-  process.exit(1);
-});

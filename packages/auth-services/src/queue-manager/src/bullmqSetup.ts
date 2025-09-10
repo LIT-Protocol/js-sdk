@@ -1,14 +1,63 @@
 import { ConnectionOptions, Queue } from 'bullmq';
-import { JSONStringify as BigIntStringify } from 'json-with-bigint';
+const BigIntStringify = (obj: any) =>
+  JSON.stringify(obj, (_key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  );
 import { env } from '../../env';
 import { parseRedisUrl } from './helper/redisUrlParser';
 import { JobName } from './jobRegistry';
 
 export const mainQueueName = 'pkpAuthServiceQueue';
 
-export const bullmqConnectionOptions: ConnectionOptions = parseRedisUrl(
-  env.REDIS_URL
-);
+let bullmqConnectionOptions: ConnectionOptions = parseRedisUrl(env.REDIS_URL);
+
+export const setBullmqRedisUrl = (redisUrl: string) => {
+  bullmqConnectionOptions = parseRedisUrl(redisUrl);
+  if (mainAppQueueInstance) {
+    console.warn(
+      '[BullMQ] Redis URL changed after queue initialisation; new connections will use the updated URL. Existing queue instance not re-created.'
+    );
+  }
+};
+
+export const getBullmqConnectionOptions = (): ConnectionOptions =>
+  bullmqConnectionOptions;
+
+let mainAppQueueInstance: Queue | null = null;
+
+export const getMainAppQueue = (): Queue => {
+  if (!mainAppQueueInstance) {
+    mainAppQueueInstance = new Queue(mainQueueName, {
+      connection: bullmqConnectionOptions,
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+        removeOnComplete: {
+          count: 1000,
+          age: 3600 * 24 * 7,
+        },
+        removeOnFail: {
+          count: 5000,
+          age: 3600 * 24 * 30,
+        },
+      },
+    });
+
+    mainAppQueueInstance.on('error', (error) => {
+      console.error(`BullMQ Queue (${mainQueueName}) Error:`, error);
+    });
+
+    console.log(
+      `BullMQ main queue (${mainQueueName}) initialized using Redis options derived from: ${JSON.stringify(
+        bullmqConnectionOptions
+      )}`
+    );
+  }
+  return mainAppQueueInstance;
+};
 
 export const addJob = async (
   jobName: JobName,
@@ -18,17 +67,19 @@ export const addJob = async (
    */
   jobData: { requestBody: any }
 ) => {
-  const job = await mainAppQueue.add(jobName, jobData, {
+  const job = await getMainAppQueue().add(jobName, jobData, {
     jobId: crypto.randomUUID(),
   });
 
-  console.log(`[BullMQ] Job ${job.id} added to queue ${mainAppQueue.name}`);
+  console.log(
+    `[BullMQ] Job ${job.id} added to queue ${getMainAppQueue().name}`
+  );
 
   return job;
 };
 
 export const getJobStatus = async (jobId: string) => {
-  const job = await mainAppQueue.getJob(jobId);
+  const job = await getMainAppQueue().getJob(jobId);
 
   if (!job) {
     return new Response(BigIntStringify({ error: 'Job not found.' }), {
@@ -53,30 +104,3 @@ export const getJobStatus = async (jobId: string) => {
 
   return responsePayload;
 };
-
-export const mainAppQueue = new Queue(mainQueueName, {
-  connection: bullmqConnectionOptions,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 5000,
-    },
-    removeOnComplete: {
-      count: 1000,
-      age: 3600 * 24 * 7,
-    },
-    removeOnFail: {
-      count: 5000,
-      age: 3600 * 24 * 30,
-    },
-  },
-});
-
-mainAppQueue.on('error', (error) => {
-  console.error(`BullMQ Queue (${mainQueueName}) Error:`, error);
-});
-
-console.log(
-  `BullMQ main queue (${mainQueueName}) initialized using Redis options derived from: ${env.REDIS_URL}`
-);

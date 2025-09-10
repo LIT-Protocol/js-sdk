@@ -1,6 +1,6 @@
 import { getChildLogger } from '@lit-protocol/logger';
 import { Worker } from 'bullmq';
-import { bullmqConnectionOptions, mainQueueName } from './bullmqSetup';
+import { getBullmqConnectionOptions, mainQueueName } from './bullmqSetup';
 import { JobName, jobRegistry } from './jobRegistry';
 
 const logger = getChildLogger({
@@ -54,8 +54,8 @@ export function createGenericWorker() {
       }
     },
     {
-      connection: bullmqConnectionOptions,
-      concurrency: parseInt(process.env.WORKER_CONCURRENCY || '5', 10),
+      connection: getBullmqConnectionOptions(),
+      concurrency: parseInt(process.env['WORKER_CONCURRENCY'] || '5', 10),
     }
   );
 

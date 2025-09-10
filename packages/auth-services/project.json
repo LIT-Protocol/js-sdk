@@ -16,11 +16,16 @@
       },
       "dependsOn": ["^build"]
     },
-    "check-deps": {
+    "serve:auth": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "depcheck",
-        "cwd": "packages/auth-services"
+        "command": "tsx watch packages/auth-services/src/auth-server/src/index.ts"
+      }
+    },
+    "serve:login": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx watch packages/auth-services/src/login-server/index.ts"
       }
     },
     "publish": {

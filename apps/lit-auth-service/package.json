@@ -1,5 +1,6 @@
 {
   "name": "lit-auth-service",
+  "type": "module",
   "module": "index.ts",
   "devDependencies": {
     "@types/bun": "^1.2.15",
@@ -12,13 +13,10 @@
   },
   "private": true,
   "scripts": {
-    "validate-deps": "npm ls --depth=0 || true",
-    "start": "bun run validate-deps && bun run ./index.ts",
+    "start": "dotenvx run --env-file=.env tsx index.ts",
     "reset": "rimraf package-lock.json bun.lock node_modules"
   },
-  "type": "module",
   "dependencies": {
-    "@lit-protocol/auth-services": "1.0.0-alpha.13",
-    "@t3-oss/env-core": "^0.13.6"
+    "@lit-protocol/auth-services": "workspace:*"
   }
 }
