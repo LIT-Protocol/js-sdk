@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "reset": "rimraf dist pnpm-lock.yaml node_modules tmp yarn-error.log yarn.lock package-lock.json learn-debug.log .nx lit-auth-storage pkp-tokens lit-auth-local ./e2e/dist ./e2e/node_modules",
-    "build": "nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions && npm run prettier",
+    "build": "nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions",
     "build:affected": "nx affected --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions",
     "check-deps": "npx nx run-many --target=check-deps --exclude=wrapped-keys,wrapped-keys-lit-actions",
     "validate": "npm run check-deps && npm run build",

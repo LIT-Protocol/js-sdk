@@ -44,14 +44,16 @@ async function tryEnhanceLoggerForNode() {
   if (isNodeEnvironment) {
     try {
       // Dynamically import pino-caller. This prevents it from being in browser bundles.
-      const pinoCallerModule = await import('pino-caller');
-      // Handle potential differences in how CJS modules are exposed via dynamic import
-      const pinoCallerWrapper = pinoCallerModule.default || pinoCallerModule;
+      const pinoCallerModule: any = await import('pino-caller');
+      // Handle potential differences in how CJS modules are exposed via dynamic import and avoid type mismatches
+      const pinoCallerWrapper: (logger: any) => any =
+        (pinoCallerModule && (pinoCallerModule.default || pinoCallerModule)) ||
+        ((l: any) => l);
 
       // Create a new pino instance specifically for pino-caller to wrap.
       // This ensures pino-caller operates on a logger with the correct Node.js settings.
       const nodeBaseLogger = pino({ level: getLogLevel() });
-      logger = pinoCallerWrapper(nodeBaseLogger); // Reassign the exported logger
+      logger = pinoCallerWrapper(nodeBaseLogger) as unknown as PinoLogger; // Reassign the exported logger
     } catch (e) {
       // If pino-caller fails to load, the basic pino logger for Node.js (already set) will be used.
       // You could add a log message here if desired, e.g., using console.error
