@@ -1,4 +1,3 @@
-import { t } from 'elysia';
 import { z } from 'zod';
 
 /**
@@ -23,19 +22,3 @@ export type AuthServiceMintRequestRaw = z.input<
 export type AuthServiceMintRequestTransformed = z.infer<
   typeof AuthServiceMintRequestSchema
 >;
-
-// Elysia Schema for runtime validation
-export const tAuthServiceMintRequestSchema = t.Object({
-  authMethodType: t.String(),
-  authMethodId: t.String(),
-  pubkey: t.Optional(t.String({ default: '0x' })),
-  scopes: t.Optional(
-    t.Array(
-      t.Union([
-        t.Literal('sign-anything'),
-        t.Literal('personal-sign'),
-        t.Literal('no-permissions'),
-      ])
-    )
-  ),
-});
