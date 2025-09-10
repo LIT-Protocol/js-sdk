@@ -9,11 +9,25 @@ import { registerStytchRoutes } from './routes/auth/stytch.express';
 import { registerWebAuthnRoutes } from './routes/auth/webauthn.express';
 import { apiKeyGate } from '../middleware/apiKeyGate.express';
 import { logger, requestLogger } from './providers/logger';
-import { loadEnv, AppConfig } from './providers/env';
+import { env, AppConfig } from './providers/env';
 import { createStytchClient } from './providers/stytch';
 
 export const createApp = (config?: Partial<AppConfig>): Express => {
-  const cfg = loadEnv(config);
+  const cfg: AppConfig = {
+    authServerPort: config?.authServerPort ?? env.AUTH_SERVER_PORT,
+    authServerHost: config?.authServerHost ?? env.AUTH_SERVER_HOST,
+    network: config?.network ?? env.NETWORK,
+    litTxsenderRpcUrl: config?.litTxsenderRpcUrl ?? env.LIT_TXSENDER_RPC_URL,
+    litTxsenderPrivateKey:
+      config?.litTxsenderPrivateKey ?? env.LIT_TXSENDER_PRIVATE_KEY,
+    enableApiKeyGate: config?.enableApiKeyGate ?? env.ENABLE_API_KEY_GATE,
+    redisUrl: config?.redisUrl ?? env.REDIS_URL,
+    stytchProjectId: config?.stytchProjectId ?? env.STYTCH_PROJECT_ID,
+    stytchSecretKey: config?.stytchSecretKey ?? env.STYTCH_SECRET,
+    maxRequestsPerWindow:
+      config?.maxRequestsPerWindow ?? env.MAX_REQUESTS_PER_WINDOW,
+    windowMs: config?.windowMs ?? env.WINDOW_MS,
+  };
 
   const app = express();
   app.use(helmet());

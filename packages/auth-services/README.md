@@ -1,47 +1,73 @@
-# PKP Auth Service
+# PKP Auth Services
 
-This package contains the PKP Authentication Service for the Lit Protocol.
+This package contains the PKP Authentication Services & Login Server for the Lit Protocol.
 
-## Running (pnpm + Nx)
+# Auth Server
 
-Development targets:
+## Getting started
 
-```bash
-pnpm nx run auth-services:serve:auth    # Auth server
-pnpm nx run auth-services:serve:login   # Login server
+```shell
+pnpm install @lit-protocol/auth-services
 ```
 
-Build:
+### Usage
 
-```bash
-pnpm nx run auth-services:build
+```ts
+import { createLitAuthServer } from '@lit-protocol/auth-services';
+import { startAuthServiceWorker } from '@lit-protocol/auth-services';
+
+const litAuthServer = createLitAuthServer({
+  port: Number(3001),
+  host: '0.0.0.0',
+  network: process.env['NETWORK'],
+  litTxsenderRpcUrl: process.env['LIT_TXSENDER_RPC_URL'] as string,
+  litTxsenderPrivateKey: process.env['LIT_TXSENDER_PRIVATE_KEY'],
+  enableApiKeyGate: true,
+  stytchProjectId: process.env['STYTCH_PROJECT_ID'],
+  stytchSecretKey: process.env['STYTCH_SECRET'],
+  maxRequestsPerWindow: Number(process.env['MAX_REQUESTS_PER_WINDOW']),
+  windowMs: Number(process.env['WINDOW_MS']),
+  redisUrl: process.env['REDIS_URL'] as string,
+});
+
+// Start the auth server
+await litAuthServer.start();
+
+// Requires REDIS_URL
+await startAuthServiceWorker({
+  litTxsenderRpcUrl: process.env['LIT_TXSENDER_RPC_URL'] as string,
+  redisUrl: process.env['REDIS_URL'] as string,
+});
 ```
 
-## No static UI
+# Login Server
 
-This package no longer serves static pages. Clients must provide their own UI and pass a return URL via the `app_redirect` query parameter when starting an OAuth flow.
+## Getting started
 
-## OAuth flow (headless)
-
-1. Start a provider flow by redirecting the user to:
-
-```
-GET {ORIGIN}/auth/google?state={STATE}&app_redirect={ENCODED_RETURN_URL}&caller={OPTIONAL}
-GET {ORIGIN}/auth/discord?state={STATE}&app_redirect={ENCODED_RETURN_URL}&caller={OPTIONAL}
+```shell
+pnpm install @lit-protocol/auth-services
 ```
 
-2. On callback, the server will redirect the user to your `app_redirect` URL:
+### Usage
 
-- Google success: `?provider=google&id_token=...&access_token=...&state=...&caller=...`
-- Discord success: `?provider=discord&access_token=...&state=...&caller=...`
-- Error (both): `?error={error_code}`
+```ts
+import { createLitLoginServer } from '@lit-protocol/auth-services';
 
-If the initial request is invalid or misconfigured, the endpoints respond with JSON errors (HTTP 400/500) rather than serving HTML.
+const litLoginServer = createLitLoginServer({
+  port: Number(process.env['LOGIN_SERVER_PORT']),
+  host: process.env['LOGIN_SERVER_HOST'],
+  stateExpirySeconds: 30,
+  socialProviders: {
+    google: {
+      clientId: process.env['LOGIN_SERVER_GOOGLE_CLIENT_ID'] as string,
+      clientSecret: process.env['LOGIN_SERVER_GOOGLE_CLIENT_SECRET'] as string,
+    },
+    discord: {
+      clientId: process.env['LOGIN_SERVER_DISCORD_CLIENT_ID'] as string,
+      clientSecret: process.env['LOGIN_SERVER_DISCORD_CLIENT_SECRET'] as string,
+    },
+  },
+});
 
-## Configuration
-
-- `PORT` (default: derived from config)
-- `HOST` (default: `0.0.0.0`)
-- `ORIGIN` (default: `http://localhost:{PORT}`)
-
-Provider credentials are supplied via `LitLoginServerConfig` when instantiating the server.
+await litLoginServer.start();
+```

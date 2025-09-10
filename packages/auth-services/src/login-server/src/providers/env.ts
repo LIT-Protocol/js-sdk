@@ -1,21 +1,30 @@
 import 'dotenv/config';
+import { createEnv } from '@t3-oss/env-core';
+import { z } from 'zod';
 
 /**
- * Login Server environment loader
+ * Login Server environment (validated via @t3-oss/env-core)
  *
  * Purpose:
- * - Provide configuration strictly for the login server without coupling to the auth server env.
- * - Avoid consumers needing unrelated env vars when they only use the login server or auth server.
- *
- * Usage:
- * - Programmatic: const cfg = loadLoginEnv();
- * - With overrides: const cfg = loadLoginEnv({ loginServerPort: 4400 });
+ * - Strict validation and defaults for login server.
+ * - Single flat `env` object; access like `env.LOGIN_SERVER_PORT`.
  */
 
-// Configurable defaults (constants placed at the top by convention)
-const DEFAULT_LOGIN_PORT = 3300;
-const DEFAULT_LOGIN_HOST = '0.0.0.0';
-const DEFAULT_STATE_EXPIRY_SECONDS = 30;
+export const env = createEnv({
+  server: {
+    LOGIN_SERVER_PORT: z.coerce.number().int().positive().default(3300),
+    LOGIN_SERVER_HOST: z.string().min(1).default('0.0.0.0'),
+    ORIGIN: z.string().url().optional(),
+    STATE_EXPIRY_SECONDS: z.coerce.number().int().positive().default(30),
+    GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+    GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+    DISCORD_CLIENT_ID: z.string().min(1).optional(),
+    DISCORD_CLIENT_SECRET: z.string().min(1).optional(),
+  },
+  clientPrefix: 'PUBLIC_',
+  client: {},
+  runtimeEnv: process.env,
+});
 
 export type LoginEnv = {
   loginServerPort: number;
@@ -25,55 +34,5 @@ export type LoginEnv = {
   socialProviders: {
     google?: { clientId: string; clientSecret: string };
     discord?: { clientId: string; clientSecret: string };
-  };
-};
-
-/**
- * Load login server environment values with sensible defaults.
- */
-export const loadLoginEnv = (overrides: Partial<LoginEnv> = {}): LoginEnv => {
-  const port =
-    overrides.loginServerPort ??
-    (process.env['LOGIN_SERVER_PORT']
-      ? Number(process.env['LOGIN_SERVER_PORT'])
-      : DEFAULT_LOGIN_PORT);
-
-  const host =
-    overrides.loginServerHost ??
-    process.env['LOGIN_SERVER_HOST'] ??
-    DEFAULT_LOGIN_HOST;
-
-  const origin =
-    overrides.origin ?? process.env['ORIGIN'] ?? `http://localhost:${port}`;
-
-  const stateExpirySeconds =
-    overrides.stateExpirySeconds ??
-    (process.env['STATE_EXPIRY_SECONDS']
-      ? Number(process.env['STATE_EXPIRY_SECONDS'])
-      : DEFAULT_STATE_EXPIRY_SECONDS);
-
-  const socialProviders = overrides.socialProviders ?? {
-    google:
-      process.env['GOOGLE_CLIENT_ID'] && process.env['GOOGLE_CLIENT_SECRET']
-        ? {
-            clientId: process.env['GOOGLE_CLIENT_ID'] as string,
-            clientSecret: process.env['GOOGLE_CLIENT_SECRET'] as string,
-          }
-        : undefined,
-    discord:
-      process.env['DISCORD_CLIENT_ID'] && process.env['DISCORD_CLIENT_SECRET']
-        ? {
-            clientId: process.env['DISCORD_CLIENT_ID'] as string,
-            clientSecret: process.env['DISCORD_CLIENT_SECRET'] as string,
-          }
-        : undefined,
-  };
-
-  return {
-    loginServerPort: port,
-    loginServerHost: host,
-    origin,
-    stateExpirySeconds,
-    socialProviders,
   };
 };

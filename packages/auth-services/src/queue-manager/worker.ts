@@ -3,13 +3,6 @@ import { mainQueueName, setBullmqRedisUrl } from './src/bullmqSetup';
 import { createGenericWorker } from './src/genericWorker';
 import { env } from '../env';
 
-interface ParsedRedisConnectionOpts {
-  host?: string;
-  port?: number;
-  password?: string;
-  db?: number;
-}
-
 export async function startAuthServiceWorker(params?: {
   litTxsenderRpcUrl?: string;
   redisUrl?: string;

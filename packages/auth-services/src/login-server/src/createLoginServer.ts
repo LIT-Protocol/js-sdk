@@ -1,5 +1,5 @@
-import { createServer, Server } from 'node:http';
 import type { Express } from 'express';
+import { createServer, Server } from 'node:http';
 import { createLoginApp, LoginAppConfig } from './app';
 
 export interface LitLoginServerConfig {
@@ -32,11 +32,6 @@ export const createLitLoginServer = (
     config.origin || process.env['ORIGIN'] || `http://localhost:${port}`;
   const stateExpirySeconds = config.stateExpirySeconds || 30;
 
-  const stateStore = new Map<
-    string,
-    { appRedirect: string; caller?: string; timeoutId: NodeJS.Timeout }
-  >();
-
   const app = createLoginApp({
     origin,
     stateExpirySeconds,
@@ -51,7 +46,7 @@ export const createLitLoginServer = (
       await new Promise<void>((resolve) => {
         server!.listen(port, host, () => resolve());
       });
-      console.log(`Login Server listening on ${origin}`);
+      console.log(`🔥 Login Server listening on ${origin}`);
     },
     stop: async () => {
       if (!server) return;

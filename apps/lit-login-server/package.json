@@ -1,16 +1,7 @@
 {
-  "name": "lit-auth-service",
+  "name": "lit-login-server",
   "type": "module",
   "module": "index.ts",
-  "devDependencies": {
-    "@types/bun": "^1.2.15",
-    "dotenv": "^16.5.0",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.19.2"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
   "private": true,
   "scripts": {
     "start": "dotenvx run --env-file=.env tsx index.ts",
@@ -18,5 +9,13 @@
   },
   "dependencies": {
     "@lit-protocol/auth-services": "workspace:*"
+  },
+  "devDependencies": {
+    "dotenv": "^16.5.0",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }
