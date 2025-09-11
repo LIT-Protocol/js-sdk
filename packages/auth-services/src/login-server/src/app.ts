@@ -1,10 +1,18 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import { OAuth2Client } from 'google-auth-library';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Prefer Node's CJS globals when available; fallback to process.cwd()
+const resolvedDirname = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
+
+type DiscordTokenResponse = {
+  access_token?: string;
+  token_type?: string;
+  scope?: string;
+  expires_in?: number;
+  refresh_token?: string;
+  error?: string;
+};
 
 export type LoginAppConfig = {
   origin: string;
@@ -32,12 +40,12 @@ export const createLoginApp = (config: LoginAppConfig): Express => {
   const app = express();
   app.use(cors({ origin: true, credentials: true }));
 
-  const staticDir = path.join(__dirname, 'public'); 
+  const staticDir = path.join(resolvedDirname, 'public');
   app.use(express.static(staticDir, { index: 'index.html', maxAge: '1h' }));
 
   // error page /error goes to /error.html
   app.get('/error', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'error.html'));
+    res.sendFile(path.join(resolvedDirname, 'public', 'error.html'));
   });
 
   app.get('/auth/google', (req, res) => {
@@ -179,7 +187,7 @@ export const createLoginApp = (config: LoginAppConfig): Express => {
         body: params,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
-      const json = await response.json();
+      const json = (await response.json()) as DiscordTokenResponse;
       if (!json.access_token) {
         const url = new URL(appRedirect);
         url.searchParams.set('error', 'invalid_access_token');

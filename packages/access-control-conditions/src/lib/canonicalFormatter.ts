@@ -1,4 +1,7 @@
-import { type OperatorAcc } from '@lit-protocol/access-control-conditions-schemas';
+import {
+  EvmContractAcc,
+  type OperatorAcc,
+} from '@lit-protocol/access-control-conditions-schemas';
 import { InvalidAccessControlConditions } from '@lit-protocol/constants';
 import {
   AccessControlConditions,
@@ -12,11 +15,6 @@ import {
   JsonSigningResourceId,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-
-interface ABIParams {
-  name: string;
-  type: string;
-}
 
 /** ---------- Local Functions ---------- */
 /**
@@ -41,11 +39,15 @@ const getOperatorParam = (cond: ConditionItem): OperatorAcc => {
  * @param { Array<ABIParams> } params
  * @returns { Array<ABIParams> }
  */
-const canonicalAbiParamss = (params: ABIParams[]): ABIParams[] => {
-  return params.map((param) => ({
-    name: param.name,
-    type: param.type,
-  }));
+const canonicalAbiParamss = (
+  params: EvmContractAcc['functionAbi']['inputs']
+): EvmContractAcc['functionAbi']['outputs'] => {
+  return params.map(
+    (param: EvmContractAcc['functionAbi']['inputs'][number]) => ({
+      name: param.name,
+      type: param.type,
+    })
+  );
 };
 
 /**

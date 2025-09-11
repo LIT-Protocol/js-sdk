@@ -1,4 +1,5 @@
-import { decodeEventLog, Log } from 'viem';
+import { decodeEventLog } from 'viem';
+import { type Log as ViemLog } from 'viem';
 import { DefaultNetworkConfig } from '../../../../../shared/interfaces/NetworkContext';
 import {
   createContractsManager,
@@ -18,7 +19,8 @@ export type DecodedLog = {
  * @returns Array of decoded logs with event names and parameters
  */
 export const decodeLogs = async (
-  logs: Log[],
+  // The `Log` type imported doesn't include the `topics` property, so we need to add it manually.
+  logs: (ViemLog & { topics?: `0x${string}`[] })[],
   networkCtx: DefaultNetworkConfig,
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<DecodedLog[]> => {
@@ -66,10 +68,16 @@ export const decodeLogs = async (
         };
       }
 
+      // build a tuple type for topics that matches viem's expectation (as we don't want to cast it to `any`)
+      const [signature, ...rest] = log.topics ?? [];
+      const topics = signature
+        ? ([signature, ...rest] as [`0x${string}`, ...`0x${string}`[]])
+        : ([] as []);
+
       const decoded = decodeEventLog({
         abi,
         data: log.data,
-        topics: log.topics,
+        topics,
       });
 
       return decoded;
