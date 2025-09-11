@@ -2,30 +2,17 @@
   "name": "auth-services",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/auth-services/src",
-  "projectType": "application",
+  "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/auth-services",
-        "main": "packages/auth-services/src/auth-server/server.ts",
+        "main": "packages/auth-services/src/index.ts",
         "tsConfig": "packages/auth-services/tsconfig.lib.json",
         "assets": ["packages/auth-services/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
-      },
-      "dependsOn": ["^build"]
-    },
-    "serve:auth": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "tsx watch packages/auth-services/src/auth-server/src/index.ts"
-      }
-    },
-    "serve:login": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "tsx watch packages/auth-services/src/login-server/index.ts"
       }
     },
     "publish": {
