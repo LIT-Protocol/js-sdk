@@ -1,5 +1,6 @@
 import { batchGenerateEncryptedKeys } from './common/batchGenerateEncryptedKeys';
 import { exportPrivateKey } from './common/exportPrivateKey';
+import { decryptWrappedKeyForDelegatee } from './delegated/decryptWrappedKeyForDelegatee';
 import { generateEncryptedEthereumPrivateKey } from './ethereum/generateEncryptedEthereumPrivateKey';
 import { signMessageWithEncryptedEthereumKey } from './ethereum/signMessageWithEncryptedEthereumKey';
 import { signTransactionWithEncryptedEthereumKey } from './ethereum/signTransactionWithEncryptedEthereumKey';
@@ -16,4 +17,5 @@ export const rawActionFunctions = {
   generateEncryptedSolanaPrivateKey,
   signMessageWithEncryptedSolanaKey,
   signTransactionWithEncryptedSolanaKey,
+  decryptWrappedKeyForDelegatee,
 };

@@ -45,6 +45,7 @@
     "@lit-protocol/accs-schemas": "^0.0.31",
     "@lit-protocol/contracts": "^0.0.74",
     "@lit-protocol/lit-status-sdk": "^0.1.8",
+    "@lit-protocol/vincent-contracts-sdk": "^1.2.0",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
     "@openagenda/verror": "^3.1.4",

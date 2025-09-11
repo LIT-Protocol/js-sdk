@@ -27,6 +27,9 @@ const {
 const {
   code: signTransactionWithEncryptedSolanaKey,
 } = require('../wrapped-keys-lit-actions/src/generated/solana/signTransactionWithEncryptedSolanaKey');
+const {
+  code: decryptWrappedKeyForDelegatee,
+} = require('../wrapped-keys-lit-actions/src/generated/delegated/decryptWrappedKeyForDelegatee');
 
 async function updateConstants() {
   // Generate new CID hashes
@@ -50,6 +53,7 @@ async function updateConstants() {
   };
   const litActionCIDRepositoryCommon = {
     batchGenerateEncryptedKeys: await Hash.of(batchGenerateEncryptedKey),
+    decryptWrappedKeyForDelegatee: await Hash.of(decryptWrappedKeyForDelegatee),
   };
 
   // Write constant json files with lit action hashes

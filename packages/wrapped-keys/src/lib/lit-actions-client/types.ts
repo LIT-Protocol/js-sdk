@@ -6,7 +6,9 @@ export type LitActionType =
   | 'generateEncryptedKey'
   | 'exportPrivateKey';
 
-export type LitActionTypeCommon = 'batchGenerateEncryptedKeys';
+export type LitActionTypeCommon =
+  | 'batchGenerateEncryptedKeys'
+  | 'decryptWrappedKeyForDelegatee';
 
 export type LitCidRepositoryEntry = Readonly<Record<Network, string>>;
 

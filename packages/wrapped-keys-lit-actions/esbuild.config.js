@@ -59,6 +59,7 @@ module.exports = {
           './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.ts',
           './src/lib/self-executing-actions/common/exportPrivateKey.ts',
           './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.ts',
+          './src/lib/self-executing-actions/delegated/decryptWrappedKeyForDelegatee.ts',
         ],
         bundle: true,
         minify: true,

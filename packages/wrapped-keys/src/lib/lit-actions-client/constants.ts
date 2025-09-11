@@ -34,6 +34,8 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = deepFreeze({
 const LIT_ACTION_CID_REPOSITORY_COMMON: LitCidRepositoryCommon = Object.freeze({
   batchGenerateEncryptedKeys:
     GENERATED_LIT_ACTION_CID_REPOSITORY_COMMON.batchGenerateEncryptedKeys,
+  decryptWrappedKeyForDelegatee:
+    GENERATED_LIT_ACTION_CID_REPOSITORY_COMMON.decryptWrappedKeyForDelegatee,
 });
 
 export { LIT_ACTION_CID_REPOSITORY, LIT_ACTION_CID_REPOSITORY_COMMON };

@@ -1,5 +1,6 @@
 import * as batchGenerateEncryptedKeys from './generated/common/batchGenerateEncryptedKeys';
 import * as exportPrivateKey from './generated/common/exportPrivateKey';
+import * as decryptWrappedKeyForDelegatee from './generated/delegated/decryptWrappedKeyForDelegatee';
 import * as generateEncryptedEthereumPrivateKey from './generated/ethereum/generateEncryptedEthereumPrivateKey';
 import * as signMessageWithEthereumEncryptedKey from './generated/ethereum/signMessageWithEncryptedEthereumKey';
 import * as signTransactionWithEthereumEncryptedKey from './generated/ethereum/signTransactionWithEncryptedEthereumKey';
@@ -34,6 +35,7 @@ const litActionRepository: LitActionCodeRepository = {
 
 const litActionRepositoryCommon: LitActionCodeRepositoryCommon = {
   batchGenerateEncryptedKeys: batchGenerateEncryptedKeys.code,
+  decryptWrappedKeyForDelegatee: decryptWrappedKeyForDelegatee.code,
 };
 
 export {
@@ -50,6 +52,7 @@ export {
   generateEncryptedSolanaPrivateKey,
   signMessageWithSolanaEncryptedKey,
   signTransactionWithSolanaEncryptedKey,
+  decryptWrappedKeyForDelegatee,
 
   // Full export to bundle all lit actions
   litActionRepository,
