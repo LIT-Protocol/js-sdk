@@ -31,7 +31,10 @@ export const GetActiveUnkickedValidatorStructsAndCountsSchema = z
     const minNodeCount = ctx[1];
     const activeUnkickedValidatorStructs = ctx[2] as ValidatorStruct[];
 
-    const validatorURLs = generateValidatorURLs(activeUnkickedValidatorStructs);
+    // It fixes the type mismatch (TS2345) when calling generateValidatorURLs, which requires { ip: number; port: number }[] but was receiving a broader array (ValidatorStruct[] with more/optional fields).
+    const validatorURLs = generateValidatorURLs(
+      activeUnkickedValidatorStructs.map(({ ip, port }) => ({ ip, port }))
+    );
 
     if (!minNodeCount) {
       throw new Error('❌ Minimum validator count is not set');

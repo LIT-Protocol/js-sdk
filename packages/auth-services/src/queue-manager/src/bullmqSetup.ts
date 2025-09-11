@@ -79,14 +79,27 @@ export const addJob = async (
   return job;
 };
 
-export const getJobStatus = async (jobId: string) => {
+export type JobStatusPayload =
+  | { error: string }
+  | {
+      jobId: string | number;
+      name: string;
+      state: string;
+      progress: unknown;
+      timestamp: number;
+      processedOn: number | null | undefined;
+      finishedOn: number | null | undefined;
+      returnValue: unknown;
+      failedReason: string | null | undefined;
+    };
+
+export const getJobStatus = async (
+  jobId: string
+): Promise<JobStatusPayload> => {
   const job = await getMainAppQueue().getJob(jobId);
 
-  if (!job) {
-    return new Response(BigIntStringify({ error: 'Job not found.' }), {
-      headers: { 'content-type': 'application/json' },
-      status: 404,
-    });
+  if (!job || !job.id) {
+    return { error: 'Job not found.' };
   }
 
   const state = await job.getState();
