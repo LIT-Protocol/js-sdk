@@ -1,15 +1,17 @@
-# lit-auth-services
+# Getting started
 
-To install dependencies:
+## Building the server
 
-```bash
-bun install
+```
+nx run lit-login-server:build
 ```
 
-To run:
+# Running the server
 
-```bash
-bun run index.ts
 ```
+pnpm nx run lit-login-server:serve:production
 
-This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+or
+
+node ./dist/apps/lit-login-server/main.cjs
+```

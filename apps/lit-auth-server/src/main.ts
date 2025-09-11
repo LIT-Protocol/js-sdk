@@ -15,11 +15,12 @@ const litAuthServer = createLitAuthServer({
   redisUrl: process.env['REDIS_URL'] as string,
 });
 
-// Start the auth server
-await litAuthServer.start();
+async function main() {
+  await litAuthServer.start();
+  await startAuthServiceWorker();
+}
 
-// Requires REDIS_URL
-await startAuthServiceWorker({
-  litTxsenderRpcUrl: process.env['LIT_TXSENDER_RPC_URL'] as string,
-  redisUrl: process.env['REDIS_URL'] as string,
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });
