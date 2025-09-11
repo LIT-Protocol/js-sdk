@@ -109,6 +109,11 @@ npx changeset publish
 
 </div>
 
+# Running your own Auth Service & Login Server
+
+- See [README](apps/lit-auth-server/README.md) for the Auth Service
+- See [README](apps/lit-login-server/README.md) for the Login Server
+
 # Contact
 
 You can reach the Lit Protocol team through <a href="https://t.me/+aa73FAF9Vp82ZjJh"><img src="https://img.shields.io/badge/Telegram-blue?logo=telegram&style=social"/></a>, <a href="https://litgateway.com/discord"><img src="https://img.shields.io/badge/Discord-blue?logo=discord&style=social"/></a>, or [X](https://x.com/litprotocol).

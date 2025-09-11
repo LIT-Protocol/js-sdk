@@ -4,22 +4,28 @@
 # Tip: Modify "docker-build" options in project.json to change docker build args.
 #
 # Run the container with `docker run -p 3000:3000 -t lit-login-server`.
-FROM docker.io/node:lts-alpine
+# Runtime-only image that uses the Nx-built dist output
+FROM --platform=linux/amd64 node:lts-alpine
 
+ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
 WORKDIR /app
 
-RUN addgroup --system lit-login-server && \
-          adduser --system -G lit-login-server lit-login-server
+# Create non-root user
+RUN addgroup --system lit-login-server && adduser --system -G lit-login-server lit-login-server
 
-COPY dist/apps/lit-login-server lit-login-server/
-COPY apps/lit-login-server/package.json lit-login-server/
-RUN chown -R lit-login-server:lit-login-server .
+# Copy Nx build artefacts (includes generated package.json and lockfile)
+COPY dist/apps/lit-login-server/ ./
 
-# You can remove this install step if you build with `--bundle` option.
-# The bundled output will include external dependencies.
-RUN npm --prefix lit-login-server --omit=dev -f install
+# Install only production deps from the generated package.json/lockfile
+RUN corepack enable && pnpm install --prod --frozen-lockfile --ignore-scripts
 
-CMD [ "node", "lit-login-server" ]
+# Drop privileges
+USER lit-login-server
+
+ENV NODE_OPTIONS="--no-deprecation"
+
+EXPOSE 3000
+CMD ["node", "main.cjs"]
