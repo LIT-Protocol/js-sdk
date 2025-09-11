@@ -54,7 +54,7 @@ export async function decryptWrappedKeyForDelegatee({
 
   if (!validationResult.isPermitted) {
     throw new Error(
-      `App Delegatee: ${appDelegateeAddress} is not permitted to execute Vincent Ability: ${abilityIpfsCid} for App ID: ${validationResult.appId} App Version: ${validationResult.appVersion} using Agent Wallet PKP Address: ${agentWalletPkpEthAddress}`
+      `App Delegatee: ${appDelegateeAddress} is not permitted to decrypt the Agent Wallet PKP Address: ${agentWalletPkpEthAddress}'s Wrapped Key using the Vincent Ability: ${abilityIpfsCid} for App ID: ${validationResult.appId} App Version: ${validationResult.appVersion}`
     );
   }
 
