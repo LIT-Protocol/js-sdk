@@ -382,6 +382,12 @@ declare global {
        * @type {string | `"\\(true,${string})\\"`}
        */
       const customAuthResource: string | `"\\(true,${string})\\"`;
+
+      /**
+       * The address of the signer of the inner auth sig in the session sigs.
+       * @type {string}
+       */
+      const authSigAddress: string;
     }
   }
   // eslint-disable-next-line import/export
@@ -391,4 +397,4 @@ declare global {
 
 global.ethers = Ethers;
 
-export {};
+export { };
