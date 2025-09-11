@@ -15,5 +15,11 @@ const litLoginServer = createLitLoginServer({
     },
   },
 });
+async function main() {
+  await litLoginServer.start();
+}
 
-await litLoginServer.start();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
