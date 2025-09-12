@@ -9,16 +9,56 @@ import {
 import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
 import { getTokenIdsForAuthMethod } from '../../../rawContractApis/pkp/read/getTokenIdsForAuthMethod';
 import type { PKPStorageProvider } from '../../../../../../../../../storage/types';
-import type { PKPInfo } from '@lit-protocol/types';
+import { PKPData } from '@lit-protocol/schemas';
 
-// Schema for auth data (matching the structure from ViemAccountAuthenticator)
-const authDataSchema = z.object({
-  authMethodType: z
-    .union([z.number(), z.bigint()])
-    .transform((val) => BigInt(val)),
-  authMethodId: z.string().startsWith('0x'),
-  accessToken: z.string().optional(), // Optional since not needed for lookup
-});
+// Schema for auth data (accept both strict and normal shapes, normalise to canonical output)
+const strictAuthDataInput = z
+  .object({
+    authMethodType: z.union([z.number(), z.bigint()]),
+    authMethodId: z.string().startsWith('0x'),
+    accessToken: z.string().optional(),
+  })
+  .transform(({ authMethodType, authMethodId, accessToken }) => ({
+    authMethodType:
+      typeof authMethodType === 'bigint'
+        ? authMethodType
+        : BigInt(authMethodType),
+    authMethodId,
+    accessToken,
+  }));
+
+const AuthDataInput = z
+  .object({
+    authMethodType: z.union([z.number(), z.bigint()]).optional(),
+    authMethodId: z.string().startsWith('0x').optional(),
+    publicKey: z.string().optional(),
+    accessToken: z.string().optional(),
+    metadata: z.unknown().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.authMethodType == null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'authMethodType is required',
+      });
+    }
+    if (val.authMethodId == null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'authMethodId is required',
+      });
+    }
+  })
+  .transform(({ authMethodType, authMethodId, accessToken }) => ({
+    authMethodType:
+      typeof authMethodType === 'bigint'
+        ? authMethodType!
+        : BigInt(authMethodType!),
+    authMethodId: authMethodId!,
+    accessToken,
+  }));
+
+const authDataSchema = z.union([strictAuthDataInput, AuthDataInput]);
 
 // Schema for pagination
 const paginationSchema = z.object({
@@ -39,7 +79,7 @@ type GetPKPsByAuthDataRequest = z.input<typeof getPKPsByAuthDataSchema>;
  * Paginated response for PKPs
  */
 export interface PaginatedPKPsResponse {
-  pkps: PKPInfo[];
+  pkps: PKPData[];
   pagination: {
     limit: number;
     offset: number;
@@ -217,8 +257,8 @@ async function fetchPKPDetailsForTokenIds(
   networkCtx: DefaultNetworkConfig,
   accountOrWalletClient: ExpectedAccountOrWalletClient,
   storageProvider?: PKPStorageProvider
-): Promise<PKPInfo[]> {
-  const pkps: PKPInfo[] = [];
+): Promise<PKPData[]> {
+  const pkps: PKPData[] = [];
 
   // Create contract manager for address derivation (only if needed)
   let contractsManager: ReturnType<typeof createContractsManager> | null = null;
@@ -314,8 +354,8 @@ async function fetchPKPDetailsForTokenIds(
       }
 
       pkps.push({
-        tokenId,
-        publicKey,
+        tokenId: BigInt(tokenId),
+        pubkey: publicKey,
         ethAddress,
       });
 

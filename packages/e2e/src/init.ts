@@ -3,13 +3,18 @@ import {
   storagePlugins,
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
-import { createLitClient } from '@lit-protocol/lit-client';
-import { Account, PrivateKeyAccount } from 'viem';
+import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
 import { getOrCreatePkp } from './helper/pkp-utils';
-// import { createPkpAuthContext } from './helper/auth-contexts';
+import { PKPData, AuthData, CustomAuthData } from '@lit-protocol/schemas';
+import {
+  AuthContext,
+  AuthManagerInstance,
+  LitClientInstance,
+  ViemAccount,
+} from './types';
 
 const SupportedNetworkSchema = z.enum([
   'naga-dev',
@@ -31,17 +36,21 @@ export const init = async (
   network?: SupportedNetwork,
   logLevel?: LogLevel
 ): Promise<{
-  litClient: any;
-  authManager: any;
-  localMasterAccount: any;
-  aliceViemAccount: any;
-  aliceViemAccountAuthData: any;
-  aliceViemAccountPkp: any;
-  bobViemAccount: any;
-  bobViemAccountAuthData: any;
-  bobViemAccountPkp: any;
-  aliceEoaAuthContext: any;
-  alicePkpAuthContext: any;
+  litClient: LitClientInstance;
+  authManager: AuthManagerInstance;
+  localMasterAccount: ViemAccount;
+  aliceViemAccount: ViemAccount;
+  aliceViemAccountAuthData: AuthData;
+  aliceViemAccountPkp: PKPData;
+  bobViemAccount: ViemAccount;
+  bobViemAccountAuthData: AuthData;
+  bobViemAccountPkp: PKPData;
+  aliceEoaAuthContext: AuthContext;
+  alicePkpAuthContext: AuthContext;
+  eveViemAccount: ViemAccount;
+  eveCustomAuthData: CustomAuthData;
+  eveViemAccountPkp: PKPData;
+  eveValidationIpfsCid: `Qm${string}`;
   masterDepositForUser: (userAddress: string) => Promise<void>;
   // alicePkpViemAccountPermissionsManager: any,
 }> => {
@@ -169,21 +178,34 @@ export const init = async (
    * ====================================
    */
   const [aliceViemAccountPkp, bobViemAccountPkp] = await Promise.all([
-    getOrCreatePkp(
-      litClient,
-      aliceViemAccountAuthData,
-      aliceViemAccount,
-      './pkp-tokens',
-      _network
-    ),
-    getOrCreatePkp(
-      litClient,
-      bobViemAccountAuthData,
-      bobViemAccount,
-      './pkp-tokens-bob',
-      _network
-    ),
+    getOrCreatePkp(litClient, aliceViemAccountAuthData, aliceViemAccount),
+    getOrCreatePkp(litClient, bobViemAccountAuthData, bobViemAccount),
   ]);
+
+  // Use custom auth to create a PKP for Eve
+  const uniqueDappName = 'e2e-test-dapp';
+
+  const authMethodConfig = litUtils.generateUniqueAuthMethodType({
+    uniqueDappName: uniqueDappName,
+  });
+
+  const eveCustomAuthData = litUtils.generateAuthData({
+    uniqueDappName: uniqueDappName,
+    uniqueAuthMethodType: authMethodConfig.bigint,
+    userId: 'eve',
+  });
+
+  const { pkpData } = await litClient.mintWithCustomAuth({
+    account: eveViemAccount,
+    authData: eveCustomAuthData,
+    scope: 'sign-anything',
+    validationIpfsCid: EVE_VALIDATION_IPFS_CID,
+  });
+
+  const eveViemAccountPkp = {
+    ...pkpData.data,
+    tokenId: pkpData.data.tokenId,
+  };
 
   /**
    * ====================================
@@ -217,7 +239,7 @@ export const init = async (
    */
   const alicePkpAuthContext = await authManager.createPkpAuthContext({
     authData: aliceViemAccountAuthData,
-    pkpPublicKey: aliceViemAccountPkp.publicKey,
+    pkpPublicKey: aliceViemAccountPkp.pubkey,
     authConfig: {
       resources: [
         ['pkp-signing', '*'],
@@ -231,7 +253,7 @@ export const init = async (
   });
 
   const alicePkpViemAccount = await litClient.getPkpViemAccount({
-    pkpPublicKey: aliceViemAccountPkp.publicKey,
+    pkpPublicKey: aliceViemAccountPkp.pubkey,
     authContext: alicePkpAuthContext,
     chainConfig: _networkModule.getChainConfig(),
   });

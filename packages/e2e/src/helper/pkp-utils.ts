@@ -1,16 +1,6 @@
-/**
- * PKP Utilities
- *
- * This module provides utility functions for managing Programmable Key Pairs (PKPs)
- * in the Lit Protocol ecosystem. It handles the common pattern of checking for
- * existing PKPs and creating new ones when necessary.
- *
- * Usage:
- *   import { getOrCreatePkp } from './helper/pkp-utils';
- *   const pkp = await getOrCreatePkp(litClient, authData, account, storagePath, networkName);
- */
-
-import { storagePlugins } from '@lit-protocol/auth';
+import type { AuthData, PKPData } from '@lit-protocol/schemas';
+import type { PrivateKeyAccount } from 'viem/accounts';
+import { LitClientInstance } from '../types';
 
 // Configuration constants
 const PAGINATION_LIMIT = 5;
@@ -28,23 +18,16 @@ const PKP_SCOPES = ['sign-anything'];
  * @returns Promise<PKP> - The existing or newly created PKP
  */
 export const getOrCreatePkp = async (
-  litClient: any,
-  authData: any,
-  account: any,
-  storagePath: string,
-  networkName: string
-) => {
+  litClient: LitClientInstance,
+  authData: AuthData,
+  account: PrivateKeyAccount
+): Promise<PKPData> => {
   // Check for existing PKPs
   const { pkps } = await litClient.viewPKPsByAuthData({
     authData,
     pagination: {
       limit: PAGINATION_LIMIT,
     },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: APP_NAME,
-      networkName,
-      storagePath,
-    }),
   });
 
   // If PKP exists, return it
@@ -53,11 +36,15 @@ export const getOrCreatePkp = async (
   }
 
   // Otherwise mint new PKP
-  const mintResult = await litClient.mintWithAuth({
-    authData,
-    account,
-    scopes: PKP_SCOPES,
-  });
+  try {
+    await litClient.mintWithAuth({
+      authData,
+      account,
+      scopes: PKP_SCOPES,
+    });
+  } catch (e) {
+    throw new Error(`❌ Error minting PKP: ${e}`);
+  }
 
   // Query again to get the newly minted PKP in the expected format
   const { pkps: newPkps } = await litClient.viewPKPsByAuthData({
@@ -65,11 +52,6 @@ export const getOrCreatePkp = async (
     pagination: {
       limit: PAGINATION_LIMIT,
     },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: APP_NAME,
-      networkName,
-      storagePath,
-    }),
   });
 
   return newPkps[0];

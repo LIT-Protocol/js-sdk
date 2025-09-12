@@ -9,7 +9,7 @@ export const createViemSignTypedDataTest = (
     const { getAddress } = await import('viem');
 
     const pkpViemAccount = await ctx.litClient.getPkpViemAccount({
-      pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
       authContext: getAuthContext(),
       chainConfig: ctx.litClient.getChainConfig().viemConfig,
     });

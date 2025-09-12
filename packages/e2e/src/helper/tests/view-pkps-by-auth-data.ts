@@ -1,20 +1,25 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
+import { ViemAccountAuthenticator } from '@lit-protocol/auth';
+import { AuthContext } from '../../types';
+import { AuthData } from '@lit-protocol/schemas';
+
+type InitialisedInstance = Awaited<ReturnType<typeof init>>;
 
 export const createViewPKPsByAuthDataTest = (
-  ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any
+  ctx: InitialisedInstance,
+  getAuthContext: () => AuthContext,
+  authData?: AuthData
 ) => {
   return async () => {
-    const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
-    const authData = await ViemAccountAuthenticator.authenticate(
-      ctx.aliceViemAccount
-    );
+    const _authData =
+      authData ||
+      (await ViemAccountAuthenticator.authenticate(ctx.aliceViemAccount));
 
     const pkps = await ctx.litClient.viewPKPsByAuthData({
       authData: {
-        authMethodType: authData.authMethodType,
-        authMethodId: authData.authMethodId,
+        authMethodType: _authData.authMethodType,
+        authMethodId: _authData.authMethodId,
+        accessToken: _authData.accessToken || 'mock-token',
       },
       pagination: {
         limit: 10,
@@ -22,20 +27,20 @@ export const createViewPKPsByAuthDataTest = (
       },
     });
 
-    assert.toBeDefined(pkps);
-    assert.toBeDefined(pkps.pkps);
-    assert.toBe(Array.isArray(pkps.pkps), true);
-    assert.toBeDefined(pkps.pagination);
-    assert.toBe(typeof pkps.pagination.total, 'number');
-    assert.toBe(typeof pkps.pagination.hasMore, 'boolean');
+    expect(pkps).toBeDefined();
+    expect(pkps.pkps).toBeDefined();
+    expect(Array.isArray(pkps.pkps)).toBe(true);
+    expect(pkps.pagination).toBeDefined();
+    expect(typeof pkps.pagination.total).toBe('number');
+    expect(typeof pkps.pagination.hasMore).toBe('boolean');
 
     // Should find at least the PKP we created in init
-    assert.toBeGreaterThan(pkps.pkps.length, 0);
+    expect(pkps.pkps.length).toBeGreaterThan(0);
 
     // Verify the PKP structure
     const firstPkp = pkps.pkps[0];
-    assert.toBeDefined(firstPkp.tokenId);
-    assert.toBeDefined(firstPkp.publicKey);
-    assert.toBeDefined(firstPkp.ethAddress);
+    expect(firstPkp.tokenId).toBeDefined();
+    expect(firstPkp.pubkey).toBeDefined();
+    expect(firstPkp.ethAddress).toBeDefined();
   };
 };

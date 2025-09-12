@@ -10,7 +10,7 @@ export const createPkpAuthContext = async (
   try {
     const pkpAuthContext = await ctx.authManager.createPkpAuthContext({
       authData: ctx.aliceViemAccountAuthData,
-      pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
       authConfig: {
         resources: [
           ['pkp-signing', '*'],

@@ -1,10 +1,9 @@
-import { createAuthManager, storagePlugins, ViemAccountAuthenticator } from "@lit-protocol/auth";
-import { createLitClient } from "@lit-protocol/lit-client";
-import { nagaDev } from "@lit-protocol/networks";
-import { privateKeyToAccount } from "viem/accounts";
+import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
+import { createLitClient } from '@lit-protocol/lit-client';
+import { nagaDev } from '@lit-protocol/networks';
+import { privateKeyToAccount } from 'viem/accounts';
 
-
-describe('v7 compatability', () => {
+describe('v7 encrypt decrypt compatability', () => {
   it('should be able to use the v7 api', async () => {
 
 
