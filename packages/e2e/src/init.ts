@@ -22,6 +22,7 @@ const SupportedNetworkSchema = z.enum([
   'naga-local',
   'naga-staging',
 ]);
+
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
@@ -31,6 +32,9 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
+
+const EVE_VALIDATION_IPFS_CID =
+  'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
 
 export const init = async (
   network?: SupportedNetwork,
@@ -52,7 +56,6 @@ export const init = async (
   eveViemAccountPkp: PKPData;
   eveValidationIpfsCid: `Qm${string}`;
   masterDepositForUser: (userAddress: string) => Promise<void>;
-  // alicePkpViemAccountPermissionsManager: any,
 }> => {
   /**
    * ====================================
@@ -74,6 +77,8 @@ export const init = async (
   const bobViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
     bobViemAccount
   );
+
+  const eveViemAccount = privateKeyToAccount(generatePrivateKey());
 
   /**
    * ====================================
@@ -118,7 +123,18 @@ export const init = async (
 
   // Dynamic import of network module
   const networksModule = await import('@lit-protocol/networks');
-  const _networkModule = networksModule[config.importName];
+  const _baseNetworkModule = networksModule[config.importName];
+
+  // Optional RPC override from env
+  const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  const _networkModule = _baseNetworkModule;
+
+  if (rpcOverride) {
+    console.log(
+      '✅ Using RPC override (LIT_YELLOWSTONE_PRIVATE_RPC_URL):',
+      rpcOverride
+    );
+  }
 
   // Fund accounts based on network type
   const isLocal = config.type === 'local';
@@ -134,6 +150,11 @@ export const init = async (
   });
 
   await fundAccount(bobViemAccount, masterAccount, _networkModule, {
+    ifLessThan: fundingAmount,
+    thenFundWith: fundingAmount,
+  });
+
+  await fundAccount(eveViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
     thenFundWith: fundingAmount,
   });
@@ -292,6 +313,12 @@ export const init = async (
   // Deposit to the Bob PKP Ledger
   await masterDepositForUser(bobViemAccountPkp.ethAddress);
 
+  // Deposit to the Eve EOA Ledger
+  await masterDepositForUser(eveViemAccount.address);
+
+  // Deposit to the Eve PKP Ledger
+  await masterDepositForUser(eveViemAccountPkp.ethAddress);
+
   // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
   //   pkpIdentifier: {
   //     tokenId: aliceViemAccountPkp.tokenId,
@@ -314,6 +341,10 @@ export const init = async (
     bobViemAccount,
     bobViemAccountAuthData,
     bobViemAccountPkp,
+    eveViemAccount,
+    eveCustomAuthData,
+    eveViemAccountPkp,
+    eveValidationIpfsCid: EVE_VALIDATION_IPFS_CID,
     aliceEoaAuthContext,
     alicePkpAuthContext,
     masterDepositForUser,

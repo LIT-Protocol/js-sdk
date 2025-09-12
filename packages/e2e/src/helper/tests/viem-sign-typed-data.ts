@@ -1,13 +1,10 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
-
+import { getAddress } from 'viem';
 export const createViemSignTypedDataTest = (
   ctx: Awaited<ReturnType<typeof init>>,
   getAuthContext: () => any
 ) => {
   return async () => {
-    const { getAddress } = await import('viem');
-
     const pkpViemAccount = await ctx.litClient.getPkpViemAccount({
       pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
       authContext: getAuthContext(),
@@ -56,7 +53,7 @@ export const createViemSignTypedDataTest = (
 
     const signature = await pkpViemAccount.signTypedData(typedData);
 
-    assert.toBeDefined(signature);
-    assert.toMatch(signature, /^0x[a-fA-F0-9]{130}$/);
+    expect(signature).toBeDefined();
+    expect(signature).toMatch(/^0x[a-fA-F0-9]{130}$/);
   };
 };

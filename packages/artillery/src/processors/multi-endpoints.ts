@@ -2,7 +2,7 @@ import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { createLitClient, LitClientType } from '@lit-protocol/lit-client';
 import { z } from 'zod';
 import * as StateManager from '../StateManager';
-import * as NetworkManager from '../../../src/helper/NetworkManager';
+import { getLitNetworkModule } from '@lit-protocol/e2e';
 import * as AccountManager from '../AccountManager';
 import { createAccBuilder } from '@lit-protocol/access-control-conditions';
 
@@ -55,7 +55,7 @@ const initialiseSharedResources = async () => {
     console.log('🔧 Initializing shared resources...');
 
     // Import network module
-    networkModule = await NetworkManager.getLitNetworkModule();
+    networkModule = await getLitNetworkModule();
 
     // Create LitClient
     litClient = await createLitClient({ network: networkModule });

@@ -1,4 +1,4 @@
-import '../../src/helper/supressLogs';
+import '../../e2e/src/helper/supressLogs';
 import {
   createAuthManager,
   storagePlugins,
@@ -6,11 +6,8 @@ import {
 } from '@lit-protocol/auth';
 import * as StateManager from './StateManager';
 import { createLitClient } from '@lit-protocol/lit-client';
-import {
-  getOrCreatePkp,
-  getLitNetworkModule,
-  getViemPublicClient,
-} from '@lit-protocol/e2e';
+import { getOrCreatePkp } from '@lit-protocol/e2e/src/helper/pkp-utils';
+import * as NetworkManager from '@lit-protocol/e2e/src/helper/NetworkManager';
 import * as AccountManager from '../src/AccountManager';
 
 const _network = process.env['NETWORK'];

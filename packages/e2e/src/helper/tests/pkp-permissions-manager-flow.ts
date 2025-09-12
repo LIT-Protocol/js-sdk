@@ -1,5 +1,5 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
+
 export const createPkpPermissionsManagerFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>,
   getAuthContext: () => any
@@ -28,17 +28,17 @@ export const createPkpPermissionsManagerFlowTest = (
       account: pkpViemAccount,
     });
 
-    assert.toBeDefined(pkpPermissionsManager);
+    expect(pkpPermissionsManager).toBeDefined();
 
     // Test 1: Get initial permissions context
     const initialContext = await pkpPermissionsManager.getPermissionsContext();
-    assert.toBeDefined(initialContext);
-    assert.toBeDefined(initialContext.addresses);
-    assert.toBeDefined(initialContext.actions);
-    assert.toBeDefined(initialContext.authMethods);
-    assert.toBe(Array.isArray(initialContext.addresses), true);
-    assert.toBe(Array.isArray(initialContext.actions), true);
-    assert.toBe(Array.isArray(initialContext.authMethods), true);
+    expect(initialContext).toBeDefined();
+    expect(initialContext.addresses).toBeDefined();
+    expect(initialContext.actions).toBeDefined();
+    expect(initialContext.authMethods).toBeDefined();
+    expect(Array.isArray(initialContext.addresses)).toBe(true);
+    expect(Array.isArray(initialContext.actions)).toBe(true);
+    expect(Array.isArray(initialContext.authMethods)).toBe(true);
 
     const initialAddressesCount = initialContext.addresses.length;
     const initialActionsCount = initialContext.actions.length;
@@ -52,8 +52,8 @@ export const createPkpPermissionsManagerFlowTest = (
       await pkpPermissionsManager.isPermittedAction({
         ipfsId: TEST_ACTION_IPFS_ID,
       });
-    assert.toBe(typeof initialAddressPermitted, 'boolean');
-    assert.toBe(typeof initialActionPermitted, 'boolean');
+    expect(typeof initialAddressPermitted).toBe('boolean');
+    expect(typeof initialActionPermitted).toBe('boolean');
 
     // Test 3: Get all permitted items
     const allAddresses = await pkpPermissionsManager.getPermittedAddresses();
@@ -61,32 +61,32 @@ export const createPkpPermissionsManagerFlowTest = (
     const allAuthMethods =
       await pkpPermissionsManager.getPermittedAuthMethods();
 
-    assert.toBe(Array.isArray(allAddresses), true);
-    assert.toBe(Array.isArray(allActions), true);
-    assert.toBe(Array.isArray(allAuthMethods), true);
-    assert.toBe(allAddresses.length, initialAddressesCount);
-    assert.toBe(allActions.length, initialActionsCount);
+    expect(Array.isArray(allAddresses)).toBe(true);
+    expect(Array.isArray(allActions)).toBe(true);
+    expect(Array.isArray(allAuthMethods)).toBe(true);
+    expect(allAddresses.length).toBe(initialAddressesCount);
+    expect(allActions.length).toBe(initialActionsCount);
 
     // Test 4: Test context helper functions
     if (allAddresses.length > 0) {
       const firstAddress = allAddresses[0];
       const isAddressInContext =
         initialContext.isAddressPermitted(firstAddress);
-      assert.toBe(typeof isAddressInContext, 'boolean');
+      expect(typeof isAddressInContext).toBe('boolean');
     }
 
     // Test 5: Working with auth methods
     if (allAuthMethods.length > 0) {
       const firstAuthMethod = allAuthMethods[0];
-      assert.toBeDefined(firstAuthMethod.authMethodType);
-      assert.toBeDefined(firstAuthMethod.id);
+      expect(firstAuthMethod.authMethodType).toBeDefined();
+      expect(firstAuthMethod.id).toBeDefined();
 
       const authMethodScopes =
         await pkpPermissionsManager.getPermittedAuthMethodScopes({
           authMethodType: Number(firstAuthMethod.authMethodType),
           authMethodId: firstAuthMethod.id,
         });
-      assert.toBe(Array.isArray(authMethodScopes), true);
+      expect(Array.isArray(authMethodScopes)).toBe(true);
     }
 
     // Note: We don't test add/remove operations as they require PKP ownership
@@ -95,8 +95,8 @@ export const createPkpPermissionsManagerFlowTest = (
 
     // Test 6: Verify all read operations work consistently
     const finalContext = await pkpPermissionsManager.getPermissionsContext();
-    assert.toBe(finalContext.addresses.length, initialAddressesCount);
-    assert.toBe(finalContext.actions.length, initialActionsCount);
+    expect(finalContext.addresses.length).toBe(initialAddressesCount);
+    expect(finalContext.actions.length).toBe(initialActionsCount);
 
     // Test 7: Verify permission checks are consistent
     const finalAddressPermitted =
@@ -107,20 +107,18 @@ export const createPkpPermissionsManagerFlowTest = (
       ipfsId: TEST_ACTION_IPFS_ID,
     });
 
-    assert.toBe(finalAddressPermitted, initialAddressPermitted);
-    assert.toBe(finalActionPermitted, initialActionPermitted);
+    expect(finalAddressPermitted).toBe(initialAddressPermitted);
+    expect(finalActionPermitted).toBe(initialActionPermitted);
 
     // Test 8: Verify new addPermittedAuthMethod method exists and is callable
-    assert.toBeDefined(pkpPermissionsManager.addPermittedAuthMethod);
-    assert.toBe(
-      typeof pkpPermissionsManager.addPermittedAuthMethod,
+    expect(pkpPermissionsManager.addPermittedAuthMethod).toBeDefined();
+    expect(typeof pkpPermissionsManager.addPermittedAuthMethod).toBe(
       'function'
     );
 
     // Test 9: Verify new removePermittedAuthMethodScope method exists and is callable
-    assert.toBeDefined(pkpPermissionsManager.removePermittedAuthMethodScope);
-    assert.toBe(
-      typeof pkpPermissionsManager.removePermittedAuthMethodScope,
+    expect(pkpPermissionsManager.removePermittedAuthMethodScope).toBeDefined();
+    expect(typeof pkpPermissionsManager.removePermittedAuthMethodScope).toBe(
       'function'
     );
 
@@ -130,7 +128,7 @@ export const createPkpPermissionsManagerFlowTest = (
       authMethodId: '0x1234567890abcdef1234567890abcdef12345678',
       userPubkey:
         '0x04abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-      scopes: ['sign-anything'] as const,
+      scopes: ['sign-anything'] as ('sign-anything' | 'no-permissions' | 'personal-sign')[],
     };
 
     // Get initial auth methods count
@@ -143,14 +141,14 @@ export const createPkpPermissionsManagerFlowTest = (
     const addAuthMethodTx = await pkpPermissionsManager.addPermittedAuthMethod(
       testAuthMethodParams
     );
-    assert.toBeDefined(addAuthMethodTx.hash);
-    assert.toBeDefined(addAuthMethodTx.receipt);
-    assert.toBe(addAuthMethodTx.receipt.status, 'success');
+    expect(addAuthMethodTx.hash).toBeDefined();
+    expect(addAuthMethodTx.receipt).toBeDefined();
+    expect(addAuthMethodTx.receipt.status).toBe('success');
 
     // Verify the auth method was added
     const authMethodsAfterAdd =
       await pkpPermissionsManager.getPermittedAuthMethods();
-    assert.toBe(authMethodsAfterAdd.length, initialAuthMethodsCount + 1);
+    expect(authMethodsAfterAdd.length).toBe(initialAuthMethodsCount + 1);
 
     // Find our added auth method
     const addedAuthMethod = authMethodsAfterAdd.find(
@@ -158,7 +156,7 @@ export const createPkpPermissionsManagerFlowTest = (
         am.id === testAuthMethodParams.authMethodId &&
         Number(am.authMethodType) === testAuthMethodParams.authMethodType
     );
-    assert.toBeDefined(addedAuthMethod);
+    expect(addedAuthMethod).toBeDefined();
     console.log('✅ Test auth method successfully added');
 
     // Test 11: Test removePermittedAuthMethodScope functionality
@@ -174,9 +172,9 @@ export const createPkpPermissionsManagerFlowTest = (
       await pkpPermissionsManager.removePermittedAuthMethodScope(
         testScopeParams
       );
-    assert.toBeDefined(removeScopeTx.hash);
-    assert.toBeDefined(removeScopeTx.receipt);
-    assert.toBe(removeScopeTx.receipt.status, 'success');
+    expect(removeScopeTx.hash).toBeDefined();
+    expect(removeScopeTx.receipt).toBeDefined();
+    expect(removeScopeTx.receipt.status).toBe('success');
 
     // Verify the scope was removed by checking auth method scopes
     const authMethodScopes =
@@ -186,7 +184,7 @@ export const createPkpPermissionsManagerFlowTest = (
         scopeId: 1,
       });
     // After removing scope 1, it should return false for that specific scope
-    assert.toBe(authMethodScopes[0], false);
+    expect(authMethodScopes[0]).toBe(false);
     console.log('✅ Scope successfully removed from test auth method');
 
     // Test 12: Cleanup - Remove the test auth method entirely
@@ -196,14 +194,14 @@ export const createPkpPermissionsManagerFlowTest = (
         authMethodType: testAuthMethodParams.authMethodType,
         authMethodId: testAuthMethodParams.authMethodId,
       });
-    assert.toBeDefined(removeAuthMethodTx.hash);
-    assert.toBeDefined(removeAuthMethodTx.receipt);
-    assert.toBe(removeAuthMethodTx.receipt.status, 'success');
+    expect(removeAuthMethodTx.hash).toBeDefined();
+    expect(removeAuthMethodTx.receipt).toBeDefined();
+    expect(removeAuthMethodTx.receipt.status).toBe('success');
 
     // Verify the auth method was removed
     const finalAuthMethods =
       await pkpPermissionsManager.getPermittedAuthMethods();
-    assert.toBe(finalAuthMethods.length, initialAuthMethodsCount);
+    expect(finalAuthMethods.length).toBe(initialAuthMethodsCount);
 
     // Ensure our test auth method is no longer in the list
     const removedAuthMethod = finalAuthMethods.find(
@@ -211,7 +209,7 @@ export const createPkpPermissionsManagerFlowTest = (
         am.id === testAuthMethodParams.authMethodId &&
         Number(am.authMethodType) === testAuthMethodParams.authMethodType
     );
-    assert.toBe(removedAuthMethod, undefined);
+    expect(removedAuthMethod).toBe(undefined);
     console.log('✅ Test auth method successfully cleaned up');
   };
 };

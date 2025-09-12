@@ -4,7 +4,7 @@ Standalone Artillery load-testing package for Lit Protocol. Moved from `packages
 
 Usage via root scripts remains the same, now pointing to `packages/artillery`.
 
-# Run Artillery tests
+# 🚀 Run Artillery tests
 
 - LOG_LEVEL= `debug` | `info` | `silent` | `debug2` (raw console.log)
 - NETWORK= `naga-dev` | `naga-staging`

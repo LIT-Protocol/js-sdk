@@ -5,11 +5,19 @@
   "scripts": {
     "reset": "rimraf dist pnpm-lock.yaml node_modules tmp yarn-error.log yarn.lock package-lock.json learn-debug.log .nx lit-auth-storage pkp-tokens lit-auth-local ./e2e/dist ./e2e/node_modules",
     "build": "nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions",
+    "build:affected": "nx affected --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions",
+    "test:local": "node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/test.mjs",
     "gen:local-network-context": "dotenvx run --env-file=.env -- node --conditions=import --import tsx packages/networks/src/networks/vNaga/shared/scripts/generate-abi-signatures.ts",
     "prettier": "npx nx format:write --all",
     "format:check": "npx nx format:check --all",
     "test:e2e": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000 -t",
-    "test:custom": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000"
+    "artillery:init": "dotenvx run --env-file=.env -- tsx packages/artillery/src/init.ts",
+    "artillery:balance-status": "LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- tsx packages/artillery/src/balance-status.ts",
+    "artillery:pkp-sign": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./packages/artillery/configs/pkp-sign.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:encrypt-decrypt": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./packages/artillery/configs/encrypt-decrypt.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:execute-js": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./packages/artillery/configs/execute.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:mix": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./packages/artillery/configs/mix.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'",
+    "artillery:sign-session-key": "DEBUG_HTTP=true LOG_LEVEL=silent dotenvx run --env-file=.env -- sh -c 'artillery run ./packages/artillery/configs/sign-session-key.yml ${ARTILLERY_KEY:+--record --key $ARTILLERY_KEY}'"
   },
   "private": true,
   "dependencies": {

@@ -1,9 +1,7 @@
-import * as NetworkManager from '../../../e2e/src/helper/NetworkManager';
 import { privateKeyToAccount } from 'viem/accounts';
-import { createPublicClient, formatEther, http } from 'viem';
+import { formatEther } from 'viem';
 import { createLitClient } from '@lit-protocol/lit-client';
-import * as StateManager from './StateManager';
-import { printAligned } from '../../../e2e/src/helper/utils';
+import { printAligned } from '@lit-protocol/e2e';
 
 export const getMasterAccount = async () => {
   const privateKey = process.env['LIVE_MASTER_ACCOUNT'];

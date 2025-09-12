@@ -17,14 +17,7 @@
     "README.md",
     "example.js"
   ],
-  "scripts": {
-    "build": "bun run build:cjs && bun run build:esm",
-    "build:cjs": "bun build src/index.ts --outdir dist --format cjs --target node --external '@lit-protocol/*'",
-    "build:esm": "mkdir -p dist-esm && bun build src/index.ts --outdir dist-esm --format esm --target node --external '@lit-protocol/*' && mv dist-esm/index.js dist/index.mjs && rm -rf dist-esm",
-    "prepublishOnly": "bun run build",
-    "test": "bun test",
-    "test:watch": "bun test --watch"
-  },
+  "scripts": {},
   "keywords": [
     "lit-protocol",
     "e2e",
@@ -45,9 +38,11 @@
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "@lit-protocol/auth": "*",
-    "@lit-protocol/lit-client": "*",
-    "@lit-protocol/networks": "*"
+    "@lit-protocol/access-control-conditions": "workspace:*",
+    "@lit-protocol/auth": "workspace:*",
+    "@lit-protocol/lit-client": "workspace:*",
+    "@lit-protocol/networks": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -58,6 +53,7 @@
     "directory": "e2e"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "../../dist/packages/e2e"
   }
 }

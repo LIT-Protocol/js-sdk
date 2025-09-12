@@ -1,5 +1,5 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
+
 
 export const createPaymentManagerFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -26,33 +26,17 @@ export const createPaymentManagerFlowTest = (
       amountInEth: depositAmount,
     });
 
-    assert.toBeDefined(
-      depositResult.hash,
-      'Deposit transaction hash should be defined'
-    );
-    assert.toBeDefined(
-      depositResult.receipt,
-      'Deposit transaction receipt should be defined'
-    );
+    expect(depositResult.hash).toBeDefined();
+    expect(depositResult.receipt).toBeDefined();
     console.log('✅ Deposit successful:', depositResult.hash);
 
     console.log('📊 Testing balance checking...');
     // Check balance after deposit
     const balanceInfo = await paymentManager.getBalance({ userAddress });
 
-    assert.toBeDefined(
-      balanceInfo.totalBalance,
-      'Total balance should be defined'
-    );
-    assert.toBeDefined(
-      balanceInfo.availableBalance,
-      'Available balance should be defined'
-    );
-    assert.toBeGreaterThan(
-      Number(balanceInfo.raw.totalBalance),
-      0,
-      'Balance should be greater than 0'
-    );
+    expect(balanceInfo.totalBalance).toBeDefined();
+    expect(balanceInfo.availableBalance).toBeDefined();
+    expect(Number(balanceInfo.raw.totalBalance)).toBeGreaterThan(0);
 
     console.log('💰 Current balance:', balanceInfo.totalBalance, 'ETH');
     console.log('💳 Available balance:', balanceInfo.availableBalance, 'ETH');
@@ -64,14 +48,8 @@ export const createPaymentManagerFlowTest = (
       amountInEth: withdrawAmount,
     });
 
-    assert.toBeDefined(
-      withdrawRequestResult.hash,
-      'Withdrawal request transaction hash should be defined'
-    );
-    assert.toBeDefined(
-      withdrawRequestResult.receipt,
-      'Withdrawal request transaction receipt should be defined'
-    );
+    expect(withdrawRequestResult.hash).toBeDefined();
+    expect(withdrawRequestResult.receipt).toBeDefined();
     console.log(
       '✅ Withdrawal request successful:',
       withdrawRequestResult.hash
@@ -83,21 +61,9 @@ export const createPaymentManagerFlowTest = (
       userAddress,
     });
 
-    assert.toBe(
-      withdrawRequestInfo.isPending,
-      true,
-      'Withdrawal request should be pending'
-    );
-    assert.toBe(
-      withdrawRequestInfo.amount,
-      withdrawAmount,
-      'Withdrawal amount should match'
-    );
-    assert.toBeGreaterThan(
-      Number(withdrawRequestInfo.timestamp),
-      0,
-      'Withdrawal timestamp should be greater than 0'
-    );
+    expect(withdrawRequestInfo.isPending).toBe(true);
+    expect(withdrawRequestInfo.amount).toBe(withdrawAmount);
+    expect(Number(withdrawRequestInfo.timestamp)).toBeGreaterThan(0);
 
     console.log(
       '⏰ Withdrawal request timestamp:',
@@ -113,15 +79,8 @@ export const createPaymentManagerFlowTest = (
     // Get withdrawal delay
     const delayInfo = await paymentManager.getWithdrawDelay();
 
-    assert.toBeDefined(
-      delayInfo.delaySeconds,
-      'Delay seconds should be defined'
-    );
-    assert.toBeGreaterThan(
-      Number(delayInfo.raw),
-      0,
-      'Delay should be greater than 0'
-    );
+    expect(delayInfo.delaySeconds).toBeDefined();
+    expect(Number(delayInfo.raw)).toBeGreaterThan(0);
 
     console.log('⏳ Withdrawal delay:', delayInfo.delaySeconds, 'seconds');
 
@@ -131,15 +90,8 @@ export const createPaymentManagerFlowTest = (
       userAddress,
     });
 
-    assert.toBeDefined(
-      canExecuteInfo.canExecute,
-      'canExecute should be defined'
-    );
-    assert.toBe(
-      canExecuteInfo.withdrawRequest.isPending,
-      true,
-      'Withdrawal request should be pending'
-    );
+    expect(canExecuteInfo.canExecute).toBeDefined();
+    expect(canExecuteInfo.withdrawRequest.isPending).toBe(true);
 
     if (canExecuteInfo.canExecute) {
       console.log('✅ Withdrawal can be executed immediately');
@@ -150,14 +102,8 @@ export const createPaymentManagerFlowTest = (
         amountInEth: withdrawAmount,
       });
 
-      assert.toBeDefined(
-        withdrawResult.hash,
-        'Withdrawal execution transaction hash should be defined'
-      );
-      assert.toBeDefined(
-        withdrawResult.receipt,
-        'Withdrawal execution transaction receipt should be defined'
-      );
+      expect(withdrawResult.hash).toBeDefined();
+      expect(withdrawResult.receipt).toBeDefined();
       console.log('✅ Withdrawal executed successfully:', withdrawResult.hash);
 
       // Check balance after withdrawal
@@ -179,25 +125,15 @@ export const createPaymentManagerFlowTest = (
       amountInEth: '0.00001',
     });
 
-    assert.toBeDefined(
-      depositForUserResult.hash,
-      'Deposit for user transaction hash should be defined'
-    );
-    assert.toBeDefined(
-      depositForUserResult.receipt,
-      'Deposit for user transaction receipt should be defined'
-    );
+    expect(depositForUserResult.hash).toBeDefined();
+    expect(depositForUserResult.receipt).toBeDefined();
     console.log('✅ Deposit for user successful:', depositForUserResult.hash);
 
     // Check target user's balance
     const targetUserBalance = await paymentManager.getBalance({
       userAddress: targetUserAddress,
     });
-    assert.toBeGreaterThan(
-      Number(targetUserBalance.raw.totalBalance),
-      0,
-      'Target user balance should be greater than 0'
-    );
+    expect(Number(targetUserBalance.raw.totalBalance)).toBeGreaterThan(0);
     console.log(
       '💰 Target user balance:',
       targetUserBalance.totalBalance,
