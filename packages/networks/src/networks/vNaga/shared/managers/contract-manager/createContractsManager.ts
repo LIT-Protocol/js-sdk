@@ -100,7 +100,7 @@ export const createContractsManager = <T, M>(
       contractData.PKPNFT.methods.safeTransferFrom,
       ...contractData.PKPNFT.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { public: publicClientForContract, wallet: walletClientForContract },
   });
 
   const pkpHelperContract = getContract({
@@ -151,7 +151,7 @@ export const createContractsManager = <T, M>(
       contractData.PKPPermissions.methods.getTokenIdsForAuthMethod,
       ...contractData.PKPPermissions.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { public: publicClientForContract, wallet: walletClientForContract },
   });
 
   const pubkeyRouterContract = getContract({
@@ -179,7 +179,7 @@ export const createContractsManager = <T, M>(
       contractData.Ledger.methods.withdraw,
       ...contractData.Ledger.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { public: publicClientForContract, wallet: walletClientForContract },
   });
 
   const paymentDelegationContract = getContract({
@@ -196,7 +196,7 @@ export const createContractsManager = <T, M>(
       contractData.PaymentDelegation.methods.undelegatePaymentsBatch,
       ...contractData.PaymentDelegation.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { public: publicClientForContract, wallet: walletClientForContract },
   });
 
   // ---------- End of all your contracts ----------
