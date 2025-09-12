@@ -124,17 +124,32 @@ describe('all', () => {
 
       describe('endpoints', () => {
         it('pkpSign', () =>
-          createPkpSignTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey)());
+          createPkpSignTest(
+            ctx,
+            () => eveCustomAuthContext,
+            ctx.eveViemAccountPkp.pubkey
+          )());
         it('executeJs', () =>
-          createExecuteJsTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey)());
-        it('viewPKPsByAddress', () =>
-          createViewPKPsByAddressTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey)());
+          createExecuteJsTest(
+            ctx,
+            () => eveCustomAuthContext,
+            ctx.eveViemAccountPkp.pubkey
+          )());
+        it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
         it('viewPKPsByAuthData', () =>
-          createViewPKPsByAuthDataTest(ctx, () => eveCustomAuthContext, ctx.eveCustomAuthData)());
+          createViewPKPsByAuthDataTest(ctx, ctx.eveCustomAuthData)());
         it('pkpEncryptDecrypt', () =>
-          createPkpEncryptDecryptTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.ethAddress)());
+          createPkpEncryptDecryptTest(
+            ctx,
+            () => eveCustomAuthContext,
+            ctx.eveViemAccountPkp.ethAddress
+          )());
         it('encryptDecryptFlow', () =>
-          createEncryptDecryptFlowTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey)());
+          createEncryptDecryptFlowTest(
+            ctx,
+            () => eveCustomAuthContext,
+            ctx.eveViemAccountPkp.pubkey
+          )());
 
         // Disable for now because it requires a different flow
         // it('pkpPermissionsManagerFlow', () =>

@@ -3,14 +3,13 @@ import { assert } from '../assertions';
 
 export const createViewPKPsByAuthDataTest = (
   ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any,
-  authData?: any,
+  authData?: any
 ) => {
   return async () => {
     const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
-    const _authData = authData ||  await ViemAccountAuthenticator.authenticate(
-      ctx.aliceViemAccount
-    );
+    const _authData =
+      authData ||
+      (await ViemAccountAuthenticator.authenticate(ctx.aliceViemAccount));
 
     const pkps = await ctx.litClient.viewPKPsByAuthData({
       authData: {
