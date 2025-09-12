@@ -6,8 +6,11 @@ import {
 } from '@lit-protocol/auth';
 import * as StateManager from './StateManager';
 import { createLitClient } from '@lit-protocol/lit-client';
-import { getOrCreatePkp } from '../../../e2e/src/helper/pkp-utils';
-import * as NetworkManager from '../../../e2e/src/helper/NetworkManager';
+import {
+  getOrCreatePkp,
+  getLitNetworkModule,
+  getViemPublicClient,
+} from '@lit-protocol/e2e';
 import * as AccountManager from '../src/AccountManager';
 
 const _network = process.env['NETWORK'];
@@ -21,8 +24,8 @@ const LEDGER_MINIMUM_BALANCE = 20000;
   console.log('\x1b[90m✅ Initialising Artillery...\x1b[0m');
 
   // 1. Setup network and chain client
-  const networkModule = await NetworkManager.getLitNetworkModule();
-  const publicClient = await NetworkManager.getViemPublicClient({
+  const networkModule = await getLitNetworkModule();
+  const publicClient = await getViemPublicClient({
     networkModule,
   });
   const litClient = await createLitClient({ network: networkModule });
@@ -89,13 +92,7 @@ const LEDGER_MINIMUM_BALANCE = 20000;
   // 5. get or mint a PKP for the master account
   const masterAccountPkp = await StateManager.getOrUpdate(
     'masterAccount.pkp',
-    await getOrCreatePkp(
-      litClient,
-      masterAccountAuthData,
-      masterAccount,
-      './artillery-pkp-tokens',
-      `${_network}-artillery`
-    )
+    await getOrCreatePkp(litClient, masterAccountAuthData, masterAccount)
   );
 
   console.log('✅ Master Account PKP:', masterAccountPkp);
