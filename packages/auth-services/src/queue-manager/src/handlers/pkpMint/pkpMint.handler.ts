@@ -1,3 +1,4 @@
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { AuthData } from '@lit-protocol/schemas';
 import { Optional } from '@lit-protocol/types';
 import { Hex } from 'viem';
@@ -17,8 +18,7 @@ export async function handlePkpMintTask(jobData: {
   reqId?: string;
 }): Promise<any> {
   if (
-    // AUTH_METHOD_TYPE.WebAuthn = 3 (without importing the constants package)
-    Number(jobData.requestBody.authMethodType) === 3 &&
+    Number(jobData.requestBody.authMethodType) === AUTH_METHOD_TYPE.WebAuthn &&
     (!jobData.requestBody.pubkey || jobData.requestBody.pubkey === '0x')
   ) {
     throw new Error(
