@@ -9,7 +9,7 @@ import {
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
 } from '@lit-protocol/schemas';
-import { Hex, hexToBytes, stringToBytes } from 'viem';
+import { Hex, hexToBytes, stringToBytes, bytesToHex } from 'viem';
 import { z } from 'zod';
 
 // Base types
@@ -78,6 +78,7 @@ import { DecryptRequestDataSchema } from '../managers/api-manager/decrypt/decryp
 import { DecryptResponseDataSchema } from '../managers/api-manager/decrypt/decrypt.ResponseDataSchema';
 
 import { ExecuteJsCreateRequestParams } from '../managers/api-manager/executeJs/executeJs.CreateRequestParams';
+
 import { ExecuteJsInputSchema } from '../managers/api-manager/executeJs/executeJs.InputSchema';
 import { ExecuteJsRequestDataSchema } from '../managers/api-manager/executeJs/executeJs.RequestDataSchema';
 import { ExecuteJsResponseDataSchema } from '../managers/api-manager/executeJs/executeJs.ResponseDataSchema';
@@ -871,6 +872,9 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               litActionCode: requestBody.litActionCode,
               litActionIpfsId: requestBody.litActionIpfsId,
               jsParams: requestBody.jsParams,
+              maxPrice: getUserMaxPrice({
+                product: 'SIGN_SESSION_KEY',
+              }).toString(),
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -883,7 +887,6 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               url,
               endpoint: baseModule.getEndpoints().SIGN_SESSION_KEY,
             });
-
             requests.push({
               fullPath: _urlWithPath,
               data: encryptedPayload,
@@ -898,23 +901,18 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         handleResponse: async (
           result: z.infer<typeof GenericEncryptedPayloadSchema>,
           pkpPublicKey: Hex | string,
-          jitContext: NagaJitContext
+          jitContext: NagaJitContext,
+          requestId?: string
         ) => {
-          if (!result.success) {
-            E2EERequestManager.handleEncryptedError(
-              result,
-              jitContext,
-              'Session key signing'
-            );
-          }
-
           const decryptedValues = E2EERequestManager.decryptBatchResponse(
             result,
             jitContext,
             (decryptedJson) => {
               const signCustomSessionKeyData = decryptedJson.data;
               if (!signCustomSessionKeyData) {
-                throw new Error('Decrypted response missing data field');
+                throw new Error(
+                  `[${requestId}] Decrypted response missing data field`
+                );
               }
               return signCustomSessionKeyData;
             }

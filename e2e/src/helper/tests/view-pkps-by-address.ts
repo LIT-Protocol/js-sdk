@@ -2,8 +2,7 @@ import { init } from '../../init';
 import { assert } from '../assertions';
 
 export const createViewPKPsByAddressTest = (
-  ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any
+  ctx: Awaited<ReturnType<typeof init>>
 ) => {
   return async () => {
     const pkps = await ctx.litClient.viewPKPsByAddress({

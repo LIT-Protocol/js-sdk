@@ -3,7 +3,8 @@ import { assert } from '../assertions';
 
 export const createEncryptDecryptFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any
+  getAuthContext: () => any,
+  address?: string
 ) => {
   return async () => {
     const { createAccBuilder } = await import(
@@ -17,7 +18,7 @@ export const createEncryptDecryptFlowTest = (
     if (authContext === ctx.aliceEoaAuthContext) {
       aliceAddress = ctx.aliceViemAccount.address;
     } else {
-      aliceAddress = ctx.aliceViemAccountPkp.ethAddress;
+      aliceAddress = address || ctx.aliceViemAccountPkp.ethAddress;
     }
 
     // Set up access control conditions requiring Bob's wallet ownership
