@@ -13,41 +13,39 @@
     "balance-status": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsx packages/artillery/src/balance-status.ts"
+        "command": "LOG_LEVEL=${LOG_LEVEL:-silent} tsx packages/artillery/src/balance-status.ts"
       }
     },
-    "run:pkp-sign": {
+    "pkp-sign": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/pkp-sign.yml"
+        "command": "DEBUG_HTTP=true LOG_LEVEL=silent artillery run packages/artillery/configs/pkp-sign.yml"
       }
     },
-    "run:encrypt-decrypt": {
+    "encrypt-decrypt": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/encrypt-decrypt.yml"
+        "command": "DEBUG_HTTP=true LOG_LEVEL=silent artillery run packages/artillery/configs/encrypt-decrypt.yml"
       }
     },
-    "run:execute": {
+    "execute": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/execute.yml"
+        "command": "DEBUG_HTTP=true LOG_LEVEL=silent artillery run packages/artillery/configs/execute.yml"
       }
     },
-    "run:mix": {
+    "mix": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/mix.yml"
+        "command": "DEBUG_HTTP=true LOG_LEVEL=silent artillery run packages/artillery/configs/mix.yml"
       }
     },
-    "run:sign-session-key": {
+    "sign-session-key": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/sign-session-key.yml"
+        "command": "DEBUG_HTTP=true LOG_LEVEL=silent artillery run packages/artillery/configs/sign-session-key.yml"
       }
     }
   },
   "tags": []
 }
-
-
