@@ -1,7 +1,5 @@
 import { init } from '../init';
 
-import { hexToBigInt, keccak256, toBytes } from 'viem';
-
 /**
  * Creates a PKP authentication context
  */
