@@ -15,7 +15,7 @@ export const createPkpPermissionsManagerFlowTest = (
 
     // Get PKP Viem account for permissions management
     const pkpViemAccount = await ctx.litClient.getPkpViemAccount({
-      pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
       authContext: authContext,
       chainConfig: ctx.litClient.getChainConfig().viemConfig,
     });

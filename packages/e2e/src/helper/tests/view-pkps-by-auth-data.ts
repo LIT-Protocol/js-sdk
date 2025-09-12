@@ -1,10 +1,14 @@
 import { init } from '../../init';
 import { ViemAccountAuthenticator } from '@lit-protocol/auth';
+import { AuthContext } from '../../types';
+import { AuthData } from '@lit-protocol/schemas';
+
+type InitialisedInstance = Awaited<ReturnType<typeof init>>;
 
 export const createViewPKPsByAuthDataTest = (
-  ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any,
-  authData?: any
+  ctx: InitialisedInstance,
+  getAuthContext: () => AuthContext,
+  authData?: AuthData
 ) => {
   return async () => {
     const _authData =
@@ -36,7 +40,7 @@ export const createViewPKPsByAuthDataTest = (
     // Verify the PKP structure
     const firstPkp = pkps.pkps[0];
     expect(firstPkp.tokenId).toBeDefined();
-    expect(firstPkp.publicKey).toBeDefined();
+    expect(firstPkp.pubkey).toBeDefined();
     expect(firstPkp.ethAddress).toBeDefined();
   };
 };

@@ -1,6 +1,6 @@
-import type { LitClientType } from '@lit-protocol/lit-client';
-import type { AuthData } from '@lit-protocol/schemas';
+import type { AuthData, PKPData } from '@lit-protocol/schemas';
 import type { PrivateKeyAccount } from 'viem/accounts';
+import { LitClientInstance } from '../types';
 
 // Configuration constants
 const PAGINATION_LIMIT = 5;
@@ -18,12 +18,10 @@ const PKP_SCOPES = ['sign-anything'];
  * @returns Promise<PKP> - The existing or newly created PKP
  */
 export const getOrCreatePkp = async (
-  litClient: LitClientType,
+  litClient: LitClientInstance,
   authData: AuthData,
-  account: PrivateKeyAccount,
-  storagePath: string,
-  networkName: string
-) => {
+  account: PrivateKeyAccount
+): Promise<PKPData> => {
   // Check for existing PKPs
   const { pkps } = await litClient.viewPKPsByAuthData({
     authData,
@@ -38,11 +36,15 @@ export const getOrCreatePkp = async (
   }
 
   // Otherwise mint new PKP
-  const mintResult = await (litClient as any).mintWithAuth({
-    authData,
-    account,
-    scopes: PKP_SCOPES,
-  });
+  try {
+    await litClient.mintWithAuth({
+      authData,
+      account,
+      scopes: PKP_SCOPES,
+    });
+  } catch (e) {
+    throw new Error(`❌ Error minting PKP: ${e}`);
+  }
 
   // Query again to get the newly minted PKP in the expected format
   const { pkps: newPkps } = await litClient.viewPKPsByAuthData({

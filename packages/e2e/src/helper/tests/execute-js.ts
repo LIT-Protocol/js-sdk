@@ -29,7 +29,7 @@ export const createExecuteJsTest = (
         message: 'Test message from e2e executeJs',
         sigName: 'e2e-test-sig',
         toSign: 'Test message from e2e executeJs',
-        publicKey: pubkey || ctx.aliceViemAccountPkp.publicKey,
+        publicKey: pubkey || ctx.aliceViemAccountPkp.pubkey,
       },
     });
 

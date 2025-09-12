@@ -32,8 +32,6 @@ describe('Custom Auth Frontend Logic', () => {
       uniqueDappName: YOU_UNIQUE_DAPP_NAME,
     });
 
-    console.log('authMethodConfig:', authMethodConfig);
-
     // Step 2: Create and Pin Validation Lit Action
     // This is done manually in the browser at https://explorer.litprotocol.com/create-action
     // This is the code used
@@ -60,7 +58,7 @@ describe('Custom Auth Frontend Logic', () => {
     //   LitActions.setResponse({ response: isValid ? "true" : "false" });
     // })();
     // ============================================================
-    const validationIpfsCid = 'QmP3ZoTSGQ2P9cAZ4pBUjmPC34xbJZFRoWnCXT2SdHA2uD';
+    const validationIpfsCid = 'QmTdTemgWBYS76ACdZPttsve6edukyXjCdsNYNK1QDeXKY';
 
     // Step 3: Mint PKPs for Users - Mint PKPs for your users using the custom auth method
     // type and validation CID.

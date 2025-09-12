@@ -10,7 +10,7 @@ export const createPkpSignTest = (
       // chain: 'ethereum',
       // signingScheme: 'EcdsaK256Sha256',
       authContext: getAuthContext(),
-      pubKey: pubkey || ctx.aliceViemAccountPkp.publicKey,
+      pubKey: pubkey || ctx.aliceViemAccountPkp.pubkey,
       toSign: 'Hello, world!',
     });
 
