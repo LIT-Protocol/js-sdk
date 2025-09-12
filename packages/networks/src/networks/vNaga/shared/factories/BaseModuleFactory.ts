@@ -8,6 +8,7 @@ import {
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
+  ScopeStringSchema,
 } from '@lit-protocol/schemas';
 import { Hex, hexToBytes, stringToBytes } from 'viem';
 import { z } from 'zod';
@@ -376,7 +377,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       mintWithAuth: async (params: {
         account: ExpectedAccountOrWalletClient;
         authData: Optional<AuthData, 'accessToken'>;
-        scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+        scopes: z.infer<typeof ScopeStringSchema>[];
       }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
         const chainManager = createChainManager(params.account);
         const res = await chainManager.api.mintPKP({

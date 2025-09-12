@@ -1,7 +1,9 @@
-import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
-import { AuthData } from '@lit-protocol/schemas';
+import {
+  AuthData,
+  MintPKPRequest,
+  MintPKPRequestSchema,
+} from '@lit-protocol/schemas';
 import { Optional } from '@lit-protocol/types';
-import { Hex } from 'viem';
 
 /**
  * Handles PKP minting tasks.
@@ -9,33 +11,25 @@ import { Hex } from 'viem';
  * @returns The result of the PKP minting process.
  */
 export async function handlePkpMintTask(jobData: {
-  requestBody: {
-    authMethodType: string;
-    authMethodId: Hex;
-    pubkey: Hex;
-    scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
-  };
+  requestBody: MintPKPRequest;
   reqId?: string;
 }): Promise<any> {
-  if (
-    Number(jobData.requestBody.authMethodType) === AUTH_METHOD_TYPE.WebAuthn &&
-    (!jobData.requestBody.pubkey || jobData.requestBody.pubkey === '0x')
-  ) {
-    throw new Error(
-      `[PKP Mint][HANDLER] WebAuthn requires a non-empty COSE pubkey; got '${jobData.requestBody.pubkey}'. reqId=${jobData.reqId}`
-    );
-  }
+  // Validate and transform the request using the unified schema
+  // This handles the WebAuthn pubkey validation internally
+  const validatedRequest = await MintPKPRequestSchema.parseAsync(
+    jobData.requestBody
+  );
 
   const userAuthData: Optional<AuthData, 'accessToken'> = {
-    authMethodId: jobData.requestBody.authMethodId,
-    authMethodType: Number(jobData.requestBody.authMethodType),
-    publicKey: jobData.requestBody.pubkey,
+    authMethodId: validatedRequest.authMethodId,
+    authMethodType: validatedRequest.authMethodType,
+    publicKey: validatedRequest.pubkey,
   };
 
   const result = await globalThis.systemContext.litClient.mintWithAuth({
     account: globalThis.systemContext.account,
     authData: userAuthData,
-    scopes: jobData.requestBody.scopes || [],
+    scopes: validatedRequest.scopes,
   });
 
   console.log(

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { DefaultNetworkConfig } from '../../../../../../../shared/interfaces/NetworkContext';
-import { ScopeStringSchema } from '../../../../schemas/shared/ScopeSchema';
+import { ScopeStringSchema } from '@lit-protocol/schemas';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,

@@ -14,12 +14,13 @@ import {
 } from '@lit-protocol/constants';
 import { AuthMethod, AuthServerTx, Hex } from '@lit-protocol/types';
 
-import { AuthData, PKPData } from '@lit-protocol/schemas';
+import { AuthData, PKPData, ScopeStringSchema } from '@lit-protocol/schemas';
 import { getRPIdFromOrigin, parseAuthenticatorData } from '../helper/utils';
 
 import { EthBlockhashInfo } from '@lit-protocol/types';
 import { pollResponse } from '../helper/pollResponse';
 import { JobStatusResponse } from '../types';
+import { z } from 'zod';
 
 const fetchBlockchainData = async () => {
   try {
@@ -149,7 +150,7 @@ export class WebAuthnAuthenticator {
   public static async registerAndMintPKP(params: {
     username?: string;
     authServiceBaseUrl: string;
-    scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+    scopes?: z.infer<typeof ScopeStringSchema>[];
   }): Promise<{
     pkpInfo: PKPData;
 

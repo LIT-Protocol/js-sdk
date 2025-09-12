@@ -6,7 +6,7 @@ import { logger } from '../../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../../shared/interfaces/NetworkContext';
 import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
 import { PKPData } from '../../../schemas/shared/PKPDataSchema';
-import { ScopeSchemaRaw } from '../../../schemas/shared/ScopeSchema';
+import { ScopeSchemaRaw } from '@lit-protocol/schemas';
 import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';
 import { LitTxRes } from '../../types';
 

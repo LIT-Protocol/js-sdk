@@ -2,12 +2,12 @@ import { ElysiaInstance } from '../../types/ElysiaInstance.type';
 import { addJob } from '../../../../queue-manager/src/bullmqSetup';
 import { resp } from '../../response-helpers/response-helpers';
 import { mintPkpDoc } from '../../../../queue-manager/src/handlers/pkpMint/pkpMint.doc';
-import { AuthServiceMintRequestRaw } from '../../schemas/AuthServiceMintRequestSchema';
+import { MintPKPRequest } from '@lit-protocol/schemas';
 
 export const mint = (app: ElysiaInstance) => {
   app.post(
     '/mint',
-    async ({ body }: { body: AuthServiceMintRequestRaw }) => {
+    async ({ body }: { body: MintPKPRequest }) => {
       try {
         const job = await addJob('pkpMint', { requestBody: body });
         return resp.QUEUED(job.id, 'PKP minting request queued successfully.');
