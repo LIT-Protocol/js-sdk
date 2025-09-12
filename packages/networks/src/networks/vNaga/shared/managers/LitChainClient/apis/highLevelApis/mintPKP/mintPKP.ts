@@ -4,7 +4,7 @@ import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/crea
 import { PKPData } from '../../../schemas/shared/PKPDataSchema';
 import { mintNextAndAddAuthMethods } from '../../rawContractApis/pkp/write/mintNextAndAddAuthMethods';
 import { LitTxRes } from '../../types';
-import { MintPKPRequest, MintPKPSchema } from './MintPKPSchema';
+import { MintPKPRequest, MintPKPRequestSchema } from '@lit-protocol/schemas';
 
 /**
  * authMethod
@@ -36,7 +36,7 @@ export const mintPKP = async (
   networkConfig: DefaultNetworkConfig,
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxRes<PKPData>> => {
-  const validatedRequest = await MintPKPSchema.parseAsync(request);
+  const validatedRequest = await MintPKPRequestSchema.parseAsync(request);
 
   logger.debug({ validatedRequest });
 

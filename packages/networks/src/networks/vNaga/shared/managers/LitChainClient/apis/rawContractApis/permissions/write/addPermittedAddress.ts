@@ -7,7 +7,7 @@ import {
   createContractsManager,
   ExpectedAccountOrWalletClient,
 } from '../../../../../contract-manager/createContractsManager';
-import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
+import { ScopeSchemaRaw } from '@lit-protocol/schemas';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
 import { decodeLogs } from '../../../utils/decodeLogs';

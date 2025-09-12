@@ -5,7 +5,7 @@ import { ipfsCidV0ToHex } from '../../../../../../../../shared/utils/transformer
 import { toBigInt } from '../../../../../../../../shared/utils/z-transformers';
 import { isIpfsCidV0 } from '../../../../../../../../shared/utils/z-validate';
 import { DefaultNetworkConfig } from '../../../../../../../shared/interfaces/NetworkContext';
-import { ScopeSchemaRaw } from '../../../../schemas/shared/ScopeSchema';
+import { ScopeSchemaRaw } from '@lit-protocol/schemas';
 import { LitTxVoid } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
 import {
