@@ -219,14 +219,14 @@ export const JsonSchema: z.ZodType<Json> = z.lazy(() =>
 );
 
 export const HexSchema = z.string().regex(/^0x[0-9a-fA-F]+$/);
-export const ChainSchema = z.string();
+export const ChainSchema = z.string().default('ethereum');
 export const EvmChainSchema = z.enum(LIT_CHAINS_KEYS);
 
 export const ChainedSchema = z.object({
   /**
    * The chain name of the chain that will be used. See LIT_CHAINS for currently supported chains.
    */
-  chain: ChainSchema,
+  chain: ChainSchema.optional(),
 });
 
 export const PricedSchema = z.object({
