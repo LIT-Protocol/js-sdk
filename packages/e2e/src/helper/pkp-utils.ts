@@ -1,16 +1,6 @@
-/**
- * PKP Utilities
- *
- * This module provides utility functions for managing Programmable Key Pairs (PKPs)
- * in the Lit Protocol ecosystem. It handles the common pattern of checking for
- * existing PKPs and creating new ones when necessary.
- *
- * Usage:
- *   import { getOrCreatePkp } from './helper/pkp-utils';
- *   const pkp = await getOrCreatePkp(litClient, authData, account, storagePath, networkName);
- */
-
-import { storagePlugins } from '@lit-protocol/auth';
+import type { LitClientType } from '@lit-protocol/lit-client';
+import type { AuthData } from '@lit-protocol/schemas';
+import type { PrivateKeyAccount } from 'viem/accounts';
 
 // Configuration constants
 const PAGINATION_LIMIT = 5;
@@ -28,9 +18,9 @@ const PKP_SCOPES = ['sign-anything'];
  * @returns Promise<PKP> - The existing or newly created PKP
  */
 export const getOrCreatePkp = async (
-  litClient: any,
-  authData: any,
-  account: any,
+  litClient: LitClientType,
+  authData: AuthData,
+  account: PrivateKeyAccount,
   storagePath: string,
   networkName: string
 ) => {
@@ -40,11 +30,6 @@ export const getOrCreatePkp = async (
     pagination: {
       limit: PAGINATION_LIMIT,
     },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: APP_NAME,
-      networkName,
-      storagePath,
-    }),
   });
 
   // If PKP exists, return it
@@ -53,7 +38,7 @@ export const getOrCreatePkp = async (
   }
 
   // Otherwise mint new PKP
-  const mintResult = await litClient.mintWithAuth({
+  const mintResult = await (litClient as any).mintWithAuth({
     authData,
     account,
     scopes: PKP_SCOPES,
@@ -65,11 +50,6 @@ export const getOrCreatePkp = async (
     pagination: {
       limit: PAGINATION_LIMIT,
     },
-    storageProvider: storagePlugins.localStorageNode({
-      appName: APP_NAME,
-      networkName,
-      storagePath,
-    }),
   });
 
   return newPkps[0];

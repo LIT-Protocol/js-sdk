@@ -133,6 +133,7 @@ export async function runLitE2eTests(
       : ('info' as LogLevel),
     selectedTests: config.selectedTests?.map((t) => TestNameSchema.parse(t)),
     testTimeout: config.testTimeout || 30000,
+    callback: config.callback,
   };
 
   console.log(
@@ -627,3 +628,7 @@ if (
     AVAILABLE_TESTS,
   };
 }
+
+export { printAligned } from './helper/utils';
+export { getLitNetworkModule } from './helper/NetworkManager';
+export { getViemPublicClient } from './helper/NetworkManager';

@@ -3,7 +3,7 @@ import {
   storagePlugins,
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
-import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
+import { createLitClient, utils as litUtils, type LitClientType } from '@lit-protocol/lit-client';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
@@ -35,25 +35,22 @@ export const init = async (
   network?: SupportedNetwork,
   logLevel?: LogLevel
 ): Promise<{
-  litClient: any;
-  authManager: any;
-  localMasterAccount: any;
-  aliceViemAccount: any;
-  aliceViemAccountAuthData: any;
-  aliceViemAccountPkp: any;
-  bobViemAccount: any;
-  bobViemAccountAuthData: any;
-  bobViemAccountPkp: any;
+  litClient: LitClientType;
+  authManager: ReturnType<typeof createAuthManager>;
+  localMasterAccount: ReturnType<typeof privateKeyToAccount>;
+  aliceViemAccount: ReturnType<typeof privateKeyToAccount>;
+  aliceViemAccountAuthData: Awaited<ReturnType<typeof ViemAccountAuthenticator.authenticate>>;
+  aliceViemAccountPkp: { tokenId: string; publicKey: string; ethAddress: string };
+  bobViemAccount: ReturnType<typeof privateKeyToAccount>;
+  bobViemAccountAuthData: Awaited<ReturnType<typeof ViemAccountAuthenticator.authenticate>>;
+  bobViemAccountPkp: { tokenId: string; publicKey: string; ethAddress: string };
   aliceEoaAuthContext: any;
   alicePkpAuthContext: any;
-  eveViemAccount: any;
+  eveViemAccount: ReturnType<typeof privateKeyToAccount>;
   eveCustomAuthData: Awaited<ReturnType<typeof litUtils.generateAuthData>>;
-  eveViemAccountPkp: Awaited<
-    ReturnType<typeof litClient.mintWithCustomAuth>
-  >['pkpData']['data'];
+  eveViemAccountPkp: { tokenId: string; pubkey: string; ethAddress: string };
   eveValidationIpfsCid: string;
   masterDepositForUser: (userAddress: string) => Promise<void>;
-  // alicePkpViemAccountPermissionsManager: any,
 }> => {
   /**
    * ====================================
@@ -125,10 +122,7 @@ export const init = async (
 
   // Optional RPC override from env
   const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
-  const _networkModule =
-    rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
-      ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
-      : _baseNetworkModule;
+  const _networkModule = _baseNetworkModule;
 
   if (rpcOverride) {
     console.log(
@@ -235,7 +229,10 @@ export const init = async (
     validationIpfsCid: EVE_VALIDATION_IPFS_CID,
   });
 
-  const eveViemAccountPkp = pkpData.data;
+  const eveViemAccountPkp = {
+    ...pkpData.data,
+    tokenId: pkpData.data.tokenId.toString(),
+  };
 
   /**
    * ====================================

@@ -1,11 +1,11 @@
 import { createLitClient } from '@lit-protocol/lit-client';
-import * as NetworkManager from '../../src/helper/NetworkManager';
+import { getLitNetworkModule, getViemPublicClient } from '@lit-protocol/e2e';
 import * as AccountManager from '../src/AccountManager';
 
 (async () => {
   // 1. Setup network and chain client
-  const networkModule = await NetworkManager.getLitNetworkModule();
-  const publicClient = await NetworkManager.getViemPublicClient({
+  const networkModule = await getLitNetworkModule();
+  const publicClient = await getViemPublicClient({
     networkModule,
   });
   const litClient = await createLitClient({ network: networkModule });

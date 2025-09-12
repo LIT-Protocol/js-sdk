@@ -1,5 +1,4 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
 
 export const createEoaNativeAuthFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>
@@ -7,62 +6,62 @@ export const createEoaNativeAuthFlowTest = (
   return async () => {
     // Test 1: Get the authenticator
     const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
-    assert.toBeDefined(ViemAccountAuthenticator);
+    expect(ViemAccountAuthenticator).toBeDefined();
 
     // Test 2: Authenticate the account and get auth data
     const authDataViemAccount = await ViemAccountAuthenticator.authenticate(
       ctx.aliceViemAccount
     );
 
-    assert.toBeDefined(authDataViemAccount);
-    assert.toBeDefined(authDataViemAccount.accessToken);
-    assert.toBeDefined(authDataViemAccount.authMethodType);
-    assert.toBeDefined(authDataViemAccount.authMethodId);
+    expect(authDataViemAccount).toBeDefined();
+    expect(authDataViemAccount.accessToken).toBeDefined();
+    expect(authDataViemAccount.authMethodType).toBeDefined();
+    expect(authDataViemAccount.authMethodId).toBeDefined();
 
     // Test 3: Parse and validate the auth signature
     const authSig = JSON.parse(authDataViemAccount.accessToken);
-    assert.toBeDefined(authSig);
-    assert.toBeDefined(authSig.sig);
-    assert.toBeDefined(authSig.derivedVia);
-    assert.toBeDefined(authSig.signedMessage);
-    assert.toBeDefined(authSig.address);
+    expect(authSig).toBeDefined();
+    expect(authSig.sig).toBeDefined();
+    expect(authSig.derivedVia).toBeDefined();
+    expect(authSig.signedMessage).toBeDefined();
+    expect(authSig.address).toBeDefined();
 
     // Test 4: Get auth data again (testing consistency)
     const authData = await ViemAccountAuthenticator.authenticate(
       ctx.aliceViemAccount
     );
-    assert.toBeDefined(authData);
-    assert.toBe(authData.authMethodType, authDataViemAccount.authMethodType);
-    assert.toBe(authData.authMethodId, authDataViemAccount.authMethodId);
+    expect(authData).toBeDefined();
+    expect(authData.authMethodType).toBe(authDataViemAccount.authMethodType);
+    expect(authData.authMethodId).toBe(authDataViemAccount.authMethodId);
 
     // Test 5: Mint a PKP using EOA
     const mintedPkpWithEoa = await ctx.litClient.mintWithEoa({
       account: ctx.aliceViemAccount,
     });
 
-    assert.toBeDefined(mintedPkpWithEoa);
-    assert.toBeDefined(mintedPkpWithEoa.data);
-    assert.toBeDefined(mintedPkpWithEoa.txHash);
+    expect(mintedPkpWithEoa).toBeDefined();
+    expect(mintedPkpWithEoa.data).toBeDefined();
+    expect(mintedPkpWithEoa.txHash).toBeDefined();
 
     // Validate the PKP data structure
     const pkpData = mintedPkpWithEoa.data;
-    assert.toBeDefined(pkpData.tokenId);
-    assert.toBeDefined(pkpData.pubkey);
-    assert.toBeDefined(pkpData.ethAddress);
+    expect(pkpData.tokenId).toBeDefined();
+    expect(pkpData.pubkey).toBeDefined();
+    expect(pkpData.ethAddress).toBeDefined();
 
     // Validate that the PKP address is a valid Ethereum address
-    assert.toMatch(pkpData.ethAddress, /^0x[a-fA-F0-9]{40}$/);
+    expect(pkpData.ethAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
 
     // Validate that the public key is defined and has expected format
-    assert.toBe(typeof pkpData.pubkey, 'string');
-    assert.toBeGreaterThan(pkpData.pubkey.length, 0);
-    assert.toMatch(pkpData.pubkey, /^0x04[a-fA-F0-9]{128}$/); // Uncompressed public key format
+    expect(typeof pkpData.pubkey).toBe('string');
+    expect(pkpData.pubkey.length).toBeGreaterThan(0);
+    expect(pkpData.pubkey).toMatch(/^0x04[a-fA-F0-9]{128}$/); // Uncompressed public key format
 
     // Validate that the token ID is a valid BigInt
-    assert.toBe(typeof pkpData.tokenId, 'bigint');
-    assert.toBeGreaterThan(Number(pkpData.tokenId), 0);
+    expect(typeof pkpData.tokenId).toBe('bigint');
+    expect(Number(pkpData.tokenId)).toBeGreaterThan(0);
 
     // Validate that the transaction hash is properly formatted
-    assert.toMatch(mintedPkpWithEoa.txHash, /^0x[a-fA-F0-9]{64}$/);
+    expect(mintedPkpWithEoa.txHash).toMatch(/^0x[a-fA-F0-9]{64}$/);
   };
 };

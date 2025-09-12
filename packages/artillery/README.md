@@ -1,3 +1,9 @@
+# @lit-protocol/artillery
+
+Standalone Artillery load-testing package for Lit Protocol. Moved from `packages/e2e/artillery`.
+
+Usage via root scripts remains the same, now pointing to `packages/artillery`.
+
 # 🚀 Run Artillery tests
 
 - LOG_LEVEL= `debug` | `info` | `silent` | `debug2` (raw console.log)

@@ -1,5 +1,4 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
 
 export const createViemSignMessageTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -16,7 +15,7 @@ export const createViemSignMessageTest = (
       message: 'Hello Viem + Lit',
     });
 
-    assert.toBeDefined(signature);
-    assert.toMatch(signature, /^0x[a-fA-F0-9]{130}$/);
+    expect(signature).toBeDefined();
+    expect(signature).toMatch(/^0x[a-fA-F0-9]{130}$/);
   };
 };

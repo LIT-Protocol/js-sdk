@@ -1,5 +1,4 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
 
 export const createPaymentDelegationFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -16,8 +15,8 @@ export const createPaymentDelegationFlowTest = (
       account: ctx.bobViemAccount,
     });
 
-    assert.toBeDefined(alicePaymentManager);
-    assert.toBeDefined(bobPaymentManager);
+    expect(alicePaymentManager).toBeDefined();
+    expect(bobPaymentManager).toBeDefined();
 
     const aliceAddress = ctx.aliceViemAccount.address;
     const bobAddress = ctx.bobViemAccount.address;
@@ -26,7 +25,7 @@ export const createPaymentDelegationFlowTest = (
     const initialPayers = await bobPaymentManager.getPayers({
       userAddress: bobAddress,
     });
-    assert.toBe(Array.isArray(initialPayers), true);
+    expect(Array.isArray(initialPayers)).toBe(true);
     const initialPayersCount = initialPayers.length;
     console.log('initialPayers', initialPayers);
 
@@ -34,7 +33,7 @@ export const createPaymentDelegationFlowTest = (
     const initialUsers = await alicePaymentManager.getUsers({
       payerAddress: aliceAddress,
     });
-    assert.toBe(Array.isArray(initialUsers), true);
+    expect(Array.isArray(initialUsers)).toBe(true);
     const initialUsersCount = initialUsers.length;
     console.log('initialUsers', initialUsers);
 
@@ -42,24 +41,24 @@ export const createPaymentDelegationFlowTest = (
     const delegateTx = await alicePaymentManager.delegatePayments({
       userAddress: bobAddress,
     });
-    assert.toBeDefined(delegateTx.hash);
-    assert.toBeDefined(delegateTx.receipt);
-    assert.toBe(delegateTx.receipt.status, 'success');
+    expect(delegateTx.hash).toBeDefined();
+    expect(delegateTx.receipt).toBeDefined();
+    expect(delegateTx.receipt.status).toBe('success');
 
     // Test 4: Verify Bob now has Alice as a payer
     const payersAfterDelegate = await bobPaymentManager.getPayers({
       userAddress: bobAddress,
     });
-    assert.toBe(payersAfterDelegate.length, initialPayersCount + 1);
-    assert.toBe(payersAfterDelegate.includes(aliceAddress), true);
+    expect(payersAfterDelegate.length).toBe(initialPayersCount + 1);
+    expect(payersAfterDelegate.includes(aliceAddress)).toBe(true);
     console.log('payersAfterDelegate', payersAfterDelegate);
 
     // Test 5: Verify Alice now has Bob as a user
     const usersAfterDelegate = await alicePaymentManager.getUsers({
       payerAddress: aliceAddress,
     });
-    assert.toBe(usersAfterDelegate.length, initialUsersCount + 1);
-    assert.toBe(usersAfterDelegate.includes(bobAddress), true);
+    expect(usersAfterDelegate.length).toBe(initialUsersCount + 1);
+    expect(usersAfterDelegate.includes(bobAddress)).toBe(true);
     console.log('usersAfterDelegate', usersAfterDelegate);
 
     // Test 6: Set a restriction for Alice
@@ -68,18 +67,18 @@ export const createPaymentDelegationFlowTest = (
       requestsPerPeriod: '100',
       periodSeconds: '3600', // 1 hour
     });
-    assert.toBeDefined(setRestrictionTx.hash);
-    assert.toBe(setRestrictionTx.receipt.status, 'success');
+    expect(setRestrictionTx.hash).toBeDefined();
+    expect(setRestrictionTx.receipt.status).toBe('success');
     console.log('setRestrictionTx', setRestrictionTx);
 
     // Test 7: Get and verify the restriction
     const restriction = await alicePaymentManager.getRestriction({
       payerAddress: aliceAddress,
     });
-    assert.toBeDefined(restriction);
-    assert.toBe(restriction.totalMaxPrice, '1000000000000000000');
-    assert.toBe(restriction.requestsPerPeriod, '100');
-    assert.toBe(restriction.periodSeconds, '3600');
+    expect(restriction).toBeDefined();
+    expect(restriction.totalMaxPrice).toBe('1000000000000000000');
+    expect(restriction.requestsPerPeriod).toBe('100');
+    expect(restriction.periodSeconds).toBe('3600');
     console.log('restriction', restriction);
     // Test 8: Test batch operations - create test addresses
     const testAddresses = [
@@ -91,26 +90,26 @@ export const createPaymentDelegationFlowTest = (
     const batchDelegateTx = await alicePaymentManager.delegatePaymentsBatch({
       userAddresses: testAddresses,
     });
-    assert.toBeDefined(batchDelegateTx.hash);
-    assert.toBe(batchDelegateTx.receipt.status, 'success');
+    expect(batchDelegateTx.hash).toBeDefined();
+    expect(batchDelegateTx.receipt.status).toBe('success');
     console.log('batchDelegateTx', batchDelegateTx);
     // Test 9: Verify batch delegation
     const usersAfterBatch = await alicePaymentManager.getUsers({
       payerAddress: aliceAddress,
     });
-    assert.toBe(usersAfterBatch.includes(testAddresses[0]), true);
-    assert.toBe(usersAfterBatch.includes(testAddresses[1]), true);
+    expect(usersAfterBatch.includes(testAddresses[0])).toBe(true);
+    expect(usersAfterBatch.includes(testAddresses[1])).toBe(true);
     console.log('usersAfterBatch', usersAfterBatch);
     // Test 10: Get payers and restrictions for multiple users
     const payersAndRestrictions =
       await alicePaymentManager.getPayersAndRestrictions({
         userAddresses: [bobAddress, testAddresses[0]],
       });
-    assert.toBeDefined(payersAndRestrictions);
-    assert.toBe(Array.isArray(payersAndRestrictions.payers), true);
-    assert.toBe(payersAndRestrictions.payers.length, 2);
-    assert.toBe(Array.isArray(payersAndRestrictions.restrictions), true);
-    assert.toBe(payersAndRestrictions.restrictions.length, 2);
+    expect(payersAndRestrictions).toBeDefined();
+    expect(Array.isArray(payersAndRestrictions.payers)).toBe(true);
+    expect(payersAndRestrictions.payers.length).toBe(2);
+    expect(Array.isArray(payersAndRestrictions.restrictions)).toBe(true);
+    expect(payersAndRestrictions.restrictions.length).toBe(2);
     console.log('payersAndRestrictions', payersAndRestrictions);
     // Test 11: Undelegate from batch users
     const batchUndelegateTx = await alicePaymentManager.undelegatePaymentsBatch(
@@ -118,28 +117,28 @@ export const createPaymentDelegationFlowTest = (
         userAddresses: testAddresses,
       }
     );
-    assert.toBeDefined(batchUndelegateTx.hash);
-    assert.toBe(batchUndelegateTx.receipt.status, 'success');
+    expect(batchUndelegateTx.hash).toBeDefined();
+    expect(batchUndelegateTx.receipt.status).toBe('success');
     console.log('batchUndelegateTx', batchUndelegateTx);
     // Test 12: Alice undelegates payment from Bob
     const undelegateTx = await alicePaymentManager.undelegatePayments({
       userAddress: bobAddress,
     });
-    assert.toBeDefined(undelegateTx.hash);
-    assert.toBe(undelegateTx.receipt.status, 'success');
+    expect(undelegateTx.hash).toBeDefined();
+    expect(undelegateTx.receipt.status).toBe('success');
     console.log('undelegateTx', undelegateTx);
     // Test 13: Verify Bob no longer has Alice as a payer
     const finalPayers = await bobPaymentManager.getPayers({
       userAddress: bobAddress,
     });
-    assert.toBe(finalPayers.length, initialPayersCount);
-    assert.toBe(finalPayers.includes(aliceAddress), false);
+    expect(finalPayers.length).toBe(initialPayersCount);
+    expect(finalPayers.includes(aliceAddress)).toBe(false);
     console.log('finalPayers', finalPayers);
     // Test 14: Verify Alice no longer has Bob as a user
     const finalUsers = await alicePaymentManager.getUsers({
       payerAddress: aliceAddress,
     });
-    assert.toBe(finalUsers.includes(bobAddress), false);
+    expect(finalUsers.includes(bobAddress)).toBe(false);
     console.log('finalUsers', finalUsers);
   };
 };

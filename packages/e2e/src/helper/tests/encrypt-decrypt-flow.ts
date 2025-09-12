@@ -1,5 +1,5 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
+import { createAccBuilder } from '@lit-protocol/access-control-conditions';
 
 export const createEncryptDecryptFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -7,10 +7,6 @@ export const createEncryptDecryptFlowTest = (
   address?: string
 ) => {
   return async () => {
-    const { createAccBuilder } = await import(
-      '@lit-protocol/access-control-conditions'
-    );
-
     const authContext = getAuthContext();
 
     // Determine which address to use for Alice based on auth context type
@@ -36,10 +32,10 @@ export const createEncryptDecryptFlowTest = (
       chain: 'ethereum',
     });
 
-    assert.toBeDefined(encryptedStringData);
-    assert.toBeDefined(encryptedStringData.ciphertext);
-    assert.toBeDefined(encryptedStringData.dataToEncryptHash);
-    assert.toBe(encryptedStringData.metadata?.dataType, 'string');
+    expect(encryptedStringData).toBeDefined();
+    expect(encryptedStringData.ciphertext).toBeDefined();
+    expect(encryptedStringData.dataToEncryptHash).toBeDefined();
+    expect(encryptedStringData.metadata?.dataType).toBe('string');
 
     // Test 2: Encrypt JSON object
     const jsonData = {
@@ -55,8 +51,8 @@ export const createEncryptDecryptFlowTest = (
       chain: 'ethereum',
     });
 
-    assert.toBeDefined(encryptedJsonData);
-    assert.toBe(encryptedJsonData.metadata?.dataType, 'json');
+    expect(encryptedJsonData).toBeDefined();
+    expect(encryptedJsonData.metadata?.dataType).toBe('json');
 
     // Test 3: Encrypt Uint8Array
     const uint8Data = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
@@ -66,10 +62,10 @@ export const createEncryptDecryptFlowTest = (
       chain: 'ethereum',
     });
 
-    assert.toBeDefined(encryptedUint8Data);
+    expect(encryptedUint8Data).toBeDefined();
     // Note: Uint8Array may not have automatic dataType inference, so we check if metadata exists
-    assert.toBeDefined(encryptedUint8Data.ciphertext);
-    assert.toBeDefined(encryptedUint8Data.dataToEncryptHash);
+    expect(encryptedUint8Data.ciphertext).toBeDefined();
+    expect(encryptedUint8Data.dataToEncryptHash).toBeDefined();
 
     // Test 4: Encrypt with custom metadata
     const documentData = new TextEncoder().encode(
@@ -92,10 +88,10 @@ export const createEncryptDecryptFlowTest = (
       },
     });
 
-    assert.toBeDefined(encryptedFileData);
-    assert.toBe(encryptedFileData.metadata?.dataType, 'file');
-    assert.toBe(encryptedFileData.metadata?.mimeType, 'application/pdf');
-    assert.toBe(encryptedFileData.metadata?.filename, 'secret-document.pdf');
+    expect(encryptedFileData).toBeDefined();
+    expect(encryptedFileData.metadata?.dataType).toBe('file');
+    expect(encryptedFileData.metadata?.mimeType).toBe('application/pdf');
+    expect(encryptedFileData.metadata?.filename).toBe('secret-document.pdf');
 
     // Create Bob's auth context for decryption
     const bobAuthContext = await ctx.authManager.createEoaAuthContext({
@@ -119,8 +115,8 @@ export const createEncryptDecryptFlowTest = (
       authContext: bobAuthContext,
     });
 
-    assert.toBeDefined(decryptedStringResponse);
-    assert.toBe(decryptedStringResponse.convertedData, stringData);
+    expect(decryptedStringResponse).toBeDefined();
+    expect(decryptedStringResponse.convertedData).toBe(stringData);
 
     // Test 6: Decrypt JSON data (traditional method)
     const decryptedJsonResponse = await ctx.litClient.decrypt({
@@ -132,8 +128,8 @@ export const createEncryptDecryptFlowTest = (
       authContext: bobAuthContext,
     });
 
-    assert.toBeDefined(decryptedJsonResponse);
-    assert.toEqual(decryptedJsonResponse.convertedData, jsonData);
+    expect(decryptedJsonResponse).toBeDefined();
+    expect(decryptedJsonResponse.convertedData).toEqual(jsonData);
 
     // Test 7: Decrypt Uint8Array data
     const decryptedUint8Response = await ctx.litClient.decrypt({
@@ -143,15 +139,15 @@ export const createEncryptDecryptFlowTest = (
       authContext: bobAuthContext,
     });
 
-    assert.toBeDefined(decryptedUint8Response);
+    expect(decryptedUint8Response).toBeDefined();
     // For Uint8Array, the decrypted data might be in a different format
     // Check if convertedData exists, otherwise check the raw data
     if (decryptedUint8Response.convertedData) {
-      assert.toEqual(decryptedUint8Response.convertedData, uint8Data);
+      expect(decryptedUint8Response.convertedData).toEqual(uint8Data);
     } else {
       // If no convertedData, check that we can get the raw data back
-      assert.toBeDefined(decryptedUint8Response.decryptedData);
-      assert.toEqual(decryptedUint8Response.decryptedData, uint8Data);
+      expect(decryptedUint8Response.decryptedData).toBeDefined();
+      expect(decryptedUint8Response.decryptedData).toEqual(uint8Data);
     }
 
     // Test 8: Decrypt file data with custom metadata
@@ -162,30 +158,28 @@ export const createEncryptDecryptFlowTest = (
       authContext: bobAuthContext,
     });
 
-    assert.toBeDefined(decryptedFileResponse);
-    assert.toBe(decryptedFileResponse.metadata?.dataType, 'file');
-    assert.toBe(
-      decryptedFileResponse.metadata?.filename,
+    expect(decryptedFileResponse).toBeDefined();
+    expect(decryptedFileResponse.metadata?.dataType).toBe('file');
+    expect(decryptedFileResponse.metadata?.filename).toBe(
       'secret-document.pdf'
     );
-    assert.toBe(decryptedFileResponse.metadata?.custom?.author, 'Alice');
+    expect(decryptedFileResponse.metadata?.custom?.author).toBe('Alice');
 
     // When dataType is 'file', convertedData returns a File object
     if (decryptedFileResponse.convertedData instanceof File) {
-      assert.toBe(
-        decryptedFileResponse.convertedData.name,
+      expect(decryptedFileResponse.convertedData.name).toBe(
         'secret-document.pdf'
       );
-      assert.toBe(decryptedFileResponse.convertedData.type, 'application/pdf');
+      expect(decryptedFileResponse.convertedData.type).toBe('application/pdf');
 
       // Convert File to Uint8Array to compare content
       const fileArrayBuffer =
         await decryptedFileResponse.convertedData.arrayBuffer();
       const fileUint8Array = new Uint8Array(fileArrayBuffer);
-      assert.toEqual(fileUint8Array, documentData);
+      expect(fileUint8Array).toEqual(documentData);
     } else {
       // Fallback: expect the raw data
-      assert.toEqual(decryptedFileResponse.convertedData, documentData);
+      expect(decryptedFileResponse.convertedData).toEqual(documentData);
     }
   };
 };

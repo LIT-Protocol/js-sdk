@@ -3,7 +3,9 @@ import { init } from '../init';
 /**
  * Creates a PKP authentication context
  */
-export const createPkpAuthContext = async (
+export const createPkpAuthContext: (
+  ctx: Awaited<ReturnType<typeof init>>
+) => Promise<any> = async (
   ctx: Awaited<ReturnType<typeof init>>
 ) => {
   console.log('🔁 Creating PKP Auth Context');
@@ -33,7 +35,9 @@ export const createPkpAuthContext = async (
 /**
  * Creates a custom authentication context
  */
-export const createCustomAuthContext = async (
+export const createCustomAuthContext: (
+  ctx: Awaited<ReturnType<typeof init>>
+) => Promise<any> = async (
   ctx: Awaited<ReturnType<typeof init>>
 ) => {
   console.log('🔁 Creating Custom Auth Context');

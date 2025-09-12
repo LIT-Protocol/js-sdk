@@ -1,5 +1,4 @@
 import { init } from '../../init';
-import { assert } from '../assertions';
 
 export const createPkpSignTest = (
   ctx: Awaited<ReturnType<typeof init>>,
@@ -8,11 +7,13 @@ export const createPkpSignTest = (
 ) => {
   return async () => {
     const res = await ctx.litClient.chain.ethereum.pkpSign({
+      // chain: 'ethereum',
+      // signingScheme: 'EcdsaK256Sha256',
       authContext: getAuthContext(),
       pubKey: pubkey || ctx.aliceViemAccountPkp.publicKey,
       toSign: 'Hello, world!',
     });
 
-    assert.toBeDefined(res.signature, 'toBeDefined');
+    expect(res.signature).toBeDefined();
   };
 };
