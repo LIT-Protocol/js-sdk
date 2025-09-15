@@ -73,9 +73,7 @@ export async function getConnectionInfo({
       realmId: networkCtx.networkSpecificConfigs.realmId,
       networkCtx: networkCtx,
     },
-    {
-      accountOrWalletClient,
-    }
+    accountOrWalletClient
   );
 
   const epochState = {

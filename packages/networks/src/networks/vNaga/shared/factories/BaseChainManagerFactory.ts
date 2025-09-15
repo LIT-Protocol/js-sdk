@@ -9,6 +9,7 @@ import {
 } from '../interfaces/NetworkContext';
 import type { PKPStorageProvider } from '../../../../storage/types';
 import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
+import { AuthData, StrictAuthData } from '@lit-protocol/schemas';
 
 export type CreateChainManagerReturn = {
   api: {
@@ -26,11 +27,7 @@ export type CreateChainManagerReturn = {
     ) => InstanceType<typeof api.PKPPermissionsManager>;
     paymentManager: () => InstanceType<typeof api.PaymentManager>;
     getPKPsByAuthData: (
-      authData: {
-        authMethodType: number | bigint;
-        authMethodId: string;
-        accessToken?: string;
-      },
+      authData: StrictAuthData | AuthData,
       pagination?: { limit?: number; offset?: number },
       storageProvider?: PKPStorageProvider
     ) => ReturnType<typeof api.PKPPermissionsManager.getPKPsByAuthData>;
@@ -76,6 +73,15 @@ export const createChainManagerFactory = <T, M>(
   ) => {
     return (req: ReqArgType): RetType =>
       fn(req, _networkConfig, accountOrWalletClient);
+  };
+
+  const bindAccount = <ReqArgType, RetType>(
+    fn: (
+      req: ReqArgType,
+      accountOrWalletClient: ExpectedAccountOrWalletClient
+    ) => RetType
+  ) => {
+    return (req: ReqArgType): RetType => fn(req, accountOrWalletClient);
   };
 
   return {
@@ -135,8 +141,8 @@ export const createChainManagerFactory = <T, M>(
         );
       },
       pricing: {
-        getPriceFeedInfo: bindContext(api.pricing.getPriceFeedInfo),
-        getNodePrices: bindContext(api.pricing.getNodePrices),
+        getPriceFeedInfo: bindAccount(api.pricing.getPriceFeedInfo),
+        getNodePrices: bindAccount(api.pricing.getNodePrices),
       },
       connection: {
         getConnectionInfo: (args?: {
