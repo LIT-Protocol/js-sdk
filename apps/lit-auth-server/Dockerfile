@@ -5,6 +5,7 @@
 #
 # Run the container with `docker run -p 3000:3000 -t lit-auth-server`.
 # Runtime-only image that uses the Nx-built dist output
+# --platform=linux/amd64
 FROM node:lts-alpine
 
 ENV NODE_ENV=production

@@ -5,7 +5,8 @@
 #
 # Run the container with `docker run -p 3000:3000 -t lit-login-server`.
 # Runtime-only image that uses the Nx-built dist output
-FROM --platform=linux/amd64 node:lts-alpine
+# --platform=linux/amd64
+FROM node:lts-alpine
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
@@ -27,5 +28,5 @@ USER lit-login-server
 
 ENV NODE_OPTIONS="--no-deprecation"
 
-EXPOSE 3000
+EXPOSE 3001
 CMD ["node", "main.cjs"]
