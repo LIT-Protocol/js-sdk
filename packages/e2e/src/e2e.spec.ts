@@ -18,6 +18,7 @@ import {
   createPaymentDelegationFlowTest,
 } from './helper/tests';
 import { init } from './init';
+import { AuthContext } from './types';
 
 const RPC_OVERRIDE = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 if (RPC_OVERRIDE) {
@@ -32,8 +33,8 @@ describe('all', () => {
   let ctx: Awaited<ReturnType<typeof init>>;
 
   // Auth contexts for testing
-  let alicePkpAuthContext: any;
-  let eveCustomAuthContext: any;
+  let alicePkpAuthContext: AuthContext;
+  let eveCustomAuthContext: AuthContext;
 
   beforeAll(async () => {
     try {
@@ -150,11 +151,7 @@ describe('all', () => {
             ctx.eveViemAccountPkp.pubkey
           )());
         it('viewPKPsByAuthData', () =>
-          createViewPKPsByAuthDataTest(
-            ctx,
-            () => eveCustomAuthContext,
-            ctx.eveCustomAuthData
-          )());
+          createViewPKPsByAuthDataTest(ctx, () => eveCustomAuthContext)());
         it('pkpEncryptDecrypt', () =>
           createPkpEncryptDecryptTest(
             ctx,
