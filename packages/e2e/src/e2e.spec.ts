@@ -33,7 +33,6 @@ describe('all', () => {
   let ctx: Awaited<ReturnType<typeof init>>;
 
   // Auth contexts for testing
-  let alicePkpAuthContext: AuthContext;
   let eveCustomAuthContext: AuthContext;
 
   beforeAll(async () => {
