@@ -16,9 +16,7 @@
     "@lit-protocol/types": "7.0.0",
     "@lit-protocol/wasm": "7.0.0",
     "@lit-protocol/artillery": "0.0.1",
-    "@lit-protocol/e2e": "1.0.11",
-    "@lit-protocol/wrapped-keys": "8.0.0-beta.15",
-    "@lit-protocol/wrapped-keys-lit-actions": "8.0.0-beta.15"
+    "@lit-protocol/e2e": "1.0.11"
   },
   "changesets": [
     "afraid-moons-go",
@@ -29,6 +27,7 @@
     "cute-experts-clap",
     "cyan-bears-invent",
     "eighty-adults-talk",
+    "fancy-pillows-bake",
     "flat-vans-find",
     "flat-waves-cross",
     "gentle-dodos-shout",

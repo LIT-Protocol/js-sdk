@@ -1,5 +1,13 @@
 # @lit-protocol/networks
 
+## 8.0.0-test.23
+
+### Patch Changes
+
+- bump versions
+- Updated dependencies
+  - @lit-protocol/constants@8.0.0-test.23
+
 ## 8.0.0-test.17
 
 ### Patch Changes
