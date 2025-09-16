@@ -1,5 +1,13 @@
 # @lit-protocol/networks
 
+## 8.0.0-test.25
+
+### Patch Changes
+
+- fix authData type struct
+- Updated dependencies
+  - @lit-protocol/constants@8.0.0-test.25
+
 ## 8.0.0-test.24
 
 ### Patch Changes

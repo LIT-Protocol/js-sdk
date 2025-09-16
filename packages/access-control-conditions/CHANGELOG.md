@@ -1,5 +1,11 @@
 # @lit-protocol/access-control-conditions
 
+## 8.0.0-test.25
+
+### Patch Changes
+
+- fix authData type struct
+
 ## 8.0.0-test.24
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.23
+
+### Patch Changes
+
+- fix authData type struct
+- Updated dependencies
+  - @lit-protocol/logger@8.0.0-test.25
+
 ## 2.0.0-test.22
 
 ### Patch Changes

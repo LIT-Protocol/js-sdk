@@ -1,5 +1,17 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.4
+
+### Patch Changes
+
+- fix authData type struct
+- Updated dependencies
+  - @lit-protocol/access-control-conditions@8.0.0-test.25
+  - @lit-protocol/auth@8.0.0-test.25
+  - @lit-protocol/lit-client@8.0.0-test.25
+  - @lit-protocol/networks@8.0.0-test.25
+  - @lit-protocol/schemas@8.0.0-test.25
+
 ## 1.0.12-test.3
 
 ### Patch Changes
