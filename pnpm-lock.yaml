@@ -284,6 +284,9 @@ importers:
       '@noble/curves':
         specifier: 1.8.1
         version: 1.8.1
+      '@noble/hashes':
+        specifier: 1.8.0
+        version: 1.8.0
       '@simplewebauthn/browser':
         specifier: 7.2.0
         version: 7.2.0
