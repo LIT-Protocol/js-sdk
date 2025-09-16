@@ -60,6 +60,7 @@ import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/crea
 import { ScopeString } from '../../../schemas/shared/ScopeSchema';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import { LitTxVoid } from '../../types';
+import { AuthData, StrictAuthData } from '@lit-protocol/schemas';
 
 // This constant is used for testing purposes
 // IPFS CID in v0 format for commonly used test action
@@ -409,11 +410,7 @@ export class PKPPermissionsManager {
    * @returns Promise resolving to paginated PKP information
    */
   static async getPKPsByAuthData(
-    authData: {
-      authMethodType: number | bigint;
-      authMethodId: string;
-      accessToken?: string;
-    },
+    authData: Partial<StrictAuthData> | Partial<AuthData>,
     pagination: { limit?: number; offset?: number } | undefined,
     storageProvider: PKPStorageProvider | undefined,
     networkContext: DefaultNetworkConfig,

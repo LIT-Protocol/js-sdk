@@ -335,7 +335,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       },
 
       getPKPsByAuthData: async (params: {
-        authData: StrictAuthData | AuthData;
+        authData: Partial<StrictAuthData> | Partial<AuthData>;
         pagination?: { limit?: number; offset?: number };
         storageProvider?: PKPStorageProvider;
         account: ExpectedAccountOrWalletClient;

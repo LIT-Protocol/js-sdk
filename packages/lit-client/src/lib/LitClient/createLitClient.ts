@@ -850,7 +850,7 @@ export const _createNagaLitClient = async (
       };
     },
     viewPKPsByAuthData: async (params: {
-      authData: StrictAuthData | AuthData;
+      authData: Partial<StrictAuthData> | Partial<AuthData>;
       pagination?: { limit?: number; offset?: number };
     }) => {
       // Use read-only account for viewing PKPs
