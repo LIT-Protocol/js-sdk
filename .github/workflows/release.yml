@@ -22,7 +22,7 @@ jobs:
           node-version: '22.18.0'
       
       - name: Setup PNPM
-        uses: pnpm/action-step@v4
+        uses: pnpm/action-setup@v4
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
