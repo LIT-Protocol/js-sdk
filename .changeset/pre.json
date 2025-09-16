@@ -14,7 +14,11 @@
     "@lit-protocol/networks": "7.0.0",
     "@lit-protocol/schemas": "7.0.0",
     "@lit-protocol/types": "7.0.0",
-    "@lit-protocol/wasm": "7.0.0"
+    "@lit-protocol/wasm": "7.0.0",
+    "@lit-protocol/artillery": "0.0.1",
+    "@lit-protocol/e2e": "1.0.11",
+    "@lit-protocol/wrapped-keys": "8.0.0-beta.15",
+    "@lit-protocol/wrapped-keys-lit-actions": "8.0.0-beta.15"
   },
   "changesets": [
     "afraid-moons-go",
@@ -33,6 +37,7 @@
     "orange-cows-judge",
     "rich-cows-start",
     "salty-rockets-try",
+    "silly-seas-cover",
     "strong-parrots-buy",
     "tame-moose-notice",
     "true-corners-obey",

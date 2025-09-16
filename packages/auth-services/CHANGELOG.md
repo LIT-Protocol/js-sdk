@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.19
+
+### Patch Changes
+
+- fix SyntaxError: The requested module '@lit-protocol/constants' does not provide an export named 'DEV_PRIVATE_KEY'
+- Updated dependencies
+  - @lit-protocol/logger@8.0.0-test.16
+
 ## 2.0.0-beta.18
 
 ### Patch Changes

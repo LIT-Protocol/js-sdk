@@ -1,5 +1,11 @@
 # @lit-protocol/types
 
+## 8.0.0-test.16
+
+### Patch Changes
+
+- fix SyntaxError: The requested module '@lit-protocol/constants' does not provide an export named 'DEV_PRIVATE_KEY'
+
 ## 8.0.0-beta.15
 
 ### Patch Changes
