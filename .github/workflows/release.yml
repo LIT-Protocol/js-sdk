@@ -57,6 +57,12 @@ jobs:
             echo "📋 Not in pre-release mode"
           fi
 
+      - name: Exit beta pre-mode and enter test pre-mode
+        run: |
+          pnpm changeset pre exit
+          pnpm changeset pre enter test
+          echo "✅ Switched from beta to test pre-mode"
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
