@@ -18,6 +18,7 @@
     "directory": "../../dist/packages/networks"
   },
   "dependencies": {
+    "@lit-protocol/constants": "workspace:*",
     "@lit-protocol/contracts": "0.5.0",
     "@lit-protocol/nacl": "7.1.1",
     "@noble/curves": "1.8.1",
