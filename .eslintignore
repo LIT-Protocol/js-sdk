@@ -1,3 +1,5 @@
 node_modules
 packages/wasm/rust/**/*
 packages/wasm/src/pkg/*
+**/*.spec.ts
+**/*.test.ts
