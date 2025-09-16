@@ -11,8 +11,6 @@
 '@lit-protocol/schemas': patch
 '@lit-protocol/types': patch
 '@lit-protocol/wasm': patch
-'@lit-protocol/wrapped-keys': patch
-'@lit-protocol/wrapped-keys-lit-actions': patch
 ---
 
 test

@@ -12,8 +12,6 @@
 '@lit-protocol/schemas': patch
 '@lit-protocol/types': patch
 '@lit-protocol/wasm': patch
-'@lit-protocol/wrapped-keys': patch
-'@lit-protocol/wrapped-keys-lit-actions': patch
 ---
 
 withOverrides no longer monkey-patches methods nor wraps every chain API. It now builds an overridden networkConfig with the resolved RPC URL and a cloned chainConfig whose rpcUrls.default.http and rpcUrls['public'].http use the override. So all downstream consumers (state manager, chain APIs, contracts) automatically use the overridden RPC via the standard construction path. No per-method wrapping needed.
