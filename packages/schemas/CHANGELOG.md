@@ -1,5 +1,12 @@
 # @lit-protocol/schemas
 
+## 8.0.0-test.20
+
+### Patch Changes
+
+- fece28d: test changeset
+- fd7bc9e: test changeset 4
+
 ## 8.0.0-test.19
 
 ### Patch Changes

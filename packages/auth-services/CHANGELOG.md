@@ -1,5 +1,15 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.23
+
+### Patch Changes
+
+- fece28d: test changeset
+- fd7bc9e: test changeset 4
+- Updated dependencies [fece28d]
+- Updated dependencies [fd7bc9e]
+  - @lit-protocol/logger@8.0.0-test.20
+
 ## 2.0.0-test.22
 
 ### Patch Changes
