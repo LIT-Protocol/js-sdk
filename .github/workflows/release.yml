@@ -48,14 +48,20 @@ jobs:
         with:
           version: 9.15.0
 
+      - name: Check current pre-release mode
+        run: |
+          if [ -f ".changeset/pre.json" ]; then
+            echo "📋 Current pre-release mode status:"
+            cat .changeset/pre.json | jq '{ mode: .mode, tag: .tag }'
+          else
+            echo "📋 Not in pre-release mode"
+          fi
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
-
-      - name: Enter pre-release mode
-        run: pnpm changeset pre enter test
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
