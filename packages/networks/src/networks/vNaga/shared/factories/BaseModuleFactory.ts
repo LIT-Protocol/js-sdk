@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { LitNetworkModuleBase } from '../../../types';
 import type { ExpectedAccountOrWalletClient } from '../managers/contract-manager/createContractsManager';
 import type { INetworkConfig } from '../interfaces/NetworkContext';
+import { createChainManagerFactory } from './BaseChainManagerFactory';
 
 // Shared utilities
 import { NetworkError } from '@lit-protocol/constants';
@@ -1084,6 +1085,54 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           return executeJsResponse;
         },
       },
+    },
+    /**
+     * Returns a wrapped module instance with runtime overrides while keeping the base immutable.
+     * Currently supports overriding the RPC URL used by consumers of this module.
+     *
+     * @param overrides - The overrides to apply to the module.
+     * @returns A wrapped module instance with the overrides applied.
+     * @example
+     *
+     * import { nagaDev } from '@lit-protocol/networks';
+     * const nagaDevWithOverride = nagaDev.withOverrides({ rpcUrl: 'https://custom-rpc-url.com' });
+     * const litClient = await createLitClient({ network: nagaDevWithOverride });
+     */
+    withOverrides: (overrides: { rpcUrl?: string }) => {
+      const resolvedRpcUrl = overrides.rpcUrl ?? baseModule.getRpcUrl();
+
+      // Build an overridden network config and a chain manager bound to it
+      const overriddenChainConfig = {
+        ...networkConfig.chainConfig,
+        rpcUrls: {
+          ...networkConfig.chainConfig.rpcUrls,
+          default: {
+            ...networkConfig.chainConfig.rpcUrls.default,
+            http: [resolvedRpcUrl],
+          },
+          ['public']: {
+            ...(networkConfig.chainConfig.rpcUrls as any)['public'],
+            http: [resolvedRpcUrl],
+          },
+        },
+      } as typeof networkConfig.chainConfig;
+
+      const overriddenNetworkConfig = {
+        ...networkConfig,
+        rpcUrl: resolvedRpcUrl,
+        chainConfig: overriddenChainConfig,
+      } as typeof networkConfig;
+
+      const createChainManagerOverridden = (account: ExpectedAccountOrWalletClient) =>
+        createChainManagerFactory(overriddenNetworkConfig, account);
+
+      // Rebuild a fresh module bound to the overridden config
+      return createBaseModule({
+        networkConfig: overriddenNetworkConfig,
+        moduleName,
+        createChainManager: createChainManagerOverridden,
+        verifyReleaseId: baseModule.getVerifyReleaseId(),
+      });
     },
   };
 
