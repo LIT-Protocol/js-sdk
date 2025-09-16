@@ -2,7 +2,6 @@
   "name": "@lit-protocol/js-sdk",
   "version": "0.0.1",
   "license": "MIT",
-  "packageManager": "pnpm@9.15.0",
   "scripts": {
     "reset": "rimraf dist pnpm-lock.yaml node_modules tmp yarn-error.log yarn.lock package-lock.json learn-debug.log .nx lit-auth-storage pkp-tokens lit-auth-local ./e2e/dist ./e2e/node_modules",
     "build": "nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions",
