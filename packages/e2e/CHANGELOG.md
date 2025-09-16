@@ -1,5 +1,17 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.5
+
+### Patch Changes
+
+- ff54600: fix Uncaught ReferenceError: exports is not defined
+- Updated dependencies [ff54600]
+  - @lit-protocol/access-control-conditions@8.0.0-test.21
+  - @lit-protocol/auth@8.0.0-test.21
+  - @lit-protocol/lit-client@8.0.0-test.21
+  - @lit-protocol/networks@8.0.0-test.21
+  - @lit-protocol/schemas@8.0.0-test.21
+
 ## 1.0.12-test.4
 
 ### Patch Changes

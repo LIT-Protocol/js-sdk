@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.24
+
+### Patch Changes
+
+- ff54600: fix Uncaught ReferenceError: exports is not defined
+- Updated dependencies [ff54600]
+  - @lit-protocol/logger@8.0.0-test.21
+
 ## 2.0.0-test.23
 
 ### Patch Changes
