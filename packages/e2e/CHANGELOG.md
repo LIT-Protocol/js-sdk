@@ -1,5 +1,17 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.3
+
+### Patch Changes
+
+- test split CI workflows
+- Updated dependencies
+  - @lit-protocol/access-control-conditions@8.0.0-test.24
+  - @lit-protocol/auth@8.0.0-test.24
+  - @lit-protocol/lit-client@8.0.0-test.24
+  - @lit-protocol/networks@8.0.0-test.24
+  - @lit-protocol/schemas@8.0.0-test.24
+
 ## 1.0.12-test.2
 
 ### Patch Changes

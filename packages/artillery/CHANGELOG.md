@@ -1,5 +1,13 @@
 # @lit-protocol/artillery
 
+## 0.0.2-test.3
+
+### Patch Changes
+
+- test split CI workflows
+- Updated dependencies
+  - @lit-protocol/e2e@1.0.12-test.3
+
 ## 0.0.2-test.2
 
 ### Patch Changes

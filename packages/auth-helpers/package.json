@@ -25,7 +25,7 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.0.0-test.23",
+  "version": "8.0.0-test.24",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {

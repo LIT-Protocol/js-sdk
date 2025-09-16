@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.22
+
+### Patch Changes
+
+- test split CI workflows
+- Updated dependencies
+  - @lit-protocol/logger@8.0.0-test.24
+
 ## 2.0.0-test.21
 
 ### Patch Changes

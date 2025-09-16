@@ -1,5 +1,11 @@
 # @lit-protocol/constants
 
+## 8.0.0-test.24
+
+### Patch Changes
+
+- test split CI workflows
+
 ## 8.0.0-test.23
 
 ### Patch Changes
