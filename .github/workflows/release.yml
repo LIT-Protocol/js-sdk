@@ -14,13 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check NPM Token
-        id: check-token
         run: |
           if [ -z "${{ secrets.NODE_AUTH_TOKEN }}" ]; then
-            echo "npm-token-exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ NODE_AUTH_TOKEN secret is not set. Skipping release steps."
+            echo "❌ NODE_AUTH_TOKEN secret is not set. Please add it to repository secrets."
+            exit 1
           else
-            echo "npm-token-exists=true" >> $GITHUB_OUTPUT
             echo "✅ NODE_AUTH_TOKEN secret is available."
           fi
 
