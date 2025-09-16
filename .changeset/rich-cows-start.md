@@ -12,8 +12,6 @@
 '@lit-protocol/schemas': patch
 '@lit-protocol/types': patch
 '@lit-protocol/wasm': patch
-'@lit-protocol/wrapped-keys': patch
-'@lit-protocol/wrapped-keys-lit-actions': patch
 ---
 
 fix "any" return types due to the return/param types are not imported/re-exported from the public entry points. Here are the Affected methods mintWithEoa mintWithAuth mintWithCustomAuth getPKPPermissionsManager getPaymentManager viewPKPPermissions

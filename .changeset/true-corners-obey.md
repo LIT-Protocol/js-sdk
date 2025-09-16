@@ -12,8 +12,6 @@
 '@lit-protocol/schemas': patch
 '@lit-protocol/types': patch
 '@lit-protocol/wasm': patch
-'@lit-protocol/wrapped-keys': patch
-'@lit-protocol/wrapped-keys-lit-actions': patch
 ---
 
 Second attempt to fix webauthn. The error seems to be WebAuthnAuthenticator is missing a scope.
