@@ -1,5 +1,19 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.4
+
+### Patch Changes
+
+- fece28d: test changeset
+- fd7bc9e: test changeset 4
+- Updated dependencies [fece28d]
+- Updated dependencies [fd7bc9e]
+  - @lit-protocol/access-control-conditions@8.0.0-test.20
+  - @lit-protocol/auth@8.0.0-test.20
+  - @lit-protocol/lit-client@8.0.0-test.20
+  - @lit-protocol/networks@8.0.0-test.20
+  - @lit-protocol/schemas@8.0.0-test.20
+
 ## 1.0.12-test.3
 
 ### Patch Changes

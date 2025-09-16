@@ -1,5 +1,15 @@
 # @lit-protocol/artillery
 
+## 0.0.2-test.4
+
+### Patch Changes
+
+- fece28d: test changeset
+- fd7bc9e: test changeset 4
+- Updated dependencies [fece28d]
+- Updated dependencies [fd7bc9e]
+  - @lit-protocol/e2e@1.0.12-test.4
+
 ## 0.0.2-test.3
 
 ### Patch Changes
