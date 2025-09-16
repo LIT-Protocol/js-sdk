@@ -74,7 +74,7 @@ jobs:
         uses: changesets/action@v1
         with:
           version: pnpm changeset version
-          publish: pnpm changeset publish --access public --tag test
+          publish: pnpm changeset publish --access public
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
         env:
