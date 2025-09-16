@@ -57,7 +57,7 @@ import type { PKPStorageProvider } from '../../../../../../../../storage/types';
 import { logger } from '../../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../../shared/interfaces/NetworkContext';
 import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
-import { ScopeString } from '../../../schemas/shared/ScopeSchema';
+import { ScopeString } from '@lit-protocol/schemas';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import { LitTxVoid } from '../../types';
 
