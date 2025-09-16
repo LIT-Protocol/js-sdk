@@ -1,5 +1,17 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.3
+
+### Patch Changes
+
+- da538ab: test changeset 3
+- Updated dependencies [da538ab]
+  - @lit-protocol/access-control-conditions@8.0.0-test.19
+  - @lit-protocol/auth@8.0.0-test.19
+  - @lit-protocol/lit-client@8.0.0-test.19
+  - @lit-protocol/networks@8.0.0-test.19
+  - @lit-protocol/schemas@8.0.0-test.19
+
 ## 1.0.12-test.2
 
 ### Patch Changes
