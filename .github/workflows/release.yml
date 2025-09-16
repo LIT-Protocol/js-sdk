@@ -54,10 +54,13 @@ jobs:
       - name: Build
         run: pnpm build 
 
-      # - name: Release
-      #   if: steps.check-token.outputs.npm-token-exists == 'true'
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-      #   run: |
-      #     # Add your release commands here
-      #     # e.g., npx changeset publish
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm changeset publish --access public --tag test
+          commit: 'chore(release): version packages'
+          title: 'chore(release): version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
