@@ -22,6 +22,7 @@
     "universal"
   ],
   "dependencies": {
+    "@noble/hashes": "1.8.0",
     "@noble/curves": "1.8.1",
     "@simplewebauthn/browser": "7.2.0",
     "@simplewebauthn/typescript-types": "7.0.0",
@@ -33,11 +34,11 @@
     "jose": "4.14.4",
     "siwe": "2.3.2",
     "stytch": "12.4.0",
-    "viem": "2.29.4",
     "zod": "3.24.3"
   },
   "peerDependencies": {
-    "tslib": "2.8.1"
+    "tslib": "2.8.1",
+    "viem": "2.29.4"
   },
   "browser": {
     "crypto": false,
