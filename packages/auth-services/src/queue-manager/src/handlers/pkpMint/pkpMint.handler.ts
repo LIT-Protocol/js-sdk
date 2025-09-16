@@ -14,22 +14,15 @@ export async function handlePkpMintTask(jobData: {
   requestBody: MintPKPRequest;
   reqId?: string;
 }): Promise<any> {
-  // Validate and transform the request using the unified schema
-  // This handles the WebAuthn pubkey validation internally
-  const validatedRequest = await MintPKPRequestSchema.parseAsync(
-    jobData.requestBody
-  );
-
-  const userAuthData: Optional<AuthData, 'accessToken'> = {
-    authMethodId: validatedRequest.authMethodId,
-    authMethodType: validatedRequest.authMethodType,
-    publicKey: validatedRequest.pubkey,
-  };
 
   const result = await globalThis.systemContext.litClient.mintWithAuth({
     account: globalThis.systemContext.account,
-    authData: userAuthData,
-    scopes: validatedRequest.scopes,
+    authData: {
+      authMethodId: jobData.requestBody.authMethodId,
+      authMethodType: jobData.requestBody.authMethodType,
+      publicKey: jobData.requestBody.pubkey,
+    },
+    scopes: jobData.requestBody.scopes,
   });
 
   console.log(
