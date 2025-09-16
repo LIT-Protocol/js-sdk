@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/logger",
-  "version": "8.0.0-beta.15",
+  "version": "8.0.0-test.16",
   "type": "module",
   "tags": [
     "universal"

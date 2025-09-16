@@ -1,5 +1,11 @@
 # @lit-protocol/types
 
+## 8.0.0-test.16
+
+### Patch Changes
+
+- test changeset
+
 ## 8.0.0-beta.15
 
 ### Patch Changes
