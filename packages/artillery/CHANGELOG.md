@@ -1,5 +1,13 @@
 # @lit-protocol/artillery
 
+## 0.0.2-test.5
+
+### Patch Changes
+
+- ff54600: fix Uncaught ReferenceError: exports is not defined
+- Updated dependencies [ff54600]
+  - @lit-protocol/e2e@1.0.12-test.5
+
 ## 0.0.2-test.4
 
 ### Patch Changes

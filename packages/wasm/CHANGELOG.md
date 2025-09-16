@@ -1,5 +1,11 @@
 # @lit-protocol/wasm
 
+## 8.0.0-test.21
+
+### Patch Changes
+
+- ff54600: fix Uncaught ReferenceError: exports is not defined
+
 ## 8.0.0-test.20
 
 ### Patch Changes

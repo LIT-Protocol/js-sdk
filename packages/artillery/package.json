@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/artillery",
-  "version": "0.0.2-test.4",
+  "version": "0.0.2-test.5",
   "private": true,
   "dependencies": {
     "artillery": "2.0.23",
