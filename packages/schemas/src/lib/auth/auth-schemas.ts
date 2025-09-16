@@ -9,7 +9,7 @@ import {
   NodeSetSchema,
   SessionKeyUriSchema,
 } from '../schemas';
-import { ScopeStringSchema } from './ScopeSchema';
+import { ScopeSchemaRaw } from './ScopeSchema';
 
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
