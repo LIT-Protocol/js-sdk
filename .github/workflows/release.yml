@@ -73,6 +73,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
+          version: pnpm changeset version
           publish: pnpm changeset publish --access public --tag test
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
