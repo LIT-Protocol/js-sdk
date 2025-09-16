@@ -13,6 +13,17 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Check NPM Token
+        id: check-token
+        run: |
+          if [ -z "${{ secrets.NODE_AUTH_TOKEN }}" ]; then
+            echo "npm-token-exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ NODE_AUTH_TOKEN secret is not set. Skipping release steps."
+          else
+            echo "npm-token-exists=true" >> $GITHUB_OUTPUT
+            echo "✅ NODE_AUTH_TOKEN secret is available."
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -32,6 +43,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.18.0'
+          registry-url: 'https://registry.npmjs.org'
       
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
@@ -43,3 +55,11 @@ jobs:
 
       - name: Build
         run: pnpm build 
+
+      # - name: Release
+      #   if: steps.check-token.outputs.npm-token-exists == 'true'
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+      #   run: |
+      #     # Add your release commands here
+      #     # e.g., npx changeset publish
