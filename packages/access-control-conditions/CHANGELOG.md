@@ -1,5 +1,11 @@
 # @lit-protocol/access-control-conditions
 
+## 8.0.0-test.17
+
+### Patch Changes
+
+- fix CI `auth:build` and fix different viem instances have incompatible types even if they're similar versions
+
 ## 8.0.0-test.16
 
 ### Patch Changes

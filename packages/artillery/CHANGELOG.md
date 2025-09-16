@@ -1,5 +1,13 @@
 # @lit-protocol/artillery
 
+## 0.0.2-test.1
+
+### Patch Changes
+
+- fix CI `auth:build` and fix different viem instances have incompatible types even if they're similar versions
+- Updated dependencies
+  - @lit-protocol/e2e@1.0.12-test.1
+
 ## 0.0.2-test.0
 
 ### Patch Changes

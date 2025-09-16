@@ -1,5 +1,13 @@
 # @lit-protocol/networks
 
+## 8.0.0-test.17
+
+### Patch Changes
+
+- fix CI `auth:build` and fix different viem instances have incompatible types even if they're similar versions
+- Updated dependencies
+  - @lit-protocol/constants@8.0.0-test.17
+
 ## 8.0.0-test.16
 
 ### Patch Changes

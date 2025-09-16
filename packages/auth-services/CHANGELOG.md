@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.20
+
+### Patch Changes
+
+- fix CI `auth:build` and fix different viem instances have incompatible types even if they're similar versions
+- Updated dependencies
+  - @lit-protocol/logger@8.0.0-test.17
+
 ## 2.0.0-test.19
 
 ### Patch Changes

@@ -32,13 +32,13 @@
     "@noble/hashes": "1.8.0"
   },
   "peerDependencies": {
-    "viem": "2.29.4" 
-   },
+    "viem": "2.29.4"
+  },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [
     "universal"
   ],
-  "version": "8.0.0-test.16",
+  "version": "8.0.0-test.17",
   "main": "./dist/index.js",
   "typings": "./src/index.d.ts",
   "types": "./dist/index.d.ts"
