@@ -23,7 +23,7 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "8.0.0-test.16",
+  "version": "8.0.0-test.17",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {

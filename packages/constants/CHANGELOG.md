@@ -1,5 +1,11 @@
 # @lit-protocol/constants
 
+## 8.0.0-test.17
+
+### Patch Changes
+
+- test changeset publish
+
 ## 8.0.0-test.16
 
 ### Patch Changes
