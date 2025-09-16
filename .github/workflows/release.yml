@@ -7,7 +7,7 @@ permissions:
   # allow pushing commits, creating tags, and modifying repo files
   # needed for the workflow to update package.json versions and CHANGELOG files
   contents: write
-  pull-request: write
+  pull-requests: write
 
 jobs:
   release:
