@@ -1,5 +1,11 @@
 # @lit-protocol/wasm
 
+## 8.0.0-test.19
+
+### Patch Changes
+
+- da538ab: test changeset 3
+
 ## 8.0.0-test.18
 
 ### Patch Changes

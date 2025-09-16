@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.22
+
+### Patch Changes
+
+- da538ab: test changeset 3
+- Updated dependencies [da538ab]
+  - @lit-protocol/logger@8.0.0-test.19
+
 ## 2.0.0-test.21
 
 ### Patch Changes
