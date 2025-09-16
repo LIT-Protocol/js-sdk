@@ -1,0 +1,76 @@
+name: Release
+on:
+  push:
+    branches: ['dev/anson']
+
+permissions:
+  # allow pushing commits, creating tags, and modifying repo files
+  # needed for the workflow to update package.json versions and CHANGELOG files
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check NPM Token
+        run: |
+          if [ -z "${{ secrets.NODE_AUTH_TOKEN }}" ]; then
+            echo "❌ NODE_AUTH_TOKEN secret is not set. Please add it to repository secrets."
+            exit 1
+          else
+            echo "✅ NODE_AUTH_TOKEN secret is available."
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check current pre-release mode
+        run: |
+          if [ -f ".changeset/pre.json" ]; then
+            echo "📋 Current pre-release mode status:"
+            cat .changeset/pre.json | jq '{ mode: .mode, tag: .tag }'
+          else
+            echo "📋 Not in pre-release mode"
+          fi
+
+      - name: Build
+        run: pnpm build
+
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset version
+          publish: pnpm changeset publish --access public
+          commit: 'chore(release): version packages'
+          title: 'chore(release): version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
