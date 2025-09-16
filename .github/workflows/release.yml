@@ -1,0 +1,31 @@
+name: Release
+on:
+  push:
+    branches: ['naga']
+
+permissions:
+  # allow pushing commits, creating tags, and modifying repo files
+  # needed for the workflow to update package.json versions and CHANGELOG files
+  context: write
+  pull-request: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+      
+      - name: Setup PNPM
+        uses: pnpm/action-step@v4
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build 
