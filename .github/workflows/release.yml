@@ -48,6 +48,9 @@ jobs:
         with:
           version: 9.15.0
 
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Check current pre-release mode
         run: |
           if [ -f ".changeset/pre.json" ]; then
@@ -62,9 +65,6 @@ jobs:
           pnpm changeset pre exit
           pnpm changeset pre enter test
           echo "✅ Switched from beta to test pre-mode"
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
