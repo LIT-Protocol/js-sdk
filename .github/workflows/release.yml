@@ -1,7 +1,7 @@
 name: Release
 on:
   push:
-    branches: ['naga']
+    branches: ['dev/test-ci']
 
 permissions:
   # allow pushing commits, creating tags, and modifying repo files
