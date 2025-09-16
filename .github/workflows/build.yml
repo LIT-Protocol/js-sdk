@@ -1,0 +1,69 @@
+name: Build & Test
+on:
+  push:
+    branches: ['dev/anson']
+  pull_request:
+    branches: ['dev/anson']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changesets: ${{ steps.check-changesets.outputs.has_changesets }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check current pre-release mode
+        run: |
+          if [ -f ".changeset/pre.json" ]; then
+            echo "📋 Current pre-release mode status:"
+            cat .changeset/pre.json | jq '{ mode: .mode, tag: .tag }'
+          else
+            echo "📋 Not in pre-release mode"
+          fi
+
+      - name: Build
+        run: pnpm build
+
+      - name: Check for changesets
+        id: check-changesets
+        run: |
+          if [ -d ".changeset" ] && [ "$(ls -A .changeset/*.md 2>/dev/null | wc -l)" -gt 0 ]; then
+            echo "has_changesets=true" >> $GITHUB_OUTPUT
+            echo "📦 Found changesets - will trigger release workflow"
+          else
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+            echo "✅ No changesets found - build complete"
+          fi
+
+  trigger-release:
+    needs: build
+    if: needs.build.outputs.has_changesets == 'true' && github.event_name == 'push'
+    uses: ./.github/workflows/release.yml
+    secrets: inherit

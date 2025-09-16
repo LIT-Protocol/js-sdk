@@ -1,7 +1,6 @@
 name: Release
 on:
-  push:
-    branches: ['dev/anson']
+  workflow_call:
 
 permissions:
   # allow pushing commits, creating tags, and modifying repo files
