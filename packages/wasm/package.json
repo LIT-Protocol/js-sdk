@@ -32,7 +32,7 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
-    "ethers": "^5.7.1",
-    "pako": "^2.1.0"
+    "ethers": "5.7.2",
+    "pako": "2.1.0"
   }
 }

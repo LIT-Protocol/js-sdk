@@ -1,0 +1,256 @@
+{
+  "versionGroups": [
+    {
+      "dependencies": [
+        "ethers"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "5.7.2"
+    },
+    {
+      "dependencies": [
+        "@ethersproject/**"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "5.7.0"
+    },
+    {
+      "dependencies": [
+        "zod"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "3.24.3"
+    },
+    {
+      "dependencies": [
+        "artillery"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "2.0.23"
+    },
+    {
+      "dependencies": [
+        "@noble/curves"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "1.8.1"
+    },
+    {
+      "dependencies": [
+        "@noble/hashes"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "1.8.0"
+    },
+    {
+      "dependencies": [
+        "@simplewebauthn/browser"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "7.2.0"
+    },
+    {
+      "dependencies": [
+        "@simplewebauthn/typescript-types"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "7.0.0"
+    },
+    {
+      "dependencies": [
+        "@wagmi/core"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "2.17.1"
+    },
+    {
+      "dependencies": [
+        "base64url"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "3.0.1"
+    },
+    {
+      "dependencies": [
+        "cbor-web"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "9.0.2"
+    },
+    {
+      "dependencies": [
+        "depd"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "2.0.0"
+    },
+    {
+      "dependencies": [
+        "jose"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "4.14.4"
+    },
+    {
+      "dependencies": [
+        "siwe"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "2.3.2"
+    },
+    {
+      "dependencies": [
+        "siwe-recap"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "0.0.2-alpha.0"
+    },
+    {
+      "dependencies": [
+        "stytch"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "12.4.0"
+    },
+    {
+      "dependencies": [
+        "viem"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "2.29.4"
+    },
+    {
+      "dependencies": [
+        "@lit-protocol/contracts"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "0.5.0"
+    },
+    {
+      "dependencies": [
+        "bs58"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "6.0.0"
+    },
+    {
+      "dependencies": [
+        "tslib"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "2.8.1"
+    },
+    {
+      "dependencies": [
+        "tsx"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "4.20.5"
+    },
+    {
+      "dependencies": [
+        "ajv"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "8.12.0"
+    },
+    {
+      "dependencies": [
+        "pino"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "9.6.0"
+    },
+    {
+      "dependencies": [
+        "pino-caller"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "4.0.0"
+    },
+    {
+      "dependencies": [
+        "node-localstorage"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "3.0.5"
+    },
+    {
+      "dependencies": [
+        "pako"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "2.1.0"
+    },
+    {
+      "dependencies": [
+        "@types/node"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "20.0.0"
+    },
+    {
+      "dependencies": [
+        "@openagenda/verror"
+      ],
+      "packages": [
+        "**"
+      ],
+      "pinVersion": "3.1.4"
+    }
+  ]
+}

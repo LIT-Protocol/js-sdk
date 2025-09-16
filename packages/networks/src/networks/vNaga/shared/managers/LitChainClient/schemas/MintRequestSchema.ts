@@ -1,4 +1,3 @@
-import { t } from 'elysia';
 import { z } from 'zod';
 import {
   toBigInt,
@@ -24,14 +23,3 @@ export const MintRequestSchema = z.object({
 // 2. Transformed/Validated Type - this is the type after the user input has been transformed and validated. Usually used for smart contract calls or external API calls (such as communication with nodes). (e.g., BigInt, etc.)
 export type MintRequestRaw = z.input<typeof MintRequestSchema>;
 export type MintRequestTransformed = z.infer<typeof MintRequestSchema>;
-
-// ✨ Elysia Schema
-export const tMintRequestSchema = t.Object({
-  keyType: t.Number(),
-  permittedAuthMethodTypes: t.Array(t.Number()),
-  permittedAuthMethodIds: t.Array(t.String()),
-  permittedAuthMethodPubkeys: t.Array(t.String()),
-  permittedAuthMethodScopes: t.Array(t.Array(t.Number())),
-  addPkpEthAddressAsPermittedAddress: t.Boolean(),
-  sendPkpToItself: t.Boolean(),
-});

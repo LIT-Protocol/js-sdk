@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(NETWORK_CONFIG=/Users/anson/Projects/lit-assets/blockchain/contracts/networkContext.json NETWORK_NAME=naga-develop nx build raw-contracts --skip-nx-cache)",
+      "Bash(nx run:*)",
+      "Bash(NETWORK_CONFIG=/Users/anson/Projects/lit-assets/blockchain/contracts/networkContext.json NETWORK_NAME=naga-develop nx run raw-contracts:generate)",
+      "Bash(pnpm run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -31,11 +31,11 @@
   "license": "MIT",
   "dependencies": {
     "viem": "2.29.4",
-    "zod": "^3.22.0"
+    "zod": "3.24.3"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "@types/node": "20.0.0",
+    "typescript": "5.8.3"
   },
   "peerDependencies": {
     "@lit-protocol/access-control-conditions": "workspace:*",
