@@ -91,7 +91,10 @@ export const createLitAuthServer = (
       // =============================================================
       // Ensure system context is initialized before server fully starts, using appName from config
       // This was originally at the top level, moved here to use config.appName
-      await initSystemContext({ appName: config.appName });
+      await initSystemContext({
+        appName: config.appName,
+        rpcUrl: config.litTxsenderRpcUrl,
+      });
     })
     .get('/', () => ({
       message: 'PKP Auth Service is running. PKP minting is now asynchronous.',
