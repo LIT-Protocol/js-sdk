@@ -24,6 +24,7 @@ import {
 import {
   AuthContextSchema2,
   AuthData,
+  ChainSchema,
   EncryptedVersion1Schema,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
@@ -671,7 +672,7 @@ export const _createNagaLitClient = async (
       unifiedAccessControlConditions: params.unifiedAccessControlConditions,
       connectionInfo: currentConnectionInfo,
       version: networkModule.version,
-      chain: params.chain,
+      chain: ChainSchema.parse(params.chain),
       jitContext,
     })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
