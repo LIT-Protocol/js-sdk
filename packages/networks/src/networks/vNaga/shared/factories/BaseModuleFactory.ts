@@ -2,6 +2,7 @@ import { DEV_PRIVATE_KEY, version } from '@lit-protocol/constants';
 import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
+  AuthDataInput,
   EncryptedVersion1Schema,
   GenericEncryptedPayloadSchema,
   GenericResultBuilder,
@@ -376,7 +377,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
 
       mintWithAuth: async (params: {
         account: ExpectedAccountOrWalletClient;
-        authData: Optional<AuthData, 'accessToken'>;
+        authData: Optional<AuthDataInput, 'accessToken'>;
         scopes: z.infer<typeof ScopeStringSchema>[];
       }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
         const chainManager = createChainManager(params.account);

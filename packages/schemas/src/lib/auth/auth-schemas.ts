@@ -9,15 +9,11 @@ import {
   NodeSetSchema,
   SessionKeyUriSchema,
 } from '../schemas';
-import { ScopeStringSchema, SCOPE_MAPPING } from './ScopeSchema';
+import { ScopeStringSchema } from './ScopeSchema';
 
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
-  authMethodType: z.union([
-    AuthMethodSchema.shape.authMethodType,
-    z.number(),
-    z.bigint(),
-  ]),
+  authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
   accessToken: AuthMethodSchema.shape.accessToken,
   publicKey: HexPrefixedSchema.optional(),
 
@@ -26,7 +22,8 @@ export const AuthDataSchema = z.object({
   metadata: z.any().optional(),
 });
 
-export type AuthData = z.infer<typeof AuthDataSchema>;
+export type AuthData = z.output<typeof AuthDataSchema>;
+export type AuthDataInput = z.input<typeof AuthDataSchema>;
 
 /**
  * Return Object Schema
@@ -77,48 +74,25 @@ export const JsonSignCustomSessionKeyRequestForPkpReturnSchema = z
 export const MintPKPRequestSchema = z
   .object({
     authMethodId: HexPrefixedSchema,
-    // Accept string, number, or enum for backwards compatibility
-    authMethodType: z
-      .union([
-        AuthMethodSchema.shape.authMethodType, // z.nativeEnum(AUTH_METHOD_TYPE)
-        z.string().transform((val) => parseInt(val, 10)),
-        z.number(),
-      ])
-      .transform((val) => {
-        // Ensure it's a valid AUTH_METHOD_TYPE enum value
-        const numVal = typeof val === 'string' ? parseInt(val, 10) : val;
-        if (!Object.values(AUTH_METHOD_TYPE).includes(numVal as any)) {
-          throw new Error(`Invalid authMethodType: ${val}`);
-        }
-        return numVal as AUTH_METHOD_TYPE_VALUES;
-      }),
-    pubkey: HexPrefixedSchema.optional(),
+    authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
+    pubkey: HexPrefixedSchema.default('0x'),
     scopes: z.array(ScopeStringSchema).optional().default([]),
   })
-  .transform(async (data) => {
-    let derivedPubkey: z.infer<typeof HexPrefixedSchema>;
-
-    // Validate pubkey for WebAuthn
-    if (data.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
-      if (!data.pubkey || data.pubkey === '0x') {
-        throw new Error(
-          `pubkey is required for WebAuthn and cannot be 0x. Received pubkey: "${data.pubkey}" and authMethodType: ${data.authMethodType}`
-        );
+  .refine(
+    (data) => {
+      // Validate pubkey is present for WebAuthn
+      // the default has been set to 0x, so we need to check when
+      // webauthn is used the pubkey should NOT be 0x
+      if (data.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
+        return data.pubkey && data.pubkey !== '0x';
       }
-      derivedPubkey = data.pubkey;
-    } else {
-      derivedPubkey = '0x' as z.infer<typeof HexPrefixedSchema>;
+      return true;
+    },
+    {
+      message: 'pubkey is required for WebAuthn and cannot be 0x',
+      path: ['pubkey'],
     }
-
-    // Transform scope strings to bigints for contract calls
-    const scopeBigInts = data.scopes.map(scope => SCOPE_MAPPING[scope]);
-
-    return {
-      ...data,
-      pubkey: derivedPubkey,
-      scopes: scopeBigInts,
-    };
-  });
+  );
 
 export type MintPKPRequest = z.input<typeof MintPKPRequestSchema>;
 export type MintPKPRequestTransformed = z.output<typeof MintPKPRequestSchema>;
