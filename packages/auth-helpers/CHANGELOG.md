@@ -1,5 +1,11 @@
 # @lit-protocol/auth-helpers
 
+## 8.0.0-test.22
+
+### Patch Changes
+
+- fix Uncaught ReferenceError: exports is not defined
+
 ## 8.0.0-test.21
 
 ### Patch Changes

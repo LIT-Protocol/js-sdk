@@ -1,5 +1,13 @@
 # @lit-protocol/artillery
 
+## 0.0.2-test.6
+
+### Patch Changes
+
+- fix Uncaught ReferenceError: exports is not defined
+- Updated dependencies
+  - @lit-protocol/e2e@1.0.12-test.6
+
 ## 0.0.2-test.5
 
 ### Patch Changes

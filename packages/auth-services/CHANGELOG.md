@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-test.25
+
+### Patch Changes
+
+- fix Uncaught ReferenceError: exports is not defined
+- Updated dependencies
+  - @lit-protocol/logger@8.0.0-test.22
+
 ## 2.0.0-test.24
 
 ### Patch Changes
