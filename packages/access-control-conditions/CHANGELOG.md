@@ -1,5 +1,11 @@
 # @lit-protocol/access-control-conditions
 
+## 8.0.0-test.18
+
+### Patch Changes
+
+- test changeset
+
 ## 8.0.0-test.17
 
 ### Patch Changes
