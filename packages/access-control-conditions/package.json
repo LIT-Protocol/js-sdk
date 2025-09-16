@@ -26,6 +26,7 @@
   "typings": "./src/index.d.ts",
   "dependencies": {
     "ethers": "5.7.2",
-    "zod": "3.24.3"
+    "zod": "3.24.3",
+    "@ethersproject/providers": "5.7.0"
   }
 }
