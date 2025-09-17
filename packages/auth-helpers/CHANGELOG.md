@@ -1,5 +1,29 @@
 # @lit-protocol/auth-helpers
 
+## 8.0.0-canary.3
+
+### Patch Changes
+
+- remove console logs
+
+## 8.0.0-canary.2
+
+### Patch Changes
+
+- fix scopes to transform scope strings like "sign-anything" to their BigInt values (like 1n).
+
+## 8.0.0-canary.1
+
+### Patch Changes
+
+- investigate scopes issues
+
+## 8.0.0-canary.2
+
+### Patch Changes
+
+- merge of [Bug] Fix False Positive Custom Auth Tests #881
+
 ## 8.0.0-beta.1
 
 ### Patch Changes

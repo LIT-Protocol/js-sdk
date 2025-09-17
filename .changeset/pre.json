@@ -1,22 +1,30 @@
 {
   "mode": "pre",
-  "tag": "beta",
+  "tag": "canary",
   "initialVersions": {
-    "@lit-protocol/access-control-conditions": "7.0.0",
-    "@lit-protocol/access-control-conditions-schemas": "7.0.0",
-    "@lit-protocol/auth": "7.0.0",
-    "@lit-protocol/auth-helpers": "7.0.0",
-    "@lit-protocol/auth-services": "1.0.0",
-    "@lit-protocol/constants": "7.0.0",
-    "@lit-protocol/crypto": "7.0.0",
-    "@lit-protocol/lit-client": "7.0.0",
-    "@lit-protocol/logger": "7.0.0",
-    "@lit-protocol/networks": "7.0.0",
-    "@lit-protocol/schemas": "7.0.0",
-    "@lit-protocol/types": "7.0.0",
-    "@lit-protocol/wasm": "7.0.0",
-    "@lit-protocol/wrapped-keys": "7.0.0",
-    "@lit-protocol/wrapped-keys-lit-actions": "7.0.0"
+    "@lit-protocol/access-control-conditions": "8.0.0-beta.1",
+    "@lit-protocol/access-control-conditions-schemas": "8.0.0-beta.1",
+    "@lit-protocol/auth": "8.0.0-beta.1",
+    "@lit-protocol/auth-helpers": "8.0.0-beta.1",
+    "@lit-protocol/auth-services": "2.0.0-beta.1",
+    "@lit-protocol/constants": "8.0.0-beta.1",
+    "@lit-protocol/crypto": "8.0.0-beta.1",
+    "@lit-protocol/lit-client": "8.0.0-beta.1",
+    "@lit-protocol/logger": "8.0.0-beta.1",
+    "@lit-protocol/networks": "8.0.0-beta.1",
+    "@lit-protocol/schemas": "8.0.0-beta.1",
+    "@lit-protocol/types": "8.0.0-beta.1",
+    "@lit-protocol/wasm": "8.0.0-beta.1",
+    "@lit-protocol/wrapped-keys": "8.0.0-beta.1",
+    "@lit-protocol/wrapped-keys-lit-actions": "8.0.0-beta.1"
   },
-  "changesets": ["cute-bottles-ask", "cute-experts-clap", "cyan-bears-invent"]
+  "changesets": [
+    "cute-bottles-ask",
+    "cute-experts-clap",
+    "cyan-bears-invent",
+    "four-badgers-heal",
+    "light-beds-push",
+    "stupid-lies-invent",
+    "witty-news-join"
+  ]
 }

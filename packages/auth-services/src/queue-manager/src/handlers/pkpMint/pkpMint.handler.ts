@@ -14,7 +14,6 @@ export async function handlePkpMintTask(jobData: {
   requestBody: MintPKPRequest;
   reqId?: string;
 }): Promise<any> {
-
   const result = await globalThis.systemContext.litClient.mintWithAuth({
     account: globalThis.systemContext.account,
     authData: {

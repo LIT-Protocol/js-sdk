@@ -9,7 +9,7 @@ import {
   NodeSetSchema,
   SessionKeyUriSchema,
 } from '../schemas';
-import { ScopeStringSchema } from './ScopeSchema';
+import { ScopeSchemaRaw } from './ScopeSchema';
 
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
@@ -76,7 +76,7 @@ export const MintPKPRequestSchema = z
     authMethodId: HexPrefixedSchema,
     authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
     pubkey: HexPrefixedSchema.default('0x'),
-    scopes: z.array(ScopeStringSchema).optional().default([]),
+    scopes: z.array(ScopeSchemaRaw).optional().default([]),
   })
   .refine(
     (data) => {
