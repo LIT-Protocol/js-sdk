@@ -13,7 +13,9 @@ import { ScopeSchemaRaw } from './ScopeSchema';
 
 export const CustomAuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
-  authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
+
+  // This will be a very big number, unlike our native auth
+  authMethodType: z.bigint(),
 });
 
 export type CustomAuthData = z.infer<typeof CustomAuthDataSchema>;

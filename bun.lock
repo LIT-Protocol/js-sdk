@@ -96,7 +96,7 @@
     },
     "packages/access-control-conditions": {
       "name": "@lit-protocol/access-control-conditions",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "ethers": "^5.7.1",
         "zod": "3.24.3",
@@ -104,14 +104,14 @@
     },
     "packages/access-control-conditions-schemas": {
       "name": "@lit-protocol/access-control-conditions-schemas",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "zod": "3.24.3",
       },
     },
     "packages/auth": {
       "name": "@lit-protocol/auth",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "@noble/curves": "^1.8.1",
         "@simplewebauthn/browser": "^7.2.0",
@@ -133,7 +133,7 @@
     },
     "packages/auth-helpers": {
       "name": "@lit-protocol/auth-helpers",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "@wagmi/core": "^2.17.1",
         "ethers": "^5.7.1",
@@ -145,7 +145,7 @@
     },
     "packages/auth-services": {
       "name": "@lit-protocol/auth-services",
-      "version": "2.0.0-beta.1",
+      "version": "2.0.0-canary.3",
       "dependencies": {
         "@elysiajs/bearer": "^1.2.0",
         "@elysiajs/cors": "^1.2.0",
@@ -184,7 +184,7 @@
     },
     "packages/constants": {
       "name": "@lit-protocol/constants",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "@openagenda/verror": "^3.1.4",
         "zod": "3.24.3",
@@ -192,7 +192,7 @@
     },
     "packages/crypto": {
       "name": "@lit-protocol/crypto",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "@lit-protocol/nacl": "7.1.1",
         "@lit-protocol/uint8arrays": "7.1.1",
@@ -203,7 +203,7 @@
     },
     "packages/lit-client": {
       "name": "@lit-protocol/lit-client",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "@lit-protocol/uint8arrays": "7.1.1",
         "bs58": "^6.0.0",
@@ -213,14 +213,14 @@
     },
     "packages/logger": {
       "name": "@lit-protocol/logger",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "pino": "^9.6.0",
       },
     },
     "packages/networks": {
       "name": "@lit-protocol/networks",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "@lit-protocol/contracts": "^0.5.0",
         "@lit-protocol/nacl": "7.1.1",
@@ -238,7 +238,7 @@
     },
     "packages/schemas": {
       "name": "@lit-protocol/schemas",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "ethers": "^5.7.1",
         "siwe": "^2.3.2",
@@ -248,7 +248,7 @@
     },
     "packages/types": {
       "name": "@lit-protocol/types",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "ethers": "^5.7.1",
         "zod": "3.24.3",
@@ -256,7 +256,7 @@
     },
     "packages/wasm": {
       "name": "@lit-protocol/wasm",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
       "dependencies": {
         "ethers": "^5.7.1",
         "pako": "^2.1.0",
@@ -264,11 +264,11 @@
     },
     "packages/wrapped-keys": {
       "name": "@lit-protocol/wrapped-keys",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
     },
     "packages/wrapped-keys-lit-actions": {
       "name": "@lit-protocol/wrapped-keys-lit-actions",
-      "version": "8.0.0-beta.1",
+      "version": "8.0.0-canary.3",
     },
   },
   "packages": {

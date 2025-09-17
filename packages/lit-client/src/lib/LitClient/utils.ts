@@ -61,7 +61,7 @@ export const utils = {
     const uniqueUserId = `${uniqueDappName}-${userId}`;
 
     const customAuthData = CustomAuthDataSchema.parse({
-      authMethodType: Number(uniqueAuthMethodType),
+      authMethodType: uniqueAuthMethodType,
       authMethodId: keccak256(toBytes(uniqueUserId)),
     });
 
