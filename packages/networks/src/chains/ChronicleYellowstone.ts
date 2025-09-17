@@ -41,3 +41,27 @@ export const WagmiConfig = createConfig({
     [viemChainConfig.id]: http(),
   },
 });
+
+/**
+ * Resolve the effective RPC URL from an optional override.
+ */
+export function resolveRpcUrl(overrideRpc?: string): string {
+  return overrideRpc ?? RPC_URL;
+}
+
+/**
+ * Build a Chain config using the base Chronicle Yellowstone config,
+ * applying an optional RPC override to both default and public http URLs.
+ */
+export function buildViemChainConfig(overrideRpc?: string): Chain {
+  const rpc = resolveRpcUrl(overrideRpc);
+  const base = viemChainConfig;
+  return {
+    ...base,
+    rpcUrls: {
+      ...base.rpcUrls,
+      default: { ...base.rpcUrls.default, http: [rpc] },
+      public: { ...(base.rpcUrls as any)['public'], http: [rpc] },
+    },
+  } as Chain;
+}

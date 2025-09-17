@@ -1,7 +1,7 @@
 import { DefaultNetworkConfig } from '../../../../../../../shared/interfaces/NetworkContext';
 import { isIpfsCidV0 } from '../../../../../../../../shared/utils/z-validate';
 import { z } from 'zod';
-import { ScopeStringSchema } from '../../../../schemas/shared/ScopeSchema';
+import { ScopeStringSchema } from '@lit-protocol/schemas';
 import {
   PkpIdentifierRaw,
   resolvePkpTokenId,

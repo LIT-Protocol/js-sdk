@@ -20,7 +20,7 @@ export class NagaStagingEnvironment extends BaseNetworkEnvironment<
   NagaStagingSignatures,
   NagaStagingSpecificConfigs
 > {
-  constructor() {
+  constructor(options?: { rpcUrlOverride?: string }) {
     super({
       network: NETWORK,
       abiSignatures: nagaStagingSignatures,
@@ -34,15 +34,16 @@ export class NagaStagingEnvironment extends BaseNetworkEnvironment<
       minimumThreshold: MINIMUM_THRESHOLD,
       httpProtocol: PROTOCOL,
       requiredAttestation: true,
+      rpcUrlOverride: options?.rpcUrlOverride,
     });
   }
 
-  protected getRpcUrl(): string {
-    return chainInfo.RPC_URL;
+  protected getRpcUrl(overrideRpc?: string): string {
+    return chainInfo.resolveRpcUrl(overrideRpc);
   }
 
-  protected getChainConfig(): Chain {
-    return chainInfo.viemChainConfig;
+  protected getChainConfig(overrideRpc?: string): Chain {
+    return chainInfo.buildViemChainConfig(overrideRpc);
   }
 
   protected getEndpoints(): NagaEndpointsType {
