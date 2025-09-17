@@ -1,5 +1,11 @@
 # @lit-protocol/auth-services
 
+## 2.0.0-canary.4
+
+### Patch Changes
+
+- fix custom auth data schema
+
 ## 2.0.0-canary.3
 
 ### Patch Changes

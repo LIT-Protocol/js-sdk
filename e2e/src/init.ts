@@ -228,7 +228,6 @@ export const init = async (
     userId: 'eve',
   });
 
-
   const { pkpData } = await litClient.mintWithCustomAuth({
     account: eveViemAccount,
     authData: eveCustomAuthData,

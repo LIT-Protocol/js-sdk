@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/wasm",
-  "version": "8.0.0-canary.3",
+  "version": "8.0.0-canary.4",
   "type": "commonjs",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {

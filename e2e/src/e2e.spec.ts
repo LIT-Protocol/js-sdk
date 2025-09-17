@@ -57,8 +57,7 @@ describe('all', () => {
       it('executeJs', () =>
         createExecuteJsTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
-      it('viewPKPsByAuthData', () =>
-        createViewPKPsByAuthDataTest(ctx)());
+      it('viewPKPsByAuthData', () => createViewPKPsByAuthDataTest(ctx)());
       it('pkpEncryptDecrypt', () =>
         createPkpEncryptDecryptTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('encryptDecryptFlow', () =>
