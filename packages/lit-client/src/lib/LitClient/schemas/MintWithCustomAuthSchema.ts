@@ -21,8 +21,7 @@ const BaseMintWithCustomAuthSchema = z.object({
  */
 // const MintWithValidationCodeSchema = BaseMintWithCustomAuthSchema.extend({
 //   validationCode: z.string().min(1, 'validationCode cannot be empty'),
-//   validationIpfsCid: z.undefined().optional(),
-// });
+//   validationIpfsCid: z.undefined
 
 /**
  * Schema variant for validation IPFS CID

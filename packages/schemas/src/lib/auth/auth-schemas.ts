@@ -11,6 +11,13 @@ import {
 } from '../schemas';
 import { ScopeSchemaRaw } from './ScopeSchema';
 
+export const CustomAuthDataSchema = z.object({
+  authMethodId: HexPrefixedSchema,
+  authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
+});
+
+export type CustomAuthData = z.infer<typeof CustomAuthDataSchema>;
+
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
   authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
