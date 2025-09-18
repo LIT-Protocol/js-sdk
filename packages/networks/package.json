@@ -18,7 +18,7 @@
     "directory": "../../dist/packages/networks"
   },
   "dependencies": {
-    "@lit-protocol/contracts": "^0.4.0",
+    "@lit-protocol/contracts": "^0.5.1",
     "@lit-protocol/nacl": "7.1.1",
     "@noble/curves": "^1.8.1",
     "@wagmi/core": "^2.17.1",
