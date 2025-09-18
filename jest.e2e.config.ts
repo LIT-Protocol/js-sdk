@@ -21,7 +21,7 @@ const localPackages = [
 
 const config: Config = {
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/e2e/src/e2e.spec.ts'],
+  testMatch: ['<rootDir>/packages/e2e/src/**/*.spec.ts'],
 
   // Use Babel for everything; simple and robust with TS + ESM
   transform: {
