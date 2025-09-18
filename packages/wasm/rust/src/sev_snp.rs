@@ -130,21 +130,27 @@ fn get_expected_report_data(
 ) -> JsResult<[u8; 64]> {
     let mut hasher = Sha512::new();
     hasher.update("noonce");
+    hasher.update(&(challenge.len() as u64).to_be_bytes());
     hasher.update(challenge);
 
     hasher.update("data");
+    hasher.update(&(data.len() as u64).to_be_bytes());
     for (key, value) in data {
+        hasher.update(&(key.len() as u64).to_be_bytes());
         hasher.update(key);
+        hasher.update(&(value.len() as u64).to_be_bytes());
         hasher.update(value);
     }
 
     if !signatures.is_empty() {
         hasher.update("signatures");
+        hasher.update(&(signatures.len() as u64).to_be_bytes());
 
-        for idx in 0..((signatures.len() - 1) as usize) {
+        for idx in 0..=((signatures.len() - 1) as usize) {
             let sig = signatures.get(idx);
             match sig {
                 Some(s) => {
+                    hasher.update(&(s.len() as u64).to_be_bytes());
                     hasher.update(s.clone());
                 }
                 None => {
