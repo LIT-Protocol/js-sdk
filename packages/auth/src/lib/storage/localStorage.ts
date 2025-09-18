@@ -1,6 +1,7 @@
-import type { LitAuthStorageProvider, PKPInfo } from './types';
+import type { LitAuthStorageProvider } from './types';
 import type { LitAuthData } from '../types';
 import { getGlobal } from '@lit-protocol/constants';
+import { PKPData } from '@lit-protocol/schemas';
 
 const LOCALSTORAGE_LIT_AUTH_PREFIX = 'lit-auth';
 const LOCALSTORAGE_LIT_PKP_PREFIX = 'lit-pkp-tokens';
@@ -309,7 +310,7 @@ export function localStorage({
     async readPKPs({
       authMethodType,
       authMethodId,
-    }): Promise<PKPInfo[] | null> {
+    }): Promise<PKPData[] | null> {
       const cacheKey = buildPKPFullCacheKey({
         appName,
         networkName,

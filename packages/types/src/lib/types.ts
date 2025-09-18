@@ -39,12 +39,6 @@ export {
   Literal,
 } from '@lit-protocol/schemas';
 
-export interface PKPInfo {
-  tokenId: string;
-  publicKey: string;
-  ethAddress: string;
-}
-
 export interface JobStatusResponse {
   jobId: string;
   name: string;
