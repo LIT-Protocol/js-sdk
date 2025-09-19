@@ -1204,7 +1204,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     name: '0G Mainnet',
     symbol: 'FLOW',
     decimals: 18,
-    rpcUrls: ['http://evmrpc.0g.ai/ '],
+    rpcUrls: ['https://evmrpc.0g.ai/ '],
     blockExplorerUrls: ['https://chainscan.0g.ai/'],
     type: null,
     vmType: 'EVM',
