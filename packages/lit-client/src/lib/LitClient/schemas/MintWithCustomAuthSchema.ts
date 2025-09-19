@@ -1,4 +1,4 @@
-import { AuthData } from '@lit-protocol/schemas';
+import { AuthData, CustomAuthDataSchema } from '@lit-protocol/schemas';
 import { Optional } from '@lit-protocol/types';
 import { z } from 'zod';
 
@@ -9,7 +9,7 @@ const BaseMintWithCustomAuthSchema = z.object({
   // Account information - this will be passed from the calling context
   account: z.any(), // Account type varies by network
   // Authentication data for the user
-  authData: z.custom<Optional<AuthData, 'accessToken'>>(),
+  authData: CustomAuthDataSchema,
   scope: z.enum(['no-permissions', 'sign-anything', 'personal-sign']),
   // Optional overrides
   addPkpEthAddressAsPermittedAddress: z.boolean().default(false),
