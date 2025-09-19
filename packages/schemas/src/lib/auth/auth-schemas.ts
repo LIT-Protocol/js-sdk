@@ -1,4 +1,4 @@
-import { AUTH_METHOD_TYPE_VALUES } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { z } from 'zod';
 import {
   AuthMethodSchema,
@@ -9,6 +9,7 @@ import {
 
 export const CustomAuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
+  // This will be a very big number, unlike our native auth
   authMethodType: z.bigint(),
 });
 
@@ -28,11 +29,7 @@ export type StrictAuthData = z.infer<typeof StrictAuthDataSchema>;
 
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
-  authMethodType: z.union([
-    AuthMethodSchema.shape.authMethodType,
-    z.number(),
-    z.bigint(),
-  ]),
+  authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
   accessToken: AuthMethodSchema.shape.accessToken,
   publicKey: HexPrefixedSchema.optional(),
 
