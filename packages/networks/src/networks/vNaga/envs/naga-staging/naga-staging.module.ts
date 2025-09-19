@@ -5,7 +5,7 @@ import type { ExpectedAccountOrWalletClient } from '../../shared/managers/contra
 
 const nagaStaging = createBaseModule({
   networkConfig: nagaStagingEnvironment.getConfig(),
-  moduleName: 'naga-staging',
+  moduleName: nagaStagingEnvironment.getNetworkName(),
   createChainManager: (account: ExpectedAccountOrWalletClient) =>
     createChainManager(account),
 });
