@@ -1198,7 +1198,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  "0gMainnet": {
+  '0gMainnet': {
     contractAddress: null,
     chainId: 16661,
     name: '0G Mainnet',
