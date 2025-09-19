@@ -2817,10 +2817,10 @@
     npmlog "^6.0.2"
     write-file-atomic "^4.0.1"
 
-"@lit-protocol/accs-schemas@^0.0.31":
-  version "0.0.31"
-  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.31.tgz#a37ebde40e0246a56452327882b104d94a4f90a3"
-  integrity sha512-L3MxpXY1hP6Ep4GwD3ZBQjaFVPuF7VlLU0zJhODqcs+RkHXlcXp9py7rY2APJEW3Amx1LTMwaRKn63egn16RYw==
+"@lit-protocol/accs-schemas@^0.0.33":
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-schemas/-/accs-schemas-0.0.33.tgz#99f708134e86417c0b41ceee13f0d01fa852dd0b"
+  integrity sha512-naUYIAp1sHVzHZTwkpP8dZlRnVyIhSyjIQyG77lJEtliGALP4lAoWFS0iInha83TlHBYxXZxwXf+aKtQuNCs+Q==
   dependencies:
     ajv "^8.12.0"
 
