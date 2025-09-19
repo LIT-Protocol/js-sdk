@@ -120,16 +120,14 @@ export async function createPKPViemAccount({
     tx,
     address,
     chain,
-    transportUrl,
   }: {
     tx: Partial<TransactionSerializable>;
     address: `0x${string}`;
     chain: Chain;
-    transportUrl: string;
   }): Promise<TransactionSerializable> {
     const client = createPublicClient({
       chain,
-      transport: http(transportUrl),
+      transport: http(chain.rpcUrls.default.http[0]),
     });
 
     try {
@@ -246,7 +244,6 @@ export async function createPKPViemAccount({
           tx: txRequest,
           address,
           chain: chainConfig,
-          transportUrl: chainConfig.rpcUrls.default.http[0],
         });
       } else {
         // Ensure minimum required fields for transaction type inference

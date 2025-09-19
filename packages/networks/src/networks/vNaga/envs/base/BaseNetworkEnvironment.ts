@@ -15,6 +15,7 @@ export interface BaseEnvironmentOptions<T, M> {
   minimumThreshold?: number;
   httpProtocol?: 'http://' | 'https://';
   requiredAttestation?: boolean;
+  rpcUrlOverride?: string;
 }
 
 export abstract class BaseNetworkEnvironment<T, M> {
@@ -24,9 +25,9 @@ export abstract class BaseNetworkEnvironment<T, M> {
     this.config = {
       minimumThreshold: options.minimumThreshold || 3,
       network: options.network,
-      rpcUrl: this.getRpcUrl(),
+      rpcUrl: this.getRpcUrl(options.rpcUrlOverride),
       abiSignatures: options.abiSignatures,
-      chainConfig: this.getChainConfig(),
+      chainConfig: this.getChainConfig(options.rpcUrlOverride),
       httpProtocol: options.httpProtocol || 'https://',
       networkSpecificConfigs: options.networkSpecificConfigs,
       endpoints: this.getEndpoints(),
@@ -51,8 +52,8 @@ export abstract class BaseNetworkEnvironment<T, M> {
     return this.config.services;
   }
 
-  protected abstract getRpcUrl(): string;
-  protected abstract getChainConfig(): Chain;
+  protected abstract getRpcUrl(overrideRpc?: string): string;
+  protected abstract getChainConfig(overrideRpc?: string): Chain;
   protected abstract getEndpoints(): NagaEndpointsType;
   protected abstract getDefaultRealmId(): bigint;
 }
