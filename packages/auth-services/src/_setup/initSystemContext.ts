@@ -1,5 +1,10 @@
-import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
+import {
+  createAuthManager,
+  storagePlugins,
+  ViemAccountAuthenticator,
+} from '@lit-protocol/auth';
 import { createLitClient } from '@lit-protocol/lit-client';
+import { nagaDev, nagaTest, nagaStaging } from '@lit-protocol/networks';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { env } from '../env';
@@ -19,20 +24,35 @@ export async function initSystemContext({ appName }: { appName: string }) {
   console.log('🔥 [initSystemContext] Initializing system context...');
 
   let networkModule: any;
+  if (env.NETWORK === 'naga-dev') networkModule = nagaDev;
+  else if (env.NETWORK === 'naga-test') networkModule = nagaTest;
+  else if (env.NETWORK === 'naga-staging') networkModule = nagaStaging;
+  else throw new Error(`Unsupported network: ${env.NETWORK}`);
 
-  // TODO: Add more supports for other networks
-  if (env.NETWORK === 'naga-dev') {
-    const { nagaDev } = await import('@lit-protocol/networks');
-    networkModule = nagaDev;
-  } else if (env.NETWORK === 'naga-test') {
-    const { nagaTest } = await import('@lit-protocol/networks');
-    networkModule = nagaTest;
-  } else if (env.NETWORK === 'naga-staging') {
-    const { nagaStaging } = await import('@lit-protocol/networks');
-    networkModule = nagaStaging;
-  } else {
-    throw new Error(`Unsupported network: ${env.NETWORK}`);
-  }
+  const overrideRpc = rpcUrl || env.LIT_TXSENDER_RPC_URL;
+
+  // Apply runtime override if rpcUrl provided
+  const effectiveModule =
+    overrideRpc && typeof networkModule.withOverrides === 'function'
+      ? networkModule.withOverrides({ rpcUrl: overrideRpc })
+      : networkModule;
+
+  try {
+    const baseRpc =
+      typeof networkModule.getRpcUrl === 'function'
+        ? networkModule.getRpcUrl()
+        : 'n/a';
+    const effRpc =
+      typeof effectiveModule.getRpcUrl === 'function'
+        ? effectiveModule.getRpcUrl()
+        : 'n/a';
+    console.log(
+      '[initSystemContext] RPC (base → effective):',
+      baseRpc,
+      '→',
+      effRpc
+    );
+  } catch {}
 
   const litClient = await createLitClient({
     network: networkModule,
@@ -47,8 +67,6 @@ export async function initSystemContext({ appName }: { appName: string }) {
       storagePath: `./lit-auth-worker-storage-${appName}`,
     }),
   });
-
-  const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
 
   const authData = await ViemAccountAuthenticator.authenticate(account);
 

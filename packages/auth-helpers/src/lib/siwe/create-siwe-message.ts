@@ -4,7 +4,6 @@ import { SiweMessage } from 'siwe';
 import { getGlobal, InvalidArgumentException } from '@lit-protocol/constants';
 import {
   BaseSiweMessage,
-  CapacityDelegationFields,
   WithCapacityDelegation,
   WithRecap,
 } from '@lit-protocol/types';
@@ -119,34 +118,6 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
   };
 
   let siweMessage = new SiweMessage(siweParams);
-
-  // -- create a message with capacity credits
-  if (
-    'dAppOwnerWallet' in params || // required param
-    'uses' in params || // optional
-    'delegateeAddresses' in params // optional
-    // 'capacityTokenId' in params // optional
-  ) {
-    const ccParams = params as CapacityDelegationFields;
-
-    const capabilities = createCapacityCreditsResourceData(ccParams);
-
-    params.resources = [
-      {
-        // TODO: new resource to be used
-        //   resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
-        //   ability: LIT_ABILITY.RateLimitIncreaseAuth,
-
-        // @ts-expect-error - TODO: new resource to be used
-        resource: null,
-
-        // @ts-expect-error - TODO: new ability to be used
-        ability: null,
-        // @ts-expect-error Complaining because of index signature in destination
-        data: capabilities,
-      },
-    ];
-  }
 
   // -- add recap resources if needed
   if (params.resources) {

@@ -1,0 +1,62 @@
+{
+  "name": "lit-auth-server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/lit-auth-server/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/lit-auth-server",
+        "format": [
+          "cjs"
+        ],
+        "thirdParty": true,
+        "main": "apps/lit-auth-server/src/main.ts",
+        "tsConfig": "apps/lit-auth-server/tsconfig.app.json",
+        "assets": [
+          "apps/lit-auth-server/src/assets"
+        ],
+        "generatePackageJson": true
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "generateLockfile": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "buildTarget": "lit-auth-server:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "lit-auth-server:build:development"
+        },
+        "production": {
+          "buildTarget": "lit-auth-server:build:production"
+        }
+      }
+    },
+    "docker-build": {
+      "dependsOn": [
+        "build"
+      ],
+      "command": "docker build -f apps/lit-auth-server/Dockerfile . -t lit-auth-server"
+    }
+  }
+}

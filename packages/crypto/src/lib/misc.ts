@@ -1,4 +1,4 @@
-import Ajv, { JSONSchemaType } from 'ajv';
+import Ajv, { SchemaObject, ValidateFunction } from 'ajv';
 
 import {
   InvalidArgumentException,
@@ -313,12 +313,16 @@ export const checkType = ({
  */
 export const checkSchema = (
   value: any,
-  schema: JSONSchemaType<any>,
+  schema: SchemaObject | boolean,
   paramName: string,
   functionName: string,
   throwOnError: boolean = true
 ): boolean => {
-  let validate = schema.$id ? ajv.getSchema(schema.$id) : undefined;
+  let validate: ValidateFunction | undefined =
+    typeof schema === 'object' && schema && (schema as SchemaObject).$id
+      ? ajv.getSchema((schema as SchemaObject).$id as string)
+      : undefined;
+
   if (!validate) {
     validate = ajv.compile(schema);
   }

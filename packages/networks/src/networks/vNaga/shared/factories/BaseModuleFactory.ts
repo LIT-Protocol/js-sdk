@@ -8,6 +8,7 @@ import {
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
+  StrictAuthData,
 } from '@lit-protocol/schemas';
 import { Hex, hexToBytes, stringToBytes } from 'viem';
 import { z } from 'zod';
@@ -97,7 +98,9 @@ import { RawHandshakeResponseSchema } from '../managers/api-manager/handshake/ha
 export interface BaseModuleConfig<T, M> {
   networkConfig: INetworkConfig<T, M>;
   moduleName: string;
-  createChainManager: (account: ExpectedAccountOrWalletClient) => any;
+  createChainManager: (
+    account: ExpectedAccountOrWalletClient
+  ) => ReturnType<typeof createChainManagerFactory>;
   verifyReleaseId?: (
     attestation: NodeAttestation,
     config: ReleaseVerificationConfig
@@ -330,11 +333,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       },
 
       getPKPsByAuthData: async (params: {
-        authData: {
-          authMethodType: number | bigint;
-          authMethodId: string;
-          accessToken?: string;
-        };
+        authData: StrictAuthData | AuthData;
         pagination?: { limit?: number; offset?: number };
         storageProvider?: PKPStorageProvider;
         account: ExpectedAccountOrWalletClient;
@@ -421,6 +420,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         authData: AuthData;
         authServiceBaseUrl?: string;
         scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+        apiKey?: string;
       }) => {
         return await handleAuthServerRequest<PKPData>({
           jobName: 'PKP Minting',
@@ -434,6 +434,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             pubkey: params.authData.publicKey,
             scopes: params.scopes,
           },
+          headers: params.apiKey ? { 'x-api-key': params.apiKey } : undefined,
         });
       },
     },
