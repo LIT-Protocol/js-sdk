@@ -7,6 +7,13 @@ import {
   SessionKeyUriSchema,
 } from '../schemas';
 
+export const CustomAuthDataSchema = z.object({
+  authMethodId: HexPrefixedSchema,
+  authMethodType: z.bigint(),
+});
+
+export type CustomAuthData = z.infer<typeof CustomAuthDataSchema>;
+
 export const StrictAuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
   authMethodType: z.union([

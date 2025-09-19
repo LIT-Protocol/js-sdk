@@ -1,5 +1,10 @@
 import type { Account, Chain, WalletClient, Client } from 'viem';
-import { createPublicClient, createWalletClient, getContract, http } from 'viem';
+import {
+  createPublicClient,
+  createWalletClient,
+  getContract,
+  http,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
 import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
@@ -86,7 +91,10 @@ export const createContractsManager = <T, M>(
       contractData.PKPNFT.methods.safeTransferFrom,
       ...contractData.PKPNFT.events,
     ],
-    client: { wallet: walletClientForContract },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   const pkpHelperContract = getContract({
@@ -137,7 +145,10 @@ export const createContractsManager = <T, M>(
       contractData.PKPPermissions.methods.getTokenIdsForAuthMethod,
       ...contractData.PKPPermissions.events,
     ],
-    client: { wallet: walletClientForContract },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   const pubkeyRouterContract = getContract({
@@ -165,7 +176,10 @@ export const createContractsManager = <T, M>(
       contractData.Ledger.methods.withdraw,
       ...contractData.Ledger.events,
     ],
-    client: { wallet: walletClientForContract },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   const paymentDelegationContract = getContract({
@@ -182,7 +196,10 @@ export const createContractsManager = <T, M>(
       contractData.PaymentDelegation.methods.undelegatePaymentsBatch,
       ...contractData.PaymentDelegation.events,
     ],
-    client: { wallet: walletClientForContract },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   // ---------- End of all your contracts ----------

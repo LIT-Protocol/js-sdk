@@ -13,7 +13,7 @@ import { ViemAccountAuthenticator } from './lib/authenticators/ViemAccountAuthen
 import { WalletClientAuthenticator } from './lib/authenticators/WalletClientAuthenticator';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
 import { localStorage, localStorageNode } from './lib/storage';
-import type { LitAuthStorageProvider, PKPInfo } from './lib/storage/types';
+import type { LitAuthStorageProvider } from './lib/storage/types';
 import type { LitAuthData } from './lib/types';
 
 // -- exports
@@ -23,11 +23,6 @@ export { JsonSignSessionKeyRequestForPkpReturnSchema } from '@lit-protocol/schem
  * Storage providers are used to cache authentication data.
  */
 export type { LitAuthStorageProvider };
-
-/**
- * Type definition for PKP information used for caching
- */
-export type { PKPInfo };
 
 /**
  * Type definition for the structure of authentication data used within the Lit Auth client.

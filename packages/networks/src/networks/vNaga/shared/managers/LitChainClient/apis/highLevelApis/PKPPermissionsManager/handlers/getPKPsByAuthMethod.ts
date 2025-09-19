@@ -9,7 +9,7 @@ import {
 import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
 import { getTokenIdsForAuthMethod } from '../../../rawContractApis/pkp/read/getTokenIdsForAuthMethod';
 import type { PKPStorageProvider } from '../../../../../../../../../storage/types';
-import type { PKPInfo } from '@lit-protocol/types';
+import { PKPData } from '@lit-protocol/schemas';
 
 // Schema for auth data (accept both strict and normal shapes, normalise to canonical output)
 const strictAuthDataInput = z
@@ -20,7 +20,9 @@ const strictAuthDataInput = z
   })
   .transform(({ authMethodType, authMethodId, accessToken }) => ({
     authMethodType:
-      typeof authMethodType === 'bigint' ? authMethodType : BigInt(authMethodType),
+      typeof authMethodType === 'bigint'
+        ? authMethodType
+        : BigInt(authMethodType),
     authMethodId,
     accessToken,
   }));
@@ -35,15 +37,23 @@ const AuthDataInput = z
   })
   .superRefine((val, ctx) => {
     if (val.authMethodType == null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'authMethodType is required' });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'authMethodType is required',
+      });
     }
     if (val.authMethodId == null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'authMethodId is required' });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'authMethodId is required',
+      });
     }
   })
   .transform(({ authMethodType, authMethodId, accessToken }) => ({
     authMethodType:
-      typeof authMethodType === 'bigint' ? authMethodType! : BigInt(authMethodType!),
+      typeof authMethodType === 'bigint'
+        ? authMethodType!
+        : BigInt(authMethodType!),
     authMethodId: authMethodId!,
     accessToken,
   }));
@@ -69,7 +79,7 @@ type GetPKPsByAuthDataRequest = z.input<typeof getPKPsByAuthDataSchema>;
  * Paginated response for PKPs
  */
 export interface PaginatedPKPsResponse {
-  pkps: PKPInfo[];
+  pkps: PKPData[];
   pagination: {
     limit: number;
     offset: number;
@@ -247,8 +257,8 @@ async function fetchPKPDetailsForTokenIds(
   networkCtx: DefaultNetworkConfig,
   accountOrWalletClient: ExpectedAccountOrWalletClient,
   storageProvider?: PKPStorageProvider
-): Promise<PKPInfo[]> {
-  const pkps: PKPInfo[] = [];
+): Promise<PKPData[]> {
+  const pkps: PKPData[] = [];
 
   // Create contract manager for address derivation (only if needed)
   let contractsManager: ReturnType<typeof createContractsManager> | null = null;
@@ -344,8 +354,8 @@ async function fetchPKPDetailsForTokenIds(
       }
 
       pkps.push({
-        tokenId,
-        publicKey,
+        tokenId: BigInt(tokenId),
+        pubkey: publicKey,
         ethAddress,
       });
 
