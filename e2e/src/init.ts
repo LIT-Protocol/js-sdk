@@ -150,6 +150,17 @@ export const init = async (
   });
   console.log('✅ Master Payment Balance:', masterPaymentBalance);
 
+  async function masterDepositForUser(userAddress: string) {
+    await masterPaymentManager.depositForUser({
+      userAddress: userAddress,
+      amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+    });
+    console.log(
+      `✅ New ${userAddress} Ledger Balance:`,
+      await masterPaymentManager.getBalance({ userAddress: userAddress })
+    );
+  }
+
   /**
    * ====================================
    * Initialise the AuthManager
@@ -184,6 +195,12 @@ export const init = async (
       _network
     ),
   ]);
+
+  // Making sure all signers have sufficient ledger balance before calling the signSessionKey endpoint
+  await masterDepositForUser(aliceViemAccount.address);
+  await masterDepositForUser(bobViemAccount.address);
+  await masterDepositForUser(aliceViemAccountPkp.ethAddress);
+  await masterDepositForUser(bobViemAccountPkp.ethAddress);
 
   /**
    * ====================================
@@ -247,28 +264,8 @@ export const init = async (
    * ====================================
    */
 
-  async function masterDepositForUser(userAddress: string) {
-    await masterPaymentManager.depositForUser({
-      userAddress: userAddress,
-      amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
-    });
-    console.log(
-      `✅ New ${userAddress} Ledger Balance:`,
-      await masterPaymentManager.getBalance({ userAddress: userAddress })
-    );
-  }
-
-  // Deposit to the Alice EOA Ledger
-  await masterDepositForUser(aliceViemAccount.address);
-
-  // Deposit to the PKP Ledger
+  // Deposit to the PKP Viem account Ledger
   await masterDepositForUser(alicePkpViemAccount.address);
-
-  // Deposit to the Bob EOA Ledger
-  await masterDepositForUser(bobViemAccount.address);
-
-  // Deposit to the Bob PKP Ledger
-  await masterDepositForUser(bobViemAccountPkp.ethAddress);
 
   // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
   //   pkpIdentifier: {
