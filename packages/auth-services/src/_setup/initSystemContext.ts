@@ -49,9 +49,20 @@ export async function initSystemContext({
       : networkModule;
 
   try {
-    const baseRpc = typeof networkModule.getRpcUrl === 'function' ? networkModule.getRpcUrl() : 'n/a';
-    const effRpc = typeof effectiveModule.getRpcUrl === 'function' ? effectiveModule.getRpcUrl() : 'n/a';
-    console.log('[initSystemContext] RPC (base → effective):', baseRpc, '→', effRpc);
+    const baseRpc =
+      typeof networkModule.getRpcUrl === 'function'
+        ? networkModule.getRpcUrl()
+        : 'n/a';
+    const effRpc =
+      typeof effectiveModule.getRpcUrl === 'function'
+        ? effectiveModule.getRpcUrl()
+        : 'n/a';
+    console.log(
+      '[initSystemContext] RPC (base → effective):',
+      baseRpc,
+      '→',
+      effRpc
+    );
   } catch {}
 
   const litClient = await createLitClient({
