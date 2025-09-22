@@ -3,12 +3,13 @@ import { assert } from '../assertions';
 
 export const createPkpSignTest = (
   ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any
+  getAuthContext: () => any,
+  pubkey?: string
 ) => {
   return async () => {
     const res = await ctx.litClient.chain.ethereum.pkpSign({
       authContext: getAuthContext(),
-      pubKey: ctx.aliceViemAccountPkp.publicKey,
+      pubKey: pubkey || ctx.aliceViemAccountPkp.publicKey,
       toSign: 'Hello, world!',
     });
 

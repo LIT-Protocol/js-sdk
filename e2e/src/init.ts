@@ -3,12 +3,12 @@ import {
   storagePlugins,
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
-import { createLitClient } from '@lit-protocol/lit-client';
-import { Account, PrivateKeyAccount } from 'viem';
+import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
 import { getOrCreatePkp } from './helper/pkp-utils';
+
 // import { createPkpAuthContext } from './helper/auth-contexts';
 
 const SupportedNetworkSchema = z.enum([
@@ -17,6 +17,7 @@ const SupportedNetworkSchema = z.enum([
   'naga-local',
   'naga-staging',
 ]);
+
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
@@ -26,6 +27,9 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
+
+const EVE_VALIDATION_IPFS_CID =
+  'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
 
 export const init = async (
   network?: SupportedNetwork,
@@ -42,6 +46,12 @@ export const init = async (
   bobViemAccountPkp: any;
   aliceEoaAuthContext: any;
   alicePkpAuthContext: any;
+  eveViemAccount: any;
+  eveCustomAuthData: Awaited<ReturnType<typeof litUtils.generateAuthData>>;
+  eveViemAccountPkp: Awaited<
+    ReturnType<typeof litClient.mintWithCustomAuth>
+  >['pkpData']['data'];
+  eveValidationIpfsCid: string;
   masterDepositForUser: (userAddress: string) => Promise<void>;
   // alicePkpViemAccountPermissionsManager: any,
 }> => {
@@ -65,6 +75,8 @@ export const init = async (
   const bobViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
     bobViemAccount
   );
+
+  const eveViemAccount = privateKeyToAccount(generatePrivateKey());
 
   /**
    * ====================================
@@ -109,7 +121,21 @@ export const init = async (
 
   // Dynamic import of network module
   const networksModule = await import('@lit-protocol/networks');
-  const _networkModule = networksModule[config.importName];
+  const _baseNetworkModule = networksModule[config.importName];
+
+  // Optional RPC override from env
+  const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  const _networkModule =
+    rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
+      ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
+      : _baseNetworkModule;
+
+  if (rpcOverride) {
+    console.log(
+      '✅ Using RPC override (LIT_YELLOWSTONE_PRIVATE_RPC_URL):',
+      rpcOverride
+    );
+  }
 
   // Fund accounts based on network type
   const isLocal = config.type === 'local';
@@ -125,6 +151,11 @@ export const init = async (
   });
 
   await fundAccount(bobViemAccount, masterAccount, _networkModule, {
+    ifLessThan: fundingAmount,
+    thenFundWith: fundingAmount,
+  });
+
+  await fundAccount(eveViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
     thenFundWith: fundingAmount,
   });
@@ -184,6 +215,27 @@ export const init = async (
       _network
     ),
   ]);
+  // Use custom auth to create a PKP for Eve
+  const uniqueDappName = 'e2e-test-dapp';
+
+  const authMethodConfig = litUtils.generateUniqueAuthMethodType({
+    uniqueDappName: uniqueDappName,
+  });
+
+  const eveCustomAuthData = litUtils.generateAuthData({
+    uniqueDappName: uniqueDappName,
+    uniqueAuthMethodType: authMethodConfig.bigint,
+    userId: 'eve',
+  });
+
+  const { pkpData } = await litClient.mintWithCustomAuth({
+    account: eveViemAccount,
+    authData: eveCustomAuthData,
+    scope: 'sign-anything',
+    validationIpfsCid: EVE_VALIDATION_IPFS_CID,
+  });
+
+  const eveViemAccountPkp = pkpData.data;
 
   /**
    * ====================================
@@ -270,6 +322,12 @@ export const init = async (
   // Deposit to the Bob PKP Ledger
   await masterDepositForUser(bobViemAccountPkp.ethAddress);
 
+  // Deposit to the Eve EOA Ledger
+  await masterDepositForUser(eveViemAccount.address);
+
+  // Deposit to the Eve PKP Ledger
+  await masterDepositForUser(eveViemAccountPkp.ethAddress);
+
   // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
   //   pkpIdentifier: {
   //     tokenId: aliceViemAccountPkp.tokenId,
@@ -292,6 +350,10 @@ export const init = async (
     bobViemAccount,
     bobViemAccountAuthData,
     bobViemAccountPkp,
+    eveViemAccount,
+    eveCustomAuthData,
+    eveViemAccountPkp,
+    eveValidationIpfsCid: EVE_VALIDATION_IPFS_CID,
     aliceEoaAuthContext,
     alicePkpAuthContext,
     masterDepositForUser,
