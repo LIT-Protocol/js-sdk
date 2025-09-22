@@ -6,6 +6,7 @@ import {
   NodeSetSchema,
   SessionKeyUriSchema,
 } from '../schemas';
+import { ScopeSchemaRaw } from './ScopeSchema';
 
 export const CustomAuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
@@ -14,18 +15,6 @@ export const CustomAuthDataSchema = z.object({
 });
 
 export type CustomAuthData = z.infer<typeof CustomAuthDataSchema>;
-
-export const StrictAuthDataSchema = z.object({
-  authMethodId: HexPrefixedSchema,
-  authMethodType: z.union([
-    AuthMethodSchema.shape.authMethodType,
-    z.number(),
-    z.bigint(),
-  ]),
-  accessToken: AuthMethodSchema.shape.accessToken,
-});
-
-export type StrictAuthData = z.infer<typeof StrictAuthDataSchema>;
 
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
@@ -38,7 +27,8 @@ export const AuthDataSchema = z.object({
   metadata: z.any().optional(),
 });
 
-export type AuthData = z.infer<typeof AuthDataSchema>;
+export type AuthData = z.output<typeof AuthDataSchema>;
+export type AuthDataInput = z.input<typeof AuthDataSchema>;
 
 /**
  * Return Object Schema
@@ -80,3 +70,34 @@ export const JsonSignCustomSessionKeyRequestForPkpReturnSchema = z
       }),
     ])
   );
+
+/**
+ * Consolidated schema for PKP mint requests.
+ * This replaces the duplicated schemas across the codebase.
+ * Handles both string and number authMethodType inputs.
+ */
+export const MintPKPRequestSchema = z
+  .object({
+    authMethodId: HexPrefixedSchema,
+    authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
+    pubkey: HexPrefixedSchema.default('0x'),
+    scopes: z.array(ScopeSchemaRaw).optional().default([]),
+  })
+  .refine(
+    (data) => {
+      // Validate pubkey is present for WebAuthn
+      // the default has been set to 0x, so we need to check when
+      // webauthn is used the pubkey should NOT be 0x
+      if (data.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
+        return data.pubkey && data.pubkey !== '0x';
+      }
+      return true;
+    },
+    {
+      message: 'pubkey is required for WebAuthn and cannot be 0x',
+      path: ['pubkey'],
+    }
+  );
+
+export type MintPKPRequest = z.input<typeof MintPKPRequestSchema>;
+export type MintPKPRequestTransformed = z.output<typeof MintPKPRequestSchema>;

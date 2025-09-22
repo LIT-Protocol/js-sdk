@@ -8,7 +8,6 @@ import {
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
-  StrictAuthData,
 } from '@lit-protocol/schemas';
 import { Hex, hexToBytes, stringToBytes, bytesToHex } from 'viem';
 import { z } from 'zod';
@@ -335,7 +334,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       },
 
       getPKPsByAuthData: async (params: {
-        authData: Partial<StrictAuthData> | Partial<AuthData>;
+        authData: Partial<AuthData>;
         pagination?: { limit?: number; offset?: number };
         storageProvider?: PKPStorageProvider;
         account: ExpectedAccountOrWalletClient;

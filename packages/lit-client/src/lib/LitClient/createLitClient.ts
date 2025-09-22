@@ -29,7 +29,6 @@ import {
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
-  StrictAuthData,
 } from '@lit-protocol/schemas';
 import {
   DecryptRequest,
@@ -850,7 +849,7 @@ export const _createNagaLitClient = async (
       };
     },
     viewPKPsByAuthData: async (params: {
-      authData: Partial<StrictAuthData> | Partial<AuthData>;
+      authData: Partial<AuthData>;
       pagination?: { limit?: number; offset?: number };
     }) => {
       // Use read-only account for viewing PKPs
