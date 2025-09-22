@@ -905,6 +905,14 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           jitContext: NagaJitContext,
           requestId?: string
         ) => {
+          if (!result.success) {
+            E2EERequestManager.handleEncryptedError(
+              result,
+              jitContext,
+              'Sign Custom Session Key'
+            );
+          }
+
           const decryptedValues = E2EERequestManager.decryptBatchResponse(
             result,
             jitContext,

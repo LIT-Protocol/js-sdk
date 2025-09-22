@@ -253,6 +253,8 @@ export const init = async (
   await masterDepositForUser(bobViemAccount.address);
   await masterDepositForUser(aliceViemAccountPkp.ethAddress);
   await masterDepositForUser(bobViemAccountPkp.ethAddress);
+  await masterDepositForUser(eveViemAccount.address);
+  await masterDepositForUser(eveViemAccountPkp.ethAddress);
 
   /**
    * ====================================
