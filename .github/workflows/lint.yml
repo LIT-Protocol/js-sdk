@@ -3,9 +3,8 @@ on:
   pull_request:
   push:
     branches:
-      - master
-      - main
-      - develop
+      - naga
+      - canary-naga
 jobs:
   linter:
     runs-on: ubuntu-latest
