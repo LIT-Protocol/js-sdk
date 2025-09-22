@@ -39,18 +39,12 @@ export const createCustomAuthContext = async (
   ctx: Awaited<ReturnType<typeof init>>
 ) => {
   console.log('🔁 Creating Custom Auth Context');
+
   try {
     // Set up custom auth method type and validation IPFS CID (from custom-auth-flow example)
-    const uniqueDappName = 'e2e-test-dapp';
-    const uniqueAuthMethodType = hexToBigInt(
-      keccak256(toBytes(uniqueDappName))
-    );
-    const uniqueUserId = `${uniqueDappName}-alice`;
-    const authMethodId = keccak256(toBytes(uniqueUserId));
-    const validationIpfsCid = 'QmYLeVmwJPVs7Uebk85YdVPivMyrvoeKR6X37kyVRZUXW4';
 
     const customAuthContext = await ctx.authManager.createCustomAuthContext({
-      pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+      pkpPublicKey: ctx.eveViemAccountPkp.pubkey,
       authConfig: {
         resources: [
           ['pkp-signing', '*'],
@@ -61,17 +55,17 @@ export const createCustomAuthContext = async (
       },
       litClient: ctx.litClient,
       customAuthParams: {
-        litActionIpfsId: validationIpfsCid,
+        litActionIpfsId: ctx.eveValidationIpfsCid,
         jsParams: {
-          pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
-          username: 'alice',
+          pkpPublicKey: ctx.eveViemAccountPkp.pubkey,
+          username: 'eve',
           password: 'lit',
-          authMethodId: authMethodId,
+          authMethodId: ctx.eveCustomAuthData.authMethodId,
         },
       },
     });
 
-    console.log('✅ Custom Auth Context created');
+    console.log('✅ Custom Auth Context created', customAuthContext);
     return customAuthContext;
   } catch (e) {
     console.error('❌ Error creating Custom Auth Context', e);
