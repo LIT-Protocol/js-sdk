@@ -12,8 +12,6 @@
 '@lit-protocol/schemas': major
 '@lit-protocol/types': major
 '@lit-protocol/wasm': major
-'@lit-protocol/wrapped-keys': major
-'@lit-protocol/wrapped-keys-lit-actions': major
 ---
 
 first naga beta release

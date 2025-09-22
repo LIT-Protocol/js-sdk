@@ -14,9 +14,7 @@
     "@lit-protocol/networks": "7.0.0",
     "@lit-protocol/schemas": "7.0.0",
     "@lit-protocol/types": "7.0.0",
-    "@lit-protocol/wasm": "7.0.0",
-    "@lit-protocol/wrapped-keys": "7.0.0",
-    "@lit-protocol/wrapped-keys-lit-actions": "7.0.0"
+    "@lit-protocol/wasm": "7.0.0"
   },
   "changesets": ["cute-bottles-ask", "cute-experts-clap", "cyan-bears-invent"]
 }
