@@ -42,8 +42,12 @@ jobs:
           bun-version: latest
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@1.76.0
-
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+        
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
         with:
