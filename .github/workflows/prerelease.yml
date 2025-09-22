@@ -67,8 +67,6 @@ jobs:
         run: bunx changeset version --snapshot beta
 
       - name: Build workspace
-        env:
-          NX_DAEMON: 'false'
         run: bun run build
 
       - name: Publish prerelease packages

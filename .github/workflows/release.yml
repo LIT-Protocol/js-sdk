@@ -70,8 +70,6 @@ jobs:
           fi
 
       - name: Build
-        env:
-          NX_DAEMON: 'false'
         run: bun run build
         # Enable this after pnpm migration
         # run: pnpm build
