@@ -1,5 +1,17 @@
 # @lit-protocol/auth
 
+## 8.0.0
+
+### Major Changes
+
+- ceac462: first naga beta release
+
+### Patch Changes
+
+- 935c218: reset naga-dev contract addresses and add naga-staging network
+- a48fbfb: Initial version after networks unification
+- a59f48f: Initial release for networks unification
+
 ## 8.0.0-beta.1
 
 ### Patch Changes
