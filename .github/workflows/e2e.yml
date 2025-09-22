@@ -3,9 +3,8 @@ name: E2E Tests
 on:
   push:
     branches:
-      - main
-      - master
-      - develop
+      - naga
+      - canary-naga
   pull_request:
 env:
   LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
@@ -51,9 +50,9 @@ jobs:
         run: NETWORK=naga-dev bun run test:e2e all
         timeout-minutes: 10
 
-      # - name: Run health check for naga-test
-      #   run: NETWORK=naga-test bun run test:e2e all
-      #   timeout-minutes: 10
+      - name: Run health check for naga-test
+        run: NETWORK=naga-test bun run test:e2e all
+        timeout-minutes: 10
 
       - name: Run health check for naga-staging
         run: NETWORK=naga-staging bun run test:e2e all
