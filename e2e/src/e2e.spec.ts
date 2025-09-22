@@ -56,10 +56,12 @@ describe('all', () => {
         createPkpSignTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('executeJs', () =>
         createExecuteJsTest(ctx, () => ctx.aliceEoaAuthContext)());
-      it('viewPKPsByAddress', () =>
-        createViewPKPsByAddressTest(ctx, () => ctx.aliceEoaAuthContext)());
+      it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
       it('viewPKPsByAuthData', () =>
-        createViewPKPsByAuthDataTest(ctx, () => ctx.aliceEoaAuthContext)());
+        createViewPKPsByAuthDataTest(
+          ctx,
+          ctx.aliceViemAccountAuthData
+        )());
       it('pkpEncryptDecrypt', () =>
         createPkpEncryptDecryptTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('encryptDecryptFlow', () =>
@@ -98,9 +100,12 @@ describe('all', () => {
         it('executeJs', () =>
           createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
         it('viewPKPsByAddress', () =>
-          createViewPKPsByAddressTest(ctx, () => ctx.alicePkpAuthContext)());
+          createViewPKPsByAddressTest(ctx)());
         it('viewPKPsByAuthData', () =>
-          createViewPKPsByAuthDataTest(ctx, () => ctx.alicePkpAuthContext)());
+          createViewPKPsByAuthDataTest(
+            ctx,
+            ctx.aliceViemAccountAuthData
+          )());
         it('pkpEncryptDecrypt', () =>
           createPkpEncryptDecryptTest(ctx, () => ctx.alicePkpAuthContext)());
         it('encryptDecryptFlow', () =>

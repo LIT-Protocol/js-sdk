@@ -549,11 +549,9 @@ class AccessControlConditionBuilder implements AccBuilder {
     return this;
   }
 
-  evmBasic(
-    params: Omit<EvmBasicAcc, 'conditionType'>
-  ): AccBuilder {
+  evmBasic(params: Omit<EvmBasicAcc, 'conditionType'>): AccBuilder {
     const p = params as Partial<EvmBasicAcc>;
-    
+
     // For raw evmBasic, chain must be provided in params
     if (!p.chain) {
       throw new Error('Chain must be specified in params for evmBasic method');
@@ -568,14 +566,14 @@ class AccessControlConditionBuilder implements AccBuilder {
     return this;
   }
 
-  evmContract(
-    params: Omit<EvmContractAcc, 'conditionType'>
-  ): AccBuilder {
+  evmContract(params: Omit<EvmContractAcc, 'conditionType'>): AccBuilder {
     const p = params as Partial<EvmContractAcc>;
-    
+
     // For raw evmContract, chain must be provided in params
     if (!p.chain) {
-      throw new Error('Chain must be specified in params for evmContract method');
+      throw new Error(
+        'Chain must be specified in params for evmContract method'
+      );
     }
 
     this.pendingCondition = {
@@ -587,11 +585,9 @@ class AccessControlConditionBuilder implements AccBuilder {
     return this;
   }
 
-  solRpc(
-    params: Omit<SolAcc, 'conditionType'>
-  ): AccBuilder {
+  solRpc(params: Omit<SolAcc, 'conditionType'>): AccBuilder {
     const p = params as Partial<SolAcc>;
-    
+
     // For raw solRpc, chain must be provided in params
     if (!p.chain) {
       throw new Error('Chain must be specified in params for solRpc method');
@@ -606,11 +602,9 @@ class AccessControlConditionBuilder implements AccBuilder {
     return this;
   }
 
-  cosmos(
-    params: Omit<AtomAcc, 'conditionType'>
-  ): AccBuilder {
+  cosmos(params: Omit<AtomAcc, 'conditionType'>): AccBuilder {
     const p = params as Partial<AtomAcc>;
-    
+
     // For raw cosmos, chain must be provided in params
     if (!p.chain) {
       throw new Error('Chain must be specified in params for cosmos method');

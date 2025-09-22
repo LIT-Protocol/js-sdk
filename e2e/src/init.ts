@@ -48,7 +48,9 @@ export const init = async (
   alicePkpAuthContext: any;
   eveViemAccount: any;
   eveCustomAuthData: Awaited<ReturnType<typeof litUtils.generateAuthData>>;
-  eveViemAccountPkp: Awaited<ReturnType<typeof litClient.mintWithCustomAuth>>['pkpData']['data'];
+  eveViemAccountPkp: Awaited<
+    ReturnType<typeof litClient.mintWithCustomAuth>
+  >['pkpData']['data'];
   eveValidationIpfsCid: string;
   masterDepositForUser: (userAddress: string) => Promise<void>;
   // alicePkpViemAccountPermissionsManager: any,

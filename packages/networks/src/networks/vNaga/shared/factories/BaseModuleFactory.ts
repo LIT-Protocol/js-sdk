@@ -1123,8 +1123,9 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         chainConfig: overriddenChainConfig,
       } as typeof networkConfig;
 
-      const createChainManagerOverridden = (account: ExpectedAccountOrWalletClient) =>
-        createChainManagerFactory(overriddenNetworkConfig, account);
+      const createChainManagerOverridden = (
+        account: ExpectedAccountOrWalletClient
+      ) => createChainManagerFactory(overriddenNetworkConfig, account);
 
       // Rebuild a fresh module bound to the overridden config
       return createBaseModule({
