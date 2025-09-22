@@ -10,13 +10,21 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
-import type {
-  LitNetworkModule,
-  PKPStorageProvider,
+import {
+  type LitNetworkModule,
+  type PKPStorageProvider,
+  type ExpectedAccountOrWalletClient,
+  type GenericTxRes,
+  type LitTxRes,
+  type PKPData,
+  type AuthMethod,
+  PKPPermissionsManager,
+  PaymentManager,
 } from '@lit-protocol/networks';
 import {
   AuthContextSchema2,
   AuthData,
+  ChainSchema,
   EncryptedVersion1Schema,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
@@ -663,7 +671,7 @@ export const _createNagaLitClient = async (
       unifiedAccessControlConditions: params.unifiedAccessControlConditions,
       connectionInfo: currentConnectionInfo,
       version: networkModule.version,
-      chain: params.chain,
+      chain: ChainSchema.parse(params.chain),
       jitContext,
     })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
@@ -735,8 +743,14 @@ export const _createNagaLitClient = async (
       loginUrl: networkModule.getDefaultLoginBaseUrl(),
     },
     disconnect: _stateManager.stop,
-    mintWithEoa: networkModule.chainApi.mintWithEoa,
-    mintWithAuth: networkModule.chainApi.mintWithAuth,
+    mintWithEoa: networkModule.chainApi.mintWithEoa as (params: {
+      account: ExpectedAccountOrWalletClient;
+    }) => Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>>,
+    mintWithAuth: networkModule.chainApi.mintWithAuth as (params: {
+      account: ExpectedAccountOrWalletClient;
+      authData: any;
+      scopes: string[];
+    }) => Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>>,
     mintWithCustomAuth: async (params: MintWithCustomAuthRequest) => {
       const validatedParams = MintWithCustomAuthSchema.parse(params);
 
@@ -801,11 +815,15 @@ export const _createNagaLitClient = async (
         pkpData: pkp,
       };
     },
-    getPKPPermissionsManager: networkModule.chainApi.getPKPPermissionsManager,
+    getPKPPermissionsManager: networkModule.chainApi
+      .getPKPPermissionsManager as (params: {
+      pkpIdentifier: PkpIdentifierRaw;
+      account: ExpectedAccountOrWalletClient;
+    }) => Promise<PKPPermissionsManager>,
     getPaymentManager: async (params: { account: any }) => {
-      return await networkModule.chainApi.getPaymentManager({
+      return (await networkModule.chainApi.getPaymentManager({
         account: params.account,
-      });
+      })) as PaymentManager;
     },
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣
