@@ -1,0 +1,83 @@
+name: Prerelease Snapshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    name: Publish prerelease snapshot
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_BRANCH_PREFIX: 'changeset-release/'
+    steps:
+      - name: Ensure Changesets release branch
+        run: |
+          if [[ "${GITHUB_REF_NAME}" != ${RELEASE_BRANCH_PREFIX}* ]]; then
+            echo "❌ This workflow must be triggered on a Changesets release branch. Current branch: ${GITHUB_REF_NAME}"
+            echo "👉 From the release PR, choose \"Run workflow\" and keep the default branch (changeset-release/...)."
+            exit 1
+          fi
+
+      - name: Check NPM Token
+        run: |
+          if [ -z "${{ secrets.NODE_AUTH_TOKEN }}" ]; then
+            echo "❌ NODE_AUTH_TOKEN secret is not set. Please add it to repository secrets."
+            exit 1
+          else
+            echo "✅ NODE_AUTH_TOKEN secret is available."
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@1.76.0
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install project dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Apply snapshot versions
+        run: bunx changeset version --snapshot beta
+
+      - name: Build workspace
+        env:
+          NX_DAEMON: 'false'
+        run: bun run build
+
+      - name: Publish prerelease packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+        run: bunx changeset publish --tag beta
+
+      - name: Reset working tree
+        if: always()
+        run: |
+          git reset --hard HEAD
+          git clean -fd
