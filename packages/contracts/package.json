@@ -1,0 +1,169 @@
+{
+  "name": "@lit-protocol/contracts",
+  "version": "0.5.1",
+  "license": "MIT",
+  "homepage": "https://github.com/LIT-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./prod/datil": {
+      "import": "./dist/prod/datil.js",
+      "require": "./dist/prod/datil.cjs",
+      "types": "./dist/prod/datil.d.ts"
+    },
+    "./signatures/datil": {
+      "import": "./dist/signatures/datil.js",
+      "require": "./dist/signatures/datil.cjs",
+      "types": "./dist/signatures/datil.d.ts"
+    },
+    "./prod/datil-dev": {
+      "import": "./dist/prod/datil-dev.js",
+      "require": "./dist/prod/datil-dev.cjs",
+      "types": "./dist/prod/datil-dev.d.ts"
+    },
+    "./signatures/datil-dev": {
+      "import": "./dist/signatures/datil-dev.js",
+      "require": "./dist/signatures/datil-dev.cjs",
+      "types": "./dist/signatures/datil-dev.d.ts"
+    },
+    "./prod/datil-test": {
+      "import": "./dist/prod/datil-test.js",
+      "require": "./dist/prod/datil-test.cjs",
+      "types": "./dist/prod/datil-test.d.ts"
+    },
+    "./signatures/datil-test": {
+      "import": "./dist/signatures/datil-test.js",
+      "require": "./dist/signatures/datil-test.cjs",
+      "types": "./dist/signatures/datil-test.d.ts"
+    },
+    "./prod/naga-dev": {
+      "import": "./dist/prod/naga-dev.js",
+      "require": "./dist/prod/naga-dev.cjs",
+      "types": "./dist/prod/naga-dev.d.ts"
+    },
+    "./signatures/naga-dev": {
+      "import": "./dist/signatures/naga-dev.js",
+      "require": "./dist/signatures/naga-dev.cjs",
+      "types": "./dist/signatures/naga-dev.d.ts"
+    },
+    "./prod/naga-test": {
+      "import": "./dist/prod/naga-test.js",
+      "require": "./dist/prod/naga-test.cjs",
+      "types": "./dist/prod/naga-test.d.ts"
+    },
+    "./signatures/naga-test": {
+      "import": "./dist/signatures/naga-test.js",
+      "require": "./dist/signatures/naga-test.cjs",
+      "types": "./dist/signatures/naga-test.d.ts"
+    },
+    "./prod/naga-staging": {
+      "import": "./dist/prod/naga-staging.js",
+      "require": "./dist/prod/naga-staging.cjs",
+      "types": "./dist/prod/naga-staging.d.ts"
+    },
+    "./signatures/naga-staging": {
+      "import": "./dist/signatures/naga-staging.js",
+      "require": "./dist/signatures/naga-staging.cjs",
+      "types": "./dist/signatures/naga-staging.d.ts"
+    },
+    "./dev/develop": {
+      "import": "./dist/dev/develop.js",
+      "require": "./dist/dev/develop.cjs",
+      "types": "./dist/dev/develop.d.ts"
+    },
+    "./signatures/develop": {
+      "import": "./dist/signatures/develop.js",
+      "require": "./dist/signatures/develop.cjs",
+      "types": "./dist/signatures/develop.d.ts"
+    },
+    "./custom-network-signatures": {
+      "import": "./dist/custom-network-signatures.js",
+      "require": "./dist/custom-network-signatures.cjs",
+      "types": "./dist/custom-network-signatures.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "prod/datil": [
+        "dist/prod/datil.d.ts"
+      ],
+      "signatures/datil": [
+        "dist/signatures/datil.d.ts"
+      ],
+      "prod/datil-dev": [
+        "dist/prod/datil-dev.d.ts"
+      ],
+      "signatures/datil-dev": [
+        "dist/signatures/datil-dev.d.ts"
+      ],
+      "prod/datil-test": [
+        "dist/prod/datil-test.d.ts"
+      ],
+      "signatures/datil-test": [
+        "dist/signatures/datil-test.d.ts"
+      ],
+      "prod/naga-dev": [
+        "dist/prod/naga-dev.d.ts"
+      ],
+      "signatures/naga-dev": [
+        "dist/signatures/naga-dev.d.ts"
+      ],
+      "prod/naga-test": [
+        "dist/prod/naga-test.d.ts"
+      ],
+      "signatures/naga-test": [
+        "dist/signatures/naga-test.d.ts"
+      ],
+      "prod/naga-staging": [
+        "dist/prod/naga-staging.d.ts"
+      ],
+      "signatures/naga-staging": [
+        "dist/signatures/naga-staging.d.ts"
+      ],
+      "dev/develop": [
+        "dist/dev/develop.d.ts"
+      ],
+      "signatures/develop": [
+        "dist/signatures/develop.d.ts"
+      ],
+      "custom-network-signatures": [
+        "dist/custom-network-signatures.d.ts"
+      ]
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/contracts"
+  },
+  "devDependencies": {
+    "@t3-oss/env-core": "^0.13.8",
+    "@typechain/ethers-v6": "^0.5.1",
+    "esbuild": "^0.19.2",
+    "ethers": "^6.13.5",
+    "tsx": "^4.20.5",
+    "typechain": "^8.3.2",
+    "typescript": "^5.8.3",
+    "viem": "^2.29.4",
+    "zod": "^3.24.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -4,9 +4,8 @@
   "license": "MIT",
   "scripts": {
     "reset": "bun unlink-all && rimraf dist node_modules doc tmp yarn-error.log yarn.lock package-lock.json bun.lockb learn-debug.log tmp .nx lit-auth-storage pkp-tokens lit-auth-local ./e2e/dist ./e2e/node_modules",
-    "go": "bun run build && bun link-all",
-    "build": "bun unlink-all && nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions && bun run prettier",
-    "build:affected": "nx affected --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions",
+    "build": "nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions,contracts && bun run prettier",
+    "build:affected": "nx affected --target=build --exclude=wrapped-keys,wrapped-keys-lit-actions,contracts",
     "check-deps": "npx nx run-many --target=check-deps --exclude=wrapped-keys,wrapped-keys-lit-actions",
     "validate": "npm run check-deps && npm run build",
     "test:local": "node ./local-tests/build.mjs && dotenvx run --env-file=.env -- node ./local-tests/build/test.mjs",
@@ -18,6 +17,7 @@
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "node ./tools/scripts/gen-readme.mjs",
     "gen:local-network-context": "bun run packages/networks/src/networks/vNaga/envs/naga-local/scripts/00-generate-abi-signatures.ts",
+    "sync:contracts": "nx run contracts:start",
     "prettier": "npx nx format:write --all",
     "format:check": "npx nx format:check --all",
     "link-all": "for dir in packages/*/; do echo \"Linking in $dir\"; (cd \"$dir\" && bun link) || { echo \"ERROR: Failed to link in $dir\"; exit 1; }; done",
@@ -35,7 +35,6 @@
   "private": true,
   "dependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
-    "@lit-protocol/contracts": "0.5.1",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
     "@metamask/eth-sig-util": "5.0.2",
