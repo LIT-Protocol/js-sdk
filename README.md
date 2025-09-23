@@ -98,7 +98,7 @@ git commit -m "chore: release v0.0.1"
 bunx changeset publish
 ```
 
-# # Keeping the contract address and ABIs in sync with the latest changes
+## Keeping the contract address and ABIs in sync with the latest changes
 
 This command must be run manually and is NOT part of the build process, as it requires a GitHub API key.
 

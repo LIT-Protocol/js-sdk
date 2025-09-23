@@ -8780,6 +8780,78 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "ethAddresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "getPkpInfoFromEthAddresses",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "tokenIds",
+                  "type": "uint256[]"
+                }
+              ],
+              "name": "getPkpInfoFromTokenIds",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "getPkpNftAddress",
               "outputs": [
@@ -9828,6 +9900,170 @@
                   "internalType": "bytes32",
                   "name": "",
                   "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "ethAddresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "getPkpInfoFromEthAddresses",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageSize",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPkpInfoFromOwnerAddress",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageSize",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPkpInfoFromOwnerTokenId",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "tokenIds",
+                  "type": "uint256[]"
+                }
+              ],
+              "name": "getPkpInfoFromTokenIds",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
                 }
               ],
               "stateMutability": "view",
