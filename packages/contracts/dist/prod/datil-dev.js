@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.datilDev = void 0;
-exports.datilDev = {
+export const datilDev = {
     "data": [
         {
             "name": "StakingBalances",

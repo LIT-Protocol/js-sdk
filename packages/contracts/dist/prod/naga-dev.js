@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.nagaDev = void 0;
-exports.nagaDev = {
+export const nagaDev = {
     "data": [
         {
             "name": "Staking",

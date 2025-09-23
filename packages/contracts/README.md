@@ -2,7 +2,6 @@
 
 All configs are in the `./src/config` directory
 
-
 ```bash
 .
 ├── env.ts // 👈 to modify env vars

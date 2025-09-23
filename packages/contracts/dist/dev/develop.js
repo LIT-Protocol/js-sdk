@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.develop = void 0;
-exports.develop = {
+export const develop = {
     "data": [
         {
             "name": "Staking",
