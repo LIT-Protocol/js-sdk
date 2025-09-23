@@ -2,12 +2,14 @@ import { DEV_PRIVATE_KEY, version } from '@lit-protocol/constants';
 import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
+  AuthDataInput,
   EncryptedVersion1Schema,
   GenericEncryptedPayloadSchema,
   GenericResultBuilder,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
+  ScopeStringSchema,
 } from '@lit-protocol/schemas';
 import { Hex, hexToBytes, stringToBytes, bytesToHex } from 'viem';
 import { z } from 'zod';
@@ -377,8 +379,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
 
       mintWithAuth: async (params: {
         account: ExpectedAccountOrWalletClient;
-        authData: Optional<AuthData, 'accessToken'>;
-        scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+        authData: Optional<AuthDataInput, 'accessToken'>;
+        scopes: z.infer<typeof ScopeStringSchema>[];
       }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
         const chainManager = createChainManager(params.account);
         const res = await chainManager.api.mintPKP({

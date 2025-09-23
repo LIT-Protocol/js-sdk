@@ -19,6 +19,8 @@
     "gen:local-network-context": "bun run packages/networks/src/networks/vNaga/envs/naga-local/scripts/00-generate-abi-signatures.ts",
     "sync:contracts": "nx run contracts:start",
     "prettier": "npx nx format:write --all",
+    "lint": "npx nx run-many --target=lint --all",
+    "lint:fix": "npx nx run-many --target=lint --all -- --fix",
     "format:check": "npx nx format:check --all",
     "link-all": "for dir in packages/*/; do echo \"Linking in $dir\"; (cd \"$dir\" && bun link) || { echo \"ERROR: Failed to link in $dir\"; exit 1; }; done",
     "unlink-all": "for dir in packages/*/; do echo \"Unlinking in $dir\"; (cd \"$dir\" && bun unlink) || { echo \"ERROR: Failed to unlink in $dir\"; exit 1; }; done",
