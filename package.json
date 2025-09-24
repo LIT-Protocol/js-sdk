@@ -17,7 +17,7 @@
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "node ./tools/scripts/gen-readme.mjs",
     "gen:local-network-context": "bun run packages/networks/src/networks/vNaga/envs/naga-local/scripts/00-generate-abi-signatures.ts",
-    "sync:contracts": "nx run contracts:start",
+    "sync:contracts": "nx run contracts:sync",
     "prettier": "npx nx format:write --all",
     "lint": "npx nx run-many --target=lint --all",
     "lint:fix": "npx nx run-many --target=lint --all -- --fix",

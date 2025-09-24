@@ -4,10 +4,18 @@
   "sourceRoot": "packages/contracts/src",
   "projectType": "library",
   "targets": {
-    "start": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/packages/contracts"],
+      "options": {
+        "command": "tsx src/build.ts",
+        "cwd": "packages/contracts"
+      }
+    },
+    "sync": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsx src/index.ts",
+        "command": "tsx src/sync.ts",
         "cwd": "packages/contracts"
       }
     },
