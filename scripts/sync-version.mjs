@@ -44,7 +44,12 @@ async function main() {
     throw new Error(`Version not found in ${litClientPackageJsonPath}`);
   }
 
-  const versionFileContents = await readFile(versionFilePath, 'utf8');
+  let versionFileContents;
+  try {
+    versionFileContents = await readFile(versionFilePath, 'utf8');
+  } catch (err) {
+    throw new Error(`Failed to read version file at ${versionFilePath}: ${err.message}`);
+  }
   const match = versionFileContents.match(VERSION_EXPORT_PATTERN);
 
   if (!match) {
