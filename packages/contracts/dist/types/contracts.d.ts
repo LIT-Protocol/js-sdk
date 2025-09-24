@@ -21,7 +21,7 @@ export interface NetworkPaths {
     abis: string;
     deployedContracts: string;
     error?: string;
-    status: "success" | "error";
+    status: 'success' | 'error';
 }
 export interface ContractData {
     name: string;

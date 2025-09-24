@@ -6,7 +6,7 @@
  * const methods = extractAbiMethods(networkCache, ['transfer', 'approve']);
  * ```
  */
-import type { NetworkCache } from "../types/contracts";
+import type { NetworkCache } from '../types/contracts';
 /**
  * Represents a single contract method with its metadata
  */

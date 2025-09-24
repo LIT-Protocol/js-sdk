@@ -8,11 +8,11 @@ export declare const NETWORKS_REPO = "networks";
 export declare const LIT_ASSETS_REPO = "lit-assets";
 export declare const PROD_PATH_BY_NETWORK: {
     readonly datil: "datil-prod";
-    readonly "datil-dev": "datil-dev";
-    readonly "datil-test": "datil-test";
-    readonly "naga-dev": "naga-dev";
-    readonly "naga-test": "naga-test";
-    readonly "naga-staging": "naga-staging";
+    readonly 'datil-dev': "datil-dev";
+    readonly 'datil-test': "datil-test";
+    readonly 'naga-dev': "naga-dev";
+    readonly 'naga-test': "naga-test";
+    readonly 'naga-staging': "naga-staging";
 };
 export declare const DEV_PATH_BY_NETWORK: {
     readonly develop: "develop";
@@ -40,11 +40,11 @@ export declare const NETWORK_PATHS: {
          */
         readonly networkToPath: {
             readonly datil: "datil-prod";
-            readonly "datil-dev": "datil-dev";
-            readonly "datil-test": "datil-test";
-            readonly "naga-dev": "naga-dev";
-            readonly "naga-test": "naga-test";
-            readonly "naga-staging": "naga-staging";
+            readonly 'datil-dev': "datil-dev";
+            readonly 'datil-test': "datil-test";
+            readonly 'naga-dev': "naga-dev";
+            readonly 'naga-test': "naga-test";
+            readonly 'naga-staging': "naga-staging";
         };
         /**
          * Constructs the full path for production networks
@@ -73,19 +73,19 @@ export declare const NETWORKS: {
     readonly prod: {
         readonly networks: ProdNetworkName[];
         readonly deployedContracts: {
-            readonly "datil-dev": "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json";
-            readonly "datil-test": "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-test/deployed-lit-node-contracts-temp.json";
+            readonly 'datil-dev': "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json";
+            readonly 'datil-test': "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-test/deployed-lit-node-contracts-temp.json";
             readonly datil: "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-prod/deployed-lit-node-contracts-temp.json";
-            readonly "naga-dev": "https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-dev/deployed-lit-node-contracts-temp.json";
-            readonly "naga-staging": "https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-staging/deployed-lit-node-contracts-temp.json";
-            readonly "naga-test": "https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-test/deployed-lit-node-contracts-temp.json";
+            readonly 'naga-dev': "https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-dev/deployed-lit-node-contracts-temp.json";
+            readonly 'naga-staging': "https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-staging/deployed-lit-node-contracts-temp.json";
+            readonly 'naga-test': "https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-test/deployed-lit-node-contracts-temp.json";
         };
     };
     readonly dev: {
         readonly networks: DevNetworkName[];
         readonly deployedContracts: {
             readonly develop: "https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-dev/deployed-lit-node-contracts-temp.json";
-            readonly "datil-clone": "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-clone/deployed-lit-node-contracts-temp.json";
+            readonly 'datil-clone': "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-clone/deployed-lit-node-contracts-temp.json";
         };
     };
 };

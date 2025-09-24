@@ -1,5 +1,5 @@
-import type { NetworkName } from "../config/networks";
-import type { NetworkPaths } from "../types/contracts";
+import type { NetworkName } from '../config/networks';
+import type { NetworkPaths } from '../types/contracts';
 export declare class GitHubService {
     readonly headers: HeadersInit;
     private networkPaths;
@@ -11,11 +11,11 @@ export declare class GitHubService {
     /**
      * Fetches the last modified date for a file from GitHub
      */
-    getLastModified(filePath: string, network: NetworkName | "develop"): Promise<string | null>;
+    getLastModified(filePath: string, network: NetworkName | 'develop'): Promise<string | null>;
     /**
      * Tracks network paths for summary
      */
-    trackNetworkPath(network: string, type: keyof Omit<NetworkPaths, "error" | "status">, path: string): void;
+    trackNetworkPath(network: string, type: keyof Omit<NetworkPaths, 'error' | 'status'>, path: string): void;
     /**
      * Tracks network error
      */

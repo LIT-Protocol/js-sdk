@@ -5001,7 +5001,9 @@ function extractAbiMethods(networkCache, methodNames) {
             const iface = new Interface(ABI);
             let functionFragment;
             if (abiItem.name === "safeTransferFrom") {
-              functionFragment = iface.getFunction("safeTransferFrom(address,address,uint256)");
+              functionFragment = iface.getFunction(
+                "safeTransferFrom(address,address,uint256)"
+              );
             } else {
               functionFragment = iface.getFunction(abiItem.name);
             }
@@ -5195,7 +5197,10 @@ if (mainScriptPath === currentScriptPath) {
     useScriptDirectory: false
     // Use current working directory for CLI usage
   }).catch((error) => {
-    console.error("Error in CLI execution of custom-network-signatures:", error);
+    console.error(
+      "Error in CLI execution of custom-network-signatures:",
+      error
+    );
     process.exit(1);
   });
 }

@@ -1,6 +1,6 @@
-import type { ProdNetworkName, DevNetworkName } from "../config/networks";
-import type { ContractData } from "../types/contracts";
-import { GitHubService } from "./github";
+import type { ProdNetworkName, DevNetworkName } from '../config/networks';
+import type { ContractData } from '../types/contracts';
+import { GitHubService } from './github';
 export declare class ContractService {
     private githubService;
     constructor(githubService: GitHubService);
