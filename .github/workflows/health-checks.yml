@@ -2,7 +2,7 @@ name: E2E Tests and Health Checks
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       datil_branch:
