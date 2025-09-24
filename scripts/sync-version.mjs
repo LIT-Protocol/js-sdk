@@ -48,7 +48,9 @@ async function main() {
   try {
     versionFileContents = await readFile(versionFilePath, 'utf8');
   } catch (err) {
-    throw new Error(`Failed to read version file at ${versionFilePath}: ${err.message}`);
+    throw new Error(
+      `Failed to read version file at ${versionFilePath}: ${err.message}`
+    );
   }
   const match = versionFileContents.match(VERSION_EXPORT_PATTERN);
 
