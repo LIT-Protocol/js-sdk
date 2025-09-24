@@ -12,7 +12,7 @@ All configs are in the `./src/config` directory
 # Syncing Contract Addresses and ABIs
 
 ```shell
-tsx ./src/index.ts
+tsx ./src/sync.ts
 ```
 
 or from monorepo root
