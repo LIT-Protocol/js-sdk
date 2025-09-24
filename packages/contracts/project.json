@@ -1,0 +1,31 @@
+{
+  "name": "contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/contracts/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/packages/contracts"],
+      "options": {
+        "command": "tsx src/build.ts",
+        "cwd": "packages/contracts"
+      }
+    },
+    "sync": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx src/sync.ts",
+        "cwd": "packages/contracts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/contracts/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}
