@@ -28,9 +28,16 @@ async function main() {
     'version.ts'
   );
 
-  const litClientPackageJson = JSON.parse(
-    await readFile(litClientPackageJsonPath, 'utf8')
-  );
+  let litClientPackageJson;
+  try {
+    litClientPackageJson = JSON.parse(
+      await readFile(litClientPackageJsonPath, 'utf8')
+    );
+  } catch (err) {
+    throw new Error(
+      `Failed to read or parse package.json at ${litClientPackageJsonPath}: ${err.message}`
+    );
+  }
   const litClientVersion = litClientPackageJson.version;
 
   if (!litClientVersion) {
