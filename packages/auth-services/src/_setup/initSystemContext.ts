@@ -58,32 +58,11 @@ export async function initSystemContext({
       '→',
       effRpc
     );
-  } catch {}
-
-  const overrideRpc = rpcUrl || env.LIT_TXSENDER_RPC_URL;
-
-  // Apply runtime override if rpcUrl provided
-  const effectiveModule =
-    overrideRpc && typeof networkModule.withOverrides === 'function'
-      ? networkModule.withOverrides({ rpcUrl: overrideRpc })
-      : networkModule;
-
-  try {
-    const baseRpc =
-      typeof networkModule.getRpcUrl === 'function'
-        ? networkModule.getRpcUrl()
-        : 'n/a';
-    const effRpc =
-      typeof effectiveModule.getRpcUrl === 'function'
-        ? effectiveModule.getRpcUrl()
-        : 'n/a';
-    console.log(
-      '[initSystemContext] RPC (base → effective):',
-      baseRpc,
-      '→',
-      effRpc
+  } catch {
+    throw new Error(
+      `Failed to determine RPC URL from network module ${networkModule}`
     );
-  } catch {}
+  }
 
   const litClient = await createLitClient({
     network: effectiveModule,
