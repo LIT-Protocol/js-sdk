@@ -43,8 +43,9 @@ describe('all', () => {
       // alicePkpAuthContext = await createPkpAuthContext(ctx);
       eveCustomAuthContext = await createCustomAuthContext(ctx);
     } catch (e) {
+      console.error('❌ Failed to initialise E2E test context');
       console.error(e);
-      process.exit(1);
+      throw e;
     }
   });
 
