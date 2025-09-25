@@ -14,8 +14,9 @@
  * // Use nodeStorage.write(...) and nodeStorage.read(...)
  */
 
+import { PKPData } from '@lit-protocol/schemas';
 import type { LitAuthData } from '../types';
-import type { LitAuthStorageProvider, PKPInfo } from './types';
+import type { LitAuthStorageProvider } from './types';
 
 const LOCALSTORAGE_LIT_AUTH_PREFIX = 'lit-auth';
 const LOCALSTORAGE_LIT_PKP_PREFIX = 'lit-pkp-tokens';
@@ -223,7 +224,7 @@ export function localStorageNode({
       async readPKPs({
         authMethodType,
         authMethodId,
-      }): Promise<PKPInfo[] | null> {
+      }): Promise<PKPData[] | null> {
         console.warn('localStorageNode (stub): readPKPs called in browser.');
         return null;
       },
@@ -442,7 +443,7 @@ export function localStorageNode({
     async readPKPs({
       authMethodType,
       authMethodId,
-    }): Promise<PKPInfo[] | null> {
+    }): Promise<PKPData[] | null> {
       const store = await getMemoisedStorageInstance();
       const cacheKey = buildPKPFullCacheKey({
         appName,

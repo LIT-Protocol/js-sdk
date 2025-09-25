@@ -1,0 +1,36 @@
+{
+  "name": "e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/e2e/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/e2e",
+        "main": "packages/e2e/src/index.ts",
+        "tsConfig": "packages/e2e/tsconfig.lib.json",
+        "assets": ["packages/e2e/*.md", "packages/e2e/example.js"],
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/e2e/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/e2e"],
+      "options": {
+        "jestConfig": "jest.e2e.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,27 +1,21 @@
-import { GetWalletClientReturnType } from '@wagmi/core';
+import type { Account, Chain, WalletClient, Client } from 'viem';
 import {
-  Account,
-  Chain,
   createPublicClient,
   createWalletClient,
   getContract,
   http,
-  WalletClient,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { INetworkConfig } from '../../interfaces/NetworkContext';
 import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
+import type { LocalAccount } from 'viem/accounts';
 
 // ❗️ NOTE: This could be any network's signatures assuming they all have the same ABI signatures
 // import { signatures } from '../../envs/naga-local/generated/naga-develop';
 import { nagaDevSignatures } from '@lit-protocol/contracts';
 type Signatures = typeof nagaDevSignatures;
 
-export type ExpectedAccountOrWalletClient =
-  | Account
-  | WalletClient
-  | GetWalletClientReturnType
-  | any;
+export type ExpectedAccountOrWalletClient = Account | WalletClient;
 
 function _resolveAccount({
   accountOrWalletClient,
@@ -31,24 +25,19 @@ function _resolveAccount({
   accountOrWalletClient: ExpectedAccountOrWalletClient;
   chainConfig: Chain;
   rpcUrl: string;
-}) {
-  // Check if accountOrWalletClient is null or undefined
-  if (!accountOrWalletClient) {
-    throw new Error('accountOrWalletClient is required but was not provided');
-  }
-
-  // If a wallet client is already provided, use it directly
+}): WalletClient {
+  if (!accountOrWalletClient)
+    throw new Error('accountOrWalletClient is required');
   if (accountOrWalletClient.type === 'local') {
-    // If an account is provided, create a wallet client with it
-    const walletClient = createWalletClient({
-      account: accountOrWalletClient as Account,
+    const account = accountOrWalletClient as LocalAccount;
+    const client = createWalletClient({
+      account,
       chain: chainConfig,
       transport: http(rpcUrl),
     });
-    return walletClient;
-  } else {
-    return accountOrWalletClient as WalletClient;
+    return client;
   }
+  return accountOrWalletClient as WalletClient;
 }
 
 export const createReadOnlyContractsManager = <T, M>(
@@ -66,12 +55,10 @@ export const createContractsManager = <T, M>(
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ): any => {
   // 2. Decide which publicClient to use
-  const publicClient =
-    // opts?.publicClient ??
-    createPublicClient({
-      chain: networkConfig.chainConfig,
-      transport: http(networkConfig.rpcUrl),
-    });
+  const publicClient = createPublicClient({
+    chain: networkConfig.chainConfig,
+    transport: http(networkConfig.rpcUrl),
+  });
 
   // 3. Decide which walletClient to use
   const walletClient = _resolveAccount({
@@ -79,6 +66,10 @@ export const createContractsManager = <T, M>(
     chainConfig: networkConfig.chainConfig,
     rpcUrl: networkConfig.rpcUrl,
   });
+
+  // Normalise to base Client type for contract typing
+  const publicClientForContract: Client = publicClient as unknown as Client;
+  const walletClientForContract: Client = walletClient as unknown as Client;
 
   // 4. Get the contract data (casting a default type to ensure type safety)
   const contractData = networkConfig.abiSignatures as Signatures;
@@ -100,7 +91,10 @@ export const createContractsManager = <T, M>(
       contractData.PKPNFT.methods.safeTransferFrom,
       ...contractData.PKPNFT.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   const pkpHelperContract = getContract({
@@ -110,7 +104,7 @@ export const createContractsManager = <T, M>(
       contractData.PKPHelper.methods.mintNextAndAddAuthMethods,
       ...contractData.PKPHelper.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { wallet: walletClientForContract },
   });
 
   const stakingContract = getContract({
@@ -119,7 +113,7 @@ export const createContractsManager = <T, M>(
       contractData.Staking.methods.getActiveUnkickedValidatorStructsAndCounts,
       ...contractData.Staking.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { public: publicClientForContract },
   });
 
   const priceFeed = getContract({
@@ -128,7 +122,7 @@ export const createContractsManager = <T, M>(
       contractData.PriceFeed.methods.getNodesForRequest,
       ...contractData.PriceFeed.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { public: publicClientForContract },
   });
 
   const pkpPermissionsContract = getContract({
@@ -151,7 +145,10 @@ export const createContractsManager = <T, M>(
       contractData.PKPPermissions.methods.getTokenIdsForAuthMethod,
       ...contractData.PKPPermissions.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   const pubkeyRouterContract = getContract({
@@ -163,7 +160,7 @@ export const createContractsManager = <T, M>(
       contractData.PubkeyRouter.methods.getPubkey,
       ...contractData.PubkeyRouter.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: { public: publicClientForContract },
   });
 
   const ledgerContract = getContract({
@@ -179,7 +176,10 @@ export const createContractsManager = <T, M>(
       contractData.Ledger.methods.withdraw,
       ...contractData.Ledger.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   const paymentDelegationContract = getContract({
@@ -196,7 +196,10 @@ export const createContractsManager = <T, M>(
       contractData.PaymentDelegation.methods.undelegatePaymentsBatch,
       ...contractData.PaymentDelegation.events,
     ],
-    client: { public: publicClient, wallet: walletClient },
+    client: {
+      public: publicClientForContract,
+      wallet: walletClientForContract,
+    },
   });
 
   // ---------- End of all your contracts ----------

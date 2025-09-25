@@ -1,5 +1,4 @@
 import { PKPData } from '@lit-protocol/schemas';
-
 export interface PKPStorageProvider {
   readPKPTokens?(params: {
     authMethodType: number | bigint;

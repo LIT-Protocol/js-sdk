@@ -1,4 +1,3 @@
-import type { PKPInfo } from '@lit-protocol/types';
 import { getAddress } from 'viem';
 import { z } from 'zod';
 import type { PKPStorageProvider } from '../../../../../../../../../storage/types';
@@ -11,6 +10,7 @@ import {
 import { getPubkeyByTokenId } from '../../../rawContractApis/pkp/read/getPubkeyByTokenId';
 import { tokenOfOwnerByIndex } from '../../../rawContractApis/pkp/read/tokenOfOwnerByIndex';
 import { PaginatedPKPsResponse } from './getPKPsByAuthMethod';
+import { PKPData } from '@lit-protocol/schemas';
 
 // Schema for pagination
 const paginationSchema = z.object({
@@ -111,8 +111,8 @@ async function fetchPKPDetailsForTokenIds(
   networkCtx: DefaultNetworkConfig,
   accountOrWalletClient: ExpectedAccountOrWalletClient,
   storageProvider?: PKPStorageProvider
-): Promise<PKPInfo[]> {
-  const pkps: PKPInfo[] = [];
+): Promise<PKPData[]> {
+  const pkps: PKPData[] = [];
 
   for (const tokenId of tokenIds) {
     try {
@@ -179,8 +179,8 @@ async function fetchPKPDetailsForTokenIds(
       }
 
       pkps.push({
-        tokenId,
-        publicKey,
+        tokenId: BigInt(tokenId),
+        pubkey: publicKey,
         ethAddress,
       });
     } catch (error) {

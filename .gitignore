@@ -92,3 +92,7 @@ artillery-state.json
 artillery-pkp-tokens
 lit-auth-artillery
 alice-auth-manager-data
+
+.plans
+.e2e
+alice-auth-manager-data

@@ -21,6 +21,7 @@ import {
   PKPPermissionsManager,
   PaymentManager,
 } from '@lit-protocol/networks';
+
 import {
   AuthContextSchema2,
   AuthData,

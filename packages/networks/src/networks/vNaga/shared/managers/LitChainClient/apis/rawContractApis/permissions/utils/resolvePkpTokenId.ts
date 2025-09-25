@@ -9,6 +9,7 @@ import { logger } from '../../../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../../../shared/interfaces/NetworkContext';
 import {
   createContractsManager,
+  createReadOnlyContractsManager,
   ExpectedAccountOrWalletClient,
 } from '../../../../../contract-manager/createContractsManager';
 import { pubkeyToTokenId } from './pubkeyToTokenId';
@@ -110,10 +111,11 @@ export async function resolvePkpTokenId(
       throw new Error('Network context required for address resolution');
     }
 
-    const { pubkeyRouterContract } = createContractsManager(
-      networkCtx,
-      accountOrWalletClient
-    );
+    // never pass undefined; fall back to read-only
+    const { pubkeyRouterContract } = accountOrWalletClient
+      ? createContractsManager(networkCtx, accountOrWalletClient)
+      : createReadOnlyContractsManager(networkCtx);
+
     const pkpTokenId = await pubkeyRouterContract.read.ethAddressToPkpId([
       validatedInput.address as `0x${string}`,
     ]);

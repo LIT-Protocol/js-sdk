@@ -1,13 +1,5 @@
+import { PKPData } from '@lit-protocol/schemas';
 import type { LitAuthData } from '../types';
-
-/**
- * @deprecated Use the PKPInfo type from @lit-protocol/types instead
- */
-export interface PKPInfo {
-  tokenId: string;
-  publicKey: string;
-  ethAddress: string;
-}
 
 export interface LitAuthStorageProvider {
   config: unknown;
@@ -92,7 +84,7 @@ export interface LitAuthStorageProvider {
   writePKPs?(params: {
     authMethodType: number | bigint;
     authMethodId: string;
-    pkps: PKPInfo[];
+    pkps: PKPData[];
   }): Promise<void>;
 
   /**
@@ -102,5 +94,5 @@ export interface LitAuthStorageProvider {
   readPKPs?(params: {
     authMethodType: number | bigint;
     authMethodId: string;
-  }): Promise<PKPInfo[] | null>;
+  }): Promise<PKPData[] | null>;
 }

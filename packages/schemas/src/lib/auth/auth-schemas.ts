@@ -11,13 +11,24 @@ import {
 } from '../schemas';
 import { ScopeSchemaRaw } from './ScopeSchema';
 
+export type CustomAuthData = z.infer<typeof CustomAuthDataSchema>;
+
 export const CustomAuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
-  // This will be a very big number, unlike our native auth
   authMethodType: z.bigint(),
 });
 
-export type CustomAuthData = z.infer<typeof CustomAuthDataSchema>;
+export const StrictAuthDataSchema = z.object({
+  authMethodId: HexPrefixedSchema,
+  authMethodType: z.union([
+    AuthMethodSchema.shape.authMethodType,
+    z.number(),
+    z.bigint(),
+  ]),
+  accessToken: AuthMethodSchema.shape.accessToken,
+});
+
+export type StrictAuthData = z.infer<typeof StrictAuthDataSchema>;
 
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
