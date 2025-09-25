@@ -21,7 +21,13 @@ export const apiKeyGate =
 
     // lazy initialise redis based on cfg.redisUrl
     const url = cfg.redisUrl || process.env['REDIS_URL'];
-    if (!url) return res.status(500).json({ error: 'redis_not_configured' });
+    if (!url)
+      return res
+        .status(500)
+        .json({
+          error:
+            'Redis configuration missing. API key tracking requires Redis to be configured.',
+        });
     const client = getCachedRedisClient() || (await getRedisClient(url));
     const now = new Date();
     const trackingKey = `${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}:${apiKey}`;
