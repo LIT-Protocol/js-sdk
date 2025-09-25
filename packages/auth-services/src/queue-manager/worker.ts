@@ -1,6 +1,7 @@
 import { initSystemContext } from '../_setup/initSystemContext';
 import { bullmqConnectionOptions, mainQueueName } from './src/bullmqSetup';
 import { createGenericWorker } from './src/genericWorker';
+import { env } from '../env';
 
 interface ParsedRedisConnectionOpts {
   host?: string;
@@ -10,7 +11,10 @@ interface ParsedRedisConnectionOpts {
 }
 
 export async function startAuthServiceWorker() {
-  await initSystemContext({ appName: 'auth-services-worker' });
+  await initSystemContext({
+    appName: 'auth-services-worker',
+    rpcUrl: env.LIT_TXSENDER_RPC_URL,
+  });
   console.log('------------------------------------------------------');
   console.log(' Attempting to start Generic BullMQ Worker Process... ');
   console.log('------------------------------------------------------');

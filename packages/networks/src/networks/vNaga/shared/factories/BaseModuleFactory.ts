@@ -2,20 +2,23 @@ import { DEV_PRIVATE_KEY, version } from '@lit-protocol/constants';
 import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
+  AuthDataInput,
   EncryptedVersion1Schema,
   GenericEncryptedPayloadSchema,
   GenericResultBuilder,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
+  ScopeStringSchema,
 } from '@lit-protocol/schemas';
-import { Hex, hexToBytes, stringToBytes } from 'viem';
+import { Hex, hexToBytes, stringToBytes, bytesToHex } from 'viem';
 import { z } from 'zod';
 
 // Base types
 import { LitNetworkModuleBase } from '../../../types';
 import type { ExpectedAccountOrWalletClient } from '../managers/contract-manager/createContractsManager';
 import type { INetworkConfig } from '../interfaces/NetworkContext';
+import { createChainManagerFactory } from './BaseChainManagerFactory';
 
 // Shared utilities
 import { NetworkError } from '@lit-protocol/constants';
@@ -78,6 +81,7 @@ import { DecryptRequestDataSchema } from '../managers/api-manager/decrypt/decryp
 import { DecryptResponseDataSchema } from '../managers/api-manager/decrypt/decrypt.ResponseDataSchema';
 
 import { ExecuteJsCreateRequestParams } from '../managers/api-manager/executeJs/executeJs.CreateRequestParams';
+
 import { ExecuteJsInputSchema } from '../managers/api-manager/executeJs/executeJs.InputSchema';
 import { ExecuteJsRequestDataSchema } from '../managers/api-manager/executeJs/executeJs.RequestDataSchema';
 import { ExecuteJsResponseDataSchema } from '../managers/api-manager/executeJs/executeJs.ResponseDataSchema';
@@ -375,8 +379,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
 
       mintWithAuth: async (params: {
         account: ExpectedAccountOrWalletClient;
-        authData: Optional<AuthData, 'accessToken'>;
-        scopes: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+        authData: Optional<AuthDataInput, 'accessToken'>;
+        scopes: z.infer<typeof ScopeStringSchema>[];
       }): Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>> => {
         const chainManager = createChainManager(params.account);
         const res = await chainManager.api.mintPKP({
@@ -871,6 +875,9 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               litActionCode: requestBody.litActionCode,
               litActionIpfsId: requestBody.litActionIpfsId,
               jsParams: requestBody.jsParams,
+              maxPrice: getUserMaxPrice({
+                product: 'SIGN_SESSION_KEY',
+              }).toString(),
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -883,7 +890,6 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               url,
               endpoint: baseModule.getEndpoints().SIGN_SESSION_KEY,
             });
-
             requests.push({
               fullPath: _urlWithPath,
               data: encryptedPayload,
@@ -898,13 +904,14 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         handleResponse: async (
           result: z.infer<typeof GenericEncryptedPayloadSchema>,
           pkpPublicKey: Hex | string,
-          jitContext: NagaJitContext
+          jitContext: NagaJitContext,
+          requestId?: string
         ) => {
           if (!result.success) {
             E2EERequestManager.handleEncryptedError(
               result,
               jitContext,
-              'Session key signing'
+              'Sign Custom Session Key'
             );
           }
 
@@ -914,7 +921,9 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             (decryptedJson) => {
               const signCustomSessionKeyData = decryptedJson.data;
               if (!signCustomSessionKeyData) {
-                throw new Error('Decrypted response missing data field');
+                throw new Error(
+                  `[${requestId}] Decrypted response missing data field`
+                );
               }
               return signCustomSessionKeyData;
             }
@@ -1086,6 +1095,55 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           return executeJsResponse;
         },
       },
+    },
+    /**
+     * Returns a wrapped module instance with runtime overrides while keeping the base immutable.
+     * Currently supports overriding the RPC URL used by consumers of this module.
+     *
+     * @param overrides - The overrides to apply to the module.
+     * @returns A wrapped module instance with the overrides applied.
+     * @example
+     *
+     * import { nagaDev } from '@lit-protocol/networks';
+     * const nagaDevWithOverride = nagaDev.withOverrides({ rpcUrl: 'https://custom-rpc-url.com' });
+     * const litClient = await createLitClient({ network: nagaDevWithOverride });
+     */
+    withOverrides: (overrides: { rpcUrl?: string }) => {
+      const resolvedRpcUrl = overrides.rpcUrl ?? baseModule.getRpcUrl();
+
+      // Build an overridden network config and a chain manager bound to it
+      const overriddenChainConfig = {
+        ...networkConfig.chainConfig,
+        rpcUrls: {
+          ...networkConfig.chainConfig.rpcUrls,
+          default: {
+            ...networkConfig.chainConfig.rpcUrls.default,
+            http: [resolvedRpcUrl],
+          },
+          ['public']: {
+            ...(networkConfig.chainConfig.rpcUrls as any)['public'],
+            http: [resolvedRpcUrl],
+          },
+        },
+      } as typeof networkConfig.chainConfig;
+
+      const overriddenNetworkConfig = {
+        ...networkConfig,
+        rpcUrl: resolvedRpcUrl,
+        chainConfig: overriddenChainConfig,
+      } as typeof networkConfig;
+
+      const createChainManagerOverridden = (
+        account: ExpectedAccountOrWalletClient
+      ) => createChainManagerFactory(overriddenNetworkConfig, account);
+
+      // Rebuild a fresh module bound to the overridden config
+      return createBaseModule({
+        networkConfig: overriddenNetworkConfig,
+        moduleName,
+        createChainManager: createChainManagerOverridden,
+        verifyReleaseId: baseModule.getVerifyReleaseId(),
+      });
     },
   };
 

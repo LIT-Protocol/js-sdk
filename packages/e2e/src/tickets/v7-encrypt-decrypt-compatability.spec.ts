@@ -5,12 +5,9 @@ import { privateKeyToAccount } from 'viem/accounts';
 
 describe('v7 encrypt decrypt compatability', () => {
   it('should be able to use the v7 api', async () => {
-
-
     const liveMasterAccount = privateKeyToAccount(
       process.env['LIVE_MASTER_ACCOUNT'] as `0x${string}`
     );
-
 
     const litClient = await createLitClient({ network: nagaDev });
 
@@ -45,40 +42,38 @@ describe('v7 encrypt decrypt compatability', () => {
       litClient: litClient,
     });
 
-
-
-
     const { createAccBuilder } = await import(
       '@lit-protocol/access-control-conditions'
     );
 
+    const unifiedAccs = createAccBuilder()
+      .unifiedAccs({
+        conditionType: 'evmBasic',
+        contractAddress: '',
+        standardContractType: '',
+        chain: 'ethereum',
+        method: '',
+        parameters: [':userAddress'],
+        returnValueTest: {
+          comparator: '=',
+          value: liveMasterAccount.address,
+        },
+      })
+      .build();
 
-    const unifiedAccs = createAccBuilder().unifiedAccs({
-      conditionType: 'evmBasic',
-      contractAddress: '',
-      standardContractType: '',
-      chain: 'ethereum',
-      method: '',
-      parameters: [':userAddress'],
-      returnValueTest: {
-        comparator: '=',
-        value: liveMasterAccount.address,
-      },
-    }).build();
-
-
-    const accs = createAccBuilder().evmBasic({
-      contractAddress: '',
-      standardContractType: '',
-      chain: 'ethereum',
-      method: '',
-      parameters: [':userAddress'],
-      returnValueTest: {
-        comparator: '=',
-        value: liveMasterAccount.address,
-      },
-    }).build();
-
+    const accs = createAccBuilder()
+      .evmBasic({
+        contractAddress: '',
+        standardContractType: '',
+        chain: 'ethereum',
+        method: '',
+        parameters: [':userAddress'],
+        returnValueTest: {
+          comparator: '=',
+          value: liveMasterAccount.address,
+        },
+      })
+      .build();
 
     const stringData = 'Hello from encrypt-decrypt flow test!';
     const encryptedStringData = await litClient.encrypt({
@@ -87,9 +82,7 @@ describe('v7 encrypt decrypt compatability', () => {
       chain: 'ethereum',
     });
 
-
     console.log(encryptedStringData);
-
 
     const decryptedStringResponse = await litClient.decrypt({
       data: encryptedStringData,
