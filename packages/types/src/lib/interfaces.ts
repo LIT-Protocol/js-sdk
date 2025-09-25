@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider';
 import { z } from 'zod';
 
 import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
