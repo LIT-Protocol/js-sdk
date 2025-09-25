@@ -16,6 +16,8 @@ import {
   ViemAccount,
 } from './types';
 
+// import { createPkpAuthContext } from './helper/auth-contexts';
+
 const SupportedNetworkSchema = z.enum([
   'naga-dev',
   'naga-test',
@@ -127,7 +129,10 @@ export const init = async (
 
   // Optional RPC override from env
   const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
-  const _networkModule = _baseNetworkModule;
+  const _networkModule =
+    rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
+      ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
+      : _baseNetworkModule;
 
   if (rpcOverride) {
     console.log(
@@ -180,6 +185,17 @@ export const init = async (
   });
   console.log('✅ Master Payment Balance:', masterPaymentBalance);
 
+  async function masterDepositForUser(userAddress: string) {
+    await masterPaymentManager.depositForUser({
+      userAddress: userAddress,
+      amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+    });
+    console.log(
+      `✅ New ${userAddress} Ledger Balance:`,
+      await masterPaymentManager.getBalance({ userAddress: userAddress })
+    );
+  }
+
   /**
    * ====================================
    * Initialise the AuthManager
@@ -227,6 +243,14 @@ export const init = async (
     ...pkpData.data,
     tokenId: pkpData.data.tokenId,
   };
+
+  // Making sure all signers have sufficient ledger balance before calling the signSessionKey endpoint
+  await masterDepositForUser(aliceViemAccount.address);
+  await masterDepositForUser(bobViemAccount.address);
+  await masterDepositForUser(aliceViemAccountPkp.ethAddress);
+  await masterDepositForUser(bobViemAccountPkp.ethAddress);
+  await masterDepositForUser(eveViemAccount.address);
+  await masterDepositForUser(eveViemAccountPkp.ethAddress);
 
   /**
    * ====================================
@@ -290,34 +314,8 @@ export const init = async (
    * ====================================
    */
 
-  async function masterDepositForUser(userAddress: string) {
-    await masterPaymentManager.depositForUser({
-      userAddress: userAddress,
-      amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
-    });
-    console.log(
-      `✅ New ${userAddress} Ledger Balance:`,
-      await masterPaymentManager.getBalance({ userAddress: userAddress })
-    );
-  }
-
-  // Deposit to the Alice EOA Ledger
-  await masterDepositForUser(aliceViemAccount.address);
-
-  // Deposit to the PKP Ledger
+  // Deposit to the PKP Viem account Ledger
   await masterDepositForUser(alicePkpViemAccount.address);
-
-  // Deposit to the Bob EOA Ledger
-  await masterDepositForUser(bobViemAccount.address);
-
-  // Deposit to the Bob PKP Ledger
-  await masterDepositForUser(bobViemAccountPkp.ethAddress);
-
-  // Deposit to the Eve EOA Ledger
-  await masterDepositForUser(eveViemAccount.address);
-
-  // Deposit to the Eve PKP Ledger
-  await masterDepositForUser(eveViemAccountPkp.ethAddress);
 
   // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
   //   pkpIdentifier: {

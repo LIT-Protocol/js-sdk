@@ -128,7 +128,11 @@ export const createPkpPermissionsManagerFlowTest = (
       authMethodId: '0x1234567890abcdef1234567890abcdef12345678',
       userPubkey:
         '0x04abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-      scopes: ['sign-anything'] as ('sign-anything' | 'no-permissions' | 'personal-sign')[],
+      scopes: ['sign-anything'] as (
+        | 'sign-anything'
+        | 'no-permissions'
+        | 'personal-sign'
+      )[],
     };
 
     // Get initial auth methods count

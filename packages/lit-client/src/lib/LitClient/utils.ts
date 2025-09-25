@@ -1,4 +1,4 @@
-import { CustomAuthData } from '@lit-protocol/schemas';
+import { CustomAuthData, CustomAuthDataSchema } from '@lit-protocol/schemas';
 import { hexToBigInt, keccak256, toBytes } from 'viem';
 
 export const utils = {
@@ -60,9 +60,11 @@ export const utils = {
   }): CustomAuthData => {
     const uniqueUserId = `${uniqueDappName}-${userId}`;
 
-    return {
+    const customAuthData = CustomAuthDataSchema.parse({
       authMethodType: uniqueAuthMethodType,
       authMethodId: keccak256(toBytes(uniqueUserId)),
-    };
+    });
+
+    return customAuthData;
   },
 };

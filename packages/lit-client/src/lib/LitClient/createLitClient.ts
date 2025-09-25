@@ -25,6 +25,7 @@ import {
 import {
   AuthContextSchema2,
   AuthData,
+  ChainSchema,
   EncryptedVersion1Schema,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
@@ -359,7 +360,8 @@ export const _createNagaLitClient = async (
     return await networkModule.api.signCustomSessionKey.handleResponse(
       result as any,
       params.requestBody.pkpPublicKey,
-      jitContext
+      jitContext,
+      requestId
     );
   }
 
@@ -672,7 +674,7 @@ export const _createNagaLitClient = async (
       unifiedAccessControlConditions: params.unifiedAccessControlConditions,
       connectionInfo: currentConnectionInfo,
       version: networkModule.version,
-      chain: params.chain,
+      chain: ChainSchema.parse(params.chain),
       jitContext,
     })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
@@ -816,11 +818,15 @@ export const _createNagaLitClient = async (
         pkpData: pkp,
       };
     },
-    getPKPPermissionsManager: networkModule.chainApi.getPKPPermissionsManager,
+    getPKPPermissionsManager: networkModule.chainApi
+      .getPKPPermissionsManager as (params: {
+      pkpIdentifier: PkpIdentifierRaw;
+      account: ExpectedAccountOrWalletClient;
+    }) => Promise<PKPPermissionsManager>,
     getPaymentManager: async (params: { account: any }) => {
-      return await networkModule.chainApi.getPaymentManager({
+      return (await networkModule.chainApi.getPaymentManager({
         account: params.account,
-      });
+      })) as PaymentManager;
     },
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣

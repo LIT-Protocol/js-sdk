@@ -3,7 +3,8 @@ import { createAccBuilder } from '@lit-protocol/access-control-conditions';
 
 export const createPkpEncryptDecryptTest = (
   ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any
+  getAuthContext: () => any,
+  address?: string
 ) => {
   return async () => {
     const authContext = getAuthContext();
@@ -15,7 +16,7 @@ export const createPkpEncryptDecryptTest = (
       addressToUse = ctx.aliceViemAccount.address;
     } else {
       // PKP or Custom auth contexts
-      addressToUse = ctx.aliceViemAccountPkp.ethAddress;
+      addressToUse = address || ctx.aliceViemAccountPkp.ethAddress;
     }
 
     // Set up access control conditions requiring wallet ownership

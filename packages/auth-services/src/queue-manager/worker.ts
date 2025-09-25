@@ -1,6 +1,7 @@
 import { initSystemContext } from '../_setup/initSystemContext';
 import { mainQueueName, setBullmqRedisUrl } from './src/bullmqSetup';
 import { createGenericWorker } from './src/genericWorker';
+import { env } from '../env';
 
 export async function startAuthServiceWorker(params?: {
   litTxsenderRpcUrl?: string;
