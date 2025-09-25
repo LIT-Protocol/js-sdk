@@ -63,7 +63,6 @@ jobs:
         with:
           node-version: 22.18.0
           registry-url: https://registry.npmjs.org
-          cache: pnpm
       - name: Enable corepack + pin pnpm
         run: |
           corepack enable
