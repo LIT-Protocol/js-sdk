@@ -54,13 +54,13 @@ jobs:
 
       # ==================== Run Tests ====================
       - name: Run health check for naga-dev
-        run: NETWORK=naga-dev pnpm run test:e2e:ci -- all
+        run: NETWORK=naga-dev pnpm run test:e2e:ci all
         timeout-minutes: 10
 
       # - name: Run health check for naga-test
-      #   run: NETWORK=naga-test pnpm run test:e2e:ci -- all
+      #   run: NETWORK=naga-test pnpm run test:e2e:ci all
       #   timeout-minutes: 10
 
       # - name: Run health check for naga-staging
-      #   run: NETWORK=naga-staging pnpm run test:e2e:ci -- all
+      #   run: NETWORK=naga-staging pnpm run test:e2e:ci all
       #   timeout-minutes: 10
