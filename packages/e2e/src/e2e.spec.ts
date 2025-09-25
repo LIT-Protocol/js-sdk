@@ -141,8 +141,7 @@ describe('all', () => {
             () => eveCustomAuthContext,
             ctx.eveViemAccountPkp.pubkey
           )());
-        it('viewPKPsByAddress', () =>
-          createViewPKPsByAddressTest(ctx)());
+        it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
         it('viewPKPsByAuthData', () =>
           createViewPKPsByAuthDataTest(ctx, () => eveCustomAuthContext)());
         it('pkpEncryptDecrypt', () =>
