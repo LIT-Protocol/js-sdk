@@ -23,10 +23,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: '20'
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -40,20 +47,20 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Install Bun dependencies
-        run: bun install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
-        run: bun run build
+        run: pnpm run build
 
       - name: Run health check for naga-dev
-        run: NETWORK=naga-dev bun run test:e2e all
+        run: NETWORK=naga-dev pnpm run test:e2e:ci -- all
         timeout-minutes: 10
 
       # - name: Run health check for naga-test
-      #   run: NETWORK=naga-test bun run test:e2e all
+      #   run: NETWORK=naga-test pnpm run test:e2e:ci -- all
       #   timeout-minutes: 10
 
       - name: Run health check for naga-staging
-        run: NETWORK=naga-staging bun run test:e2e all
+        run: NETWORK=naga-staging pnpm run test:e2e:ci -- all
         timeout-minutes: 10
