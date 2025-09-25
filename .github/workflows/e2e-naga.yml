@@ -75,7 +75,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: .
+          path: build-output
+      - name: Restore build artifacts
+        run: |
+          mkdir -p dist
+          mkdir -p packages/wasm/pkg
+          if [ -d build-output/dist ]; then
+            cp -a build-output/dist/. dist/
+          fi
+          if [ -d build-output/packages/wasm/pkg ]; then
+            cp -a build-output/packages/wasm/pkg/. packages/wasm/pkg/
+          fi
       - name: Run health check (${{ matrix.network }})
         run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci -- packages/e2e/src/e2e.spec.ts
         timeout-minutes: 10
