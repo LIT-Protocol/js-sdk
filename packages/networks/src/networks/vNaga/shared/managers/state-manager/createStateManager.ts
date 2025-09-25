@@ -86,8 +86,8 @@ export const createStateManager = async <T>(params: {
     const err = error instanceof Error ? error : new Error(String(error));
 
     _logger.error(
-      'Failed to get initial connection info for State Manager',
-      { error: err, message: err.message, stack: err.stack }
+      { error: err, message: err.message, stack: err.stack },
+      'Failed to get initial connection info for State Manager'
     );
     throw err;
   }
