@@ -33,7 +33,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: dist
+          path: |
+            dist
+            packages/wasm/pkg
           if-no-files-found: error
 
   e2e:
@@ -73,7 +75,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: dist
+          path: .
       - name: Run health check (${{ matrix.network }})
-        run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci all
+        run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci:file -- packages/e2e/src/e2e.spec.ts
         timeout-minutes: 10
