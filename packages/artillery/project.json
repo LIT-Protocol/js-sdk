@@ -7,47 +7,53 @@
     "init": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsx packages/artillery/src/init.ts"
+        "cwd": "{projectRoot}",
+        "command": "tsx src/init.ts"
       }
     },
     "balance-status": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsx packages/artillery/src/balance-status.ts"
+        "cwd": "{projectRoot}",
+        "command": "tsx src/balance-status.ts"
       }
     },
     "run:pkp-sign": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/pkp-sign.yml"
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign.yml"
       }
     },
     "run:encrypt-decrypt": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/encrypt-decrypt.yml"
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/encrypt-decrypt.yml"
       }
     },
     "run:execute": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/execute.yml"
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/execute.yml"
       }
     },
     "run:mix": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/mix.yml"
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/mix.yml"
       }
     },
     "run:sign-session-key": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "artillery run packages/artillery/configs/sign-session-key.yml"
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/sign-session-key.yml"
       }
     }
   },
   "tags": []
 }
-
 

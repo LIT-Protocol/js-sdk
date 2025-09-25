@@ -144,25 +144,13 @@ describe('all', () => {
             ctx.eveViemAccountPkp.pubkey
           )());
         it('viewPKPsByAddress', () =>
-          createViewPKPsByAddressTest(
-            ctx,
-            () => eveCustomAuthContext,
-            ctx.eveViemAccountPkp.pubkey
-          )());
+          createViewPKPsByAddressTest(ctx, () => ctx.aliceEoaAuthContext)());
         it('viewPKPsByAuthData', () =>
           createViewPKPsByAuthDataTest(ctx, () => eveCustomAuthContext)());
         it('pkpEncryptDecrypt', () =>
-          createPkpEncryptDecryptTest(
-            ctx,
-            () => eveCustomAuthContext,
-            ctx.eveViemAccountPkp.ethAddress
-          )());
+          createPkpEncryptDecryptTest(ctx, () => ctx.aliceEoaAuthContext)());
         it('encryptDecryptFlow', () =>
-          createEncryptDecryptFlowTest(
-            ctx,
-            () => eveCustomAuthContext,
-            ctx.eveViemAccountPkp.pubkey
-          )());
+          createEncryptDecryptFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
 
         // Disable for now because it requires a different flow
         // it('pkpPermissionsManagerFlow', () =>
