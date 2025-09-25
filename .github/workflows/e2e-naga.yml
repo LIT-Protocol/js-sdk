@@ -35,7 +35,7 @@ jobs:
           name: build-output
           path: |
             dist
-            packages/wasm/pkg
+            packages/wasm/src/pkg
           if-no-files-found: error
 
   e2e:
@@ -79,12 +79,12 @@ jobs:
       - name: Restore build artifacts
         run: |
           mkdir -p dist
-          mkdir -p packages/wasm/pkg
+          mkdir -p packages/wasm/src/pkg
           if [ -d build-output/dist ]; then
             cp -a build-output/dist/. dist/
           fi
-          if [ -d build-output/packages/wasm/pkg ]; then
-            cp -a build-output/packages/wasm/pkg/. packages/wasm/pkg/
+          if [ -d build-output/packages/wasm/src/pkg ]; then
+            cp -a build-output/packages/wasm/src/pkg/. packages/wasm/src/pkg/
           fi
           rm -rf build-output
       - name: Run health check (${{ matrix.network }})
