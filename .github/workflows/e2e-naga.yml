@@ -6,8 +6,39 @@ on:
   pull_request:
 
 jobs:
+  build:
+    name: Build once
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          registry-url: https://registry.npmjs.org
+      - name: Enable corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: dist
+          if-no-files-found: error
+
   e2e:
     name: E2E (${{ matrix.network }})
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,49 +53,17 @@ jobs:
           - environment: naga-test
             network: naga-test
             privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
-
     env:
       LOCAL_MASTER_ACCOUNT: ${{ secrets.LOCAL_MASTER_ACCOUNT }}
       LOG_LEVEL: debug2
-      # Dynamic lookup of the right secret by matrix entry
       LIVE_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
-
     steps:
-      # ==================== Base Env Setup (shared) ====================
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install rust
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - name: Download build output
+        uses: actions/download-artifact@v4
         with:
-          toolchain: stable
-          override: true
-          components: rust-std
-
-      - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          version: latest
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.18.0
-          registry-url: https://registry.npmjs.org
-
-      - name: Enable corepack + pin pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@9.15.0 --activate
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      # ==================== Run Build (shared) ====================
-      - name: Build
-        run: pnpm build
-
-      # ==================== Run Tests (varies by matrix) ====================
+          name: build-output
+          path: dist
       - name: Run health check (${{ matrix.network }})
         run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci all
         timeout-minutes: 10
