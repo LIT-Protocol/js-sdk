@@ -2,8 +2,9 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import { OAuth2Client } from 'google-auth-library';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 // Prefer Node's CJS globals when available; fallback to process.cwd()
-const resolvedDirname = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
+const resolvedDirname = path.dirname(fileURLToPath(import.meta.url));
 
 type DiscordTokenResponse = {
   access_token?: string;
