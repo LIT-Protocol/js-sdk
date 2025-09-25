@@ -24,8 +24,8 @@ importers:
         specifier: 5.8.0
         version: 5.8.0
       '@lit-protocol/contracts':
-        specifier: ^0.5.0
-        version: 0.5.0(typescript@5.8.3)
+        specifier: 0.5.1
+        version: 0.5.1(typescript@5.8.3)
       '@lit-protocol/nacl':
         specifier: 7.1.1
         version: 7.1.1
@@ -412,8 +412,8 @@ importers:
         specifier: ^1.2.0
         version: 1.3.1(elysia@1.3.21(exact-mirror@0.2.2(@sinclair/typebox@0.34.41))(file-type@21.0.0)(typescript@5.8.3))
       '@lit-protocol/contracts':
-        specifier: ^0.4.0
-        version: 0.4.0(typescript@5.8.3)
+        specifier: ^0.5.1
+        version: 0.5.1(typescript@5.8.3)
       '@simplewebauthn/server':
         specifier: 6.2.1
         version: 6.2.1(encoding@0.1.13)
@@ -585,8 +585,8 @@ importers:
   packages/networks:
     dependencies:
       '@lit-protocol/contracts':
-        specifier: ^0.4.0
-        version: 0.4.0(typescript@5.8.3)
+        specifier: ^0.5.1
+        version: 0.5.1(typescript@5.8.3)
       '@lit-protocol/nacl':
         specifier: 7.1.1
         version: 7.1.1
@@ -2457,13 +2457,8 @@ packages:
     peerDependencies:
       typescript: ^5.0.0
 
-  '@lit-protocol/contracts@0.4.0':
-    resolution: {integrity: sha512-+PLkQNab2+n7AS6gLUD+b2JoVMTMSB2BDFRoO5epQuli/wd4HBH7XiwBb15111Ta7fn/+TR0R27YJLoDPNYCPg==}
-    peerDependencies:
-      typescript: ^5.0.0
-
-  '@lit-protocol/contracts@0.5.0':
-    resolution: {integrity: sha512-dXQkG5elAME73DulVEKUu/z43nfrCXj5F5rHW/2TsNbj/Da0206fWoeikHm6lJtfqeKpXkaPn6BN98LY6hwWpQ==}
+  '@lit-protocol/contracts@0.5.1':
+    resolution: {integrity: sha512-2j4tQ5ZxNpQakXn7kEmepftlHrqYc5Gc6albDd1EewWvcNYtX32sLEgRGh5/qqYQKvAbA9/9kPFIE+g3p61rrw==}
     peerDependencies:
       typescript: ^5.0.0
 
@@ -11714,11 +11709,7 @@ snapshots:
     dependencies:
       typescript: 5.8.3
 
-  '@lit-protocol/contracts@0.4.0(typescript@5.8.3)':
-    dependencies:
-      typescript: 5.8.3
-
-  '@lit-protocol/contracts@0.5.0(typescript@5.8.3)':
+  '@lit-protocol/contracts@0.5.1(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 
