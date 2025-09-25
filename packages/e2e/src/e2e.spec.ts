@@ -56,8 +56,7 @@ describe('all', () => {
         createPkpSignTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('executeJs', () =>
         createExecuteJsTest(ctx, () => ctx.aliceEoaAuthContext)());
-      it('viewPKPsByAddress', () =>
-        createViewPKPsByAddressTest(ctx, () => ctx.aliceEoaAuthContext)());
+      it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
       it('viewPKPsByAuthData', () =>
         createViewPKPsByAuthDataTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('pkpEncryptDecrypt', () =>
@@ -97,8 +96,7 @@ describe('all', () => {
           createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
         it('executeJs', () =>
           createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
-        it('viewPKPsByAddress', () =>
-          createViewPKPsByAddressTest(ctx, () => ctx.alicePkpAuthContext)());
+        it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
         it('viewPKPsByAuthData', () =>
           createViewPKPsByAuthDataTest(ctx, () => ctx.alicePkpAuthContext)());
         it('pkpEncryptDecrypt', () =>
@@ -144,7 +142,7 @@ describe('all', () => {
             ctx.eveViemAccountPkp.pubkey
           )());
         it('viewPKPsByAddress', () =>
-          createViewPKPsByAddressTest(ctx, () => ctx.aliceEoaAuthContext)());
+          createViewPKPsByAddressTest(ctx)());
         it('viewPKPsByAuthData', () =>
           createViewPKPsByAuthDataTest(ctx, () => eveCustomAuthContext)());
         it('pkpEncryptDecrypt', () =>
