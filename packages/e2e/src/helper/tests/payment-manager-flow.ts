@@ -1,6 +1,5 @@
 import { init } from '../../init';
 
-
 export const createPaymentManagerFlowTest = (
   ctx: Awaited<ReturnType<typeof init>>,
   getAuthContext: () => any

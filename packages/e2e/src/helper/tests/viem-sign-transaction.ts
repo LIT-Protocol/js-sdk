@@ -1,6 +1,5 @@
 import { init } from '../../init';
 
-
 export const createViemSignTransactionTest = (
   ctx: Awaited<ReturnType<typeof init>>,
   getAuthContext: () => any

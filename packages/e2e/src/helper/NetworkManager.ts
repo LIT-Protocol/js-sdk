@@ -17,7 +17,9 @@ const SupportedNetworkSchema = z.enum([
 ]);
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
-export const getLitNetworkModule = async (network?: SupportedNetwork) : Promise<any>  => {
+export const getLitNetworkModule = async (
+  network?: SupportedNetwork
+): Promise<any> => {
   const _network = network || process.env['NETWORK'];
 
   if (!_network) {
