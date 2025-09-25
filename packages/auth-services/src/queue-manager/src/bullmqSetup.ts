@@ -3,11 +3,6 @@ import { env } from '../../env';
 import { parseRedisUrl } from './helper/redisUrlParser';
 import { JobName } from './jobRegistry';
 
-const BigIntStringify = (obj: any) =>
-  JSON.stringify(obj, (_key, value) =>
-    typeof value === 'bigint' ? value.toString() : value
-  );
-
 export const mainQueueName = 'pkpAuthServiceQueue';
 
 let bullmqConnectionOptions: ConnectionOptions = parseRedisUrl(env.REDIS_URL);
