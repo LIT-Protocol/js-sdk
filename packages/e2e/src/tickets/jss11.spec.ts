@@ -169,11 +169,11 @@ describe('JSS-11: PKP Management and Pagination', () => {
 
       // Verify data types
       expect(typeof pkp.tokenId).toBe('string');
-      expect(typeof pkp.publicKey).toBe('string');
+      expect(typeof pkp.pubkey).toBe('string');
       expect(typeof pkp.ethAddress).toBe('string');
 
       // Verify format
-      expect(pkp.publicKey).toMatch(/^0x[a-fA-F0-9]+$/);
+      expect(pkp.pubkey).toMatch(/^0x[a-fA-F0-9]+$/);
       expect(pkp.ethAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
     });
   });
