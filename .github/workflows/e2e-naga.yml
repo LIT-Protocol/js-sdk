@@ -5,30 +5,29 @@ on:
     branches: [naga, canary-naga]
   pull_request:
 
-env:
-  LOCAL_MASTER_ACCOUNT: ${{ secrets.LOCAL_MASTER_ACCOUNT }}
-  LOG_LEVEL: debug2
-
 jobs:
   e2e:
     name: E2E (${{ matrix.network }})
     runs-on: ubuntu-latest
-    environment: ${{ matrix.environment }}
-
     strategy:
       fail-fast: false
       matrix:
         include:
           - environment: naga-dev
             network: naga-dev
+            privateKey: LIVE_MASTER_ACCOUNT_NAGA_DEV
           - environment: naga-staging
             network: naga-staging
+            privateKey: LIVE_MASTER_ACCOUNT_NAGA_STAGING
           - environment: naga-test
             network: naga-test
+            privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
 
     env:
-      # Pulled from the environment-scoped secret of the active matrix environment
-      LIVE_MASTER_ACCOUNT: ${{ secrets.LIVE_MASTER_ACCOUNT }}
+      LOCAL_MASTER_ACCOUNT: ${{ secrets.LOCAL_MASTER_ACCOUNT }}
+      LOG_LEVEL: debug2
+      # Dynamic lookup of the right secret by matrix entry
+      LIVE_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
 
     steps:
       # ==================== Base Env Setup (shared) ====================
@@ -52,12 +51,11 @@ jobs:
         with:
           node-version: 22.18.0
           registry-url: https://registry.npmjs.org
-          cache: pnpm
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.0
+      - name: Enable corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
