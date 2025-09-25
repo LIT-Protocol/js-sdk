@@ -56,9 +56,9 @@ jobs:
             network: naga-test
             privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
     env:
-      LOCAL_MASTER_ACCOUNT: ${{ secrets.LOCAL_MASTER_ACCOUNT }}
       LOG_LEVEL: debug2
       LIVE_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
+      LOCAL_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -90,11 +90,11 @@ jobs:
       - name: Verify required secrets
         run: |
           if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
-            echo "LIVE_MASTER_ACCOUNT is not set for network ${NETWORK:-unknown}" >&2
+            echo "LIVE_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
             exit 1
           fi
           if [ -z "${LOCAL_MASTER_ACCOUNT}" ]; then
-            echo "LOCAL_MASTER_ACCOUNT is not set" >&2
+            echo "LOCAL_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
             exit 1
           fi
       - name: Run health check (${{ matrix.network }})
