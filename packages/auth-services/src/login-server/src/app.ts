@@ -8,7 +8,8 @@ import path from 'node:path';
 // TypeError: The "path" argument must be of type string or an instance of URL. Received undefined
 //     at fileURLToPath (node:internal/url:1606:11)
 //     at Object.<anonymous> (/Users/js-sdk/dist/apps/lit-auth-server/main.cjs:490211:90)
-const resolvedDirname = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
+const resolvedDirname =
+  typeof __dirname !== 'undefined' ? __dirname : process.cwd();
 
 type DiscordTokenResponse = {
   access_token?: string;
