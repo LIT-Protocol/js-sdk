@@ -29,17 +29,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Enable this after PNPM migration
-      # - name: Setup PNPM
-      #   uses: pnpm/action-setup@v4
-      #   with:
-      #     version: 9.15.0
-
-      # TODO: Disable this after PNPM migration
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 9.15.0
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -60,9 +53,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install project dependencies
-        run: bun install --frozen-lockfile
-        # Enable this after PNPM migration
-        # run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Check current pre-release mode
         run: |
@@ -74,19 +65,14 @@ jobs:
           fi
 
       - name: Build
-        run: bun run build
-        # Enable this after pnpm migration
-        # run: pnpm build
+        run: pnpm build
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          version: bunx changeset version
-          publish: bunx changeset publish --access public
-          # Enable this after pnpm migration
-          # version: pnpm changeset version
-          # publish: pnpm changeset publish --access public
+          version: pnpm changeset version
+          publish: pnpm changeset publish --access public
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
         env:
