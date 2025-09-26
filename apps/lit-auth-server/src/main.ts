@@ -2,8 +2,8 @@ import { createLitAuthServer } from '@lit-protocol/auth-services';
 import { startAuthServiceWorker } from '@lit-protocol/auth-services';
 
 const litAuthServer = createLitAuthServer({
-  port: Number(3001),
-  host: '0.0.0.0',
+  port: Number(process.env['PORT']) || 3000,
+  host: process.env['AUTH_SERVER_HOST'],
   network: process.env['NETWORK'],
   litTxsenderRpcUrl: process.env['LIT_TXSENDER_RPC_URL'] as string,
   litTxsenderPrivateKey: process.env['LIT_TXSENDER_PRIVATE_KEY'],
