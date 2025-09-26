@@ -102,7 +102,7 @@ bunx changeset publish
 
 - Trigger the `Release Docker Images` GitHub Action (`.github/workflows/release-docker-images.yml`) from the Actions tab once the desired changes are on the branch you want to release from.
 - When starting the workflow, select the branch ref, set `auth-server-released` to true, and optionally provide a `custom-tag` to add an extra image tag alongside the branch/commit/`latest` tags.
-- The job builds both `lit-auth-server` and `lit-login-server` via their Nx `docker-build` targets and pushes images to `ghcr.io/lit-protocol/<app>` using the repo's `GITHUB_TOKEN` (or the `GHCR_USERNAME`/`GHCR_TOKEN` secrets if you supply them).
+- The job installs the Rust toolchain and `wasm-pack`, builds both `lit-auth-server` and `lit-login-server` via their Nx `docker-build` targets, and pushes images to `ghcr.io/lit-protocol/<app>` using the repo's `GITHUB_TOKEN` (or the `GHCR_USERNAME`/`GHCR_TOKEN` secrets if you supply them).
 - Leave `auth-server-released` unchecked to perform a no-op dry run and confirm the workflow is available without publishing images.
 
 ## Keeping the contract address and ABIs in sync with the latest changes
