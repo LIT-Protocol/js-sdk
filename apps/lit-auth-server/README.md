@@ -15,3 +15,9 @@ or
 
 node ./dist/apps/lit-auth-server/main.cjs
 ```
+
+# Building the Docker image
+
+```
+nx run lit-auth-server:docker-build
+```
