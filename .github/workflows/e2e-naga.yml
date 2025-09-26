@@ -49,9 +49,9 @@ jobs:
           - environment: naga-dev
             network: naga-dev
             privateKey: LIVE_MASTER_ACCOUNT_NAGA_DEV
-          - environment: naga-staging
-            network: naga-staging
-            privateKey: LIVE_MASTER_ACCOUNT_NAGA_STAGING
+          # - environment: naga-staging
+          #   network: naga-staging
+          #   privateKey: LIVE_MASTER_ACCOUNT_NAGA_STAGING
           - environment: naga-test
             network: naga-test
             privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
