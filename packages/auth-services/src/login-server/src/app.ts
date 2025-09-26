@@ -2,9 +2,13 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import { OAuth2Client } from 'google-auth-library';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+
 // Prefer Node's CJS globals when available; fallback to process.cwd()
-const resolvedDirname = path.dirname(fileURLToPath(import.meta.url));
+// Note: Tried to use "import { fileURLToPath } from 'node:url';", but got the following error:
+// TypeError: The "path" argument must be of type string or an instance of URL. Received undefined
+//     at fileURLToPath (node:internal/url:1606:11)
+//     at Object.<anonymous> (/Users/js-sdk/dist/apps/lit-auth-server/main.cjs:490211:90)
+const resolvedDirname = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
 
 type DiscordTokenResponse = {
   access_token?: string;
