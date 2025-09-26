@@ -1,5 +1,11 @@
 # @lit-protocol/auth-helpers
 
+## 8.0.1-test.0
+
+### Patch Changes
+
+- first pnpm complete release test for naga-test
+
 ## 8.0.0
 
 ### Major Changes

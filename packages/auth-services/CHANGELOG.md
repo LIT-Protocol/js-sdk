@@ -1,5 +1,15 @@
 # @lit-protocol/auth-services
 
+## 2.0.1-test.0
+
+### Patch Changes
+
+- first pnpm complete release test for naga-test
+- Updated dependencies
+- Updated dependencies [642cd0b]
+  - @lit-protocol/contracts@0.5.2-test.0
+  - @lit-protocol/logger@8.0.1-test.0
+
 ## 2.0.0
 
 ### Major Changes
