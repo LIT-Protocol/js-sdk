@@ -1,0 +1,96 @@
+name: Release Docker Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      auth-server-released:
+        description: 'Set to true to push docker images.'
+        required: true
+        type: boolean
+        default: false
+      custom-tag:
+        description: 'Optional tag name to apply in addition to ref/sha tags.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  NODE_VERSION: '22.18.0'
+  PNPM_VERSION: 9.15.0
+
+jobs:
+  docker-images:
+    name: Build and Push
+    if: ${{ github.event.inputs.auth-server-released == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [lit-auth-server, lit-login-server]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install project dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME || github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/lit-protocol/${{ matrix.app }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+            type=raw,value=latest
+
+      - name: Build image with Nx target
+        run: pnpm nx run ${{ matrix.app }}:docker-build
+
+      - name: Tag and push image
+        env:
+          IMAGE_NAME: ${{ matrix.app }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+          CUSTOM_TAG: ${{ github.event.inputs.custom-tag }}
+        run: |
+          tags_to_push="$TAGS"
+          if [ -n "$CUSTOM_TAG" ]; then
+            tags_to_push="$tags_to_push"$'\n'"ghcr.io/lit-protocol/${IMAGE_NAME}:$CUSTOM_TAG"
+          fi
+          echo "$tags_to_push" | while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            docker tag "$IMAGE_NAME" "$tag"
+            docker push "$tag"
+          done
+
+  skip:
+    name: Skip Docker Release
+    if: ${{ github.event.inputs.auth-server-released != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Skipping docker image publish because auth-server release flag is false."
