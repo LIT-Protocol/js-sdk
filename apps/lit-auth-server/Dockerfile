@@ -4,8 +4,9 @@
 # Tip: Modify "docker-build" options in project.json to change docker build args.
 #
 # Run the container with `docker run -p 3000:3000 -t lit-auth-server`.
-FROM docker.io/node:lts-alpine
+FROM --platform=linux/amd64 docker.io/node:lts-alpine
 
+ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
@@ -14,12 +15,15 @@ WORKDIR /app
 RUN addgroup --system lit-auth-server && \
           adduser --system -G lit-auth-server lit-auth-server
 
-COPY dist/apps/lit-auth-server lit-auth-server/
-COPY apps/lit-auth-server/package.json lit-auth-server/
-RUN chown -R lit-auth-server:lit-auth-server .
+COPY dist/apps/lit-auth-server/ ./
 
-# You can remove this install step if you build with `--bundle` option.
-# The bundled output will include external dependencies.
-RUN npm --prefix lit-auth-server --omit=dev -f install
+# Install only production deps from the generated package.json/lockfile
+RUN corepack enable && pnpm install --prod --frozen-lockfile --ignore-scripts
 
-CMD [ "node", "lit-auth-server" ]
+# Drop privileges
+USER lit-auth-server
+
+ENV NODE_OPTIONS="--no-deprecation"
+
+EXPOSE 3000
+CMD ["node", "main.cjs"]
