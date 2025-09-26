@@ -108,12 +108,26 @@ bunx changeset publish
   - `lit-login-server`: https://github.com/LIT-Protocol/js-sdk/pkgs/container/lit-login-server
 - Leave `auth-server-released` unchecked to perform a no-op dry run and confirm the workflow is available without publishing images.
 
+## One Click Deployable Images
+
+### Lit Auth Server
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/OYOevk?referralCode=RP1REI&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+### Lit Login Server
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/RO0wsZ?referralCode=RP1REI&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+#### Environment configuration
+
+- `ORIGIN`: required for OAuth callbacks. Railway asks for a value during deploy—drop in a placeholder like `http://localhost:3000`, let the app spin up, then replace it with the generated public HTTPS domain (or your custom domain) so Google and Discord redirect URIs match. Leaving it empty keeps the local-only default and will break production flows.
+
 ## Keeping the contract address and ABIs in sync with the latest changes
 
 This command must be run manually and is NOT part of the build process, as it requires a GitHub API key.
 
-```
-DEV_BRANCH=develop GH_API_KEY=github_pat_xxx bun run sync:contracts
+```shell
+DEV_BRANCH=develop GH_API_KEY=github_pat_xxx pnpm run sync:contracts
 ```
 
 ---
