@@ -21,7 +21,12 @@
         "main": "apps/lit-login-server/src/main.ts",
         "tsConfig": "apps/lit-login-server/tsconfig.app.json",
         "assets": [
-          "apps/lit-login-server/src/assets"
+          "apps/lit-login-server/src/assets",
+          {
+            "input": "packages/auth-services/src/login-server/src/public",
+            "glob": "**/*",
+            "output": "public"
+          }
         ],
         "generatePackageJson": true
       },
