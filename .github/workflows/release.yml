@@ -14,6 +14,10 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Enable this when we want to implement docker image release
+    # outputs:
+    #   published: ${{ steps.changesets.outputs.published }}
+    #   auth_server_published: ${{ steps.auth_server_release.outputs.published }}
     steps:
       - name: Check NPM Token
         run: |
@@ -78,3 +82,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      # - Was lit-auth-server part of the most recent release?
+      # - Capture published packages
+      # - Fallback to empty array if nothing was published
+      # - Search for the specific package
+      # - Using jq, it inspects the JSON array of published packages, checking if any have a .name equal to either lit-auth-server or @lit-protocol/lit-auth-server.
+      # - If the package is found, it writes published=true into the GitHub Actions step output.
+      # - name: Check for lit-auth-server release
+      #   id: auth_server_release
+      #   run: |
+      #     packages='${{ steps.changesets.outputs.publishedPackages }}'
+      #     if [ -z "$packages" ]; then
+      #       packages='[]'
+      #     fi
+      #     if echo "$packages" | jq -e '.[] | select(.name == "lit-auth-server" or .name == "@lit-protocol/lit-auth-server")' > /dev/null; then
+      #       echo "published=true" >> "$GITHUB_OUTPUT"
+      #     else
+      #       echo "published=false" >> "$GITHUB_OUTPUT"
+      #     fi
