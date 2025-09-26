@@ -98,5 +98,5 @@ jobs:
             exit 1
           fi
       - name: Run health check (${{ matrix.network }})
-        run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci:file -- packages/e2e/src/e2e.spec.ts -t all
+        run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci -- packages/e2e/src/e2e.spec.ts --testNamePattern "^all "
         timeout-minutes: 10
