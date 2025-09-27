@@ -1,5 +1,13 @@
 # @lit-protocol/auth-services
 
+## 2.0.1-test.2
+
+### Patch Changes
+
+- bump
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.2
+
 ## 2.0.1-test.1
 
 ### Patch Changes

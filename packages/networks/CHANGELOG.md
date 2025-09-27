@@ -1,5 +1,13 @@
 # @lit-protocol/networks
 
+## 8.0.1-test.2
+
+### Patch Changes
+
+- bump
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.2
+
 ## 8.0.1-test.1
 
 ### Patch Changes

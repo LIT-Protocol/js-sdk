@@ -1,5 +1,11 @@
 # @lit-protocol/access-control-conditions-schemas
 
+## 8.0.1-test.2
+
+### Patch Changes
+
+- bump
+
 ## 8.0.1-test.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @lit-protocol/wrapped-keys-lit-actions
 
+## 8.0.1-test.2
+
+### Patch Changes
+
+- bump
+
 ## 8.0.1-test.1
 
 ### Patch Changes
