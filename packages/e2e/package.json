@@ -4,7 +4,7 @@
   "description": "Lit Protocol E2E testing package for running comprehensive integration tests",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "type": "module",
+  "type": "commonjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {

@@ -9,7 +9,7 @@
   "keywords": [
     "library"
   ],
-  "type": "module",
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },

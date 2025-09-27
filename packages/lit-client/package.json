@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
-  "type": "module",
+  "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/lit-client"
@@ -22,9 +22,9 @@
     "universal"
   ],
   "version": "8.0.1-test.0",
-  "main": "./dist/index.js",
-  "typings": "./src/index.d.ts",
-  "types": "./dist/index.d.ts",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
+  "types": "./index.d.ts",
   "dependencies": {
     "@lit-protocol/uint8arrays": "7.1.1",
     "bs58": "^6.0.0",

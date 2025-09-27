@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "@openagenda/verror": "^3.1.4",
     "tslib": "^2.8.1",

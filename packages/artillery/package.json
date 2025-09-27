@@ -2,7 +2,7 @@
   "name": "@lit-protocol/artillery",
   "version": "0.0.2-test.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "artillery": "^2.0.23",
     "@lit-protocol/e2e": "workspace:*"

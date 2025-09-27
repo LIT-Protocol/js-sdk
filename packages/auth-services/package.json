@@ -2,7 +2,7 @@
   "name": "@lit-protocol/auth-services",
   "version": "2.0.1-test.0",
   "license": "MIT",
-  "type": "module",
+  "type": "commonjs",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "publishConfig": {
