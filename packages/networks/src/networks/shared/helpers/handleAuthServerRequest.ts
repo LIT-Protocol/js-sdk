@@ -6,6 +6,7 @@ export const handleAuthServerRequest = async <T>(params: {
   path: '/pkp/mint';
   body: any;
   jobName: string;
+  headers?: Record<string, string>;
 }): Promise<AuthServerTx<T>> => {
   const _body = JSON.stringify(params.body);
   const _url = `${params.serverUrl}${params.path}`;
@@ -14,6 +15,7 @@ export const handleAuthServerRequest = async <T>(params: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(params.headers || {}),
     },
     body: _body,
   });

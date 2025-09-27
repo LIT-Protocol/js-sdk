@@ -1,4 +1,5 @@
-// @ts-expect-error No types available for this package
+// The directive is “unused” because the import line isn’t erroring in this build context. @ts-expect-error only works when the next line definitely produces a TS error.
+// @ts-ignore No types available for this package
 import { Options, VError } from '@openagenda/verror';
 
 import { ConstantValues } from './constants/constants';

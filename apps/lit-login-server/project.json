@@ -1,0 +1,67 @@
+{
+  "name": "lit-login-server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/lit-login-server/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/lit-login-server",
+        "format": [
+          "cjs"
+        ],
+        "thirdParty": true,
+        "main": "apps/lit-login-server/src/main.ts",
+        "tsConfig": "apps/lit-login-server/tsconfig.app.json",
+        "assets": [
+          "apps/lit-login-server/src/assets",
+          {
+            "input": "packages/auth-services/src/login-server/src/public",
+            "glob": "**/*",
+            "output": "public"
+          }
+        ],
+        "generatePackageJson": true
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "generateLockfile": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "buildTarget": "lit-login-server:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "lit-login-server:build:development"
+        },
+        "production": {
+          "buildTarget": "lit-login-server:build:production"
+        }
+      }
+    },
+    "docker-build": {
+      "dependsOn": [
+        "build"
+      ],
+      "command": "docker build -f apps/lit-login-server/Dockerfile . -t lit-login-server"
+    }
+  }
+}

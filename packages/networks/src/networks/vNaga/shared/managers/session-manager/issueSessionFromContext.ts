@@ -90,9 +90,7 @@ export const issueSessionFromContext = async (params: {
   const _userMaxPrices = getMaxPricesForNodeProduct({
     nodePrices: params.pricingContext.nodePrices,
     userMaxPrice: params.pricingContext.userMaxPrice,
-
-    // @ts-ignore - need to change the MaxPricesForNodes interface
-    productId: Number(params.pricingContext.product.id),
+    productId: params.pricingContext.product.id,
     numRequiredNodes: params.pricingContext.threshold,
   });
 

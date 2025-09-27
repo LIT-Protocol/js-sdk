@@ -205,7 +205,7 @@ export const init = async (
     storage: storagePlugins.localStorageNode({
       appName: 'my-local-testing-app',
       networkName: _network,
-      storagePath: './lit-auth-local',
+      storagePath: './.e2e/lit-auth-local',
     }),
   });
 

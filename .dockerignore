@@ -1,0 +1,29 @@
+# dependencies & artifacts
+node_modules
+**/node_modules
+dist
+**/dist
+tmp
+e2e/dist
+coverage
+
+# vcs & editor
+.git
+.gitignore
+.vscode
+.idea
+
+# env and secrets (mount or --env-file at runtime instead)
+**/.env*
+.env*
+
+out
+**/out
+ 
+# allow lit-auth-server build output for docker image
+!dist/apps/lit-auth-server/**
+!dist/apps/lit-auth-server
+
+# allow lit-login-server build output for docker image
+!dist/apps/lit-login-server/**
+!dist/apps/lit-login-server
