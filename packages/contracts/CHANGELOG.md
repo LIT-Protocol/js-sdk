@@ -1,5 +1,11 @@
 # @lit-protocol/contracts
 
+## 0.5.2-test.1
+
+### Patch Changes
+
+- fix package metadata so bundlers load the CommonJS builds again
+
 ## 0.5.2-test.0
 
 ### Patch Changes

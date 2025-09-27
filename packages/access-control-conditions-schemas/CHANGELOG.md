@@ -1,5 +1,11 @@
 # @lit-protocol/access-control-conditions-schemas
 
+## 8.0.1-test.1
+
+### Patch Changes
+
+- fix package metadata so bundlers load the CommonJS builds again
+
 ## 8.0.1-test.0
 
 ### Patch Changes
