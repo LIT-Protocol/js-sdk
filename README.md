@@ -96,6 +96,10 @@ git commit -m "chore: release v0.0.1"
 pnpm changeset publish
 ```
 
+# Apps
+
+This monorepo contains two apps: [Lit Auth Server](./apps/lit-auth-server/README.md) and [Lit Login Server](./apps/lit-login-server/README.md).Both apps support Docker builds.
+
 ## Releasing Docker Images
 
 - Trigger the `Release Docker Images` GitHub Action (`.github/workflows/release-docker-images.yml`) from the Actions tab once the desired changes are on the branch you want to release from.
