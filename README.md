@@ -28,10 +28,8 @@
 
 # Getting started
 
-> **Note:** ❗️Bun is currently used for package management, but npm will become the default soon. (Mon 8 Sep, 2025)
-
 ```
-bun install && bun run build
+pnpm install && pnpm build
 ```
 
 # Running E2E Tests
@@ -78,14 +76,14 @@ DIRECTORY_NAME=naga-local
 NETWORK=naga-local bun run test:e2e all
 ```
 
-# Publishing
+# Manual Publishing
 
 ```bash
 # Generate a changeset
-bunx changeset
+pnpm changeset
 
 # Version the changeset
-bunx changeset version
+pnpm changeset version
 
 # Build the packages
 bun run build
@@ -95,7 +93,7 @@ git add .
 git commit -m "chore: release v0.0.1"
 
 # Publish the packages
-bunx changeset publish
+pnpm changeset publish
 ```
 
 ## Releasing Docker Images
