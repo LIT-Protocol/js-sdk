@@ -7,8 +7,8 @@
 FROM --platform=linux/amd64 docker.io/node:lts-alpine
 
 ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV LOGIN_SERVER_HOST=0.0.0.0
+ENV LOGIN_SERVER_PORT=3000
 
 WORKDIR /app
 
