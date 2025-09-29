@@ -1,5 +1,11 @@
 # @lit-protocol/lit-client
 
+## 8.0.1-test.5
+
+### Patch Changes
+
+- testing
+
 ## 8.0.1-test.4
 
 ### Patch Changes

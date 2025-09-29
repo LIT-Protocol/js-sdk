@@ -1,5 +1,17 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.5
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/access-control-conditions@8.0.1-test.5
+  - @lit-protocol/auth@8.0.1-test.5
+  - @lit-protocol/lit-client@8.0.1-test.5
+  - @lit-protocol/networks@8.0.1-test.5
+  - @lit-protocol/schemas@8.0.1-test.5
+
 ## 1.0.12-test.4
 
 ### Patch Changes

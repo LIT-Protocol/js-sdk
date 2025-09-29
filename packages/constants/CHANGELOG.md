@@ -1,5 +1,13 @@
 # @lit-protocol/constants
 
+## 8.0.1-test.5
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.5
+
 ## 8.0.1-test.4
 
 ### Patch Changes
