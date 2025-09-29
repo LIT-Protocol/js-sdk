@@ -1,5 +1,21 @@
 # @lit-protocol/networks
 
+## 8.0.1-test.4
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.4
+
+## 8.0.1-test.3
+
+### Patch Changes
+
+- put console logs to debug
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.3
+
 ## 8.0.1-test.2
 
 ### Patch Changes

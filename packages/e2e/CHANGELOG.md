@@ -1,5 +1,29 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.4
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/access-control-conditions@8.0.1-test.4
+  - @lit-protocol/auth@8.0.1-test.4
+  - @lit-protocol/lit-client@8.0.1-test.4
+  - @lit-protocol/networks@8.0.1-test.4
+  - @lit-protocol/schemas@8.0.1-test.4
+
+## 1.0.12-test.3
+
+### Patch Changes
+
+- put console logs to debug
+- Updated dependencies
+  - @lit-protocol/access-control-conditions@8.0.1-test.3
+  - @lit-protocol/auth@8.0.1-test.3
+  - @lit-protocol/lit-client@8.0.1-test.3
+  - @lit-protocol/networks@8.0.1-test.3
+  - @lit-protocol/schemas@8.0.1-test.3
+
 ## 1.0.12-test.2
 
 ### Patch Changes

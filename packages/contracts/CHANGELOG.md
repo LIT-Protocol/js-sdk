@@ -1,5 +1,17 @@
 # @lit-protocol/contracts
 
+## 0.5.2-test.4
+
+### Patch Changes
+
+- testing
+
+## 0.5.2-test.3
+
+### Patch Changes
+
+- put console logs to debug
+
 ## 0.5.2-test.2
 
 ### Patch Changes

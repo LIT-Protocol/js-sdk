@@ -1,5 +1,21 @@
 # @lit-protocol/artillery
 
+## 0.0.2-test.4
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/e2e@1.0.12-test.4
+
+## 0.0.2-test.3
+
+### Patch Changes
+
+- put console logs to debug
+- Updated dependencies
+  - @lit-protocol/e2e@1.0.12-test.3
+
 ## 0.0.2-test.2
 
 ### Patch Changes
