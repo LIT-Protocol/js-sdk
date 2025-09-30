@@ -44,7 +44,7 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.0.1-test.7",
+  "version": "8.0.1-test.9",
   "main": "./index.js",
   "typings": "./index.d.ts",
   "types": "./index.d.ts"

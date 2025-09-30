@@ -1,5 +1,19 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.9
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/auth@8.0.1-test.9
+
+## 1.0.12-test.8
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/auth@8.0.1-test.8
+
 ## 1.0.12-test.7
 
 ### Patch Changes
