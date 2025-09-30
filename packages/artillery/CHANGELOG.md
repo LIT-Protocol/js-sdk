@@ -1,5 +1,21 @@
 # @lit-protocol/artillery
 
+## 0.0.2-test.7
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @lit-protocol/e2e@1.0.12-test.7
+
+## 0.0.2-test.6
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @lit-protocol/e2e@1.0.12-test.6
+
 ## 0.0.2-test.5
 
 ### Patch Changes

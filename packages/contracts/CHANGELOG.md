@@ -1,5 +1,17 @@
 # @lit-protocol/contracts
 
+## 0.5.2-test.7
+
+### Patch Changes
+
+- test
+
+## 0.5.2-test.6
+
+### Patch Changes
+
+- test
+
 ## 0.5.2-test.5
 
 ### Patch Changes
