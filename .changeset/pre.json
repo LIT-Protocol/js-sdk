@@ -22,11 +22,21 @@
     "@lit-protocol/wrapped-keys-lit-actions": "8.0.0"
   },
   "changesets": [
+    "cute-dingos-rush",
+    "dirty-baboons-happen",
+    "fair-hounds-cross",
+    "famous-breads-stop",
+    "gold-coats-yawn",
     "green-results-drum",
     "nine-oranges-attack",
+    "slick-grapes-go",
     "some-dryers-throw",
     "spicy-dryers-jam",
+    "stupid-trams-reply",
     "tidy-masks-run",
+    "tidy-paws-like",
+    "tough-seas-yawn",
+    "violet-walls-fall",
     "weak-bats-act"
   ]
 }

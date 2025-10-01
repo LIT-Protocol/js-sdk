@@ -1,5 +1,17 @@
 # @lit-protocol/auth
 
+## 8.0.1-test.11
+
+### Patch Changes
+
+- test
+
+## 8.0.1-test.10
+
+### Patch Changes
+
+- testing
+
 ## 8.0.1-test.9
 
 ### Patch Changes

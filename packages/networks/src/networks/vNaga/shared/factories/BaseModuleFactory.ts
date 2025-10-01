@@ -10,7 +10,6 @@ import {
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
   ScopeStringSchema,
-  StrictAuthData,
 } from '@lit-protocol/schemas';
 import { Hex, hexToBytes, stringToBytes } from 'viem';
 import { z } from 'zod';
@@ -291,8 +290,6 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
     getEndpoints: () => networkConfig.endpoints,
     getRpcUrl: () => networkConfig.rpcUrl,
     getChainConfig: () => networkConfig.chainConfig,
-    getDefaultAuthServiceBaseUrl: () =>
-      networkConfig.services.authServiceBaseUrl,
     getDefaultLoginBaseUrl: () => networkConfig.services.loginServiceBaseUrl,
     getMinimumThreshold: () => networkConfig.minimumThreshold,
 
@@ -337,7 +334,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       },
 
       getPKPsByAuthData: async (params: {
-        authData: StrictAuthData | AuthData;
+        authData: Partial<AuthData>;
         pagination?: { limit?: number; offset?: number };
         storageProvider?: PKPStorageProvider;
         account: ExpectedAccountOrWalletClient;
@@ -422,15 +419,14 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
     authService: {
       pkpMint: async (params: {
         authData: AuthData;
-        authServiceBaseUrl?: string;
+        authServiceBaseUrl: string;
         scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
         apiKey?: string;
       }) => {
+        console.log('[BaseModuleFactory.authService.pkpMint] params:', params);
         return await handleAuthServerRequest<PKPData>({
           jobName: 'PKP Minting',
-          serverUrl:
-            params.authServiceBaseUrl ||
-            networkConfig.services.authServiceBaseUrl,
+          serverUrl: params.authServiceBaseUrl,
           path: '/pkp/mint',
           body: {
             authMethodType: params.authData.authMethodType,

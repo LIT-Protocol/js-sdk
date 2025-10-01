@@ -1,5 +1,23 @@
 # @lit-protocol/auth-services
 
+## 2.0.1-test.9
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.9
+  - @lit-protocol/logger@8.0.1-test.9
+
+## 2.0.1-test.8
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.8
+  - @lit-protocol/logger@8.0.1-test.8
+
 ## 2.0.1-test.7
 
 ### Patch Changes

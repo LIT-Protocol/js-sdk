@@ -1,5 +1,51 @@
 # @lit-protocol/e2e
 
+## 1.0.12-test.14
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @lit-protocol/access-control-conditions@8.0.1-test.9
+  - @lit-protocol/auth@8.0.1-test.11
+  - @lit-protocol/lit-client@8.0.1-test.11
+  - @lit-protocol/networks@8.0.1-test.11
+  - @lit-protocol/schemas@8.0.1-test.9
+
+## 1.0.12-test.13
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/access-control-conditions@8.0.1-test.8
+  - @lit-protocol/auth@8.0.1-test.10
+  - @lit-protocol/lit-client@8.0.1-test.10
+  - @lit-protocol/networks@8.0.1-test.10
+  - @lit-protocol/schemas@8.0.1-test.8
+
+## 1.0.12-test.12
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/lit-client@8.0.1-test.9
+  - @lit-protocol/networks@8.0.1-test.9
+
+## 1.0.12-test.11
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/lit-client@8.0.1-test.8
+
+## 1.0.12-test.10
+
+### Patch Changes
+
+- Updated dependencies
+  - @lit-protocol/networks@8.0.1-test.8
+
 ## 1.0.12-test.9
 
 ### Patch Changes
