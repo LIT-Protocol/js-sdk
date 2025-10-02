@@ -1,6 +1,8 @@
 import { MintPKPRequest } from '@lit-protocol/schemas';
 import { getChildLogger } from '@lit-protocol/logger';
 
+const logger = getChildLogger({ name: 'PkpMintHandler' });
+
 /**
  * Handles PKP minting tasks.
  * @param jobData The data for the job, expected to contain `requestBody`.
@@ -24,11 +26,17 @@ export async function handlePkpMintTask(jobData: {
     mintParams
   );
 
-  console.log(
-    `[PkpMintHandler] PKP Minting successful. Token ID: ${result.data.tokenId.toString()}`
+  logger.info(
+    {
+      tokenId: result.data.tokenId.toString(),
+      authMethodId: jobData.requestBody.authMethodId,
+      authMethodType: jobData.requestBody.authMethodType,
+      scopes: jobData.requestBody.scopes,
+    },
+    '[PkpMintHandler] PKP mint successful'
   );
 
-  logger.info({ result }, '[PkpMintHandler] raw mint result:');
+  logger.debug({ result }, '[PkpMintHandler] raw mint result');
 
   const processedResult = {
     hash: result._raw.hash,
