@@ -2,8 +2,12 @@ import { ConnectionOptions, Queue } from 'bullmq';
 import { env } from '../../env';
 import { parseRedisUrl } from './helper/redisUrlParser';
 import { JobName } from './jobRegistry';
+import { getChildLogger } from '@lit-protocol/logger';
 
-export const mainQueueName = 'pkpAuthServiceQueue';
+const logger = getChildLogger({ name: 'BullMQ' });
+
+const queueSuffix = env.NETWORK ? `-${env.NETWORK}` : '';
+export const mainQueueName = `pkpAuthServiceQueue${queueSuffix}`;
 
 let bullmqConnectionOptions: ConnectionOptions = parseRedisUrl(env.REDIS_URL);
 
@@ -23,6 +27,14 @@ let mainAppQueueInstance: Queue | null = null;
 
 export const getMainAppQueue = (): Queue => {
   if (!mainAppQueueInstance) {
+    logger.info(
+      {
+        queue: mainQueueName,
+        network: env.NETWORK,
+        redis: bullmqConnectionOptions,
+      },
+      'Initialising BullMQ Queue...'
+    );
     mainAppQueueInstance = new Queue(mainQueueName, {
       connection: bullmqConnectionOptions,
       defaultJobOptions: {
@@ -52,6 +64,14 @@ export const getMainAppQueue = (): Queue => {
       )}`
     );
   }
+
+  logger.info(
+    {
+      queue: mainQueueName,
+      network: env.NETWORK,
+    },
+    'Reusing existing BullMQ Queue instance'
+  );
   return mainAppQueueInstance;
 };
 
@@ -63,12 +83,26 @@ export const addJob = async (
    */
   jobData: { requestBody: any }
 ) => {
+  logger.info(
+    {
+      queue: mainQueueName,
+      network: env.NETWORK,
+      jobName,
+    },
+    'Adding job to BullMQ queue'
+  );
   const job = await getMainAppQueue().add(jobName, jobData, {
     jobId: crypto.randomUUID(),
   });
 
-  console.log(
-    `[BullMQ] Job ${job.id} added to queue ${getMainAppQueue().name}`
+  logger.info(
+    {
+      queue: mainQueueName,
+      network: env.NETWORK,
+      jobName,
+      jobId: job.id,
+    },
+    'Job added to BullMQ queue'
   );
 
   return job;
@@ -99,6 +133,27 @@ export const getJobStatus = async (
 
   const state = await job.getState();
 
+  let returnValue: unknown = undefined;
+
+  if (state === 'completed') {
+    returnValue = job.returnvalue;
+
+    if (returnValue == null) {
+      try {
+        const { returnvalue: rawReturnValue } = job.asJSON();
+        returnValue =
+          typeof rawReturnValue === 'string' && rawReturnValue.length > 0
+            ? JSON.parse(rawReturnValue)
+            : rawReturnValue;
+      } catch (err) {
+        console.warn(
+          `[BullMQ] Unable to read return value for completed job ${job.id}:`,
+          err
+        );
+      }
+    }
+  }
+
   const responsePayload = {
     jobId: job.id,
     name: job.name,
@@ -107,7 +162,7 @@ export const getJobStatus = async (
     timestamp: job.timestamp, // Creation time
     processedOn: job.processedOn,
     finishedOn: job.finishedOn,
-    returnValue: job.returnvalue, // Contains result if completed (already stringified by handler)
+    returnValue,
     failedReason: job.failedReason, // Contains error message if failed
   };
 

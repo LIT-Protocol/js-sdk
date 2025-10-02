@@ -1,5 +1,8 @@
 import { AuthServerTx, JobStatusResponse } from '@lit-protocol/types';
 import { pollResponse } from './pollResponse';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const logger = getChildLogger({ name: 'handleAuthServerRequest' });
 
 export const handleAuthServerRequest = async <T>(params: {
   serverUrl: string;
@@ -8,6 +11,8 @@ export const handleAuthServerRequest = async <T>(params: {
   jobName: string;
   headers?: Record<string, string>;
 }): Promise<AuthServerTx<T>> => {
+  logger.info({ params }, 'Initiating auth server request');
+
   const _body = JSON.stringify(params.body);
   const _url = `${params.serverUrl}${params.path}`;
 
@@ -22,14 +27,15 @@ export const handleAuthServerRequest = async <T>(params: {
 
   if (res.status === 202) {
     const { jobId, message } = await res.json();
-    console.log('[Server Response] message:', message);
+    logger.info({ message }, 'Received response from auth server');
 
     const statusUrl = `${params.serverUrl}/status/${jobId}`;
 
     try {
       const completedJobStatus = await pollResponse<JobStatusResponse>({
         url: statusUrl,
-        isCompleteCondition: (response) => response.state === 'completed',
+        isCompleteCondition: (response) =>
+          response.state === 'completed' && response.returnValue != null,
         isErrorCondition: (response) =>
           response.state === 'failed' || response.state === 'error',
         intervalMs: 3000,
@@ -37,10 +43,18 @@ export const handleAuthServerRequest = async <T>(params: {
         errorMessageContext: `${params.jobName} Job ${jobId}`,
       });
 
+      const { returnValue } = completedJobStatus;
+
+      if (!returnValue) {
+        throw new Error(
+          `${params.jobName} job completed without a return value; please retry or check the auth service logs.`
+        );
+      }
+
       return {
         _raw: completedJobStatus,
-        txHash: completedJobStatus.returnValue.hash,
-        data: completedJobStatus.returnValue.data,
+        txHash: returnValue.hash,
+        data: returnValue.data,
       };
     } catch (error: any) {
       console.error(`Error during ${params.jobName} polling:`, error);

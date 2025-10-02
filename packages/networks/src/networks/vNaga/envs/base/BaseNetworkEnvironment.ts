@@ -3,7 +3,6 @@ import type { INetworkConfig } from '../../shared/interfaces/NetworkContext';
 import type { NagaEndpointsType } from '../../shared/managers/endpoints-manager/endpoints';
 
 export interface BaseEnvironmentServices {
-  authServiceBaseUrl: string;
   loginServiceBaseUrl: string;
 }
 

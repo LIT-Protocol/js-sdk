@@ -4,11 +4,14 @@ import {
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
 import { createLitClient } from '@lit-protocol/lit-client';
-import { nagaDev, nagaTest, nagaStaging } from '@lit-protocol/networks';
+import { nagaDev, nagaTest } from '@lit-protocol/networks';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { env } from '../env';
 import { AuthData } from '@lit-protocol/schemas';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({ name: 'initSystemContext' });
 
 declare global {
   var systemContext: {
@@ -29,11 +32,12 @@ export async function initSystemContext({
 }) {
   console.log('🔥 [initSystemContext] Initializing system context...');
 
-  let networkModule: any;
+  let networkModule: typeof nagaDev | typeof nagaTest;
   if (env.NETWORK === 'naga-dev') networkModule = nagaDev;
   else if (env.NETWORK === 'naga-test') networkModule = nagaTest;
-  else if (env.NETWORK === 'naga-staging') networkModule = nagaStaging;
   else throw new Error(`Unsupported network: ${env.NETWORK}`);
+
+  _logger.info({ env: env.NETWORK }, 'Using env.NETWORK');
 
   const overrideRpc = rpcUrl || env.LIT_TXSENDER_RPC_URL;
 
@@ -52,11 +56,10 @@ export async function initSystemContext({
       typeof effectiveModule.getRpcUrl === 'function'
         ? effectiveModule.getRpcUrl()
         : 'n/a';
-    console.log(
-      '[initSystemContext] RPC (base → effective):',
-      baseRpc,
-      '→',
-      effRpc
+
+    _logger.info(
+      { baseRpc, effRpc },
+      '[initSystemContext] RPC (base → effective):'
     );
   } catch {
     throw new Error(
@@ -73,7 +76,7 @@ export async function initSystemContext({
   const authManager = createAuthManager({
     storage: storagePlugins.localStorageNode({
       appName: appName,
-      networkName: 'naga-dev',
+      networkName: env.NETWORK,
       storagePath: `./lit-auth-worker-storage-${appName}`,
     }),
   });
@@ -93,7 +96,6 @@ export async function initSystemContext({
           statement: `${appName} is running..`,
           domain: 'worker.litprotocol.com',
           resources: [['pkp-signing', '*']],
-          capabilityAuthSigs: [],
           expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
         },
         litClient: litClient,
@@ -101,5 +103,5 @@ export async function initSystemContext({
     },
     authData,
   };
-  console.log('🔥 [initSystemContext] System context initialized');
+  _logger.info('🔥 [initSystemContext] System context initialized');
 }

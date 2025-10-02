@@ -1,6 +1,6 @@
 // Compatibility env shim for existing imports
 export const env = {
-  NETWORK: process.env['NETWORK'] || 'naga-dev',
+  NETWORK: process.env['NETWORK'],
   LIT_TXSENDER_RPC_URL: process.env['LIT_TXSENDER_RPC_URL'] || '',
   LIT_TXSENDER_PRIVATE_KEY: process.env['LIT_TXSENDER_PRIVATE_KEY'] || '',
   REDIS_URL: process.env['REDIS_URL'] || 'redis://localhost:6379',

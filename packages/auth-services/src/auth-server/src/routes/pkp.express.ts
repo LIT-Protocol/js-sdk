@@ -1,11 +1,16 @@
 import { Express } from 'express';
 import { addJob } from '../../../queue-manager/src/bullmqSetup';
 import { randomUUID } from 'node:crypto';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const logger = getChildLogger({ name: 'registerPkpRoutes' });
 
 export const registerPkpRoutes = (app: Express) => {
   app.post('/pkp/mint', async (req, res) => {
     const reqId = randomUUID();
     try {
+      logger.info({ reqId, body: req.body }, `[API] pkp/mint incoming request`);
+
       const job = await addJob('pkpMint', { requestBody: req.body });
       return res
         .status(202)

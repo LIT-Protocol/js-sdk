@@ -2,6 +2,7 @@ import { getChildLogger } from '@lit-protocol/logger';
 import { Worker } from 'bullmq';
 import { getBullmqConnectionOptions, mainQueueName } from './bullmqSetup';
 import { JobName, jobRegistry } from './jobRegistry';
+import { env } from '../../env';
 
 const logger = getChildLogger({
   name: 'generic-bullmq-worker',
@@ -10,11 +11,23 @@ const logger = getChildLogger({
 export function createGenericWorker() {
   logger.info('Initialising Generic BullMQ Worker...');
 
+  logger.info(
+    {
+      queue: mainQueueName,
+      network: env.NETWORK,
+      pid: process.pid,
+    },
+    'Generic BullMQ Worker started'
+  );
+
   const worker = new Worker(
     mainQueueName,
     async (job) => {
       logger.info(
         {
+          queue: mainQueueName,
+          network: env.NETWORK,
+          pid: process.pid,
           jobId: job.id,
           jobName: job.name,
         },

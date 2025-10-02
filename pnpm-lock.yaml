@@ -350,8 +350,8 @@ importers:
   packages/auth-services:
     dependencies:
       '@lit-protocol/contracts':
-        specifier: ^0.5.2-test.0
-        version: 0.5.2-test.0(typescript@5.8.3)
+        specifier: workspace:*
+        version: link:../../dist/packages/contracts
       '@lit-protocol/logger':
         specifier: workspace:*
         version: link:../../dist/packages/logger
@@ -2386,11 +2386,6 @@ packages:
 
   '@lit-protocol/contracts@0.0.74':
     resolution: {integrity: sha512-8uV038gzBp7ew7a4884SVt9Zhu8CtiTb+A8dKNnByxVoT1kFt4O4DmsaniV8p9AGjNR13IWfpU1NFChmPHVIpQ==}
-    peerDependencies:
-      typescript: ^5.0.0
-
-  '@lit-protocol/contracts@0.5.2-test.0':
-    resolution: {integrity: sha512-z9+/XVKzDuNqAyCVP8RpO7ngHKiayK1PW+SV2TQ2uH3EHjqCZIVV3VVg3gtfwBnUp/ykJzKLPPNWMvan4wuCqw==}
     peerDependencies:
       typescript: ^5.0.0
 
@@ -11671,10 +11666,6 @@ snapshots:
       - utf-8-validate
 
   '@lit-protocol/contracts@0.0.74(typescript@5.8.3)':
-    dependencies:
-      typescript: 5.8.3
-
-  '@lit-protocol/contracts@0.5.2-test.0(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 

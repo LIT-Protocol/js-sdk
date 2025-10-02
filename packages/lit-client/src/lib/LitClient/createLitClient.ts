@@ -11,17 +11,17 @@ import {
 import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
 import {
-  type LitNetworkModule,
-  type PKPStorageProvider,
   type ExpectedAccountOrWalletClient,
   type GenericTxRes,
+  type LitNetworkModule,
   type LitTxRes,
   type PKPData,
-  type AuthMethod,
   PKPPermissionsManager,
+  type PKPStorageProvider,
   PaymentManager,
 } from '@lit-protocol/networks';
 
+import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
 import {
   AuthContextSchema2,
   AuthData,
@@ -30,7 +30,6 @@ import {
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
   JsonSignSessionKeyRequestForPkpReturnSchema,
-  StrictAuthData,
 } from '@lit-protocol/schemas';
 import {
   DecryptRequest,
@@ -62,7 +61,6 @@ import {
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
 import { NagaNetworkModule } from './type';
-import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -742,18 +740,23 @@ export const _createNagaLitClient = async (
       };
     },
     getDefault: {
-      authServiceUrl: networkModule.getDefaultAuthServiceBaseUrl(),
+      // authServiceUrl: networkModule.getDefaultAuthServiceBaseUrl(),
       loginUrl: networkModule.getDefaultLoginBaseUrl(),
     },
     disconnect: _stateManager.stop,
     mintWithEoa: networkModule.chainApi.mintWithEoa as (params: {
       account: ExpectedAccountOrWalletClient;
     }) => Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>>,
-    mintWithAuth: networkModule.chainApi.mintWithAuth as (params: {
-      account: ExpectedAccountOrWalletClient;
-      authData: any;
-      scopes: string[];
-    }) => Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>>,
+    mintWithAuth: (async (
+      params: Parameters<(typeof networkModule)['chainApi']['mintWithAuth']>[0]
+    ) => {
+      _logger.info(`mintWithAuth called`);
+      const result = await networkModule.chainApi.mintWithAuth(params);
+      _logger.info({ result }, `mintWithAuth result`);
+      return result;
+    }) as (
+      params: Parameters<(typeof networkModule)['chainApi']['mintWithAuth']>[0]
+    ) => ReturnType<(typeof networkModule)['chainApi']['mintWithAuth']>,
     mintWithCustomAuth: async (params: MintWithCustomAuthRequest) => {
       const validatedParams = MintWithCustomAuthSchema.parse(params);
 
@@ -848,7 +851,7 @@ export const _createNagaLitClient = async (
       };
     },
     viewPKPsByAuthData: async (params: {
-      authData: StrictAuthData | AuthData;
+      authData: Partial<AuthData>;
       pagination?: { limit?: number; offset?: number };
     }) => {
       // Use read-only account for viewing PKPs
@@ -857,7 +860,6 @@ export const _createNagaLitClient = async (
       return await networkModule.chainApi.getPKPsByAuthData({
         authData: params.authData,
         pagination: params.pagination,
-        // storageProvider: params.storageProvider,
         account,
       });
     },
@@ -877,7 +879,14 @@ export const _createNagaLitClient = async (
       });
     },
     authService: {
-      mintWithAuth: networkModule.authService.pkpMint,
+      mintWithAuth: async (
+        params: Parameters<(typeof networkModule)['authService']['pkpMint']>[0]
+      ) => {
+        _logger.info(`authService.mintWithAuth called`);
+        const result = await networkModule.authService.pkpMint(params);
+        _logger.info({ result }, `authService.mintWithAuth result`);
+        return result;
+      },
     },
     executeJs: async (
       params: z.infer<typeof networkModule.api.executeJs.schemas.Input>
