@@ -166,7 +166,15 @@ export async function runPkpSignTest() {
     );
 
     // Throw the error to let Artillery handle it
-    throw error;
+    // Handle specific errors to aggregate them
+    if (
+      error instanceof Error &&
+      error.message.includes('unable to get signature share')
+    ) {
+      throw new Error('"PKP Sign" failed. unable to get signature share.');
+    } else {
+      throw error;
+    }
   }
 }
 
