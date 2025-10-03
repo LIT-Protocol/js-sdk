@@ -9,7 +9,7 @@ import {
 } from '../interfaces/NetworkContext';
 import type { PKPStorageProvider } from '../../../../storage/types';
 import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
-import { AuthData, StrictAuthData } from '@lit-protocol/schemas';
+import { AuthData } from '@lit-protocol/schemas';
 
 export type CreateChainManagerReturn = {
   api: {
@@ -27,7 +27,7 @@ export type CreateChainManagerReturn = {
     ) => InstanceType<typeof api.PKPPermissionsManager>;
     paymentManager: () => InstanceType<typeof api.PaymentManager>;
     getPKPsByAuthData: (
-      authData: StrictAuthData | AuthData,
+      authData: Partial<AuthData>,
       pagination?: { limit?: number; offset?: number },
       storageProvider?: PKPStorageProvider
     ) => ReturnType<typeof api.PKPPermissionsManager.getPKPsByAuthData>;
@@ -100,11 +100,7 @@ export const createChainManagerFactory = <T, M>(
         return new api.PaymentManager(_networkConfig, accountOrWalletClient);
       },
       getPKPsByAuthData: (
-        authData: {
-          authMethodType: number | bigint;
-          authMethodId: string;
-          accessToken?: string;
-        },
+        authData: Partial<AuthData>,
         pagination?: { limit?: number; offset?: number },
         storageProvider?: PKPStorageProvider
       ) => {

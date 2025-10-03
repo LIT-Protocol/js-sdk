@@ -4,6 +4,7 @@
     "module": "ES2022",
     "target": "ES2022",
     "moduleResolution": "bundler",
+    "types": ["node"],
     "forceConsistentCasingInFileNames": true,
     "strict": false,
     "noImplicitOverride": true,

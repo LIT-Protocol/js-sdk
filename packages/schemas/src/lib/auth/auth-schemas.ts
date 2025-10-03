@@ -18,18 +18,6 @@ export const CustomAuthDataSchema = z.object({
   authMethodType: z.bigint(),
 });
 
-export const StrictAuthDataSchema = z.object({
-  authMethodId: HexPrefixedSchema,
-  authMethodType: z.union([
-    AuthMethodSchema.shape.authMethodType,
-    z.number(),
-    z.bigint(),
-  ]),
-  accessToken: AuthMethodSchema.shape.accessToken,
-});
-
-export type StrictAuthData = z.infer<typeof StrictAuthDataSchema>;
-
 export const AuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
   authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),

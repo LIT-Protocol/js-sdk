@@ -113,4 +113,5 @@ function getChildLogger(
   return logger.child(...childParams);
 }
 
-export { getChildLogger, Logger, logger, setLoggerOptions };
+export { getChildLogger, logger, setLoggerOptions };
+export type { Logger };

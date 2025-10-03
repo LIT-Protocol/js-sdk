@@ -57,7 +57,7 @@ import type { PKPStorageProvider } from '../../../../../../../../storage/types';
 import { logger } from '../../../../../../../shared/logger';
 import { DefaultNetworkConfig } from '../../../../../../shared/interfaces/NetworkContext';
 import { ExpectedAccountOrWalletClient } from '../../../../contract-manager/createContractsManager';
-import { ScopeString } from '@lit-protocol/schemas';
+import { AuthData, ScopeString } from '@lit-protocol/schemas';
 import { AuthMethod } from '../../rawContractApis/permissions/read/getPermittedAuthMethods';
 import { LitTxVoid } from '../../types';
 
@@ -409,11 +409,7 @@ export class PKPPermissionsManager {
    * @returns Promise resolving to paginated PKP information
    */
   static async getPKPsByAuthData(
-    authData: {
-      authMethodType: number | bigint;
-      authMethodId: string;
-      accessToken?: string;
-    },
+    authData: Partial<AuthData>,
     pagination: { limit?: number; offset?: number } | undefined,
     storageProvider: PKPStorageProvider | undefined,
     networkContext: DefaultNetworkConfig,

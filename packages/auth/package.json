@@ -44,8 +44,8 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.0.0",
-  "main": "./dist/index.js",
-  "typings": "./src/index.d.ts",
-  "types": "./dist/index.d.ts"
+  "version": "8.0.1-test.11",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
+  "types": "./index.d.ts"
 }

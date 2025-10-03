@@ -63,7 +63,7 @@ const authManager = createAuthManager({
   storage: storagePlugins.localStorageNode({
     appName: 'my-local-testing-app',
     networkName: 'local-test',
-    storagePath: './lit-auth-local',
+    storagePath: './.e2e/add-permitted-address-guide/lit-auth-local',
   }),
 });
 console.log('✅ Created Auth Manager');

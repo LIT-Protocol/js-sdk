@@ -1,9 +1,7 @@
-import {
-  AuthData,
-  MintPKPRequest,
-  MintPKPRequestSchema,
-} from '@lit-protocol/schemas';
-import { Optional } from '@lit-protocol/types';
+import { MintPKPRequest } from '@lit-protocol/schemas';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const logger = getChildLogger({ name: 'PkpMintHandler' });
 
 /**
  * Handles PKP minting tasks.
@@ -14,7 +12,7 @@ export async function handlePkpMintTask(jobData: {
   requestBody: MintPKPRequest;
   reqId?: string;
 }): Promise<any> {
-  const result = await globalThis.systemContext.litClient.mintWithAuth({
+  const mintParams = {
     account: globalThis.systemContext.account,
     authData: {
       authMethodId: jobData.requestBody.authMethodId,
@@ -22,11 +20,23 @@ export async function handlePkpMintTask(jobData: {
       publicKey: jobData.requestBody.pubkey,
     },
     scopes: jobData.requestBody.scopes,
-  });
+  };
 
-  console.log(
-    `[PkpMintHandler] PKP Minting successful. Token ID: ${result.data.tokenId.toString()}`
+  const result = await globalThis.systemContext.litClient.mintWithAuth(
+    mintParams
   );
+
+  logger.info(
+    {
+      tokenId: result.data.tokenId.toString(),
+      authMethodId: jobData.requestBody.authMethodId,
+      authMethodType: jobData.requestBody.authMethodType,
+      scopes: jobData.requestBody.scopes,
+    },
+    '[PkpMintHandler] PKP mint successful'
+  );
+
+  logger.debug({ result }, '[PkpMintHandler] raw mint result');
 
   const processedResult = {
     hash: result._raw.hash,

@@ -1,0 +1,42 @@
+{
+  "mode": "pre",
+  "tag": "test",
+  "initialVersions": {
+    "@lit-protocol/access-control-conditions": "8.0.0",
+    "@lit-protocol/access-control-conditions-schemas": "8.0.0",
+    "@lit-protocol/artillery": "0.0.1",
+    "@lit-protocol/auth": "8.0.0",
+    "@lit-protocol/auth-helpers": "8.0.0",
+    "@lit-protocol/auth-services": "2.0.0",
+    "@lit-protocol/constants": "8.0.0",
+    "@lit-protocol/contracts": "0.5.1",
+    "@lit-protocol/crypto": "8.0.0",
+    "@lit-protocol/e2e": "1.0.11",
+    "@lit-protocol/lit-client": "8.0.0",
+    "@lit-protocol/logger": "8.0.0",
+    "@lit-protocol/networks": "8.0.0",
+    "@lit-protocol/schemas": "8.0.0",
+    "@lit-protocol/types": "8.0.0",
+    "@lit-protocol/wasm": "8.0.0",
+    "@lit-protocol/wrapped-keys": "8.0.0",
+    "@lit-protocol/wrapped-keys-lit-actions": "8.0.0"
+  },
+  "changesets": [
+    "cute-dingos-rush",
+    "dirty-baboons-happen",
+    "fair-hounds-cross",
+    "famous-breads-stop",
+    "gold-coats-yawn",
+    "green-results-drum",
+    "nine-oranges-attack",
+    "slick-grapes-go",
+    "some-dryers-throw",
+    "spicy-dryers-jam",
+    "stupid-trams-reply",
+    "tidy-masks-run",
+    "tidy-paws-like",
+    "tough-seas-yawn",
+    "violet-walls-fall",
+    "weak-bats-act"
+  ]
+}

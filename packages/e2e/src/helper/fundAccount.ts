@@ -7,6 +7,7 @@ import {
 } from 'viem';
 
 // Global nonce manager to track nonces per account address
+// Tracks the next nonce to use per account to prevent concurrent collisions
 const globalNonceManager = new Map<string, number>();
 
 async function getNextNonce(
@@ -19,14 +20,21 @@ async function getNextNonce(
     blockTag: 'pending',
   });
 
-  const localNonce = globalNonceManager.get(accountAddress) || 0;
+  const cachedNextNonce = globalNonceManager.get(accountAddress);
 
-  // Use the higher of network nonce or local nonce + 1
-  const nextNonce = Math.max(networkNonce, localNonce + 1);
-  globalNonceManager.set(accountAddress, nextNonce);
+  // If we have a cached value, ensure we never go backwards relative to the network
+  const nextNonce =
+    cachedNextNonce !== undefined
+      ? Math.max(cachedNextNonce, networkNonce)
+      : networkNonce;
+
+  // Store the following nonce for the next caller
+  globalNonceManager.set(accountAddress, nextNonce + 1);
 
   console.log(
-    `🔢 Using nonce ${nextNonce} for ${accountAddress} (network: ${networkNonce}, local: ${localNonce})`
+    `🔢 Using nonce ${nextNonce} for ${accountAddress} (network: ${networkNonce}, cached: ${
+      cachedNextNonce ?? 'unset'
+    })`
   );
   return nextNonce;
 }

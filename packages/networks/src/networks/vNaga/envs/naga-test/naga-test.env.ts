@@ -28,7 +28,6 @@ export class NagaTestEnvironment extends BaseNetworkEnvironment<
         realmId: DEFAULT_REALM_ID,
       },
       services: {
-        authServiceBaseUrl: 'https://naga-auth-service.getlit.dev',
         loginServiceBaseUrl: 'https://login.litgateway.com',
       },
       minimumThreshold: MINIMUM_THRESHOLD,
