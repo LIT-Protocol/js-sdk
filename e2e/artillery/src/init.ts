@@ -14,7 +14,7 @@ const _network = process.env['NETWORK'];
 
 // CONFIGURATIONS
 const REJECT_BALANCE_THRESHOLD = 0;
-const LEDGER_MINIMUM_BALANCE = 20000;
+const LEDGER_MINIMUM_BALANCE = 10000;
 
 (async () => {
   // -- Start
