@@ -112,7 +112,8 @@ const createAuthContextFromState = async () => {
           ['access-control-condition-decryption', '*'],
         ],
         capabilityAuthSigs: [],
-        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+        // 30m expiration
+        expiration: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
       },
       litClient: litClient,
     });
