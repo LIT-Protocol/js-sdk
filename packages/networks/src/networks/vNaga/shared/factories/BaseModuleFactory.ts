@@ -450,15 +450,47 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       ): Promise<NagaJitContext> => {
         const keySet: KeySet = {};
 
-        for (const url of connectionInfo.bootstrapUrls) {
+        const respondingUrls = Object.keys(handshakeResult.serverKeys);
+        const respondingUrlSet = new Set(respondingUrls);
+
+        if (respondingUrls.length === 0) {
+          throw new Error(
+            `Handshake response did not include any node identity keys. Received handshake result: ${JSON.stringify(
+              handshakeResult
+            )}`
+          );
+        }
+
+        for (const url of respondingUrls) {
+          const serverKey = handshakeResult.serverKeys[url];
+
+          if (!serverKey || !serverKey.nodeIdentityKey) {
+            throw new Error(
+              `Handshake response missing node identity key for node ${url}. Received handshake result: ${JSON.stringify(
+                handshakeResult
+              )}`
+            );
+          }
+
           keySet[url] = {
             publicKey: hexToBytes(
               HexPrefixedSchema.parse(
-                handshakeResult.serverKeys[url].nodeIdentityKey
+                serverKey.nodeIdentityKey
               ) as `0x${string}`
             ),
             secretKey: nacl.box.keyPair().secretKey,
           };
+        }
+
+        const missingUrls = connectionInfo.bootstrapUrls.filter(
+          (url) => !keySet[url]
+        );
+
+        if (missingUrls.length > 0) {
+          _logger.warn(
+            { missingUrls },
+            'Some bootstrap URLs did not complete the handshake; proceeding with responding nodes only'
+          );
         }
 
         // Use read-only account for viewing PKPs
@@ -473,7 +505,25 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           account
         );
 
-        return { keySet, nodePrices };
+        const filteredNodePrices = nodePrices.filter((price) =>
+          respondingUrlSet.has(price.url)
+        );
+
+        if (filteredNodePrices.length === 0) {
+          throw new Error('Unable to resolve price data for responding handshake nodes');
+        }
+
+        if (filteredNodePrices.length !== nodePrices.length) {
+          const excludedByPriceFeed = nodePrices
+            .filter((price) => !respondingUrlSet.has(price.url))
+            .map((price) => price.url);
+          _logger.warn(
+            { excludedByPriceFeed },
+            'Price feed included nodes that did not complete the handshake; excluding them from pricing context'
+          );
+        }
+
+        return { keySet, nodePrices: filteredNodePrices };
       },
 
       /**
