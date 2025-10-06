@@ -510,7 +510,9 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         );
 
         if (filteredNodePrices.length === 0) {
-          throw new Error('Unable to resolve price data for responding handshake nodes');
+          throw new Error(
+            'Unable to resolve price data for responding handshake nodes'
+          );
         }
 
         if (filteredNodePrices.length !== nodePrices.length) {
