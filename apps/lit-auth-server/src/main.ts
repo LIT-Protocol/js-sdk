@@ -7,6 +7,7 @@ const litAuthServer = createLitAuthServer({
   network: process.env['NETWORK'],
   litTxsenderRpcUrl: process.env['LIT_TXSENDER_RPC_URL'] as string,
   litTxsenderPrivateKey: process.env['LIT_TXSENDER_PRIVATE_KEY'],
+  litDelegationRootMnemonic: process.env['LIT_DELEGATION_ROOT_MNEMONIC'],
   enableApiKeyGate: process.env['ENABLE_API_KEY_GATE'] === 'true',
   stytchProjectId: process.env['STYTCH_PROJECT_ID'],
   stytchSecretKey: process.env['STYTCH_SECRET'],

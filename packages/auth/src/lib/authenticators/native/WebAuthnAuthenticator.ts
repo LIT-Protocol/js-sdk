@@ -106,6 +106,7 @@ export class WebAuthnAuthenticator {
   public static async getRegistrationOptions(params: {
     username?: string;
     authServiceBaseUrl: string;
+    apiKey?: string;
   }): Promise<PublicKeyCredentialCreationOptionsJSON> {
     let url = `${params.authServiceBaseUrl}/auth/webauthn/generate-registration-options`;
 
@@ -114,13 +115,14 @@ export class WebAuthnAuthenticator {
     }
 
     const response = await fetch(
-      url
-      //   {
-      //   method: 'GET',
-      //   headers: {
-      //     'api-key': params.apiKey,
-      //   },
-      // }
+      url,
+      params.apiKey
+        ? {
+            headers: {
+              'x-api-key': params.apiKey,
+            },
+          }
+        : undefined
     );
     if (response.status < 200 || response.status >= 400) {
       const err = new Error(
@@ -153,6 +155,7 @@ export class WebAuthnAuthenticator {
     const opts = await WebAuthnAuthenticator.getRegistrationOptions({
       username: params.username,
       authServiceBaseUrl: params.authServiceBaseUrl,
+      apiKey: params.apiKey,
     });
 
     // Submit registration options to the authenticator

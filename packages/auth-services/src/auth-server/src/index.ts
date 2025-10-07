@@ -11,6 +11,7 @@ const cfg = {
   network: env.NETWORK,
   litTxsenderRpcUrl: env.LIT_TXSENDER_RPC_URL,
   litTxsenderPrivateKey: env.LIT_TXSENDER_PRIVATE_KEY,
+  litDelegationRootMnemonic: env.LIT_DELEGATION_ROOT_MNEMONIC,
   enableApiKeyGate: env.ENABLE_API_KEY_GATE,
   redisUrl: env.REDIS_URL,
   stytchProjectId: env.STYTCH_PROJECT_ID,

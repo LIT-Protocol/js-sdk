@@ -18,6 +18,7 @@ export const env = createEnv({
     STYTCH_SECRET: z.string().min(1).optional(),
     MAX_REQUESTS_PER_WINDOW: z.coerce.number().int().positive().default(60),
     WINDOW_MS: z.coerce.number().int().positive().default(60_000),
+    LIT_DELEGATION_ROOT_MNEMONIC: z.string().min(1).optional(),
   },
   clientPrefix: 'PUBLIC_',
   client: {},
@@ -36,4 +37,5 @@ export type AppConfig = {
   stytchSecretKey?: string;
   maxRequestsPerWindow: number;
   windowMs: number;
+  litDelegationRootMnemonic?: string;
 };

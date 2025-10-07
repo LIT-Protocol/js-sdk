@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { json, urlencoded } from 'express';
 import { registerStatusRoutes } from './routes/status.express';
 import { registerPkpRoutes } from './routes/pkp.express';
+import { registerPaymentRoutes } from './routes/payment.express';
 import { registerStytchRoutes } from './routes/auth/stytch.express';
 import { registerWebAuthnRoutes } from './routes/auth/webauthn.express';
 import { apiKeyGate } from '../middleware/apiKeyGate.express';
@@ -20,6 +21,8 @@ export const createApp = (config?: Partial<AppConfig>): Express => {
     litTxsenderRpcUrl: config?.litTxsenderRpcUrl ?? env.LIT_TXSENDER_RPC_URL,
     litTxsenderPrivateKey:
       config?.litTxsenderPrivateKey ?? env.LIT_TXSENDER_PRIVATE_KEY,
+    litDelegationRootMnemonic:
+      config?.litDelegationRootMnemonic ?? env.LIT_DELEGATION_ROOT_MNEMONIC,
     enableApiKeyGate: config?.enableApiKeyGate ?? env.ENABLE_API_KEY_GATE,
     redisUrl: config?.redisUrl ?? env.REDIS_URL,
     stytchProjectId: config?.stytchProjectId ?? env.STYTCH_PROJECT_ID,
@@ -56,6 +59,7 @@ export const createApp = (config?: Partial<AppConfig>): Express => {
   // routes
   registerStatusRoutes(app);
   registerPkpRoutes(app);
+  registerPaymentRoutes(app, cfg);
   registerStytchRoutes(app, createStytchClient(cfg));
   registerWebAuthnRoutes(app);
 

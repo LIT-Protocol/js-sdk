@@ -49,6 +49,10 @@ import type { PKPStorageProvider } from '../../../../storage/types';
 // Shared managers and utilities
 import { privateKeyToAccount } from 'viem/accounts';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
+import {
+  delegateUsersWithAuthService,
+  registerPayerWithAuthService,
+} from '../../../shared/helpers/paymentDelegation';
 import { createRequestId } from '../helpers/createRequestId';
 import { composeLitUrl } from '../managers/endpoints-manager/composeLitUrl';
 import {
@@ -436,6 +440,20 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           },
           headers: params.apiKey ? { 'x-api-key': params.apiKey } : undefined,
         });
+      },
+      registerPayer: async (params: {
+        authServiceBaseUrl: string;
+        apiKey: string;
+      }) => {
+        return await registerPayerWithAuthService(params);
+      },
+      delegateUsers: async (params: {
+        authServiceBaseUrl: string;
+        apiKey: string;
+        payerSecretKey: string;
+        userAddresses: string[];
+      }) => {
+        return await delegateUsersWithAuthService(params);
       },
     },
 

@@ -10,6 +10,7 @@ export type CreateLitAuthServerOptions = {
   network?: string;
   litTxsenderRpcUrl?: string;
   litTxsenderPrivateKey?: string;
+  litDelegationRootMnemonic?: string;
   enableApiKeyGate?: boolean;
   redisUrl?: string;
   stytchProjectId?: string;
@@ -33,6 +34,7 @@ export const createLitAuthServer = (
     network: options.network,
     litTxsenderRpcUrl: options.litTxsenderRpcUrl,
     litTxsenderPrivateKey: options.litTxsenderPrivateKey,
+    litDelegationRootMnemonic: options.litDelegationRootMnemonic,
     enableApiKeyGate: options.enableApiKeyGate ?? false,
     redisUrl: options.redisUrl,
     stytchProjectId: options.stytchProjectId,

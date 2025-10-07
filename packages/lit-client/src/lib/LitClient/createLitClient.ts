@@ -140,6 +140,8 @@ export const createLitClient = async ({
  * - `getChainConfig()` - Get chain configuration and RPC URL
  * - `getDefault` - Default service URLs (authServiceUrl, loginUrl)
  * - `authService.mintWithAuth(params)` - Auth service PKP minting
+ * - `authService.registerPayer(params)` - Create payer wallet via Auth Service
+ * - `authService.delegateUsers(params)` - Delegate payments via Auth Service
  *
  * **Integrations:**
  * - `getPkpViemAccount(params)` - Get Viem account for PKP interactions
@@ -885,6 +887,26 @@ export const _createNagaLitClient = async (
         _logger.info(`authService.mintWithAuth called`);
         const result = await networkModule.authService.pkpMint(params);
         _logger.info({ result }, `authService.mintWithAuth result`);
+        return result;
+      },
+      registerPayer: async (
+        params: Parameters<
+          (typeof networkModule)['authService']['registerPayer']
+        >[0]
+      ) => {
+        _logger.info(`authService.registerPayer called`);
+        const result = await networkModule.authService.registerPayer(params);
+        _logger.info({ result }, `authService.registerPayer result`);
+        return result;
+      },
+      delegateUsers: async (
+        params: Parameters<
+          (typeof networkModule)['authService']['delegateUsers']
+        >[0]
+      ) => {
+        _logger.info(`authService.delegateUsers called`);
+        const result = await networkModule.authService.delegateUsers(params);
+        _logger.info({ result }, `authService.delegateUsers result`);
         return result;
       },
     },
