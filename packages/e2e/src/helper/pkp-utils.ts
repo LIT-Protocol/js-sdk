@@ -1,11 +1,11 @@
-import type { AuthData, PKPData } from '@lit-protocol/schemas';
+import type { AuthData, PKPData, ScopeString } from '@lit-protocol/schemas';
+import { ScopeStringSchema } from '@lit-protocol/schemas';
 import type { PrivateKeyAccount } from 'viem/accounts';
 import { LitClientInstance } from '../types';
 
 // Configuration constants
 const PAGINATION_LIMIT = 5;
-const APP_NAME = 'my-app';
-const PKP_SCOPES = ['sign-anything'];
+const PKP_SCOPES: ScopeString[] = [ScopeStringSchema.enum['sign-anything']];
 
 /**
  * Gets an existing PKP or creates a new one if none exists

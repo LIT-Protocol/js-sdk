@@ -11,13 +11,13 @@ import {
   JsonSignSessionKeyRequestForPkpReturnSchema,
   ScopeStringSchema,
 } from '@lit-protocol/schemas';
-import { Hex, hexToBytes, stringToBytes, bytesToHex } from 'viem';
+import { Hex, hexToBytes, stringToBytes } from 'viem';
 import { z } from 'zod';
 
 // Base types
 import { LitNetworkModuleBase } from '../../../types';
-import type { ExpectedAccountOrWalletClient } from '../managers/contract-manager/createContractsManager';
 import type { INetworkConfig } from '../interfaces/NetworkContext';
+import type { ExpectedAccountOrWalletClient } from '../managers/contract-manager/createContractsManager';
 import { createChainManagerFactory } from './BaseChainManagerFactory';
 
 // Shared utilities
@@ -29,6 +29,7 @@ import {
   ReleaseVerificationConfig,
 } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
+import { nacl } from '@lit-protocol/nacl';
 import {
   AuthMethod,
   AuthSig,
@@ -43,19 +44,23 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import { nacl } from '@lit-protocol/nacl';
 import type { PKPStorageProvider } from '../../../../storage/types';
 
 // Shared managers and utilities
-import { createRequestId } from '../helpers/createRequestId';
+import { privateKeyToAccount } from 'viem/accounts';
 import { handleAuthServerRequest } from '../../../shared/helpers/handleAuthServerRequest';
+import {
+  delegateUsersWithAuthService,
+  registerPayerWithAuthService,
+} from '../../../shared/helpers/paymentDelegation';
+import { createRequestId } from '../helpers/createRequestId';
 import { composeLitUrl } from '../managers/endpoints-manager/composeLitUrl';
 import {
   getNodePrices,
   PKPPermissionsManager,
 } from '../managers/LitChainClient/apis/highLevelApis';
-import { PaymentManager } from '../managers/LitChainClient/apis/highLevelApis/PaymentManager/PaymentManager';
 import { MintWithMultiAuthsRequest } from '../managers/LitChainClient/apis/highLevelApis/mintPKP/mintWithMultiAuths';
+import { PaymentManager } from '../managers/LitChainClient/apis/highLevelApis/PaymentManager/PaymentManager';
 import { PkpIdentifierRaw } from '../managers/LitChainClient/apis/rawContractApis/permissions/utils/resolvePkpTokenId';
 import type {
   GenericTxRes,
@@ -63,16 +68,15 @@ import type {
 } from '../managers/LitChainClient/apis/types';
 import type { PKPData } from '../managers/LitChainClient/schemas/shared/PKPDataSchema';
 import { ConnectionInfo } from '../managers/LitChainClient/types';
-import { privateKeyToAccount } from 'viem/accounts';
 
 // Shared API components
 import { E2EERequestManager } from '../managers/api-manager/e2ee-request-manager/E2EERequestManager';
+import { combinePKPSignSignatures } from '../managers/api-manager/helper/get-signatures';
+import { getMaxPricesForNodeProduct } from '../managers/pricing-manager/getMaxPricesForNodeProduct';
+import { getUserMaxPrice } from '../managers/pricing-manager/getUserMaxPrice';
 import { PricingContextSchema } from '../managers/pricing-manager/schema';
 import { issueSessionFromContext } from '../managers/session-manager/issueSessionFromContext';
 import { createStateManager } from '../managers/state-manager/createStateManager';
-import { getMaxPricesForNodeProduct } from '../managers/pricing-manager/getMaxPricesForNodeProduct';
-import { getUserMaxPrice } from '../managers/pricing-manager/getUserMaxPrice';
-import { combinePKPSignSignatures } from '../managers/api-manager/helper/get-signatures';
 
 // Shared schemas - import from shared location
 import { DecryptCreateRequestParams } from '../managers/api-manager/decrypt/decrypt.CreateRequestParams';
@@ -82,11 +86,12 @@ import { DecryptResponseDataSchema } from '../managers/api-manager/decrypt/decry
 
 import { ExecuteJsCreateRequestParams } from '../managers/api-manager/executeJs/executeJs.CreateRequestParams';
 
+import { handleResponse as handleExecuteJsResponse } from '../managers/api-manager/executeJs';
 import { ExecuteJsInputSchema } from '../managers/api-manager/executeJs/executeJs.InputSchema';
 import { ExecuteJsRequestDataSchema } from '../managers/api-manager/executeJs/executeJs.RequestDataSchema';
 import { ExecuteJsResponseDataSchema } from '../managers/api-manager/executeJs/executeJs.ResponseDataSchema';
-import { handleResponse as handleExecuteJsResponse } from '../managers/api-manager/executeJs';
 
+import { RawHandshakeResponseSchema } from '../managers/api-manager/handshake/handshake.schema';
 import { PKPSignCreateRequestParams } from '../managers/api-manager/pkpSign/pkpSign.CreateRequestParams';
 import {
   BitCoinPKPSignInputSchema,
@@ -95,13 +100,14 @@ import {
 } from '../managers/api-manager/pkpSign/pkpSign.InputSchema';
 import { PKPSignRequestDataSchema } from '../managers/api-manager/pkpSign/pkpSign.RequestDataSchema';
 import { PKPSignResponseDataSchema } from '../managers/api-manager/pkpSign/pkpSign.ResponseDataSchema';
-import { RawHandshakeResponseSchema } from '../managers/api-manager/handshake/handshake.schema';
 
 // Configuration interface for environment-specific settings
 export interface BaseModuleConfig<T, M> {
   networkConfig: INetworkConfig<T, M>;
   moduleName: string;
-  createChainManager: (account: ExpectedAccountOrWalletClient) => any;
+  createChainManager: (
+    account: ExpectedAccountOrWalletClient
+  ) => ReturnType<typeof createChainManagerFactory>;
   verifyReleaseId?: (
     attestation: NodeAttestation,
     config: ReleaseVerificationConfig
@@ -288,8 +294,6 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
     getEndpoints: () => networkConfig.endpoints,
     getRpcUrl: () => networkConfig.rpcUrl,
     getChainConfig: () => networkConfig.chainConfig,
-    getDefaultAuthServiceBaseUrl: () =>
-      networkConfig.services.authServiceBaseUrl,
     getDefaultLoginBaseUrl: () => networkConfig.services.loginServiceBaseUrl,
     getMinimumThreshold: () => networkConfig.minimumThreshold,
 
@@ -334,11 +338,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       },
 
       getPKPsByAuthData: async (params: {
-        authData: {
-          authMethodType: number | bigint;
-          authMethodId: string;
-          accessToken?: string;
-        };
+        authData: Partial<AuthData>;
         pagination?: { limit?: number; offset?: number };
         storageProvider?: PKPStorageProvider;
         account: ExpectedAccountOrWalletClient;
@@ -423,14 +423,14 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
     authService: {
       pkpMint: async (params: {
         authData: AuthData;
-        authServiceBaseUrl?: string;
+        authServiceBaseUrl: string;
         scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
+        apiKey?: string;
       }) => {
+        console.log('[BaseModuleFactory.authService.pkpMint] params:', params);
         return await handleAuthServerRequest<PKPData>({
           jobName: 'PKP Minting',
-          serverUrl:
-            params.authServiceBaseUrl ||
-            networkConfig.services.authServiceBaseUrl,
+          serverUrl: params.authServiceBaseUrl,
           path: '/pkp/mint',
           body: {
             authMethodType: params.authData.authMethodType,
@@ -438,7 +438,22 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             pubkey: params.authData.publicKey,
             scopes: params.scopes,
           },
+          headers: params.apiKey ? { 'x-api-key': params.apiKey } : undefined,
         });
+      },
+      registerPayer: async (params: {
+        authServiceBaseUrl: string;
+        apiKey: string;
+      }) => {
+        return await registerPayerWithAuthService(params);
+      },
+      delegateUsers: async (params: {
+        authServiceBaseUrl: string;
+        apiKey: string;
+        payerSecretKey: string;
+        userAddresses: string[];
+      }) => {
+        return await delegateUsersWithAuthService(params);
       },
     },
 
@@ -453,15 +468,47 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
       ): Promise<NagaJitContext> => {
         const keySet: KeySet = {};
 
-        for (const url of connectionInfo.bootstrapUrls) {
+        const respondingUrls = Object.keys(handshakeResult.serverKeys);
+        const respondingUrlSet = new Set(respondingUrls);
+
+        if (respondingUrls.length === 0) {
+          throw new Error(
+            `Handshake response did not include any node identity keys. Received handshake result: ${JSON.stringify(
+              handshakeResult
+            )}`
+          );
+        }
+
+        for (const url of respondingUrls) {
+          const serverKey = handshakeResult.serverKeys[url];
+
+          if (!serverKey || !serverKey.nodeIdentityKey) {
+            throw new Error(
+              `Handshake response missing node identity key for node ${url}. Received handshake result: ${JSON.stringify(
+                handshakeResult
+              )}`
+            );
+          }
+
           keySet[url] = {
             publicKey: hexToBytes(
               HexPrefixedSchema.parse(
-                handshakeResult.serverKeys[url].nodeIdentityKey
+                serverKey.nodeIdentityKey
               ) as `0x${string}`
             ),
             secretKey: nacl.box.keyPair().secretKey,
           };
+        }
+
+        const missingUrls = connectionInfo.bootstrapUrls.filter(
+          (url) => !keySet[url]
+        );
+
+        if (missingUrls.length > 0) {
+          _logger.warn(
+            { missingUrls },
+            'Some bootstrap URLs did not complete the handshake; proceeding with responding nodes only'
+          );
         }
 
         // Use read-only account for viewing PKPs
@@ -476,7 +523,27 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           account
         );
 
-        return { keySet, nodePrices };
+        const filteredNodePrices = nodePrices.filter((price) =>
+          respondingUrlSet.has(price.url)
+        );
+
+        if (filteredNodePrices.length === 0) {
+          throw new Error(
+            'Unable to resolve price data for responding handshake nodes'
+          );
+        }
+
+        if (filteredNodePrices.length !== nodePrices.length) {
+          const excludedByPriceFeed = nodePrices
+            .filter((price) => !respondingUrlSet.has(price.url))
+            .map((price) => price.url);
+          _logger.warn(
+            { excludedByPriceFeed },
+            'Price feed included nodes that did not complete the handshake; excluding them from pricing context'
+          );
+        }
+
+        return { keySet, nodePrices: filteredNodePrices };
       },
 
       /**

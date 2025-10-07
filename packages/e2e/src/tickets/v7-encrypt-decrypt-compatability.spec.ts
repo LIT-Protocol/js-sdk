@@ -15,7 +15,7 @@ describe('v7 encrypt decrypt compatability', () => {
       storage: storagePlugins.localStorageNode({
         appName: 'v7-compatability',
         networkName: 'naga-dev',
-        storagePath: './lit-auth-local',
+        storagePath: './.e2e/v7-encrypt-decrypt-compatability/lit-auth-local',
       }),
     });
 

@@ -1,5 +1,89 @@
 # @lit-protocol/auth-services
 
+## 2.0.1-test.9
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.9
+  - @lit-protocol/logger@8.0.1-test.9
+
+## 2.0.1-test.8
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/contracts@0.5.2-test.8
+  - @lit-protocol/logger@8.0.1-test.8
+
+## 2.0.1-test.7
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.7
+
+## 2.0.1-test.6
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.6
+
+## 2.0.1-test.5
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.5
+
+## 2.0.1-test.4
+
+### Patch Changes
+
+- testing
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.4
+
+## 2.0.1-test.3
+
+### Patch Changes
+
+- put console logs to debug
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.3
+
+## 2.0.1-test.2
+
+### Patch Changes
+
+- bump
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.2
+
+## 2.0.1-test.1
+
+### Patch Changes
+
+- fix package metadata so bundlers load the CommonJS builds again
+- Updated dependencies
+  - @lit-protocol/logger@8.0.1-test.1
+
+## 2.0.1-test.0
+
+### Patch Changes
+
+- first pnpm complete release test for naga-test
+- Updated dependencies
+- Updated dependencies [642cd0b]
+  - @lit-protocol/contracts@0.5.2-test.0
+  - @lit-protocol/logger@8.0.1-test.0
+
 ## 2.0.0
 
 ### Major Changes

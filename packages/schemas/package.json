@@ -9,6 +9,7 @@
   "keywords": [
     "library"
   ],
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
@@ -26,7 +27,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.0.0",
+  "version": "8.0.1-test.9",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts"
 }

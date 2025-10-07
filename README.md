@@ -28,10 +28,8 @@
 
 # Getting started
 
-> **Note:** ❗️Bun is currently used for package management, but npm will become the default soon. (Mon 8 Sep, 2025)
-
 ```
-bun install && bun run build
+pnpm install && pnpm build
 ```
 
 # Running E2E Tests
@@ -78,14 +76,14 @@ DIRECTORY_NAME=naga-local
 NETWORK=naga-local bun run test:e2e all
 ```
 
-# Publishing
+# Manual Publishing
 
 ```bash
 # Generate a changeset
-bunx changeset
+pnpm changeset
 
 # Version the changeset
-bunx changeset version
+pnpm changeset version
 
 # Build the packages
 bun run build
@@ -95,7 +93,43 @@ git add .
 git commit -m "chore: release v0.0.1"
 
 # Publish the packages
-bunx changeset publish
+pnpm changeset publish
+```
+
+# Apps
+
+This monorepo contains two apps: [Lit Auth Server](./apps/lit-auth-server/README.md) and [Lit Login Server](./apps/lit-login-server/README.md).Both apps support Docker builds.
+
+## Releasing Docker Images
+
+- Trigger the `Release Docker Images` GitHub Action (`.github/workflows/release-docker-images.yml`) from the Actions tab once the desired changes are on the branch you want to release from.
+- When starting the workflow, select the branch ref, set `auth-server-released` to true, and optionally provide a `custom-tag` to add an extra image tag alongside the branch/commit/`latest` tags.
+- The job installs the Rust toolchain and `wasm-pack`, builds both `lit-auth-server` and `lit-login-server` via their Nx `docker-build` targets, and pushes images to `ghcr.io/lit-protocol/<app>` using the repo's `GITHUB_TOKEN` (or the `GHCR_USERNAME`/`GHCR_TOKEN` secrets if you supply them).
+- Published images live under:
+  - `lit-auth-server`: https://github.com/LIT-Protocol/js-sdk/pkgs/container/lit-auth-server
+  - `lit-login-server`: https://github.com/LIT-Protocol/js-sdk/pkgs/container/lit-login-server
+- Leave `auth-server-released` unchecked to perform a no-op dry run and confirm the workflow is available without publishing images.
+
+## One Click Deployable Images
+
+### Lit Auth Server
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/OYOevk?referralCode=RP1REI&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+### Lit Login Server
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/RO0wsZ?referralCode=RP1REI&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+#### Environment configuration
+
+- `ORIGIN`: required for OAuth callbacks. Railway asks for a value during deploy—drop in a placeholder like `http://localhost:3000`, let the app spin up, then replace it with the generated public HTTPS domain (or your custom domain) so Google and Discord redirect URIs match. Leaving it empty keeps the local-only default and will break production flows.
+
+## Keeping the contract address and ABIs in sync with the latest changes
+
+This command must be run manually and is NOT part of the build process, as it requires a GitHub API key.
+
+```shell
+DEV_BRANCH=develop GH_API_KEY=github_pat_xxx pnpm run sync:contracts
 ```
 
 ---

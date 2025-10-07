@@ -82,13 +82,14 @@ export const createStateManager = async <T>(params: {
       // releaseVerificationConfig: null,
       networkModule: params.networkModule,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+
     _logger.error(
-      'Failed to get initial connection info for State Manager',
-      error
+      { error: err, message: err.message, stack: err.stack },
+      'Failed to get initial connection info for State Manager'
     );
-    // Depending on requirements, might want to re-throw or handle differently
-    throw new Error(error);
+    throw err;
   }
 
   // --- Setup Staking Event Listener ---

@@ -39,7 +39,7 @@ export async function sendNodeRequest<T>(
     Accept: 'application/json',
     'X-Lit-SDK-Version': params.version,
     'X-Lit-SDK-Type': 'Typescript', // Or determine dynamically
-    'X-Request-Id': `lit_${params.requestId}`, // Use the passed request ID
+    'X-Request-Id': params.requestId, // Use the passed request ID
   };
 
   const controller = new AbortController();

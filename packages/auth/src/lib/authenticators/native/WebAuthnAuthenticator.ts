@@ -17,47 +17,24 @@ import { AuthMethod, AuthServerTx, Hex } from '@lit-protocol/types';
 import { AuthData, PKPData, ScopeStringSchema } from '@lit-protocol/schemas';
 import { getRPIdFromOrigin, parseAuthenticatorData } from '../helper/utils';
 
-import { EthBlockhashInfo } from '@lit-protocol/types';
+import { getChildLogger } from '@lit-protocol/logger';
+import { z } from 'zod';
 import { pollResponse } from '../helper/pollResponse';
 import { JobStatusResponse } from '../types';
-import { z } from 'zod';
+import { fetchBlockchainData } from '../helper/fetchBlockchainData';
 
-const fetchBlockchainData = async () => {
-  try {
-    const resp = await fetch(
-      'https://block-indexer.litgateway.com/get_most_recent_valid_block'
-    );
-    if (!resp.ok) {
-      throw new Error(`Primary fetch failed with status: ${resp.status}`); // Or a custom error
-    }
-
-    const blockHashBody: EthBlockhashInfo = await resp.json();
-    const { blockhash, timestamp } = blockHashBody;
-
-    if (!blockhash || !timestamp) {
-      throw new Error('Invalid data from primary blockhash source');
-    }
-
-    return blockhash;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    }
-    throw new Error(String(error));
-  }
-};
-
-interface WebAuthnRegistrationResponse {
-  opts: PublicKeyCredentialCreationOptionsJSON;
-  publicKey: string;
-}
+const _logger = getChildLogger({
+  module: 'WebAuthnAuthenticator',
+});
 
 const handleAuthServerRequest = async <T>(params: {
   serverUrl: string;
   path: '/pkp/mint';
   body: any;
   jobName: string;
+  headers?: Record<string, string>;
 }): Promise<AuthServerTx<T>> => {
+  _logger.info('[WebAuthnAuthenticator][handleAuthServerRequest] called');
   const _body = JSON.stringify(params.body);
   const _url = `${params.serverUrl}${params.path}`;
 
@@ -65,20 +42,27 @@ const handleAuthServerRequest = async <T>(params: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(params.headers || {}),
     },
     body: _body,
   });
 
   if (res.status === 202) {
+    _logger.info(
+      `[WebAuthnAuthenticator] ${params.jobName} initiated, polling for completion...`
+    );
+
     const { jobId, message } = await res.json();
-    console.log('[Server Response] message:', message);
+
+    _logger.info({ message }, '[WebAuthnAuthenticator] Server response');
 
     const statusUrl = `${params.serverUrl}/status/${jobId}`;
 
     try {
       const completedJobStatus = await pollResponse<JobStatusResponse>({
         url: statusUrl,
-        isCompleteCondition: (response) => response.state === 'completed',
+        isCompleteCondition: (response) =>
+          response.state === 'completed' && response.returnValue != null,
         isErrorCondition: (response) =>
           response.state === 'failed' || response.state === 'error',
         intervalMs: 3000,
@@ -86,10 +70,18 @@ const handleAuthServerRequest = async <T>(params: {
         errorMessageContext: `${params.jobName} Job ${jobId}`,
       });
 
+      const { returnValue } = completedJobStatus;
+
+      if (!returnValue) {
+        throw new Error(
+          `${params.jobName} job completed without a return value; please retry or check the auth service logs.`
+        );
+      }
+
       return {
         _raw: completedJobStatus,
-        txHash: completedJobStatus.returnValue.hash,
-        data: completedJobStatus.returnValue.data,
+        txHash: returnValue.hash,
+        data: returnValue.data,
       };
     } catch (error: any) {
       console.error(`Error during ${params.jobName} polling:`, error);
@@ -114,6 +106,7 @@ export class WebAuthnAuthenticator {
   public static async getRegistrationOptions(params: {
     username?: string;
     authServiceBaseUrl: string;
+    apiKey?: string;
   }): Promise<PublicKeyCredentialCreationOptionsJSON> {
     let url = `${params.authServiceBaseUrl}/auth/webauthn/generate-registration-options`;
 
@@ -122,13 +115,14 @@ export class WebAuthnAuthenticator {
     }
 
     const response = await fetch(
-      url
-      //   {
-      //   method: 'GET',
-      //   headers: {
-      //     'api-key': params.apiKey,
-      //   },
-      // }
+      url,
+      params.apiKey
+        ? {
+            headers: {
+              'x-api-key': params.apiKey,
+            },
+          }
+        : undefined
     );
     if (response.status < 200 || response.status >= 400) {
       const err = new Error(
@@ -150,6 +144,7 @@ export class WebAuthnAuthenticator {
   public static async registerAndMintPKP(params: {
     username?: string;
     authServiceBaseUrl: string;
+    apiKey?: string;
     scopes?: z.infer<typeof ScopeStringSchema>[];
   }): Promise<{
     pkpInfo: PKPData;
@@ -160,6 +155,7 @@ export class WebAuthnAuthenticator {
     const opts = await WebAuthnAuthenticator.getRegistrationOptions({
       username: params.username,
       authServiceBaseUrl: params.authServiceBaseUrl,
+      apiKey: params.apiKey,
     });
 
     // Submit registration options to the authenticator
@@ -175,12 +171,6 @@ export class WebAuthnAuthenticator {
       accessToken: JSON.stringify(attResp),
     });
 
-    // We could store the public key and look it up by the credential ID (rawId),
-    // but since users registering a WebAuthn credential typically want to mint a PKP to associate with it,
-    // we might as well do that here. 😊
-    // We can implement the alternative approach later if needed.
-    // localStorage.setItem(attResp.rawId, authMethodPubkey);
-
     const authData = {
       authMethodType: AUTH_METHOD_TYPE.WebAuthn,
       authMethodId: authMethodId,
@@ -194,6 +184,7 @@ export class WebAuthnAuthenticator {
       serverUrl: params.authServiceBaseUrl,
       path: '/pkp/mint',
       body: authData,
+      headers: params.apiKey ? { 'x-api-key': params.apiKey } : undefined,
     });
 
     return {
