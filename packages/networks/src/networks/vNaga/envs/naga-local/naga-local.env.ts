@@ -30,7 +30,6 @@ export class NagaLocalEnvironment extends BaseNetworkEnvironment<
         privateKey: chainInfo.DEV_PRIVATE_KEY, // Note: Includes private key
       },
       services: {
-        authServiceBaseUrl: 'https://naga-auth-service.getlit.dev',
         loginServiceBaseUrl: 'http://localhost:3300',
       },
       minimumThreshold: MINIMUM_THRESHOLD,

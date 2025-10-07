@@ -1,0 +1,25 @@
+import { init } from '../../init';
+
+export const createViemSignTransactionTest = (
+  ctx: Awaited<ReturnType<typeof init>>,
+  getAuthContext: () => any
+) => {
+  return async () => {
+    const pkpViemAccount = await ctx.litClient.getPkpViemAccount({
+      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
+      authContext: getAuthContext(),
+      chainConfig: ctx.litClient.getChainConfig().viemConfig,
+    });
+
+    const txRequest = {
+      chainId: ctx.litClient.getChainConfig().viemConfig.id,
+      to: pkpViemAccount.address,
+      value: BigInt('1000000000000000'),
+    };
+
+    const signedTx = await pkpViemAccount.signTransaction(txRequest);
+
+    expect(signedTx).toBeDefined();
+    expect(signedTx).toMatch(/^0x[a-fA-F0-9]+$/);
+  };
+};

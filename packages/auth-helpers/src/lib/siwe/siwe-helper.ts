@@ -6,13 +6,14 @@ import {
 } from '@lit-protocol/constants';
 import {
   CapacityDelegationFields,
-  CapacityDelegationRequest,
   ILitResource,
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/types';
 
 import { RecapSessionCapabilityObject } from '../recap/recap-session-capability-object';
+import { LitResourceAbilityRequestSchema } from '@lit-protocol/schemas';
+import { z } from 'zod';
 
 /**
  * Sanitizes a SIWE message by unescaping double-escaped newlines and replacing escaped double quotes with single quotes.
@@ -35,7 +36,7 @@ export function sanitizeSiweMessage(message: string): string {
  */
 export const createCapacityCreditsResourceData = (
   params: CapacityDelegationFields
-): CapacityDelegationRequest => {
+): z.infer<(typeof LitResourceAbilityRequestSchema)['shape']['data']> => {
   return {
     ...(params.delegateeAddresses
       ? {

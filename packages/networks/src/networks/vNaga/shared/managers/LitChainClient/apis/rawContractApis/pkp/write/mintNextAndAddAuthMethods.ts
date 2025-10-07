@@ -1,5 +1,6 @@
-import type { ExpectedAccountOrWalletClient } from '../../../../../contract-manager/createContractsManager';
+import { ethers } from 'ethers';
 import { DefaultNetworkConfig } from '../../../../../../../shared/interfaces/NetworkContext';
+import type { ExpectedAccountOrWalletClient } from '../../../../../contract-manager/createContractsManager';
 import { createContractsManager } from '../../../../../contract-manager/createContractsManager';
 import {
   MintRequestRaw,
@@ -12,8 +13,7 @@ import {
 import { LitTxRes } from '../../../types';
 import { callWithAdjustedOverrides } from '../../../utils/callWithAdjustedOverrides';
 import { decodeLogs } from '../../../utils/decodeLogs';
-import { hexToBytes } from 'viem';
-import { ethers } from 'ethers';
+import { logger } from '@lit-protocol/logger';
 
 async function getBytesFromIpfsCid(ipfsCid: string): Promise<`0x${string}`> {
   const decoded = ethers.utils.base58.decode(ipfsCid);
@@ -41,6 +41,11 @@ export async function mintNextAndAddAuthMethods(
   accountOrWalletClient: ExpectedAccountOrWalletClient
 ): Promise<LitTxRes<PKPData>> {
   const validatedRequest = MintRequestSchema.parse(request);
+
+  logger.info(
+    { validatedRequest },
+    '[mintNextAndAddAuthMethods] validated request:'
+  );
 
   const { pkpHelperContract, pkpNftContract, publicClient, walletClient } =
     createContractsManager(networkCtx, accountOrWalletClient);
@@ -84,6 +89,8 @@ export async function mintNextAndAddAuthMethods(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
+  logger.info({ hash, receipt }, '[mintNextAndAddAuthMethods] tx details:');
+
   const decodedLogs = await decodeLogs(
     receipt.logs,
     networkCtx,
@@ -100,6 +107,8 @@ export async function mintNextAndAddAuthMethods(
   const args = decodedLogs.find((log) => log.eventName === 'PKPMinted')?.args;
 
   const data = PKPDataSchema.parse(args);
+
+  logger.info({ data }, '[mintNextAndAddAuthMethods] parsed PKP data:');
 
   return { hash, receipt, decodedLogs, data };
 }

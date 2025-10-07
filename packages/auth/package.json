@@ -22,7 +22,8 @@
     "universal"
   ],
   "dependencies": {
-    "@noble/curves": "^1.8.1",
+    "@noble/hashes": "1.8.0",
+    "@noble/curves": "1.8.1",
     "@simplewebauthn/browser": "^7.2.0",
     "@simplewebauthn/typescript-types": "^7.0.0",
     "@wagmi/core": "^2.17.1",
@@ -43,8 +44,8 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.0.0",
-  "main": "./dist/index.js",
-  "typings": "./src/index.d.ts",
-  "types": "./dist/index.d.ts"
+  "version": "8.0.1-test.11",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
+  "types": "./index.d.ts"
 }

@@ -1,15 +1,29 @@
 import { createClient } from 'redis';
-import { env } from '../env';
 
-export const redisClient = createClient({
-  url: env.REDIS_URL,
-});
+type RedisClient = ReturnType<typeof createClient>;
 
-redisClient.on('error', (error: Error) => {
-  console.error(`Redis Error: ${error}`);
-});
+let cachedClient: RedisClient | null = null;
+let cachedUrl: string | null = null;
 
-// Connect to Redis
-(async () => {
-  await redisClient.connect();
-})();
+export const getRedisClient = async (url: string): Promise<RedisClient> => {
+  if (cachedClient && cachedUrl === url) return cachedClient;
+
+  if (cachedClient) {
+    try {
+      await cachedClient.quit();
+    } catch {}
+    cachedClient = null;
+  }
+
+  const client = createClient({ url });
+  client.on('error', (error: Error) => {
+    console.error(`Redis Error: ${error}`);
+  });
+  await client.connect();
+
+  cachedClient = client;
+  cachedUrl = url;
+  return client;
+};
+
+export const getCachedRedisClient = (): RedisClient | null => cachedClient;

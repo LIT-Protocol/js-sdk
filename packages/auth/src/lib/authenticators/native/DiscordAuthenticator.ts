@@ -6,6 +6,10 @@ import { AuthMethod, Hex } from '@lit-protocol/types';
 import { AuthData } from '@lit-protocol/schemas';
 import { LIT_LOGIN_GATEWAY, prepareLoginUrl } from '../helper/utils';
 
+// IMPORTANT: this default client id only matches the public login server.
+// When integrating with your own Discord OAuth app, always pass the actual
+// client id to `authenticate`/`authMethodId`, otherwise the hashed authMethodId
+// will differ from what Lit nodes calculate and PKP auth lookups will fail.
 const DEFAULT_CLIENT_ID = '1052874239658692668';
 
 export class DiscordAuthenticator {
@@ -22,12 +26,31 @@ export class DiscordAuthenticator {
    * @example
    * http://localhost:3300
    */
-  public static async authenticate(baseURL: string): Promise<AuthData> {
+  /**
+   * @param baseURL The login server URL (e.g. https://login.litgateway.com)
+   * @param options Optional overrides.
+   * @param options.clientId Discord OAuth client id to pair with the returned access token.
+   *                         Must be provided when using a custom login server, otherwise the
+   *                         derived authMethodId will not match what Lit nodes expect.
+   */
+  public static async authenticate(
+    baseURL: string,
+    options?: { clientId?: string }
+  ): Promise<AuthData> {
     /**
      * If you are using the Lit Login Server or a clone from that, the redirectUri is the same as the baseUri. That's
      * because the app.js is loaded in the index.html file.
      */
     const redirectUri = baseURL;
+
+    if (baseURL && baseURL !== LIT_LOGIN_GATEWAY && !options?.clientId) {
+      throw new UnknownError(
+        {},
+        'Discord client id is required when using a custom login server.'
+      );
+    }
+
+    const resolvedClientId = options?.clientId ?? DEFAULT_CLIENT_ID;
 
     const width = 500;
     const height = 600;
@@ -78,9 +101,24 @@ export class DiscordAuthenticator {
       });
     });
 
+    const authMethodWithMetadata = authMethod as AuthMethod & {
+      metadata?: Record<string, unknown>;
+    };
+    authMethodWithMetadata.metadata = {
+      ...authMethodWithMetadata.metadata,
+      clientId: resolvedClientId,
+    };
+
     return {
-      ...authMethod,
-      authMethodId: await DiscordAuthenticator.authMethodId(authMethod),
+      ...authMethodWithMetadata,
+      authMethodId: await DiscordAuthenticator.authMethodId(
+        authMethodWithMetadata,
+        resolvedClientId
+      ),
+      metadata: {
+        ...(authMethodWithMetadata.metadata || {}),
+        clientId: resolvedClientId,
+      },
     };
   }
 
@@ -97,7 +135,10 @@ export class DiscordAuthenticator {
     authMethod: AuthMethod,
     clientId?: string
   ): Promise<Hex> {
-    const _clientId = clientId || DEFAULT_CLIENT_ID;
+    const _clientId =
+      clientId ||
+      (authMethod as { metadata?: { clientId?: string } }).metadata?.clientId ||
+      DEFAULT_CLIENT_ID;
     const userId = await DiscordAuthenticator._fetchDiscordUser(
       authMethod.accessToken
     );

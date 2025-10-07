@@ -18,7 +18,7 @@
     "directory": "../../dist/packages/networks"
   },
   "dependencies": {
-    "@lit-protocol/contracts": "^0.5.1",
+    "@lit-protocol/contracts": "workspace:*",
     "@lit-protocol/nacl": "7.1.1",
     "@noble/curves": "^1.8.1",
     "@wagmi/core": "^2.17.1",
@@ -29,14 +29,15 @@
     "pino": "^9.6.0",
     "pino-caller": "^4.0.0",
     "viem": "2.29.4",
-    "zod": "3.24.3"
+    "zod": "3.24.3",
+    "@noble/hashes": "^1.8.0"
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [
     "universal"
   ],
-  "version": "8.0.0",
-  "main": "./dist/index.js",
-  "typings": "./src/index.d.ts",
-  "types": "./dist/index.d.ts"
+  "version": "8.0.1-test.11",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
+  "types": "./index.d.ts"
 }

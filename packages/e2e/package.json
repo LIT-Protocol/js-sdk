@@ -1,0 +1,59 @@
+{
+  "name": "@lit-protocol/e2e",
+  "version": "1.0.12-test.14",
+  "description": "Lit Protocol E2E testing package for running comprehensive integration tests",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "type": "commonjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "example.js"
+  ],
+  "scripts": {},
+  "keywords": [
+    "lit-protocol",
+    "e2e",
+    "testing",
+    "integration-tests",
+    "blockchain",
+    "pkp",
+    "encryption"
+  ],
+  "author": "Lit Protocol",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.0.0",
+    "typescript": "5.8.3"
+  },
+  "peerDependencies": {
+    "@lit-protocol/access-control-conditions": "workspace:*",
+    "@lit-protocol/auth": "workspace:*",
+    "@lit-protocol/lit-client": "workspace:*",
+    "@lit-protocol/networks": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*",
+    "viem": "2.29.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LitProtocol/js-sdk.git",
+    "directory": "e2e"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/e2e"
+  }
+}

@@ -25,7 +25,7 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.0.0",
+  "version": "8.0.1-test.9",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
@@ -34,6 +34,7 @@
     "siwe": "^2.3.2",
     "siwe-recap": "0.0.2-alpha.0",
     "viem": "2.29.4",
-    "zod": "3.24.3"
+    "zod": "3.24.3",
+    "@ethersproject/transactions": "5.7.0"
   }
 }

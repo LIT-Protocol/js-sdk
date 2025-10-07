@@ -220,12 +220,14 @@ export const combinePKPSignSignatures = async (params: {
 }): Promise<LitNodeSignature> => {
   const { threshold, requestId, nodesPkpSignResponseData } = params;
 
-  // console.log(
-  //   `[${requestId}] Initial nodesPkpSignResponseData (count: ${nodesPkpSignResponseData.length}):`,
-  //   JSON.stringify(nodesPkpSignResponseData, null, 2)
-  // );
-
-  assertThresholdShares(requestId, threshold, nodesPkpSignResponseData);
+  // Note: nodesPkpSignResponseData items have optional fields, but this helper
+  // expects an array of objects with a required `success: boolean`. Map to the
+  // narrow shape to avoid widening the type and keep the check simple.
+  assertThresholdShares(
+    requestId,
+    threshold,
+    nodesPkpSignResponseData.map((s) => ({ success: !!s.success }))
+  );
 
   const sharesAfterInitialFilter = nodesPkpSignResponseData
     .filter((share) => share.success)
@@ -265,7 +267,11 @@ export const combinePKPSignSignatures = async (params: {
         localPSEInput: {
           success: rawShare.success,
           signedData: rawShare.signedData,
-          signatureShare: signatureShareObject,
+          // The /web/pkp/sign response may nest the share under different keys
+          // and with optional fields. Assert to the local `SignatureShare` union
+          // so downstream parsing has a stable type to work with.
+          signatureShare:
+            signatureShareObject as LocalPKPSignEndpointResponse['signatureShare'],
         },
       });
     } catch (e) {

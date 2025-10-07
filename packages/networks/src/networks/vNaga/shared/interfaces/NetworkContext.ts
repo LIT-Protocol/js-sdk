@@ -17,7 +17,6 @@ export interface INetworkConfig<T, M> {
   networkSpecificConfigs?: M;
   endpoints: NagaEndpointsType;
   services: {
-    authServiceBaseUrl: string;
     loginServiceBaseUrl: string;
   };
   requiredAttestation: boolean;

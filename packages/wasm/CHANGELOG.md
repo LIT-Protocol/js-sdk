@@ -1,5 +1,65 @@
 # @lit-protocol/wasm
 
+## 8.0.1-test.9
+
+### Patch Changes
+
+- test
+
+## 8.0.1-test.8
+
+### Patch Changes
+
+- testing
+
+## 8.0.1-test.7
+
+### Patch Changes
+
+- test
+
+## 8.0.1-test.6
+
+### Patch Changes
+
+- test
+
+## 8.0.1-test.5
+
+### Patch Changes
+
+- testing
+
+## 8.0.1-test.4
+
+### Patch Changes
+
+- testing
+
+## 8.0.1-test.3
+
+### Patch Changes
+
+- put console logs to debug
+
+## 8.0.1-test.2
+
+### Patch Changes
+
+- bump
+
+## 8.0.1-test.1
+
+### Patch Changes
+
+- fix package metadata so bundlers load the CommonJS builds again
+
+## 8.0.1-test.0
+
+### Patch Changes
+
+- first pnpm complete release test for naga-test
+
 ## 8.0.0
 
 ### Major Changes
