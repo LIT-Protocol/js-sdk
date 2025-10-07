@@ -20,6 +20,7 @@ export const PRODUCT_IDS = {
   DECRYPTION: 0n, // For decryption operations
   SIGN: 1n, // For signing operations
   LIT_ACTION: 2n, // For Lit Actions execution
+  SIGN_SESSION_KEY: 3n, // For sign session key operations
 } as const;
 
 // Schema for the request
