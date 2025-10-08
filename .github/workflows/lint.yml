@@ -15,10 +15,16 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: 22.18.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Enable corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
       
       - name: Install rust
         uses: dtolnay/rust-toolchain@1.76.0
@@ -29,9 +35,9 @@ jobs:
           version: 'latest'
       
       - name: Install project dependencies
-        run: bun install
+        run: pnpm install --frozen-lockfile
       
       - name: Lint
         run: |
           echo "Running workspace format check..."
-          NX_DAEMON=false bun run format:check
+          NX_DAEMON=false pnpm run format:check
