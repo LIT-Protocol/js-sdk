@@ -19,9 +19,7 @@ const MASTER_LEDGER_MINIMUM_BALANCE = 3_000;
 const PKP_LEDGER_MINIMUM_BALANCE = 3_000;
 
 if (MASTER_LEDGER_MINIMUM_BALANCE < 0 || PKP_LEDGER_MINIMUM_BALANCE < 0) {
-  throw new Error(
-    '❌ Ledger minimum balances must be non-negative numbers'
-  );
+  throw new Error('❌ Ledger minimum balances must be non-negative numbers');
 }
 
 const ensureLedgerBalance = async ({
@@ -56,7 +54,9 @@ const ensureLedgerBalance = async ({
 
   const { availableBalance: postTopUpBalance } = await balanceFetcher();
 
-  console.log(`✅ ${label} ledger balance after top-up: ${postTopUpBalance} ETH`);
+  console.log(
+    `✅ ${label} ledger balance after top-up: ${postTopUpBalance} ETH`
+  );
 
   return Number(postTopUpBalance);
 };
