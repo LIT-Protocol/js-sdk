@@ -5,7 +5,7 @@ A comprehensive end-to-end testing package for Lit Protocol integrations. This p
 ## Installation
 
 ```bash
-bun install @litprotocol/e2e
+pnpm add @litprotocol/e2e
 ```
 
 ## Environment Variables

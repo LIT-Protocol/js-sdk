@@ -52,7 +52,7 @@ LOCAL_MASTER_ACCOUNT=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf
 
 ```bash
 // eg. naga-dev
-NETWORK=<network-name> bun run test:e2e all
+NETWORK=<network-name> pnpm run test:e2e all
 ```
 
 # Running it against a local network
@@ -73,7 +73,7 @@ DIRECTORY_NAME=naga-local
 ## Command
 
 ```bash
-NETWORK=naga-local bun run test:e2e all
+NETWORK=naga-local pnpm run test:e2e all
 ```
 
 # Manual Publishing
@@ -86,7 +86,7 @@ pnpm changeset
 pnpm changeset version
 
 # Build the packages
-bun run build
+pnpm build
 
 # Commit the changes
 git add .
