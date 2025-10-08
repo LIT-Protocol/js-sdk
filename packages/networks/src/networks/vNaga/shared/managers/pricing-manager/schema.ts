@@ -5,7 +5,7 @@ import { PRODUCT_ID_VALUES } from '@lit-protocol/constants';
 
 export const PricingContextSchema = z
   .object({
-    product: z.enum(['DECRYPTION', 'SIGN', 'LIT_ACTION']),
+    product: z.enum(['DECRYPTION', 'SIGN', 'LIT_ACTION', 'SIGN_SESSION_KEY']),
     userMaxPrice: z.bigint().optional(),
     nodePrices: z.array(
       z.object({ url: z.string(), prices: z.array(z.bigint()) })
