@@ -28,10 +28,24 @@ export function getMaxPricesForNodeProduct({
   productId,
   numRequiredNodes,
 }: MaxPricesForNodes): { url: string; price: bigint }[] {
+  // Always evaluate pricing using the product-specific column so we truly pick
+  // the cheapest validators for that product (the upstream feed is sorted by
+  // prices[0]/decryption price only).
+  const sortedNodes = [...nodePrices].sort((a, b) => {
+    const priceA = a.prices[productId];
+    const priceB = b.prices[productId];
+
+    if (priceA === priceB) {
+      return 0;
+    }
+
+    return priceA < priceB ? -1 : 1;
+  });
+
   // If we don't need all nodes to service the request, only use the cheapest `n` of them
   const nodesToConsider = numRequiredNodes
-    ? nodePrices.slice(0, numRequiredNodes)
-    : nodePrices;
+    ? sortedNodes.slice(0, numRequiredNodes)
+    : sortedNodes;
 
   let totalBaseCost = 0n;
 
