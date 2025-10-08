@@ -147,9 +147,9 @@ export async function getPkpAuthContextAdapter(
   const nodeUrls = litClientCtx.getMaxPricesForNodeProduct({
     nodePrices: respondingNodePrices,
     userMaxPrice: litClientCtx.getUserMaxPrice({
-      product: 'LIT_ACTION',
+      product: 'SIGN_SESSION_KEY',
     }),
-    productId: PRODUCT_IDS['LIT_ACTION'],
+    productId: PRODUCT_IDS['SIGN_SESSION_KEY'],
     numRequiredNodes: threshold,
   });
 
