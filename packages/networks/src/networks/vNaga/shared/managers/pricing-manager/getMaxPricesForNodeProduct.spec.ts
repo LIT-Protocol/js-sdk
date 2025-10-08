@@ -19,7 +19,7 @@ describe('getMaxPricesForNodeProduct', () => {
       },
     ];
 
-    // Log the incoming order to show the encryption column is already sorted lowest-first.
+    // Log the incoming order to show the decryption column is already sorted lowest-first.
     console.log(
       'incoming order',
       nodePrices.map(({ url, prices }) => ({
