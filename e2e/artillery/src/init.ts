@@ -15,10 +15,13 @@ const _network = process.env['NETWORK'];
 
 // CONFIGURATIONS
 const REJECT_BALANCE_THRESHOLD = 0;
-const LEDGER_MINIMUM_BALANCE = 10000;
+const MASTER_LEDGER_MINIMUM_BALANCE = 10_000;
+const PKP_LEDGER_MINIMUM_BALANCE = 10_000;
 
-if (Number.isNaN(LEDGER_MINIMUM_BALANCE) || LEDGER_MINIMUM_BALANCE < 0) {
-  throw new Error('❌ LEDGER_MINIMUM_BALANCE must be a non-negative number');
+if (MASTER_LEDGER_MINIMUM_BALANCE < 0 || PKP_LEDGER_MINIMUM_BALANCE < 0) {
+  throw new Error(
+    '❌ Ledger minimum balances must be non-negative numbers'
+  );
 }
 
 const ensureLedgerBalance = async ({
@@ -91,7 +94,7 @@ const ensureLedgerBalance = async ({
       masterAccountDetails.paymentManager.getBalance({
         userAddress: masterAccount.address,
       }),
-    minimumBalance: LEDGER_MINIMUM_BALANCE,
+    minimumBalance: MASTER_LEDGER_MINIMUM_BALANCE,
     topUp: async (difference) => {
       await masterAccountDetails.paymentManager.deposit({
         amountInEth: difference.toString(),
@@ -172,7 +175,7 @@ const ensureLedgerBalance = async ({
       masterAccountDetails.paymentManager.getBalance({
         userAddress: pkpEthAddress,
       }),
-    minimumBalance: LEDGER_MINIMUM_BALANCE,
+    minimumBalance: PKP_LEDGER_MINIMUM_BALANCE,
     topUp: async (difference) => {
       await masterAccountDetails.paymentManager.depositForUser({
         userAddress: pkpEthAddress,
