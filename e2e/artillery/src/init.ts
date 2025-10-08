@@ -1,15 +1,15 @@
+import '../../src/helper/supressLogs';
 import {
   createAuthManager,
   storagePlugins,
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
-import { createLitClient } from '@lit-protocol/lit-client';
-import * as NetworkManager from '../../../e2e/src/helper/NetworkManager';
-import { getOrCreatePkp } from '../../../e2e/src/helper/pkp-utils';
-import { printAligned } from '../../../e2e/src/helper/utils';
-import '../../src/helper/supressLogs';
-import * as AccountManager from '../src/AccountManager';
 import * as StateManager from './StateManager';
+import { createLitClient } from '@lit-protocol/lit-client';
+import { getOrCreatePkp } from '../../../e2e/src/helper/pkp-utils';
+import * as NetworkManager from '../../../e2e/src/helper/NetworkManager';
+import * as AccountManager from '../src/AccountManager';
+import { printAligned } from '../../../e2e/src/helper/utils';
 
 const _network = process.env['NETWORK'];
 
