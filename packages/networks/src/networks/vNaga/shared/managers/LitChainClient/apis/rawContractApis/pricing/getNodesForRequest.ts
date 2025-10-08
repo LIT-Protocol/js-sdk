@@ -15,6 +15,7 @@ import {
  * - DECRYPTION (0): Used for decryption operations
  * - SIGN (1): Used for signing operations
  * - LA (2): Used for Lit Actions execution
+ * - SIGN_SESSION_KEY (3): Used for sign session key operations
  */
 export const PRODUCT_IDS = {
   DECRYPTION: 0n, // For decryption operations

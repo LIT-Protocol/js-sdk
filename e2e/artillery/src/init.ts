@@ -9,12 +9,57 @@ import { createLitClient } from '@lit-protocol/lit-client';
 import { getOrCreatePkp } from '../../../e2e/src/helper/pkp-utils';
 import * as NetworkManager from '../../../e2e/src/helper/NetworkManager';
 import * as AccountManager from '../src/AccountManager';
+import { printAligned } from '../../../e2e/src/helper/utils';
 
 const _network = process.env['NETWORK'];
 
 // CONFIGURATIONS
 const REJECT_BALANCE_THRESHOLD = 0;
-const LEDGER_MINIMUM_BALANCE = 10000;
+const MASTER_LEDGER_MINIMUM_BALANCE = 3_000;
+const PKP_LEDGER_MINIMUM_BALANCE = 3_000;
+
+if (MASTER_LEDGER_MINIMUM_BALANCE < 0 || PKP_LEDGER_MINIMUM_BALANCE < 0) {
+  throw new Error('❌ Ledger minimum balances must be non-negative numbers');
+}
+
+const ensureLedgerBalance = async ({
+  label,
+  balanceFetcher,
+  minimumBalance,
+  topUp,
+}: {
+  label: string;
+  balanceFetcher: () => Promise<{ availableBalance: string }>;
+  minimumBalance: number;
+  topUp: (difference: number) => Promise<void>;
+}) => {
+  const { availableBalance } = await balanceFetcher();
+
+  const currentAvailable = Number(availableBalance);
+
+  if (currentAvailable >= minimumBalance) {
+    console.log(
+      `✅ ${label} ledger balance healthy (${currentAvailable} ETH, threshold ${minimumBalance} ETH)`
+    );
+    return currentAvailable;
+  }
+
+  const difference = minimumBalance - currentAvailable;
+
+  console.log(
+    `🚨 ${label} ledger balance (${currentAvailable} ETH) is below threshold (${minimumBalance} ETH). Depositing ${difference} ETH.`
+  );
+
+  await topUp(difference);
+
+  const { availableBalance: postTopUpBalance } = await balanceFetcher();
+
+  console.log(
+    `✅ ${label} ledger balance after top-up: ${postTopUpBalance} ETH`
+  );
+
+  return Number(postTopUpBalance);
+};
 
 (async () => {
   // -- Start
@@ -43,32 +88,19 @@ const LEDGER_MINIMUM_BALANCE = 10000;
     );
   }
 
-  if (LEDGER_MINIMUM_BALANCE > Number(masterAccountDetails.ledgerBalance)) {
-    // find the difference between the minimum balance and the current balance
-    const difference =
-      LEDGER_MINIMUM_BALANCE - Number(masterAccountDetails.ledgerBalance);
-
-    console.log(
-      `🚨 Live Master Account Ledger Balance is less than LEDGER_MINIMUM_BALANCE: ${LEDGER_MINIMUM_BALANCE} ETH. Attempting to top up the difference of ${difference} ETH to the master account.`
-    );
-
-    // deposit the difference
-    console.log(
-      '\x1b[90m✅ Depositing the difference to Live Master Account Payment Manager...\x1b[0m'
-    );
-    await masterAccountDetails.paymentManager.deposit({
-      amountInEth: difference.toString(),
-    });
-
-    // print the new balance
-    const newBalance = await masterAccountDetails.paymentManager.getBalance({
-      userAddress: masterAccount.address,
-    });
-    console.log(
-      '✅ New Live Master Account Payment Balance:',
-      newBalance.availableBalance
-    );
-  }
+  await ensureLedgerBalance({
+    label: 'Master Account',
+    balanceFetcher: () =>
+      masterAccountDetails.paymentManager.getBalance({
+        userAddress: masterAccount.address,
+      }),
+    minimumBalance: MASTER_LEDGER_MINIMUM_BALANCE,
+    topUp: async (difference) => {
+      await masterAccountDetails.paymentManager.deposit({
+        amountInEth: difference.toString(),
+      });
+    },
+  });
 
   // 3. Authenticate the master account and store the auth data
   const masterAccountAuthData = await StateManager.getOrUpdate(
@@ -99,6 +131,58 @@ const LEDGER_MINIMUM_BALANCE = 10000;
   );
 
   console.log('✅ Master Account PKP:', masterAccountPkp);
+
+  const pkpEthAddress = masterAccountPkp?.ethAddress;
+
+  if (!pkpEthAddress) {
+    throw new Error('❌ Master Account PKP is missing an ethAddress');
+  }
+
+  const pkpLedgerBalance = await masterAccountDetails.paymentManager.getBalance(
+    {
+      userAddress: pkpEthAddress,
+    }
+  );
+
+  console.log('\n========== Master Account PKP Details ==========');
+
+  const pkpStatus =
+    Number(pkpLedgerBalance.availableBalance) < 0
+      ? {
+          label: '🚨 Status:',
+          value: `Negative balance (debt): ${pkpLedgerBalance.availableBalance}`,
+        }
+      : { label: '', value: '' };
+
+  printAligned(
+    [
+      { label: '🔑 PKP ETH Address:', value: pkpEthAddress },
+      {
+        label: '💳 Ledger Total Balance:',
+        value: pkpLedgerBalance.totalBalance,
+      },
+      {
+        label: '💳 Ledger Available Balance:',
+        value: pkpLedgerBalance.availableBalance,
+      },
+      pkpStatus,
+    ].filter((item) => item.label)
+  );
+
+  await ensureLedgerBalance({
+    label: 'Master Account PKP',
+    balanceFetcher: () =>
+      masterAccountDetails.paymentManager.getBalance({
+        userAddress: pkpEthAddress,
+      }),
+    minimumBalance: PKP_LEDGER_MINIMUM_BALANCE,
+    topUp: async (difference) => {
+      await masterAccountDetails.paymentManager.depositForUser({
+        userAddress: pkpEthAddress,
+        amountInEth: difference.toString(),
+      });
+    },
+  });
 
   // create pkp auth context
   // const masterAccountPkpAuthContext = await authManager.createPkpAuthContext({
