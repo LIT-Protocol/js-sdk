@@ -84,13 +84,15 @@ jobs:
             echo "📋 Not in pre-release mode"
           fi
 
+      - name: Build packages
+        run: pnpm run build
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
           version: pnpm changeset version
-          # Build immediately before publishing so artifacts reflect the freshly bumped version
-          publish: pnpm build && pnpm changeset publish --access public
+          publish: pnpm changeset publish --access public
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
         env:
