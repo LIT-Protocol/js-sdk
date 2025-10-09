@@ -1,5 +1,24 @@
 # @lit-protocol/constants
 
+## 8.0.1
+
+### Patch Changes
+
+- release naga-test
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [9752854]
+- Updated dependencies
+- Updated dependencies [4616e56]
+- Updated dependencies [a833c7a]
+- Updated dependencies [4d353dd]
+- Updated dependencies [4616e56]
+- Updated dependencies [a833c7a]
+- Updated dependencies [642cd0b]
+- Updated dependencies [a833c7a]
+- Updated dependencies [867516f]
+  - @lit-protocol/contracts@0.5.2
+
 ## 8.0.1-test.9
 
 ### Patch Changes
