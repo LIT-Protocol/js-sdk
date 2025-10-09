@@ -104,11 +104,11 @@ jobs:
       - name: Health check summary
         if: always()
         run: |
-          if [ ${{ job.status }} == 'success' ]; then
+          if [[ "${{ job.status }}" == "success" ]]; then
             echo "✅ Health check passed for ${{ matrix.network }}"
-            echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+            echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
           else
             echo "❌ Health check failed for ${{ matrix.network }}"
-            echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+            echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
             echo "Please check the logs above for details"
-
+          fi
