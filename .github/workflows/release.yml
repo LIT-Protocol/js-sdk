@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
@@ -91,7 +91,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          branch: naga
+          branch: ${{ github.event.workflow_run.head_branch || 'naga' }}
           version: pnpm changeset version
           publish: pnpm changeset publish --access public
           commit: 'chore(release): version packages'
