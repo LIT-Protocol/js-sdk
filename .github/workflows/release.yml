@@ -1,0 +1,117 @@
+name: Release
+on:
+  workflow_run:
+    workflows:
+      - E2E - Naga (matrix)
+    branches:
+      - naga
+      - canary-naga
+    types:
+      - completed
+
+permissions:
+  # allow pushing commits, creating tags, and modifying repo files
+  # needed for the workflow to update package.json versions and CHANGELOG files
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.event.workflow_run.head_branch || github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          (github.event.workflow_run.head_branch == 'naga' ||
+           github.event.workflow_run.head_branch == 'canary-naga') }}
+    # Enable this when we want to implement docker image release
+    # outputs:
+    #   published: ${{ steps.changesets.outputs.published }}
+    #   auth_server_published: ${{ steps.auth_server_release.outputs.published }}
+    steps:
+      - name: Check NPM Token
+        run: |
+          if [ -z "${{ secrets.NODE_AUTH_TOKEN }}" ]; then
+            echo "❌ NODE_AUTH_TOKEN secret is not set. Please add it to repository secrets."
+            exit 1
+          else
+            echo "✅ NODE_AUTH_TOKEN secret is available."
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: '0.12.1'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install project dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check current pre-release mode
+        run: |
+          if [ -f ".changeset/pre.json" ]; then
+            echo "📋 Current pre-release mode status:"
+            cat .changeset/pre.json | jq '{ mode: .mode, tag: .tag }'
+          else
+            echo "📋 Not in pre-release mode"
+          fi
+
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset version
+          # Build immediately before publishing so artifacts reflect the freshly bumped version
+          publish: pnpm build && pnpm changeset publish --access public
+          commit: 'chore(release): version packages'
+          title: 'chore(release): version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      # - Was lit-auth-server part of the most recent release?
+      # - Capture published packages
+      # - Fallback to empty array if nothing was published
+      # - Search for the specific package
+      # - Using jq, it inspects the JSON array of published packages, checking if any have a .name equal to either lit-auth-server or @lit-protocol/lit-auth-server.
+      # - If the package is found, it writes published=true into the GitHub Actions step output.
+      # - name: Check for lit-auth-server release
+      #   id: auth_server_release
+      #   run: |
+      #     packages='${{ steps.changesets.outputs.publishedPackages }}'
+      #     if [ -z "$packages" ]; then
+      #       packages='[]'
+      #     fi
+      #     if echo "$packages" | jq -e '.[] | select(.name == "lit-auth-server" or .name == "@lit-protocol/lit-auth-server")' > /dev/null; then
+      #       echo "published=true" >> "$GITHUB_OUTPUT"
+      #     else
+      #       echo "published=false" >> "$GITHUB_OUTPUT"
+      #     fi
