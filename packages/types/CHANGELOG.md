@@ -1,5 +1,11 @@
 # @lit-protocol/types
 
+## 8.0.1
+
+### Patch Changes
+
+- release naga-test
+
 ## 8.0.1-test.9
 
 ### Patch Changes

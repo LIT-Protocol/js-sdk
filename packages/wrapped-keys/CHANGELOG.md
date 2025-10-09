@@ -1,5 +1,20 @@
 # @lit-protocol/wrapped-keys
 
+## 8.0.1
+
+### Patch Changes
+
+- a833c7a: test
+- a833c7a: test
+- 9752854: first pnpm complete release test for naga-test
+- 4616e56: testing
+- a833c7a: test
+- 4d353dd: bump
+- 4616e56: put console logs to debug
+- a833c7a: testing
+- a833c7a: testing
+- 867516f: fix package metadata so bundlers load the CommonJS builds again
+
 ## 8.0.1-test.9
 
 ### Patch Changes

@@ -1,5 +1,32 @@
 # @lit-protocol/e2e
 
+## 1.0.12
+
+### Patch Changes
+
+- release naga-test
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [9752854]
+- Updated dependencies
+- Updated dependencies [4616e56]
+- Updated dependencies [a833c7a]
+- Updated dependencies [4d353dd]
+- Updated dependencies [4616e56]
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [a833c7a]
+- Updated dependencies [867516f]
+  - @lit-protocol/access-control-conditions@8.0.1
+  - @lit-protocol/auth@8.0.1
+  - @lit-protocol/lit-client@8.0.1
+  - @lit-protocol/networks@8.0.1
+  - @lit-protocol/schemas@8.0.1
+
 ## 1.0.12-test.14
 
 ### Patch Changes
