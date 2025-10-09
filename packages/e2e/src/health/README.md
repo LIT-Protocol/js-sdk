@@ -38,6 +38,7 @@ The health check system is designed to be:
 ### How It Works
 
 1. **Initialization** (`health-init.ts`):
+
    - Creates a single test account (Alice)
    - Funds it with minimal amount
    - Creates one PKP
@@ -45,6 +46,7 @@ The health check system is designed to be:
    - No Bob, Eve, or complex multi-account setup
 
 2. **Test Execution** (`NagaHealthManager.ts`):
+
    - Reuses the same Alice account and auth context
    - Tests each endpoint sequentially
    - Throws errors on failures for proper error tracking
@@ -111,11 +113,13 @@ You can manually trigger health checks from GitHub:
 Configure these in your repository settings under `Settings → Secrets and variables → Actions`:
 
 **Secrets:**
+
 - `LIT_STATUS_WRITE_KEY` - API key for status backend
 - `LIVE_MASTER_ACCOUNT_NAGA_DEV` - Funding account for naga-dev
 - `LIVE_MASTER_ACCOUNT_NAGA_TEST` - Funding account for naga-test
 
 **Variables:**
+
 - `LIT_STATUS_BACKEND_URL` - Status backend URL
 - `LIT_YELLOWSTONE_PRIVATE_RPC_URL` - (Optional) Custom RPC URL
 
@@ -126,6 +130,7 @@ Environment: `Health Check` (create this environment in repository settings)
 ### Status Dashboard
 
 View health check results at the Lit Status dashboard:
+
 - URL: Configured via `LIT_STATUS_BACKEND_URL`
 - Shows success/failure rates
 - Tracks response times
@@ -134,6 +139,7 @@ View health check results at the Lit Status dashboard:
 ### GitHub Actions
 
 Monitor workflow runs:
+
 - Go to `Actions → Naga Health Checks`
 - View recent runs and their status
 - Check logs for detailed error messages
@@ -152,15 +158,19 @@ If health checks fail:
 ### Common Issues
 
 **Error: "NETWORK environment variable is not set"**
+
 - Solution: Ensure `NETWORK` is set in the workflow or .env file
 
 **Error: "LIVE_MASTER_ACCOUNT is not set"**
+
 - Solution: Check that the appropriate secret is configured in GitHub
 
 **Error: "Failed to get network information"**
+
 - Solution: Network may be down or unreachable. Check node status.
 
 **Error: "Insufficient funds"**
+
 - Solution: Fund the master account with more tokens
 
 ## 🧪 Testing Locally
@@ -191,6 +201,7 @@ pnpm run test:health
 To add a new health check test:
 
 1. **Add test method to `NagaHealthManager.ts`**:
+
 ```typescript
 myNewTest = async (): Promise<void> => {
   try {
@@ -204,6 +215,7 @@ myNewTest = async (): Promise<void> => {
 ```
 
 2. **Register function in `index.ts`**:
+
 ```typescript
 const txs = await statusClient.getOrRegisterFunctions({
   network: NETWORK!,
@@ -220,12 +232,10 @@ const txs = await statusClient.getOrRegisterFunctions({
 ```
 
 3. **Execute test in `index.ts`**:
+
 ```typescript
 console.log('6️⃣  Testing: My New Test');
-await statusClient.executeAndLog(
-  txs.myNewTest.id,
-  healthManager.myNewTest
-);
+await statusClient.executeAndLog(txs.myNewTest.id, healthManager.myNewTest);
 ```
 
 ## 🔐 Security Considerations
@@ -254,7 +264,7 @@ When modifying health checks:
 ## 📧 Support
 
 For issues or questions:
+
 - Create an issue in the repository
 - Contact the Lit Protocol team
 - Check the status dashboard for network-wide issues
-

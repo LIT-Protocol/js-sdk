@@ -1,20 +1,20 @@
 /**
  * Naga Health Check Runner
- * 
+ *
  * This is the main entry point for running health checks on Naga networks.
  * It initializes the environment, runs all endpoint tests, and logs results
  * to the Lit Status backend for monitoring.
- * 
+ *
  * Environment Variables Required:
  * - NETWORK: The network to test (naga-dev or naga-test)
  * - LIVE_MASTER_ACCOUNT: Private key of the master funding account
  * - LIT_STATUS_BACKEND_URL: URL of the status backend
  * - LIT_STATUS_WRITE_KEY: API key for writing to status backend
- * 
+ *
  * Optional:
  * - LOG_LEVEL: Logging verbosity (silent, info, debug)
  * - LIT_YELLOWSTONE_PRIVATE_RPC_URL: Override RPC URL
- * 
+ *
  * Usage:
  *   NETWORK=naga-dev pnpm run ci:health
  *   NETWORK=naga-test pnpm run test:health
@@ -33,7 +33,10 @@ const PRODUCT = 'js-sdk/naga';
 function validateEnvironment(): void {
   console.log('🔍 Environment Variables:');
   console.log('  NETWORK:', process.env['NETWORK']);
-  console.log('  LIT_STATUS_BACKEND_URL:', process.env['LIT_STATUS_BACKEND_URL']);
+  console.log(
+    '  LIT_STATUS_BACKEND_URL:',
+    process.env['LIT_STATUS_BACKEND_URL']
+  );
   console.log(
     '  LIT_STATUS_WRITE_KEY:',
     process.env['LIT_STATUS_WRITE_KEY'] ? '[SET]' : '[NOT SET]'
@@ -48,7 +51,9 @@ function validateEnvironment(): void {
   }
 
   if (!process.env['LIT_STATUS_BACKEND_URL']) {
-    throw new Error('❌ LIT_STATUS_BACKEND_URL environment variable is not set');
+    throw new Error(
+      '❌ LIT_STATUS_BACKEND_URL environment variable is not set'
+    );
   }
 
   if (!process.env['LIT_STATUS_WRITE_KEY']) {
@@ -77,7 +82,9 @@ async function runHealthCheck(): Promise<void> {
   console.log(`Time: ${new Date().toISOString()}\n`);
 
   // Initialize Lit Status Client (dynamic import for ESM compatibility)
-  const { createLitStatusClient } = await import('@lit-protocol/lit-status-sdk');
+  const { createLitStatusClient } = await import(
+    '@lit-protocol/lit-status-sdk'
+  );
   const statusClient = createLitStatusClient({
     url: process.env['LIT_STATUS_BACKEND_URL']!,
     apiKey: process.env['LIT_STATUS_WRITE_KEY']!,
@@ -124,10 +131,7 @@ async function runHealthCheck(): Promise<void> {
 
   // Test 2: PKP Sign
   console.log('2️⃣  Testing: PKP Sign');
-  await statusClient.executeAndLog(
-    txs.pkpSign.id,
-    healthManager.pkpSignTest
-  );
+  await statusClient.executeAndLog(txs.pkpSign.id, healthManager.pkpSignTest);
   console.log('');
 
   // Test 3: Sign Session Key
@@ -148,10 +152,7 @@ async function runHealthCheck(): Promise<void> {
 
   // Test 5: Decrypt
   console.log('5️⃣  Testing: Encrypt/Decrypt');
-  await statusClient.executeAndLog(
-    txs.decrypt.id,
-    healthManager.decryptTest
-  );
+  await statusClient.executeAndLog(txs.decrypt.id, healthManager.decryptTest);
   console.log('');
 
   console.log('═══════════════════════════════════════');
@@ -180,4 +181,3 @@ async function runHealthCheck(): Promise<void> {
     process.exit(1);
   }
 })();
-

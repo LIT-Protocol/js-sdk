@@ -1,17 +1,17 @@
 /**
  * Naga Health Manager
- * 
+ *
  * This module implements health checks for Naga network endpoints.
  * It tests the core functionality of the Lit Protocol network by executing
  * a series of endpoint tests using a single test account.
- * 
+ *
  * Tested Endpoints:
  * 1. Handshake - Verifies basic node connectivity
  * 2. PKP Sign - Tests PKP signing functionality
  * 3. Sign Session Key - Tests session key signing (via PKP auth context creation)
  * 4. Execute JS - Tests Lit Actions execution
  * 5. Decrypt - Tests encryption and decryption flow
- * 
+ *
  * Usage:
  *   const manager = new NagaHealthManager(ctx);
  *   await manager.handshakeTest();
@@ -33,10 +33,10 @@ export class NagaHealthManager {
 
   /**
    * Test 1: Handshake Test
-   * 
+   *
    * Verifies basic connectivity to Lit nodes by checking if the client
    * is properly initialized and connected.
-   * 
+   *
    * This is the most basic health check - if this fails, the network is down.
    */
   handshakeTest = async (): Promise<void> => {
@@ -72,7 +72,7 @@ export class NagaHealthManager {
 
   /**
    * Test 2: PKP Sign Test
-   * 
+   *
    * Tests the PKP signing endpoint by signing a simple message.
    * This verifies that:
    * - The PKP is accessible
@@ -82,7 +82,7 @@ export class NagaHealthManager {
   pkpSignTest = async (): Promise<void> => {
     try {
       const testMessage = 'Hello from Naga health check!';
-      
+
       const result = await this.ctx.litClient.chain.ethereum.pkpSign({
         authContext: this.ctx.aliceEoaAuthContext,
         pubKey: this.ctx.aliceViemAccountPkp.pubkey,
@@ -102,7 +102,7 @@ export class NagaHealthManager {
 
   /**
    * Test 3: Sign Session Key Test
-   * 
+   *
    * Tests the session key signing endpoint by creating a PKP auth context.
    * This involves the signSessionKey endpoint which is critical for
    * establishing authenticated sessions with PKPs.
@@ -136,10 +136,10 @@ export class NagaHealthManager {
 
   /**
    * Test 4: Execute JS Test
-   * 
+   *
    * Tests Lit Actions execution by running a simple JavaScript code
    * that performs an ECDSA signature.
-   * 
+   *
    * This verifies:
    * - Lit Actions runtime is operational
    * - Code execution environment is working
@@ -186,11 +186,11 @@ export class NagaHealthManager {
 
   /**
    * Test 5: Decrypt Test
-   * 
+   *
    * Tests the encryption and decryption flow:
    * 1. Encrypts data with access control conditions
    * 2. Decrypts the data using the same account
-   * 
+   *
    * This verifies:
    * - Encryption endpoint works
    * - Access control condition evaluation works
@@ -200,7 +200,7 @@ export class NagaHealthManager {
   decryptTest = async (): Promise<void> => {
     try {
       const testData = 'Secret health check data';
-      
+
       // Create access control conditions for Alice's wallet
       const builder = createAccBuilder();
       const accs = builder
@@ -245,4 +245,3 @@ export class NagaHealthManager {
     }
   };
 }
-

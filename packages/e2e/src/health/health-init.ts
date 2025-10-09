@@ -1,10 +1,10 @@
 /**
  * Health Check Initialization Module
- * 
+ *
  * This module provides a lightweight initialization for health checks that minimizes
  * chain interactions. Unlike the full e2e init, this only creates a single test person
  * using EOA authentication and reuses it across all endpoint tests.
- * 
+ *
  * Design Philosophy:
  * - Minimal chain interactions (only what's necessary for testing endpoints)
  * - Single person setup to reduce overhead
@@ -30,10 +30,7 @@ import {
   ViemAccount,
 } from '../types';
 
-const SupportedNetworkSchema = z.enum([
-  'naga-dev',
-  'naga-test',
-]);
+const SupportedNetworkSchema = z.enum(['naga-dev', 'naga-test']);
 
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
@@ -46,13 +43,13 @@ const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
 
 /**
  * Initialize the health check environment with minimal setup
- * 
+ *
  * This function:
  * 1. Creates a single test account (Alice)
  * 2. Funds it minimally
  * 3. Creates one PKP for testing
  * 4. Sets up auth context for endpoint testing
- * 
+ *
  * @param network - The network to run health checks on (naga-dev or naga-test)
  * @param logLevel - Logging level for the health check run
  * @returns Initialized components needed for health checks
@@ -90,7 +87,9 @@ export const initHealthCheck = async (
   const parsedNetwork = SupportedNetworkSchema.safeParse(_network);
   if (!parsedNetwork.success) {
     throw new Error(
-      `❌ Invalid network: ${_network}. Must be one of: ${SupportedNetworkSchema.options.join(', ')}`
+      `❌ Invalid network: ${_network}. Must be one of: ${SupportedNetworkSchema.options.join(
+        ', '
+      )}`
     );
   }
 
@@ -249,4 +248,3 @@ export const initHealthCheck = async (
     networkName: _network,
   };
 };
-
