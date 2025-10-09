@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - feature/jss-29-feature-add-naga-uptime-bot
-  # Temporarily disabled schedule; re-enable when satisfied
-  # schedule:
-  #   - cron: '*/5 * * * *'
+  schedule:
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       naga_branch:
@@ -30,21 +29,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: Health Check
     strategy:
-      # Don't cancel other network tests if one fails
       fail-fast: false
       matrix:
         network: [naga-dev, naga-test]
-    
     env:
       NETWORK: ${{ matrix.network }}
       LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST }}
       LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # If manually triggered and a branch is provided, use it; otherwise use the triggering ref
           ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.naga_branch || github.ref }}
           fetch-depth: 1
 
@@ -95,7 +90,6 @@ jobs:
           echo "✅ All required environment variables are set"
 
       - name: Run health check for ${{ matrix.network }}
-        # If a specific network is selected via workflow_dispatch input, only run that one
         if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.network == '' || github.event.inputs.network == matrix.network }}
         run: pnpm run ci:health
         timeout-minutes: 10
@@ -117,5 +111,4 @@ jobs:
             echo "❌ Health check failed for ${{ matrix.network }}"
             echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
             echo "Please check the logs above for details"
-          fi
 
