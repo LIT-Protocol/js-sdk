@@ -13,7 +13,9 @@
     "format:check": "npx nx format:check --all",
     "test:e2e": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000 -t",
     "test:custom": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000",
-    "test:e2e:ci": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} npx jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000 --runTestsByPath"
+    "test:e2e:ci": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} npx jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000 --runTestsByPath",
+    "test:health": "LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- tsx packages/e2e/src/health/index.ts",
+    "ci:health": "LOG_LEVEL=${LOG_LEVEL:-silent} tsx packages/e2e/src/health/index.ts"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +23,7 @@
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-typescript": "^7.27.1",
     "@dotenvx/dotenvx": "^1.6.4",
+    "@lit-protocol/lit-status-sdk": "^0.1.8",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
     "@metamask/eth-sig-util": "5.0.2",
