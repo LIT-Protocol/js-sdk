@@ -1,0 +1,149 @@
+---
+title: "(2FA) Stytch TOTP"
+description: "Stytch TOTP 2FA Authentication is a secondary authentication method that adds an extra layer of security using TOTP (Time-based One-Time Password) from authenticator apps like Google Authenticator, Authy, or 1Password."
+---
+
+# Prerequisites
+
+<Warning>
+  ⚠️ Backend Required: This authentication method requires a backend service
+  that handles Stytch Email OTP operations. The auth service already has the
+  implementation in place with the `/stytch/email/send-otp` and
+  `/stytch/email/verify-otp` endpoints, but they are disabled by default. Simply
+  run your auth service at the configured URL to enable Stytch Email OTP
+  functionality.
+</Warning>
+
+<Note>
+  Lit Auth Server URLs. Please refer to [Auth
+  Services](/sdk/getting-started/auth-services#naga-dev-network) section.
+</Note>
+
+# (Prerequisite) TOTP Registration
+
+Existing Stytch User Account required. (from primary authentication methods, such as Email, SMS, or WhatsApp)
+
+This step must be completed before you can authenticate with TOTP 2FA.
+
+- See Step 3 in [Stytch Email OTP](/sdk/auth/pkp-native-auth/pkp-stytch-email-otp-auth) for more details.
+- See Step 3 in [Stytch SMS OTP](/sdk/auth/pkp-native-auth/pkp-stytch-sms-otp-auth) for more details.
+- See Step 3 in [Stytch WhatsApp OTP](/sdk/auth/pkp-native-auth/pkp-stytch-whatsapp-otp-auth) for more details.
+
+<Steps>
+  <Step title="Create TOTP Registration">
+
+Create TOTP registration with the user ID from your email/sms/whatsapp auth
+
+```ts
+import { StytchTotp2FAAuthenticator } from "@lit-protocol/auth";
+
+const registrationData = await StytchTotp2FAAuthenticator.initiateTotpRegistration({
+  userId:authData?.metadata?.userId // from your email/sms/whatsapp auth
+  authServiceBaseUrl: "https://naga-auth-service.onrender.com"
+});
+```
+
+  </Step>
+
+  <Step title="Verify TOTP Setup" >
+  Verify TOTP setup with code from authenticator app
+
+```ts
+const verifyResult = await StytchTotp2FAAuthenticator.verifyTotpRegistration({
+  userId:authData?.metadata?.userId
+  totpRegistrationId: registrationData.totpRegistrationId,
+  totpCode: "123456", // from authenticator app
+  authServiceBaseUrl: "https://naga-auth-service.onrender.com"
+});
+```
+
+  </Step>
+</Steps>
+
+# TOTP Authentication
+
+<Steps>
+  <Step title="Authenticate with TOTP 2FA">
+Enter your Stytch User ID (from your primary authentication) and the current 6-digit TOTP code from your authenticator app to authenticate and generate authentication data.
+
+```ts
+import { StytchTotp2FAAuthenticator } from "@lit-protocol/auth";
+
+const authData = await StytchTotp2FAAuthenticator.authenticate({
+  userId: "user-test-uuid-1234", // Stytch user ID from primary auth
+  totpCode: "123456", // 6-digit code from authenticator app
+  authServiceBaseUrl: "https://naga-auth-service.onrender.com",
+});
+```
+
+  </Step>
+
+  <Step title="Verify OTP">
+Enter the OTP code sent to your WhatsApp to verify your identity and generate authentication data.
+
+```ts
+import { StytchWhatsAppOtpAuthenticator } from "@lit-protocol/auth";
+
+const authData = await StytchWhatsAppOtpAuthenticator.authenticate({
+  methodId: methodId, // from sendOtp step
+  code: "123456", // user-entered OTP code
+  authServiceBaseUrl: "https://naga-auth-service.onrender.com",
+});
+```
+
+  </Step>
+
+  <Step title="Get or Mint a PKP">
+    You can select an existing PKP associated with your account or mint a new one.
+
+    <CodeGroup>
+      ```ts Mint a fresh PKP
+      const res = await litClient.authService.mintWithAuth({
+        authData: authData,
+      });
+      ```
+
+      ```ts Using an existing PKP
+      const result = await litClient.viewPKPsByAuthData({
+        authData: {
+          authMethodType: authData.authMethodType,
+          authMethodId: authData.authMethodId,
+        },
+        pagination: {
+          limit: 5,
+          offset: 0,
+        }
+      });
+      ```
+    </CodeGroup>
+
+  </Step>
+
+    <Step title="Generate Auth Context">
+
+Use your newly minted PKP to create an AuthContext. This method will cache two things:
+
+1. session key pair - a temporary cryptographic key pair generated on the client side that acts as a temporary identity for the client application. It consists of:
+   - A public key - shared with the Lit nodes
+   - A secret key (private key) - kept securely on the client
+2. Delegation AuthSig aka. the inner auth sig - a cryptographic attestation from the Lit Protocol nodes that authorises your session key to act on behalf of your PKP.
+
+```ts
+const authContext = await authManager.createPkpAuthContext({
+  authData: authData, // <-- Retrieved earlier
+  pkpPublicKey: pkpInfo.pubkey, // <-- Minted earlier
+  authConfig: {
+    resources: [
+      ["pkp-signing", "*"],
+      ["lit-action-execution", "*"],
+    ],
+    expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+    statement: "",
+    domain: window.location.origin,
+  },
+  litClient: litClient,
+});
+```
+
+  </Step>
+</Steps>

@@ -1,0 +1,70 @@
+---
+title: "PKP Sign"
+description: "Use your PKP to sign a message with the selected chain and scheme. The signing operation will automatically find the most optimised price, or you can specify a custom maximum price using the userMaxPrice parameter."
+---
+
+<Tip>
+  See SDK Reference for more details on the PKP Sign. [PKP Sign
+  Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#chain-raw-pkpsign)
+</Tip>
+
+# Prerequisites
+
+<Note>
+- `authContext` is required. This is the result from the authentication flow.
+- `pubkey` is required. This is the public key of the PKP to sign with.
+</Note>
+
+# Quick Example
+
+```ts
+// The message string will be UTF-8 encoded before signing.
+// Hashing (e.g., Keccak256 for Ethereum, SHA256 for Bitcoin)
+// is handled automatically by the Lit Protocol based on the selected chain.
+const messageBytes = new TextEncoder().encode(messageToSign);
+
+const signatures = await litClient.chain.raw.pkpSign({
+  chain: "ethereum",
+  signingScheme: "EcdsaK256Sha256",
+  pubKey: pkpInfo.pubkey,
+  authContext: authContext,
+  toSign: messageBytes, // UTF-8 encoded message
+});
+```
+
+---
+
+# Available signing schemes
+
+### ECDSA Schemes
+
+| Scheme | Curve |
+|--------|-------|
+| `EcdsaK256Sha256` | secp256k1 |
+| `EcdsaP256Sha256` | NIST P‑256 |
+| `EcdsaP384Sha384` | NIST P‑384 |
+
+### EdDSA Schemes
+
+| Scheme | Curve |
+|--------|-------|
+| `SchnorrEd25519Sha512` | ed25519 |
+| `SchnorrEd448Shake256` | ed448 |
+
+### Schnorr Variants
+
+| Scheme | Curve |
+|--------|-------|
+| `SchnorrK256Taproot` | secp256k1 |
+| `SchnorrK256Sha256` | secp256k1 |
+| `SchnorrP256Sha256` | NIST P‑256 |
+| `SchnorrP384Sha384` | NIST P‑384 |
+
+### ZK/Privacy Schnorr Variants
+
+| Scheme | Curve |
+|--------|-------|
+| `SchnorrRistretto25519Sha512` | Ristretto25519 |
+| `SchnorrRedJubjubBlake2b512` | Jubjub |
+| `SchnorrRedDecaf377Blake2b512` | Decaf377 |
+| `SchnorrkelSubstrate` | sr25519 |

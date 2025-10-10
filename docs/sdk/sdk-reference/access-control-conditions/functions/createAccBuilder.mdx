@@ -1,0 +1,239 @@
+---
+title: createAccBuilder
+---
+
+<Note>
+
+- Calling `.on(chain)` is required after each convenience method to set the target chain, except for `requireLitAction`.
+- Use `validate()` during development to catch operator ordering and empty builder issues.
+- For advanced conditions, prefer `unifiedAccs()` when you already have canonical unified condition objects.
+</Note>
+
+# Installation
+
+<CodeGroup>
+```bash npm
+npm install @lit-protocol/access-control-conditions
+```
+```bash yarn
+yarn add @lit-protocol/access-control-conditions
+```
+```bash pnpm
+pnpm add @lit-protocol/access-control-conditions
+```
+```bash bun 
+bun add @lit-protocol/access-control-conditions
+```
+</CodeGroup>
+
+# Examples
+
+### Using the convenience helpers
+
+```ts
+import { createAccBuilder } from '@lit-protocol/access-control-conditions';
+
+// Simple ETH balance check on Ethereum
+const simple = createAccBuilder()
+  .requireEthBalance('1000000000000000000')
+  .on('ethereum')
+  .build();
+
+// Weather-gated content using Lit Action
+const weatherGated = createAccBuilder()
+  .requireLitAction('Qm...IPFSCID', 'checkTemperature', ['40'], 'true')
+  .build();
+
+// Complex: (ETH >= 0.001 on ethereum) OR (ERC20 >= 1000 on polygon) AND (Wallet ownership on ethereum)
+const complex = createAccBuilder()
+  .requireEthBalance('1000000000000000').on('ethereum')
+  .or()
+  .requireTokenBalance('0x123...', '1000').on('polygon')
+  .and()
+  .requireWalletOwnership('0x123...').on('ethereum')
+  .build();
+```
+
+See [Weather Check Lit Action](https://explorer.litprotocol.com/ipfs/QmcgbVu2sJSPpTeFhBd174FnmYmoVYvUFJeDkS7eYtwoFY) for more details.
+
+### Using the raw conditions
+
+```ts
+import { createAccBuilder } from '@lit-protocol/access-control-conditions';
+
+const rawCondition = {
+  conditionType: 'evmBasic',
+  contractAddress: '',
+  standardContractType: '',
+  chain: 'ethereum',
+  method: 'eth_getBalance',
+  parameters: [':userAddress', 'latest'],
+  returnValueTest: {
+    comparator: '>=',
+    value: '1000000000000000000',
+  },
+};
+
+const conditions = createAccBuilder()
+  .unifiedAccs(rawCondition)
+  .build();
+```
+
+
+# Reference
+
+## Functions
+
+> **createAccBuilder**()
+
+Builder for Access Control Conditions (ACC) supporting EVM, Solana, Cosmos, and Lit Actions with boolean logic, grouping, and helpers.
+
+### Parameters
+
+No parameters.
+
+### Returns
+
+<ResponseField name="AccBuilder" type="object">
+  Fluent builder with convenience methods, boolean operators, grouping, and utilities.
+</ResponseField>
+
+#### Custom Access Control Conditions
+
+Manually supply the access control conditions instead of using the chainable helper methods.
+
+<ResponseField name="unifiedAccs(condition)" type="AccBuilder" />
+<ResponseField name="evmBasic(params)" type="AccBuilder" />
+<ResponseField name="evmContract(params)" type="AccBuilder" />
+<ResponseField name="solRpc(params)" type="AccBuilder" />
+<ResponseField name="cosmos(params)" type="AccBuilder" />
+
+#### EVM Conditions
+
+<ResponseField name="requireEthBalance(amount, comparator?)" type="ChainableEvmBuilder">
+  Require ETH balance on a chain.
+  <Expandable title="parameters" defaultOpen={true}>
+    <ResponseField name="amount" type="string" required>
+      Minimum balance required (wei as string or normalised amount per your app).
+    </ResponseField>
+    <ResponseField name="comparator" type="'>=' | '>' | '=' | '<=' | '<'">
+      Defaults to '>='.
+    </ResponseField>
+  </Expandable>
+  <Expandable title="usage">
+```ts
+const conditions = createAccBuilder()
+  .requireEthBalance('1000000000000000000') // 1 ETH
+  .on('ethereum')
+  .build();
+```
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="requireTokenBalance(contractAddress, amount, comparator?)" type="ChainableEvmBuilder">
+  Require ERC‑20 token balance.
+  <Expandable title="parameters">
+    <ResponseField name="contractAddress" type="string" required />
+    <ResponseField name="amount" type="string" required />
+    <ResponseField name="comparator" type="NumericComparator" />
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="requireNftOwnership(contractAddress, tokenId?)" type="ChainableEvmBuilder">
+  Require ERC‑721 or ERC‑1155 ownership.
+  <Expandable title="parameters">
+    <ResponseField name="contractAddress" type="string" required />
+    <ResponseField name="tokenId" type="string">
+      If provided, assumes ERC‑721; otherwise ERC‑1155 with default tokenId '1'.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="requireWalletOwnership(address)" type="ChainableEvmBuilder">
+  Verify that :userAddress equals the provided address.
+</ResponseField>
+
+<ResponseField name="requireTimestamp(timestamp, comparator?)" type="ChainableEvmBuilder">
+  Compare latest block timestamp using comparator (default '>=').
+</ResponseField>
+
+<ResponseField name="requireDAOMembership(daoAddress)" type="ChainableEvmBuilder">
+  Check membership for MolochDAOv2.1.
+</ResponseField>
+
+<ResponseField name="requirePOAPOwnership(eventId)" type="ChainableEvmBuilder">
+  Check POAP event ownership.
+</ResponseField>
+
+#### Solana Conditions
+
+<ResponseField name="requireSolBalance(amount, comparator?)" type="ChainableSolBuilder" />
+<ResponseField name="requireSolNftOwnership(collectionAddress)" type="ChainableSolBuilder" />
+<ResponseField name="requireSolWalletOwnership(address)" type="ChainableSolBuilder" />
+
+#### Cosmos Conditions
+
+<ResponseField name="requireCosmosBalance(amount, comparator?)" type="ChainableCosmosBuilder" />
+<ResponseField name="requireCosmosWalletOwnership(address)" type="ChainableCosmosBuilder" />
+<ResponseField name="requireCosmosCustom(path, key, value, comparator?)" type="ChainableCosmosBuilder">
+  <Expandable title="parameters" defaultOpen={true}>
+    <ResponseField name="path" type="string" required />
+    <ResponseField name="key" type="string" required />
+    <ResponseField name="value" type="string" required />
+    <ResponseField name="comparator" type="'contains' | '=' | '>' | '>=' | '<' | '<=' | '!=' | '!contains'">
+      Defaults to '='.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+
+#### Lit Action Conditions
+
+<ResponseField name="requireLitAction(ipfsCid, method, parameters, expectedValue, comparator?)" type="AccBuilder">
+  Create a condition validated by a Lit Action.
+  <Expandable title="parameters" defaultOpen={true}>
+    <ResponseField name="ipfsCid" type="string" required />
+    <ResponseField name="method" type="string" required />
+    <ResponseField name="parameters" type="string[]" required />
+    <ResponseField name="expectedValue" type="string" required />
+    <ResponseField name="comparator" type="'= | != | contains | !contains'">
+      Defaults to '='.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<Expandable title="example">
+
+```ts
+const conditions = createAccBuilder()
+  .requireLitAction(
+    'QmcgbVu2sJSPpTeFhBd174FnmYmoVYvUFJeDkS7eYtwoFY', // Weather check Lit Action
+    'go',
+    ['40'], // Max temperature 40°F
+    'true'
+  )
+  .build();
+```
+</Expandable>
+
+See [Weather Check Lit Action](https://explorer.litprotocol.com/ipfs/QmcgbVu2sJSPpTeFhBd174FnmYmoVYvUFJeDkS7eYtwoFY)
+
+
+#### Boolean operations
+
+<ResponseField name="and()" type="AccBuilder" />
+<ResponseField name="or()" type="AccBuilder" />
+
+---
+
+#### Build and utilities
+
+<ResponseField name="build()" type="AccessControlConditions">
+  Finalise and return the conditions array (unformatted; canonical formatting occurs downstream).
+</ResponseField>
+
+<ResponseField name="validate()" type="{ valid: boolean; errors: string[] }" />
+
+<ResponseField name="humanize()" type="Promise<string>">
+  Generate a human-readable explanation of the built conditions.
+</ResponseField>

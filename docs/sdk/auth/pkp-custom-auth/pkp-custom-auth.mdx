@@ -1,0 +1,165 @@
+---
+title: "PKP Custom Authentication"
+description: "Implement custom PKP authentication methods with Lit Actions"
+---
+
+# Prerequisites
+
+<Note>
+  💰 Need Test Tokens? Visit the [Chronicle Yellowstone
+  Faucet](https://chronicle-yellowstone-faucet.getlit.dev/) to get test tokens
+  for your EOA account.
+</Note>
+
+# What is Custom Authentication?
+
+Custom Authentication allows <b>dApp owners</b> to provide PKPs (Programmable Key Pairs) to their users without requiring them to understand blockchain technology or manage private keys. Instead of forcing users to learn new authentication methods, you can leverage your existing authentication systems (OAuth, APIs, databases) while providing them with powerful web3 capabilities.
+
+This demonstrates the complete <b>dApp-centric custom authentication</b> flow from both perspectives: the <b>Site Owner</b> who sets up the system and the User who interacts with it.
+
+# Overview
+
+In this example:
+
+- site owners control the PKP minting process and provide immutable validation logic via IPFS.
+- Users get pre-minted PKPs and authenticate through the site owner's validation Lit Action.
+
+# Site Owner Walkthrough
+
+<Steps>
+
+  <Step title="Configure dApp and Generate Auth Method Type">
+  Generate a unique authentication method type for your dApp using the dApp name. This creates a secure identifier that will be used for all PKP minting and validation.
+
+```ts
+// Generate unique auth method type for dApp
+import { utils as litUtils } from "@lit-protocol/lit-client";
+
+const authMethodConfig = litUtils.generateUniqueAuthMethodType({
+  uniqueDappName: "stellar-network-mrcsjy",
+});
+
+console.log("Auth Method Type (hex):", authMethodConfig.hex);
+console.log("Auth Method Type (bigint):", authMethodConfig.bigint);
+```
+
+  </Step>
+
+  <Step title="Create and Pin Validation Lit Action">
+    Create the validation logic as a Lit Action and pin it to IPFS for immutable validation. This code will run on Lit nodes to validate user authentication attempts.
+
+    ```ts Example Validation Lit Action
+    (async () => {
+      const dAppUniqueAuthMethodType = "0x...";
+      const { pkpPublicKey, username, password, authMethodId } = jsParams;
+
+      // Custom validation logic for awesome-platform-2dprnf
+      const EXPECTED_USERNAME = 'alice';
+      const EXPECTED_PASSWORD = 'lit';
+      const userIsValid = username === EXPECTED_USERNAME && password === EXPECTED_PASSWORD;
+
+      // Check PKP permissions
+      const tokenId = await Lit.Actions.pubkeyToTokenId({ publicKey: pkpPublicKey });
+      const permittedAuthMethods = await Lit.Actions.getPermittedAuthMethods({ tokenId });
+
+      const isPermitted = permittedAuthMethods.some((permittedAuthMethod) => {
+        return permittedAuthMethod["auth_method_type"] === dAppUniqueAuthMethodType &&
+              permittedAuthMethod["id"] === authMethodId;
+      });
+
+      const isValid = isPermitted && userIsValid;
+      LitActions.setResponse({ response: isValid ? "true" : "false" });
+    })();
+    ```
+
+    <Tip>
+    Opens [Lit Protocol Explorer](https://explorer.litprotocol.com/create-action) to create and pin your validation Lit Action
+    </Tip>
+
+    <Note>
+    🔍 <b>IPFS Visibility Required</b>: The IPFS CID must be publicly accessible via the Lit Explorer. If the CID isn't visible on explorer.litprotocol.com, the Lit nodes won't be able to fetch and execute your validation logic.
+    </Note>
+
+  </Step>
+
+  <Step title="Mint PKPs for Users">
+  Mint PKPs for your users using the custom auth method type and validation CID. Each user gets their own unique PKP tied to your dApp's authentication system.
+
+```ts
+import { utils as litUtils } from "@lit-protocol/lit-client";
+
+// Mint PKP for each user, assuming that's what you want to do
+for (const userId of ["alice", "bob"]) {
+  const authData = litUtils.generateAuthData({
+    uniqueDappName: "stellar-network-mrcsjy",
+    uniqueAuthMethodType: authMethodConfig.bigint,
+    userId: userId,
+  });
+
+  const { pkpData } = await litClient.mintWithCustomAuth({
+    account: siteOwnerAccount,
+    authData: authData,
+    scope: "sign-anything",
+    validationIpfsCid: "your-validation-cid-here",
+  });
+
+  // Store PKP info for user
+  database.users[userId].pkpPublicKey = pkpData.data.pubkey;
+}
+```
+
+  </Step>
+</Steps>
+
+# User Walkthrough
+
+How users interact with the dApp to authenticate and use their PKP
+
+<Steps>
+  <Step title="Login to dApp and Get PKP Inf">
+    User logs into the dApp frontend and retrieves their pre-minted PKP information from the dApp's backend. The dApp provides the PKP public key and validation details.
+
+    <Warning>
+    The following code is served as an example. It is not part of the SDK.
+    </Warning>
+
+    ```ts
+      // User login and PKP retrieval
+      const userDashboard = dappFrontend.login('alice', password);
+      const userPkpInfo = userDashboard.getMyPkpInfo();
+
+      console.log('User PKP Public Key:', userPkpInfo.pkpPublicKey);
+      console.log('Validation CID:', userPkpInfo.validationCid);
+    ```
+
+  </Step>
+
+  <Step title="Generate Custom Auth Context">
+  Create a custom auth context using the user's PKP and the dApp's validation IPFS CID. The Lit Action will validate the user's credentials against the dApp's authentication logic.
+
+```ts
+// Create custom auth context for user
+const customAuthContext = await authManager.createCustomAuthContext({
+  pkpPublicKey: userPkpInfo.pkpPublicKey,
+  authConfig: {
+    resources: [
+      ["pkp-signing", "*"],
+      ["lit-action-execution", "*"],
+    ],
+    expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+  },
+  litClient: litClient,
+  customAuthParams: {
+    litActionIpfsId: userPkpInfo.validationCid,
+    jsParams: {
+      pkpPublicKey: userPkpInfo.pkpPublicKey,
+      username: "alice",
+      password: userPassword,
+      authMethodId: userPkpInfo.authData.authMethodId,
+    },
+  },
+});
+```
+
+  </Step>
+</Steps>

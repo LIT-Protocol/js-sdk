@@ -1,0 +1,35 @@
+---
+title: "Security Model"
+description: "How Lit Protocol keeps data and assets secure"
+---
+
+# Lit Protocol's Security Model
+
+## Overview
+
+The following section provides a highly detailed and technical overview of how the Lit network keeps data and assets secure. For an introductory overview of how Lit works, check out the [how it works](/learning-lit/how-it-works) section.
+
+Lit uses Multi-Party Computation Threshold Signature Schemes (MPC TSS) and Trusted Execution Environments (TEEs) to manage secrets, perform signing and decryption operations, and execute Lit Actions. Each of these is actioned by every node in parallel and requires participation from more than two-thirds of the network to be executed.
+
+MPC TSS eliminates the central points of failure associated with key management, preventing any single entity from compromising or unilaterally accessing the private key material and other secrets managed by the network.
+
+The use of TEEs provide hardware-enforced isolation, ensuring that even if an adversary gains control of a node's infrastructure, **they cannot extract private key shares, manipulate computation outputs, or interfere with cryptographic execution.**
+
+## Audits
+
+All security audit reports can be found [here](https://drive.google.com/drive/folders/1Rrht88iUkzpofwl1CvP9gEjqY60BKyFn).
+
+## Bug Bounty Program
+
+We have a bug bounty program to reward security researchers who find and report vulnerabilities in our code. We are committed to keeping our code secure and we want to reward those who help us achieve that goal.
+
+Our repos can be found here on [Github](https://github.com/LIT-Protocol).
+
+If you find something and want to report it, email [bugs@litprotocol.com](mailto:bugs@litprotocol.com) with the following information:
+
+- A description of the vulnerability
+- Steps to reproduce the vulnerability
+- A description of the impact of the vulnerability
+- Your name, email address, and country of residence
+
+Not all our repos are covered by the bug bounty program. For example, our documentation repos and some application repos are not covered. If you are unsure if a repo is covered, please email [bugs@litprotocol.com](mailto:bugs@litprotocol.com) to check.

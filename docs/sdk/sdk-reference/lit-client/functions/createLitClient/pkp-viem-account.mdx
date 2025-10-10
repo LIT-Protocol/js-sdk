@@ -1,0 +1,30 @@
+---
+title: PKP Viem Account
+---
+
+<Tip>
+  See SDK Reference for more details on the PKP Viem Account. [PKP Viem Account
+  Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#getpkpviemaccount)
+</Tip>
+
+### What it is
+
+A drop‑in, Viem‑compatible `account` that behaves like an EOA account, but is backed by a PKP. It exposes `signMessage`, `signTransaction`, and `signTypedData` so existing Viem workflows continue to work unchanged, while signatures are produced by the Lit Network using your PKP.
+
+### Examples
+
+Creates a Viem account instance that can sign transactions using a PKP
+
+```typescript
+const pkpAccount = await litClient.getPkpViemAccount({
+  pkpPublicKey: '0x...',
+  authContext: { ... },
+  chainConfig: mainnet // from viem/chains
+});
+
+const txHash = await viemClient.sendTransaction({
+  account: pkpAccount,
+  to: '0x...',
+  value: parseEther('0.1')
+});
+```

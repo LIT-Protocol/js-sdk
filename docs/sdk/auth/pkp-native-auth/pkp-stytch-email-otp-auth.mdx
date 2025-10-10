@@ -1,0 +1,102 @@
+---
+title: "Stytch Email OTP"
+description: "Stytch Email OTP Authentication uses Stytch's Email OTP service to authenticate users through email verification. This method sends a one-time password (OTP) to your email address, which you then use to verify your identity and mint a PKP."
+---
+
+# Prerequisites
+
+<Warning>
+⚠️ Backend Required: This authentication method requires a backend service that handles Stytch Email OTP operations. The auth service already has the implementation in place with the `/stytch/email/send-otp` and `/stytch/email/verify-otp` endpoints, but they are disabled by default. Simply run your auth service at the configured URL to enable Stytch Email OTP functionality.
+</Warning>
+
+<Note>
+  Lit Auth Server URLs. Please refer to [Auth Services](/sdk/getting-started/auth-services#naga-dev-network) section.
+</Note>
+
+
+
+<Steps>
+  <Step title="Send OTP to Email">
+  Enter your email address to receive a one-time password (OTP). The OTP will be sent via Stytch's email service through your backend.
+
+  ```ts
+  import { StytchEmailOtpAuthenticator } from "@lit-protocol/auth";
+
+  const { methodId } = await StytchEmailOtpAuthenticator.sendOtp({
+    email: "user@example.com",
+    authServiceBaseUrl: "https://naga-auth-service.onrender.com"
+  });
+  ```
+  </Step>
+
+  <Step title="Verify OTP">
+  Enter the OTP code sent to your email to verify your identity and generate authentication data.
+
+  ```ts
+  import { StytchEmailOtpAuthenticator } from "@lit-protocol/auth";
+
+  const authData = await StytchEmailOtpAuthenticator.authenticate({
+    methodId: methodId, // from sendOtp step
+    code: "123456", // user-entered OTP code
+    authServiceBaseUrl: "https://naga-auth-service.onrender.com"
+  });
+  ```
+  </Step>
+
+  <Step title="Setup TOTP 2FA (Optional)">
+  Add an extra layer of security to your account by setting up TOTP (Time-based One-Time Password) 2FA. This will allow you to use authenticator apps like Google Authenticator, Authy, or 1Password for future logins.
+
+  See [TOTP 2FA](/sdk/auth/pkp-native-auth/pkp-stytch-2fa-totp-auth) for more details.
+  </Step>
+
+  <Step title="Get or Mint a PKP">
+    You can select an existing PKP associated with your account or mint a new one.
+
+    <CodeGroup>
+      ```ts Mint a fresh PKP
+      const res = await litClient.authService.mintWithAuth({
+        authData: authData,
+      });
+      ```
+
+      ```ts Using an existing PKP
+      const result = await litClient.viewPKPsByAuthData({
+        authData: {
+          authMethodType: authData.authMethodType,
+          authMethodId: authData.authMethodId,
+        },
+        pagination: {
+          limit: 5,
+          offset: 0,
+        }
+      });
+      ```
+    </CodeGroup>
+  </Step>
+
+    <Step title="Generate Auth Context">
+Use your newly minted PKP to create an AuthContext. This method will cache two things:
+1. session key pair - a temporary cryptographic key pair generated on the client side that acts as a temporary identity for the client application. It consists of:
+    - A public key - shared with the Lit nodes
+    - A secret key (private key) - kept securely on the client
+2. Delegation AuthSig aka. the inner auth sig - a cryptographic attestation from the Lit Protocol nodes that authorises your session key to act on behalf of your PKP.
+
+```ts
+
+const authContext = await authManager.createPkpAuthContext({
+  authData: authData, // <-- Retrieved earlier
+  pkpPublicKey: pkpInfo.pubkey, // <-- Minted earlier
+  authConfig: {
+    resources: [
+      ["pkp-signing", "*"],
+      ["lit-action-execution", "*"],
+    ],
+    expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+    statement: "",
+    domain: window.location.origin,
+  },
+  litClient: litClient,
+});
+```
+  </Step>
+</Steps>

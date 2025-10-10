@@ -1,0 +1,303 @@
+---
+title: createAuthManager
+---
+
+# Functions
+
+> **createAuthManager**(`authManagerParams`)
+
+
+## Parameters
+
+<ParamField path="param.storage" type="LitAuthStorageProvider" required>
+  The storage provider used by the Auth Manager.
+  ```ts
+  import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
+  const authManager = createAuthManager({
+    storage: storagePlugins.localStorageNode({
+      appName: "my-app",
+      networkName: "naga-local",
+      storagePath: "./lit-auth-local",
+    }),
+  });
+  ```
+</ParamField>
+
+## Returns
+
+<ResponseField name="AuthManager" type="object">
+  Complete AuthManager object with all returned methods.
+</ResponseField>
+
+---
+
+### createEoaAuthContext
+
+Create an EOA (Externally Owned Account) auth context adapter for signing and session issuance.
+
+#### Parameters
+
+<ResponseField name="params" type="object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="config" type="object" required>
+      EOA configuration for the adapter.
+      <Expandable title="properties">
+        <ResponseField name="account" type="Account | WalletClient | Signer" required>
+          The EOA used for auth/signing.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="authConfig" type="AuthConfigV2" required>
+      Configuration for statements, resources, expiration, etc.
+      <Expandable title="properties">
+        <ResponseField name="statement" type="string">
+          SIWE statement suffix appended to Auth message.
+        </ResponseField>
+        <ResponseField name="domain" type="string">
+          Domain used in auth message.
+        </ResponseField>
+        <ResponseField name="resources" type="LitResourceAbilityRequest[]">
+          Capability resources to include (e.g., ['lit-action-execution','*']).
+        </ResponseField>
+        <ResponseField name="capabilityAuthSigs" type="AuthSig[]">
+          Optional capability signatures.
+        </ResponseField>
+        <ResponseField name="expiration" type="ISO 8601 string">
+          Session expiration timestamp (e.g., new Date(Date.now() + 1000*60*15).toISOString()).
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="litClient" type="LitClient" required>
+      The Lit client instance used for network interactions.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="EoaAuthContext" type="object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="account" type="Account | WalletClient | Signer" required>
+      The EOA used for signing.
+    </ResponseField>
+    <ResponseField name="authenticator" type="Authenticator" required>
+      The authenticator used (e.g., ViemAccountAuthenticator, WalletClientAuthenticator).
+    </ResponseField>
+    <ResponseField name="authData" type="AuthData" required>
+      Auth data produced by the authenticator.
+    </ResponseField>
+    <ResponseField name="authNeededCallback" type="() => Promise<AuthSig>" required>
+      Callback that returns an AuthSig for session issuance when needed.
+    </ResponseField>
+    <ResponseField name="sessionKeyPair" type="SessionKeyPair" required>
+      Ephemeral session key pair associated with the context.
+    </ResponseField>
+    <ResponseField name="authConfig" type="object" required>
+      <Expandable title="properties">
+        <ResponseField name="expiration" type="ISO 8601 string" required />
+        <ResponseField name="statement" type="string" />
+        <ResponseField name="domain" type="string" />
+        <ResponseField name="resources" type="LitResourceAbilityRequest[]" />
+        <ResponseField name="capabilityAuthSigs" type="AuthSig[]" />
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+```ts
+import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
+
+const authManager = createAuthManager({
+  storage: storagePlugins.localStorageNode({
+    appName: 'my-app',
+    networkName: 'naga-local',
+    storagePath: './lit-auth-local'
+  })
+});
+
+const eoaAuthContext = await authManager.createEoaAuthContext({
+  config: { account: myViemAccount },
+  authConfig: {
+    statement: 'I authorize this action.',
+    domain: 'example.com',
+    resources: [ ['lit-action-execution','*'], ['pkp-signing','*'] ],
+    expiration: new Date(Date.now()+1000*60*15).toISOString()
+  },
+  litClient
+});
+
+// Use with litClient
+await litClient.executeJs({ code: '...', authContext: eoaAuthContext });
+```
+
+---
+
+### createPkpAuthContext
+
+Create a PKP auth context adapter using a user's AuthData and a PKP public key.
+
+#### Parameters
+
+<ResponseField name="params" type="object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="authData" type="AuthData" required>
+      Authentication data (e.g., from ViemAccountAuthenticator.authenticate(account)).
+    </ResponseField>
+    <ResponseField name="pkpPublicKey" type="0x-hex string" required>
+      The PKP public key to bind the context to.
+    </ResponseField>
+    <ResponseField name="authConfig" type="AuthConfigV2" required>
+      Config controlling resources and expiration for the PKP session.
+      <Expandable title="properties">
+        <ResponseField name="resources" type="LitResourceAbilityRequest[]" required />
+        <ResponseField name="expiration" type="ISO 8601 string" required />
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="litClient" type="LitClient" required />
+    <ResponseField name="cache" type="object">
+      Optional cache hints.
+      <Expandable title="properties">
+        <ResponseField name="delegationAuthSig" type="boolean">
+          Whether to cache/store a delegationAuthSig if created.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="PkpAuthContext" type="object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="chain" type="string" required>
+      Currently 'ethereum'.
+    </ResponseField>
+    <ResponseField name="pkpPublicKey" type="0x-hex string" required />
+    <ResponseField name="authData" type="AuthData" required />
+    <ResponseField name="authNeededCallback" type="() => Promise<AuthSig>" required />
+    <ResponseField name="authConfig" type="object" required>
+      <Expandable title="properties">
+        <ResponseField name="expiration" type="ISO 8601 string" required />
+        <ResponseField name="statement" type="string" />
+        <ResponseField name="domain" type="string" />
+        <ResponseField name="resources" type="LitResourceAbilityRequest[]" />
+        <ResponseField name="capabilityAuthSigs" type="AuthSig[]" />
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="sessionKeyPair" type="SessionKeyPair" required />
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+```ts
+import { ViemAccountAuthenticator } from '@lit-protocol/auth';
+
+const authData = await ViemAccountAuthenticator.authenticate(myViemAccount);
+const pkpAuthContext = await authManager.createPkpAuthContext({
+  authData,
+  pkpPublicKey: myPkp.publicKey,
+  authConfig: {
+    resources: [ ['pkp-signing','*'], ['lit-action-execution','*'] ],
+    expiration: new Date(Date.now()+1000*60*30).toISOString()
+  },
+  litClient
+});
+
+// Example: sign via PKP Viem account integration
+const pkpAccount = await litClient.getPkpViemAccount({
+  pkpPublicKey: myPkp.publicKey,
+  authContext: pkpAuthContext,
+  chainConfig: myChain
+});
+```
+
+---
+
+### createCustomAuthContext
+
+Create a Custom auth context that validates using a Lit Action (by inline code or IPFS CID).
+
+#### Parameters
+
+<ResponseField name="params" type="object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="pkpPublicKey" type="0x-hex string" required>
+      PKP public key used in the custom auth flow.
+    </ResponseField>
+    <ResponseField name="authConfig" type="AuthConfigV2" required>
+      Config controlling resources and expiration for the session.
+    </ResponseField>
+    <ResponseField name="litClient" type="LitClient" required />
+    <ResponseField name="customAuthParams" type="object" required>
+      Custom Lit Action parameters.
+      <Expandable title="properties">
+        <ResponseField name="litActionCode" type="string">
+          Inline Lit Action code (base64-encoding handled externally if needed).
+        </ResponseField>
+        <ResponseField name="litActionIpfsId" type="string">
+          IPFS CID of the Lit Action to run.
+        </ResponseField>
+        <ResponseField name="jsParams" type="record">
+          Arbitrary parameters exposed inside the Lit Action. Note: The implementation nests your provided object under a top-level key `jsParams` before sending to nodes.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="CustomAuthContext" type="object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="chain" type="string" required>
+      Currently 'ethereum'.
+    </ResponseField>
+    <ResponseField name="pkpPublicKey" type="0x-hex string" required />
+    <ResponseField name="customParams" type="object">
+      <Expandable title="properties">
+        <ResponseField name="litActionCode" type="string" />
+        <ResponseField name="litActionIpfsId" type="string" />
+        <ResponseField name="jsParams" type="record">
+          Note: Adapter nests your provided object under a top-level key 'jsParams' before sending to nodes.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="authNeededCallback" type="() => Promise<AuthSig>" required />
+    <ResponseField name="authConfig" type="object" required>
+      <Expandable title="properties">
+        <ResponseField name="expiration" type="ISO 8601 string" required />
+        <ResponseField name="statement" type="string" />
+        <ResponseField name="domain" type="string" />
+        <ResponseField name="resources" type="LitResourceAbilityRequest[]" />
+        <ResponseField name="capabilityAuthSigs" type="AuthSig[]" />
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="sessionKeyPair" type="SessionKeyPair" required />
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+```ts
+const customAuthContext = await authManager.createCustomAuthContext({
+  pkpPublicKey: evePkp.publicKey,
+  authConfig: {
+    resources: [ ['pkp-signing','*'], ['lit-action-execution','*'] ],
+    expiration: new Date(Date.now()+1000*60*30).toISOString()
+  },
+  litClient,
+  customAuthParams: {
+    litActionIpfsId: 'QmYourLitActionCID',
+    jsParams: { 
+      userId: 'eve',
+      password: 'password'
+  }
+});
+
+await litClient.executeJs({ ipfsId: 'QmYourLitActionCID', authContext: customAuthContext });
+```

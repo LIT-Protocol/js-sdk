@@ -1,0 +1,89 @@
+---
+title: "Lit Client Setup"
+description: "Configure the Lit Protocol client for the Lit JS SDK"
+---
+
+<Tip>
+See SDK Reference for more details on the Lit Client. [Lit Client Reference](/sdk/sdk-reference/lit-client/functions/createLitClient)
+</Tip>
+
+## Overview
+
+The Lit Client is the core interface for interacting with the Lit Protocol network.
+
+<Steps>
+  <Step title="Install the SDK">
+    Run the following command to install the SDK:
+
+    <CodeGroup>
+
+    ```bash npm
+    npm i @lit-protocol/lit-client @lit-protocol/networks
+    ```
+
+    ```bash yarn
+    yarn add @lit-protocol/lit-client @lit-protocol/networks
+    ```
+
+    ```bash pnpm
+    pnpm add @lit-protocol/lit-client @lit-protocol/networks
+    ```
+
+    ```bash bun
+    bun add @lit-protocol/lit-client @lit-protocol/networks
+    ```
+
+    </CodeGroup>
+
+  </Step>
+
+  <Step title="Network Configuration & Client Creation">
+    Choose the appropriate network based on your development stage and requirements, then create your Lit Client instance.
+
+    Choose the appropriate network based on your development stage and requirements, then create your Lit Client instance.
+
+<CodeGroup>
+
+```typescript dev
+import { nagaDev } from "@lit-protocol/networks";
+import { createLitClient } from "@lit-protocol/lit-client";
+
+const litClient = await createLitClient({
+  network: nagaDev,
+});
+```
+
+```typescript test
+// ❗️ Currently in development. Coming soon...
+import { nagaTest } from "@lit-protocol/networks";
+import { createLitClient } from "@lit-protocol/lit-client";
+
+const litClient = await createLitClient({
+  network: nagaTest,
+});
+```
+
+```typescript production
+// ❗️ Currently in development. Coming soon...
+import { nagaProduction } from "@lit-protocol/networks";
+import { createLitClient } from "@lit-protocol/lit-client";
+
+const litClient = await createLitClient({
+  network: nagaProduction,
+});
+```
+
+</CodeGroup>
+
+  </Step>
+</Steps>
+
+## Network Comparison
+
+Select the appropriate network environment based on your development stage and requirements. Each network offers different characteristics for testing and production use cases.
+
+| Network        | Type          | Key Persistence  | Payment Required | Use Case               | Status         |
+| -------------- | ------------- | ---------------- | ---------------- | ---------------------- | -------------- |
+| **Dev**        | Centralised   | ❌ Temporary     | ❌ Free          | Development & Testing  | ✅ Available   |
+| **Test**       | Decentralised | ⚠️ No guarantees | ✅ Required      | Pre-production Testing | ❌ Coming Soon |
+| **Production** | Decentralised | ✅ Persistent    | ✅ Required      | Live Applications      | ❌ Coming Soon |
