@@ -1,5 +1,14 @@
 # @lit-protocol/auth-services
 
+## 2.0.2
+
+### Patch Changes
+
+- 9ec9ea9: naga-test release
+- Updated dependencies [9ec9ea9]
+  - @lit-protocol/contracts@0.5.3
+  - @lit-protocol/logger@8.0.2
+
 ## 2.0.1
 
 ### Patch Changes

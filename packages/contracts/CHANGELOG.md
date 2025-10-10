@@ -1,5 +1,11 @@
 # @lit-protocol/contracts
 
+## 0.5.3
+
+### Patch Changes
+
+- 9ec9ea9: naga-test release
+
 ## 0.5.2
 
 ### Patch Changes
