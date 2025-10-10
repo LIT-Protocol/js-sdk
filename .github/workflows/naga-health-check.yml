@@ -41,7 +41,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.naga_branch || github.ref }}
+          repository: LIT-Protocol/js-sdk
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.naga_branch || 'naga' }}
           fetch-depth: 1
 
       - name: Install rust
@@ -66,6 +67,17 @@ jobs:
         run: |
           corepack enable
           corepack prepare pnpm@9.15.0 --activate
+
+      - name: Print repo, branch and lockfile context
+        run: |
+          echo "Repo: $GITHUB_REPOSITORY"
+          echo "Checked out repo: LIT-Protocol/js-sdk"
+          echo "Ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.naga_branch || 'naga' }}"
+          echo "Checked out ref: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Current commit: $(git rev-parse HEAD)"
+          echo "Node: $(node -v)"
+          echo "PNPM: $(pnpm --version)"
+          [ -f pnpm-lock.yaml ] && echo "pnpm-lock.yaml present" || echo "pnpm-lock.yaml missing"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

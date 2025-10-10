@@ -73,6 +73,18 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
+      - name: Print repo and branch context
+        run: |
+          echo "Repo: $GITHUB_REPOSITORY"
+          echo "Head branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "Workflow head_sha: ${{ github.event.workflow_run.head_sha }}"
+          echo "Checked out ref: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Current commit: $(git rev-parse HEAD)"
+          echo "Node: $(node -v)"
+          echo "PNPM: $(pnpm --version)"
+          [ -f pnpm-lock.yaml ] && echo "pnpm-lock.yaml present" || echo "pnpm-lock.yaml missing"
+          [ -d .changeset ] && echo ".changeset present" || echo ".changeset missing"
+
       - name: Install project dependencies
         run: pnpm install --frozen-lockfile
 
@@ -92,8 +104,10 @@ jobs:
         id: branch_tip
         run: |
           BRANCH="${{ github.event.workflow_run.head_branch }}"
-          git fetch origin "$BRANCH"
-          echo "sha=$(git rev-parse \"origin/$BRANCH\")" >> "$GITHUB_OUTPUT"
+          git fetch --no-tags --prune --depth=1 origin "$BRANCH"
+          TIP_SHA=$(git rev-parse --verify "origin/$BRANCH^{commit}")
+          echo "Resolved branch tip SHA: $TIP_SHA"
+          echo "sha=$TIP_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
