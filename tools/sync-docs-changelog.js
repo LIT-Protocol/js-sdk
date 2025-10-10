@@ -5,6 +5,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const PACKAGES_DIR = path.join(ROOT, 'packages');
+const ORG_SCOPE = '@lit-protocol/';
 
 function resolveDocsChangelogPaths() {
   const arg = process.argv.find((value) => value.startsWith('--docs='));
@@ -28,7 +29,6 @@ function resolveDocsChangelogPaths() {
 
   candidates.push({ path: path.resolve(ROOT, 'docs', 'changelog.mdx'), allowCreate: false });
   candidates.push({ path: path.resolve(ROOT, '..', 'docs-v2', 'changelog.mdx'), allowCreate: false });
-  candidates.push({ path: path.resolve(ROOT, '..', 'naga-doc', 'changelog.mdx'), allowCreate: false });
 
   const resolved = [];
   const seen = new Set();
@@ -358,7 +358,9 @@ async function main() {
     }
 
     const sections = parseReleaseSections(latest.content);
-    const labelText = `${packageName.replace('@lit-protocol/', '')}`;
+    const labelText = packageName.startsWith(ORG_SCOPE)
+      ? packageName.slice(ORG_SCOPE.length)
+      : packageName;
     const label = escapeAttribute(labelText);
     let descriptionText = null;
     for (const section of sections) {
@@ -404,10 +406,10 @@ async function main() {
   }
 
   const priorityNames = [
-    '@lit-protocol/lit-client',
-    '@lit-protocol/auth',
-    '@lit-protocol/networks',
-    '@lit-protocol/auth-services',
+    `${ORG_SCOPE}lit-client`,
+    `${ORG_SCOPE}auth`,
+    `${ORG_SCOPE}networks`,
+    `${ORG_SCOPE}auth-services`,
   ];
   const priorityDirs = ['lit-client', 'auth', 'networks', 'auth-services'];
 
