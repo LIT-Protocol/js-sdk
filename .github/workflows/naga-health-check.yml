@@ -27,6 +27,7 @@ env:
 jobs:
   naga-health-check:
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'LIT-Protocol/js-sdk' }}
     environment: Health Check
     strategy:
       fail-fast: false
