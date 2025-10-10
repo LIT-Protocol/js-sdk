@@ -169,3 +169,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Sync docs changelog
+        run: pnpm sync:docs-changelog
+
+      - name: Commit docs changelog
+        run: |
+          if git diff --quiet docs/changelog.mdx; then
+            echo "Docs changelog already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/changelog.mdx
+          git commit -m "chore: sync docs changelog"
+          git push origin ${{ github.ref_name }}

@@ -1,0 +1,84 @@
+---
+title: "WebAuthn"
+description: "WebAuthn Authentication uses your device's secure hardware (such as fingerprint sensor, facial recognition, or security key) to authenticate you via the FIDO2/WebAuthn standard. This can be used to mint a PKP and then sign messages."
+---
+
+# Prerequisites
+
+<Note>
+  Lit Auth Server URLs. Please refer to [Auth Services](/sdk/getting-started/auth-services#naga-dev-network) section.
+</Note>
+
+<Steps>
+  <Step title="Register WebAuthn Credential and mint a PKP OR authenticate with an existing WebAuthn credential">
+  1a. Register a new WebAuthn credential using the options obtained from the server. This will prompt you to use your device's authentication method (fingerprint, face ID, etc.). Then, we immediately mint a PKP and associate it with it.
+
+  1b. If you already have a registered WebAuthn credential, you can authenticate with it directly.
+
+  <Warning>Each WebAuthn credential is bound to a single PKP; you cannot mint another with it.</Warning>
+
+    <CodeGroup>
+
+    ```ts Register a new WebAuthn credential and mint a PKP
+    import { WebAuthnAuthenticator } from "@lit-protocol/auth";
+
+    const { pkpInfo, webAuthnPublicKey } = await WebAuthnAuthenticator.registerAndMintPKP({
+      authServiceBaseUrl: "https://naga-auth-service.onrender.com",
+      scopes: ["sign-anything"],
+    });
+    ```
+
+    ```ts Using an existing WebAuthn credential
+    import { WebAuthnAuthenticator } from "@lit-protocol/auth";
+
+    const authData = await WebAuthnAuthenticator.authenticate({
+      authServiceBaseUrl: "https://naga-auth-service.onrender.com",
+    });
+    ```
+
+
+    </CodeGroup>
+  </Step>
+
+  <Step title="Get your PKP">
+
+  ```ts
+  const result = await litClient.viewPKPsByAuthData({
+    authData: {
+      authMethodType: authData.authMethodType,
+      authMethodId: authData.authMethodId,
+    },
+    pagination: {
+      limit: 5,
+      offset: 0,
+    }
+  });
+  ```
+  </Step>
+
+    <Step title="Generate Auth Context">
+Use your newly minted PKP to create an AuthContext. This method will cache two things:
+1. session key pair - a temporary cryptographic key pair generated on the client side that acts as a temporary identity for the client application. It consists of:
+    - A public key - shared with the Lit nodes
+    - A secret key (private key) - kept securely on the client
+2. Delegation AuthSig aka. the inner auth sig - a cryptographic attestation from the Lit Protocol nodes that authorises your session key to act on behalf of your PKP.
+
+```ts
+
+const authContext = await authManager.createPkpAuthContext({
+  authData: authData, // <-- Retrieved earlier
+  pkpPublicKey: pkpInfo.pubkey, // <-- Minted earlier
+  authConfig: {
+    resources: [
+      ["pkp-signing", "*"],
+      ["lit-action-execution", "*"],
+    ],
+    expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+    statement: "",
+    domain: window.location.origin,
+  },
+  litClient: litClient,
+});
+```
+  </Step>
+</Steps>

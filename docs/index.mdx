@@ -1,0 +1,72 @@
+---
+title: "What is Lit Protocol"
+description: "Decentralized key management and private compute"
+---
+
+# Overview
+
+Lit Protocol is a decentralized key management and private compute network. Lit provides developers building in Web3 with three core primitives:
+
+1. [Decentralized Signing and Wallet Management](https://litprotocol.mintlify.app/sdk/auth-context-consumption/pkp-sign) (support for ECDSA and EdDSA signatures) via MPC TSS + TEEs
+2. [Decentralized Encryption / Decryption](https://litprotocol.mintlify.app/sdk/auth-context-consumption/encrypt-and-decrypt) (identity-based BLS encryption scheme) via MPC TSS + TEEs
+3. [Private Compute](https://litprotocol.mintlify.app/sdk/auth-context-consumption/execute-js) executed via Lit's MPC TSS network and protected by sealed TEEs
+
+## The Problem
+
+Lit Protocol is a decentralized key management network that solves the fundamental Web3 security dilemma: how to manage secrets without compromising security, user experience, or decentralization. The network empowers developers to create secure, decentralized applications that manage crypto assets, private data, and user authority seamlessly across any blockchain or distributed system.
+
+Traditional approaches force an impossible choice. Giving private keys or credentials to centralized servers creates massive security responsibilities and single points of failure. Putting the burden entirely on end users requires them to navigate complex key management and opens up avenues for compromise. Lit Protocol eliminates this tradeoff.
+
+Lit's distributed architecture ensures secrets remain verifiably secure - encrypted at the hardware level and fragmented across a decentralized network with no single point of failure. Using threshold signature schemes (MPC TSS) as a foundation means that for the first time, universal accounts can be programmed and automated without trusting centralized custodians.
+
+This underlying security architecture enables powerful developer capabilities. Using Lit's SDK, builders can easily:
+
+- Encrypt and decrypt private data
+- Create and manage Web3 wallets, accounts, and signers
+- Sign transactions and messages on virtually any blockchain
+- Execute automated signing and/or decryption operations based on programmable conditions
+- Read and write to any off-chain endpoint to ensure compatibility with legacy systems and the rest of the web2 world
+
+These capabilities enable builders to create immutable, interoperable, and user-owned applications, AI agents, and protocols.
+
+Explore our [Whitepaper](https://github.com/LIT-Protocol/whitepaper), view the open source [Lit Node code](https://github.com/LIT-Protocol/Node), and review our [Audit reports](https://drive.google.com/drive/folders/1Rrht88iUkzpofwl1CvP9gEjqY60BKyFn?ref=spark.litprotocol.com).
+
+## Use Cases and Live Implementations
+
+Lit Protocol's versatile architecture supports a wide range of applications across various categories:
+
+### Web3 Wallets and User Onboarding
+
+Developers can use Lit to generate and manage non-custodial keys using a variety of flexible authentication flows (ex. oAuth and Passkeys) with support for programmable transaction automation. This functionality enables seamless onboarding experiences that don't sacrifice UX while keeping users in control. Examples include [Collab.Land](https://www.collab.land/), [Plurality Network](https://plurality.network/), and [Genius Protocol](https://www.tradegenius.com/) who are using Lit to create user-friendly wallet experiences and account abstraction solutions.
+
+### Digital Identity
+
+Lit allows for flexible encryption and access management based on blockchain state, token ownership, or other on/off-chain conditions. This can be used for digital identity and IP rights management, verifiable data marketplaces, DWeb storage solutions, and more. [Streamr](https://streamr.network/), [Bonny](https://bonny.so/), [Cheqd](https://cheqd.io/), [Beacon Protocol](https://beaconprotocol.com/), [Lens Protocol](https://www.lens.xyz/), [Irys](https://irys.xyz/), [Verify (Fox Corp)](https://docs.verifymedia.com/publishing/access-control/methods/lit-protocol), and [Alexandria Labs](https://www.alexandriabooks.com/) are examples of protocols using Lit for secure data management and distribution.
+
+### Chain Abstraction and DeFi
+
+Developers can utilize Lit's programmable and chain-agnostic signing capabilities to facilitate cross-chain interoperability and generalized message passing to create a more unified and capital efficient Web3 ecosystem. Live implementations include [Genius Protocol](https://www.tradegenius.com/), [Tria](https://www.tria.so/), [Emblem Vault](https://emblem.vision/), [Eco](https://eco.com/), [Polaris](https://polaris.app/), [VaultLayer](https://vaultlayer.xyz/), and [GVNR](https://gvnr.xyz/).
+
+### Data Oracles and Real-World Integration
+
+Lit enables the creation of data oracles that securely fetch off-chain data for use in on-chain applications, bridging the gap between smart contracts and real-world information.
+
+> **📝 Data Oracle Kit**
+> 
+> The [Lit Oracle Kit](https://github.com/LIT-Protocol/lit-oracle-kit) demonstrates how the Lit Network can be used to sign data pulled from the web (or another blockchain) and write it to chain.
+> 
+> **Note:** This kit is currently built for V7 of the Lit SDK. A V8 version is coming soon!
+
+### AI Agents and Infrastructure
+
+Agent devs can use Lit's signing and compute capabilities to build autonomous, verifiable, and unruggable agents and infra solutions. If you're focused on building in this category, check out Lit's [Vincent](https://heyvincent.ai/) automation system and agent deployment kit to get started.
+
+### Web3 Infrastructure
+
+Projects in this category are focused on delivering essential infrastructure critical to various aspects Web3 application development. This includes payment infrastructure, smart contract tooling, grants management, video streaming, and more. The following projects leverage Lit's signing, encryption, and compute capabilities in a multitude of ways to deliver value to end consumers. [Request Network](https://request.network/), [Crossmint](https://www.crossmint.com/), [Gitcoin](https://www.gitcoin.co/), [Livepeer](https://www.livepeer.org/), [Hats Protocol](https://www.hatsprotocol.xyz/), [Open Campus](https://opencampus.xyz/), [CharmVerse](https://charmverse.io/), [Spheron Network](https://www.spheron.network/), and [Sign Protocol](https://sign.global/).
+
+## Next Steps
+
+To learn more about how Lit Protocol works and keeps assets and data secure, continue on to the sections ahead. 
+
+If you're a developer looking to build with the Lit SDK, check out the [Build with Lit](https://litprotocol.mintlify.app/sdk/introduction) section to get started.

@@ -1,0 +1,35 @@
+---
+title: PKP View Helpers
+---
+
+These helper methods are useful for getting information about PKPs.
+
+## viewPKPPermissions
+
+Returns the current permissions for a PKP (permitted addresses, Lit Actions, and auth methods with scopes)
+
+```ts
+const permissions = await litClient.viewPKPPermissions({...});
+```
+
+[See Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#viewpkppermissions)
+
+## viewPKPsByAuthData
+
+Lists PKPs linked to a given authentication data payload
+
+```ts
+const pkps = await litClient.viewPKPsByAuthData({...});
+```
+
+[See Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#viewpkpsbyauthdata)
+
+## viewPKPsByAddress
+
+Lists PKPs that permit a specific EVM address (which PKPs that address can operate).
+
+```ts
+const pkps = await litClient.viewPKPsByAddress({...});
+```
+
+[See Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#viewpkpsbyaddress)

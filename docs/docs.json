@@ -1,0 +1,158 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Lit JS SDK Documentation",
+  "colors": {
+    "primary": "#EA580C",
+    "light": "#F97316",
+    "dark": "#EA580C"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Learning Lit",
+        "pages": [
+          "index",
+          "learning-lit/how-it-works",
+          {
+            "group": "Security",
+            "pages": [
+              "learning-lit/security",
+              "learning-lit/node-architecture",
+              "learning-lit/distributed-key-generation",
+              "learning-lit/on-chain-coordination-mechanisms",
+              "learning-lit/communicating-with-lit-nodes",
+              "learning-lit/cryptoeconomic-security",
+              "learning-lit/backup-and-recovery"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Build with Lit",
+        "groups": [
+          {
+            "group": "SDK",
+            "pages": ["sdk/introduction"]
+          },
+          {
+            "group": "Getting Started",
+            "pages": [
+              {
+                "group": "Prerequisites",
+                "pages": [
+                  "sdk/getting-started/prerequisites/faucet",
+                  "sdk/getting-started/prerequisites/chain-config"
+                ]
+              },
+              "sdk/getting-started/lit-client",
+              "sdk/getting-started/auth-manager",
+              "sdk/getting-started/payment-manager-setup",
+              "sdk/getting-started/auth-services"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              {
+                "group": "PKP Native Auth",
+                "pages": [
+                  "sdk/auth/pkp-native-auth/pkp-eoa-auth",
+                  "sdk/auth/pkp-native-auth/pkp-google-auth",
+                  "sdk/auth/pkp-native-auth/pkp-discord-auth",
+                  "sdk/auth/pkp-native-auth/pkp-webauthn-auth",
+                  "sdk/auth/pkp-native-auth/pkp-stytch-email-otp-auth",
+                  "sdk/auth/pkp-native-auth/pkp-stytch-sms-otp-auth",
+                  "sdk/auth/pkp-native-auth/pkp-stytch-whatsapp-otp-auth",
+                  "sdk/auth/pkp-native-auth/pkp-stytch-2fa-totp-auth"
+                ]
+              },
+              "sdk/auth/pkp-custom-auth/pkp-custom-auth",
+              "sdk/auth/eoa/eoa-auth"
+            ]
+          },
+          {
+            "group": "Core API Methods",
+            "pages": [
+              "sdk/auth-context-consumption/pkp-sign",
+              "sdk/auth-context-consumption/execute-js",
+              "sdk/auth-context-consumption/encrypt-and-decrypt"
+            ]
+          },
+          {
+            "group": "PKP Wallet Management",
+            "pages": [
+              "sdk/sdk-reference/lit-client/functions/createLitClient/pkp-viem-account",
+              "sdk/sdk-reference/lit-client/functions/createLitClient/pkp-permissions",
+              "sdk/sdk-reference/lit-client/functions/createLitClient/pkp-view-helpers"
+            ]
+          },
+          {
+            "group": "Access Control Conditions",
+            "pages": [
+              "sdk/sdk-reference/access-control-conditions/functions/createAccBuilder"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              {
+                "group": "@lit-protocol/lit-client",
+                "pages": [
+                  "sdk/sdk-reference/lit-client/functions/createLitClient"
+                ]
+              },
+              {
+                "group": "@lit-protocol/auth",
+                "pages": ["sdk/sdk-reference/auth/functions/createAuthManager"]
+              },
+              {
+                "group": "@lit-protocol/networks",
+                "pages": ["sdk/sdk-reference/networks/functions/withOverrides"]
+              }
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": ["sdk/resources/supported-evm-chains"]
+          }
+        ]
+      },
+      {
+        "tab": "Changelog",
+        "pages": ["changelog"]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "https://developer.litprotocol.com/support/intro"
+      }
+    ]
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://twitter.com/litprotocol",
+      "discord": "https://litgateway.com/discord"
+    }
+  }
+}

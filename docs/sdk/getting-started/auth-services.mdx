@@ -1,0 +1,241 @@
+---
+title: "Auth Services Setup"
+description: "Configure auth services for the Lit JS SDK"
+---
+
+<Note>
+  💰 Need Test Tokens? Visit the [Chronicle Yellowstone
+  Faucet](https://chronicle-yellowstone-faucet.getlit.dev/) to get test tokens
+  for your EOA account.
+</Note>
+
+## Overview
+
+The Lit Protocol Auth Services package helps you run the infrastructure required to mint Programmable Key Pairs (PKPs) and power OAuth-based sign-in flows.
+
+- `Auth Service`: Handles PKP minting for supported auth methods and exposes APIs consumed by the Lit JS SDK.
+- `Login Server`: Manages OAuth flows (Google, Discord, etc.) and issues short-lived session tokens that the Auth Service consumes.
+
+## Hosted Auth Services
+
+Lit hosts default Auth Service instances so you can build without deploying infrastructure on day one. Point your application to the URL that matches the network you're targeting:
+
+| Network     | Auth Service URL                            | Login Server                   | Usage |
+| ----------- | ------------------------------------------- | ------------------------------ | ----- |
+| `naga-dev`  | `https://naga-dev-auth-service.getlit.dev`  | `https://login.litgateway.com` | Use Lit's hosted endpoints while you prototype. Configure your SDK or environment variables with the URLs in this table. |
+| `naga-test` | `https://naga-test-auth-service.getlit.dev` | `https://login.litgateway.com` | Start with the hosted endpoints for staging, then switch to your own infrastructure as you scale. |
+| `naga`      | `Run your own (recommended)`                | `Run your own (recommended)`   | Lit does not operate public Auth Service or Login Server endpoints for `naga` |
+
+<Note>
+  The hosted services are best suited for prototyping. Self-host the Auth
+  Service and Login Server for production traffic or when you need custom
+  configuration.
+</Note>
+
+
+### Install the SDK
+
+Run the following command to install the SDK: (Only available using Bun to install at the moment.)
+
+<CodeGroup>
+
+```bash npm
+npm i @lit-protocol/auth-services
+```
+
+```bash yarn
+yarn add @lit-protocol/auth-services
+```
+
+```bash pnpm
+pnpm add @lit-protocol/auth-services
+```
+
+```bash bun
+bun add @lit-protocol/auth-services
+```
+
+</CodeGroup>
+
+### Lit Auth Service
+
+Choose how to run:
+
+- One-click Deploy (Railway)
+- Container image (Docker)
+- Use the package (Node.js)
+
+#### One-click Deploy (Railway)
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/OYOevk?referralCode=RP1REI&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+#### Container image
+
+- Image: <a href="https://ghcr.io/lit-protocol/lit-auth-server" target="_blank" rel="noreferrer">ghcr.io/lit-protocol/lit-auth-server</a>
+
+```bash
+docker run \
+  -p 6380:6380 \
+  --env-file .env \
+  ghcr.io/lit-protocol/lit-auth-server:latest
+```
+
+#### Use the package (Node.js)
+
+<Steps>
+  <Step title="Create the Lit Auth Service">
+    Create the Lit Auth Service instance.
+
+    ```typescript
+    // Auth Server Setup
+    import { createLitAuthServer } from "@lit-protocol/auth-services";
+
+    const litAuthServer = createLitAuthServer({
+      port: process.env.PORT || 6380,
+      network: process.env.NETWORK || "naga-dev",
+      litTxsenderRpcUrl: process.env['LIT_TXSENDER_RPC_URL'],
+      litTxsenderPrivateKey: process.env['LIT_TXSENDER_PRIVATE_KEY'],
+      litDelegationRootMnemonic: process.env['LIT_DELEGATION_ROOT_MNEMONIC'],
+      enableApiKeyGate: process.env['ENABLE_API_KEY_GATE'] === "true",
+    });
+
+    // Start the auth server
+    await litAuthServer.start();
+    ```
+
+  </Step>
+
+    <Step title="Start the background worker">
+
+```ts
+// Worker Setup
+import { startAuthServiceWorker } from "@lit-protocol/auth-services";
+
+// Start the background worker for processing PKP minting operations
+await startAuthServiceWorker();
+
+// The worker handles:
+// - Background PKP minting operations (non-blocking)
+// - Job queue processing with BullMQ
+// - Redis connection management
+// - Error handling and retry logic for minting jobs
+```
+
+  </Step>
+
+  <Step title="Setup environment variables">
+    Setup the environment variables.
+
+    ```bash
+
+# Network configuration (supports naga-dev, naga-test, naga)
+NETWORK=naga-dev
+LOG_LEVEL=debug
+
+# Lit transaction sender settings
+LIT_TXSENDER_RPC_URL=https://yellowstone-rpc.litprotocol.com
+LIT_TXSENDER_PRIVATE_KEY=your_private_key
+LIT_DELEGATION_ROOT_MNEMONIC=
+
+# Redis settings for job queue and caching
+REDIS_URL=redis://user:pass@redis-host.com:12345
+PORT=6380
+
+# Rate limiting configuration
+ENABLE_API_KEY_GATE=true
+MAX_REQUESTS_PER_WINDOW=10
+WINDOW_MS=10000
+
+# Stytch configuration (for OTP services)
+STYTCH_PUBLIC_TOKEN=your_stytch_public_token
+STYTCH_SECRET=your_stytch_secret
+
+````
+
+  </Step>
+</Steps>
+
+### Lit Login Server
+
+#### Prerequisites
+
+- Google OAuth 2.0 (Web) client ID and client secret. Use the official guide: <a href="https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#get_your_google_api_client_id" target="_blank" rel="noreferrer">Get your Google API client ID</a>.
+- Discord application client ID and client secret. Follow the official guide: <a href="https://discord.com/developers/docs/topics/oauth2" target="_blank" rel="noreferrer">Discord OAuth2</a>.
+
+<Note>
+  You should set the callback/redirect URLs to the same domain as the Login
+  Server. eg. > - https://your-domain.com/auth/discord/callback > -
+  https://your-domain.com/auth/google/callback
+</Note>
+
+#### One-click Deploy (Railway)
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/RO0wsZ?referralCode=RP1REI&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+#### Container image
+
+- Image: <a href="https://ghcr.io/lit-protocol/lit-login-server" target="_blank" rel="noreferrer">ghcr.io/lit-protocol/lit-login-server</a>
+
+```bash
+docker run \
+  -p 3300:3300 \
+  -e GOOGLE_CLIENT_ID=your_google_client_id \
+  -e GOOGLE_CLIENT_SECRET=your_google_client_secret \
+  -e DISCORD_CLIENT_ID=your_discord_client_id \
+  -e DISCORD_CLIENT_SECRET=your_discord_client_secret \
+  ghcr.io/lit-protocol/lit-login-server:latest
+````
+
+#### Use the package (Node.js)
+
+<Steps>
+  <Step title="Create the Lit Login Server">
+    Create the Lit Login Server instance.
+    ```typescript
+    // Login Server Setup  
+    import { createLitLoginServer } from "@lit-protocol/auth-services";
+
+    const litLoginServer = createLitLoginServer({
+      port: 3300,
+      host: "0.0.0.0",
+      stateExpirySeconds: 30,
+
+      // OAuth provider configuration
+      socialProviders: {
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID!,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        },
+        discord: {
+          clientId: process.env.DISCORD_CLIENT_ID!,
+          clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+        },
+      },
+    });
+
+    // Start the login server
+    await litLoginServer.start();
+    ```
+
+  </Step>
+
+  <Step title="Setup environment variables">
+```bash
+# OAuth provider credentials
+
+# Google
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Discord
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+
+```
+  </Step>
+</Steps>
+
+<Note>
+  When you run a custom Login Server, the `DISCORD_CLIENT_ID` is embedded into the `authMethodId` that Lit nodes use to locate the correct PKP. Make sure the value matches the client ID you used when minting the Discord auth method.
+</Note>
+```

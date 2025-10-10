@@ -1,0 +1,121 @@
+---
+title: "Auth Manager Setup"
+description: "Configure the authentication manager with storage options and auth methods"
+---
+
+<Tip>
+See SDK Reference for more details on the Auth Manager. [Auth Manager Reference](/sdk/sdk-reference/auth/functions/createAuthManager)
+</Tip>
+
+## Overview & Key Concepts
+
+The Auth Manager handles authentication flows and session persistence.
+
+### AuthContext Creation
+
+This method caches two components:
+
+**Session Key Pair**: A temporary cryptographic key pair generated on the client side that acts as a temporary identity for the client application. It consists of:
+
+- **Public key** - shared with the Lit nodes
+- **Secret key (private key)** - kept securely on the client
+
+**Delegation AuthSig (Inner Auth Sig)**: A cryptographic attestation from the Lit Protocol nodes that authorises your session key to act on behalf of your PKP
+
+<Steps>
+  <Step title="Install the SDK">
+
+Run the following command to install the SDK:
+
+<CodeGroup>
+
+```bash npm
+npm i @lit-protocol/auth
+```
+
+```bash yarn
+yarn add @lit-protocol/auth
+```
+
+```bash pnpm
+pnpm add @lit-protocol/auth
+```
+
+```bash bun
+bun add @lit-protocol/auth
+```
+
+</CodeGroup>
+  </Step>
+  <Step title="Choose Storage Plugin">
+    Choose the appropriate network based on your development stage and requirements, then create your Lit Client instance.
+
+    <CodeGroup>
+
+```typescript browser
+import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
+
+const authManager = createAuthManager({
+  storage: storagePlugins.localStorage({
+    appName: "my-app",
+    networkName: "naga-dev",
+  }),
+});
+```
+
+```typescript node.js
+import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
+
+const authManager = createAuthManager({
+  storage: storagePlugins.localStorageNode({
+    appName: "my-node-app",
+    networkName: "naga-dev",
+    storagePath: "./lit-auth-storage",
+  }),
+});
+```
+
+```typescript custom
+import { createAuthManager } from "@lit-protocol/auth";
+
+// Custom storage plugin example
+const customStorage = {
+  async write({ address, authData }) {
+    // Your custom write logic
+    await myDatabase.set(`lit-auth:${address}`, authData);
+  },
+  async read({ address }) {
+    // Your custom read logic
+    return await myDatabase.get(`lit-auth:${address}`);
+  },
+  async writeInnerDelegationAuthSig({ publicKey, authSig }) {
+    // Store delegation auth signature
+    await myDatabase.set(`lit-delegation:${publicKey}`, authSig);
+  },
+  async readInnerDelegationAuthSig({ publicKey }) {
+    // Retrieve delegation auth signature
+    return await myDatabase.get(`lit-delegation:${publicKey}`);
+  },
+  // ... implement other required methods
+};
+
+const authManager = createAuthManager({
+  storage: customStorage,
+});
+```
+
+</CodeGroup>
+
+  </Step>
+
+</Steps>
+
+## Storage Options Comparison
+
+Select the appropriate network environment based on your development stage and requirements. Each network offers different characteristics for testing and production use cases.
+
+| Storage Type         | Persistence                             | Use Case                                           | Environment  |
+| -------------------- | --------------------------------------- | -------------------------------------------------- | ------------ |
+| **localStorage**     | Survives page refresh & browser restart | Web applications, client-side storage              | Browser      |
+| **localStorageNode** | File-based persistent storage           | Node.js applications, server-side scripts          | Node.js only |
+| **custom**           | Depends on implementation               | Database storage, encrypted storage, cloud storage | Custom       |
