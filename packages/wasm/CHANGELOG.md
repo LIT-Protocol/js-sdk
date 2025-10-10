@@ -1,5 +1,11 @@
 # @lit-protocol/wasm
 
+## 8.0.2
+
+### Patch Changes
+
+- 9ec9ea9: naga-test release
+
 ## 8.0.1
 
 ### Patch Changes

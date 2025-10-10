@@ -1,5 +1,18 @@
 # @lit-protocol/e2e
 
+## 1.0.13
+
+### Patch Changes
+
+- 9ec9ea9: naga-test release
+- dd339e0: Add standalone Naga health checks (EOA + single PKP) covering handshake, pkpSign, signSessionKey, executeJs, and encrypt/decrypt, with status logging via @lit-protocol/lit-status-sdk (no breaking changes).
+- Updated dependencies [9ec9ea9]
+  - @lit-protocol/access-control-conditions@8.0.2
+  - @lit-protocol/auth@8.0.2
+  - @lit-protocol/lit-client@8.0.2
+  - @lit-protocol/networks@8.0.2
+  - @lit-protocol/schemas@8.0.2
+
 ## 1.0.12
 
 ### Patch Changes

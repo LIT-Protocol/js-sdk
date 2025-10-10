@@ -1,5 +1,14 @@
 # @lit-protocol/artillery
 
+## 0.0.3
+
+### Patch Changes
+
+- 9ec9ea9: naga-test release
+- Updated dependencies [9ec9ea9]
+- Updated dependencies [dd339e0]
+  - @lit-protocol/e2e@1.0.13
+
 ## 0.0.2
 
 ### Patch Changes
