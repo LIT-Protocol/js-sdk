@@ -160,8 +160,8 @@ jobs:
           branch: ${{ github.ref_name }}
           version: pnpm changeset version
           publish: pnpm changeset publish --access public
-          commit: chore(release): version packages
-          title: chore(release): version packages
+          commit: "chore(release): version packages"
+          title: "chore(release): version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
