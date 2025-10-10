@@ -118,8 +118,14 @@ jobs:
 
       - name: Reset release branch base
         run: |
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
           git fetch --no-tags --prune origin
-          git push origin :changeset-release/${{ github.event.workflow_run.head_branch }} || true
+          if git ls-remote --heads origin "changeset-release/$BRANCH" | grep -q .; then
+            git push origin :changeset-release/$BRANCH
+            echo "Deleted remote release branch changeset-release/$BRANCH"
+          else
+            echo "Remote release branch changeset-release/$BRANCH not found; nothing to delete"
+          fi
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -130,7 +136,6 @@ jobs:
           publish: pnpm changeset publish --access public
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
-          commitMode: github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
