@@ -25,7 +25,7 @@ export interface RequestItem<T> {
 // Definition for a single endpoint
 export type EndpointDefinition = {
   path: string;
-  version: typeof LIT_ENDPOINT_VERSION[keyof typeof LIT_ENDPOINT_VERSION];
+  version: (typeof LIT_ENDPOINT_VERSION)[keyof typeof LIT_ENDPOINT_VERSION];
 };
 
 // Collection of known endpoints

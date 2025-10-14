@@ -45,7 +45,7 @@ const SUPPORTED_NETWORKS = [
   'naga-local',
 ] as const;
 
-type SupportedNetwork = typeof SUPPORTED_NETWORKS[number];
+type SupportedNetwork = (typeof SUPPORTED_NETWORKS)[number];
 
 const isSupportedNetwork = (value: string): value is SupportedNetwork =>
   SUPPORTED_NETWORKS.includes(value as SupportedNetwork);

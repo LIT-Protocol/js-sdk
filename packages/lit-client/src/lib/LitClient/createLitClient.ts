@@ -750,15 +750,15 @@ export const _createNagaLitClient = async (
       account: ExpectedAccountOrWalletClient;
     }) => Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>>,
     mintWithAuth: (async (
-      params: Parameters<typeof networkModule['chainApi']['mintWithAuth']>[0]
+      params: Parameters<(typeof networkModule)['chainApi']['mintWithAuth']>[0]
     ) => {
       _logger.info(`mintWithAuth called`);
       const result = await networkModule.chainApi.mintWithAuth(params);
       _logger.info({ result }, `mintWithAuth result`);
       return result;
     }) as (
-      params: Parameters<typeof networkModule['chainApi']['mintWithAuth']>[0]
-    ) => ReturnType<typeof networkModule['chainApi']['mintWithAuth']>,
+      params: Parameters<(typeof networkModule)['chainApi']['mintWithAuth']>[0]
+    ) => ReturnType<(typeof networkModule)['chainApi']['mintWithAuth']>,
     mintWithCustomAuth: async (params: MintWithCustomAuthRequest) => {
       const validatedParams = MintWithCustomAuthSchema.parse(params);
 
@@ -882,7 +882,7 @@ export const _createNagaLitClient = async (
     },
     authService: {
       mintWithAuth: async (
-        params: Parameters<typeof networkModule['authService']['pkpMint']>[0]
+        params: Parameters<(typeof networkModule)['authService']['pkpMint']>[0]
       ) => {
         _logger.info(`authService.mintWithAuth called`);
         const result = await networkModule.authService.pkpMint(params);
@@ -891,7 +891,7 @@ export const _createNagaLitClient = async (
       },
       registerPayer: async (
         params: Parameters<
-          typeof networkModule['authService']['registerPayer']
+          (typeof networkModule)['authService']['registerPayer']
         >[0]
       ) => {
         _logger.info(`authService.registerPayer called`);
@@ -901,7 +901,7 @@ export const _createNagaLitClient = async (
       },
       delegateUsers: async (
         params: Parameters<
-          typeof networkModule['authService']['delegateUsers']
+          (typeof networkModule)['authService']['delegateUsers']
         >[0]
       ) => {
         _logger.info(`authService.delegateUsers called`);

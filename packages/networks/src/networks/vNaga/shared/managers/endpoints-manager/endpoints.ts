@@ -7,7 +7,7 @@ export const LIT_ENDPOINT_VERSION = {
 // Define the type for an individual endpoint
 export type EndpointDefinition = {
   path: string;
-  version: typeof LIT_ENDPOINT_VERSION[keyof typeof LIT_ENDPOINT_VERSION];
+  version: (typeof LIT_ENDPOINT_VERSION)[keyof typeof LIT_ENDPOINT_VERSION];
 };
 
 // Define the type for the collection of Naga endpoints

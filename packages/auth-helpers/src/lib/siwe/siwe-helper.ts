@@ -36,7 +36,7 @@ export function sanitizeSiweMessage(message: string): string {
  */
 export const createCapacityCreditsResourceData = (
   params: CapacityDelegationFields
-): z.infer<typeof LitResourceAbilityRequestSchema['shape']['data']> => {
+): z.infer<(typeof LitResourceAbilityRequestSchema)['shape']['data']> => {
   return {
     ...(params.delegateeAddresses
       ? {
