@@ -27,7 +27,7 @@
     "@babel/preset-typescript": "7.27.1",
     "@dotenvx/dotenvx": "1.6.4",
     "@ethersproject/contracts": "5.7.0",
-    "@lit-protocol/contracts": "0.5.0",
+    "@lit-protocol/contracts": "workspace:*",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
     "@metamask/eth-sig-util": "5.0.2",

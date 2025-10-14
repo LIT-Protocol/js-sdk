@@ -10,7 +10,7 @@
     "directory": "../../dist/packages/auth-services"
   },
   "dependencies": {
-    "@lit-protocol/contracts": "0.5.0",
+    "@lit-protocol/contracts": "workspace:*",
     "@lit-protocol/logger": "workspace:*",
     "@simplewebauthn/server": "6.2.1",
     "@t3-oss/env-core": "0.13.8",

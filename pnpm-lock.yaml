@@ -23,8 +23,8 @@ importers:
         specifier: 5.7.0
         version: 5.7.0
       '@lit-protocol/contracts':
-        specifier: 0.5.0
-        version: 0.5.0(typescript@5.8.3)
+        specifier: workspace:*
+        version: link:dist/packages/contracts
       '@lit-protocol/nacl':
         specifier: 7.1.1
         version: 7.1.1
@@ -355,8 +355,8 @@ importers:
   packages/auth-services:
     dependencies:
       '@lit-protocol/contracts':
-        specifier: 0.5.0
-        version: 0.5.0(typescript@5.8.3)
+        specifier: workspace:*
+        version: link:../../dist/packages/contracts
       '@lit-protocol/logger':
         specifier: workspace:*
         version: link:../../dist/packages/logger
@@ -441,8 +441,8 @@ importers:
   packages/constants:
     dependencies:
       '@lit-protocol/contracts':
-        specifier: 0.5.0
-        version: 0.5.0(typescript@5.8.3)
+        specifier: workspace:*
+        version: link:../../dist/packages/contracts
       '@openagenda/verror':
         specifier: 3.1.4
         version: 3.1.4
@@ -571,8 +571,8 @@ importers:
   packages/networks:
     dependencies:
       '@lit-protocol/contracts':
-        specifier: 0.5.0
-        version: 0.5.0(typescript@5.8.3)
+        specifier: workspace:*
+        version: link:../../dist/packages/contracts
       '@lit-protocol/nacl':
         specifier: 7.1.1
         version: 7.1.1
