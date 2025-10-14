@@ -133,9 +133,9 @@ export const LIT_COSMOS_CHAINS_KEYS = [
   'juno',
 ] as const;
 
-export type LitEVMChainKeys = (typeof LIT_CHAINS_KEYS)[number];
-export type LITSVMChainKeys = (typeof LIT_SVM_CHAINS_KEYS)[number];
-export type LitCosmosChainKeys = (typeof LIT_COSMOS_CHAINS_KEYS)[number];
+export type LitEVMChainKeys = typeof LIT_CHAINS_KEYS[number];
+export type LITSVMChainKeys = typeof LIT_SVM_CHAINS_KEYS[number];
+export type LitCosmosChainKeys = typeof LIT_COSMOS_CHAINS_KEYS[number];
 
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.

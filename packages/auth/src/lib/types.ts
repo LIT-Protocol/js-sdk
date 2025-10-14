@@ -59,7 +59,7 @@ export const AuthMethodTypeStringMap = ObjectMapFromArray(authMethodTypeKeys);
  * 'EthWallet' | 'LitAction' | 'WebAuthn' | 'Discord' | 'Google' | 'GoogleJwt' | 'AppleJwt'
  * ```
  */
-export type AuthMethodType = (typeof authMethodTypeKeys)[number];
+export type AuthMethodType = typeof authMethodTypeKeys[number];
 
 export const LitAuthDataSchema = z.object({
   sessionKey: z.object({

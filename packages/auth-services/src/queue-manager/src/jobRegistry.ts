@@ -2,7 +2,7 @@ import { handlePkpMintTask } from './handlers'; // This imports from ./handlers/
 
 export const JOBS = ['pkpMint'] as const;
 
-export type JobName = (typeof JOBS)[number];
+export type JobName = typeof JOBS[number];
 
 /**
  * Registry of job names to their handler functions.

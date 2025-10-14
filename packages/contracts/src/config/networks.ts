@@ -29,8 +29,8 @@ export type ProdNetworkName = keyof typeof PROD_PATH_BY_NETWORK;
 export type DevNetworkName = keyof typeof DEV_PATH_BY_NETWORK;
 export type NetworkName = ProdNetworkName | DevNetworkName;
 export type NetworkPath =
-  | (typeof PROD_PATH_BY_NETWORK)[ProdNetworkName]
-  | (typeof DEV_PATH_BY_NETWORK)[DevNetworkName];
+  | typeof PROD_PATH_BY_NETWORK[ProdNetworkName]
+  | typeof DEV_PATH_BY_NETWORK[DevNetworkName];
 
 /**
  * Network path configuration for GitHub API requests
