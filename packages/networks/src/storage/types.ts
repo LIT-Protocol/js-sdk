@@ -1,5 +1,4 @@
-import { PKPInfo } from '@lit-protocol/types';
-
+import { PKPData } from '@lit-protocol/schemas';
 export interface PKPStorageProvider {
   readPKPTokens?(params: {
     authMethodType: number | bigint;
@@ -37,11 +36,11 @@ export interface PKPStorageProvider {
   readPKPs?(params: {
     authMethodType: number | bigint;
     authMethodId: string;
-  }): Promise<PKPInfo[] | null>;
+  }): Promise<PKPData[] | null>;
 
   writePKPs?(params: {
     authMethodType: number | bigint;
     authMethodId: string;
-    pkps: PKPInfo[];
+    pkps: PKPData[];
   }): Promise<void>;
 }

@@ -1,0 +1,97 @@
+---
+title: "EOA Authentication"
+description: "EOA Auth demonstrates direct EOA usage for PKP management. Your EOA owns and directly manages PKPs, including minting, setting permissions, and viewing permissions. This approach gives you full control over PKP management."
+---
+
+# Prerequisites
+
+<Note>
+  💰 Need Test Tokens? Visit the [Chronicle Yellowstone
+  Faucet](https://chronicle-yellowstone-faucet.getlit.dev/) to get test tokens
+  for your EOA account.
+</Note>
+
+---
+
+<Warning>
+  PKPs minted with mintWithEoa require manual permission setup before they can
+  be used for signing operations.
+</Warning>
+
+<Steps>
+
+  <Step title="Create Account">
+    Use your connected wallet account to own and manage PKPs.
+
+    ```ts
+    import { useWalletClient } from "wagmi";
+
+    const { data: myAccount } = useWalletClient();
+    ```
+
+  </Step>
+
+  <Step title="Mint PKP with EOA">
+  Mint a new Programmable Key Pair (PKP) using your EOA. The PKP will be owned by your EOA account.
+  <Note>
+  You will need to manually add permissions to the PKP before it can be used for signing.
+  </Note>
+
+```ts
+const mintedPkpWithEoa = await litClient.mintWithEoa({
+  account: myAccount,
+});
+```
+
+  </Step>
+
+  <Step title="Get PKP Permissions Manager">
+    Instantiate a PKP permissions manager to control your PKP permissions. This manager allows you to add, remove, and modify permissions for your PKP.
+
+    ```ts
+    const pkpPermissionsManager = await litClient.getPKPPermissionsManager({
+      pkpIdentifier: {
+        tokenId: mintedPkpWithEoa.data.tokenId,
+      },
+      account: myAccount,
+    });
+    ```
+
+  </Step>
+
+  <Step title="View PKP Permissions">
+  View all current permissions associated with your PKP. This shows what actions and scopes are currently allowed.
+
+```ts
+const res = await litClient.viewPKPPermissions({
+  tokenId: mintedPkpWithEoa.data.tokenId,
+});
+
+console.log("✅ viewPKPPermissions:", res);
+```
+
+  </Step>
+
+  <Step title="Add Signing Permissions">
+  Add permissions to allow your PKP to be used for signing operations. This adds the "sign anything" scope which enables general signing functionality.
+
+```ts
+// Add permissions to allow the PKP to be used for signing
+const addPermissionsTx = await pkpPermissionsManager.addPermittedAction({
+  ipfsId: "QmWGkjZKcfsE9nabey7cXf8ViZ5Mf5CvLFTHbsYa79s3ER",
+  scopes: ["sign-anything"],
+});
+```
+
+  </Step>
+</Steps>
+
+# EOA-Based Authentications
+
+<Note>
+Key Differences:
+
+- <b>EOA Native</b>: Direct EOA ownership and management of PKPs with manual
+  permission setup
+- <b>EOA Auth Method</b>: EOA used as authentication mechanism, similar to Google/Discord auth patterns
+</Note>

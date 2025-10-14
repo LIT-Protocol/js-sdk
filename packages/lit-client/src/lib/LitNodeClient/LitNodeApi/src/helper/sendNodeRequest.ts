@@ -39,7 +39,7 @@ export async function sendNodeRequest<T>(
     Accept: 'application/json',
     'X-Lit-SDK-Version': params.version,
     'X-Lit-SDK-Type': 'Typescript', // Or determine dynamically
-    'X-Request-Id': `lit_${params.requestId}`, // Use the passed request ID
+    'X-Request-Id': params.requestId, // Use the passed request ID
   };
 
   const controller = new AbortController();
@@ -56,12 +56,12 @@ export async function sendNodeRequest<T>(
       // signal: controller.signal,
     };
 
-    _logger.info('🔄 _fullUrl', _fullUrl);
-    _logger.info('🔄 req', req);
+    _logger.info({ _fullUrl }, '🔄 _fullUrl');
+    _logger.info({ req }, '🔄 req');
 
     // Generate and log CURL command
     const curlCommand = generateCurlCommand(_fullUrl, req);
-    _logger.info('🔄 CURL command:', curlCommand);
+    _logger.info({ curlCommand }, '🔄 CURL command:');
 
     // if (_fullUrl.includes('sign_session_key')) {
     //   console.log("Curl command: ", curlCommand);

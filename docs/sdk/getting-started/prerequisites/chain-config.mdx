@@ -1,0 +1,51 @@
+---
+title: "Chain Config"
+---
+
+### Chronicle Yellowstone - Lit Protocol Testnet
+
+| Property | Value |
+| -------- | ----- |
+| ChainID | 175188 (0x2ac54) |
+| Currency | tstLPX |
+| RPC URL | `https://yellowstone-rpc.litprotocol.com/` |
+
+Also see [Chainlist](https://chainlist.org/chain/175188) for more details.
+
+
+### Viem Chain Config for the Chronicle Yellowstone network
+
+```ts
+import { Chain, http } from "viem";
+
+export const viemChainConfig: Readonly<Chain> = Object.freeze({
+  id: 175188,
+  name: "Chronicle Yellowstone",
+  nativeCurrency: {
+    name: "Chronicle Yellowstone",
+    symbol: "tstLPX",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://yellowstone-rpc.litprotocol.com/"],
+    },
+    public: {
+      http: ["https://yellowstone-rpc.litprotocol.com/"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Yellowstone Explorer",
+      url: "https://yellowstone-explorer.litprotocol.com/",
+    },
+  },
+});
+```
+
+Alternatively, we also provide a helper function to get the viem chain config. You can use
+
+```ts
+litClient.getChainConfig().viemConfig
+```
+to get the viem chain config. See [Lit Client Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#getchainconfig) for more details.

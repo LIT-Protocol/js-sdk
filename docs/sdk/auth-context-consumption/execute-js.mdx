@@ -1,0 +1,689 @@
+---
+title: "Execute Javascript"
+description: "Execute custom Lit Actions using your authenticated context. Choose between custom code or IPFS-stored actions. The execution will automatically find the most optimised price, or you can specify a custom maximum price using the userMaxPrice parameter."
+---
+
+# Prerequisites
+
+<Note>
+- `authContext` is required. This is the result from the authentication flow.
+</Note>
+
+# Quick Example
+
+<Note>
+  SDK Parameter Structure: In this SDK version, all parameters are wrapped
+  inside a jsParams object. This allows you to access them as properties of
+  jsParams in your Lit Action, making validation and parameter management much
+  clearer.
+</Note>
+
+<Tip>
+  [📚 View Full LitActions API Documentation
+  →](https://actions-docs.litprotocol.com/)
+</Tip>
+
+<CodeGroup>
+```ts Inline JS Code
+// 1. Write your Lit Action code
+const litActionCode = `(async () => {
+  const { pubkey, username, password } = jsParams;
+  console.log(`Username: ${username}, Password: ${password}`);
+
+  // Sign a message with the PKP
+})();`;
+
+// 2. Execute Lit Action with custom code
+const result = await litClient.executeJs({
+  code: litActionCode,
+  authContext: authContext,
+  jsParams: {
+    pubkey: pkpInfo.pubkey,
+    username: "alice",
+    password: "password",
+  },
+});
+
+````
+
+```ts IPFS CID
+// 1. Pin your Lit Action to IPFS using eg. Pinata
+
+// 2. Execute Lit Action with IPFS CID
+const result = await litClient.executeJs({
+  ipfsId: "QmYLeVmwJPVs7Uebk85YdVPivMyrvoeKR6X37kyVRZUXW4",
+  authContext: authContext,
+  jsParams: parsedJsParams,
+});
+````
+</CodeGroup>
+
+# Examples
+
+### ⚡️ Basic Fetch Example
+
+This Lit Action fetches real-time temperature data from the National Weather Service API and compares it against minimum and maximum thresholds provided via jsParams. It demonstrates how external data can drive conditional logic, returning different responses based on whether the current temperature falls below, within, or above the defined range.
+
+```ts
+const _litActionCode = async () => {
+    try {
+        const url = "https://api.weather.gov/gridpoints/TOP/31,80/forecast";
+        const resp = await fetch(url).then((response) => response.json());
+        const temp = resp.properties.periods[0].temperature;
+        console.log("Current temperature from the API:", temp);
+
+        let response = "It's just right!";
+        if (temp < jsParams.minTemp) {
+            response = "It's too cold!";
+        } else if (temp > jsParams.maxTemp) {
+            response = "It's too hot!";
+        }
+
+        return Lit.Actions.setResponse({ response });
+    } catch (error) {
+        Lit.Actions.setResponse({ response: error.message });
+    }
+};
+
+const litActionCode = `(${_litActionCode.toString()})();`;
+
+const result = await litClient.executeJs({
+  code: litActionCode,
+  authContext: authContext,
+  jsParams: {
+    minTemp: 60,
+    maxTemp: 80,
+  },
+});
+
+console.log("Result:", result);
+```
+
+#### Important Considerations
+
+When your Lit Action uses fetch(), it's important to understand that the request is made by every Lit node processing the action. This distributed execution has important implications for how you design both read and write operations.
+
+#### Read Operations
+
+Fetching data (e.g., weather, prices, public APIs) is generally safe as long as you're not causing side effects. However, keep the following in mind:
+
+- Rate Limiting: The same HTTP request will be made once per node. Be mindful of API limits, per-request billing, or throttling.
+- Non-Deterministic Responses: If your API/data source returns inconsistent or non-deterministic data (e.g., timestamps, random values, latest block), each Lit node can receive a different response. This is important to consider when processing the retrieved data.
+
+#### Write Operations
+If your Lit Action modifies external data (e.g., using POST, PUT, or DELETE), those operations must be idempotent — meaning repeated execution produces the same effect. Otherwise, you risk duplicate entries or unintended side effects.
+
+#### Using runOnce()
+If you need to perform your read or write operation only once, check out the built-in runOnce() function that lets you define logic to be executed only by a single Lit node.
+
+---
+
+### ⚡️ Run Once Example
+
+<Note>
+Return Value Requirements - The function passed to runOnce() must return a value that can be serialized with toString(). Complex objects should be converted to JSON strings or simple primitives. If serialization fails, the response will default to [ERROR].
+</Note>
+
+The `runOnce()` function accepts a configuration object with the following properties:
+
+<ResponseField name="runOnce(config)" type="object">
+    <ResponseField name="waitForResponse" type="boolean" default={true}>
+      Determines whether the Lit Action should wait for the selected node to complete execution before continuing. Set to false for fire-and-forget behavior where there is no need to wait for the result.
+    </ResponseField>
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  A unique identifier for the operation. This is especially helpful when using multiple runOnce() calls within the same Lit Action to distinguish between them.
+</ResponseField>
+
+#### Important Considerations
+While runOnce() is powerful, there are several important considerations to keep in mind when using it in your Lit Actions.
+
+#### Node Selection
+The node selection process is deterministic but not predictable. You cannot control which specific node will be chosen to execute your function. The selection is based on cryptographic algorithms that ensure fairness and security.
+
+#### Error Handling
+If the selected node fails to execute the function (due to network issues, errors, etc.), the operation may fail entirely. Implement proper error handling within your runOnce() function to gracefully handle potential failures.
+
+#### Consensus and Security
+Operations within runOnce() don't benefit from the same consensus mechanisms as regular Lit Action code. Only one node validates the execution, so ensure your operations are secure and don't rely on consensus for correctness.
+
+#### Network Latency
+When waitForResponse is set to true, all nodes wait for the selected node to complete execution. This can introduce latency, especially for time-consuming operations.
+
+---
+
+### ⚡️ Decrypting within Lit Actions
+
+<Note>
+As shown in the code example, the decryptAndCombine function will automatically use the identity provided in the authContext for decryption, unless you explicitly pass a different authSig.
+
+You might explicitly set authSig when the identity permitted to decrypt the data is different from the identity used to execute the Lit Action. This approach is still secure because Lit Actions are immutable, so the executor cannot modify the code to extract decrypted data and wouldn't otherwise be able to access it unless the action is intentionally returning the decrypted data.
+</Note>
+
+The decryptAndCombine function enables you to decrypt content directly within a Lit Action. This powerful capability allows you to perform operations over sensitive data while keeping the decrypted content secure within each Lit node's [Trusted Execution Environment (TEE)](/learning-lit/security).
+
+Unlike traditional client-side decryption, this approach ensures that sensitive data never leaves the secure environment of the Lit nodes, making it ideal for scenarios involving API keys, private credentials, or confidential data processing.
+
+<Steps>
+  <Step title="Encrypt Your Data">
+  First, encrypt your data client-side using the standard Lit encryption process. This generates the ciphertext and dataToEncryptHash needed later for decryption (can you learn more about this proccess in the [Encryption & Access Control](/sdk/auth-context-consumption/encrypt-and-decrypt) section):
+
+  ```ts
+  // First, encrypt your data client-side
+  const accessControlConditions = createAccBuilder().requireEthBalance(
+    '10000000000000000', '>='
+  ).on('ethereum').build();
+
+  const encryptedData = await litClient.encrypt({
+    dataToEncrypt: 'The answer to life, the universe, and everything is 42',
+    unifiedAccessControlConditions: accessControlConditions,
+    chain: 'ethereum',
+  });
+  ```
+  </Step>
+
+  <Step title="Decrypt within Lit Action">
+  Use the decryptAndCombine function within your Lit Action to decrypt the content. The decrypted data remains secure within the TEE environment:
+
+  ```ts
+  // Then, decrypt within your Lit Action
+  const _litActionCode = async () => {
+    try {
+        // Decrypt the content using decryptAndCombine
+        const decryptedContent = await LitActions.decryptAndCombine({
+          accessControlConditions: jsParams.accessControlConditions,
+          ciphertext: jsParams.ciphertext,
+          dataToEncryptHash: jsParams.dataToEncryptHash,
+          // The authenticated identity from the authContext used
+          // to make the decryption request is automatically used
+          // for the decryption request
+          authSig: null,
+          chain: 'ethereum',
+      });
+
+      // Use the decrypted content for your logic
+      LitActions.setResponse({
+        response: `Successfully decrypted: ${decryptedContent}`,
+        success: true
+      });
+    } catch (error) {
+      LitActions.setResponse({
+        response: `Decryption failed: ${error.message}`,
+        success: false
+      });
+    }
+  };
+
+  const litActionCode = `(${_litActionCode.toString()})();`;
+
+  // Execute the Lit Action
+  const result = await litClient.executeJs({
+    code: litActionCode,
+    authContext: authContext,
+    jsParams: {
+        accessControlConditions,
+        ciphertext: encryptedData.ciphertext,
+        dataToEncryptHash: encryptedData.dataToEncryptHash,
+      },
+  });
+
+  console.log("Decrypted content:", result.response);
+  ```
+  </Step>
+</Steps>
+
+---
+
+### ⚡️ Getting Chain RPC URLs Example
+
+The getRpcUrl() function allows your Lit Actions to interact with blockchain networks by providing access to RPC endpoints for various chains. This enables you to read blockchain data, call contract methods, fetch transaction information, and perform other blockchain operations directly within your Lit Actions.
+
+Each Lit node maintains connections to multiple blockchain networks and provides RPC access without requiring you to manage your own infrastructure or API keys. This simplifies blockchain integration and ensures consistent access across the network.
+
+#### Common Use Cases for getRpcUrl()
+
+- Reading Blockchain Data: Fetch block information, transaction details, or account balances
+- Contract Interactions: Call smart contract methods to retrieve data or validate conditions
+- Transaction Broadcasting: Send signed transactions to the blockchain network
+- Cross-Chain Operations: Gather data from multiple blockchains within a single Lit Action
+
+#### Basic Usage
+
+Here's a simple example of using getRpcUrl() to fetch blockchain data. By default, all nodes will execute this code in parallel and should return consistent results.
+
+Each Lit node gets its RPC URL for Ethereum, creates a provider, and fetches the latest block information. Since all nodes are querying the same blockchain, they should return the same results, however the returned block number might still differ due to timing.
+
+```ts
+const _litActionCode = async () => {
+  // Get the RPC URL for Ethereum mainnet
+  const rpcUrl = await Lit.Actions.getRpcUrl({ chain: "ethereum" });
+  
+  // Create a provider using the RPC URL
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+  
+  // Fetch the latest block information
+  const latestBlock = await provider.getBlock("latest");
+  
+  // Return block information
+  const blockInfo = {
+    blockNumber: latestBlock.number,
+    blockHash: latestBlock.hash,
+    timestamp: latestBlock.timestamp,
+    transactionCount: latestBlock.transactions.length
+  };
+  
+  Lit.Actions.setResponse({ response: blockInfo });
+};
+
+const litActionCode = `(${_litActionCode.toString()})();`;
+
+const result = await litClient.executeJs({
+  code: litActionCode,
+  authContext: authContext,
+  jsParams: {},
+});
+
+console.log("Block info from all nodes:", result);
+```
+
+#### Important Considerations
+When using getRpcUrl() in your Lit Actions, keep these important factors in mind:
+
+#### Supported Chains
+
+The getRpcUrl() function only supports the listed supported EVM chains [here](/sdk/resources/supported-evm-chains). The returned RPC URLs are public RPC endpoints that can be subject to throttling and rate limiting, so consider using your own RPC provider for more reliable access.
+
+#### Single Node Execution
+
+For operations that don't require consensus or when you want to reduce the number of RPC calls, you can combine getRpcUrl() with runOnce() to execute blockchain queries on only one node.
+
+#### Network Latency and Reliability
+
+RPC calls are subject to network conditions and blockchain congestion. Always implement proper error handling and consider timeout scenarios, especially when making multiple sequential calls.
+
+Additionally, since Lit Actions have a maximum execution time, waiting for a transaction to be confirmed on-chain may not be feasible, especially on blockchains with long block times.
+
+#### Consensus and Consistency
+
+When all nodes execute RPC calls simultaneously, they might receive slightly different results due to timing differences (e.g., different latest block numbers). Because the lack of consensus on the returned data, consider using runOnce() for non-deterministic operations.
+
+---
+
+### ⚡️ Conditional Execution
+
+Lit Actions can utilize [Access Control Conditions](/sdk/sdk-reference/access-control-conditions/functions/createAccBuilder) to gate any logic within your Lit Actions, enabling sophisticated conditional execution patterns.
+
+This powerful feature allows you to create dynamic, context-aware applications that can make decisions based on on-chain or off-chain conditions such as token balances, NFT ownership, time constraints, smart contract states, and more.
+
+This example demonstrates conditional signing based on ETH balance. The Lit Action checks if the authenticated user has at least 1 Wei on Ethereum before proceeding with the signature operation. If the condition fails, it returns an error message instead of signing.
+
+```ts
+
+import { createAccBuilder } from "@lit-protocol/access-control-conditions";
+import { privateKeyToAccount } from "viem/accounts";
+import { ViemAccountAuthenticator } from "@lit-protocol/auth";
+import { createSiweMessage } from "@lit-protocol/auth-helpers";
+
+const _litActionCode = async () => {
+  try {
+    // Check if the authenticated user meets the conditions
+    const testResult = await Lit.Actions.checkConditions({
+      conditions: jsParams.conditions,
+      authSig: jsParams.authSig,
+      chain: "ethereum",
+    });
+
+    let response = "Access granted";
+
+    if (!testResult) {
+      response = "Access denied: insufficient ETH balance";
+    }
+
+    return LitActions.setResponse({ response });
+  } catch (error) {
+    LitActions.setResponse({ response: error.message });
+  }
+};
+
+const litActionCode = `(${_litActionCode.toString()})();`;
+
+const accessControlConditions = createAccBuilder().requireEthBalance(
+  '10000000000000000', '>='
+).on('ethereum').build();
+
+const aliceViemAccount = privateKeyToAccount("0xprivateKey");
+const aliceAuthSig = await ViemAccountAuthenticator.createAuthSig(
+  aliceViemAccount,
+  await createSiweMessage({
+    walletAddress: aliceViemAccount.address,
+    nonce: (await litClient.getContext()).latestBlockhash
+  })
+);
+
+const result = await litClient.executeJs({
+  code: litActionCode,
+  authContext: authContext,
+  jsParams: {
+    conditions: accessControlConditions,
+    authSig: aliceAuthSig,
+  },
+});
+```
+
+This example demonstrates how to generate a Sign-In With Ethereum (SIWE) message using the createSiweMessage function, and then sign it using ViemAccountAuthenticator.createAuthSig function. This signed SIWE message (called an authSig) serves as cryptographic proof that Alice controls the Ethereum address the Access Control Conditions will be checking the balance for. The Lit Action derives the address from the signed SIWE message and uses it to check the balance.
+
+#### Example Use Cases
+
+Conditional execution in Lit Actions enables a wide range of applications where cryptographic operations depend on meeting specific criteria:
+
+
+#### Access Control Scenarios
+
+- Token-Gated Signing: Only sign transactions or messages for users holding specific ERC20 tokens, NFTs, or specific token balances
+- Tiered Data Access: Provide different API access levels, data sets, or functionality based on user credentials or membership tiers
+- Multi-Chain Requirements: Gate access based on assets or conditions across multiple blockchain networks
+- DAO Membership: Restrict operations to verified DAO members or governance token holders
+
+#### Time-Based Logic
+
+- Business Hours Automation: Execute different logic during business hours vs. after hours
+- Time-Locked Execution: Grant execution only after specific timestamps or during scheduled time windows
+- Scheduled Operations: Combine time conditions with other criteria for complex scheduling logic
+
+#### Dynamic Applications
+
+Conditional Workflows: Create self-executing logic that responds to changing on-chain or off-chain conditions
+- Premium Services: Offer enhanced features, higher rate limits, or exclusive content based on user holdings
+- Risk Management: Implement safety checks and conditional approvals for high-value operations
+
+#### Important Considerations
+
+When implementing conditional execution in your Lit Actions, it's important to understand how access control conditions work and plan for potential edge cases.
+
+#### Condition Evaluation
+
+
+The checkConditions function returns a boolean value indicating whether the authenticated user meets the specified conditions. Always handle both true and false cases gracefully in your logic flow.
+
+#### Authentication Requirements
+Condition checking requires a valid authSig parameter that proves the user's identity the Access Control Conditions will be checking against. In our example usage code example, this was handled by the code:
+
+```ts
+
+const aliceViemAccount = privateKeyToAccount("0xprivateKey");
+const aliceAuthSig = await ViemAccountAuthenticator.createAuthSig(
+  aliceViemAccount,
+  await createSiweMessage({
+    walletAddress: aliceViemAccount.address,
+    nonce: (await litClient.getContext()).latestBlockhash
+  })
+);
+```
+
+#### Available Condition Types
+
+For a complete list of supported access control conditions and detailed examples, visit the [Access Control Conditions](/sdk/sdk-reference/access-control-conditions/functions/createAccBuilder) documentation.
+
+---
+
+### ⚡️ PKP Signing Example
+
+<Note>
+This example code uses runOnce() to ensure the transaction is only submitted once, however it's required that the signAndCombineEcdsa logic exists outside of the runOnce function. This is because 2/3 of the Lit nodes are required in order to produce the signature shares to form a complete signature for the PKP.
+</Note>
+
+The signAndCombineEcdsa function allows you to combine PKP signature shares directly within a Lit Action, rather than combining them client-side. This powerful capability enables you to use the complete signature within your Lit Action for operations like submitting signed transactions or creating signed messages.
+
+When using this function, signature shares are collected from each Lit node and combined on a single node, all within the secure [Trusted Execution Environment (TEE)](/learning-lit/security). The signature shares will remain within the TEE, never being exposed to the outside world, unless you explicitly share them.
+
+#### Key Benefits
+
+- Server-Side Signing: Complete the entire signing and transaction submission process within the Lit Action
+- Enhanced Security: Signature shares remain within the TEE without exposure to external environments, unless you explicitly choose to share them
+- Automated Workflows: Build end-to-end transaction flows that don't require client-side intervention
+- Conditional Signatures: Combine with access control conditions for sophisticated automated signing logic
+
+#### Basic Usage
+
+This example demonstrates how to sign a blockchain transaction and submit it entirely within a Lit Action. The process involves combining signature shares using signAndCombineEcdsa, formatting the signature for use with ethers.js, and then submitting the signed transaction to the blockchain.
+
+```ts
+const _litActionCode = async () => {
+  try {
+    // Combine signature shares directly within the Lit Action
+    const signature = await Lit.Actions.signAndCombineEcdsa({
+      toSign: jsParams.toSign,
+      publicKey: jsParams.publicKey,
+      sigName: "transactionSignature",
+    });
+
+    // Parse and format the signature for use with ethers.js
+    const jsonSignature = JSON.parse(signature);
+    jsonSignature.r = "0x" + jsonSignature.r.substring(2);
+    jsonSignature.s = "0x" + jsonSignature.s;
+    const hexSignature = ethers.utils.joinSignature(jsonSignature);
+
+    // Serialize the signed transaction
+    const signedTx = ethers.utils.serializeTransaction(
+      jsParams.unsignedTransaction,
+      hexSignature
+    );
+
+    // Verify the signature by recovering the address
+    const recoveredAddress = ethers.utils.recoverAddress(jsParams.toSign, hexSignature);
+    console.log("Recovered Address:", recoveredAddress);
+
+    // Submit the transaction using runOnce to avoid duplicate submissions
+    const response = await Lit.Actions.runOnce(
+      { waitForResponse: true, name: "txnSender" },
+      async () => {
+        try {
+          const rpcUrl = await Lit.Actions.getRpcUrl({ chain: jsParams.chain });
+          const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+          const transactionReceipt = await provider.sendTransaction(signedTx);
+
+          return `Transaction sent successfully. Hash: ${transactionReceipt.hash}`;
+        } catch (error) {
+          return `Error sending transaction: ${error.message}`;
+        }
+      }
+    );
+
+    Lit.Actions.setResponse({ response });
+  } catch (error) {
+    Lit.Actions.setResponse({ response: `Error: ${error.message}` });
+  }
+};
+
+const litActionCode = `(${_litActionCode.toString()})();`;
+
+const result = await litClient.executeJs({
+  code: litActionCode,
+  authContext: authContext,
+  jsParams: {
+    toSign: unsignedExampleTransactionHash,
+    publicKey: pkpPublicKey,
+    unsignedTransaction: unsignedExampleTransaction,
+    chain: "ethereum",
+  },
+});
+```
+
+#### Example Use Cases
+
+PKP signing within Lit Actions enables powerful automated workflows that combine cryptographic operations with programmable logic:
+
+#### Transaction Automation
+- Conditional Payments: Automatically execute payments when specific on-chain or off-chain conditions are met
+- Scheduled Transactions: Execute transactions at predetermined times or intervals without manual intervention
+- Cross-Chain Operations: Coordinate and execute transactions across multiple blockchain networks
+#### DeFi Automation
+- Automated Trading: Execute trades based on price feeds or market conditions
+- Yield Farming: Automatically compound rewards or rebalance positions
+- Liquidation Protection: Monitor positions and automatically adjust to prevent liquidations
+#### Smart Contract Interactions
+- Governance Participation: Automatically vote on proposals based on predefined criteria
+- Contract Upgrades: Execute contract upgrades or parameter changes when conditions are met
+- Emergency Responses: Trigger emergency actions like pausing contracts or withdrawing funds
+
+#### Important Considerations
+
+When using `signAndCombineEcdsa` within Lit Actions, there are several important factors to consider for secure and effective implementation.
+
+#### Signature Share Combination
+
+The `signAndCombineEcdsa` function collects signature shares from each Lit node and combines them on a single node. This process happens entirely within the TEE, ensuring that individual signature shares are never exposed outside the secure environment.
+
+#### Transaction Submission
+When submitting transactions, always use `runOnce()` to prevent duplicate submissions.
+
+#### PKP Permissions
+Ensure your PKP has the appropriate permissions to sign within the Lit Action by permitting the Lit Action's IPFS CID as a permitted Auth Method with the sign-anything capability.
+
+#### PKP Signing Must Happen Outside of runOnce
+As mentioned above, the signAndCombineEcdsa function must be called outside of the runOnce function. This is because 2/3 of the Lit nodes are required in order to produce the signature shares to form a complete signature for the PKP. Including the signAndCombineEcdsa function within the runOnce function will result in the Lit Action timing out.
+
+### ⚡️ PKP Signing with EIP-191
+
+The ethPersonalSignMessageEcdsa function allows you to sign messages using the [EIP-191 standard](https://eips.ethereum.org/EIPS/eip-191) directly within a Lit Action. This method automatically prepends "\x19Ethereum Signed Message:\n" and the message length to your message before hashing and signing it.
+
+EIP-191 message signing is commonly used for authentication by creating a cryptographic proof that a specific account holder authored a particular message.
+
+#### Usage
+
+This example demonstrates how to sign a message using the EIP-191 standard within a Lit Action.
+
+
+The ethPersonalSignMessageEcdsa function returns a boolean value indicating whether the signing was successful, while the actual signature is automatically appended to the Lit Action result using the specified sigName as the object key (messageSignature in this example).
+
+```ts
+const _litActionCode = async () => {
+  try {
+    // Sign the message using EIP-191 standard
+    const sigShare = await LitActions.ethPersonalSignMessageEcdsa({
+      message: jsParams.message,
+      publicKey: jsParams.publicKey,
+      sigName: "messageSignature",
+    });
+
+    // sigShare is a boolean indicating success/failure
+    // The actual signature is available under the sigName key
+    if (sigShare) {
+      LitActions.setResponse({ 
+        response: "Message signed successfully",
+        success: true
+      });
+    } else {
+      LitActions.setResponse({ 
+        response: "Failed to sign message",
+        success: false
+      });
+    }
+  } catch (error) {
+    LitActions.setResponse({ 
+      response: `Error: ${error.message}`,
+      success: false
+    });
+  }
+};
+
+const litActionCode = `(${_litActionCode.toString()})();`;
+
+const result = await litClient.executeJs({
+  code: litActionCode,
+  authContext: authContext,
+  jsParams: {
+    message: "Hello, this is a test message for EIP-191 signing!",
+    publicKey: pkpPublicKey,
+  },
+});
+
+// The complete signature will be available in the result
+console.log("Signature:", result.signatures.messageSignature);
+```
+
+#### Example Use Cases
+
+EIP-191 message signing within Lit Actions enables secure authentication and verification workflows that require cryptographic proof of message authorship:
+
+#### Authentication & Verification
+- Login Systems: Create secure login mechanisms that verify user identity through message signing
+- Message Attestation: Prove that specific messages were authored by the PKP holder
+- Data Integrity: Sign data payloads to ensure they haven't been tampered with
+####  Decentralized Applications
+- Social Platforms: Sign posts, comments, or messages to verify authenticity
+- Voting Systems: Sign votes or proposals to ensure they come from verified identities
+####  Oracle & Data Services
+- Data Attestation: Sign external data feeds to verify their source and integrity
+- API Response Verification: Prove that API responses haven't been modified in transit
+- Timestamp Services: Create verifiable timestamps for events or data points
+
+#### Important Considerations
+When using ethPersonalSignMessageEcdsa within Lit Actions, there are several important factors to consider:
+
+#### EIP-191 Message Format
+The function automatically formats your message according to EIP-191 by prepending "\x19Ethereum Signed Message:\n" and the message length. You don't need to format the message yourself - just provide the raw message content.
+
+####  Return Value Structure
+ethPersonalSignMessageEcdsa returns a boolean indicating success or failure. The actual signature is made available in the execution result under the sigName you specify when calling the function.
+
+#### PKP Permissions
+To allow your Lit Action to sign with a PKP, you must add the Lit Action's IPFS CID as a permitted Auth Method for the PKP, and grant it either the sign-anything capability to enable general-purpose signing, or restrict access to the personal-sign capability to limit the PKP to only using ethPersonalSignMessageEcdsa. The latter ensures the Lit Action can only sign personal messages, not arbitrary data or transactions via signAndCombineEcdsa.
+
+---
+
+### ⚡️ Broadcast and Collect
+
+The broadcastAndCollect() function allows you to run an operation on every node in the Lit network, collect their responses, and aggregate them into a single dataset. This enables you to perform additional operations over the collected responses, such as calculating medians, averages, or other statistical operations.
+
+When you call this function, each node executes the same operation independently, and their responses are collected and grouped together before being returned to each node for further processing. This pattern is particularly useful for scenarios where you need consensus or statistical analysis across multiple data sources.
+
+#### When to use broadcastAndCollect()
+
+- Data Aggregation: Collect multiple API responses to calculate averages, medians, or other statistics
+- Consensus Building: Gather responses from multiple sources to determine the most reliable data point
+- Outlier Detection: Identify and filter out anomalous responses in your dataset
+
+#### Basic Usage
+
+```ts
+const _litActionCode = async () => {
+  // Fetch weather data on each node
+  const url = "https://api.weather.gov/gridpoints/TOP/31,80/forecast";
+  const resp = await fetch(url).then((response) => response.json());
+  const temp = resp.properties.periods[0].temperature;
+
+  // Collect responses from all nodes and aggregate them into an array
+  const temperatures = await Lit.Actions.broadcastAndCollect({
+    name: "temperature",
+    value: temp,
+  });
+
+  // Calculate median from all node responses
+  const median = temperatures.sort()[Math.floor(temperatures.length / 2)];
+  
+  Lit.Actions.setResponse({ response: median });
+};
+
+const litActionCode = `(${_litActionCode.toString()})();`;
+
+const result = await litClient.executeJs({
+  code: litActionCode,
+  authContext: authContext,
+  jsParams: {},
+});
+
+console.log("Median temperature from all nodes:", result);
+```
+
+In this example, each node fetches weather data independently, then all responses are collected and the median temperature is calculated.
+
+#### Important Considerations
+When using broadcastAndCollect() in your Lit Actions, keep these important factors in mind:
+
+#### Network Calls and Timing
+Each node makes independent network calls, which may return slightly different results due to timing or API rate limits. Design your aggregation logic to handle these variations gracefully.
+
+#### Execution Time
+Since Lit Actions have execution time limits, ensure data retrieval operations complete quickly. Consider using runOnce() for operations that don't require collection from all nodes.

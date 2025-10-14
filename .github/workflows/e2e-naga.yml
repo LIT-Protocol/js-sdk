@@ -1,0 +1,186 @@
+name: E2E - Naga (matrix)
+
+on:
+  push:
+    branches: [naga, canary-naga]
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    name: Build once
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          registry-url: https://registry.npmjs.org
+      - name: Enable corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            dist
+            packages/wasm/src/pkg
+          if-no-files-found: error
+
+  e2e:
+    name: E2E (${{ matrix.network }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - environment: naga-dev
+            network: naga-dev
+            privateKey: LIVE_MASTER_ACCOUNT_NAGA_DEV
+          # - environment: naga-staging
+          #   network: naga-staging
+          #   privateKey: LIVE_MASTER_ACCOUNT_NAGA_STAGING
+          - environment: naga-test
+            network: naga-test
+            privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
+    env:
+      LOG_LEVEL: debug2
+      LIVE_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
+      LOCAL_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          registry-url: https://registry.npmjs.org
+      - name: Enable corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: build-output
+      - name: Restore build artifacts
+        run: |
+          mkdir -p dist
+          mkdir -p packages/wasm/src/pkg
+          if [ -d build-output/dist ]; then
+            cp -a build-output/dist/. dist/
+          fi
+          if [ -d build-output/packages/wasm/src/pkg ]; then
+            cp -a build-output/packages/wasm/src/pkg/. packages/wasm/src/pkg/
+          fi
+          rm -rf build-output
+      - name: Verify required secrets
+        run: |
+          if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
+            echo "LIVE_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
+            exit 1
+          fi
+          if [ -z "${LOCAL_MASTER_ACCOUNT}" ]; then
+            echo "LOCAL_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
+            exit 1
+          fi
+      - name: Run health check (${{ matrix.network }})
+        run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci -- packages/e2e/src/e2e.spec.ts --testNamePattern "^all "
+        timeout-minutes: 10
+
+  release:
+    name: Release
+    needs: e2e
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && needs.e2e.result == 'success'
+    steps:
+      - name: Check NPM Token
+        run: |
+          if [ -z "${{ secrets.NODE_AUTH_TOKEN }}" ]; then
+            echo "❌ NODE_AUTH_TOKEN secret is not set. Please add it to repository secrets."
+            exit 1
+          else
+            echo "✅ NODE_AUTH_TOKEN secret is available."
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Enable corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rust-std
+
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: latest
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm run build
+
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          branch: ${{ github.ref_name }}
+          version: pnpm changeset version
+          publish: pnpm changeset publish --access public
+          commit: "chore(release): version packages"
+          title: "chore(release): version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Sync docs changelog
+        run: pnpm sync:docs-changelog
+
+      - name: Commit docs changelog
+        run: |
+          if git diff --quiet docs/changelog.mdx; then
+            echo "Docs changelog already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/changelog.mdx
+          git commit -m "chore: sync docs changelog"
+          git push origin ${{ github.ref_name }}

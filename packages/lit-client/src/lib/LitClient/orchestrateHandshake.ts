@@ -87,29 +87,32 @@ export const orchestrateHandshake = async (params: {
             };
 
             // Debug logging before handshake
-            _logger.info(`🔍 About to make handshake request to: ${url}`);
-            _logger.info(`🔍 Handshake request data:`, _data);
-            _logger.info(`🔍 Network module details:`, {
-              version: params.networkModule?.version,
-              hasApiHandshakeSchemas:
-                !!params.networkModule?.api?.handshake?.schemas,
-              endpointHandshake: params.endpoints.HANDSHAKE,
-            });
+            _logger.info({}, `🔍 About to make handshake request to: ${url}`);
+            _logger.info({ _data }, `🔍 Handshake request data:`);
+            _logger.info(
+              {
+                version: params.networkModule?.version,
+                hasApiHandshakeSchemas:
+                  !!params.networkModule?.api?.handshake?.schemas,
+                endpointHandshake: params.endpoints.HANDSHAKE,
+              },
+              `🔍 Network module details:`
+            );
 
             // 1. Call the thin API
             const retrievedServerKeys = await LitNodeApi.handshake(_data);
 
             _logger.info(
-              '🔍 Retrieved server keys from handshake:',
-              retrievedServerKeys
+              { retrievedServerKeys },
+              '🔍 Retrieved server keys from handshake:'
             );
             _logger.info(
-              '🔍 Type of retrieved server keys:',
-              typeof retrievedServerKeys
+              { type: typeof retrievedServerKeys },
+              '🔍 Type of retrieved server keys:'
             );
             _logger.info(
-              '🔍 Keys in retrieved server keys:',
-              Object.keys(retrievedServerKeys || {})
+              { keys: Object.keys(retrievedServerKeys || {}) },
+              '🔍 Keys in retrieved server keys:'
             );
 
             // 2. Process the response (verify attestation etc.)
@@ -157,11 +160,14 @@ export const orchestrateHandshake = async (params: {
 
             return { url, success: true };
           } catch (error: any) {
-            _logger.error(`❌ Handshake failed for node: ${url}`, {
-              error: error.message,
-              stack: error.stack,
-              url,
-            });
+            _logger.error(
+              {
+                error: error.message,
+                stack: error.stack,
+                url,
+              },
+              `❌ Handshake failed for node: ${url}`
+            );
 
             // With Promise.all, any failure will cause immediate rejection
             // But we still want to check if we have enough successful connections so far
@@ -252,12 +258,15 @@ export const orchestrateHandshake = async (params: {
       requestId,
     });
   } catch (error) {
-    _logger.error('Handshake orchestration failed:', {
-      requestId,
-      error: error instanceof Error ? error.message : String(error),
-      connectedNodes: connectedNodes.size,
-      totalNodes: params.bootstrapUrls.length,
-    });
+    _logger.error(
+      {
+        requestId,
+        error: error instanceof Error ? error.message : String(error),
+        connectedNodes: connectedNodes.size,
+        totalNodes: params.bootstrapUrls.length,
+      },
+      'Handshake orchestration failed:'
+    );
     throw error; // Rethrow for the caller
   } finally {
     // @ts-ignore

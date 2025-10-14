@@ -32,18 +32,12 @@ import type {
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export {
+export type {
   DefinedJson,
   DefinedLiteral,
   Json,
   Literal,
 } from '@lit-protocol/schemas';
-
-export interface PKPInfo {
-  tokenId: string;
-  publicKey: string;
-  ethAddress: string;
-}
 
 export interface JobStatusResponse {
   jobId: string;

@@ -15,3 +15,5 @@ tools
 /packages/wasm/rust/*
 /packages/wasm/src/pkg/*
 **/*/dist
+/docs
+/packages/**/CHANGELOG.md

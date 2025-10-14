@@ -1,0 +1,77 @@
+---
+title: PKP Permissions
+---
+
+<Tip>
+  See SDK Reference for more details on the PKP Permissions. [PKP Permissions
+  Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#getpkppermissionsmanager)
+</Tip>
+
+### What it is
+
+The PKP Permissions Manager is a high‑level helper that manages who and what may use a PKP. It provides a unified interface over the underlying on‑chain permissions, covering three dimensions: permitted addresses, permitted Lit Actions (by IPFS CID), and permitted authentication methods with fine‑grained scopes.
+
+```ts
+const pkpPermissionsManager = await litClient.getPKPPermissionsManager({
+  pkpIdentifier: { tokenId: myPkp.tokenId },
+  account: pkpViemAccount,
+});
+```
+
+### Core capabilities
+
+- **Read a unified context**: fetch a normalised snapshot of current permissions (addresses, actions, auth methods) with helper checks (e.g., is an address permitted?).
+- **Manage addresses**: allow or remove EVM addresses that can operate the PKP.
+- **Manage Lit Actions**: allow or remove Lit Actions by IPFS CID to constrain what code can execute with the PKP.
+- **Manage auth methods and scopes**: bind supported auth methods to the PKP and adjust their scopes (e.g., a scope like `sign-anything`) for least‑privilege access.
+
+### Quick Examples
+
+```ts
+// 1) Initialise a PKP‑scoped viem account and permissions manager
+const pkpViemAccount = await litClient.getPkpViemAccount({
+  pkpPublicKey: myPkp.publicKey,
+  authContext,
+  chainConfig: litClient.getChainConfig().viemConfig,
+});
+
+const pkpPermissionsManager = await litClient.getPKPPermissionsManager({
+  pkpIdentifier: { tokenId: myPkp.tokenId },
+  account: pkpViemAccount,
+});
+
+// 2) Read current permissions and perform checks
+const ctx = await pkpPermissionsManager.getPermissionsContext();
+console.log(ctx.addresses, ctx.actions, ctx.authMethods);
+
+const isAddrAllowed = await pkpPermissionsManager.isPermittedAddress({
+  address: "0xabc...def",
+});
+
+// 3) Manage an auth method and its scopes (requires PKP ownership)
+const addTx = await pkpPermissionsManager.addPermittedAuthMethod({
+  authMethodType: 1, // EthWallet
+  authMethodId: "0x1234567890abcdef1234567890abcdef12345678",
+  userPubkey:
+    "0x04abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  scopes: ["sign-anything"],
+});
+await addTx.receipt;
+
+// Remove a specific scope (e.g. scopeId 1) from that auth method
+const removeScopeTx =
+  await pkpPermissionsManager.removePermittedAuthMethodScope({
+    authMethodType: 1,
+    authMethodId: "0x1234567890abcdef1234567890abcdef12345678",
+    scopeId: 1,
+  });
+await removeScopeTx.receipt;
+
+// Optionally remove the auth method entirely
+const removeAuthMethodTx =
+  await pkpPermissionsManager.removePermittedAuthMethod({
+    authMethodType: 1,
+    authMethodId: "0x1234567890abcdef1234567890abcdef12345678",
+  });
+await removeAuthMethodTx.receipt;
+```

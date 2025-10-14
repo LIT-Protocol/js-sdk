@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: lit-auth-service
-    env: docker
-    dockerfilePath: packages/auth-services/Dockerfile
-    dockerContext: ./
-    plan: starter
-    region: oregon

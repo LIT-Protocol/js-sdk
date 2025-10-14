@@ -455,7 +455,7 @@ describe('Access Control Conditions Builder', () => {
         },
       };
 
-      const conditions = createAccBuilder().raw(rawCondition).build();
+      const conditions = createAccBuilder().unifiedAccs(rawCondition).build();
 
       expect(conditions).toHaveLength(1);
       // Should be canonically formatted
@@ -480,7 +480,7 @@ describe('Access Control Conditions Builder', () => {
         .requireEthBalance('1000000000000000000')
         .on('ethereum')
         .or()
-        .raw(customCondition)
+        .unifiedAccs(customCondition)
         .build();
 
       expect(conditions).toHaveLength(3);

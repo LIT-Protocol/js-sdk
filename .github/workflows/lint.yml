@@ -3,9 +3,8 @@ on:
   pull_request:
   push:
     branches:
-      - master
-      - main
-      - develop
+      - naga
+      - canary-naga
 jobs:
   linter:
     runs-on: ubuntu-latest
@@ -16,10 +15,16 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: 22.18.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Enable corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
       
       - name: Install rust
         uses: dtolnay/rust-toolchain@1.76.0
@@ -30,38 +35,9 @@ jobs:
           version: 'latest'
       
       - name: Install project dependencies
-        run: bun install
+        run: pnpm install --frozen-lockfile
       
-      - name: Debug Git and Environment
-        run: |
-          echo "Current branch:"
-          git branch --show-current
-          echo "Available branches:"
-          git branch -a
-          echo "Git remotes:"
-          git remote -v
-          echo "Last 3 commits:"
-          git log --oneline -3
-          echo "Git status:"
-          git status
-          echo "NX configuration:"
-          cat nx.json | head -10
-          echo "Prettier configuration:"
-          cat .prettierrc
-          
       - name: Lint
         run: |
-          echo "Running format check..."
-          # Use prettier directly to avoid NX git issues
-          npx prettier --check . || {
-            echo "Format check failed. Running prettier --write to fix issues..."
-            npx prettier --write .
-            echo "Checking again after formatting..."
-            npx prettier --check . || {
-              echo "Still failing after auto-format. Manual intervention needed."
-              exit 1
-            }
-            echo "Auto-formatting successful. All files are now properly formatted."
-            echo "Note: Some files were auto-formatted. Consider committing these changes in your next commit."
-          }
-          echo "Format check passed!"
+          echo "Running workspace format check..."
+          NX_DAEMON=false pnpm run format:check

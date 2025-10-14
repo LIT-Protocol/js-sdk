@@ -1,0 +1,40 @@
+---
+title: withOverrides
+---
+
+# Functions
+
+> **withOverrides**(`overrides`)
+
+Create a network module instance with runtime overrides (primarily for RPC URL). Use this to direct SDK operations to your own private RPC endpoint.
+
+## Parameters
+
+<ParamField path="param.overrides" type="{ rpcUrl?: string }" required>
+  Optional overrides. Provide `rpcUrl` to replace the chain RPC used by the module instance.
+  ```ts
+  { rpcUrl: "https://my-private-rpc.example.com" }
+  ```
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="NagaNetworkModule">
+  A new module instance with overrides applied. Pass this into `createLitClient(
+  {network})`.
+</ResponseField>
+
+## Example
+
+### Override RPC at runtime
+
+```ts
+import { createLitClient } from "@lit-protocol/lit-client";
+import { nagaDev } from "@lit-protocol/networks";
+
+const network = nagaDev.withOverrides({
+  rpcUrl: "https://my-private-rpc.example.com",
+});
+
+const litClient = await createLitClient({ network });
+```

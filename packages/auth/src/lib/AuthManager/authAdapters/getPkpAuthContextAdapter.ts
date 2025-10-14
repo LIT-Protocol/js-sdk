@@ -172,12 +172,23 @@ export async function getPkpAuthContextAdapter(
   const threshold = handshakeResult.threshold;
 
   // TODO: ❗️THIS IS NOT TYPED - we have to fix this! (This can only be in Naga)
+  const respondingUrlSet = new Set(Object.keys(handshakeResult.serverKeys));
+  const respondingNodePrices = nodePrices.filter((item: { url: string }) =>
+    respondingUrlSet.has(item.url)
+  );
+
+  if (respondingNodePrices.length < threshold) {
+    throw new Error(
+      `Not enough handshake nodes to satisfy threshold. Threshold: ${threshold}, responding nodes: ${respondingNodePrices.length}`
+    );
+  }
+
   const nodeUrls = litClientCtx.getMaxPricesForNodeProduct({
-    nodePrices: nodePrices,
+    nodePrices: respondingNodePrices,
     userMaxPrice: litClientCtx.getUserMaxPrice({
-      product: 'LIT_ACTION',
+      product: 'SIGN_SESSION_KEY',
     }),
-    productId: PRODUCT_IDS['LIT_ACTION'],
+    productId: PRODUCT_IDS['SIGN_SESSION_KEY'],
     numRequiredNodes: threshold,
   });
 

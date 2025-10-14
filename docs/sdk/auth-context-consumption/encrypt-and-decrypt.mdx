@@ -1,0 +1,158 @@
+---
+title: "Encrypt and Decrypt"
+description: "Demonstrates the complete encrypt/decrypt flow using official access control conditions builder. Alice encrypts data, Bob decrypts it using properly configured access control conditions."
+---
+
+<Tip>
+  If you are here to see how auth context is consumed here, jump to
+  [Decrypt](#decrypts-data).
+</Tip>
+
+# Prerequisites
+
+<Note>
+- `authContext` is required. This is the result from the authentication flow.
+</Note>
+
+## Installation
+
+<CodeGroup>
+```bash npm
+npm install @lit-protocol/access-control-conditions
+```
+```bash yarn
+yarn add @lit-protocol/access-control-conditions
+```
+```bash pnpm
+pnpm add @lit-protocol/access-control-conditions
+```
+```bash bun 
+bun add @lit-protocol/access-control-conditions
+```
+</CodeGroup>
+
+# Example Walkthrough
+
+🔐 Encrypt & Decrypt Flow
+
+Alice can encrypt without authentication, Bob must authenticate to decrypt.
+
+- Alice: Encrypts → No AuthContext needed
+- Bob: Decrypts → Requires AuthContext
+
+
+# 👩🏼 Alice
+
+Alice encrypts data without needing authentication
+
+### Create Alice's Account
+
+Generate Alice's account using a random private key. Alice only needs an account for encryption - no authentication required.
+
+```ts
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+
+// Alice's account (sender)
+const AliceAccount = privateKeyToAccount(generatePrivateKey());
+console.log("🙋‍♀️ AliceAccount:", AliceAccount.address);
+```
+
+# 🧔🏻‍♂️ Bob
+
+Bob needs authentication to decrypt data
+
+### Create Bob's Account
+
+Generate Bob's account using a random private key. Bob will need this account for authentication to decrypt data.
+
+```ts
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+
+// Bob's account (recipient)
+const BobsAccount = privateKeyToAccount(generatePrivateKey());
+console.log("🧔🏻‍♂️ BobsAccount:", BobsAccount.address);
+```
+
+# 👩🏼 Alice Defines Access Rules
+
+Alice decides who can decrypt her encrypted data
+
+<Tip>
+  See SDK Reference for more details on the Access Control Conditions Builder. [Access Control Conditions Builder Reference](/sdk/sdk-reference/access-control-conditions/functions/createAccBuilder)
+</Tip>
+
+### Build Access Control Conditions
+
+Alice defines who can decrypt the encrypted data using official access control conditions builder. These conditions reference Bob's wallet address and will be checked during decryption.
+
+```ts
+import { createAccBuilder } from "@lit-protocol/access-control-conditions";
+
+// Build access control conditions
+const builder = createAccBuilder();
+
+const accs = builder
+  .requireWalletOwnership(BobsAccount.address)
+  .on("ethereum")
+  .and()
+  .requireEthBalance("0", "=")
+  .on("yellowstone")
+  .build();
+```
+
+# 🧔🏻‍♂️ Bob
+
+### Prepares for Decryption
+
+Bob creates authentication context to prove he meets access conditions
+
+```ts
+// Bob needs AuthContext for decryption
+const authContext = await authManager.createEoaAuthContext({
+  config: {
+    account: BobsAccount,
+  },
+  authConfig: {
+    domain: "localhost",
+    statement: "Decrypt test data",
+    expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+    resources: [
+      ["access-control-condition-decryption", "*"],
+      ["lit-action-execution", "*"],
+    ],
+  },
+  litClient,
+});
+```
+
+# 👩🏼 Alice
+
+### Prepares Data
+
+Alice configures and encrypts the data with access control conditions
+
+```ts
+// Alice encrypts data (no AuthContext needed)
+const encryptedData = await litClient.encrypt({
+  dataToEncrypt: "Hello, my love! ❤️",
+  unifiedAccessControlConditions: accs,
+  chain: "ethereum",
+  // metadata: { dataType: 'string' }, // auto-inferred
+});
+```
+
+# 🧔🏻‍♂️ Bob
+
+### Decrypts Data
+
+Bob uses his authentication context to decrypt Alice's data
+
+```ts
+// Bob decrypts data (requires AuthContext)
+const decryptedResponse = await litClient.decrypt({
+  data: encryptedData,
+  unifiedAccessControlConditions: accs,
+  authContext: bobAuthContext,
+  chain: "ethereum",
+});
+```

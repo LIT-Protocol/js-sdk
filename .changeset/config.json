@@ -5,7 +5,10 @@
   "fixed": [],
   "linked": [],
   "access": "public",
-  "baseBranch": "main",
+  "baseBranch": "naga",
   "updateInternalDependencies": "minor",
-  "ignore": []
+  "ignore": [
+    "@lit-protocol/wrapped-keys",
+    "@lit-protocol/wrapped-keys-lit-actions"
+  ]
 }

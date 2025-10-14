@@ -119,9 +119,12 @@ const preparePkpAuthRequestBody = async (
 export const getPkpAuthContext = async (
   params: z.infer<typeof GetPkpAuthContextSchema>
 ) => {
-  _logger.info('getPkpAuthContext: params', {
-    params,
-  });
+  _logger.info(
+    {
+      params,
+    },
+    'getPkpAuthContext: params'
+  );
 
   const _params = GetPkpAuthContextSchema.parse(params);
   const _nodeInfo = NodeInfoSchema.parse(params.deps.connection.nodeUrls);
@@ -161,10 +164,19 @@ export const getPkpAuthContext = async (
           }),
       });
 
+<<<<<<< HEAD
   _logger.info('getPkpAuthContext: delegationAuthSig', {
     delegationAuthSig,
     isPreGenerated: !!_params.deps.preGeneratedDelegationAuthSig,
   });
+=======
+  _logger.info(
+    {
+      delegationAuthSig,
+    },
+    'getPkpAuthContext: delegationAuthSig'
+  );
+>>>>>>> naga
 
   return {
     chain: 'ethereum',

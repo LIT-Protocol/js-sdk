@@ -1,0 +1,1077 @@
+---
+title: createLitClient
+---
+
+# Functions
+
+> **createLitClient**(`{ network }`)
+
+## Parameters
+
+<ParamField path="param.network" type="NagaNetworkModule" required>
+    The network to connect to.
+    ```ts
+    import { nagaDev } from "@lit-protocol/networks";
+    const litClient = await createLitClient({ network: nagaDev });
+    ```
+</ParamField>
+
+## Returns
+
+<ResponseField name="litClient" type="object">
+  Complete litClient object with all returned methods.
+</ResponseField>
+
+### chain.raw.pkpSign
+
+Signs arbitrary bytes with a PKP using the specified signing scheme on the chosen chain.
+
+#### Parameters
+
+<ResponseField name="params" type="object">
+  <Expandable title="properties">
+    <ResponseField name="pubKey" type="string" required>
+      0x‑prefixed PKP public key.
+    </ResponseField>
+
+    <ResponseField name="toSign" type="Uint8Array | ArrayLike<number>" required>
+      Bytes to sign. If hashing is enabled, the hash of this payload is signed.
+    </ResponseField>
+
+    <ResponseField name="signingScheme" type="enum" required>
+      Signing scheme to use.
+      <Expandable title="allowed values">
+        <ResponseField name="EcdsaK256Sha256" type="string">
+          ECDSA over secp256k1 with SHA‑256 prehash.
+        </ResponseField>
+        <ResponseField name="EcdsaP256Sha256" type="string">
+          ECDSA over P‑256 with SHA‑256 prehash.
+        </ResponseField>
+        <ResponseField name="EcdsaP384Sha384" type="string">
+          ECDSA over P‑384 with SHA‑384 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrEd25519Sha512" type="string">
+          Schnorr over Ed25519 with SHA‑512 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrK256Sha256" type="string">
+          Schnorr over secp256k1 with SHA‑256 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrP256Sha256" type="string">
+          Schnorr over P‑256 with SHA‑256 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrP384Sha384" type="string">
+          Schnorr over P‑384 with SHA‑384 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrRistretto25519Sha512" type="string">
+          Schnorr over Ristretto25519 with SHA‑512 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrEd448Shake256" type="string">
+          Schnorr over Ed448 with SHAKE‑256 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrRedJubjubBlake2b512" type="string">
+          Schnorr over Jubjub (red) with BLAKE2b‑512 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrK256Taproot" type="string">
+          Schnorr over secp256k1 (Taproot) variant.
+        </ResponseField>
+        <ResponseField name="SchnorrRedDecaf377Blake2b512" type="string">
+          Schnorr over Decaf377 (red) with BLAKE2b‑512 prehash.
+        </ResponseField>
+        <ResponseField name="SchnorrkelSubstrate" type="string">
+          Schnorrkel (Substrate) variant.
+        </ResponseField>
+      </Expandable>
+      <Expandable title="chain compatibility">
+        <ResponseField name="ethereum" type="default">
+          Defaults to EcdsaK256Sha256.
+        </ResponseField>
+        <ResponseField name="bitcoin" type="supported">
+          Supports EcdsaK256Sha256, SchnorrK256Sha256, SchnorrK256Taproot.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="chain" type="enum" required>
+      Target chain; determines hashing (e.g. keccak256 for ethereum, sha256 for bitcoin).
+      <Expandable title="allowed values">
+        <ResponseField name="ethereum" type="string">
+          Uses keccak256 prehashing when hashing is enabled.
+        </ResponseField>
+        <ResponseField name="bitcoin" type="string">
+          Uses SHA‑256 prehashing when hashing is enabled.
+        </ResponseField>
+        <ResponseField name="cosmos" type="string">
+          Reserved in schema.
+        </ResponseField>
+        <ResponseField name="solana" type="string">
+          Reserved in schema.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="authContext" type="AuthenticationContext" required>
+      Authorisation/session context
+    </ResponseField>
+
+    <ResponseField name="userMaxPrice" type="bigint">
+      Optional maximum price the user is willing to pay for this request.
+    </ResponseField>
+
+    <ResponseField name="bypassAutoHashing" type="boolean">
+      Optional. Controls message pre‑hashing before signing.
+      <Expandable title="behaviour">
+        <ResponseField name="true" type="boolean">
+          Do not transform <code>toSign</code>; the payload is signed as‑is. Use when you already
+          computed the digest (e.g. EIP‑712 typed data, pre‑computed tx/message hash).
+        </ResponseField>
+
+        <ResponseField name="false (default)" type="boolean">
+          Auto‑hash <code>toSign</code> according to <code>signingScheme</code> and <code>chain</code> via LitMessageSchema.
+        </ResponseField>
+      </Expandable>
+
+      <Expandable title="auto‑hash mapping (ECDSA)">
+        <ResponseField name="ethereum.EcdsaK256Sha256" type="keccak256">
+          Hash function used before signing.
+        </ResponseField>
+        <ResponseField name="ethereum.EcdsaP256Sha256" type="keccak256">
+          Hash function used before signing.
+        </ResponseField>
+        <ResponseField name="ethereum.EcdsaP384Sha384" type="keccak384">
+          Hash function used before signing.
+        </ResponseField>
+        <ResponseField name="bitcoin.EcdsaK256Sha256" type="sha256">
+          Hash function used before signing.
+        </ResponseField>
+        <ResponseField name="bitcoin.EcdsaP256Sha256" type="sha256">
+          Hash function used before signing.
+        </ResponseField>
+        <ResponseField name="bitcoin.EcdsaP384Sha384" type="sha384">
+          Hash function used before signing.
+        </ResponseField>
+      </Expandable>
+
+      <Expandable title="auto‑hash mapping (FROST)">
+        <ResponseField name="all FROST variants" type="none">
+          No hashing is applied; <code>toSign</code> is signed as‑is.
+        </ResponseField>
+      </Expandable>
+
+      <Expandable title="notes">
+        <ResponseField name="cosmos / solana" type="experimental">
+          Auto‑hash mapping is not defined; avoid relying on auto‑hash with these chains.
+        </ResponseField>
+        <ResponseField name="EIP‑712 / typed data" type="guidance">
+          Compute the EIP‑712 digest client‑side and set <code>bypassAutoHashing</code>=true to sign the digest directly.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="LitNodeSignature Object">
+  <Expandable title="properties">
+    <ResponseField name="signature" type="string">
+      The final signature for the request.
+    </ResponseField>
+
+    <ResponseField name="verifyingKey" type="string">
+      0x‑prefixed verifying (compressed) public key used to produce the signature.
+    </ResponseField>
+
+    <ResponseField name="signedData" type="string">
+      0x‑prefixed hex of the exact payload that was signed (post‑hashing if applicable).
+    </ResponseField>
+
+    <ResponseField name="recoveryId" type="number | null">
+      Recovery identifier when applicable to the scheme (0 or 1; may be null).
+    </ResponseField>
+
+    <ResponseField name="publicKey" type="string">
+      0x‑prefixed PKP public key associated with the signature.
+    </ResponseField>
+
+    <ResponseField name="sigType" type="string">
+      The signature type/scheme used
+    </ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+### executeJs
+
+Execute a Lit Action (JS) on the network.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="code" type="string">
+      Inline JS code to run. Either code or ipfsId must be provided.
+    </ResponseField>
+    <ResponseField name="ipfsId" type="string">
+      IPFS CID of a Lit Action to run. Either code or ipfsId must be provided.
+    </ResponseField>
+    <ResponseField name="jsParams" type="any | { publicKey?: string; sigName?: string; ... }">
+      Parameters injected into the Lit Action runtime before execution.
+    </ResponseField>
+    <ResponseField name="authContext" type="AuthenticationContext" required>
+      Authorisation/session context for node authorisation.
+    </ResponseField>
+    <ResponseField name="userMaxPrice" type="bigint">
+      Optional maximum price the user is willing to pay.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="ExecuteJsResponse Object">
+  <Expandable title="properties">
+    <ResponseField name="success" type="boolean" />
+    <ResponseField name="response" type="string | object">
+      The action-defined response payload.
+    </ResponseField>
+    <ResponseField name="logs" type="string">
+      Aggregated logs from nodes.
+    </ResponseField>
+    <ResponseField name="signatures" type="object | any">
+      Signature map when action performs signing.
+    </ResponseField>
+    <ResponseField name="claims" type="record">
+      Optional claim results when present.
+    </ResponseField>
+    <ResponseField name="debug" type="object">
+      Optional debug info (allNodeResponses, allNodeLogs, rawNodeHTTPResponses).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+
+### encrypt
+
+Encrypt data with access control conditions using BLS.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="dataToEncrypt" type="string | object | any[] | Uint8Array" required>
+      The data to encrypt. Strings/objects/arrays are internally converted to bytes. Objects/arrays are JSON-stringified first.
+    </ResponseField>
+
+    <ResponseField name="chain" type="string" required>
+      Target chain context for condition evaluation.
+    </ResponseField>
+
+    <ResponseField name="accessControlConditions" type="ACC[]">
+      Standard access control conditions (ACC). Provide one of ACC, evmContractConditions, solRpcConditions, or unifiedAccessControlConditions.
+    </ResponseField>
+
+    <ResponseField name="evmContractConditions" type="EVM ACC[]">
+      EVM-specific contract conditions (mutually exclusive with other condition types).
+    </ResponseField>
+
+    <ResponseField name="solRpcConditions" type="Solana ACC[]">
+      Solana RPC conditions (mutually exclusive with other condition types).
+    </ResponseField>
+
+    <ResponseField name="unifiedAccessControlConditions" type="Unified ACC[]">
+      Unified access control conditions (mutually exclusive with other condition types).
+    </ResponseField>
+
+    <ResponseField name="metadata" type="object">
+      Optional metadata to describe the data being encrypted.
+      <Expandable title="properties">
+        <ResponseField name="dataType" type="'uint8array' | 'string' | 'json' | 'buffer' | 'image' | 'video' | 'file'">
+          Expected data type for downstream conversion on decrypt.
+        </ResponseField>
+        <ResponseField name="mimeType" type="string">
+          MIME type for file-like data.
+        </ResponseField>
+        <ResponseField name="filename" type="string">
+          Original filename for file-like data.
+        </ResponseField>
+        <ResponseField name="size" type="number">
+          File size in bytes.
+        </ResponseField>
+        <ResponseField name="custom" type="record">
+          Arbitrary custom metadata.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="EncryptResponse Object">
+  <Expandable title="properties">
+    <ResponseField name="ciphertext" type="string">
+      Base64-encoded ciphertext.
+    </ResponseField>
+    <ResponseField name="dataToEncryptHash" type="string">
+      SHA-256 hash (hex) of the plaintext data.
+    </ResponseField>
+    <ResponseField name="metadata" type="object">
+      Echo of provided metadata or inferred data type where applicable.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### decrypt
+
+Decrypt data previously encrypted with access control conditions.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="data" type="EncryptResponse">
+      Optional. Pass the full encrypted object from encrypt(). If omitted, provide fields below individually.
+    </ResponseField>
+
+    <ResponseField name="ciphertext" type="string">
+      Base64-encoded ciphertext (required if data is not provided).
+    </ResponseField>
+    <ResponseField name="dataToEncryptHash" type="string">
+      SHA-256 hash (hex) of the original plaintext (required if data is not provided).
+    </ResponseField>
+
+    <ResponseField name="accessControlConditions" type="ACC[]">
+      One of ACC, evmContractConditions, solRpcConditions, or unifiedAccessControlConditions (must match encryption).
+    </ResponseField>
+    <ResponseField name="evmContractConditions" type="EVM ACC[]" />
+    <ResponseField name="solRpcConditions" type="Solana ACC[]" />
+    <ResponseField name="unifiedAccessControlConditions" type="Unified ACC[]" />
+
+    <ResponseField name="chain" type="string">
+      Target chain context for condition evaluation.
+    </ResponseField>
+
+    <ResponseField name="authContext" type="AuthenticationContext">
+      Authorisation/session context for node authorisation.
+    </ResponseField>
+
+    <ResponseField name="userMaxPrice" type="bigint">
+      Optional maximum price the user is willing to pay for this request.
+    </ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="DecryptResponse Object">
+  <Expandable title="properties">
+    <ResponseField name="decryptedData" type="Uint8Array">
+      The raw decrypted bytes.
+    </ResponseField>
+    <ResponseField
+      name="convertedData"
+      type="string | object | Buffer | Blob | File"
+    >
+      Present when metadata.dataType was provided and conversion is applicable.
+    </ResponseField>
+    <ResponseField name="metadata" type="object">
+      Metadata echo including dataType and optional file info.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### mintWithEoa
+
+Mint a PKP using an EOA.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="account" type="Account | WalletClient | Signer" required>
+      The signing account that will perform the mint on-chain.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="AuthServerTx<PKPData>">
+  <Expandable title="properties">
+    <ResponseField name="txHash" type="string">
+      Transaction hash of the mint.
+    </ResponseField>
+    <ResponseField name="data" type="PKPData Object">
+      <Expandable title="properties">
+        <ResponseField name="tokenId" type="bigint"> PKP token ID. </ResponseField>
+        <ResponseField name="pubkey" type="string"> 0x-hex uncompressed public key. </ResponseField>
+        <ResponseField name="ethAddress" type="string"> Derived 0x-hex Ethereum address. </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### mintWithAuth
+
+Mint a PKP using an authentication method.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="account" type="Account | WalletClient | Signer" required>
+      The signing account that will perform the mint on-chain.
+    </ResponseField>
+    <ResponseField name="authData" type="AuthData" required>
+      Auth method payload (e.g., from ViemAccountAuthenticator): includes authMethodType, authMethodId, optional accessToken.
+    </ResponseField>
+    <ResponseField name="scopes" type="string[] | number[]" required>
+      Permission scopes to attach to the minted PKP.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="AuthServerTx<PKPData>">
+  <Expandable title="properties">
+    <ResponseField name="txHash" type="string" />
+    <ResponseField name="data" type="PKPData" />
+  </Expandable>
+</ResponseField>
+
+### mintWithCustomAuth
+
+Mint a PKP using custom authentication (Lit Action validator or IPFS CID).
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="account" type="Account | WalletClient | Signer" required>
+      The signing account for on-chain operations.
+    </ResponseField>
+    <ResponseField name="authData" type="AuthData (without accessToken)" required>
+      Authentication method details used alongside the validation Lit Action.
+    </ResponseField>
+    <ResponseField name="validationIpfsCid" type="string" required>
+      Lit Action IPFS CID (must start with "Qm" and be ≥ 46 chars).
+    </ResponseField>
+    <ResponseField name="scope" type="'no-permissions' | 'sign-anything' | 'personal-sign'" required>
+      Initial permission scope to grant.
+    </ResponseField>
+    <ResponseField name="addPkpEthAddressAsPermittedAddress" type="boolean" default="false">
+      If true, add the PKP's own address as a permitted address.
+    </ResponseField>
+    <ResponseField name="sendPkpToItself" type="boolean" default="true">
+      If true, transfers the PKP to itself after minting.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="object">
+  <Expandable title="properties">
+    <ResponseField name="validationIpfsCid" type="string">
+      Echo of the provided Lit Action CID.
+    </ResponseField>
+    <ResponseField name="pkpData" type="PKPData | any">
+      Mint result and PKP details from the chain API.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### authService.mintWithAuth
+
+Mint a PKP via the Auth Service. Parameters and returns mirror `mintWithAuth`.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="account" type="Account | WalletClient | Signer" />
+    <ResponseField name="authData" type="AuthData" />
+    <ResponseField name="scopes" type="string[] | number[]" />
+    <ResponseField name="authServiceBaseUrl" type="string">
+      Optional. Override the Auth Service base URL; defaults to the network’s configured value.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="AuthServerTx<PKPData>" />
+
+### getPKPPermissionsManager
+
+Create a PKP permissions manager instance.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="pkpIdentifier" type="object" required>
+      PKP identifier. Exactly one of the following must be provided.
+      <Expandable title="one of">
+        <ResponseField name="tokenId" type="string">
+          PKP token ID (stringified bigint).
+        </ResponseField>
+        <ResponseField name="pubkey" type="string">
+          0x‑prefixed uncompressed PKP public key.
+        </ResponseField>
+        <ResponseField name="address" type="string">
+          0x‑prefixed PKP Ethereum address.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="account" type="Account | WalletClient | Signer" required>
+      Account used for permission transactions and reads.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="PKPPermissionsManager Object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="addPermittedAction(params)" type="Promise<LitTxVoid>">
+      Add a permitted Lit Action.
+      <Expandable title="params">
+        <ResponseField name="ipfsId" type="string" required>
+          Lit Action IPFS CID.
+        </ResponseField>
+        <ResponseField name="scopes" type="ScopeString[]" required>
+          Permission scopes (e.g., 'sign-anything').
+        </ResponseField>
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.addPermittedAction({ ipfsId: "Qm...", scopes: ["sign-anything"] });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="addPermittedAddress(params)" type="Promise<LitTxVoid>">
+      Add a permitted address.
+      <Expandable title="params">
+        <ResponseField name="address" type="string" required>
+          0x‑prefixed address to permit.
+        </ResponseField>
+        <ResponseField name="scopes" type="ScopeString[]" required>
+          Permission scopes.
+        </ResponseField>
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.addPermittedAddress({ address: "0xUser...", scopes: ["sign-anything"] });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="addPermittedAuthMethod(params)" type="Promise<LitTxVoid>">
+      Permit an authentication method.
+      <Expandable title="params">
+        <ResponseField name="authMethodType" type="string | number | bigint" required />
+        <ResponseField name="authMethodId" type="string" required />
+        <ResponseField name="userPubkey" type="string" required />
+        <ResponseField name="scopes" type="ScopeString[]" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.addPermittedAuthMethod({ authMethodType: 1, authMethodId: "0x...", userPubkey: "0x...", scopes: ["sign-anything"] });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="addPermittedAuthMethodScope(params)" type="Promise<LitTxVoid>">
+      Permit a scope for an auth method.
+      <Expandable title="params">
+        <ResponseField name="authMethodType" type="string | number | bigint" required />
+        <ResponseField name="authMethodId" type="string" required />
+        <ResponseField name="scopeId" type="string | number | bigint" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.addPermittedAuthMethodScope({ authMethodType: 1, authMethodId: "0x...", scopeId: 0 });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="removePermittedAction(params)" type="Promise<LitTxVoid>">
+      <Expandable title="params">
+        <ResponseField name="ipfsId" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.removePermittedAction({ ipfsId: "Qm..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="removePermittedAddress(params)" type="Promise<LitTxVoid>">
+      <Expandable title="params">
+        <ResponseField name="address" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.removePermittedAddress({ address: "0xUser..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="removePermittedAuthMethod(params)" type="Promise<LitTxVoid>">
+      <Expandable title="params">
+        <ResponseField name="authMethodType" type="string | number | bigint" required />
+        <ResponseField name="authMethodId" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.removePermittedAuthMethod({ authMethodType: 1, authMethodId: "0x..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="removePermittedAuthMethodScope(params)" type="Promise<LitTxVoid>">
+      <Expandable title="params">
+        <ResponseField name="authMethodType" type="string | number | bigint" required />
+        <ResponseField name="authMethodId" type="string" required />
+        <ResponseField name="scopeId" type="string | number | bigint" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.removePermittedAuthMethodScope({ authMethodType: 1, authMethodId: "0x...", scopeId: 0 });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="isPermittedAction(params)" type="Promise<boolean>">
+      <Expandable title="params">
+        <ResponseField name="ipfsId" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const ok = await manager.isPermittedAction({ ipfsId: "Qm..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="isPermittedAddress(params)" type="Promise<boolean>">
+      <Expandable title="params">
+        <ResponseField name="address" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const ok = await manager.isPermittedAddress({ address: "0xUser..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getPermittedActions()" type="Promise<readonly 0x-hex[]>" />
+    <ResponseField name="getPermittedAddresses()" type="Promise<readonly 0x-hex[]>" />
+    <ResponseField name="getPermittedAuthMethods()" type="Promise<readonly AuthMethod[]>" />
+
+    <ResponseField name="getPermittedAuthMethodScopes(params)" type="Promise<readonly boolean[]>">
+      <Expandable title="params">
+        <ResponseField name="authMethodType" type="number" required />
+        <ResponseField name="authMethodId" type="string" required />
+        <ResponseField name="scopeId" type="number" />
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getPermissionsContext()" type="Promise<PermissionsContext>">
+      Returns consolidated permissions (actions, addresses, authMethods).
+    </ResponseField>
+
+    <ResponseField name="batchUpdatePermissions(operations)" type="Promise<void>">
+      Batch perform add/remove operations.
+      <Expandable title="operations (array of)">
+        <ResponseField name="{ type: 'addAction'; ipfsId; scopes }" type="object" />
+        <ResponseField name="{ type: 'addAddress'; address; scopes }" type="object" />
+        <ResponseField name="{ type: 'addAuthMethod'; authMethodType; authMethodId; userPubkey; scopes }" type="object" />
+        <ResponseField name="{ type: 'addAuthMethodScope'; authMethodType; authMethodId; scopeId }" type="object" />
+        <ResponseField name="{ type: 'removeAction'; ipfsId }" type="object" />
+        <ResponseField name="{ type: 'removeAddress'; address }" type="object" />
+        <ResponseField name="{ type: 'removeAuthMethod'; authMethodType; authMethodId }" type="object" />
+        <ResponseField name="{ type: 'removeAuthMethodScope'; authMethodType; authMethodId; scopeId }" type="object" />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await manager.batchUpdatePermissions([
+  { type: 'addAddress', address: '0xUser...', scopes: ['sign-anything'] },
+  { type: 'addAction', ipfsId: 'Qm...', scopes: ['sign-anything'] },
+]);
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="revokeAllPermissions()" type="Promise<void>">
+      Remove all addresses, auth methods, and known test actions.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### getPaymentManager
+
+Get a Payment Manager for Ledger contract operations.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="account" type="Account | WalletClient | Signer" required>
+      The account used for deposits, withdrawals, and queries.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="PaymentManager Object">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="deposit(params)" type="Promise<LitTxVoid>">
+      Deposit funds to your own account.
+      <Expandable title="params">
+        <ResponseField name="amountInEth" type="string" required>
+          Amount to deposit in ETH (string), internally converted to Wei.
+        </ResponseField>
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.deposit({ amountInEth: "0.1" });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="depositForUser(params)" type="Promise<LitTxVoid>">
+      Deposit funds for another user.
+      <Expandable title="params">
+        <ResponseField name="userAddress" type="string" required />
+        <ResponseField name="amountInEth" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.depositForUser({ userAddress: "0x...", amountInEth: "0.25" });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getBalance(params)" type="Promise<PaymentBalance>">
+      Get total and available balances for a user.
+      <Expandable title="params">
+        <ResponseField name="userAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const bal = await paymentManager.getBalance({ userAddress: "0x..." });
+console.log(bal.totalBalance, bal.availableBalance);
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="requestWithdraw(params)" type="Promise<LitTxVoid>">
+      Request withdrawal (starts delay period).
+      <Expandable title="params">
+        <ResponseField name="amountInEth" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.requestWithdraw({ amountInEth: "0.05" });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="withdraw(params)" type="Promise<LitTxVoid>">
+      Execute withdrawal after delay.
+      <Expandable title="params">
+        <ResponseField name="amountInEth" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.withdraw({ amountInEth: "0.05" });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getWithdrawRequest(params)" type="Promise<WithdrawRequestInfo>">
+      Get current withdrawal request for a user.
+      <Expandable title="params">
+        <ResponseField name="userAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const info = await paymentManager.getWithdrawRequest({ userAddress: "0x..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getWithdrawDelay()" type="Promise<{ delaySeconds: string; raw: bigint }>">
+      Get global withdrawal delay in seconds.
+      <Expandable title="example">
+```ts
+const delay = await paymentManager.getWithdrawDelay();
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="canExecuteWithdraw(params)" type="Promise<{ canExecute: boolean; timeRemaining?: number; withdrawRequest: WithdrawRequestInfo }>">
+      Check whether a user's withdrawal can be executed now.
+      <Expandable title="params">
+        <ResponseField name="userAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const { canExecute, timeRemaining } = await paymentManager.canExecuteWithdraw({ userAddress: "0x..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="delegatePayments(params)" type="Promise<LitTxVoid>">
+      Delegate payments to a user.
+      <Expandable title="params">
+        <ResponseField name="userAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.delegatePayments({ userAddress: "0xUser..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="undelegatePayments(params)" type="Promise<LitTxVoid>">
+      Undelegate payments from a user.
+      <Expandable title="params">
+        <ResponseField name="userAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.undelegatePayments({ userAddress: "0xUser..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="delegatePaymentsBatch(params)" type="Promise<LitTxVoid>">
+      Delegate payments to multiple users.
+      <Expandable title="params">
+        <ResponseField name="userAddresses" type="string[]" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.delegatePaymentsBatch({ userAddresses: ["0xA...","0xB..."] });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="undelegatePaymentsBatch(params)" type="Promise<LitTxVoid>">
+      Undelegate payments from multiple users.
+      <Expandable title="params">
+        <ResponseField name="userAddresses" type="string[]" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.undelegatePaymentsBatch({ userAddresses: ["0xA...","0xB..."] });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="setRestriction(params)" type="Promise<LitTxVoid>">
+      Set payment restriction for caller.
+      <Expandable title="params">
+        <ResponseField name="totalMaxPrice" type="string" required />
+        <ResponseField name="requestsPerPeriod" type="string" required />
+        <ResponseField name="periodSeconds" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+await paymentManager.setRestriction({ totalMaxPrice: "1000000000000000000", requestsPerPeriod: "100", periodSeconds: "86400" });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getPayers(params)" type="Promise<string[]>">
+      List payers for a user.
+      <Expandable title="params">
+        <ResponseField name="userAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const payers = await paymentManager.getPayers({ userAddress: "0xUser..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getUsers(params)" type="Promise<string[]>">
+      List users for a payer.
+      <Expandable title="params">
+        <ResponseField name="payerAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const users = await paymentManager.getUsers({ payerAddress: "0xPayer..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getRestriction(params)" type="Promise<{ totalMaxPrice: string; requestsPerPeriod: string; periodSeconds: string; raw: Restriction }>">
+      Get restriction for a payer.
+      <Expandable title="params">
+        <ResponseField name="payerAddress" type="string" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const r = await paymentManager.getRestriction({ payerAddress: "0xPayer..." });
+```
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="getPayersAndRestrictions(params)" type="Promise<{ payers: string[][]; restrictions: { totalMaxPrice: string; requestsPerPeriod: string; periodSeconds: string; }[][]; raw: { payers: string[][]; restrictions: Restriction[][] } }>">
+      Batch get payers and restrictions for users.
+      <Expandable title="params">
+        <ResponseField name="userAddresses" type="string[]" required />
+      </Expandable>
+      <Expandable title="example">
+```ts
+const res = await paymentManager.getPayersAndRestrictions({ userAddresses: ["0xA...","0xB..."] });
+```
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+
+### viewPKPPermissions
+
+View current permissions context for a PKP.
+
+#### Parameters
+
+<ResponseField name="pkpIdentifier" type="{ tokenId?: string; pubkey?: string; address?: string }" required />
+
+#### Returns
+
+<ResponseField name="result" type="object">
+  <Expandable title="properties">
+    <ResponseField name="actions" type="readonly 0x-hex[]" />
+    <ResponseField name="addresses" type="readonly 0x-hex[]" />
+    <ResponseField name="authMethods" type="readonly object[]" />
+  </Expandable>
+</ResponseField>
+
+### viewPKPsByAddress
+
+List PKPs owned by an address.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="ownerAddress" type="string" required>
+      Address whose PKPs to fetch.
+    </ResponseField>
+    <ResponseField name="pagination" type="{ limit?: number; offset?: number }" />
+    <ResponseField name="storageProvider" type="PKPStorageProvider" />
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="PaginatedPKPsResponse">
+  <Expandable title="properties">
+    <ResponseField name="pkps" type="PKPInfo[]" />
+    <ResponseField name="pagination" type="{ limit: number; offset: number; total: number; hasMore: boolean }" />
+  </Expandable>
+</ResponseField>
+
+### getPkpViemAccount
+
+Create a Viem-compatible account backed by a PKP.
+
+#### Parameters
+
+<ResponseField name="Request" type="object">
+  <Expandable title="properties">
+    <ResponseField name="pkpPublicKey" type="string | Hex" required>
+      0x-prefixed PKP public key.
+    </ResponseField>
+    <ResponseField name="authContext" type="AuthenticationContext" required>
+      Authorisation context used for signing sessions.
+    </ResponseField>
+    <ResponseField name="chainConfig" type="Chain" required>
+      Viem chain configuration used by the returned account.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="Viem Account Object">
+  <Expandable title="properties">
+    <ResponseField name="signMessage / signTypedData / sendTransaction" type="functions">
+      Standard Viem account methods that route to PKP signing under the hood.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="LitNodeSignature Object">
+  <Expandable title="properties">
+    <ResponseField name="signature" type="string">
+      The final signature for the request.
+    </ResponseField>
+
+    <ResponseField name="verifyingKey" type="string">
+      0x‑prefixed verifying (compressed) public key used to produce the signature.
+    </ResponseField>
+
+    <ResponseField name="signedData" type="string">
+      0x‑prefixed hex of the exact payload that was signed (post‑hashing if applicable).
+    </ResponseField>
+
+    <ResponseField name="recoveryId" type="number | null">
+      Recovery identifier when applicable to the scheme (0 or 1; may be null).
+    </ResponseField>
+
+    <ResponseField name="publicKey" type="string">
+      0x‑prefixed PKP public key associated with the signature.
+    </ResponseField>
+
+    <ResponseField name="sigType" type="string">
+      The signature type/scheme used (e.g. ECDSA, Schnorr).
+    </ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+### getChainConfig
+
+Returns the chain configuration for the current network.
+
+#### Parameters
+
+none
+
+#### Returns
+
+<ResponseField name="result" type="ChainConfig">
+  <Expandable title="properties">
+    <ResponseField name="viemConfig" type="Chain">
+      Viem chain configuration used by the returned account.
+    </ResponseField>
+    <ResponseField name="rpcUrl" type="string">
+      RPC URL for the chain.  
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### disconnect
+Stop background state updates and release resources.
+
+#### Parameters
+none
+
+#### Returns
+void

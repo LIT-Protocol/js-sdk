@@ -5,7 +5,7 @@
 
 export const signatures = {
   PKPHelper: {
-    address: '0x04C89607413713Ec9775E14b954286519d836FEf',
+    address: '0x4C4a2f8c81640e47606d3fd77B353E87Ba015584',
     methods: {
       claimAndMintNextAndAddAuthMethodsWithTypes: {
         inputs: [
@@ -128,6 +128,11 @@ export const signatures = {
             internalType: 'uint256',
             name: 'keyType',
             type: 'uint256',
+          },
+          {
+            internalType: 'string',
+            name: 'keySetId',
+            type: 'string',
           },
           {
             internalType: 'uint256[]',
@@ -283,7 +288,7 @@ export const signatures = {
     ],
   },
   PKPNFT: {
-    address: '0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf',
+    address: '0x0E801D84Fa97b50751Dbf25036d067dCf18858bF',
     methods: {
       claimAndMint: {
         inputs: [
@@ -296,6 +301,11 @@ export const signatures = {
             internalType: 'uint256',
             name: 'keyType',
             type: 'uint256',
+          },
+          {
+            internalType: 'string',
+            name: 'keySetId',
+            type: 'string',
           },
           {
             internalType: 'bytes32',
@@ -360,6 +370,11 @@ export const signatures = {
             internalType: 'uint256',
             name: 'keyType',
             type: 'uint256',
+          },
+          {
+            internalType: 'string',
+            name: 'keySetId',
+            type: 'string',
           },
         ],
         name: 'mintNext',
@@ -663,7 +678,7 @@ export const signatures = {
     ],
   },
   PKPPermissions: {
-    address: '0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6',
+    address: '0x04C89607413713Ec9775E14b954286519d836FEf',
     methods: {
       addPermittedAction: {
         inputs: [
@@ -707,6 +722,46 @@ export const signatures = {
           },
         ],
         name: 'addPermittedAddress',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      addPermittedAuthMethod: {
+        inputs: [
+          {
+            internalType: 'uint256',
+            name: 'tokenId',
+            type: 'uint256',
+          },
+          {
+            components: [
+              {
+                internalType: 'uint256',
+                name: 'authMethodType',
+                type: 'uint256',
+              },
+              {
+                internalType: 'bytes',
+                name: 'id',
+                type: 'bytes',
+              },
+              {
+                internalType: 'bytes',
+                name: 'userPubkey',
+                type: 'bytes',
+              },
+            ],
+            internalType: 'struct LibPKPPermissionsStorage.AuthMethod',
+            name: 'authMethod',
+            type: 'tuple',
+          },
+          {
+            internalType: 'uint256[]',
+            name: 'scopes',
+            type: 'uint256[]',
+          },
+        ],
+        name: 'addPermittedAuthMethod',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -978,6 +1033,34 @@ export const signatures = {
         stateMutability: 'nonpayable',
         type: 'function',
       },
+      removePermittedAuthMethodScope: {
+        inputs: [
+          {
+            internalType: 'uint256',
+            name: 'tokenId',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'authMethodType',
+            type: 'uint256',
+          },
+          {
+            internalType: 'bytes',
+            name: 'id',
+            type: 'bytes',
+          },
+          {
+            internalType: 'uint256',
+            name: 'scopeId',
+            type: 'uint256',
+          },
+        ],
+        name: 'removePermittedAuthMethodScope',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
     },
     events: [
       {
@@ -1213,7 +1296,7 @@ export const signatures = {
     ],
   },
   PubkeyRouter: {
-    address: '0x809d550fca64d94Bd9F66E60752A544199cfAC3D',
+    address: '0x4c5859f0F772848b2D91F1D83E2Fe57935348029',
     methods: {
       getEthAddress: {
         inputs: [
@@ -1495,7 +1578,7 @@ export const signatures = {
     ],
   },
   Staking: {
-    address: '0x9E545E3C0baAB3E08CdfD552C960A1050f373042',
+    address: '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9',
     methods: {
       getActiveUnkickedValidatorStructsAndCounts: {
         inputs: [
@@ -2140,6 +2223,44 @@ export const signatures = {
         inputs: [
           {
             indexed: false,
+            internalType: 'bool',
+            name: 'exists',
+            type: 'bool',
+          },
+          {
+            indexed: false,
+            internalType: 'string',
+            name: 'identifier',
+            type: 'string',
+          },
+          {
+            indexed: false,
+            internalType: 'bytes32',
+            name: 'hashed',
+            type: 'bytes32',
+          },
+        ],
+        name: 'KeySetConfigSet',
+        type: 'event',
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
+            internalType: 'string',
+            name: 'identifier',
+            type: 'string',
+          },
+        ],
+        name: 'KeySetConfigUpdated',
+        type: 'event',
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
             internalType: 'uint256',
             name: 'realmId',
             type: 'uint256',
@@ -2484,7 +2605,7 @@ export const signatures = {
     ],
   },
   PriceFeed: {
-    address: '0xf953b3A269d80e3eB0F2947630Da976B896A8C5b',
+    address: '0xAA292E8611aDF267e563f334Ee42320aC96D0463',
     methods: {
       getNodesForRequest: {
         inputs: [
@@ -2754,7 +2875,7 @@ export const signatures = {
     ],
   },
   Ledger: {
-    address: '0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901',
+    address: '0x7A9Ec1d04904907De0ED7b6839CcdD59c3716AC9',
     methods: {
       withdraw: {
         inputs: [
@@ -3173,7 +3294,7 @@ export const signatures = {
     ],
   },
   PaymentDelegation: {
-    address: '0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5',
+    address: '0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d',
     methods: {
       delegatePayments: {
         inputs: [

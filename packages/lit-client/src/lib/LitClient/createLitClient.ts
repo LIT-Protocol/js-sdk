@@ -10,13 +10,22 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import { encrypt as blsEncrypt } from '@lit-protocol/crypto';
 import { getChildLogger } from '@lit-protocol/logger';
-import type {
-  LitNetworkModule,
-  PKPStorageProvider,
+import {
+  type ExpectedAccountOrWalletClient,
+  type GenericTxRes,
+  type LitNetworkModule,
+  type LitTxRes,
+  type PKPData,
+  PKPPermissionsManager,
+  type PKPStorageProvider,
+  PaymentManager,
 } from '@lit-protocol/networks';
+
+import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
 import {
   AuthContextSchema2,
   AuthData,
+  ChainSchema,
   EncryptedVersion1Schema,
   HexPrefixedSchema,
   JsonSignCustomSessionKeyRequestForPkpReturnSchema,
@@ -52,7 +61,6 @@ import {
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
 import { NagaNetworkModule } from './type';
-import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -132,6 +140,8 @@ export const createLitClient = async ({
  * - `getChainConfig()` - Get chain configuration and RPC URL
  * - `getDefault` - Default service URLs (authServiceUrl, loginUrl)
  * - `authService.mintWithAuth(params)` - Auth service PKP minting
+ * - `authService.registerPayer(params)` - Create payer wallet via Auth Service
+ * - `authService.delegateUsers(params)` - Delegate payments via Auth Service
  *
  * **Integrations:**
  * - `getPkpViemAccount(params)` - Get Viem account for PKP interactions
@@ -176,7 +186,8 @@ export const _createNagaLitClient = async (
     }
   ): Promise<LitNodeSignature> {
     _logger.info(
-      `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${params.bypassAutoHashing || false
+      `🔥 signing on ${params.chain} with ${params.signingScheme} (bypass: ${
+        params.bypassAutoHashing || false
       })`
     );
 
@@ -349,7 +360,8 @@ export const _createNagaLitClient = async (
     return await networkModule.api.signCustomSessionKey.handleResponse(
       result as any,
       params.requestBody.pkpPublicKey,
-      jitContext
+      jitContext,
+      requestId
     );
   }
 
@@ -662,7 +674,7 @@ export const _createNagaLitClient = async (
       unifiedAccessControlConditions: params.unifiedAccessControlConditions,
       connectionInfo: currentConnectionInfo,
       version: networkModule.version,
-      chain: params.chain,
+      chain: ChainSchema.parse(params.chain),
       jitContext,
     })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
@@ -730,12 +742,23 @@ export const _createNagaLitClient = async (
       };
     },
     getDefault: {
-      authServiceUrl: networkModule.getDefaultAuthServiceBaseUrl(),
+      // authServiceUrl: networkModule.getDefaultAuthServiceBaseUrl(),
       loginUrl: networkModule.getDefaultLoginBaseUrl(),
     },
     disconnect: _stateManager.stop,
-    mintWithEoa: networkModule.chainApi.mintWithEoa,
-    mintWithAuth: networkModule.chainApi.mintWithAuth,
+    mintWithEoa: networkModule.chainApi.mintWithEoa as (params: {
+      account: ExpectedAccountOrWalletClient;
+    }) => Promise<GenericTxRes<LitTxRes<PKPData>, PKPData>>,
+    mintWithAuth: (async (
+      params: Parameters<(typeof networkModule)['chainApi']['mintWithAuth']>[0]
+    ) => {
+      _logger.info(`mintWithAuth called`);
+      const result = await networkModule.chainApi.mintWithAuth(params);
+      _logger.info({ result }, `mintWithAuth result`);
+      return result;
+    }) as (
+      params: Parameters<(typeof networkModule)['chainApi']['mintWithAuth']>[0]
+    ) => ReturnType<(typeof networkModule)['chainApi']['mintWithAuth']>,
     mintWithCustomAuth: async (params: MintWithCustomAuthRequest) => {
       const validatedParams = MintWithCustomAuthSchema.parse(params);
 
@@ -800,17 +823,19 @@ export const _createNagaLitClient = async (
         pkpData: pkp,
       };
     },
-    getPKPPermissionsManager: networkModule.chainApi.getPKPPermissionsManager,
+    getPKPPermissionsManager: networkModule.chainApi
+      .getPKPPermissionsManager as (params: {
+      pkpIdentifier: PkpIdentifierRaw;
+      account: ExpectedAccountOrWalletClient;
+    }) => Promise<PKPPermissionsManager>,
     getPaymentManager: async (params: { account: any }) => {
-      return await networkModule.chainApi.getPaymentManager({
+      return (await networkModule.chainApi.getPaymentManager({
         account: params.account,
-      });
+      })) as PaymentManager;
     },
     viewPKPPermissions: async (pkpIdentifier: PkpIdentifierRaw) => {
       // It's an Anvil private key, chill. 🤣
-      const account = privateKeyToAccount(
-        DEV_PRIVATE_KEY
-      );
+      const account = privateKeyToAccount(DEV_PRIVATE_KEY);
 
       const pkpPermissionsManager =
         await networkModule.chainApi.getPKPPermissionsManager({
@@ -828,25 +853,15 @@ export const _createNagaLitClient = async (
       };
     },
     viewPKPsByAuthData: async (params: {
-      authData:
-      | {
-        authMethodType: number | bigint;
-        authMethodId: string;
-        accessToken?: string;
-      }
-      | AuthData;
+      authData: Partial<AuthData>;
       pagination?: { limit?: number; offset?: number };
-      storageProvider?: PKPStorageProvider;
     }) => {
       // Use read-only account for viewing PKPs
-      const account = privateKeyToAccount(
-        DEV_PRIVATE_KEY
-      );
+      const account = privateKeyToAccount(DEV_PRIVATE_KEY);
 
       return await networkModule.chainApi.getPKPsByAuthData({
         authData: params.authData,
         pagination: params.pagination,
-        storageProvider: params.storageProvider,
         account,
       });
     },
@@ -856,9 +871,7 @@ export const _createNagaLitClient = async (
       storageProvider?: PKPStorageProvider;
     }) => {
       // Use read-only account for viewing PKPs
-      const account = privateKeyToAccount(
-        DEV_PRIVATE_KEY
-      );
+      const account = privateKeyToAccount(DEV_PRIVATE_KEY);
 
       return await networkModule.chainApi.getPKPsByAddress({
         ownerAddress: params.ownerAddress,
@@ -868,7 +881,34 @@ export const _createNagaLitClient = async (
       });
     },
     authService: {
-      mintWithAuth: networkModule.authService.pkpMint,
+      mintWithAuth: async (
+        params: Parameters<(typeof networkModule)['authService']['pkpMint']>[0]
+      ) => {
+        _logger.info(`authService.mintWithAuth called`);
+        const result = await networkModule.authService.pkpMint(params);
+        _logger.info({ result }, `authService.mintWithAuth result`);
+        return result;
+      },
+      registerPayer: async (
+        params: Parameters<
+          (typeof networkModule)['authService']['registerPayer']
+        >[0]
+      ) => {
+        _logger.info(`authService.registerPayer called`);
+        const result = await networkModule.authService.registerPayer(params);
+        _logger.info({ result }, `authService.registerPayer result`);
+        return result;
+      },
+      delegateUsers: async (
+        params: Parameters<
+          (typeof networkModule)['authService']['delegateUsers']
+        >[0]
+      ) => {
+        _logger.info(`authService.delegateUsers called`);
+        const result = await networkModule.authService.delegateUsers(params);
+        _logger.info({ result }, `authService.delegateUsers result`);
+        return result;
+      },
     },
     executeJs: async (
       params: z.infer<typeof networkModule.api.executeJs.schemas.Input>
