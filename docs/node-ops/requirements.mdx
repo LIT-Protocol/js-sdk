@@ -1,0 +1,57 @@
+---
+title: "Requirements and Expectations"
+---
+
+This page outlines the technical and operational requirements for running a Lit Protocol node, as well as the current selection and onboarding process. If you’re considering participating in the Lit network as a node operator, please read this carefully.
+
+## Selection Process
+
+Lit Protocol is currently a federated network, meaning node operations are not fully permissionless at this time. Instead, validator participation is governed through Lit’s governance model and managed by the Lit Protocol Council.
+
+- Genesis Validator Set: The first group of mainnet validators will be chosen via staking and delegation. At the end of the staking contest, the top 10 operators based on their total stake weight will be selected as the genesis validator set. Read more about the initial selection process in the Staking Contest Docs.
+
+- Ongoing Onboarding: After the genesis validator set has been selected, new nodes will be onboarded or rotated quarterly or as needed (for example, if a node leaves, is slashed, or a new network/Realm is spun up).
+
+- Transparency Reports: The Protocol Council will publish transparency reports on the [governance forum](https://litprotocol.discourse.group/categories) whenever nodes leave or join the network.
+
+## Hardware Requirements
+
+To run a Lit Protocol node you will need robust, production-grade hardware capable of supporting confidential computing workloads. The current minimum requirements are:
+
+1. CPU: 64-core AMD EPYC Gen 3 or a 32-core dual-CPU setup
+
+2. RAM: 128 GB minimum
+
+3. Storage: Mirrored RAID, at least 400 GB
+
+4. Networking: Two dedicated IPs (one for the Host and one for the Guest VM where the Lit Node software runs)
+
+5. Operating System: Debian 12 (required for current Lit OS builds)
+
+**Important**: Only 3rd generation AMD EPYC processors currently support Lit OS. Support for newer generation processors is under development. Cloud deployment costs typically range from $750–$1,000/month, depending on the selected provider.
+
+## KYC / KYB Requirements
+
+Because Lit is a [threshold-based network](learning-lit/node-architecture), all node operators on a given network must be independent entities to maintain the integrity of the decentralized cryptographic operations and keys managed by the network. KYC/KYB verification ensures that no single operator controls more than one node on any public Lit network.
+
+## Staking and Delegation
+
+All node operators must stake a minimum of \$20,000 worth of \$LITKEY tokens as committed self-stake. This self-stake requirement is separate from any tokens that may be delegated to your node by external token holders. This requirement ensures that operators have economic skin in the game and are aligned with the long-term success of the protocol.
+
+- Staking enforces liveness and reliability by incentivizing operators to maintain uptime.
+- Slashing disincentives are applied for downtime or malicious behavior.
+
+Read more in [Staking and Delegation](/node-ops/staking-and-delegation).
+
+## Deployment and Maintenance
+
+You only need to acquire node hardware once you have been officially selected as a node operator. Currently, 3rd generation AMD EPYC chips can be difficult to source; however, Lit has secured hardware inventory and partnered with data centers capable of deploying approved nodes. Node operators are responsible for:
+
+- Configuring and maintaining approved hardware environment
+- Updating to new software releases as directed by Lit’s governance system and the Protocol Council
+- Meeting uptime and performance expectations
+
+## Additional Resources
+
+- [Lit Staking Contest](/node-ops/staking-contest/logistics)
+- [Staking and Delegation](/node-ops/staking-and-delegation)
