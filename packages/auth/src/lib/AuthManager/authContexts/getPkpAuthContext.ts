@@ -164,19 +164,16 @@ export const getPkpAuthContext = async (
           }),
       });
 
-<<<<<<< HEAD
   _logger.info('getPkpAuthContext: delegationAuthSig', {
     delegationAuthSig,
     isPreGenerated: !!_params.deps.preGeneratedDelegationAuthSig,
   });
-=======
   _logger.info(
     {
       delegationAuthSig,
     },
     'getPkpAuthContext: delegationAuthSig'
   );
->>>>>>> naga
 
   return {
     chain: 'ethereum',
