@@ -27,7 +27,7 @@
   "types": "./index.d.ts",
   "dependencies": {
     "@lit-protocol/uint8arrays": "7.1.1",
-    "bs58": "^6.0.0",
+    "bs58": "6.0.0",
     "viem": "2.29.4",
     "zod": "3.24.3"
   }

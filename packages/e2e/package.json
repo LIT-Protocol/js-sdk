@@ -30,6 +30,7 @@
   "author": "Lit Protocol",
   "license": "MIT",
   "dependencies": {
+    "@lit-protocol/lit-status-sdk": "0.1.8",
     "zod": "3.24.3"
   },
   "devDependencies": {
