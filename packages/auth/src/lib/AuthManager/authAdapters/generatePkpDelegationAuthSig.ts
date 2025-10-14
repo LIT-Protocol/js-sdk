@@ -41,11 +41,11 @@ export async function generatePkpDelegationAuthSig(
   }
 ): Promise<AuthSig> {
   _logger.info(
-    'generatePkpDelegationAuthSig: Starting PKP delegation signature generation',
     {
       pkpPublicKey: params.pkpPublicKey,
       hasSessionKeyPair: !!params.sessionKeyPair,
-    }
+    },
+    'generatePkpDelegationAuthSig: Starting PKP delegation signature generation'
   );
 
   const _resources = processResources(params.authConfig.resources);
@@ -112,11 +112,11 @@ export async function generatePkpDelegationAuthSig(
   const delegationAuthSig = await authContext.authNeededCallback();
 
   _logger.info(
-    'generatePkpDelegationAuthSig: PKP delegation signature generated successfully',
     {
       pkpAddress,
       hasSignature: !!delegationAuthSig,
-    }
+    },
+    'generatePkpDelegationAuthSig: PKP delegation signature generated successfully'
   );
 
   return delegationAuthSig;

@@ -79,6 +79,8 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
       cache?: {
         delegationAuthSig?: boolean;
       };
+      sessionKeyPair?: SessionKeyPair;
+      delegationAuthSig?: AuthSig;
     }) => {
       return getPkpAuthContextAdapter(authManagerParams, params);
     },

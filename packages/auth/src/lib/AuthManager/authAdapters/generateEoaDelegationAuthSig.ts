@@ -40,11 +40,11 @@ export async function generateEoaDelegationAuthSig(
   }
 ): Promise<AuthSig> {
   _logger.info(
-    'generateEoaDelegationAuthSig: Starting EOA delegation signature generation',
     {
       hasAccount: !!params.account,
       hasSessionKeyPair: !!params.sessionKeyPair,
-    }
+    },
+    'generateEoaDelegationAuthSig: Starting EOA delegation signature generation'
   );
 
   const _resources = processResources(params.authConfig.resources);
@@ -99,10 +99,10 @@ export async function generateEoaDelegationAuthSig(
   const delegationAuthSig = await authContext.authNeededCallback();
 
   _logger.info(
-    'generateEoaDelegationAuthSig: EOA delegation signature generated successfully',
     {
       hasSignature: !!delegationAuthSig,
-    }
+    },
+    'generateEoaDelegationAuthSig: EOA delegation signature generated successfully'
   );
 
   return delegationAuthSig as AuthSig;

@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { AuthData } from '@lit-protocol/schemas';
 import { AuthManagerParams } from '../auth-manager';
 import { processResources } from '../utils/processResources';
+import { validateDelegationAuthSig } from '../utils/validateDelegationAuthSig';
 
 const _logger = getChildLogger({
   module: 'getPkpAuthContextFromPreGeneratedAdapter',
@@ -47,54 +48,6 @@ function extractAuthConfigFromDelegationAuthSig(delegationAuthSig: AuthSig): {
 }
 
 /**
- * Validates that the provided delegation auth sig hasn't expired and contains required resources
- */
-function validateDelegationAuthSig(
-  delegationAuthSig: AuthSig,
-  requiredResources: LitResourceAbilityRequest[],
-  sessionKeyUri: string
-): void {
-  try {
-    // Parse the signed message to extract expiration and validate session key match
-    const siweMessage = delegationAuthSig.signedMessage;
-
-    // Check expiration
-    const expirationMatch = siweMessage.match(/^Expiration Time: (.*)$/m);
-    if (expirationMatch && expirationMatch[1]) {
-      const expiration = new Date(expirationMatch[1].trim());
-      if (expiration.getTime() <= Date.now()) {
-        throw new Error(
-          `Delegation signature has expired at ${expiration.toISOString()}`
-        );
-      }
-    }
-
-    // Validate session key URI matches
-    if (!siweMessage.includes(sessionKeyUri)) {
-      throw new Error(
-        'Session key URI in delegation signature does not match provided session key pair'
-      );
-    }
-
-    // TODO: Add resource validation - check if delegationAuthSig has required resources
-    // This would involve parsing the RECAP URN and checking against requiredResources
-    _logger.debug(
-      'validateDelegationAuthSig: Delegation signature validated successfully',
-      {
-        sessionKeyUri,
-        hasResources: requiredResources.length > 0,
-      }
-    );
-  } catch (error) {
-    throw new Error(
-      `Invalid delegation signature: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`
-    );
-  }
-}
-
-/**
  * Creates a PKP auth context from pre-generated session materials.
  * This is a streamlined API for server-side scenarios where session materials
  * are generated once and reused across multiple requests.
@@ -109,13 +62,13 @@ export async function getPkpAuthContextFromPreGeneratedAdapter(
   }
 ) {
   _logger.info(
-    'getPkpAuthContextFromPreGeneratedAdapter: Creating PKP auth context from pre-generated materials',
     {
       pkpPublicKey: params.pkpPublicKey,
       hasSessionKeyPair: !!params.sessionKeyPair,
       hasDelegationAuthSig: !!params.delegationAuthSig,
       hasAuthData: !!params.authData,
-    }
+    },
+    'getPkpAuthContextFromPreGeneratedAdapter: Creating PKP auth context from pre-generated materials'
   );
 
   // Extract auth config from delegation signature
@@ -141,11 +94,11 @@ export async function getPkpAuthContextFromPreGeneratedAdapter(
   );
 
   // Validate the delegation signature
-  validateDelegationAuthSig(
-    params.delegationAuthSig,
-    authConfig.resources,
-    sessionKeyUri
-  );
+  validateDelegationAuthSig({
+    delegationAuthSig: params.delegationAuthSig,
+    requiredResources: authConfig.resources,
+    sessionKeyUri,
+  });
 
   // Return auth context using pre-generated materials
   return {

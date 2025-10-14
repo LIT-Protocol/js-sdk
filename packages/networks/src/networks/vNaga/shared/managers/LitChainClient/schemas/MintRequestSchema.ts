@@ -1,4 +1,3 @@
-import { t } from 'elysia';
 import { z } from 'zod';
 import {
   toBigInt,
@@ -26,12 +25,3 @@ export type MintRequestRaw = z.input<typeof MintRequestSchema>;
 export type MintRequestTransformed = z.infer<typeof MintRequestSchema>;
 
 // ✨ Elysia Schema
-export const tMintRequestSchema = t.Object({
-  keyType: t.Number(),
-  permittedAuthMethodTypes: t.Array(t.Number()),
-  permittedAuthMethodIds: t.Array(t.String()),
-  permittedAuthMethodPubkeys: t.Array(t.String()),
-  permittedAuthMethodScopes: t.Array(t.Array(t.Number())),
-  addPkpEthAddressAsPermittedAddress: t.Boolean(),
-  sendPkpToItself: t.Boolean(),
-});

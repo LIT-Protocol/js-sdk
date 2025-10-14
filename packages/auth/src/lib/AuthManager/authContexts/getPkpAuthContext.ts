@@ -7,14 +7,16 @@ import {
   NodeInfoSchema,
   NodeUrlsSchema,
   SessionKeyUriSchema,
+  SessionKeyPairSchema,
 } from '@lit-protocol/schemas';
-import { NodeSet } from '@lit-protocol/types';
+import { AuthSig, NodeSet } from '@lit-protocol/types';
 import { z } from 'zod';
 import { LitAuthStorageProvider } from '../../storage';
 import { LitAuthData, LitAuthDataSchema } from '../../types';
 import { AuthConfig } from '../auth-manager';
 import { tryGetCachedDelegationAuthSig } from '../try-getters/tryGetCachedDelegationAuthSig';
 import { AuthConfigSchema } from './BaseAuthContextType';
+import { validateDelegationAuthSig } from '../utils/validateDelegationAuthSig';
 
 const _logger = getChildLogger({
   module: 'getPkpAuthContext',
@@ -58,6 +60,8 @@ export const GetPkpAuthContextSchema = z.object({
       delegationAuthSig: z.boolean().optional(),
     })
     .optional(),
+  sessionKeyPair: SessionKeyPairSchema.optional(),
+  delegationAuthSig: z.custom<AuthSig>().optional(),
 });
 
 interface PreparePkpAuthRequestBodyParams {
@@ -127,19 +131,7 @@ export const getPkpAuthContext = async (
   );
 
   const _params = GetPkpAuthContextSchema.parse(params);
-  const _nodeInfo = NodeInfoSchema.parse(params.deps.connection.nodeUrls);
-
-  const requestBody = await preparePkpAuthRequestBody({
-    authentication: _params.authentication,
-    authConfig: _params.authConfig,
-    deps: {
-      litAuthData: _params.deps.litAuthData,
-      nodeUrls: _nodeInfo.urls,
-      nodeSet: _nodeInfo.nodeSet,
-      nonce: _params.deps.connection.nonce,
-      currentEpoch: _params.deps.connection.currentEpoch,
-    },
-  });
+  const _nodeInfo = NodeInfoSchema.parse(_params.deps.connection.nodeUrls);
 
   const authConfig: AuthConfig = {
     capabilityAuthSigs: _params.authConfig.capabilityAuthSigs,
@@ -149,28 +141,71 @@ export const getPkpAuthContext = async (
     resources: _params.authConfig.resources,
   };
 
-  // Use pre-generated delegation signature if provided, otherwise generate/fetch one
-  const delegationAuthSig = _params.deps.preGeneratedDelegationAuthSig
-    ? _params.deps.preGeneratedDelegationAuthSig
-    : await tryGetCachedDelegationAuthSig({
-        cache: _params.cache?.delegationAuthSig,
-        storage: _params.deps.storage,
-        address: _params.deps.pkpAddress,
-        expiration: _params.authConfig.expiration,
-        signSessionKey: () =>
-          _params.deps.signSessionKey({
-            requestBody,
-            nodeUrls: _nodeInfo.urls,
-          }),
-      });
+  const hasProvidedSessionKeyPair = !!_params.sessionKeyPair;
+  const hasProvidedDelegationAuthSig = !!_params.delegationAuthSig;
 
-  _logger.info('getPkpAuthContext: delegationAuthSig', {
-    delegationAuthSig,
-    isPreGenerated: !!_params.deps.preGeneratedDelegationAuthSig,
-  });
+  if (hasProvidedSessionKeyPair !== hasProvidedDelegationAuthSig) {
+    throw new Error(
+      'Both sessionKeyPair and delegationAuthSig must be provided together, or neither should be provided'
+    );
+  }
+
+  const sessionKeyPair = hasProvidedSessionKeyPair
+    ? _params.sessionKeyPair!
+    : _params.deps.litAuthData.sessionKey.keyPair;
+
+  const sessionKeyUri = SessionKeyUriSchema.parse(sessionKeyPair.publicKey);
+
+  let delegationAuthSig: AuthSig;
+  let isPreGenerated = false;
+
+  if (hasProvidedSessionKeyPair && hasProvidedDelegationAuthSig) {
+    validateDelegationAuthSig({
+      delegationAuthSig: _params.delegationAuthSig!,
+      requiredResources: _params.authConfig.resources,
+      sessionKeyUri,
+    });
+    delegationAuthSig = _params.delegationAuthSig!;
+    isPreGenerated = true;
+  } else if (_params.deps.preGeneratedDelegationAuthSig) {
+    validateDelegationAuthSig({
+      delegationAuthSig: _params.deps.preGeneratedDelegationAuthSig,
+      requiredResources: _params.authConfig.resources,
+      sessionKeyUri,
+    });
+    delegationAuthSig = _params.deps.preGeneratedDelegationAuthSig;
+    isPreGenerated = true;
+  } else {
+    const requestBody = await preparePkpAuthRequestBody({
+      authentication: _params.authentication,
+      authConfig: _params.authConfig,
+      deps: {
+        litAuthData: _params.deps.litAuthData,
+        nodeUrls: _nodeInfo.urls,
+        nodeSet: _nodeInfo.nodeSet,
+        nonce: _params.deps.connection.nonce,
+        currentEpoch: _params.deps.connection.currentEpoch,
+      },
+    });
+
+    delegationAuthSig = await tryGetCachedDelegationAuthSig({
+      cache: _params.cache?.delegationAuthSig,
+      storage: _params.deps.storage,
+      address: _params.deps.pkpAddress,
+      expiration: _params.authConfig.expiration,
+      signSessionKey: () =>
+        _params.deps.signSessionKey({
+          requestBody,
+          nodeUrls: _nodeInfo.urls,
+        }),
+    });
+  }
+
   _logger.info(
     {
       delegationAuthSig,
+      isPreGenerated,
+      usedProvidedSessionMaterials: hasProvidedSessionKeyPair,
     },
     'getPkpAuthContext: delegationAuthSig'
   );
@@ -185,6 +220,6 @@ export const getPkpAuthContext = async (
       return delegationAuthSig;
     },
     authConfig,
-    sessionKeyPair: _params.deps.litAuthData.sessionKey.keyPair,
+    sessionKeyPair,
   };
 };

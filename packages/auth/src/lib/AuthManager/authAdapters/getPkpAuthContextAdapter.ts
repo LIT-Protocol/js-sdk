@@ -6,17 +6,14 @@ import {
   NodeUrlsSchema,
   SessionKeyUriSchema,
 } from '@lit-protocol/schemas';
-import {
-  AuthSig,
-  LitResourceAbilityRequest,
-  SessionKeyPair,
-} from '@lit-protocol/types';
+import { AuthSig, SessionKeyPair } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { z } from 'zod';
 import { AuthConfigV2 } from '../../authenticators/types';
 import { AuthManagerParams } from '../auth-manager';
 import { getPkpAuthContext } from '../authContexts/getPkpAuthContext';
 import { processResources } from '../utils/processResources';
+import { validateDelegationAuthSig } from '../utils/validateDelegationAuthSig';
 import { tryGetCachedAuthData } from '../try-getters/tryGetCachedAuthData';
 
 const _logger = getChildLogger({
@@ -29,54 +26,6 @@ export const PkpAuthDepsSchema = z.object({
   getSignSessionKey: z.any(),
   nodeUrls: NodeUrlsSchema,
 });
-
-/**
- * Validates that the provided delegation auth sig hasn't expired and contains required resources
- */
-function validateDelegationAuthSig(
-  delegationAuthSig: AuthSig,
-  requiredResources: LitResourceAbilityRequest[],
-  sessionKeyUri: string
-): void {
-  try {
-    // Parse the signed message to extract expiration and validate session key match
-    const siweMessage = delegationAuthSig.signedMessage;
-
-    // Check expiration
-    const expirationMatch = siweMessage.match(/^Expiration Time: (.*)$/m);
-    if (expirationMatch && expirationMatch[1]) {
-      const expiration = new Date(expirationMatch[1].trim());
-      if (expiration.getTime() <= Date.now()) {
-        throw new Error(
-          `Delegation signature has expired at ${expiration.toISOString()}`
-        );
-      }
-    }
-
-    // Validate session key URI matches
-    if (!siweMessage.includes(sessionKeyUri)) {
-      throw new Error(
-        'Session key URI in delegation signature does not match provided session key pair'
-      );
-    }
-
-    // TODO: Add resource validation - check if delegationAuthSig has required resources
-    // This would involve parsing the RECAP URN and checking against requiredResources
-    _logger.debug(
-      'validateDelegationAuthSig: Delegation signature validated successfully',
-      {
-        sessionKeyUri,
-        hasResources: requiredResources.length > 0,
-      }
-    );
-  } catch (error) {
-    throw new Error(
-      `Invalid delegation signature: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`
-    );
-  }
-}
 
 export async function getPkpAuthContextAdapter(
   upstreamParams: AuthManagerParams,
@@ -110,11 +59,11 @@ export async function getPkpAuthContextAdapter(
   // If pre-generated auth materials are provided, validate and use them
   if (params.sessionKeyPair && params.delegationAuthSig) {
     _logger.info(
-      'getPkpAuthContextAdapter: Using pre-generated session materials',
       {
         hasSessionKeyPair: true,
         hasDelegationAuthSig: true,
-      }
+      },
+      'getPkpAuthContextAdapter: Using pre-generated session materials'
     );
 
     // Generate sessionKeyUri from the public key
@@ -123,11 +72,11 @@ export async function getPkpAuthContextAdapter(
     );
 
     // Validate the delegation signature
-    validateDelegationAuthSig(
-      params.delegationAuthSig,
-      _resources,
-      sessionKeyUri
-    );
+    validateDelegationAuthSig({
+      delegationAuthSig: params.delegationAuthSig,
+      requiredResources: _resources,
+      sessionKeyUri,
+    });
 
     // Return auth context using provided materials
     return {
