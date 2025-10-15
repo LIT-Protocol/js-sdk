@@ -122,7 +122,8 @@
           {
             "group": "Resources",
             "pages": [
-              "sdk/resources/supported-evm-chains"
+              "sdk/resources/supported-evm-chains",
+              "sdk/resources/network-status"
             ]
           }
         ]
