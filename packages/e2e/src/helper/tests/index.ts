@@ -1,6 +1,9 @@
 // Endpoint tests
 export { createPkpSignTest } from './pkp-sign';
-export { createExecuteJsTest } from './execute-js';
+export {
+  createExecuteJsBasicTest,
+  createExecuteJsDecryptAndCombineTest,
+} from './executeJs';
 export { createViewPKPsByAddressTest } from './view-pkps-by-address';
 export { createViewPKPsByAuthDataTest } from './view-pkps-by-auth-data';
 export { createPkpEncryptDecryptTest } from './pkp-encrypt-decrypt';

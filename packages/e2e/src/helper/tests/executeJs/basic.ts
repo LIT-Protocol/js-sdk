@@ -1,8 +1,14 @@
-import { init } from '../../init';
+import { init } from '../../../init';
+import { AuthContext } from '../../../types';
 
-export const createExecuteJsTest = (
-  ctx: Awaited<ReturnType<typeof init>>,
-  getAuthContext: () => any,
+type ExecuteJsContext = Pick<
+  Awaited<ReturnType<typeof init>>,
+  'litClient' | 'aliceViemAccountPkp'
+>;
+
+export const createExecuteJsBasicTest = (
+  ctx: ExecuteJsContext,
+  getAuthContext: () => AuthContext,
   pubkey?: string
 ) => {
   return async () => {
@@ -22,6 +28,13 @@ export const createExecuteJsTest = (
   });  
 })();`;
 
+    const defaultPubkey = ctx.aliceViemAccountPkp?.pubkey;
+    const targetPubkey = pubkey ?? defaultPubkey;
+
+    if (!targetPubkey) {
+      throw new Error('Missing PKP public key for executeJs test');
+    }
+
     const result = await ctx.litClient.executeJs({
       code: litActionCode,
       authContext: getAuthContext(),
@@ -29,7 +42,7 @@ export const createExecuteJsTest = (
         message: 'Test message from e2e executeJs',
         sigName: 'e2e-test-sig',
         toSign: 'Test message from e2e executeJs',
-        publicKey: pubkey || ctx.aliceViemAccountPkp.pubkey,
+        publicKey: targetPubkey,
       },
     });
 
