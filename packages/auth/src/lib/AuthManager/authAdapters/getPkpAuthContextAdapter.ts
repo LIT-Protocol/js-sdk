@@ -74,7 +74,6 @@ export async function getPkpAuthContextAdapter(
     // Validate the delegation signature
     validateDelegationAuthSig({
       delegationAuthSig: params.delegationAuthSig,
-      requiredResources: _resources,
       sessionKeyUri,
     });
 

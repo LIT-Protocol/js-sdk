@@ -1,4 +1,4 @@
-import { generateSessionKeyPair } from '@lit-protocol/crypto';
+import { generateSessionKeyPair } from '@lit-protocol/auth';
 import { init } from '../init';
 
 /**

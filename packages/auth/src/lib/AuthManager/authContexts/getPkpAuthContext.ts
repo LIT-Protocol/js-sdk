@@ -162,7 +162,6 @@ export const getPkpAuthContext = async (
   if (hasProvidedSessionKeyPair && hasProvidedDelegationAuthSig) {
     validateDelegationAuthSig({
       delegationAuthSig: _params.delegationAuthSig!,
-      requiredResources: _params.authConfig.resources,
       sessionKeyUri,
     });
     delegationAuthSig = _params.delegationAuthSig!;
@@ -170,7 +169,6 @@ export const getPkpAuthContext = async (
   } else if (_params.deps.preGeneratedDelegationAuthSig) {
     validateDelegationAuthSig({
       delegationAuthSig: _params.deps.preGeneratedDelegationAuthSig,
-      requiredResources: _params.authConfig.resources,
       sessionKeyUri,
     });
     delegationAuthSig = _params.deps.preGeneratedDelegationAuthSig;

@@ -1,10 +1,6 @@
 import { AUTH_METHOD_TYPE_VALUES, PRODUCT_IDS } from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
-import {
-  AuthData,
-  HexPrefixedSchema,
-  SessionKeyUriSchema,
-} from '@lit-protocol/schemas';
+import { AuthData, HexPrefixedSchema } from '@lit-protocol/schemas';
 import { AuthSig, SessionKeyPair } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { z } from 'zod';
@@ -38,12 +34,16 @@ export async function generatePkpDelegationAuthSig(
     litClient: {
       getContext: () => Promise<any>;
     };
+    productId?: 'LIT_ACTION' | 'SIGN_SESSION_KEY';
   }
 ): Promise<AuthSig> {
+  const defaultedProductId = params.productId ?? 'LIT_ACTION';
+
   _logger.info(
     {
       pkpPublicKey: params.pkpPublicKey,
       hasSessionKeyPair: !!params.sessionKeyPair,
+      productId: defaultedProductId,
     },
     'generatePkpDelegationAuthSig: Starting PKP delegation signature generation'
   );
@@ -60,9 +60,9 @@ export async function generatePkpDelegationAuthSig(
   const nodeUrls = litClientCtx.getMaxPricesForNodeProduct({
     nodePrices: nodePrices,
     userMaxPrice: litClientCtx.getUserMaxPrice({
-      product: 'LIT_ACTION',
+      product: defaultedProductId,
     }),
-    productId: PRODUCT_IDS['LIT_ACTION'],
+    productId: PRODUCT_IDS[defaultedProductId],
     numRequiredNodes: threshold,
   });
 
