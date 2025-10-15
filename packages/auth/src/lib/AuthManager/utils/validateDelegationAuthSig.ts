@@ -1,4 +1,6 @@
-import { AuthSig, LitResourceAbilityRequest } from '@lit-protocol/types';
+import { AuthSig } from '@lit-protocol/types';
+import { SessionKeyUriSchema } from '@lit-protocol/schemas';
+import { parseSignedMessage } from '../../authenticators/helper/session-sigs-validator';
 
 /**
  * Validates that the provided delegation auth sig hasn't expired and
@@ -7,18 +9,19 @@ import { AuthSig, LitResourceAbilityRequest } from '@lit-protocol/types';
  */
 export function validateDelegationAuthSig(params: {
   delegationAuthSig: AuthSig;
-  requiredResources: LitResourceAbilityRequest[];
   sessionKeyUri: string;
 }) {
   const { delegationAuthSig, sessionKeyUri } = params;
+  const expectedSessionKeyUri = SessionKeyUriSchema.parse(sessionKeyUri);
 
   try {
     const siweMessage = delegationAuthSig.signedMessage;
+    const parsedMessage = parseSignedMessage(siweMessage);
 
     // Check expiration if it exists in the SIWE message
-    const expirationMatch = siweMessage.match(/^Expiration Time: (.*)$/m);
-    if (expirationMatch?.[1]) {
-      const expiration = new Date(expirationMatch[1].trim());
+    const expirationField = parsedMessage['Expiration Time'];
+    if (typeof expirationField === 'string') {
+      const expiration = new Date(expirationField.trim());
       if (Number.isNaN(expiration.getTime())) {
         throw new Error(
           'Delegation signature contains an invalid expiration timestamp'
@@ -29,10 +32,25 @@ export function validateDelegationAuthSig(params: {
           `Delegation signature has expired at ${expiration.toISOString()}`
         );
       }
+    } else if (Array.isArray(expirationField)) {
+      throw new Error(
+        'Delegation signature contains multiple expiration timestamps'
+      );
     }
 
     // Validate session key URI matches
-    if (!siweMessage.includes(sessionKeyUri)) {
+    const parsedSessionKeyUri =
+      typeof parsedMessage['URI'] === 'string'
+        ? parsedMessage['URI'].trim()
+        : undefined;
+
+    if (parsedSessionKeyUri) {
+      if (parsedSessionKeyUri !== expectedSessionKeyUri) {
+        throw new Error(
+          'Session key URI in delegation signature does not match provided session key pair'
+        );
+      }
+    } else if (!siweMessage.includes(expectedSessionKeyUri)) {
       throw new Error(
         'Session key URI in delegation signature does not match provided session key pair'
       );
