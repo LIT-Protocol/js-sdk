@@ -53,12 +53,12 @@ type BaseInitResult = {
   localMasterAccount: ViemAccount;
   aliceViemAccount: ViemAccount;
   aliceViemAccountAuthData: AuthData;
+  aliceViemAccountPkp: PKPData;
   aliceEoaAuthContext: AuthContext;
   masterDepositForUser: (userAddress: string) => Promise<void>;
 };
 
 type FullInitResult = BaseInitResult & {
-  aliceViemAccountPkp: PKPData;
   bobViemAccount: ViemAccount;
   bobViemAccountAuthData: AuthData;
   bobViemAccountPkp: PKPData;
@@ -252,8 +252,15 @@ async function initInternal(
       litClient: litClient,
     });
 
+  const aliceViemAccountPkp = await getOrCreatePkp(
+    litClient,
+    aliceViemAccountAuthData,
+    aliceViemAccount
+  );
+
   if (mode === 'fast') {
     await masterDepositForUser(aliceViemAccount.address);
+    await masterDepositForUser(aliceViemAccountPkp.ethAddress);
 
     const aliceEoaAuthContext = await createAliceEoaAuthContext();
 
@@ -265,6 +272,7 @@ async function initInternal(
       localMasterAccount,
       aliceViemAccount,
       aliceViemAccountAuthData,
+      aliceViemAccountPkp,
       aliceEoaAuthContext,
       masterDepositForUser,
     };
@@ -281,10 +289,11 @@ async function initInternal(
    * Get or create PKPs for Alice and Bob
    * ====================================
    */
-  const [aliceViemAccountPkp, bobViemAccountPkp] = await Promise.all([
-    getOrCreatePkp(litClient, aliceViemAccountAuthData, aliceViemAccount),
-    getOrCreatePkp(litClient, bobViemAccountAuthData, bobViemAccount),
-  ]);
+  const bobViemAccountPkp = await getOrCreatePkp(
+    litClient,
+    bobViemAccountAuthData,
+    bobViemAccount
+  );
 
   // Use custom auth to create a PKP for Eve
   const uniqueDappName = 'e2e-test-dapp';
@@ -372,13 +381,13 @@ async function initInternal(
     localMasterAccount,
     aliceViemAccount,
     aliceViemAccountAuthData,
+    aliceViemAccountPkp,
     aliceEoaAuthContext,
     masterDepositForUser,
   };
 
   const fullResult: FullInitResult = {
     ...baseResult,
-    aliceViemAccountPkp,
     bobViemAccount,
     bobViemAccountAuthData,
     bobViemAccountPkp,
