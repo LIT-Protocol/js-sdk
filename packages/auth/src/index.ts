@@ -89,6 +89,7 @@ export { getAuthIdByAuthMethod } from './lib/authenticators/helper/utils';
  * @returns {SessionKeyPair} The generated session key pair.
  */
 export { generateSessionKeyPair } from './lib/AuthManager/utils/generateSessionKeyPair';
+export { validateDelegationAuthSig } from './lib/AuthManager/utils/validateDelegationAuthSig';
 
 /**
  * Utility function to generate a PKP delegation auth signature for a given session key pair.
