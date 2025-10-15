@@ -55,6 +55,14 @@ LOCAL_MASTER_ACCOUNT=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf
 NETWORK=<network-name> pnpm run test:e2e all
 ```
 
+### Run a custom ticket spec
+
+Run a single test file by pointing `--runTestsByPath` at the spec you are iterating on:
+
+```bash
+pnpm test:custom -- --runTestsByPath packages/e2e/src/tickets/drel1157-la-decryptandcombine.spec.ts
+```
+
 # Running it against a local network
 
 ## Required Environment Variables
