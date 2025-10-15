@@ -233,6 +233,38 @@ Unlike traditional client-side decryption, this approach ensures that sensitive 
   </Step>
 </Steps>
 
+#### Important Considerations
+
+When using `decryptAndCombine` within your Lit Actions, there are several critical requirements and potential issues to be aware of:
+
+#### Unified Access Control Conditions Required
+
+<Warning>
+The `decryptAndCombine` function **only accepts unified access control conditions**. Standard or legacy access control condition formats are not supported.
+</Warning>
+
+When encrypting data that you plan to decrypt within a Lit Action, ensure you use the unified access control conditions format. EVM contract conditions are supported, but they must be specified as unified access control conditions with `conditionType: "evmContract"` in the JSON structure.
+
+#### Timeout Issues and Determinism
+
+<Warning>
+**Common Cause of Timeouts**: If you experience timeouts when using `decryptAndCombine`, the most likely cause is nondeterminism in your Lit Action.
+</Warning>
+
+For decryption to succeed, all Lit nodes must reach consensus on:
+- The access control conditions being evaluated
+- The ciphertext being decrypted  
+- The dataToEncryptHash being validated
+
+If nodes receive different values for any of these parameters, they cannot reach consensus and the operation will timeout. Common sources of nondeterminism include:
+
+- **Dynamic Construction**: Building access control conditions dynamically within the Lit Action
+- **Variable Data**: Using timestamps, random values, or other changing data in your conditions
+- **External Data**: Fetching data that may differ between nodes (e.g., latest block numbers, API responses)
+- **Conditional Logic**: Logic that produces different results on different nodes
+
+To avoid timeouts, ensure all parameters passed to `decryptAndCombine` are static and deterministic across all nodes. Pass these values via `jsParams` from the client rather than generating them within the Lit Action.
+
 ---
 
 ### ⚡️ Getting Chain RPC URLs Example
