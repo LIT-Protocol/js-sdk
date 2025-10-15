@@ -9,8 +9,5 @@ describe('drel1157 decryptAndCombine Lit Action', () => {
   });
 
   it('should execute the decrypt and combine Lit Action successfully', () =>
-    createExecuteJsDecryptAndCombineTest(
-      ctx,
-      () => ctx.aliceEoaAuthContext
-    )());
+    createExecuteJsDecryptAndCombineTest(ctx, () => ctx.aliceEoaAuthContext)());
 });
