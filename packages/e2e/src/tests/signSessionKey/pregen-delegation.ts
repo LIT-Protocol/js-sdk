@@ -5,7 +5,7 @@ import {
   validateDelegationAuthSig,
 } from '@lit-protocol/auth';
 import { createLitClient } from '@lit-protocol/lit-client';
-import { resolveNetworkImportName } from '../../helper/network';
+import { ResolvedNetwork } from '../../helper/network';
 import { AuthData } from '@lit-protocol/schemas';
 import { AuthManagerInstance, LitClientInstance } from '../../types';
 
@@ -15,7 +15,7 @@ type PregenDelegationParams = {
   pkpPublicKey: string;
   clientLitClient: LitClientInstance;
   fallbackLitClient?: LitClientInstance;
-  networkName?: string;
+  resolvedNetwork: ResolvedNetwork;
 };
 
 export const createPregenDelegationServerReuseTest = (
@@ -28,7 +28,7 @@ export const createPregenDelegationServerReuseTest = (
       pkpPublicKey,
       clientLitClient,
       fallbackLitClient,
-      networkName,
+      resolvedNetwork,
     } = params;
 
     const sessionKeyPair = generateSessionKeyPair();
@@ -73,10 +73,18 @@ export const createPregenDelegationServerReuseTest = (
       sessionKeyUri: decodedPayload.sessionKeyPair.publicKey,
     });
 
+    let litClient: LitClientInstance;
+
+    try {
+      litClient = await createLitClient({ network: resolvedNetwork.networkModule });
+    } catch {
+      litClient = fallbackLitClient ?? clientLitClient;
+    }
+
     const serverAuthManager = createAuthManager({
       storage: storagePlugins.localStorageNode({
         appName: 'e2e-server-reuse',
-        networkName: networkName ?? 'naga-dev',
+        networkName: resolvedNetwork.name,
         storagePath: './.e2e/server-reuse-storage',
       }),
     });
@@ -87,17 +95,6 @@ export const createPregenDelegationServerReuseTest = (
         sessionKeyPair: decodedPayload.sessionKeyPair,
         delegationAuthSig: decodedPayload.delegationAuthSig,
       });
-
-    let litClient;
-    try {
-      const networksModule = await import('@lit-protocol/networks');
-      const importName = resolveNetworkImportName(networkName);
-      const networkModule = networksModule[importName];
-      litClient = await createLitClient({ network: networkModule });
-      await litClient.connect();
-    } catch {
-      litClient = fallbackLitClient ?? clientLitClient;
-    }
 
     const result = await litClient.chain.ethereum.pkpSign({
       authContext,

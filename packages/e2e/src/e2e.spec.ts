@@ -278,7 +278,7 @@ describe('all', () => {
             pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
             clientLitClient: ctx.litClient,
             fallbackLitClient: ctx.litClient,
-            networkName: process.env['NETWORK'] ?? 'naga-dev',
+            resolvedNetwork: ctx.resolvedNetwork,
           })
         );
       });

@@ -5,7 +5,12 @@ import {
 } from '@lit-protocol/auth';
 import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { resolveNetworkImportName } from './helper/network';
+import {
+  NetworkName,
+  NetworkNameSchema,
+  ResolvedNetwork,
+  resolveNetwork,
+} from './helper/network';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
 import { getOrCreatePkp } from './helper/pkp-utils';
@@ -19,15 +24,6 @@ import {
 
 // import { createPkpAuthContext } from './helper/auth-contexts';
 
-const SupportedNetworkSchema = z.enum([
-  'naga-dev',
-  'naga-test',
-  'naga-local',
-  'naga-staging',
-]);
-
-type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
-
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
@@ -39,15 +35,6 @@ const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
 const EVE_VALIDATION_IPFS_CID =
   'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
 
-const NETWORK_CONFIG = {
-  'naga-dev': { importName: 'nagaDev', type: 'live' },
-  'naga-test': { importName: 'nagaTest', type: 'live' },
-  'naga-local': { importName: 'nagaLocal', type: 'local' },
-  'naga-staging': { importName: 'nagaStaging', type: 'live' },
-} as const;
-
-type NetworkConfigKey = keyof typeof NETWORK_CONFIG;
-
 type BaseInitResult = {
   litClient: LitClientInstance;
   authManager: AuthManagerInstance;
@@ -57,6 +44,7 @@ type BaseInitResult = {
   aliceViemAccountPkp: PKPData;
   aliceEoaAuthContext: AuthContext;
   masterDepositForUser: (userAddress: string) => Promise<void>;
+  resolvedNetwork: ResolvedNetwork;
 };
 
 type FullInitResult = BaseInitResult & {
@@ -72,17 +60,17 @@ type FullInitResult = BaseInitResult & {
 
 async function initInternal(
   mode: 'fast',
-  network?: SupportedNetwork,
+  network?: NetworkName,
   logLevel?: LogLevel
 ): Promise<BaseInitResult>;
 async function initInternal(
   mode: 'full',
-  network?: SupportedNetwork,
+  network?: NetworkName,
   logLevel?: LogLevel
 ): Promise<FullInitResult>;
 async function initInternal(
   mode: 'fast' | 'full',
-  network?: SupportedNetwork,
+  network?: NetworkName,
   logLevel?: LogLevel
 ): Promise<BaseInitResult | FullInitResult> {
   /**
@@ -106,22 +94,19 @@ async function initInternal(
    * Environment settings
    * ====================================
    */
-  const _network = network || process.env['NETWORK'];
-  const _logLevel = logLevel || process.env['LOG_LEVEL'];
+  const networkInput = network ?? process.env['NETWORK'];
+  const _logLevel = logLevel ?? process.env['LOG_LEVEL'];
   if (_logLevel) {
     process.env['LOG_LEVEL'] = _logLevel;
   }
 
-  if (!_network) {
+  if (!networkInput) {
     throw new Error(
-      `❌ Network not specified. Please set the NETWORK environment variable or pass a network parameter. Available networks: ${SupportedNetworkSchema.options.join(
+      `❌ Network not specified. Please set the NETWORK environment variable or pass a network parameter. Available networks: ${NetworkNameSchema.options.join(
         ', '
       )}`
     );
   }
-
-  console.log('✅ Using network:', _network);
-  console.log('✅ Using log level:', _logLevel);
 
   /**
    * ====================================
@@ -130,22 +115,18 @@ async function initInternal(
    * ❗️ If it's on live chain, we will fund it with the master account. (set in the .env file)
    * ====================================
    */
-  const config = NETWORK_CONFIG[_network as NetworkConfigKey];
-  if (!config) {
-    throw new Error(`❌ Invalid network: ${_network}`);
-  }
-
-  // Dynamic import of network module
-  const networksModule = await import('@lit-protocol/networks');
-  const importName = resolveNetworkImportName(_network);
-  const _baseNetworkModule = networksModule[importName];
-
   // Optional RPC override from env
   const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
-  const _networkModule =
-    rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
-      ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
-      : _baseNetworkModule;
+  const resolvedNetwork = await resolveNetwork({
+    network: networkInput,
+    rpcUrlOverride: rpcOverride,
+  });
+
+  const { name: resolvedNetworkName, type: networkType, networkModule } =
+    resolvedNetwork;
+
+  console.log('✅ Using network:', resolvedNetworkName);
+  console.log('✅ Using log level:', _logLevel);
 
   if (rpcOverride) {
     console.log(
@@ -155,14 +136,14 @@ async function initInternal(
   }
 
   // Fund accounts based on network type
-  const isLocal = config.type === 'local';
+  const isLocal = networkType === 'local';
   const masterAccount = isLocal ? localMasterAccount : liveMasterAccount;
   const fundingAmount = isLocal
     ? LOCAL_NETWORK_FUNDING_AMOUNT
     : LIVE_NETWORK_FUNDING_AMOUNT;
 
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
-  await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
+  await fundAccount(aliceViemAccount, masterAccount, networkModule, {
     ifLessThan: fundingAmount,
     thenFundWith: fundingAmount,
   });
@@ -179,12 +160,12 @@ async function initInternal(
 
     eveViemAccount = privateKeyToAccount(generatePrivateKey());
 
-    await fundAccount(bobViemAccount, masterAccount, _networkModule, {
+    await fundAccount(bobViemAccount, masterAccount, networkModule, {
       ifLessThan: fundingAmount,
       thenFundWith: fundingAmount,
     });
 
-    await fundAccount(eveViemAccount, masterAccount, _networkModule, {
+    await fundAccount(eveViemAccount, masterAccount, networkModule, {
       ifLessThan: fundingAmount,
       thenFundWith: fundingAmount,
     });
@@ -195,7 +176,7 @@ async function initInternal(
    * Initialise the LitClient
    * ====================================
    */
-  const litClient = await createLitClient({ network: _networkModule });
+  const litClient = await createLitClient({ network: networkModule });
 
   /**
    * ====================================
@@ -230,7 +211,7 @@ async function initInternal(
   const authManager = createAuthManager({
     storage: storagePlugins.localStorageNode({
       appName: 'my-local-testing-app',
-      networkName: _network,
+      networkName: resolvedNetworkName,
       storagePath: './.e2e/lit-auth-local',
     }),
   });
@@ -277,6 +258,7 @@ async function initInternal(
       aliceViemAccountPkp,
       aliceEoaAuthContext,
       masterDepositForUser,
+      resolvedNetwork,
     };
 
     return baseResult;
@@ -362,10 +344,10 @@ async function initInternal(
   const alicePkpViemAccount = await litClient.getPkpViemAccount({
     pkpPublicKey: aliceViemAccountPkp.pubkey,
     authContext: alicePkpAuthContext,
-    chainConfig: _networkModule.getChainConfig(),
+    chainConfig: networkModule.getChainConfig(),
   });
 
-  await fundAccount(alicePkpViemAccount, masterAccount, _networkModule, {
+  await fundAccount(alicePkpViemAccount, masterAccount, networkModule, {
     ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
     thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
   });
@@ -386,6 +368,7 @@ async function initInternal(
     aliceViemAccountPkp,
     aliceEoaAuthContext,
     masterDepositForUser,
+    resolvedNetwork,
   };
 
   const fullResult: FullInitResult = {
@@ -404,14 +387,14 @@ async function initInternal(
 }
 
 export const init = async (
-  network?: SupportedNetwork,
+  network?: NetworkName,
   logLevel?: LogLevel
 ): Promise<FullInitResult> => {
   return initInternal('full', network, logLevel);
 };
 
 export const initFast = async (
-  network?: SupportedNetwork,
+  network?: NetworkName,
   logLevel?: LogLevel
 ): Promise<BaseInitResult> => {
   return initInternal('fast', network, logLevel);
