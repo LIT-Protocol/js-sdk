@@ -5,6 +5,7 @@ import {
 } from '@lit-protocol/auth';
 import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { resolveNetworkImportName } from './helper/network';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
 import { getOrCreatePkp } from './helper/pkp-utils';
@@ -136,7 +137,8 @@ async function initInternal(
 
   // Dynamic import of network module
   const networksModule = await import('@lit-protocol/networks');
-  const _baseNetworkModule = networksModule[config.importName];
+  const importName = resolveNetworkImportName(_network);
+  const _baseNetworkModule = networksModule[importName];
 
   // Optional RPC override from env
   const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];

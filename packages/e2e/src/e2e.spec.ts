@@ -20,14 +20,7 @@ import {
 } from './helper/tests';
 import { init } from './init';
 import { AuthContext } from './types';
-import {
-  createAuthManager,
-  storagePlugins,
-  validateDelegationAuthSig,
-  generateSessionKeyPair,
-} from '@lit-protocol/auth';
-import { createLitClient } from '@lit-protocol/lit-client';
-import { nagaDev } from '@lit-protocol/networks';
+import { createPregenDelegationServerReuseTest } from './tests/signSessionKey/pregen-delegation';
 
 const RPC_OVERRIDE = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 if (RPC_OVERRIDE) {
@@ -267,68 +260,20 @@ describe('all', () => {
         });
       });
 
+      /**
+       * This scenario mirrors the client/server hand-off used in production:
+       * 1. A client generates session materials and a delegation auth sig.
+       * 2. The bundle travels over the wire (simulated via JSON serialisation).
+       * 3. A server restores those materials with a fresh AuthManager instance and
+       *    proves it can sign with the delegated PKP using an independently created LitClient.
+       * Keeping this in the main e2e suite ensures we catch regressions in CI without
+       * relying on the ad-hoc ticket test.
+       */
       describe('server reuse flow', () => {
-        it('should sign using materials shipped over the wire', async () => {
-          const sessionKeyPair = generateSessionKeyPair();
-          const delegationAuthSig =
-            await ctx.authManager.generatePkpDelegationAuthSig({
-              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-              authData: ctx.aliceViemAccountAuthData,
-              sessionKeyPair,
-              authConfig: {
-                resources: [
-                  ['pkp-signing', '*'],
-                  ['lit-action-execution', '*'],
-                  ['access-control-condition-decryption', '*'],
-                ],
-                expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-              },
-              litClient: ctx.litClient,
-            });
-
-          const wirePayload = JSON.stringify({
-            sessionKeyPair,
-            delegationAuthSig,
-          });
-
-          const {
-            sessionKeyPair: receivedSessionKeyPair,
-            delegationAuthSig: receivedDelegation,
-          } = JSON.parse(wirePayload) as {
-            sessionKeyPair: typeof sessionKeyPair;
-            delegationAuthSig: typeof delegationAuthSig;
-          };
-
-          validateDelegationAuthSig({
-            delegationAuthSig: receivedDelegation,
-            sessionKeyUri: receivedSessionKeyPair.publicKey,
-          });
-
-          const serverAuthManager = createAuthManager({
-            storage: storagePlugins.localStorageNode({
-              appName: 'e2e-server-reuse',
-              networkName: 'naga-dev',
-              storagePath: './.e2e/server-reuse-storage',
-            }),
-          });
-
-          const authContext =
-            await serverAuthManager.createPkpAuthContextFromPreGenerated({
-              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-              sessionKeyPair: receivedSessionKeyPair,
-              delegationAuthSig: receivedDelegation,
-            });
-
-          const litClient = await createLitClient({ network: nagaDev });
-
-          const result = await litClient.chain.ethereum.pkpSign({
-            authContext,
-            pubKey: ctx.aliceViemAccountPkp.pubkey,
-            toSign: 'hello from server reuse',
-          });
-
-          expect(result).toBeTruthy();
-        });
+        it(
+          'should sign using materials shipped over the wire',
+          createPregenDelegationServerReuseTest(ctx)
+        );
       });
     });
 
