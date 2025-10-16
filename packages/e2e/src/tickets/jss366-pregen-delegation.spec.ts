@@ -1,9 +1,12 @@
-import { createPkpSignTest } from '../helper/tests';
 import { initFast } from '../init';
 import {
+  createAuthManager,
   generateSessionKeyPair,
+  storagePlugins,
   validateDelegationAuthSig,
 } from '@lit-protocol/auth';
+import { createLitClient } from '@lit-protocol/lit-client';
+import { nagaDev } from '@lit-protocol/networks';
 
 describe('PKP Auth with Pre-generated Materials', () => {
   let ctx: Awaited<ReturnType<typeof initFast>>;
@@ -13,11 +16,9 @@ describe('PKP Auth with Pre-generated Materials', () => {
   });
 
   test('Try to pregen', async () => {
-    // Step 1: Generate a session key pair directly
+    // CLIENT SIDE: generate session materials and delegation
     const sessionKeyPair = generateSessionKeyPair();
-    console.log('Session Key Pair:', sessionKeyPair);
 
-    // Step 2: Generate PKP delegation signature for the session key pair
     const delegationAuthSig =
       await ctx.authManager.generatePkpDelegationAuthSig({
         pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
@@ -34,30 +35,54 @@ describe('PKP Auth with Pre-generated Materials', () => {
         litClient: ctx.litClient,
       });
 
-    console.log('delegationAuthSig:', delegationAuthSig);
-
-    // (Optional) Internally, we also run the `validateDelegationAuthSig` function to ensure the signature is valid before proceeding. However, we can also use this externally in case you want to validate a signature yourself.
-    validateDelegationAuthSig({
+    const serializedPayload = JSON.stringify({
+      sessionKeyPair,
       delegationAuthSig,
-      sessionKeyUri: sessionKeyPair.publicKey,
     });
 
-    // Step 3: Create auth context using the pre-generated materials
+    console.log('Serialized Payload:', serializedPayload);
+
+    // SERVER SIDE: receive over the wire
+    const {
+      sessionKeyPair: receivedSessionKeyPair,
+      delegationAuthSig: receivedDelegationAuthSig,
+    } = JSON.parse(serializedPayload) as {
+      sessionKeyPair: typeof sessionKeyPair;
+      delegationAuthSig: typeof delegationAuthSig;
+    };
+
+    validateDelegationAuthSig({
+      delegationAuthSig: receivedDelegationAuthSig,
+      sessionKeyUri: receivedSessionKeyPair.publicKey,
+    });
+
+    const serverAuthManager = createAuthManager({
+      storage: storagePlugins.localStorageNode({
+        appName: 'e2e-pre-generated',
+        networkName: 'naga-dev',
+        storagePath: './.e2e/pre-generated-storage',
+      }),
+    });
+
     const authContextWithPreGenerated =
-      await ctx.authManager.createPkpAuthContextFromPreGenerated({
+      await serverAuthManager.createPkpAuthContextFromPreGenerated({
         pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-        sessionKeyPair,
-        delegationAuthSig,
+        sessionKeyPair: receivedSessionKeyPair,
+        delegationAuthSig: receivedDelegationAuthSig,
       });
 
-    console.log('authContextWithPreGenerated:', authContextWithPreGenerated);
-
-    const res = await ctx.litClient.chain.ethereum.pkpSign({
+    const litClient = await createLitClient({ network: nagaDev });
+    const res = await litClient.chain.ethereum.pkpSign({
       authContext: authContextWithPreGenerated,
       pubKey: ctx.aliceViemAccountPkp.pubkey,
       toSign: 'Hello, world!',
     });
 
-    console.log('res:', res);
+    expect(res).toBeTruthy();
+
+    console.log(
+      'ctx.aliceViemAccountPkp.pubkey:',
+      ctx.aliceViemAccountPkp.pubkey
+    );
   });
 });
