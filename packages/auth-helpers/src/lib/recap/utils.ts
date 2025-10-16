@@ -90,7 +90,10 @@ export function getLitAbilityFromRecap(params: {
     }
   }
 
-  if (recapNamespace === LIT_NAMESPACE.Auth && recapAbility === LIT_RECAP_ABILITY.Auth) {
+  if (
+    recapNamespace === LIT_NAMESPACE.Auth &&
+    recapAbility === LIT_RECAP_ABILITY.Auth
+  ) {
     if (resourceKey.startsWith(PAYMENT_DELEGATION_PREFIX)) {
       return LIT_ABILITY.PaymentDelegation;
     }

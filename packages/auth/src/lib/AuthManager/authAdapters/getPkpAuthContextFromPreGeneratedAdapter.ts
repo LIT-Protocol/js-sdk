@@ -159,16 +159,13 @@ function extractAuthMetadataFromRestriction(
 function sanitiseRestrictionData(
   restriction: Record<string, unknown>
 ): Record<string, DefinedJson> | undefined {
-  const parsedData = Object.entries(restriction).reduce(
-    (acc, [key, value]) => {
-      const result = DefinedJsonSchema.safeParse(value);
-      if (result.success) {
-        acc[key] = result.data;
-      }
-      return acc;
-    },
-    {} as Record<string, DefinedJson>
-  );
+  const parsedData = Object.entries(restriction).reduce((acc, [key, value]) => {
+    const result = DefinedJsonSchema.safeParse(value);
+    if (result.success) {
+      acc[key] = result.data;
+    }
+    return acc;
+  }, {} as Record<string, DefinedJson>);
 
   return Object.keys(parsedData).length > 0 ? parsedData : undefined;
 }
@@ -309,9 +306,7 @@ function extractAuthConfigFromDelegationAuthSig(delegationAuthSig: AuthSig): {
   const expirationMatch = siweMessage.match(/^Expiration Time: (.*)$/m);
   const expiration = expirationMatch ? expirationMatch[1].trim() : undefined;
 
-  const resourceMatches = [
-    ...siweMessage.matchAll(/-\s*(urn:recap:[^\s]+)/g),
-  ];
+  const resourceMatches = [...siweMessage.matchAll(/-\s*(urn:recap:[^\s]+)/g)];
 
   const resources: LitResourceAbilityRequest[] = [];
   let derivedAuthData: AuthData | undefined;

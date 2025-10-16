@@ -11,7 +11,9 @@ const baseDelegation = ({
 }: {
   recap: Record<string, unknown>;
 }): AuthSig => {
-  const resourcesLine = `- urn:recap:${Buffer.from(JSON.stringify(recap)).toString('base64url')}`;
+  const resourcesLine = `- urn:recap:${Buffer.from(
+    JSON.stringify(recap)
+  ).toString('base64url')}`;
 
   const signedMessage = [
     'localhost wants you to sign in with your Ethereum account:',
