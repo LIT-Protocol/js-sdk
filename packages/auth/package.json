@@ -34,11 +34,11 @@
     "jose": "^4.14.4",
     "siwe": "^2.3.2",
     "stytch": "^12.4.0",
-    "viem": "2.29.4",
     "zod": "3.24.3"
   },
   "peerDependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "viem": "^2.29.4"
   },
   "browser": {
     "crypto": false,
