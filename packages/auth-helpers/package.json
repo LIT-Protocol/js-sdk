@@ -37,6 +37,6 @@
     "@ethersproject/transactions": "5.7.0"
   },
   "peerDependencies": {
-    "viem": "^2.29.4"
+   "viem": "2.29.4"
   }
 }
