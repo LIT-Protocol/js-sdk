@@ -32,21 +32,20 @@ export const createPregenDelegationServerReuseTest = (
     } = params;
 
     const sessionKeyPair = generateSessionKeyPair();
-    const delegationAuthSig =
-      await authManager.generatePkpDelegationAuthSig({
-        pkpPublicKey,
-        authData,
-        sessionKeyPair,
-        authConfig: {
-          resources: [
-            ['pkp-signing', '*'],
-            ['lit-action-execution', '*'],
-            ['access-control-condition-decryption', '*'],
-          ],
-          expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-        },
-        litClient: clientLitClient,
-      });
+    const delegationAuthSig = await authManager.generatePkpDelegationAuthSig({
+      pkpPublicKey,
+      authData,
+      sessionKeyPair,
+      authConfig: {
+        resources: [
+          ['pkp-signing', '*'],
+          ['lit-action-execution', '*'],
+          ['access-control-condition-decryption', '*'],
+        ],
+        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+      },
+      litClient: clientLitClient,
+    });
 
     const envelope = JSON.stringify({
       pkpPublicKey,
@@ -76,7 +75,9 @@ export const createPregenDelegationServerReuseTest = (
     let litClient: LitClientInstance;
 
     try {
-      litClient = await createLitClient({ network: resolvedNetwork.networkModule });
+      litClient = await createLitClient({
+        network: resolvedNetwork.networkModule,
+      });
     } catch {
       litClient = fallbackLitClient ?? clientLitClient;
     }

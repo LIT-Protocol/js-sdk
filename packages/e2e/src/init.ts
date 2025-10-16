@@ -122,8 +122,11 @@ async function initInternal(
     rpcUrlOverride: rpcOverride,
   });
 
-  const { name: resolvedNetworkName, type: networkType, networkModule } =
-    resolvedNetwork;
+  const {
+    name: resolvedNetworkName,
+    type: networkType,
+    networkModule,
+  } = resolvedNetwork;
 
   console.log('✅ Using network:', resolvedNetworkName);
   console.log('✅ Using log level:', _logLevel);
