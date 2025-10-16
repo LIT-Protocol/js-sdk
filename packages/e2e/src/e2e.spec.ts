@@ -20,6 +20,14 @@ import {
 } from './helper/tests';
 import { init } from './init';
 import { AuthContext } from './types';
+import {
+  createAuthManager,
+  storagePlugins,
+  validateDelegationAuthSig,
+  generateSessionKeyPair,
+} from '@lit-protocol/auth';
+import { createLitClient } from '@lit-protocol/lit-client';
+import { nagaDev } from '@lit-protocol/networks';
 
 const RPC_OVERRIDE = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 if (RPC_OVERRIDE) {
@@ -201,7 +209,7 @@ describe('all', () => {
         it('should reject when only sessionKeyPair is provided', async () => {
           const tempAuthContext = await ctx.authManager.createPkpAuthContext({
             authData: ctx.aliceViemAccountAuthData,
-            pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+            pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
             authConfig: {
               resources: [['pkp-signing', '*']],
               expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
@@ -214,7 +222,7 @@ describe('all', () => {
           await expect(
             ctx.authManager.createPkpAuthContext({
               authData: ctx.aliceViemAccountAuthData,
-              pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
               authConfig: {
                 resources: [['pkp-signing', '*']],
                 expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
@@ -231,7 +239,7 @@ describe('all', () => {
         it('should reject when only delegationAuthSig is provided', async () => {
           const tempAuthContext = await ctx.authManager.createPkpAuthContext({
             authData: ctx.aliceViemAccountAuthData,
-            pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+            pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
             authConfig: {
               resources: [['pkp-signing', '*']],
               expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
@@ -244,7 +252,7 @@ describe('all', () => {
           await expect(
             ctx.authManager.createPkpAuthContext({
               authData: ctx.aliceViemAccountAuthData,
-              pkpPublicKey: ctx.aliceViemAccountPkp.publicKey,
+              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
               authConfig: {
                 resources: [['pkp-signing', '*']],
                 expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
@@ -256,6 +264,70 @@ describe('all', () => {
           ).rejects.toThrow(
             'Both sessionKeyPair and delegationAuthSig must be provided together, or neither should be provided'
           );
+        });
+      });
+
+      describe('server reuse flow', () => {
+        it('should sign using materials shipped over the wire', async () => {
+          const sessionKeyPair = generateSessionKeyPair();
+          const delegationAuthSig =
+            await ctx.authManager.generatePkpDelegationAuthSig({
+              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
+              authData: ctx.aliceViemAccountAuthData,
+              sessionKeyPair,
+              authConfig: {
+                resources: [
+                  ['pkp-signing', '*'],
+                  ['lit-action-execution', '*'],
+                  ['access-control-condition-decryption', '*'],
+                ],
+                expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+              },
+              litClient: ctx.litClient,
+            });
+
+          const wirePayload = JSON.stringify({
+            sessionKeyPair,
+            delegationAuthSig,
+          });
+
+          const {
+            sessionKeyPair: receivedSessionKeyPair,
+            delegationAuthSig: receivedDelegation,
+          } = JSON.parse(wirePayload) as {
+            sessionKeyPair: typeof sessionKeyPair;
+            delegationAuthSig: typeof delegationAuthSig;
+          };
+
+          validateDelegationAuthSig({
+            delegationAuthSig: receivedDelegation,
+            sessionKeyUri: receivedSessionKeyPair.publicKey,
+          });
+
+          const serverAuthManager = createAuthManager({
+            storage: storagePlugins.localStorageNode({
+              appName: 'e2e-server-reuse',
+              networkName: 'naga-dev',
+              storagePath: './.e2e/server-reuse-storage',
+            }),
+          });
+
+          const authContext =
+            await serverAuthManager.createPkpAuthContextFromPreGenerated({
+              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
+              sessionKeyPair: receivedSessionKeyPair,
+              delegationAuthSig: receivedDelegation,
+            });
+
+          const litClient = await createLitClient({ network: nagaDev });
+
+          const result = await litClient.chain.ethereum.pkpSign({
+            authContext,
+            pubKey: ctx.aliceViemAccountPkp.pubkey,
+            toSign: 'hello from server reuse',
+          });
+
+          expect(result).toBeTruthy();
         });
       });
     });
