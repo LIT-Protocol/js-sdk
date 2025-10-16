@@ -23,7 +23,6 @@
     "@noble/curves": "^1.8.1",
     "@wagmi/core": "^2.17.1",
     "bs58": "^6.0.0",
-    "elysia": "^1.2.25",
     "ethers": "^5.7.1",
     "node-localstorage": "^3.0.5",
     "pino": "^9.6.0",
