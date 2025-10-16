@@ -90,10 +90,7 @@ export const createAuthManager = (authManagerParams: AuthManagerParams) => {
       delegationAuthSig: AuthSig;
       authData?: AuthData;
     }) => {
-      return getPkpAuthContextFromPreGeneratedAdapter(
-        authManagerParams,
-        params
-      );
+      return getPkpAuthContextFromPreGeneratedAdapter(params);
     },
     createCustomAuthContext: (params: {
       // authData: AuthData;
