@@ -9,6 +9,13 @@ describe('PKP Auth with Pre-generated Materials', () => {
   });
 
   test('Try to pregen', async () => {
-    await createPregenDelegationServerReuseTest(ctx)();
+    await createPregenDelegationServerReuseTest({
+      authManager: ctx.authManager,
+      authData: ctx.aliceViemAccountAuthData,
+      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
+      clientLitClient: ctx.litClient,
+      fallbackLitClient: ctx.litClient,
+      networkName: process.env['NETWORK'] ?? 'naga-dev',
+    })();
   });
 });

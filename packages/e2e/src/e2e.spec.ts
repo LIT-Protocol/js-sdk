@@ -272,7 +272,14 @@ describe('all', () => {
       describe('server reuse flow', () => {
         it(
           'should sign using materials shipped over the wire',
-          createPregenDelegationServerReuseTest(ctx)
+          createPregenDelegationServerReuseTest({
+            authManager: ctx.authManager,
+            authData: ctx.aliceViemAccountAuthData,
+            pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
+            clientLitClient: ctx.litClient,
+            fallbackLitClient: ctx.litClient,
+            networkName: process.env['NETWORK'] ?? 'naga-dev',
+          })
         );
       });
     });
