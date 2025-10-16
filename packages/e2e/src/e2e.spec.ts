@@ -270,8 +270,7 @@ describe('all', () => {
        * relying on the ad-hoc ticket test.
        */
       describe('server reuse flow', () => {
-        it(
-          'should sign using materials shipped over the wire',
+        it('should sign using materials shipped over the wire', () =>
           createPregenDelegationServerReuseTest({
             authManager: ctx.authManager,
             authData: ctx.aliceViemAccountAuthData,
@@ -279,8 +278,7 @@ describe('all', () => {
             clientLitClient: ctx.litClient,
             fallbackLitClient: ctx.litClient,
             resolvedNetwork: ctx.resolvedNetwork,
-          })
-        );
+          })());
       });
     });
 

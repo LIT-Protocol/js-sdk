@@ -8,14 +8,13 @@ describe('PKP Auth with Pre-generated Materials', () => {
     ctx = await initFast();
   });
 
-  test('Try to pregen', async () => {
-    await createPregenDelegationServerReuseTest({
+  test('Try to pregen', async () =>
+    createPregenDelegationServerReuseTest({
       authManager: ctx.authManager,
       authData: ctx.aliceViemAccountAuthData,
       pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
       clientLitClient: ctx.litClient,
       fallbackLitClient: ctx.litClient,
       resolvedNetwork: ctx.resolvedNetwork,
-    })();
-  });
+    })());
 });
