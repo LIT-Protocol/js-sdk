@@ -27,12 +27,10 @@ const buildModule = (env: NagaLocalEnvironment) => {
       createChainManager(env, account),
   });
 
-  const createWithEnv = (nextEnv: NagaLocalEnvironment) =>
-    buildModule(nextEnv);
+  const createWithEnv = (nextEnv: NagaLocalEnvironment) => buildModule(nextEnv);
 
   const withOverrides = (overrides: { rpcUrl?: string }) => {
-    const resolvedRpc =
-      overrides.rpcUrl ?? env.getConfig().rpcUrl;
+    const resolvedRpc = overrides.rpcUrl ?? env.getConfig().rpcUrl;
 
     return createWithEnv(
       new NagaLocalEnvironment({
@@ -50,8 +48,7 @@ const buildModule = (env: NagaLocalEnvironment) => {
       networkName: networkName ?? 'naga-develop',
     });
 
-    const resolvedSignatures =
-      signatures as unknown as NagaLocalSignatures;
+    const resolvedSignatures = signatures as unknown as NagaLocalSignatures;
 
     return createWithEnv(
       new NagaLocalEnvironment({

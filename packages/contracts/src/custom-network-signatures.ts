@@ -235,12 +235,8 @@ export async function generateSignaturesFromContext(
   options: GenerateSignaturesOptions
 ): Promise<void> {
   try {
-    const {
-      signatures,
-      networkName,
-      resolvedJsonPath,
-      baseDirectory,
-    } = buildSignaturesFromContext(options);
+    const { signatures, networkName, resolvedJsonPath, baseDirectory } =
+      buildSignaturesFromContext(options);
 
     const outputDir = options.outputDir ?? './dist/signatures';
     const resolvedOutputDir = resolvePath(outputDir, baseDirectory, true);
