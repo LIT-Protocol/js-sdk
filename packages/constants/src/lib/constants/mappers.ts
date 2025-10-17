@@ -1,4 +1,4 @@
-import { nagaDev } from '@lit-protocol/contracts';
+import { nagaDev, nagaStaging, nagaTest } from '@lit-protocol/contracts';
 
 import {
   LIT_NETWORK,
@@ -12,23 +12,12 @@ import {
  */
 export const NETWORK_CONTEXT_BY_NETWORK: Record<
   LIT_NETWORK_VALUES,
-  typeof nagaDev | undefined
+  typeof nagaDev | typeof nagaTest | typeof nagaStaging | undefined
 > = {
   [LIT_NETWORK.NagaDev]: nagaDev,
+  [LIT_NETWORK.NagaTest]: nagaTest,
+  [LIT_NETWORK.NagaStaging]: nagaStaging,
   [LIT_NETWORK.Custom]: undefined,
-} as const;
-
-/**
- * Whether to overwrite the IPFS code for a given network.
- * This is useful when the nodes are not able to connect to the IPFS gateway,
- * so the sdk can fallback to these gateways.
- */
-export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
-  boolean
-> = {
-  [LIT_NETWORK.NagaDev]: false,
-  [LIT_NETWORK.Custom]: false,
 } as const;
 
 /**

@@ -1,4 +1,4 @@
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
+
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
@@ -39,10 +39,7 @@ export async function exportPrivateKeyWithLitAction(
       dataToEncryptHash,
       accessControlConditions,
     },
-    ipfsOptions: {
-      overwriteCode:
-        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
-    },
+
   });
 
   const decryptedPrivateKey = postLitActionValidation(result);

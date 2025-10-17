@@ -1,4 +1,4 @@
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
+
 import {
   AccessControlConditions,
   ILitNodeClient,
@@ -48,10 +48,7 @@ export async function signTransactionWithLitAction({
       accessControlConditions,
       versionedTransaction,
     },
-    ipfsOptions: {
-      overwriteCode:
-        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
-    },
+
   });
 
   return postLitActionValidation(result);
