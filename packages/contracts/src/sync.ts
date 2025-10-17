@@ -367,6 +367,13 @@ ${signatureExports
  * This file is auto-generated. DO NOT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING.
  */
 
+// Define lazy getters so requiring the CJS root does not eagerly load all ABIs
+function __defineLazy(target, key, getter) {
+  Object.defineProperty(target, key, { enumerable: true, configurable: true, get: getter });
+}
+
+const __exports = {};
+
 ${exports
   .map((line) => {
     if (line.startsWith('//')) return line;
@@ -377,7 +384,7 @@ ${exports
       .replace(';', '')
       .replace(/["']/g, '')
       .replace('.ts', '');
-    return `const ${varName} = require("${importPath}.cjs");`;
+    return `__defineLazy(__exports, "${varName}", () => require("${importPath}.cjs"));`;
   })
   .join('\n')}
 
@@ -391,13 +398,11 @@ ${signatureExports
       .replace(';', '')
       .replace(/["']/g, '')
       .replace('.ts', '');
-    return `const ${varName} = require("${importPath}.cjs").signatures;`;
+    return `__defineLazy(__exports, "${varName}", () => require("${importPath}.cjs").signatures);`;
   })
   .join('\n')}
 
-module.exports = {
-${moduleNames.map((name) => `  ${name},`).join('\n')}
-};
+module.exports = __exports;
 `;
 
   fs.writeFileSync('./dist/index.d.ts', tsContent);
