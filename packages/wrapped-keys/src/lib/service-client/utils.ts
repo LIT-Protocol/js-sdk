@@ -17,9 +17,8 @@ function composeAuthHeader(sessionSig: AuthSig) {
 }
 
 const supportedNetworks: SupportedNetworks[] = [
-  'datil-dev',
-  'datil-test',
-  'datil',
+  'naga-dev',
+  'naga-test'
 ];
 
 function isSupportedLitNetwork(
