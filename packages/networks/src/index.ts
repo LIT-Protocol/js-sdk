@@ -54,3 +54,5 @@ export type { PkpIdentifierRaw } from './networks/vNaga/shared/managers/LitChain
 export { getMaxPricesForNodeProduct } from './networks/vNaga/shared/managers/pricing-manager/getMaxPricesForNodeProduct';
 export { getUserMaxPrice } from './networks/vNaga/shared/managers/pricing-manager/getUserMaxPrice';
 export { PRODUCT_IDS } from './networks/vNaga/shared/managers/pricing-manager/constants';
+export { PricingContextSchema } from './networks/vNaga/shared/managers/pricing-manager/schema';
+export { issueSessionFromContext } from './networks/vNaga/shared/managers/session-manager/issueSessionFromContext';
