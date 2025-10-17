@@ -9,11 +9,7 @@ import {
 } from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
 import { AuthData } from '@lit-protocol/schemas';
-import {
-  AuthMethod,
-  AuthSig,
-  BaseSiweMessage,
-} from '@lit-protocol/types';
+import { AuthMethod, AuthSig, BaseSiweMessage } from '@lit-protocol/types';
 import { GetWalletClientReturnType } from '@wagmi/core';
 import { getAddress, Hex, keccak256, stringToBytes, WalletClient } from 'viem';
 import { fetchBlockchainData } from './helper/fetchBlockchainData';
