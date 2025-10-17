@@ -1,24 +1,4 @@
-import { nagaDev, nagaStaging, nagaTest } from '@lit-protocol/contracts';
-
-import {
-  LIT_NETWORK,
-  LIT_NETWORK_VALUES,
-  ConstantKeys,
-  ConstantValues,
-} from './constants';
-
-/**
- * Mapping of network context by network value.
- */
-export const NETWORK_CONTEXT_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
-  typeof nagaDev | typeof nagaTest | typeof nagaStaging | undefined
-> = {
-  [LIT_NETWORK.NagaDev]: nagaDev,
-  [LIT_NETWORK.NagaTest]: nagaTest,
-  [LIT_NETWORK.NagaStaging]: nagaStaging,
-  [LIT_NETWORK.Custom]: undefined,
-} as const;
+import { ConstantKeys, ConstantValues } from './constants';
 
 /**
  * Product IDs used for price feed and node selection
