@@ -125,7 +125,32 @@ export const init = async (
 
   // Dynamic import of network module
   const networksModule = await import('@lit-protocol/networks');
-  const _baseNetworkModule = networksModule[config.importName];
+  let _baseNetworkModule = networksModule[config.importName];
+
+  if (_network === 'naga-local') {
+    const localContextPath = process.env['NAGA_LOCAL_CONTEXT_PATH'];
+    if (localContextPath) {
+      const withLocalContext = (_baseNetworkModule as any)?.withLocalContext;
+
+      if (typeof withLocalContext === 'function') {
+        const localContextName = process.env['NAGA_LOCAL_CONTEXT_NAME'];
+
+        console.log(
+          '✅ Loading naga-local signatures from NAGA_LOCAL_CONTEXT_PATH:',
+          localContextPath
+        );
+
+        _baseNetworkModule = await withLocalContext({
+          networkContextPath: localContextPath,
+          networkName: localContextName,
+        });
+      } else {
+        console.warn(
+          '⚠️ NAGA_LOCAL_CONTEXT_PATH is set but nagaLocal.withLocalContext is unavailable in the current networks build.'
+        );
+      }
+    }
+  }
 
   // Optional RPC override from env
   const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];

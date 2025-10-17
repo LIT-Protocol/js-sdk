@@ -3,7 +3,7 @@ import * as chainInfo from '../../../../chains/Anvil';
 import { NAGA_ENDPOINT } from '../../shared/managers/endpoints-manager/endpoints';
 import type { NagaEndpointsType } from '../../shared/managers/endpoints-manager/endpoints';
 import { BaseNetworkEnvironment } from '../base/BaseNetworkEnvironment';
-import { signatures } from './generated/naga-develop';
+import { signatures as defaultSignatures } from './generated/naga-develop';
 
 const NETWORK = 'custom';
 const PROTOCOL = 'http://'; // Note: Different from dev/staging
@@ -15,16 +15,20 @@ export interface NagaLocalSpecificConfigs {
   privateKey?: Hex; // Note: Local has private key config
 }
 
-export type NagaLocalSignatures = typeof signatures;
+export type NagaLocalSignatures = typeof defaultSignatures;
 
 export class NagaLocalEnvironment extends BaseNetworkEnvironment<
   NagaLocalSignatures,
   NagaLocalSpecificConfigs
 > {
-  constructor(options?: { rpcUrlOverride?: string }) {
+  constructor(options?: {
+    rpcUrlOverride?: string;
+    signatures?: NagaLocalSignatures;
+  }) {
+    const resolvedSignatures = options?.signatures ?? defaultSignatures;
     super({
       network: NETWORK,
-      abiSignatures: signatures, // Note: Uses locally generated signatures
+      abiSignatures: resolvedSignatures, // Note: Uses locally generated signatures
       networkSpecificConfigs: {
         realmId: DEFAULT_REALM_ID,
         privateKey: chainInfo.DEV_PRIVATE_KEY, // Note: Includes private key
