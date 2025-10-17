@@ -4,6 +4,7 @@ import {
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
 import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
+import type { NagaLocalModule } from '@lit-protocol/networks';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
@@ -130,9 +131,14 @@ export const init = async (
   if (_network === 'naga-local') {
     const localContextPath = process.env['NAGA_LOCAL_CONTEXT_PATH'];
     if (localContextPath) {
-      const withLocalContext = (_baseNetworkModule as any)?.withLocalContext;
+      const isNagaLocalModule = (
+        module: unknown
+      ): module is NagaLocalModule =>
+        !!module &&
+        typeof (module as { withLocalContext?: unknown }).withLocalContext ===
+          'function';
 
-      if (typeof withLocalContext === 'function') {
+      if (isNagaLocalModule(_baseNetworkModule)) {
         const localContextName = process.env['NAGA_LOCAL_CONTEXT_NAME'];
 
         console.log(
@@ -140,7 +146,9 @@ export const init = async (
           localContextPath
         );
 
-        _baseNetworkModule = await withLocalContext({
+        const nagaLocalModule: NagaLocalModule = _baseNetworkModule;
+
+        _baseNetworkModule = await nagaLocalModule.withLocalContext({
           networkContextPath: localContextPath,
           networkName: localContextName,
         });

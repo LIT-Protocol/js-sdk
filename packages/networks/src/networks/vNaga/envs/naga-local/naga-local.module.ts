@@ -6,6 +6,7 @@ import {
   nagaLocalEnvironment,
   type NagaLocalSignatures,
 } from './naga-local.env';
+import { signatures as defaultSignatures } from './generated/naga-develop';
 import type { ExpectedAccountOrWalletClient } from '../../shared/managers/contract-manager/createContractsManager';
 
 type NagaLocalContextOptions = {
@@ -13,6 +14,32 @@ type NagaLocalContextOptions = {
   networkName?: string;
   rpcUrlOverride?: string;
 };
+
+const REQUIRED_SIGNATURE_KEYS = Object.keys(
+  defaultSignatures
+) as (keyof NagaLocalSignatures)[];
+
+function assertIsNagaLocalSignatures(
+  value: unknown
+): asserts value is NagaLocalSignatures {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error('Generated signatures is not an object');
+  }
+
+  for (const key of REQUIRED_SIGNATURE_KEYS) {
+    const contract = (value as Record<string, unknown>)[key];
+    if (
+      typeof contract !== 'object' ||
+      contract === null ||
+      typeof (contract as { address?: unknown }).address !== 'string' ||
+      typeof (contract as { methods?: unknown }).methods !== 'object'
+    ) {
+      throw new Error(
+        `Generated signatures missing required contract metadata for ${key as string}`
+      );
+    }
+  }
+}
 
 const createChainManager = (
   env: NagaLocalEnvironment,
@@ -48,12 +75,12 @@ const buildModule = (env: NagaLocalEnvironment) => {
       networkName: networkName ?? 'naga-develop',
     });
 
-    const resolvedSignatures = signatures as unknown as NagaLocalSignatures;
+    assertIsNagaLocalSignatures(signatures);
 
     return createWithEnv(
       new NagaLocalEnvironment({
         rpcUrlOverride: rpcUrlOverride ?? env.getConfig().rpcUrl,
-        signatures: resolvedSignatures,
+        signatures,
       })
     );
   };
