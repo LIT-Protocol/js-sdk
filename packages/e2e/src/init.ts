@@ -131,6 +131,7 @@ export const init = async (
   if (_network === 'naga-local') {
     const localContextPath = process.env['NAGA_LOCAL_CONTEXT_PATH'];
     if (localContextPath) {
+      // Type guard: verify the module exposes withLocalContext so TypeScript narrows it to NagaLocal.
       const isNagaLocalModule = (
         module: unknown
       ): module is NagaLocalModule =>
