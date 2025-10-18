@@ -6,11 +6,11 @@ import { LIT_NETWORK_VALUES } from './constants';
 // import { datil, datilDev, datilTest } from '@lit-protocol/contracts';
 
 // @ts-ignore -- TypeScript can't resolve the subpath because this package compiles to CJS, but runtime bundlers can.
-import { datil as datilContext } from '@lit-protocol/contracts/prod/datil';
+import { datil as datilContext } from '@lit-protocol/contracts/prod/datil.js';
 // @ts-ignore -- see note above.
-import { datilDev as datilDevContext } from '@lit-protocol/contracts/prod/datil-dev';
+import { datilDev as datilDevContext } from '@lit-protocol/contracts/prod/datil-dev.js';
 // @ts-ignore -- see note above.
-import { datilTest as datilTestContext } from '@lit-protocol/contracts/prod/datil-test';
+import { datilTest as datilTestContext } from '@lit-protocol/contracts/prod/datil-test.js';
 
 type DatilContext = typeof datilContext;
 type DatilDevContext = typeof datilDevContext;
