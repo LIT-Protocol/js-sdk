@@ -14,7 +14,6 @@ type PregenDelegationParams = {
   authData: AuthData;
   pkpPublicKey: string;
   clientLitClient: LitClientInstance;
-  fallbackLitClient?: LitClientInstance;
   resolvedNetwork: ResolvedNetwork;
 };
 
@@ -27,10 +26,10 @@ export const createPregenDelegationServerReuseTest = (
       authData,
       pkpPublicKey,
       clientLitClient,
-      fallbackLitClient,
       resolvedNetwork,
     } = params;
 
+    // 1. Generate session key pair and delegation auth sig
     const sessionKeyPair = generateSessionKeyPair();
     const delegationAuthSig = await authManager.generatePkpDelegationAuthSig({
       pkpPublicKey,
@@ -47,6 +46,7 @@ export const createPregenDelegationServerReuseTest = (
       litClient: clientLitClient,
     });
 
+    // 2. Create envelope to send over the wire
     const envelope = JSON.stringify({
       pkpPublicKey,
       payload: Buffer.from(
@@ -55,6 +55,7 @@ export const createPregenDelegationServerReuseTest = (
       ).toString('base64url'),
     });
 
+    // 3. On server side, parse envelope and validate delegation auth sig
     const parsedEnvelope = JSON.parse(envelope) as {
       pkpPublicKey: string;
       payload: string;
@@ -72,15 +73,9 @@ export const createPregenDelegationServerReuseTest = (
       sessionKeyUri: decodedPayload.sessionKeyPair.publicKey,
     });
 
-    let litClient: LitClientInstance;
-
-    try {
-      litClient = await createLitClient({
-        network: resolvedNetwork.networkModule,
-      });
-    } catch {
-      litClient = fallbackLitClient ?? clientLitClient;
-    }
+    const litClient = await createLitClient({
+      network: resolvedNetwork.networkModule,
+    });
 
     const serverAuthManager = createAuthManager({
       storage: storagePlugins.localStorageNode({
@@ -90,6 +85,7 @@ export const createPregenDelegationServerReuseTest = (
       }),
     });
 
+    // 4. Recreate auth context on server side
     const authContext =
       await serverAuthManager.createPkpAuthContextFromPreGenerated({
         pkpPublicKey: parsedEnvelope.pkpPublicKey,
@@ -102,6 +98,8 @@ export const createPregenDelegationServerReuseTest = (
       pubKey: parsedEnvelope.pkpPublicKey,
       toSign: 'hello from server reuse',
     });
+
+    console.log('result:', result);
 
     expect(result).toBeTruthy();
   };

@@ -1,5 +1,5 @@
 import { initFast } from '../init';
-import { createPregenDelegationServerReuseTest } from '../tests/signSessionKey/pregen-delegation';
+import { createPregenDelegationServerReuseTest } from '../test-helpers/signSessionKey/pregen-delegation';
 
 describe('PKP Auth with Pre-generated Materials', () => {
   let ctx: Awaited<ReturnType<typeof initFast>>;
@@ -14,7 +14,6 @@ describe('PKP Auth with Pre-generated Materials', () => {
       authData: ctx.aliceViemAccountAuthData,
       pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
       clientLitClient: ctx.litClient,
-      fallbackLitClient: ctx.litClient,
       resolvedNetwork: ctx.resolvedNetwork,
     })());
 });
