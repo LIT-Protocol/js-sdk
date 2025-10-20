@@ -25,27 +25,31 @@ This method caches two components:
 <Steps>
   <Step title="Install the SDK">
 
-Run the following command to install the SDK:
+Run the following command to install the SDK and the required <code>viem</code> peer dependency:
 
 <CodeGroup>
 
 ```bash npm
-npm i @lit-protocol/auth
+npm i @lit-protocol/auth viem
 ```
 
 ```bash yarn
-yarn add @lit-protocol/auth
+yarn add @lit-protocol/auth viem
 ```
 
 ```bash pnpm
-pnpm add @lit-protocol/auth
+pnpm add @lit-protocol/auth viem
 ```
 
 ```bash bun
-bun add @lit-protocol/auth
+bun add @lit-protocol/auth viem
 ```
 
 </CodeGroup>
+
+<Note>
+  <code>viem</code> must be installed in your application because the SDK no longer bundles it.
+</Note>
   </Step>
   <Step title="Choose Storage Plugin">
     Choose the appropriate network based on your development stage and requirements, then create your Lit Client instance.

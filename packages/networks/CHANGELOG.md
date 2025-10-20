@@ -1,5 +1,16 @@
 # @lit-protocol/networks
 
+## 8.1.0
+
+### Minor Changes
+
+- 9d60bfa: Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
+
+### Patch Changes
+
+- Updated dependencies [9d60bfa]
+  - @lit-protocol/contracts@0.6.0
+
 ## 8.0.2
 
 ### Patch Changes
