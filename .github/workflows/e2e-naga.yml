@@ -56,9 +56,9 @@ jobs:
           # - environment: naga-staging
           #   network: naga-staging
           #   privateKey: LIVE_MASTER_ACCOUNT_NAGA_STAGING
-          - environment: naga-test
-            network: naga-test
-            privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
+          # - environment: naga-test
+          #   network: naga-test
+          #   privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
     env:
       LOG_LEVEL: debug2
       LIVE_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
