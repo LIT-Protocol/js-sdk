@@ -6,15 +6,18 @@ rss: true
 
 | Package | Latest version | Summary |
 | ------- | -------------- | ------- |
-| [@lit-protocol/lit-client](#lit-client) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Flit-client) | - |
-| [@lit-protocol/auth](#auth) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fauth) | - |
-| [@lit-protocol/networks](#networks) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fnetworks) | Updated dependencies |
+| [@lit-protocol/lit-client](#lit-client) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Flit-client) | Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually. |
+| [@lit-protocol/auth](#auth) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fauth) | Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually. |
+| [@lit-protocol/networks](#networks) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fnetworks) | Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually. |
+| [@lit-protocol/auth-services](#auth-services) | [2.0.3](https://www.npmjs.com/package/%40lit-protocol%2Fauth-services) | Updated dependencies |
 | [@lit-protocol/access-control-conditions](#access-control-conditions) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions) | - |
 | [@lit-protocol/access-control-conditions-schemas](#access-control-conditions-schemas) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions-schemas) | - |
-| [@lit-protocol/auth-helpers](#auth-helpers) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fauth-helpers) | - |
-| [@lit-protocol/constants](#constants) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fconstants) | Updated dependencies |
-| [@lit-protocol/contracts](#contracts) | [0.5.3](https://www.npmjs.com/package/%40lit-protocol%2Fcontracts) | release `naga-test` network support |
+| [@lit-protocol/artillery](#artillery) | [0.0.4](https://www.npmjs.com/package/%40lit-protocol%2Fartillery) | @lit-protocol/e2e@2.0.0 |
+| [@lit-protocol/auth-helpers](#auth-helpers) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fauth-helpers) | Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually. |
+| [@lit-protocol/constants](#constants) | [8.0.3](https://www.npmjs.com/package/%40lit-protocol%2Fconstants) | Updated dependencies |
+| [@lit-protocol/contracts](#contracts) | [0.6.0](https://www.npmjs.com/package/%40lit-protocol%2Fcontracts) | Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually. |
 | [@lit-protocol/crypto](#crypto) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fcrypto) | - |
+| [@lit-protocol/e2e](#e2e) | [2.0.0](https://www.npmjs.com/package/%40lit-protocol%2Fe2e) | Updated dependencies |
 | [@lit-protocol/logger](#logger) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Flogger) | - |
 | [@lit-protocol/schemas](#schemas) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fschemas) | - |
 | [@lit-protocol/types](#types) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Ftypes) | - |
@@ -24,38 +27,64 @@ rss: true
 
 <Update
   label="lit-client"
-  description="v8.0.2"
-  tags={["Release"]}
-  rss={{ title: "lit-client", description: "No release notes provided yet." }}
+  description="v8.1.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "lit-client", description: "Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually." }}
   id="lit-client"
 >
 
-  No release notes available.
+  ## Minor Changes
+
+  - Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
 </Update>
 
 <Update
   label="auth"
-  description="v8.0.2"
-  tags={["Release"]}
-  rss={{ title: "auth", description: "No release notes provided yet." }}
+  description="v8.1.0"
+  tags={["Minor Changes", "Patch Changes"]}
+  rss={{ title: "auth", description: "Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually." }}
   id="auth"
 >
 
-  No release notes available.
+  ## Minor Changes
+
+  - Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
+
+  ## Patch Changes
+
+  - Allows `WalletClientAuthenticator.authenticate` to build SIWE messages with user-specified fields (`domain`, `uri`, `statement`, etc.) while still managing the nonce internally.
 </Update>
 
 <Update
   label="networks"
-  description="v8.0.2"
-  tags={["Patch Changes"]}
-  rss={{ title: "networks", description: "Updated dependencies" }}
+  description="v8.1.0"
+  tags={["Minor Changes", "Patch Changes"]}
+  rss={{ title: "networks", description: "Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually." }}
   id="networks"
+>
+
+  ## Minor Changes
+
+  - Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
+
+  ## Patch Changes
+
+  - Updated dependencies
+  - @lit-protocol/contracts@0.6.0
+</Update>
+
+<Update
+  label="auth-services"
+  description="v2.0.3"
+  tags={["Patch Changes"]}
+  rss={{ title: "auth-services", description: "Updated dependencies" }}
+  id="auth-services"
 >
 
   ## Patch Changes
 
   - Updated dependencies
-  - @lit-protocol/contracts@0.5.3
+  - @lit-protocol/contracts@0.6.0
 </Update>
 
 <Update
@@ -81,19 +110,34 @@ rss: true
 </Update>
 
 <Update
+  label="artillery"
+  description="v0.0.4"
+  tags={["Patch Changes"]}
+  rss={{ title: "artillery", description: "@lit-protocol/e2e@2.0.0" }}
+  id="artillery"
+>
+
+  ## Patch Changes
+
+  - @lit-protocol/e2e@2.0.0
+</Update>
+
+<Update
   label="auth-helpers"
-  description="v8.0.2"
-  tags={["Release"]}
-  rss={{ title: "auth-helpers", description: "No release notes provided yet." }}
+  description="v8.1.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "auth-helpers", description: "Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually." }}
   id="auth-helpers"
 >
 
-  No release notes available.
+  ## Minor Changes
+
+  - Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
 </Update>
 
 <Update
   label="constants"
-  description="v8.0.2"
+  description="v8.0.3"
   tags={["Patch Changes"]}
   rss={{ title: "constants", description: "Updated dependencies" }}
   id="constants"
@@ -102,20 +146,20 @@ rss: true
   ## Patch Changes
 
   - Updated dependencies
-  - @lit-protocol/contracts@0.5.3
+  - @lit-protocol/contracts@0.6.0
 </Update>
 
 <Update
   label="contracts"
-  description="v0.5.3"
-  tags={["Patch Changes"]}
-  rss={{ title: "contracts", description: "release `naga-test` network support" }}
+  description="v0.6.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "contracts", description: "Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually." }}
   id="contracts"
 >
 
-  ## Patch Changes
+  ## Minor Changes
 
-  - release `naga-test` network support
+  - Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
 </Update>
 
 <Update
@@ -127,6 +171,23 @@ rss: true
 >
 
   No release notes available.
+</Update>
+
+<Update
+  label="e2e"
+  description="v2.0.0"
+  tags={["Patch Changes"]}
+  rss={{ title: "e2e", description: "Updated dependencies" }}
+  id="e2e"
+>
+
+  ## Patch Changes
+
+  - Updated dependencies
+  - Updated dependencies
+  - @lit-protocol/auth@8.1.0
+  - @lit-protocol/lit-client@8.1.0
+  - @lit-protocol/networks@8.1.0
 </Update>
 
 <Update

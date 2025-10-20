@@ -1,0 +1,12 @@
+---
+title: 'FAQ'
+description: 'Common questions about using the Lit JS SDK'
+---
+
+# Frequently Asked Questions
+
+## What's the default `responseStrategy` for `executeJs` in v8?
+
+The behavior matches v7. When you omit `responseStrategy`, the SDK calls `processLitActionResponseStrategy` with `{ strategy: 'leastCommon' }`. If you provide an unrecognized value, the helper still falls back to `leastCommon`.
+
+This default keeps compatibility with `Lit.Actions.runOnce`. Only the node that runs the `runOnce` block returns a value, so selecting the least-common response ensures that single result is preserved. When `runOnce` is not used, all nodes should emit the same payload, making least- vs most-common equivalent—the former stayed in place because it was the quickest path to enabling the new `runOnce` flow in v8.

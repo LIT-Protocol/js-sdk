@@ -3,6 +3,12 @@ title: "Introduction"
 description: "Explore our JS SDK for building applications with Lit Protocol"
 ---
 
+<Tip>
+Lit V1 ("Naga") is currently live on [testnet](https://spark.litprotocol.com/naga-test/). 
+
+If you're a builder looking to deploy your application in production, you can use Lit's V0 Mainnet Beta ("Datil"), already live today ([Link](https://developer.litprotocol.com/)).
+</Tip>
+
 # SDK Reference
 
 The Lit JS SDK provides a comprehensive toolkit for integrating Lit Protocol's decentralised authentication and cryptographic capabilities into your applications. This reference documentation covers all the methods, classes, and configuration options available in the SDK.
@@ -11,14 +17,14 @@ The Lit JS SDK provides a comprehensive toolkit for integrating Lit Protocol's d
 
 - **[Lit Client Setup](/sdk/getting-started/lit-client)**: Configure the Lit Protocol client
 - **[Auth Manager Setup](/sdk/getting-started/auth-manager)**: Set up authentication management with configurable storage options
-- **[Payment Manager Setup](/sdk/getting-started/payment-setup)**: Configure payment processing capabilities
+- **[Payment Manager Setup](/sdk/getting-started/payment-manager-setup)**: Configure payment processing capabilities
 - **[Auth Services Setup](/sdk/getting-started/auth-services)**: Configure auth services
 
 ### 2. Authentication Options
 
 - **[PKP Native Authentication](/sdk/auth/pkp-native-auth)**: Programmable Key Pair native authentication options
 - **[PKP Custom Authentication](/sdk/auth/pkp-custom-auth)**: Custom PKP authentication implementations
-- **[EOA Authentication](/sdk/auth/eoa-auth)**: Externally Owned Account authentication
+- **[EOA Authentication](/sdk/auth/eoa/eoa-auth)**: Externally Owned Account authentication
 
 ### 3. Auth Context Consumption / Core API Methods
 
@@ -31,3 +37,7 @@ The Lit JS SDK provides a comprehensive toolkit for integrating Lit Protocol's d
 - **[PKP Permissions](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-permissions)**: - Manage PKP permissions
 - **[PKP Viem Account](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-viem-account)**: - Manage PKP Viem account
 - **[PKP View Helpers](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-view-helpers)**: - View PKP permissions
+
+### 5. Network Status & Monitoring
+
+- **[Network Status](/sdk/resources/network-status)**: - Monitor real-time uptime and performance of Lit Protocol networks

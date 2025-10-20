@@ -1,4 +1,3 @@
-import { t } from 'elysia';
 import { z } from 'zod';
 import {
   toBigInt,
@@ -19,18 +18,3 @@ export const ClaimRequestSchema = z.object({
 // 2. Transformed/Validated Type - this is the type after the user input has been transformed and validated. Usually used for smart contract calls or external API calls (such as communication with nodes). (e.g., BigInt, etc.)
 export type ClaimRequestRaw = z.input<typeof ClaimRequestSchema>;
 export type ClaimRequestTransformed = z.infer<typeof ClaimRequestSchema>;
-
-// ✨ Elysia Schema
-export const tClaimRequestSchema = t.Object({
-  derivedKeyId: t.String(),
-  signatures: t.Array(
-    t.Object({
-      r: t.String(),
-      s: t.String(),
-      v: t.Number(),
-    })
-  ),
-  authMethodType: t.Number(),
-  authMethodId: t.String(),
-  authMethodPubkey: t.String(),
-});

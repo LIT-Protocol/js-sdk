@@ -1,5 +1,12 @@
 # @lit-protocol/constants
 
+## 8.0.3
+
+### Patch Changes
+
+- Updated dependencies [9d60bfa]
+  - @lit-protocol/contracts@0.6.0
+
 ## 8.0.2
 
 ### Patch Changes
