@@ -42,7 +42,7 @@
     "@lit-protocol/lit-client": "workspace:*",
     "@lit-protocol/networks": "workspace:*",
     "@lit-protocol/schemas": "workspace:*",
-    "viem": "2.29.4"
+    "viem": "2.38.x"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -33,8 +33,10 @@
     "ethers": "^5.7.1",
     "siwe": "^2.3.2",
     "siwe-recap": "0.0.2-alpha.0",
-    "viem": "2.29.4",
     "zod": "3.24.3",
     "@ethersproject/transactions": "5.7.0"
+  },
+  "peerDependencies": {
+    "viem": "2.38.x"
   }
 }
