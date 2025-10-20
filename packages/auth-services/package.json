@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/auth-services",
-  "version": "2.0.2",
+  "version": "8.0.2",
   "license": "MIT",
   "type": "commonjs",
   "main": "./src/index.js",
@@ -29,7 +29,7 @@
     "redis": "^4.6.13",
     "stytch": "^12.4.0",
     "tslib": "^2.8.1",
-    "viem": "2.29.4",
+    "viem": "2.38.x",
     "wagmi": "^2.14.11",
     "zod": "^3.24.3",
     "zod-validation-error": "3.4.0"

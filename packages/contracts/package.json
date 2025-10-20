@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/contracts",
-  "version": "0.5.3",
+  "version": "8.0.2",
   "license": "MIT",
   "homepage": "https://github.com/LIT-Protocol/js-sdk",
   "repository": {
@@ -160,7 +160,7 @@
     "tsx": "^4.20.5",
     "typechain": "^8.3.2",
     "typescript": "^5.8.3",
-    "viem": "2.29.4",
+    "viem": "2.38.x",
     "zod": "^3.24.3"
   },
   "peerDependencies": {
