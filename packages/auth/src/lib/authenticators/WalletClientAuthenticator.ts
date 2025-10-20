@@ -9,7 +9,7 @@ import {
 } from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
 import { AuthData } from '@lit-protocol/schemas';
-import { AuthMethod, AuthSig } from '@lit-protocol/types';
+import { AuthMethod, AuthSig, BaseSiweMessage } from '@lit-protocol/types';
 import { GetWalletClientReturnType } from '@wagmi/core';
 import { getAddress, Hex, keccak256, stringToBytes, WalletClient } from 'viem';
 import { fetchBlockchainData } from './helper/fetchBlockchainData';
@@ -17,6 +17,10 @@ import { fetchBlockchainData } from './helper/fetchBlockchainData';
 const _logger = getChildLogger({
   module: 'WalletClientAuthenticator',
 });
+
+export type WalletClientAuthenticateOverrides = Partial<
+  Omit<BaseSiweMessage, 'walletAddress' | 'nonce'>
+>;
 
 export class WalletClientAuthenticator {
   public readonly type = 'walletClient';
@@ -42,16 +46,30 @@ export class WalletClientAuthenticator {
     });
   }
 
+  /**
+   * Generate an AuthSig for the connected wallet. Provide a full message to sign via `messageToSign`,
+   * or let the helper build one while overriding specific SIWE fields with `siweMessageOverrides`.
+   */
   static async authenticate(
     account: GetWalletClientReturnType | WalletClient,
-    messageToSign?: string
+    messageToSign?: string,
+    siweMessageOverrides?: WalletClientAuthenticateOverrides
   ): Promise<AuthData> {
     let _toSign = messageToSign;
 
     if (!_toSign) {
-      _toSign = await createSiweMessage({
+      const restOverrides = siweMessageOverrides ?? {};
+
+      const nonce = await fetchBlockchainData();
+
+      const siweParams: BaseSiweMessage = {
         walletAddress: account.account!.address,
-        nonce: await fetchBlockchainData(),
+        nonce,
+        ...restOverrides,
+      };
+
+      _toSign = await createSiweMessage({
+        ...siweParams,
       });
     }
 

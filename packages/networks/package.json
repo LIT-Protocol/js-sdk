@@ -28,15 +28,17 @@
     "node-localstorage": "3.0.5",
     "pino": "9.6.0",
     "pino-caller": "4.0.0",
-    "viem": "2.29.4",
     "zod": "3.24.3",
     "@noble/hashes": "1.8.0"
+  },
+  "peerDependencies": {
+    "viem": "2.38.x"
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [
     "universal"
   ],
-  "version": "8.0.2",
+  "version": "8.1.0",
   "main": "./index.js",
   "typings": "./index.d.ts",
   "types": "./index.d.ts"

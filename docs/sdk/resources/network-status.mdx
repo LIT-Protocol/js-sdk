@@ -1,0 +1,109 @@
+---
+title: Network Status & Health Monitoring
+---
+
+# Network Status
+
+Monitor the real-time health and uptime of Lit Protocol's core network endpoints across different environments.
+
+## Status Pages
+
+### Development Network
+
+**[Naga Dev Network Status](https://uptime.getlit.dev/naga-dev)**
+
+Live monitoring dashboard for the development network, tracking real-time metrics for all core SDK operations.
+
+### Test Network
+
+**[Naga Test Network Status](https://uptime.getlit.dev/naga-test)**
+
+Live monitoring dashboard for the test network, providing visibility into network health and performance.
+
+## Monitored Operations
+
+These dashboards track the uptime and performance of core SDK methods:
+
+| Operation          | Description                                          |
+| ------------------ | ---------------------------------------------------- |
+| **decrypt**        | Decryption operations for encrypted data             |
+| **executeJs**      | JavaScript execution in Lit Actions                  |
+| **handshake**      | Node handshake and connection establishment          |
+| **pkpSign**        | PKP signing operations for transactions and messages |
+| **signSessionKey** | Session key signing for authentication               |
+
+## Programmatic Access
+
+<Warning>
+**Experimental Feature**: The Lit Status SDK is currently in active development and should be considered experimental. APIs and features may change without notice.
+</Warning>
+
+You can access network metrics programmatically using the [Lit Status SDK](https://uptime-docs.vercel.app/docs/sdk) for read-only monitoring and analytics.
+
+### Prerequisites
+
+To access the Status API, you'll need a read-only API key. Request access by filling out the [Lit Protocol Contact Form](https://docs.google.com/forms/d/e/1FAIpQLScBVsg-NhdMIC1H1mozh2zaVX0V4WtmEPSPrtmqVtnj_3qqNw/viewform).
+
+### Installation
+
+```bash
+npm install @lit-protocol/lit-status-sdk
+```
+
+### Example Usage
+
+```typescript
+import { createLitStatusClient } from '@lit-protocol/lit-status-sdk';
+
+(async () => {
+  const client = createLitStatusClient({
+    url: process.env.API_URL,
+    apiKey: process.env.READ_KEY,
+  });
+
+  // Get available filter options
+  const filterOptions = await client.getFilterOptions();
+  console.log('Available networks:', filterOptions.networks);
+  console.log('Available functions:', filterOptions.functions);
+
+  // Register and retrieve function references
+  const functions = await client.getOrRegisterFunctions({
+    network: 'naga-dev',
+    product: 'js-sdk/naga',
+    functions: ['executeJs', 'pkpSign', 'decrypt'],
+  });
+
+  // Get recent metrics for a specific function
+  const executeJsMetrics = await client.getFunctionMetrics(
+    functions['executeJs'].id,
+    {
+      startDate: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+      endDate: new Date(),
+    }
+  );
+
+  console.log('ExecuteJs Metrics:', {
+    uptime: `${executeJsMetrics.uptime}%`,
+    successRate: `${executeJsMetrics.successRate}%`,
+    avgResponseTime: `${executeJsMetrics.averageResponseTime}ms`,
+    totalExecutions: executeJsMetrics.totalExecutions,
+  });
+
+  // Get time-series data for charting
+  const timeSeries = await client.getFunctionMetricsTimeSeries(
+    functions['executeJs'].id,
+    {
+      startDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      endDate: new Date(),
+    },
+    'hour'
+  );
+
+  timeSeries.buckets.forEach((bucket) => {
+    console.log(
+      `${bucket.timestamp}: ${bucket.successRate}% success, ` +
+        `${bucket.averageResponseTime}ms avg`
+    );
+  });
+})();
+```

@@ -55,7 +55,7 @@
     "syncpack": "13.0.4",
     "tslib": "2.8.1",
     "uint8arrays": "4.0.3",
-    "viem": "2.29.4",
+     "viem": "2.38.x",
     "wagmi": "2.15.4",
     "zod": "3.24.3",
     "zod-validation-error": "3.4.0"
