@@ -125,6 +125,12 @@
               "sdk/resources/supported-evm-chains",
               "sdk/resources/network-status"
             ]
+          },
+          {
+            "group": "FAQ",
+            "pages": [
+              "faqs/index"
+            ]
           }
         ]
       },

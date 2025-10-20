@@ -41,11 +41,21 @@ description: "Externally Owned Account (EOA) authentication uses your existing E
 Use the WalletClientAuthenticator/ViemAccountAuthenticator to authenticate your connected wallet and generate auth data.
 
   <CodeGroup>
-    ```ts wagmi
+```ts wagmi
 import { WalletClientAuthenticator } from '@lit-protocol/auth';
 
 const authData = await WalletClientAuthenticator.authenticate(walletClient);
-    ```
+
+// Override SIWE fields (e.g., when running on production domains)
+const authDataForProd = await WalletClientAuthenticator.authenticate(
+  walletClient,
+  undefined,
+  {
+    domain: 'example.com',
+    uri: 'https://example.com/login',
+  }
+);
+```
 
     ```ts viem/accounts
 import { ViemAccountAuthenticator } from '@lit-protocol/auth';

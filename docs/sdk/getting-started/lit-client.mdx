@@ -13,28 +13,31 @@ The Lit Client is the core interface for interacting with the Lit Protocol netwo
 
 <Steps>
   <Step title="Install the SDK">
-    Run the following command to install the SDK:
+    Run the following command to install the SDK and the required <code>viem</code> peer dependency:
 
     <CodeGroup>
 
     ```bash npm
-    npm i @lit-protocol/lit-client @lit-protocol/networks
+    npm i @lit-protocol/lit-client @lit-protocol/networks viem
     ```
 
     ```bash yarn
-    yarn add @lit-protocol/lit-client @lit-protocol/networks
+    yarn add @lit-protocol/lit-client @lit-protocol/networks viem
     ```
 
     ```bash pnpm
-    pnpm add @lit-protocol/lit-client @lit-protocol/networks
+    pnpm add @lit-protocol/lit-client @lit-protocol/networks viem
     ```
 
     ```bash bun
-    bun add @lit-protocol/lit-client @lit-protocol/networks
+    bun add @lit-protocol/lit-client @lit-protocol/networks viem
     ```
 
     </CodeGroup>
 
+    <Note>
+      <code>viem</code> is not bundled with the SDK. Ensure your application supplies a compatible version.
+    </Note>
   </Step>
 
   <Step title="Network Configuration & Client Creation">
