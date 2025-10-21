@@ -109,7 +109,7 @@ If your app previously minted Capacity Credits and handed users a `CapacityDeleg
    - **Manual (no Auth Service)** – generate a wallet yourself (e.g. `privateKeyToAccount`) and store the private key securely; you’ll call the Payment Manager directly in the next step.
 3. **Delegate end-user addresses** – map users to the payer:
    - Using an Auth Service: POST to `authService.add-users`.
-   - Manual route: call `paymentManager.delegatePayments*` with your server-side account; this writes to the same Payment Delegation contract.
+   - Manual route: call `paymentManager.delegatePayments` (for a single user) or `paymentManager.delegatePaymentsBatch` (for multiple users) with your server-side account; this writes to the same Payment Delegation contract.
 
 <Note>
   For production environments we recommend running your own Auth Service (self-hosted) so you retain full custody over the `LIT_DELEGATION_ROOT_MNEMONIC` and derivation secrets. The Lit-hosted Auth Service is handy for prototypes and quick starts, but you still remain responsible for storing the returned `payerSecretKey` securely.
