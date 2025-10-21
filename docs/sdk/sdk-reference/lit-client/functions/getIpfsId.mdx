@@ -1,0 +1,32 @@
+---
+title: getIpfsId
+description: Generate CIDv0 hashes with the Lit Client IPFS helper
+---
+
+## Overview
+
+`getIpfsId` is an optional helper exported via `@lit-protocol/lit-client/ipfs`. It produces CIDv0 IPFS identifiers identical to the Lit SDK v7 utility while remaining fully tree-shakeable from the main client bundle.
+
+## Usage
+
+```ts
+import { getIpfsId } from '@lit-protocol/lit-client/ipfs';
+
+const cid = await getIpfsId('console.log("hello lit")');
+// cid === 'Qm...'
+```
+
+## Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| input | `string` | Source content to hash. Mirrors the v7 helper contract by accepting plain strings. |
+
+## Returns
+
+- `Promise<\`Qm${string}\`>` – A CIDv0 string beginning with `Qm`.
+
+## Notes
+
+- The helper delegates to the same hashing routine used in v7 (`typestub-ipfs-only-hash`) and can be imported without pulling the entire Lit Client into your bundle.
+- If you need to hash binary data, convert it to a string representation (for example, base64) before passing it to `getIpfsId`.
