@@ -31,7 +31,7 @@ const toUint8Array = (value: ArrayBuffer | ArrayBufferView): Uint8Array => {
 const normalizeInput = (input: SupportedInput): Uint8Array => {
   // Accommodate all portable input shapes while keeping the helper tree-shakeable and browser-friendly.
   if (typeof input === 'string') {
-    return toUint8Array(encodeString(input));
+    return encodeString(input);
   }
 
   if (input instanceof Uint8Array) {
