@@ -102,7 +102,7 @@ console.log(`Deposit successful: ${result.hash}`);
 
 If your app previously minted Capacity Credits and handed users a `CapacityDelegationAuthSig`, the equivalent Naga flow is:
 
-1. **Fund a payer wallet** – call `litClient.getPaymentManager({ account })` and deposit $LITKEY ($tstLPX in testnet) into the ledger contract (see examples above).
+1. **Fund a payer wallet** – call `litClient.getPaymentManager({ account })` and deposit `$LITKEY` (`$tstLPX` in testnet) into the ledger contract (see examples above).
 2. **Register the payer** – decide how you want to provision and operate the sponsor wallet:
    - **Lit-hosted Auth Service** – call `authService.registerPayer`; Lit derives the wallet + `payerSecretKey` for you (ideal for prototypes).
    - **Self-hosted Auth Service** – deploy the open-source service (see [Auth Services setup](/sdk/getting-started/auth-services)) so derivation stays within your infrastructure. You’ll supply your own `LIT_DELEGATION_ROOT_MNEMONIC`.
@@ -165,7 +165,7 @@ const response = await litClient.decrypt({
 Behind the scenes the SDK:
 
 - Builds a pricing context during handshake (product, per-node prices, threshold).
-- Encrypts requests per node using the JIT keyset.
+- Encrypts requests per node using the keyset.
 - Emits per-node max price in the session signature.
 - Lets the validators call `Ledger.chargeUser` against the delegated payer wallet.
 
@@ -177,7 +177,7 @@ Leverage the hosted Auth Service to manage delegation without exposing private k
 - Call `authService.delegateUsers` (`/add-users`) to sponsor a list of user addresses.
 - Or skip the service entirely and use the Payment Manager methods directly (example below).
 
-> The legacy capacity-credit minting flow has been removed. Payment delegation now interacts directly with the Payment Manager contracts.
+> The legacy (V7, Datil) capacity-credit minting flow has been removed. Payment delegation now interacts directly with the Payment Manager contracts.
 
 ```typescript
 import { createLitClient } from '@lit-protocol/lit-client';
@@ -214,5 +214,3 @@ console.log('Delegation submitted with tx hash:', delegateResponse.txHash);
 ### How the Auth Service derives payer wallets
 
 - For hosted or self-hosted deployments, see the derivation and rotation notes in the [Auth Services guide](/sdk/getting-started/auth-services#payment-delegation-apis). Manual deployments can always provision and delegate entirely via the `PaymentManager` helper without touching these endpoints.
-
-![](https://www.plantuml.com/plantuml/png/XPAn3jCm48PtFyMfKw8IiKSAQcab1a1K58c1CXpEaLWaJcHVIlFs6DkKcBHYYy-Vl_Floyuo6fxwJh3YZc0_SGjdCbSb2KuuzwGPZjHHWwm6BSJeS2NLYAw-ENJAxMy0BOJFT7ifyz3lGbodv3l5qG3lKMD3nlFn-ndh6RTyr3lSFTN5MYo96Xc_eINOh8F2OT1iKFeUzuKGLGKVgL6MoS28CnceAX5lNhnQ1YpXzE7y2LwQY1SUl-ZiLk2eYXyqvsA1hqw_8Kq6cKARCqb3VD57CkfAy1ExZXY-cw67NbC_Q2LX2quCJfnwdJXSi0ogp_xilguDMNlH2_rRcdt2-0m4aoLZ_viGwxhmv3BSYz2iiDuSAXxwydMLEmwaX8RYBBDSnABR_plY4fmCcToZEbUgMM1Ub0uxGoc7INCk0XNJf509Ibj6pGfvPVyNhUCZnRfzZIpRp4VCHGgxu_TVo1zSlAxuim75WoPy0qEIrCWhPJeBZxPeswUpjvEKP2rix-IET3trtIy0)
