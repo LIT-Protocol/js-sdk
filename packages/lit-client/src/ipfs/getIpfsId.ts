@@ -35,7 +35,7 @@ const normalizeInput = (input: SupportedInput): Uint8Array => {
   }
 
   if (input instanceof Uint8Array) {
-    return toUint8Array(input);
+    return input;
   }
 
   if (typeof ArrayBuffer !== 'undefined') {
