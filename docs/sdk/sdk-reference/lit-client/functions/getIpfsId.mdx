@@ -14,13 +14,17 @@ import { getIpfsId } from '@lit-protocol/lit-client/ipfs';
 
 const cid = await getIpfsId('console.log("hello lit")');
 // cid === 'Qm...'
+
+const bytes = new TextEncoder().encode('console.log("hello lit")');
+const sameCid = await getIpfsId(bytes);
+// sameCid === cid
 ```
 
 ## Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| input | `string` | Source content to hash. Mirrors the v7 helper contract by accepting plain strings. |
+| input | `string \| Uint8Array \| ArrayBuffer \| ArrayBufferView` | Source content to hash. Strings are UTF-8 encoded automatically; buffers and typed views are accepted directly. |
 
 ## Returns
 
@@ -29,4 +33,4 @@ const cid = await getIpfsId('console.log("hello lit")');
 ## Notes
 
 - The helper delegates to the same hashing routine used in v7 (`typestub-ipfs-only-hash`) and can be imported without pulling the entire Lit Client into your bundle.
-- If you need to hash binary data, convert it to a string representation (for example, base64) before passing it to `getIpfsId`.
+- Binary payloads do not need to be stringified first—pass any `Uint8Array`, `ArrayBuffer`, or typed view directly and the helper will normalize it before hashing.
