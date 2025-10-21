@@ -127,6 +127,12 @@
             ]
           },
           {
+            "group": "Guides",
+            "pages": [
+              "guides/lit-action-sign-as-action"
+            ]
+          },
+          {
             "group": "FAQ",
             "pages": [
               "faqs/index"
