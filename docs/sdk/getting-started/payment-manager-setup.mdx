@@ -162,13 +162,6 @@ const response = await litClient.decrypt({
 });
 ```
 
-Behind the scenes the SDK:
-
-- Builds a pricing context during handshake (product, per-node prices, threshold).
-- Encrypts requests per node using the keyset.
-- Emits per-node max price in the session signature.
-- Lets the validators call `Ledger.chargeUser` against the delegated payer wallet.
-
 ## Auth Service API Endpoints
 
 Leverage the hosted Auth Service to manage delegation without exposing private keys in your application. Full request/response details live in the [Auth Services setup guide](/sdk/getting-started/auth-services#payment-delegation-apis). In practice you will:
@@ -186,8 +179,8 @@ import { nagaTest } from '@lit-protocol/networks';
 // 1. Create the Lit client for the naga-test environment
 const litClient = await createLitClient({ network: nagaTest });
 
-const authServiceBaseUrl = 'https://naga-test-auth-service.example.com';
-const apiKey = process.env.LIT_API_KEY!;
+const authServiceBaseUrl = 'https://naga-test-auth-service.getlit.dev/';
+const apiKey = process.env.YOUR_AUTH_SERVICE_API_KEY!;
 
 // 3. Register a payer wallet (store the secret securely server-side)
 const registerResponse = await litClient.authService.registerPayer({
