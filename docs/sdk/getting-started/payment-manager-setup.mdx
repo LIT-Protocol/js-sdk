@@ -158,7 +158,7 @@ const response = await litClient.decrypt({
   unifiedAccessControlConditions: accs,
   authContext,
   chain: 'ethereum',
-  userMaxPrice: BigInt('200000000000000000'), // optional guardrail
+  userMaxPrice: 1000000000000000000n, // required for sponsored sessions, typically the same value as the restriction the sponsor set; optional guardrail when self-funded
 });
 ```
 
