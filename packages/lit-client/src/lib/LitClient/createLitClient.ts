@@ -919,7 +919,7 @@ export const _createNagaLitClient = async (
       pkpPublicKey: string | Hex;
       authContext: AuthContextSchema2;
       chainConfig: Chain;
-      userMaxPrice?: bigint
+      userMaxPrice?: bigint;
     }) => {
       const _pkpPublicKey = HexPrefixedSchema.parse(params.pkpPublicKey);
 
