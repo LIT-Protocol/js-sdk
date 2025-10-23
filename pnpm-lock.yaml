@@ -50,14 +50,11 @@ importers:
       '@simplewebauthn/typescript-types':
         specifier: ^7.0.0
         version: 7.4.0
-      '@solana/keys':
-        specifier: 4.0.0
-        version: 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/kit':
-        specifier: ^4.0.0
+        specifier: 4.0.0
         version: 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/web3.js':
-        specifier: ^1.98.4
+        specifier: 1.98.4
         version: 1.98.4(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@wagmi/core':
         specifier: ^2.17.1
