@@ -1,5 +1,12 @@
-import { PKPAuthContextSchema, EoaAuthContextSchema } from '@lit-protocol/schemas';
-import { AuthSig, LitActionResponseStrategy, NagaJitContext } from '@lit-protocol/types';
+import {
+  PKPAuthContextSchema,
+  EoaAuthContextSchema,
+} from '@lit-protocol/schemas';
+import {
+  AuthSig,
+  LitActionResponseStrategy,
+  NagaJitContext,
+} from '@lit-protocol/types';
 import { z } from 'zod';
 import { PricingContextSchema } from '../../pricing-manager/schema';
 import { ConnectionInfo } from '../../LitChainClient/types';

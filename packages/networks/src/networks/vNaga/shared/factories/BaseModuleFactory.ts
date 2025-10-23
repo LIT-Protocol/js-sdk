@@ -577,7 +577,10 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
 
           // Generate or reuse session sigs
           let sessionSigs: Record<string, AuthSig>;
-          if (params.sessionSigs && Object.keys(params.sessionSigs).length > 0) {
+          if (
+            params.sessionSigs &&
+            Object.keys(params.sessionSigs).length > 0
+          ) {
             sessionSigs = params.sessionSigs;
           } else {
             if (!params.authContext) {
@@ -1068,7 +1071,10 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           executeJsResponseStrategy = params.responseStrategy;
 
           let sessionSigs: Record<string, AuthSig>;
-          if (params.sessionSigs && Object.keys(params.sessionSigs).length > 0) {
+          if (
+            params.sessionSigs &&
+            Object.keys(params.sessionSigs).length > 0
+          ) {
             sessionSigs = params.sessionSigs;
           } else {
             if (!params.authContext) {

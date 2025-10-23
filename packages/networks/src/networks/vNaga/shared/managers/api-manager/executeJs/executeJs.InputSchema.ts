@@ -63,18 +63,17 @@ const ExecuteJsInputWithAuthContextSchema = ExecuteJsSharedFieldsSchema.extend({
   sessionSigs: z.never().optional(),
 });
 
-const ExecuteJsInputWithSessionSigsSchema =
-  ExecuteJsSharedFieldsSchema.extend({
-    /**
-     * Pre-generated session signatures; when provided, authContext must be omitted.
-     */
-    sessionSigs: SessionSigsSchema,
+const ExecuteJsInputWithSessionSigsSchema = ExecuteJsSharedFieldsSchema.extend({
+  /**
+   * Pre-generated session signatures; when provided, authContext must be omitted.
+   */
+  sessionSigs: SessionSigsSchema,
 
-    /**
-     * authContext is intentionally unsupported in this branch.
-     */
-    authContext: z.undefined().optional(),
-  });
+  /**
+   * authContext is intentionally unsupported in this branch.
+   */
+  authContext: z.undefined().optional(),
+});
 
 export const ExecuteJsInputSchema = z
   .union([

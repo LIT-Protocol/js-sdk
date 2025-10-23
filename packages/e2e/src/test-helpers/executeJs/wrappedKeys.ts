@@ -537,8 +537,7 @@ export const registerWrappedKeysExecuteJsTests = () => {
         );
         const pkpSessionSigs = await createPkpSessionSigs();
 
-        const unsignedTransaction =
-          createSolanaUnsignedTransaction(publicKey);
+        const unsignedTransaction = createSolanaUnsignedTransaction(publicKey);
 
         const signature = await wrappedKeysApi.signTransactionWithEncryptedKey({
           pkpSessionSigs,

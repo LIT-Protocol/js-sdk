@@ -20,14 +20,8 @@ import { ImportPrivateKeyParams, ImportPrivateKeyResult } from '../types';
 export async function importPrivateKey(
   params: ImportPrivateKeyParams
 ): Promise<ImportPrivateKeyResult> {
-  const {
-    pkpSessionSigs,
-    privateKey,
-    publicKey,
-    keyType,
-    litClient,
-    memo,
-  } = params;
+  const { pkpSessionSigs, privateKey, publicKey, keyType, litClient, memo } =
+    params;
 
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);

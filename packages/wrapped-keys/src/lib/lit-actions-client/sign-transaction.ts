@@ -1,4 +1,3 @@
-
 import { AccessControlConditions, SessionSigsMap } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';

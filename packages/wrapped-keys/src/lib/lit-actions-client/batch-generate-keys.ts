@@ -1,4 +1,3 @@
-
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';

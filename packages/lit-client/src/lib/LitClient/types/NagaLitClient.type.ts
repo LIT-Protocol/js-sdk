@@ -1,5 +1,8 @@
 import { nagaLocal } from '@lit-protocol/networks';
-import type { ConnectionInfo, PKPStorageProvider } from '@lit-protocol/networks';
+import type {
+  ConnectionInfo,
+  PKPStorageProvider,
+} from '@lit-protocol/networks';
 import {
   ExecuteJsResponse,
   AuthSig,
@@ -28,9 +31,7 @@ type GetMaxPricesForNodeProductFn =
 type GetUserMaxPriceFn =
   typeof import('@lit-protocol/networks')['getUserMaxPrice'];
 
-type RawPkpSignInput = z.infer<
-  typeof nagaLocal.api.pkpSign.schemas.Input.raw
->;
+type RawPkpSignInput = z.infer<typeof nagaLocal.api.pkpSign.schemas.Input.raw>;
 
 type EthereumPkpSignInput = Omit<
   z.input<typeof nagaLocal.api.pkpSign.schemas.Input.ethereum>,
@@ -356,9 +357,7 @@ export interface NagaLitClient extends BaseLitClient<NagaLitClientContext> {
        * });
        * ```
        */
-      pkpSign: (
-        params: RawPkpSignInput
-      ) => Promise<LitNodeSignature>;
+      pkpSign: (params: RawPkpSignInput) => Promise<LitNodeSignature>;
     };
     /**
      * Ethereum-specific PKP signing methods
@@ -376,9 +375,7 @@ export interface NagaLitClient extends BaseLitClient<NagaLitClientContext> {
        * });
        * ```
        */
-      pkpSign: (
-        params: EthereumPkpSignInput
-      ) => Promise<LitNodeSignature>;
+      pkpSign: (params: EthereumPkpSignInput) => Promise<LitNodeSignature>;
     };
     /**
      * Bitcoin-specific PKP signing methods
@@ -396,9 +393,7 @@ export interface NagaLitClient extends BaseLitClient<NagaLitClientContext> {
        * });
        * ```
        */
-      pkpSign: (
-        params: BitcoinPkpSignInput
-      ) => Promise<LitNodeSignature>;
+      pkpSign: (params: BitcoinPkpSignInput) => Promise<LitNodeSignature>;
     };
   };
 }
