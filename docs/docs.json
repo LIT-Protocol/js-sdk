@@ -109,7 +109,11 @@
               {
                 "group": "@lit-protocol/auth",
                 "pages": [
-                  "sdk/sdk-reference/auth/functions/createAuthManager"
+                  "sdk/sdk-reference/auth/functions/createAuthManager",
+                  "sdk/sdk-reference/auth/functions/generatePkpDelegationAuthSig",
+                  "sdk/sdk-reference/auth/functions/generateEoaDelegationAuthSig",
+                  "sdk/sdk-reference/auth/functions/validateDelegationAuthSig",
+                  "sdk/sdk-reference/auth/functions/getPkpAuthContextFromPreGeneratedAdapter"
                 ]
               },
               {

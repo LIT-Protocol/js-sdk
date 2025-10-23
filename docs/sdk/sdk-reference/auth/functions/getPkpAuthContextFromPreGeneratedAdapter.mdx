@@ -1,0 +1,36 @@
+---
+title: getPkpAuthContextFromPreGeneratedAdapter
+---
+
+# Function
+
+> **getPkpAuthContextFromPreGeneratedAdapter**(`params`)
+
+Creates a PKP auth context from pre-generated session materials. This streamlined adapter is ideal for server flows where you ship `{ sessionKeyPair, delegationAuthSig }` and want to hydrate an auth context without re-specifying the auth config.
+
+## Parameters
+
+<ParamField path="params.pkpPublicKey" type="string" required />
+<ParamField path="params.sessionKeyPair" type="SessionKeyPair" required />
+<ParamField path="params.delegationAuthSig" type="AuthSig" required />
+<ParamField path="params.authData" type="AuthData">
+  Optional if embedded in the delegation. Provide when you need to override or enrich the auth context.
+</ParamField>
+
+## Returns
+
+<ResponseField name="authContext" type="AuthContext">
+  PKP auth context ready to use with `litClient` helpers or to derive session signatures.
+</ResponseField>
+
+## Example
+
+```ts
+import { getPkpAuthContextFromPreGeneratedAdapter } from '@lit-protocol/auth';
+
+const authContext = await getPkpAuthContextFromPreGeneratedAdapter({
+  pkpPublicKey,
+  sessionKeyPair,
+  delegationAuthSig,
+});
+```
