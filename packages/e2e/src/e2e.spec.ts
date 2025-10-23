@@ -20,7 +20,7 @@ import {
 } from './helper/tests';
 import { init } from './init';
 import { AuthContext } from './types';
-import { createPregenDelegationServerReuseTest } from './tests/signSessionKey/pregen-delegation';
+import { createPregenDelegationServerReuseTest } from './test-helpers/signSessionKey/pregen-delegation';
 
 const RPC_OVERRIDE = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 if (RPC_OVERRIDE) {
@@ -276,7 +276,6 @@ describe('all', () => {
             authData: ctx.aliceViemAccountAuthData,
             pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
             clientLitClient: ctx.litClient,
-            fallbackLitClient: ctx.litClient,
             resolvedNetwork: ctx.resolvedNetwork,
           })());
       });

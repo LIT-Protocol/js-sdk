@@ -85,12 +85,19 @@ export const fundAccount = async (
     ifLessThan?: string;
     thenFundWith?: string;
   }
-) => {
+): Promise<
+  | {
+      txHash: `0x${string}`;
+      rpcUrl: string;
+    }
+  | undefined
+> => {
   const defaultRpcUrl = networkModule.getChainConfig().rpcUrls.default.http[0];
   const isLocalNetwork = defaultRpcUrl.includes('127.0.0.1');
   const customRpcUrl = isLocalNetwork
     ? process.env['LOCAL_RPC_URL']
     : process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  const rpcUrl = customRpcUrl || defaultRpcUrl;
 
   if (customRpcUrl) {
     console.log(`🔧 Using custom E2E RPC URL: ***${customRpcUrl.slice(-6)}`);
@@ -103,7 +110,7 @@ export const fundAccount = async (
   // check account balance
   const publicClient = createPublicClient({
     chain: networkModule.getChainConfig(),
-    transport: http(customRpcUrl || defaultRpcUrl),
+    transport: http(rpcUrl),
   });
 
   const balance = await publicClient.getBalance({
@@ -116,7 +123,7 @@ export const fundAccount = async (
 
     const walletClient = createWalletClient({
       account: sponsorAccount,
-      transport: http(customRpcUrl || defaultRpcUrl),
+      transport: http(rpcUrl),
     });
 
     // Get the next managed nonce for this sponsor account
@@ -130,14 +137,17 @@ export const fundAccount = async (
       account: sponsorAccount, // Add account for retry logic
     };
 
-    await sendTransactionWithRetry(
+    const txHash = (await sendTransactionWithRetry(
       walletClient,
       transactionRequest,
       publicClient
-    );
+    )) as `0x${string}`;
 
     console.log('✅ Topped up account with', options?.thenFundWith, 'ETH');
+    return { txHash, rpcUrl };
   } else {
     console.log('✅ Account has enough balance');
   }
+
+  return undefined;
 };
