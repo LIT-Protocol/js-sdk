@@ -30,21 +30,17 @@ function loadLitActionExports() {
   );
 }
 
-const {
-  litActionRepository,
-  litActionRepositoryCommon,
-} = loadLitActionExports();
+const { litActionRepository, litActionRepositoryCommon } =
+  loadLitActionExports();
 
 function renderLitActionRepository(repo) {
-  const actionEntries = Object.entries(repo).map(
-    ([actionName, networks]) => {
-      const networkEntries = Object.entries(networks)
-        .map(([networkName, cid]) => `    ${networkName}: '${cid}',`)
-        .join('\n');
+  const actionEntries = Object.entries(repo).map(([actionName, networks]) => {
+    const networkEntries = Object.entries(networks)
+      .map(([networkName, cid]) => `    ${networkName}: '${cid}',`)
+      .join('\n');
 
-      return `  ${actionName}: Object.freeze({\n${networkEntries}\n  }),`;
-    }
-  );
+    return `  ${actionName}: Object.freeze({\n${networkEntries}\n  }),`;
+  });
 
   return `Object.freeze({\n${actionEntries.join('\n')}\n});`;
 }

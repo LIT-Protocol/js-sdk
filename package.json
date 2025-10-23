@@ -5,6 +5,7 @@
   "scripts": {
     "sync:contracts": "nx run contracts:sync",
     "sync:docs-changelog": "node tools/sync-docs-changelog.js",
+    "sync:wk": "node packages/wrapped-keys-lit-actions/sync-actions-to-ipfs.js",
     "reset": "rimraf .nx dist node_modules packages/**/node_modules tmp",
     "build": "nx run-many --parallel=false --target=build --all",
     "gen:local-network-context": "dotenvx run --env-file=.env -- node --conditions=import --import tsx packages/networks/src/networks/vNaga/shared/scripts/generate-abi-signatures.ts",

@@ -17,10 +17,10 @@ const LIT_ACTION_CID_REPOSITORY: LitCidRepository = Object.freeze({
     evm: 'QmaCGGq6EqXezgBiwAAbwh2UTeeTZnLaHQxxDcXwRboFXM',
     solana: 'QmaCGGq6EqXezgBiwAAbwh2UTeeTZnLaHQxxDcXwRboFXM',
   }),
-});;
+});
 
 const LIT_ACTION_CID_REPOSITORY_COMMON: LitCidRepositoryCommon = Object.freeze({
-  batchGenerateEncryptedKeys: 'QmUDB7jZfCMwh9CuQZZ4YDmrJnNdPq9NGdqHzmQE3RggSr'
-});;
+  batchGenerateEncryptedKeys: 'QmUDB7jZfCMwh9CuQZZ4YDmrJnNdPq9NGdqHzmQE3RggSr',
+});
 
 export { LIT_ACTION_CID_REPOSITORY, LIT_ACTION_CID_REPOSITORY_COMMON };
