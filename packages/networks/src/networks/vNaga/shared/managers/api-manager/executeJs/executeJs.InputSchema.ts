@@ -60,7 +60,7 @@ const ExecuteJsInputWithAuthContextSchema = ExecuteJsSharedFieldsSchema.extend({
   /**
    * Session signatures must not be supplied when an auth context is provided.
    */
-  sessionSigs: z.never().optional(),
+  sessionSigs: z.undefined().optional(),
 });
 
 const ExecuteJsInputWithSessionSigsSchema = ExecuteJsSharedFieldsSchema.extend({
