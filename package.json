@@ -46,6 +46,7 @@
     "depcheck": "^1.4.7",
     "depd": "^2.0.0",
     "ethers": "^5.7.1",
+    "form-data": "^4.0.4",
     "ipfs-only-hash": "^4.0.0",
     "jose": "^4.14.4",
     "pako": "^2.1.0",
