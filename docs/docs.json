@@ -113,7 +113,8 @@
                   "sdk/sdk-reference/auth/functions/generatePkpDelegationAuthSig",
                   "sdk/sdk-reference/auth/functions/generateEoaDelegationAuthSig",
                   "sdk/sdk-reference/auth/functions/validateDelegationAuthSig",
-                  "sdk/sdk-reference/auth/functions/getPkpAuthContextFromPreGeneratedAdapter"
+                  "sdk/sdk-reference/auth/functions/createPkpAuthContextFromPreGenerated",
+                  "sdk/sdk-reference/auth/functions/createPkpSessionSigs"
                 ]
               },
               {
