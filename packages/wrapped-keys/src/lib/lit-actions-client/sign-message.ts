@@ -17,7 +17,7 @@ export async function signMessageWithLitAction(
 ) {
   const {
     accessControlConditions,
-    litNodeClient,
+    litClient,
     messageToSign,
     pkpSessionSigs,
     litActionIpfsCid,
@@ -26,7 +26,7 @@ export async function signMessageWithLitAction(
   } = args;
 
   const { pkpAddress, ciphertext, dataToEncryptHash } = storedKeyMetadata;
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
@@ -36,8 +36,14 @@ export async function signMessageWithLitAction(
       dataToEncryptHash,
       messageToSign,
       accessControlConditions,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        messageToSign,
+        accessControlConditions,
+      },
     },
-
   });
   return postLitActionValidation(result);
 }

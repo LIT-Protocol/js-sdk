@@ -1,4 +1,3 @@
-
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
@@ -18,14 +17,14 @@ interface GeneratePrivateKeyLitActionResult {
 }
 
 export async function generateKeyWithLitAction({
-  litNodeClient,
+  litClient,
   pkpSessionSigs,
   litActionIpfsCid,
   litActionCode,
   accessControlConditions,
   pkpAddress,
 }: GeneratePrivateKeyLitActionParams): Promise<GeneratePrivateKeyLitActionResult> {
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     useSingleNode: true,
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
@@ -33,8 +32,11 @@ export async function generateKeyWithLitAction({
     jsParams: {
       pkpAddress,
       accessControlConditions,
+      jsParams: {
+        pkpAddress,
+        accessControlConditions,
+      },
     },
-
   });
 
   const response = postLitActionValidation(result);

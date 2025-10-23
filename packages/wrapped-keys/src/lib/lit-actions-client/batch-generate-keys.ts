@@ -29,14 +29,14 @@ export async function batchGenerateKeysWithLitAction(
 ): Promise<BatchGeneratePrivateKeysWithLitActionResult[]> {
   const {
     accessControlConditions,
-    litNodeClient,
+    litClient,
     actions,
     pkpSessionSigs,
     litActionIpfsCid,
     litActionCode,
   } = args;
 
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     useSingleNode: true,
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
@@ -45,7 +45,6 @@ export async function batchGenerateKeysWithLitAction(
       actions,
       accessControlConditions,
     },
-
   });
 
   const response = postLitActionValidation(result);

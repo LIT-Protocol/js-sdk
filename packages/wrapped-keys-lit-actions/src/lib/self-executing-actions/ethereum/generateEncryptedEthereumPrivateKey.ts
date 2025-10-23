@@ -3,12 +3,9 @@ import { generateEncryptedEthereumPrivateKey } from '../../raw-action-functions/
 
 import type { GenerateEncryptedEthereumPrivateKeyParams } from '../../raw-action-functions/ethereum/generateEncryptedEthereumPrivateKey';
 
-// Using local declarations to avoid _every file_ thinking these are always in scope
-declare const accessControlConditions: GenerateEncryptedEthereumPrivateKeyParams['accessControlConditions'];
+declare const jsParams: GenerateEncryptedEthereumPrivateKeyParams;
 
 (async () =>
   litActionHandler(async () =>
-    generateEncryptedEthereumPrivateKey({
-      accessControlConditions,
-    })
+    generateEncryptedEthereumPrivateKey(jsParams)
   ))();

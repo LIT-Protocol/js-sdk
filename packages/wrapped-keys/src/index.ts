@@ -1,59 +1,31 @@
 import {
-  signMessageWithEncryptedKey,
-  getEncryptedKey,
+  batchGeneratePrivateKeys,
   exportPrivateKey,
   generatePrivateKey,
+  getEncryptedKey,
   importPrivateKey,
+  listEncryptedKeyMetadata,
+  signMessageWithEncryptedKey,
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
-  listEncryptedKeyMetadata,
-  batchGeneratePrivateKeys,
   storeEncryptedKeyBatch,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
+  KEYTYPE_ED25519,
+  KEYTYPE_K256,
   LIT_PREFIX,
   NETWORK_EVM,
   NETWORK_SOLANA,
-  KEYTYPE_K256,
-  KEYTYPE_ED25519,
 } from './lib/constants';
+import {
+  createSessionSigsForWrappedKeys,
+  createWrappedKeysAuthContext,
+} from './lib/helpers/create-session-sigs';
 import {
   setLitActionsCode,
   setLitActionsCodeCommon,
 } from './lib/lit-actions-client/code-repository';
-import {
-  LitActionCodeRepository,
-  LitActionCodeRepositoryCommon,
-  LitActionCodeRepositoryEntry,
-} from './lib/lit-actions-client/types';
-
-import type { SupportedNetworks } from './lib/service-client/types';
-import type {
-  SignMessageWithEncryptedKeyParams,
-  GetEncryptedKeyDataParams,
-  ExportPrivateKeyParams,
-  GeneratePrivateKeyParams,
-  ImportPrivateKeyParams,
-  SignTransactionWithEncryptedKeyParams,
-  ExportPrivateKeyResult,
-  GeneratePrivateKeyResult,
-  EthereumLitTransaction,
-  SerializedTransaction,
-  BaseApiParams,
-  ApiParamsSupportedNetworks,
-  SignTransactionParams,
-  SignTransactionParamsSupportedEvm,
-  SignTransactionParamsSupportedSolana,
-  StoreEncryptedKeyParams,
-  StoreEncryptedKeyBatchParams,
-  StoredKeyData,
-  StoredKeyMetadata,
-  ListEncryptedKeyMetadataParams,
-  StoreEncryptedKeyResult,
-  ImportPrivateKeyResult,
-  StoreEncryptedKeyBatchResult,
-} from './lib/types';
 
 export const constants = {
   CHAIN_ETHEREUM,
@@ -82,32 +54,45 @@ export const config = {
   setLitActionsCodeCommon,
 };
 
-export {
+export const helpers = {
+  createWrappedKeysAuthContext,
+  createSessionSigsForWrappedKeys,
+};
+
+export type {
   ApiParamsSupportedNetworks,
   BaseApiParams,
+  BatchGeneratePrivateKeysResult,
   EthereumLitTransaction,
   ExportPrivateKeyParams,
   ExportPrivateKeyResult,
-  GetEncryptedKeyDataParams,
   GeneratePrivateKeyParams,
   GeneratePrivateKeyResult,
+  GetEncryptedKeyDataParams,
   ImportPrivateKeyParams,
   ImportPrivateKeyResult,
   ListEncryptedKeyMetadataParams,
-  LitActionCodeRepository,
-  LitActionCodeRepositoryCommon,
-  LitActionCodeRepositoryEntry,
+  LitClient,
   SerializedTransaction,
+  SignMessageWithEncryptedKeyParams,
   SignTransactionParams,
   SignTransactionParamsSupportedEvm,
   SignTransactionParamsSupportedSolana,
-  SignMessageWithEncryptedKeyParams,
   SignTransactionWithEncryptedKeyParams,
-  StoreEncryptedKeyParams,
-  StoreEncryptedKeyResult,
   StoreEncryptedKeyBatchParams,
   StoreEncryptedKeyBatchResult,
+  StoreEncryptedKeyParams,
+  StoreEncryptedKeyResult,
   StoredKeyData,
   StoredKeyMetadata,
-  SupportedNetworks,
-};
+} from './lib/types';
+
+export type {
+  LitActionCodeRepository,
+  LitActionCodeRepositoryCommon,
+  LitActionCodeRepositoryEntry,
+} from './lib/lit-actions-client/types';
+
+export type { SupportedNetworks } from './lib/service-client/types';
+
+export { createSessionSigsForWrappedKeys, createWrappedKeysAuthContext };

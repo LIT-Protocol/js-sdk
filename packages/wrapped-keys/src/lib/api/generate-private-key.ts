@@ -3,6 +3,7 @@ import {
   getKeyTypeFromNetwork,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
 } from './utils';
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
@@ -23,25 +24,36 @@ import { GeneratePrivateKeyParams, GeneratePrivateKeyResult } from '../types';
 export async function generatePrivateKey(
   params: GeneratePrivateKeyParams
 ): Promise<GeneratePrivateKeyResult> {
-  const { pkpSessionSigs, network, litNodeClient, memo } = params;
+  const { pkpSessionSigs, network, litClient, memo } = params;
 
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
+  // console.log('firstSessionSig:', firstSessionSig);
+  // console.log('pkpAddress:', pkpAddress);
+  // console.log('allowPkpAddressToDecrypt:', allowPkpAddressToDecrypt);
+
   const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
     network,
     'generateEncryptedKey'
   );
+  // console.log('litActionCode:', litActionCode);
+  // console.log('litActionIpfsCid:', litActionIpfsCid);
 
   const { ciphertext, dataToEncryptHash, publicKey } =
     await generateKeyWithLitAction({
       ...params,
+      litClient,
       pkpAddress,
       litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
       litActionCode: litActionCode ? litActionCode : undefined,
       accessControlConditions: [allowPkpAddressToDecrypt],
     });
+
+  // console.log('ciphertext:', ciphertext);
+  // console.log('dataToEncryptHash:', dataToEncryptHash);
+  // console.log('publicKey:', publicKey);
 
   const { id } = await storePrivateKey({
     sessionSig: firstSessionSig,
@@ -52,7 +64,7 @@ export async function generatePrivateKey(
       dataToEncryptHash,
       memo,
     },
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork: getLitNetworkFromClient(litClient),
   });
 
   return {

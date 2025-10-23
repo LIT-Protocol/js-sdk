@@ -16,7 +16,7 @@ export async function exportPrivateKeyWithLitAction(
 ) {
   const {
     accessControlConditions,
-    litNodeClient,
+    litClient,
     pkpSessionSigs,
     litActionCode,
     litActionIpfsCid,
@@ -29,7 +29,7 @@ export async function exportPrivateKeyWithLitAction(
     dataToEncryptHash,
     ...storeKeyMetadataMinusEncryptedAndPkp
   } = storedKeyMetadata;
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     sessionSigs: pkpSessionSigs,
     code: litActionCode,
     ipfsId: litActionIpfsCid,
@@ -38,8 +38,13 @@ export async function exportPrivateKeyWithLitAction(
       ciphertext,
       dataToEncryptHash,
       accessControlConditions,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        accessControlConditions,
+      },
     },
-
   });
 
   const decryptedPrivateKey = postLitActionValidation(result);

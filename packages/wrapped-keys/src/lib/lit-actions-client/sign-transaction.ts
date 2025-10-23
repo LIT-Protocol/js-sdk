@@ -1,9 +1,5 @@
 
-import {
-  AccessControlConditions,
-  ILitNodeClient,
-  SessionSigsMap,
-} from '@lit-protocol/types';
+import { AccessControlConditions, SessionSigsMap } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
 import {
@@ -11,9 +7,10 @@ import {
   SerializedTransaction,
   StoredKeyData,
 } from '../types';
+import type { LitClient } from '../types';
 
 interface SignTransactionWithLitActionParams {
-  litNodeClient: ILitNodeClient;
+  litClient: LitClient;
   pkpSessionSigs: SessionSigsMap;
   litActionIpfsCid?: string;
   litActionCode?: string;
@@ -29,13 +26,13 @@ export async function signTransactionWithLitAction({
   broadcast,
   litActionIpfsCid,
   litActionCode,
-  litNodeClient,
+  litClient,
   pkpSessionSigs,
   storedKeyMetadata: { ciphertext, dataToEncryptHash, pkpAddress },
   unsignedTransaction,
   versionedTransaction,
 }: SignTransactionWithLitActionParams): Promise<string> {
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
@@ -47,8 +44,16 @@ export async function signTransactionWithLitAction({
       broadcast,
       accessControlConditions,
       versionedTransaction,
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        unsignedTransaction,
+        broadcast,
+        accessControlConditions,
+        versionedTransaction,
+      },
     },
-
   });
 
   return postLitActionValidation(result);
