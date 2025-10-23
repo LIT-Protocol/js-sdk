@@ -1,4 +1,5 @@
 import { getChildLogger } from '@lit-protocol/logger';
+import type { LitClient } from '@lit-protocol/lit-client';
 import { AuthData, HexPrefixedSchema } from '@lit-protocol/schemas';
 import { AuthSig, SessionKeyPair } from '@lit-protocol/types';
 import { z } from 'zod';
@@ -14,6 +15,8 @@ import { getCustomAuthContextAdapter } from './authAdapters/getCustomAuthContext
 import { generatePkpDelegationAuthSig } from './authAdapters/generatePkpDelegationAuthSig';
 import { generateEoaDelegationAuthSig } from './authAdapters/generateEoaDelegationAuthSig';
 import { getPkpAuthContextFromPreGeneratedAdapter } from './authAdapters/getPkpAuthContextFromPreGeneratedAdapter';
+import type { PkpSessionSigsProduct } from './authAdapters/getPkpSessionSigsAdapter';
+import { getPkpSessionSigsAdapter } from './authAdapters/getPkpSessionSigsAdapter';
 
 export interface AuthManagerParams {
   storage: LitAuthStorageProvider;
@@ -31,9 +34,7 @@ export interface BaseAuthContext<T> {
   authConfig: z.infer<typeof AuthConfigSchema>;
   config: T;
 
-  // @ts-expect-error - LitClientType is not defined in the package. We need to define this
-  // once the LitClienType is ready
-  litClient: ReturnType<typeof createLitClient>;
+  litClient: LitClient;
 }
 
 /**
@@ -62,12 +63,18 @@ export type ConstructorConfig<T> = T extends new (config: infer C) => any
 
 export const createAuthManager = (authManagerParams: AuthManagerParams) => {
   return {
-    //   throw new Error(`Invalid authenticator: ${params.authenticator}`);
-    // },
-    // TODO: for wrapped keys!
-    // createRequestToken: async () => {
-    //   // use createSessionSisg then send to wrapped key service
-    // }
+    /**
+     * A migration helper to create session sigs for wrapped keys and datil v7
+     */
+    createPkpSessionSigs: async (params: {
+      pkpPublicKey: z.infer<typeof HexPrefixedSchema>;
+      litClient: BaseAuthContext<any>['litClient'];
+      sessionKeyPair: SessionKeyPair;
+      delegationAuthSig: AuthSig;
+      product?: PkpSessionSigsProduct;
+    }) => {
+      return getPkpSessionSigsAdapter(authManagerParams, params);
+    },
     createEoaAuthContext: (params: EoaAuthContextAdapterParams) => {
       return getEoaAuthContextAdapter(authManagerParams, params);
     },
