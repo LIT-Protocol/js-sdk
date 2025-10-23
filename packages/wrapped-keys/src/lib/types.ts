@@ -22,6 +22,7 @@ export type LitClient = Awaited<ReturnType<typeof createLitClient>> & {
 export interface BaseApiParams {
   pkpSessionSigs: SessionSigsMap;
   litClient: LitClient;
+  userMaxPrice?: bigint;
 }
 
 export interface ApiParamsSupportedNetworks {

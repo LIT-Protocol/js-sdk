@@ -8,6 +8,7 @@ interface BatchGeneratePrivateKeysWithLitActionParams
   accessControlConditions: AccessControlConditions;
   litActionIpfsCid?: string;
   litActionCode?: string;
+  userMaxPrice?: bigint;
 }
 
 interface GeneratePrivateKeyLitActionResult {
@@ -33,6 +34,7 @@ export async function batchGenerateKeysWithLitAction(
     pkpSessionSigs,
     litActionIpfsCid,
     litActionCode,
+    userMaxPrice,
   } = args;
 
   const result = await litClient.executeJs({
@@ -40,6 +42,7 @@ export async function batchGenerateKeysWithLitAction(
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
+    userMaxPrice,
     jsParams: {
       actions,
       accessControlConditions,

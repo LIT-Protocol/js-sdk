@@ -18,6 +18,7 @@ interface SignTransactionWithLitActionParams {
   accessControlConditions: AccessControlConditions;
   broadcast: boolean;
   versionedTransaction?: boolean;
+  userMaxPrice?: bigint;
 }
 
 export async function signTransactionWithLitAction({
@@ -30,11 +31,13 @@ export async function signTransactionWithLitAction({
   storedKeyMetadata: { ciphertext, dataToEncryptHash, pkpAddress },
   unsignedTransaction,
   versionedTransaction,
+  userMaxPrice,
 }: SignTransactionWithLitActionParams): Promise<string> {
   const result = await litClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
+    userMaxPrice,
     jsParams: {
       pkpAddress,
       ciphertext,

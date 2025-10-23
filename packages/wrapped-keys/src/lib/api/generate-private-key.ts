@@ -24,7 +24,7 @@ import { GeneratePrivateKeyParams, GeneratePrivateKeyResult } from '../types';
 export async function generatePrivateKey(
   params: GeneratePrivateKeyParams
 ): Promise<GeneratePrivateKeyResult> {
-  const { pkpSessionSigs, network, litClient, memo } = params;
+  const { pkpSessionSigs, network, litClient, memo, userMaxPrice } = params;
 
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
@@ -43,6 +43,7 @@ export async function generatePrivateKey(
       litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
       litActionCode: litActionCode ? litActionCode : undefined,
       accessControlConditions: [allowPkpAddressToDecrypt],
+      userMaxPrice,
     });
 
   const { id } = await storePrivateKey({

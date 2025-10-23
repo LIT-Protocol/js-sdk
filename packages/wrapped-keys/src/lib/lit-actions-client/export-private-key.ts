@@ -8,6 +8,7 @@ interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
   storedKeyMetadata: StoredKeyData;
   litActionIpfsCid?: string;
   litActionCode?: string;
+  userMaxPrice?: bigint;
 }
 
 export async function exportPrivateKeyWithLitAction(
@@ -20,6 +21,7 @@ export async function exportPrivateKeyWithLitAction(
     litActionCode,
     litActionIpfsCid,
     storedKeyMetadata,
+    userMaxPrice,
   } = args;
 
   const {
@@ -32,6 +34,7 @@ export async function exportPrivateKeyWithLitAction(
     sessionSigs: pkpSessionSigs,
     code: litActionCode,
     ipfsId: litActionIpfsCid,
+    userMaxPrice,
     jsParams: {
       pkpAddress,
       ciphertext,

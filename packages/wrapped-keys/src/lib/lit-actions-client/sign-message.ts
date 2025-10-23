@@ -9,6 +9,7 @@ interface SignMessageWithLitActionParams
   storedKeyMetadata: StoredKeyData;
   litActionIpfsCid?: string;
   litActionCode?: string;
+  userMaxPrice?: bigint;
 }
 
 export async function signMessageWithLitAction(
@@ -22,6 +23,7 @@ export async function signMessageWithLitAction(
     litActionIpfsCid,
     litActionCode,
     storedKeyMetadata,
+    userMaxPrice,
   } = args;
 
   const { pkpAddress, ciphertext, dataToEncryptHash } = storedKeyMetadata;
@@ -29,6 +31,7 @@ export async function signMessageWithLitAction(
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
+    userMaxPrice,
     jsParams: {
       pkpAddress,
       ciphertext,

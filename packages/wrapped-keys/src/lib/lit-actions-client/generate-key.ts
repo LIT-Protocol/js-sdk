@@ -8,6 +8,7 @@ interface GeneratePrivateKeyLitActionParams extends GeneratePrivateKeyParams {
   accessControlConditions: AccessControlConditions;
   litActionIpfsCid?: string;
   litActionCode?: string;
+  userMaxPrice?: bigint;
 }
 
 interface GeneratePrivateKeyLitActionResult {
@@ -23,12 +24,14 @@ export async function generateKeyWithLitAction({
   litActionCode,
   accessControlConditions,
   pkpAddress,
+  userMaxPrice,
 }: GeneratePrivateKeyLitActionParams): Promise<GeneratePrivateKeyLitActionResult> {
   const result = await litClient.executeJs({
     useSingleNode: true,
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
+    userMaxPrice,
     jsParams: {
       pkpAddress,
       accessControlConditions,
