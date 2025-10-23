@@ -32,10 +32,6 @@ export async function generateKeyWithLitAction({
     jsParams: {
       pkpAddress,
       accessControlConditions,
-      jsParams: {
-        pkpAddress,
-        accessControlConditions,
-      },
     },
   });
 

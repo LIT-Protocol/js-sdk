@@ -30,16 +30,10 @@ export async function generatePrivateKey(
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(pkpAddress);
 
-  // console.log('firstSessionSig:', firstSessionSig);
-  // console.log('pkpAddress:', pkpAddress);
-  // console.log('allowPkpAddressToDecrypt:', allowPkpAddressToDecrypt);
-
   const { litActionCode, litActionIpfsCid } = getLitActionCodeOrCid(
     network,
     'generateEncryptedKey'
   );
-  // console.log('litActionCode:', litActionCode);
-  // console.log('litActionIpfsCid:', litActionIpfsCid);
 
   const { ciphertext, dataToEncryptHash, publicKey } =
     await generateKeyWithLitAction({
@@ -50,10 +44,6 @@ export async function generatePrivateKey(
       litActionCode: litActionCode ? litActionCode : undefined,
       accessControlConditions: [allowPkpAddressToDecrypt],
     });
-
-  // console.log('ciphertext:', ciphertext);
-  // console.log('dataToEncryptHash:', dataToEncryptHash);
-  // console.log('publicKey:', publicKey);
 
   const { id } = await storePrivateKey({
     sessionSig: firstSessionSig,

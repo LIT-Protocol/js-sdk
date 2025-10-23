@@ -1,4 +1,3 @@
-
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
@@ -38,12 +37,6 @@ export async function exportPrivateKeyWithLitAction(
       ciphertext,
       dataToEncryptHash,
       accessControlConditions,
-      jsParams: {
-        pkpAddress,
-        ciphertext,
-        dataToEncryptHash,
-        accessControlConditions,
-      },
     },
   });
 

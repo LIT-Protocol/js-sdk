@@ -1,4 +1,3 @@
-
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
@@ -36,13 +35,6 @@ export async function signMessageWithLitAction(
       dataToEncryptHash,
       messageToSign,
       accessControlConditions,
-      jsParams: {
-        pkpAddress,
-        ciphertext,
-        dataToEncryptHash,
-        messageToSign,
-        accessControlConditions,
-      },
     },
   });
   return postLitActionValidation(result);
