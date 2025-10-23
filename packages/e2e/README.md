@@ -1,104 +1,96 @@
-# @litprotocol/e2e
+# @lit-protocol/e2e
 
-A comprehensive end-to-end testing package for Lit Protocol integrations. This package allows you to programmatically run the full suite of Lit Protocol tests across different authentication methods and network configurations.
+Utilities and ready-made specs for Lit Protocol end-to-end testing. This package now ships the canonical Jest suite we run in-repo, plus helpers (state initialisers, Shiva client, etc.) so QA teams can execute the same coverage or layer on additional `.spec.ts` files without cloning this repository.
 
 ## Installation
 
 ```bash
-pnpm add @litprotocol/e2e
+pnpm add -D jest @lit-protocol/e2e @lit-protocol/lit-client @lit-protocol/networks viem
 ```
 
-## Environment Variables
+> The package depends on `jest` being available in the consumer workspace. Install any additional peer dependencies (for example `ts-node` if you prefer to author specs in TypeScript directly).
 
-**Required** - Set these environment variables before running tests:
+## Required Environment
+
+Set the same environment variables the in-repo test harness expects **before** running any specs:
 
 ```bash
-# For live networks (naga-dev, naga-staging)
+# Accounts that sponsor users on live and local networks
 LIVE_MASTER_ACCOUNT=0x...
-
-# For local network (naga-local)
 LOCAL_MASTER_ACCOUNT=0x...
 
-# Optional - can also be passed as parameters
-NETWORK=naga-dev
+# General configuration (can also be passed to init())
+NETWORK=naga-local          # or naga-dev / naga-staging / naga-test
 LOG_LEVEL=info
+
+# Optional local overrides
+NAGA_LOCAL_CONTEXT_PATH=./lit-assets/blockchain/contracts/networkContext.json
+NAGA_LOCAL_CONTEXT_NAME=naga-develop
+LIT_YELLOWSTONE_PRIVATE_RPC_URL=http://127.0.0.1:8545
 ```
 
-## Quick Start
+Make sure the referenced network (local Naga cluster, Shiva-managed testnet, or live subnet) is running and reachable from your test machine.
 
-```typescript
-import { runLitE2eTests } from '@litprotocol/e2e';
+## Run the Bundled Suite
 
-// Run all tests on naga-dev network
-const results = await runLitE2eTests({
-  network: 'naga-dev',
-});
+The published package contains the compiled `e2e.spec.ts`. You can execute it either through the provided CLI or by calling Jest directly:
 
-console.log(`Tests completed: ${results.passed}/${results.totalTests} passed`);
+```bash
+# Preferred: CLI wrapper injects the packaged config automatically
+npx lit-e2e
+
+# Equivalent manual invocation
+npx jest \
+  --config node_modules/@lit-protocol/e2e/dist/jest.e2e.package.config.cjs \
+  node_modules/@lit-protocol/e2e/dist/specs/e2e.spec.js
 ```
 
-## Configuration Options
+Both commands honour additional Jest flags (e.g. `--runInBand`, `--verbose`), so you can tailor runs to your infrastructure.
 
-```typescript
-const results = await runLitE2eTests({
-  network: 'naga-dev', // Required: 'naga-dev' | 'naga-local' | 'naga-staging'
-  logLevel: 'info', // Optional: 'silent' | 'info' | 'debug'
-  testTimeout: 30000, // Optional: timeout per test in milliseconds
-  selectedTests: [
-    // Optional: run specific tests only
-    'pkpSign',
-    'executeJs',
-    'viemSignMessage',
-  ],
-});
-```
+## Author Your Own Specs
 
-## Available Tests
+All helper utilities are exported from `@lit-protocol/e2e`. This includes the environment `init` routine, auth-context builders, and the new Shiva client wrapper.
 
-### Endpoint Tests
+```ts
+import { init, createShivaClient } from '@lit-protocol/e2e';
 
-- `pkpSign` - PKP signing functionality
-- `executeJs` - Lit Actions execution
-- `viewPKPsByAddress` - PKP lookup by address
-- `viewPKPsByAuthData` - PKP lookup by auth data
-- `pkpEncryptDecrypt` - PKP-based encryption/decryption
-- `encryptDecryptFlow` - Full encryption/decryption workflow
-- `pkpPermissionsManagerFlow` - PKP permissions management
-- `eoaNativeAuthFlow` - EOA native authentication and PKP minting
+describe('Epoch rollover', () => {
+  it('advances when Shiva triggers a transition', async () => {
+    const ctx = await init('naga-local');
+    const shiva = await createShivaClient(ctx.litClient, {
+      baseUrl: 'http://localhost:8000',
+    });
 
-### Integration Tests
+    const before = await shiva.inspectEpoch();
+    await shiva.transitionEpochAndWait();
+    const after = await shiva.waitForEpochChange({ baselineEpoch: before.epoch });
 
-- `viemSignMessage` - Viem integration for message signing
-- `viemSignTransaction` - Viem integration for transaction signing
-- `viemSignTypedData` - Viem integration for typed data signing
-
-## Test Results
-
-```typescript
-const results = await runLitE2eTests({ network: 'naga-dev' });
-
-console.log(`Total: ${results.totalTests}`);
-console.log(`Passed: ${results.passed}`);
-console.log(`Failed: ${results.failed}`);
-console.log(`Duration: ${results.duration}ms`);
-
-// Check for failures
-if (results.failed > 0) {
-  const failedTests = results.results.filter((r) => r.status === 'failed');
-  failedTests.forEach((test) => {
-    console.log(`Failed: ${test.name} - ${test.error}`);
+    expect(after.epoch).not.toEqual(before.epoch);
   });
-}
+});
 ```
 
-## Examples
+Execute custom specs with the same packaged config:
 
-See `example.js` for detailed usage examples.
+```bash
+npx jest --config node_modules/@lit-protocol/e2e/dist/jest.e2e.package.config.cjs qa-epoch.spec.ts
+```
 
-## Networks
+## Bundled APIs
 
-- **naga-dev** - Development network (requires LIVE_MASTER_ACCOUNT)
-- **naga-local** - Local development network (requires LOCAL_MASTER_ACCOUNT)
-- **naga-staging** - Staging network (requires LIVE_MASTER_ACCOUNT)
+Key exports now available from the package:
 
-## License
+- `init(network?, logLevel?)` – prepares Lit Client, Auth Manager, PKPs, and funded accounts across local or live environments.
+- `createShivaClient(litClient, { baseUrl, testnetId?, createRequest? })` – talks to the Shiva testnet manager (epoch transitions, node control, epoch inspection helpers).
+- Auth context helpers (EOA, PKP, Custom auth) under `@lit-protocol/e2e/helper/auth-contexts`.
+- Payment funding utilities, PKP helpers, and assorted testing primitives.
+
+Refer to the source under `packages/e2e/src/helper` for additional exported functions.
+
+## Troubleshooting
+
+- **Jest not found** – install it locally (`pnpm add -D jest`). The CLI wrapper will exit with a helpful message if the dependency is missing.
+- **Missing signatures on naga-local** – provide `NAGA_LOCAL_CONTEXT_PATH` and optional `NAGA_LOCAL_CONTEXT_NAME` so the init routine calls `nagaLocal.withLocalContext`.
+- **RPC connectivity** – when pointing at a private RPC, set `LIT_YELLOWSTONE_PRIVATE_RPC_URL` so the Lit Client bypasses defaults.
+
+With these additions, QA can stay in sync with the canonical Lit Protocol E2E coverage while extending it with custom assertions tailored to fast-epoch or failure scenarios.

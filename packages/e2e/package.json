@@ -6,10 +6,25 @@
   "module": "dist/index.mjs",
   "type": "commonjs",
   "types": "dist/index.d.ts",
+  "bin": {
+    "lit-e2e": "dist/bin/run-e2e.cjs"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./specs/e2e": {
+      "import": "./dist/specs/e2e.spec.js",
+      "require": "./dist/specs/e2e.spec.js"
+    },
+    "./jest-config": {
+      "import": "./dist/jest.e2e.package.config.cjs",
+      "require": "./dist/jest.e2e.package.config.cjs"
+    },
+    "./cli": {
+      "import": "./dist/bin/run-e2e.cjs",
+      "require": "./dist/bin/run-e2e.cjs"
     }
   },
   "files": [
