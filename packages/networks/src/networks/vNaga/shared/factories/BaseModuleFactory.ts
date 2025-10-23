@@ -575,11 +575,25 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         ): Promise<RequestItem<z.infer<typeof EncryptedVersion1Schema>>[]> => {
           _logger.info({ params }, 'pkpSign:createRequest: Creating request');
 
-          // Generate session sigs
-          const sessionSigs = await issueSessionFromContext({
-            pricingContext: PricingContextSchema.parse(params.pricingContext),
-            authContext: params.authContext,
-          });
+          // Generate or reuse session sigs
+          let sessionSigs: Record<string, AuthSig>;
+          if (params.sessionSigs && Object.keys(params.sessionSigs).length > 0) {
+            sessionSigs = params.sessionSigs;
+          } else {
+            if (!params.authContext) {
+              throw new Error(
+                'authContext is required when sessionSigs are not provided for pkpSign.'
+              );
+            }
+            const pricingContext = PricingContextSchema.parse(
+              params.pricingContext
+            );
+            sessionSigs = await issueSessionFromContext({
+              pricingContext,
+              authContext: params.authContext,
+              delegationAuthSig: params.delegationAuthSig,
+            });
+          }
 
           _logger.info('pkpSign:createRequest: Session sigs generated');
 
@@ -688,6 +702,11 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           _logger.info({ params }, 'decrypt:createRequest: Creating request');
 
           // Generate session sigs for decrypt
+          if (!params.authContext) {
+            throw new Error(
+              'authContext is required when generating sessionSigs for decrypt.'
+            );
+          }
           const sessionSigs = await issueSessionFromContext({
             pricingContext: PricingContextSchema.parse(params.pricingContext),
             authContext: params.authContext,
@@ -1048,11 +1067,24 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           // Store response strategy for later use in handleResponse
           executeJsResponseStrategy = params.responseStrategy;
 
-          // Generate session sigs
-          const sessionSigs = await issueSessionFromContext({
-            pricingContext: PricingContextSchema.parse(params.pricingContext),
-            authContext: params.authContext,
-          });
+          let sessionSigs: Record<string, AuthSig>;
+          if (params.sessionSigs && Object.keys(params.sessionSigs).length > 0) {
+            sessionSigs = params.sessionSigs;
+          } else {
+            if (!params.authContext) {
+              throw new Error(
+                'authContext is required when sessionSigs are not provided for executeJs.'
+              );
+            }
+            const pricingContext = PricingContextSchema.parse(
+              params.pricingContext
+            );
+            sessionSigs = await issueSessionFromContext({
+              pricingContext,
+              authContext: params.authContext,
+              delegationAuthSig: params.delegationAuthSig,
+            });
+          }
 
           // Generate requests
           const _requestId = createRequestId();

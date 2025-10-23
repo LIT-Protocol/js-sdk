@@ -5,7 +5,7 @@ import {
   GenericEncryptedPayloadSchema,
   GenericResultBuilder,
 } from '@lit-protocol/schemas';
-import { RequestItem, NagaJitContext } from '@lit-protocol/types';
+import { AuthSig, NagaJitContext, RequestItem } from '@lit-protocol/types';
 
 import { E2EERequestManager } from './e2ee-request-manager/E2EERequestManager';
 import { composeLitUrl } from '../endpoints-manager/composeLitUrl';
@@ -37,11 +37,20 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
     ): Promise<RequestItem<z.infer<typeof EncryptedVersion1Schema>>[]> => {
       _logger.info({ params }, 'pkpSign:createRequest: Creating request');
 
-      // Generate session sigs
-      const sessionSigs = await issueSessionFromContext({
-        pricingContext: PricingContextSchema.parse(params.pricingContext),
-        authContext: params.authContext,
-      });
+      // Generate or reuse session sigs
+      let sessionSigs: Record<string, AuthSig>;
+      if ('sessionSigs' in params && params.sessionSigs) {
+        sessionSigs = params.sessionSigs;
+      } else {
+        const pricingContext = PricingContextSchema.parse(
+          params.pricingContext
+        );
+        sessionSigs = await issueSessionFromContext({
+          pricingContext,
+          authContext: params.authContext,
+          delegationAuthSig: params.delegationAuthSig,
+        });
+      }
 
       _logger.info('pkpSign:createRequest: Session sigs generated');
 
@@ -222,11 +231,19 @@ export function createExecuteJsAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
     createRequest: async (params: ExecuteJsCreateRequestParams) => {
       _logger.info({ params }, 'executeJs:createRequest: Creating request');
 
-      // Generate session sigs
-      const sessionSigs = await issueSessionFromContext({
-        pricingContext: PricingContextSchema.parse(params.pricingContext),
-        authContext: params.authContext,
-      });
+      let sessionSigs: Record<string, AuthSig>;
+      if ('sessionSigs' in params && params.sessionSigs) {
+        sessionSigs = params.sessionSigs;
+      } else {
+        const pricingContext = PricingContextSchema.parse(
+          params.pricingContext
+        );
+        sessionSigs = await issueSessionFromContext({
+          pricingContext,
+          authContext: params.authContext,
+          delegationAuthSig: params.delegationAuthSig,
+        });
+      }
 
       const _requestId = createRequestId();
       const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
