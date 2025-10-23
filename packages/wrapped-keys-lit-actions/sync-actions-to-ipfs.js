@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const FormData = require('form-data');
@@ -34,12 +35,55 @@ const {
   litActionRepositoryCommon,
 } = loadLitActionExports();
 
+function renderLitActionRepository(repo) {
+  const actionEntries = Object.entries(repo).map(
+    ([actionName, networks]) => {
+      const networkEntries = Object.entries(networks)
+        .map(([networkName, cid]) => `    ${networkName}: '${cid}',`)
+        .join('\n');
+
+      return `  ${actionName}: Object.freeze({\n${networkEntries}\n  }),`;
+    }
+  );
+
+  return `Object.freeze({\n${actionEntries.join('\n')}\n});`;
+}
+
+function renderLitActionRepositoryCommon(repo) {
+  const commonEntries = Object.entries(repo)
+    .map(([actionName, cid]) => `  ${actionName}: '${cid}'`)
+    .join(',\n');
+
+  return `Object.freeze({\n${commonEntries}\n});`;
+}
+
+function updateConstantsFile(cidRepo, cidRepoCommon) {
+  const constantsFilePath = path.resolve(
+    __dirname,
+    '../wrapped-keys/src/lib/lit-actions-client/constants.ts'
+  );
+
+  const fileContents = `import { LitCidRepository, LitCidRepositoryCommon } from './types';
+
+const LIT_ACTION_CID_REPOSITORY: LitCidRepository = ${renderLitActionRepository(
+    cidRepo
+  )};
+
+const LIT_ACTION_CID_REPOSITORY_COMMON: LitCidRepositoryCommon = ${renderLitActionRepositoryCommon(
+    cidRepoCommon
+  )};
+
+export { LIT_ACTION_CID_REPOSITORY, LIT_ACTION_CID_REPOSITORY_COMMON };
+`;
+
+  fs.writeFileSync(constantsFilePath, fileContents);
+}
+
 /** Usage:
  * 1. Ensure you have a valid Pinata IPFS JWT in `LIT_IPFS_JWT` env var
- * 2. Make sure you run `yarn build` to ensure that all LIT actions code has been built into the generated directory from the current commit
- * 3. `node sync-actions-to-ipfs` -> this will print out JSON of the `LIT_ACTION_CID_REPOSITORY` and LIT_ACTION_CID_REPOSITORY_COMMON
- * 4. Copy/paste the CIDs into those objects in `packages/wrapped-keys/src/lib/lit-actions-client/constants.ts`
- * 5. Commit the changes and push them to your branch
+ * 2. Make sure you run the library build (`pnpm nx build wrapped-keys-lit-actions`) so the generated actions are up to date
+ * 3. `node sync-actions-to-ipfs` -> this will pin the latest lit actions, update `packages/wrapped-keys/src/lib/lit-actions-client/constants.ts`, and print the CID JSON for verification
+ * 4. Review the diff in `constants.ts` and commit the changes
  */
 
 const JWT = process.env.LIT_IPFS_JWT || '';
@@ -123,6 +167,10 @@ async function gogo() {
     getCidRepository(litActionRepository),
   ]);
 
+  updateConstantsFile(cidRepo, cidRepoCommon);
+  console.log(
+    'Updated constants file at packages/wrapped-keys/src/lib/lit-actions-client/constants.ts'
+  );
   console.log('common', cidRepoCommon);
   console.log('byNetwork', cidRepo);
 }
