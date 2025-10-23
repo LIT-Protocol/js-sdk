@@ -60,7 +60,11 @@ module.exports = {
           './src/lib/self-executing-actions/ethereum/signTransactionWithEncryptedEthereumKey.ts',
           './src/lib/self-executing-actions/ethereum/signMessageWithEncryptedEthereumKey.ts',
           './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.ts',
+          './src/lib/self-executing-actions/solana/signTransactionWithEncryptedSolanaKey.ts',
+          './src/lib/self-executing-actions/solana/signMessageWithEncryptedSolanaKey.ts',
+          './src/lib/self-executing-actions/solana/generateEncryptedSolanaPrivateKey.ts',
           './src/lib/self-executing-actions/common/exportPrivateKey.ts',
+          './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.ts',
         ],
         bundle: true,
         minify: true,
@@ -73,19 +77,44 @@ module.exports = {
         platform: 'browser',
       })
       .then((result) => {
-        result.outputFiles.forEach((file) => {
-          const bytes = file.text.length;
-          const mbInBinary = (bytes / (1024 * 1024)).toFixed(4);
-          const mbInDecimal = (bytes / 1_000_000).toFixed(4);
+        // Simple ANSI color helpers
+        const color = {
+          reset: '\x1b[0m',
+          bold: '\x1b[1m',
+          green: '\x1b[32m',
+          cyan: '\x1b[36m',
+          gray: '\x1b[90m',
+          dim: '\x1b[2m',
+        };
 
-          console.log(
-            `✅ ${file.path
-              .split('/')
-              .pop()}\n- ${mbInDecimal} MB (in decimal)\n- ${mbInBinary} MB (in binary)`
-          );
+        console.log(
+          `\n${color.bold}${color.cyan}📦 Built Lit Actions:${color.reset}\n`
+        );
+
+        const rows = result.outputFiles.map((file) => {
+          const fileName = file.path.split('/').pop() ?? file.path;
+          const bytes = file.text.length;
+          const mbDecimal = (bytes / 1_000_000).toFixed(4);
+          const mbBinary = (bytes / (1024 * 1024)).toFixed(4);
+          return { fileName, mbDecimal, mbBinary };
         });
+
+        const namePad = Math.max(...rows.map((r) => r.fileName.length)) + 2;
+
+        for (const { fileName, mbDecimal, mbBinary } of rows) {
+          console.log(
+            `${color.green}✔${color.reset} ${fileName.padEnd(namePad)} ${
+              color.gray
+            }${mbDecimal} MB${color.reset} ${color.dim}(${mbBinary} MB binary)${
+              color.reset
+            }`
+          );
+        }
+
+        console.log(
+          `\n${color.bold}${color.green}✅ Lit Actions built successfully!${color.reset}\n`
+        );
       });
-    console.log('✅ Lit actions built successfully');
   } catch (e) {
     console.error('❌ Error building lit actions: ', e);
     process.exit(1);
