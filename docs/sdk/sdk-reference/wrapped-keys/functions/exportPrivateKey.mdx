@@ -1,0 +1,55 @@
+---
+title: exportPrivateKey
+---
+
+# Function
+
+> **exportPrivateKey**(`params`)
+
+Decrypts a previously stored wrapped key in a Lit Action and returns the plaintext private key together with metadata.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required>
+  Session signatures proving the PKP owns the wrapped key.
+</ParamField>
+
+<ParamField path="params.litClient" type="LitClient" required>
+  Lit client connected to the network that holds the encrypted key.
+</ParamField>
+
+<ParamField path="params.network" type="'evm' | 'solana'" required>
+  Selects the Lit Action that knows how to handle the key type.
+</ParamField>
+
+<ParamField path="params.id" type="string" required>
+  Identifier returned from `generatePrivateKey`, `importPrivateKey`, or `storeEncryptedKey`.
+</ParamField>
+
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional spending cap passed to the underlying `executeJs` call.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="ExportPrivateKeyResult">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="decryptedPrivateKey" type="string" required />
+    <ResponseField name="pkpAddress" type="string" required />
+    <ResponseField name="publicKey" type="string" required />
+    <ResponseField name="keyType" type="'K256' | 'ed25519'" required />
+    <ResponseField name="memo" type="string" required />
+    <ResponseField name="id" type="string" required />
+  </Expandable>
+</ResponseField>
+
+## Example
+
+```ts
+const { decryptedPrivateKey } = await wrappedKeysApi.exportPrivateKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  id,
+});
+```

@@ -1,0 +1,43 @@
+---
+title: getEncryptedKey
+---
+
+# Function
+
+> **getEncryptedKey**(`params`)
+
+Fetches the encrypted ciphertext and metadata for a stored wrapped key without decrypting it.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required>
+  Session signatures identifying the PKP that owns the wrapped key.
+</ParamField>
+
+<ParamField path="params.litClient" type="LitClient" required>
+  Lit client instance used to talk to the wrapped-keys service.
+</ParamField>
+
+<ParamField path="params.id" type="string" required>
+  Identifier of the wrapped key to retrieve.
+</ParamField>
+
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional price ceiling for the Lit Action.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="StoredKeyData">
+  Includes ciphertext, `dataToEncryptHash`, memo, key type, public key, and PKP address.
+</ResponseField>
+
+## Example
+
+```ts
+const storedKey = await wrappedKeysApi.getEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  id,
+});
+```
