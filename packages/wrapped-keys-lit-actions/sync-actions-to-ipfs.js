@@ -1,10 +1,38 @@
+const path = require('path');
 const axios = require('axios');
 const FormData = require('form-data');
+
+function loadLitActionExports() {
+  const candidates = [
+    path.resolve(
+      __dirname,
+      '../../dist/packages/wrapped-keys-lit-actions/src/index.js'
+    ),
+    path.resolve(
+      __dirname,
+      '../../dist/out-tsc/packages/wrapped-keys-lit-actions/src/index.js'
+    ),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      return require(candidate);
+    } catch (error) {
+      if (error.code !== 'MODULE_NOT_FOUND') {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error(
+    'Unable to locate built Lit action exports. Please build the package first (e.g. `pnpm nx build wrapped-keys-lit-actions`).'
+  );
+}
 
 const {
   litActionRepository,
   litActionRepositoryCommon,
-} = require('./dist/src/index');
+} = loadLitActionExports();
 
 /** Usage:
  * 1. Ensure you have a valid Pinata IPFS JWT in `LIT_IPFS_JWT` env var
