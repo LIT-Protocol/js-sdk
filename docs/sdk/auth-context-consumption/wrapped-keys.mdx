@@ -1,0 +1,146 @@
+---
+title: "Wrapped Keys"
+description: "Manage generated or imported keys through Lit’s wrapped-keys service by delegating a PKP session and calling the specialised APIs for EVM and Solana."
+---
+
+# Overview
+
+Wrapped keys let you generate, import, store, and use non-PKP private keys while keeping them encrypted by the Lit Network. The `@lit-protocol/wrapped-keys` package exposes helper APIs that run curated Lit Actions via `executeJs` for you so that signed messages or transactions never leave the Lit node unless you explicitly export the key material.
+
+Unlike the Core API flows (`pkpSign`, `executeJs`, `encryptAndDecrypt`) that accept an `authContext` directly, the wrapped-keys APIs expect a PKP session signature bundle (`pkpSessionSigs`). This keeps the SDK compatible with the v7 infrastructure and Lambda/serverless deployments that pass session materials between runtimes. Mint the bundle with `authManager.createPkpSessionSigs` as shown below.
+
+# How the flow differs from other Core API methods
+
+- **Why generate a delegation auth sig?**  
+  You delegate your PKP to an ephemeral session key so the wrapped-keys Lit Actions can execute without presenting your long-lived auth credentials. The delegation constrains the permissions (`pkp-signing`, `lit-action-execution`, `access-control-condition-decryption`) and sets an expiry window, limiting blast radius if the session key is ever leaked.
+
+- **Why supply PKP session signatures?**  
+  Wrapped-keys endpoints reuse the same session bundle across all networks (for example, Lambda functions in the v7 stack). Provide `pkpSessionSigs` produced by `authManager.createPkpSessionSigs` so the Lit nodes can verify the delegated permissions before executing the action.
+
+- **Controlling network spend**  
+  Because every wrapped-keys helper ultimately calls `executeJs`, you can supply an optional `userMaxPrice` to cap how much a caller is willing to pay for node execution (mirroring the parameter available on the core `executeJs` API).
+
+- **Optional: bundle Lit Action source**  
+  By default the SDK references IPFS CIDs. To remove the IPFS dependency, inject the Lit Action source code at runtime:
+
+  ```ts
+  import { api as wrappedKeysApi, config as wrappedKeysConfig } from '@lit-protocol/wrapped-keys';
+  import {
+    litActionRepository,
+    litActionRepositoryCommon,
+  } from '@lit-protocol/wrapped-keys-lit-actions';
+
+  wrappedKeysConfig.setLitActionsCode(litActionRepository);
+  wrappedKeysConfig.setLitActionsCodeCommon(litActionRepositoryCommon);
+  ```
+
+# Session material workflow
+
+```ts
+import { createAuthManager, generateSessionKeyPair } from '@lit-protocol/auth';
+import { api as wrappedKeysApi } from '@lit-protocol/wrapped-keys';
+
+const authManager = createAuthManager();
+const litClient = await createLitClient({ network: resolvedNetwork });
+
+// 1. Ephemeral signer that will front the PKP for wrapped-key actions
+const sessionKeyPair = generateSessionKeyPair();
+
+// 2. Delegate the PKP to the session key with explicit Lit resources and expiry
+const delegationAuthSig = await authManager.generatePkpDelegationAuthSig({
+  pkpPublicKey,
+  authData,
+  sessionKeyPair,
+  authConfig: {
+    resources: [
+      ['pkp-signing', '*'],
+      ['lit-action-execution', '*'],
+      ['access-control-condition-decryption', '*'],
+    ],
+    expiration: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+  },
+  litClient,
+});
+
+// 3. Produce the SessionSigsMap required by every wrapped-keys API call
+const pkpSessionSigs = await authManager.createPkpSessionSigs({
+  sessionKeyPair,
+  pkpPublicKey,
+  delegationAuthSig,
+  litClient,
+});
+
+// 4. Call wrapped-keys APIs with the session signatures
+const { id } = await wrappedKeysApi.generatePrivateKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  memo: 'wallet for gasless relays',
+  userMaxPrice: 1000n, // optional cap on per-request spend
+});
+```
+
+<Note>
+  Wrapped-keys calls need `pkpSessionSigs` explicitly. Other Lit APIs that accept an `authContext` (for example `executeJs` or `pkpSign`) creates session signatures internally, so you do not need to export it when you are not touching wrapped keys.
+</Note>
+
+Need a backend to create fresh session signatures on demand? Follow the [server sessions guide](/guides/server-sessions) to delegate a session key and let the server recreate `pkpSessionSigs` per request.
+
+# Example usage
+
+## Generate and sign on EVM
+
+```ts
+const { id, generatedPublicKey } = await wrappedKeysApi.generatePrivateKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  memo: 'lit',
+});
+
+// Export once if you need the raw private key 
+const { decryptedPrivateKey } = await wrappedKeysApi.exportPrivateKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  id,
+});
+
+// Sign an EVM transaction without revealing the key outside the Lit nodes
+const serializedTx = await wrappedKeysApi.signTransactionWithEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  id,
+  unsignedTransaction: {
+    chain: 'yellowstone',
+    chainId: 175188,
+    toAddress: '0x0000000000000000000000000000000000000000',
+    value: '0',
+  },
+  broadcast: false,
+});
+```
+
+## Generate and sign on Solana
+
+```ts
+const { id, publicKey } = await wrappedKeysApi.generatePrivateKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'solana',
+  memo: 'vault signer',
+});
+
+const signature = await wrappedKeysApi.signMessageWithEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'solana',
+  id,
+  messageToSign: 'hello from wrapped keys',
+});
+```
+
+# API catalogue
+
+See the full reference for every helper at [`sdk-reference/wrapped-keys`](./sdk-reference/wrapped-keys/index.mdx).

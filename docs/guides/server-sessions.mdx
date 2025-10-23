@@ -1,0 +1,126 @@
+---
+title: "Server Sessions"
+description: "Delegate a PKP to an ephemeral session key and hand that scoped capability to backend services that mint fresh session signatures on demand."
+---
+
+# Overview
+
+Some integrations need a backend or serverless worker to execute Lit actions long after a user has left the client. Instead of caching `pkpSessionSigs` (which expire quickly and can become invalid when nodes join or leave the network), you can delegate the PKP to a session key and send the **session keypair plus delegation auth signature** to the server. The server then recreates the auth context and generates short-lived session signatures immediately before each request.
+
+This pattern keeps the delegation scoped (resources and expiration are enforced by the delegation) while avoiding the flakiness that comes from reusing stale session signatures.
+
+# Workflow
+
+1. **Client generates a session keypair** with `generateSessionKeyPair()`.
+2. **Client mints a delegation auth signature** with `authManager.generatePkpDelegationAuthSig`, scoping the allowed abilities and expiration.
+3. **Client sends the bundle** `{ sessionKeyPair, delegationAuthSig, pkpPublicKey }` to the server over a secure channel.
+4. **Server restores an auth context** using `authManager.createPkpAuthContextFromPreGenerated`.
+5. **Server issues fresh session signatures on demand** (e.g., `authManager.createPkpSessionSigs`) immediately before calling SDK helpers such as the wrapped-keys API or `pkpSign`.
+
+# Client hand-off example
+
+```ts
+import {
+  createAuthManager,
+  generateSessionKeyPair,
+} from '@lit-protocol/auth';
+
+const sessionKeyPair = generateSessionKeyPair();
+
+const delegationAuthSig = await authManager.generatePkpDelegationAuthSig({
+  pkpPublicKey,
+  authData,
+  sessionKeyPair,
+  authConfig: {
+    resources: [
+      ['pkp-signing', '*'],
+      ['lit-action-execution', '*'],
+      ['access-control-condition-decryption', '*'],
+    ],
+    expiration: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+  },
+  litClient: litClient,
+});
+
+const envelope = JSON.stringify({
+  pkpPublicKey,
+  payload: Buffer.from(
+    JSON.stringify({ sessionKeyPair, delegationAuthSig }),
+    'utf8'
+  ).toString('base64url'),
+});
+```
+
+# Server restore example
+
+```ts
+import {
+  createAuthManager,
+  storagePlugins,
+  validateDelegationAuthSig,
+} from '@lit-protocol/auth';
+import { createLitClient } from '@lit-protocol/lit-client';
+
+const parsedEnvelope = JSON.parse(envelope) as {
+  pkpPublicKey: string;
+  payload: string;
+};
+
+const decodedPayload = JSON.parse(
+  Buffer.from(parsedEnvelope.payload, 'base64url').toString('utf8')
+) as {
+  sessionKeyPair: typeof sessionKeyPair;
+  delegationAuthSig: typeof delegationAuthSig;
+};
+
+validateDelegationAuthSig({
+  delegationAuthSig: decodedPayload.delegationAuthSig,
+  sessionKeyUri: decodedPayload.sessionKeyPair.publicKey,
+});
+
+const serverLitClient = await createLitClient({ network: resolvedNetwork });
+const serverAuthManager = createAuthManager({
+  storage: storagePlugins.localStorageNode({
+    appName: 'server-session-demo',
+    networkName: resolvedNetwork.name,
+    storagePath: './.server-session-cache',
+  }),
+});
+
+const authContext =
+  await serverAuthManager.createPkpAuthContextFromPreGenerated({
+    pkpPublicKey: parsedEnvelope.pkpPublicKey,
+    sessionKeyPair: decodedPayload.sessionKeyPair,
+    delegationAuthSig: decodedPayload.delegationAuthSig,
+  });
+
+// ONly call this when the downstream API explicitly requires session sigs
+const pkpSessionSigs = await serverAuthManager.createPkpSessionSigs({
+  sessionKeyPair: decodedPayload.sessionKeyPair,
+  pkpPublicKey: parsedEnvelope.pkpPublicKey,
+  delegationAuthSig: decodedPayload.delegationAuthSig,
+  litClient: serverLitClient,
+});
+
+await serverLitClient.chain.ethereum.pkpSign({
+  authContext,
+  pubKey: parsedEnvelope.pkpPublicKey,
+  toSign: 'hello from server reuse',
+});
+```
+
+<Note>
+  Only call `createPkpSessionSigs` when the downstream API explicitly requires the session sigs (for example, the wrapped-keys service). 
+</Note>
+
+# Security considerations
+
+- **Treat the session keypair like a secret.** Whoever holds the private key can mint new session signatures until the delegation expires.
+- **Scope the delegation.** Restrict resources to the minimal Lit resources needed and set conservative expirations.
+- **Rotate on failure.** If a node joins or leaves the network the server can simply regenerate session signatures with the current handshake; if that fails, request a fresh delegation from the client.
+
+# When to use this pattern
+
+- Long-running workflows where session signatures might expire before all steps finish (e.g., Bitcoin transactions that need multiple confirmations).
+- Server-driven orchestration that must run without a browser tab staying open.
+- Integrations that want to avoid caching `pkpSessionSigs`, but still need durable delegated access.
