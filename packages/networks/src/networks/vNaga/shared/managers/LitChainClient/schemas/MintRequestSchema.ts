@@ -23,5 +23,3 @@ export const MintRequestSchema = z.object({
 // 2. Transformed/Validated Type - this is the type after the user input has been transformed and validated. Usually used for smart contract calls or external API calls (such as communication with nodes). (e.g., BigInt, etc.)
 export type MintRequestRaw = z.input<typeof MintRequestSchema>;
 export type MintRequestTransformed = z.infer<typeof MintRequestSchema>;
-
-// ✨ Elysia Schema
