@@ -35,7 +35,9 @@ function assertIsNagaLocalSignatures(
       typeof (contract as { methods?: unknown }).methods !== 'object'
     ) {
       throw new Error(
-        `Generated signatures missing required contract metadata for ${key as string}`
+        `Generated signatures missing required contract metadata for ${
+          key as string
+        }`
       );
     }
   }
